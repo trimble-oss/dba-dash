@@ -149,7 +149,7 @@ namespace DBADashGUI
         }
 
         private readonly List<DataGridViewColumn> TestCols = new()
-        {           new DataGridViewLinkColumn(){ Name="Test", HeaderText="Test", DataPropertyName="DisplayText", SortMode = DataGridViewColumnSortMode.Automatic},
+        {           new DataGridViewLinkColumn(){ Name="Test", HeaderText="Test", DataPropertyName="DisplayText", SortMode = DataGridViewColumnSortMode.Automatic, Width=200},
                     new DataGridViewLinkColumn(){ Name="OK", HeaderText="Instance Count OK", DataPropertyName="OK", SortMode = DataGridViewColumnSortMode.Automatic },
                     new DataGridViewLinkColumn(){ Name = "Warning",  HeaderText="Instance Count Warning", DataPropertyName="Warning", SortMode = DataGridViewColumnSortMode.Automatic },
                     new DataGridViewLinkColumn(){ Name = "Critical",  HeaderText="Instance Count Critical", DataPropertyName="Critical", SortMode = DataGridViewColumnSortMode.Automatic },
@@ -215,7 +215,6 @@ namespace DBADashGUI
             dgvTests.Invoke((Action)(() =>
             {
                 dgvTests.DataSource = dv;
-                dgvTests.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }));
             // Auto size split container
             if (dgvTests.Rows.Count > 0)
@@ -278,7 +277,7 @@ namespace DBADashGUI
             dgvSummary.Invoke((Action)(() =>
             {
                 dgvSummary.DataSource = dv;
-                dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                dgvSummary.AutoResizeColumn(Instance.Index, DataGridViewAutoSizeColumnMode.DisplayedCells);
             }
             ));
             lastRefresh = DateTime.UtcNow;

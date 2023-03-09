@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Summary));
@@ -42,86 +42,86 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            this.dgvSummary = new System.Windows.Forms.DataGridView();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.tsCopyGrid = new System.Windows.Forms.ToolStripDropDownButton();
-            this.copySummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.copyTestSummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsExportToExcel = new System.Windows.Forms.ToolStripDropDownButton();
-            this.exportSummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exportTestSummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsOptions = new System.Windows.Forms.ToolStripDropDownButton();
-            this.focusedViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.showTestSummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.lblRefreshTime = new System.Windows.Forms.ToolStripLabel();
-            this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
-            this.acknowledgeDumpsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.configureThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsClearFilter = new System.Windows.Forms.ToolStripButton();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn10 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn13 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn14 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn15 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn16 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.refresh1 = new DBADashGUI.Refresh();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.dgvTests = new System.Windows.Forms.DataGridView();
-            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHidden = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.MemoryDumpStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CorruptionStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.LastGoodCheckDBStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.AlertStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.FullBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.DiffBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.LogBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.DriveStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.JobStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.IsAgentRunningStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LogShippingStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.MirroringStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.AGStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.LogFreeSpaceStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.FileFreeSpaceStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.PctMaxSizeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.ElasticPoolStorageStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.QueryStoreStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.CustomCheckStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.CollectionErrorStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.SnapshotAgeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.DBMailStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.IdentityStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.DatabaseStateStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.UptimeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).BeginInit();
-            this.toolStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvTests)).BeginInit();
-            this.SuspendLayout();
+            dgvSummary = new System.Windows.Forms.DataGridView();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            tsRefresh = new System.Windows.Forms.ToolStripButton();
+            tsCopyGrid = new System.Windows.Forms.ToolStripDropDownButton();
+            copySummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            copyTestSummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsExportToExcel = new System.Windows.Forms.ToolStripDropDownButton();
+            exportSummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            exportTestSummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsOptions = new System.Windows.Forms.ToolStripDropDownButton();
+            focusedViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            showTestSummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            lblRefreshTime = new System.Windows.Forms.ToolStripLabel();
+            toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
+            acknowledgeDumpsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            configureThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
+            dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn10 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn13 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn14 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn15 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn16 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            timer1 = new System.Windows.Forms.Timer(components);
+            refresh1 = new Refresh();
+            splitContainer1 = new System.Windows.Forms.SplitContainer();
+            dgvTests = new System.Windows.Forms.DataGridView();
+            Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colHidden = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            MemoryDumpStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            CorruptionStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            LastGoodCheckDBStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            AlertStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            FullBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            DiffBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            LogBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            DriveStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            JobStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            IsAgentRunningStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            LogShippingStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            MirroringStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            AGStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            LogFreeSpaceStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            FileFreeSpaceStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            PctMaxSizeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            ElasticPoolStorageStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            QueryStoreStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            CustomCheckStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            CollectionErrorStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            SnapshotAgeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            DBMailStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            IdentityStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            DatabaseStateStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            UptimeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            ((System.ComponentModel.ISupportInitialize)dgvSummary).BeginInit();
+            toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
+            splitContainer1.Panel1.SuspendLayout();
+            splitContainer1.Panel2.SuspendLayout();
+            splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvTests).BeginInit();
+            SuspendLayout();
             // 
             // dgvSummary
             // 
-            this.dgvSummary.AllowUserToAddRows = false;
-            this.dgvSummary.AllowUserToDeleteRows = false;
-            this.dgvSummary.BackgroundColor = System.Drawing.Color.White;
+            dgvSummary.AllowUserToAddRows = false;
+            dgvSummary.AllowUserToDeleteRows = false;
+            dgvSummary.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -129,36 +129,9 @@
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgvSummary.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            this.dgvSummary.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvSummary.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Instance,
-            this.colHidden,
-            this.MemoryDumpStatus,
-            this.CorruptionStatus,
-            this.LastGoodCheckDBStatus,
-            this.AlertStatus,
-            this.FullBackupStatus,
-            this.DiffBackupStatus,
-            this.LogBackupStatus,
-            this.DriveStatus,
-            this.JobStatus,
-            this.IsAgentRunningStatus,
-            this.LogShippingStatus,
-            this.MirroringStatus,
-            this.AGStatus,
-            this.LogFreeSpaceStatus,
-            this.FileFreeSpaceStatus,
-            this.PctMaxSizeStatus,
-            this.ElasticPoolStorageStatus,
-            this.QueryStoreStatus,
-            this.CustomCheckStatus,
-            this.CollectionErrorStatus,
-            this.SnapshotAgeStatus,
-            this.DBMailStatus,
-            this.IdentityStatus,
-            this.DatabaseStateStatus,
-            this.UptimeStatus});
+            dgvSummary.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dgvSummary.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvSummary.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, colHidden, MemoryDumpStatus, CorruptionStatus, LastGoodCheckDBStatus, AlertStatus, FullBackupStatus, DiffBackupStatus, LogBackupStatus, DriveStatus, JobStatus, IsAgentRunningStatus, LogShippingStatus, MirroringStatus, AGStatus, LogFreeSpaceStatus, FileFreeSpaceStatus, PctMaxSizeStatus, ElasticPoolStorageStatus, QueryStoreStatus, CustomCheckStatus, CollectionErrorStatus, SnapshotAgeStatus, DBMailStatus, IdentityStatus, DatabaseStateStatus, UptimeStatus });
             dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle7.BackColor = System.Drawing.SystemColors.Window;
             dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -166,368 +139,352 @@
             dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgvSummary.DefaultCellStyle = dataGridViewCellStyle7;
-            this.dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvSummary.Location = new System.Drawing.Point(0, 0);
-            this.dgvSummary.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dgvSummary.Name = "dgvSummary";
-            this.dgvSummary.ReadOnly = true;
-            this.dgvSummary.RowHeadersVisible = false;
-            this.dgvSummary.RowHeadersWidth = 51;
-            this.dgvSummary.RowTemplate.Height = 24;
-            this.dgvSummary.Size = new System.Drawing.Size(1800, 117);
-            this.dgvSummary.TabIndex = 0;
-            this.dgvSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvSummary_CellContentClick);
-            this.dgvSummary.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.DgvSummary_ColumnHeaderMouseClick);
-            this.dgvSummary.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.DgvSummary_RowAdded);
+            dgvSummary.DefaultCellStyle = dataGridViewCellStyle7;
+            dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvSummary.Location = new System.Drawing.Point(0, 0);
+            dgvSummary.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dgvSummary.Name = "dgvSummary";
+            dgvSummary.ReadOnly = true;
+            dgvSummary.RowHeadersVisible = false;
+            dgvSummary.RowHeadersWidth = 51;
+            dgvSummary.RowTemplate.Height = 24;
+            dgvSummary.Size = new System.Drawing.Size(1800, 117);
+            dgvSummary.TabIndex = 0;
+            dgvSummary.CellContentClick += DgvSummary_CellContentClick;
+            dgvSummary.ColumnHeaderMouseClick += DgvSummary_ColumnHeaderMouseClick;
+            dgvSummary.RowsAdded += DgvSummary_RowAdded;
             // 
             // toolStrip1
             // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsRefresh,
-            this.tsCopyGrid,
-            this.tsExportToExcel,
-            this.tsOptions,
-            this.lblRefreshTime,
-            this.toolStripDropDownButton1,
-            this.tsClearFilter});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1800, 27);
-            this.toolStrip1.TabIndex = 1;
-            this.toolStrip1.Text = "toolStrip1";
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopyGrid, tsExportToExcel, tsOptions, lblRefreshTime, toolStripDropDownButton1, tsClearFilter });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new System.Drawing.Size(1800, 27);
+            toolStrip1.TabIndex = 1;
+            toolStrip1.Text = "toolStrip1";
             // 
             // tsRefresh
             // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
+            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Name = "tsRefresh";
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Text = "Refresh";
+            tsRefresh.Click += TsRefresh_Click;
             // 
             // tsCopyGrid
             // 
-            this.tsCopyGrid.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopyGrid.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.copySummaryToolStripMenuItem,
-            this.copyTestSummaryToolStripMenuItem});
-            this.tsCopyGrid.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopyGrid.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopyGrid.Name = "tsCopyGrid";
-            this.tsCopyGrid.Size = new System.Drawing.Size(34, 24);
-            this.tsCopyGrid.Text = "Copy";
+            tsCopyGrid.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopyGrid.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { copySummaryToolStripMenuItem, copyTestSummaryToolStripMenuItem });
+            tsCopyGrid.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsCopyGrid.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopyGrid.Name = "tsCopyGrid";
+            tsCopyGrid.Size = new System.Drawing.Size(34, 24);
+            tsCopyGrid.Text = "Copy";
             // 
             // copySummaryToolStripMenuItem
             // 
-            this.copySummaryToolStripMenuItem.Name = "copySummaryToolStripMenuItem";
-            this.copySummaryToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
-            this.copySummaryToolStripMenuItem.Text = "Copy Summary";
-            this.copySummaryToolStripMenuItem.Click += new System.EventHandler(this.CopySummaryToolStripMenuItem_Click);
+            copySummaryToolStripMenuItem.Name = "copySummaryToolStripMenuItem";
+            copySummaryToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
+            copySummaryToolStripMenuItem.Text = "Copy Summary";
+            copySummaryToolStripMenuItem.Click += CopySummaryToolStripMenuItem_Click;
             // 
             // copyTestSummaryToolStripMenuItem
             // 
-            this.copyTestSummaryToolStripMenuItem.Name = "copyTestSummaryToolStripMenuItem";
-            this.copyTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
-            this.copyTestSummaryToolStripMenuItem.Text = "Copy Test Summary";
-            this.copyTestSummaryToolStripMenuItem.Click += new System.EventHandler(this.CopyTestSummaryToolStripMenuItem_Click);
+            copyTestSummaryToolStripMenuItem.Name = "copyTestSummaryToolStripMenuItem";
+            copyTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
+            copyTestSummaryToolStripMenuItem.Text = "Copy Test Summary";
+            copyTestSummaryToolStripMenuItem.Click += CopyTestSummaryToolStripMenuItem_Click;
             // 
             // tsExportToExcel
             // 
-            this.tsExportToExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExportToExcel.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.exportSummaryToolStripMenuItem,
-            this.exportTestSummaryToolStripMenuItem});
-            this.tsExportToExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExportToExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExportToExcel.Name = "tsExportToExcel";
-            this.tsExportToExcel.Size = new System.Drawing.Size(34, 24);
-            this.tsExportToExcel.Text = "Export to Excel";
+            tsExportToExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsExportToExcel.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { exportSummaryToolStripMenuItem, exportTestSummaryToolStripMenuItem });
+            tsExportToExcel.Image = Properties.Resources.excel16x16;
+            tsExportToExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExportToExcel.Name = "tsExportToExcel";
+            tsExportToExcel.Size = new System.Drawing.Size(34, 24);
+            tsExportToExcel.Text = "Export to Excel";
             // 
             // exportSummaryToolStripMenuItem
             // 
-            this.exportSummaryToolStripMenuItem.Name = "exportSummaryToolStripMenuItem";
-            this.exportSummaryToolStripMenuItem.Size = new System.Drawing.Size(231, 26);
-            this.exportSummaryToolStripMenuItem.Text = "Export Summary";
-            this.exportSummaryToolStripMenuItem.Click += new System.EventHandler(this.ExportSummaryToolStripMenuItem_Click);
+            exportSummaryToolStripMenuItem.Name = "exportSummaryToolStripMenuItem";
+            exportSummaryToolStripMenuItem.Size = new System.Drawing.Size(231, 26);
+            exportSummaryToolStripMenuItem.Text = "Export Summary";
+            exportSummaryToolStripMenuItem.Click += ExportSummaryToolStripMenuItem_Click;
             // 
             // exportTestSummaryToolStripMenuItem
             // 
-            this.exportTestSummaryToolStripMenuItem.Name = "exportTestSummaryToolStripMenuItem";
-            this.exportTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(231, 26);
-            this.exportTestSummaryToolStripMenuItem.Text = "Export Test Summary";
-            this.exportTestSummaryToolStripMenuItem.Click += new System.EventHandler(this.ExportTestSummaryToolStripMenuItem_Click);
+            exportTestSummaryToolStripMenuItem.Name = "exportTestSummaryToolStripMenuItem";
+            exportTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(231, 26);
+            exportTestSummaryToolStripMenuItem.Text = "Export Test Summary";
+            exportTestSummaryToolStripMenuItem.Click += ExportTestSummaryToolStripMenuItem_Click;
             // 
             // tsOptions
             // 
-            this.tsOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.focusedViewToolStripMenuItem,
-            this.showTestSummaryToolStripMenuItem,
-            this.saveToolStripMenuItem});
-            this.tsOptions.Image = global::DBADashGUI.Properties.Resources.Table_16x;
-            this.tsOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsOptions.Name = "tsOptions";
-            this.tsOptions.Size = new System.Drawing.Size(75, 24);
-            this.tsOptions.Text = "View";
+            tsOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { focusedViewToolStripMenuItem, showTestSummaryToolStripMenuItem, saveToolStripMenuItem });
+            tsOptions.Image = Properties.Resources.Table_16x;
+            tsOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsOptions.Name = "tsOptions";
+            tsOptions.Size = new System.Drawing.Size(75, 24);
+            tsOptions.Text = "View";
             // 
             // focusedViewToolStripMenuItem
             // 
-            this.focusedViewToolStripMenuItem.CheckOnClick = true;
-            this.focusedViewToolStripMenuItem.Name = "focusedViewToolStripMenuItem";
-            this.focusedViewToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.focusedViewToolStripMenuItem.Text = "Focused View";
-            this.focusedViewToolStripMenuItem.ToolTipText = "Show only instances and checks that are warning or critical status";
-            this.focusedViewToolStripMenuItem.Click += new System.EventHandler(this.FocusedViewToolStripMenuItem_Click);
+            focusedViewToolStripMenuItem.CheckOnClick = true;
+            focusedViewToolStripMenuItem.Name = "focusedViewToolStripMenuItem";
+            focusedViewToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            focusedViewToolStripMenuItem.Text = "Focused View";
+            focusedViewToolStripMenuItem.ToolTipText = "Show only instances and checks that are warning or critical status";
+            focusedViewToolStripMenuItem.Click += FocusedViewToolStripMenuItem_Click;
             // 
             // showTestSummaryToolStripMenuItem
             // 
-            this.showTestSummaryToolStripMenuItem.Checked = true;
-            this.showTestSummaryToolStripMenuItem.CheckOnClick = true;
-            this.showTestSummaryToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.showTestSummaryToolStripMenuItem.Name = "showTestSummaryToolStripMenuItem";
-            this.showTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.showTestSummaryToolStripMenuItem.Text = "Show Test Summary";
-            this.showTestSummaryToolStripMenuItem.Click += new System.EventHandler(this.ShowTestSummaryToolStripMenuItem_Click);
+            showTestSummaryToolStripMenuItem.Checked = true;
+            showTestSummaryToolStripMenuItem.CheckOnClick = true;
+            showTestSummaryToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            showTestSummaryToolStripMenuItem.Name = "showTestSummaryToolStripMenuItem";
+            showTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            showTestSummaryToolStripMenuItem.Text = "Show Test Summary";
+            showTestSummaryToolStripMenuItem.Click += ShowTestSummaryToolStripMenuItem_Click;
             // 
             // saveToolStripMenuItem
             // 
-            this.saveToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.Save_16x;
-            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.saveToolStripMenuItem.Text = "Save";
-            this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveToolStripMenuItem_Click);
+            saveToolStripMenuItem.Image = Properties.Resources.Save_16x;
+            saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            saveToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            saveToolStripMenuItem.Text = "Save";
+            saveToolStripMenuItem.Click += SaveToolStripMenuItem_Click;
             // 
             // lblRefreshTime
             // 
-            this.lblRefreshTime.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.lblRefreshTime.Name = "lblRefreshTime";
-            this.lblRefreshTime.Size = new System.Drawing.Size(98, 24);
-            this.lblRefreshTime.Text = "Refresh Time:";
+            lblRefreshTime.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            lblRefreshTime.Name = "lblRefreshTime";
+            lblRefreshTime.Size = new System.Drawing.Size(98, 24);
+            lblRefreshTime.Text = "Refresh Time:";
             // 
             // toolStripDropDownButton1
             // 
-            this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.acknowledgeDumpsToolStripMenuItem,
-            this.configureThresholdsToolStripMenuItem});
-            this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
-            this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
-            this.toolStripDropDownButton1.Size = new System.Drawing.Size(129, 24);
-            this.toolStripDropDownButton1.Text = "Memory Dumps";
+            toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { acknowledgeDumpsToolStripMenuItem, configureThresholdsToolStripMenuItem });
+            toolStripDropDownButton1.Image = (System.Drawing.Image)resources.GetObject("toolStripDropDownButton1.Image");
+            toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            toolStripDropDownButton1.Name = "toolStripDropDownButton1";
+            toolStripDropDownButton1.Size = new System.Drawing.Size(129, 24);
+            toolStripDropDownButton1.Text = "Memory Dumps";
             // 
             // acknowledgeDumpsToolStripMenuItem
             // 
-            this.acknowledgeDumpsToolStripMenuItem.Name = "acknowledgeDumpsToolStripMenuItem";
-            this.acknowledgeDumpsToolStripMenuItem.Size = new System.Drawing.Size(233, 26);
-            this.acknowledgeDumpsToolStripMenuItem.Text = "Acknowledge Dumps";
-            this.acknowledgeDumpsToolStripMenuItem.Click += new System.EventHandler(this.AcknowledgeDumpsToolStripMenuItem_Click);
+            acknowledgeDumpsToolStripMenuItem.Name = "acknowledgeDumpsToolStripMenuItem";
+            acknowledgeDumpsToolStripMenuItem.Size = new System.Drawing.Size(233, 26);
+            acknowledgeDumpsToolStripMenuItem.Text = "Acknowledge Dumps";
+            acknowledgeDumpsToolStripMenuItem.Click += AcknowledgeDumpsToolStripMenuItem_Click;
             // 
             // configureThresholdsToolStripMenuItem
             // 
-            this.configureThresholdsToolStripMenuItem.Name = "configureThresholdsToolStripMenuItem";
-            this.configureThresholdsToolStripMenuItem.Size = new System.Drawing.Size(233, 26);
-            this.configureThresholdsToolStripMenuItem.Text = "Configure Thresholds";
-            this.configureThresholdsToolStripMenuItem.Click += new System.EventHandler(this.ConfigureThresholdsToolStripMenuItem_Click);
+            configureThresholdsToolStripMenuItem.Name = "configureThresholdsToolStripMenuItem";
+            configureThresholdsToolStripMenuItem.Size = new System.Drawing.Size(233, 26);
+            configureThresholdsToolStripMenuItem.Text = "Configure Thresholds";
+            configureThresholdsToolStripMenuItem.Click += ConfigureThresholdsToolStripMenuItem_Click;
             // 
             // tsClearFilter
             // 
-            this.tsClearFilter.Enabled = false;
-            this.tsClearFilter.Image = global::DBADashGUI.Properties.Resources.Eraser_16x;
-            this.tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsClearFilter.Name = "tsClearFilter";
-            this.tsClearFilter.Size = new System.Drawing.Size(104, 24);
-            this.tsClearFilter.Text = "Clear Filter";
-            this.tsClearFilter.Click += new System.EventHandler(this.TsClearFilter_Click);
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Image = Properties.Resources.Eraser_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            tsClearFilter.Text = "Clear Filter";
+            tsClearFilter.Click += TsClearFilter_Click;
             // 
             // dataGridViewTextBoxColumn1
             // 
-            this.dataGridViewTextBoxColumn1.DataPropertyName = "Instance";
-            this.dataGridViewTextBoxColumn1.HeaderText = "Instance";
-            this.dataGridViewTextBoxColumn1.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            this.dataGridViewTextBoxColumn1.Width = 90;
+            dataGridViewTextBoxColumn1.DataPropertyName = "Instance";
+            dataGridViewTextBoxColumn1.HeaderText = "Instance";
+            dataGridViewTextBoxColumn1.MinimumWidth = 6;
+            dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            dataGridViewTextBoxColumn1.ReadOnly = true;
+            dataGridViewTextBoxColumn1.Width = 90;
             // 
             // dataGridViewTextBoxColumn2
             // 
-            this.dataGridViewTextBoxColumn2.HeaderText = "Memory Dump";
-            this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            this.dataGridViewTextBoxColumn2.Width = 128;
+            dataGridViewTextBoxColumn2.HeaderText = "Memory Dump";
+            dataGridViewTextBoxColumn2.MinimumWidth = 6;
+            dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            dataGridViewTextBoxColumn2.ReadOnly = true;
+            dataGridViewTextBoxColumn2.Width = 128;
             // 
             // dataGridViewTextBoxColumn3
             // 
-            this.dataGridViewTextBoxColumn3.DataPropertyName = "DetectedCorruptionDate ";
-            this.dataGridViewTextBoxColumn3.HeaderText = "Corruption";
-            this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            this.dataGridViewTextBoxColumn3.Width = 103;
+            dataGridViewTextBoxColumn3.DataPropertyName = "DetectedCorruptionDate ";
+            dataGridViewTextBoxColumn3.HeaderText = "Corruption";
+            dataGridViewTextBoxColumn3.MinimumWidth = 6;
+            dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            dataGridViewTextBoxColumn3.ReadOnly = true;
+            dataGridViewTextBoxColumn3.Width = 103;
             // 
             // dataGridViewTextBoxColumn4
             // 
-            this.dataGridViewTextBoxColumn4.HeaderText = "Last Good Check DB";
-            this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
-            this.dataGridViewTextBoxColumn4.ReadOnly = true;
-            this.dataGridViewTextBoxColumn4.Width = 137;
+            dataGridViewTextBoxColumn4.HeaderText = "Last Good Check DB";
+            dataGridViewTextBoxColumn4.MinimumWidth = 6;
+            dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            dataGridViewTextBoxColumn4.ReadOnly = true;
+            dataGridViewTextBoxColumn4.Width = 137;
             // 
             // dataGridViewTextBoxColumn5
             // 
             dataGridViewCellStyle8.NullValue = "View";
-            this.dataGridViewTextBoxColumn5.DefaultCellStyle = dataGridViewCellStyle8;
-            this.dataGridViewTextBoxColumn5.HeaderText = "Alerts";
-            this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
-            this.dataGridViewTextBoxColumn5.ReadOnly = true;
-            this.dataGridViewTextBoxColumn5.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.dataGridViewTextBoxColumn5.Width = 73;
+            dataGridViewTextBoxColumn5.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewTextBoxColumn5.HeaderText = "Alerts";
+            dataGridViewTextBoxColumn5.MinimumWidth = 6;
+            dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
+            dataGridViewTextBoxColumn5.ReadOnly = true;
+            dataGridViewTextBoxColumn5.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            dataGridViewTextBoxColumn5.Width = 73;
             // 
             // dataGridViewTextBoxColumn6
             // 
             dataGridViewCellStyle9.NullValue = "View";
-            this.dataGridViewTextBoxColumn6.DefaultCellStyle = dataGridViewCellStyle9;
-            this.dataGridViewTextBoxColumn6.HeaderText = "Full Backup";
-            this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
-            this.dataGridViewTextBoxColumn6.ReadOnly = true;
-            this.dataGridViewTextBoxColumn6.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.dataGridViewTextBoxColumn6.Width = 101;
+            dataGridViewTextBoxColumn6.DefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewTextBoxColumn6.HeaderText = "Full Backup";
+            dataGridViewTextBoxColumn6.MinimumWidth = 6;
+            dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
+            dataGridViewTextBoxColumn6.ReadOnly = true;
+            dataGridViewTextBoxColumn6.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            dataGridViewTextBoxColumn6.Width = 101;
             // 
             // dataGridViewTextBoxColumn7
             // 
             dataGridViewCellStyle10.NullValue = "View";
-            this.dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle10;
-            this.dataGridViewTextBoxColumn7.HeaderText = "Diff Backup";
-            this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
-            this.dataGridViewTextBoxColumn7.ReadOnly = true;
-            this.dataGridViewTextBoxColumn7.Width = 125;
+            dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle10;
+            dataGridViewTextBoxColumn7.HeaderText = "Diff Backup";
+            dataGridViewTextBoxColumn7.MinimumWidth = 6;
+            dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
+            dataGridViewTextBoxColumn7.ReadOnly = true;
+            dataGridViewTextBoxColumn7.Width = 125;
             // 
             // dataGridViewTextBoxColumn8
             // 
-            this.dataGridViewTextBoxColumn8.HeaderText = "Log Backup";
-            this.dataGridViewTextBoxColumn8.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
-            this.dataGridViewTextBoxColumn8.ReadOnly = true;
-            this.dataGridViewTextBoxColumn8.Width = 103;
+            dataGridViewTextBoxColumn8.HeaderText = "Log Backup";
+            dataGridViewTextBoxColumn8.MinimumWidth = 6;
+            dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
+            dataGridViewTextBoxColumn8.ReadOnly = true;
+            dataGridViewTextBoxColumn8.Width = 103;
             // 
             // dataGridViewTextBoxColumn9
             // 
-            this.dataGridViewTextBoxColumn9.HeaderText = "Log Shipping";
-            this.dataGridViewTextBoxColumn9.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn9.Name = "dataGridViewTextBoxColumn9";
-            this.dataGridViewTextBoxColumn9.ReadOnly = true;
-            this.dataGridViewTextBoxColumn9.Width = 110;
+            dataGridViewTextBoxColumn9.HeaderText = "Log Shipping";
+            dataGridViewTextBoxColumn9.MinimumWidth = 6;
+            dataGridViewTextBoxColumn9.Name = "dataGridViewTextBoxColumn9";
+            dataGridViewTextBoxColumn9.ReadOnly = true;
+            dataGridViewTextBoxColumn9.Width = 110;
             // 
             // dataGridViewTextBoxColumn10
             // 
-            this.dataGridViewTextBoxColumn10.HeaderText = "Drive Space";
-            this.dataGridViewTextBoxColumn10.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn10.Name = "dataGridViewTextBoxColumn10";
-            this.dataGridViewTextBoxColumn10.ReadOnly = true;
-            this.dataGridViewTextBoxColumn10.Width = 105;
+            dataGridViewTextBoxColumn10.HeaderText = "Drive Space";
+            dataGridViewTextBoxColumn10.MinimumWidth = 6;
+            dataGridViewTextBoxColumn10.Name = "dataGridViewTextBoxColumn10";
+            dataGridViewTextBoxColumn10.ReadOnly = true;
+            dataGridViewTextBoxColumn10.Width = 105;
             // 
             // dataGridViewTextBoxColumn11
             // 
-            this.dataGridViewTextBoxColumn11.HeaderText = "Agent Jobs";
-            this.dataGridViewTextBoxColumn11.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn11.Name = "dataGridViewTextBoxColumn11";
-            this.dataGridViewTextBoxColumn11.ReadOnly = true;
-            this.dataGridViewTextBoxColumn11.Width = 125;
+            dataGridViewTextBoxColumn11.HeaderText = "Agent Jobs";
+            dataGridViewTextBoxColumn11.MinimumWidth = 6;
+            dataGridViewTextBoxColumn11.Name = "dataGridViewTextBoxColumn11";
+            dataGridViewTextBoxColumn11.ReadOnly = true;
+            dataGridViewTextBoxColumn11.Width = 125;
             // 
             // dataGridViewTextBoxColumn12
             // 
-            this.dataGridViewTextBoxColumn12.HeaderText = "Availability Groups";
-            this.dataGridViewTextBoxColumn12.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
-            this.dataGridViewTextBoxColumn12.ReadOnly = true;
-            this.dataGridViewTextBoxColumn12.Width = 141;
+            dataGridViewTextBoxColumn12.HeaderText = "Availability Groups";
+            dataGridViewTextBoxColumn12.MinimumWidth = 6;
+            dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
+            dataGridViewTextBoxColumn12.ReadOnly = true;
+            dataGridViewTextBoxColumn12.Width = 141;
             // 
             // dataGridViewTextBoxColumn13
             // 
-            this.dataGridViewTextBoxColumn13.HeaderText = "File FreeSpace";
-            this.dataGridViewTextBoxColumn13.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn13.Name = "dataGridViewTextBoxColumn13";
-            this.dataGridViewTextBoxColumn13.ReadOnly = true;
-            this.dataGridViewTextBoxColumn13.Width = 121;
+            dataGridViewTextBoxColumn13.HeaderText = "File FreeSpace";
+            dataGridViewTextBoxColumn13.MinimumWidth = 6;
+            dataGridViewTextBoxColumn13.Name = "dataGridViewTextBoxColumn13";
+            dataGridViewTextBoxColumn13.ReadOnly = true;
+            dataGridViewTextBoxColumn13.Width = 121;
             // 
             // dataGridViewTextBoxColumn14
             // 
-            this.dataGridViewTextBoxColumn14.HeaderText = "Custom Checks";
-            this.dataGridViewTextBoxColumn14.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
-            this.dataGridViewTextBoxColumn14.ReadOnly = true;
-            this.dataGridViewTextBoxColumn14.Width = 123;
+            dataGridViewTextBoxColumn14.HeaderText = "Custom Checks";
+            dataGridViewTextBoxColumn14.MinimumWidth = 6;
+            dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
+            dataGridViewTextBoxColumn14.ReadOnly = true;
+            dataGridViewTextBoxColumn14.Width = 123;
             // 
             // dataGridViewTextBoxColumn15
             // 
-            this.dataGridViewTextBoxColumn15.HeaderText = "DBADash Errors";
-            this.dataGridViewTextBoxColumn15.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn15.Name = "dataGridViewTextBoxColumn15";
-            this.dataGridViewTextBoxColumn15.ReadOnly = true;
-            this.dataGridViewTextBoxColumn15.Width = 141;
+            dataGridViewTextBoxColumn15.HeaderText = "DBADash Errors";
+            dataGridViewTextBoxColumn15.MinimumWidth = 6;
+            dataGridViewTextBoxColumn15.Name = "dataGridViewTextBoxColumn15";
+            dataGridViewTextBoxColumn15.ReadOnly = true;
+            dataGridViewTextBoxColumn15.Width = 141;
             // 
             // dataGridViewTextBoxColumn16
             // 
-            this.dataGridViewTextBoxColumn16.HeaderText = "Snapshot Age";
-            this.dataGridViewTextBoxColumn16.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn16.Name = "dataGridViewTextBoxColumn16";
-            this.dataGridViewTextBoxColumn16.ReadOnly = true;
-            this.dataGridViewTextBoxColumn16.Width = 116;
+            dataGridViewTextBoxColumn16.HeaderText = "Snapshot Age";
+            dataGridViewTextBoxColumn16.MinimumWidth = 6;
+            dataGridViewTextBoxColumn16.Name = "dataGridViewTextBoxColumn16";
+            dataGridViewTextBoxColumn16.ReadOnly = true;
+            dataGridViewTextBoxColumn16.Width = 116;
             // 
             // dataGridViewTextBoxColumn17
             // 
-            this.dataGridViewTextBoxColumn17.HeaderText = "Instance Uptime";
-            this.dataGridViewTextBoxColumn17.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn17.Name = "dataGridViewTextBoxColumn17";
-            this.dataGridViewTextBoxColumn17.Width = 127;
+            dataGridViewTextBoxColumn17.HeaderText = "Instance Uptime";
+            dataGridViewTextBoxColumn17.MinimumWidth = 6;
+            dataGridViewTextBoxColumn17.Name = "dataGridViewTextBoxColumn17";
+            dataGridViewTextBoxColumn17.Width = 127;
             // 
             // timer1
             // 
-            this.timer1.Enabled = true;
-            this.timer1.Interval = 10000;
-            this.timer1.Tick += new System.EventHandler(this.Timer1_Tick);
+            timer1.Enabled = true;
+            timer1.Interval = 10000;
+            timer1.Tick += Timer1_Tick;
             // 
             // refresh1
             // 
-            this.refresh1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
-            this.refresh1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.refresh1.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.refresh1.ForeColor = System.Drawing.Color.White;
-            this.refresh1.Location = new System.Drawing.Point(0, 27);
-            this.refresh1.Margin = new System.Windows.Forms.Padding(4);
-            this.refresh1.Name = "refresh1";
-            this.refresh1.Size = new System.Drawing.Size(1800, 239);
-            this.refresh1.TabIndex = 2;
+            refresh1.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
+            refresh1.Dock = System.Windows.Forms.DockStyle.Fill;
+            refresh1.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            refresh1.ForeColor = System.Drawing.Color.White;
+            refresh1.Location = new System.Drawing.Point(0, 27);
+            refresh1.Margin = new System.Windows.Forms.Padding(4);
+            refresh1.Name = "refresh1";
+            refresh1.Size = new System.Drawing.Size(1800, 239);
+            refresh1.TabIndex = 2;
             // 
             // splitContainer1
             // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 27);
-            this.splitContainer1.Name = "splitContainer1";
-            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitContainer1.Location = new System.Drawing.Point(0, 27);
+            splitContainer1.Name = "splitContainer1";
+            splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.dgvTests);
+            splitContainer1.Panel1.Controls.Add(dgvTests);
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.dgvSummary);
-            this.splitContainer1.Size = new System.Drawing.Size(1800, 239);
-            this.splitContainer1.SplitterDistance = 118;
-            this.splitContainer1.TabIndex = 3;
+            splitContainer1.Panel2.Controls.Add(dgvSummary);
+            splitContainer1.Size = new System.Drawing.Size(1800, 239);
+            splitContainer1.SplitterDistance = 118;
+            splitContainer1.TabIndex = 3;
             // 
             // dgvTests
             // 
-            this.dgvTests.AllowUserToAddRows = false;
-            this.dgvTests.AllowUserToDeleteRows = false;
-            this.dgvTests.BackgroundColor = System.Drawing.Color.White;
+            dgvTests.AllowUserToAddRows = false;
+            dgvTests.AllowUserToDeleteRows = false;
+            dgvTests.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle11.BackColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle11.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -535,8 +492,8 @@
             dataGridViewCellStyle11.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle11.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgvTests.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle11;
-            this.dgvTests.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvTests.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle11;
+            dgvTests.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle12.BackColor = System.Drawing.SystemColors.Window;
             dataGridViewCellStyle12.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -544,345 +501,344 @@
             dataGridViewCellStyle12.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle12.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle12.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgvTests.DefaultCellStyle = dataGridViewCellStyle12;
-            this.dgvTests.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvTests.Location = new System.Drawing.Point(0, 0);
-            this.dgvTests.Name = "dgvTests";
-            this.dgvTests.ReadOnly = true;
-            this.dgvTests.RowHeadersVisible = false;
-            this.dgvTests.RowHeadersWidth = 51;
-            this.dgvTests.RowTemplate.Height = 29;
-            this.dgvTests.Size = new System.Drawing.Size(1800, 118);
-            this.dgvTests.TabIndex = 0;
-            this.dgvTests.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvTests_CellContentClick);
-            this.dgvTests.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.DgvTests_RowsAdded);
+            dgvTests.DefaultCellStyle = dataGridViewCellStyle12;
+            dgvTests.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvTests.Location = new System.Drawing.Point(0, 0);
+            dgvTests.Name = "dgvTests";
+            dgvTests.ReadOnly = true;
+            dgvTests.RowHeadersVisible = false;
+            dgvTests.RowHeadersWidth = 51;
+            dgvTests.RowTemplate.Height = 29;
+            dgvTests.Size = new System.Drawing.Size(1800, 118);
+            dgvTests.TabIndex = 0;
+            dgvTests.CellContentClick += DgvTests_CellContentClick;
+            dgvTests.RowsAdded += DgvTests_RowsAdded;
             // 
             // Instance
             // 
-            this.Instance.DataPropertyName = "InstanceGroupName";
-            this.Instance.HeaderText = "Instance";
-            this.Instance.MinimumWidth = 6;
-            this.Instance.Name = "Instance";
-            this.Instance.ReadOnly = true;
-            this.Instance.Width = 90;
+            Instance.DataPropertyName = "InstanceGroupName";
+            Instance.HeaderText = "Instance";
+            Instance.MinimumWidth = 6;
+            Instance.Name = "Instance";
+            Instance.ReadOnly = true;
+            Instance.Width = 125;
             // 
             // colHidden
             // 
-            this.colHidden.DataPropertyName = "IsHidden";
-            this.colHidden.HeaderText = "Hidden";
-            this.colHidden.MinimumWidth = 6;
-            this.colHidden.Name = "colHidden";
-            this.colHidden.ReadOnly = true;
-            this.colHidden.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colHidden.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.colHidden.ToolTipText = "Checked if instance is hidden by default at root level";
-            this.colHidden.Visible = false;
-            this.colHidden.Width = 125;
+            colHidden.DataPropertyName = "IsHidden";
+            colHidden.HeaderText = "Hidden";
+            colHidden.MinimumWidth = 6;
+            colHidden.Name = "colHidden";
+            colHidden.ReadOnly = true;
+            colHidden.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colHidden.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            colHidden.ToolTipText = "Checked if instance is hidden by default at root level";
+            colHidden.Visible = false;
+            colHidden.Width = 70;
             // 
             // MemoryDumpStatus
             // 
-            this.MemoryDumpStatus.HeaderText = "Memory Dump";
-            this.MemoryDumpStatus.MinimumWidth = 6;
-            this.MemoryDumpStatus.Name = "MemoryDumpStatus";
-            this.MemoryDumpStatus.ReadOnly = true;
-            this.MemoryDumpStatus.Width = 118;
+            MemoryDumpStatus.HeaderText = "Memory Dump";
+            MemoryDumpStatus.MinimumWidth = 6;
+            MemoryDumpStatus.Name = "MemoryDumpStatus";
+            MemoryDumpStatus.ReadOnly = true;
+            MemoryDumpStatus.Width = 70;
             // 
             // CorruptionStatus
             // 
-            this.CorruptionStatus.DataPropertyName = "DetectedCorruptionDate";
-            this.CorruptionStatus.HeaderText = "Corruption";
-            this.CorruptionStatus.MinimumWidth = 6;
-            this.CorruptionStatus.Name = "CorruptionStatus";
-            this.CorruptionStatus.ReadOnly = true;
-            this.CorruptionStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.CorruptionStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.CorruptionStatus.Width = 103;
+            CorruptionStatus.DataPropertyName = "DetectedCorruptionDate";
+            CorruptionStatus.HeaderText = "Corruption";
+            CorruptionStatus.MinimumWidth = 6;
+            CorruptionStatus.Name = "CorruptionStatus";
+            CorruptionStatus.ReadOnly = true;
+            CorruptionStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            CorruptionStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            CorruptionStatus.Width = 75;
             // 
             // LastGoodCheckDBStatus
             // 
-            this.LastGoodCheckDBStatus.HeaderText = "Last Good Check DB";
-            this.LastGoodCheckDBStatus.LinkColor = System.Drawing.Color.Black;
-            this.LastGoodCheckDBStatus.MinimumWidth = 6;
-            this.LastGoodCheckDBStatus.Name = "LastGoodCheckDBStatus";
-            this.LastGoodCheckDBStatus.ReadOnly = true;
-            this.LastGoodCheckDBStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.LastGoodCheckDBStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.LastGoodCheckDBStatus.Width = 137;
+            LastGoodCheckDBStatus.HeaderText = "Last Good Check DB";
+            LastGoodCheckDBStatus.LinkColor = System.Drawing.Color.Black;
+            LastGoodCheckDBStatus.MinimumWidth = 6;
+            LastGoodCheckDBStatus.Name = "LastGoodCheckDBStatus";
+            LastGoodCheckDBStatus.ReadOnly = true;
+            LastGoodCheckDBStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            LastGoodCheckDBStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            LastGoodCheckDBStatus.Width = 70;
             // 
             // AlertStatus
             // 
-            this.AlertStatus.HeaderText = "Alerts";
-            this.AlertStatus.LinkColor = System.Drawing.Color.Black;
-            this.AlertStatus.MinimumWidth = 6;
-            this.AlertStatus.Name = "AlertStatus";
-            this.AlertStatus.ReadOnly = true;
-            this.AlertStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.AlertStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.AlertStatus.Width = 73;
+            AlertStatus.HeaderText = "Alerts";
+            AlertStatus.LinkColor = System.Drawing.Color.Black;
+            AlertStatus.MinimumWidth = 6;
+            AlertStatus.Name = "AlertStatus";
+            AlertStatus.ReadOnly = true;
+            AlertStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            AlertStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            AlertStatus.Width = 70;
             // 
             // FullBackupStatus
             // 
-            this.FullBackupStatus.HeaderText = "Full Backup";
-            this.FullBackupStatus.LinkColor = System.Drawing.Color.Black;
-            this.FullBackupStatus.MinimumWidth = 6;
-            this.FullBackupStatus.Name = "FullBackupStatus";
-            this.FullBackupStatus.ReadOnly = true;
-            this.FullBackupStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.FullBackupStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.FullBackupStatus.Width = 101;
+            FullBackupStatus.HeaderText = "Full Backup";
+            FullBackupStatus.LinkColor = System.Drawing.Color.Black;
+            FullBackupStatus.MinimumWidth = 6;
+            FullBackupStatus.Name = "FullBackupStatus";
+            FullBackupStatus.ReadOnly = true;
+            FullBackupStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            FullBackupStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            FullBackupStatus.Width = 70;
             // 
             // DiffBackupStatus
             // 
-            this.DiffBackupStatus.HeaderText = "Diff Backup";
-            this.DiffBackupStatus.LinkColor = System.Drawing.Color.Black;
-            this.DiffBackupStatus.MinimumWidth = 6;
-            this.DiffBackupStatus.Name = "DiffBackupStatus";
-            this.DiffBackupStatus.ReadOnly = true;
-            this.DiffBackupStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.DiffBackupStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.DiffBackupStatus.Width = 125;
+            DiffBackupStatus.HeaderText = "Diff Backup";
+            DiffBackupStatus.LinkColor = System.Drawing.Color.Black;
+            DiffBackupStatus.MinimumWidth = 6;
+            DiffBackupStatus.Name = "DiffBackupStatus";
+            DiffBackupStatus.ReadOnly = true;
+            DiffBackupStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            DiffBackupStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            DiffBackupStatus.Width = 70;
             // 
             // LogBackupStatus
             // 
-            this.LogBackupStatus.HeaderText = "Log Backup";
-            this.LogBackupStatus.LinkColor = System.Drawing.Color.Black;
-            this.LogBackupStatus.MinimumWidth = 6;
-            this.LogBackupStatus.Name = "LogBackupStatus";
-            this.LogBackupStatus.ReadOnly = true;
-            this.LogBackupStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.LogBackupStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.LogBackupStatus.Width = 103;
+            LogBackupStatus.HeaderText = "Log Backup";
+            LogBackupStatus.LinkColor = System.Drawing.Color.Black;
+            LogBackupStatus.MinimumWidth = 6;
+            LogBackupStatus.Name = "LogBackupStatus";
+            LogBackupStatus.ReadOnly = true;
+            LogBackupStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            LogBackupStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            LogBackupStatus.Width = 70;
             // 
             // DriveStatus
             // 
-            this.DriveStatus.HeaderText = "Drive Space";
-            this.DriveStatus.LinkColor = System.Drawing.Color.Black;
-            this.DriveStatus.MinimumWidth = 6;
-            this.DriveStatus.Name = "DriveStatus";
-            this.DriveStatus.ReadOnly = true;
-            this.DriveStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.DriveStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.DriveStatus.Width = 105;
+            DriveStatus.HeaderText = "Drive Space";
+            DriveStatus.LinkColor = System.Drawing.Color.Black;
+            DriveStatus.MinimumWidth = 6;
+            DriveStatus.Name = "DriveStatus";
+            DriveStatus.ReadOnly = true;
+            DriveStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            DriveStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            DriveStatus.Width = 70;
             // 
             // JobStatus
             // 
-            this.JobStatus.HeaderText = "Agent Jobs";
-            this.JobStatus.LinkColor = System.Drawing.Color.Black;
-            this.JobStatus.MinimumWidth = 6;
-            this.JobStatus.Name = "JobStatus";
-            this.JobStatus.ReadOnly = true;
-            this.JobStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.JobStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.JobStatus.Width = 125;
+            JobStatus.HeaderText = "Agent Jobs";
+            JobStatus.LinkColor = System.Drawing.Color.Black;
+            JobStatus.MinimumWidth = 6;
+            JobStatus.Name = "JobStatus";
+            JobStatus.ReadOnly = true;
+            JobStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            JobStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            JobStatus.Width = 70;
             // 
             // IsAgentRunningStatus
             // 
-            this.IsAgentRunningStatus.HeaderText = "Is Agent Running";
-            this.IsAgentRunningStatus.MinimumWidth = 6;
-            this.IsAgentRunningStatus.Name = "IsAgentRunningStatus";
-            this.IsAgentRunningStatus.ReadOnly = true;
-            this.IsAgentRunningStatus.Width = 125;
+            IsAgentRunningStatus.HeaderText = "Is Agent Running";
+            IsAgentRunningStatus.MinimumWidth = 6;
+            IsAgentRunningStatus.Name = "IsAgentRunningStatus";
+            IsAgentRunningStatus.ReadOnly = true;
+            IsAgentRunningStatus.Width = 70;
             // 
             // LogShippingStatus
             // 
-            this.LogShippingStatus.HeaderText = "Log Shipping";
-            this.LogShippingStatus.LinkColor = System.Drawing.Color.Black;
-            this.LogShippingStatus.MinimumWidth = 6;
-            this.LogShippingStatus.Name = "LogShippingStatus";
-            this.LogShippingStatus.ReadOnly = true;
-            this.LogShippingStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.LogShippingStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.LogShippingStatus.Width = 110;
+            LogShippingStatus.HeaderText = "Log Shipping";
+            LogShippingStatus.LinkColor = System.Drawing.Color.Black;
+            LogShippingStatus.MinimumWidth = 6;
+            LogShippingStatus.Name = "LogShippingStatus";
+            LogShippingStatus.ReadOnly = true;
+            LogShippingStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            LogShippingStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            LogShippingStatus.Width = 70;
             // 
             // MirroringStatus
             // 
-            this.MirroringStatus.HeaderText = "Mirroring";
-            this.MirroringStatus.MinimumWidth = 6;
-            this.MirroringStatus.Name = "MirroringStatus";
-            this.MirroringStatus.ReadOnly = true;
-            this.MirroringStatus.Width = 93;
+            MirroringStatus.HeaderText = "Mirroring";
+            MirroringStatus.MinimumWidth = 6;
+            MirroringStatus.Name = "MirroringStatus";
+            MirroringStatus.ReadOnly = true;
+            MirroringStatus.Width = 70;
             // 
             // AGStatus
             // 
-            this.AGStatus.HeaderText = "Availability Groups";
-            this.AGStatus.LinkColor = System.Drawing.Color.Black;
-            this.AGStatus.MinimumWidth = 6;
-            this.AGStatus.Name = "AGStatus";
-            this.AGStatus.ReadOnly = true;
-            this.AGStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.AGStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.AGStatus.Text = "";
-            this.AGStatus.Width = 141;
+            AGStatus.HeaderText = "Availability Groups";
+            AGStatus.LinkColor = System.Drawing.Color.Black;
+            AGStatus.MinimumWidth = 6;
+            AGStatus.Name = "AGStatus";
+            AGStatus.ReadOnly = true;
+            AGStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            AGStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            AGStatus.Text = "";
+            AGStatus.Width = 80;
             // 
             // LogFreeSpaceStatus
             // 
-            this.LogFreeSpaceStatus.HeaderText = "Log Space";
-            this.LogFreeSpaceStatus.LinkColor = System.Drawing.Color.Black;
-            this.LogFreeSpaceStatus.MinimumWidth = 6;
-            this.LogFreeSpaceStatus.Name = "LogFreeSpaceStatus";
-            this.LogFreeSpaceStatus.ReadOnly = true;
-            this.LogFreeSpaceStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.LogFreeSpaceStatus.Text = "View";
-            this.LogFreeSpaceStatus.UseColumnTextForLinkValue = true;
-            this.LogFreeSpaceStatus.Width = 97;
+            LogFreeSpaceStatus.HeaderText = "Log Space";
+            LogFreeSpaceStatus.LinkColor = System.Drawing.Color.Black;
+            LogFreeSpaceStatus.MinimumWidth = 6;
+            LogFreeSpaceStatus.Name = "LogFreeSpaceStatus";
+            LogFreeSpaceStatus.ReadOnly = true;
+            LogFreeSpaceStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            LogFreeSpaceStatus.Text = "View";
+            LogFreeSpaceStatus.UseColumnTextForLinkValue = true;
+            LogFreeSpaceStatus.Width = 70;
             // 
             // FileFreeSpaceStatus
             // 
             dataGridViewCellStyle2.NullValue = "View";
-            this.FileFreeSpaceStatus.DefaultCellStyle = dataGridViewCellStyle2;
-            this.FileFreeSpaceStatus.HeaderText = "File Space";
-            this.FileFreeSpaceStatus.LinkColor = System.Drawing.Color.Black;
-            this.FileFreeSpaceStatus.MinimumWidth = 6;
-            this.FileFreeSpaceStatus.Name = "FileFreeSpaceStatus";
-            this.FileFreeSpaceStatus.ReadOnly = true;
-            this.FileFreeSpaceStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.FileFreeSpaceStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.FileFreeSpaceStatus.Width = 95;
+            FileFreeSpaceStatus.DefaultCellStyle = dataGridViewCellStyle2;
+            FileFreeSpaceStatus.HeaderText = "File Space";
+            FileFreeSpaceStatus.LinkColor = System.Drawing.Color.Black;
+            FileFreeSpaceStatus.MinimumWidth = 6;
+            FileFreeSpaceStatus.Name = "FileFreeSpaceStatus";
+            FileFreeSpaceStatus.ReadOnly = true;
+            FileFreeSpaceStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            FileFreeSpaceStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            FileFreeSpaceStatus.Width = 70;
             // 
             // PctMaxSizeStatus
             // 
             dataGridViewCellStyle3.Format = "P1";
-            this.PctMaxSizeStatus.DefaultCellStyle = dataGridViewCellStyle3;
-            this.PctMaxSizeStatus.HeaderText = "% Max Size";
-            this.PctMaxSizeStatus.LinkColor = System.Drawing.Color.Black;
-            this.PctMaxSizeStatus.MinimumWidth = 6;
-            this.PctMaxSizeStatus.Name = "PctMaxSizeStatus";
-            this.PctMaxSizeStatus.ReadOnly = true;
-            this.PctMaxSizeStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.PctMaxSizeStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.PctMaxSizeStatus.Text = "View";
-            this.PctMaxSizeStatus.UseColumnTextForLinkValue = true;
-            this.PctMaxSizeStatus.Width = 125;
+            PctMaxSizeStatus.DefaultCellStyle = dataGridViewCellStyle3;
+            PctMaxSizeStatus.HeaderText = "% Max Size";
+            PctMaxSizeStatus.LinkColor = System.Drawing.Color.Black;
+            PctMaxSizeStatus.MinimumWidth = 6;
+            PctMaxSizeStatus.Name = "PctMaxSizeStatus";
+            PctMaxSizeStatus.ReadOnly = true;
+            PctMaxSizeStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            PctMaxSizeStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            PctMaxSizeStatus.Text = "View";
+            PctMaxSizeStatus.UseColumnTextForLinkValue = true;
+            PctMaxSizeStatus.Width = 70;
             // 
             // ElasticPoolStorageStatus
             // 
-            this.ElasticPoolStorageStatus.HeaderText = "Elastic Pool Storage";
-            this.ElasticPoolStorageStatus.LinkColor = System.Drawing.Color.Black;
-            this.ElasticPoolStorageStatus.MinimumWidth = 6;
-            this.ElasticPoolStorageStatus.Name = "ElasticPoolStorageStatus";
-            this.ElasticPoolStorageStatus.ReadOnly = true;
-            this.ElasticPoolStorageStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.ElasticPoolStorageStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.ElasticPoolStorageStatus.Width = 150;
+            ElasticPoolStorageStatus.HeaderText = "Elastic Pool Storage";
+            ElasticPoolStorageStatus.LinkColor = System.Drawing.Color.Black;
+            ElasticPoolStorageStatus.MinimumWidth = 6;
+            ElasticPoolStorageStatus.Name = "ElasticPoolStorageStatus";
+            ElasticPoolStorageStatus.ReadOnly = true;
+            ElasticPoolStorageStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            ElasticPoolStorageStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            ElasticPoolStorageStatus.Width = 70;
             // 
             // QueryStoreStatus
             // 
-            this.QueryStoreStatus.HeaderText = "QS";
-            this.QueryStoreStatus.LinkColor = System.Drawing.Color.Black;
-            this.QueryStoreStatus.MinimumWidth = 6;
-            this.QueryStoreStatus.Name = "QueryStoreStatus";
-            this.QueryStoreStatus.ReadOnly = true;
-            this.QueryStoreStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.QueryStoreStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.QueryStoreStatus.Text = "View";
-            this.QueryStoreStatus.ToolTipText = "Query Store";
-            this.QueryStoreStatus.UseColumnTextForLinkValue = true;
-            this.QueryStoreStatus.Width = 57;
+            QueryStoreStatus.HeaderText = "QS";
+            QueryStoreStatus.LinkColor = System.Drawing.Color.Black;
+            QueryStoreStatus.MinimumWidth = 6;
+            QueryStoreStatus.Name = "QueryStoreStatus";
+            QueryStoreStatus.ReadOnly = true;
+            QueryStoreStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            QueryStoreStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            QueryStoreStatus.Text = "View";
+            QueryStoreStatus.ToolTipText = "Query Store";
+            QueryStoreStatus.UseColumnTextForLinkValue = true;
+            QueryStoreStatus.Width = 70;
             // 
             // CustomCheckStatus
             // 
             dataGridViewCellStyle4.NullValue = "View";
-            this.CustomCheckStatus.DefaultCellStyle = dataGridViewCellStyle4;
-            this.CustomCheckStatus.HeaderText = "Custom Checks";
-            this.CustomCheckStatus.LinkColor = System.Drawing.Color.Black;
-            this.CustomCheckStatus.MinimumWidth = 6;
-            this.CustomCheckStatus.Name = "CustomCheckStatus";
-            this.CustomCheckStatus.ReadOnly = true;
-            this.CustomCheckStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.CustomCheckStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.CustomCheckStatus.Width = 123;
+            CustomCheckStatus.DefaultCellStyle = dataGridViewCellStyle4;
+            CustomCheckStatus.HeaderText = "Custom Checks";
+            CustomCheckStatus.LinkColor = System.Drawing.Color.Black;
+            CustomCheckStatus.MinimumWidth = 6;
+            CustomCheckStatus.Name = "CustomCheckStatus";
+            CustomCheckStatus.ReadOnly = true;
+            CustomCheckStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            CustomCheckStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            CustomCheckStatus.Width = 70;
             // 
             // CollectionErrorStatus
             // 
-            this.CollectionErrorStatus.DataPropertyName = "CollectionErrorCount";
+            CollectionErrorStatus.DataPropertyName = "CollectionErrorCount";
             dataGridViewCellStyle5.NullValue = "View";
-            this.CollectionErrorStatus.DefaultCellStyle = dataGridViewCellStyle5;
-            this.CollectionErrorStatus.HeaderText = "DBA Dash Errors (24hrs)";
-            this.CollectionErrorStatus.LinkColor = System.Drawing.Color.Black;
-            this.CollectionErrorStatus.MinimumWidth = 6;
-            this.CollectionErrorStatus.Name = "CollectionErrorStatus";
-            this.CollectionErrorStatus.ReadOnly = true;
-            this.CollectionErrorStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.CollectionErrorStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.CollectionErrorStatus.Width = 136;
+            CollectionErrorStatus.DefaultCellStyle = dataGridViewCellStyle5;
+            CollectionErrorStatus.HeaderText = "DBA Dash Errors (24hrs)";
+            CollectionErrorStatus.LinkColor = System.Drawing.Color.Black;
+            CollectionErrorStatus.MinimumWidth = 6;
+            CollectionErrorStatus.Name = "CollectionErrorStatus";
+            CollectionErrorStatus.ReadOnly = true;
+            CollectionErrorStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            CollectionErrorStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            CollectionErrorStatus.Width = 70;
             // 
             // SnapshotAgeStatus
             // 
-            this.SnapshotAgeStatus.HeaderText = "Snapshot Age";
-            this.SnapshotAgeStatus.LinkColor = System.Drawing.Color.Black;
-            this.SnapshotAgeStatus.MinimumWidth = 6;
-            this.SnapshotAgeStatus.Name = "SnapshotAgeStatus";
-            this.SnapshotAgeStatus.ReadOnly = true;
-            this.SnapshotAgeStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.SnapshotAgeStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.SnapshotAgeStatus.Width = 116;
+            SnapshotAgeStatus.HeaderText = "Snapshot Age";
+            SnapshotAgeStatus.LinkColor = System.Drawing.Color.Black;
+            SnapshotAgeStatus.MinimumWidth = 6;
+            SnapshotAgeStatus.Name = "SnapshotAgeStatus";
+            SnapshotAgeStatus.ReadOnly = true;
+            SnapshotAgeStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            SnapshotAgeStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            SnapshotAgeStatus.Width = 110;
             // 
             // DBMailStatus
             // 
-            this.DBMailStatus.HeaderText = "DB Mail";
-            this.DBMailStatus.MinimumWidth = 6;
-            this.DBMailStatus.Name = "DBMailStatus";
-            this.DBMailStatus.ReadOnly = true;
-            this.DBMailStatus.Width = 79;
+            DBMailStatus.HeaderText = "DB Mail";
+            DBMailStatus.MinimumWidth = 6;
+            DBMailStatus.Name = "DBMailStatus";
+            DBMailStatus.ReadOnly = true;
+            DBMailStatus.Width = 70;
             // 
             // IdentityStatus
             // 
-            this.IdentityStatus.DataPropertyName = "MaxIdentityPctUsed";
+            IdentityStatus.DataPropertyName = "MaxIdentityPctUsed";
             dataGridViewCellStyle6.Format = "P1";
-            this.IdentityStatus.DefaultCellStyle = dataGridViewCellStyle6;
-            this.IdentityStatus.HeaderText = "Identity Columns";
-            this.IdentityStatus.LinkColor = System.Drawing.Color.Black;
-            this.IdentityStatus.MinimumWidth = 6;
-            this.IdentityStatus.Name = "IdentityStatus";
-            this.IdentityStatus.ReadOnly = true;
-            this.IdentityStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.IdentityStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.IdentityStatus.ToolTipText = "Check for identity columns running out of values.  Show Max % used";
-            this.IdentityStatus.Width = 125;
+            IdentityStatus.DefaultCellStyle = dataGridViewCellStyle6;
+            IdentityStatus.HeaderText = "Identity Columns";
+            IdentityStatus.LinkColor = System.Drawing.Color.Black;
+            IdentityStatus.MinimumWidth = 6;
+            IdentityStatus.Name = "IdentityStatus";
+            IdentityStatus.ReadOnly = true;
+            IdentityStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            IdentityStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            IdentityStatus.ToolTipText = "Check for identity columns running out of values.  Show Max % used";
+            IdentityStatus.Width = 70;
             // 
             // DatabaseStateStatus
             // 
-            this.DatabaseStateStatus.HeaderText = "Database State";
-            this.DatabaseStateStatus.MinimumWidth = 6;
-            this.DatabaseStateStatus.Name = "DatabaseStateStatus";
-            this.DatabaseStateStatus.ReadOnly = true;
-            this.DatabaseStateStatus.Text = "View";
-            this.DatabaseStateStatus.ToolTipText = "Check for databases in Recovery Pending, Suspect or Emergency state";
-            this.DatabaseStateStatus.UseColumnTextForLinkValue = true;
-            this.DatabaseStateStatus.Width = 125;
+            DatabaseStateStatus.HeaderText = "Database State";
+            DatabaseStateStatus.MinimumWidth = 6;
+            DatabaseStateStatus.Name = "DatabaseStateStatus";
+            DatabaseStateStatus.ReadOnly = true;
+            DatabaseStateStatus.Text = "View";
+            DatabaseStateStatus.ToolTipText = "Check for databases in Recovery Pending, Suspect or Emergency state";
+            DatabaseStateStatus.UseColumnTextForLinkValue = true;
+            DatabaseStateStatus.Width = 70;
             // 
             // UptimeStatus
             // 
-            this.UptimeStatus.HeaderText = "Instance Uptime";
-            this.UptimeStatus.LinkColor = System.Drawing.Color.Black;
-            this.UptimeStatus.MinimumWidth = 6;
-            this.UptimeStatus.Name = "UptimeStatus";
-            this.UptimeStatus.ReadOnly = true;
-            this.UptimeStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.UptimeStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.UptimeStatus.Width = 127;
+            UptimeStatus.HeaderText = "Instance Uptime";
+            UptimeStatus.LinkColor = System.Drawing.Color.Black;
+            UptimeStatus.MinimumWidth = 6;
+            UptimeStatus.Name = "UptimeStatus";
+            UptimeStatus.ReadOnly = true;
+            UptimeStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            UptimeStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            UptimeStatus.Width = 110;
             // 
             // Summary
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.splitContainer1);
-            this.Controls.Add(this.refresh1);
-            this.Controls.Add(this.toolStrip1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "Summary";
-            this.Size = new System.Drawing.Size(1800, 266);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).EndInit();
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
-            this.splitContainer1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvTests)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            Controls.Add(splitContainer1);
+            Controls.Add(refresh1);
+            Controls.Add(toolStrip1);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "Summary";
+            Size = new System.Drawing.Size(1800, 266);
+            ((System.ComponentModel.ISupportInitialize)dgvSummary).EndInit();
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            splitContainer1.Panel1.ResumeLayout(false);
+            splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
+            splitContainer1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvTests).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
