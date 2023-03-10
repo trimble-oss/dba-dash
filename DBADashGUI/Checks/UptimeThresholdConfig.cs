@@ -119,13 +119,7 @@ namespace DBADashGUI.Checks
 
         private void BttnClearAlert_Click(object sender, EventArgs e)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.InstanceUptimeAck", cn) { CommandType = CommandType.StoredProcedure })
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.ExecuteNonQuery();
-            }
+            CommonData.AcknowledgeInstanceUptime(InstanceID);
             MessageBox.Show("Alert cleared", "Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
             this.DialogResult = DialogResult.OK;
             this.Close();

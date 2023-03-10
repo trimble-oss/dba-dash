@@ -245,5 +245,16 @@ namespace DBADashGUI
                 return dt;
             }
         }
+
+        public static void AcknowledgeInstanceUptime(int instanceId)
+        {
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.InstanceUptimeAck", cn) { CommandType = CommandType.StoredProcedure })
+            {
+                cn.Open();
+                cmd.Parameters.AddWithValue("InstanceID", instanceId);
+                cmd.ExecuteNonQuery();
+            }
+        }
     }
 }

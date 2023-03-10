@@ -474,12 +474,7 @@ namespace DBADashGUI
             var row = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
             if (e.ColumnIndex == UptimeStatus.Index)
             {
-                using var frm = new UptimeThresholdConfig() { InstanceID = (int)row["InstanceID"] };
-                frm.ShowDialog();
-                if (frm.DialogResult == DialogResult.OK)
-                {
-                    RefreshData();
-                }
+                ShowUptimeThresholdConfig((int)row["InstanceID"]);
             }
             else if (e.ColumnIndex == CorruptionStatus.Index)
             {
@@ -491,6 +486,16 @@ namespace DBADashGUI
                     row["InstanceID"] != DBNull.Value
                         ? new InstanceSelectedEventArgs() { InstanceID = (int)row["InstanceID"], Tab = tab }
                         : new InstanceSelectedEventArgs() { Instance = (string)row["InstanceGroupName"], Tab = tab });
+            }
+        }
+
+        private void ShowUptimeThresholdConfig(int instanceId)
+        {
+            using var frm = new UptimeThresholdConfig() { InstanceID = instanceId };
+            frm.ShowDialog();
+            if (frm.DialogResult == DialogResult.OK)
+            {
+                RefreshData();
             }
         }
 
@@ -685,6 +690,17 @@ namespace DBADashGUI
             {
                 MessageBox.Show("Error saving view options\n", ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void ConfigureUptimeThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowUptimeThresholdConfig(-1);
+        }
+
+        private void AcknowledgeUptimeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CommonData.AcknowledgeInstanceUptime(-1);
+            RefreshData();
         }
     }
 }
