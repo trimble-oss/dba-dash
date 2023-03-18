@@ -16,6 +16,33 @@ namespace DBADashGUI.Changes
 
         private List<Int32> InstanceIDs;
 
+        private static readonly DataGridViewColumn[] Cols ={
+                new DataGridViewLinkColumn(){ Name="Acknowledge", HeaderText="Acknowledge", Text="Acknowledge", LinkColor = DashColors.LinkColor, SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewLinkColumn(){ Name="Configure", HeaderText="Configure", Text="Configure", UseColumnTextForLinkValue=true,LinkColor = DashColors.LinkColor, SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewTextBoxColumn(){ Name="Instance", HeaderText="Instance", DataPropertyName="Instance", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewTextBoxColumn(){ HeaderText="Alert Name", DataPropertyName="Alert Name", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewTextBoxColumn(){ HeaderText="Message ID", DataPropertyName="Message ID", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewTextBoxColumn(){ HeaderText="Severity", DataPropertyName="Severity", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewCheckBoxColumn(){ HeaderText="Enabled", DataPropertyName="Enabled", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewTextBoxColumn(){ HeaderText="Delay Between Responses", DataPropertyName="Delay Between Responses", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewTextBoxColumn(){ Name="Last Occurrence", HeaderText="Last Occurrence", DataPropertyName="Last Occurrence", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewTextBoxColumn(){ Name="Acknowledged Date", HeaderText="Acknowledged Date", DataPropertyName="AcknowledgeDate", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewTextBoxColumn(){ HeaderText="Days Since Last Occurrence", DataPropertyName="Days Since Last Occurrence", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewTextBoxColumn(){ HeaderText="Last Response", DataPropertyName="Last Response", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewTextBoxColumn(){ HeaderText="Notification Message", DataPropertyName="Notification Message", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewCheckBoxColumn(){ HeaderText="Include Event Description", DataPropertyName="Include Event Description", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewTextBoxColumn(){ HeaderText="Database Name", DataPropertyName="Database Name", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewTextBoxColumn(){ HeaderText="Event Description Keyword", DataPropertyName="Event Description Keyword", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewTextBoxColumn(){ HeaderText="Occurrence Count", DataPropertyName="Occurrence Count", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewTextBoxColumn(){ HeaderText="Count Reset", DataPropertyName="Count Reset", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewTextBoxColumn(){ HeaderText="Job ID", DataPropertyName="Job ID", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewTextBoxColumn(){ HeaderText="Job Name", DataPropertyName="Job Name", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewCheckBoxColumn(){ HeaderText="Has Notification", DataPropertyName="Has Notification", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewTextBoxColumn(){ HeaderText="Category ID", DataPropertyName="Category ID", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewTextBoxColumn(){ HeaderText="Performance Condition", DataPropertyName="Performance Condition", SortMode = DataGridViewColumnSortMode.Automatic},
+                new DataGridViewCheckBoxColumn(){ HeaderText="Is Critical Alert", DataPropertyName="Is Critical Alert", SortMode = DataGridViewColumnSortMode.Automatic},
+        };
+
         public bool UseAlertName
         {
             get => pivotByAlertNameToolStripMenuItem.Checked; set => pivotByAlertNameToolStripMenuItem.Checked = value;
@@ -113,6 +140,11 @@ namespace DBADashGUI.Changes
         private void RefreshAlerts()
         {
             DataTable dt = GetAlerts();
+            if (dgvAlerts.Columns.Count == 0)
+            {
+                dgvAlerts.Columns.AddRange(Cols);
+                dgvAlerts.AutoGenerateColumns = false;
+            }
             dgvAlerts.DataSource = dt;
             dgvAlerts.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
@@ -150,6 +182,62 @@ namespace DBADashGUI.Changes
         private void TsExcelAlerts_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvAlerts);
+        }
+
+        private void DgvAlerts_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            {
+                var row = (DataRowView)dgvAlerts.Rows[idx].DataBoundItem;
+                var status = (DBADashStatus.DBADashStatusEnum)row["AlertStatus"];
+                dgvAlerts.Rows[idx].Cells["Last Occurrence"].SetStatusColor(status);
+
+                dgvAlerts.Rows[idx].Cells["Acknowledge"].Value = status switch
+                {
+                    DBADashStatus.DBADashStatusEnum.Acknowledged => "Clear",
+                    DBADashStatus.DBADashStatusEnum.Critical => "Acknowledge",
+                    DBADashStatus.DBADashStatusEnum.Warning => "Acknowledge",
+                    _ => ""
+                };
+            }
+        }
+
+        private void DgvAlerts_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                var row = (DataRowView)dgvAlerts.Rows[e.RowIndex].DataBoundItem;
+                int id = (int)row["id"];
+                int instanceID = (int)row["InstanceID"];
+                var status = (DBADashStatus.DBADashStatusEnum)row["AlertStatus"];
+                if (dgvAlerts.Columns[e.ColumnIndex].Name == "Acknowledge")
+                {
+                    AcknowledgeAlert(instanceID,id,status== DBADashStatus.DBADashStatusEnum.Acknowledged);
+                    RefreshAlerts();
+                }
+                else if (dgvAlerts.Columns[e.ColumnIndex].Name == "Configure")
+                {
+                    AlertConfig frm = new() { AlertRow = row.Row };
+                    frm.ShowDialog();
+                    if(frm.DialogResult == DialogResult.OK)
+                    {
+                        RefreshAlerts();
+                    }
+                }
+            }
+        }
+
+        private static void AcknowledgeAlert(int InstanceID, int id, bool clear = false)
+        {
+            using (SqlConnection cn = new(Common.ConnectionString))
+            using(SqlCommand cmd = new("dbo.Alerts_Ack", cn) { CommandType = CommandType.StoredProcedure})
+            {
+                cn.Open();
+                cmd.Parameters.AddIfGreaterThanZero("id", id);
+                cmd.Parameters.AddIfGreaterThanZero("InstanceID", InstanceID);
+                cmd.Parameters.AddWithValue("Clear", clear);
+                cmd.ExecuteNonQuery();
+            }
         }
     }
 }

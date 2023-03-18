@@ -713,6 +713,8 @@
     <Build Include="dbo\Stored Procedures\JobErrorAck.sql" />
     <Build Include="dbo\Stored Procedures\Corruption_Get.sql" />
     <Build Include="dbo\Stored Procedures\Corruption_Ack.sql" />
+    <Build Include="dbo\Stored Procedures\Alerts_Ack.sql" />
+    <Build Include="dbo\Stored Procedures\AlertThresholds_Upd.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
