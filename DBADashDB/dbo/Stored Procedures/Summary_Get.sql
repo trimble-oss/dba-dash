@@ -146,7 +146,8 @@ a AS(
 		MAX(last_occurrence_utc) AS LastAlert,
 		SUM(occurrence_count) AS TotalAlerts,
 		MAX(CASE WHEN IsCriticalAlert=1 THEN last_occurrence_utc ELSE NULL END) AS LastCritical,
-		COUNT(*) ConfiguredAlertCount
+		COUNT(*) ConfiguredAlertCount,
+		ISNULL(MIN(NULLIF(AlertStatus,3)),3) AS AlertStatus
 	FROM dbo.SysAlerts
 	GROUP BY InstanceID
 )
@@ -253,10 +254,7 @@ SELECT I.InstanceID,
 	a.LastAlert,
 	a.LastCritical,
 	a.TotalAlerts,
-	CASE WHEN a.ConfiguredAlertCount=0 THEN 3
-		WHEN DATEDIFF(hh,a.LastCritical,GETUTCDATE())<168 THEN 1
-		WHEN DATEDIFF(hh,a.LastAlert,GETUTCDATE())<72 THEN 2
-		ELSE 4 END AS AlertStatus,
+	a.AlertStatus,
 	AlertCD.SnapshotDate AS AlertSnapshotDate,
 	CASE WHEN I.EngineEdition = 4 THEN NULL ELSE I.IsAgentRunning END AS IsAgentRunning,
 	CASE WHEN I.EngineEdition = 4 THEN 3 WHEN I.IsAgentRunning = 1 THEN 4 ELSE 1 END AS IsAgentRunningStatus,

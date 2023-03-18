@@ -11,7 +11,7 @@ SELECT I.InstanceID,
         A.enabled,
         A.delay_between_responses,
 		A.last_occurrence,
-		DATEADD(mi,I.UTCOffset,A.last_occurrence) last_occurrence_utc,
+		calc.last_occurrence_utc,
         A.last_response,
 		DATEADD(mi,I.UTCOffset,A.last_response) last_response_utc,
         A.notification_message,
@@ -29,9 +29,25 @@ SELECT I.InstanceID,
 		CASE WHEN A.include_event_description & 4 = 4 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS NetSend,
         A.category_id,
 		A.performance_condition,
-		CASE WHEN (message_id IN (823,824,825) OR severity >20 ) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsCriticalAlert,
+		calc.IsCriticalAlert,
 		I.UTCOffset,
-        I.ShowInSummary
+        I.ShowInSummary,
+        A.AlertLevel,
+        A.DefaultAlertLevel,
+        calc.ActualAlertLevel,
+        A.NotificationPeriodHrs,
+        A.DefaultNotificationPeriodHrs,
+        calc.ActualNotificationPeriodHrs,
+        CASE    WHEN calc.ActualAlertLevel = 3 THEN 3
+                WHEN calc.last_occurrence_utc >= DATEADD(HOUR,-calc.ActualNotificationPeriodHrs,GETUTCDATE()) AND calc.last_occurrence_utc < A.AcknowledgeDate THEN 5
+                WHEN calc.last_occurrence_utc >= DATEADD(HOUR,-calc.ActualNotificationPeriodHrs,GETUTCDATE()) THEN calc.ActualAlertLevel
+                ELSE 4 END AS AlertStatus,
+        A.AcknowledgeDate
 FROM dbo.Alerts A 
 JOIN dbo.Instances I ON A.InstanceID = I.InstanceID
 LEFT JOIN dbo.Jobs J ON J.InstanceID = I.InstanceID AND J.job_id = A.job_id
+OUTER APPLY(SELECT  CASE WHEN ISNULL(A.AlertLevel,A.DefaultAlertLevel)=1 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsCriticalAlert,
+                    DATEADD(mi,I.UTCOffset,A.last_occurrence) AS last_occurrence_utc,
+                     ISNULL(A.AlertLevel,A.DefaultAlertLevel) AS ActualAlertLevel,
+                     ISNULL(A.NotificationPeriodHrs,A.DefaultNotificationPeriodHrs) AS ActualNotificationPeriodHrs
+            ) calc
