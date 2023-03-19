@@ -43,6 +43,9 @@
             tsRefreshAlerts = new System.Windows.Forms.ToolStripButton();
             tsCopyAlerts = new System.Windows.Forms.ToolStripButton();
             tsExcelAlerts = new System.Windows.Forms.ToolStripButton();
+            tsOptions = new System.Windows.Forms.ToolStripDropDownButton();
+            acknowledgeALLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            clearALLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)dgvAlertsConfig).BeginInit();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
@@ -180,7 +183,7 @@
             // toolStrip2
             // 
             toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel2, tsRefreshAlerts, tsCopyAlerts, tsExcelAlerts });
+            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel2, tsRefreshAlerts, tsCopyAlerts, tsExcelAlerts, tsOptions });
             toolStrip2.Location = new System.Drawing.Point(0, 0);
             toolStrip2.Name = "toolStrip2";
             toolStrip2.Size = new System.Drawing.Size(667, 27);
@@ -225,6 +228,29 @@
             tsExcelAlerts.Text = "Export Excel";
             tsExcelAlerts.Click += TsExcelAlerts_Click;
             // 
+            // tsOptions
+            // 
+            tsOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { acknowledgeALLToolStripMenuItem, clearALLToolStripMenuItem });
+            tsOptions.Image = Properties.Resources.SettingsOutline_16x;
+            tsOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsOptions.Name = "tsOptions";
+            tsOptions.Size = new System.Drawing.Size(95, 24);
+            tsOptions.Text = "Options";
+            // 
+            // acknowledgeALLToolStripMenuItem
+            // 
+            acknowledgeALLToolStripMenuItem.Name = "acknowledgeALLToolStripMenuItem";
+            acknowledgeALLToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            acknowledgeALLToolStripMenuItem.Text = "Acknowledge ALL";
+            acknowledgeALLToolStripMenuItem.Click += AcknowledgeALLToolStripMenuItem_Click;
+            // 
+            // clearALLToolStripMenuItem
+            // 
+            clearALLToolStripMenuItem.Name = "clearALLToolStripMenuItem";
+            clearALLToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            clearALLToolStripMenuItem.Text = "Clear ALL";
+            clearALLToolStripMenuItem.Click += ClearALLToolStripMenuItem_Click;
+            // 
             // Alerts
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -265,5 +291,8 @@
         private System.Windows.Forms.ToolStripButton tsCopyAlerts;
         private System.Windows.Forms.ToolStripButton tsExcel;
         private System.Windows.Forms.ToolStripButton tsExcelAlerts;
+        private System.Windows.Forms.ToolStripDropDownButton tsOptions;
+        private System.Windows.Forms.ToolStripMenuItem acknowledgeALLToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem clearALLToolStripMenuItem;
     }
 }

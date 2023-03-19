@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -212,14 +213,14 @@ namespace DBADashGUI.Changes
                 var status = (DBADashStatus.DBADashStatusEnum)row["AlertStatus"];
                 if (dgvAlerts.Columns[e.ColumnIndex].Name == "Acknowledge")
                 {
-                    AcknowledgeAlert(instanceID,id,status== DBADashStatus.DBADashStatusEnum.Acknowledged);
+                    AcknowledgeAlert(instanceID, id, status == DBADashStatus.DBADashStatusEnum.Acknowledged);
                     RefreshAlerts();
                 }
                 else if (dgvAlerts.Columns[e.ColumnIndex].Name == "Configure")
                 {
                     AlertConfig frm = new() { AlertRow = row.Row };
                     frm.ShowDialog();
-                    if(frm.DialogResult == DialogResult.OK)
+                    if (frm.DialogResult == DialogResult.OK)
                     {
                         RefreshAlerts();
                     }
@@ -230,7 +231,7 @@ namespace DBADashGUI.Changes
         private static void AcknowledgeAlert(int InstanceID, int id, bool clear = false)
         {
             using (SqlConnection cn = new(Common.ConnectionString))
-            using(SqlCommand cmd = new("dbo.Alerts_Ack", cn) { CommandType = CommandType.StoredProcedure})
+            using (SqlCommand cmd = new("dbo.Alerts_Ack", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
                 cmd.Parameters.AddIfGreaterThanZero("id", id);
@@ -238,6 +239,36 @@ namespace DBADashGUI.Changes
                 cmd.Parameters.AddWithValue("Clear", clear);
                 cmd.ExecuteNonQuery();
             }
+        }
+
+        private void AcknowledgeALLToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var dt = (DataTable)dgvAlerts.DataSource;
+            if (dt == null) return;
+            var instanceIDs = dt.AsEnumerable()
+                .Where(row => row.Field<int>("AlertStatus") == 1 || row.Field<int>("AlertStatus") == 2)
+                .Select(row => row.Field<int>("InstanceID"))
+                .Distinct();
+            foreach (var instanceID in instanceIDs)
+            {
+                AcknowledgeAlert(instanceID, -1, false);
+            }
+            RefreshAlerts();
+        }
+
+        private void ClearALLToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var dt = (DataTable)dgvAlerts.DataSource;
+            if (dt == null) return;
+            var instanceIDs = dt.AsEnumerable()
+                .Where(row => row.Field<int>("AlertStatus") == 5)
+                .Select(row => row.Field<int>("InstanceID"))
+                .Distinct();
+            foreach (var instanceID in instanceIDs)
+            {
+                AcknowledgeAlert(instanceID, -1, true);
+            }
+            RefreshAlerts();
         }
     }
 }
