@@ -372,19 +372,26 @@ namespace DBADashGUI.Changes
                         break;
                 }
 
-                switch (Convert.ToInt32(r.Cells["VLFCount"].Value))
+                if (r.Cells["VLFCount"].Value == DBNull.Value)
                 {
-                    case > MAX_VLF_CRITICAL_THRESHOLD:
-                        r.Cells["VLFCount"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Critical);
-                        break;
+                    r.Cells["VLFCount"].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
+                }
+                else
+                {
+                    switch (Convert.ToInt32(r.Cells["VLFCount"].Value))
+                    {
+                        case > MAX_VLF_CRITICAL_THRESHOLD:
+                            r.Cells["VLFCount"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Critical);
+                            break;
 
-                    case > MAX_VLF_WARNING_THRESHOLD:
-                        r.Cells["VLFCount"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Warning);
-                        break;
+                        case > MAX_VLF_WARNING_THRESHOLD:
+                            r.Cells["VLFCount"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Warning);
+                            break;
 
-                    default:
-                        r.Cells["VLFCount"].SetStatusColor(DBADashStatus.DBADashStatusEnum.OK);
-                        break;
+                        default:
+                            r.Cells["VLFCount"].SetStatusColor(DBADashStatus.DBADashStatusEnum.OK);
+                            break;
+                    }
                 }
             }
         }
