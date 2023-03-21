@@ -415,24 +415,38 @@ namespace DBADashGUI
             }
         }
 
-        private static void AddDatabases(SQLTreeItem instanceNode)
+        private void ExpandInstance(SQLTreeItem instanceNode)
         {
+            List<TreeNode> nodesToAdd = new();
+            var changesNode = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration)
+            {
+                InstanceID = instanceNode.InstanceID
+            };
+            nodesToAdd.Add(changesNode);
+            nodesToAdd.Add(new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks));
+            nodesToAdd.Add(new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR));
+
+            var dbNode = new SQLTreeItem("Databases", SQLTreeItem.TreeType.Folder);
+            dbNode.AddDummyNode();
+            nodesToAdd.Add(dbNode);
+
+            var jobs = new SQLTreeItem("Jobs", SQLTreeItem.TreeType.AgentJobs) { InstanceID = instanceNode.InstanceID };
+            jobs.AddDummyNode();
+            nodesToAdd.Add(jobs);
+            instanceNode.Nodes.AddRange(nodesToAdd.ToArray());
+        }
+
+        private void ExpandDatabases(SQLTreeItem dbFolder)
+        {
+            List<TreeNode> nodesToAdd = new();
+            var systemNode = new SQLTreeItem("System Databases", SQLTreeItem.TreeType.Folder);
+            nodesToAdd.Add(systemNode);
+
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DatabasesByInstance_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
-
-                var changesNode = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration)
-                {
-                    InstanceID = instanceNode.InstanceID
-                };
-                instanceNode.Nodes.Add(changesNode);
-                instanceNode.Nodes.Add(new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks));
-                instanceNode.Nodes.Add(new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR));
-
-                cmd.Parameters.AddWithValue("InstanceID", instanceNode.InstanceID);
-                var systemNode = new SQLTreeItem("System Databases", SQLTreeItem.TreeType.Folder);
-                instanceNode.Nodes.Add(systemNode);
+                cmd.Parameters.AddWithValue("InstanceID", dbFolder.InstanceID);
                 using (var rdr = cmd.ExecuteReader())
                 {
                     while (rdr.Read())
@@ -451,21 +465,19 @@ namespace DBADashGUI
                         {
                             n.ObjectID = (Int64)rdr["ObjectID"];
                         }
-                        n.AddDatabaseFolders();
+                        n.AddDummyNode();
                         if ((new string[] { "master", "model", "msdb", "tempdb" }).Contains((string)rdr[1]))
                         {
                             systemNode.Nodes.Add(n);
                         }
                         else
                         {
-                            instanceNode.Nodes.Add(n);
+                            nodesToAdd.Add(n);
                         }
                     }
                 }
-                var jobs = new SQLTreeItem("Jobs", SQLTreeItem.TreeType.AgentJobs) { InstanceID = instanceNode.InstanceID };
-                jobs.AddDummyNode();
-                instanceNode.Nodes.Add(jobs);
             }
+            dbFolder.Nodes.AddRange(nodesToAdd.ToArray());
         }
 
         private static void ExpandObjects(SQLTreeItem n)
@@ -612,7 +624,11 @@ namespace DBADashGUI
                 n.Nodes.Clear();
                 if (n.Type == SQLTreeItem.TreeType.Instance)
                 {
-                    AddDatabases(n);
+                    ExpandInstance(n);
+                }
+                else if (n.Type == SQLTreeItem.TreeType.Folder && n.Text == "Databases" && n.SQLTreeItemParent.Type == SQLTreeItem.TreeType.Instance)
+                {
+                    ExpandDatabases(n);
                 }
                 else if (n.Type == SQLTreeItem.TreeType.AgentJobs)
                 {
@@ -621,6 +637,10 @@ namespace DBADashGUI
                 else if (n.Type == SQLTreeItem.TreeType.AgentJob)
                 {
                     ExpandJobSteps(n);
+                }
+                else if (n.Type == SQLTreeItem.TreeType.Database)
+                {
+                    n.AddDatabaseFolders();
                 }
                 else
                 {
