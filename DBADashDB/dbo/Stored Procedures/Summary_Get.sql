@@ -3,6 +3,7 @@
 	@ShowHidden BIT=1
 )
 AS
+SET NOCOUNT ON
 CREATE TABLE #Instances(
 	InstanceID INT PRIMARY KEY
 )
@@ -41,167 +42,266 @@ EXEC dbo.MemoryDumpThresholds_Get @MemoryDumpWarningThresholdHrs=@MemoryDumpWarn
 
 SET @ErrorsFrom = CASE WHEN @ErrorsFrom > DATEADD(d,-1,GETUTCDATE()) THEN @ErrorsFrom ELSE DATEADD(d,-1,GETUTCDATE())  END;
 
-WITH LS AS (
-	SELECT InstanceID,MIN(Status) AS LogShippingStatus
-	FROM dbo.LogShippingStatus
-	WHERE Status<>3
-	GROUP BY InstanceID
-)
-, B AS (
-	SELECT InstanceID,
-			MIN(NULLIF(FullBackupStatus,3)) AS FullBackupStatus,
-			MIN(NULLIF(LogBackupStatus,3)) AS LogBackupStatus,
-			MIN(NULLIF(DiffBackupStatus,3)) AS DiffBackupStatus
-	FROM dbo.BackupStatus
-	GROUP BY InstanceID
-)
-, D AS (
-	SELECT InstanceID, MIN(Status) AS DriveStatus
-	FROM dbo.DriveStatus
-	WHERE Status<>3
-	GROUP BY InstanceID
-),
- F AS (
-	SELECT InstanceID,
-		MIN(CASE WHEN data_space_id <> 0 THEN NULLIF(FreeSpaceStatus,3) ELSE NULL END) AS FileFreeSpaceStatus,
-		MIN(CASE WHEN data_space_id = 0 THEN NULLIF(FreeSpaceStatus,3) ELSE NULL END) AS LogFreeSpaceStatus,
-		MIN(NULLIF(PctMaxSizeStatus,3)) AS PctMaxSizeStatus
-	FROM dbo.FilegroupStatus
-	GROUP BY InstanceID
-),
-J AS (
-	SELECT InstanceID,
-		MIN(JobStatus) AS JobStatus
-	FROM dbo.AgentJobStatus
-	WHERE JobStatus<>3
-	AND enabled=1
-	GROUP BY InstanceID
-)
-,ag AS (
-	SELECT D.InstanceID, 
-		MIN(hadr.synchronization_health) AS synchronization_health
-	FROM dbo.DatabasesHADR hadr
-	JOIN dbo.Databases D ON D.DatabaseID = hadr.DatabaseID
-	GROUP BY D.InstanceID
-),
-dc AS (
-	SELECT I.InstanceID,
-		MAX(DATEADD(mi,I.UTCOffset,c.UpdateDate)) AS DetectedCorruptionDateUtc,
-		MIN(CASE WHEN c.CountOfRows>=1000 AND c.SourceTable=1 THEN 1 
-				WHEN c.AckDate >=DATEADD(mi,I.UTCOffset,c.UpdateDate) THEN 5 ELSE 1 END) AS CorruptionStatus
-	FROM dbo.Instances I
-	JOIN dbo.Databases D ON D.InstanceID = I.InstanceID
-	JOIN dbo.Corruption c ON D.DatabaseID = c.DatabaseID
-	WHERE I.IsActive=1
-	AND D.IsActive=1
-	GROUP BY I.InstanceID
-),
-err AS (
+
+SELECT	InstanceID,
+		MIN(Status) AS LogShippingStatus
+INTO #LogShippingStatus
+FROM dbo.LogShippingStatus L
+WHERE Status<>3
+AND EXISTS	(	
+			SELECT 1 
+			FROM #Instances T 
+			WHERE T.InstanceID = L.InstanceID
+			)
+GROUP BY InstanceID
+
+
+SELECT InstanceID,
+		MIN(NULLIF(FullBackupStatus,3)) AS FullBackupStatus,
+		MIN(NULLIF(LogBackupStatus,3)) AS LogBackupStatus,
+		MIN(NULLIF(DiffBackupStatus,3)) AS DiffBackupStatus
+INTO #BackupStatus
+FROM dbo.BackupStatus BS
+WHERE EXISTS(	
+			SELECT 1 
+			FROM #Instances T 
+			WHERE T.InstanceID = BS.InstanceID
+			)
+GROUP BY InstanceID
+
+
+SELECT	InstanceID, 
+		MIN(Status) AS DriveStatus
+INTO #DriveStatus 
+FROM dbo.DriveStatus D
+WHERE Status<>3
+AND EXISTS	(	
+			SELECT 1 
+			FROM #Instances T 
+			WHERE T.InstanceID = D.InstanceID
+			)
+GROUP BY InstanceID
+
+SELECT InstanceID,
+	MIN(CASE WHEN data_space_id <> 0 THEN NULLIF(FreeSpaceStatus,3) ELSE NULL END) AS FileFreeSpaceStatus,
+	MIN(CASE WHEN data_space_id = 0 THEN NULLIF(FreeSpaceStatus,3) ELSE NULL END) AS LogFreeSpaceStatus,
+	MIN(NULLIF(PctMaxSizeStatus,3)) AS PctMaxSizeStatus
+INTO #FileGroupStatus
+FROM dbo.FilegroupStatus F
+WHERE EXISTS(	
+			SELECT 1 
+			FROM #Instances T 
+			WHERE T.InstanceID = F.InstanceID
+			)
+GROUP BY InstanceID
+
+SELECT InstanceID,
+	MIN(JobStatus) AS JobStatus
+INTO #JobStatus
+FROM dbo.AgentJobStatus J
+WHERE JobStatus<>3
+AND enabled=1
+AND EXISTS	(	
+			SELECT 1 
+			FROM #Instances T 
+			WHERE T.InstanceID = J.InstanceID
+			)
+GROUP BY InstanceID
+
+
+SELECT D.InstanceID, 
+	MIN(hadr.synchronization_health) AS synchronization_health
+INTO #AGStatus
+FROM dbo.DatabasesHADR hadr
+JOIN dbo.Databases D ON D.DatabaseID = hadr.DatabaseID
+WHERE EXISTS(	
+			SELECT 1 
+			FROM #Instances T 
+			WHERE T.InstanceID = D.InstanceID
+			)
+GROUP BY D.InstanceID
+
+
+SELECT I.InstanceID,
+	MAX(DATEADD(mi,I.UTCOffset,c.UpdateDate)) AS DetectedCorruptionDateUtc,
+	MIN(CASE WHEN c.CountOfRows>=1000 AND c.SourceTable=1 THEN 1 
+			WHEN c.AckDate >=DATEADD(mi,I.UTCOffset,c.UpdateDate) THEN 5 ELSE 1 END) AS CorruptionStatus
+INTO #CorruptionStatus
+FROM dbo.Instances I
+JOIN dbo.Databases D ON D.InstanceID = I.InstanceID
+JOIN dbo.Corruption c ON D.DatabaseID = c.DatabaseID
+WHERE I.IsActive=1
+AND D.IsActive=1
+AND EXISTS	(	
+			SELECT 1 
+			FROM #Instances T 
+			WHERE T.InstanceID = I.InstanceID
+			)
+GROUP BY I.InstanceID;
+
+WITH err AS (
 	SELECT InstanceID,
 		ErrorSource,
 		COUNT(*) cnt,
 		MAX(ErrorDate) AS LastError
-	FROM dbo.CollectionErrorLog
+	FROM dbo.CollectionErrorLog E
 	WHERE ErrorDate>=@ErrorsFrom
 	AND ErrorContext NOT LIKE '%[[]Retrying]'
+	AND EXISTS	(	
+				SELECT 1 
+				FROM #Instances T 
+				WHERE T.InstanceID = E.InstanceID
+				)
 	GROUP BY InstanceID,ErrorSource
-),
-errSummary AS(
-	SELECT err.InstanceID, 
-		SUM(err.cnt) CollectionErrorCount,
-		MIN(x.SucceedAfterErrorCount) AS SucceedAfterErrorCount
-	FROM err
-	CROSS APPLY(SELECT COUNT(*) SucceedAfterErrorCount
-				FROM dbo.CollectionDates CD 
-				WHERE CD.InstanceID = err.InstanceID 
-				AND CD.Reference = err.ErrorSource
-				AND CD.SnapshotDate>err.LastError
-				) x
-	GROUP BY err.InstanceID
-),
-SSD AS (
-	SELECT InstanceID,
-		MIN(Status) AS CollectionDatesStatus,
-		MAX(SnapshotAge) AS SnapshotAgeMax,
-		MIN(SnapshotAge) AS SnapshotAgeMin,
-		MIN(SnapshotDate) AS OldestSnapshot
-	FROM dbo.CollectionDatesStatus
-	WHERE Status<>3
-	GROUP BY InstanceID
-),
-dbc AS (
-	SELECT InstanceID,
-		MIN(CASE WHEN Status = 3 THEN NULL ELSE Status END) AS LastGoodCheckDBStatus,
-		SUM(CASE WHEN Status=1 THEN 1 ELSE 0 END) AS LastGoodCheckDBCriticalCount,
-		SUM(CASE WHEN Status=2 THEN 1 ELSE 0 END) AS LastGoodCheckDBWarningCount,
-		SUM(CASE WHEN Status=4 THEN 1 ELSE 0 END) AS LastGoodCheckDBHealthyCount,
-		SUM(CASE WHEN Status=3 OR Status IS NULL THEN 1 ELSE 0 END) AS LastGoodCheckDBNACount,
-		MIN(CASE WHEN Status=3 THEN NULL ELSE LastGoodCheckDbTime END) AS OldestLastGoodCheckDBTime,
-		DATEDIFF(d,NULLIF(MIN(CASE WHEN Status <> 3 THEN LastGoodCheckDbTime ELSE NULL END),'1900-01-01'),GETUTCDATE()) AS DaysSinceLastGoodCheckDB
-	FROM dbo.LastGoodCheckDB
-	GROUP BY InstanceID
-),
-a AS(
-	SELECT InstanceID,
-		MAX(last_occurrence_utc) AS LastAlert,
-		SUM(occurrence_count) AS TotalAlerts,
-		MAX(CASE WHEN IsCriticalAlert=1 THEN last_occurrence_utc ELSE NULL END) AS LastCritical,
-		COUNT(*) ConfiguredAlertCount,
-		ISNULL(MIN(NULLIF(AlertStatus,3)),3) AS AlertStatus
-	FROM dbo.SysAlerts
-	GROUP BY InstanceID
 )
-,cus AS (
-	SELECT cc.InstanceID, 
-		MIN(cc.Status) AS Status
-	FROM dbo.CustomChecks cc
-	WHERE Status <> 3
-	GROUP BY cc.InstanceID
-)
-, dbm AS (
-	SELECT	DM.InstanceID,
-		MIN(CASE WHEN DM.mirroring_state IN(4,6) AND DM.mirroring_witness_state IN(0,1) THEN 4 WHEN DM.mirroring_state IN(2,4,6) THEN 2 ELSE 1 END) AS MirroringStatus
-	FROM dbo.DatabaseMirroring DM 
-	GROUP BY DM.InstanceID
-),
-QS AS (
-	SELECT D.InstanceID,
-		MIN(CASE WHEN QS.actual_state=3 THEN 1 
-				WHEN QS.readonly_reason NOT IN(0,1,8) THEN 2
-				WHEN QS.actual_state=2 THEN 4
-				ELSE NULL END) AS QueryStoreStatus
-	FROM dbo.DatabaseQueryStoreOptions QS
-	JOIN dbo.Databases D ON QS.DatabaseID = D.DatabaseID
-	GROUP BY D.InstanceID
-),
-Ident AS (
-	/* Get max % used for each instance */
-	SELECT	InstanceID,
-			MIN(NULLIF(IdentityStatus,3)) AS IdentityStatus,
-			MAX(pct_used) AS MaxIdentityPctUsed
-	FROM dbo.IdentityColumnsInfo
-	GROUP BY InstanceID
-	UNION ALL
-	/* Show status 4 (OK) if we have collected data for a instance but we don't have rows in IdentityColumns table.  (No identity columns have hit the collection threshold) */
-	SELECT InstanceID,
-			4 AS IdentityStatus,
-			NULL AS MaxIdentityPctUsed
-	FROM dbo.CollectionDatesStatus CD
-	WHERE Reference='IdentityColumns'
-	AND Status=4
-	AND NOT EXISTS(SELECT 1 
-					FROM dbo.IdentityColumns IC
-					WHERE IC.InstanceID=CD.InstanceID
-					)
-),
-DBState AS (
-	SELECT	InstanceID, 
-			1 AS DatabaseStateStatus 
-	FROM dbo.Databases
-	WHERE IsActive = 1
-	AND state IN(3,4,5) /* Recovery Pending, Suspect, Emergency */
-	GROUP BY InstanceID
-)
+SELECT err.InstanceID, 
+	SUM(err.cnt) CollectionErrorCount,
+	MIN(x.SucceedAfterErrorCount) AS SucceedAfterErrorCount
+INTO #CollectionErrorStatus
+FROM err
+CROSS APPLY(SELECT COUNT(*) SucceedAfterErrorCount
+			FROM dbo.CollectionDates CD 
+			WHERE CD.InstanceID = err.InstanceID 
+			AND CD.Reference = err.ErrorSource
+			AND CD.SnapshotDate>err.LastError
+			) x
+GROUP BY err.InstanceID
+
+SELECT InstanceID,
+	MIN(Status) AS CollectionDatesStatus,
+	MAX(SnapshotAge) AS SnapshotAgeMax,
+	MIN(SnapshotAge) AS SnapshotAgeMin,
+	MIN(SnapshotDate) AS OldestSnapshot
+INTO #CollectionStatus
+FROM dbo.CollectionDatesStatus C
+WHERE Status<>3
+AND EXISTS	(	
+			SELECT 1 
+			FROM #Instances T 
+			WHERE T.InstanceID = C.InstanceID
+			)
+GROUP BY InstanceID
+
+
+SELECT InstanceID,
+	MIN(CASE WHEN Status = 3 THEN NULL ELSE Status END) AS LastGoodCheckDBStatus,
+	SUM(CASE WHEN Status=1 THEN 1 ELSE 0 END) AS LastGoodCheckDBCriticalCount,
+	SUM(CASE WHEN Status=2 THEN 1 ELSE 0 END) AS LastGoodCheckDBWarningCount,
+	SUM(CASE WHEN Status=4 THEN 1 ELSE 0 END) AS LastGoodCheckDBHealthyCount,
+	SUM(CASE WHEN Status=3 OR Status IS NULL THEN 1 ELSE 0 END) AS LastGoodCheckDBNACount,
+	MIN(CASE WHEN Status=3 THEN NULL ELSE LastGoodCheckDbTime END) AS OldestLastGoodCheckDBTime,
+	DATEDIFF(d,NULLIF(MIN(CASE WHEN Status <> 3 THEN LastGoodCheckDbTime ELSE NULL END),'1900-01-01'),GETUTCDATE()) AS DaysSinceLastGoodCheckDB
+INTO #DBCCStatus
+FROM dbo.LastGoodCheckDB LG
+WHERE EXISTS	(	
+			SELECT 1 
+			FROM #Instances T 
+			WHERE T.InstanceID = LG.InstanceID
+			)
+GROUP BY InstanceID
+
+
+SELECT InstanceID,
+	MAX(last_occurrence_utc) AS LastAlert,
+	SUM(occurrence_count) AS TotalAlerts,
+	MAX(CASE WHEN IsCriticalAlert=1 THEN last_occurrence_utc ELSE NULL END) AS LastCritical,
+	COUNT(*) ConfiguredAlertCount,
+	ISNULL(MIN(NULLIF(AlertStatus,3)),3) AS AlertStatus
+INTO #AlertStatus
+FROM dbo.SysAlerts A
+WHERE EXISTS(	
+			SELECT 1 
+			FROM #Instances T 
+			WHERE T.InstanceID = A.InstanceID
+			)
+GROUP BY InstanceID
+
+
+SELECT cc.InstanceID, 
+	MIN(cc.Status) AS Status
+INTO #CustomChecksStatus
+FROM dbo.CustomChecks cc
+WHERE Status <> 3
+AND EXISTS	(	
+			SELECT 1 
+			FROM #Instances T 
+			WHERE T.InstanceID = cc.InstanceID
+			)
+GROUP BY cc.InstanceID
+
+
+SELECT	DM.InstanceID,
+	MIN(CASE WHEN DM.mirroring_state IN(4,6) AND DM.mirroring_witness_state IN(0,1) THEN 4 WHEN DM.mirroring_state IN(2,4,6) THEN 2 ELSE 1 END) AS MirroringStatus
+INTO #MirroringStatus
+FROM dbo.DatabaseMirroring DM 
+WHERE EXISTS(	
+			SELECT 1 
+			FROM #Instances T 
+			WHERE T.InstanceID = DM.InstanceID
+			)
+GROUP BY DM.InstanceID
+
+
+SELECT D.InstanceID,
+	MIN(CASE WHEN QS.actual_state=3 THEN 1 
+			WHEN QS.readonly_reason NOT IN(0,1,8) THEN 2
+			WHEN QS.actual_state=2 THEN 4
+			ELSE NULL END) AS QueryStoreStatus
+INTO #QueryStoreStatus
+FROM dbo.DatabaseQueryStoreOptions QS
+JOIN dbo.Databases D ON QS.DatabaseID = D.DatabaseID
+WHERE EXISTS(	
+			SELECT 1 
+			FROM #Instances T 
+			WHERE T.InstanceID = D.InstanceID
+			)
+GROUP BY D.InstanceID
+
+
+/* Get max % used for each instance */
+SELECT	InstanceID,
+		MIN(NULLIF(IdentityStatus,3)) AS IdentityStatus,
+		MAX(pct_used) AS MaxIdentityPctUsed
+INTO #IdentityStatus
+FROM dbo.IdentityColumnsInfo I
+WHERE EXISTS(	
+			SELECT 1 
+			FROM #Instances T 
+			WHERE T.InstanceID = I.InstanceID
+			)
+GROUP BY InstanceID
+UNION ALL
+/* Show status 4 (OK) if we have collected data for a instance but we don't have rows in IdentityColumns table.  (No identity columns have hit the collection threshold) */
+SELECT InstanceID,
+		4 AS IdentityStatus,
+		NULL AS MaxIdentityPctUsed
+FROM dbo.CollectionDatesStatus CD
+WHERE Reference='IdentityColumns'
+AND Status=4
+AND NOT EXISTS(SELECT 1 
+				FROM dbo.IdentityColumns IC
+				WHERE IC.InstanceID=CD.InstanceID
+				)
+AND EXISTS	(	
+			SELECT 1 
+			FROM #Instances T 
+			WHERE T.InstanceID = CD.InstanceID
+			)
+
+
+SELECT	InstanceID, 
+		1 AS DatabaseStateStatus 
+INTO #DatabaseStateStatus
+FROM dbo.Databases D
+WHERE IsActive = 1
+AND state IN(3,4,5) /* Recovery Pending, Suspect, Emergency */
+AND EXISTS	(	
+			SELECT 1 
+			FROM #Instances T 
+			WHERE T.InstanceID = D.InstanceID
+			)
+GROUP BY InstanceID
+
 SELECT I.InstanceID,
 	I.Instance,
 	I.InstanceGroupName,
@@ -271,17 +371,17 @@ SELECT I.InstanceID,
 	~I.ShowInSummary IsHidden,
 	ISNULL(DBState.DatabaseStateStatus,4) AS DatabaseStateStatus
 FROM dbo.Instances I 
-LEFT JOIN LS ON I.InstanceID = LS.InstanceID
-LEFT JOIN B ON I.InstanceID = B.InstanceID
-LEFT JOIN D ON I.InstanceID = D.InstanceID
-LEFT JOIN F ON I.InstanceID = F.InstanceID
-LEFT JOIN J ON I.InstanceID = J.InstanceID
-LEFT JOIN ag ON I.InstanceID= ag.InstanceID
-LEFT JOIN dc ON I.InstanceID = dc.InstanceID
-LEFT JOIN errSummary ON I.InstanceID = errSummary.InstanceID
-LEFT JOIN SSD ON I.InstanceID = SSD.InstanceID
-LEFT JOIN dbc ON I.InstanceID = dbc.InstanceID
-LEFT JOIN a ON I.InstanceID = a.InstanceID 
+LEFT JOIN #LogShippingStatus LS ON I.InstanceID = LS.InstanceID
+LEFT JOIN #BackupStatus B ON I.InstanceID = B.InstanceID
+LEFT JOIN #DriveStatus D ON I.InstanceID = D.InstanceID
+LEFT JOIN #FileGroupStatus F ON I.InstanceID = F.InstanceID
+LEFT JOIN #JobStatus J ON I.InstanceID = J.InstanceID
+LEFT JOIN #AGStatus ag ON I.InstanceID= ag.InstanceID
+LEFT JOIN #CorruptionStatus dc ON I.InstanceID = dc.InstanceID
+LEFT JOIN #CollectionErrorStatus errSummary ON I.InstanceID = errSummary.InstanceID
+LEFT JOIN #CollectionStatus SSD ON I.InstanceID = SSD.InstanceID
+LEFT JOIN #DBCCStatus dbc ON I.InstanceID = dbc.InstanceID
+LEFT JOIN #AlertStatus a ON I.InstanceID = a.InstanceID 
 LEFT JOIN dbo.CollectionDates OSInfoCD ON OSInfoCD.InstanceID = I.InstanceID AND OSInfoCD.Reference='OSInfo'
 LEFT JOIN dbo.CollectionDates AlertCD ON AlertCD.InstanceID = I.InstanceID AND AlertCD.Reference='Alerts'
 OUTER APPLY(SELECT TOP(1) IUT.WarningThreshold AS UptimeWarningThreshold,
@@ -290,11 +390,11 @@ OUTER APPLY(SELECT TOP(1) IUT.WarningThreshold AS UptimeWarningThreshold,
 			FROM dbo.InstanceUptimeThresholds IUT
 			WHERE (IUT.InstanceID = I.InstanceID OR IUT.InstanceID=-1) 
 			ORDER BY IUT.InstanceID DESC) UTT		
-LEFT JOIN cus ON cus.InstanceID = I.InstanceID
-LEFT JOIN dbm ON dbm.InstanceID = I.InstanceID
-LEFT JOIN QS ON QS.InstanceID = I.InstanceID
-LEFT JOIN Ident ON Ident.InstanceID = I.InstanceID
-LEFT JOIN DBState ON I.InstanceID = DBState.InstanceID
+LEFT JOIN #CustomChecksStatus cus ON cus.InstanceID = I.InstanceID
+LEFT JOIN #MirroringStatus dbm ON dbm.InstanceID = I.InstanceID
+LEFT JOIN #QueryStoreStatus QS ON QS.InstanceID = I.InstanceID
+LEFT JOIN #IdentityStatus Ident ON Ident.InstanceID = I.InstanceID
+LEFT JOIN #DatabaseStateStatus DBState ON I.InstanceID = DBState.InstanceID
 WHERE EXISTS(SELECT 1 FROM #Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
 AND I.EngineEdition<> 5 -- not azure
@@ -360,14 +460,14 @@ SELECT NULL AS InstanceID,
 	~CAST(MAX(CAST(I.ShowInSummary AS TINYINT)) AS BIT) AS IsHidden,
 	ISNULL(MIN(DBState.DatabaseStateStatus),4) AS DatabaseStateStatus
 FROM dbo.Instances I
-LEFT JOIN errSummary  ON I.InstanceID = errSummary.InstanceID
-LEFT JOIN F ON I.InstanceID = F.InstanceID
-LEFT JOIN SSD ON I.InstanceID = SSD.InstanceID
-LEFT JOIN cus ON cus.InstanceID = I.InstanceID
+LEFT JOIN #CollectionErrorStatus errSummary  ON I.InstanceID = errSummary.InstanceID
+LEFT JOIN #FileGroupStatus F ON I.InstanceID = F.InstanceID
+LEFT JOIN #CollectionStatus SSD ON I.InstanceID = SSD.InstanceID
+LEFT JOIN #CustomChecksStatus cus ON cus.InstanceID = I.InstanceID
 LEFT JOIN dbo.AzureDBElasticPoolStorageStatus EPS ON I.InstanceID = EPS.InstanceID
-LEFT JOIN QS ON QS.InstanceID = I.InstanceID
-LEFT JOIN Ident ON Ident.InstanceID = I.InstanceID
-LEFT JOIN DBState ON I.InstanceID = DBState.InstanceID
+LEFT JOIN #QueryStoreStatus QS ON QS.InstanceID = I.InstanceID
+LEFT JOIN #IdentityStatus Ident ON Ident.InstanceID = I.InstanceID
+LEFT JOIN #DatabaseStateStatus DBState ON I.InstanceID = DBState.InstanceID
 WHERE I.EngineEdition=5 -- azure
 AND EXISTS(SELECT 1 FROM #Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1

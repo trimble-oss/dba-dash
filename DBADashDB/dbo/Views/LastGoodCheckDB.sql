@@ -30,7 +30,7 @@ OUTER APPLY(SELECT TOP(1) T.*
 			FROM dbo.LastGoodCheckDBThresholds T
 			WHERE (D.InstanceID = T.InstanceID OR T.InstanceID = -1)
 				AND (D.DatabaseID = T.DatabaseID  OR T.DatabaseID = -1)
-				ORDER BY T.DatabaseID DESC, T.InstanceID DESC
+				ORDER BY T.InstanceID DESC,T.DatabaseID DESC
 			) cfg
 OUTER APPLY(SELECT STUFF(CONCAT(CASE WHEN D.state<>0 THEN ', ' + state_desc ELSE NULL END,
 					CASE WHEN D.is_in_standby=1 THEN ', STANDBY' WHEN D.is_read_only=1 THEN ', READ ONLY'  ELSE NULL END,
