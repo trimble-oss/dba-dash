@@ -1,0 +1,10 @@
+﻿{
+  "CollectionCommandTimeouts": {
+    "DatabasePermissions": 900,
+    "DatabasePrincipals": 900,
+    "DatabaseRoleMembers": 900,
+    "IdentityColumns": 900,
+    "SlowQueries": 90
+  },
+  "DefaultCommandTimeout": 60
+}
