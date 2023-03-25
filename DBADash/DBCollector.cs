@@ -303,7 +303,7 @@ namespace DBADash
         public void GetInstance()
         {
             StartCollection(CollectionType.Instance);
-            var dt = GetDT("DBADash", SqlStrings.Instance, CollectionCommandTimeout.DefaultCommandTimeout);
+            var dt = GetDT("DBADash", SqlStrings.Instance, CollectionCommandTimeout.GetDefaultCommandTimeout());
             AddDBADashServiceMetaData(ref dt);
 
             computerName = (string)dt.Rows[0]["ComputerNamePhysicalNetBIOS"];
