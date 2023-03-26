@@ -57,7 +57,8 @@ namespace DBADashGUI
             DBAChecks,
             Tags,
             AgentJobStep,
-            InstanceFolder
+            InstanceFolder,
+            DatabasesFolder
         }
 
         private DatabaseEngineEdition _engineEdition = DatabaseEngineEdition.Unknown;
@@ -434,37 +435,20 @@ namespace DBADashGUI
                     break;
 
                 case TreeType.StoredProcedure:
-                    ImageIndex = 5;
-                    break;
-
                 case TreeType.InlineFunction:
-                    ImageIndex = 5;
-                    break;
-
                 case TreeType.ScalarFunction:
-                    ImageIndex = 5;
-                    break;
-
                 case TreeType.TableFunction:
-                    ImageIndex = 5;
-                    break;
-
                 case TreeType.AggregateFunction:
-                    ImageIndex = 5;
-                    break;
-
                 case TreeType.DatabaseTrigger:
-                    ImageIndex = 5;
-                    break;
-
                 case TreeType.CLRAssembly:
                     ImageIndex = 5;
                     break;
 
                 case TreeType.Folder:
+                case TreeType.DatabasesFolder:
+                case TreeType.HADR:
                     ImageIndex = 3;
                     break;
-
                 case TreeType.Configuration:
                     ImageIndex = 7;
                     break;
@@ -481,10 +465,6 @@ namespace DBADashGUI
                     ImageIndex = 3;
                     break;
 
-                case TreeType.HADR:
-                    ImageIndex = 3;
-                    break;
-
                 case TreeType.DBAChecks:
                     ImageIndex = 10;
                     break;
@@ -495,43 +475,23 @@ namespace DBADashGUI
 
                 case TreeType.AgentJobStep:
                     string subsystem = (string)_attributes["subsystem"];
-                    if (subsystem == "CmdExec")
+                    ImageIndex = subsystem switch
                     {
-                        ImageIndex = 12;
-                    }
-                    else if (subsystem == "PowerShell")
-                    {
-                        ImageIndex = 15;
-                    }
-                    else if (subsystem == "Ssis")
-                    {
-                        ImageIndex = 14;
-                    }
-                    else if (subsystem == "AnalysisQuery")
-                    {
-                        ImageIndex = 13;
-                    }
-                    else
-                    {
-                        ImageIndex = 16;
-                    }
+                        "CmdExec" => 12,
+                        "PowerShell" => 15,
+                        "Ssis" => 14,
+                        "AnalysisQuery" => 13,
+                        _ => 16
+                    };
                     break;
 
                 case TreeType.AgentJob:
-                    if (Attributes.Count > 0 && (bool)Attributes["enabled"])
-                    {
-                        ImageIndex = 5;
-                    }
-                    else
-                    {
-                        ImageIndex = 17;
-                    }
+                    ImageIndex = Attributes.Count > 0 && (bool)Attributes["enabled"] ? 5 : 17;
                     break;
 
                 case TreeType.InstanceFolder:
                     ImageIndex = 20;
                     break;
-
                 default:
                     ImageIndex = 5;
                     break;

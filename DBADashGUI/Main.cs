@@ -426,7 +426,7 @@ namespace DBADashGUI
             nodesToAdd.Add(new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks));
             nodesToAdd.Add(new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR));
 
-            var dbNode = new SQLTreeItem("Databases", SQLTreeItem.TreeType.Folder);
+            var dbNode = new SQLTreeItem("Databases", SQLTreeItem.TreeType.DatabasesFolder);
             dbNode.AddDummyNode();
             nodesToAdd.Add(dbNode);
 
@@ -560,7 +560,7 @@ namespace DBADashGUI
                 {
                     allowedTabs.AddRange(new TabPage[] { tabDrives, tabJobs, tabLastGood, tabOSLoadedModules });
                 }
-                allowedTabs.AddRange(new TabPage[] { tabFiles, tabDBADashErrorLog, tabCollectionDates, tabDBSpace, tabCustomChecks, tabSnapshotsSummary, tabIdentityColumns });
+                allowedTabs.AddRange(new TabPage[] { tabFiles, tabDBADashErrorLog, tabCollectionDates, tabCustomChecks, tabSnapshotsSummary, tabIdentityColumns });
             }
             else if (n.Type == SQLTreeItem.TreeType.Tags)
             {
@@ -569,6 +569,10 @@ namespace DBADashGUI
             else if (n.Type == SQLTreeItem.TreeType.AgentJobStep)
             {
                 allowedTabs.AddRange(new TabPage[] { tabJobs, tabJobStats });
+            }
+            else if (n.Type == SQLTreeItem.TreeType.DatabasesFolder)
+            {
+                allowedTabs.Add(tabDBSpace);
             }
 
             if (n.ObjectID > 0)
@@ -626,7 +630,7 @@ namespace DBADashGUI
                 {
                     ExpandInstance(n);
                 }
-                else if (n.Type == SQLTreeItem.TreeType.Folder && n.Text == "Databases" && n.SQLTreeItemParent.Type == SQLTreeItem.TreeType.Instance)
+                else if (n.Type == SQLTreeItem.TreeType.DatabasesFolder)
                 {
                     ExpandDatabases(n);
                 }
