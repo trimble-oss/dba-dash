@@ -1,4 +1,8 @@
-﻿<Counters>
+﻿<!-- 
+	Create a copy of this file called PerformanceCountersCustom.xml to modify
+	For help: https://dbadash.com/docs/help/os-performance-counters/
+-->
+<Counters>
   <Counter object_name="Buffer Manager" counter_name="Buffer cache hit ratio" instance_name="" />
   <Counter object_name="Buffer Manager" counter_name="Buffer cache hit ratio base" instance_name="" />
   <Counter object_name="Buffer Manager" counter_name="Lazy writes/sec" instance_name="" />
@@ -35,5 +39,6 @@
   <Counter object_name="Plan Cache" counter_name="Cache Pages" />
   <Counter object_name="sys.dm_os_sys_memory" counter_name="*"/>
   <Counter object_name="sys.dm_os_nodes" counter_name="*" />
+  <!--<Counter object_name="sys.dm_os_schedulers" counter_name="*" />-->
   <Counter object_name="Databases" counter_name="Transactions/sec" instance_name="_Total" />
 </Counters>
