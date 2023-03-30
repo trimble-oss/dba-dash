@@ -99,8 +99,6 @@ namespace DBADash
         private string instanceName;
         private string dbName;
         private string productVersion;
-        public int RetryCount = 1;
-        public int RetryInterval = 30;
         private HostPlatform platform;
         public DateTime JobLastModified = DateTime.MinValue;
         private bool IsHadrEnabled;
@@ -231,12 +229,12 @@ namespace DBADash
         {
             noWMI = Source.NoWMI;
             dashAgent = DBADashAgent.GetCurrent(serviceName);
-            retryPolicy = Policy.Handle<Exception>()
+            // retryPolicy excludes query timeout #581
+            retryPolicy = Policy.Handle<Exception>(e => e is not SqlException { Number: -2 })
                 .WaitAndRetry(new[]
                 {
-                                TimeSpan.FromSeconds(2),
-                                TimeSpan.FromSeconds(5),
-                                TimeSpan.FromSeconds(10)
+                    TimeSpan.FromSeconds(2),
+                    TimeSpan.FromSeconds(10)
                 }, (exception, timeSpan, retryCount, context) =>
                 {
                     LogError(exception, context.OperationKey, "Collect[Retrying]");
