@@ -131,8 +131,8 @@ namespace DBADash
             get
             {
                 if (!Data.Tables.Contains("JobHistory")) return job_instance_id;
-                DataTable jh = Data.Tables["JobHistory"];
-                if (jh.Rows.Count > 0)
+                var jh = Data.Tables["JobHistory"];
+                if (jh is { Rows.Count: > 0 })
                 {
                     job_instance_id = Convert.ToInt32(jh.Compute("max(instance_id)", string.Empty));
                 }
@@ -145,20 +145,11 @@ namespace DBADash
 
         public DateTime GetJobLastModified()
         {
-            using (SqlConnection cn = new(ConnectionString))
-            using (SqlCommand cmd = new("SELECT MAX(date_modified) FROM msdb.dbo.sysjobs", cn))
-            {
-                cn.Open();
-                var result = cmd.ExecuteScalar();
-                if (result == DBNull.Value)
-                {
-                    return DateTime.MinValue;
-                }
-                else
-                {
-                    return (DateTime)result;
-                }
-            }
+            using SqlConnection cn = new(ConnectionString);
+            using SqlCommand cmd = new("SELECT MAX(date_modified) FROM msdb.dbo.sysjobs", cn);
+            cn.Open();
+            var result = cmd.ExecuteScalar();
+            return result == DBNull.Value ? DateTime.MinValue : (DateTime)result;
         }
 
         public bool IsXESupported => !IsExtendedEventsNotSupportedException && DBADashConnection.IsXESupported(productVersion);
@@ -186,21 +177,31 @@ namespace DBADash
             dtErrors.Rows.Add(rError);
         }
 
+        private void CreateInternalPerformanceCountersDataTable()
+        {
+            dtInternalPerfCounters = new("InternalPerformanceCounters")
+            {
+                Columns =
+                {
+                    new DataColumn("SnapshotDate", typeof(DateTime)),
+                    new DataColumn("object_name"),
+                    new DataColumn("counter_name"),
+                    new DataColumn("instance_name"),
+                    new DataColumn("cntr_value", typeof(decimal)),
+                    new DataColumn("cntr_type", typeof(int))
+                }
+            };
+            Data.Tables.Add(dtInternalPerfCounters);
+        }
+
         private void LogInternalPerformanceCounter(string objectName, string counterName, string instance, decimal counterValue)
         {
             if (!LogInternalPerformanceCounters) return;
             if (dtInternalPerfCounters == null)
             {
-                dtInternalPerfCounters = new DataTable("InternalPerformanceCounters");
-                dtInternalPerfCounters.Columns.Add("SnapshotDate", typeof(DateTime));
-                dtInternalPerfCounters.Columns.Add("object_name");
-                dtInternalPerfCounters.Columns.Add("counter_name");
-                dtInternalPerfCounters.Columns.Add("instance_name");
-                dtInternalPerfCounters.Columns.Add("cntr_value", typeof(decimal));
-                dtInternalPerfCounters.Columns.Add("cntr_type", typeof(int));
-                Data.Tables.Add(dtInternalPerfCounters);
+                CreateInternalPerformanceCountersDataTable();
             }
-            var row = dtInternalPerfCounters.NewRow();
+            var row = dtInternalPerfCounters!.NewRow();
             row["SnapshotDate"] = DateTime.UtcNow;
             row["object_name"] = objectName;
             row["counter_name"] = counterName;
@@ -235,21 +236,26 @@ namespace DBADash
                 {
                     TimeSpan.FromSeconds(2),
                     TimeSpan.FromSeconds(10)
-                }, (exception, timeSpan, retryCount, context) =>
+                }, (exception, _, _, context) =>
                 {
                     LogError(exception, context.OperationKey, "Collect[Retrying]");
                 });
 
             Data = new DataSet("DBADash");
-            dtErrors = new DataTable("Errors");
-            dtErrors.Columns.Add("ErrorSource");
-            dtErrors.Columns.Add("ErrorMessage");
-            dtErrors.Columns.Add("ErrorContext");
+            dtErrors = new("Errors")
+            {
+                Columns =
+                {
+                    new DataColumn("ErrorSource"),
+                    new DataColumn("ErrorMessage"),
+                    new DataColumn("ErrorContext")
+                }
+            };
 
             Data.Tables.Add(dtErrors);
 
             retryPolicy.Execute(
-                context => GetInstance(),
+                _ => GetInstance(),
                 new Context("Instance")
               );
         }
@@ -259,12 +265,10 @@ namespace DBADash
             if (IsXESupported)
             {
                 var removeSQL = IsAzureDB ? SqlStrings.RemoveEventSessionsAzure : SqlStrings.RemoveEventSessions;
-                await using (var cn = new SqlConnection(ConnectionString))
-                await using (var cmd = new SqlCommand(removeSQL, cn))
-                {
-                    await cn.OpenAsync();
-                    await cmd.ExecuteNonQueryAsync();
-                }
+                await using var cn = new SqlConnection(ConnectionString);
+                await using var cmd = new SqlCommand(removeSQL, cn);
+                await cn.OpenAsync();
+                await cmd.ExecuteNonQueryAsync();
             }
         }
 
@@ -273,12 +277,10 @@ namespace DBADash
             if (IsXESupported)
             {
                 var removeSQL = IsAzureDB ? SqlStrings.StopEventSessionsAzure : SqlStrings.StopEventSessions;
-                await using (var cn = new SqlConnection(ConnectionString))
-                await using (var cmd = new SqlCommand(removeSQL, cn))
-                {
-                    await cn.OpenAsync();
-                    await cmd.ExecuteNonQueryAsync();
-                }
+                await using var cn = new SqlConnection(ConnectionString);
+                await using var cmd = new SqlCommand(removeSQL, cn);
+                await cn.OpenAsync();
+                await cmd.ExecuteNonQueryAsync();
             }
         }
 
@@ -287,11 +289,14 @@ namespace DBADash
         /// </summary>
         private void AddDBADashServiceMetaData(ref DataTable dt)
         {
-            dt.Columns.Add("AgentVersion", typeof(string));
-            dt.Columns.Add("ConnectionID", typeof(string));
-            dt.Columns.Add("AgentHostName", typeof(string));
-            dt.Columns.Add("AgentServiceName", typeof(string));
-            dt.Columns.Add("AgentPath", typeof(string));
+            dt.Columns.AddRange(new[]
+            {
+                new DataColumn("AgentVersion", typeof(string)),
+                new DataColumn("ConnectionID", typeof(string)),
+                new DataColumn("AgentHostName", typeof(string)),
+                new DataColumn("AgentServiceName", typeof(string)),
+                new DataColumn("AgentPath", typeof(string))
+            });
             dt.Rows[0]["AgentVersion"] = dashAgent.AgentVersion;
             dt.Rows[0]["AgentHostName"] = dashAgent.AgentHostName;
             dt.Rows[0]["AgentServiceName"] = dashAgent.AgentServiceName;
@@ -467,7 +472,7 @@ namespace DBADash
             try
             {
                 retryPolicy.Execute(
-                  context =>
+                  _ =>
                   {
                       StartCollection(collectionType);
                       ExecuteCollection(collectionType);
@@ -508,61 +513,62 @@ namespace DBADash
             return hex.Replace("-", "");
         }
 
+        private DataTable GetPlans(string plansSQL)
+        {
+            if (string.IsNullOrEmpty(plansSQL)) return null;
+     
+            using var cn = new SqlConnection(ConnectionString);
+            using var da = new SqlDataAdapter(plansSQL, cn);
+            var dt = new DataTable("QueryPlans");
+            da.Fill(dt);
+            return dt;
+        }
+
         private void CollectPlans()
         {
             if (!Data.Tables.Contains("RunningQueries") || !Source.PlanCollectionEnabled) return;
             var plansSQL = GetPlansSQL();
-            if (!string.IsNullOrEmpty(plansSQL))
+
+            var dt = GetPlans(plansSQL);
+
+            if (dt is { Rows.Count: > 0 })
             {
-                using (var cn = new SqlConnection(ConnectionString))
-                using (var da = new SqlDataAdapter(plansSQL, cn))
+                dt.Columns.Add("query_plan_hash", typeof(byte[]));
+                dt.Columns.Add("query_plan_compressed", typeof(byte[]));
+                foreach (DataRow r in dt.Rows)
                 {
-                    var dt = new DataTable("QueryPlans");
-                    da.Fill(dt);
-                    if (dt.Rows.Count > 0)
+                    try
                     {
-                        dt.Columns.Add("query_plan_hash", typeof(byte[]));
-                        dt.Columns.Add("query_plan_compressed", typeof(byte[]));
-                        foreach (DataRow r in dt.Rows)
-                        {
-                            try
-                            {
-                                string strPlan = r["query_plan"] == DBNull.Value ? string.Empty : (string)r["query_plan"];
-                                r["query_plan_compressed"] = SMOBaseClass.Zip(strPlan);
-                                var hash = GetPlanHash(strPlan);
-                                r["query_plan_hash"] = hash;
-                            }
-                            catch (Exception ex)
-                            {
-                                Log.Error(ex, "Error processing query plans");
-                            }
-                        }
-                        dt.Columns.Remove("query_plan");
-
-                        var nullRows = dt.Select("query_plan_hash IS NULL");
-
-                        // Remove rows with null query plan hash
-                        if (nullRows.Length > 0)
-                        {
-                            Log.Information("Removing {0} rows with NULL query_plan_hash", nullRows.Length);
-                            foreach (var row in nullRows)
-                            {
-                                row.Delete();
-                            }
-                            dt.AcceptChanges();
-                        }
-                        if (dt.Rows.Count > 0) // Check if we still have rows
-                        {
-                            Data.Tables.Add(dt);
-                        }
+                        string strPlan = r["query_plan"] == DBNull.Value ? string.Empty : (string)r["query_plan"];
+                        r["query_plan_compressed"] = SMOBaseClass.Zip(strPlan);
+                        var hash = GetPlanHash(strPlan);
+                        r["query_plan_hash"] = hash;
                     }
-                    LogInternalPerformanceCounter("DBADash", "Count of plans collected", "", dt.Rows.Count); // Count of plans actually collected - might be less than the list of plans we wanted to collect
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Error processing query plans");
+                    }
+                }
+                dt.Columns.Remove("query_plan");
+
+                var nullRows = dt.Select("query_plan_hash IS NULL");
+
+                // Remove rows with null query plan hash
+                if (nullRows.Length > 0)
+                {
+                    Log.Information("Removing {0} rows with NULL query_plan_hash", nullRows.Length);
+                    foreach (var row in nullRows)
+                    {
+                        row.Delete();
+                    }
+                    dt.AcceptChanges();
+                }
+                if (dt.Rows.Count > 0) // Check if we still have rows
+                {
+                    Data.Tables.Add(dt);
                 }
             }
-            else
-            {
-                LogInternalPerformanceCounter("DBADash", "Count of plans collected", "", 0); // Count of plans actually collected - might be less than the list of plans we wanted to collect
-            }
+            LogInternalPerformanceCounter("DBADash", "Count of plans collected", "", dt?.Rows.Count ?? 0); // Count of plans actually collected - might be less than the list of plans we wanted to collect
         }
 
         ///<summary>
@@ -661,7 +667,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             if (Data.Tables.Contains("RunningQueries"))
             {
                 DataTable dt = Data.Tables["RunningQueries"];
-                var plans = (from r in dt.AsEnumerable()
+                var plans = (from r in dt!.AsEnumerable()
                              where r["plan_handle"] != DBNull.Value
                              && r["query_plan_hash"] != DBNull.Value
                              && r["statement_start_offset"] != DBNull.Value
@@ -686,18 +692,16 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             if (!Data.Tables.Contains("RunningQueries")) return;
             var handlesSQL = GetTextFromHandlesSQL();
             if (string.IsNullOrEmpty(handlesSQL)) return;
-            using (var cn = new SqlConnection(ConnectionString))
-            using (var da = new SqlDataAdapter(handlesSQL, cn))
+            using var cn = new SqlConnection(ConnectionString);
+            using var da = new SqlDataAdapter(handlesSQL, cn);
+            var dt = new DataTable("QueryText");
+            da.Fill(dt);
+            if (dt.Rows.Count > 0)
             {
-                var dt = new DataTable("QueryText");
-                da.Fill(dt);
-                if (dt.Rows.Count > 0)
-                {
-                    Data.Tables.Add(dt);
-                }
-                LogInternalPerformanceCounter("DBADash", "Count of text collected", "", dt.Rows.Count); // Count of text collected from sql_handles
-                LogInternalPerformanceCounter("DBADash", "Count of running queries", "", Data.Tables["RunningQueries"].Rows.Count); // Total number of running queries
+                Data.Tables.Add(dt);
             }
+            LogInternalPerformanceCounter("DBADash", "Count of text collected", "", dt.Rows.Count); // Count of text collected from sql_handles
+            LogInternalPerformanceCounter("DBADash", "Count of running queries", "", Data.Tables["RunningQueries"]!.Rows.Count); // Total number of running queries
         }
 
         ///<summary>
@@ -708,7 +712,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
         {
             if (!Data.Tables.Contains("QueryPlans")) return;
             var dt = Data.Tables["QueryPlans"];
-            foreach (DataRow r in dt.Rows)
+            foreach (DataRow r in dt!.Rows)
             {
                 if (r["query_plan_hash"] != DBNull.Value)
                 {
@@ -726,7 +730,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
         {
             if (!Data.Tables.Contains("QueryText")) return;
             var dt = Data.Tables["QueryText"];
-            foreach (DataRow r in dt.Rows)
+            foreach (DataRow r in dt!.Rows)
             {
                 cache.Add(ByteArrayToHexString((byte[])r["sql_handle"]), "", policy);
             }
@@ -805,7 +809,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
         ///</summary>
         private List<string> RunningQueriesHandles()
         {
-            var handles = (from r in Data.Tables["RunningQueries"].AsEnumerable()
+            var handles = (from r in Data.Tables["RunningQueries"]!.AsEnumerable()
                            where r["sql_handle"] != DBNull.Value
                            select ByteArrayToHexString((byte[])r["sql_handle"])).Distinct().ToList();
             return handles;
@@ -907,26 +911,22 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
 
         private void CollectRunningQueries()
         {
-            using (var cn = new SqlConnection(ConnectionString))
-            using (var cmd = new SqlCommand(SqlStrings.RunningQueries, cn))
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("CollectSessionWaits", Source.CollectSessionWaits);
-                var ds = new DataSet();
-                da.Fill(ds);
-                var dtRunningQueries = ds.Tables[0];
-                dtRunningQueries.TableName = "RunningQueries";
-                ds.Tables.Remove(dtRunningQueries);
-                Data.Tables.Add(dtRunningQueries);
-                // We might have a second table if we are collecting session waits
-                if (ds.Tables.Count == 1)
-                {
-                    var dtSessionWaits = ds.Tables[0];
-                    dtSessionWaits.TableName = "SessionWaits";
-                    ds.Tables.Remove(dtSessionWaits);
-                    Data.Tables.Add(dtSessionWaits);
-                }
-            }
+            using var cn = new SqlConnection(ConnectionString);
+            using var cmd = new SqlCommand(SqlStrings.RunningQueries, cn);
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("CollectSessionWaits", Source.CollectSessionWaits);
+            var ds = new DataSet();
+            da.Fill(ds);
+            var dtRunningQueries = ds.Tables[0];
+            dtRunningQueries.TableName = "RunningQueries";
+            ds.Tables.Remove(dtRunningQueries);
+            Data.Tables.Add(dtRunningQueries);
+            // We might have a second table if we are collecting session waits
+            if (ds.Tables.Count != 1) return;
+            var dtSessionWaits = ds.Tables[0];
+            dtSessionWaits.TableName = "SessionWaits";
+            ds.Tables.Remove(dtSessionWaits);
+            Data.Tables.Add(dtSessionWaits);
         }
 
         private void CollectResourceGovernor()
@@ -936,103 +936,122 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             Data.Tables.Add(dtRG);
         }
 
-        private void CollectPerformanceCounters()
+        private string PerformanceCountersSQL()
         {
             string xml = PerformanceCounters.PerformanceCountersXML;
-            if (xml.Length <= 0) return;
+            if (xml.Length <= 0) return string.Empty;
             string sql = SqlStrings.PerformanceCounters;
             if (productVersion.StartsWith("8") || productVersion.StartsWith("9"))
             {
                 sql = sql.Replace("SYSUTCDATETIME()", "GETUTCDATE()");
             }
-            using (var cn = new SqlConnection(ConnectionString))
-            using (var da = new SqlDataAdapter(sql, cn))
-            {
-                cn.Open();
-                var ds = new DataSet();
-                SqlParameter pCountersXML = new("CountersXML", PerformanceCounters.PerformanceCountersXML)
-                {
-                    SqlDbType = SqlDbType.Xml
-                };
-                da.SelectCommand.CommandTimeout = CollectionType.PerformanceCounters.GetCommandTimeout();
-                da.SelectCommand.Parameters.Add(pCountersXML);
-                da.Fill(ds);
+            return sql;
+        }
 
-                var dt = ds.Tables[0];
-                if (ds.Tables.Count == 2)
+        private DataSet GetPerformanceCounters()
+        {
+            string sql = PerformanceCountersSQL();
+            if (sql == string.Empty) return null;
+            using var cn = new SqlConnection(ConnectionString);
+            using var da = new SqlDataAdapter(sql, cn);
+            cn.Open();
+            var ds = new DataSet();
+            SqlParameter pCountersXML = new("CountersXML", PerformanceCounters.PerformanceCountersXML)
+            {
+                SqlDbType = SqlDbType.Xml
+            };
+            da.SelectCommand.CommandTimeout = CollectionType.PerformanceCounters.GetCommandTimeout();
+            da.SelectCommand.Parameters.Add(pCountersXML);
+            da.Fill(ds);
+            return ds;
+        }
+
+        private void MergeCustomPerformanceCounters(DataTable dt,DataTable userDT)
+        {
+            if (dt.Columns.Count == userDT.Columns.Count)
+            {
+                try
                 {
-                    var userDT = ds.Tables[1];
-                    if (dt.Columns.Count == userDT.Columns.Count)
+                    for (var i = 0; i < (dt.Columns.Count - 1); i++)
                     {
-                        try
+                        if (dt.Columns[i].ColumnName != userDT.Columns[i].ColumnName)
                         {
-                            for (int i = 0; i < (dt.Columns.Count - 1); i++)
-                            {
-                                if (dt.Columns[i].ColumnName != userDT.Columns[i].ColumnName)
-                                {
-                                    throw new Exception(
-                                        $"Invalid schema for custom metrics.  Expected column '{dt.Columns[i].ColumnName}' in position {i + 1} instead of '{userDT.Columns[i].ColumnName}'");
-                                }
-                                if (dt.Columns[i].DataType != userDT.Columns[i].DataType)
-                                {
-                                    throw new Exception(
-                                        $"Invalid schema for custom metrics.  Column {dt.Columns[i].ColumnName} expected data type is {dt.Columns[i].DataType.Name} instead of {userDT.Columns[i].DataType.Name}");
-                                }
-                            }
-                            dt.Merge(userDT);
+                            throw new Exception(
+                                $"Invalid schema for custom metrics.  Expected column '{dt.Columns[i].ColumnName}' in position {i + 1} instead of '{userDT.Columns[i].ColumnName}'");
                         }
-                        catch (Exception ex)
+                        if (dt.Columns[i].DataType != userDT.Columns[i].DataType)
                         {
-                            LogError(ex, "PerformanceCounters");
+                            throw new Exception(
+                                $"Invalid schema for custom metrics.  Column {dt.Columns[i].ColumnName} expected data type is {dt.Columns[i].DataType.Name} instead of {userDT.Columns[i].DataType.Name}");
                         }
                     }
-                    else
-                    {
-                        throw new Exception($"Invalid schema for custom metrics. Expected {dt.Columns.Count} columns instead of {userDT.Columns.Count}.");
-                    }
+                    dt.Merge(userDT);
                 }
-                ds.Tables.Remove(dt);
-                dt.TableName = "PerformanceCounters";
-                Data.Tables.Add(dt);
+                catch (Exception ex)
+                {
+                    LogError(ex, "PerformanceCounters");
+                }
+            }
+            else
+            {
+                throw new Exception($"Invalid schema for custom metrics. Expected {dt.Columns.Count} columns instead of {userDT.Columns.Count}.");
             }
         }
 
-        private void CollectSlowQueries()
+        private void CollectPerformanceCounters()
         {
-            if (!IsXESupported) return;
+            var ds = GetPerformanceCounters();
+            if (ds == null) return;
+            var dt = ds.Tables[0];
+            if (ds.Tables.Count == 2)
+            {
+                var userDT = ds.Tables[1];
+                MergeCustomPerformanceCounters(dt,userDT);
+            }
+            ds.Tables.Remove(dt);
+            dt.TableName = "PerformanceCounters";
+            Data.Tables.Add(dt);
+        }
+
+        private object GetSlowQueries()
+        {
             SqlConnectionStringBuilder builder = new(ConnectionString)
             {
                 ApplicationName = "DBADashXE"
             };
             var slowQueriesSQL = IsAzureDB ? SqlStrings.SlowQueriesAzure : SqlStrings.SlowQueries;
-            using (var cn = new SqlConnection(builder.ConnectionString))
-            using (var cmd = new SqlCommand(slowQueriesSQL, cn) { CommandTimeout = CollectionType.SlowQueries.GetCommandTimeout() })
-            {
-                cn.Open();
+            using var cn = new SqlConnection(builder.ConnectionString);
+            using var cmd = new SqlCommand(slowQueriesSQL, cn) { CommandTimeout = CollectionType.SlowQueries.GetCommandTimeout() };
+            cn.Open();
 
-                cmd.Parameters.AddWithValue("SlowQueryThreshold", Source.SlowQueryThresholdMs * 1000);
-                cmd.Parameters.AddWithValue("MaxMemory", Source.SlowQuerySessionMaxMemoryKB);
-                cmd.Parameters.AddWithValue("UseDualSession", Source.UseDualEventSession);
-                cmd.Parameters.AddWithValue("MaxTargetMemory", Source.SlowQueryTargetMaxMemoryKB);
-                var result = cmd.ExecuteScalar();
-                if (result == DBNull.Value)
-                {
-                    throw new Exception("Result is NULL");
-                }
-                string ringBuffer = (string)result;
-                if (ringBuffer.Length <= 0) return;
-                var dt = XETools.XEStrToDT(ringBuffer, out RingBufferTargetAttributes ringBufferAtt);
-                dt.TableName = "SlowQueries";
-                AddDT(dt);
-                var dtAtt = ringBufferAtt.GetTable();
-                dtAtt.TableName = "SlowQueriesStats";
-                AddDT(dtAtt);
+            cmd.Parameters.AddWithValue("SlowQueryThreshold", Source.SlowQueryThresholdMs * 1000);
+            cmd.Parameters.AddWithValue("MaxMemory", Source.SlowQuerySessionMaxMemoryKB);
+            cmd.Parameters.AddWithValue("UseDualSession", Source.UseDualEventSession);
+            cmd.Parameters.AddWithValue("MaxTargetMemory", Source.SlowQueryTargetMaxMemoryKB);
+            return cmd.ExecuteScalar();
+        }
+
+        private void CollectSlowQueries()
+        {
+            if (!IsXESupported) return;
+            var result = GetSlowQueries();
+            if (result == DBNull.Value)
+            {
+                throw new Exception("Result is NULL");
             }
+            var ringBuffer = (string)result;
+            if (ringBuffer.Length <= 0) return;
+            var dt = XETools.XEStrToDT(ringBuffer, out RingBufferTargetAttributes ringBufferAtt);
+            dt.TableName = "SlowQueries";
+            AddDT(dt);
+            var dtAtt = ringBufferAtt.GetTable();
+            dtAtt.TableName = "SlowQueriesStats";
+            AddDT(dtAtt);
         }
 
         private void CollectServerExtraProperties()
         {
-            if (this.IsAzureDB)
+            if (IsAzureDB)
             {
                 throw new Exception("ServerExtraProperties collection not supported on AzureDB");
             }
@@ -1043,7 +1062,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                 CollectProcessorWMI();
             }
             AddDT("ServerExtraProperties", SqlStrings.ServerExtraProperties, CollectionType.ServerExtraProperties.GetCommandTimeout());
-            Data.Tables["ServerExtraProperties"].Columns.Add("WindowsCaption");
+            Data.Tables["ServerExtraProperties"]!.Columns.Add("WindowsCaption");
             if (manufacturer != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemManufacturer"] = manufacturer; }
             if (model != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemProductName"] = model; }
 
@@ -1059,20 +1078,18 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
 
         public DataTable GetDT(string tableName, string SQL, int commandTimeout, SqlParameter[] param = null)
         {
-            using (var cn = new SqlConnection(ConnectionString))
-            using (var da = new SqlDataAdapter(SQL, cn))
+            using var cn = new SqlConnection(ConnectionString);
+            using var da = new SqlDataAdapter(SQL, cn);
+            cn.Open();
+            DataTable dt = new();
+            da.SelectCommand.CommandTimeout = commandTimeout;
+            if (param != null)
             {
-                cn.Open();
-                DataTable dt = new();
-                da.SelectCommand.CommandTimeout = commandTimeout;
-                if (param != null)
-                {
-                    da.SelectCommand.Parameters.AddRange(param);
-                }
-                da.Fill(dt);
-                dt.TableName = tableName;
-                return dt;
+                da.SelectCommand.Parameters.AddRange(param);
             }
+            da.Fill(dt);
+            dt.TableName = tableName;
+            return dt;
         }
 
         public void AddDT(string tableName, string sql, int commandTimeout, SqlParameter[] param = null)
@@ -1141,9 +1158,13 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                 using CimSession session = CimSession.Create(computerName, WMISessionOptions);
                 IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2", "WQL", "SELECT Caption FROM Win32_OperatingSystem");
 
-                if (results.Count() != 1) return;
-                var item = results.First();
-                WindowsCaption = Convert.ToString(item.CimInstanceProperties["Caption"].Value).Truncate(256);
+                var item = results.SingleOrDefault();
+                if (item == null)
+                {
+                    return;
+                }
+                var caption = item.CimInstanceProperties["Caption"].Value?.ToString();
+                WindowsCaption = caption?.Truncate(256);
             }
             catch (Exception ex)
             {
@@ -1235,12 +1256,12 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             try
             {
                 using CimSession session = CimSession.Create(computerName, WMISessionOptions);
-                IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2", "WQL", "SELECT Manufacturer, Model FROM Win32_ComputerSystem");
+                var result = session.QueryInstances(@"root\cimv2", "WQL", "SELECT Manufacturer, Model FROM Win32_ComputerSystem").SingleOrDefault();
 
-                if (results.Count() != 1) return;
-                var item = results.First();
-                manufacturer = Convert.ToString(item.CimInstanceProperties["Manufacturer"].Value).Truncate(200);
-                model = Convert.ToString(item.CimInstanceProperties["Model"].Value).Truncate(200);
+                if (result == null) return;
+
+                manufacturer = Convert.ToString(result.CimInstanceProperties["Manufacturer"].Value).Truncate(200);
+                model = Convert.ToString(result.CimInstanceProperties["Model"].Value).Truncate(200);
             }
             catch (Exception ex)
             {
@@ -1254,15 +1275,17 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             try
             {
                 using CimSession session = CimSession.Create(computerName, WMISessionOptions);
-                IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2\power", "WQL", "SELECT InstanceID,ElementName FROM Win32_PowerPlan WHERE IsActive=1");
+                var results = session.QueryInstances(@"root\cimv2\power", "WQL", "SELECT InstanceID,ElementName FROM Win32_PowerPlan WHERE IsActive=1");
+                var item = results.SingleOrDefault();
 
-                if (results.Count() != 1) return;
-                var item = results.First();
-                string instanceId = Convert.ToString(item.CimInstanceProperties["InstanceID"].Value);
+                if (item == null) return;
+
+                var instanceId = Convert.ToString(item.CimInstanceProperties["InstanceID"].Value);
                 activePowerPlan = Convert.ToString(item.CimInstanceProperties["ElementName"].Value);
-                if (instanceId.Length > 0)
+
+                if (!string.IsNullOrEmpty(instanceId))
                 {
-                    activePowerPlanGUID = Guid.Parse(instanceId.AsSpan(instanceId.Length - 38, 38));
+                    activePowerPlanGUID = Guid.Parse(instanceId.Substring(instanceId.Length - 38, 38));
                 }
             }
             catch (Exception ex)
@@ -1281,18 +1304,14 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                 string[] selectedProperties = new[] { "ClassGuid", "DeviceClass", "DeviceID", "DeviceName", "DriverDate", "DriverProviderName", "DriverVersion", "FriendlyName", "HardWareID", "Manufacturer", "PDO" };
                 foreach (string p in selectedProperties)
                 {
-                    if (p == "DriverDate")
+                    Type columnType = p switch
                     {
-                        dtDrivers.Columns.Add(p, typeof(DateTime));
-                    }
-                    else if (p == "ClassGuid")
-                    {
-                        dtDrivers.Columns.Add(p, typeof(Guid));
-                    }
-                    else
-                    {
-                        dtDrivers.Columns.Add(p, typeof(string));
-                    }
+                        "DriverDate" => typeof(DateTime),
+                        "ClassGuid" => typeof(Guid),
+                        _ => typeof(string)
+                    };
+                   
+                    dtDrivers.Columns.Add(p, columnType);
                 }
 
                 string query = "SELECT " + string.Join(",", selectedProperties) + " FROM Win32_PnPSignedDriver";
@@ -1340,16 +1359,14 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             try
             {
                 var PVVersion = PVDriverVersion();
-                if (!string.IsNullOrEmpty(PVVersion))
-                {
-                    var rDriver = dtDrivers.NewRow();
-                    rDriver["DeviceID"] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Amazon\\PVDriver";
-                    rDriver["Manufacturer"] = "Amazon Inc.";
-                    rDriver["DriverProviderName"] = "Amazon Inc.";
-                    rDriver["DeviceName"] = "AWS PV Driver";
-                    rDriver["DriverVersion"] = PVVersion;
-                    dtDrivers.Rows.Add(rDriver);
-                }
+                if (string.IsNullOrEmpty(PVVersion)) return;
+                var rDriver = dtDrivers.NewRow();
+                rDriver["DeviceID"] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Amazon\\PVDriver";
+                rDriver["Manufacturer"] = "Amazon Inc.";
+                rDriver["DriverProviderName"] = "Amazon Inc.";
+                rDriver["DeviceName"] = "AWS PV Driver";
+                rDriver["DriverVersion"] = PVVersion;
+                dtDrivers.Rows.Add(rDriver);
             }
             catch (Exception ex)
             {
@@ -1404,11 +1421,16 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
         private void CollectDrivesWMI()
         {
             if (Data.Tables.Contains("Drives") || !OperatingSystem.IsWindows()) return;
-            DataTable drives = new("Drives");
-            drives.Columns.Add("Name", typeof(string));
-            drives.Columns.Add("Capacity", typeof(long));
-            drives.Columns.Add("FreeSpace", typeof(long));
-            drives.Columns.Add("Label", typeof(string));
+            DataTable drives = new ("Drives")
+            {
+                Columns =
+                {
+                    new DataColumn("Name", typeof(string)),
+                    new DataColumn("Capacity", typeof(long)),
+                    new DataColumn("FreeSpace", typeof(long)),
+                    new DataColumn("Label", typeof(string))
+                }
+            };
 
             using CimSession session = CimSession.Create(computerName, WMISessionOptions);
             IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2", "WQL", @"SELECT FreeSpace,Name,Capacity,Caption,Label FROM Win32_Volume WHERE DriveType=3 AND NOT Name LIKE '%?%'");
