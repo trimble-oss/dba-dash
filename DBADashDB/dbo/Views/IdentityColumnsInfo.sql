@@ -34,7 +34,8 @@ SELECT	IC.InstanceID,
 		CAST(DATEADD(d,CASE WHEN calc3.estimated_days > 36500 THEN NULL ELSE calc3.estimated_days END,IC.SnapshotDate) AS DATE) AS estimated_date,
 		THRES.PctUsedWarningThreshold,
 		THRES.PctUsedCriticalThreshold,
-		I.ShowInSummary
+		I.ShowInSummary,
+		THRES.ThresholdConfigurationLevel
 FROM dbo.IdentityColumns IC
 JOIN dbo.Instances I ON I.InstanceID = IC.InstanceID
 JOIN dbo.Databases D ON D.DatabaseID = IC.DatabaseID
@@ -70,7 +71,8 @@ OUTER APPLY(SELECT TOP(1)	T.WarningThreshold,
 			AND T.Reference = 'IdentityColumns'
 			ORDER BY T.InstanceID DESC) cdt
 OUTER APPLY(SELECT TOP(1)	ICT.PctUsedWarningThreshold,
-							ICT.PctUsedCriticalThreshold
+							ICT.PctUsedCriticalThreshold,
+							CASE WHEN ICT.object_name <>'' THEN 'Table' WHEN ICT.DatabaseID <> -1 THEN 'Database' WHEN ICT.InstanceID <> -1 THEN 'Instance' ELSE 'Root' END AS ThresholdConfigurationLevel
 		FROM dbo.IdentityColumnThresholds ICT
 		WHERE (ICT.InstanceID = IC.InstanceID OR ICT.InstanceID=-1)
 		AND (ICT.DatabaseID = IC.DatabaseID OR ICT.DatabaseID =-1)

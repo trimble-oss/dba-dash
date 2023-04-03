@@ -46,6 +46,8 @@ namespace DBADashGUI.Checks
             IncludeWarning = true;
             IncludeOK = !string.IsNullOrEmpty(context.InstanceName);
             IncludeNA = !string.IsNullOrEmpty(context.InstanceName);
+            configureInstanceThresholdsToolStripMenuItem.Enabled = context.InstanceIDs.Count == 1;
+            configureDatabaseThresholdsToolStripMenuItem.Enabled = DatabaseID!=-1 && context.InstanceIDs.Count == 1;
             RefreshData();
         }
 
@@ -92,8 +94,12 @@ namespace DBADashGUI.Checks
                 new DataGridViewTextBoxColumn() { HeaderText = "Estimated Date", DataPropertyName = "estimated_date", DefaultCellStyle = new DataGridViewCellStyle() { Format = "d", NullValue = ">100 years" }, ToolTipText = "Estimated date table will run out of identity values" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Ident Estimated Days", DataPropertyName = "ident_estimated_days", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, Visible = false, ToolTipText = "Estimated days remaining until table runs out of identity values.  Based on Ident Remaining and Avg Ident/day" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Row Estimated Days", DataPropertyName = "row_estimated_days", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, Visible = false, ToolTipText = "Estimated days remaining until table runs out of identity values.  Based on Rows Remaining and Avg Rows/day" },
-                new DataGridViewTextBoxColumn() { Name = "colSnapshotDate", HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", ToolTipText = "Date identity data was collected from the SQL instance" }
-                );
+                new DataGridViewTextBoxColumn() { Name = "colSnapshotDate", HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", ToolTipText = "Date identity data was collected from the SQL instance" },
+                new DataGridViewTextBoxColumn() { Name = "colPctUsedWarningThreshold", HeaderText = "Warning Threshold", DataPropertyName = "PctUsedWarningThreshold", DefaultCellStyle  = Common.DataGridViewPercentCellStyle, Visible = false},
+                new DataGridViewTextBoxColumn() { Name = "colPctUsedCriticalThreshold", HeaderText = "Critical Threshold", DataPropertyName = "PctUsedCriticalThreshold", DefaultCellStyle = Common.DataGridViewPercentCellStyle, Visible = false},
+                new DataGridViewTextBoxColumn() { Name = "colThresholdConfigurationLevel", HeaderText = "Config Level", DataPropertyName = "ThresholdConfigurationLevel", Visible = false },
+                new DataGridViewLinkColumn() { Name = "colEdit", HeaderText = "Edit", Text = "Edit",LinkColor = DashColors.LinkColor, ToolTipText = "Edit thresholds", UseColumnTextForLinkValue = true}
+            );
         }
 
         private DataTable GetIdentityColumns()
@@ -155,6 +161,47 @@ namespace DBADashGUI.Checks
         private void Filter_Click(object sender, EventArgs e)
         {
             RefreshData();
+        }
+
+        private void ConfigureRootThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ConfigureThresholds(-1,-1,"");
+        }
+
+        private void ConfigureThresholds(int instanceID, int databaseID, string objectName)
+        {
+            using var frm = new IdentityColumnsThresholdConfig() { InstanceID = instanceID, DatabaseID = databaseID, ObjectName = objectName };
+            frm.ShowDialog();
+            if (frm.DialogResult == DialogResult.OK)
+            {
+                RefreshData();
+            }
+        }
+
+        private void ConfigureInstanceThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (InstanceIDs.Count == 1)
+            {
+                ConfigureThresholds(InstanceIDs[0],-1,"");
+            }
+        }
+
+        private void ConfigureDatabaseThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (InstanceIDs.Count == 1 && DatabaseID!=-1)
+            {
+                ConfigureThresholds(InstanceIDs[0], DatabaseID, "");
+            }
+        }
+
+        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+            if (dgv.Columns[e.ColumnIndex].Name == "colEdit" )
+            {
+                ConfigureThresholds((int)row["InstanceID"], (int)row["DatabaseID"], (string)row["object_name"]);
+            }
         }
     }
 }
