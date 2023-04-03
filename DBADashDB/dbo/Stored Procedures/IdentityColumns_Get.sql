@@ -39,7 +39,10 @@ SELECT ICI.InstanceID,
        ICI.ident_estimated_days,
        ICI.row_estimated_days,
        ICI.estimated_days,
-       ICI.estimated_date
+       ICI.estimated_date,
+       ICI.PctUsedWarningThreshold,
+	   ICI.PctUsedCriticalThreshold,
+       ICI.ThresholdConfigurationLevel
 FROM dbo.IdentityColumnsInfo ICI
 WHERE EXISTS(
 		SELECT 1 
