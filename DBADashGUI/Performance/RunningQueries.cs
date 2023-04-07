@@ -110,12 +110,51 @@ namespace DBADashGUI.Performance
 
         public void SetContext(DBADashContext context)
         {
+            if (InstanceIDs != null && context.InstanceIDs.SetEquals(InstanceIDs) && InstanceID == context.InstanceID) // Context hasn't changed
+            {
+                return;
+            }
+            currentSnapshotDate = DateTime.MinValue;
+            dgv.DataSource = null;
             InstanceIDs = context.InstanceIDs.ToList();
             InstanceID = context.InstanceID;
+            if (InstanceIDs is { Count: 1 })
+            {
+                InstanceID = InstanceIDs[0];
+            }
             RefreshData();
         }
 
-        public void RefreshData()
+        /// <summary>
+        /// Get the date of the snapshot to highlight in the snapshot list.  Either the current snapshot we are viewing or the first displayed row.  In the first case the row will be highlighted otherwise just the scroll position is set.
+        /// </summary>
+        /// <param name="highlightSnapshot">DateTime of snapshot to be highlighted and set as first displayed row</param>
+        /// <param name="highlight">Value is true (row to be highlighted) if we are currently viewing the snapshot</param>
+        private void SetHighlightBeforeRefresh(out DateTime? highlightSnapshot, out bool highlight)
+        {
+            if (currentSnapshotDate > DateTime.MinValue)
+            {
+                highlightSnapshot = currentSnapshotDate.ToLocalTime();
+                highlight = true;
+            }
+            else if (dgv.RowCount > 0 && dgv.Columns.Contains("colSnapshotDate") && dgv.FirstDisplayedScrollingRowIndex > 0) // Note: Only maintain scroll position if we have scrolled (If index is 0, we want new rows to display rather than scrolling down)
+            {
+                highlight = false;
+                highlightSnapshot =
+                    (DateTime)dgv.Rows[dgv.FirstDisplayedScrollingRowIndex].Cells["colSnapshotDate"].Value;
+            }
+            else
+            {
+                highlight = false;
+                highlightSnapshot = null;
+            }
+            currentSnapshotDate = DateTime.MinValue;
+        }
+
+        /// <summary>
+        /// Set things back to defaults (control visibility, enabled etc)
+        /// </summary>
+        private void Reset()
         {
             UpdateRowLimit();
             tsEditLimit.Visible = false;
@@ -132,11 +171,13 @@ namespace DBADashGUI.Performance
             tsPrevious.Visible = false;
             tsNext.Visible = false;
             tsGetLatest.Visible = true;
+        }
+
+        public void RefreshData()
+        {
+            SetHighlightBeforeRefresh(out var highlightSnapshot, out var highlight);
+            Reset();
             ClearBlocking();
-            if (InstanceIDs is { Count: 1 })
-            {
-                InstanceID = InstanceIDs[0];
-            }
 
             if (SessionID != 0) // Show the running query snapshots for a specific session ID between specified dates
             {
@@ -154,6 +195,10 @@ namespace DBADashGUI.Performance
             else // List of snapshots for an instance or last snapshot for all instances
             {
                 LoadSummaryData();
+                if (highlightSnapshot.HasValue)
+                {
+                    HighlightSnapshot(highlightSnapshot.Value, highlight);
+                }
             }
         }
 
@@ -169,7 +214,6 @@ namespace DBADashGUI.Performance
             tsBlockingFilter.Visible = false;
             tsGetLatest.Visible = !IsServerLevelSummary;
             tsStatus.Visible = false;
-
             if (IsServerLevelSummary) // Show a list of snapshots for the selected database instance
             {
                 dt = RunningQueriesServerSummary();
@@ -582,6 +626,25 @@ namespace DBADashGUI.Performance
             return true;
         }
 
+        /// <summary>
+        /// Highlight a snapshot in the grid by setting the scroll position to the specified snapshot so that it is visible.  Row is also selected when highlight is true
+        /// </summary>
+        /// <param name="snapshotDate">Snapshot date to find</param>
+        /// <param name="highlight">Option to select the row in addition to setting the scroll position</param>
+        private void HighlightSnapshot(DateTime snapshotDate, bool highlight)
+        {
+            foreach (DataGridViewRow row in dgv.Rows)
+            {
+                if (row.Cells["colSnapshotDate"].Value != null && (DateTime)row.Cells["colSnapshotDate"].Value == snapshotDate)
+                {
+                    dgv.ClearSelection();
+                    row.Selected = highlight;
+                    dgv.FirstDisplayedScrollingRowIndex = row.Index;
+                    break;
+                }
+            }
+        }
+
         private void TsGetLatest_Click(object sender, EventArgs e)
         {
             LoadSnapshot(DateTime.MaxValue);
@@ -590,6 +653,7 @@ namespace DBADashGUI.Performance
         private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
+            dgv.FirstDisplayedScrollingRowIndex = 0; // Reset the scroll position if we click refresh as it's likely we are interested in new snapshots.
         }
 
         private void Dgv_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
