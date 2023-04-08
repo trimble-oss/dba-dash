@@ -54,6 +54,7 @@ namespace DBADashGUI.Changes
                     new DataGridViewLinkColumn(){ Name="Max VLF Count", HeaderText="Max VLF Count", DataPropertyName="Max VLF Count", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Too many virtual log files (VLF) can slow down log backups and database recovery."},
                     new DataGridViewLinkColumn(){ Name="Not Using Indirect Checkpoints", HeaderText="Not Using Indirect Checkpoints", DataPropertyName="Not Using Indirect Checkpoints", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Indirect checkpoints can improve database recovery time and reduce checkpoint related I/O spiking.\nIntroduced in SQL 2012 and became the default in SQL 2016.\nNote: In some cases indirect checkpoints might cause performance degradation."},
                     new DataGridViewLinkColumn(){ Name="None-Default Target Recovery Time", HeaderText="None-Default Target Recovery Time", DataPropertyName="None-Default Target Recovery Time", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Defaults are:\n0 - Automatic checkpoints.  Old default.\n60 - Indirect checkpoints. Default from SQL 2016.  Can improve recovery time and reduce checkpoint related I/O spiking."},
+                    new DataGridViewLinkColumn(){ Name="RCSI Count", HeaderText="RCSI Count", DataPropertyName="RCSI Count", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of user databases using read committed snapshot isolation level.\nRead Committed Isolation Level (RCSI) allows read and write queries to run concurrently without blocking each other."},
                     new DataGridViewLinkColumn(){ Name="User Database Count", HeaderText="User Database Count", DataPropertyName="User Database Count", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of databases excluding system databases."},
         };
 
@@ -549,6 +550,10 @@ namespace DBADashGUI.Changes
             else if (e.ColumnIndex == dgv.Columns["Standby"]?.Index)
             {
                 RowFilter = "is_in_standby = 1";
+            }
+            else if (e.ColumnIndex == dgv.Columns["RCSI Count"]?.Index)
+            {
+                RowFilter = "is_read_committed_snapshot_on=1";
             }
             else
             {
