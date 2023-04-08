@@ -24,7 +24,8 @@ SELECT I.InstanceGroupName AS Instance,
 	MAX(D.VLFCount) AS [Max VLF Count],
 	SUM(CASE WHEN D.target_recovery_time_in_seconds IS NULL THEN NULL WHEN D.target_recovery_time_in_seconds = 0 AND D.database_id > 4 THEN 1 ELSE 0 END) AS [Not Using Indirect Checkpoints],
 	SUM(CASE WHEN D.target_recovery_time_in_seconds IS NULL OR D.target_recovery_time_in_seconds IN(0,60) THEN 0 ELSE 1 END) AS [None-Default Target Recovery Time],
-	MAX(I.MaxSupportedCompatibilityLevel) AS [Max Supported Compatibility Level]
+	MAX(I.MaxSupportedCompatibilityLevel) AS [Max Supported Compatibility Level],
+	SUM(CASE WHEN D.database_id >4  AND D.is_read_committed_snapshot_on = 1 THEN 1 ELSE 0 END) AS [RCSI Count]
 FROM dbo.InstanceInfo I 
 JOIN dbo.Databases D ON I.InstanceID = D.InstanceID
 WHERE I.IsActive=1
