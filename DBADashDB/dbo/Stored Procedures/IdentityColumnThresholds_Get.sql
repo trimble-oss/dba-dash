@@ -26,7 +26,7 @@ LEFT JOIN dbo.Databases D ON P.DatabaseID = D.DatabaseID AND D.InstanceID = P.In
 LEFT JOIN dbo.IdentityColumnThresholds T ON(
 										(T.InstanceID = P.InstanceID OR T.InstanceID = -1)
 										AND (T.DatabaseID = P.DatabaseID OR T.DatabaseID = -1)
-										AND (T.object_name = P.object_name OR P.object_name = '')
+										AND (T.object_name = P.object_name OR T.object_name = '')
 										)
 ORDER BY T.InstanceID DESC, 
 		T.DatabaseID DESC, 
