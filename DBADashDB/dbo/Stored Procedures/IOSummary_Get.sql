@@ -48,7 +48,10 @@ DECLARE @TableName SYSNAME
 SELECT @TableName = CASE WHEN @GroupBy ='Filegroup' THEN 'dbo.FGIOStats' ELSE 'dbo.DBIOStats' END + CASE WHEN @Use60MIN=1 THEN '_60MIN' ELSE '' END
 
 DECLARE @GroupBySQL NVARCHAR(MAX) 
-SELECT @GroupBySQL= CASE @GroupBy WHEN 'Database' THEN 'D.name' WHEN 'Filegroup' THEN 'D.name + '' | '' + IOS.filegroup_name' WHEN 'File' THEN 'D.name + '' | '' + F.name + '' | ('' + IOS.Drive + '':\)''' WHEN 'Drive' THEN 'REPLACE(IOS.Drive + '':\'',''*'',''{All}'') + ISNULL('' ('' + DRV.Label + '')'','''')' END
+SELECT @GroupBySQL= CASE @GroupBy WHEN 'Database' THEN 'CASE WHEN IOS.DatabaseID =-1 AND IOS.FileID = -1 AND IOS.Drive=''*'' THEN ''{All}'' ELSE D.name END' 
+					WHEN 'Filegroup' THEN 'D.name + '' | '' + IOS.filegroup_name' 
+					WHEN 'File' THEN 'CASE WHEN IOS.DatabaseID =-1 AND IOS.FileID = -1 AND IOS.Drive=''*'' THEN ''{All}'' ELSE D.name + '' | '' + F.name + '' | ('' + IOS.Drive + '':\)'' END' 
+					WHEN 'Drive' THEN 'REPLACE(IOS.Drive + '':\'',''*'',''{All}'') + ISNULL('' ('' + DRV.Label + '')'','''')' END
 IF @GroupBySQL IS NULL
 BEGIN
 	RAISERROR('Invalid @GroupBy.  Valid values: Database,Filegroup,File,Drive',11,1)
@@ -88,9 +91,9 @@ SELECT ' + @GroupBySQL + N' AS Grp,
 		MAX(MaxWriteLatency) AS MaxWriteLatency,
 		MAX(MaxLatency) AS MaxLatency
 FROM ' + @TableName + ' IOS
-' + CASE WHEN @GroupBy IN('Filegroup','File','Database') AND @EditionID=1674378470 THEN 'JOIN dbo.Databases D ON D.InstanceID = IOS.InstanceID AND D.IsActive=1 ' ELSE '' END + '
-' + CASE WHEN @GroupBy IN('Filegroup','File','Database') AND @EditionID<>1674378470 THEN 'JOIN dbo.Databases D ON D.DatabaseID = IOS.DatabaseID AND D.IsActive=1' ELSE '' END + '
-' + CASE WHEN @GroupBy IN('File') THEN 'JOIN dbo.DBFiles F ON D.DatabaseID = F.DatabaseID AND IOS.FileID = F.FileID' ELSE '' END + '
+' + CASE WHEN @GroupBy IN('Filegroup','File','Database') AND @EditionID=1674378470 THEN 'LEFT JOIN dbo.Databases D ON D.InstanceID = IOS.InstanceID AND D.IsActive=1 ' ELSE '' END + '
+' + CASE WHEN @GroupBy IN('Filegroup','File','Database') AND @EditionID<>1674378470 THEN 'LEFT JOIN dbo.Databases D ON D.DatabaseID = IOS.DatabaseID AND D.IsActive=1' ELSE '' END + '
+' + CASE WHEN @GroupBy IN('File') THEN 'LEFT JOIN dbo.DBFiles F ON D.DatabaseID = F.DatabaseID AND IOS.FileID = F.FileID' ELSE '' END + '
 ' + CASE WHEN @GroupBy ='Drive' THEN 'LEFT JOIN dbo.Drives DRV ON IOS.InstanceID = DRV.InstanceID AND DRV.Name = IOS.Drive + '':\'' AND DRV.IsActive=1' ELSE '' END + '
 WHERE IOS.InstanceID = @InstanceID
 AND IOS.SnapshotDate >= @FromDate
@@ -99,6 +102,7 @@ AND IOS.SnapshotDate < @ToDate
 ' + CASE WHEN @GroupBy IN('Drive','Database') THEN 'AND IOS.FileID = -1' ELSE '' END + '
 ' + CASE WHEN @GroupBy ='Database' THEN 'AND IOS.Drive=''*''' ELSE '' END + '
 ' + CASE WHEN @GroupBy ='Drive' AND @DatabaseID IS NULL THEN 'AND IOS.DatabaseID = -1' ELSE '' END + '
+' + CASE WHEN @GroupBy = 'File' THEN 'AND (IOS.FileID>0 OR (IOS.FileID=-1 AND IOS.DatabaseID = -1 AND IOS.Drive=''*''))' ELSE '' END + '
 ' + CASE WHEN @DaysOfWeekCsv IS NULL THEN N'' ELSE 'AND DATEPART(dw,DATEADD(mi, @UTCOffset, IOS.SnapshotDate)) IN (' + @DaysOfWeekCsv + ')' END + '
 ' + CASE WHEN @HoursCsv IS NULL THEN N'' ELSE 'AND DATEPART(hh,DATEADD(mi, @UTCOffset, IOS.SnapshotDate)) IN(' + @HoursCsv + ')' END + '
 GROUP BY ' + @GroupBySQL + '

@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using DBADash;
 
 namespace DBADashConfig
 {
@@ -58,6 +59,10 @@ namespace DBADashConfig
         [Option("ServiceName", Default = "", Required = false, HelpText = "Use with -a SetServiceName to set the service name for the DBA Dash service.")]
         public string ServiceName { get; set; } = "";
 
+        [Option("IOCollectionLevel", Default = 1, Required = false,
+            HelpText = "IO Collection Level.  1=Full, 2=Drive, 3=Instance")]
+        public int IOCollectionLevel { get; set; } = 1;
+
         public enum CommandLineActionOption
         {
             Add,
@@ -72,6 +77,4 @@ namespace DBADashConfig
             SetServiceName
         }
     }
-
-
 }

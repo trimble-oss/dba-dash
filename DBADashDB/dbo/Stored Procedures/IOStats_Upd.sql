@@ -32,7 +32,7 @@ DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = N'SELECT @InstanceID,
 			A.SnapshotDate,
 			ISNULL(x.DatabaseID,-1) AS DatabaseID,
-			ISNULL(x.Drive,''*'') AS Drive,
+			COALESCE(x.Drive,''*'') AS Drive,
 			ISNULL(x.FileID,-1) AS FileID,
 			MAX(A.sample_ms-B.sample_ms) AS sample_ms_diff,
 			SUM(A.num_of_reads-B.num_of_reads),
@@ -43,12 +43,12 @@ SET @SQL = N'SELECT @InstanceID,
 			SUM(A.io_stall_write_ms-B.io_stall_write_ms),
 			SUM(A.size_on_disk_bytes)
 FROM @IOStats a
-JOIN Staging.IOStats b ON b.database_id = a.database_id AND b.file_id = a.file_id AND b.InstanceID=@InstanceID
+JOIN Staging.IOStats b ON b.database_id = a.database_id AND b.file_id = a.file_id AND a.drive = b.drive AND b.InstanceID=@InstanceID
 LEFT JOIN dbo.Databases D ON D.database_id = a.database_id AND d.InstanceID=@InstanceID AND D.IsActive=1
 LEFT JOIN dbo.DBFiles F ON F.file_id = a.file_id AND F.DatabaseID = D.DatabaseID AND F.IsActive=1 
-CROSS APPLY(SELECT ISNULL(F.DatabaseID,-999) AS DatabaseID,
+CROSS APPLY(SELECT ISNULL(D.DatabaseID,-999) AS DatabaseID,
 					ISNULL(F.FileID,-999) AS FileID,
-					CASE WHEN F.physical_name LIKE ''_:\%'' THEN LEFT(F.physical_name,1) ELSE ''?'' END AS Drive,
+					CASE WHEN a.drive LIKE ''[A-Z,-]'' THEN a.drive WHEN F.physical_name LIKE ''_:\%'' THEN LEFT(F.physical_name,1) ELSE ''?'' END AS Drive,
 					@InstanceID AS InstanceID
 					) x
 WHERE A.sample_ms > b.sample_ms
@@ -57,7 +57,6 @@ WHERE A.sample_ms > b.sample_ms
 			AND A.num_of_reads>=B.num_of_reads
 			AND A.num_of_writes>=B.num_of_writes
 			AND A.num_of_bytes_written>= B.num_of_bytes_written
-			AND NOT (A.num_of_reads=B.num_of_reads AND A.num_of_writes=B.num_of_writes)
 GROUP BY GROUPING SETS(
 			(x.InstanceID),
 			(x.DatabaseID,x.FileID,x.Drive)' + CASE WHEN @EngineEdition IN(1,2,3,4) THEN ',
@@ -65,8 +64,11 @@ GROUP BY GROUPING SETS(
 			(x.DatabaseID,x.Drive),			
 			(x.Drive)' ELSE '' END + '
 			)
-,a.SnapshotDate'
-
+		,a.SnapshotDate
+HAVING(
+		SUM(A.num_of_writes-B.num_of_writes)>0 
+		OR SUM(A.num_of_reads-B.num_of_reads)>0
+	   )'
 
 INSERT INTO #DBIOStatsTemp
 (
@@ -85,6 +87,15 @@ INSERT INTO #DBIOStatsTemp
 	size_on_disk_bytes
 )
 EXEC sp_executesql @SQL,N'@IOStats IOStats READONLY,@InstanceID INT',@IOStats,@InstanceID
+
+/* 
+	Depending on the IO Collection Level, the database_id & file_id could be set to -1 and Drive could be set to "-".  
+	These won't join to an existing DB/file in the repository DB so DatabaseID and FileID get set to -999 in this case.
+	We just want to keep the aggregates produced by GROUPING SETS in this case.
+*/
+DELETE #DBIOStatsTemp 
+WHERE InstanceID = @InstanceID 
+AND (DatabaseID = -999 OR FileID=-999 OR Drive = '-')
 
 BEGIN TRAN
 
@@ -241,7 +252,8 @@ INSERT INTO Staging.IOStats
     num_of_bytes_written,
     io_stall_write_ms,
     io_stall,
-    size_on_disk_bytes
+    size_on_disk_bytes,
+	drive
 )
 SELECT @InstanceID InstanceID,
     SnapshotDate,
@@ -255,7 +267,8 @@ SELECT @InstanceID InstanceID,
     num_of_bytes_written,
     io_stall_write_ms,
     io_stall,
-    size_on_disk_bytes
+    size_on_disk_bytes,
+	drive
 FROM @IOStats
 
 COMMIT

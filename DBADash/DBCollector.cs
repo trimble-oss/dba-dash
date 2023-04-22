@@ -516,7 +516,7 @@ namespace DBADash
         private DataTable GetPlans(string plansSQL)
         {
             if (string.IsNullOrEmpty(plansSQL)) return null;
-     
+
             using var cn = new SqlConnection(ConnectionString);
             using var da = new SqlDataAdapter(plansSQL, cn);
             var dt = new DataTable("QueryPlans");
@@ -837,6 +837,10 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             {
                 param = new[] { new SqlParameter("IdentityCollectionThreshold", IdentityCollectionThreshold) };
             }
+            else if (collectionType == CollectionType.IOStats)
+            {
+                param = new[] { new SqlParameter("IOCollectionLevel", Source.IOCollectionLevel) };
+            }
 
             if (collectionType == CollectionType.Drives)
             {
@@ -966,7 +970,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             return ds;
         }
 
-        private void MergeCustomPerformanceCounters(DataTable dt,DataTable userDT)
+        private void MergeCustomPerformanceCounters(DataTable dt, DataTable userDT)
         {
             if (dt.Columns.Count == userDT.Columns.Count)
             {
@@ -1006,7 +1010,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             if (ds.Tables.Count == 2)
             {
                 var userDT = ds.Tables[1];
-                MergeCustomPerformanceCounters(dt,userDT);
+                MergeCustomPerformanceCounters(dt, userDT);
             }
             ds.Tables.Remove(dt);
             dt.TableName = "PerformanceCounters";
@@ -1310,7 +1314,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                         "ClassGuid" => typeof(Guid),
                         _ => typeof(string)
                     };
-                   
+
                     dtDrivers.Columns.Add(p, columnType);
                 }
 
@@ -1421,7 +1425,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
         private void CollectDrivesWMI()
         {
             if (Data.Tables.Contains("Drives") || !OperatingSystem.IsWindows()) return;
-            DataTable drives = new ("Drives")
+            DataTable drives = new("Drives")
             {
                 Columns =
                 {

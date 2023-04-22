@@ -74,165 +74,164 @@ try
           .WithParsed<Options>(o =>
           {
               Log.Information("Action:" + o.Option.ToString());
-              if (o.Option == CommandLineActionOption.GetServiceName) // Just return the name of the service
+              switch (o.Option)
               {
-                  Console.WriteLine(config.ServiceName);
-                  Environment.Exit(0);
-              }
-              else if (o.Option == CommandLineActionOption.GetDestination)
-              {
-                  Console.WriteLine(config.DestinationConnection.EncryptedConnectionString);
-                  Environment.Exit(0);
-              }
-              else if (o.Option == CommandLineActionOption.List) // List source and destination connections
-              {
-                  foreach (var cn in config.SourceConnections)
-                  {
-                      Console.WriteLine(cn.SourceConnection.EncryptedConnectionString);
-                  }
-                  Environment.Exit(0);
-              }
-              else if (o.Option == CommandLineActionOption.Count) // Count connections
-              {
-                  Console.WriteLine(config.SourceConnections.Count);
-                  Environment.Exit(0);
-              }
-              else if (o.Option == CommandLineActionOption.Add) // Add a new source connection
-              {
-                  if (string.IsNullOrEmpty(o.ConnectionString))
-                  {
-                      throw new ArgumentException("ConnectionString required");
-                  }
-                  Log.Information("Add new connection: {Connection}", o.ConnectionString);
-                  // check if connection exists before adding a new connection
-                  if (config.SourceExists(o.ConnectionString))
-                  {
-                      if (o.Replace)
+                  // Just return the name of the service
+                  case CommandLineActionOption.GetServiceName:
+                      Console.WriteLine(config.ServiceName);
+                      Environment.Exit(0);
+                      break;
+
+                  case CommandLineActionOption.GetDestination:
+                      Console.WriteLine(config.DestinationConnection.EncryptedConnectionString);
+                      Environment.Exit(0);
+                      break;
+                  // List source and destination connections
+                  case CommandLineActionOption.List:
                       {
-                          Log.Information("Replace existing connection");
-                          config.SourceConnections.Remove(config.GetSourceFromConnectionString(o.ConnectionString));
-                      }
-                      else
-                      {
-                          Log.Information("Source connection already exists");
+                          foreach (var cn in config.SourceConnections)
+                          {
+                              Console.WriteLine(cn.SourceConnection.EncryptedConnectionString);
+                          }
                           Environment.Exit(0);
+                          break;
                       }
-                  }
-                  var source = new DBADashSource();
-                  if (o.ConnectionID != string.Empty)
-                  {
-                      source.ConnectionID = o.ConnectionID;
-                  }
-                  source.ConnectionString = o.ConnectionString;
-                  source.NoWMI = o.NoWMI;
-                  source.CollectSessionWaits = !o.NoCollectSessionWaits;
-                  if (!string.IsNullOrEmpty(o.SchemaSnapshotDBs) && o.SchemaSnapshotDBs != "<null>") // <null> was added for powershell script as passing a blank string results in an error with commandline parser
-                  {
-                      source.SchemaSnapshotDBs = o.SchemaSnapshotDBs;
-                  }
-                  source.PlanCollectionEnabled = o.PlanCollectionEnabled;
-                  if (o.PlanCollectionEnabled)
-                  {
-                      source.PlanCollectionCountThreshold = o.PlanCollectionCountThreshold;
-                      source.PlanCollectionCPUThreshold = o.PlanCollectionCPUThreshold;
-                      source.PlanCollectionDurationThreshold = o.PlanCollectionDurationThreshold;
-                      source.PlanCollectionMemoryGrantThreshold = o.PlanCollectionMemoryGrantThreshold;
-                  }
-                  source.SlowQueryThresholdMs = o.SlowQueryThresholdMs;
-                  source.SlowQuerySessionMaxMemoryKB = o.SlowQuerySessionMaxMemoryKB;
-                  source.SlowQueryTargetMaxMemoryKB = o.SlowQueryTargetMaxMemoryKB;
-                  if (!o.SkipValidation)
-                  {
-                      Log.Information("Validating connection...");
-                      source.SourceConnection.Validate();
-                      Log.Information("Validated");
-                  }
-                  config.SourceConnections.Add(source);
-              }
-              else if (o.Option == CommandLineActionOption.Remove) // Remove connection from config
-              {
-                  if (string.IsNullOrEmpty(o.ConnectionString))
-                  {
+                  // Count connections
+                  case CommandLineActionOption.Count:
+                      Console.WriteLine(config.SourceConnections.Count);
+                      Environment.Exit(0);
+                      break;
+                  // Add a new source connection
+                  case CommandLineActionOption.Add when string.IsNullOrEmpty(o.ConnectionString):
                       throw new ArgumentException("ConnectionString required");
-                  }
-                  if (config.SourceExists(o.ConnectionString))
-                  {
-                      var remove = config.GetSourceFromConnectionString(o.ConnectionString);
-                      Log.Information("Remove existing connection: {Connection}", remove.SourceConnection.ConnectionForPrint);
-                      config.SourceConnections.Remove(remove);
-                  }
-                  else
-                  {
+                  case CommandLineActionOption.Add:
+                      {
+                          Log.Information("Add new connection: {Connection}", o.ConnectionString);
+                          // check if connection exists before adding a new connection
+                          if (config.SourceExists(o.ConnectionString))
+                          {
+                              if (o.Replace)
+                              {
+                                  Log.Information("Replace existing connection");
+                                  config.SourceConnections.Remove(config.GetSourceFromConnectionString(o.ConnectionString));
+                              }
+                              else
+                              {
+                                  Log.Information("Source connection already exists");
+                                  Environment.Exit(0);
+                              }
+                          }
+                          var source = new DBADashSource()
+                          {
+                              IOCollectionLevel = (DBADashSource.IOCollectionLevels)o.IOCollectionLevel,
+                              ConnectionString = o.ConnectionString,
+                              NoWMI = o.NoWMI,
+                              CollectSessionWaits = !o.NoCollectSessionWaits,
+                              PlanCollectionEnabled = o.PlanCollectionEnabled,
+                              SlowQueryThresholdMs = o.SlowQueryThresholdMs,
+                              SlowQuerySessionMaxMemoryKB = o.SlowQuerySessionMaxMemoryKB,
+                              SlowQueryTargetMaxMemoryKB = o.SlowQueryTargetMaxMemoryKB
+                          };
+                          if (o.ConnectionID != string.Empty)
+                          {
+                              source.ConnectionID = o.ConnectionID;
+                          }
+                          if (!string.IsNullOrEmpty(o.SchemaSnapshotDBs) && o.SchemaSnapshotDBs != "<null>") // <null> was added for powershell script as passing a blank string results in an error with commandline parser
+                          {
+                              source.SchemaSnapshotDBs = o.SchemaSnapshotDBs;
+                          }
+                          if (o.PlanCollectionEnabled)
+                          {
+                              source.PlanCollectionCountThreshold = o.PlanCollectionCountThreshold;
+                              source.PlanCollectionCPUThreshold = o.PlanCollectionCPUThreshold;
+                              source.PlanCollectionDurationThreshold = o.PlanCollectionDurationThreshold;
+                              source.PlanCollectionMemoryGrantThreshold = o.PlanCollectionMemoryGrantThreshold;
+                          }
+                          if (!o.SkipValidation)
+                          {
+                              Log.Information("Validating connection...");
+                              source.SourceConnection.Validate();
+                              Log.Information("Validated");
+                          }
+                          config.SourceConnections.Add(source);
+                          break;
+                      }
+                  // Remove connection from config
+                  case CommandLineActionOption.Remove when string.IsNullOrEmpty(o.ConnectionString):
+                      throw new ArgumentException("ConnectionString required");
+                  case CommandLineActionOption.Remove when config.SourceExists(o.ConnectionString):
+                      {
+                          var remove = config.GetSourceFromConnectionString(o.ConnectionString);
+                          Log.Information("Remove existing connection: {Connection}", remove.SourceConnection.ConnectionForPrint);
+                          config.SourceConnections.Remove(remove);
+                          break;
+                      }
+                  case CommandLineActionOption.Remove:
                       Log.Warning("Connection not found");
                       Environment.Exit(0);
-                  }
-              }
-              else if (o.Option == CommandLineActionOption.SetDestination) // Set/Update the destination connection
-              {
-                  if (string.IsNullOrEmpty(o.ConnectionString))
-                  {
+                      break;
+                  // Set/Update the destination connection
+                  case CommandLineActionOption.SetDestination when string.IsNullOrEmpty(o.ConnectionString):
                       throw new ArgumentException("ConnectionString required");
-                  }
-                  Log.Information("Setting destination connection");
-                  config.Destination = o.ConnectionString;
-                  if (!o.SkipValidation)
-                  {
-                      Log.Information("Validating connection...");
-                      config.ValidateDestination();
-                      Log.Information("Validated");
-                  }
-              }
-              else if (o.Option == CommandLineActionOption.CheckForUpdates)
-              {
-                  var latest = Upgrade.GetLatestVersionAsync().GetAwaiter().GetResult();
-                  Log.Information("Upgrade Available: : {0}", Upgrade.IsUpgradeAvailable(latest));
-                  Log.Information("Current Version: {0}", Upgrade.CurrentVersion().ToString());
-                  Log.Information("Latest Version: {0}", latest.TagName);
-                  Log.Information("Release Date: {0}", latest.PublishedAt.ToString());
-                  Log.Information("URL: {0}", latest.Url);
-                  Console.WriteLine(latest.Body);
-                  return;
-              }
-              else if (o.Option == CommandLineActionOption.Update)
-              {
-                  CommandLineUpgrade();
-                  return;
-              }
-              else if (o.Option == CommandLineActionOption.SetServiceName)
-              {
-                  if (string.IsNullOrEmpty(o.ServiceName))
-                  {
+                  case CommandLineActionOption.SetDestination:
+                      {
+                          Log.Information("Setting destination connection");
+                          config.Destination = o.ConnectionString;
+                          if (!o.SkipValidation)
+                          {
+                              Log.Information("Validating connection...");
+                              config.ValidateDestination();
+                              Log.Information("Validated");
+                          }
+
+                          break;
+                      }
+                  case CommandLineActionOption.CheckForUpdates:
+                      {
+                          var latest = Upgrade.GetLatestVersionAsync().GetAwaiter().GetResult();
+                          Log.Information("Upgrade Available: : {0}", Upgrade.IsUpgradeAvailable(latest));
+                          Log.Information("Current Version: {0}", Upgrade.CurrentVersion().ToString());
+                          Log.Information("Latest Version: {0}", latest.TagName);
+                          Log.Information("Release Date: {0}", latest.PublishedAt.ToString());
+                          Log.Information("URL: {0}", latest.Url);
+                          Console.WriteLine(latest.Body);
+                          return;
+                      }
+                  case CommandLineActionOption.Update:
+                      CommandLineUpgrade();
+                      return;
+
+                  case CommandLineActionOption.SetServiceName when string.IsNullOrEmpty(o.ServiceName):
                       Log.Error("ServiceName is required with SetServiceName action");
                       return;
-                  }
-                  if (o.ServiceName == config.ServiceName)
-                  {
+
+                  case CommandLineActionOption.SetServiceName when o.ServiceName == config.ServiceName:
                       Log.Information("ServiceName is already set to {ServiceName}", config.ServiceName);
                       return;
-                  }
-                  if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                  {
-                      if (ServiceTools.IsServiceInstalledByName(o.ServiceName)) // Check if a service exists with the specified name
+
+                  case CommandLineActionOption.SetServiceName when RuntimeInformation.IsOSPlatform(OSPlatform.Windows):
                       {
-                          Log.Error("ServiceName is already in use");
-                          return;
+                          if (ServiceTools.IsServiceInstalledByName(o.ServiceName)) // Check if a service exists with the specified name
+                          {
+                              Log.Error("ServiceName is already in use");
+                              return;
+                          }
+                          if (DBADash.ServiceTools.IsServiceInstalledByPath()) // Check if the service is already installed by location on disk
+                          {
+                              Log.Error("Service is already installed.  Please uninstall before setting a new service name");
+                              return;
+                          }
+                          else
+                          {
+                              Log.Information("Setting service name to {ServiceName}", o.ServiceName);
+                              config.ServiceName = o.ServiceName;
+                          }
+
+                          break;
                       }
-                      if (DBADash.ServiceTools.IsServiceInstalledByPath()) // Check if the service is already installed by location on disk
-                      {
-                          Log.Error("Service is already installed.  Please uninstall before setting a new service name");
-                          return;
-                      }
-                      else
-                      {
-                          Log.Information("Setting service name to {ServiceName}", o.ServiceName);
-                          config.ServiceName = o.ServiceName;
-                      }
-                  }
-                  else
-                  {
+                  case CommandLineActionOption.SetServiceName:
                       Log.Error("SetServiceName is only supported on Windows");
                       return;
-                  }
               }
               // Save a copy of the old config before writing changes
               if (File.Exists(jsonConfigPath) && !o.NoBackupConfig)

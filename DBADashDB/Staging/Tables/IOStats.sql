@@ -12,6 +12,7 @@
     [io_stall_write_ms]    BIGINT        NOT NULL,
     [io_stall]             BIGINT        NOT NULL,
     [size_on_disk_bytes]   BIGINT        NOT NULL,
-    CONSTRAINT [PK_staging_IOStats] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [database_id] ASC, [file_id] ASC)
+    drive CHAR(3) NOT NULL CONSTRAINT [DF_staging_IOStats_drive] DEFAULT('*'),
+    CONSTRAINT [PK_staging_IOStats] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [database_id] ASC, [file_id] ASC, drive)
 );
 
