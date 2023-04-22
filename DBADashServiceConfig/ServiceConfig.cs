@@ -75,7 +75,8 @@ namespace DBADashServiceConfig
                     RunningQueryPlanThreshold = chkCollectPlans.Checked ? new PlanCollectionThreshold() { CountThreshold = int.Parse(txtCountThreshold.Text), CPUThreshold = int.Parse(txtCPUThreshold.Text), DurationThreshold = int.Parse(txtDurationThreshold.Text), MemoryGrantThreshold = int.Parse(txtGrantThreshold.Text) } : null,
                     SchemaSnapshotDBs = schemaSnapshotDBs,
                     CollectSessionWaits = chkCollectSessionWaits.Checked,
-                    ScriptAgentJobs = chkScriptJobs.Checked
+                    ScriptAgentJobs = chkScriptJobs.Checked,
+                    IOCollectionLevel = (DBADashSource.IOCollectionLevels)cboIOLevel.SelectedItem
                 };
                 bool validated = ValidateSource(sourceString);
 
@@ -283,6 +284,9 @@ namespace DBADashServiceConfig
         {
             await CommonShared.CheckForIncompleteUpgrade();
             if (Upgrade.IsUpgradeIncomplete) return;
+
+            cboIOLevel.DataSource = Enum.GetValues(typeof(DBADashSource.IOCollectionLevels));
+
             dgvConnections.AutoGenerateColumns = false;
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ConnectionString", DataPropertyName = "ConnectionString", HeaderText = "Connection String", Width = 300 });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ConnectionID", DataPropertyName = "ConnectionID", HeaderText = "Connection ID", ToolTipText = "The ConnectionID is used to uniquely identify the SQL Instance in the repository database.  The ConnectionID is automatically assigned to @@SERVERNAME but you can override this with a custom value.  If you change the ConnectionID for an existing server it will appear as a new instance in the repository database." });
@@ -301,6 +305,7 @@ namespace DBADashServiceConfig
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "PlanCollectionMemoryGrantThreshold", HeaderText = "Plan Collection Memory Grant Threshold" });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "ScriptAgentJobs", HeaderText = "Script Agent Jobs" });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "HasCustomSchedule", HeaderText = "Custom Schedule" });
+            dgvConnections.Columns.Add(new DataGridViewComboBoxColumn() { DataPropertyName = "IOCollectionLevel", HeaderText = "IO Collection Level", DataSource = Enum.GetValues(typeof(DBADashSource.IOCollectionLevels)) });
             dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Schedule", HeaderText = "Schedule", Text = "Schedule", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
             dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Edit", HeaderText = "Edit", Text = "Edit", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
             dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Delete", HeaderText = "Delete", Text = "Delete", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
@@ -711,6 +716,8 @@ namespace DBADashServiceConfig
                 {
                     chkCollectPlans.Checked = false;
                 }
+
+                cboIOLevel.SelectedItem = src.IOCollectionLevel;
             }
             else
             {

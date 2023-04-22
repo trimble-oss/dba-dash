@@ -79,14 +79,7 @@
             this.label9 = new System.Windows.Forms.Label();
             this.lblSlow = new System.Windows.Forms.Label();
             this.chkPersistXESession = new System.Windows.Forms.CheckBox();
-            this.tabAddConnectionOther = new System.Windows.Forms.TabPage();
-            this.chkCollectSessionWaits = new System.Windows.Forms.CheckBox();
-            this.pictureBox3 = new System.Windows.Forms.PictureBox();
-            this.lnkExample = new System.Windows.Forms.LinkLabel();
-            this.lnkNone = new System.Windows.Forms.LinkLabel();
-            this.lnkALL = new System.Windows.Forms.LinkLabel();
-            this.label8 = new System.Windows.Forms.Label();
-            this.txtSnapshotDBs = new System.Windows.Forms.TextBox();
+            this.tabRunningQueries = new System.Windows.Forms.TabPage();
             this.chkCollectPlans = new System.Windows.Forms.CheckBox();
             this.grpRunningQueryThreshold = new System.Windows.Forms.GroupBox();
             this.label15 = new System.Windows.Forms.Label();
@@ -97,6 +90,17 @@
             this.txtCPUThreshold = new System.Windows.Forms.TextBox();
             this.txtGrantThreshold = new System.Windows.Forms.TextBox();
             this.label16 = new System.Windows.Forms.Label();
+            this.chkCollectSessionWaits = new System.Windows.Forms.CheckBox();
+            this.tabAddConnectionOther = new System.Windows.Forms.TabPage();
+            this.label18 = new System.Windows.Forms.Label();
+            this.cboIOLevel = new System.Windows.Forms.ComboBox();
+            this.chkScriptJobs = new System.Windows.Forms.CheckBox();
+            this.pictureBox3 = new System.Windows.Forms.PictureBox();
+            this.lnkExample = new System.Windows.Forms.LinkLabel();
+            this.lnkNone = new System.Windows.Forms.LinkLabel();
+            this.lnkALL = new System.Windows.Forms.LinkLabel();
+            this.label8 = new System.Windows.Forms.Label();
+            this.txtSnapshotDBs = new System.Windows.Forms.TextBox();
             this.chkNoWMI = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.dgvConnections = new System.Windows.Forms.DataGridView();
@@ -123,7 +127,6 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.button1 = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.chkScriptJobs = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tab1.SuspendLayout();
             this.tabDest.SuspendLayout();
@@ -136,9 +139,10 @@
             this.tabExtendedEvents.SuspendLayout();
             this.pnlExtendedEvents.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numSlowQueryThreshold)).BeginInit();
+            this.tabRunningQueries.SuspendLayout();
+            this.grpRunningQueryThreshold.SuspendLayout();
             this.tabAddConnectionOther.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
-            this.grpRunningQueryThreshold.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvConnections)).BeginInit();
             this.tabOther.SuspendLayout();
@@ -559,6 +563,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabSrcOptions.Controls.Add(this.tabGeneral);
             this.tabSrcOptions.Controls.Add(this.tabExtendedEvents);
+            this.tabSrcOptions.Controls.Add(this.tabRunningQueries);
             this.tabSrcOptions.Controls.Add(this.tabAddConnectionOther);
             this.tabSrcOptions.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.tabSrcOptions.Location = new System.Drawing.Point(16, 26);
@@ -606,7 +611,7 @@
             this.txtSource.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.txtSource.Multiline = true;
             this.txtSource.Name = "txtSource";
-            this.txtSource.Size = new System.Drawing.Size(945, 128);
+            this.txtSource.Size = new System.Drawing.Size(945, 115);
             this.txtSource.TabIndex = 13;
             // 
             // bttnS3Src
@@ -771,112 +776,23 @@
             this.chkPersistXESession.Text = "Persist XE sessions (to allow for manual configuration)";
             this.chkPersistXESession.UseVisualStyleBackColor = true;
             // 
-            // tabAddConnectionOther
+            // tabRunningQueries
             // 
-            this.tabAddConnectionOther.Controls.Add(this.chkScriptJobs);
-            this.tabAddConnectionOther.Controls.Add(this.chkCollectSessionWaits);
-            this.tabAddConnectionOther.Controls.Add(this.pictureBox3);
-            this.tabAddConnectionOther.Controls.Add(this.lnkExample);
-            this.tabAddConnectionOther.Controls.Add(this.lnkNone);
-            this.tabAddConnectionOther.Controls.Add(this.lnkALL);
-            this.tabAddConnectionOther.Controls.Add(this.label8);
-            this.tabAddConnectionOther.Controls.Add(this.txtSnapshotDBs);
-            this.tabAddConnectionOther.Controls.Add(this.chkCollectPlans);
-            this.tabAddConnectionOther.Controls.Add(this.grpRunningQueryThreshold);
-            this.tabAddConnectionOther.Controls.Add(this.chkNoWMI);
-            this.tabAddConnectionOther.Location = new System.Drawing.Point(4, 25);
-            this.tabAddConnectionOther.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabAddConnectionOther.Name = "tabAddConnectionOther";
-            this.tabAddConnectionOther.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabAddConnectionOther.Size = new System.Drawing.Size(1060, 192);
-            this.tabAddConnectionOther.TabIndex = 3;
-            this.tabAddConnectionOther.Text = "Other";
-            this.tabAddConnectionOther.UseVisualStyleBackColor = true;
-            // 
-            // chkCollectSessionWaits
-            // 
-            this.chkCollectSessionWaits.AutoSize = true;
-            this.chkCollectSessionWaits.Checked = true;
-            this.chkCollectSessionWaits.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkCollectSessionWaits.Location = new System.Drawing.Point(302, 56);
-            this.chkCollectSessionWaits.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.chkCollectSessionWaits.Name = "chkCollectSessionWaits";
-            this.chkCollectSessionWaits.Size = new System.Drawing.Size(159, 20);
-            this.chkCollectSessionWaits.TabIndex = 27;
-            this.chkCollectSessionWaits.Text = "Collect Session Waits";
-            this.toolTip1.SetToolTip(this.chkCollectSessionWaits, "Collect Session Waits for Running Queries");
-            this.chkCollectSessionWaits.UseVisualStyleBackColor = true;
-            // 
-            // pictureBox3
-            // 
-            this.pictureBox3.Image = global::DBADashServiceConfig.Properties.Resources.Warning_yellow_7231_16x16;
-            this.pictureBox3.Location = new System.Drawing.Point(482, 118);
-            this.pictureBox3.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.pictureBox3.Name = "pictureBox3";
-            this.pictureBox3.Size = new System.Drawing.Size(16, 16);
-            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.pictureBox3.TabIndex = 26;
-            this.pictureBox3.TabStop = false;
-            this.toolTip1.SetToolTip(this.pictureBox3, "Warning: Avoid using this feature on databases with very large numbers of objects" +
-        " or selecting all databases on servers with very large numbers of databases.");
-            // 
-            // lnkExample
-            // 
-            this.lnkExample.AutoSize = true;
-            this.lnkExample.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
-            this.lnkExample.Location = new System.Drawing.Point(93, 149);
-            this.lnkExample.Name = "lnkExample";
-            this.lnkExample.Size = new System.Drawing.Size(60, 16);
-            this.lnkExample.TabIndex = 25;
-            this.lnkExample.TabStop = true;
-            this.lnkExample.Text = "Example";
-            this.lnkExample.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkExample_LinkClicked);
-            // 
-            // lnkNone
-            // 
-            this.lnkNone.AutoSize = true;
-            this.lnkNone.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
-            this.lnkNone.Location = new System.Drawing.Point(44, 149);
-            this.lnkNone.Name = "lnkNone";
-            this.lnkNone.Size = new System.Drawing.Size(40, 16);
-            this.lnkNone.TabIndex = 24;
-            this.lnkNone.TabStop = true;
-            this.lnkNone.Text = "None";
-            this.lnkNone.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkNone_LinkClicked);
-            // 
-            // lnkALL
-            // 
-            this.lnkALL.AutoSize = true;
-            this.lnkALL.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
-            this.lnkALL.Location = new System.Drawing.Point(15, 149);
-            this.lnkALL.Name = "lnkALL";
-            this.lnkALL.Size = new System.Drawing.Size(22, 16);
-            this.lnkALL.TabIndex = 23;
-            this.lnkALL.TabStop = true;
-            this.lnkALL.Text = "All";
-            this.lnkALL.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkALL_LinkClicked);
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(15, 92);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(190, 16);
-            this.label8.TabIndex = 20;
-            this.label8.Text = "Schema Snapshot Databases:";
-            // 
-            // txtSnapshotDBs
-            // 
-            this.txtSnapshotDBs.Location = new System.Drawing.Point(18, 118);
-            this.txtSnapshotDBs.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.txtSnapshotDBs.Name = "txtSnapshotDBs";
-            this.txtSnapshotDBs.Size = new System.Drawing.Size(449, 22);
-            this.txtSnapshotDBs.TabIndex = 17;
+            this.tabRunningQueries.Controls.Add(this.chkCollectPlans);
+            this.tabRunningQueries.Controls.Add(this.grpRunningQueryThreshold);
+            this.tabRunningQueries.Controls.Add(this.chkCollectSessionWaits);
+            this.tabRunningQueries.Location = new System.Drawing.Point(4, 25);
+            this.tabRunningQueries.Name = "tabRunningQueries";
+            this.tabRunningQueries.Padding = new System.Windows.Forms.Padding(3);
+            this.tabRunningQueries.Size = new System.Drawing.Size(1060, 192);
+            this.tabRunningQueries.TabIndex = 4;
+            this.tabRunningQueries.Text = "Running Queries";
+            this.tabRunningQueries.UseVisualStyleBackColor = true;
             // 
             // chkCollectPlans
             // 
             this.chkCollectPlans.AutoSize = true;
-            this.chkCollectPlans.Location = new System.Drawing.Point(18, 56);
+            this.chkCollectPlans.Location = new System.Drawing.Point(9, 42);
             this.chkCollectPlans.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.chkCollectPlans.Name = "chkCollectPlans";
             this.chkCollectPlans.Size = new System.Drawing.Size(227, 20);
@@ -898,11 +814,11 @@
             this.grpRunningQueryThreshold.Controls.Add(this.txtGrantThreshold);
             this.grpRunningQueryThreshold.Controls.Add(this.label16);
             this.grpRunningQueryThreshold.Enabled = false;
-            this.grpRunningQueryThreshold.Location = new System.Drawing.Point(513, 8);
+            this.grpRunningQueryThreshold.Location = new System.Drawing.Point(545, 16);
             this.grpRunningQueryThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.grpRunningQueryThreshold.Name = "grpRunningQueryThreshold";
             this.grpRunningQueryThreshold.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.grpRunningQueryThreshold.Size = new System.Drawing.Size(541, 159);
+            this.grpRunningQueryThreshold.Size = new System.Drawing.Size(509, 132);
             this.grpRunningQueryThreshold.TabIndex = 22;
             this.grpRunningQueryThreshold.TabStop = false;
             this.grpRunningQueryThreshold.Text = "Running Queries Plan Collection Thresholds";
@@ -918,7 +834,7 @@
             // 
             // txtDurationThreshold
             // 
-            this.txtDurationThreshold.Location = new System.Drawing.Point(146, 38);
+            this.txtDurationThreshold.Location = new System.Drawing.Point(146, 37);
             this.txtDurationThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.txtDurationThreshold.Name = "txtDurationThreshold";
             this.txtDurationThreshold.Size = new System.Drawing.Size(100, 22);
@@ -935,7 +851,7 @@
             // label17
             // 
             this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(263, 79);
+            this.label17.Location = new System.Drawing.Point(263, 82);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(108, 16);
             this.label17.TabIndex = 21;
@@ -944,7 +860,7 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(6, 71);
+            this.label14.Location = new System.Drawing.Point(6, 82);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(102, 16);
             this.label14.TabIndex = 15;
@@ -952,7 +868,7 @@
             // 
             // txtCPUThreshold
             // 
-            this.txtCPUThreshold.Location = new System.Drawing.Point(146, 75);
+            this.txtCPUThreshold.Location = new System.Drawing.Point(146, 79);
             this.txtCPUThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.txtCPUThreshold.Name = "txtCPUThreshold";
             this.txtCPUThreshold.Size = new System.Drawing.Size(100, 22);
@@ -960,7 +876,7 @@
             // 
             // txtGrantThreshold
             // 
-            this.txtGrantThreshold.Location = new System.Drawing.Point(385, 36);
+            this.txtGrantThreshold.Location = new System.Drawing.Point(385, 37);
             this.txtGrantThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.txtGrantThreshold.Name = "txtGrantThreshold";
             this.txtGrantThreshold.Size = new System.Drawing.Size(100, 22);
@@ -975,12 +891,144 @@
             this.label16.TabIndex = 19;
             this.label16.Text = "Grant Threshold:";
             // 
+            // chkCollectSessionWaits
+            // 
+            this.chkCollectSessionWaits.AutoSize = true;
+            this.chkCollectSessionWaits.Checked = true;
+            this.chkCollectSessionWaits.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkCollectSessionWaits.Location = new System.Drawing.Point(9, 8);
+            this.chkCollectSessionWaits.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.chkCollectSessionWaits.Name = "chkCollectSessionWaits";
+            this.chkCollectSessionWaits.Size = new System.Drawing.Size(159, 20);
+            this.chkCollectSessionWaits.TabIndex = 27;
+            this.chkCollectSessionWaits.Text = "Collect Session Waits";
+            this.toolTip1.SetToolTip(this.chkCollectSessionWaits, "Collect Session Waits for Running Queries");
+            this.chkCollectSessionWaits.UseVisualStyleBackColor = true;
+            // 
+            // tabAddConnectionOther
+            // 
+            this.tabAddConnectionOther.Controls.Add(this.label18);
+            this.tabAddConnectionOther.Controls.Add(this.cboIOLevel);
+            this.tabAddConnectionOther.Controls.Add(this.chkScriptJobs);
+            this.tabAddConnectionOther.Controls.Add(this.pictureBox3);
+            this.tabAddConnectionOther.Controls.Add(this.lnkExample);
+            this.tabAddConnectionOther.Controls.Add(this.lnkNone);
+            this.tabAddConnectionOther.Controls.Add(this.lnkALL);
+            this.tabAddConnectionOther.Controls.Add(this.label8);
+            this.tabAddConnectionOther.Controls.Add(this.txtSnapshotDBs);
+            this.tabAddConnectionOther.Controls.Add(this.chkNoWMI);
+            this.tabAddConnectionOther.Location = new System.Drawing.Point(4, 25);
+            this.tabAddConnectionOther.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.tabAddConnectionOther.Name = "tabAddConnectionOther";
+            this.tabAddConnectionOther.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.tabAddConnectionOther.Size = new System.Drawing.Size(1060, 192);
+            this.tabAddConnectionOther.TabIndex = 3;
+            this.tabAddConnectionOther.Text = "Other";
+            this.tabAddConnectionOther.UseVisualStyleBackColor = true;
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(9, 81);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(121, 16);
+            this.label18.TabIndex = 30;
+            this.label18.Text = "IO Collection Level:";
+            // 
+            // cboIOLevel
+            // 
+            this.cboIOLevel.FormattingEnabled = true;
+            this.cboIOLevel.Location = new System.Drawing.Point(224, 78);
+            this.cboIOLevel.Name = "cboIOLevel";
+            this.cboIOLevel.Size = new System.Drawing.Size(135, 24);
+            this.cboIOLevel.TabIndex = 29;
+            // 
+            // chkScriptJobs
+            // 
+            this.chkScriptJobs.AutoSize = true;
+            this.chkScriptJobs.Checked = true;
+            this.chkScriptJobs.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkScriptJobs.Location = new System.Drawing.Point(9, 42);
+            this.chkScriptJobs.Name = "chkScriptJobs";
+            this.chkScriptJobs.Size = new System.Drawing.Size(96, 20);
+            this.chkScriptJobs.TabIndex = 28;
+            this.chkScriptJobs.Text = "Script Jobs";
+            this.toolTip1.SetToolTip(this.chkScriptJobs, "If Jobs collection is enabled, the job definition will be scripted via SMO");
+            this.chkScriptJobs.UseVisualStyleBackColor = true;
+            // 
+            // pictureBox3
+            // 
+            this.pictureBox3.Image = global::DBADashServiceConfig.Properties.Resources.Warning_yellow_7231_16x16;
+            this.pictureBox3.Location = new System.Drawing.Point(679, 123);
+            this.pictureBox3.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.pictureBox3.Name = "pictureBox3";
+            this.pictureBox3.Size = new System.Drawing.Size(16, 16);
+            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.pictureBox3.TabIndex = 26;
+            this.pictureBox3.TabStop = false;
+            this.toolTip1.SetToolTip(this.pictureBox3, "Warning: Avoid using this feature on databases with very large numbers of objects" +
+        " or selecting all databases on servers with very large numbers of databases.");
+            // 
+            // lnkExample
+            // 
+            this.lnkExample.AutoSize = true;
+            this.lnkExample.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
+            this.lnkExample.Location = new System.Drawing.Point(613, 146);
+            this.lnkExample.Name = "lnkExample";
+            this.lnkExample.Size = new System.Drawing.Size(60, 16);
+            this.lnkExample.TabIndex = 25;
+            this.lnkExample.TabStop = true;
+            this.lnkExample.Text = "Example";
+            this.lnkExample.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkExample_LinkClicked);
+            // 
+            // lnkNone
+            // 
+            this.lnkNone.AutoSize = true;
+            this.lnkNone.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
+            this.lnkNone.Location = new System.Drawing.Point(564, 146);
+            this.lnkNone.Name = "lnkNone";
+            this.lnkNone.Size = new System.Drawing.Size(40, 16);
+            this.lnkNone.TabIndex = 24;
+            this.lnkNone.TabStop = true;
+            this.lnkNone.Text = "None";
+            this.lnkNone.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkNone_LinkClicked);
+            // 
+            // lnkALL
+            // 
+            this.lnkALL.AutoSize = true;
+            this.lnkALL.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
+            this.lnkALL.Location = new System.Drawing.Point(535, 146);
+            this.lnkALL.Name = "lnkALL";
+            this.lnkALL.Size = new System.Drawing.Size(22, 16);
+            this.lnkALL.TabIndex = 23;
+            this.lnkALL.TabStop = true;
+            this.lnkALL.Text = "All";
+            this.lnkALL.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkALL_LinkClicked);
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(9, 123);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(190, 16);
+            this.label8.TabIndex = 20;
+            this.label8.Text = "Schema Snapshot Databases:";
+            // 
+            // txtSnapshotDBs
+            // 
+            this.txtSnapshotDBs.Location = new System.Drawing.Point(224, 120);
+            this.txtSnapshotDBs.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.txtSnapshotDBs.Name = "txtSnapshotDBs";
+            this.txtSnapshotDBs.Size = new System.Drawing.Size(449, 22);
+            this.txtSnapshotDBs.TabIndex = 17;
+            // 
             // chkNoWMI
             // 
-            this.chkNoWMI.Location = new System.Drawing.Point(18, 20);
+            this.chkNoWMI.AutoSize = true;
+            this.chkNoWMI.Location = new System.Drawing.Point(9, 8);
             this.chkNoWMI.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkNoWMI.Name = "chkNoWMI";
-            this.chkNoWMI.Size = new System.Drawing.Size(191, 26);
+            this.chkNoWMI.Size = new System.Drawing.Size(115, 20);
             this.chkNoWMI.TabIndex = 6;
             this.chkNoWMI.Text = "Don\'t use WMI";
             this.chkNoWMI.UseVisualStyleBackColor = true;
@@ -1299,19 +1347,6 @@
             this.panel1.Size = new System.Drawing.Size(1137, 64);
             this.panel1.TabIndex = 23;
             // 
-            // chkScriptJobs
-            // 
-            this.chkScriptJobs.AutoSize = true;
-            this.chkScriptJobs.Checked = true;
-            this.chkScriptJobs.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkScriptJobs.Location = new System.Drawing.Point(302, 23);
-            this.chkScriptJobs.Name = "chkScriptJobs";
-            this.chkScriptJobs.Size = new System.Drawing.Size(96, 20);
-            this.chkScriptJobs.TabIndex = 28;
-            this.chkScriptJobs.Text = "Script Jobs";
-            this.toolTip1.SetToolTip(this.chkScriptJobs, "If Jobs collection is enabled, the job definition will be scripted via SMO");
-            this.chkScriptJobs.UseVisualStyleBackColor = true;
-            // 
             // ServiceConfig
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -1343,11 +1378,13 @@
             this.pnlExtendedEvents.ResumeLayout(false);
             this.pnlExtendedEvents.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numSlowQueryThreshold)).EndInit();
+            this.tabRunningQueries.ResumeLayout(false);
+            this.tabRunningQueries.PerformLayout();
+            this.grpRunningQueryThreshold.ResumeLayout(false);
+            this.grpRunningQueryThreshold.PerformLayout();
             this.tabAddConnectionOther.ResumeLayout(false);
             this.tabAddConnectionOther.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
-            this.grpRunningQueryThreshold.ResumeLayout(false);
-            this.grpRunningQueryThreshold.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvConnections)).EndInit();
@@ -1429,7 +1466,6 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.TabPage tabAddConnectionOther;
-        private System.Windows.Forms.CheckBox chkCollectPlans;
         private System.Windows.Forms.GroupBox grpRunningQueryThreshold;
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.TextBox txtDurationThreshold;
@@ -1463,6 +1499,10 @@
         private System.Windows.Forms.CheckBox chkDefaultIdentityCollection;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox chkScriptJobs;
+        private System.Windows.Forms.TabPage tabRunningQueries;
+        private System.Windows.Forms.CheckBox chkCollectPlans;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.ComboBox cboIOLevel;
     }
 }
 

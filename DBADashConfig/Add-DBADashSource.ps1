@@ -28,6 +28,8 @@
     Keep a copy of the old config file before saving
 .PARAMETER Replace
     Option to replace the existing connection if it already exists
+.PARAMETER IOCollectionLevel
+    1=Full,2=Drive,3=Instance
 .EXAMPLE
     ./Add-DBADashSource -ConnectionString "Data Source=MYSERVER;Integrated Security=True;Encrypt=True;Trust Server Certificate=True"
 .EXAMPLE
@@ -50,7 +52,8 @@ Param(
     [bool]$BackupConfig=$true,
     [switch]$Replace,
     [switch]$RestartService,
-    [bool]$CollectSessionWaits=$true
+    [bool]$CollectSessionWaits=$true,
+    [int]$IOCollectionLevel=1
 )
 if(!$SchemaSnapshotDBs){
     $SchemaSnapshotDBs="<null>"
@@ -65,6 +68,7 @@ $command+="--PlanCollectionCPUThreshold $PlanCollectionCPUThreshold "
 $command+="--PlanCollectionDurationThreshold $PlanCollectionDurationThreshold "
 $command+="--PlanCollectionMemoryGrantThreshold $PlanCollectionMemoryGrantThreshold "
 $command+="--SchemaSnapshotDBs `"$SchemaSnapshotDBs`" "
+$command+="--IOCollectionLevel $IOCollectionLevel "
 if ($PlanCollectionEnabled.IsPresent){
     $command+="--PlanCollectionEnabled "
 }   

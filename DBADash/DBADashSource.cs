@@ -2,14 +2,23 @@
 using Newtonsoft.Json;
 using System;
 using System.ComponentModel;
+using Microsoft.SqlServer.Dac.Model;
 using static DBADash.DBADashConnection;
 
 namespace DBADash
 {
     public class DBADashSource
     {
-        private Int32 slowQueryThresholdMs = -1;
+        public enum IOCollectionLevels
+        {
+            Full = 1,
+            InstanceOnly = 2,
+            Drive = 3,
+            Database = 4,
+            DriveAndDatabase = 5
+        }
 
+        private Int32 slowQueryThresholdMs = -1;
         private CollectionSchedules collectionSchedules;
         private PlanCollectionThreshold runningQueryPlanThreshold;
         private string schemaSnapshotDBs;
@@ -21,6 +30,8 @@ namespace DBADash
 
         public string ConnectionID { get; set; }
         public bool ScriptAgentJobs { get; set; } = true;
+
+        public IOCollectionLevels IOCollectionLevel { get; set; } = IOCollectionLevels.Full;
 
         public CollectionSchedules CollectionSchedules
         {
