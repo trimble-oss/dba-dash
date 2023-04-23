@@ -6,16 +6,16 @@ Describe 'CI Workflow checks' {
             }
         }
     It 'Test Instance Count' {
-         $result= Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -Query "SELECT COUNT(*) AS CountOfInstances FROM dbo.Instances"
+         $result= Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) AS CountOfInstances FROM dbo.Instances"
          $result.CountOfInstances | Should -Be 1
     }
     It 'Check for errors' {
-         $results= Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -Query "SELECT * FROM dbo.CollectionErrorLog"
+         $results= Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT * FROM dbo.CollectionErrorLog"
          $results.Count  | Should -Be 0
          
     }
     It 'Check CPU table count' {
-         $results= Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -Query "SELECT COUNT(*) cnt FROM dbo.CPU"
+         $results= Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.CPU"
          $results.cnt  | Should -BeGreaterThan 0
     }
    
@@ -88,7 +88,7 @@ Describe 'CI Workflow checks' {
     )
     It 'Check table counts for <TableName>' -TestCases $TableCountGreaterThanZeroTestCases {
         param($tableName)
-             $results= Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database  -Query "SELECT COUNT(*) cnt FROM $tableName"
+             $results= Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM $tableName"
              $results.cnt  | Should -BeGreaterThan 0
          
     }
@@ -99,7 +99,7 @@ Describe 'CI Workflow checks' {
 	It 'Check WMI table counts for <TableName>' -TestCases $TableCountGreaterThanZeroTestCasesWMI -Skip:$NoWMI {
 		param($tableName)
 			
-			$results= Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database  -Query "SELECT COUNT(*) cnt FROM $tableName"
+			$results= Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM $tableName"
 										
 			$results.cnt | Should -BeGreaterThan 0
 					

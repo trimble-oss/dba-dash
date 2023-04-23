@@ -16,7 +16,7 @@ Param(
     [Parameter(Mandatory=$true)]
     [string]$Database
 )
-Invoke-Sqlcmd -ServerInstance $ServerInstance -Database $Database -Query `
+Invoke-Sqlcmd -ServerInstance $ServerInstance -Database $Database -TrustServerCertificate -Query `
 "SELECT   S.name + '.' + O.name AS TableName
       , SUM(P.Rows) AS CountOfRows
 FROM sys.objects AS O 

@@ -121,7 +121,7 @@ jobs:
       - name: Output CollectionErrorLog
         shell: powershell
         run: | 
-          Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database "DBADashDB_GitHubAction" -Query "SELECT * FROM dbo.CollectionErrorLog" | Format-Table
+          Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database "DBADashDB_GitHubAction" -Query "SELECT * FROM dbo.CollectionErrorLog" -TrustServerCertificate | Format-Table
 
       - name: Output Table Counts
         shell: powershell
