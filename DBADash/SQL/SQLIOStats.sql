@@ -46,8 +46,8 @@ BEGIN
 	ELSE IF @IOCollectionLevel IN(2,3,4,5)
 	BEGIN
 		SELECT GETUTCDATE() AS SnapshotDate,
-				CASE WHEN @IOCollectionLevel IN(4,5) THEN mf.database_id ELSE -1 END AS database_id, 
-				-1 AS file_id,
+				CASE WHEN @IOCollectionLevel IN(4,5) THEN mf.database_id WHEN d.state=1 OR is_in_standby=1 THEN -d.database_id ELSE -32768 END AS database_id, 
+				CASE WHEN d.state=1 OR d.is_in_standby=1 THEN -vfs.file_id ELSE -32768 END AS file_id,
 				MAX(vfs.sample_ms) AS sample_ms,
 				SUM(vfs.num_of_reads) AS num_of_reads,
 				SUM(vfs.num_of_bytes_read) AS num_of_bytes_read,
@@ -60,8 +60,10 @@ BEGIN
 				CASE WHEN @IOCollectionLevel IN(3,5) THEN CAST(LEFT(mf.physical_name,1) AS CHAR(1)) ELSE '-' END AS drive
 		FROM sys.dm_io_virtual_file_stats(NULL, NULL) vfs
 		JOIN sys.master_files mf on vfs.database_id = mf.database_id AND vfs.file_id = mf.file_id
+		JOIN sys.databases d ON vfs.database_id = d.database_id
 		GROUP BY CASE WHEN @IOCollectionLevel IN(3,5) THEN CAST(LEFT(mf.physical_name,1) AS CHAR(1)) ELSE '-' END,
-				CASE WHEN @IOCollectionLevel IN(4,5) THEN mf.database_id ELSE -1 END
+				CASE WHEN @IOCollectionLevel IN(4,5) THEN mf.database_id WHEN d.state=1 OR is_in_standby=1 THEN -d.database_id ELSE -32768 END,
+				CASE WHEN d.state=1 OR d.is_in_standby=1 THEN -vfs.file_id ELSE -32768 END
 
 	END
 	ELSE
