@@ -27,13 +27,46 @@ CREATE TABLE #DBIOStatsTemp(
 	size_on_disk_bytes BIGINT NOT NULL,
 	PRIMARY KEY(InstanceID,DatabaseID,Drive,FileID,	SnapshotDate)
 )
+DECLARE @IOStorageBitMask TINYINT
+DECLARE @Grp NVARCHAR(MAX)
+/*	
+	Configuration setting to control what level we store IO stats. 
+	1 = Instance
+	2 = File level
+	4 = DB
+	8 = DB, Drive
+	16 = Drive
+	31 = Everything
+*/
+SELECT @IOStorageBitMask = CAST(SettingValue AS TINYINT)
+FROM dbo.InstanceSettings
+WHERE InstanceID = @InstanceID
+AND SettingName = 'IOStorageBitMask'
+
+/* Azure DB = Instance and file level */
+SELECT @IOStorageBitMask = ISNULL(@IOStorageBitMask,31) & CASE WHEN @EngineEdition IN(1,2,3,4) THEN 31 ELSE 3 END
+
+IF @IOStorageBitMask = 0
+BEGIN
+	RETURN;
+END
+
+SELECT @Grp = STUFF((SELECT REPLICATE(CHAR(9),3) + ',' + Grp + CHAR(13) + CHAR(10)
+FROM (VALUES('(x.InstanceID)',1),
+		('(x.DatabaseID,x.FileID,x.Drive)',2),
+		('(x.DatabaseID)',4),
+		('(x.DatabaseID,x.Drive)',8),
+		('(x.Drive)',16)
+		) T(Grp,BitMask)
+WHERE BitMask & @IOStorageBitMask > 0
+FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,4,REPLICATE(CHAR(9),3))
 
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = N'SELECT @InstanceID,
 			A.SnapshotDate,
-			ISNULL(x.DatabaseID,-1) AS DatabaseID,
-			COALESCE(x.Drive,''*'') AS Drive,
-			ISNULL(x.FileID,-1) AS FileID,
+			' + CASE WHEN @IOStorageBitMask & 14 > 0 THEN 'ISNULL(x.DatabaseID,-1)' ELSE '-1' END + ' AS DatabaseID,
+			' + CASE WHEN @IOStorageBitMask & 26 > 0 THEN 'COALESCE(x.Drive,''*'')' ELSE '''*''' END + ' AS Drive,
+			' + CASE WHEN @IOStorageBitMask & 2 > 0 THEN 'ISNULL(x.FileID,-1)' ELSE '-1' END + ' AS FileID,
 			MAX(A.sample_ms-B.sample_ms) AS sample_ms_diff,
 			SUM(A.num_of_reads-B.num_of_reads),
 			SUM(A.num_of_bytes_read-B.num_of_bytes_read),
@@ -58,11 +91,7 @@ WHERE A.sample_ms > b.sample_ms
 			AND A.num_of_writes>=B.num_of_writes
 			AND A.num_of_bytes_written>= B.num_of_bytes_written
 GROUP BY GROUPING SETS(
-			(x.InstanceID),
-			(x.DatabaseID,x.FileID,x.Drive)' + CASE WHEN @EngineEdition IN(1,2,3,4) THEN ',
-			(x.DatabaseID),
-			(x.DatabaseID,x.Drive),			
-			(x.Drive)' ELSE '' END + '
+			' + @Grp + '
 			)
 		,a.SnapshotDate
 HAVING(
