@@ -92,8 +92,8 @@ $upgradeFile = "DBADash.Upgrade"
 # Set security protocol to avoid 'Could not create SSL/TLS secure channel' error.
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-# Check if the configuration file exists - if not the current path isn't valid.  Exit.
-if (!(Test-Path -Path "ServiceConfig.json")){
+# Check if current folder looks like the DBA Dash installation directoy.
+if (!(Test-Path -Path "DBADash.dll")){
     throw "Invalid Folder"
     return
  }
@@ -115,10 +115,12 @@ $newVersion = [System.Version]::Parse($Tag + ".0" * (4-($Tag.Split(".")).Count))
 $path = [System.IO.Path]::Combine((Get-Location),"DBADash.dll")
 $existingVersion=[System.Version](Get-Item $path).VersionInfo.ProductVersion
 
-# Create object from the config file.
-$config = Get-Content -Raw -Path "ServiceConfig.json" | ConvertFrom-Json
-# Get the name of the service so we can stop/start it.
-$serviceName = $config.ServiceName
+if (Test-Path -Path "ServiceConfig.json"){
+    # Create object from the config file.
+    $config = Get-Content -Raw -Path "ServiceConfig.json" | ConvertFrom-Json
+    # Get the name of the service so we can stop/start it.
+    $serviceName = $config.ServiceName
+}
 
 # Check if the service name specified exists (user might not have installed as service yet)
 if ($serviceName -eq $null){
@@ -243,6 +245,9 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
         Write-Host "Start Service Config Tool"
         Start-Process .\DBADashServiceConfigTool.exe
     }
+    
+    Write-Host "Remove installation files"
+    Get-ChildItem -Path "." -Filter "DBADash*.zip" | Remove-Item -Force
     Write-Host "Upgrade Completed" -ForegroundColor DarkGreen
 }
 else{
