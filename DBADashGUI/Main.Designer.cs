@@ -331,7 +331,6 @@
             this.tsConnect.Size = new System.Drawing.Size(97, 30);
             this.tsConnect.Text = "Connect";
             this.tsConnect.ToolTipText = "Connect to a different DBA Dash repository";
-            this.tsConnect.Click += new System.EventHandler(this.TsConnect_Click);
             // 
             // diffToolStripMenuItem
             // 
@@ -916,7 +915,6 @@
             // tsPrevious
             // 
             this.tsPrevious.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsPrevious.Image = ((System.Drawing.Image)(resources.GetObject("tsPrevious.Image")));
             this.tsPrevious.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsPrevious.Name = "tsPrevious";
             this.tsPrevious.Size = new System.Drawing.Size(29, 29);
@@ -932,7 +930,6 @@
             // tsNext
             // 
             this.tsNext.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsNext.Image = ((System.Drawing.Image)(resources.GetObject("tsNext.Image")));
             this.tsNext.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsNext.Name = "tsNext";
             this.tsNext.Size = new System.Drawing.Size(29, 29);
@@ -2292,7 +2289,6 @@
             this.Controls.Add(this.splitMain);
             this.Controls.Add(this.menuStrip1);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Main";
             this.Text = "DBA Dash";

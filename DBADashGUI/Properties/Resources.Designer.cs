@@ -535,5 +535,42 @@ namespace DBADashGUI.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+
+        internal static System.Drawing.Bitmap AddConnection_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("AddConnection_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap Database_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("Database_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+
+        internal static System.Drawing.Bitmap Rename_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("Rename_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap DeleteDatabase_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("DeleteDatabase_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

@@ -8,15 +8,15 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Windows.Forms;
+using Amazon.S3.Model;
 
 namespace DBADashGUI
 {
     public class Common : CommonShared
     {
-        private static string connectionString;
-        private static Guid connectionGUID;
-        public static Guid ConnectionGUID { get => connectionGUID; }
-        public static string ConnectionString { get => connectionString; }
+        public static Guid ConnectionGUID => RepositoryDBConnection.ConnectionID;
+
+        public static string ConnectionString => RepositoryDBConnection?.ConnectionString;
         public static readonly string JsonConfigPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
         private static bool FreezeKeyColumnInternal;
         public static bool FreezeKeyColumn { get => FreezeKeyColumnInternal; set => FreezeKeyColumnInternal = value; }
@@ -24,11 +24,16 @@ namespace DBADashGUI
         public static bool IsApplicationRunning { get => IsApplicationRunningInternal; set => IsApplicationRunningInternal = value; } /* Set to true if App is running - used to detect design time mode */
         private static CodeViewer FrmCodeViewer;
         private static bool showHidden;
+        public static RepositoryConnection RepositoryDBConnection;
 
-        public static void SetConnectionString(string connection)
+        public static void SetConnectionString(RepositoryConnection connection)
         {
-            connectionString = connection;
-            connectionGUID = Guid.NewGuid();
+            var builder = new SqlConnectionStringBuilder(connection.ConnectionString)
+            {
+                ApplicationName = "DBADashGUI"
+            };
+            connection.ConnectionString = builder.ToString();
+            RepositoryDBConnection = connection;
         }
 
         public static Guid HighPerformancePowerPlanGUID
