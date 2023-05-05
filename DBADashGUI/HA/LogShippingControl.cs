@@ -90,6 +90,7 @@ namespace DBADashGUI.LogShipping
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
 
                 DataTable dt = new();
