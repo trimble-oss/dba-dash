@@ -416,5 +416,12 @@ namespace DBADashGUI
                 Console.WriteLine("Error deleting temp file:" + ex.ToString());
             }
         }
+        internal static void ConfigureService()
+        {
+            var psi = new ProcessStartInfo(Properties.Resources.ServiceConfigToolName) { UseShellExecute = true };
+            Process.Start(psi);
+            Application.Exit();
+        }
+
     }
 }
