@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -128,8 +129,19 @@ namespace DBADashGUI
             diffSchemaSnapshot.Dock = DockStyle.Fill;
 
             LoadRepositoryConnections();
-            if (repositories.Count == 0)
+            if (repositories.Count == 0) // We don't have a connection to the repository DB yet
             {
+                if (File.Exists(Properties.Resources.ServiceConfigToolName)) // The service configuration tool exists (Not the GUI only package).  Give user the option to configure the service or connect to an existing repository.
+                {
+                    using var frm = new ConnectionOptions(); 
+                    frm.ShowDialog();
+                    if (frm.DialogResult == DialogResult.OK && frm.RequestConfigureService)
+                    {
+                        Common.ConfigureService();
+                        return;
+                    }
+                } 
+                // Prompt the user to connect to an existing DBA Dash repository DB.
                 await AddConnection();
                 if (repositories.Count == 0)
                 {
