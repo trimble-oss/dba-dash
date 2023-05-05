@@ -453,16 +453,10 @@ namespace DBADashGUI
 
         private void DgvSummary_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            var sortCol = dgvSummary.Columns[e.ColumnIndex].Name;
-
-            if (dgvSummary.Columns[e.ColumnIndex] == UptimeStatus)
-            {
-                sortCol = "sqlserver_uptime";
-            }
-            else if (dgvSummary.Columns[e.ColumnIndex] == MemoryDumpStatus)
-            {
-                sortCol = "LastMemoryDump";
-            }
+            var sortCol = dgvSummary.Columns[e.ColumnIndex] == UptimeStatus ? "sqlserver_uptime" :
+                dgvSummary.Columns[e.ColumnIndex] == MemoryDumpStatus ? "LastMemoryDump" :
+                dgvSummary.Columns[e.ColumnIndex] == Instance ? "InstanceGroupName" :
+                dgvSummary.Columns[e.ColumnIndex].Name;
 
             dv.Sort = sortCol + (dv.Sort == sortCol ? " DESC" : "");
         }
