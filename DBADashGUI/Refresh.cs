@@ -56,15 +56,10 @@ namespace DBADashGUI
 
         public void SetMessage(string message, Color backColor, Color foreColor)
         {
+            timer1.Enabled = false;
             this.BackColor = backColor;
             this.ForeColor = foreColor;
             lblRefresh.Text = message;
-            timer1.Enabled = false;
-        }
-
-        private void Refresh_VisibilityChanged(object sender, EventArgs e)
-        {
-            Reset();
         }
     }
 }

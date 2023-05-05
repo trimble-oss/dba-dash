@@ -118,7 +118,7 @@ namespace DBADashGUI
                 Properties.Settings.Default.SettingsUpgradeRequired = false;
                 Properties.Settings.Default.Save();
             }
-
+            mnuTags.Visible = !commandLine.NoTagMenu;
             lblVersion.Text = "Version: " + System.Reflection.Assembly.GetEntryAssembly().GetName().Version;
             tabs.TabPages.Clear();
             tabs.TabPages.Add(tabDBADash);
@@ -142,37 +142,75 @@ namespace DBADashGUI
 
         public async Task SetConnection(RepositoryConnection connection)
         {
+            SetConnectionState(false);
             if (connection == null) return;
-            Common.SetConnectionString(connection);
-            mnuTags.Visible = !commandLine.NoTagMenu;
 
-            if (!CheckRepositoryDBConnection())
+            try
             {
-                throw new Exception("Error checking repository DB connection");
+                if (!CheckRepositoryDBConnection(connection.ConnectionString))
+                {
+                    return;
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
 
-            await CheckVersion();
+            try
+            {
+                await CheckVersion(connection.ConnectionString);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
-            DBADashUser.GetUser();
-            GetCommandLineTags();
-            GetTreeLayout();
-            BuildTagMenu(commandLineTags);
-            AddInstanes();
-            AddTimeZoneMenus();
+            Common.SetConnectionString(connection);
+            try
+            {
+                DBADashUser.GetUser();
+                GetCommandLineTags();
+                GetTreeLayout();
+                BuildTagMenu(commandLineTags);
+                AddInstanes();
+                AddTimeZoneMenus();
+                SetConnectionState(true);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+        }
+
+        private void SetConnectionState(bool isGood)
+        {
+            bttnSearch.Enabled = isGood;
+            optionsToolStripMenuItem.Enabled = isGood;
+            diffToolStripMenuItem.Enabled = isGood;
+            if (!isGood)
+            {
+                tv1.Nodes.Clear();
+                tabs.TabPages.Clear();
+                tabs.TabPages.Add(tabDBADash);
+            }
         }
 
         /// <summary>
         /// Check connection to DBA Dash repository DB.  User is prompted to retry or cancel on failure.
         /// </summary>
         /// <returns>True if connection succeeded</returns>
-        private static bool CheckRepositoryDBConnection()
+        private static bool CheckRepositoryDBConnection(string connectionString)
         {
             bool connectionCheckPassed = false;
             while (!connectionCheckPassed)
             {
                 try
                 {
-                    using (var cn = new SqlConnection(Common.ConnectionString))
+                    using (var cn = new SqlConnection(connectionString))
                     {
                         cn.Open();
                     }
@@ -192,9 +230,9 @@ namespace DBADashGUI
             return connectionCheckPassed;
         }
 
-        private static async Task CheckVersion()
+        private static async Task CheckVersion(string connectionString)
         {
-            var dbVersion = DBValidations.GetDBVersion(Common.ConnectionString);
+            var dbVersion = DBValidations.GetDBVersion(connectionString);
             var appVersion = System.Reflection.Assembly.GetEntryAssembly().GetName().Version;
             var compare =
                 (new Version(appVersion.Major, appVersion.Minor)).CompareTo(new Version(dbVersion.Major,
@@ -1422,6 +1460,7 @@ namespace DBADashGUI
         /// </summary>
         private void TsHome_Click(object sender, EventArgs e)
         {
+            if (tv1.Nodes.Count == 0) return;
             tv1.SelectedNode = tv1.Nodes[0];
             tabs.SelectedIndex = 0;
         }
@@ -1570,7 +1609,7 @@ namespace DBADashGUI
         private async void TsConnect_Click(object sender, EventArgs e)
         {
             var oldConnection = Common.RepositoryDBConnection;
-            using var frm = new DBConnection() { ConnectionString = Common.ConnectionString };
+            using var frm = new DBConnection() { ConnectionString = GetNewConnectionString() };
             frm.ShowDialog();
             if (frm.DialogResult != DialogResult.OK) return;
             try
@@ -1706,14 +1745,47 @@ namespace DBADashGUI
             await AddConnection();
         }
 
+        private string GetNewConnectionString()
+        {
+            string connectionString = Common.ConnectionString;
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                connectionString = (new SqlConnectionStringBuilder()
+                {
+                    InitialCatalog = "DBADashDB",
+                    IntegratedSecurity = true,
+                    Encrypt = true,
+                    TrustServerCertificate = true
+                }).ConnectionString;
+            }
+            return connectionString;
+        }
+
         private async Task AddConnection()
         {
             var oldConnection = Common.RepositoryDBConnection;
-            using var frm = new DBConnection() { ConnectionString = Common.ConnectionString };
+            using var frm = new DBConnection() { ConnectionString = GetNewConnectionString() };
             frm.ShowDialog();
             if (frm.DialogResult != DialogResult.OK) return;
+            var connection = repositories.FindByConnectionString(frm.ConnectionString);
+            if (connection != null)
+            {
+                MessageBox.Show($"The connection already exists: {connection.Name}", "Add Connection", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
 
-            var connection = new RepositoryConnection() { ConnectionString = frm.ConnectionString };
+            connection = new RepositoryConnection() { ConnectionString = frm.ConnectionString };
+
+            try
+            {
+                DBValidations.GetDBVersion(connection.ConnectionString);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             connection.Name = connection.GetDefaultName();
             repositories.Add(connection);
             LoadRepositoryConnections();

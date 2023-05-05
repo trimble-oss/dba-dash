@@ -28,940 +28,893 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            this.TreeViewImageList = new System.Windows.Forms.ImageList(this.components);
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.tsConnect = new System.Windows.Forms.ToolStripMenuItem();
-            this.diffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.databaseSchemaDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.agentJobDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.configureDisplayNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.dataRetentionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.freezeKeyColumnsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.showHiddenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.manageInstancesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveTimeZonePreferenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsTime = new System.Windows.Forms.ToolStripDropDownButton();
-            this.minsToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.minsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.minsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.ts30Min = new System.Windows.Forms.ToolStripMenuItem();
-            this.ts1Hr = new System.Windows.Forms.ToolStripMenuItem();
-            this.ts2Hr = new System.Windows.Forms.ToolStripMenuItem();
-            this.ts3Hr = new System.Windows.Forms.ToolStripMenuItem();
-            this.ts6Hr = new System.Windows.Forms.ToolStripMenuItem();
-            this.ts12Hr = new System.Windows.Forms.ToolStripMenuItem();
-            this.dayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.daysToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.daysToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.days7ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.days14toolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.days28ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.dateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.dummyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsCustom = new System.Windows.Forms.ToolStripMenuItem();
-            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsTimeFilter = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsDayOfWeek = new System.Windows.Forms.ToolStripMenuItem();
-            this.cboTimeZone = new System.Windows.Forms.ToolStripComboBox();
-            this.splitMain = new System.Windows.Forms.SplitContainer();
-            this.tv1 = new System.Windows.Forms.TreeView();
-            this.pnlSearch = new System.Windows.Forms.Panel();
-            this.bttnSearch = new System.Windows.Forms.Button();
-            this.txtSearch = new System.Windows.Forms.TextBox();
-            this.toolStrip2 = new System.Windows.Forms.ToolStrip();
-            this.tsHome = new System.Windows.Forms.ToolStripButton();
-            this.tsBack = new System.Windows.Forms.ToolStripButton();
-            this.mnuTags = new System.Windows.Forms.ToolStripDropDownButton();
-            this.groupToolStripMenuItem = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tabs = new System.Windows.Forms.TabControl();
-            this.tabSnapshotsSummary = new System.Windows.Forms.TabPage();
-            this.schemaSnapshots1 = new DBADashGUI.Changes.SchemaSnapshots();
-            this.tabSchema = new System.Windows.Forms.TabPage();
-            this.splitSchemaSnapshot = new System.Windows.Forms.SplitContainer();
-            this.label7 = new System.Windows.Forms.Label();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsPrevious = new System.Windows.Forms.ToolStripButton();
-            this.tsPageNum = new System.Windows.Forms.ToolStripLabel();
-            this.tsNext = new System.Windows.Forms.ToolStripButton();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            this.tsPageSize = new System.Windows.Forms.ToolStripComboBox();
-            this.gvHistory = new System.Windows.Forms.DataGridView();
-            this.ObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SchemaName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ObjectType = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SnapshotValidFrom = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SnapshotValidTo = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ObjectDateCreated = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ObjectDateModified = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colCompare = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.label1 = new System.Windows.Forms.Label();
-            this.tabTags = new System.Windows.Forms.TabPage();
-            this.tags1 = new DBADashGUI.Tagging.Tags();
-            this.tabDrives = new System.Windows.Forms.TabPage();
-            this.drivesControl1 = new DBADashGUI.Properties.DrivesControl();
-            this.tabBackups = new System.Windows.Forms.TabPage();
-            this.backupsControl1 = new DBADashGUI.Backups.BackupsControl();
-            this.tabLogShipping = new System.Windows.Forms.TabPage();
-            this.logShippingControl1 = new DBADashGUI.LogShipping.LogShippingControl();
-            this.tabJobs = new System.Windows.Forms.TabPage();
-            this.agentJobsControl1 = new DBADashGUI.AgentJobs.AgentJobsControl();
-            this.tabSummary = new System.Windows.Forms.TabPage();
-            this.summary1 = new DBADashGUI.Summary();
-            this.tabFiles = new System.Windows.Forms.TabPage();
-            this.dbFilesControl1 = new DBADashGUI.DBFiles.DBFilesControl();
-            this.tabLastGood = new System.Windows.Forms.TabPage();
-            this.lastGoodCheckDBControl1 = new DBADashGUI.LastGoodCheckDB.LastGoodCheckDBControl();
-            this.tabPerformance = new System.Windows.Forms.TabPage();
-            this.performance1 = new DBADashGUI.Performance.Performance();
-            this.tabDBADashErrorLog = new System.Windows.Forms.TabPage();
-            this.collectionErrors1 = new DBADashGUI.CollectionDates.CollectionErrors();
-            this.tabCollectionDates = new System.Windows.Forms.TabPage();
-            this.collectionDates1 = new DBADashGUI.CollectionDates.CollectionDates();
-            this.tabPerformanceSummary = new System.Windows.Forms.TabPage();
-            this.performanceSummary1 = new DBADashGUI.Performance.PerformanceSummary();
-            this.tabInfo = new System.Windows.Forms.TabPage();
-            this.info1 = new DBADashGUI.Info();
-            this.tabHardware = new System.Windows.Forms.TabPage();
-            this.hardwareChanges1 = new DBADashGUI.HardwareChanges();
-            this.tabSQLPatching = new System.Windows.Forms.TabPage();
-            this.sqlPatching1 = new DBADashGUI.SQLPatching();
-            this.tabInstanceConfig = new System.Windows.Forms.TabPage();
-            this.configurationHistory1 = new DBADashGUI.ConfigurationHistory();
-            this.tabSlowQueries = new System.Windows.Forms.TabPage();
-            this.slowQueries1 = new DBADashGUI.SlowQueries();
-            this.tabTraceFlags = new System.Windows.Forms.TabPage();
-            this.traceFlagHistory1 = new DBADashGUI.Changes.TraceFlagHistory();
-            this.tabAlerts = new System.Windows.Forms.TabPage();
-            this.alerts1 = new DBADashGUI.Changes.Alerts();
-            this.tabDrivers = new System.Windows.Forms.TabPage();
-            this.drivers1 = new DBADashGUI.Changes.Drivers();
-            this.tabDBSpace = new System.Windows.Forms.TabPage();
-            this.spaceTracking1 = new DBADashGUI.SpaceTracking();
-            this.tabAzureSummary = new System.Windows.Forms.TabPage();
-            this.azureSummary1 = new DBADashGUI.Performance.AzureSummary();
-            this.tabAzureDB = new System.Windows.Forms.TabPage();
-            this.azureDBResourceStats1 = new DBADashGUI.Performance.AzureDBResourceStats();
-            this.tabServiceObjectives = new System.Windows.Forms.TabPage();
-            this.azureServiceObjectivesHistory1 = new DBADashGUI.Changes.AzureServiceObjectivesHistory();
-            this.tabDBConfiguration = new System.Windows.Forms.TabPage();
-            this.dbConfiguration1 = new DBADashGUI.Changes.DBConfiguration();
-            this.tabDBOptions = new System.Windows.Forms.TabPage();
-            this.dbOptions1 = new DBADashGUI.Changes.DBOptions();
-            this.tabTempDB = new System.Windows.Forms.TabPage();
-            this.tempDBConfig1 = new DBADashGUI.DBFiles.TempDBConfig();
-            this.tabCustomChecks = new System.Windows.Forms.TabPage();
-            this.customChecks1 = new DBADashGUI.Checks.CustomChecks();
-            this.tabPC = new System.Windows.Forms.TabPage();
-            this.performanceCounterSummary1 = new DBADashGUI.Performance.PerformanceCounterSummary();
-            this.tabObjectExecutionSummary = new System.Windows.Forms.TabPage();
-            this.objectExecutionSummary1 = new DBADashGUI.Performance.ObjectExecutionSummary();
-            this.tabWaits = new System.Windows.Forms.TabPage();
-            this.waitsSummary1 = new DBADashGUI.Performance.WaitsSummary();
-            this.tabMirroring = new System.Windows.Forms.TabPage();
-            this.mirroring1 = new DBADashGUI.HA.Mirroring();
-            this.tabJobDDL = new System.Windows.Forms.TabPage();
-            this.jobDDLHistory1 = new DBADashGUI.Changes.JobDDLHistory();
-            this.tabAG = new System.Windows.Forms.TabPage();
-            this.ag1 = new DBADashGUI.HA.AG();
-            this.tabQS = new System.Windows.Forms.TabPage();
-            this.queryStore1 = new DBADashGUI.Changes.QueryStore();
-            this.tabRG = new System.Windows.Forms.TabPage();
-            this.resourceGovernor1 = new DBADashGUI.Changes.ResourceGovernor();
-            this.tabAzureDBesourceGovernance = new System.Windows.Forms.TabPage();
-            this.azureDBResourceGovernance1 = new DBADashGUI.Changes.AzureDBResourceGovernance();
-            this.tabRunningQueries = new System.Windows.Forms.TabPage();
-            this.runningQueries1 = new DBADashGUI.Performance.RunningQueries();
-            this.tabMemory = new System.Windows.Forms.TabPage();
-            this.memoryUsage1 = new DBADashGUI.Performance.MemoryUsage();
-            this.tabJobStats = new System.Windows.Forms.TabPage();
-            this.jobStats1 = new DBADashGUI.AgentJobs.JobStats();
-            this.tabDBADash = new System.Windows.Forms.TabPage();
-            this.lblVersion = new System.Windows.Forms.Label();
-            this.lblSQLMonitoring = new System.Windows.Forms.Label();
-            this.lblDBADash = new System.Windows.Forms.Label();
-            this.tabIdentityColumns = new System.Windows.Forms.TabPage();
-            this.identityColumns1 = new DBADashGUI.Checks.IdentityColumns();
-            this.tabOSLoadedModules = new System.Windows.Forms.TabPage();
-            this.osLoadedModules1 = new DBADashGUI.Checks.OSLoadedModules();
-            this.tabJobTimeline = new System.Windows.Forms.TabPage();
-            this.jobTimeline1 = new DBADashGUI.AgentJobs.JobTimeline();
-            this.refresh1 = new DBADashGUI.Refresh();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn10 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn13 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn14 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn15 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn16 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn19 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn20 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn21 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn22 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn23 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
-            this.splitMain.Panel1.SuspendLayout();
-            this.splitMain.Panel2.SuspendLayout();
-            this.splitMain.SuspendLayout();
-            this.pnlSearch.SuspendLayout();
-            this.toolStrip2.SuspendLayout();
-            this.tabs.SuspendLayout();
-            this.tabSnapshotsSummary.SuspendLayout();
-            this.tabSchema.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitSchemaSnapshot)).BeginInit();
-            this.splitSchemaSnapshot.Panel1.SuspendLayout();
-            this.splitSchemaSnapshot.Panel2.SuspendLayout();
-            this.splitSchemaSnapshot.SuspendLayout();
-            this.toolStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gvHistory)).BeginInit();
-            this.tabTags.SuspendLayout();
-            this.tabDrives.SuspendLayout();
-            this.tabBackups.SuspendLayout();
-            this.tabLogShipping.SuspendLayout();
-            this.tabJobs.SuspendLayout();
-            this.tabSummary.SuspendLayout();
-            this.tabFiles.SuspendLayout();
-            this.tabLastGood.SuspendLayout();
-            this.tabPerformance.SuspendLayout();
-            this.tabDBADashErrorLog.SuspendLayout();
-            this.tabCollectionDates.SuspendLayout();
-            this.tabPerformanceSummary.SuspendLayout();
-            this.tabInfo.SuspendLayout();
-            this.tabHardware.SuspendLayout();
-            this.tabSQLPatching.SuspendLayout();
-            this.tabInstanceConfig.SuspendLayout();
-            this.tabSlowQueries.SuspendLayout();
-            this.tabTraceFlags.SuspendLayout();
-            this.tabAlerts.SuspendLayout();
-            this.tabDrivers.SuspendLayout();
-            this.tabDBSpace.SuspendLayout();
-            this.tabAzureSummary.SuspendLayout();
-            this.tabAzureDB.SuspendLayout();
-            this.tabServiceObjectives.SuspendLayout();
-            this.tabDBConfiguration.SuspendLayout();
-            this.tabDBOptions.SuspendLayout();
-            this.tabTempDB.SuspendLayout();
-            this.tabCustomChecks.SuspendLayout();
-            this.tabPC.SuspendLayout();
-            this.tabObjectExecutionSummary.SuspendLayout();
-            this.tabWaits.SuspendLayout();
-            this.tabMirroring.SuspendLayout();
-            this.tabJobDDL.SuspendLayout();
-            this.tabAG.SuspendLayout();
-            this.tabQS.SuspendLayout();
-            this.tabRG.SuspendLayout();
-            this.tabAzureDBesourceGovernance.SuspendLayout();
-            this.tabRunningQueries.SuspendLayout();
-            this.tabMemory.SuspendLayout();
-            this.tabJobStats.SuspendLayout();
-            this.tabDBADash.SuspendLayout();
-            this.tabIdentityColumns.SuspendLayout();
-            this.tabOSLoadedModules.SuspendLayout();
-            this.tabJobTimeline.SuspendLayout();
-            this.SuspendLayout();
+            TreeViewImageList = new System.Windows.Forms.ImageList(components);
+            menuStrip1 = new System.Windows.Forms.MenuStrip();
+            tsConnect = new System.Windows.Forms.ToolStripMenuItem();
+            diffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            databaseSchemaDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            agentJobDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            configureDisplayNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            dataRetentionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            freezeKeyColumnsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            showHiddenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            manageInstancesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            saveTimeZonePreferenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsTime = new System.Windows.Forms.ToolStripDropDownButton();
+            minsToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            minsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            minsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            ts30Min = new System.Windows.Forms.ToolStripMenuItem();
+            ts1Hr = new System.Windows.Forms.ToolStripMenuItem();
+            ts2Hr = new System.Windows.Forms.ToolStripMenuItem();
+            ts3Hr = new System.Windows.Forms.ToolStripMenuItem();
+            ts6Hr = new System.Windows.Forms.ToolStripMenuItem();
+            ts12Hr = new System.Windows.Forms.ToolStripMenuItem();
+            dayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            daysToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            daysToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            days7ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            days14toolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            days28ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            dateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            dummyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsCustom = new System.Windows.Forms.ToolStripMenuItem();
+            helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsTimeFilter = new System.Windows.Forms.ToolStripMenuItem();
+            tsDayOfWeek = new System.Windows.Forms.ToolStripMenuItem();
+            cboTimeZone = new System.Windows.Forms.ToolStripComboBox();
+            splitMain = new System.Windows.Forms.SplitContainer();
+            tv1 = new System.Windows.Forms.TreeView();
+            pnlSearch = new System.Windows.Forms.Panel();
+            bttnSearch = new System.Windows.Forms.Button();
+            txtSearch = new System.Windows.Forms.TextBox();
+            toolStrip2 = new System.Windows.Forms.ToolStrip();
+            tsHome = new System.Windows.Forms.ToolStripButton();
+            tsBack = new System.Windows.Forms.ToolStripButton();
+            mnuTags = new System.Windows.Forms.ToolStripDropDownButton();
+            groupToolStripMenuItem = new System.Windows.Forms.ToolStripDropDownButton();
+            tabs = new System.Windows.Forms.TabControl();
+            tabSnapshotsSummary = new System.Windows.Forms.TabPage();
+            schemaSnapshots1 = new Changes.SchemaSnapshots();
+            tabSchema = new System.Windows.Forms.TabPage();
+            splitSchemaSnapshot = new System.Windows.Forms.SplitContainer();
+            label7 = new System.Windows.Forms.Label();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            tsPrevious = new System.Windows.Forms.ToolStripButton();
+            tsPageNum = new System.Windows.Forms.ToolStripLabel();
+            tsNext = new System.Windows.Forms.ToolStripButton();
+            toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            tsPageSize = new System.Windows.Forms.ToolStripComboBox();
+            gvHistory = new System.Windows.Forms.DataGridView();
+            ObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            SchemaName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ObjectType = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            SnapshotValidFrom = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            SnapshotValidTo = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ObjectDateCreated = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ObjectDateModified = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colCompare = new System.Windows.Forms.DataGridViewLinkColumn();
+            label1 = new System.Windows.Forms.Label();
+            tabTags = new System.Windows.Forms.TabPage();
+            tags1 = new Tagging.Tags();
+            tabDrives = new System.Windows.Forms.TabPage();
+            drivesControl1 = new Properties.DrivesControl();
+            tabBackups = new System.Windows.Forms.TabPage();
+            backupsControl1 = new Backups.BackupsControl();
+            tabLogShipping = new System.Windows.Forms.TabPage();
+            logShippingControl1 = new LogShipping.LogShippingControl();
+            tabJobs = new System.Windows.Forms.TabPage();
+            agentJobsControl1 = new AgentJobs.AgentJobsControl();
+            tabSummary = new System.Windows.Forms.TabPage();
+            summary1 = new Summary();
+            tabFiles = new System.Windows.Forms.TabPage();
+            dbFilesControl1 = new DBFiles.DBFilesControl();
+            tabLastGood = new System.Windows.Forms.TabPage();
+            lastGoodCheckDBControl1 = new LastGoodCheckDB.LastGoodCheckDBControl();
+            tabPerformance = new System.Windows.Forms.TabPage();
+            performance1 = new Performance.Performance();
+            tabDBADashErrorLog = new System.Windows.Forms.TabPage();
+            collectionErrors1 = new CollectionDates.CollectionErrors();
+            tabCollectionDates = new System.Windows.Forms.TabPage();
+            collectionDates1 = new CollectionDates.CollectionDates();
+            tabPerformanceSummary = new System.Windows.Forms.TabPage();
+            performanceSummary1 = new Performance.PerformanceSummary();
+            tabInfo = new System.Windows.Forms.TabPage();
+            info1 = new Info();
+            tabHardware = new System.Windows.Forms.TabPage();
+            hardwareChanges1 = new HardwareChanges();
+            tabSQLPatching = new System.Windows.Forms.TabPage();
+            sqlPatching1 = new SQLPatching();
+            tabInstanceConfig = new System.Windows.Forms.TabPage();
+            configurationHistory1 = new ConfigurationHistory();
+            tabSlowQueries = new System.Windows.Forms.TabPage();
+            slowQueries1 = new SlowQueries();
+            tabTraceFlags = new System.Windows.Forms.TabPage();
+            traceFlagHistory1 = new Changes.TraceFlagHistory();
+            tabAlerts = new System.Windows.Forms.TabPage();
+            alerts1 = new Changes.Alerts();
+            tabDrivers = new System.Windows.Forms.TabPage();
+            drivers1 = new Changes.Drivers();
+            tabDBSpace = new System.Windows.Forms.TabPage();
+            spaceTracking1 = new SpaceTracking();
+            tabAzureSummary = new System.Windows.Forms.TabPage();
+            azureSummary1 = new Performance.AzureSummary();
+            tabAzureDB = new System.Windows.Forms.TabPage();
+            azureDBResourceStats1 = new Performance.AzureDBResourceStats();
+            tabServiceObjectives = new System.Windows.Forms.TabPage();
+            azureServiceObjectivesHistory1 = new Changes.AzureServiceObjectivesHistory();
+            tabDBConfiguration = new System.Windows.Forms.TabPage();
+            dbConfiguration1 = new Changes.DBConfiguration();
+            tabDBOptions = new System.Windows.Forms.TabPage();
+            dbOptions1 = new Changes.DBOptions();
+            tabTempDB = new System.Windows.Forms.TabPage();
+            tempDBConfig1 = new DBFiles.TempDBConfig();
+            tabCustomChecks = new System.Windows.Forms.TabPage();
+            customChecks1 = new Checks.CustomChecks();
+            tabPC = new System.Windows.Forms.TabPage();
+            performanceCounterSummary1 = new Performance.PerformanceCounterSummary();
+            tabObjectExecutionSummary = new System.Windows.Forms.TabPage();
+            objectExecutionSummary1 = new Performance.ObjectExecutionSummary();
+            tabWaits = new System.Windows.Forms.TabPage();
+            waitsSummary1 = new Performance.WaitsSummary();
+            tabMirroring = new System.Windows.Forms.TabPage();
+            mirroring1 = new HA.Mirroring();
+            tabJobDDL = new System.Windows.Forms.TabPage();
+            jobDDLHistory1 = new Changes.JobDDLHistory();
+            tabAG = new System.Windows.Forms.TabPage();
+            ag1 = new HA.AG();
+            tabQS = new System.Windows.Forms.TabPage();
+            queryStore1 = new Changes.QueryStore();
+            tabRG = new System.Windows.Forms.TabPage();
+            resourceGovernor1 = new Changes.ResourceGovernor();
+            tabAzureDBesourceGovernance = new System.Windows.Forms.TabPage();
+            azureDBResourceGovernance1 = new Changes.AzureDBResourceGovernance();
+            tabRunningQueries = new System.Windows.Forms.TabPage();
+            runningQueries1 = new Performance.RunningQueries();
+            tabMemory = new System.Windows.Forms.TabPage();
+            memoryUsage1 = new Performance.MemoryUsage();
+            tabJobStats = new System.Windows.Forms.TabPage();
+            jobStats1 = new AgentJobs.JobStats();
+            tabDBADash = new System.Windows.Forms.TabPage();
+            lblVersion = new System.Windows.Forms.Label();
+            lblSQLMonitoring = new System.Windows.Forms.Label();
+            lblDBADash = new System.Windows.Forms.Label();
+            tabIdentityColumns = new System.Windows.Forms.TabPage();
+            identityColumns1 = new Checks.IdentityColumns();
+            tabOSLoadedModules = new System.Windows.Forms.TabPage();
+            osLoadedModules1 = new Checks.OSLoadedModules();
+            tabJobTimeline = new System.Windows.Forms.TabPage();
+            jobTimeline1 = new AgentJobs.JobTimeline();
+            refresh1 = new Refresh();
+            dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn10 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn13 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn14 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn15 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn16 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn19 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn20 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn21 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn22 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn23 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitMain).BeginInit();
+            splitMain.Panel1.SuspendLayout();
+            splitMain.Panel2.SuspendLayout();
+            splitMain.SuspendLayout();
+            pnlSearch.SuspendLayout();
+            toolStrip2.SuspendLayout();
+            tabs.SuspendLayout();
+            tabSnapshotsSummary.SuspendLayout();
+            tabSchema.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitSchemaSnapshot).BeginInit();
+            splitSchemaSnapshot.Panel1.SuspendLayout();
+            splitSchemaSnapshot.Panel2.SuspendLayout();
+            splitSchemaSnapshot.SuspendLayout();
+            toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)gvHistory).BeginInit();
+            tabTags.SuspendLayout();
+            tabDrives.SuspendLayout();
+            tabBackups.SuspendLayout();
+            tabLogShipping.SuspendLayout();
+            tabJobs.SuspendLayout();
+            tabSummary.SuspendLayout();
+            tabFiles.SuspendLayout();
+            tabLastGood.SuspendLayout();
+            tabPerformance.SuspendLayout();
+            tabDBADashErrorLog.SuspendLayout();
+            tabCollectionDates.SuspendLayout();
+            tabPerformanceSummary.SuspendLayout();
+            tabInfo.SuspendLayout();
+            tabHardware.SuspendLayout();
+            tabSQLPatching.SuspendLayout();
+            tabInstanceConfig.SuspendLayout();
+            tabSlowQueries.SuspendLayout();
+            tabTraceFlags.SuspendLayout();
+            tabAlerts.SuspendLayout();
+            tabDrivers.SuspendLayout();
+            tabDBSpace.SuspendLayout();
+            tabAzureSummary.SuspendLayout();
+            tabAzureDB.SuspendLayout();
+            tabServiceObjectives.SuspendLayout();
+            tabDBConfiguration.SuspendLayout();
+            tabDBOptions.SuspendLayout();
+            tabTempDB.SuspendLayout();
+            tabCustomChecks.SuspendLayout();
+            tabPC.SuspendLayout();
+            tabObjectExecutionSummary.SuspendLayout();
+            tabWaits.SuspendLayout();
+            tabMirroring.SuspendLayout();
+            tabJobDDL.SuspendLayout();
+            tabAG.SuspendLayout();
+            tabQS.SuspendLayout();
+            tabRG.SuspendLayout();
+            tabAzureDBesourceGovernance.SuspendLayout();
+            tabRunningQueries.SuspendLayout();
+            tabMemory.SuspendLayout();
+            tabJobStats.SuspendLayout();
+            tabDBADash.SuspendLayout();
+            tabIdentityColumns.SuspendLayout();
+            tabOSLoadedModules.SuspendLayout();
+            tabJobTimeline.SuspendLayout();
+            SuspendLayout();
             // 
             // TreeViewImageList
             // 
-            this.TreeViewImageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this.TreeViewImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("TreeViewImageList.ImageStream")));
-            this.TreeViewImageList.TransparentColor = System.Drawing.Color.Transparent;
-            this.TreeViewImageList.Images.SetKeyName(0, "ServerProject_16x.png");
-            this.TreeViewImageList.Images.SetKeyName(1, "DataServer_16x.png");
-            this.TreeViewImageList.Images.SetKeyName(2, "Database_16x.png");
-            this.TreeViewImageList.Images.SetKeyName(3, "FolderClosed_16x.png");
-            this.TreeViewImageList.Images.SetKeyName(4, "Table_16x.png");
-            this.TreeViewImageList.Images.SetKeyName(5, "StoredProcedureScript_16x.png");
-            this.TreeViewImageList.Images.SetKeyName(6, "FilterFolderOpened_16x.png");
-            this.TreeViewImageList.Images.SetKeyName(7, "DatabaseProperty_16x.png");
-            this.TreeViewImageList.Images.SetKeyName(8, "Cloud_blue_whiteHalo_16x.png");
-            this.TreeViewImageList.Images.SetKeyName(9, "CloudDatabase_16x.png");
-            this.TreeViewImageList.Images.SetKeyName(10, "Checklist_16x.png");
-            this.TreeViewImageList.Images.SetKeyName(11, "Tag_16x.png");
-            this.TreeViewImageList.Images.SetKeyName(12, "BatchFile_16x.png");
-            this.TreeViewImageList.Images.SetKeyName(13, "Cube_16x.png");
-            this.TreeViewImageList.Images.SetKeyName(14, "DataSourceTarget_16x.png");
-            this.TreeViewImageList.Images.SetKeyName(15, "PowerShellFile_16x.png");
-            this.TreeViewImageList.Images.SetKeyName(16, "SQLFile_16x.png");
-            this.TreeViewImageList.Images.SetKeyName(17, "ProcedureMissing_16x.png");
-            this.TreeViewImageList.Images.SetKeyName(18, "CloudServer_16x.png");
-            this.TreeViewImageList.Images.SetKeyName(19, "DataServer_16x_BWLight.png");
-            this.TreeViewImageList.Images.SetKeyName(20, "FolderClosedBlue_16x.png");
+            TreeViewImageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
+            TreeViewImageList.ImageStream = (System.Windows.Forms.ImageListStreamer)resources.GetObject("TreeViewImageList.ImageStream");
+            TreeViewImageList.TransparentColor = System.Drawing.Color.Transparent;
+            TreeViewImageList.Images.SetKeyName(0, "ServerProject_16x.png");
+            TreeViewImageList.Images.SetKeyName(1, "DataServer_16x.png");
+            TreeViewImageList.Images.SetKeyName(2, "Database_16x.png");
+            TreeViewImageList.Images.SetKeyName(3, "FolderClosed_16x.png");
+            TreeViewImageList.Images.SetKeyName(4, "Table_16x.png");
+            TreeViewImageList.Images.SetKeyName(5, "StoredProcedureScript_16x.png");
+            TreeViewImageList.Images.SetKeyName(6, "FilterFolderOpened_16x.png");
+            TreeViewImageList.Images.SetKeyName(7, "DatabaseProperty_16x.png");
+            TreeViewImageList.Images.SetKeyName(8, "Cloud_blue_whiteHalo_16x.png");
+            TreeViewImageList.Images.SetKeyName(9, "CloudDatabase_16x.png");
+            TreeViewImageList.Images.SetKeyName(10, "Checklist_16x.png");
+            TreeViewImageList.Images.SetKeyName(11, "Tag_16x.png");
+            TreeViewImageList.Images.SetKeyName(12, "BatchFile_16x.png");
+            TreeViewImageList.Images.SetKeyName(13, "Cube_16x.png");
+            TreeViewImageList.Images.SetKeyName(14, "DataSourceTarget_16x.png");
+            TreeViewImageList.Images.SetKeyName(15, "PowerShellFile_16x.png");
+            TreeViewImageList.Images.SetKeyName(16, "SQLFile_16x.png");
+            TreeViewImageList.Images.SetKeyName(17, "ProcedureMissing_16x.png");
+            TreeViewImageList.Images.SetKeyName(18, "CloudServer_16x.png");
+            TreeViewImageList.Images.SetKeyName(19, "DataServer_16x_BWLight.png");
+            TreeViewImageList.Images.SetKeyName(20, "FolderClosedBlue_16x.png");
             // 
             // menuStrip1
             // 
-            this.menuStrip1.AutoSize = false;
-            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsConnect,
-            this.diffToolStripMenuItem,
-            this.optionsToolStripMenuItem,
-            this.tsTime,
-            this.helpToolStripMenuItem,
-            this.tsTimeFilter,
-            this.tsDayOfWeek,
-            this.cboTimeZone});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1983, 34);
-            this.menuStrip1.TabIndex = 1;
-            this.menuStrip1.Text = "menuStrip1";
+            menuStrip1.AutoSize = false;
+            menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsConnect, diffToolStripMenuItem, optionsToolStripMenuItem, tsTime, helpToolStripMenuItem, tsTimeFilter, tsDayOfWeek, cboTimeZone });
+            menuStrip1.Location = new System.Drawing.Point(0, 0);
+            menuStrip1.Name = "menuStrip1";
+            menuStrip1.Size = new System.Drawing.Size(1983, 34);
+            menuStrip1.TabIndex = 1;
+            menuStrip1.Text = "menuStrip1";
             // 
             // tsConnect
             // 
-            this.tsConnect.Image = global::DBADashGUI.Properties.Resources.ConnectToDatabase_16x;
-            this.tsConnect.Name = "tsConnect";
-            this.tsConnect.Size = new System.Drawing.Size(97, 30);
-            this.tsConnect.Text = "Connect";
-            this.tsConnect.ToolTipText = "Connect to a different DBA Dash repository";
+            tsConnect.Image = Properties.Resources.ConnectToDatabase_16x;
+            tsConnect.Name = "tsConnect";
+            tsConnect.Size = new System.Drawing.Size(97, 30);
+            tsConnect.Text = "Connect";
+            tsConnect.ToolTipText = "Connect to a different DBA Dash repository";
             // 
             // diffToolStripMenuItem
             // 
-            this.diffToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.databaseSchemaDiffToolStripMenuItem,
-            this.agentJobDiffToolStripMenuItem});
-            this.diffToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.Diff_16x;
-            this.diffToolStripMenuItem.Name = "diffToolStripMenuItem";
-            this.diffToolStripMenuItem.Size = new System.Drawing.Size(68, 30);
-            this.diffToolStripMenuItem.Text = "Diff";
+            diffToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { databaseSchemaDiffToolStripMenuItem, agentJobDiffToolStripMenuItem });
+            diffToolStripMenuItem.Enabled = false;
+            diffToolStripMenuItem.Image = Properties.Resources.Diff_16x;
+            diffToolStripMenuItem.Name = "diffToolStripMenuItem";
+            diffToolStripMenuItem.Size = new System.Drawing.Size(68, 30);
+            diffToolStripMenuItem.Text = "Diff";
             // 
             // databaseSchemaDiffToolStripMenuItem
             // 
-            this.databaseSchemaDiffToolStripMenuItem.Name = "databaseSchemaDiffToolStripMenuItem";
-            this.databaseSchemaDiffToolStripMenuItem.Size = new System.Drawing.Size(240, 26);
-            this.databaseSchemaDiffToolStripMenuItem.Text = "Database Schema Diff";
-            this.databaseSchemaDiffToolStripMenuItem.Click += new System.EventHandler(this.DatabaseSchemaDiffToolStripMenuItem_Click);
+            databaseSchemaDiffToolStripMenuItem.Name = "databaseSchemaDiffToolStripMenuItem";
+            databaseSchemaDiffToolStripMenuItem.Size = new System.Drawing.Size(240, 26);
+            databaseSchemaDiffToolStripMenuItem.Text = "Database Schema Diff";
+            databaseSchemaDiffToolStripMenuItem.Click += DatabaseSchemaDiffToolStripMenuItem_Click;
             // 
             // agentJobDiffToolStripMenuItem
             // 
-            this.agentJobDiffToolStripMenuItem.Name = "agentJobDiffToolStripMenuItem";
-            this.agentJobDiffToolStripMenuItem.Size = new System.Drawing.Size(240, 26);
-            this.agentJobDiffToolStripMenuItem.Text = "Agent Job Diff";
-            this.agentJobDiffToolStripMenuItem.Click += new System.EventHandler(this.AgentJobDiffToolStripMenuItem_Click);
+            agentJobDiffToolStripMenuItem.Name = "agentJobDiffToolStripMenuItem";
+            agentJobDiffToolStripMenuItem.Size = new System.Drawing.Size(240, 26);
+            agentJobDiffToolStripMenuItem.Text = "Agent Job Diff";
+            agentJobDiffToolStripMenuItem.Click += AgentJobDiffToolStripMenuItem_Click;
             // 
             // optionsToolStripMenuItem
             // 
-            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.configureDisplayNameToolStripMenuItem,
-            this.dataRetentionToolStripMenuItem,
-            this.freezeKeyColumnsToolStripMenuItem,
-            this.showHiddenToolStripMenuItem,
-            this.manageInstancesToolStripMenuItem,
-            this.saveTimeZonePreferenceToolStripMenuItem});
-            this.optionsToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
-            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(95, 30);
-            this.optionsToolStripMenuItem.Text = "Options";
+            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { configureDisplayNameToolStripMenuItem, dataRetentionToolStripMenuItem, freezeKeyColumnsToolStripMenuItem, showHiddenToolStripMenuItem, manageInstancesToolStripMenuItem, saveTimeZonePreferenceToolStripMenuItem });
+            optionsToolStripMenuItem.Enabled = false;
+            optionsToolStripMenuItem.Image = Properties.Resources.SettingsOutline_16x;
+            optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+            optionsToolStripMenuItem.Size = new System.Drawing.Size(95, 30);
+            optionsToolStripMenuItem.Text = "Options";
             // 
             // configureDisplayNameToolStripMenuItem
             // 
-            this.configureDisplayNameToolStripMenuItem.Name = "configureDisplayNameToolStripMenuItem";
-            this.configureDisplayNameToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
-            this.configureDisplayNameToolStripMenuItem.Text = "Configure Display Name";
-            this.configureDisplayNameToolStripMenuItem.Click += new System.EventHandler(this.ConfigureDisplayNameToolStripMenuItem_Click);
+            configureDisplayNameToolStripMenuItem.Name = "configureDisplayNameToolStripMenuItem";
+            configureDisplayNameToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
+            configureDisplayNameToolStripMenuItem.Text = "Configure Display Name";
+            configureDisplayNameToolStripMenuItem.Click += ConfigureDisplayNameToolStripMenuItem_Click;
             // 
             // dataRetentionToolStripMenuItem
             // 
-            this.dataRetentionToolStripMenuItem.Name = "dataRetentionToolStripMenuItem";
-            this.dataRetentionToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
-            this.dataRetentionToolStripMenuItem.Text = "Data Retention";
-            this.dataRetentionToolStripMenuItem.Click += new System.EventHandler(this.DataRetentionToolStripMenuItem_Click);
+            dataRetentionToolStripMenuItem.Name = "dataRetentionToolStripMenuItem";
+            dataRetentionToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
+            dataRetentionToolStripMenuItem.Text = "Data Retention";
+            dataRetentionToolStripMenuItem.Click += DataRetentionToolStripMenuItem_Click;
             // 
             // freezeKeyColumnsToolStripMenuItem
             // 
-            this.freezeKeyColumnsToolStripMenuItem.Checked = true;
-            this.freezeKeyColumnsToolStripMenuItem.CheckOnClick = true;
-            this.freezeKeyColumnsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.freezeKeyColumnsToolStripMenuItem.Name = "freezeKeyColumnsToolStripMenuItem";
-            this.freezeKeyColumnsToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
-            this.freezeKeyColumnsToolStripMenuItem.Text = "Freeze Key Columns";
-            this.freezeKeyColumnsToolStripMenuItem.ToolTipText = "Keep the key column(s) in the grid visible as you scroll to the right";
-            this.freezeKeyColumnsToolStripMenuItem.Click += new System.EventHandler(this.FreezeKeyColumnsToolStripMenuItem_Click);
+            freezeKeyColumnsToolStripMenuItem.Checked = true;
+            freezeKeyColumnsToolStripMenuItem.CheckOnClick = true;
+            freezeKeyColumnsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            freezeKeyColumnsToolStripMenuItem.Name = "freezeKeyColumnsToolStripMenuItem";
+            freezeKeyColumnsToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
+            freezeKeyColumnsToolStripMenuItem.Text = "Freeze Key Columns";
+            freezeKeyColumnsToolStripMenuItem.ToolTipText = "Keep the key column(s) in the grid visible as you scroll to the right";
+            freezeKeyColumnsToolStripMenuItem.Click += FreezeKeyColumnsToolStripMenuItem_Click;
             // 
             // showHiddenToolStripMenuItem
             // 
-            this.showHiddenToolStripMenuItem.CheckOnClick = true;
-            this.showHiddenToolStripMenuItem.Name = "showHiddenToolStripMenuItem";
-            this.showHiddenToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
-            this.showHiddenToolStripMenuItem.Text = "Show Hidden";
-            this.showHiddenToolStripMenuItem.CheckStateChanged += new System.EventHandler(this.ShowHidden_Changed);
+            showHiddenToolStripMenuItem.CheckOnClick = true;
+            showHiddenToolStripMenuItem.Name = "showHiddenToolStripMenuItem";
+            showHiddenToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
+            showHiddenToolStripMenuItem.Text = "Show Hidden";
+            showHiddenToolStripMenuItem.CheckStateChanged += ShowHidden_Changed;
             // 
             // manageInstancesToolStripMenuItem
             // 
-            this.manageInstancesToolStripMenuItem.Name = "manageInstancesToolStripMenuItem";
-            this.manageInstancesToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
-            this.manageInstancesToolStripMenuItem.Text = "Manage Instances";
-            this.manageInstancesToolStripMenuItem.Click += new System.EventHandler(this.ManageInstancesToolStripMenuItem_Click);
+            manageInstancesToolStripMenuItem.Name = "manageInstancesToolStripMenuItem";
+            manageInstancesToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
+            manageInstancesToolStripMenuItem.Text = "Manage Instances";
+            manageInstancesToolStripMenuItem.Click += ManageInstancesToolStripMenuItem_Click;
             // 
             // saveTimeZonePreferenceToolStripMenuItem
             // 
-            this.saveTimeZonePreferenceToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.Save_16x;
-            this.saveTimeZonePreferenceToolStripMenuItem.Name = "saveTimeZonePreferenceToolStripMenuItem";
-            this.saveTimeZonePreferenceToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
-            this.saveTimeZonePreferenceToolStripMenuItem.Text = "Save time zone preference";
-            this.saveTimeZonePreferenceToolStripMenuItem.Click += new System.EventHandler(this.SaveTimeZonePreferenceToolStripMenuItem_Click);
+            saveTimeZonePreferenceToolStripMenuItem.Image = Properties.Resources.Save_16x;
+            saveTimeZonePreferenceToolStripMenuItem.Name = "saveTimeZonePreferenceToolStripMenuItem";
+            saveTimeZonePreferenceToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
+            saveTimeZonePreferenceToolStripMenuItem.Text = "Save time zone preference";
+            saveTimeZonePreferenceToolStripMenuItem.Click += SaveTimeZonePreferenceToolStripMenuItem_Click;
             // 
             // tsTime
             // 
-            this.tsTime.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsTime.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.minsToolStripMenuItem2,
-            this.minsToolStripMenuItem1,
-            this.minsToolStripMenuItem,
-            this.ts30Min,
-            this.ts1Hr,
-            this.ts2Hr,
-            this.ts3Hr,
-            this.ts6Hr,
-            this.ts12Hr,
-            this.dayToolStripMenuItem,
-            this.daysToolStripMenuItem,
-            this.daysToolStripMenuItem1,
-            this.days7ToolStripMenuItem,
-            this.days14toolStripMenuItem,
-            this.days28ToolStripMenuItem,
-            this.toolStripSeparator1,
-            this.dateToolStripMenuItem,
-            this.tsCustom});
-            this.tsTime.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.tsTime.Image = global::DBADashGUI.Properties.Resources.Time_16x;
-            this.tsTime.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsTime.Name = "tsTime";
-            this.tsTime.Size = new System.Drawing.Size(71, 27);
-            this.tsTime.Text = "1Hr";
+            tsTime.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsTime.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { minsToolStripMenuItem2, minsToolStripMenuItem1, minsToolStripMenuItem, ts30Min, ts1Hr, ts2Hr, ts3Hr, ts6Hr, ts12Hr, dayToolStripMenuItem, daysToolStripMenuItem, daysToolStripMenuItem1, days7ToolStripMenuItem, days14toolStripMenuItem, days28ToolStripMenuItem, toolStripSeparator1, dateToolStripMenuItem, tsCustom });
+            tsTime.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            tsTime.Image = Properties.Resources.Time_16x;
+            tsTime.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsTime.Name = "tsTime";
+            tsTime.Size = new System.Drawing.Size(71, 27);
+            tsTime.Text = "1Hr";
+            tsTime.Visible = false;
             // 
             // minsToolStripMenuItem2
             // 
-            this.minsToolStripMenuItem2.CheckOnClick = true;
-            this.minsToolStripMenuItem2.Name = "minsToolStripMenuItem2";
-            this.minsToolStripMenuItem2.Size = new System.Drawing.Size(153, 28);
-            this.minsToolStripMenuItem2.Tag = "5";
-            this.minsToolStripMenuItem2.Text = "5 Mins";
-            this.minsToolStripMenuItem2.Click += new System.EventHandler(this.TsTime_Click);
+            minsToolStripMenuItem2.CheckOnClick = true;
+            minsToolStripMenuItem2.Name = "minsToolStripMenuItem2";
+            minsToolStripMenuItem2.Size = new System.Drawing.Size(153, 28);
+            minsToolStripMenuItem2.Tag = "5";
+            minsToolStripMenuItem2.Text = "5 Mins";
+            minsToolStripMenuItem2.Click += TsTime_Click;
             // 
             // minsToolStripMenuItem1
             // 
-            this.minsToolStripMenuItem1.CheckOnClick = true;
-            this.minsToolStripMenuItem1.Name = "minsToolStripMenuItem1";
-            this.minsToolStripMenuItem1.Size = new System.Drawing.Size(153, 28);
-            this.minsToolStripMenuItem1.Tag = "10";
-            this.minsToolStripMenuItem1.Text = "10 Mins";
-            this.minsToolStripMenuItem1.Click += new System.EventHandler(this.TsTime_Click);
+            minsToolStripMenuItem1.CheckOnClick = true;
+            minsToolStripMenuItem1.Name = "minsToolStripMenuItem1";
+            minsToolStripMenuItem1.Size = new System.Drawing.Size(153, 28);
+            minsToolStripMenuItem1.Tag = "10";
+            minsToolStripMenuItem1.Text = "10 Mins";
+            minsToolStripMenuItem1.Click += TsTime_Click;
             // 
             // minsToolStripMenuItem
             // 
-            this.minsToolStripMenuItem.CheckOnClick = true;
-            this.minsToolStripMenuItem.Name = "minsToolStripMenuItem";
-            this.minsToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
-            this.minsToolStripMenuItem.Tag = "15";
-            this.minsToolStripMenuItem.Text = "15 Mins";
-            this.minsToolStripMenuItem.Click += new System.EventHandler(this.TsTime_Click);
+            minsToolStripMenuItem.CheckOnClick = true;
+            minsToolStripMenuItem.Name = "minsToolStripMenuItem";
+            minsToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            minsToolStripMenuItem.Tag = "15";
+            minsToolStripMenuItem.Text = "15 Mins";
+            minsToolStripMenuItem.Click += TsTime_Click;
             // 
             // ts30Min
             // 
-            this.ts30Min.CheckOnClick = true;
-            this.ts30Min.Name = "ts30Min";
-            this.ts30Min.Size = new System.Drawing.Size(153, 28);
-            this.ts30Min.Tag = "30";
-            this.ts30Min.Text = "30 Mins";
-            this.ts30Min.Click += new System.EventHandler(this.TsTime_Click);
+            ts30Min.CheckOnClick = true;
+            ts30Min.Name = "ts30Min";
+            ts30Min.Size = new System.Drawing.Size(153, 28);
+            ts30Min.Tag = "30";
+            ts30Min.Text = "30 Mins";
+            ts30Min.Click += TsTime_Click;
             // 
             // ts1Hr
             // 
-            this.ts1Hr.Checked = true;
-            this.ts1Hr.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.ts1Hr.Name = "ts1Hr";
-            this.ts1Hr.Size = new System.Drawing.Size(153, 28);
-            this.ts1Hr.Tag = "60";
-            this.ts1Hr.Text = "1Hr";
-            this.ts1Hr.Click += new System.EventHandler(this.TsTime_Click);
+            ts1Hr.Checked = true;
+            ts1Hr.CheckState = System.Windows.Forms.CheckState.Checked;
+            ts1Hr.Name = "ts1Hr";
+            ts1Hr.Size = new System.Drawing.Size(153, 28);
+            ts1Hr.Tag = "60";
+            ts1Hr.Text = "1Hr";
+            ts1Hr.Click += TsTime_Click;
             // 
             // ts2Hr
             // 
-            this.ts2Hr.CheckOnClick = true;
-            this.ts2Hr.Name = "ts2Hr";
-            this.ts2Hr.Size = new System.Drawing.Size(153, 28);
-            this.ts2Hr.Tag = "120";
-            this.ts2Hr.Text = "2Hr";
-            this.ts2Hr.Click += new System.EventHandler(this.TsTime_Click);
+            ts2Hr.CheckOnClick = true;
+            ts2Hr.Name = "ts2Hr";
+            ts2Hr.Size = new System.Drawing.Size(153, 28);
+            ts2Hr.Tag = "120";
+            ts2Hr.Text = "2Hr";
+            ts2Hr.Click += TsTime_Click;
             // 
             // ts3Hr
             // 
-            this.ts3Hr.CheckOnClick = true;
-            this.ts3Hr.Name = "ts3Hr";
-            this.ts3Hr.Size = new System.Drawing.Size(153, 28);
-            this.ts3Hr.Tag = "180";
-            this.ts3Hr.Text = "3Hr";
-            this.ts3Hr.Click += new System.EventHandler(this.TsTime_Click);
+            ts3Hr.CheckOnClick = true;
+            ts3Hr.Name = "ts3Hr";
+            ts3Hr.Size = new System.Drawing.Size(153, 28);
+            ts3Hr.Tag = "180";
+            ts3Hr.Text = "3Hr";
+            ts3Hr.Click += TsTime_Click;
             // 
             // ts6Hr
             // 
-            this.ts6Hr.CheckOnClick = true;
-            this.ts6Hr.Name = "ts6Hr";
-            this.ts6Hr.Size = new System.Drawing.Size(153, 28);
-            this.ts6Hr.Tag = "360";
-            this.ts6Hr.Text = "6Hr";
-            this.ts6Hr.Click += new System.EventHandler(this.TsTime_Click);
+            ts6Hr.CheckOnClick = true;
+            ts6Hr.Name = "ts6Hr";
+            ts6Hr.Size = new System.Drawing.Size(153, 28);
+            ts6Hr.Tag = "360";
+            ts6Hr.Text = "6Hr";
+            ts6Hr.Click += TsTime_Click;
             // 
             // ts12Hr
             // 
-            this.ts12Hr.CheckOnClick = true;
-            this.ts12Hr.Name = "ts12Hr";
-            this.ts12Hr.Size = new System.Drawing.Size(153, 28);
-            this.ts12Hr.Tag = "720";
-            this.ts12Hr.Text = "12Hr";
-            this.ts12Hr.Click += new System.EventHandler(this.TsTime_Click);
+            ts12Hr.CheckOnClick = true;
+            ts12Hr.Name = "ts12Hr";
+            ts12Hr.Size = new System.Drawing.Size(153, 28);
+            ts12Hr.Tag = "720";
+            ts12Hr.Text = "12Hr";
+            ts12Hr.Click += TsTime_Click;
             // 
             // dayToolStripMenuItem
             // 
-            this.dayToolStripMenuItem.Name = "dayToolStripMenuItem";
-            this.dayToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
-            this.dayToolStripMenuItem.Tag = "1440";
-            this.dayToolStripMenuItem.Text = "1 Day";
-            this.dayToolStripMenuItem.Click += new System.EventHandler(this.TsTime_Click);
+            dayToolStripMenuItem.Name = "dayToolStripMenuItem";
+            dayToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            dayToolStripMenuItem.Tag = "1440";
+            dayToolStripMenuItem.Text = "1 Day";
+            dayToolStripMenuItem.Click += TsTime_Click;
             // 
             // daysToolStripMenuItem
             // 
-            this.daysToolStripMenuItem.Name = "daysToolStripMenuItem";
-            this.daysToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
-            this.daysToolStripMenuItem.Tag = "2880";
-            this.daysToolStripMenuItem.Text = "2 Days";
-            this.daysToolStripMenuItem.Click += new System.EventHandler(this.TsTime_Click);
+            daysToolStripMenuItem.Name = "daysToolStripMenuItem";
+            daysToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            daysToolStripMenuItem.Tag = "2880";
+            daysToolStripMenuItem.Text = "2 Days";
+            daysToolStripMenuItem.Click += TsTime_Click;
             // 
             // daysToolStripMenuItem1
             // 
-            this.daysToolStripMenuItem1.Name = "daysToolStripMenuItem1";
-            this.daysToolStripMenuItem1.Size = new System.Drawing.Size(153, 28);
-            this.daysToolStripMenuItem1.Tag = "4320";
-            this.daysToolStripMenuItem1.Text = "3 Days";
-            this.daysToolStripMenuItem1.Click += new System.EventHandler(this.TsTime_Click);
+            daysToolStripMenuItem1.Name = "daysToolStripMenuItem1";
+            daysToolStripMenuItem1.Size = new System.Drawing.Size(153, 28);
+            daysToolStripMenuItem1.Tag = "4320";
+            daysToolStripMenuItem1.Text = "3 Days";
+            daysToolStripMenuItem1.Click += TsTime_Click;
             // 
             // days7ToolStripMenuItem
             // 
-            this.days7ToolStripMenuItem.Name = "days7ToolStripMenuItem";
-            this.days7ToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
-            this.days7ToolStripMenuItem.Tag = "10080";
-            this.days7ToolStripMenuItem.Text = "7 Days";
-            this.days7ToolStripMenuItem.Click += new System.EventHandler(this.TsTime_Click);
+            days7ToolStripMenuItem.Name = "days7ToolStripMenuItem";
+            days7ToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            days7ToolStripMenuItem.Tag = "10080";
+            days7ToolStripMenuItem.Text = "7 Days";
+            days7ToolStripMenuItem.Click += TsTime_Click;
             // 
             // days14toolStripMenuItem
             // 
-            this.days14toolStripMenuItem.Name = "days14toolStripMenuItem";
-            this.days14toolStripMenuItem.Size = new System.Drawing.Size(153, 28);
-            this.days14toolStripMenuItem.Tag = "20160";
-            this.days14toolStripMenuItem.Text = "14 Days";
-            this.days14toolStripMenuItem.Click += new System.EventHandler(this.TsTime_Click);
+            days14toolStripMenuItem.Name = "days14toolStripMenuItem";
+            days14toolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            days14toolStripMenuItem.Tag = "20160";
+            days14toolStripMenuItem.Text = "14 Days";
+            days14toolStripMenuItem.Click += TsTime_Click;
             // 
             // days28ToolStripMenuItem
             // 
-            this.days28ToolStripMenuItem.Name = "days28ToolStripMenuItem";
-            this.days28ToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
-            this.days28ToolStripMenuItem.Tag = "40320";
-            this.days28ToolStripMenuItem.Text = "28 Days";
-            this.days28ToolStripMenuItem.Click += new System.EventHandler(this.TsTime_Click);
+            days28ToolStripMenuItem.Name = "days28ToolStripMenuItem";
+            days28ToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            days28ToolStripMenuItem.Tag = "40320";
+            days28ToolStripMenuItem.Text = "28 Days";
+            days28ToolStripMenuItem.Click += TsTime_Click;
             // 
             // toolStripSeparator1
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(150, 6);
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new System.Drawing.Size(150, 6);
             // 
             // dateToolStripMenuItem
             // 
-            this.dateToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.dummyToolStripMenuItem});
-            this.dateToolStripMenuItem.Name = "dateToolStripMenuItem";
-            this.dateToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
-            this.dateToolStripMenuItem.Tag = "Date";
-            this.dateToolStripMenuItem.Text = "Date";
-            this.dateToolStripMenuItem.DropDownOpening += new System.EventHandler(this.DateToolStripMenuItem_Opening);
+            dateToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { dummyToolStripMenuItem });
+            dateToolStripMenuItem.Name = "dateToolStripMenuItem";
+            dateToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            dateToolStripMenuItem.Tag = "Date";
+            dateToolStripMenuItem.Text = "Date";
+            dateToolStripMenuItem.DropDownOpening += DateToolStripMenuItem_Opening;
             // 
             // dummyToolStripMenuItem
             // 
-            this.dummyToolStripMenuItem.Name = "dummyToolStripMenuItem";
-            this.dummyToolStripMenuItem.Size = new System.Drawing.Size(154, 28);
-            this.dummyToolStripMenuItem.Text = "Dummy";
+            dummyToolStripMenuItem.Name = "dummyToolStripMenuItem";
+            dummyToolStripMenuItem.Size = new System.Drawing.Size(154, 28);
+            dummyToolStripMenuItem.Text = "Dummy";
             // 
             // tsCustom
             // 
-            this.tsCustom.Name = "tsCustom";
-            this.tsCustom.Size = new System.Drawing.Size(153, 28);
-            this.tsCustom.Tag = "-1";
-            this.tsCustom.Text = "Custom";
-            this.tsCustom.Click += new System.EventHandler(this.TsCustomTime_Click);
+            tsCustom.Name = "tsCustom";
+            tsCustom.Size = new System.Drawing.Size(153, 28);
+            tsCustom.Tag = "-1";
+            tsCustom.Text = "Custom";
+            tsCustom.Click += TsCustomTime_Click;
             // 
             // helpToolStripMenuItem
             // 
-            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.aboutToolStripMenuItem});
-            this.helpToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.Information_blue_6227_16x16;
-            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(75, 30);
-            this.helpToolStripMenuItem.Text = "Help";
+            helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { aboutToolStripMenuItem });
+            helpToolStripMenuItem.Image = Properties.Resources.Information_blue_6227_16x16;
+            helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            helpToolStripMenuItem.Size = new System.Drawing.Size(75, 30);
+            helpToolStripMenuItem.Text = "Help";
             // 
             // aboutToolStripMenuItem
             // 
-            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(133, 26);
-            this.aboutToolStripMenuItem.Text = "About";
-            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.AboutToolStripMenuItem_Click);
+            aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            aboutToolStripMenuItem.Size = new System.Drawing.Size(133, 26);
+            aboutToolStripMenuItem.Text = "About";
+            aboutToolStripMenuItem.Click += AboutToolStripMenuItem_Click;
             // 
             // tsTimeFilter
             // 
-            this.tsTimeFilter.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsTimeFilter.Image = global::DBADashGUI.Properties.Resources.Filter_16x;
-            this.tsTimeFilter.Name = "tsTimeFilter";
-            this.tsTimeFilter.Size = new System.Drawing.Size(124, 30);
-            this.tsTimeFilter.Text = "Time of Day";
-            this.tsTimeFilter.Visible = false;
-            this.tsTimeFilter.Click += new System.EventHandler(this.TsTimeFilter_Click);
+            tsTimeFilter.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsTimeFilter.Image = Properties.Resources.Filter_16x;
+            tsTimeFilter.Name = "tsTimeFilter";
+            tsTimeFilter.Size = new System.Drawing.Size(124, 30);
+            tsTimeFilter.Text = "Time of Day";
+            tsTimeFilter.Visible = false;
+            tsTimeFilter.Click += TsTimeFilter_Click;
             // 
             // tsDayOfWeek
             // 
-            this.tsDayOfWeek.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsDayOfWeek.Image = global::DBADashGUI.Properties.Resources.Filter_16x;
-            this.tsDayOfWeek.Name = "tsDayOfWeek";
-            this.tsDayOfWeek.Size = new System.Drawing.Size(127, 30);
-            this.tsDayOfWeek.Text = "Day of Week";
-            this.tsDayOfWeek.Visible = false;
-            this.tsDayOfWeek.Click += new System.EventHandler(this.TsDayOfWeek_Click);
+            tsDayOfWeek.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsDayOfWeek.Image = Properties.Resources.Filter_16x;
+            tsDayOfWeek.Name = "tsDayOfWeek";
+            tsDayOfWeek.Size = new System.Drawing.Size(127, 30);
+            tsDayOfWeek.Text = "Day of Week";
+            tsDayOfWeek.Visible = false;
+            tsDayOfWeek.Click += TsDayOfWeek_Click;
             // 
             // cboTimeZone
             // 
-            this.cboTimeZone.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.cboTimeZone.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
-            this.cboTimeZone.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboTimeZone.DropDownWidth = 350;
-            this.cboTimeZone.ForeColor = System.Drawing.Color.White;
-            this.cboTimeZone.Name = "cboTimeZone";
-            this.cboTimeZone.Size = new System.Drawing.Size(250, 30);
-            this.cboTimeZone.SelectedIndexChanged += new System.EventHandler(this.TimeZone_Selected);
+            cboTimeZone.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            cboTimeZone.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
+            cboTimeZone.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            cboTimeZone.DropDownWidth = 350;
+            cboTimeZone.ForeColor = System.Drawing.Color.White;
+            cboTimeZone.Name = "cboTimeZone";
+            cboTimeZone.Size = new System.Drawing.Size(250, 30);
+            cboTimeZone.SelectedIndexChanged += TimeZone_Selected;
             // 
             // splitMain
             // 
-            this.splitMain.AccessibleRole = System.Windows.Forms.AccessibleRole.ScrollBar;
-            this.splitMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitMain.Location = new System.Drawing.Point(0, 34);
-            this.splitMain.Name = "splitMain";
+            splitMain.AccessibleRole = System.Windows.Forms.AccessibleRole.ScrollBar;
+            splitMain.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitMain.Location = new System.Drawing.Point(0, 34);
+            splitMain.Name = "splitMain";
             // 
             // splitMain.Panel1
             // 
-            this.splitMain.Panel1.Controls.Add(this.tv1);
-            this.splitMain.Panel1.Controls.Add(this.pnlSearch);
-            this.splitMain.Panel1.Controls.Add(this.toolStrip2);
-            this.splitMain.Panel1MinSize = 50;
+            splitMain.Panel1.Controls.Add(tv1);
+            splitMain.Panel1.Controls.Add(pnlSearch);
+            splitMain.Panel1.Controls.Add(toolStrip2);
+            splitMain.Panel1MinSize = 50;
             // 
             // splitMain.Panel2
             // 
-            this.splitMain.Panel2.Controls.Add(this.tabs);
-            this.splitMain.Panel2.Controls.Add(this.refresh1);
-            this.splitMain.Panel2MinSize = 100;
-            this.splitMain.Size = new System.Drawing.Size(1983, 1275);
-            this.splitMain.SplitterDistance = 340;
-            this.splitMain.TabIndex = 3;
+            splitMain.Panel2.Controls.Add(tabs);
+            splitMain.Panel2.Controls.Add(refresh1);
+            splitMain.Panel2MinSize = 100;
+            splitMain.Size = new System.Drawing.Size(1983, 1275);
+            splitMain.SplitterDistance = 340;
+            splitMain.TabIndex = 3;
             // 
             // tv1
             // 
-            this.tv1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tv1.ImageIndex = 0;
-            this.tv1.ImageList = this.TreeViewImageList;
-            this.tv1.Location = new System.Drawing.Point(0, 27);
-            this.tv1.Name = "tv1";
-            this.tv1.SelectedImageIndex = 0;
-            this.tv1.Size = new System.Drawing.Size(340, 1196);
-            this.tv1.TabIndex = 0;
-            this.tv1.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.Tv1_BeforeExpand);
-            this.tv1.BeforeSelect += new System.Windows.Forms.TreeViewCancelEventHandler(this.Tv1_BeforeSelect);
-            this.tv1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.Tv1_AfterSelect);
+            tv1.Dock = System.Windows.Forms.DockStyle.Fill;
+            tv1.ImageIndex = 0;
+            tv1.ImageList = TreeViewImageList;
+            tv1.Location = new System.Drawing.Point(0, 27);
+            tv1.Name = "tv1";
+            tv1.SelectedImageIndex = 0;
+            tv1.Size = new System.Drawing.Size(340, 1196);
+            tv1.TabIndex = 0;
+            tv1.BeforeExpand += Tv1_BeforeExpand;
+            tv1.BeforeSelect += Tv1_BeforeSelect;
+            tv1.AfterSelect += Tv1_AfterSelect;
             // 
             // pnlSearch
             // 
-            this.pnlSearch.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
-            this.pnlSearch.Controls.Add(this.bttnSearch);
-            this.pnlSearch.Controls.Add(this.txtSearch);
-            this.pnlSearch.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.pnlSearch.Location = new System.Drawing.Point(0, 1223);
-            this.pnlSearch.Name = "pnlSearch";
-            this.pnlSearch.Size = new System.Drawing.Size(340, 52);
-            this.pnlSearch.TabIndex = 1;
+            pnlSearch.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
+            pnlSearch.Controls.Add(bttnSearch);
+            pnlSearch.Controls.Add(txtSearch);
+            pnlSearch.Dock = System.Windows.Forms.DockStyle.Bottom;
+            pnlSearch.Location = new System.Drawing.Point(0, 1223);
+            pnlSearch.Name = "pnlSearch";
+            pnlSearch.Size = new System.Drawing.Size(340, 52);
+            pnlSearch.TabIndex = 1;
             // 
             // bttnSearch
             // 
-            this.bttnSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.bttnSearch.Location = new System.Drawing.Point(232, 13);
-            this.bttnSearch.Name = "bttnSearch";
-            this.bttnSearch.Size = new System.Drawing.Size(94, 29);
-            this.bttnSearch.TabIndex = 2;
-            this.bttnSearch.Text = "Search";
-            this.bttnSearch.UseVisualStyleBackColor = true;
-            this.bttnSearch.Click += new System.EventHandler(this.BttnSearch_Click);
+            bttnSearch.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            bttnSearch.Enabled = false;
+            bttnSearch.Location = new System.Drawing.Point(232, 13);
+            bttnSearch.Name = "bttnSearch";
+            bttnSearch.Size = new System.Drawing.Size(94, 29);
+            bttnSearch.TabIndex = 2;
+            bttnSearch.Text = "Search";
+            bttnSearch.UseVisualStyleBackColor = true;
+            bttnSearch.Click += BttnSearch_Click;
             // 
             // txtSearch
             // 
-            this.txtSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtSearch.Location = new System.Drawing.Point(12, 16);
-            this.txtSearch.Name = "txtSearch";
-            this.txtSearch.Size = new System.Drawing.Size(214, 22);
-            this.txtSearch.TabIndex = 0;
-            this.txtSearch.KeyUp += new System.Windows.Forms.KeyEventHandler(this.TxtSearch_KeyUp);
+            txtSearch.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            txtSearch.Location = new System.Drawing.Point(12, 16);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new System.Drawing.Size(214, 22);
+            txtSearch.TabIndex = 0;
+            txtSearch.KeyUp += TxtSearch_KeyUp;
             // 
             // toolStrip2
             // 
-            this.toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsHome,
-            this.tsBack,
-            this.mnuTags,
-            this.groupToolStripMenuItem});
-            this.toolStrip2.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(340, 27);
-            this.toolStrip2.TabIndex = 2;
-            this.toolStrip2.Text = "toolStrip2";
+            toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsHome, tsBack, mnuTags, groupToolStripMenuItem });
+            toolStrip2.Location = new System.Drawing.Point(0, 0);
+            toolStrip2.Name = "toolStrip2";
+            toolStrip2.Size = new System.Drawing.Size(340, 27);
+            toolStrip2.TabIndex = 2;
+            toolStrip2.Text = "toolStrip2";
             // 
             // tsHome
             // 
-            this.tsHome.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsHome.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsHome.Image = global::DBADashGUI.Properties.Resources.HomeHS;
-            this.tsHome.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsHome.Name = "tsHome";
-            this.tsHome.Size = new System.Drawing.Size(29, 24);
-            this.tsHome.Text = "Home";
-            this.tsHome.ToolTipText = "Go to root level summary";
-            this.tsHome.Click += new System.EventHandler(this.TsHome_Click);
+            tsHome.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsHome.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsHome.Image = Properties.Resources.HomeHS;
+            tsHome.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsHome.Name = "tsHome";
+            tsHome.Size = new System.Drawing.Size(29, 24);
+            tsHome.Text = "Home";
+            tsHome.ToolTipText = "Go to root level summary";
+            tsHome.Click += TsHome_Click;
             // 
             // tsBack
             // 
-            this.tsBack.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsBack.Image = global::DBADashGUI.Properties.Resources.Previous_grey_16x;
-            this.tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsBack.Name = "tsBack";
-            this.tsBack.Size = new System.Drawing.Size(29, 24);
-            this.tsBack.Text = "Back";
-            this.tsBack.ToolTipText = "Move back to the previous context";
-            this.tsBack.Click += new System.EventHandler(this.TsBack_Click);
+            tsBack.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsBack.Image = Properties.Resources.Previous_grey_16x;
+            tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsBack.Name = "tsBack";
+            tsBack.Size = new System.Drawing.Size(29, 24);
+            tsBack.Text = "Back";
+            tsBack.ToolTipText = "Move back to the previous context";
+            tsBack.Click += TsBack_Click;
             // 
             // mnuTags
             // 
-            this.mnuTags.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
-            this.mnuTags.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.mnuTags.Name = "mnuTags";
-            this.mnuTags.Size = new System.Drawing.Size(76, 24);
-            this.mnuTags.Text = "Filter";
-            this.mnuTags.ToolTipText = "Filter instances by tag";
+            mnuTags.Image = Properties.Resources.FilterDropdown_16x;
+            mnuTags.ImageTransparentColor = System.Drawing.Color.Magenta;
+            mnuTags.Name = "mnuTags";
+            mnuTags.Size = new System.Drawing.Size(76, 24);
+            mnuTags.Text = "Filter";
+            mnuTags.ToolTipText = "Filter instances by tag";
             // 
             // groupToolStripMenuItem
             // 
-            this.groupToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.GroupBy_16x;
-            this.groupToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.groupToolStripMenuItem.Name = "groupToolStripMenuItem";
-            this.groupToolStripMenuItem.Size = new System.Drawing.Size(84, 24);
-            this.groupToolStripMenuItem.Text = "Group";
-            this.groupToolStripMenuItem.ToolTipText = "Group instances by tag";
+            groupToolStripMenuItem.Image = Properties.Resources.GroupBy_16x;
+            groupToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
+            groupToolStripMenuItem.Name = "groupToolStripMenuItem";
+            groupToolStripMenuItem.Size = new System.Drawing.Size(84, 24);
+            groupToolStripMenuItem.Text = "Group";
+            groupToolStripMenuItem.ToolTipText = "Group instances by tag";
             // 
             // tabs
             // 
-            this.tabs.Controls.Add(this.tabSnapshotsSummary);
-            this.tabs.Controls.Add(this.tabSchema);
-            this.tabs.Controls.Add(this.tabTags);
-            this.tabs.Controls.Add(this.tabDrives);
-            this.tabs.Controls.Add(this.tabBackups);
-            this.tabs.Controls.Add(this.tabLogShipping);
-            this.tabs.Controls.Add(this.tabJobs);
-            this.tabs.Controls.Add(this.tabSummary);
-            this.tabs.Controls.Add(this.tabFiles);
-            this.tabs.Controls.Add(this.tabLastGood);
-            this.tabs.Controls.Add(this.tabPerformance);
-            this.tabs.Controls.Add(this.tabDBADashErrorLog);
-            this.tabs.Controls.Add(this.tabCollectionDates);
-            this.tabs.Controls.Add(this.tabPerformanceSummary);
-            this.tabs.Controls.Add(this.tabInfo);
-            this.tabs.Controls.Add(this.tabHardware);
-            this.tabs.Controls.Add(this.tabSQLPatching);
-            this.tabs.Controls.Add(this.tabInstanceConfig);
-            this.tabs.Controls.Add(this.tabSlowQueries);
-            this.tabs.Controls.Add(this.tabTraceFlags);
-            this.tabs.Controls.Add(this.tabAlerts);
-            this.tabs.Controls.Add(this.tabDrivers);
-            this.tabs.Controls.Add(this.tabDBSpace);
-            this.tabs.Controls.Add(this.tabAzureSummary);
-            this.tabs.Controls.Add(this.tabAzureDB);
-            this.tabs.Controls.Add(this.tabServiceObjectives);
-            this.tabs.Controls.Add(this.tabDBConfiguration);
-            this.tabs.Controls.Add(this.tabDBOptions);
-            this.tabs.Controls.Add(this.tabTempDB);
-            this.tabs.Controls.Add(this.tabCustomChecks);
-            this.tabs.Controls.Add(this.tabPC);
-            this.tabs.Controls.Add(this.tabObjectExecutionSummary);
-            this.tabs.Controls.Add(this.tabWaits);
-            this.tabs.Controls.Add(this.tabMirroring);
-            this.tabs.Controls.Add(this.tabJobDDL);
-            this.tabs.Controls.Add(this.tabAG);
-            this.tabs.Controls.Add(this.tabQS);
-            this.tabs.Controls.Add(this.tabRG);
-            this.tabs.Controls.Add(this.tabAzureDBesourceGovernance);
-            this.tabs.Controls.Add(this.tabRunningQueries);
-            this.tabs.Controls.Add(this.tabMemory);
-            this.tabs.Controls.Add(this.tabJobStats);
-            this.tabs.Controls.Add(this.tabDBADash);
-            this.tabs.Controls.Add(this.tabIdentityColumns);
-            this.tabs.Controls.Add(this.tabOSLoadedModules);
-            this.tabs.Controls.Add(this.tabJobTimeline);
-            this.tabs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabs.Location = new System.Drawing.Point(0, 0);
-            this.tabs.Name = "tabs";
-            this.tabs.SelectedIndex = 0;
-            this.tabs.Size = new System.Drawing.Size(1639, 1275);
-            this.tabs.TabIndex = 0;
-            this.tabs.Tag = "";
-            this.tabs.SelectedIndexChanged += new System.EventHandler(this.Tabs_SelectedIndexChanged);
+            tabs.Controls.Add(tabSnapshotsSummary);
+            tabs.Controls.Add(tabSchema);
+            tabs.Controls.Add(tabTags);
+            tabs.Controls.Add(tabDrives);
+            tabs.Controls.Add(tabBackups);
+            tabs.Controls.Add(tabLogShipping);
+            tabs.Controls.Add(tabJobs);
+            tabs.Controls.Add(tabSummary);
+            tabs.Controls.Add(tabFiles);
+            tabs.Controls.Add(tabLastGood);
+            tabs.Controls.Add(tabPerformance);
+            tabs.Controls.Add(tabDBADashErrorLog);
+            tabs.Controls.Add(tabCollectionDates);
+            tabs.Controls.Add(tabPerformanceSummary);
+            tabs.Controls.Add(tabInfo);
+            tabs.Controls.Add(tabHardware);
+            tabs.Controls.Add(tabSQLPatching);
+            tabs.Controls.Add(tabInstanceConfig);
+            tabs.Controls.Add(tabSlowQueries);
+            tabs.Controls.Add(tabTraceFlags);
+            tabs.Controls.Add(tabAlerts);
+            tabs.Controls.Add(tabDrivers);
+            tabs.Controls.Add(tabDBSpace);
+            tabs.Controls.Add(tabAzureSummary);
+            tabs.Controls.Add(tabAzureDB);
+            tabs.Controls.Add(tabServiceObjectives);
+            tabs.Controls.Add(tabDBConfiguration);
+            tabs.Controls.Add(tabDBOptions);
+            tabs.Controls.Add(tabTempDB);
+            tabs.Controls.Add(tabCustomChecks);
+            tabs.Controls.Add(tabPC);
+            tabs.Controls.Add(tabObjectExecutionSummary);
+            tabs.Controls.Add(tabWaits);
+            tabs.Controls.Add(tabMirroring);
+            tabs.Controls.Add(tabJobDDL);
+            tabs.Controls.Add(tabAG);
+            tabs.Controls.Add(tabQS);
+            tabs.Controls.Add(tabRG);
+            tabs.Controls.Add(tabAzureDBesourceGovernance);
+            tabs.Controls.Add(tabRunningQueries);
+            tabs.Controls.Add(tabMemory);
+            tabs.Controls.Add(tabJobStats);
+            tabs.Controls.Add(tabDBADash);
+            tabs.Controls.Add(tabIdentityColumns);
+            tabs.Controls.Add(tabOSLoadedModules);
+            tabs.Controls.Add(tabJobTimeline);
+            tabs.Dock = System.Windows.Forms.DockStyle.Fill;
+            tabs.Location = new System.Drawing.Point(0, 0);
+            tabs.Name = "tabs";
+            tabs.SelectedIndex = 0;
+            tabs.Size = new System.Drawing.Size(1639, 1275);
+            tabs.TabIndex = 0;
+            tabs.Tag = "";
+            tabs.SelectedIndexChanged += Tabs_SelectedIndexChanged;
             // 
             // tabSnapshotsSummary
             // 
-            this.tabSnapshotsSummary.Controls.Add(this.schemaSnapshots1);
-            this.tabSnapshotsSummary.Location = new System.Drawing.Point(4, 25);
-            this.tabSnapshotsSummary.Name = "tabSnapshotsSummary";
-            this.tabSnapshotsSummary.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSnapshotsSummary.Size = new System.Drawing.Size(1631, 1246);
-            this.tabSnapshotsSummary.TabIndex = 1;
-            this.tabSnapshotsSummary.Text = "Snapshot Summary";
-            this.tabSnapshotsSummary.UseVisualStyleBackColor = true;
+            tabSnapshotsSummary.Controls.Add(schemaSnapshots1);
+            tabSnapshotsSummary.Location = new System.Drawing.Point(4, 25);
+            tabSnapshotsSummary.Name = "tabSnapshotsSummary";
+            tabSnapshotsSummary.Padding = new System.Windows.Forms.Padding(3);
+            tabSnapshotsSummary.Size = new System.Drawing.Size(1631, 1246);
+            tabSnapshotsSummary.TabIndex = 1;
+            tabSnapshotsSummary.Text = "Snapshot Summary";
+            tabSnapshotsSummary.UseVisualStyleBackColor = true;
             // 
             // schemaSnapshots1
             // 
-            this.schemaSnapshots1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.schemaSnapshots1.Location = new System.Drawing.Point(3, 3);
-            this.schemaSnapshots1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.schemaSnapshots1.Name = "schemaSnapshots1";
-            this.schemaSnapshots1.Size = new System.Drawing.Size(1625, 1240);
-            this.schemaSnapshots1.TabIndex = 0;
+            schemaSnapshots1.Dock = System.Windows.Forms.DockStyle.Fill;
+            schemaSnapshots1.Location = new System.Drawing.Point(3, 3);
+            schemaSnapshots1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            schemaSnapshots1.Name = "schemaSnapshots1";
+            schemaSnapshots1.Size = new System.Drawing.Size(1625, 1240);
+            schemaSnapshots1.TabIndex = 0;
             // 
             // tabSchema
             // 
-            this.tabSchema.Controls.Add(this.splitSchemaSnapshot);
-            this.tabSchema.Location = new System.Drawing.Point(4, 29);
-            this.tabSchema.Name = "tabSchema";
-            this.tabSchema.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSchema.Size = new System.Drawing.Size(192, 67);
-            this.tabSchema.TabIndex = 0;
-            this.tabSchema.Text = "Schema Snapshot";
-            this.tabSchema.UseVisualStyleBackColor = true;
+            tabSchema.Controls.Add(splitSchemaSnapshot);
+            tabSchema.Location = new System.Drawing.Point(4, 29);
+            tabSchema.Name = "tabSchema";
+            tabSchema.Padding = new System.Windows.Forms.Padding(3);
+            tabSchema.Size = new System.Drawing.Size(192, 67);
+            tabSchema.TabIndex = 0;
+            tabSchema.Text = "Schema Snapshot";
+            tabSchema.UseVisualStyleBackColor = true;
             // 
             // splitSchemaSnapshot
             // 
-            this.splitSchemaSnapshot.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitSchemaSnapshot.Location = new System.Drawing.Point(3, 3);
-            this.splitSchemaSnapshot.Name = "splitSchemaSnapshot";
-            this.splitSchemaSnapshot.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            splitSchemaSnapshot.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitSchemaSnapshot.Location = new System.Drawing.Point(3, 3);
+            splitSchemaSnapshot.Name = "splitSchemaSnapshot";
+            splitSchemaSnapshot.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
             // splitSchemaSnapshot.Panel1
             // 
-            this.splitSchemaSnapshot.Panel1.Controls.Add(this.label7);
+            splitSchemaSnapshot.Panel1.Controls.Add(label7);
             // 
             // splitSchemaSnapshot.Panel2
             // 
-            this.splitSchemaSnapshot.Panel2.Controls.Add(this.toolStrip1);
-            this.splitSchemaSnapshot.Panel2.Controls.Add(this.gvHistory);
-            this.splitSchemaSnapshot.Panel2.Controls.Add(this.label1);
-            this.splitSchemaSnapshot.Size = new System.Drawing.Size(186, 61);
-            this.splitSchemaSnapshot.SplitterDistance = 25;
-            this.splitSchemaSnapshot.TabIndex = 1;
+            splitSchemaSnapshot.Panel2.Controls.Add(toolStrip1);
+            splitSchemaSnapshot.Panel2.Controls.Add(gvHistory);
+            splitSchemaSnapshot.Panel2.Controls.Add(label1);
+            splitSchemaSnapshot.Size = new System.Drawing.Size(186, 61);
+            splitSchemaSnapshot.SplitterDistance = 25;
+            splitSchemaSnapshot.TabIndex = 1;
             // 
             // label7
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(215, 236);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(311, 16);
-            this.label7.TabIndex = 1;
-            this.label7.Text = "Diff (Loaded programatically due to designer issue)";
-            this.label7.Visible = false;
+            label7.AutoSize = true;
+            label7.Location = new System.Drawing.Point(215, 236);
+            label7.Name = "label7";
+            label7.Size = new System.Drawing.Size(311, 16);
+            label7.TabIndex = 1;
+            label7.Text = "Diff (Loaded programatically due to designer issue)";
+            label7.Visible = false;
             // 
             // toolStrip1
             // 
-            this.toolStrip1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsPrevious,
-            this.tsPageNum,
-            this.tsNext,
-            this.toolStripLabel1,
-            this.tsPageSize});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(186, 32);
-            this.toolStrip1.TabIndex = 1;
-            this.toolStrip1.Text = "toolStrip1";
+            toolStrip1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsPrevious, tsPageNum, tsNext, toolStripLabel1, tsPageSize });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new System.Drawing.Size(186, 32);
+            toolStrip1.TabIndex = 1;
+            toolStrip1.Text = "toolStrip1";
             // 
             // tsPrevious
             // 
-            this.tsPrevious.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsPrevious.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsPrevious.Name = "tsPrevious";
-            this.tsPrevious.Size = new System.Drawing.Size(29, 29);
-            this.tsPrevious.Text = "Previous";
-            this.tsPrevious.Click += new System.EventHandler(this.TsPrevious_Click);
+            tsPrevious.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsPrevious.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsPrevious.Name = "tsPrevious";
+            tsPrevious.Size = new System.Drawing.Size(29, 29);
+            tsPrevious.Text = "Previous";
+            tsPrevious.Click += TsPrevious_Click;
             // 
             // tsPageNum
             // 
-            this.tsPageNum.Name = "tsPageNum";
-            this.tsPageNum.Size = new System.Drawing.Size(53, 29);
-            this.tsPageNum.Text = "Page 1";
+            tsPageNum.Name = "tsPageNum";
+            tsPageNum.Size = new System.Drawing.Size(53, 29);
+            tsPageNum.Text = "Page 1";
             // 
             // tsNext
             // 
-            this.tsNext.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsNext.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsNext.Name = "tsNext";
-            this.tsNext.Size = new System.Drawing.Size(29, 29);
-            this.tsNext.Text = "Next";
-            this.tsNext.Click += new System.EventHandler(this.TsNext_Click);
+            tsNext.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsNext.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsNext.Name = "tsNext";
+            tsNext.Size = new System.Drawing.Size(29, 29);
+            tsNext.Text = "Next";
+            tsNext.Click += TsNext_Click;
             // 
             // toolStripLabel1
             // 
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(75, 20);
-            this.toolStripLabel1.Text = "Page Size:";
+            toolStripLabel1.Name = "toolStripLabel1";
+            toolStripLabel1.Size = new System.Drawing.Size(75, 20);
+            toolStripLabel1.Text = "Page Size:";
             // 
             // tsPageSize
             // 
-            this.tsPageSize.Items.AddRange(new object[] {
-            "100",
-            "200",
-            "500",
-            "1000",
-            "5000"});
-            this.tsPageSize.Name = "tsPageSize";
-            this.tsPageSize.Size = new System.Drawing.Size(121, 28);
-            this.tsPageSize.Text = "100";
-            this.tsPageSize.Validating += new System.ComponentModel.CancelEventHandler(this.TsPageSize_Validating);
-            this.tsPageSize.Validated += new System.EventHandler(this.TsPageSize_Validated);
+            tsPageSize.Items.AddRange(new object[] { "100", "200", "500", "1000", "5000" });
+            tsPageSize.Name = "tsPageSize";
+            tsPageSize.Size = new System.Drawing.Size(121, 28);
+            tsPageSize.Text = "100";
+            tsPageSize.Validating += TsPageSize_Validating;
+            tsPageSize.Validated += TsPageSize_Validated;
             // 
             // gvHistory
             // 
-            this.gvHistory.AllowUserToAddRows = false;
-            this.gvHistory.AllowUserToDeleteRows = false;
-            this.gvHistory.AllowUserToOrderColumns = true;
-            this.gvHistory.BackgroundColor = System.Drawing.Color.White;
+            gvHistory.AllowUserToAddRows = false;
+            gvHistory.AllowUserToDeleteRows = false;
+            gvHistory.AllowUserToOrderColumns = true;
+            gvHistory.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -969,17 +922,9 @@
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.gvHistory.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            this.gvHistory.ColumnHeadersHeight = 29;
-            this.gvHistory.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.ObjectName,
-            this.SchemaName,
-            this.ObjectType,
-            this.SnapshotValidFrom,
-            this.SnapshotValidTo,
-            this.ObjectDateCreated,
-            this.ObjectDateModified,
-            this.colCompare});
+            gvHistory.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            gvHistory.ColumnHeadersHeight = 29;
+            gvHistory.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { ObjectName, SchemaName, ObjectType, SnapshotValidFrom, SnapshotValidTo, ObjectDateCreated, ObjectDateModified, colCompare });
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
             dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -987,1382 +932,1380 @@
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.gvHistory.DefaultCellStyle = dataGridViewCellStyle2;
-            this.gvHistory.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gvHistory.Location = new System.Drawing.Point(0, 25);
-            this.gvHistory.MultiSelect = false;
-            this.gvHistory.Name = "gvHistory";
-            this.gvHistory.RowHeadersVisible = false;
-            this.gvHistory.RowHeadersWidth = 51;
-            this.gvHistory.RowTemplate.Height = 24;
-            this.gvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvHistory.Size = new System.Drawing.Size(186, 7);
-            this.gvHistory.TabIndex = 0;
-            this.gvHistory.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.GvHistory_CellContentClick);
-            this.gvHistory.SelectionChanged += new System.EventHandler(this.GvHistory_SelectionChanged);
+            gvHistory.DefaultCellStyle = dataGridViewCellStyle2;
+            gvHistory.Dock = System.Windows.Forms.DockStyle.Fill;
+            gvHistory.Location = new System.Drawing.Point(0, 25);
+            gvHistory.MultiSelect = false;
+            gvHistory.Name = "gvHistory";
+            gvHistory.RowHeadersVisible = false;
+            gvHistory.RowHeadersWidth = 51;
+            gvHistory.RowTemplate.Height = 24;
+            gvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            gvHistory.Size = new System.Drawing.Size(186, 7);
+            gvHistory.TabIndex = 0;
+            gvHistory.CellContentClick += GvHistory_CellContentClick;
+            gvHistory.SelectionChanged += GvHistory_SelectionChanged;
             // 
             // ObjectName
             // 
-            this.ObjectName.DataPropertyName = "ObjectName";
-            this.ObjectName.HeaderText = "Object Name";
-            this.ObjectName.MinimumWidth = 6;
-            this.ObjectName.Name = "ObjectName";
-            this.ObjectName.Width = 119;
+            ObjectName.DataPropertyName = "ObjectName";
+            ObjectName.HeaderText = "Object Name";
+            ObjectName.MinimumWidth = 6;
+            ObjectName.Name = "ObjectName";
+            ObjectName.Width = 119;
             // 
             // SchemaName
             // 
-            this.SchemaName.DataPropertyName = "SchemaName";
-            this.SchemaName.HeaderText = "Schema Name";
-            this.SchemaName.MinimumWidth = 6;
-            this.SchemaName.Name = "SchemaName";
-            this.SchemaName.Width = 129;
+            SchemaName.DataPropertyName = "SchemaName";
+            SchemaName.HeaderText = "Schema Name";
+            SchemaName.MinimumWidth = 6;
+            SchemaName.Name = "SchemaName";
+            SchemaName.Width = 129;
             // 
             // ObjectType
             // 
-            this.ObjectType.HeaderText = "Object Type";
-            this.ObjectType.MinimumWidth = 6;
-            this.ObjectType.Name = "ObjectType";
-            this.ObjectType.Width = 114;
+            ObjectType.HeaderText = "Object Type";
+            ObjectType.MinimumWidth = 6;
+            ObjectType.Name = "ObjectType";
+            ObjectType.Width = 114;
             // 
             // SnapshotValidFrom
             // 
-            this.SnapshotValidFrom.DataPropertyName = "SnapshotValidFrom";
-            this.SnapshotValidFrom.HeaderText = "Snapshot Valid From";
-            this.SnapshotValidFrom.MinimumWidth = 6;
-            this.SnapshotValidFrom.Name = "SnapshotValidFrom";
-            this.SnapshotValidFrom.Width = 168;
+            SnapshotValidFrom.DataPropertyName = "SnapshotValidFrom";
+            SnapshotValidFrom.HeaderText = "Snapshot Valid From";
+            SnapshotValidFrom.MinimumWidth = 6;
+            SnapshotValidFrom.Name = "SnapshotValidFrom";
+            SnapshotValidFrom.Width = 168;
             // 
             // SnapshotValidTo
             // 
-            this.SnapshotValidTo.DataPropertyName = "SnapshotValidTo";
-            this.SnapshotValidTo.HeaderText = "Snapshot Valid To";
-            this.SnapshotValidTo.MinimumWidth = 6;
-            this.SnapshotValidTo.Name = "SnapshotValidTo";
-            this.SnapshotValidTo.Width = 153;
+            SnapshotValidTo.DataPropertyName = "SnapshotValidTo";
+            SnapshotValidTo.HeaderText = "Snapshot Valid To";
+            SnapshotValidTo.MinimumWidth = 6;
+            SnapshotValidTo.Name = "SnapshotValidTo";
+            SnapshotValidTo.Width = 153;
             // 
             // ObjectDateCreated
             // 
-            this.ObjectDateCreated.DataPropertyName = "ObjectDateCreated";
-            this.ObjectDateCreated.HeaderText = "Date Created";
-            this.ObjectDateCreated.MinimumWidth = 6;
-            this.ObjectDateCreated.Name = "ObjectDateCreated";
-            this.ObjectDateCreated.Width = 121;
+            ObjectDateCreated.DataPropertyName = "ObjectDateCreated";
+            ObjectDateCreated.HeaderText = "Date Created";
+            ObjectDateCreated.MinimumWidth = 6;
+            ObjectDateCreated.Name = "ObjectDateCreated";
+            ObjectDateCreated.Width = 121;
             // 
             // ObjectDateModified
             // 
-            this.ObjectDateModified.DataPropertyName = "ObjectDateModified";
-            this.ObjectDateModified.HeaderText = "Date Modified";
-            this.ObjectDateModified.MinimumWidth = 6;
-            this.ObjectDateModified.Name = "ObjectDateModified";
-            this.ObjectDateModified.Width = 124;
+            ObjectDateModified.DataPropertyName = "ObjectDateModified";
+            ObjectDateModified.HeaderText = "Date Modified";
+            ObjectDateModified.MinimumWidth = 6;
+            ObjectDateModified.Name = "ObjectDateModified";
+            ObjectDateModified.Width = 124;
             // 
             // colCompare
             // 
-            this.colCompare.HeaderText = "Compare";
-            this.colCompare.MinimumWidth = 6;
-            this.colCompare.Name = "colCompare";
-            this.colCompare.Text = "Compare";
-            this.colCompare.UseColumnTextForLinkValue = true;
-            this.colCompare.Width = 125;
+            colCompare.HeaderText = "Compare";
+            colCompare.MinimumWidth = 6;
+            colCompare.Name = "colCompare";
+            colCompare.Text = "Compare";
+            colCompare.UseColumnTextForLinkValue = true;
+            colCompare.Width = 125;
             // 
             // label1
             // 
-            this.label1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
-            this.label1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label1.ForeColor = System.Drawing.Color.White;
-            this.label1.Location = new System.Drawing.Point(0, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(186, 25);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "Snapshot History";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            label1.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
+            label1.Dock = System.Windows.Forms.DockStyle.Top;
+            label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            label1.ForeColor = System.Drawing.Color.White;
+            label1.Location = new System.Drawing.Point(0, 0);
+            label1.Name = "label1";
+            label1.Size = new System.Drawing.Size(186, 25);
+            label1.TabIndex = 2;
+            label1.Text = "Snapshot History";
+            label1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // tabTags
             // 
-            this.tabTags.Controls.Add(this.tags1);
-            this.tabTags.Location = new System.Drawing.Point(4, 29);
-            this.tabTags.Name = "tabTags";
-            this.tabTags.Padding = new System.Windows.Forms.Padding(3);
-            this.tabTags.Size = new System.Drawing.Size(192, 67);
-            this.tabTags.TabIndex = 2;
-            this.tabTags.Text = "Tags";
-            this.tabTags.UseVisualStyleBackColor = true;
+            tabTags.Controls.Add(tags1);
+            tabTags.Location = new System.Drawing.Point(4, 29);
+            tabTags.Name = "tabTags";
+            tabTags.Padding = new System.Windows.Forms.Padding(3);
+            tabTags.Size = new System.Drawing.Size(192, 67);
+            tabTags.TabIndex = 2;
+            tabTags.Text = "Tags";
+            tabTags.UseVisualStyleBackColor = true;
             // 
             // tags1
             // 
-            this.tags1.AllTags = null;
-            this.tags1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tags1.Location = new System.Drawing.Point(3, 3);
-            this.tags1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tags1.Name = "tags1";
-            this.tags1.Size = new System.Drawing.Size(186, 61);
-            this.tags1.TabIndex = 0;
-            this.tags1.TagsChanged += new System.EventHandler(this.Tags1_TagsChanged);
+            tags1.Dock = System.Windows.Forms.DockStyle.Fill;
+            tags1.Location = new System.Drawing.Point(3, 3);
+            tags1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            tags1.Name = "tags1";
+            tags1.Size = new System.Drawing.Size(186, 61);
+            tags1.TabIndex = 0;
+            tags1.TagsChanged += Tags1_TagsChanged;
             // 
             // tabDrives
             // 
-            this.tabDrives.AutoScroll = true;
-            this.tabDrives.Controls.Add(this.drivesControl1);
-            this.tabDrives.Location = new System.Drawing.Point(4, 29);
-            this.tabDrives.Name = "tabDrives";
-            this.tabDrives.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDrives.Size = new System.Drawing.Size(192, 67);
-            this.tabDrives.TabIndex = 3;
-            this.tabDrives.Text = "Drives";
-            this.tabDrives.UseVisualStyleBackColor = true;
+            tabDrives.AutoScroll = true;
+            tabDrives.Controls.Add(drivesControl1);
+            tabDrives.Location = new System.Drawing.Point(4, 29);
+            tabDrives.Name = "tabDrives";
+            tabDrives.Padding = new System.Windows.Forms.Padding(3);
+            tabDrives.Size = new System.Drawing.Size(192, 67);
+            tabDrives.TabIndex = 3;
+            tabDrives.Text = "Drives";
+            tabDrives.UseVisualStyleBackColor = true;
             // 
             // drivesControl1
             // 
-            this.drivesControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.drivesControl1.IncludeCritical = true;
-            this.drivesControl1.IncludeNA = true;
-            this.drivesControl1.IncludeOK = true;
-            this.drivesControl1.IncludeWarning = true;
-            this.drivesControl1.Location = new System.Drawing.Point(3, 3);
-            this.drivesControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.drivesControl1.Name = "drivesControl1";
-            this.drivesControl1.Size = new System.Drawing.Size(186, 61);
-            this.drivesControl1.TabIndex = 0;
+            drivesControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            drivesControl1.IncludeCritical = true;
+            drivesControl1.IncludeNA = true;
+            drivesControl1.IncludeOK = true;
+            drivesControl1.IncludeWarning = true;
+            drivesControl1.Location = new System.Drawing.Point(3, 3);
+            drivesControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            drivesControl1.Name = "drivesControl1";
+            drivesControl1.Size = new System.Drawing.Size(186, 61);
+            drivesControl1.TabIndex = 0;
             // 
             // tabBackups
             // 
-            this.tabBackups.Controls.Add(this.backupsControl1);
-            this.tabBackups.Location = new System.Drawing.Point(4, 29);
-            this.tabBackups.Name = "tabBackups";
-            this.tabBackups.Padding = new System.Windows.Forms.Padding(3);
-            this.tabBackups.Size = new System.Drawing.Size(192, 67);
-            this.tabBackups.TabIndex = 4;
-            this.tabBackups.Tag = "1";
-            this.tabBackups.Text = "Backups";
-            this.tabBackups.UseVisualStyleBackColor = true;
+            tabBackups.Controls.Add(backupsControl1);
+            tabBackups.Location = new System.Drawing.Point(4, 29);
+            tabBackups.Name = "tabBackups";
+            tabBackups.Padding = new System.Windows.Forms.Padding(3);
+            tabBackups.Size = new System.Drawing.Size(192, 67);
+            tabBackups.TabIndex = 4;
+            tabBackups.Tag = "1";
+            tabBackups.Text = "Backups";
+            tabBackups.UseVisualStyleBackColor = true;
             // 
             // backupsControl1
             // 
-            this.backupsControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.backupsControl1.IncludeCritical = true;
-            this.backupsControl1.IncludeNA = true;
-            this.backupsControl1.IncludeOK = true;
-            this.backupsControl1.IncludeWarning = true;
-            this.backupsControl1.Location = new System.Drawing.Point(3, 3);
-            this.backupsControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.backupsControl1.Name = "backupsControl1";
-            this.backupsControl1.Size = new System.Drawing.Size(186, 61);
-            this.backupsControl1.TabIndex = 0;
+            backupsControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            backupsControl1.IncludeCritical = true;
+            backupsControl1.IncludeNA = true;
+            backupsControl1.IncludeOK = true;
+            backupsControl1.IncludeWarning = true;
+            backupsControl1.Location = new System.Drawing.Point(3, 3);
+            backupsControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            backupsControl1.Name = "backupsControl1";
+            backupsControl1.Size = new System.Drawing.Size(186, 61);
+            backupsControl1.TabIndex = 0;
             // 
             // tabLogShipping
             // 
-            this.tabLogShipping.Controls.Add(this.logShippingControl1);
-            this.tabLogShipping.Location = new System.Drawing.Point(4, 29);
-            this.tabLogShipping.Name = "tabLogShipping";
-            this.tabLogShipping.Padding = new System.Windows.Forms.Padding(3);
-            this.tabLogShipping.Size = new System.Drawing.Size(192, 67);
-            this.tabLogShipping.TabIndex = 5;
-            this.tabLogShipping.Text = "Log Shipping";
-            this.tabLogShipping.UseVisualStyleBackColor = true;
+            tabLogShipping.Controls.Add(logShippingControl1);
+            tabLogShipping.Location = new System.Drawing.Point(4, 29);
+            tabLogShipping.Name = "tabLogShipping";
+            tabLogShipping.Padding = new System.Windows.Forms.Padding(3);
+            tabLogShipping.Size = new System.Drawing.Size(192, 67);
+            tabLogShipping.TabIndex = 5;
+            tabLogShipping.Text = "Log Shipping";
+            tabLogShipping.UseVisualStyleBackColor = true;
             // 
             // logShippingControl1
             // 
-            this.logShippingControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.logShippingControl1.IncludeCritical = true;
-            this.logShippingControl1.IncludeNA = true;
-            this.logShippingControl1.IncludeOK = true;
-            this.logShippingControl1.IncludeWarning = true;
-            this.logShippingControl1.Location = new System.Drawing.Point(3, 3);
-            this.logShippingControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.logShippingControl1.Name = "logShippingControl1";
-            this.logShippingControl1.Size = new System.Drawing.Size(186, 61);
-            this.logShippingControl1.TabIndex = 0;
+            logShippingControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            logShippingControl1.IncludeCritical = true;
+            logShippingControl1.IncludeNA = true;
+            logShippingControl1.IncludeOK = true;
+            logShippingControl1.IncludeWarning = true;
+            logShippingControl1.Location = new System.Drawing.Point(3, 3);
+            logShippingControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            logShippingControl1.Name = "logShippingControl1";
+            logShippingControl1.Size = new System.Drawing.Size(186, 61);
+            logShippingControl1.TabIndex = 0;
             // 
             // tabJobs
             // 
-            this.tabJobs.Controls.Add(this.agentJobsControl1);
-            this.tabJobs.Location = new System.Drawing.Point(4, 29);
-            this.tabJobs.Name = "tabJobs";
-            this.tabJobs.Padding = new System.Windows.Forms.Padding(3);
-            this.tabJobs.Size = new System.Drawing.Size(192, 67);
-            this.tabJobs.TabIndex = 6;
-            this.tabJobs.Text = "Agent Jobs";
-            this.tabJobs.UseVisualStyleBackColor = true;
+            tabJobs.Controls.Add(agentJobsControl1);
+            tabJobs.Location = new System.Drawing.Point(4, 29);
+            tabJobs.Name = "tabJobs";
+            tabJobs.Padding = new System.Windows.Forms.Padding(3);
+            tabJobs.Size = new System.Drawing.Size(192, 67);
+            tabJobs.TabIndex = 6;
+            tabJobs.Text = "Agent Jobs";
+            tabJobs.UseVisualStyleBackColor = true;
             // 
             // agentJobsControl1
             // 
-            this.agentJobsControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.agentJobsControl1.IncludeAcknowledged = true;
-            this.agentJobsControl1.IncludeCritical = false;
-            this.agentJobsControl1.IncludeNA = false;
-            this.agentJobsControl1.IncludeOK = false;
-            this.agentJobsControl1.IncludeWarning = false;
-            this.agentJobsControl1.Location = new System.Drawing.Point(3, 3);
-            this.agentJobsControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.agentJobsControl1.Name = "agentJobsControl1";
-            this.agentJobsControl1.Size = new System.Drawing.Size(186, 61);
-            this.agentJobsControl1.TabIndex = 0;
+            agentJobsControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            agentJobsControl1.IncludeAcknowledged = true;
+            agentJobsControl1.IncludeCritical = false;
+            agentJobsControl1.IncludeNA = false;
+            agentJobsControl1.IncludeOK = false;
+            agentJobsControl1.IncludeWarning = false;
+            agentJobsControl1.Location = new System.Drawing.Point(3, 3);
+            agentJobsControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            agentJobsControl1.Name = "agentJobsControl1";
+            agentJobsControl1.Size = new System.Drawing.Size(186, 61);
+            agentJobsControl1.TabIndex = 0;
             // 
             // tabSummary
             // 
-            this.tabSummary.Controls.Add(this.summary1);
-            this.tabSummary.Location = new System.Drawing.Point(4, 29);
-            this.tabSummary.Name = "tabSummary";
-            this.tabSummary.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSummary.Size = new System.Drawing.Size(192, 67);
-            this.tabSummary.TabIndex = 7;
-            this.tabSummary.Text = "Summary";
-            this.tabSummary.UseVisualStyleBackColor = true;
+            tabSummary.Controls.Add(summary1);
+            tabSummary.Location = new System.Drawing.Point(4, 29);
+            tabSummary.Name = "tabSummary";
+            tabSummary.Padding = new System.Windows.Forms.Padding(3);
+            tabSummary.Size = new System.Drawing.Size(192, 67);
+            tabSummary.TabIndex = 7;
+            tabSummary.Text = "Summary";
+            tabSummary.UseVisualStyleBackColor = true;
             // 
             // summary1
             // 
-            this.summary1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.summary1.Location = new System.Drawing.Point(3, 3);
-            this.summary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.summary1.Name = "summary1";
-            this.summary1.Size = new System.Drawing.Size(186, 61);
-            this.summary1.TabIndex = 0;
-            this.summary1.Instance_Selected += new System.EventHandler<DBADashGUI.Main.InstanceSelectedEventArgs>(this.Instance_Selected);
+            summary1.Dock = System.Windows.Forms.DockStyle.Fill;
+            summary1.Location = new System.Drawing.Point(3, 3);
+            summary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            summary1.Name = "summary1";
+            summary1.Size = new System.Drawing.Size(186, 61);
+            summary1.TabIndex = 0;
+            summary1.Instance_Selected += Instance_Selected;
             // 
             // tabFiles
             // 
-            this.tabFiles.Controls.Add(this.dbFilesControl1);
-            this.tabFiles.Location = new System.Drawing.Point(4, 29);
-            this.tabFiles.Name = "tabFiles";
-            this.tabFiles.Padding = new System.Windows.Forms.Padding(3);
-            this.tabFiles.Size = new System.Drawing.Size(192, 67);
-            this.tabFiles.TabIndex = 8;
-            this.tabFiles.Text = "Files";
-            this.tabFiles.UseVisualStyleBackColor = true;
+            tabFiles.Controls.Add(dbFilesControl1);
+            tabFiles.Location = new System.Drawing.Point(4, 29);
+            tabFiles.Name = "tabFiles";
+            tabFiles.Padding = new System.Windows.Forms.Padding(3);
+            tabFiles.Size = new System.Drawing.Size(192, 67);
+            tabFiles.TabIndex = 8;
+            tabFiles.Text = "Files";
+            tabFiles.UseVisualStyleBackColor = true;
             // 
             // dbFilesControl1
             // 
-            this.dbFilesControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dbFilesControl1.IncludeCritical = true;
-            this.dbFilesControl1.IncludeNA = true;
-            this.dbFilesControl1.IncludeOK = true;
-            this.dbFilesControl1.IncludeWarning = true;
-            this.dbFilesControl1.Location = new System.Drawing.Point(3, 3);
-            this.dbFilesControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dbFilesControl1.Name = "dbFilesControl1";
-            this.dbFilesControl1.Size = new System.Drawing.Size(186, 61);
-            this.dbFilesControl1.TabIndex = 0;
+            dbFilesControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            dbFilesControl1.IncludeCritical = true;
+            dbFilesControl1.IncludeNA = true;
+            dbFilesControl1.IncludeOK = true;
+            dbFilesControl1.IncludeWarning = true;
+            dbFilesControl1.Location = new System.Drawing.Point(3, 3);
+            dbFilesControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dbFilesControl1.Name = "dbFilesControl1";
+            dbFilesControl1.Size = new System.Drawing.Size(186, 61);
+            dbFilesControl1.TabIndex = 0;
             // 
             // tabLastGood
             // 
-            this.tabLastGood.Controls.Add(this.lastGoodCheckDBControl1);
-            this.tabLastGood.Location = new System.Drawing.Point(4, 29);
-            this.tabLastGood.Name = "tabLastGood";
-            this.tabLastGood.Padding = new System.Windows.Forms.Padding(3);
-            this.tabLastGood.Size = new System.Drawing.Size(192, 67);
-            this.tabLastGood.TabIndex = 9;
-            this.tabLastGood.Text = "Last Good CheckDB";
-            this.tabLastGood.UseVisualStyleBackColor = true;
+            tabLastGood.Controls.Add(lastGoodCheckDBControl1);
+            tabLastGood.Location = new System.Drawing.Point(4, 29);
+            tabLastGood.Name = "tabLastGood";
+            tabLastGood.Padding = new System.Windows.Forms.Padding(3);
+            tabLastGood.Size = new System.Drawing.Size(192, 67);
+            tabLastGood.TabIndex = 9;
+            tabLastGood.Text = "Last Good CheckDB";
+            tabLastGood.UseVisualStyleBackColor = true;
             // 
             // lastGoodCheckDBControl1
             // 
-            this.lastGoodCheckDBControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lastGoodCheckDBControl1.IncludeCritical = true;
-            this.lastGoodCheckDBControl1.IncludeNA = true;
-            this.lastGoodCheckDBControl1.IncludeOK = true;
-            this.lastGoodCheckDBControl1.IncludeWarning = true;
-            this.lastGoodCheckDBControl1.Location = new System.Drawing.Point(3, 3);
-            this.lastGoodCheckDBControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.lastGoodCheckDBControl1.Name = "lastGoodCheckDBControl1";
-            this.lastGoodCheckDBControl1.Size = new System.Drawing.Size(186, 61);
-            this.lastGoodCheckDBControl1.TabIndex = 0;
+            lastGoodCheckDBControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            lastGoodCheckDBControl1.IncludeCritical = true;
+            lastGoodCheckDBControl1.IncludeNA = true;
+            lastGoodCheckDBControl1.IncludeOK = true;
+            lastGoodCheckDBControl1.IncludeWarning = true;
+            lastGoodCheckDBControl1.Location = new System.Drawing.Point(3, 3);
+            lastGoodCheckDBControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            lastGoodCheckDBControl1.Name = "lastGoodCheckDBControl1";
+            lastGoodCheckDBControl1.Size = new System.Drawing.Size(186, 61);
+            lastGoodCheckDBControl1.TabIndex = 0;
             // 
             // tabPerformance
             // 
-            this.tabPerformance.Controls.Add(this.performance1);
-            this.tabPerformance.Location = new System.Drawing.Point(4, 29);
-            this.tabPerformance.Name = "tabPerformance";
-            this.tabPerformance.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPerformance.Size = new System.Drawing.Size(192, 67);
-            this.tabPerformance.TabIndex = 10;
-            this.tabPerformance.Text = "Performance";
-            this.tabPerformance.UseVisualStyleBackColor = true;
+            tabPerformance.Controls.Add(performance1);
+            tabPerformance.Location = new System.Drawing.Point(4, 29);
+            tabPerformance.Name = "tabPerformance";
+            tabPerformance.Padding = new System.Windows.Forms.Padding(3);
+            tabPerformance.Size = new System.Drawing.Size(192, 67);
+            tabPerformance.TabIndex = 10;
+            tabPerformance.Text = "Performance";
+            tabPerformance.UseVisualStyleBackColor = true;
             // 
             // performance1
             // 
-            this.performance1.AutoScroll = true;
-            this.performance1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.performance1.Location = new System.Drawing.Point(3, 3);
-            this.performance1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.performance1.Name = "performance1";
-            this.performance1.Size = new System.Drawing.Size(186, 61);
-            this.performance1.TabIndex = 0;
+            performance1.AutoScroll = true;
+            performance1.Dock = System.Windows.Forms.DockStyle.Fill;
+            performance1.Location = new System.Drawing.Point(3, 3);
+            performance1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            performance1.Name = "performance1";
+            performance1.Size = new System.Drawing.Size(186, 61);
+            performance1.TabIndex = 0;
             // 
             // tabDBADashErrorLog
             // 
-            this.tabDBADashErrorLog.Controls.Add(this.collectionErrors1);
-            this.tabDBADashErrorLog.Location = new System.Drawing.Point(4, 29);
-            this.tabDBADashErrorLog.Name = "tabDBADashErrorLog";
-            this.tabDBADashErrorLog.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDBADashErrorLog.Size = new System.Drawing.Size(192, 67);
-            this.tabDBADashErrorLog.TabIndex = 11;
-            this.tabDBADashErrorLog.Text = "DBA Dash ErrorLog";
-            this.tabDBADashErrorLog.UseVisualStyleBackColor = true;
+            tabDBADashErrorLog.Controls.Add(collectionErrors1);
+            tabDBADashErrorLog.Location = new System.Drawing.Point(4, 29);
+            tabDBADashErrorLog.Name = "tabDBADashErrorLog";
+            tabDBADashErrorLog.Padding = new System.Windows.Forms.Padding(3);
+            tabDBADashErrorLog.Size = new System.Drawing.Size(192, 67);
+            tabDBADashErrorLog.TabIndex = 11;
+            tabDBADashErrorLog.Text = "DBA Dash ErrorLog";
+            tabDBADashErrorLog.UseVisualStyleBackColor = true;
             // 
             // collectionErrors1
             // 
-            this.collectionErrors1.AckErrors = false;
-            this.collectionErrors1.Days = 0;
-            this.collectionErrors1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.collectionErrors1.Location = new System.Drawing.Point(3, 3);
-            this.collectionErrors1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.collectionErrors1.Name = "collectionErrors1";
-            this.collectionErrors1.Size = new System.Drawing.Size(186, 61);
-            this.collectionErrors1.TabIndex = 0;
+            collectionErrors1.AckErrors = false;
+            collectionErrors1.Days = 0;
+            collectionErrors1.Dock = System.Windows.Forms.DockStyle.Fill;
+            collectionErrors1.Location = new System.Drawing.Point(3, 3);
+            collectionErrors1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            collectionErrors1.Name = "collectionErrors1";
+            collectionErrors1.Size = new System.Drawing.Size(186, 61);
+            collectionErrors1.TabIndex = 0;
             // 
             // tabCollectionDates
             // 
-            this.tabCollectionDates.Controls.Add(this.collectionDates1);
-            this.tabCollectionDates.Location = new System.Drawing.Point(4, 29);
-            this.tabCollectionDates.Name = "tabCollectionDates";
-            this.tabCollectionDates.Padding = new System.Windows.Forms.Padding(3);
-            this.tabCollectionDates.Size = new System.Drawing.Size(192, 67);
-            this.tabCollectionDates.TabIndex = 12;
-            this.tabCollectionDates.Text = "Collection Dates";
-            this.tabCollectionDates.UseVisualStyleBackColor = true;
+            tabCollectionDates.Controls.Add(collectionDates1);
+            tabCollectionDates.Location = new System.Drawing.Point(4, 29);
+            tabCollectionDates.Name = "tabCollectionDates";
+            tabCollectionDates.Padding = new System.Windows.Forms.Padding(3);
+            tabCollectionDates.Size = new System.Drawing.Size(192, 67);
+            tabCollectionDates.TabIndex = 12;
+            tabCollectionDates.Text = "Collection Dates";
+            tabCollectionDates.UseVisualStyleBackColor = true;
             // 
             // collectionDates1
             // 
-            this.collectionDates1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.collectionDates1.IncludeCritical = true;
-            this.collectionDates1.IncludeNA = true;
-            this.collectionDates1.IncludeOK = true;
-            this.collectionDates1.IncludeWarning = true;
-            this.collectionDates1.Location = new System.Drawing.Point(3, 3);
-            this.collectionDates1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.collectionDates1.Name = "collectionDates1";
-            this.collectionDates1.Size = new System.Drawing.Size(186, 61);
-            this.collectionDates1.TabIndex = 0;
+            collectionDates1.Dock = System.Windows.Forms.DockStyle.Fill;
+            collectionDates1.IncludeCritical = true;
+            collectionDates1.IncludeNA = true;
+            collectionDates1.IncludeOK = true;
+            collectionDates1.IncludeWarning = true;
+            collectionDates1.Location = new System.Drawing.Point(3, 3);
+            collectionDates1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            collectionDates1.Name = "collectionDates1";
+            collectionDates1.Size = new System.Drawing.Size(186, 61);
+            collectionDates1.TabIndex = 0;
             // 
             // tabPerformanceSummary
             // 
-            this.tabPerformanceSummary.Controls.Add(this.performanceSummary1);
-            this.tabPerformanceSummary.Location = new System.Drawing.Point(4, 29);
-            this.tabPerformanceSummary.Name = "tabPerformanceSummary";
-            this.tabPerformanceSummary.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPerformanceSummary.Size = new System.Drawing.Size(192, 67);
-            this.tabPerformanceSummary.TabIndex = 13;
-            this.tabPerformanceSummary.Text = "Performance Summary";
-            this.tabPerformanceSummary.UseVisualStyleBackColor = true;
+            tabPerformanceSummary.Controls.Add(performanceSummary1);
+            tabPerformanceSummary.Location = new System.Drawing.Point(4, 29);
+            tabPerformanceSummary.Name = "tabPerformanceSummary";
+            tabPerformanceSummary.Padding = new System.Windows.Forms.Padding(3);
+            tabPerformanceSummary.Size = new System.Drawing.Size(192, 67);
+            tabPerformanceSummary.TabIndex = 13;
+            tabPerformanceSummary.Text = "Performance Summary";
+            tabPerformanceSummary.UseVisualStyleBackColor = true;
             // 
             // performanceSummary1
             // 
-            this.performanceSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.performanceSummary1.Location = new System.Drawing.Point(3, 3);
-            this.performanceSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.performanceSummary1.Name = "performanceSummary1";
-            this.performanceSummary1.Size = new System.Drawing.Size(186, 61);
-            this.performanceSummary1.TabIndex = 0;
-            this.performanceSummary1.Instance_Selected += new System.EventHandler<DBADashGUI.Main.InstanceSelectedEventArgs>(this.Instance_Selected);
+            performanceSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
+            performanceSummary1.Location = new System.Drawing.Point(3, 3);
+            performanceSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            performanceSummary1.Name = "performanceSummary1";
+            performanceSummary1.Size = new System.Drawing.Size(186, 61);
+            performanceSummary1.TabIndex = 0;
+            performanceSummary1.Instance_Selected += Instance_Selected;
             // 
             // tabInfo
             // 
-            this.tabInfo.Controls.Add(this.info1);
-            this.tabInfo.Location = new System.Drawing.Point(4, 29);
-            this.tabInfo.Name = "tabInfo";
-            this.tabInfo.Padding = new System.Windows.Forms.Padding(3);
-            this.tabInfo.Size = new System.Drawing.Size(192, 67);
-            this.tabInfo.TabIndex = 14;
-            this.tabInfo.Text = "Info";
-            this.tabInfo.UseVisualStyleBackColor = true;
+            tabInfo.Controls.Add(info1);
+            tabInfo.Location = new System.Drawing.Point(4, 29);
+            tabInfo.Name = "tabInfo";
+            tabInfo.Padding = new System.Windows.Forms.Padding(3);
+            tabInfo.Size = new System.Drawing.Size(192, 67);
+            tabInfo.TabIndex = 14;
+            tabInfo.Text = "Info";
+            tabInfo.UseVisualStyleBackColor = true;
             // 
             // info1
             // 
-            this.info1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.info1.Location = new System.Drawing.Point(3, 3);
-            this.info1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.info1.Name = "info1";
-            this.info1.Size = new System.Drawing.Size(186, 61);
-            this.info1.TabIndex = 0;
+            info1.Dock = System.Windows.Forms.DockStyle.Fill;
+            info1.Location = new System.Drawing.Point(3, 3);
+            info1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            info1.Name = "info1";
+            info1.Size = new System.Drawing.Size(186, 61);
+            info1.TabIndex = 0;
             // 
             // tabHardware
             // 
-            this.tabHardware.Controls.Add(this.hardwareChanges1);
-            this.tabHardware.Location = new System.Drawing.Point(4, 29);
-            this.tabHardware.Name = "tabHardware";
-            this.tabHardware.Padding = new System.Windows.Forms.Padding(3);
-            this.tabHardware.Size = new System.Drawing.Size(192, 67);
-            this.tabHardware.TabIndex = 15;
-            this.tabHardware.Text = "Hardware";
-            this.tabHardware.UseVisualStyleBackColor = true;
+            tabHardware.Controls.Add(hardwareChanges1);
+            tabHardware.Location = new System.Drawing.Point(4, 29);
+            tabHardware.Name = "tabHardware";
+            tabHardware.Padding = new System.Windows.Forms.Padding(3);
+            tabHardware.Size = new System.Drawing.Size(192, 67);
+            tabHardware.TabIndex = 15;
+            tabHardware.Text = "Hardware";
+            tabHardware.UseVisualStyleBackColor = true;
             // 
             // hardwareChanges1
             // 
-            this.hardwareChanges1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.hardwareChanges1.Location = new System.Drawing.Point(3, 3);
-            this.hardwareChanges1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.hardwareChanges1.Name = "hardwareChanges1";
-            this.hardwareChanges1.Size = new System.Drawing.Size(186, 61);
-            this.hardwareChanges1.TabIndex = 0;
+            hardwareChanges1.Dock = System.Windows.Forms.DockStyle.Fill;
+            hardwareChanges1.Location = new System.Drawing.Point(3, 3);
+            hardwareChanges1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            hardwareChanges1.Name = "hardwareChanges1";
+            hardwareChanges1.Size = new System.Drawing.Size(186, 61);
+            hardwareChanges1.TabIndex = 0;
             // 
             // tabSQLPatching
             // 
-            this.tabSQLPatching.Controls.Add(this.sqlPatching1);
-            this.tabSQLPatching.Location = new System.Drawing.Point(4, 29);
-            this.tabSQLPatching.Name = "tabSQLPatching";
-            this.tabSQLPatching.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSQLPatching.Size = new System.Drawing.Size(192, 67);
-            this.tabSQLPatching.TabIndex = 16;
-            this.tabSQLPatching.Text = "SQL Patching";
-            this.tabSQLPatching.UseVisualStyleBackColor = true;
+            tabSQLPatching.Controls.Add(sqlPatching1);
+            tabSQLPatching.Location = new System.Drawing.Point(4, 29);
+            tabSQLPatching.Name = "tabSQLPatching";
+            tabSQLPatching.Padding = new System.Windows.Forms.Padding(3);
+            tabSQLPatching.Size = new System.Drawing.Size(192, 67);
+            tabSQLPatching.TabIndex = 16;
+            tabSQLPatching.Text = "SQL Patching";
+            tabSQLPatching.UseVisualStyleBackColor = true;
             // 
             // sqlPatching1
             // 
-            this.sqlPatching1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.sqlPatching1.Location = new System.Drawing.Point(3, 3);
-            this.sqlPatching1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.sqlPatching1.Name = "sqlPatching1";
-            this.sqlPatching1.Size = new System.Drawing.Size(186, 61);
-            this.sqlPatching1.TabIndex = 0;
+            sqlPatching1.Dock = System.Windows.Forms.DockStyle.Fill;
+            sqlPatching1.Location = new System.Drawing.Point(3, 3);
+            sqlPatching1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            sqlPatching1.Name = "sqlPatching1";
+            sqlPatching1.Size = new System.Drawing.Size(186, 61);
+            sqlPatching1.TabIndex = 0;
             // 
             // tabInstanceConfig
             // 
-            this.tabInstanceConfig.Controls.Add(this.configurationHistory1);
-            this.tabInstanceConfig.Location = new System.Drawing.Point(4, 29);
-            this.tabInstanceConfig.Name = "tabInstanceConfig";
-            this.tabInstanceConfig.Padding = new System.Windows.Forms.Padding(3);
-            this.tabInstanceConfig.Size = new System.Drawing.Size(192, 67);
-            this.tabInstanceConfig.TabIndex = 17;
-            this.tabInstanceConfig.Text = "Configuration";
-            this.tabInstanceConfig.UseVisualStyleBackColor = true;
+            tabInstanceConfig.Controls.Add(configurationHistory1);
+            tabInstanceConfig.Location = new System.Drawing.Point(4, 29);
+            tabInstanceConfig.Name = "tabInstanceConfig";
+            tabInstanceConfig.Padding = new System.Windows.Forms.Padding(3);
+            tabInstanceConfig.Size = new System.Drawing.Size(192, 67);
+            tabInstanceConfig.TabIndex = 17;
+            tabInstanceConfig.Text = "Configuration";
+            tabInstanceConfig.UseVisualStyleBackColor = true;
             // 
             // configurationHistory1
             // 
-            this.configurationHistory1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.configurationHistory1.Location = new System.Drawing.Point(3, 3);
-            this.configurationHistory1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.configurationHistory1.Name = "configurationHistory1";
-            this.configurationHistory1.Size = new System.Drawing.Size(186, 61);
-            this.configurationHistory1.TabIndex = 0;
+            configurationHistory1.Dock = System.Windows.Forms.DockStyle.Fill;
+            configurationHistory1.Location = new System.Drawing.Point(3, 3);
+            configurationHistory1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            configurationHistory1.Name = "configurationHistory1";
+            configurationHistory1.Size = new System.Drawing.Size(186, 61);
+            configurationHistory1.TabIndex = 0;
             // 
             // tabSlowQueries
             // 
-            this.tabSlowQueries.Controls.Add(this.slowQueries1);
-            this.tabSlowQueries.Location = new System.Drawing.Point(4, 29);
-            this.tabSlowQueries.Name = "tabSlowQueries";
-            this.tabSlowQueries.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSlowQueries.Size = new System.Drawing.Size(192, 67);
-            this.tabSlowQueries.TabIndex = 18;
-            this.tabSlowQueries.Text = "Slow Queries";
-            this.tabSlowQueries.UseVisualStyleBackColor = true;
+            tabSlowQueries.Controls.Add(slowQueries1);
+            tabSlowQueries.Location = new System.Drawing.Point(4, 29);
+            tabSlowQueries.Name = "tabSlowQueries";
+            tabSlowQueries.Padding = new System.Windows.Forms.Padding(3);
+            tabSlowQueries.Size = new System.Drawing.Size(192, 67);
+            tabSlowQueries.TabIndex = 18;
+            tabSlowQueries.Text = "Slow Queries";
+            tabSlowQueries.UseVisualStyleBackColor = true;
             // 
             // slowQueries1
             // 
-            this.slowQueries1.DBName = "";
-            this.slowQueries1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.slowQueries1.Location = new System.Drawing.Point(3, 3);
-            this.slowQueries1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.slowQueries1.Name = "slowQueries1";
-            this.slowQueries1.Size = new System.Drawing.Size(186, 61);
-            this.slowQueries1.TabIndex = 0;
+            slowQueries1.DBName = "";
+            slowQueries1.Dock = System.Windows.Forms.DockStyle.Fill;
+            slowQueries1.Location = new System.Drawing.Point(3, 3);
+            slowQueries1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            slowQueries1.Name = "slowQueries1";
+            slowQueries1.Size = new System.Drawing.Size(186, 61);
+            slowQueries1.TabIndex = 0;
             // 
             // tabTraceFlags
             // 
-            this.tabTraceFlags.Controls.Add(this.traceFlagHistory1);
-            this.tabTraceFlags.Location = new System.Drawing.Point(4, 29);
-            this.tabTraceFlags.Name = "tabTraceFlags";
-            this.tabTraceFlags.Padding = new System.Windows.Forms.Padding(3);
-            this.tabTraceFlags.Size = new System.Drawing.Size(192, 67);
-            this.tabTraceFlags.TabIndex = 19;
-            this.tabTraceFlags.Text = "Trace Flags";
-            this.tabTraceFlags.UseVisualStyleBackColor = true;
+            tabTraceFlags.Controls.Add(traceFlagHistory1);
+            tabTraceFlags.Location = new System.Drawing.Point(4, 29);
+            tabTraceFlags.Name = "tabTraceFlags";
+            tabTraceFlags.Padding = new System.Windows.Forms.Padding(3);
+            tabTraceFlags.Size = new System.Drawing.Size(192, 67);
+            tabTraceFlags.TabIndex = 19;
+            tabTraceFlags.Text = "Trace Flags";
+            tabTraceFlags.UseVisualStyleBackColor = true;
             // 
             // traceFlagHistory1
             // 
-            this.traceFlagHistory1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.traceFlagHistory1.Location = new System.Drawing.Point(3, 3);
-            this.traceFlagHistory1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.traceFlagHistory1.Name = "traceFlagHistory1";
-            this.traceFlagHistory1.Size = new System.Drawing.Size(186, 61);
-            this.traceFlagHistory1.TabIndex = 0;
+            traceFlagHistory1.Dock = System.Windows.Forms.DockStyle.Fill;
+            traceFlagHistory1.Location = new System.Drawing.Point(3, 3);
+            traceFlagHistory1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            traceFlagHistory1.Name = "traceFlagHistory1";
+            traceFlagHistory1.Size = new System.Drawing.Size(186, 61);
+            traceFlagHistory1.TabIndex = 0;
             // 
             // tabAlerts
             // 
-            this.tabAlerts.Controls.Add(this.alerts1);
-            this.tabAlerts.Location = new System.Drawing.Point(4, 29);
-            this.tabAlerts.Name = "tabAlerts";
-            this.tabAlerts.Padding = new System.Windows.Forms.Padding(3);
-            this.tabAlerts.Size = new System.Drawing.Size(192, 67);
-            this.tabAlerts.TabIndex = 20;
-            this.tabAlerts.Text = "Alerts";
-            this.tabAlerts.UseVisualStyleBackColor = true;
+            tabAlerts.Controls.Add(alerts1);
+            tabAlerts.Location = new System.Drawing.Point(4, 29);
+            tabAlerts.Name = "tabAlerts";
+            tabAlerts.Padding = new System.Windows.Forms.Padding(3);
+            tabAlerts.Size = new System.Drawing.Size(192, 67);
+            tabAlerts.TabIndex = 20;
+            tabAlerts.Text = "Alerts";
+            tabAlerts.UseVisualStyleBackColor = true;
             // 
             // alerts1
             // 
-            this.alerts1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.alerts1.Location = new System.Drawing.Point(3, 3);
-            this.alerts1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.alerts1.Name = "alerts1";
-            this.alerts1.Size = new System.Drawing.Size(186, 61);
-            this.alerts1.TabIndex = 0;
-            this.alerts1.UseAlertName = false;
+            alerts1.Dock = System.Windows.Forms.DockStyle.Fill;
+            alerts1.Location = new System.Drawing.Point(3, 3);
+            alerts1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            alerts1.Name = "alerts1";
+            alerts1.Size = new System.Drawing.Size(186, 61);
+            alerts1.TabIndex = 0;
+            alerts1.UseAlertName = false;
             // 
             // tabDrivers
             // 
-            this.tabDrivers.Controls.Add(this.drivers1);
-            this.tabDrivers.Location = new System.Drawing.Point(4, 29);
-            this.tabDrivers.Name = "tabDrivers";
-            this.tabDrivers.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDrivers.Size = new System.Drawing.Size(192, 67);
-            this.tabDrivers.TabIndex = 21;
-            this.tabDrivers.Text = "Drivers";
-            this.tabDrivers.UseVisualStyleBackColor = true;
+            tabDrivers.Controls.Add(drivers1);
+            tabDrivers.Location = new System.Drawing.Point(4, 29);
+            tabDrivers.Name = "tabDrivers";
+            tabDrivers.Padding = new System.Windows.Forms.Padding(3);
+            tabDrivers.Size = new System.Drawing.Size(192, 67);
+            tabDrivers.TabIndex = 21;
+            tabDrivers.Text = "Drivers";
+            tabDrivers.UseVisualStyleBackColor = true;
             // 
             // drivers1
             // 
-            this.drivers1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.drivers1.Location = new System.Drawing.Point(3, 3);
-            this.drivers1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.drivers1.Name = "drivers1";
-            this.drivers1.Size = new System.Drawing.Size(186, 61);
-            this.drivers1.TabIndex = 0;
+            drivers1.Dock = System.Windows.Forms.DockStyle.Fill;
+            drivers1.Location = new System.Drawing.Point(3, 3);
+            drivers1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            drivers1.Name = "drivers1";
+            drivers1.Size = new System.Drawing.Size(186, 61);
+            drivers1.TabIndex = 0;
             // 
             // tabDBSpace
             // 
-            this.tabDBSpace.Controls.Add(this.spaceTracking1);
-            this.tabDBSpace.Location = new System.Drawing.Point(4, 29);
-            this.tabDBSpace.Name = "tabDBSpace";
-            this.tabDBSpace.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDBSpace.Size = new System.Drawing.Size(192, 67);
-            this.tabDBSpace.TabIndex = 22;
-            this.tabDBSpace.Text = "DB Space";
-            this.tabDBSpace.UseVisualStyleBackColor = true;
+            tabDBSpace.Controls.Add(spaceTracking1);
+            tabDBSpace.Location = new System.Drawing.Point(4, 29);
+            tabDBSpace.Name = "tabDBSpace";
+            tabDBSpace.Padding = new System.Windows.Forms.Padding(3);
+            tabDBSpace.Size = new System.Drawing.Size(192, 67);
+            tabDBSpace.TabIndex = 22;
+            tabDBSpace.Text = "DB Space";
+            tabDBSpace.UseVisualStyleBackColor = true;
             // 
             // spaceTracking1
             // 
-            this.spaceTracking1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.spaceTracking1.Location = new System.Drawing.Point(3, 3);
-            this.spaceTracking1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.spaceTracking1.Name = "spaceTracking1";
-            this.spaceTracking1.Size = new System.Drawing.Size(186, 61);
-            this.spaceTracking1.TabIndex = 0;
+            spaceTracking1.Dock = System.Windows.Forms.DockStyle.Fill;
+            spaceTracking1.Location = new System.Drawing.Point(3, 3);
+            spaceTracking1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            spaceTracking1.Name = "spaceTracking1";
+            spaceTracking1.Size = new System.Drawing.Size(186, 61);
+            spaceTracking1.TabIndex = 0;
             // 
             // tabAzureSummary
             // 
-            this.tabAzureSummary.Controls.Add(this.azureSummary1);
-            this.tabAzureSummary.Location = new System.Drawing.Point(4, 29);
-            this.tabAzureSummary.Name = "tabAzureSummary";
-            this.tabAzureSummary.Padding = new System.Windows.Forms.Padding(3);
-            this.tabAzureSummary.Size = new System.Drawing.Size(192, 67);
-            this.tabAzureSummary.TabIndex = 23;
-            this.tabAzureSummary.Text = "Azure Summary";
-            this.tabAzureSummary.UseVisualStyleBackColor = true;
+            tabAzureSummary.Controls.Add(azureSummary1);
+            tabAzureSummary.Location = new System.Drawing.Point(4, 29);
+            tabAzureSummary.Name = "tabAzureSummary";
+            tabAzureSummary.Padding = new System.Windows.Forms.Padding(3);
+            tabAzureSummary.Size = new System.Drawing.Size(192, 67);
+            tabAzureSummary.TabIndex = 23;
+            tabAzureSummary.Text = "Azure Summary";
+            tabAzureSummary.UseVisualStyleBackColor = true;
             // 
             // azureSummary1
             // 
-            this.azureSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.azureSummary1.Location = new System.Drawing.Point(3, 3);
-            this.azureSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.azureSummary1.Name = "azureSummary1";
-            this.azureSummary1.Size = new System.Drawing.Size(186, 61);
-            this.azureSummary1.TabIndex = 0;
+            azureSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
+            azureSummary1.Location = new System.Drawing.Point(3, 3);
+            azureSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            azureSummary1.Name = "azureSummary1";
+            azureSummary1.Size = new System.Drawing.Size(186, 61);
+            azureSummary1.TabIndex = 0;
             // 
             // tabAzureDB
             // 
-            this.tabAzureDB.Controls.Add(this.azureDBResourceStats1);
-            this.tabAzureDB.Location = new System.Drawing.Point(4, 29);
-            this.tabAzureDB.Name = "tabAzureDB";
-            this.tabAzureDB.Padding = new System.Windows.Forms.Padding(3);
-            this.tabAzureDB.Size = new System.Drawing.Size(192, 67);
-            this.tabAzureDB.TabIndex = 24;
-            this.tabAzureDB.Text = "Azure DB";
-            this.tabAzureDB.UseVisualStyleBackColor = true;
+            tabAzureDB.Controls.Add(azureDBResourceStats1);
+            tabAzureDB.Location = new System.Drawing.Point(4, 29);
+            tabAzureDB.Name = "tabAzureDB";
+            tabAzureDB.Padding = new System.Windows.Forms.Padding(3);
+            tabAzureDB.Size = new System.Drawing.Size(192, 67);
+            tabAzureDB.TabIndex = 24;
+            tabAzureDB.Text = "Azure DB";
+            tabAzureDB.UseVisualStyleBackColor = true;
             // 
             // azureDBResourceStats1
             // 
-            this.azureDBResourceStats1.DateGrouping = 0;
-            this.azureDBResourceStats1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.azureDBResourceStats1.Location = new System.Drawing.Point(3, 3);
-            this.azureDBResourceStats1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.azureDBResourceStats1.Name = "azureDBResourceStats1";
-            this.azureDBResourceStats1.Size = new System.Drawing.Size(186, 61);
-            this.azureDBResourceStats1.TabIndex = 0;
+            azureDBResourceStats1.DateGrouping = 0;
+            azureDBResourceStats1.Dock = System.Windows.Forms.DockStyle.Fill;
+            azureDBResourceStats1.Location = new System.Drawing.Point(3, 3);
+            azureDBResourceStats1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            azureDBResourceStats1.Name = "azureDBResourceStats1";
+            azureDBResourceStats1.Size = new System.Drawing.Size(186, 61);
+            azureDBResourceStats1.TabIndex = 0;
             // 
             // tabServiceObjectives
             // 
-            this.tabServiceObjectives.Controls.Add(this.azureServiceObjectivesHistory1);
-            this.tabServiceObjectives.Location = new System.Drawing.Point(4, 29);
-            this.tabServiceObjectives.Name = "tabServiceObjectives";
-            this.tabServiceObjectives.Padding = new System.Windows.Forms.Padding(3);
-            this.tabServiceObjectives.Size = new System.Drawing.Size(192, 67);
-            this.tabServiceObjectives.TabIndex = 25;
-            this.tabServiceObjectives.Text = "Azure Service Objectives";
-            this.tabServiceObjectives.UseVisualStyleBackColor = true;
+            tabServiceObjectives.Controls.Add(azureServiceObjectivesHistory1);
+            tabServiceObjectives.Location = new System.Drawing.Point(4, 29);
+            tabServiceObjectives.Name = "tabServiceObjectives";
+            tabServiceObjectives.Padding = new System.Windows.Forms.Padding(3);
+            tabServiceObjectives.Size = new System.Drawing.Size(192, 67);
+            tabServiceObjectives.TabIndex = 25;
+            tabServiceObjectives.Text = "Azure Service Objectives";
+            tabServiceObjectives.UseVisualStyleBackColor = true;
             // 
             // azureServiceObjectivesHistory1
             // 
-            this.azureServiceObjectivesHistory1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.azureServiceObjectivesHistory1.Location = new System.Drawing.Point(3, 3);
-            this.azureServiceObjectivesHistory1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.azureServiceObjectivesHistory1.Name = "azureServiceObjectivesHistory1";
-            this.azureServiceObjectivesHistory1.Size = new System.Drawing.Size(186, 61);
-            this.azureServiceObjectivesHistory1.TabIndex = 0;
+            azureServiceObjectivesHistory1.Dock = System.Windows.Forms.DockStyle.Fill;
+            azureServiceObjectivesHistory1.Location = new System.Drawing.Point(3, 3);
+            azureServiceObjectivesHistory1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            azureServiceObjectivesHistory1.Name = "azureServiceObjectivesHistory1";
+            azureServiceObjectivesHistory1.Size = new System.Drawing.Size(186, 61);
+            azureServiceObjectivesHistory1.TabIndex = 0;
             // 
             // tabDBConfiguration
             // 
-            this.tabDBConfiguration.Controls.Add(this.dbConfiguration1);
-            this.tabDBConfiguration.Location = new System.Drawing.Point(4, 29);
-            this.tabDBConfiguration.Name = "tabDBConfiguration";
-            this.tabDBConfiguration.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDBConfiguration.Size = new System.Drawing.Size(192, 67);
-            this.tabDBConfiguration.TabIndex = 26;
-            this.tabDBConfiguration.Text = "DB Configuration";
-            this.tabDBConfiguration.UseVisualStyleBackColor = true;
+            tabDBConfiguration.Controls.Add(dbConfiguration1);
+            tabDBConfiguration.Location = new System.Drawing.Point(4, 29);
+            tabDBConfiguration.Name = "tabDBConfiguration";
+            tabDBConfiguration.Padding = new System.Windows.Forms.Padding(3);
+            tabDBConfiguration.Size = new System.Drawing.Size(192, 67);
+            tabDBConfiguration.TabIndex = 26;
+            tabDBConfiguration.Text = "DB Configuration";
+            tabDBConfiguration.UseVisualStyleBackColor = true;
             // 
             // dbConfiguration1
             // 
-            this.dbConfiguration1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dbConfiguration1.Location = new System.Drawing.Point(3, 3);
-            this.dbConfiguration1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dbConfiguration1.Name = "dbConfiguration1";
-            this.dbConfiguration1.Size = new System.Drawing.Size(186, 61);
-            this.dbConfiguration1.TabIndex = 0;
+            dbConfiguration1.Dock = System.Windows.Forms.DockStyle.Fill;
+            dbConfiguration1.Location = new System.Drawing.Point(3, 3);
+            dbConfiguration1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dbConfiguration1.Name = "dbConfiguration1";
+            dbConfiguration1.Size = new System.Drawing.Size(186, 61);
+            dbConfiguration1.TabIndex = 0;
             // 
             // tabDBOptions
             // 
-            this.tabDBOptions.Controls.Add(this.dbOptions1);
-            this.tabDBOptions.Location = new System.Drawing.Point(4, 29);
-            this.tabDBOptions.Name = "tabDBOptions";
-            this.tabDBOptions.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDBOptions.Size = new System.Drawing.Size(192, 67);
-            this.tabDBOptions.TabIndex = 27;
-            this.tabDBOptions.Text = "DB Options";
-            this.tabDBOptions.UseVisualStyleBackColor = true;
+            tabDBOptions.Controls.Add(dbOptions1);
+            tabDBOptions.Location = new System.Drawing.Point(4, 29);
+            tabDBOptions.Name = "tabDBOptions";
+            tabDBOptions.Padding = new System.Windows.Forms.Padding(3);
+            tabDBOptions.Size = new System.Drawing.Size(192, 67);
+            tabDBOptions.TabIndex = 27;
+            tabDBOptions.Text = "DB Options";
+            tabDBOptions.UseVisualStyleBackColor = true;
             // 
             // dbOptions1
             // 
-            this.dbOptions1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dbOptions1.Location = new System.Drawing.Point(3, 3);
-            this.dbOptions1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dbOptions1.Name = "dbOptions1";
-            this.dbOptions1.Size = new System.Drawing.Size(186, 61);
-            this.dbOptions1.SummaryMode = false;
-            this.dbOptions1.TabIndex = 0;
+            dbOptions1.Dock = System.Windows.Forms.DockStyle.Fill;
+            dbOptions1.Location = new System.Drawing.Point(3, 3);
+            dbOptions1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dbOptions1.Name = "dbOptions1";
+            dbOptions1.Size = new System.Drawing.Size(186, 61);
+            dbOptions1.SummaryMode = false;
+            dbOptions1.TabIndex = 0;
             // 
             // tabTempDB
             // 
-            this.tabTempDB.Controls.Add(this.tempDBConfig1);
-            this.tabTempDB.Location = new System.Drawing.Point(4, 29);
-            this.tabTempDB.Name = "tabTempDB";
-            this.tabTempDB.Padding = new System.Windows.Forms.Padding(3);
-            this.tabTempDB.Size = new System.Drawing.Size(192, 67);
-            this.tabTempDB.TabIndex = 28;
-            this.tabTempDB.Text = "TempDB";
-            this.tabTempDB.UseVisualStyleBackColor = true;
+            tabTempDB.Controls.Add(tempDBConfig1);
+            tabTempDB.Location = new System.Drawing.Point(4, 29);
+            tabTempDB.Name = "tabTempDB";
+            tabTempDB.Padding = new System.Windows.Forms.Padding(3);
+            tabTempDB.Size = new System.Drawing.Size(192, 67);
+            tabTempDB.TabIndex = 28;
+            tabTempDB.Text = "TempDB";
+            tabTempDB.UseVisualStyleBackColor = true;
             // 
             // tempDBConfig1
             // 
-            this.tempDBConfig1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tempDBConfig1.Location = new System.Drawing.Point(3, 3);
-            this.tempDBConfig1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tempDBConfig1.Name = "tempDBConfig1";
-            this.tempDBConfig1.Size = new System.Drawing.Size(186, 61);
-            this.tempDBConfig1.TabIndex = 0;
+            tempDBConfig1.Dock = System.Windows.Forms.DockStyle.Fill;
+            tempDBConfig1.Location = new System.Drawing.Point(3, 3);
+            tempDBConfig1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            tempDBConfig1.Name = "tempDBConfig1";
+            tempDBConfig1.Size = new System.Drawing.Size(186, 61);
+            tempDBConfig1.TabIndex = 0;
             // 
             // tabCustomChecks
             // 
-            this.tabCustomChecks.Controls.Add(this.customChecks1);
-            this.tabCustomChecks.Location = new System.Drawing.Point(4, 29);
-            this.tabCustomChecks.Name = "tabCustomChecks";
-            this.tabCustomChecks.Padding = new System.Windows.Forms.Padding(3);
-            this.tabCustomChecks.Size = new System.Drawing.Size(192, 67);
-            this.tabCustomChecks.TabIndex = 29;
-            this.tabCustomChecks.Text = "Custom";
-            this.tabCustomChecks.UseVisualStyleBackColor = true;
+            tabCustomChecks.Controls.Add(customChecks1);
+            tabCustomChecks.Location = new System.Drawing.Point(4, 29);
+            tabCustomChecks.Name = "tabCustomChecks";
+            tabCustomChecks.Padding = new System.Windows.Forms.Padding(3);
+            tabCustomChecks.Size = new System.Drawing.Size(192, 67);
+            tabCustomChecks.TabIndex = 29;
+            tabCustomChecks.Text = "Custom";
+            tabCustomChecks.UseVisualStyleBackColor = true;
             // 
             // customChecks1
             // 
-            this.customChecks1.Context = null;
-            this.customChecks1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.customChecks1.IncludeCritical = true;
-            this.customChecks1.IncludeNA = false;
-            this.customChecks1.IncludeOK = false;
-            this.customChecks1.IncludeWarning = true;
-            this.customChecks1.Location = new System.Drawing.Point(3, 3);
-            this.customChecks1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.customChecks1.Name = "customChecks1";
-            this.customChecks1.Size = new System.Drawing.Size(186, 61);
-            this.customChecks1.TabIndex = 0;
-            this.customChecks1.Test = null;
+            customChecks1.Context = null;
+            customChecks1.Dock = System.Windows.Forms.DockStyle.Fill;
+            customChecks1.IncludeCritical = true;
+            customChecks1.IncludeNA = false;
+            customChecks1.IncludeOK = false;
+            customChecks1.IncludeWarning = true;
+            customChecks1.Location = new System.Drawing.Point(3, 3);
+            customChecks1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            customChecks1.Name = "customChecks1";
+            customChecks1.Size = new System.Drawing.Size(186, 61);
+            customChecks1.TabIndex = 0;
+            customChecks1.Test = null;
             // 
             // tabPC
             // 
-            this.tabPC.Controls.Add(this.performanceCounterSummary1);
-            this.tabPC.Location = new System.Drawing.Point(4, 29);
-            this.tabPC.Name = "tabPC";
-            this.tabPC.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPC.Size = new System.Drawing.Size(192, 67);
-            this.tabPC.TabIndex = 30;
-            this.tabPC.Text = "Metrics";
-            this.tabPC.UseVisualStyleBackColor = true;
+            tabPC.Controls.Add(performanceCounterSummary1);
+            tabPC.Location = new System.Drawing.Point(4, 29);
+            tabPC.Name = "tabPC";
+            tabPC.Padding = new System.Windows.Forms.Padding(3);
+            tabPC.Size = new System.Drawing.Size(192, 67);
+            tabPC.TabIndex = 30;
+            tabPC.Text = "Metrics";
+            tabPC.UseVisualStyleBackColor = true;
             // 
             // performanceCounterSummary1
             // 
-            this.performanceCounterSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.performanceCounterSummary1.Location = new System.Drawing.Point(3, 3);
-            this.performanceCounterSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.performanceCounterSummary1.Name = "performanceCounterSummary1";
-            this.performanceCounterSummary1.Size = new System.Drawing.Size(186, 61);
-            this.performanceCounterSummary1.TabIndex = 0;
+            performanceCounterSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
+            performanceCounterSummary1.Location = new System.Drawing.Point(3, 3);
+            performanceCounterSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            performanceCounterSummary1.Name = "performanceCounterSummary1";
+            performanceCounterSummary1.Size = new System.Drawing.Size(186, 61);
+            performanceCounterSummary1.TabIndex = 0;
             // 
             // tabObjectExecutionSummary
             // 
-            this.tabObjectExecutionSummary.Controls.Add(this.objectExecutionSummary1);
-            this.tabObjectExecutionSummary.Location = new System.Drawing.Point(4, 29);
-            this.tabObjectExecutionSummary.Name = "tabObjectExecutionSummary";
-            this.tabObjectExecutionSummary.Padding = new System.Windows.Forms.Padding(3);
-            this.tabObjectExecutionSummary.Size = new System.Drawing.Size(192, 67);
-            this.tabObjectExecutionSummary.TabIndex = 31;
-            this.tabObjectExecutionSummary.Text = "Object Execution";
-            this.tabObjectExecutionSummary.UseVisualStyleBackColor = true;
+            tabObjectExecutionSummary.Controls.Add(objectExecutionSummary1);
+            tabObjectExecutionSummary.Location = new System.Drawing.Point(4, 29);
+            tabObjectExecutionSummary.Name = "tabObjectExecutionSummary";
+            tabObjectExecutionSummary.Padding = new System.Windows.Forms.Padding(3);
+            tabObjectExecutionSummary.Size = new System.Drawing.Size(192, 67);
+            tabObjectExecutionSummary.TabIndex = 31;
+            tabObjectExecutionSummary.Text = "Object Execution";
+            tabObjectExecutionSummary.UseVisualStyleBackColor = true;
             // 
             // objectExecutionSummary1
             // 
-            this.objectExecutionSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.objectExecutionSummary1.Location = new System.Drawing.Point(3, 3);
-            this.objectExecutionSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.objectExecutionSummary1.Name = "objectExecutionSummary1";
-            this.objectExecutionSummary1.Size = new System.Drawing.Size(186, 61);
-            this.objectExecutionSummary1.TabIndex = 0;
-            this.objectExecutionSummary1.Types = "";
+            objectExecutionSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
+            objectExecutionSummary1.Location = new System.Drawing.Point(3, 3);
+            objectExecutionSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            objectExecutionSummary1.Name = "objectExecutionSummary1";
+            objectExecutionSummary1.Size = new System.Drawing.Size(186, 61);
+            objectExecutionSummary1.TabIndex = 0;
+            objectExecutionSummary1.Types = "";
             // 
             // tabWaits
             // 
-            this.tabWaits.Controls.Add(this.waitsSummary1);
-            this.tabWaits.Location = new System.Drawing.Point(4, 29);
-            this.tabWaits.Name = "tabWaits";
-            this.tabWaits.Padding = new System.Windows.Forms.Padding(3);
-            this.tabWaits.Size = new System.Drawing.Size(192, 67);
-            this.tabWaits.TabIndex = 32;
-            this.tabWaits.Text = "Waits";
-            this.tabWaits.UseVisualStyleBackColor = true;
+            tabWaits.Controls.Add(waitsSummary1);
+            tabWaits.Location = new System.Drawing.Point(4, 29);
+            tabWaits.Name = "tabWaits";
+            tabWaits.Padding = new System.Windows.Forms.Padding(3);
+            tabWaits.Size = new System.Drawing.Size(192, 67);
+            tabWaits.TabIndex = 32;
+            tabWaits.Text = "Waits";
+            tabWaits.UseVisualStyleBackColor = true;
             // 
             // waitsSummary1
             // 
-            this.waitsSummary1.DateGrouping = 1;
-            this.waitsSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.waitsSummary1.Location = new System.Drawing.Point(3, 3);
-            this.waitsSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.waitsSummary1.Name = "waitsSummary1";
-            this.waitsSummary1.Size = new System.Drawing.Size(186, 61);
-            this.waitsSummary1.TabIndex = 0;
+            waitsSummary1.DateGrouping = 1;
+            waitsSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
+            waitsSummary1.Location = new System.Drawing.Point(3, 3);
+            waitsSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            waitsSummary1.Name = "waitsSummary1";
+            waitsSummary1.Size = new System.Drawing.Size(186, 61);
+            waitsSummary1.TabIndex = 0;
             // 
             // tabMirroring
             // 
-            this.tabMirroring.Controls.Add(this.mirroring1);
-            this.tabMirroring.Location = new System.Drawing.Point(4, 29);
-            this.tabMirroring.Name = "tabMirroring";
-            this.tabMirroring.Padding = new System.Windows.Forms.Padding(3);
-            this.tabMirroring.Size = new System.Drawing.Size(192, 67);
-            this.tabMirroring.TabIndex = 33;
-            this.tabMirroring.Text = "Mirroring";
-            this.tabMirroring.UseVisualStyleBackColor = true;
+            tabMirroring.Controls.Add(mirroring1);
+            tabMirroring.Location = new System.Drawing.Point(4, 29);
+            tabMirroring.Name = "tabMirroring";
+            tabMirroring.Padding = new System.Windows.Forms.Padding(3);
+            tabMirroring.Size = new System.Drawing.Size(192, 67);
+            tabMirroring.TabIndex = 33;
+            tabMirroring.Text = "Mirroring";
+            tabMirroring.UseVisualStyleBackColor = true;
             // 
             // mirroring1
             // 
-            this.mirroring1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mirroring1.Location = new System.Drawing.Point(3, 3);
-            this.mirroring1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.mirroring1.Name = "mirroring1";
-            this.mirroring1.Size = new System.Drawing.Size(186, 61);
-            this.mirroring1.SummaryMode = true;
-            this.mirroring1.TabIndex = 0;
+            mirroring1.Dock = System.Windows.Forms.DockStyle.Fill;
+            mirroring1.Location = new System.Drawing.Point(3, 3);
+            mirroring1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            mirroring1.Name = "mirroring1";
+            mirroring1.Size = new System.Drawing.Size(186, 61);
+            mirroring1.SummaryMode = true;
+            mirroring1.TabIndex = 0;
             // 
             // tabJobDDL
             // 
-            this.tabJobDDL.Controls.Add(this.jobDDLHistory1);
-            this.tabJobDDL.Location = new System.Drawing.Point(4, 29);
-            this.tabJobDDL.Name = "tabJobDDL";
-            this.tabJobDDL.Padding = new System.Windows.Forms.Padding(3);
-            this.tabJobDDL.Size = new System.Drawing.Size(192, 67);
-            this.tabJobDDL.TabIndex = 34;
-            this.tabJobDDL.Text = "Job DDL";
-            this.tabJobDDL.UseVisualStyleBackColor = true;
+            tabJobDDL.Controls.Add(jobDDLHistory1);
+            tabJobDDL.Location = new System.Drawing.Point(4, 29);
+            tabJobDDL.Name = "tabJobDDL";
+            tabJobDDL.Padding = new System.Windows.Forms.Padding(3);
+            tabJobDDL.Size = new System.Drawing.Size(192, 67);
+            tabJobDDL.TabIndex = 34;
+            tabJobDDL.Text = "Job DDL";
+            tabJobDDL.UseVisualStyleBackColor = true;
             // 
             // jobDDLHistory1
             // 
-            this.jobDDLHistory1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.jobDDLHistory1.Location = new System.Drawing.Point(3, 3);
-            this.jobDDLHistory1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.jobDDLHistory1.Name = "jobDDLHistory1";
-            this.jobDDLHistory1.Size = new System.Drawing.Size(186, 61);
-            this.jobDDLHistory1.TabIndex = 0;
+            jobDDLHistory1.Dock = System.Windows.Forms.DockStyle.Fill;
+            jobDDLHistory1.Location = new System.Drawing.Point(3, 3);
+            jobDDLHistory1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            jobDDLHistory1.Name = "jobDDLHistory1";
+            jobDDLHistory1.Size = new System.Drawing.Size(186, 61);
+            jobDDLHistory1.TabIndex = 0;
             // 
             // tabAG
             // 
-            this.tabAG.Controls.Add(this.ag1);
-            this.tabAG.Location = new System.Drawing.Point(4, 29);
-            this.tabAG.Name = "tabAG";
-            this.tabAG.Padding = new System.Windows.Forms.Padding(3);
-            this.tabAG.Size = new System.Drawing.Size(192, 67);
-            this.tabAG.TabIndex = 35;
-            this.tabAG.Text = "Availability Groups";
-            this.tabAG.UseVisualStyleBackColor = true;
+            tabAG.Controls.Add(ag1);
+            tabAG.Location = new System.Drawing.Point(4, 29);
+            tabAG.Name = "tabAG";
+            tabAG.Padding = new System.Windows.Forms.Padding(3);
+            tabAG.Size = new System.Drawing.Size(192, 67);
+            tabAG.TabIndex = 35;
+            tabAG.Text = "Availability Groups";
+            tabAG.UseVisualStyleBackColor = true;
             // 
             // ag1
             // 
-            this.ag1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ag1.Location = new System.Drawing.Point(3, 3);
-            this.ag1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.ag1.Name = "ag1";
-            this.ag1.Size = new System.Drawing.Size(186, 61);
-            this.ag1.TabIndex = 0;
+            ag1.Dock = System.Windows.Forms.DockStyle.Fill;
+            ag1.Location = new System.Drawing.Point(3, 3);
+            ag1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            ag1.Name = "ag1";
+            ag1.Size = new System.Drawing.Size(186, 61);
+            ag1.TabIndex = 0;
             // 
             // tabQS
             // 
-            this.tabQS.Controls.Add(this.queryStore1);
-            this.tabQS.Location = new System.Drawing.Point(4, 29);
-            this.tabQS.Name = "tabQS";
-            this.tabQS.Padding = new System.Windows.Forms.Padding(3);
-            this.tabQS.Size = new System.Drawing.Size(192, 67);
-            this.tabQS.TabIndex = 36;
-            this.tabQS.Text = "QS";
-            this.tabQS.UseVisualStyleBackColor = true;
+            tabQS.Controls.Add(queryStore1);
+            tabQS.Location = new System.Drawing.Point(4, 29);
+            tabQS.Name = "tabQS";
+            tabQS.Padding = new System.Windows.Forms.Padding(3);
+            tabQS.Size = new System.Drawing.Size(192, 67);
+            tabQS.TabIndex = 36;
+            tabQS.Text = "QS";
+            tabQS.UseVisualStyleBackColor = true;
             // 
             // queryStore1
             // 
-            this.queryStore1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.queryStore1.Location = new System.Drawing.Point(3, 3);
-            this.queryStore1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.queryStore1.Name = "queryStore1";
-            this.queryStore1.Size = new System.Drawing.Size(186, 61);
-            this.queryStore1.TabIndex = 0;
+            queryStore1.Dock = System.Windows.Forms.DockStyle.Fill;
+            queryStore1.Location = new System.Drawing.Point(3, 3);
+            queryStore1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            queryStore1.Name = "queryStore1";
+            queryStore1.Size = new System.Drawing.Size(186, 61);
+            queryStore1.TabIndex = 0;
             // 
             // tabRG
             // 
-            this.tabRG.Controls.Add(this.resourceGovernor1);
-            this.tabRG.Location = new System.Drawing.Point(4, 29);
-            this.tabRG.Name = "tabRG";
-            this.tabRG.Padding = new System.Windows.Forms.Padding(3);
-            this.tabRG.Size = new System.Drawing.Size(192, 67);
-            this.tabRG.TabIndex = 37;
-            this.tabRG.Text = "Resource Governor";
-            this.tabRG.UseVisualStyleBackColor = true;
+            tabRG.Controls.Add(resourceGovernor1);
+            tabRG.Location = new System.Drawing.Point(4, 29);
+            tabRG.Name = "tabRG";
+            tabRG.Padding = new System.Windows.Forms.Padding(3);
+            tabRG.Size = new System.Drawing.Size(192, 67);
+            tabRG.TabIndex = 37;
+            tabRG.Text = "Resource Governor";
+            tabRG.UseVisualStyleBackColor = true;
             // 
             // resourceGovernor1
             // 
-            this.resourceGovernor1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.resourceGovernor1.Location = new System.Drawing.Point(3, 3);
-            this.resourceGovernor1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.resourceGovernor1.Name = "resourceGovernor1";
-            this.resourceGovernor1.Size = new System.Drawing.Size(186, 61);
-            this.resourceGovernor1.TabIndex = 0;
+            resourceGovernor1.Dock = System.Windows.Forms.DockStyle.Fill;
+            resourceGovernor1.Location = new System.Drawing.Point(3, 3);
+            resourceGovernor1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            resourceGovernor1.Name = "resourceGovernor1";
+            resourceGovernor1.Size = new System.Drawing.Size(186, 61);
+            resourceGovernor1.TabIndex = 0;
             // 
             // tabAzureDBesourceGovernance
             // 
-            this.tabAzureDBesourceGovernance.Controls.Add(this.azureDBResourceGovernance1);
-            this.tabAzureDBesourceGovernance.Location = new System.Drawing.Point(4, 29);
-            this.tabAzureDBesourceGovernance.Name = "tabAzureDBesourceGovernance";
-            this.tabAzureDBesourceGovernance.Padding = new System.Windows.Forms.Padding(3);
-            this.tabAzureDBesourceGovernance.Size = new System.Drawing.Size(192, 67);
-            this.tabAzureDBesourceGovernance.TabIndex = 38;
-            this.tabAzureDBesourceGovernance.Text = "Azure Resource Governance";
-            this.tabAzureDBesourceGovernance.UseVisualStyleBackColor = true;
+            tabAzureDBesourceGovernance.Controls.Add(azureDBResourceGovernance1);
+            tabAzureDBesourceGovernance.Location = new System.Drawing.Point(4, 29);
+            tabAzureDBesourceGovernance.Name = "tabAzureDBesourceGovernance";
+            tabAzureDBesourceGovernance.Padding = new System.Windows.Forms.Padding(3);
+            tabAzureDBesourceGovernance.Size = new System.Drawing.Size(192, 67);
+            tabAzureDBesourceGovernance.TabIndex = 38;
+            tabAzureDBesourceGovernance.Text = "Azure Resource Governance";
+            tabAzureDBesourceGovernance.UseVisualStyleBackColor = true;
             // 
             // azureDBResourceGovernance1
             // 
-            this.azureDBResourceGovernance1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.azureDBResourceGovernance1.Location = new System.Drawing.Point(3, 3);
-            this.azureDBResourceGovernance1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.azureDBResourceGovernance1.Name = "azureDBResourceGovernance1";
-            this.azureDBResourceGovernance1.Size = new System.Drawing.Size(186, 61);
-            this.azureDBResourceGovernance1.TabIndex = 0;
+            azureDBResourceGovernance1.Dock = System.Windows.Forms.DockStyle.Fill;
+            azureDBResourceGovernance1.Location = new System.Drawing.Point(3, 3);
+            azureDBResourceGovernance1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            azureDBResourceGovernance1.Name = "azureDBResourceGovernance1";
+            azureDBResourceGovernance1.Size = new System.Drawing.Size(186, 61);
+            azureDBResourceGovernance1.TabIndex = 0;
             // 
             // tabRunningQueries
             // 
-            this.tabRunningQueries.Controls.Add(this.runningQueries1);
-            this.tabRunningQueries.Location = new System.Drawing.Point(4, 29);
-            this.tabRunningQueries.Name = "tabRunningQueries";
-            this.tabRunningQueries.Padding = new System.Windows.Forms.Padding(3);
-            this.tabRunningQueries.Size = new System.Drawing.Size(192, 67);
-            this.tabRunningQueries.TabIndex = 39;
-            this.tabRunningQueries.Text = "Running Queries";
-            this.tabRunningQueries.UseVisualStyleBackColor = true;
+            tabRunningQueries.Controls.Add(runningQueries1);
+            tabRunningQueries.Location = new System.Drawing.Point(4, 29);
+            tabRunningQueries.Name = "tabRunningQueries";
+            tabRunningQueries.Padding = new System.Windows.Forms.Padding(3);
+            tabRunningQueries.Size = new System.Drawing.Size(192, 67);
+            tabRunningQueries.TabIndex = 39;
+            tabRunningQueries.Text = "Running Queries";
+            tabRunningQueries.UseVisualStyleBackColor = true;
             // 
             // runningQueries1
             // 
-            this.runningQueries1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.runningQueries1.Location = new System.Drawing.Point(3, 3);
-            this.runningQueries1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.runningQueries1.Name = "runningQueries1";
-            this.runningQueries1.Size = new System.Drawing.Size(186, 61);
-            this.runningQueries1.TabIndex = 0;
+            runningQueries1.Dock = System.Windows.Forms.DockStyle.Fill;
+            runningQueries1.Location = new System.Drawing.Point(3, 3);
+            runningQueries1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            runningQueries1.Name = "runningQueries1";
+            runningQueries1.Size = new System.Drawing.Size(186, 61);
+            runningQueries1.TabIndex = 0;
             // 
             // tabMemory
             // 
-            this.tabMemory.Controls.Add(this.memoryUsage1);
-            this.tabMemory.Location = new System.Drawing.Point(4, 29);
-            this.tabMemory.Name = "tabMemory";
-            this.tabMemory.Padding = new System.Windows.Forms.Padding(3);
-            this.tabMemory.Size = new System.Drawing.Size(192, 67);
-            this.tabMemory.TabIndex = 40;
-            this.tabMemory.Text = "Memory";
-            this.tabMemory.UseVisualStyleBackColor = true;
+            tabMemory.Controls.Add(memoryUsage1);
+            tabMemory.Location = new System.Drawing.Point(4, 29);
+            tabMemory.Name = "tabMemory";
+            tabMemory.Padding = new System.Windows.Forms.Padding(3);
+            tabMemory.Size = new System.Drawing.Size(192, 67);
+            tabMemory.TabIndex = 40;
+            tabMemory.Text = "Memory";
+            tabMemory.UseVisualStyleBackColor = true;
             // 
             // memoryUsage1
             // 
-            this.memoryUsage1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.memoryUsage1.Location = new System.Drawing.Point(3, 3);
-            this.memoryUsage1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.memoryUsage1.Name = "memoryUsage1";
-            this.memoryUsage1.Size = new System.Drawing.Size(186, 61);
-            this.memoryUsage1.TabIndex = 0;
+            memoryUsage1.Dock = System.Windows.Forms.DockStyle.Fill;
+            memoryUsage1.Location = new System.Drawing.Point(3, 3);
+            memoryUsage1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            memoryUsage1.Name = "memoryUsage1";
+            memoryUsage1.Size = new System.Drawing.Size(186, 61);
+            memoryUsage1.TabIndex = 0;
             // 
             // tabJobStats
             // 
-            this.tabJobStats.Controls.Add(this.jobStats1);
-            this.tabJobStats.Location = new System.Drawing.Point(4, 29);
-            this.tabJobStats.Name = "tabJobStats";
-            this.tabJobStats.Padding = new System.Windows.Forms.Padding(3);
-            this.tabJobStats.Size = new System.Drawing.Size(192, 67);
-            this.tabJobStats.TabIndex = 41;
-            this.tabJobStats.Text = "Job Stats";
-            this.tabJobStats.UseVisualStyleBackColor = true;
+            tabJobStats.Controls.Add(jobStats1);
+            tabJobStats.Location = new System.Drawing.Point(4, 29);
+            tabJobStats.Name = "tabJobStats";
+            tabJobStats.Padding = new System.Windows.Forms.Padding(3);
+            tabJobStats.Size = new System.Drawing.Size(192, 67);
+            tabJobStats.TabIndex = 41;
+            tabJobStats.Text = "Job Stats";
+            tabJobStats.UseVisualStyleBackColor = true;
             // 
             // jobStats1
             // 
-            this.jobStats1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.jobStats1.Location = new System.Drawing.Point(3, 3);
-            this.jobStats1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.jobStats1.Name = "jobStats1";
-            this.jobStats1.Size = new System.Drawing.Size(186, 61);
-            this.jobStats1.TabIndex = 0;
+            jobStats1.Dock = System.Windows.Forms.DockStyle.Fill;
+            jobStats1.Location = new System.Drawing.Point(3, 3);
+            jobStats1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            jobStats1.Name = "jobStats1";
+            jobStats1.Size = new System.Drawing.Size(186, 61);
+            jobStats1.TabIndex = 0;
             // 
             // tabDBADash
             // 
-            this.tabDBADash.Controls.Add(this.lblVersion);
-            this.tabDBADash.Controls.Add(this.lblSQLMonitoring);
-            this.tabDBADash.Controls.Add(this.lblDBADash);
-            this.tabDBADash.Location = new System.Drawing.Point(4, 29);
-            this.tabDBADash.Name = "tabDBADash";
-            this.tabDBADash.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDBADash.Size = new System.Drawing.Size(192, 67);
-            this.tabDBADash.TabIndex = 42;
-            this.tabDBADash.UseVisualStyleBackColor = true;
+            tabDBADash.Controls.Add(lblVersion);
+            tabDBADash.Controls.Add(lblSQLMonitoring);
+            tabDBADash.Controls.Add(lblDBADash);
+            tabDBADash.Location = new System.Drawing.Point(4, 29);
+            tabDBADash.Name = "tabDBADash";
+            tabDBADash.Padding = new System.Windows.Forms.Padding(3);
+            tabDBADash.Size = new System.Drawing.Size(192, 67);
+            tabDBADash.TabIndex = 42;
+            tabDBADash.UseVisualStyleBackColor = true;
             // 
             // lblVersion
             // 
-            this.lblVersion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
-            this.lblVersion.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.lblVersion.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
-            this.lblVersion.ForeColor = System.Drawing.Color.White;
-            this.lblVersion.Location = new System.Drawing.Point(3, 32);
-            this.lblVersion.Name = "lblVersion";
-            this.lblVersion.Size = new System.Drawing.Size(186, 32);
-            this.lblVersion.TabIndex = 29;
-            this.lblVersion.Text = "{Version}";
+            lblVersion.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
+            lblVersion.Dock = System.Windows.Forms.DockStyle.Bottom;
+            lblVersion.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
+            lblVersion.ForeColor = System.Drawing.Color.White;
+            lblVersion.Location = new System.Drawing.Point(3, 32);
+            lblVersion.Name = "lblVersion";
+            lblVersion.Size = new System.Drawing.Size(186, 32);
+            lblVersion.TabIndex = 29;
+            lblVersion.Text = "{Version}";
             // 
             // lblSQLMonitoring
             // 
-            this.lblSQLMonitoring.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
-            this.lblSQLMonitoring.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lblSQLMonitoring.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
-            this.lblSQLMonitoring.ForeColor = System.Drawing.Color.White;
-            this.lblSQLMonitoring.Location = new System.Drawing.Point(3, 3);
-            this.lblSQLMonitoring.Name = "lblSQLMonitoring";
-            this.lblSQLMonitoring.Size = new System.Drawing.Size(186, 28);
-            this.lblSQLMonitoring.TabIndex = 28;
-            this.lblSQLMonitoring.Text = "SQL Server Monitoring";
-            this.lblSQLMonitoring.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            lblSQLMonitoring.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
+            lblSQLMonitoring.Dock = System.Windows.Forms.DockStyle.Top;
+            lblSQLMonitoring.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
+            lblSQLMonitoring.ForeColor = System.Drawing.Color.White;
+            lblSQLMonitoring.Location = new System.Drawing.Point(3, 3);
+            lblSQLMonitoring.Name = "lblSQLMonitoring";
+            lblSQLMonitoring.Size = new System.Drawing.Size(186, 28);
+            lblSQLMonitoring.TabIndex = 28;
+            lblSQLMonitoring.Text = "SQL Server Monitoring";
+            lblSQLMonitoring.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // lblDBADash
             // 
-            this.lblDBADash.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
-            this.lblDBADash.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblDBADash.Font = new System.Drawing.Font("Segoe UI", 26F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
-            this.lblDBADash.ForeColor = System.Drawing.Color.White;
-            this.lblDBADash.Location = new System.Drawing.Point(3, 3);
-            this.lblDBADash.Name = "lblDBADash";
-            this.lblDBADash.Size = new System.Drawing.Size(186, 61);
-            this.lblDBADash.TabIndex = 0;
-            this.lblDBADash.Text = "DBA Dash";
-            this.lblDBADash.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            lblDBADash.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
+            lblDBADash.Dock = System.Windows.Forms.DockStyle.Fill;
+            lblDBADash.Font = new System.Drawing.Font("Segoe UI", 26F, System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
+            lblDBADash.ForeColor = System.Drawing.Color.White;
+            lblDBADash.Location = new System.Drawing.Point(3, 3);
+            lblDBADash.Name = "lblDBADash";
+            lblDBADash.Size = new System.Drawing.Size(186, 61);
+            lblDBADash.TabIndex = 0;
+            lblDBADash.Text = "DBA Dash";
+            lblDBADash.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // tabIdentityColumns
             // 
-            this.tabIdentityColumns.Controls.Add(this.identityColumns1);
-            this.tabIdentityColumns.Location = new System.Drawing.Point(4, 29);
-            this.tabIdentityColumns.Name = "tabIdentityColumns";
-            this.tabIdentityColumns.Padding = new System.Windows.Forms.Padding(3);
-            this.tabIdentityColumns.Size = new System.Drawing.Size(192, 67);
-            this.tabIdentityColumns.TabIndex = 43;
-            this.tabIdentityColumns.Text = "Identity Columns";
-            this.tabIdentityColumns.UseVisualStyleBackColor = true;
+            tabIdentityColumns.Controls.Add(identityColumns1);
+            tabIdentityColumns.Location = new System.Drawing.Point(4, 29);
+            tabIdentityColumns.Name = "tabIdentityColumns";
+            tabIdentityColumns.Padding = new System.Windows.Forms.Padding(3);
+            tabIdentityColumns.Size = new System.Drawing.Size(192, 67);
+            tabIdentityColumns.TabIndex = 43;
+            tabIdentityColumns.Text = "Identity Columns";
+            tabIdentityColumns.UseVisualStyleBackColor = true;
             // 
             // identityColumns1
             // 
-            this.identityColumns1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.identityColumns1.IncludeCritical = true;
-            this.identityColumns1.IncludeNA = false;
-            this.identityColumns1.IncludeOK = false;
-            this.identityColumns1.IncludeWarning = true;
-            this.identityColumns1.Location = new System.Drawing.Point(3, 3);
-            this.identityColumns1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.identityColumns1.Name = "identityColumns1";
-            this.identityColumns1.Size = new System.Drawing.Size(186, 61);
-            this.identityColumns1.TabIndex = 0;
+            identityColumns1.Dock = System.Windows.Forms.DockStyle.Fill;
+            identityColumns1.IncludeCritical = true;
+            identityColumns1.IncludeNA = false;
+            identityColumns1.IncludeOK = false;
+            identityColumns1.IncludeWarning = true;
+            identityColumns1.Location = new System.Drawing.Point(3, 3);
+            identityColumns1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            identityColumns1.Name = "identityColumns1";
+            identityColumns1.Size = new System.Drawing.Size(186, 61);
+            identityColumns1.TabIndex = 0;
             // 
             // tabOSLoadedModules
             // 
-            this.tabOSLoadedModules.Controls.Add(this.osLoadedModules1);
-            this.tabOSLoadedModules.Location = new System.Drawing.Point(4, 29);
-            this.tabOSLoadedModules.Name = "tabOSLoadedModules";
-            this.tabOSLoadedModules.Padding = new System.Windows.Forms.Padding(3);
-            this.tabOSLoadedModules.Size = new System.Drawing.Size(192, 67);
-            this.tabOSLoadedModules.TabIndex = 44;
-            this.tabOSLoadedModules.Text = "OS Loaded Modules";
-            this.tabOSLoadedModules.UseVisualStyleBackColor = true;
+            tabOSLoadedModules.Controls.Add(osLoadedModules1);
+            tabOSLoadedModules.Location = new System.Drawing.Point(4, 29);
+            tabOSLoadedModules.Name = "tabOSLoadedModules";
+            tabOSLoadedModules.Padding = new System.Windows.Forms.Padding(3);
+            tabOSLoadedModules.Size = new System.Drawing.Size(192, 67);
+            tabOSLoadedModules.TabIndex = 44;
+            tabOSLoadedModules.Text = "OS Loaded Modules";
+            tabOSLoadedModules.UseVisualStyleBackColor = true;
             // 
             // osLoadedModules1
             // 
-            this.osLoadedModules1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.osLoadedModules1.Location = new System.Drawing.Point(3, 3);
-            this.osLoadedModules1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.osLoadedModules1.Name = "osLoadedModules1";
-            this.osLoadedModules1.Size = new System.Drawing.Size(186, 61);
-            this.osLoadedModules1.TabIndex = 0;
+            osLoadedModules1.Dock = System.Windows.Forms.DockStyle.Fill;
+            osLoadedModules1.Location = new System.Drawing.Point(3, 3);
+            osLoadedModules1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            osLoadedModules1.Name = "osLoadedModules1";
+            osLoadedModules1.Size = new System.Drawing.Size(186, 61);
+            osLoadedModules1.TabIndex = 0;
             // 
             // tabJobTimeline
             // 
-            this.tabJobTimeline.Controls.Add(this.jobTimeline1);
-            this.tabJobTimeline.Location = new System.Drawing.Point(4, 29);
-            this.tabJobTimeline.Name = "tabJobTimeline";
-            this.tabJobTimeline.Padding = new System.Windows.Forms.Padding(3);
-            this.tabJobTimeline.Size = new System.Drawing.Size(192, 67);
-            this.tabJobTimeline.TabIndex = 45;
-            this.tabJobTimeline.Text = "Timeline";
-            this.tabJobTimeline.UseVisualStyleBackColor = true;
+            tabJobTimeline.Controls.Add(jobTimeline1);
+            tabJobTimeline.Location = new System.Drawing.Point(4, 29);
+            tabJobTimeline.Name = "tabJobTimeline";
+            tabJobTimeline.Padding = new System.Windows.Forms.Padding(3);
+            tabJobTimeline.Size = new System.Drawing.Size(192, 67);
+            tabJobTimeline.TabIndex = 45;
+            tabJobTimeline.Text = "Timeline";
+            tabJobTimeline.UseVisualStyleBackColor = true;
             // 
             // jobTimeline1
             // 
-            this.jobTimeline1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.jobTimeline1.IsActive = false;
-            this.jobTimeline1.Location = new System.Drawing.Point(3, 3);
-            this.jobTimeline1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.jobTimeline1.Name = "jobTimeline1";
-            this.jobTimeline1.Size = new System.Drawing.Size(186, 61);
-            this.jobTimeline1.TabIndex = 0;
+            jobTimeline1.Dock = System.Windows.Forms.DockStyle.Fill;
+            jobTimeline1.IsActive = false;
+            jobTimeline1.Location = new System.Drawing.Point(3, 3);
+            jobTimeline1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            jobTimeline1.Name = "jobTimeline1";
+            jobTimeline1.Size = new System.Drawing.Size(186, 61);
+            jobTimeline1.TabIndex = 0;
             // 
             // refresh1
             // 
-            this.refresh1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
-            this.refresh1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.refresh1.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.refresh1.ForeColor = System.Drawing.Color.White;
-            this.refresh1.Location = new System.Drawing.Point(0, 0);
-            this.refresh1.Margin = new System.Windows.Forms.Padding(4);
-            this.refresh1.Name = "refresh1";
-            this.refresh1.Size = new System.Drawing.Size(1639, 1275);
-            this.refresh1.TabIndex = 1;
-            this.refresh1.Visible = false;
+            refresh1.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
+            refresh1.Dock = System.Windows.Forms.DockStyle.Fill;
+            refresh1.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            refresh1.ForeColor = System.Drawing.Color.White;
+            refresh1.Location = new System.Drawing.Point(0, 0);
+            refresh1.Margin = new System.Windows.Forms.Padding(4);
+            refresh1.Name = "refresh1";
+            refresh1.Size = new System.Drawing.Size(1639, 1275);
+            refresh1.TabIndex = 1;
+            refresh1.Visible = false;
             // 
             // dataGridViewTextBoxColumn1
             // 
-            this.dataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.dataGridViewTextBoxColumn1.DataPropertyName = "DB";
-            this.dataGridViewTextBoxColumn1.HeaderText = "DB";
-            this.dataGridViewTextBoxColumn1.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            this.dataGridViewTextBoxColumn1.Width = 125;
+            dataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            dataGridViewTextBoxColumn1.DataPropertyName = "DB";
+            dataGridViewTextBoxColumn1.HeaderText = "DB";
+            dataGridViewTextBoxColumn1.MinimumWidth = 6;
+            dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            dataGridViewTextBoxColumn1.ReadOnly = true;
+            dataGridViewTextBoxColumn1.Width = 125;
             // 
             // dataGridViewTextBoxColumn2
             // 
-            this.dataGridViewTextBoxColumn2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.dataGridViewTextBoxColumn2.DataPropertyName = "SnapshotDate";
-            this.dataGridViewTextBoxColumn2.HeaderText = "Snapshot Date";
-            this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            this.dataGridViewTextBoxColumn2.Width = 125;
+            dataGridViewTextBoxColumn2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            dataGridViewTextBoxColumn2.DataPropertyName = "SnapshotDate";
+            dataGridViewTextBoxColumn2.HeaderText = "Snapshot Date";
+            dataGridViewTextBoxColumn2.MinimumWidth = 6;
+            dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            dataGridViewTextBoxColumn2.ReadOnly = true;
+            dataGridViewTextBoxColumn2.Width = 125;
             // 
             // dataGridViewTextBoxColumn3
             // 
-            this.dataGridViewTextBoxColumn3.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.dataGridViewTextBoxColumn3.DataPropertyName = "ValidatedDate";
-            this.dataGridViewTextBoxColumn3.HeaderText = "Validated Date";
-            this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            this.dataGridViewTextBoxColumn3.Width = 125;
+            dataGridViewTextBoxColumn3.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            dataGridViewTextBoxColumn3.DataPropertyName = "ValidatedDate";
+            dataGridViewTextBoxColumn3.HeaderText = "Validated Date";
+            dataGridViewTextBoxColumn3.MinimumWidth = 6;
+            dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            dataGridViewTextBoxColumn3.ReadOnly = true;
+            dataGridViewTextBoxColumn3.Width = 125;
             // 
             // dataGridViewTextBoxColumn4
             // 
-            this.dataGridViewTextBoxColumn4.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.dataGridViewTextBoxColumn4.DataPropertyName = "ValidForDays";
-            this.dataGridViewTextBoxColumn4.HeaderText = "Valid For (Days)";
-            this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
-            this.dataGridViewTextBoxColumn4.ReadOnly = true;
-            this.dataGridViewTextBoxColumn4.Width = 125;
+            dataGridViewTextBoxColumn4.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            dataGridViewTextBoxColumn4.DataPropertyName = "ValidForDays";
+            dataGridViewTextBoxColumn4.HeaderText = "Valid For (Days)";
+            dataGridViewTextBoxColumn4.MinimumWidth = 6;
+            dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            dataGridViewTextBoxColumn4.ReadOnly = true;
+            dataGridViewTextBoxColumn4.Width = 125;
             // 
             // dataGridViewTextBoxColumn5
             // 
-            this.dataGridViewTextBoxColumn5.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.dataGridViewTextBoxColumn5.DataPropertyName = "DaysSinceValidation";
-            this.dataGridViewTextBoxColumn5.HeaderText = "Days Since Validation";
-            this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
-            this.dataGridViewTextBoxColumn5.ReadOnly = true;
-            this.dataGridViewTextBoxColumn5.Width = 125;
+            dataGridViewTextBoxColumn5.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            dataGridViewTextBoxColumn5.DataPropertyName = "DaysSinceValidation";
+            dataGridViewTextBoxColumn5.HeaderText = "Days Since Validation";
+            dataGridViewTextBoxColumn5.MinimumWidth = 6;
+            dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
+            dataGridViewTextBoxColumn5.ReadOnly = true;
+            dataGridViewTextBoxColumn5.Width = 125;
             // 
             // dataGridViewTextBoxColumn6
             // 
-            this.dataGridViewTextBoxColumn6.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.dataGridViewTextBoxColumn6.DataPropertyName = "Created";
-            this.dataGridViewTextBoxColumn6.HeaderText = "Created";
-            this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
-            this.dataGridViewTextBoxColumn6.ReadOnly = true;
-            this.dataGridViewTextBoxColumn6.Width = 125;
+            dataGridViewTextBoxColumn6.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            dataGridViewTextBoxColumn6.DataPropertyName = "Created";
+            dataGridViewTextBoxColumn6.HeaderText = "Created";
+            dataGridViewTextBoxColumn6.MinimumWidth = 6;
+            dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
+            dataGridViewTextBoxColumn6.ReadOnly = true;
+            dataGridViewTextBoxColumn6.Width = 125;
             // 
             // dataGridViewTextBoxColumn7
             // 
-            this.dataGridViewTextBoxColumn7.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.dataGridViewTextBoxColumn7.DataPropertyName = "Modified";
-            this.dataGridViewTextBoxColumn7.HeaderText = "Modified";
-            this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
-            this.dataGridViewTextBoxColumn7.ReadOnly = true;
-            this.dataGridViewTextBoxColumn7.Width = 125;
+            dataGridViewTextBoxColumn7.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            dataGridViewTextBoxColumn7.DataPropertyName = "Modified";
+            dataGridViewTextBoxColumn7.HeaderText = "Modified";
+            dataGridViewTextBoxColumn7.MinimumWidth = 6;
+            dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
+            dataGridViewTextBoxColumn7.ReadOnly = true;
+            dataGridViewTextBoxColumn7.Width = 125;
             // 
             // dataGridViewTextBoxColumn8
             // 
-            this.dataGridViewTextBoxColumn8.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.dataGridViewTextBoxColumn8.DataPropertyName = "Dropped";
-            this.dataGridViewTextBoxColumn8.HeaderText = "Dropped";
-            this.dataGridViewTextBoxColumn8.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
-            this.dataGridViewTextBoxColumn8.ReadOnly = true;
-            this.dataGridViewTextBoxColumn8.Width = 125;
+            dataGridViewTextBoxColumn8.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            dataGridViewTextBoxColumn8.DataPropertyName = "Dropped";
+            dataGridViewTextBoxColumn8.HeaderText = "Dropped";
+            dataGridViewTextBoxColumn8.MinimumWidth = 6;
+            dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
+            dataGridViewTextBoxColumn8.ReadOnly = true;
+            dataGridViewTextBoxColumn8.Width = 125;
             // 
             // dataGridViewTextBoxColumn9
             // 
-            this.dataGridViewTextBoxColumn9.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.dataGridViewTextBoxColumn9.DataPropertyName = "ObjectName";
-            this.dataGridViewTextBoxColumn9.HeaderText = "Object Name";
-            this.dataGridViewTextBoxColumn9.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn9.Name = "dataGridViewTextBoxColumn9";
-            this.dataGridViewTextBoxColumn9.ReadOnly = true;
-            this.dataGridViewTextBoxColumn9.Width = 125;
+            dataGridViewTextBoxColumn9.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            dataGridViewTextBoxColumn9.DataPropertyName = "ObjectName";
+            dataGridViewTextBoxColumn9.HeaderText = "Object Name";
+            dataGridViewTextBoxColumn9.MinimumWidth = 6;
+            dataGridViewTextBoxColumn9.Name = "dataGridViewTextBoxColumn9";
+            dataGridViewTextBoxColumn9.ReadOnly = true;
+            dataGridViewTextBoxColumn9.Width = 125;
             // 
             // dataGridViewTextBoxColumn10
             // 
-            this.dataGridViewTextBoxColumn10.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.dataGridViewTextBoxColumn10.DataPropertyName = "SchemaName";
-            this.dataGridViewTextBoxColumn10.HeaderText = "Schema Name";
-            this.dataGridViewTextBoxColumn10.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn10.Name = "dataGridViewTextBoxColumn10";
-            this.dataGridViewTextBoxColumn10.ReadOnly = true;
-            this.dataGridViewTextBoxColumn10.Width = 125;
+            dataGridViewTextBoxColumn10.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            dataGridViewTextBoxColumn10.DataPropertyName = "SchemaName";
+            dataGridViewTextBoxColumn10.HeaderText = "Schema Name";
+            dataGridViewTextBoxColumn10.MinimumWidth = 6;
+            dataGridViewTextBoxColumn10.Name = "dataGridViewTextBoxColumn10";
+            dataGridViewTextBoxColumn10.ReadOnly = true;
+            dataGridViewTextBoxColumn10.Width = 125;
             // 
             // dataGridViewTextBoxColumn11
             // 
-            this.dataGridViewTextBoxColumn11.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.dataGridViewTextBoxColumn11.DataPropertyName = "Action";
-            this.dataGridViewTextBoxColumn11.HeaderText = "Action";
-            this.dataGridViewTextBoxColumn11.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn11.Name = "dataGridViewTextBoxColumn11";
-            this.dataGridViewTextBoxColumn11.ReadOnly = true;
-            this.dataGridViewTextBoxColumn11.Width = 125;
+            dataGridViewTextBoxColumn11.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            dataGridViewTextBoxColumn11.DataPropertyName = "Action";
+            dataGridViewTextBoxColumn11.HeaderText = "Action";
+            dataGridViewTextBoxColumn11.MinimumWidth = 6;
+            dataGridViewTextBoxColumn11.Name = "dataGridViewTextBoxColumn11";
+            dataGridViewTextBoxColumn11.ReadOnly = true;
+            dataGridViewTextBoxColumn11.Width = 125;
             // 
             // dataGridViewTextBoxColumn12
             // 
-            this.dataGridViewTextBoxColumn12.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.dataGridViewTextBoxColumn12.DataPropertyName = "ObjectName";
-            this.dataGridViewTextBoxColumn12.HeaderText = "Object Name";
-            this.dataGridViewTextBoxColumn12.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
-            this.dataGridViewTextBoxColumn12.ReadOnly = true;
-            this.dataGridViewTextBoxColumn12.Width = 125;
+            dataGridViewTextBoxColumn12.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            dataGridViewTextBoxColumn12.DataPropertyName = "ObjectName";
+            dataGridViewTextBoxColumn12.HeaderText = "Object Name";
+            dataGridViewTextBoxColumn12.MinimumWidth = 6;
+            dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
+            dataGridViewTextBoxColumn12.ReadOnly = true;
+            dataGridViewTextBoxColumn12.Width = 125;
             // 
             // dataGridViewTextBoxColumn13
             // 
-            this.dataGridViewTextBoxColumn13.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.dataGridViewTextBoxColumn13.DataPropertyName = "SchemaName";
-            this.dataGridViewTextBoxColumn13.HeaderText = "Schema Name";
-            this.dataGridViewTextBoxColumn13.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn13.Name = "dataGridViewTextBoxColumn13";
-            this.dataGridViewTextBoxColumn13.ReadOnly = true;
-            this.dataGridViewTextBoxColumn13.Width = 125;
+            dataGridViewTextBoxColumn13.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            dataGridViewTextBoxColumn13.DataPropertyName = "SchemaName";
+            dataGridViewTextBoxColumn13.HeaderText = "Schema Name";
+            dataGridViewTextBoxColumn13.MinimumWidth = 6;
+            dataGridViewTextBoxColumn13.Name = "dataGridViewTextBoxColumn13";
+            dataGridViewTextBoxColumn13.ReadOnly = true;
+            dataGridViewTextBoxColumn13.Width = 125;
             // 
             // dataGridViewTextBoxColumn14
             // 
-            this.dataGridViewTextBoxColumn14.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.dataGridViewTextBoxColumn14.HeaderText = "Object Type";
-            this.dataGridViewTextBoxColumn14.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
-            this.dataGridViewTextBoxColumn14.ReadOnly = true;
-            this.dataGridViewTextBoxColumn14.Width = 125;
+            dataGridViewTextBoxColumn14.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            dataGridViewTextBoxColumn14.HeaderText = "Object Type";
+            dataGridViewTextBoxColumn14.MinimumWidth = 6;
+            dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
+            dataGridViewTextBoxColumn14.ReadOnly = true;
+            dataGridViewTextBoxColumn14.Width = 125;
             // 
             // dataGridViewTextBoxColumn15
             // 
-            this.dataGridViewTextBoxColumn15.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.dataGridViewTextBoxColumn15.DataPropertyName = "SnapshotValidFrom";
-            this.dataGridViewTextBoxColumn15.HeaderText = "Snapshot Valid From";
-            this.dataGridViewTextBoxColumn15.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn15.Name = "dataGridViewTextBoxColumn15";
-            this.dataGridViewTextBoxColumn15.ReadOnly = true;
-            this.dataGridViewTextBoxColumn15.Width = 125;
+            dataGridViewTextBoxColumn15.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            dataGridViewTextBoxColumn15.DataPropertyName = "SnapshotValidFrom";
+            dataGridViewTextBoxColumn15.HeaderText = "Snapshot Valid From";
+            dataGridViewTextBoxColumn15.MinimumWidth = 6;
+            dataGridViewTextBoxColumn15.Name = "dataGridViewTextBoxColumn15";
+            dataGridViewTextBoxColumn15.ReadOnly = true;
+            dataGridViewTextBoxColumn15.Width = 125;
             // 
             // dataGridViewTextBoxColumn16
             // 
-            this.dataGridViewTextBoxColumn16.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.dataGridViewTextBoxColumn16.DataPropertyName = "SnapshotValidTo";
-            this.dataGridViewTextBoxColumn16.HeaderText = "Snapshot Valid To";
-            this.dataGridViewTextBoxColumn16.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn16.Name = "dataGridViewTextBoxColumn16";
-            this.dataGridViewTextBoxColumn16.ReadOnly = true;
-            this.dataGridViewTextBoxColumn16.Width = 125;
+            dataGridViewTextBoxColumn16.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            dataGridViewTextBoxColumn16.DataPropertyName = "SnapshotValidTo";
+            dataGridViewTextBoxColumn16.HeaderText = "Snapshot Valid To";
+            dataGridViewTextBoxColumn16.MinimumWidth = 6;
+            dataGridViewTextBoxColumn16.Name = "dataGridViewTextBoxColumn16";
+            dataGridViewTextBoxColumn16.ReadOnly = true;
+            dataGridViewTextBoxColumn16.Width = 125;
             // 
             // dataGridViewTextBoxColumn17
             // 
-            this.dataGridViewTextBoxColumn17.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.dataGridViewTextBoxColumn17.DataPropertyName = "ObjectDateCreated";
-            this.dataGridViewTextBoxColumn17.HeaderText = "Date Created";
-            this.dataGridViewTextBoxColumn17.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn17.Name = "dataGridViewTextBoxColumn17";
-            this.dataGridViewTextBoxColumn17.ReadOnly = true;
-            this.dataGridViewTextBoxColumn17.Width = 125;
+            dataGridViewTextBoxColumn17.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            dataGridViewTextBoxColumn17.DataPropertyName = "ObjectDateCreated";
+            dataGridViewTextBoxColumn17.HeaderText = "Date Created";
+            dataGridViewTextBoxColumn17.MinimumWidth = 6;
+            dataGridViewTextBoxColumn17.Name = "dataGridViewTextBoxColumn17";
+            dataGridViewTextBoxColumn17.ReadOnly = true;
+            dataGridViewTextBoxColumn17.Width = 125;
             // 
             // dataGridViewTextBoxColumn18
             // 
-            this.dataGridViewTextBoxColumn18.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.dataGridViewTextBoxColumn18.DataPropertyName = "ObjectDateModified";
-            this.dataGridViewTextBoxColumn18.HeaderText = "Date Modified";
-            this.dataGridViewTextBoxColumn18.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn18.Name = "dataGridViewTextBoxColumn18";
-            this.dataGridViewTextBoxColumn18.ReadOnly = true;
-            this.dataGridViewTextBoxColumn18.Width = 125;
+            dataGridViewTextBoxColumn18.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            dataGridViewTextBoxColumn18.DataPropertyName = "ObjectDateModified";
+            dataGridViewTextBoxColumn18.HeaderText = "Date Modified";
+            dataGridViewTextBoxColumn18.MinimumWidth = 6;
+            dataGridViewTextBoxColumn18.Name = "dataGridViewTextBoxColumn18";
+            dataGridViewTextBoxColumn18.ReadOnly = true;
+            dataGridViewTextBoxColumn18.Width = 125;
             // 
             // dataGridViewTextBoxColumn19
             // 
-            this.dataGridViewTextBoxColumn19.DataPropertyName = "Instance";
-            this.dataGridViewTextBoxColumn19.HeaderText = "Instance";
-            this.dataGridViewTextBoxColumn19.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn19.Name = "dataGridViewTextBoxColumn19";
-            this.dataGridViewTextBoxColumn19.ReadOnly = true;
-            this.dataGridViewTextBoxColumn19.Width = 90;
+            dataGridViewTextBoxColumn19.DataPropertyName = "Instance";
+            dataGridViewTextBoxColumn19.HeaderText = "Instance";
+            dataGridViewTextBoxColumn19.MinimumWidth = 6;
+            dataGridViewTextBoxColumn19.Name = "dataGridViewTextBoxColumn19";
+            dataGridViewTextBoxColumn19.ReadOnly = true;
+            dataGridViewTextBoxColumn19.Width = 90;
             // 
             // dataGridViewTextBoxColumn20
             // 
-            this.dataGridViewTextBoxColumn20.DataPropertyName = "ErrorDate";
-            this.dataGridViewTextBoxColumn20.HeaderText = "Date";
-            this.dataGridViewTextBoxColumn20.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn20.Name = "dataGridViewTextBoxColumn20";
-            this.dataGridViewTextBoxColumn20.ReadOnly = true;
-            this.dataGridViewTextBoxColumn20.Width = 67;
+            dataGridViewTextBoxColumn20.DataPropertyName = "ErrorDate";
+            dataGridViewTextBoxColumn20.HeaderText = "Date";
+            dataGridViewTextBoxColumn20.MinimumWidth = 6;
+            dataGridViewTextBoxColumn20.Name = "dataGridViewTextBoxColumn20";
+            dataGridViewTextBoxColumn20.ReadOnly = true;
+            dataGridViewTextBoxColumn20.Width = 67;
             // 
             // dataGridViewTextBoxColumn21
             // 
-            this.dataGridViewTextBoxColumn21.DataPropertyName = "ErrorSource";
-            this.dataGridViewTextBoxColumn21.HeaderText = "Source";
-            this.dataGridViewTextBoxColumn21.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn21.Name = "dataGridViewTextBoxColumn21";
-            this.dataGridViewTextBoxColumn21.ReadOnly = true;
-            this.dataGridViewTextBoxColumn21.Width = 82;
+            dataGridViewTextBoxColumn21.DataPropertyName = "ErrorSource";
+            dataGridViewTextBoxColumn21.HeaderText = "Source";
+            dataGridViewTextBoxColumn21.MinimumWidth = 6;
+            dataGridViewTextBoxColumn21.Name = "dataGridViewTextBoxColumn21";
+            dataGridViewTextBoxColumn21.ReadOnly = true;
+            dataGridViewTextBoxColumn21.Width = 82;
             // 
             // dataGridViewTextBoxColumn22
             // 
-            this.dataGridViewTextBoxColumn22.DataPropertyName = "ErrorContext";
-            this.dataGridViewTextBoxColumn22.HeaderText = "Error Context";
-            this.dataGridViewTextBoxColumn22.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn22.Name = "dataGridViewTextBoxColumn22";
-            this.dataGridViewTextBoxColumn22.ReadOnly = true;
-            this.dataGridViewTextBoxColumn22.Width = 120;
+            dataGridViewTextBoxColumn22.DataPropertyName = "ErrorContext";
+            dataGridViewTextBoxColumn22.HeaderText = "Error Context";
+            dataGridViewTextBoxColumn22.MinimumWidth = 6;
+            dataGridViewTextBoxColumn22.Name = "dataGridViewTextBoxColumn22";
+            dataGridViewTextBoxColumn22.ReadOnly = true;
+            dataGridViewTextBoxColumn22.Width = 120;
             // 
             // dataGridViewTextBoxColumn23
             // 
-            this.dataGridViewTextBoxColumn23.DataPropertyName = "ErrorMessage";
-            this.dataGridViewTextBoxColumn23.HeaderText = "Message";
-            this.dataGridViewTextBoxColumn23.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn23.Name = "dataGridViewTextBoxColumn23";
-            this.dataGridViewTextBoxColumn23.ReadOnly = true;
-            this.dataGridViewTextBoxColumn23.Width = 94;
+            dataGridViewTextBoxColumn23.DataPropertyName = "ErrorMessage";
+            dataGridViewTextBoxColumn23.HeaderText = "Message";
+            dataGridViewTextBoxColumn23.MinimumWidth = 6;
+            dataGridViewTextBoxColumn23.Name = "dataGridViewTextBoxColumn23";
+            dataGridViewTextBoxColumn23.ReadOnly = true;
+            dataGridViewTextBoxColumn23.Width = 94;
             // 
             // Main
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1983, 1309);
-            this.Controls.Add(this.splitMain);
-            this.Controls.Add(this.menuStrip1);
-            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.MainMenuStrip = this.menuStrip1;
-            this.Name = "Main";
-            this.Text = "DBA Dash";
-            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
-            this.Load += new System.EventHandler(this.Main_Load);
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
-            this.splitMain.Panel1.ResumeLayout(false);
-            this.splitMain.Panel1.PerformLayout();
-            this.splitMain.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitMain)).EndInit();
-            this.splitMain.ResumeLayout(false);
-            this.pnlSearch.ResumeLayout(false);
-            this.pnlSearch.PerformLayout();
-            this.toolStrip2.ResumeLayout(false);
-            this.toolStrip2.PerformLayout();
-            this.tabs.ResumeLayout(false);
-            this.tabSnapshotsSummary.ResumeLayout(false);
-            this.tabSchema.ResumeLayout(false);
-            this.splitSchemaSnapshot.Panel1.ResumeLayout(false);
-            this.splitSchemaSnapshot.Panel1.PerformLayout();
-            this.splitSchemaSnapshot.Panel2.ResumeLayout(false);
-            this.splitSchemaSnapshot.Panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitSchemaSnapshot)).EndInit();
-            this.splitSchemaSnapshot.ResumeLayout(false);
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gvHistory)).EndInit();
-            this.tabTags.ResumeLayout(false);
-            this.tabDrives.ResumeLayout(false);
-            this.tabBackups.ResumeLayout(false);
-            this.tabLogShipping.ResumeLayout(false);
-            this.tabJobs.ResumeLayout(false);
-            this.tabSummary.ResumeLayout(false);
-            this.tabFiles.ResumeLayout(false);
-            this.tabLastGood.ResumeLayout(false);
-            this.tabPerformance.ResumeLayout(false);
-            this.tabDBADashErrorLog.ResumeLayout(false);
-            this.tabCollectionDates.ResumeLayout(false);
-            this.tabPerformanceSummary.ResumeLayout(false);
-            this.tabInfo.ResumeLayout(false);
-            this.tabHardware.ResumeLayout(false);
-            this.tabSQLPatching.ResumeLayout(false);
-            this.tabInstanceConfig.ResumeLayout(false);
-            this.tabSlowQueries.ResumeLayout(false);
-            this.tabTraceFlags.ResumeLayout(false);
-            this.tabAlerts.ResumeLayout(false);
-            this.tabDrivers.ResumeLayout(false);
-            this.tabDBSpace.ResumeLayout(false);
-            this.tabAzureSummary.ResumeLayout(false);
-            this.tabAzureDB.ResumeLayout(false);
-            this.tabServiceObjectives.ResumeLayout(false);
-            this.tabDBConfiguration.ResumeLayout(false);
-            this.tabDBOptions.ResumeLayout(false);
-            this.tabTempDB.ResumeLayout(false);
-            this.tabCustomChecks.ResumeLayout(false);
-            this.tabPC.ResumeLayout(false);
-            this.tabObjectExecutionSummary.ResumeLayout(false);
-            this.tabWaits.ResumeLayout(false);
-            this.tabMirroring.ResumeLayout(false);
-            this.tabJobDDL.ResumeLayout(false);
-            this.tabAG.ResumeLayout(false);
-            this.tabQS.ResumeLayout(false);
-            this.tabRG.ResumeLayout(false);
-            this.tabAzureDBesourceGovernance.ResumeLayout(false);
-            this.tabRunningQueries.ResumeLayout(false);
-            this.tabMemory.ResumeLayout(false);
-            this.tabJobStats.ResumeLayout(false);
-            this.tabDBADash.ResumeLayout(false);
-            this.tabIdentityColumns.ResumeLayout(false);
-            this.tabOSLoadedModules.ResumeLayout(false);
-            this.tabJobTimeline.ResumeLayout(false);
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(1983, 1309);
+            Controls.Add(splitMain);
+            Controls.Add(menuStrip1);
+            Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            MainMenuStrip = menuStrip1;
+            Name = "Main";
+            Text = "DBA Dash";
+            WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            Load += Main_Load;
+            menuStrip1.ResumeLayout(false);
+            menuStrip1.PerformLayout();
+            splitMain.Panel1.ResumeLayout(false);
+            splitMain.Panel1.PerformLayout();
+            splitMain.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitMain).EndInit();
+            splitMain.ResumeLayout(false);
+            pnlSearch.ResumeLayout(false);
+            pnlSearch.PerformLayout();
+            toolStrip2.ResumeLayout(false);
+            toolStrip2.PerformLayout();
+            tabs.ResumeLayout(false);
+            tabSnapshotsSummary.ResumeLayout(false);
+            tabSchema.ResumeLayout(false);
+            splitSchemaSnapshot.Panel1.ResumeLayout(false);
+            splitSchemaSnapshot.Panel1.PerformLayout();
+            splitSchemaSnapshot.Panel2.ResumeLayout(false);
+            splitSchemaSnapshot.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)splitSchemaSnapshot).EndInit();
+            splitSchemaSnapshot.ResumeLayout(false);
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)gvHistory).EndInit();
+            tabTags.ResumeLayout(false);
+            tabDrives.ResumeLayout(false);
+            tabBackups.ResumeLayout(false);
+            tabLogShipping.ResumeLayout(false);
+            tabJobs.ResumeLayout(false);
+            tabSummary.ResumeLayout(false);
+            tabFiles.ResumeLayout(false);
+            tabLastGood.ResumeLayout(false);
+            tabPerformance.ResumeLayout(false);
+            tabDBADashErrorLog.ResumeLayout(false);
+            tabCollectionDates.ResumeLayout(false);
+            tabPerformanceSummary.ResumeLayout(false);
+            tabInfo.ResumeLayout(false);
+            tabHardware.ResumeLayout(false);
+            tabSQLPatching.ResumeLayout(false);
+            tabInstanceConfig.ResumeLayout(false);
+            tabSlowQueries.ResumeLayout(false);
+            tabTraceFlags.ResumeLayout(false);
+            tabAlerts.ResumeLayout(false);
+            tabDrivers.ResumeLayout(false);
+            tabDBSpace.ResumeLayout(false);
+            tabAzureSummary.ResumeLayout(false);
+            tabAzureDB.ResumeLayout(false);
+            tabServiceObjectives.ResumeLayout(false);
+            tabDBConfiguration.ResumeLayout(false);
+            tabDBOptions.ResumeLayout(false);
+            tabTempDB.ResumeLayout(false);
+            tabCustomChecks.ResumeLayout(false);
+            tabPC.ResumeLayout(false);
+            tabObjectExecutionSummary.ResumeLayout(false);
+            tabWaits.ResumeLayout(false);
+            tabMirroring.ResumeLayout(false);
+            tabJobDDL.ResumeLayout(false);
+            tabAG.ResumeLayout(false);
+            tabQS.ResumeLayout(false);
+            tabRG.ResumeLayout(false);
+            tabAzureDBesourceGovernance.ResumeLayout(false);
+            tabRunningQueries.ResumeLayout(false);
+            tabMemory.ResumeLayout(false);
+            tabJobStats.ResumeLayout(false);
+            tabDBADash.ResumeLayout(false);
+            tabIdentityColumns.ResumeLayout(false);
+            tabOSLoadedModules.ResumeLayout(false);
+            tabJobTimeline.ResumeLayout(false);
+            ResumeLayout(false);
         }
 
         #endregion
