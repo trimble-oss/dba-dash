@@ -27,6 +27,21 @@ namespace DBADashGUI
             return this.FirstOrDefault(c => c.Name.Equals(name));
         }
 
+        public RepositoryConnection FindByConnectionString(string connectionString)
+        {
+            return this.FirstOrDefault(c => CompareConnections(c.ConnectionString, connectionString));
+        }
+
+        private bool CompareConnections(string connectionString1, string connectionString2)
+        {
+            var builder1 = new SqlConnectionStringBuilder(connectionString1);
+            var builder2 = new SqlConnectionStringBuilder(connectionString2);
+            return builder1.DataSource == builder2.DataSource 
+                   && builder1.InitialCatalog == builder2.InitialCatalog 
+                   && builder1.UserID == builder2.UserID 
+                   && builder1.IntegratedSecurity == builder2.IntegratedSecurity;
+        }
+
         public bool Contains(string name)
         {
             return FindByName(name) != null;
@@ -54,8 +69,15 @@ namespace DBADashGUI
         public void Save()
         {
             string filePath = GetStorageFilePath();
-            string json = JsonConvert.SerializeObject(this, Formatting.Indented);
-            File.WriteAllText(filePath, json);
+            if (Count == 0)
+            {
+                File.Delete(filePath);
+            }
+            else
+            {
+                string json = JsonConvert.SerializeObject(this, Formatting.Indented);
+                File.WriteAllText(filePath, json);
+            }
         }
 
         public static RepositoryConnectionList GetRepositoryConnectionList()

@@ -120,12 +120,20 @@ namespace DBADashGUI
                 toolStrip1.Invoke(() => { tsRefresh.Enabled = true; tsClearFilter.Enabled = false; });
                 if (task.Exception != null)
                 {
-                    refresh1.SetFailed("Error:" + task.Exception.ToString());
+                    refresh1.Invoke(() => { refresh1.SetFailed("Error:" + task.Exception.ToString()); });
                     return Task.CompletedTask;
                 }
                 DataTable dt = task.Result;
-                GroupSummaryByTest(ref dt);
-                UpdateSummary(ref dt);
+                try
+                {
+                    GroupSummaryByTest(ref dt);
+                    UpdateSummary(ref dt);
+                }
+                catch (Exception ex)
+                {
+                    refresh1.Invoke(() => { refresh1.SetFailed("Error:" + ex.ToString()); });
+                }
+
                 return Task.CompletedTask;
             }, cancellationTS.Token);
         }

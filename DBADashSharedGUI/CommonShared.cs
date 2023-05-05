@@ -27,19 +27,22 @@ namespace DBADashSharedGUI
         [SupportedOSPlatform("windows")]
         public static void ShowAbout(string connectionString, IWin32Window owner, bool StartGUIOnUpgrade)
         {
-            Version DBVersion;
-            try
+            Version dbVersion= new Version();
+            if (!string.IsNullOrEmpty(connectionString))
             {
-                DBVersion = DBADash.DBValidations.GetDBVersion(connectionString);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error getting repository version" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                DBVersion = new Version();
+                try
+                {
+                    dbVersion = DBADash.DBValidations.GetDBVersion(connectionString);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(@"Error getting repository version: " + ex.Message, "Error", MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                }
             }
             using About frm = new()
             {
-                DBVersion = DBVersion,
+                DBVersion = dbVersion,
                 StartGUIOnUpgrade = StartGUIOnUpgrade
             };
             frm.ShowDialog(owner);
