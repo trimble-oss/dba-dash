@@ -29,7 +29,7 @@
 .PARAMETER Replace
     Option to replace the existing connection if it already exists
 .PARAMETER IOCollectionLevel
-    1=Full,2=Drive,3=Instance
+    1=Full,2=InstanceOnly,3=Drive,4=Database,5=DriveAndDatabase
 .EXAMPLE
     ./Add-DBADashSource -ConnectionString "Data Source=MYSERVER;Integrated Security=True;Encrypt=True;Trust Server Certificate=True"
 .EXAMPLE
