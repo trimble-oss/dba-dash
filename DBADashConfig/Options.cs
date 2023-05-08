@@ -60,7 +60,7 @@ namespace DBADashConfig
         public string ServiceName { get; set; } = "";
 
         [Option("IOCollectionLevel", Default = 1, Required = false,
-            HelpText = "IO Collection Level.  1=Full, 2=Drive, 3=Instance")]
+            HelpText = "IO Collection Level.  1 = Full, 2 = InstanceOnly, 3 = Drive, 4= Database, 5 = DriveAndDatabase")]
         public int IOCollectionLevel { get; set; } = 1;
 
         public enum CommandLineActionOption
