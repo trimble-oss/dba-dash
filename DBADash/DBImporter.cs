@@ -205,6 +205,18 @@ namespace DBADash
                     dtCorruption.Columns.Add("CountOfRows", typeof(int));
                 }
             }
+            if (data.Tables.Contains("IOStats"))
+            {
+                var dtIOStats = data.Tables["IOStats"];
+                if (!dtIOStats.Columns.Contains("drive"))
+                {
+                    dtIOStats.Columns.Add("drive", typeof(char));
+                    foreach (DataRow row in dtIOStats.Rows)
+                    {
+                        row["drive"] = "*";
+                    }
+                }
+            }
         }
 
         public void Update()
