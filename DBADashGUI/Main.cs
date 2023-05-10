@@ -133,14 +133,14 @@ namespace DBADashGUI
             {
                 if (File.Exists(Properties.Resources.ServiceConfigToolName)) // The service configuration tool exists (Not the GUI only package).  Give user the option to configure the service or connect to an existing repository.
                 {
-                    using var frm = new ConnectionOptions(); 
+                    using var frm = new ConnectionOptions();
                     frm.ShowDialog();
                     if (frm.DialogResult == DialogResult.OK && frm.RequestConfigureService)
                     {
                         Common.ConfigureService();
                         return;
                     }
-                } 
+                }
                 // Prompt the user to connect to an existing DBA Dash repository DB.
                 await AddConnection();
                 if (repositories.Count == 0)
@@ -1085,6 +1085,9 @@ namespace DBADashGUI
                     SetFont((ToolStripMenuItem)itm);
                 }
             }
+            mnuTags.Font = SelectedTags().Count > 0
+                ? new Font(mnuTags.Font, FontStyle.Bold)
+                : new Font(mnuTags.Font, FontStyle.Regular);
         }
 
         #endregion Tagging
