@@ -2,6 +2,8 @@
 using Serilog;
 using System;
 using System.IO;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
+using System.Runtime.InteropServices;
 
 namespace DBADashService
 {
@@ -25,26 +27,34 @@ namespace DBADashService
                 Log.Error("Error creating failed message folder {FailedMessageFolder}", FailedMessageFolder);
                 FailedMessageFolder = string.Empty;
             }
-
+            GetCreds();
             Config = GetConfig();
+        }
+
+        public static void GetCreds()
+        {
+            if (EncryptedConfig.HasTempKey && RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !Environment.UserInteractive)
+            {
+                Log.Information("Saving config password");
+                string password = EncryptedConfig.GetPassword();
+                EncryptedConfig.SavePassword(password);
+                Log.Information("Deleting temp key");
+                EncryptedConfig.DeleteTempKey(true);
+            }
         }
 
         public static CollectionConfig GetConfig()
         {
-            string jsonConfigPath = System.IO.Path.Combine(AppContext.BaseDirectory, "ServiceConfig.json");
-            if (!(System.IO.File.Exists(jsonConfigPath)))
+            if (!(BasicConfig.ConfigExists))
             {
                 Log.Fatal("ServiceConfig.json file is missing.  Use service config tool to create.");
                 throw new Exception("ServiceConfig.json file is missing.  Use service config tool to create.");
             }
-            string jsonConfig = System.IO.File.ReadAllText(jsonConfigPath);
-            var conf = CollectionConfig.Deserialize(jsonConfig);
+            var conf = BasicConfig.Load<CollectionConfig>();
             if (conf.WasEncrypted())
             {
                 Log.Information("Saving ServiceConfig.json with encrypted password");
-
-                string confString = conf.Serialize();
-                System.IO.File.WriteAllText(jsonConfigPath, confString);
+                conf.Save(true);
             }
 
             return conf;

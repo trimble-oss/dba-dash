@@ -4,6 +4,7 @@ using Serilog;
 using System;
 using System.Data;
 using System.Threading.Tasks;
+using DBADash;
 
 namespace DBADashService
 {
@@ -28,6 +29,15 @@ namespace DBADashService
             catch (Exception ex)
             {
                 LogError(ex, connectionString, "PurgeData", ex.Message);
+            }
+
+            try
+            {
+                BasicConfig.ClearOldConfigBackups(SchedulerServiceConfig.Config.ConfigBackupRetentionDays);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error removing old configs");
             }
             return Task.CompletedTask;
         }

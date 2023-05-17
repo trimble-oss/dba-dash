@@ -63,6 +63,18 @@ namespace DBADashConfig
             HelpText = "IO Collection Level.  1 = Full, 2 = InstanceOnly, 3 = Drive, 4= Database, 5 = DriveAndDatabase")]
         public int IOCollectionLevel { get; set; } = 1;
 
+        [Option("EncryptionPassword", Required = false,
+            HelpText = "To be used with the Encrypt option")]
+        public string EncryptionPassword { get; set; }
+
+        [Option("DecryptionPassword", Required = false,
+            HelpText = "Password to decrypt current config")]
+        public string DecryptionPassword { get; set; }
+
+        [Option("SavePassword", Required = false,
+            HelpText = "Use in combination with --DecryptionPassword.  Password will be saved for the current user, protected with DPAPI. ")]
+        public bool SavePassword { get; set; }
+
         public enum CommandLineActionOption
         {
             Add,
@@ -74,7 +86,9 @@ namespace DBADashConfig
             GetServiceName,
             CheckForUpdates,
             Update,
-            SetServiceName
+            SetServiceName,
+            Encrypt,
+            Decrypt
         }
     }
 }

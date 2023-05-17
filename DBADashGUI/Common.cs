@@ -252,58 +252,6 @@ namespace DBADashGUI
             sl.SaveAs(path);
         }
 
-        public static DialogResult ShowInputDialog(ref string input, string title)
-        {
-            System.Drawing.Size size = new(400, 80);
-            Form inputBox = new()
-            {
-                FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog,
-                ClientSize = size,
-                Text = title,
-                MaximizeBox = false,
-                MinimizeBox = false,
-                StartPosition = FormStartPosition.CenterParent,
-                BackColor = DashColors.TrimbleBlueDark
-            };
-
-            System.Windows.Forms.TextBox textBox = new()
-            {
-                Size = new System.Drawing.Size(size.Width - 10, 25),
-                Location = new System.Drawing.Point(5, 5),
-                Text = input
-            };
-            inputBox.Controls.Add(textBox);
-
-            Button okButton = new()
-            {
-                DialogResult = System.Windows.Forms.DialogResult.OK,
-                Name = "okButton",
-                Size = new System.Drawing.Size(75, 30),
-                Text = "&OK",
-                Location = new System.Drawing.Point(size.Width - 80 - 80, 39),
-                BackColor = SystemColors.Control
-            };
-            inputBox.Controls.Add(okButton);
-
-            Button cancelButton = new()
-            {
-                DialogResult = System.Windows.Forms.DialogResult.Cancel,
-                Name = "cancelButton",
-                Size = new System.Drawing.Size(75, 30),
-                Text = "&Cancel",
-                Location = new System.Drawing.Point(size.Width - 80, 39),
-                BackColor = SystemColors.Control
-            };
-            inputBox.Controls.Add(cancelButton);
-
-            inputBox.AcceptButton = okButton;
-            inputBox.CancelButton = cancelButton;
-
-            DialogResult result = inputBox.ShowDialog();
-            input = textBox.Text;
-            return result;
-        }
-
         public static string ByteArrayToString(byte[] ba)
         {
             StringBuilder hex = new(ba.Length * 2);
@@ -416,12 +364,12 @@ namespace DBADashGUI
                 Console.WriteLine("Error deleting temp file:" + ex.ToString());
             }
         }
+
         internal static void ConfigureService()
         {
             var psi = new ProcessStartInfo(Properties.Resources.ServiceConfigToolName) { UseShellExecute = true };
             Process.Start(psi);
             Application.Exit();
         }
-
     }
 }
