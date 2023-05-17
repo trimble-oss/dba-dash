@@ -3,6 +3,8 @@ using DBADash;
 using DBADashConfig;
 using Serilog;
 using System.Runtime.InteropServices;
+using Amazon.Auth.AccessControlPolicy;
+using Microsoft.SqlServer.Dac.KeyVault;
 using static DBADashConfig.Options;
 
 static void CommandLineUpgrade()
@@ -53,26 +55,27 @@ Log.Logger = new LoggerConfiguration()
 
 CollectionConfig config;
 
-string jsonConfigPath = System.IO.Path.Combine(AppContext.BaseDirectory, "ServiceConfig.json");
-string backupPath = jsonConfigPath + ".backup_" + DateTime.Now.ToString("yyyyMMddHHmmssFFF");
-
-// Read config from json file or create a new config if the file doesn't exist
-if (!(System.IO.File.Exists(jsonConfigPath)))
-{
-    Log.Information("Config file does not exist.  Starting with blank config");
-    config = new CollectionConfig();
-}
-else
-{
-    string jsonConfig = System.IO.File.ReadAllText(jsonConfigPath);
-    config = CollectionConfig.Deserialize(jsonConfig);
-}
-
 try
 {
     Parser.Default.ParseArguments<Options>(args)
           .WithParsed<Options>(o =>
           {
+              // Read config from json file or create a new config if the file doesn't exist
+              if (!(BasicConfig.ConfigExists))
+              {
+                  Log.Information("Config file does not exist.  Starting with blank config");
+                  config = new CollectionConfig();
+              }
+              else
+              {
+                  config = BasicConfig.Load<CollectionConfig>(o.DecryptionPassword);
+                  if (o.SavePassword && !string.IsNullOrEmpty(o.DecryptionPassword) && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                  {
+                      Log.Information("Saving password");
+                      EncryptedConfig.SavePassword(o.DecryptionPassword);
+                  }
+              }
+
               Log.Information("Action:" + o.Option.ToString());
               switch (o.Option)
               {
@@ -229,18 +232,26 @@ try
 
                           break;
                       }
+                  case CommandLineActionOption.Encrypt:
+                      if (string.IsNullOrEmpty(o.EncryptionPassword))
+                      {
+                          Log.Error("EncryptionPassword parameter not supplied");
+                          return;
+                      }
+                      EncryptedConfig.SetPassword(o.EncryptionPassword, true);
+                      config.EncryptConfig = true;
+                      break;
+
+                  case CommandLineActionOption.Decrypt:
+                      config.EncryptConfig = false;
+                      break;
+
                   case CommandLineActionOption.SetServiceName:
                       Log.Error("SetServiceName is only supported on Windows");
                       return;
               }
-              // Save a copy of the old config before writing changes
-              if (File.Exists(jsonConfigPath) && !o.NoBackupConfig)
-              {
-                  Log.Information("Saving old config to: {path}", backupPath);
-                  File.Move(jsonConfigPath, backupPath);
-              }
-
-              File.WriteAllText(jsonConfigPath, config.Serialize());
+              Log.Information("Saving config");
+              config.Save(!o.NoBackupConfig);
 
               Log.Information("Complete.  Restart the service to apply the config change");
           });

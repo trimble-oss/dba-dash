@@ -11,6 +11,8 @@ using System.Linq;
 using System.ServiceProcess;
 using System.Text;
 using System.Windows.Forms;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
+using Newtonsoft.Json;
 using static DBADash.DBADashConnection;
 
 namespace DBADashServiceConfig
@@ -24,7 +26,6 @@ namespace DBADashServiceConfig
 
         private string originalJson = "";
         private CollectionConfig collectionConfig = new();
-        private readonly string jsonPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
         private ServiceController svcCtrl;
         private bool isInstalled = false;
 
@@ -270,11 +271,7 @@ namespace DBADashServiceConfig
         private void SaveChanges()
         {
             txtJson.Text = collectionConfig.Serialize();
-            if (File.Exists(jsonPath))
-            {
-                File.Move(jsonPath, jsonPath + ".backup_" + DateTime.Now.ToString("yyyyMMddHHmmss"));
-            }
-            System.IO.File.WriteAllText(jsonPath, txtJson.Text);
+            collectionConfig.Save(true);
             originalJson = txtJson.Text;
             UpdateSaveButton();
             MessageBox.Show("Config saved.  Restart service to apply changes.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -312,7 +309,8 @@ namespace DBADashServiceConfig
 
             txtJson.MaxLength = 0;
 
-            if (File.Exists(jsonPath))
+            txtPassword.Text = EncryptedConfig.GetPassword();
+            if (BasicConfig.ConfigExists)
             {
                 try
                 {
@@ -346,16 +344,56 @@ namespace DBADashServiceConfig
 
         private void SetOriginalJson()
         {
-            // Read from disk
-            originalJson = System.IO.File.ReadAllText(jsonPath);
-            txtJson.Text = originalJson; // Set text just here just in case there is an error deserializing
-            // Convert back to object
-            var cfg = CollectionConfig.Deserialize(originalJson);
-            // Reserialize and set original json.  (Saves prompting user to save changes if new defaults are introduced etc)
-            originalJson = cfg.Serialize();
-            txtJson.Text = originalJson;
+            try
+            {
+                var cfg = BasicConfig.Load<CollectionConfig>();
+                originalJson = cfg.Serialize();
+                txtJson.Text = originalJson;
+            }
+            catch (Exception ex)
+            {
+                if (BasicConfig.IsConfigFileEncrypted())
+                {
+                    if (ShowPassword())
+                    {
+                        SetOriginalJson();
+                    }
+                    else
+                    {
+                        Application.Exit();
+                        return;
+                    }
+                }
+            }
 
             SetFromJson(originalJson);
+        }
+
+        private bool ShowPassword()
+        {
+            string password = "";
+            if (CommonShared.ShowInputDialog(ref password, "Enter password to decrypt config", '*') == DialogResult.OK)
+            {
+                try
+                {
+                    BasicConfig.Load<CollectionConfig>(password);
+                    txtPassword.Text = password;
+                    EncryptedConfig.SetPassword(password, false);
+                    return true;
+                }
+                catch
+                {
+                    if (MessageBox.Show("Invalid Password", "Error", MessageBoxButtons.RetryCancel) == DialogResult.Retry)
+                    {
+                        return ShowPassword();
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            return false;
         }
 
         private void ApplyTrustServerCertificate()
@@ -415,6 +453,7 @@ namespace DBADashServiceConfig
             chkLogInternalPerfCounters.Checked = collectionConfig.LogInternalPerformanceCounters;
             chkDefaultIdentityCollection.Checked = !collectionConfig.IdentityCollectionThreshold.HasValue;
             numIdentityCollectionThreshold.Value = collectionConfig.IdentityCollectionThreshold ?? DBCollector.DefaultIdentityCollectionThreshold;
+            bttnRemoveEncryption.Enabled = collectionConfig.EncryptConfig;
             UpdateScanInterval();
             SetDgv();
         }
@@ -1164,7 +1203,7 @@ namespace DBADashServiceConfig
                         SaveChanges();
                     }
                 }
-                if (!File.Exists(jsonPath))
+                if (!BasicConfig.ConfigExists)
                 {
                     MessageBox.Show("Please configure the service and save changes before installing as a service.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     return;
@@ -1215,6 +1254,51 @@ namespace DBADashServiceConfig
         {
             collectionConfig.IdentityCollectionThreshold = chkDefaultIdentityCollection.Checked ? null : (int)numIdentityCollectionThreshold.Value;
             txtJson.Text = collectionConfig.Serialize();
+        }
+
+        private void lnkShowHide_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            ShowHidePassword();
+        }
+
+        private void ShowHidePassword()
+        {
+            ShowHidePassword(txtPassword.PasswordChar != '*');
+        }
+
+        private void ShowHidePassword(bool IsHidden)
+        {
+            txtPassword.PasswordChar = IsHidden ? '*' : '\0';
+            lnkShowHide.Text = IsHidden ? "Show" : "Hide";
+        }
+
+        private void bttnSetPassword_Click(object sender, EventArgs e)
+        {
+            collectionConfig.EncryptConfig = true;
+            bttnRemoveEncryption.Enabled = true;
+            txtPassword.Text = txtPassword.Text.Trim();
+            if (string.IsNullOrEmpty(txtPassword.Text))
+            {
+                txtPassword.Text = PasswordGenerator.Generate(20, true, true, true);
+                ShowHidePassword(false);
+            }
+            EncryptedConfig.SetPassword(txtPassword.Text, true);
+            SaveChanges();
+        }
+
+        private void bttnRemoveEncryption_Click(object sender, EventArgs e)
+        {
+            txtPassword.Text = "";
+            collectionConfig.EncryptConfig = false;
+            bttnRemoveEncryption.Enabled = false;
+            EncryptedConfig.ClearPassword();
+            SaveChanges();
+        }
+
+        private void lnkGenerate_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            txtPassword.Text = PasswordGenerator.Generate(20, true, true, true);
+            ShowHidePassword(false);
         }
     }
 }

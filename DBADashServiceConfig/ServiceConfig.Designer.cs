@@ -123,10 +123,17 @@
             this.bttnSchedule = new System.Windows.Forms.Button();
             this.chkLogInternalPerfCounters = new System.Windows.Forms.CheckBox();
             this.tabJson = new System.Windows.Forms.TabPage();
+            this.tabEncryption = new System.Windows.Forms.TabPage();
+            this.lnkShowHide = new System.Windows.Forms.LinkLabel();
+            this.bttnSetPassword = new System.Windows.Forms.Button();
+            this.label19 = new System.Windows.Forms.Label();
+            this.txtPassword = new System.Windows.Forms.TextBox();
             this.lnkSourceConnections = new System.Windows.Forms.LinkLabel();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.button1 = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.bttnRemoveEncryption = new System.Windows.Forms.Button();
+            this.lnkGenerate = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tab1.SuspendLayout();
             this.tabDest.SuspendLayout();
@@ -151,6 +158,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numAzureScanInterval)).BeginInit();
             this.groupBox3.SuspendLayout();
             this.tabJson.SuspendLayout();
+            this.tabEncryption.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -280,6 +288,7 @@
             this.tab1.Controls.Add(this.tabSource);
             this.tab1.Controls.Add(this.tabOther);
             this.tab1.Controls.Add(this.tabJson);
+            this.tab1.Controls.Add(this.tabEncryption);
             this.tab1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tab1.Location = new System.Drawing.Point(0, 0);
             this.tab1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -1314,6 +1323,61 @@
             this.tabJson.Text = "Json";
             this.tabJson.UseVisualStyleBackColor = true;
             // 
+            // tabEncryption
+            // 
+            this.tabEncryption.Controls.Add(this.lnkGenerate);
+            this.tabEncryption.Controls.Add(this.bttnRemoveEncryption);
+            this.tabEncryption.Controls.Add(this.lnkShowHide);
+            this.tabEncryption.Controls.Add(this.bttnSetPassword);
+            this.tabEncryption.Controls.Add(this.label19);
+            this.tabEncryption.Controls.Add(this.txtPassword);
+            this.tabEncryption.Location = new System.Drawing.Point(4, 29);
+            this.tabEncryption.Name = "tabEncryption";
+            this.tabEncryption.Padding = new System.Windows.Forms.Padding(3);
+            this.tabEncryption.Size = new System.Drawing.Size(1129, 724);
+            this.tabEncryption.TabIndex = 7;
+            this.tabEncryption.Text = "Encryption";
+            this.tabEncryption.UseVisualStyleBackColor = true;
+            // 
+            // lnkShowHide
+            // 
+            this.lnkShowHide.AutoSize = true;
+            this.lnkShowHide.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
+            this.lnkShowHide.Location = new System.Drawing.Point(404, 151);
+            this.lnkShowHide.Name = "lnkShowHide";
+            this.lnkShowHide.Size = new System.Drawing.Size(45, 20);
+            this.lnkShowHide.TabIndex = 4;
+            this.lnkShowHide.TabStop = true;
+            this.lnkShowHide.Text = "Show";
+            this.lnkShowHide.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkShowHide_LinkClicked);
+            // 
+            // bttnSetPassword
+            // 
+            this.bttnSetPassword.Location = new System.Drawing.Point(464, 110);
+            this.bttnSetPassword.Name = "bttnSetPassword";
+            this.bttnSetPassword.Size = new System.Drawing.Size(153, 29);
+            this.bttnSetPassword.TabIndex = 3;
+            this.bttnSetPassword.Text = "Set Password";
+            this.bttnSetPassword.UseVisualStyleBackColor = true;
+            this.bttnSetPassword.Click += new System.EventHandler(this.bttnSetPassword_Click);
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(33, 89);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(73, 20);
+            this.label19.TabIndex = 2;
+            this.label19.Text = "Password:";
+            // 
+            // txtPassword
+            // 
+            this.txtPassword.Location = new System.Drawing.Point(33, 112);
+            this.txtPassword.Name = "txtPassword";
+            this.txtPassword.PasswordChar = '*';
+            this.txtPassword.Size = new System.Drawing.Size(416, 27);
+            this.txtPassword.TabIndex = 0;
+            // 
             // lnkSourceConnections
             // 
             this.lnkSourceConnections.AutoSize = true;
@@ -1346,6 +1410,28 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(1137, 64);
             this.panel1.TabIndex = 23;
+            // 
+            // bttnRemoveEncryption
+            // 
+            this.bttnRemoveEncryption.Location = new System.Drawing.Point(623, 110);
+            this.bttnRemoveEncryption.Name = "bttnRemoveEncryption";
+            this.bttnRemoveEncryption.Size = new System.Drawing.Size(170, 29);
+            this.bttnRemoveEncryption.TabIndex = 5;
+            this.bttnRemoveEncryption.Text = "Remove Encryption";
+            this.bttnRemoveEncryption.UseVisualStyleBackColor = true;
+            this.bttnRemoveEncryption.Click += new System.EventHandler(this.bttnRemoveEncryption_Click);
+            // 
+            // lnkGenerate
+            // 
+            this.lnkGenerate.AutoSize = true;
+            this.lnkGenerate.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
+            this.lnkGenerate.Location = new System.Drawing.Point(33, 151);
+            this.lnkGenerate.Name = "lnkGenerate";
+            this.lnkGenerate.Size = new System.Drawing.Size(69, 20);
+            this.lnkGenerate.TabIndex = 6;
+            this.lnkGenerate.TabStop = true;
+            this.lnkGenerate.Text = "Generate";
+            this.lnkGenerate.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkGenerate_LinkClicked);
             // 
             // ServiceConfig
             // 
@@ -1398,6 +1484,8 @@
             this.groupBox3.PerformLayout();
             this.tabJson.ResumeLayout(false);
             this.tabJson.PerformLayout();
+            this.tabEncryption.ResumeLayout(false);
+            this.tabEncryption.PerformLayout();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.ResumeLayout(false);
@@ -1503,6 +1591,13 @@
         private System.Windows.Forms.CheckBox chkCollectPlans;
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.ComboBox cboIOLevel;
+        private System.Windows.Forms.TabPage tabEncryption;
+        private System.Windows.Forms.LinkLabel lnkShowHide;
+        private System.Windows.Forms.Button bttnSetPassword;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.TextBox txtPassword;
+        private System.Windows.Forms.Button bttnRemoveEncryption;
+        private System.Windows.Forms.LinkLabel lnkGenerate;
     }
 }
 

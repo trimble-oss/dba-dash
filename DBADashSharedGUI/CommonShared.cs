@@ -27,7 +27,7 @@ namespace DBADashSharedGUI
         [SupportedOSPlatform("windows")]
         public static void ShowAbout(string connectionString, IWin32Window owner, bool StartGUIOnUpgrade)
         {
-            Version dbVersion= new Version();
+            Version dbVersion = new Version();
             if (!string.IsNullOrEmpty(connectionString))
             {
                 try
@@ -73,6 +73,59 @@ namespace DBADashSharedGUI
             }
 
             Application.Exit();
+        }
+
+        public static DialogResult ShowInputDialog(ref string input, string title, char passwordChar = '\0')
+        {
+            System.Drawing.Size size = new(400, 80);
+            Form inputBox = new()
+            {
+                FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog,
+                ClientSize = size,
+                Text = title,
+                MaximizeBox = false,
+                MinimizeBox = false,
+                StartPosition = FormStartPosition.CenterParent,
+                BackColor = DashColors.TrimbleBlueDark
+            };
+
+            System.Windows.Forms.TextBox textBox = new()
+            {
+                Size = new System.Drawing.Size(size.Width - 10, 25),
+                Location = new System.Drawing.Point(5, 5),
+                Text = input,
+                PasswordChar = passwordChar
+            };
+            inputBox.Controls.Add(textBox);
+
+            Button okButton = new()
+            {
+                DialogResult = System.Windows.Forms.DialogResult.OK,
+                Name = "okButton",
+                Size = new System.Drawing.Size(75, 30),
+                Text = "&OK",
+                Location = new System.Drawing.Point(size.Width - 80 - 80, 39),
+                BackColor = SystemColors.Control
+            };
+            inputBox.Controls.Add(okButton);
+
+            Button cancelButton = new()
+            {
+                DialogResult = System.Windows.Forms.DialogResult.Cancel,
+                Name = "cancelButton",
+                Size = new System.Drawing.Size(75, 30),
+                Text = "&Cancel",
+                Location = new System.Drawing.Point(size.Width - 80, 39),
+                BackColor = SystemColors.Control
+            };
+            inputBox.Controls.Add(cancelButton);
+
+            inputBox.AcceptButton = okButton;
+            inputBox.CancelButton = cancelButton;
+
+            DialogResult result = inputBox.ShowDialog();
+            input = textBox.Text;
+            return result;
         }
     }
 }

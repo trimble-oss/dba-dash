@@ -12,23 +12,10 @@ namespace DBADashService
 
         private static void Main(string[] args)
         {
+            SetupLogging();
             Console.WriteLine(Properties.Resources.LogoText);
+            Log.Information("Running as service {RunningAsService}", !Environment.UserInteractive);
             var cfg = SchedulerServiceConfig.Config;
-
-            Directory.SetCurrentDirectory(AppContext.BaseDirectory); //  for Logs folder
-            // https://swimburger.net/blog/dotnet/changing-serilog-minimum-level-without-application-restart-on-dotnet-framework-and-core
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(AppContext.BaseDirectory)
-                  // reloadOnChange will allow you to auto reload the minimum level and level switches
-                  .AddJsonFile(path: "serilog.json", optional: false, reloadOnChange: true)
-                  .Build();
-
-            Log.Logger = new LoggerConfiguration()
-               .ReadFrom.Configuration(configuration)
-               .Enrich.WithProperty("ApplicationName", "DBADash")
-               .Enrich.WithProperty("ServiceName", cfg.ServiceName)
-               .Enrich.WithProperty("MachineName", Environment.MachineName)
-               .CreateLogger();
 
             if (DBADash.Upgrade.IsUpgradeIncomplete)
             {
@@ -59,6 +46,22 @@ namespace DBADashService
 
             var exitCode = (int)Convert.ChangeType(rc, rc.GetTypeCode());
             Environment.ExitCode = exitCode;
+        }
+
+        private static void SetupLogging()
+        {
+            Directory.SetCurrentDirectory(AppContext.BaseDirectory); //  for Logs folder
+            // https://swimburger.net/blog/dotnet/changing-serilog-minimum-level-without-application-restart-on-dotnet-framework-and-core
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(AppContext.BaseDirectory)
+                // reloadOnChange will allow you to auto reload the minimum level and level switches
+                .AddJsonFile(path: "serilog.json", optional: false, reloadOnChange: true)
+                .Build();
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(configuration)
+                .Enrich.WithProperty("ApplicationName", "DBADash")
+                .Enrich.WithProperty("MachineName", Environment.MachineName)
+                .CreateLogger();
         }
     }
 }

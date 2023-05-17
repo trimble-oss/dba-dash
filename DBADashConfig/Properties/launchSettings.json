@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DBADashConfig": {
+      "commandName": "Project",
+      "commandLineArgs": "-a List"
+    }
+  }
+}

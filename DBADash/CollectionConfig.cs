@@ -9,44 +9,6 @@ using static DBADash.DBADashConnection;
 
 namespace DBADash
 {
-    public class BasicConfig
-    {
-        [JsonIgnore]
-        public DBADashConnection DestinationConnection { get; set; }
-
-        public BasicConfig()
-        {
-            DestinationConnection = new DBADashConnection();
-        }
-
-        // Note if destination is SQL connection string, password is encrypted.  Use GetDestination() to return with real password
-        public string Destination
-        {
-            get
-            {
-                return DestinationConnection.EncryptedConnectionString;
-            }
-            set
-            {
-                DestinationConnection = new DBADashConnection(value);
-            }
-        }
-
-        public string Serialize()
-        {
-            return JsonConvert.SerializeObject(this, Formatting.Indented, new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore,
-                DefaultValueHandling = DefaultValueHandling.Include,
-            });
-        }
-
-        public static BasicConfig Deserialize(string json)
-        {
-            return JsonConvert.DeserializeObject<BasicConfig>(json);
-        }
-    }
-
     public class CollectionConfig : BasicConfig
     {
         public Int32 ServiceThreads = -1;
@@ -62,6 +24,7 @@ namespace DBADash
         public bool LogInternalPerformanceCounters = false;
         public int? IdentityCollectionThreshold = null;
         public CollectionSchedules CollectionSchedules;
+        public int ConfigBackupRetentionDays { get; set; } = 7;
 
         public CollectionSchedules GetSchedules()
         {
