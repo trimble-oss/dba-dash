@@ -674,7 +674,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                              && r["statement_end_offset"] != DBNull.Value
                              && ((byte[])r["query_plan_hash"]).Any(b => b != 0) // Not 0x00000000
                              group r by new Plan((byte[])r["plan_handle"], (byte[])r["query_plan_hash"], (int)r["statement_start_offset"], (int)r["statement_end_offset"]) into g
-                             where g.Sum(r => Convert.ToInt32(r["cpu_time"])) >= Source.PlanCollectionCPUThreshold || g.Sum(r => Convert.ToInt32(r["granted_query_memory"])) >= Source.PlanCollectionMemoryGrantThreshold || g.Count() >= Source.PlanCollectionCountThreshold || g.Max(r => ((DateTime)r["SnapshotDateUTC"]).Subtract((DateTime)r["last_request_start_time_utc"])).TotalMilliseconds >= Source.PlanCollectionDurationThreshold
+                             where g.Sum(r => Convert.ToInt64(r["cpu_time"])) >= Source.PlanCollectionCPUThreshold || g.Sum(r => Convert.ToInt64(r["granted_query_memory"])) >= Source.PlanCollectionMemoryGrantThreshold || g.Count() >= Source.PlanCollectionCountThreshold || g.Max(r => ((DateTime)r["SnapshotDateUTC"]).Subtract((DateTime)r["last_request_start_time_utc"])).TotalMilliseconds >= Source.PlanCollectionDurationThreshold
                              select g.Key).Distinct().ToList();
                 return plans;
             }
