@@ -911,7 +911,7 @@ namespace DBADashGUI
             mnuTags.DropDownItems.Add(refreshTag);
             mnuTags.DropDownItems.Add(clearTag);
 
-            //SetFont(mnuTags);
+            SetCheckedItemsBold(mnuTags);
 
             BuildGroupByTagMenu(ref tags);
         }
@@ -992,7 +992,7 @@ namespace DBADashGUI
 
         private void RefreshTag_Click(object sender, EventArgs e)
         {
-            BuildTagMenu();
+            BuildTagMenu(SelectedTags());
         }
 
         private void ClearTag_Click(object sender, EventArgs e)
@@ -1050,49 +1050,67 @@ namespace DBADashGUI
 
         private void MTagValue_CheckedChanged(object sender, EventArgs e)
         {
-            if (!isClearTags)
+            if (isClearTags) return;
+            AddInstanes();
+            var mnuTag = (ToolStripMenuItem)sender;
+            while (mnuTag.OwnerItem is not null and ToolStripMenuItem)
             {
-                AddInstanes();
-                var mnuTag = (ToolStripMenuItem)sender;
-                while (mnuTag.OwnerItem is not null and ToolStripMenuItem)
-                {
-                    mnuTag = (ToolStripMenuItem)mnuTag.OwnerItem;
-                }
-
-                SetFont(mnuTag);
+                mnuTag = (ToolStripMenuItem)mnuTag.OwnerItem;
             }
+            SetCheckedItemsBold(mnuTags);
         }
 
-        private void SetFont(ToolStripMenuItem mnu)
+
+        public void SetCheckedItemsBold(ToolStripDropDownButton dropdownButton)
         {
-            if (mnu.Checked)
-            {
-                mnu.Font = new Font(mnu.Font, mnu.Font.Style | FontStyle.Bold);
-            }
-            else if (SelectedTags(mnu.DropDownItems).Count > 0)
-            {
-                mnu.Font = new Font(mnu.Font, mnu.Font.Style | FontStyle.Bold);
-            }
-            else
-            {
-                mnu.Font = new Font(mnu.Font, mnu.Font.Style & ~FontStyle.Bold);
-            }
+            var hasCheckedChild = false;
 
-            foreach (ToolStripItem itm in mnu.DropDownItems)
+            foreach (ToolStripItem item in dropdownButton.DropDownItems)
             {
-                if (itm.GetType() == typeof(ToolStripMenuItem))
+                if (item is not ToolStripMenuItem menuItem) continue;
+                if (ProcessMenuItem(menuItem))
                 {
-                    SetFont((ToolStripMenuItem)itm);
+                    hasCheckedChild = true;
                 }
             }
-            mnuTags.Font = SelectedTags().Count > 0
-                ? new Font(mnuTags.Font, FontStyle.Bold)
-                : new Font(mnuTags.Font, FontStyle.Regular);
+
+            // If the dropdownButton has a checked child, make it bold while preserving existing styles.
+            dropdownButton.Font = hasCheckedChild
+                ? new Font(dropdownButton.Font, dropdownButton.Font.Style | FontStyle.Bold)
+                : new Font(dropdownButton.Font, dropdownButton.Font.Style & ~FontStyle.Bold);
         }
 
-        #endregion Tagging
+        public bool ProcessMenuItem(ToolStripMenuItem menuItem)
+        {
+            var isCheckedOrHasCheckedChild = menuItem.Checked;
 
-        private DataRetention DataRetentionForm = null;
+            // If this item has children, process them first.
+            if (menuItem.HasDropDownItems)
+            {
+                foreach (ToolStripItem child in menuItem.DropDownItems)
+                {
+                    if (child is not ToolStripMenuItem childMenuItem) continue;
+                    if (ProcessMenuItem(childMenuItem))
+                    {
+                        isCheckedOrHasCheckedChild = true;
+                    }
+                }
+            }
+
+            // Apply the bold font style if the item is checked or has a checked child while preserving existing styles.
+            menuItem.Font = isCheckedOrHasCheckedChild
+                ? new Font(menuItem.Font, menuItem.Font.Style | FontStyle.Bold)
+                : new Font(menuItem.Font, menuItem.Font.Style & ~FontStyle.Bold);
+
+            return isCheckedOrHasCheckedChild;
+        }
+
+
+
+
+    #endregion Tagging
+
+    private DataRetention DataRetentionForm = null;
 
         private void DataRetentionToolStripMenuItem_Click(object sender, EventArgs e)
         {
