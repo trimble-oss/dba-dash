@@ -25,7 +25,7 @@ namespace DBADash
 
         public string GetConfig()
         {
-            string password = GetPassword();
+            var password = GetPassword();
             return GetConfig(password);
         }
 
@@ -41,9 +41,19 @@ namespace DBADash
             }
         }
 
+        public EncryptedConfig(string config, string password)
+        {
+            SetConfig(config, password);
+        }
+
         public EncryptedConfig(string config)
         {
-            string password = GetPassword();
+            var password = GetPassword();
+            SetConfig(config, password);
+        }
+
+        private void SetConfig(string config, string password)
+        {
             if (password == null)
             {
                 throw new ArgumentNullException("Password", "Password is not set");

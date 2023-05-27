@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Serilog;
 using ThirdParty.Json.LitJson;
+using Newtonsoft.Json.Linq;
 
 namespace DBADash
 {
@@ -35,13 +36,19 @@ namespace DBADash
             set => DestinationConnection = new DBADashConnection(value);
         }
 
-        public string Serialize()
+        public string Serialize(bool encrypt = false, string password = null)
         {
-            return JsonConvert.SerializeObject(this, Formatting.Indented, new JsonSerializerSettings
+            var config = JsonConvert.SerializeObject(this, Formatting.Indented, new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore,
                 DefaultValueHandling = DefaultValueHandling.Include,
             });
+            if (encrypt)
+            {
+                password ??= EncryptedConfig.GetPassword();
+                config = new EncryptedConfig(config, password).Serialize();
+            }
+            return config;
         }
 
         public static BasicConfig Deserialize(string json)
@@ -55,16 +62,35 @@ namespace DBADash
         /// <param name="backup">Option to create a backup of the current config</param>
         public void Save(bool backup)
         {
+            var config = Serialize(EncryptConfig);
             if (backup && File.Exists(JsonConfigPath))
             {
-                File.Move(JsonConfigPath, JsonConfigPath + ".backup_" + DateTime.Now.ToString("yyyyMMddHHmmss"));
-            }
-            string config = Serialize();
-            if (EncryptConfig)
-            {
-                config = new EncryptedConfig(config).Serialize();
+                var movePath = GetUniqueFilename(JsonConfigPath + ".backup_" + DateTime.Now.ToString("yyyyMMddHHmmss"));
+                File.Move(JsonConfigPath, movePath);
             }
             File.WriteAllText(JsonConfigPath, config);
+        }
+
+        /// <summary>
+        /// If the file already exists, make the filename unique by adding _1, _2, _3 etc.
+        /// </summary>
+        /// <param name="fullPath">Full path to the file</param>
+        /// <returns></returns>
+        public static string GetUniqueFilename(string fullPath)
+        {
+            var path = Path.GetDirectoryName(fullPath);
+            var filename = Path.GetFileNameWithoutExtension(fullPath);
+            var extension = Path.GetExtension(fullPath);
+            var newFullPath = fullPath;
+            var counter = 1;
+            while (File.Exists(newFullPath))
+            {
+                var tempFileName = $"{filename}_{counter}";
+                newFullPath = Path.Combine(path, tempFileName + extension);
+                counter++;
+            }
+
+            return newFullPath;
         }
 
         /// <summary>
@@ -95,15 +121,20 @@ namespace DBADash
         /// <param name="password">Password to use for decryption</param>
         public static T Load<T>(string password = null) where T : BasicConfig, new()
         {
-            if (string.IsNullOrEmpty(password))
-            {
-                password = EncryptedConfig.GetPassword();
-            }
             if (!File.Exists(JsonConfigPath)) return new T();
-            string config = File.ReadAllText(JsonConfigPath);
-            if (IsConfigFileEncrypted())
+            var config = File.ReadAllText(JsonConfigPath);
+            return Deserialize<T>(config, password);
+        }
+
+        public static T Deserialize<T>(string config, string password = null) where T : BasicConfig, new()
+        {
+            if (IsConfigEncrypted(config))
             {
-                if (password == null)
+                if (string.IsNullOrEmpty(password))
+                {
+                    password = EncryptedConfig.GetPassword();
+                }
+                if (string.IsNullOrEmpty(password))
                 {
                     throw new Exception("Password not available for decryption of config file");
                 }
@@ -112,19 +143,17 @@ namespace DBADash
             return JsonConvert.DeserializeObject<T>(config);
         }
 
+        public static bool IsConfigEncrypted(string config)
+        {
+            JObject jsonObject = JObject.Parse(config);
+            return jsonObject.ContainsKey("ProtectedConfig");
+        }
+
         public static bool IsConfigFileEncrypted()
         {
             if (!File.Exists(JsonConfigPath)) return false;
             string config = File.ReadAllText(JsonConfigPath);
-            try
-            {
-                var cfg = EncryptedConfig.Deserialize(config);
-                return cfg != null && !string.IsNullOrEmpty(cfg.ProtectedConfig);
-            }
-            catch
-            {
-                return false;
-            }
+            return IsConfigEncrypted(config);
         }
 
         public static bool ConfigExists => File.Exists(JsonConfigPath);

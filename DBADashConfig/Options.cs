@@ -65,11 +65,11 @@ namespace DBADashConfig
 
         [Option("EncryptionPassword", Required = false,
             HelpText = "To be used with the Encrypt option")]
-        public string EncryptionPassword { get; set; }
+        public string? EncryptionPassword { get; set; }
 
         [Option("DecryptionPassword", Required = false,
             HelpText = "Password to decrypt current config")]
-        public string DecryptionPassword { get; set; }
+        public string? DecryptionPassword { get; set; }
 
         [Option("SavePassword", Required = false,
             HelpText = "Use in combination with --DecryptionPassword.  Password will be saved for the current user, protected with DPAPI. ")]
