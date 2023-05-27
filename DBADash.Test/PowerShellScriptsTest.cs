@@ -9,6 +9,7 @@ using static DBADashConfig.Test.Helper;
 
 namespace DBADashConfig.Test
 {
+    [DoNotParallelize]
     [TestClass]
     public class PowerShellScriptsTest
     {

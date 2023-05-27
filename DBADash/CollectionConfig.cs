@@ -1,6 +1,7 @@
 ﻿using DBADashService;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -40,9 +41,9 @@ namespace DBADash
 
         public List<DBADashSource> SourceConnections = new();
 
-        public new static CollectionConfig Deserialize(string json)
+        public static CollectionConfig Deserialize(string json, string password = null)
         {
-            return JsonConvert.DeserializeObject<CollectionConfig>(json);
+            return BasicConfig.Deserialize<CollectionConfig>(json, password);
         }
 
         public string AWSProfile { get; set; }

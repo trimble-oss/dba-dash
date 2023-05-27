@@ -350,7 +350,7 @@ namespace DBADashServiceConfig
                 originalJson = cfg.Serialize();
                 txtJson.Text = originalJson;
             }
-            catch (Exception ex)
+            catch
             {
                 if (BasicConfig.IsConfigFileEncrypted())
                 {

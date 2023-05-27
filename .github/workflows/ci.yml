@@ -39,6 +39,9 @@ jobs:
       - name: Build DB
         run: msbuild dbadashdb -property:Configuration=CLI
 
+      - name: Test
+        run: dotnet test DBADash.Test/DBADash.Test.csproj --verbosity normal
+
       - name: Get Version
         id: GetVersion 
         shell: powershell
