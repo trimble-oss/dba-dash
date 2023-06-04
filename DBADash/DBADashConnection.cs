@@ -209,7 +209,7 @@ namespace DBADash
                 }
                 else if (builder.Password.Length > 0)
                 {
-                    builder.Password = "¬=!" + EncryptText.EncryptString(builder.Password, myString);
+                    builder.Password = "¬=!" + builder.Password.EncryptString(myString);
                     wasEncryptionPerformed = true;
                     isEncrypted = true;
                     return builder.ConnectionString;
@@ -236,7 +236,7 @@ namespace DBADash
                 }
                 if (builder.Password.StartsWith("¬=!"))
                 {
-                    builder.Password = EncryptText.DecryptString(builder.Password[3..], myString);
+                    builder.Password = builder.Password[3..].DecryptString(myString);
                 }
                 return builder.ConnectionString;
             }
