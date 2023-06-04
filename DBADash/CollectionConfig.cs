@@ -65,7 +65,7 @@ namespace DBADash
                 }
                 else
                 {
-                    _secretKey = "¬=!" + EncryptText.EncryptString(value, myString);
+                    _secretKey = "¬=!" + value.EncryptString(myString);
                     wasEncryptionPerformed = true;
                 }
             }
@@ -75,7 +75,7 @@ namespace DBADash
         {
             if (_secretKey != null && _secretKey.StartsWith("¬=!"))
             {
-                return EncryptText.DecryptString(_secretKey[3..], myString);
+                return _secretKey[3..].DecryptString(myString);
             }
             else
             {
