@@ -309,7 +309,6 @@ namespace DBADashServiceConfig
 
             txtJson.MaxLength = 0;
 
-            txtPassword.Text = EncryptedConfig.GetPassword();
             if (BasicConfig.ConfigExists)
             {
                 try
@@ -377,7 +376,6 @@ namespace DBADashServiceConfig
                 try
                 {
                     BasicConfig.Load<CollectionConfig>(password);
-                    txtPassword.Text = password;
                     EncryptedConfig.SetPassword(password, false);
                     return true;
                 }
@@ -443,9 +441,6 @@ namespace DBADashServiceConfig
         {
             collectionConfig = CollectionConfig.Deserialize(json);
             txtDestination.Text = collectionConfig.DestinationConnection.EncryptedConnectionString;
-            txtAWSProfile.Text = collectionConfig.AWSProfile;
-            txtAccessKey.Text = collectionConfig.AccessKey;
-            txtSecretKey.Text = collectionConfig.SecretKey;
             chkScanAzureDB.Checked = collectionConfig.ScanForAzureDBs;
             chkScanEvery.Checked = collectionConfig.ScanForAzureDBsInterval > 0;
             numAzureScanInterval.Value = collectionConfig.ScanForAzureDBsInterval;
@@ -453,7 +448,6 @@ namespace DBADashServiceConfig
             chkLogInternalPerfCounters.Checked = collectionConfig.LogInternalPerformanceCounters;
             chkDefaultIdentityCollection.Checked = !collectionConfig.IdentityCollectionThreshold.HasValue;
             numIdentityCollectionThreshold.Value = collectionConfig.IdentityCollectionThreshold ?? DBCollector.DefaultIdentityCollectionThreshold;
-            bttnRemoveEncryption.Enabled = collectionConfig.EncryptConfig;
             UpdateScanInterval();
             SetDgv();
         }
@@ -657,22 +651,6 @@ namespace DBADashServiceConfig
             this.Close();
         }
 
-        private void TxtAWSProfile_TextChanged(object sender, EventArgs e)
-        {
-            txtAccessKey.Enabled = (txtAWSProfile.Text.Length == 0);
-            txtSecretKey.Enabled = txtAccessKey.Enabled;
-        }
-
-        private void TxtAccessKey_TextChanged(object sender, EventArgs e)
-        {
-            txtAWSProfile.Enabled = (txtAccessKey.Text.Length == 0 && txtSecretKey.Text.Length == 0);
-        }
-
-        private void TxtSecretKey_TextChanged(object sender, EventArgs e)
-        {
-            txtAWSProfile.Enabled = (txtAccessKey.Text.Length == 0 && txtSecretKey.Text.Length == 0);
-        }
-
         private void TxtDestination_Validated(object sender, EventArgs e)
         {
             DestinationChanged();
@@ -686,24 +664,6 @@ namespace DBADashServiceConfig
                 txtJson.Text = collectionConfig.Serialize();
                 ValidateDestination();
             }
-        }
-
-        private void TxtAccessKey_Validating(object sender, CancelEventArgs e)
-        {
-            collectionConfig.AccessKey = (txtAccessKey.Text == "" ? null : txtAccessKey.Text);
-            txtJson.Text = collectionConfig.Serialize();
-        }
-
-        private void TxtSecretKey_Validating(object sender, CancelEventArgs e)
-        {
-            collectionConfig.SecretKey = (txtSecretKey.Text == "" ? null : txtSecretKey.Text);
-            txtJson.Text = collectionConfig.Serialize();
-        }
-
-        private void TxtAWSProfile_Validating(object sender, CancelEventArgs e)
-        {
-            collectionConfig.AWSProfile = (txtAWSProfile.Text == "" ? null : txtAWSProfile.Text);
-            txtJson.Text = collectionConfig.Serialize();
         }
 
         private void ChkSlowQueryThreshold_CheckedChanged(object sender, EventArgs e)
@@ -955,9 +915,9 @@ namespace DBADashServiceConfig
         {
             var cfg = new CollectionConfig
             {
-                AccessKey = txtAccessKey.Text,
-                SecretKey = txtSecretKey.Text,
-                AWSProfile = txtAWSProfile.Text
+                AccessKey = collectionConfig.AccessKey,
+                SecretKey = collectionConfig.SecretKey,
+                AWSProfile = collectionConfig.AWSProfile
             };
 
             using var frm = new S3Browser() { AccessKey = cfg.AccessKey, SecretKey = cfg.GetSecretKey(), Folder = "DBADash_" + Environment.MachineName };
@@ -973,9 +933,9 @@ namespace DBADashServiceConfig
         {
             var cfg = new CollectionConfig
             {
-                AccessKey = txtAccessKey.Text,
-                SecretKey = txtSecretKey.Text,
-                AWSProfile = txtAWSProfile.Text
+                AccessKey = collectionConfig.AccessKey,
+                SecretKey = collectionConfig.SecretKey,
+                AWSProfile = collectionConfig.AWSProfile
             };
             using (var frm = new S3Browser() { AccessKey = cfg.AccessKey, SecretKey = cfg.GetSecretKey(), Folder = "DBADash_{HostName}" })
             {
@@ -1256,49 +1216,41 @@ namespace DBADashServiceConfig
             txtJson.Text = collectionConfig.Serialize();
         }
 
-        private void lnkShowHide_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void bttnAWS_Click(object sender, EventArgs e)
         {
-            ShowHidePassword();
-        }
-
-        private void ShowHidePassword()
-        {
-            ShowHidePassword(txtPassword.PasswordChar != '*');
-        }
-
-        private void ShowHidePassword(bool IsHidden)
-        {
-            txtPassword.PasswordChar = IsHidden ? '*' : '\0';
-            lnkShowHide.Text = IsHidden ? "Show" : "Hide";
-        }
-
-        private void bttnSetPassword_Click(object sender, EventArgs e)
-        {
-            collectionConfig.EncryptConfig = true;
-            bttnRemoveEncryption.Enabled = true;
-            txtPassword.Text = txtPassword.Text.Trim();
-            if (string.IsNullOrEmpty(txtPassword.Text))
+            var frm = new AWSCreds()
             {
-                txtPassword.Text = PasswordGenerator.Generate(20, true, true, true);
-                ShowHidePassword(false);
+                AWSAccessKey = collectionConfig.AccessKey,
+                AWSSecretKet = collectionConfig.SecretKey,
+                AWSProfile = collectionConfig.AWSProfile
+            };
+            frm.ShowDialog();
+            if (frm.DialogResult == DialogResult.OK)
+            {
+                collectionConfig.AWSProfile = frm.AWSProfile;
+                collectionConfig.SecretKey = frm.AWSSecretKet;
+                collectionConfig.AccessKey = frm.AWSAccessKey;
             }
-            EncryptedConfig.SetPassword(txtPassword.Text, true);
-            SaveChanges();
+            txtJson.Text = collectionConfig.Serialize();
         }
 
-        private void bttnRemoveEncryption_Click(object sender, EventArgs e)
+        private void bttnEncryption_Click(object sender, EventArgs e)
         {
-            txtPassword.Text = "";
-            collectionConfig.EncryptConfig = false;
-            bttnRemoveEncryption.Enabled = false;
-            EncryptedConfig.ClearPassword();
-            SaveChanges();
-        }
-
-        private void lnkGenerate_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            txtPassword.Text = PasswordGenerator.Generate(20, true, true, true);
-            ShowHidePassword(false);
+            var frm = new EncryptionConfig() { IsEncrypted = collectionConfig.EncryptConfig, EncryptionPassword = collectionConfig.EncryptConfig ? EncryptedConfig.GetPassword() : null };
+            frm.ShowDialog();
+            if (frm.DialogResult == DialogResult.OK)
+            {
+                collectionConfig.EncryptConfig = frm.IsEncrypted;
+                if (frm.IsEncrypted)
+                {
+                    EncryptedConfig.SetPassword(frm.EncryptionPassword, true);
+                }
+                else
+                {
+                    EncryptedConfig.ClearPassword();
+                }
+                SaveChanges();
+            }
         }
     }
 }
