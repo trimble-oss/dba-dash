@@ -77,13 +77,6 @@ Source can also be a folder or a S3 bucket to import data from remote DBA Dash a
 
 You can also click "Scan Now" to persist any new connections to the config file. </value>
   </data>
-  <data name="label12.Text" xml:space="preserve">
-    <value>For normal deployments this section isn't required
-
-Setting the destination connection to a S3 bucket allows you to send data to a repository database that you don't have direct connectivity to.
-Setting the source connection to a S3 bucket allows you to pull data from those remote sources.
-By default the instance profile credentials are used to connect to S3 buckets - if this isn't available you will need to specify a profile to use or the access/secret keys.</value>
-  </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
