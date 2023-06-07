@@ -27,8 +27,26 @@ namespace DBADashService
                 Log.Error("Error creating failed message folder {FailedMessageFolder}", FailedMessageFolder);
                 FailedMessageFolder = string.Empty;
             }
-            GetCreds();
-            Config = GetConfig();
+
+            try
+            {
+                GetCreds();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "GetCreds error");
+                throw;
+            }
+
+            try
+            {
+                Config = GetConfig();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "GetConfig error");
+                throw;
+            }
         }
 
         public static void GetCreds()
