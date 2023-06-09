@@ -50,9 +50,9 @@ namespace DBADashConfig.Test
             var cfg = new CollectionConfig
             {
                 Destination = dest,
-                EncryptConfig = true
+                EncryptionOption = BasicConfig.EncryptionOptions.Encrypt
             };
-            var protectedCfg = cfg.Serialize(true, passPhrase);
+            var protectedCfg = cfg.Serialize(BasicConfig.EncryptionOptions.Encrypt, passPhrase);
 
             Assert.IsFalse(protectedCfg.Contains(dest));
             Assert.IsTrue(BasicConfig.IsConfigEncrypted(protectedCfg));
@@ -65,9 +65,9 @@ namespace DBADashConfig.Test
         {
             var cfg = new CollectionConfig
             {
-                EncryptConfig = true
+                EncryptionOption = BasicConfig.EncryptionOptions.Encrypt
             };
-            Assert.ThrowsException<ArgumentNullException>(() => cfg.Serialize(true));
+            Assert.ThrowsException<ArgumentNullException>(() => cfg.Serialize(BasicConfig.EncryptionOptions.Encrypt));
         }
     }
 }

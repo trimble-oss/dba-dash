@@ -1236,12 +1236,12 @@ namespace DBADashServiceConfig
 
         private void bttnEncryption_Click(object sender, EventArgs e)
         {
-            var frm = new EncryptionConfig() { IsEncrypted = collectionConfig.EncryptConfig, EncryptionPassword = collectionConfig.EncryptConfig ? EncryptedConfig.GetPassword() : null };
+            var frm = new EncryptionConfig() { EncryptionOption = collectionConfig.EncryptionOption, EncryptionPassword = collectionConfig.EncryptionOption == BasicConfig.EncryptionOptions.Encrypt ? EncryptedConfig.GetPassword() : null };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
-                collectionConfig.EncryptConfig = frm.IsEncrypted;
-                if (frm.IsEncrypted)
+                collectionConfig.EncryptionOption = frm.EncryptionOption;
+                if (frm.EncryptionOption == BasicConfig.EncryptionOptions.Encrypt)
                 {
                     EncryptedConfig.SetPassword(frm.EncryptionPassword, true);
                 }

@@ -18,8 +18,14 @@ namespace DBADash
     /// </summary>
     public class BasicConfig
     {
+        public enum EncryptionOptions
+        {
+            Basic = 0,
+            Encrypt = 1
+        }
+
         public static readonly string JsonConfigPath = System.IO.Path.Combine(AppContext.BaseDirectory, "ServiceConfig.json");
-        public bool EncryptConfig { get; set; }
+        public EncryptionOptions EncryptionOption { get; set; }
 
         [JsonIgnore]
         public DBADashConnection DestinationConnection { get; set; }
@@ -36,14 +42,14 @@ namespace DBADash
             set => DestinationConnection = new DBADashConnection(value);
         }
 
-        public string Serialize(bool encrypt = false, string password = null)
+        public string Serialize(EncryptionOptions encryptionOption = EncryptionOptions.Basic, string password = null)
         {
             var config = JsonConvert.SerializeObject(this, Formatting.Indented, new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore,
                 DefaultValueHandling = DefaultValueHandling.Include,
             });
-            if (encrypt)
+            if (encryptionOption == EncryptionOptions.Encrypt)
             {
                 password ??= EncryptedConfig.GetPassword();
                 config = new EncryptedConfig(config, password).Serialize();
@@ -62,7 +68,7 @@ namespace DBADash
         /// <param name="backup">Option to create a backup of the current config</param>
         public void Save(bool backup)
         {
-            var config = Serialize(EncryptConfig);
+            var config = Serialize(EncryptionOption);
             if (backup && File.Exists(JsonConfigPath))
             {
                 var movePath = GetUniqueFilename(JsonConfigPath + ".backup_" + DateTime.Now.ToString("yyyyMMddHHmmss"));
