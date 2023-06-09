@@ -157,6 +157,7 @@ namespace DBADashServiceConfig
             txtJson.Text = collectionConfig.Serialize();
             SetConnectionCount();
             SetDgv();
+            RefreshEncryption();
             if (warnXENotSupported)
             {
                 MessageBox.Show("Warning: Slow query capture requires an extended event session which is not supported for one or more connections.\nRequirements:\nSQL 2012 or later.\nStandard or Enteprise Edition on Amazon RDS", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -339,6 +340,7 @@ namespace DBADashServiceConfig
             SetConnectionCount();
             RefreshServiceStatus();
             ValidateDestination();
+            RefreshEncryption();
         }
 
         private void SetOriginalJson()
@@ -450,6 +452,7 @@ namespace DBADashServiceConfig
             numIdentityCollectionThreshold.Value = collectionConfig.IdentityCollectionThreshold ?? DBCollector.DefaultIdentityCollectionThreshold;
             UpdateScanInterval();
             SetDgv();
+            RefreshEncryption();
         }
 
         private void SetDgv()
@@ -663,6 +666,7 @@ namespace DBADashServiceConfig
                 collectionConfig.Destination = txtDestination.Text;
                 txtJson.Text = collectionConfig.Serialize();
                 ValidateDestination();
+                RefreshEncryption();
             }
         }
 
@@ -1007,6 +1011,7 @@ namespace DBADashServiceConfig
             collectionConfig.SourceConnections = (List<DBADashSource>)((BindingSource)dgvConnections.DataSource).DataSource;
             txtJson.Text = collectionConfig.Serialize();
             SetConnectionCount();
+            RefreshEncryption();
         }
 
         private void DgvConnections_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -1232,6 +1237,7 @@ namespace DBADashServiceConfig
                 collectionConfig.AccessKey = frm.AWSAccessKey;
             }
             txtJson.Text = collectionConfig.Serialize();
+            RefreshEncryption();
         }
 
         private void bttnEncryption_Click(object sender, EventArgs e)
@@ -1250,7 +1256,18 @@ namespace DBADashServiceConfig
                     EncryptedConfig.ClearPassword();
                 }
                 SaveChanges();
+                RefreshEncryption();
             }
+        }
+
+        private void RefreshEncryption()
+        {
+            lblEncryptionStatus.Text = collectionConfig.EncryptionOption == BasicConfig.EncryptionOptions.Encrypt
+                ? "Encrypted"
+                : "Not Encrypted";
+            lblEncryptionStatus.ForeColor = collectionConfig.EncryptionOption == BasicConfig.EncryptionOptions.Encrypt
+                ? DashColors.Success
+                : collectionConfig.ContainsSensitive() ? DashColors.Fail : DashColors.Warning;
         }
     }
 }

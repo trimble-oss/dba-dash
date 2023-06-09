@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Serilog;
 using ThirdParty.Json.LitJson;
 using Newtonsoft.Json.Linq;
+using Microsoft.Data.SqlClient;
 
 namespace DBADash
 {
@@ -160,6 +161,11 @@ namespace DBADash
             if (!File.Exists(JsonConfigPath)) return false;
             string config = File.ReadAllText(JsonConfigPath);
             return IsConfigEncrypted(config);
+        }
+
+        public virtual bool ContainsSensitive()
+        {
+            return DestinationConnection.Type == DBADashConnection.ConnectionType.SQL && new SqlConnectionStringBuilder(DestinationConnection.ConnectionString).Password.Length > 0;
         }
 
         public static bool ConfigExists => File.Exists(JsonConfigPath);

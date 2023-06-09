@@ -317,5 +317,23 @@ namespace DBADash
             }
             return newConnections;
         }
+
+        public override bool ContainsSensitive()
+        {
+            if (!string.IsNullOrEmpty(SecretKey))
+            {
+                return true;
+            }
+
+            foreach (var src in SourceConnections)
+            {
+                if (src.SourceConnection.Type == ConnectionType.SQL && new SqlConnectionStringBuilder(src.SourceConnection.ConnectionString).Password.Length > 0)
+                {
+                    return true;
+                }
+            }
+
+            return base.ContainsSensitive();
+        }
     }
 }
