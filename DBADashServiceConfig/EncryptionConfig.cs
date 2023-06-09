@@ -18,10 +18,10 @@ namespace DBADashServiceConfig
             InitializeComponent();
         }
 
-        public bool IsEncrypted
+        public BasicConfig.EncryptionOptions EncryptionOption
         {
-            get => chkEncrypt.Checked;
-            set => chkEncrypt.Checked = value;
+            get => chkEncrypt.Checked ? BasicConfig.EncryptionOptions.Encrypt : BasicConfig.EncryptionOptions.Basic;
+            set => chkEncrypt.Checked = value == BasicConfig.EncryptionOptions.Encrypt;
         }
 
         public string EncryptionPassword

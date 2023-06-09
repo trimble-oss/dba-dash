@@ -239,11 +239,11 @@ try
                           return;
                       }
                       EncryptedConfig.SetPassword(o.EncryptionPassword, true);
-                      config.EncryptConfig = true;
+                      config.EncryptionOption = BasicConfig.EncryptionOptions.Encrypt;
                       break;
 
                   case CommandLineActionOption.Decrypt:
-                      config.EncryptConfig = false;
+                      config.EncryptionOption = BasicConfig.EncryptionOptions.Basic;
                       break;
 
                   case CommandLineActionOption.SetServiceName:
