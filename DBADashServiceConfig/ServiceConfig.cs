@@ -1269,6 +1269,9 @@ namespace DBADashServiceConfig
             lblEncryptionStatus.ForeColor = collectionConfig.EncryptionOption == BasicConfig.EncryptionOptions.Encrypt
                 ? DashColors.Success
                 : collectionConfig.ContainsSensitive() ? DashColors.Fail : DashColors.Warning;
+            tabJson.Text = collectionConfig.EncryptionOption == BasicConfig.EncryptionOptions.Encrypt
+                ? "Json (Decrypted)"
+                : "Json";
         }
 
         private void NumBackupRetention_ValueChanged(object sender, EventArgs e)
