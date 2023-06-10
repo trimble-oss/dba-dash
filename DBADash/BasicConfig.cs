@@ -31,6 +31,8 @@ namespace DBADash
         [JsonIgnore]
         public DBADashConnection DestinationConnection { get; set; }
 
+        public int ConfigBackupRetentionDays { get; set; } = 7;
+
         public BasicConfig()
         {
             DestinationConnection = new DBADashConnection();
@@ -76,6 +78,12 @@ namespace DBADash
                 File.Move(JsonConfigPath, movePath);
             }
             File.WriteAllText(JsonConfigPath, config);
+        }
+
+        public void Save()
+        {
+            var backup = ConfigBackupRetentionDays > 0;
+            Save(backup);
         }
 
         /// <summary>

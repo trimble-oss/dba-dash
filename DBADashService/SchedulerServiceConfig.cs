@@ -72,7 +72,7 @@ namespace DBADashService
             if (conf.WasEncrypted())
             {
                 Log.Information("Saving ServiceConfig.json with encrypted password");
-                conf.Save(true);
+                conf.Save();
             }
 
             return conf;

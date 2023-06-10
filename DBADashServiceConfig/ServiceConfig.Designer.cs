@@ -60,6 +60,9 @@
             this.txtJson = new System.Windows.Forms.TextBox();
             this.tabOther = new System.Windows.Forms.TabPage();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.lnkDeleteConfigBackups = new System.Windows.Forms.LinkLabel();
+            this.lblConfigFileRetention = new System.Windows.Forms.Label();
+            this.numBackupRetention = new System.Windows.Forms.NumericUpDown();
             this.lblEncryptionStatus = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.bttnEncryption = new System.Windows.Forms.Button();
@@ -130,6 +133,7 @@
             this.tabJson.SuspendLayout();
             this.tabOther.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numBackupRetention)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numIdentityCollectionThreshold)).BeginInit();
             this.groupBox4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numAzureScanInterval)).BeginInit();
@@ -502,6 +506,9 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.lnkDeleteConfigBackups);
+            this.groupBox3.Controls.Add(this.lblConfigFileRetention);
+            this.groupBox3.Controls.Add(this.numBackupRetention);
             this.groupBox3.Controls.Add(this.lblEncryptionStatus);
             this.groupBox3.Controls.Add(this.label2);
             this.groupBox3.Controls.Add(this.bttnEncryption);
@@ -512,14 +519,48 @@
             this.groupBox3.Controls.Add(this.chkLogInternalPerfCounters);
             this.groupBox3.Location = new System.Drawing.Point(8, 19);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(1113, 179);
+            this.groupBox3.Size = new System.Drawing.Size(1113, 205);
             this.groupBox3.TabIndex = 38;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Miscellaneous";
             // 
+            // lnkDeleteConfigBackups
+            // 
+            this.lnkDeleteConfigBackups.AutoSize = true;
+            this.lnkDeleteConfigBackups.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
+            this.lnkDeleteConfigBackups.Location = new System.Drawing.Point(380, 74);
+            this.lnkDeleteConfigBackups.Name = "lnkDeleteConfigBackups";
+            this.lnkDeleteConfigBackups.Size = new System.Drawing.Size(159, 20);
+            this.lnkDeleteConfigBackups.TabIndex = 41;
+            this.lnkDeleteConfigBackups.TabStop = true;
+            this.lnkDeleteConfigBackups.Text = "Delete Config Backups";
+            this.lnkDeleteConfigBackups.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkDeleteConfigBackups_LinkClicked);
+            // 
+            // lblConfigFileRetention
+            // 
+            this.lblConfigFileRetention.AutoSize = true;
+            this.lblConfigFileRetention.Location = new System.Drawing.Point(16, 69);
+            this.lblConfigFileRetention.Name = "lblConfigFileRetention";
+            this.lblConfigFileRetention.Size = new System.Drawing.Size(197, 20);
+            this.lblConfigFileRetention.TabIndex = 40;
+            this.lblConfigFileRetention.Text = "Config File Retention (Days):";
+            // 
+            // numBackupRetention
+            // 
+            this.numBackupRetention.Location = new System.Drawing.Point(286, 67);
+            this.numBackupRetention.Name = "numBackupRetention";
+            this.numBackupRetention.Size = new System.Drawing.Size(79, 27);
+            this.numBackupRetention.TabIndex = 39;
+            this.numBackupRetention.Value = new decimal(new int[] {
+            7,
+            0,
+            0,
+            0});
+            this.numBackupRetention.ValueChanged += new System.EventHandler(this.NumBackupRetention_ValueChanged);
+            // 
             // lblEncryptionStatus
             // 
-            this.lblEncryptionStatus.Location = new System.Drawing.Point(417, 149);
+            this.lblEncryptionStatus.Location = new System.Drawing.Point(420, 169);
             this.lblEncryptionStatus.Name = "lblEncryptionStatus";
             this.lblEncryptionStatus.Size = new System.Drawing.Size(196, 27);
             this.lblEncryptionStatus.TabIndex = 38;
@@ -529,7 +570,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(15, 36);
+            this.label2.Location = new System.Drawing.Point(16, 36);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(265, 20);
             this.label2.TabIndex = 32;
@@ -537,7 +578,7 @@
             // 
             // bttnEncryption
             // 
-            this.bttnEncryption.Location = new System.Drawing.Point(417, 90);
+            this.bttnEncryption.Location = new System.Drawing.Point(420, 110);
             this.bttnEncryption.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnEncryption.Name = "bttnEncryption";
             this.bttnEncryption.Size = new System.Drawing.Size(196, 55);
@@ -557,7 +598,7 @@
             // 
             // bttnAWS
             // 
-            this.bttnAWS.Location = new System.Drawing.Point(13, 90);
+            this.bttnAWS.Location = new System.Drawing.Point(16, 110);
             this.bttnAWS.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnAWS.Name = "bttnAWS";
             this.bttnAWS.Size = new System.Drawing.Size(196, 55);
@@ -568,7 +609,7 @@
             // 
             // bttnSchedule
             // 
-            this.bttnSchedule.Location = new System.Drawing.Point(215, 90);
+            this.bttnSchedule.Location = new System.Drawing.Point(218, 110);
             this.bttnSchedule.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnSchedule.Name = "bttnSchedule";
             this.bttnSchedule.Size = new System.Drawing.Size(196, 55);
@@ -614,7 +655,7 @@
             this.groupBox4.Controls.Add(this.label10);
             this.groupBox4.Controls.Add(this.label11);
             this.groupBox4.Controls.Add(this.chkScanEvery);
-            this.groupBox4.Location = new System.Drawing.Point(8, 205);
+            this.groupBox4.Location = new System.Drawing.Point(8, 231);
             this.groupBox4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -1326,6 +1367,7 @@
             this.tabOther.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numBackupRetention)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numIdentityCollectionThreshold)).EndInit();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
@@ -1452,6 +1494,9 @@
         private System.Windows.Forms.TabPage tabJson;
         private System.Windows.Forms.TextBox txtJson;
         private System.Windows.Forms.Label lblEncryptionStatus;
+        private System.Windows.Forms.Label lblConfigFileRetention;
+        private System.Windows.Forms.NumericUpDown numBackupRetention;
+        private System.Windows.Forms.LinkLabel lnkDeleteConfigBackups;
     }
 }
 

@@ -272,7 +272,7 @@ namespace DBADashServiceConfig
         private void SaveChanges()
         {
             txtJson.Text = collectionConfig.Serialize();
-            collectionConfig.Save(true);
+            collectionConfig.Save();
             originalJson = txtJson.Text;
             UpdateSaveButton();
             MessageBox.Show("Config saved.  Restart service to apply changes.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -450,6 +450,7 @@ namespace DBADashServiceConfig
             chkLogInternalPerfCounters.Checked = collectionConfig.LogInternalPerformanceCounters;
             chkDefaultIdentityCollection.Checked = !collectionConfig.IdentityCollectionThreshold.HasValue;
             numIdentityCollectionThreshold.Value = collectionConfig.IdentityCollectionThreshold ?? DBCollector.DefaultIdentityCollectionThreshold;
+            numBackupRetention.Value = collectionConfig.ConfigBackupRetentionDays;
             UpdateScanInterval();
             SetDgv();
             RefreshEncryption();
@@ -1268,6 +1269,21 @@ namespace DBADashServiceConfig
             lblEncryptionStatus.ForeColor = collectionConfig.EncryptionOption == BasicConfig.EncryptionOptions.Encrypt
                 ? DashColors.Success
                 : collectionConfig.ContainsSensitive() ? DashColors.Fail : DashColors.Warning;
+        }
+
+        private void NumBackupRetention_ValueChanged(object sender, EventArgs e)
+        {
+            collectionConfig.ConfigBackupRetentionDays = (int)numBackupRetention.Value;
+            txtJson.Text = collectionConfig.Serialize();
+        }
+
+        private void LnkDeleteConfigBackups_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (MessageBox.Show("Delete ALL config file backups?", "Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question) ==
+                DialogResult.Yes)
+            {
+                BasicConfig.ClearOldConfigBackups(0);
+            }
         }
     }
 }

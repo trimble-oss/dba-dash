@@ -25,7 +25,6 @@ namespace DBADash
         public bool LogInternalPerformanceCounters = false;
         public int? IdentityCollectionThreshold = null;
         public CollectionSchedules CollectionSchedules;
-        public int ConfigBackupRetentionDays { get; set; } = 7;
 
         public CollectionSchedules GetSchedules()
         {

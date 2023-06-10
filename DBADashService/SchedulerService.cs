@@ -444,6 +444,14 @@ namespace DBADashService
                     ).ToList()
                         .ForEach(f => f.Delete());
                 }
+                try
+                {
+                    BasicConfig.ClearOldConfigBackups(SchedulerServiceConfig.Config.ConfigBackupRetentionDays);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error removing old configs");
+                }
             }
             catch (Exception ex)
             {
