@@ -31,14 +31,6 @@ namespace DBADashService
                 LogError(ex, connectionString, "PurgeData", ex.Message);
             }
 
-            try
-            {
-                BasicConfig.ClearOldConfigBackups(SchedulerServiceConfig.Config.ConfigBackupRetentionDays);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error removing old configs");
-            }
             return Task.CompletedTask;
         }
 

@@ -251,7 +251,9 @@ try
                       return;
               }
               Log.Information("Saving config");
-              config.Save(!o.NoBackupConfig);
+
+              var backup = config.ConfigBackupRetentionDays > 0 && (!o.NoBackupConfig);
+              config.Save(backup);
 
               Log.Information("Complete.  Restart the service to apply the config change");
           });
