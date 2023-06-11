@@ -8,9 +8,9 @@ namespace DBADashConfig.Test
         [AssemblyCleanup]
         public static void AssemblyCleanup()
         {
-            if (File.Exists(Initialize.ServiceConfigPath))
+            if (File.Exists(Helper.ServiceConfigPath))
             {
-                File.Delete(Initialize.ServiceConfigPath);
+                File.Delete(Helper.ServiceConfigPath);
             }
         }
     }

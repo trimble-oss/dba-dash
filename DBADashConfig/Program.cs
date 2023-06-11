@@ -249,6 +249,10 @@ try
                   case CommandLineActionOption.SetServiceName:
                       Log.Error("SetServiceName is only supported on Windows");
                       return;
+
+                  case CommandLineActionOption.SetConfigFileBackupRetention:
+                      config.ConfigBackupRetentionDays = o.RetentionDays;
+                      break;
               }
               Log.Information("Saving config");
 

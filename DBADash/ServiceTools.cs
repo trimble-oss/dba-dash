@@ -3,19 +3,18 @@ using System.IO;
 using System.Linq;
 using System.Management;
 using System.Runtime.Versioning;
+
 namespace DBADash
 {
-
     [SupportedOSPlatform("windows")]
     public static class ServiceTools
     {
-
         public static bool IsServiceInstalledByPath(string ServicePath)
         {
             using var searcher = new ManagementObjectSearcher("root\\cimv2", "SELECT Name,PathName from Win32_Service");
 
             var collection = searcher.Get().Cast<ManagementBaseObject>()
-                .Where(service => ((string)service.GetPropertyValue("PathName")).Contains(ServicePath))
+                .Where(service => ((string)service.GetPropertyValue("PathName"))?.Contains(ServicePath) == true)
                 .Select(service => (string)service.GetPropertyValue("Name"));
 
             return collection.Any();
@@ -25,7 +24,6 @@ namespace DBADash
         {
             return IsServiceInstalledByPath(ServicePath);
         }
-
 
         public static bool IsServiceInstalledByName(string ServiceName)
         {
@@ -47,9 +45,7 @@ namespace DBADash
                 .Select(service => (string)service.GetPropertyValue("Name"));
 
             return collection.FirstOrDefault(string.Empty);
-
         }
-
 
         public static string GetPathOfService(string ServiceName)
         {
@@ -60,9 +56,7 @@ namespace DBADash
                 .Select(service => (string)service.GetPropertyValue("PathName"));
 
             return collection.FirstOrDefault(string.Empty);
-
         }
-
 
         public static string GetServiceNameFromPath()
         {
@@ -71,6 +65,5 @@ namespace DBADash
 
         private static readonly string serviceFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DBADashService.exe");
         public static readonly string ServicePath = serviceFolder;
-
     }
 }
