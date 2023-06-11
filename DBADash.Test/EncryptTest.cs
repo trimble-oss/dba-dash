@@ -1,6 +1,7 @@
 ﻿using DBADash;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace DBADashConfig.Test
 {
@@ -63,10 +64,12 @@ namespace DBADashConfig.Test
         [TestMethod]
         public void EncryptionShouldFailWithoutPassword()
         {
+            EncryptedConfig.ClearPassword();
             var cfg = new CollectionConfig
             {
                 EncryptionOption = BasicConfig.EncryptionOptions.Encrypt
             };
+
             Assert.ThrowsException<ArgumentNullException>(() => cfg.Serialize(BasicConfig.EncryptionOptions.Encrypt));
         }
     }

@@ -16,7 +16,8 @@ namespace DBADashConfig.Test
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            Assert.IsFalse(File.Exists(Initialize.ServiceConfigPath));
+            Helper.CleanupConfig();
+            Assert.IsFalse(File.Exists(Helper.ServiceConfigPath));
         }
 
         [ClassCleanup]

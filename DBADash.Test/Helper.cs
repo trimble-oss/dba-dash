@@ -2,16 +2,19 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 
 namespace DBADashConfig.Test
 {
     internal class Helper
     {
+        public static string AppPath => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
+        public static string ServiceConfigPath => Path.Combine(AppPath, "ServiceConfig.json");
+
         public static string GetConfigJson()
         {
-            return File.ReadAllText(Initialize.ServiceConfigPath);
+            return File.ReadAllText(ServiceConfigPath);
         }
-
 
         public static void RunProcess(ProcessStartInfo psi)
         {
@@ -38,7 +41,7 @@ namespace DBADashConfig.Test
 
         public static int GetConnectionCount()
         {
-            if (File.Exists(Initialize.ServiceConfigPath))
+            if (File.Exists(ServiceConfigPath))
             {
                 string json = GetConfigJson();
                 var cfg = DBADash.CollectionConfig.Deserialize(json);
@@ -60,6 +63,13 @@ namespace DBADashConfig.Test
                 ApplicationName = "DBADash"
             };
             return builder;
+        }
+
+        public static void CleanupConfig()
+        {
+            if (!File.Exists(ServiceConfigPath)) return;
+            Console.WriteLine("Delete existing config");
+            File.Delete(ServiceConfigPath);
         }
     }
 }

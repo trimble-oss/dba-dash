@@ -75,6 +75,10 @@ namespace DBADashConfig
             HelpText = "Use in combination with --DecryptionPassword.  Password will be saved for the current user, protected with DPAPI. ")]
         public bool SavePassword { get; set; }
 
+        [Option("RetentionDays", Required = false,
+            HelpText = "Use with action SetConfigFileBackupRetention.")]
+        public int RetentionDays { get; set; }
+
         public enum CommandLineActionOption
         {
             Add,
@@ -88,7 +92,8 @@ namespace DBADashConfig
             Update,
             SetServiceName,
             Encrypt,
-            Decrypt
+            Decrypt,
+            SetConfigFileBackupRetention
         }
     }
 }

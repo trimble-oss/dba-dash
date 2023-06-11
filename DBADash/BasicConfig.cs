@@ -75,7 +75,7 @@ namespace DBADash
             if (backup && File.Exists(JsonConfigPath))
             {
                 var movePath = GetUniqueFilename(JsonConfigPath + ".backup_" + DateTime.Now.ToString("yyyyMMddHHmmss"));
-                File.Move(JsonConfigPath, movePath);
+                File.Copy(JsonConfigPath, movePath, false);
             }
             File.WriteAllText(JsonConfigPath, config);
         }
@@ -116,18 +116,15 @@ namespace DBADash
         {
             if (retentionDays < 0) return;
             Log.Information("Remove configs older than {retentionDays} days", retentionDays);
-            foreach (string file in Directory.GetFiles(AppContext.BaseDirectory, "ServiceConfig.json.backup*"))
-            {
-                var dateString = file[^14..];
-                DateTime backupDate;
-                if (!DateTime.TryParseExact(dateString, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.None,
-                        out backupDate)) continue;
-                if (backupDate < DateTime.Now.AddDays(-retentionDays))
+
+            Directory.EnumerateFiles(AppContext.BaseDirectory, "ServiceConfig.json*.backup*")
+                .Where(file => (File.GetCreationTime(file)) < DateTime.Now.AddDays(-retentionDays))
+                .ToList()
+                .ForEach(file =>
                 {
-                    Log.Information("Remove old config {file}", file);
                     File.Delete(file);
-                }
-            }
+                    Log.Information("Remove old config {file}", file);
+                });
         }
 
         /// <summary>
