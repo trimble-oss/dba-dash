@@ -240,7 +240,7 @@
     <PackageReference Include="DiffPlex" Version="1.7.1" />
     <PackageReference Include="DiffPlex.Wpf" Version="1.4.0" />
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.20.0" />
-    <PackageReference Include="Humanizer.Core" Version="2.14.1" />
+    <PackageReference Include="Humanizer" Version="2.14.1" />
     <PackageReference Include="LiveCharts" Version="0.9.7" />
     <PackageReference Include="LiveCharts.WinForms" Version="0.9.7.1" />
     <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
