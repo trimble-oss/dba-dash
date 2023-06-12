@@ -8,7 +8,7 @@ namespace DBADashConfig
         [Option('c', "connection", Required = false, HelpText = "The connection string for the SQL Instance you want to monitor.  e.g. \"Data Source = MYSERVER;Integrated Security=True;Encrypt=True;Trust Server Certificate=True\"")]
         public string ConnectionString { get; set; } = "";
 
-        [Option('a', "action", Required = true, HelpText = "Action : Add, Remove, SetDestination, List, Count, GetServiceName, CheckForUpdates, Update, SetServiceName")]
+        [Option('a', "action", Required = true, HelpText = "Actions:\nAdd - Add a source connection to monitor. (Use -c to specify a connection string)\nRemove - Remove a source connection\nSetDestination - Connection to the repository database\nList - List source connections\nCount - Count source connections\nGetServiceName - Return the name of the service\nCheckForUpdates - Check if a new version of DBA Dash is available\nUpdate - Update to the latest version of DBA Dash\nSetServiceName - Change the name of the DBA Dash service\nEncrypt - Encrypt the config file with a password (--EncryptionPassword)\nDecrypt - Decrypt the config file. --DecryptionPassword can be used if required.\nSetConfigFileBackupRetention - Specify how long to keep config file backups. --RetentionDays")]
         public CommandLineActionOption Option { get; set; }
 
         [Option('r', "Replace", Required = false, HelpText = "Option to replace the existing connection if it already exists", Default = false)]
