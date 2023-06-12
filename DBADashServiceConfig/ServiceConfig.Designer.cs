@@ -74,8 +74,8 @@
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.lblHHmm = new System.Windows.Forms.Label();
             this.numAzureScanInterval = new System.Windows.Forms.NumericUpDown();
-            this.label10 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
             this.tabSource = new System.Windows.Forms.TabPage();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.tabSrcOptions = new System.Windows.Forms.TabControl();
@@ -652,9 +652,9 @@
             this.groupBox4.Controls.Add(this.lblHHmm);
             this.groupBox4.Controls.Add(this.bttnScanNow);
             this.groupBox4.Controls.Add(this.numAzureScanInterval);
-            this.groupBox4.Controls.Add(this.label10);
             this.groupBox4.Controls.Add(this.label11);
             this.groupBox4.Controls.Add(this.chkScanEvery);
+            this.groupBox4.Controls.Add(this.label10);
             this.groupBox4.Location = new System.Drawing.Point(8, 231);
             this.groupBox4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox4.Name = "groupBox4";
@@ -667,10 +667,11 @@
             // lblHHmm
             // 
             this.lblHHmm.AutoSize = true;
-            this.lblHHmm.Location = new System.Drawing.Point(586, 72);
+            this.lblHHmm.Location = new System.Drawing.Point(247, 103);
             this.lblHHmm.Name = "lblHHmm";
-            this.lblHHmm.Size = new System.Drawing.Size(0, 20);
+            this.lblHHmm.Size = new System.Drawing.Size(63, 20);
             this.lblHHmm.TabIndex = 29;
+            this.lblHHmm.Text = "00:00:00";
             // 
             // numAzureScanInterval
             // 
@@ -696,14 +697,6 @@
             this.numAzureScanInterval.TabIndex = 28;
             this.numAzureScanInterval.ValueChanged += new System.EventHandler(this.NumAzureScanInterval_ValueChanged);
             // 
-            // label10
-            // 
-            this.label10.Location = new System.Drawing.Point(586, 24);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(503, 102);
-            this.label10.TabIndex = 24;
-            this.label10.Text = resources.GetString("label10.Text");
-            // 
             // label11
             // 
             this.label11.AutoSize = true;
@@ -712,6 +705,15 @@
             this.label11.Size = new System.Drawing.Size(62, 20);
             this.label11.TabIndex = 27;
             this.label11.Text = "seconds";
+            // 
+            // label10
+            // 
+            this.label10.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
+            this.label10.Location = new System.Drawing.Point(585, 38);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(504, 85);
+            this.label10.TabIndex = 24;
+            this.label10.Text = resources.GetString("label10.Text");
             // 
             // tabSource
             // 
