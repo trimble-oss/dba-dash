@@ -16,6 +16,7 @@ namespace DBADash
         public const string GITHUB_APP = "dba-dash";
         public const string GITHUB_BRANCH = "main";
         public const string GITHUB_UPGRADESCRIPT = "UpgradeDBADash.ps1";
+        public static string GITHUB_UPGRADESCRIPTPATH => Path.Combine(ApplicationPath, GITHUB_UPGRADESCRIPT);
         public const string GITHUB_SCRIPTPATH = "Scripts/";
 
         public const string AppURL = "http://dbadash.com";
@@ -55,7 +56,7 @@ namespace DBADash
             var client = new GitHubClient(new ProductHeaderValue(GITHUB_APP));
             var upgradeScript = await client.Repository.Content.GetRawContentByRef(GITHUB_OWNER, GITHUB_REPO, GITHUB_SCRIPTPATH + GITHUB_UPGRADESCRIPT, GITHUB_BRANCH);
 
-            System.IO.File.WriteAllBytes(GITHUB_UPGRADESCRIPT, upgradeScript);
+            await System.IO.File.WriteAllBytesAsync(GITHUB_UPGRADESCRIPTPATH, upgradeScript);
             // Note: Setting working directory via ProcessStartInfo doesn't work when using "runas" verb.
             var psi = new ProcessStartInfo()
             {
