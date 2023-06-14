@@ -115,20 +115,10 @@ $newVersion = [System.Version]::Parse($Tag + ".0" * (4-($Tag.Split(".")).Count))
 $path = [System.IO.Path]::Combine((Get-Location),"DBADash.dll")
 $existingVersion=[System.Version](Get-Item $path).VersionInfo.ProductVersion
 
-if (Test-Path -Path "ServiceConfig.json"){
-    # Create object from the config file.
-    $config = Get-Content -Raw -Path "ServiceConfig.json" | ConvertFrom-Json
-    # Get the name of the service so we can stop/start it.
-    $serviceName = $config.ServiceName
-}
+$servicePath = [System.IO.Path]::Combine((Get-Location),"DBADashService.exe")
 
-# Check if the service name specified exists (user might not have installed as service yet)
-if ($serviceName -eq $null){
-    $serviceExists = $false
-}
-else{
-    $serviceExists = (Get-Service -Name $serviceName -ErrorAction SilentlyContinue) -ne $null 
-}
+$serviceName = (Get-WmiObject -Class Win32_Service | Where-Object { $_.PathName -ilike "*$servicePath*" } | Select-Object Name).Name
+
 $versionCompare = $existingVersion.CompareTo($newVersion) 
 
 $statusColour = "Cyan" # Default (ahead of release)
@@ -148,13 +138,11 @@ if(Test-Path $upgradeFile){
     Write-Host "Warning - a previous upgrade operation didn't complete successfully.  Upgrade will be attempted" -ForegroundColor DarkYellow
     $ForceUpgrade=$true
 }
-$servicePath = [System.IO.Path]::Combine((Get-Location),"DBADashService.exe")
 
 # Check to see if this is a deployment of GUI only to see which binary we need
 if (Test-Path $servicePath){
     Write-Host "Installation Type: Agent"
     Write-Host "ServiceName: $serviceName"
-    Write-Host "Service Exists: $serviceExists"
     if($Tag -eq "2.11"){
         $zip =  "DBADash_20220113.zip" # 2.11 was a manual release and doesn't conform to naming format
     }
@@ -171,7 +159,6 @@ else{
         $zip = "DBADash_GUI_Only_$Tag.zip"
     }
 }
-
 
 # Check if we need to upgrade
 if ($versionCompare -eq -1 -or $ForceUpgrade){  
@@ -207,7 +194,7 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
     }
 
     # Take service offline for install if it exists
-    if($serviceExists){
+    if($serviceName -ne $null){
         Write-Host "Stopping Service: $serviceName"
         Stop-Service -Name $serviceName -ErrorAction Stop
     }
@@ -216,7 +203,9 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
     Get-Process -Name DBADash -ErrorAction Ignore | Where-Object { $_.Path -like (Get-Location).Path + "*" } | Stop-Process -Force
     Get-Process -Name DBADashServiceConfigTool -ErrorAction Ignore | Where-Object { $_.Path -like (Get-Location).Path + "*" } | Stop-Process -Force
     Get-Process -Name DBADashConfig -ErrorAction Ignore | Where-Object { $_.Path -like (Get-Location).Path + "*" } | Stop-Process -Force
-    
+    # Service should already be stopped but this will ensure the process isn't running.  
+    Get-Process -Name DBADashService -ErrorAction Ignore | Where-Object { $_.Path -like (Get-Location).Path + "*" } | Stop-Process -Force
+
     # Wait for file locks to be released
     Start-Sleep -Seconds 2
 
@@ -231,7 +220,7 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
     Remove-Item $upgradeFile # Item is removed on successful file extract
 
     # If service exists, start it back up
-    if($serviceExists){
+    if($serviceName -ne $null){
         Write-Host "Start Service"
         Start-Service $serviceName
     }
