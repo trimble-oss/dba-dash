@@ -62,7 +62,7 @@ namespace DBADash
 
         public static BasicConfig Deserialize(string json)
         {
-            return JsonConvert.DeserializeObject<BasicConfig>(json);
+            return Deserialize<BasicConfig>(json);
         }
 
         /// <summary>
