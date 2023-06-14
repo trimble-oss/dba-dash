@@ -213,9 +213,9 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
     }
     # Stop the GUI if running - we don't want locks on any files
     Write-Host "Stop processes"
-    Get-Process -Name DBADash -ErrorAction Ignore | Where-Object { $_.Path -like (Get-Location).Path + "*" } | Stop-Process
-    Get-Process -Name DBADashServiceConfigTool -ErrorAction Ignore | Where-Object { $_.Path -like (Get-Location).Path + "*" } | Stop-Process
-    Get-Process -Name DBADashConfig -ErrorAction Ignore | Where-Object { $_.Path -like (Get-Location).Path + "*" } | Stop-Process
+    Get-Process -Name DBADash -ErrorAction Ignore | Where-Object { $_.Path -like (Get-Location).Path + "*" } | Stop-Process -Force
+    Get-Process -Name DBADashServiceConfigTool -ErrorAction Ignore | Where-Object { $_.Path -like (Get-Location).Path + "*" } | Stop-Process -Force
+    Get-Process -Name DBADashConfig -ErrorAction Ignore | Where-Object { $_.Path -like (Get-Location).Path + "*" } | Stop-Process -Force
     
     # Wait for file locks to be released
     Start-Sleep -Seconds 2
