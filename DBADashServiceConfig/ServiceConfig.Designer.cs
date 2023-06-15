@@ -101,12 +101,13 @@
             this.txtGrantThreshold = new System.Windows.Forms.TextBox();
             this.label16 = new System.Windows.Forms.Label();
             this.tabAddConnectionOther = new System.Windows.Forms.TabPage();
-            this.label18 = new System.Windows.Forms.Label();
+            this.chkWriteToSecondaryDestinations = new System.Windows.Forms.CheckBox();
+            this.lblIOCollectionLevel = new System.Windows.Forms.Label();
             this.cboIOLevel = new System.Windows.Forms.ComboBox();
             this.lnkExample = new System.Windows.Forms.LinkLabel();
             this.lnkNone = new System.Windows.Forms.LinkLabel();
             this.lnkALL = new System.Windows.Forms.LinkLabel();
-            this.label8 = new System.Windows.Forms.Label();
+            this.lblSchemaSnapshotDBs = new System.Windows.Forms.Label();
             this.txtSnapshotDBs = new System.Windows.Forms.TextBox();
             this.chkNoWMI = new System.Windows.Forms.CheckBox();
             this.bttnAdd = new System.Windows.Forms.Button();
@@ -257,7 +258,7 @@
             // pictureBox3
             // 
             this.pictureBox3.Image = global::DBADashServiceConfig.Properties.Resources.Warning_yellow_7231_16x16;
-            this.pictureBox3.Location = new System.Drawing.Point(679, 123);
+            this.pictureBox3.Location = new System.Drawing.Point(679, 91);
             this.pictureBox3.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.pictureBox3.Name = "pictureBox3";
             this.pictureBox3.Size = new System.Drawing.Size(16, 16);
@@ -272,7 +273,7 @@
             this.chkScriptJobs.AutoSize = true;
             this.chkScriptJobs.Checked = true;
             this.chkScriptJobs.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkScriptJobs.Location = new System.Drawing.Point(9, 42);
+            this.chkScriptJobs.Location = new System.Drawing.Point(146, 8);
             this.chkScriptJobs.Name = "chkScriptJobs";
             this.chkScriptJobs.Size = new System.Drawing.Size(96, 20);
             this.chkScriptJobs.TabIndex = 28;
@@ -1015,14 +1016,15 @@
             // 
             // tabAddConnectionOther
             // 
-            this.tabAddConnectionOther.Controls.Add(this.label18);
+            this.tabAddConnectionOther.Controls.Add(this.chkWriteToSecondaryDestinations);
+            this.tabAddConnectionOther.Controls.Add(this.lblIOCollectionLevel);
             this.tabAddConnectionOther.Controls.Add(this.cboIOLevel);
             this.tabAddConnectionOther.Controls.Add(this.chkScriptJobs);
             this.tabAddConnectionOther.Controls.Add(this.pictureBox3);
             this.tabAddConnectionOther.Controls.Add(this.lnkExample);
             this.tabAddConnectionOther.Controls.Add(this.lnkNone);
             this.tabAddConnectionOther.Controls.Add(this.lnkALL);
-            this.tabAddConnectionOther.Controls.Add(this.label8);
+            this.tabAddConnectionOther.Controls.Add(this.lblSchemaSnapshotDBs);
             this.tabAddConnectionOther.Controls.Add(this.txtSnapshotDBs);
             this.tabAddConnectionOther.Controls.Add(this.chkNoWMI);
             this.tabAddConnectionOther.Location = new System.Drawing.Point(4, 25);
@@ -1034,19 +1036,31 @@
             this.tabAddConnectionOther.Text = "Other";
             this.tabAddConnectionOther.UseVisualStyleBackColor = true;
             // 
-            // label18
+            // chkWriteToSecondaryDestinations
             // 
-            this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(9, 81);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(121, 16);
-            this.label18.TabIndex = 30;
-            this.label18.Text = "IO Collection Level:";
+            this.chkWriteToSecondaryDestinations.AutoSize = true;
+            this.chkWriteToSecondaryDestinations.Checked = true;
+            this.chkWriteToSecondaryDestinations.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkWriteToSecondaryDestinations.Location = new System.Drawing.Point(264, 8);
+            this.chkWriteToSecondaryDestinations.Name = "chkWriteToSecondaryDestinations";
+            this.chkWriteToSecondaryDestinations.Size = new System.Drawing.Size(216, 20);
+            this.chkWriteToSecondaryDestinations.TabIndex = 31;
+            this.chkWriteToSecondaryDestinations.Text = "Write to secondary destinations";
+            this.chkWriteToSecondaryDestinations.UseVisualStyleBackColor = true;
+            // 
+            // lblIOCollectionLevel
+            // 
+            this.lblIOCollectionLevel.AutoSize = true;
+            this.lblIOCollectionLevel.Location = new System.Drawing.Point(9, 49);
+            this.lblIOCollectionLevel.Name = "lblIOCollectionLevel";
+            this.lblIOCollectionLevel.Size = new System.Drawing.Size(121, 16);
+            this.lblIOCollectionLevel.TabIndex = 30;
+            this.lblIOCollectionLevel.Text = "IO Collection Level:";
             // 
             // cboIOLevel
             // 
             this.cboIOLevel.FormattingEnabled = true;
-            this.cboIOLevel.Location = new System.Drawing.Point(224, 78);
+            this.cboIOLevel.Location = new System.Drawing.Point(224, 46);
             this.cboIOLevel.Name = "cboIOLevel";
             this.cboIOLevel.Size = new System.Drawing.Size(135, 24);
             this.cboIOLevel.TabIndex = 29;
@@ -1055,7 +1069,7 @@
             // 
             this.lnkExample.AutoSize = true;
             this.lnkExample.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
-            this.lnkExample.Location = new System.Drawing.Point(613, 146);
+            this.lnkExample.Location = new System.Drawing.Point(613, 114);
             this.lnkExample.Name = "lnkExample";
             this.lnkExample.Size = new System.Drawing.Size(60, 16);
             this.lnkExample.TabIndex = 25;
@@ -1067,7 +1081,7 @@
             // 
             this.lnkNone.AutoSize = true;
             this.lnkNone.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
-            this.lnkNone.Location = new System.Drawing.Point(564, 146);
+            this.lnkNone.Location = new System.Drawing.Point(564, 114);
             this.lnkNone.Name = "lnkNone";
             this.lnkNone.Size = new System.Drawing.Size(40, 16);
             this.lnkNone.TabIndex = 24;
@@ -1079,7 +1093,7 @@
             // 
             this.lnkALL.AutoSize = true;
             this.lnkALL.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
-            this.lnkALL.Location = new System.Drawing.Point(535, 146);
+            this.lnkALL.Location = new System.Drawing.Point(535, 114);
             this.lnkALL.Name = "lnkALL";
             this.lnkALL.Size = new System.Drawing.Size(22, 16);
             this.lnkALL.TabIndex = 23;
@@ -1087,18 +1101,18 @@
             this.lnkALL.Text = "All";
             this.lnkALL.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkALL_LinkClicked);
             // 
-            // label8
+            // lblSchemaSnapshotDBs
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(9, 123);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(190, 16);
-            this.label8.TabIndex = 20;
-            this.label8.Text = "Schema Snapshot Databases:";
+            this.lblSchemaSnapshotDBs.AutoSize = true;
+            this.lblSchemaSnapshotDBs.Location = new System.Drawing.Point(9, 91);
+            this.lblSchemaSnapshotDBs.Name = "lblSchemaSnapshotDBs";
+            this.lblSchemaSnapshotDBs.Size = new System.Drawing.Size(190, 16);
+            this.lblSchemaSnapshotDBs.TabIndex = 20;
+            this.lblSchemaSnapshotDBs.Text = "Schema Snapshot Databases:";
             // 
             // txtSnapshotDBs
             // 
-            this.txtSnapshotDBs.Location = new System.Drawing.Point(224, 120);
+            this.txtSnapshotDBs.Location = new System.Drawing.Point(224, 88);
             this.txtSnapshotDBs.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.txtSnapshotDBs.Name = "txtSnapshotDBs";
             this.txtSnapshotDBs.Size = new System.Drawing.Size(449, 22);
@@ -1461,14 +1475,14 @@
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.CheckBox chkCollectSessionWaits;
         private System.Windows.Forms.TabPage tabAddConnectionOther;
-        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Label lblIOCollectionLevel;
         private System.Windows.Forms.ComboBox cboIOLevel;
         private System.Windows.Forms.CheckBox chkScriptJobs;
         private System.Windows.Forms.PictureBox pictureBox3;
         private System.Windows.Forms.LinkLabel lnkExample;
         private System.Windows.Forms.LinkLabel lnkNone;
         private System.Windows.Forms.LinkLabel lnkALL;
-        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label lblSchemaSnapshotDBs;
         private System.Windows.Forms.TextBox txtSnapshotDBs;
         private System.Windows.Forms.CheckBox chkNoWMI;
         private System.Windows.Forms.Button bttnAdd;
@@ -1499,6 +1513,7 @@
         private System.Windows.Forms.Label lblConfigFileRetention;
         private System.Windows.Forms.NumericUpDown numBackupRetention;
         private System.Windows.Forms.LinkLabel lnkDeleteConfigBackups;
+        private System.Windows.Forms.CheckBox chkWriteToSecondaryDestinations;
     }
 }
 
