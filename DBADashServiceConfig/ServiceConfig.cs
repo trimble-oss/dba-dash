@@ -77,7 +77,8 @@ namespace DBADashServiceConfig
                     SchemaSnapshotDBs = schemaSnapshotDBs,
                     CollectSessionWaits = chkCollectSessionWaits.Checked,
                     ScriptAgentJobs = chkScriptJobs.Checked,
-                    IOCollectionLevel = (DBADashSource.IOCollectionLevels)cboIOLevel.SelectedItem
+                    IOCollectionLevel = (DBADashSource.IOCollectionLevels)cboIOLevel.SelectedItem,
+                    WriteToSecondaryDestinations = chkWriteToSecondaryDestinations.Checked
                 };
                 bool validated = ValidateSource(sourceString);
 
@@ -304,6 +305,7 @@ namespace DBADashServiceConfig
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "ScriptAgentJobs", HeaderText = "Script Agent Jobs" });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "HasCustomSchedule", HeaderText = "Custom Schedule" });
             dgvConnections.Columns.Add(new DataGridViewComboBoxColumn() { DataPropertyName = "IOCollectionLevel", HeaderText = "IO Collection Level", DataSource = Enum.GetValues(typeof(DBADashSource.IOCollectionLevels)) });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "WriteToSecondaryDestinations", HeaderText = "Write to Secondary Destinations" });
             dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Schedule", HeaderText = "Schedule", Text = "Schedule", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
             dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Edit", HeaderText = "Edit", Text = "Edit", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
             dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Delete", HeaderText = "Delete", Text = "Delete", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
@@ -979,6 +981,15 @@ namespace DBADashServiceConfig
             grpRunningQueryThreshold.Enabled = isSql && chkCollectPlans.Checked;
             chkNoWMI.Enabled = isSql;
             chkScriptJobs.Enabled = isSql;
+            cboIOLevel.Enabled = isSql;
+            txtSnapshotDBs.Enabled = isSql;
+            lblIOCollectionLevel.Enabled = isSql;
+            lblSchemaSnapshotDBs.Enabled = isSql;
+            chkCollectSessionWaits.Enabled = isSql;
+            lnkALL.Enabled = isSql;
+            lnkExample.Enabled = isSql;
+            lnkNone.Enabled = isSql;
+            chkScriptJobs.Enabled = isSql;
         }
 
         private void ChkLogInternalPerfCounters_CheckedChanged(object sender, EventArgs e)
@@ -1116,8 +1127,18 @@ namespace DBADashServiceConfig
             for (int i = e.RowIndex; i < e.RowIndex + e.RowCount; i++)
             {
                 var src = (DBADashSource)dgvConnections.Rows[i].DataBoundItem;
-                dgvConnections.Rows[i].ReadOnly = src.SourceConnection.Type != ConnectionType.SQL;
-                dgvConnections.Rows[i].DefaultCellStyle.BackColor = src.SourceConnection.Type == ConnectionType.SQL ? Color.White : Color.Silver;
+                SetCellsReadOnly(i, src.SourceConnection.Type);
+            }
+        }
+
+        private void SetCellsReadOnly(int row, ConnectionType connectionType)
+        {
+            if (connectionType == ConnectionType.SQL) return;
+            foreach (DataGridViewColumn col in dgvConnections.Columns)
+            {
+                var isReadOnly = !(col.DataPropertyName == "WriteToSecondaryDestinations" || col.Name is "Delete" or "Edit");
+                dgvConnections.Rows[row].Cells[col.Index].ReadOnly = isReadOnly;
+                dgvConnections.Rows[row].Cells[col.Index].Style.BackColor = isReadOnly ? Color.Silver : Color.White;
             }
         }
 

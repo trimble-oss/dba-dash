@@ -20,7 +20,10 @@ namespace DBADashService
             {
                 try
                 {
-                    using (var op = Operation.Begin("Write to destination {destination} from {source}", d.ConnectionForPrint, src.SourceConnection.ConnectionForPrint))
+                    if (!src.WriteToSecondaryDestinations &&
+                        d != SchedulerServiceConfig.Config.DestinationConnection) continue;
+                    using (var op = Operation.Begin("Write to destination {destination} from {source}",
+                               d.ConnectionForPrint, src.SourceConnection.ConnectionForPrint))
                     {
                         await Write(ds, d, fileName);
                         op.Complete();

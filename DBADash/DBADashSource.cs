@@ -27,7 +27,7 @@ namespace DBADash
         private Int32 slowQueryTargetMaxMemoryKB = -1;
         private bool persistXESessions = false;
         private bool useDualXESesion = true;
-
+        public bool WriteToSecondaryDestinations { get; set; } = true;
         public string ConnectionID { get; set; }
         public bool ScriptAgentJobs { get; set; } = true;
 
