@@ -155,7 +155,7 @@ namespace DBADashServiceConfig
                 }
             }
 
-            txtJson.Text = collectionConfig.Serialize();
+            SetJson();
             SetConnectionCount();
             SetDgv();
             RefreshEncryption();
@@ -272,7 +272,7 @@ namespace DBADashServiceConfig
 
         private void SaveChanges()
         {
-            txtJson.Text = collectionConfig.Serialize();
+            SetJson();
             collectionConfig.Save();
             originalJson = txtJson.Text;
             UpdateSaveButton();
@@ -441,21 +441,38 @@ namespace DBADashServiceConfig
             }
         }
 
+        private bool IsSetFromJson = false;
+
         private void SetFromJson(string json)
         {
-            collectionConfig = CollectionConfig.Deserialize(json);
-            txtDestination.Text = collectionConfig.DestinationConnection.EncryptedConnectionString;
-            chkScanAzureDB.Checked = collectionConfig.ScanForAzureDBs;
-            chkScanEvery.Checked = collectionConfig.ScanForAzureDBsInterval > 0;
-            numAzureScanInterval.Value = collectionConfig.ScanForAzureDBsInterval;
-            chkAutoUpgradeRepoDB.Checked = collectionConfig.AutoUpdateDatabase;
-            chkLogInternalPerfCounters.Checked = collectionConfig.LogInternalPerformanceCounters;
-            chkDefaultIdentityCollection.Checked = !collectionConfig.IdentityCollectionThreshold.HasValue;
-            numIdentityCollectionThreshold.Value = collectionConfig.IdentityCollectionThreshold ?? DBCollector.DefaultIdentityCollectionThreshold;
-            numBackupRetention.Value = collectionConfig.ConfigBackupRetentionDays;
-            UpdateScanInterval();
-            SetDgv();
-            RefreshEncryption();
+            IsSetFromJson = true;
+            try
+            {
+                collectionConfig = CollectionConfig.Deserialize(json);
+                txtDestination.Text = collectionConfig.DestinationConnection.EncryptedConnectionString;
+                chkScanAzureDB.Checked = collectionConfig.ScanForAzureDBs;
+                chkScanEvery.Checked = collectionConfig.ScanForAzureDBsInterval > 0;
+                numAzureScanInterval.Value = collectionConfig.ScanForAzureDBsInterval;
+                chkAutoUpgradeRepoDB.Checked = collectionConfig.AutoUpdateDatabase;
+                chkLogInternalPerfCounters.Checked = collectionConfig.LogInternalPerformanceCounters;
+                chkDefaultIdentityCollection.Checked = !collectionConfig.IdentityCollectionThreshold.HasValue;
+                numIdentityCollectionThreshold.Value = collectionConfig.IdentityCollectionThreshold ??
+                                                       DBCollector.DefaultIdentityCollectionThreshold;
+                numBackupRetention.Value = collectionConfig.ConfigBackupRetentionDays;
+                UpdateScanInterval();
+                SetDgv();
+                RefreshEncryption();
+            }
+            finally
+            {
+                IsSetFromJson = false;
+            }
+        }
+
+        private void SetJson()
+        {
+            if (IsSetFromJson) return;
+            txtJson.Text = collectionConfig.Serialize();
         }
 
         private void SetDgv()
@@ -542,6 +559,7 @@ namespace DBADashServiceConfig
             catch (Exception ex)
             {
                 errorProvider1.SetError(txtJson, ex.Message);
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -667,7 +685,7 @@ namespace DBADashServiceConfig
             if (collectionConfig.Destination != txtDestination.Text)
             {
                 collectionConfig.Destination = txtDestination.Text;
-                txtJson.Text = collectionConfig.Serialize();
+                SetJson();
                 ValidateDestination();
                 RefreshEncryption();
             }
@@ -842,7 +860,7 @@ namespace DBADashServiceConfig
                 if (MessageBox.Show(String.Format("Found {0} new connections.  Add connections to config file?", newConnections.Count), "Scan", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     collectionConfig.AddConnections(newConnections);
-                    txtJson.Text = collectionConfig.Serialize();
+                    SetJson();
                     SetConnectionCount();
                     SetDgv();
                 }
@@ -852,13 +870,13 @@ namespace DBADashServiceConfig
         private void ChkScanAzureDB_CheckedChanged(object sender, EventArgs e)
         {
             collectionConfig.ScanForAzureDBs = chkScanAzureDB.Checked;
-            txtJson.Text = collectionConfig.Serialize();
+            SetJson();
         }
 
         private void ChkAutoUpgradeRepoDB_CheckedChanged(object sender, EventArgs e)
         {
             collectionConfig.AutoUpdateDatabase = chkAutoUpgradeRepoDB.Checked;
-            txtJson.Text = collectionConfig.Serialize();
+            SetJson();
         }
 
         private void ChkScanEvery_CheckedChanged(object sender, EventArgs e)
@@ -873,7 +891,7 @@ namespace DBADashServiceConfig
             }
             collectionConfig.ScanForAzureDBsInterval = Convert.ToInt32(numAzureScanInterval.Value);
             UpdateScanInterval();
-            txtJson.Text = collectionConfig.Serialize();
+            SetJson();
         }
 
         private void UpdateScanInterval()
@@ -887,7 +905,7 @@ namespace DBADashServiceConfig
             chkScanEvery.Checked = numAzureScanInterval.Value > 0;
             collectionConfig.ScanForAzureDBsInterval = Convert.ToInt32(numAzureScanInterval.Value);
             UpdateScanInterval();
-            txtJson.Text = collectionConfig.Serialize();
+            SetJson();
         }
 
         private void LnkCronBuilder_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -995,7 +1013,7 @@ namespace DBADashServiceConfig
         private void ChkLogInternalPerfCounters_CheckedChanged(object sender, EventArgs e)
         {
             collectionConfig.LogInternalPerformanceCounters = chkLogInternalPerfCounters.Checked;
-            txtJson.Text = collectionConfig.Serialize();
+            SetJson();
         }
 
         private void BttnSchedule_Click(object sender, EventArgs e)
@@ -1009,7 +1027,7 @@ namespace DBADashServiceConfig
             if (frm.DialogResult == DialogResult.OK)
             {
                 collectionConfig.CollectionSchedules = frm.ConfiguredSchedule;
-                txtJson.Text = collectionConfig.Serialize();
+                SetJson();
             }
         }
 
@@ -1021,7 +1039,7 @@ namespace DBADashServiceConfig
         private void UpdateFromGrid()
         {
             collectionConfig.SourceConnections = (List<DBADashSource>)((BindingSource)dgvConnections.DataSource).DataSource;
-            txtJson.Text = collectionConfig.Serialize();
+            SetJson();
             SetConnectionCount();
             RefreshEncryption();
         }
@@ -1234,13 +1252,13 @@ namespace DBADashServiceConfig
         {
             numIdentityCollectionThreshold.Enabled = !chkDefaultIdentityCollection.Checked;
             collectionConfig.IdentityCollectionThreshold = chkDefaultIdentityCollection.Checked ? null : (int)numIdentityCollectionThreshold.Value;
-            txtJson.Text = collectionConfig.Serialize();
+            SetJson();
         }
 
         private void NumIdentityCollectionThreshold_ValueChanged(object sender, EventArgs e)
         {
             collectionConfig.IdentityCollectionThreshold = chkDefaultIdentityCollection.Checked ? null : (int)numIdentityCollectionThreshold.Value;
-            txtJson.Text = collectionConfig.Serialize();
+            SetJson();
         }
 
         private void bttnAWS_Click(object sender, EventArgs e)
@@ -1258,7 +1276,7 @@ namespace DBADashServiceConfig
                 collectionConfig.SecretKey = frm.AWSSecretKet;
                 collectionConfig.AccessKey = frm.AWSAccessKey;
             }
-            txtJson.Text = collectionConfig.Serialize();
+            SetJson();
             RefreshEncryption();
         }
 
@@ -1298,7 +1316,7 @@ namespace DBADashServiceConfig
         private void NumBackupRetention_ValueChanged(object sender, EventArgs e)
         {
             collectionConfig.ConfigBackupRetentionDays = (int)numBackupRetention.Value;
-            txtJson.Text = collectionConfig.Serialize();
+            SetJson();
         }
 
         private void LnkDeleteConfigBackups_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
