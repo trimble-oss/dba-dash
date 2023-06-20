@@ -277,8 +277,9 @@ namespace DBADashGUI
                     statusColumns["JobStatus"] = true;
                 }
                 row["IsFocusedRow"] = isFocusedRow;
+                lastRefresh = (DateTime)row["RefreshDate"];
             }
-            dgvSummary.Invoke(() => SetStatusColumnVisibility());
+            dgvSummary.Invoke(SetStatusColumnVisibility);
             dgvSummary.Invoke((Action)(() => colHidden.Visible = ShowHidden));
 
             dv = new DataView(dt, SummaryRowFilter, "Instance", DataViewRowState.CurrentRows);
@@ -288,7 +289,7 @@ namespace DBADashGUI
                 dgvSummary.AutoResizeColumn(Instance.Index, DataGridViewAutoSizeColumnMode.DisplayedCells);
             }
             ));
-            lastRefresh = DateTime.UtcNow;
+
             toolStrip1.Invoke(() =>
             {
                 UpdateRefreshTime();
