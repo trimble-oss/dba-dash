@@ -1639,7 +1639,8 @@ FROM (VALUES('MemoryDumpCriticalThresholdHrs',48),
 		('WriteLatencyGoodThreshold',10),
 		('MinIOPsThreshold',100),
 		('CriticalWaitCriticalThreshold',1000),
-		('CriticalWaitWarningThreshold',10)
+		('CriticalWaitWarningThreshold',10),
+		('SummaryCacheDurationSec',300)
 		) T(SettingName,SettingValue)
 WHERE NOT EXISTS(
 	SELECT 1 

@@ -1,9 +1,13 @@
 ﻿CREATE PROC dbo.Summary_Get(
 	@InstanceIDs VARCHAR(MAX)=NULL,
-	@ShowHidden BIT=1
+	@ShowHidden BIT=1,
+	@GroupAzure BIT=1,
+	@ForceRefresh BIT = 0,
+	@SummaryCacheDurationSec INT=NULL
 )
 AS
 SET NOCOUNT ON
+SET XACT_ABORT ON
 CREATE TABLE #Instances(
 	InstanceID INT PRIMARY KEY
 )
@@ -26,6 +30,244 @@ BEGIN
 	SELECT value
 	FROM STRING_SPLIT(@InstanceIDs,',')
 END;
+
+IF @SummaryCacheDurationSec IS NULL
+BEGIN
+	SELECT @SummaryCacheDurationSec = CAST(SettingValue AS INT)
+	FROM dbo.Settings
+	WHERE SettingName = 'SummaryCacheDurationSec'
+END
+
+IF @SummaryCacheDurationSec>0
+BEGIN
+	
+
+	IF ISNULL((SELECT TOP(1) RefreshDate 
+		FROM dbo.Summary
+		),'19000101')  < DATEADD(s,-@SummaryCacheDurationSec,GETUTCDATE()) OR @ForceRefresh=1
+	BEGIN
+		BEGIN TRAN
+		IF ISNULL((SELECT TOP(1) RefreshDate 
+			FROM dbo.Summary WITH(UPDLOCK,TABLOCK)
+			),'19000101')  < DATEADD(s,-@SummaryCacheDurationSec,GETUTCDATE()) OR @ForceRefresh=1
+		BEGIN
+			PRINT 'Refreshing summary'	
+			DELETE dbo.Summary
+			INSERT INTO dbo.Summary
+			(
+				InstanceID,
+				Instance,
+				InstanceGroupName,
+				LogShippingStatus,
+				FullBackupStatus,
+				LogBackupStatus,
+				DiffBackupStatus,
+				DriveStatus,
+				FileFreeSpaceStatus,
+				LogFreeSpaceStatus,
+				JobStatus,
+				AGStatus,
+				DetectedCorruptionDateUtc,
+				CorruptionStatus,
+				CollectionErrorStatus,
+				CollectionErrorCount,
+				SnapshotAgeMin,
+				SnapshotAgeMax,
+				SnapshotAgeStatus,
+				sqlserver_start_time_utc,
+				UTCOffset,
+				sqlserver_uptime,
+				UptimeStatus,
+				UptimeWarningThreshold,
+				UptimeCriticalThreshold,
+				UptimeConfiguredLevel,
+				AdditionalUptime,
+				host_uptime,
+				host_start_time_utc,
+				MemoryDumpCount,
+				LastMemoryDump,
+				LastMemoryDumpUTC,
+				MemoryDumpStatus,
+				LastGoodCheckDBStatus,
+				LastGoodCheckDBCriticalCount,
+				LastGoodCheckDBWarningCount,
+				LastGoodCheckDBHealthyCount,
+				LastGoodCheckDBNACount,
+				OldestLastGoodCheckDBTime,
+				DaysSinceLastGoodCheckDB,
+				LastAlert,
+				LastCritical,
+				TotalAlerts,
+				AlertStatus,
+				AlertSnapshotDate,
+				IsAgentRunning,
+				IsAgentRunningStatus,
+				CustomCheckStatus,
+				MirroringStatus,
+				ElasticPoolStorageStatus,
+				PctMaxSizeStatus,
+				QueryStoreStatus,
+				DBMailStatus,
+				DBMailStatusDescription,
+				IdentityStatus,
+				MaxIdentityPctUsed,
+				ShowInSummary,
+				IsHidden,
+				DatabaseStateStatus,
+				RefreshDate,
+				IsAzure
+			)
+			EXEC dbo.Summary_Get @InstanceIDs = NULL,
+								 @ShowHidden = 1,
+								 @GroupAzure=0,
+								 @SummaryCacheDurationSec=0		
+		END
+		COMMIT
+	END
+	SELECT 	InstanceID,
+			Instance,
+			InstanceGroupName,
+			LogShippingStatus,
+			FullBackupStatus,
+			LogBackupStatus,
+			DiffBackupStatus,
+			DriveStatus,
+			FileFreeSpaceStatus,
+			LogFreeSpaceStatus,
+			JobStatus,
+			AGStatus,
+			DetectedCorruptionDateUtc,
+			CorruptionStatus,
+			CollectionErrorStatus,
+			CollectionErrorCount,
+			SnapshotAgeMin,
+			SnapshotAgeMax,
+			SnapshotAgeStatus,
+			sqlserver_start_time_utc,
+			UTCOffset,
+			sqlserver_uptime,
+			UptimeStatus,
+			UptimeWarningThreshold,
+			UptimeCriticalThreshold,
+			UptimeConfiguredLevel,
+			AdditionalUptime,
+			host_uptime,
+			host_start_time_utc,
+			MemoryDumpCount,
+			LastMemoryDump,
+			LastMemoryDumpUTC,
+			MemoryDumpStatus,
+			LastGoodCheckDBStatus,
+			LastGoodCheckDBCriticalCount,
+			LastGoodCheckDBWarningCount,
+			LastGoodCheckDBHealthyCount,
+			LastGoodCheckDBNACount,
+			OldestLastGoodCheckDBTime,
+			DaysSinceLastGoodCheckDB,
+			LastAlert,
+			LastCritical,
+			TotalAlerts,
+			AlertStatus,
+			AlertSnapshotDate,
+			IsAgentRunning,
+			IsAgentRunningStatus,
+			CustomCheckStatus,
+			MirroringStatus,
+			ElasticPoolStorageStatus,
+			PctMaxSizeStatus,
+			QueryStoreStatus,
+			DBMailStatus,
+			DBMailStatusDescription,
+			IdentityStatus,
+			MaxIdentityPctUsed,
+			ShowInSummary,
+			IsHidden,
+			DatabaseStateStatus,
+			RefreshDate,
+			CAST(0 AS BIT) AS IsAzure
+		FROM dbo.Summary S
+		WHERE EXISTS	(	
+						SELECT 1 
+						FROM #Instances T 
+						WHERE T.InstanceID = S.InstanceID
+						)
+		AND IsAzure=0
+		AND (S.ShowInSummary=1 OR @ShowHidden=1)
+		UNION ALL
+		SELECT 	NULL AS InstanceID,
+				Instance,
+				InstanceGroupName,
+				3 AS LogShippingStatus,
+				3 AS FullBackupStatus,
+				3 AS LogBackupStatus,
+				3 AS DiffBackupStatus,
+				3 AS DriveStatus,
+				ISNULL(MIN(NULLIF(S.FileFreeSpaceStatus,3)),3) AS FileFreeSpaceStatus,
+				ISNULL(MIN(NULLIF(S.LogFreeSpaceStatus,3)),3) AS LogFreeSpaceStatus,
+				3 AS JobStatus,
+				3 AS AGStatus,
+				NULL AS DetectedCorruptionDateUtc,
+				3 AS CorruptionStatus,
+				ISNULL(MIN(NULLIF(S.CollectionErrorStatus,3)),3) AS CollectionErrorStatus,
+				ISNULL(SUM(S.CollectionErrorCount),0) AS CollectionErrorCount,
+				MIN(S.SnapshotAgeMin) AS SnapshotAgeMin,
+				MAX(S.SnapshotAgeMax) AS SnapshotAgeMax,
+				ISNULL(MIN(NULLIF(S.SnapshotAgeStatus,3)),3) AS SnapshotAgeStatus,
+				NULL AS sqlserver_start_time_utc,
+				0 AS UTCOffset,
+				NULL AS sqlserver_uptime,
+				3 AS UptimeStatus,
+				NULL AS UptimeWarningThreshold,
+				NULL AS UptimeCriticalThreshold,
+				NULL AS UptimeConfiguredLevel,
+				NULL AS AdditionalUptime,
+				NULL AS host_uptime,
+				NULL AS	host_start_time_utc,
+				NULL AS MemoryDumpCount,
+				NULL AS LastMemoryDump,
+				NULL AS LastMemoryDumpUTC,
+				3 AS MemoryDumpStatus,
+				3 AS  LastGoodCheckDBStatus,
+				NULL AS LastGoodCheckDBCriticalCount,
+				NULL AS LastGoodCheckDBWarningCount,
+				NULL AS LastGoodCheckDBHealthyCount,
+				NULL AS LastGoodCheckDBNACount,
+				NULL AS OldestLastGoodCheckDBTime,
+				NULL AS DaysSinceLastGoodCheckDB,
+				NULL AS LastAlert,
+				NULL AS LastCritical,
+				NULL AS TotalAlerts,
+				3 AlertStatus,
+				NULL AS AlertSnapshotDate,
+				NULL AS IsAgentRunning,
+				3 AS IsAgentRunningStatus,
+				ISNULL(MIN(NULLIF(S.CustomCheckStatus,3)),3) AS CustomCheckStatus,
+				3 AS MirroringStatus,
+				ISNULL(MIN(NULLIF(S.ElasticPoolStorageStatus,3)),3)  AS ElasticPoolStorageStatus,
+				ISNULL(MIN(NULLIF(S.PctMaxSizeStatus,3)),3) AS PctMaxSizeStatus,
+				ISNULL(MIN(NULLIF(S.QueryStoreStatus,3)),3) AS QueryStoreStatus,
+				3 AS DBMailStatus,
+				NULL AS DBMailStatusDescription,
+				ISNULL(MIN(NULLIF(S.IdentityStatus,3)),3) IdentityStatus,
+				MAX(S.MaxIdentityPctUsed) AS MaxIdentityPctUsed,
+				CAST(MAX(CAST(S.ShowInSummary AS TINYINT)) AS BIT) AS ShowInSummary,
+				~CAST(MAX(CAST(S.ShowInSummary AS TINYINT)) AS BIT) AS IsHidden,
+				ISNULL(MIN(S.DatabaseStateStatus),4) AS DatabaseStateStatus,
+				MIN(S.RefreshDate) AS RefreshDate,
+				CAST(1 AS BIT) AS IsAzure
+		FROM dbo.Summary S
+		WHERE EXISTS	(	
+						SELECT 1 
+						FROM #Instances T 
+						WHERE T.InstanceID = S.InstanceID
+						)
+		AND IsAzure=1
+		AND (S.ShowInSummary=1 OR @ShowHidden=1)
+		GROUP BY Instance,InstanceGroupName
+
+
+		RETURN
+END
 
 DECLARE @ErrorsFrom DATETIME
 DECLARE @MemoryDumpWarningThresholdHrs INT 
@@ -369,7 +611,9 @@ SELECT I.InstanceID,
 	Ident.MaxIdentityPctUsed,
 	I.ShowInSummary,
 	~I.ShowInSummary IsHidden,
-	ISNULL(DBState.DatabaseStateStatus,4) AS DatabaseStateStatus
+	ISNULL(DBState.DatabaseStateStatus,4) AS DatabaseStateStatus,
+	GETUTCDATE() AS RefreshDate,
+	CAST(0 AS BIT) AS IsAzure
 FROM dbo.Instances I 
 LEFT JOIN #LogShippingStatus LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN #BackupStatus B ON I.InstanceID = B.InstanceID
@@ -400,7 +644,7 @@ AND I.IsActive=1
 AND I.EngineEdition<> 5 -- not azure
 AND (I.ShowInSummary=1 OR @ShowHidden=1)
 UNION ALL
-SELECT NULL AS InstanceID,
+SELECT CASE WHEN @GroupAzure=1 THEN NULL ELSE I.InstanceID END AS InstanceID,
 	I.Instance,
 	I.InstanceGroupName,
 	3 AS LogShippingStatus,
@@ -458,7 +702,9 @@ SELECT NULL AS InstanceID,
 	MAX(Ident.MaxIdentityPctUsed) AS MaxIdentityPctUsed,
 	CAST(MAX(CAST(I.ShowInSummary AS TINYINT)) AS BIT) AS ShowInSummary,
 	~CAST(MAX(CAST(I.ShowInSummary AS TINYINT)) AS BIT) AS IsHidden,
-	ISNULL(MIN(DBState.DatabaseStateStatus),4) AS DatabaseStateStatus
+	ISNULL(MIN(DBState.DatabaseStateStatus),4) AS DatabaseStateStatus,
+	GETUTCDATE() AS RefreshDate,
+	CAST(1 AS BIT) AS IsAzure
 FROM dbo.Instances I
 LEFT JOIN #CollectionErrorStatus errSummary  ON I.InstanceID = errSummary.InstanceID
 LEFT JOIN #FileGroupStatus F ON I.InstanceID = F.InstanceID
@@ -471,5 +717,5 @@ LEFT JOIN #DatabaseStateStatus DBState ON I.InstanceID = DBState.InstanceID
 WHERE I.EngineEdition=5 -- azure
 AND EXISTS(SELECT 1 FROM #Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
-GROUP BY I.Instance,I.InstanceGroupName
+GROUP BY CASE WHEN @GroupAzure=1 THEN NULL ELSE I.InstanceID END,I.Instance,I.InstanceGroupName
 HAVING (MAX(CAST(I.ShowInSummary AS TINYINT)) = 1 OR @ShowHidden=1)
