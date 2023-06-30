@@ -60,7 +60,7 @@ namespace DBADashGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
                 }
-                cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
+                cmd.CommandTimeout = Config.DefaultCommandTimeout;
 
                 DataTable dt = new();
                 da.Fill(dt);

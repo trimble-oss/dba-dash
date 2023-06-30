@@ -53,7 +53,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                 cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
+                cmd.CommandTimeout = Config.DefaultCommandTimeout;
                 SqlDataAdapter da = new(cmd);
                 DataTable dt = new();
                 da.Fill(dt);
@@ -98,7 +98,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                 cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
+                cmd.CommandTimeout = Config.DefaultCommandTimeout;
                 SqlDataAdapter da = new(cmd);
                 DataTable dt = new();
                 da.Fill(dt);

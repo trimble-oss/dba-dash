@@ -222,7 +222,7 @@ namespace DBADashGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
                 }
-                cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
+                cmd.CommandTimeout = Config.DefaultCommandTimeout;
                 var da = new SqlDataAdapter(cmd);
                 da.Fill(dt);
             }
@@ -408,7 +408,7 @@ namespace DBADashGUI.Performance
 
         private void TsIOSummary_Click(object sender, EventArgs e)
         {
-            if(SummaryForm != null)
+            if (SummaryForm != null)
             {
                 SummaryForm.Close();
             }
@@ -418,10 +418,9 @@ namespace DBADashGUI.Performance
                 DatabaseID = databaseid,
                 FromDate = DateRange.FromUTC,
                 ToDate = DateRange.ToUTC
-
             };
             SummaryForm.FormClosed += delegate { SummaryForm = null; };
-            
+
             SummaryForm.Show();
         }
 

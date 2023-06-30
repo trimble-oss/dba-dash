@@ -45,7 +45,7 @@ namespace DBADashGUI
         private DataTable GetDBSpace()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.DBSpace_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
+            using (var cmd = new SqlCommand("dbo.DBSpace_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout })
             using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
@@ -213,10 +213,10 @@ namespace DBADashGUI
         private void TsHistory_Click(object sender, EventArgs e)
         {
             int dbid = DatabaseID < 1 ? CommonData.GetDatabaseID(InstanceGroupName, DBName) : DatabaseID;
-            LoadDBSpaceHistoryView(dbid, DBName, InstanceGroupName,string.Empty);
+            LoadDBSpaceHistoryView(dbid, DBName, InstanceGroupName, string.Empty);
         }
 
-        private void LoadDBSpaceHistoryView(int databaseID,string dbName,string instanceGroupName,string fileName)
+        private void LoadDBSpaceHistoryView(int databaseID, string dbName, string instanceGroupName, string fileName)
         {
             DBSpaceHistoryViewForm?.Close();
             DBSpaceHistoryViewForm = new DBSpaceHistoryView
@@ -226,7 +226,7 @@ namespace DBADashGUI
                 DBName = dbName,
                 NumberFormat = NumberFormat,
                 Unit = Unit,
-                FileName=fileName
+                FileName = fileName
             };
             DBSpaceHistoryViewForm.FormClosed += delegate { DBSpaceHistoryViewForm = null; };
             DBSpaceHistoryViewForm.Show();
