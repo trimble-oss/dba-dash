@@ -54,7 +54,7 @@ namespace DBADashGUI.Performance
         public DataTable GetIOSummary(out string InstanceName, out string DatabaseName)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.IOSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
+            using (var cmd = new SqlCommand("dbo.IOSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout })
             using (var da = new SqlDataAdapter(cmd))
             {
                 var dt = new DataTable();

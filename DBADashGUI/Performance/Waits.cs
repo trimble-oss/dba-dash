@@ -116,7 +116,7 @@ namespace DBADashGUI.Performance
                     cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
                 }
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
+                cmd.CommandTimeout = Config.DefaultCommandTimeout;
                 DataTable dt = new();
                 da.Fill(dt);
                 return dt;
@@ -298,7 +298,7 @@ namespace DBADashGUI.Performance
             {
                 criticalWaitsOnlyToolStripMenuItem.Checked = false;
                 Metric.CriticalWaitsOnly = false;
-                WaitType = wt.EndsWith("%") || wt.Length == 0 ? wt : wt + "%";        
+                WaitType = wt.EndsWith("%") || wt.Length == 0 ? wt : wt + "%";
                 RefreshData();
             }
         }
@@ -329,14 +329,14 @@ namespace DBADashGUI.Performance
             RefreshChart();
         }
 
-        private static WaitSummaryDialog WaitSummaryForm=null;
+        private static WaitSummaryDialog WaitSummaryForm = null;
 
         private void TsTopWaits_Click(object sender, EventArgs e)
         {
             if (WaitSummaryForm == null)
             {
                 WaitSummaryForm = new WaitSummaryDialog();
-                WaitSummaryForm.FormClosed += delegate { WaitSummaryForm = null; };        
+                WaitSummaryForm.FormClosed += delegate { WaitSummaryForm = null; };
             }
             WaitSummaryForm.SetContext(new DBADashContext() { InstanceID = instanceID });
             WaitSummaryForm.Show();

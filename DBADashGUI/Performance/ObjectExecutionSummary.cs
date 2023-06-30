@@ -182,7 +182,7 @@ namespace DBADashGUI.Performance
         private DataTable GetObjectExecutionStatsSummary()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.ObjectExecutionStatsSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
+            using (var cmd = new SqlCommand("dbo.ObjectExecutionStatsSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout })
             using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();

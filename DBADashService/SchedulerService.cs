@@ -192,6 +192,22 @@ namespace DBADashService
             }
         }
 
+        private void ScheduleSummaryRefresh()
+        {
+            if (string.IsNullOrEmpty(config.SummaryRefreshCron)) return;
+            var i = 0;
+            foreach (DBADashConnection d in config.AllDestinations.Where(cn => cn.Type == ConnectionType.SQL))
+            {
+                i += 1;
+                IJobDetail job = JobBuilder.Create<SummaryRefreshJob>()
+                    .WithIdentity("SummaryRefreshJob" + i.ToString())
+                    .UsingJobData("ConnectionString", d.ConnectionString)
+                    .Build();
+                Log.Information("Schedule summary refresh on schedule {schedule}", config.SummaryRefreshCron);
+                ScheduleJob(config.SummaryRefreshCron, job);
+            }
+        }
+
         private async Task ScheduleAndRunAzureScanAsync()
         {
             if (config.ScanForAzureDBs)
@@ -319,6 +335,7 @@ namespace DBADashService
             Log.Information("Agent Version {version}", Assembly.GetEntryAssembly().GetName().Version);
 
             await ScheduleAndRunMaintenanceJobAsync();
+            ScheduleSummaryRefresh();
 
             await ScheduleCollectionsAsync(config.SourceConnections.ToList());
 

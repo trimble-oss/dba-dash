@@ -105,7 +105,7 @@ namespace DBADashGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
                 }
-                cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
+                cmd.CommandTimeout = Config.DefaultCommandTimeout;
                 using var rdr = cmd.ExecuteReader();
 
                 var sqlProcessValues = new ChartValues<DateTimePoint>();

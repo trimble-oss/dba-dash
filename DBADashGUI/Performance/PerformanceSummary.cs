@@ -145,7 +145,7 @@ namespace DBADashGUI.Performance
         private DataTable GetPerformanceCounters()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.PerformanceCounterSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
+            using (var cmd = new SqlCommand("dbo.PerformanceCounterSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout })
             using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
@@ -175,7 +175,7 @@ namespace DBADashGUI.Performance
         private DataTable GetPerformanceSummary()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.PerformanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
+            using (var cmd = new SqlCommand("dbo.PerformanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout })
             using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();

@@ -40,6 +40,7 @@ namespace DBADashGUI
         private bool ShowHidden => context.InstanceIDs.Count == 1 || Common.ShowHidden;
 
         private CorruptionViewer CorruptionFrm = null;
+        private bool WasRefreshed;
 
         private readonly Dictionary<string, string> tabMapping = new() { { "FullBackupStatus", "tabBackups" }, { "LogShippingStatus", "tabLogShipping" }, { "DiffBackupStatus", "tabBackups" }, { "LogBackupStatus", "tabBackups" }, { "DriveStatus", "tabDrives" },
                                                             { "JobStatus", "tabJobs" }, { "CollectionErrorStatus", "tabDBADashErrorLog"}, { "AGStatus", "tabAG" }, {"LastGoodCheckDBStatus","tabLastGood"}, {"SnapshotAgeStatus","tabCollectionDates"  },
@@ -56,7 +57,7 @@ namespace DBADashGUI
                                                             {"LogFreeSpaceStatus",false },{"DBMailStatus",false },{"IdentityStatus",false },{"IsAgentRunningStatus",false },{"DatabaseStateStatus",false} };
         }
 
-        private Task<DataTable> GetSummaryAsync()
+        private Task<DataTable> GetSummaryAsync(bool forceRefresh, DateTime? forceRefreshDate)
         {
             return Task<DataTable>.Factory.StartNew(() =>
             {
@@ -65,11 +66,18 @@ namespace DBADashGUI
                 using (var da = new SqlDataAdapter(cmd))
                 {
                     cn.Open();
-
+                    cmd.Parameters.AddWithValue("ForceRefresh", forceRefresh);
+                    cmd.Parameters.AddWithNullableValue("ForceRefreshDate", forceRefreshDate);
                     cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", context.InstanceIDs));
                     cmd.Parameters.AddWithValue("ShowHidden", ShowHidden);
+                    cmd.CommandTimeout = Config.SummaryCommandTimeout;
+                    var pWasRefreshed = new SqlParameter("WasRefreshed", SqlDbType.Bit)
+                    { Direction = ParameterDirection.Output };
+                    cmd.Parameters.Add(pWasRefreshed);
+
                     DataTable dt = new();
                     da.Fill(dt);
+                    WasRefreshed = (bool)pWasRefreshed.Value;
                     return dt;
                 }
             });
@@ -83,7 +91,7 @@ namespace DBADashGUI
 
         public void RefreshDataIfStale()
         {
-            if (DateTime.UtcNow.Subtract(lastRefresh).TotalMinutes > 5 || ParametersChanged)
+            if (DateTime.UtcNow.Subtract(lastRefresh).TotalSeconds > Config.ClientSummaryCacheDuration || ParametersChanged)
             {
                 RefreshData();
             }
@@ -99,7 +107,7 @@ namespace DBADashGUI
         private CancellationTokenSource cancellationTS = new();
         private bool savedLayoutLoaded;
 
-        public void RefreshData()
+        public void RefreshData(bool forceRefresh = false, DateTime? forceRefreshDate = null)
         {
             if (!savedLayoutLoaded)
             {
@@ -115,7 +123,7 @@ namespace DBADashGUI
             refreshInstanceIDs = new List<int>(context.InstanceIDs);
             refreshIncludeHidden = Common.ShowHidden;
             tsRefresh.Enabled = false;
-            _ = GetSummaryAsync().ContinueWith(task =>
+            _ = GetSummaryAsync(forceRefresh, forceRefreshDate).ContinueWith(task =>
             {
                 toolStrip1.Invoke(() => { tsRefresh.Enabled = true; tsClearFilter.Enabled = false; });
                 if (task.Exception != null)
@@ -464,7 +472,7 @@ namespace DBADashGUI
 
         private void TsRefresh_Click(object sender, EventArgs e)
         {
-            RefreshData();
+            RefreshData(false, lastRefresh);
         }
 
         public event EventHandler<InstanceSelectedEventArgs> Instance_Selected;
@@ -498,7 +506,7 @@ namespace DBADashGUI
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
-                RefreshData();
+                RefreshData(true);
             }
         }
 
@@ -527,6 +535,9 @@ namespace DBADashGUI
 
         private void UpdateRefreshTime()
         {
+            lblRefreshTime.Font = WasRefreshed
+                ? new Font(lblRefreshTime.Font, FontStyle.Regular)
+                : new Font(lblRefreshTime.Font, FontStyle.Italic);
             lblRefreshTime.Text = "Refresh Time: " + lastRefresh.ToAppTimeZone().ToString(CultureInfo.CurrentCulture);
         }
 
@@ -549,7 +560,7 @@ namespace DBADashGUI
             frm.ShowDialog(this);
             if (frm.DialogResult == DialogResult.OK)
             {
-                RefreshData();
+                RefreshData(true);
             }
         }
 
@@ -557,7 +568,7 @@ namespace DBADashGUI
         {
             MemoryDumpThresholds.Acknowledge();
             MessageBox.Show("Memory dump acknowledge date updated", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            RefreshData();
+            RefreshData(true);
         }
 
         private void DgvTests_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
@@ -703,7 +714,7 @@ namespace DBADashGUI
         private void AcknowledgeUptimeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             CommonData.AcknowledgeInstanceUptime(-1);
-            RefreshData();
+            RefreshData(true);
         }
     }
 }

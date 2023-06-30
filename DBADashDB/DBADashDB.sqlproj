@@ -719,6 +719,8 @@
     <Build Include="dbo\Stored Procedures\IdentityColumnThresholds_Upd.sql" />
     <Build Include="dbo\Tables\InstanceSettings.sql" />
     <Build Include="dbo\Tables\Summary.sql" />
+    <Build Include="dbo\Stored Procedures\Summary_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\Settings_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
