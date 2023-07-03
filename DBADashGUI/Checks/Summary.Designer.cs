@@ -172,15 +172,15 @@
             this.dgvSummary.DefaultCellStyle = dataGridViewCellStyle7;
             this.dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvSummary.Location = new System.Drawing.Point(0, 0);
-            this.dgvSummary.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgvSummary.Name = "dgvSummary";
             this.dgvSummary.ReadOnly = true;
             this.dgvSummary.RowHeadersVisible = false;
             this.dgvSummary.RowHeadersWidth = 51;
             this.dgvSummary.RowTemplate.Height = 24;
-            this.dgvSummary.Size = new System.Drawing.Size(1800, 117);
+            this.dgvSummary.Size = new System.Drawing.Size(1575, 85);
             this.dgvSummary.TabIndex = 0;
             this.dgvSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvSummary_CellContentClick);
+            this.dgvSummary.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.DgvSummary_ColumnHeaderMouseClick);
             this.dgvSummary.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.DgvSummary_RowAdded);
             // 
             // Instance
@@ -502,7 +502,7 @@
             this.tsClearFilter});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1800, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(1575, 27);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -512,7 +512,7 @@
             this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
+            this.tsRefresh.Size = new System.Drawing.Size(24, 24);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
@@ -525,20 +525,20 @@
             this.tsCopyGrid.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopyGrid.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopyGrid.Name = "tsCopyGrid";
-            this.tsCopyGrid.Size = new System.Drawing.Size(34, 24);
+            this.tsCopyGrid.Size = new System.Drawing.Size(33, 24);
             this.tsCopyGrid.Text = "Copy";
             // 
             // copySummaryToolStripMenuItem
             // 
             this.copySummaryToolStripMenuItem.Name = "copySummaryToolStripMenuItem";
-            this.copySummaryToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.copySummaryToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
             this.copySummaryToolStripMenuItem.Text = "Copy Summary";
             this.copySummaryToolStripMenuItem.Click += new System.EventHandler(this.CopySummaryToolStripMenuItem_Click);
             // 
             // copyTestSummaryToolStripMenuItem
             // 
             this.copyTestSummaryToolStripMenuItem.Name = "copyTestSummaryToolStripMenuItem";
-            this.copyTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.copyTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
             this.copyTestSummaryToolStripMenuItem.Text = "Copy Test Summary";
             this.copyTestSummaryToolStripMenuItem.Click += new System.EventHandler(this.CopyTestSummaryToolStripMenuItem_Click);
             // 
@@ -551,20 +551,20 @@
             this.tsExportToExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
             this.tsExportToExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsExportToExcel.Name = "tsExportToExcel";
-            this.tsExportToExcel.Size = new System.Drawing.Size(34, 24);
+            this.tsExportToExcel.Size = new System.Drawing.Size(33, 24);
             this.tsExportToExcel.Text = "Export to Excel";
             // 
             // exportSummaryToolStripMenuItem
             // 
             this.exportSummaryToolStripMenuItem.Name = "exportSummaryToolStripMenuItem";
-            this.exportSummaryToolStripMenuItem.Size = new System.Drawing.Size(231, 26);
+            this.exportSummaryToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.exportSummaryToolStripMenuItem.Text = "Export Summary";
             this.exportSummaryToolStripMenuItem.Click += new System.EventHandler(this.ExportSummaryToolStripMenuItem_Click);
             // 
             // exportTestSummaryToolStripMenuItem
             // 
             this.exportTestSummaryToolStripMenuItem.Name = "exportTestSummaryToolStripMenuItem";
-            this.exportTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(231, 26);
+            this.exportTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.exportTestSummaryToolStripMenuItem.Text = "Export Test Summary";
             this.exportTestSummaryToolStripMenuItem.Click += new System.EventHandler(this.ExportTestSummaryToolStripMenuItem_Click);
             // 
@@ -577,14 +577,14 @@
             this.tsView.Image = global::DBADashGUI.Properties.Resources.Table_16x;
             this.tsView.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsView.Name = "tsView";
-            this.tsView.Size = new System.Drawing.Size(75, 24);
+            this.tsView.Size = new System.Drawing.Size(65, 24);
             this.tsView.Text = "View";
             // 
             // focusedViewToolStripMenuItem
             // 
             this.focusedViewToolStripMenuItem.CheckOnClick = true;
             this.focusedViewToolStripMenuItem.Name = "focusedViewToolStripMenuItem";
-            this.focusedViewToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.focusedViewToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.focusedViewToolStripMenuItem.Text = "Focused View";
             this.focusedViewToolStripMenuItem.ToolTipText = "Show only instances and checks that are warning or critical status";
             this.focusedViewToolStripMenuItem.Click += new System.EventHandler(this.FocusedViewToolStripMenuItem_Click);
@@ -595,7 +595,7 @@
             this.showTestSummaryToolStripMenuItem.CheckOnClick = true;
             this.showTestSummaryToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.showTestSummaryToolStripMenuItem.Name = "showTestSummaryToolStripMenuItem";
-            this.showTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.showTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.showTestSummaryToolStripMenuItem.Text = "Show Test Summary";
             this.showTestSummaryToolStripMenuItem.Click += new System.EventHandler(this.ShowTestSummaryToolStripMenuItem_Click);
             // 
@@ -603,7 +603,7 @@
             // 
             this.saveToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.Save_16x;
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveToolStripMenuItem_Click);
             // 
@@ -611,7 +611,7 @@
             // 
             this.lblRefreshTime.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.lblRefreshTime.Name = "lblRefreshTime";
-            this.lblRefreshTime.Size = new System.Drawing.Size(98, 24);
+            this.lblRefreshTime.Size = new System.Drawing.Size(78, 24);
             this.lblRefreshTime.Text = "Refresh Time:";
             // 
             // tsOptions
@@ -622,7 +622,7 @@
             this.tsOptions.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
             this.tsOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsOptions.Name = "tsOptions";
-            this.tsOptions.Size = new System.Drawing.Size(95, 24);
+            this.tsOptions.Size = new System.Drawing.Size(82, 24);
             this.tsOptions.Text = "Options";
             this.tsOptions.ToolTipText = "Options";
             // 
@@ -632,20 +632,20 @@
             this.acknowledgeDumpsToolStripMenuItem1,
             this.configureThresholdsToolStripMenuItem1});
             this.memoryDumpsToolStripMenuItem1.Name = "memoryDumpsToolStripMenuItem1";
-            this.memoryDumpsToolStripMenuItem1.Size = new System.Drawing.Size(199, 26);
+            this.memoryDumpsToolStripMenuItem1.Size = new System.Drawing.Size(160, 22);
             this.memoryDumpsToolStripMenuItem1.Text = "Memory Dumps";
             // 
             // acknowledgeDumpsToolStripMenuItem1
             // 
             this.acknowledgeDumpsToolStripMenuItem1.Name = "acknowledgeDumpsToolStripMenuItem1";
-            this.acknowledgeDumpsToolStripMenuItem1.Size = new System.Drawing.Size(233, 26);
+            this.acknowledgeDumpsToolStripMenuItem1.Size = new System.Drawing.Size(187, 22);
             this.acknowledgeDumpsToolStripMenuItem1.Text = "Acknowledge Dumps";
             this.acknowledgeDumpsToolStripMenuItem1.Click += new System.EventHandler(this.AcknowledgeDumpsToolStripMenuItem_Click);
             // 
             // configureThresholdsToolStripMenuItem1
             // 
             this.configureThresholdsToolStripMenuItem1.Name = "configureThresholdsToolStripMenuItem1";
-            this.configureThresholdsToolStripMenuItem1.Size = new System.Drawing.Size(233, 26);
+            this.configureThresholdsToolStripMenuItem1.Size = new System.Drawing.Size(187, 22);
             this.configureThresholdsToolStripMenuItem1.Text = "Configure Thresholds";
             this.configureThresholdsToolStripMenuItem1.Click += new System.EventHandler(this.ConfigureThresholdsToolStripMenuItem_Click);
             // 
@@ -655,20 +655,20 @@
             this.acknowledgeUptimeToolStripMenuItem,
             this.configureThresholdsToolStripMenuItem2});
             this.instanceUptimeToolStripMenuItem.Name = "instanceUptimeToolStripMenuItem";
-            this.instanceUptimeToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            this.instanceUptimeToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.instanceUptimeToolStripMenuItem.Text = "Instance Uptime";
             // 
             // acknowledgeUptimeToolStripMenuItem
             // 
             this.acknowledgeUptimeToolStripMenuItem.Name = "acknowledgeUptimeToolStripMenuItem";
-            this.acknowledgeUptimeToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
+            this.acknowledgeUptimeToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
             this.acknowledgeUptimeToolStripMenuItem.Text = "Acknowledge Uptime";
             this.acknowledgeUptimeToolStripMenuItem.Click += new System.EventHandler(this.AcknowledgeUptimeToolStripMenuItem_Click);
             // 
             // configureThresholdsToolStripMenuItem2
             // 
             this.configureThresholdsToolStripMenuItem2.Name = "configureThresholdsToolStripMenuItem2";
-            this.configureThresholdsToolStripMenuItem2.Size = new System.Drawing.Size(235, 26);
+            this.configureThresholdsToolStripMenuItem2.Size = new System.Drawing.Size(188, 22);
             this.configureThresholdsToolStripMenuItem2.Text = "Configure Thresholds";
             this.configureThresholdsToolStripMenuItem2.Click += new System.EventHandler(this.ConfigureUptimeThresholdsToolStripMenuItem_Click);
             // 
@@ -678,7 +678,7 @@
             this.tsClearFilter.Image = global::DBADashGUI.Properties.Resources.Eraser_16x;
             this.tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsClearFilter.Name = "tsClearFilter";
-            this.tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            this.tsClearFilter.Size = new System.Drawing.Size(87, 24);
             this.tsClearFilter.Text = "Clear Filter";
             this.tsClearFilter.Click += new System.EventHandler(this.TsClearFilter_Click);
             // 
@@ -831,6 +831,7 @@
             // 
             this.timer1.Enabled = true;
             this.timer1.Interval = 10000;
+            this.timer1.Tick += new System.EventHandler(this.Timer1_Tick);
             // 
             // refresh1
             // 
@@ -839,15 +840,16 @@
             this.refresh1.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.refresh1.ForeColor = System.Drawing.Color.White;
             this.refresh1.Location = new System.Drawing.Point(0, 27);
-            this.refresh1.Margin = new System.Windows.Forms.Padding(4);
+            this.refresh1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.refresh1.Name = "refresh1";
-            this.refresh1.Size = new System.Drawing.Size(1800, 239);
+            this.refresh1.Size = new System.Drawing.Size(1575, 173);
             this.refresh1.TabIndex = 2;
             // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 27);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -858,8 +860,9 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.dgvSummary);
-            this.splitContainer1.Size = new System.Drawing.Size(1800, 239);
-            this.splitContainer1.SplitterDistance = 118;
+            this.splitContainer1.Size = new System.Drawing.Size(1575, 173);
+            this.splitContainer1.SplitterDistance = 85;
+            this.splitContainer1.SplitterWidth = 3;
             this.splitContainer1.TabIndex = 3;
             // 
             // dgvTests
@@ -886,26 +889,26 @@
             this.dgvTests.DefaultCellStyle = dataGridViewCellStyle12;
             this.dgvTests.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvTests.Location = new System.Drawing.Point(0, 0);
+            this.dgvTests.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.dgvTests.Name = "dgvTests";
             this.dgvTests.ReadOnly = true;
             this.dgvTests.RowHeadersVisible = false;
             this.dgvTests.RowHeadersWidth = 51;
             this.dgvTests.RowTemplate.Height = 29;
-            this.dgvTests.Size = new System.Drawing.Size(1800, 118);
+            this.dgvTests.Size = new System.Drawing.Size(1575, 85);
             this.dgvTests.TabIndex = 0;
             this.dgvTests.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvTests_CellContentClick);
             this.dgvTests.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.DgvTests_RowsAdded);
             // 
             // Summary
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.refresh1);
             this.Controls.Add(this.toolStrip1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "Summary";
-            this.Size = new System.Drawing.Size(1800, 266);
+            this.Size = new System.Drawing.Size(1575, 200);
             ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
