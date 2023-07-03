@@ -462,6 +462,7 @@ namespace DBADashServiceConfig
                 numBackupRetention.Value = collectionConfig.ConfigBackupRetentionDays;
                 txtSummaryRefreshCron.Text = collectionConfig.SummaryRefreshCron;
                 chkSummaryRefresh.Checked = !string.IsNullOrEmpty(collectionConfig.SummaryRefreshCron);
+                updateSummaryCron();
                 UpdateScanInterval();
                 SetDgv();
                 RefreshEncryption();
