@@ -11,6 +11,7 @@ using System.Linq;
 using System.ServiceProcess;
 using System.Text;
 using System.Windows.Forms;
+using CronExpressionDescriptor;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 using Newtonsoft.Json;
 using static DBADash.DBADashConnection;
@@ -459,6 +460,8 @@ namespace DBADashServiceConfig
                 numIdentityCollectionThreshold.Value = collectionConfig.IdentityCollectionThreshold ??
                                                        DBCollector.DefaultIdentityCollectionThreshold;
                 numBackupRetention.Value = collectionConfig.ConfigBackupRetentionDays;
+                txtSummaryRefreshCron.Text = collectionConfig.SummaryRefreshCron;
+                chkSummaryRefresh.Checked = !string.IsNullOrEmpty(collectionConfig.SummaryRefreshCron);
                 UpdateScanInterval();
                 SetDgv();
                 RefreshEncryption();
@@ -1325,6 +1328,38 @@ namespace DBADashServiceConfig
                 DialogResult.Yes)
             {
                 BasicConfig.ClearOldConfigBackups(0);
+            }
+        }
+
+        private void chkSummaryRefresh_CheckedChanged(object sender, EventArgs e)
+        {
+            txtSummaryRefreshCron.Enabled = chkSummaryRefresh.Checked;
+            if (!IsSetFromJson)
+            {
+                txtSummaryRefreshCron.Text = chkSummaryRefresh.Checked ? "120" : string.Empty;
+                updateSummaryCron();
+                SetJson();
+            }
+        }
+
+        private void txtSummaryRefreshCron_Validated(object sender, EventArgs e)
+        {
+            updateSummaryCron();
+        }
+
+        private void updateSummaryCron()
+        {
+            try
+            {
+                lblSummaryRefreshCron.Text = ScheduleConfig.GetScheduleDescription(txtSummaryRefreshCron.Text);
+                lblSummaryRefreshCron.ForeColor = DashColors.TrimbleBlue;
+                collectionConfig.SummaryRefreshCron = txtSummaryRefreshCron.Text;
+                SetJson();
+            }
+            catch
+            {
+                lblSummaryRefreshCron.Text = "Error with cron expression";
+                lblSummaryRefreshCron.ForeColor = DashColors.Fail;
             }
         }
     }

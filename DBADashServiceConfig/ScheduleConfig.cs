@@ -74,7 +74,7 @@ namespace DBADashServiceConfig
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
         }
 
-        private static string GetScheduleDescription(string schedule)
+        public static string GetScheduleDescription(string schedule)
         {
             if (string.IsNullOrEmpty(schedule))
             {

@@ -60,6 +60,23 @@
   <metadata name="errorProvider1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>172, 17</value>
+  </metadata>
+  <data name="pictureBox2.ToolTip" xml:space="preserve">
+    <value>Click the Connect icon to the right and enter the details of the SQL instance you want to monitor
+Or:
+* Enter the connection string manually.
+* Enter multiple connection strings,  1 per line
+* Enter server name(s), 1 per line
+
+Source can also be a folder or a S3 bucket to import data from remote DBA Dash agents</value>
+  </data>
+  <data name="label10.Text" xml:space="preserve">
+    <value>Connections are required to each AzureDB to capture data for monitoring.  Alternativley, add a connection to the master database and check the option to scan for AzureDBs on service start and/or check the option to scan for new Azure DBs every 'X' seconds.
+
+You can also click "Scan Now" to persist any new connections to the config file. </value>
+  </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -112,25 +129,5 @@
         AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///39yf/9/cH//f0Af/39AH8yMgB/
         Mv0AE/39AAP9/cAALlbAAPX9/gD9/f4A/f3+ADYy/4MyVv+D/f3///39
 </value>
-  </data>
-  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>172, 17</value>
-  </metadata>
-  <data name="pictureBox2.ToolTip" xml:space="preserve">
-    <value>Click the Connect icon to the right and enter the details of the SQL instance you want to monitor
-Or:
-* Enter the connection string manually.
-* Enter multiple connection strings,  1 per line
-* Enter server name(s), 1 per line
-
-Source can also be a folder or a S3 bucket to import data from remote DBA Dash agents</value>
-  </data>
-  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>172, 17</value>
-  </metadata>
-  <data name="label10.Text" xml:space="preserve">
-    <value>Connections are required to each AzureDB to capture data for monitoring.  Alternativley, add a connection to the master database and check the option to scan for AzureDBs on service start and/or check the option to scan for new Azure DBs every 'X' seconds.
-
-You can also click "Scan Now" to persist any new connections to the config file. </value>
   </data>
 </root>

@@ -55,22 +55,26 @@
             this.lnkStop = new System.Windows.Forms.LinkLabel();
             this.lnkStart = new System.Windows.Forms.LinkLabel();
             this.lnkRefresh = new System.Windows.Forms.LinkLabel();
+            this.label3 = new System.Windows.Forms.Label();
+            this.lblConfigFileRetention = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.bttnAWS = new System.Windows.Forms.Button();
+            this.chkLogInternalPerfCounters = new System.Windows.Forms.CheckBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.tabJson = new System.Windows.Forms.TabPage();
             this.txtJson = new System.Windows.Forms.TextBox();
             this.tabOther = new System.Windows.Forms.TabPage();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.lblSummaryRefreshCron = new System.Windows.Forms.Label();
+            this.chkSummaryRefresh = new System.Windows.Forms.CheckBox();
+            this.txtSummaryRefreshCron = new System.Windows.Forms.TextBox();
             this.lnkDeleteConfigBackups = new System.Windows.Forms.LinkLabel();
-            this.lblConfigFileRetention = new System.Windows.Forms.Label();
             this.numBackupRetention = new System.Windows.Forms.NumericUpDown();
             this.lblEncryptionStatus = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
             this.bttnEncryption = new System.Windows.Forms.Button();
             this.numIdentityCollectionThreshold = new System.Windows.Forms.NumericUpDown();
-            this.bttnAWS = new System.Windows.Forms.Button();
             this.bttnSchedule = new System.Windows.Forms.Button();
             this.chkDefaultIdentityCollection = new System.Windows.Forms.CheckBox();
-            this.chkLogInternalPerfCounters = new System.Windows.Forms.CheckBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.lblHHmm = new System.Windows.Forms.Label();
             this.numAzureScanInterval = new System.Windows.Forms.NumericUpDown();
@@ -164,9 +168,8 @@
             this.bttnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bttnSave.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.bttnSave.Location = new System.Drawing.Point(909, 16);
-            this.bttnSave.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.bttnSave.Name = "bttnSave";
-            this.bttnSave.Size = new System.Drawing.Size(100, 35);
+            this.bttnSave.Size = new System.Drawing.Size(101, 35);
             this.bttnSave.TabIndex = 14;
             this.bttnSave.Text = "&Save";
             this.bttnSave.UseVisualStyleBackColor = true;
@@ -175,7 +178,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(37, 374);
+            this.label5.Location = new System.Drawing.Point(37, 373);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(40, 20);
             this.label5.TabIndex = 12;
@@ -185,9 +188,9 @@
             // 
             this.bttnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bttnCancel.Location = new System.Drawing.Point(1016, 15);
-            this.bttnCancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.bttnCancel.Margin = new System.Windows.Forms.Padding(5);
             this.bttnCancel.Name = "bttnCancel";
-            this.bttnCancel.Size = new System.Drawing.Size(100, 35);
+            this.bttnCancel.Size = new System.Drawing.Size(101, 35);
             this.bttnCancel.TabIndex = 15;
             this.bttnCancel.Text = "Cancel";
             this.bttnCancel.UseVisualStyleBackColor = true;
@@ -198,7 +201,7 @@
             this.lnkSourceConnections.AutoSize = true;
             this.lnkSourceConnections.Font = new System.Drawing.Font("Arial", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lnkSourceConnections.LinkColor = System.Drawing.Color.Black;
-            this.lnkSourceConnections.Location = new System.Drawing.Point(28, 25);
+            this.lnkSourceConnections.Location = new System.Drawing.Point(27, 25);
             this.lnkSourceConnections.Name = "lnkSourceConnections";
             this.lnkSourceConnections.Size = new System.Drawing.Size(128, 16);
             this.lnkSourceConnections.TabIndex = 18;
@@ -233,7 +236,7 @@
             this.bttnScanNow.Location = new System.Drawing.Point(441, 65);
             this.bttnScanNow.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnScanNow.Name = "bttnScanNow";
-            this.bttnScanNow.Size = new System.Drawing.Size(104, 38);
+            this.bttnScanNow.Size = new System.Drawing.Size(104, 37);
             this.bttnScanNow.TabIndex = 22;
             this.bttnScanNow.Text = "Scan Now";
             this.toolTip1.SetToolTip(this.bttnScanNow, "Click this button to add connections for each Azure DB from the connection added " +
@@ -244,7 +247,7 @@
             // chkScanAzureDB
             // 
             this.chkScanAzureDB.AutoSize = true;
-            this.chkScanAzureDB.Location = new System.Drawing.Point(18, 38);
+            this.chkScanAzureDB.Location = new System.Drawing.Point(18, 37);
             this.chkScanAzureDB.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.chkScanAzureDB.Name = "chkScanAzureDB";
             this.chkScanAzureDB.Size = new System.Drawing.Size(256, 24);
@@ -316,7 +319,7 @@
             this.bttnConnectSource.Location = new System.Drawing.Point(957, 35);
             this.bttnConnectSource.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnConnectSource.Name = "bttnConnectSource";
-            this.bttnConnectSource.Size = new System.Drawing.Size(28, 29);
+            this.bttnConnectSource.Size = new System.Drawing.Size(27, 29);
             this.bttnConnectSource.TabIndex = 8;
             this.toolTip1.SetToolTip(this.bttnConnectSource, "Connect to a SQL Instance to monitor with DBA Dash");
             this.bttnConnectSource.UseVisualStyleBackColor = true;
@@ -329,7 +332,7 @@
             this.bttnSrcFolder.Location = new System.Drawing.Point(991, 35);
             this.bttnSrcFolder.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnSrcFolder.Name = "bttnSrcFolder";
-            this.bttnSrcFolder.Size = new System.Drawing.Size(28, 29);
+            this.bttnSrcFolder.Size = new System.Drawing.Size(27, 29);
             this.bttnSrcFolder.TabIndex = 10;
             this.toolTip1.SetToolTip(this.bttnSrcFolder, "Choose a folder source path");
             this.bttnSrcFolder.UseVisualStyleBackColor = true;
@@ -342,7 +345,7 @@
             this.bttnS3Src.Location = new System.Drawing.Point(1024, 36);
             this.bttnS3Src.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnS3Src.Name = "bttnS3Src";
-            this.bttnS3Src.Size = new System.Drawing.Size(28, 29);
+            this.bttnS3Src.Size = new System.Drawing.Size(27, 29);
             this.bttnS3Src.TabIndex = 12;
             this.toolTip1.SetToolTip(this.bttnS3Src, "Choose a S3 bucket source");
             this.bttnS3Src.UseVisualStyleBackColor = true;
@@ -362,7 +365,7 @@
             // 
             // bttnDeployDatabase
             // 
-            this.bttnDeployDatabase.Location = new System.Drawing.Point(103, 94);
+            this.bttnDeployDatabase.Location = new System.Drawing.Point(103, 93);
             this.bttnDeployDatabase.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnDeployDatabase.Name = "bttnDeployDatabase";
             this.bttnDeployDatabase.Size = new System.Drawing.Size(214, 29);
@@ -376,10 +379,10 @@
             // 
             this.bttnConnect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.bttnConnect.Image = global::DBADashServiceConfig.Properties.Resources.Connect_16x;
-            this.bttnConnect.Location = new System.Drawing.Point(1012, 25);
+            this.bttnConnect.Location = new System.Drawing.Point(1013, 25);
             this.bttnConnect.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnConnect.Name = "bttnConnect";
-            this.bttnConnect.Size = new System.Drawing.Size(28, 29);
+            this.bttnConnect.Size = new System.Drawing.Size(27, 29);
             this.bttnConnect.TabIndex = 7;
             this.toolTip1.SetToolTip(this.bttnConnect, "Connect to a SQL Instance that will store your DBA Dash repository database");
             this.bttnConnect.UseVisualStyleBackColor = true;
@@ -392,7 +395,7 @@
             this.bttnDestFolder.Location = new System.Drawing.Point(1047, 25);
             this.bttnDestFolder.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnDestFolder.Name = "bttnDestFolder";
-            this.bttnDestFolder.Size = new System.Drawing.Size(28, 29);
+            this.bttnDestFolder.Size = new System.Drawing.Size(27, 29);
             this.bttnDestFolder.TabIndex = 9;
             this.toolTip1.SetToolTip(this.bttnDestFolder, "Choose a folder destination path");
             this.bttnDestFolder.UseVisualStyleBackColor = true;
@@ -405,7 +408,7 @@
             this.bttnS3.Location = new System.Drawing.Point(1082, 25);
             this.bttnS3.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnS3.Name = "bttnS3";
-            this.bttnS3.Size = new System.Drawing.Size(28, 30);
+            this.bttnS3.Size = new System.Drawing.Size(27, 29);
             this.bttnS3.TabIndex = 10;
             this.toolTip1.SetToolTip(this.bttnS3, "Choose a S3 bucket destination");
             this.bttnS3.UseVisualStyleBackColor = true;
@@ -416,7 +419,7 @@
             this.lnkStop.Image = global::DBADashServiceConfig.Properties.Resources.Stop_16x;
             this.lnkStop.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lnkStop.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
-            this.lnkStop.Location = new System.Drawing.Point(367, 42);
+            this.lnkStop.Location = new System.Drawing.Point(367, 43);
             this.lnkStop.Name = "lnkStop";
             this.lnkStop.Size = new System.Drawing.Size(62, 21);
             this.lnkStop.TabIndex = 20;
@@ -431,7 +434,7 @@
             this.lnkStart.Image = global::DBADashServiceConfig.Properties.Resources.StartWithoutDebug_16x;
             this.lnkStart.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lnkStart.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
-            this.lnkStart.Location = new System.Drawing.Point(270, 42);
+            this.lnkStart.Location = new System.Drawing.Point(270, 43);
             this.lnkStart.Name = "lnkStart";
             this.lnkStart.Size = new System.Drawing.Size(69, 21);
             this.lnkStart.TabIndex = 19;
@@ -446,7 +449,7 @@
             this.lnkRefresh.Image = global::DBADashServiceConfig.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.lnkRefresh.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lnkRefresh.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
-            this.lnkRefresh.Location = new System.Drawing.Point(457, 42);
+            this.lnkRefresh.Location = new System.Drawing.Point(457, 43);
             this.lnkRefresh.Name = "lnkRefresh";
             this.lnkRefresh.Size = new System.Drawing.Size(80, 21);
             this.lnkRefresh.TabIndex = 21;
@@ -456,13 +459,74 @@
             this.toolTip1.SetToolTip(this.lnkRefresh, "Refresh the status of the DBA Dash service");
             this.lnkRefresh.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkRefresh_LinkClicked);
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(16, 108);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(156, 20);
+            this.label3.TabIndex = 43;
+            this.label3.Text = "Summary refresh cron:";
+            this.toolTip1.SetToolTip(this.label3, "Run Summary_Upd on this schedule.  Improves the performance of loading the summar" +
+        "y page in the GUI.  Cron expression or value in seconds");
+            // 
+            // lblConfigFileRetention
+            // 
+            this.lblConfigFileRetention.AutoSize = true;
+            this.lblConfigFileRetention.Location = new System.Drawing.Point(16, 72);
+            this.lblConfigFileRetention.Name = "lblConfigFileRetention";
+            this.lblConfigFileRetention.Size = new System.Drawing.Size(197, 20);
+            this.lblConfigFileRetention.TabIndex = 40;
+            this.lblConfigFileRetention.Text = "Config File Retention (Days):";
+            this.toolTip1.SetToolTip(this.lblConfigFileRetention, "Backups of config are created automatically to provide a rollback option. Remove " +
+        "old configs on this schedule. ");
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(16, 36);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(265, 20);
+            this.label2.TabIndex = 32;
+            this.label2.Text = "Identity Collection Threshold (Used %):";
+            this.toolTip1.SetToolTip(this.label2, "Collection threshold at which to collect identity column usage.");
+            // 
+            // bttnAWS
+            // 
+            this.bttnAWS.Location = new System.Drawing.Point(16, 149);
+            this.bttnAWS.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.bttnAWS.Name = "bttnAWS";
+            this.bttnAWS.Size = new System.Drawing.Size(197, 55);
+            this.bttnAWS.TabIndex = 35;
+            this.bttnAWS.Text = "AWS Credentials";
+            this.toolTip1.SetToolTip(this.bttnAWS, "Used when writing to a S3 bucket destination or reading from a S3 bucket.  Altern" +
+        "atively, use an instance profile to avoid storing credentials in the config.  Or" +
+        " consider using an encrypted config.");
+            this.bttnAWS.UseVisualStyleBackColor = true;
+            this.bttnAWS.Click += new System.EventHandler(this.bttnAWS_Click);
+            // 
+            // chkLogInternalPerfCounters
+            // 
+            this.chkLogInternalPerfCounters.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.chkLogInternalPerfCounters.AutoSize = true;
+            this.chkLogInternalPerfCounters.Location = new System.Drawing.Point(845, 27);
+            this.chkLogInternalPerfCounters.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.chkLogInternalPerfCounters.Name = "chkLogInternalPerfCounters";
+            this.chkLogInternalPerfCounters.Size = new System.Drawing.Size(259, 24);
+            this.chkLogInternalPerfCounters.TabIndex = 0;
+            this.chkLogInternalPerfCounters.Text = "Log Internal Performance Counters";
+            this.toolTip1.SetToolTip(this.chkLogInternalPerfCounters, "Internal performance counters are available on the Metrics tab in the GUI.  They " +
+        "track things like how long each collection took to run.");
+            this.chkLogInternalPerfCounters.UseVisualStyleBackColor = true;
+            this.chkLogInternalPerfCounters.CheckedChanged += new System.EventHandler(this.ChkLogInternalPerfCounters_CheckedChanged);
+            // 
             // panel1
             // 
             this.panel1.Controls.Add(this.bttnSave);
             this.panel1.Controls.Add(this.bttnCancel);
             this.panel1.Controls.Add(this.lnkSourceConnections);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(0, 757);
+            this.panel1.Location = new System.Drawing.Point(0, 765);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(1137, 64);
             this.panel1.TabIndex = 23;
@@ -474,7 +538,7 @@
             this.tabJson.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabJson.Name = "tabJson";
             this.tabJson.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabJson.Size = new System.Drawing.Size(1129, 724);
+            this.tabJson.Size = new System.Drawing.Size(1129, 732);
             this.tabJson.TabIndex = 6;
             this.tabJson.Text = "Json";
             this.tabJson.UseVisualStyleBackColor = true;
@@ -483,11 +547,10 @@
             // 
             this.txtJson.Dock = System.Windows.Forms.DockStyle.Fill;
             this.txtJson.Location = new System.Drawing.Point(3, 4);
-            this.txtJson.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.txtJson.Multiline = true;
             this.txtJson.Name = "txtJson";
             this.txtJson.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtJson.Size = new System.Drawing.Size(1123, 716);
+            this.txtJson.Size = new System.Drawing.Size(1123, 724);
             this.txtJson.TabIndex = 13;
             this.txtJson.TextChanged += new System.EventHandler(this.TxtJson_TextChanged);
             this.txtJson.Validating += new System.ComponentModel.CancelEventHandler(this.TxtJson_Validating);
@@ -500,13 +563,17 @@
             this.tabOther.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabOther.Name = "tabOther";
             this.tabOther.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabOther.Size = new System.Drawing.Size(1129, 724);
+            this.tabOther.Size = new System.Drawing.Size(1129, 732);
             this.tabOther.TabIndex = 5;
             this.tabOther.Text = "Options";
             this.tabOther.UseVisualStyleBackColor = true;
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.lblSummaryRefreshCron);
+            this.groupBox3.Controls.Add(this.chkSummaryRefresh);
+            this.groupBox3.Controls.Add(this.label3);
+            this.groupBox3.Controls.Add(this.txtSummaryRefreshCron);
             this.groupBox3.Controls.Add(this.lnkDeleteConfigBackups);
             this.groupBox3.Controls.Add(this.lblConfigFileRetention);
             this.groupBox3.Controls.Add(this.numBackupRetention);
@@ -520,16 +587,45 @@
             this.groupBox3.Controls.Add(this.chkLogInternalPerfCounters);
             this.groupBox3.Location = new System.Drawing.Point(8, 19);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(1113, 205);
+            this.groupBox3.Size = new System.Drawing.Size(1113, 260);
             this.groupBox3.TabIndex = 38;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Miscellaneous";
+            // 
+            // lblSummaryRefreshCron
+            // 
+            this.lblSummaryRefreshCron.AutoSize = true;
+            this.lblSummaryRefreshCron.Location = new System.Drawing.Point(441, 111);
+            this.lblSummaryRefreshCron.Name = "lblSummaryRefreshCron";
+            this.lblSummaryRefreshCron.Size = new System.Drawing.Size(0, 20);
+            this.lblSummaryRefreshCron.TabIndex = 45;
+            // 
+            // chkSummaryRefresh
+            // 
+            this.chkSummaryRefresh.AutoSize = true;
+            this.chkSummaryRefresh.Location = new System.Drawing.Point(407, 109);
+            this.chkSummaryRefresh.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.chkSummaryRefresh.Name = "chkSummaryRefresh";
+            this.chkSummaryRefresh.Size = new System.Drawing.Size(18, 17);
+            this.chkSummaryRefresh.TabIndex = 44;
+            this.chkSummaryRefresh.UseVisualStyleBackColor = true;
+            this.chkSummaryRefresh.CheckedChanged += new System.EventHandler(this.chkSummaryRefresh_CheckedChanged);
+            // 
+            // txtSummaryRefreshCron
+            // 
+            this.txtSummaryRefreshCron.Enabled = false;
+            this.txtSummaryRefreshCron.Location = new System.Drawing.Point(286, 103);
+            this.txtSummaryRefreshCron.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.txtSummaryRefreshCron.Name = "txtSummaryRefreshCron";
+            this.txtSummaryRefreshCron.Size = new System.Drawing.Size(114, 27);
+            this.txtSummaryRefreshCron.TabIndex = 42;
+            this.txtSummaryRefreshCron.Validated += new System.EventHandler(this.txtSummaryRefreshCron_Validated);
             // 
             // lnkDeleteConfigBackups
             // 
             this.lnkDeleteConfigBackups.AutoSize = true;
             this.lnkDeleteConfigBackups.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
-            this.lnkDeleteConfigBackups.Location = new System.Drawing.Point(380, 74);
+            this.lnkDeleteConfigBackups.Location = new System.Drawing.Point(407, 75);
             this.lnkDeleteConfigBackups.Name = "lnkDeleteConfigBackups";
             this.lnkDeleteConfigBackups.Size = new System.Drawing.Size(159, 20);
             this.lnkDeleteConfigBackups.TabIndex = 41;
@@ -537,20 +633,11 @@
             this.lnkDeleteConfigBackups.Text = "Delete Config Backups";
             this.lnkDeleteConfigBackups.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkDeleteConfigBackups_LinkClicked);
             // 
-            // lblConfigFileRetention
-            // 
-            this.lblConfigFileRetention.AutoSize = true;
-            this.lblConfigFileRetention.Location = new System.Drawing.Point(16, 69);
-            this.lblConfigFileRetention.Name = "lblConfigFileRetention";
-            this.lblConfigFileRetention.Size = new System.Drawing.Size(197, 20);
-            this.lblConfigFileRetention.TabIndex = 40;
-            this.lblConfigFileRetention.Text = "Config File Retention (Days):";
-            // 
             // numBackupRetention
             // 
-            this.numBackupRetention.Location = new System.Drawing.Point(286, 67);
+            this.numBackupRetention.Location = new System.Drawing.Point(286, 69);
             this.numBackupRetention.Name = "numBackupRetention";
-            this.numBackupRetention.Size = new System.Drawing.Size(79, 27);
+            this.numBackupRetention.Size = new System.Drawing.Size(114, 27);
             this.numBackupRetention.TabIndex = 39;
             this.numBackupRetention.Value = new decimal(new int[] {
             7,
@@ -561,28 +648,19 @@
             // 
             // lblEncryptionStatus
             // 
-            this.lblEncryptionStatus.Location = new System.Drawing.Point(420, 169);
+            this.lblEncryptionStatus.Location = new System.Drawing.Point(421, 209);
             this.lblEncryptionStatus.Name = "lblEncryptionStatus";
-            this.lblEncryptionStatus.Size = new System.Drawing.Size(196, 27);
+            this.lblEncryptionStatus.Size = new System.Drawing.Size(197, 27);
             this.lblEncryptionStatus.TabIndex = 38;
             this.lblEncryptionStatus.Text = "{Encryption Status}";
             this.lblEncryptionStatus.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(16, 36);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(265, 20);
-            this.label2.TabIndex = 32;
-            this.label2.Text = "Identity Collection Threshold (Used %):";
-            // 
             // bttnEncryption
             // 
-            this.bttnEncryption.Location = new System.Drawing.Point(420, 110);
+            this.bttnEncryption.Location = new System.Drawing.Point(421, 149);
             this.bttnEncryption.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnEncryption.Name = "bttnEncryption";
-            this.bttnEncryption.Size = new System.Drawing.Size(196, 55);
+            this.bttnEncryption.Size = new System.Drawing.Size(197, 55);
             this.bttnEncryption.TabIndex = 37;
             this.bttnEncryption.Text = "Configure Encryption";
             this.bttnEncryption.UseVisualStyleBackColor = true;
@@ -591,29 +669,18 @@
             // numIdentityCollectionThreshold
             // 
             this.numIdentityCollectionThreshold.Enabled = false;
-            this.numIdentityCollectionThreshold.Location = new System.Drawing.Point(286, 34);
+            this.numIdentityCollectionThreshold.Location = new System.Drawing.Point(286, 35);
             this.numIdentityCollectionThreshold.Name = "numIdentityCollectionThreshold";
-            this.numIdentityCollectionThreshold.Size = new System.Drawing.Size(79, 27);
+            this.numIdentityCollectionThreshold.Size = new System.Drawing.Size(114, 27);
             this.numIdentityCollectionThreshold.TabIndex = 34;
             this.numIdentityCollectionThreshold.ValueChanged += new System.EventHandler(this.NumIdentityCollectionThreshold_ValueChanged);
             // 
-            // bttnAWS
-            // 
-            this.bttnAWS.Location = new System.Drawing.Point(16, 110);
-            this.bttnAWS.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.bttnAWS.Name = "bttnAWS";
-            this.bttnAWS.Size = new System.Drawing.Size(196, 55);
-            this.bttnAWS.TabIndex = 35;
-            this.bttnAWS.Text = "AWS Credentials";
-            this.bttnAWS.UseVisualStyleBackColor = true;
-            this.bttnAWS.Click += new System.EventHandler(this.bttnAWS_Click);
-            // 
             // bttnSchedule
             // 
-            this.bttnSchedule.Location = new System.Drawing.Point(218, 110);
+            this.bttnSchedule.Location = new System.Drawing.Point(218, 149);
             this.bttnSchedule.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnSchedule.Name = "bttnSchedule";
-            this.bttnSchedule.Size = new System.Drawing.Size(196, 55);
+            this.bttnSchedule.Size = new System.Drawing.Size(197, 55);
             this.bttnSchedule.TabIndex = 1;
             this.bttnSchedule.Text = "Configure Schedule";
             this.bttnSchedule.UseVisualStyleBackColor = true;
@@ -624,26 +691,13 @@
             this.chkDefaultIdentityCollection.AutoSize = true;
             this.chkDefaultIdentityCollection.Checked = true;
             this.chkDefaultIdentityCollection.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkDefaultIdentityCollection.Location = new System.Drawing.Point(380, 36);
+            this.chkDefaultIdentityCollection.Location = new System.Drawing.Point(407, 37);
             this.chkDefaultIdentityCollection.Name = "chkDefaultIdentityCollection";
             this.chkDefaultIdentityCollection.Size = new System.Drawing.Size(80, 24);
             this.chkDefaultIdentityCollection.TabIndex = 33;
             this.chkDefaultIdentityCollection.Text = "Default";
             this.chkDefaultIdentityCollection.UseVisualStyleBackColor = true;
             this.chkDefaultIdentityCollection.CheckedChanged += new System.EventHandler(this.ChkDefaultIdentityCollection_CheckedChanged);
-            // 
-            // chkLogInternalPerfCounters
-            // 
-            this.chkLogInternalPerfCounters.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.chkLogInternalPerfCounters.AutoSize = true;
-            this.chkLogInternalPerfCounters.Location = new System.Drawing.Point(845, 27);
-            this.chkLogInternalPerfCounters.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.chkLogInternalPerfCounters.Name = "chkLogInternalPerfCounters";
-            this.chkLogInternalPerfCounters.Size = new System.Drawing.Size(259, 24);
-            this.chkLogInternalPerfCounters.TabIndex = 0;
-            this.chkLogInternalPerfCounters.Text = "Log Internal Performance Counters";
-            this.chkLogInternalPerfCounters.UseVisualStyleBackColor = true;
-            this.chkLogInternalPerfCounters.CheckedChanged += new System.EventHandler(this.ChkLogInternalPerfCounters_CheckedChanged);
             // 
             // groupBox4
             // 
@@ -656,7 +710,7 @@
             this.groupBox4.Controls.Add(this.label11);
             this.groupBox4.Controls.Add(this.chkScanEvery);
             this.groupBox4.Controls.Add(this.label10);
-            this.groupBox4.Location = new System.Drawing.Point(8, 231);
+            this.groupBox4.Location = new System.Drawing.Point(9, 285);
             this.groupBox4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -701,7 +755,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(348, 74);
+            this.label11.Location = new System.Drawing.Point(347, 75);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(62, 20);
             this.label11.TabIndex = 27;
@@ -710,7 +764,7 @@
             // label10
             // 
             this.label10.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
-            this.label10.Location = new System.Drawing.Point(585, 38);
+            this.label10.Location = new System.Drawing.Point(585, 37);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(504, 85);
             this.label10.TabIndex = 24;
@@ -724,7 +778,7 @@
             this.tabSource.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabSource.Name = "tabSource";
             this.tabSource.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabSource.Size = new System.Drawing.Size(1129, 724);
+            this.tabSource.Size = new System.Drawing.Size(1129, 732);
             this.tabSource.TabIndex = 0;
             this.tabSource.Text = "Source";
             this.tabSource.UseVisualStyleBackColor = true;
@@ -754,11 +808,11 @@
             this.tabSrcOptions.Controls.Add(this.tabRunningQueries);
             this.tabSrcOptions.Controls.Add(this.tabAddConnectionOther);
             this.tabSrcOptions.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.tabSrcOptions.Location = new System.Drawing.Point(16, 26);
+            this.tabSrcOptions.Location = new System.Drawing.Point(16, 27);
             this.tabSrcOptions.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabSrcOptions.Name = "tabSrcOptions";
             this.tabSrcOptions.SelectedIndex = 0;
-            this.tabSrcOptions.Size = new System.Drawing.Size(1068, 221);
+            this.tabSrcOptions.Size = new System.Drawing.Size(1067, 221);
             this.tabSrcOptions.TabIndex = 21;
             // 
             // tabGeneral
@@ -773,7 +827,7 @@
             this.tabGeneral.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabGeneral.Name = "tabGeneral";
             this.tabGeneral.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabGeneral.Size = new System.Drawing.Size(1060, 192);
+            this.tabGeneral.Size = new System.Drawing.Size(1059, 192);
             this.tabGeneral.TabIndex = 0;
             this.tabGeneral.Text = "General";
             this.tabGeneral.UseVisualStyleBackColor = true;
@@ -793,7 +847,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(28, 8);
+            this.label1.Location = new System.Drawing.Point(27, 8);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(56, 16);
             this.label1.TabIndex = 2;
@@ -807,7 +861,7 @@
             this.tabExtendedEvents.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabExtendedEvents.Name = "tabExtendedEvents";
             this.tabExtendedEvents.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabExtendedEvents.Size = new System.Drawing.Size(1060, 192);
+            this.tabExtendedEvents.Size = new System.Drawing.Size(1059, 192);
             this.tabExtendedEvents.TabIndex = 1;
             this.tabExtendedEvents.Text = "Extended Events";
             this.tabExtendedEvents.UseVisualStyleBackColor = true;
@@ -824,7 +878,7 @@
             this.pnlExtendedEvents.Location = new System.Drawing.Point(3, 4);
             this.pnlExtendedEvents.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.pnlExtendedEvents.Name = "pnlExtendedEvents";
-            this.pnlExtendedEvents.Size = new System.Drawing.Size(1054, 184);
+            this.pnlExtendedEvents.Size = new System.Drawing.Size(1053, 184);
             this.pnlExtendedEvents.TabIndex = 18;
             // 
             // chkSlowQueryThreshold
@@ -871,7 +925,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(6, 110);
+            this.label9.Location = new System.Drawing.Point(6, 109);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(100, 16);
             this.label9.TabIndex = 16;
@@ -891,7 +945,7 @@
             // 
             this.chkPersistXESession.AutoSize = true;
             this.chkPersistXESession.Enabled = false;
-            this.chkPersistXESession.Location = new System.Drawing.Point(6, 38);
+            this.chkPersistXESession.Location = new System.Drawing.Point(6, 37);
             this.chkPersistXESession.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.chkPersistXESession.Name = "chkPersistXESession";
             this.chkPersistXESession.Size = new System.Drawing.Size(347, 20);
@@ -907,7 +961,7 @@
             this.tabRunningQueries.Location = new System.Drawing.Point(4, 25);
             this.tabRunningQueries.Name = "tabRunningQueries";
             this.tabRunningQueries.Padding = new System.Windows.Forms.Padding(3);
-            this.tabRunningQueries.Size = new System.Drawing.Size(1060, 192);
+            this.tabRunningQueries.Size = new System.Drawing.Size(1059, 192);
             this.tabRunningQueries.TabIndex = 4;
             this.tabRunningQueries.Text = "Running Queries";
             this.tabRunningQueries.UseVisualStyleBackColor = true;
@@ -915,7 +969,7 @@
             // chkCollectPlans
             // 
             this.chkCollectPlans.AutoSize = true;
-            this.chkCollectPlans.Location = new System.Drawing.Point(9, 42);
+            this.chkCollectPlans.Location = new System.Drawing.Point(9, 43);
             this.chkCollectPlans.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.chkCollectPlans.Name = "chkCollectPlans";
             this.chkCollectPlans.Size = new System.Drawing.Size(227, 20);
@@ -974,7 +1028,7 @@
             // label17
             // 
             this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(263, 82);
+            this.label17.Location = new System.Drawing.Point(263, 83);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(108, 16);
             this.label17.TabIndex = 21;
@@ -983,7 +1037,7 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(6, 82);
+            this.label14.Location = new System.Drawing.Point(6, 83);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(102, 16);
             this.label14.TabIndex = 15;
@@ -1031,7 +1085,7 @@
             this.tabAddConnectionOther.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabAddConnectionOther.Name = "tabAddConnectionOther";
             this.tabAddConnectionOther.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabAddConnectionOther.Size = new System.Drawing.Size(1060, 192);
+            this.tabAddConnectionOther.Size = new System.Drawing.Size(1059, 192);
             this.tabAddConnectionOther.TabIndex = 3;
             this.tabAddConnectionOther.Text = "Other";
             this.tabAddConnectionOther.UseVisualStyleBackColor = true;
@@ -1060,7 +1114,7 @@
             // cboIOLevel
             // 
             this.cboIOLevel.FormattingEnabled = true;
-            this.cboIOLevel.Location = new System.Drawing.Point(224, 46);
+            this.cboIOLevel.Location = new System.Drawing.Point(224, 45);
             this.cboIOLevel.Name = "cboIOLevel";
             this.cboIOLevel.Size = new System.Drawing.Size(135, 24);
             this.cboIOLevel.TabIndex = 29;
@@ -1069,7 +1123,7 @@
             // 
             this.lnkExample.AutoSize = true;
             this.lnkExample.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
-            this.lnkExample.Location = new System.Drawing.Point(613, 114);
+            this.lnkExample.Location = new System.Drawing.Point(613, 115);
             this.lnkExample.Name = "lnkExample";
             this.lnkExample.Size = new System.Drawing.Size(60, 16);
             this.lnkExample.TabIndex = 25;
@@ -1081,7 +1135,7 @@
             // 
             this.lnkNone.AutoSize = true;
             this.lnkNone.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
-            this.lnkNone.Location = new System.Drawing.Point(564, 114);
+            this.lnkNone.Location = new System.Drawing.Point(565, 115);
             this.lnkNone.Name = "lnkNone";
             this.lnkNone.Size = new System.Drawing.Size(40, 16);
             this.lnkNone.TabIndex = 24;
@@ -1093,7 +1147,7 @@
             // 
             this.lnkALL.AutoSize = true;
             this.lnkALL.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
-            this.lnkALL.Location = new System.Drawing.Point(535, 114);
+            this.lnkALL.Location = new System.Drawing.Point(535, 115);
             this.lnkALL.Name = "lnkALL";
             this.lnkALL.Size = new System.Drawing.Size(22, 16);
             this.lnkALL.TabIndex = 23;
@@ -1122,7 +1176,6 @@
             // 
             this.chkNoWMI.AutoSize = true;
             this.chkNoWMI.Location = new System.Drawing.Point(9, 8);
-            this.chkNoWMI.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkNoWMI.Name = "chkNoWMI";
             this.chkNoWMI.Size = new System.Drawing.Size(115, 20);
             this.chkNoWMI.TabIndex = 6;
@@ -1132,10 +1185,9 @@
             // bttnAdd
             // 
             this.bttnAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.bttnAdd.Location = new System.Drawing.Point(981, 254);
-            this.bttnAdd.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.bttnAdd.Location = new System.Drawing.Point(981, 253);
             this.bttnAdd.Name = "bttnAdd";
-            this.bttnAdd.Size = new System.Drawing.Size(103, 38);
+            this.bttnAdd.Size = new System.Drawing.Size(103, 37);
             this.bttnAdd.TabIndex = 8;
             this.bttnAdd.Text = "Add/Update";
             this.bttnAdd.UseVisualStyleBackColor = true;
@@ -1150,11 +1202,11 @@
             this.groupBox1.Controls.Add(this.label13);
             this.groupBox1.Controls.Add(this.txtSearch);
             this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.groupBox1.Location = new System.Drawing.Point(10, 326);
+            this.groupBox1.Location = new System.Drawing.Point(10, 325);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox1.Size = new System.Drawing.Size(1102, 376);
+            this.groupBox1.Size = new System.Drawing.Size(1102, 384);
             this.groupBox1.TabIndex = 26;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Existing Connections";
@@ -1167,12 +1219,12 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvConnections.BackgroundColor = System.Drawing.Color.White;
             this.dgvConnections.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvConnections.Location = new System.Drawing.Point(16, 26);
+            this.dgvConnections.Location = new System.Drawing.Point(16, 27);
             this.dgvConnections.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgvConnections.Name = "dgvConnections";
             this.dgvConnections.RowHeadersWidth = 51;
             this.dgvConnections.RowTemplate.Height = 24;
-            this.dgvConnections.Size = new System.Drawing.Size(1068, 307);
+            this.dgvConnections.Size = new System.Drawing.Size(1067, 315);
             this.dgvConnections.TabIndex = 23;
             this.dgvConnections.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvConnections_CellContentClick);
             this.dgvConnections.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.Dgv_RowsAdded);
@@ -1184,7 +1236,7 @@
             this.label13.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label13.AutoSize = true;
             this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label13.Location = new System.Drawing.Point(830, 345);
+            this.label13.Location = new System.Drawing.Point(830, 353);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(53, 16);
             this.label13.TabIndex = 25;
@@ -1193,7 +1245,7 @@
             // txtSearch
             // 
             this.txtSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtSearch.Location = new System.Drawing.Point(893, 341);
+            this.txtSearch.Location = new System.Drawing.Point(893, 349);
             this.txtSearch.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.txtSearch.Name = "txtSearch";
             this.txtSearch.Size = new System.Drawing.Size(191, 22);
@@ -1217,7 +1269,7 @@
             this.tabDest.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabDest.Name = "tabDest";
             this.tabDest.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabDest.Size = new System.Drawing.Size(1129, 724);
+            this.tabDest.Size = new System.Drawing.Size(1129, 732);
             this.tabDest.TabIndex = 2;
             this.tabDest.Text = "Destination:";
             this.tabDest.UseVisualStyleBackColor = true;
@@ -1229,9 +1281,9 @@
             this.lblServiceWarning.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(228)))), ((int)(((byte)(147)))), ((int)(((byte)(37)))));
             this.lblServiceWarning.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblServiceWarning.ForeColor = System.Drawing.Color.White;
-            this.lblServiceWarning.Location = new System.Drawing.Point(9, 490);
+            this.lblServiceWarning.Location = new System.Drawing.Point(9, 499);
             this.lblServiceWarning.Name = "lblServiceWarning";
-            this.lblServiceWarning.Size = new System.Drawing.Size(1103, 48);
+            this.lblServiceWarning.Size = new System.Drawing.Size(1103, 47);
             this.lblServiceWarning.TabIndex = 24;
             this.lblServiceWarning.Text = "Warning: ";
             this.lblServiceWarning.Visible = false;
@@ -1256,7 +1308,7 @@
             this.groupBox5.Controls.Add(this.lnkRefresh);
             this.groupBox5.Controls.Add(this.lnkStart);
             this.groupBox5.Controls.Add(this.lnkStop);
-            this.groupBox5.Location = new System.Drawing.Point(9, 542);
+            this.groupBox5.Location = new System.Drawing.Point(9, 549);
             this.groupBox5.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -1282,7 +1334,7 @@
             this.lnkInstall.Image = global::DBADashServiceConfig.Properties.Resources.install;
             this.lnkInstall.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lnkInstall.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
-            this.lnkInstall.Location = new System.Drawing.Point(937, 42);
+            this.lnkInstall.Location = new System.Drawing.Point(937, 43);
             this.lnkInstall.Name = "lnkInstall";
             this.lnkInstall.Size = new System.Drawing.Size(160, 21);
             this.lnkInstall.TabIndex = 22;
@@ -1294,7 +1346,7 @@
             // lblServiceStatus
             // 
             this.lblServiceStatus.AutoSize = true;
-            this.lblServiceStatus.Location = new System.Drawing.Point(15, 42);
+            this.lblServiceStatus.Location = new System.Drawing.Point(15, 43);
             this.lblServiceStatus.Name = "lblServiceStatus";
             this.lblServiceStatus.Size = new System.Drawing.Size(100, 20);
             this.lblServiceStatus.TabIndex = 23;
@@ -1355,20 +1407,19 @@
             this.tab1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tab1.Name = "tab1";
             this.tab1.SelectedIndex = 0;
-            this.tab1.Size = new System.Drawing.Size(1137, 757);
+            this.tab1.Size = new System.Drawing.Size(1137, 765);
             this.tab1.TabIndex = 22;
             // 
             // ServiceConfig
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1137, 821);
+            this.ClientSize = new System.Drawing.Size(1137, 829);
             this.Controls.Add(this.tab1);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.panel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.MinimumSize = new System.Drawing.Size(842, 868);
+            this.MinimumSize = new System.Drawing.Size(842, 866);
             this.Name = "ServiceConfig";
             this.Text = "DBA Dash Service Config";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ServiceConfig_FromClosing);
@@ -1510,10 +1561,14 @@
         private System.Windows.Forms.TabPage tabJson;
         private System.Windows.Forms.TextBox txtJson;
         private System.Windows.Forms.Label lblEncryptionStatus;
-        private System.Windows.Forms.Label lblConfigFileRetention;
         private System.Windows.Forms.NumericUpDown numBackupRetention;
         private System.Windows.Forms.LinkLabel lnkDeleteConfigBackups;
         private System.Windows.Forms.CheckBox chkWriteToSecondaryDestinations;
+        private System.Windows.Forms.Label lblSummaryRefreshCron;
+        private System.Windows.Forms.CheckBox chkSummaryRefresh;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox txtSummaryRefreshCron;
+        private System.Windows.Forms.Label lblConfigFileRetention;
     }
 }
 
