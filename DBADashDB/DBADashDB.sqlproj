@@ -104,8 +104,6 @@
     <Folder Include="Security\" />
     <Folder Include="Staging\" />
     <Folder Include="Staging\Tables\" />
-    <Folder Include="Switch\" />
-    <Folder Include="Switch\Tables\" />
     <Folder Include="Storage\" />
     <Folder Include="DBADash" />
     <Folder Include="DBADash\Tables" />
@@ -253,9 +251,6 @@
     <Build Include="dbo\Stored Procedures\Partitions_Add.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="Security\Switch.sql" />
-    <Build Include="Switch\Tables\Waits.sql" />
-    <Build Include="Switch\Tables\CPU.sql" />
     <Build Include="dbo\Tables\DataRetention.sql" />
     <Build Include="Storage\PF_Waits.sql" />
     <Build Include="Storage\PF_CPU.sql" />
@@ -363,7 +358,6 @@
     <Build Include="dbo\Tables\ObjectExecutionStats_60MIN.sql" />
     <Build Include="dbo\Stored Procedures\ObjectExecutionStats_Upd.sql" />
     <Build Include="dbo\Stored Procedures\ObjectExecutionStats_Get.sql" />
-    <Build Include="Switch\Tables\ObjectExecutionStats.sql" />
     <Build Include="dbo\Tables\ServerRoleMembers.sql" />
     <Build Include="dbo\Tables\ServerPrincipals.sql" />
     <Build Include="dbo\Stored Procedures\ServerRoleMembers_Upd.sql" />
@@ -409,12 +403,10 @@
     <Build Include="dbo\Stored Procedures\Hardware_Get.sql" />
     <Build Include="dbo\Tables\DBIOStats_60MIN.sql" />
     <Build Include="dbo\Tables\DBIOStats.sql" />
-    <Build Include="Switch\Tables\DBIOStats.sql" />
     <Build Include="Storage\PF_DBIOStats.sql" />
     <Build Include="Storage\PS_DBIOStats.sql" />
     <Build Include="dbo\Tables\CPU_60MIN.sql" />
     <Build Include="dbo\Stored Procedures\DBSpace_Get.sql" />
-    <Build Include="Switch\Tables\SlowQueries.sql" />
     <None Include="dbo\Functions\PartitionFunctionName.sql" />
     <Build Include="dbo\Stored Procedures\DataRetention_Upd.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
@@ -422,8 +414,6 @@
     <Build Include="dbo\Stored Procedures\DataRetention_Get.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="Switch\Tables\AzureDBResourceStats.sql" />
-    <Build Include="Switch\Tables\AzureDBElasticPoolResourceStats.sql" />
     <Build Include="dbo\Stored Procedures\DriveSnapshot_Get.sql" />
     <Build Include="dbo\Views\FileStatus.sql" />
     <Build Include="dbo\Views\FilegroupStatus.sql" />
@@ -460,7 +450,6 @@
     <Build Include="dbo\Stored Procedures\CustomCheckContext_Get.sql" />
     <Build Include="dbo\Stored Procedures\CustomCheck_Get.sql" />
     <Build Include="dbo\User Defined Types\CustomChecks.sql" />
-    <Build Include="Switch\Tables\CustomChecksHistory.sql" />
     <Build Include="dbo\Tables\CustomChecksHistory.sql" />
     <Build Include="Storage\PF_CustomChecksHistory.sql" />
     <Build Include="Storage\PS_CustomChecksHistory.sql" />
@@ -477,12 +466,6 @@
     <Build Include="Storage\PS_ObjectExecutionStats_60MIN.sql" />
     <Build Include="Storage\PS_DBIOStats_60MIN.sql" />
     <Build Include="Storage\PS_CPU_60MIN.sql" />
-    <Build Include="Switch\Tables\Waits_60MIN.sql" />
-    <Build Include="Switch\Tables\DBIOStats_60MIN.sql" />
-    <Build Include="Switch\Tables\CPU_60MIN.sql" />
-    <Build Include="Switch\Tables\AzureDBResourceStats_60MIN.sql" />
-    <Build Include="Switch\Tables\AzureDBElasticPoolResourceStats_60MIN.sql" />
-    <Build Include="Switch\Tables\ObjectExecutionStats_60MIN.sql" />
     <Build Include="Staging\Tables\PerformanceCounters.sql" />
     <Build Include="dbo\Tables\PerformanceCounters.sql" />
     <Build Include="dbo\Tables\InstanceCounters.sql" />
@@ -494,7 +477,6 @@
     <Build Include="dbo\User Defined Types\PerformanceCounters.sql" />
     <Build Include="Storage\PF_PerformanceCounters.sql" />
     <Build Include="Storage\PS_PerformanceCounters.sql" />
-    <Build Include="Switch\Tables\PerformanceCounters.sql" />
     <Build Include="Security\App.sql" />
     <Build Include="dbo\Stored Procedures\ObjectExecutionStatsSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\DDL_Get.sql" />
@@ -503,7 +485,6 @@
     <Build Include="dbo\Tables\PerformanceCounters_60MIN.sql" />
     <Build Include="Storage\PF_PerformanceCounters_60MIN.sql" />
     <Build Include="Storage\PS_PerformanceCounters_60MIN.sql" />
-    <Build Include="Switch\Tables\PerformanceCounters_60MIN.sql" />
     <Build Include="dbo\Stored Procedures\DDLSnapshotInstanceSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\VLF_Upd.sql" />
     <Build Include="dbo\User Defined Types\VLF.sql" />
@@ -538,8 +519,6 @@
     <Build Include="Storage\PS_JobStats_60MIN.sql" />
     <Build Include="dbo\Views\AgentJob7Day.sql" />
     <Build Include="dbo\Stored Procedures\JobHistory_Get.sql" />
-    <Build Include="Switch\Tables\JobHistory.sql" />
-    <Build Include="Switch\Tables\JobStats_60MIN.sql" />
     <Build Include="dbo\Functions\Histogram_CPU.sql" />
     <Build Include="dbo\Tables\AvailabilityReplicas.sql" />
     <Build Include="dbo\User Defined Types\AvailabilityReplicas.sql" />
@@ -600,8 +579,6 @@
     <Build Include="Storage\PS_RunningQueries.sql" />
     <Build Include="Storage\PF_RunningQueriesSummary.sql" />
     <Build Include="Storage\PS_RunningQueriesSummary.sql" />
-    <Build Include="Switch\Tables\RunningQueries.sql" />
-    <Build Include="Switch\Tables\RunningQueriesSummary.sql" />
     <Build Include="dbo\Stored Procedures\PurgeCollectionErrorLog.sql" />
     <Build Include="dbo\Stored Procedures\PurgeQueryPlans.sql" />
     <Build Include="dbo\Stored Procedures\PurgeQueryText.sql" />
@@ -624,7 +601,6 @@
     <Build Include="dbo\User Defined Types\MemoryUsage.sql" />
     <Build Include="dbo\Tables\MemoryUsage.sql" />
     <Build Include="dbo\Tables\MemoryClerkType.sql" />
-    <Build Include="Switch\Tables\MemoryUsage.sql" />
     <Build Include="Storage\PF_MemoryUsage.sql" />
     <Build Include="Storage\PS_MemoryUsage.sql" />
     <Build Include="dbo\Stored Procedures\MemoryUsage_Upd.sql" />
@@ -640,7 +616,6 @@
     <Build Include="dbo\Tables\SessionWaits.sql" />
     <Build Include="dbo\User Defined Types\SessionWaits.sql" />
     <Build Include="dbo\Stored Procedures\SessionWaits_Upd.sql" />
-    <Build Include="Switch\Tables\SessionWaits.sql" />
     <Build Include="dbo\Stored Procedures\SessionWaits_Get.sql" />
     <Build Include="dbo\Stored Procedures\SessionWaitsSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\AcknowledgeMemoryDumps.sql" />
@@ -695,7 +670,6 @@
     <Build Include="Storage\PF_IdentityColumnsHistory.sql" />
     <Build Include="Storage\PS_IdentityColumnsHistory.sql" />
     <Build Include="dbo\Tables\IdentityColumnsHistory.sql" />
-    <Build Include="Switch\Tables\IdentityColumnsHistory.sql" />
     <Build Include="dbo\Views\IdentityColumnsInfo.sql" />
     <Build Include="dbo\Stored Procedures\IdentityColumns_Get.sql" />
     <Build Include="dbo\Tables\IdentityColumThresholds.sql" />
