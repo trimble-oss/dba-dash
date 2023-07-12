@@ -1,14 +1,14 @@
-﻿using LiveCharts.Defaults;
+﻿using DBADashGUI.Pickers;
+using LiveCharts.Defaults;
 using System;
 
 namespace DBADashGUI
 {
-    class ColumnMetaData
+    public class ColumnMetaData : ISelectable
     {
-        public string Alias;
-        public bool isVisible;
+        public string Name { get; set; }
+        public bool IsVisible { get; set; }
         public DateTimePoint[] Points;
         public Int32 axis = 0;
-
     }
 }

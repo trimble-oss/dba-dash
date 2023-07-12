@@ -117,30 +117,30 @@ namespace DBADashGUI.Performance
 
         private readonly Dictionary<string, ColumnMetaData> columns = new()
         {
-                {"AvgWaitTimeMs", new ColumnMetaData{Alias="Avg Wait Time (ms)",isVisible=false } },
-                {"SampleDurationSec", new ColumnMetaData{Alias="Sample Duration (sec)",isVisible=false } },
-                {"SignalWaitPct", new ColumnMetaData{Alias="Signal Wait %",isVisible=false } },
-                {"SignalWaitMsPerSec", new ColumnMetaData{Alias="Signal Wait (ms/sec)",isVisible=true } },
-                {"SignalWaitMsPerCorePerSec", new ColumnMetaData{Alias="Signal Wait Time (ms/sec/core)",isVisible=false } },
-                {"SignalWaitSec", new ColumnMetaData{Alias="Signal Wait (sec)",isVisible=false } },
-                {"TotalWaitSec", new ColumnMetaData{Alias="Total Wait (sec)",isVisible=false } },
-                {"WaitTimeMsPerSec", new ColumnMetaData{Alias="Wait Time (ms/sec)",isVisible=true } },
-                {"WaitTimeMsPerCorePerSec", new ColumnMetaData{Alias="Wait Time (ms/sec/core)",isVisible=false } },
-                {"WaitingTasksCount", new ColumnMetaData{Alias="Waiting Tasks Count",isVisible=false } }
+                {"AvgWaitTimeMs", new ColumnMetaData{Name="Avg Wait Time (ms)",IsVisible=false } },
+                {"SampleDurationSec", new ColumnMetaData{Name="Sample Duration (sec)",IsVisible=false } },
+                {"SignalWaitPct", new ColumnMetaData{Name="Signal Wait %",IsVisible=false } },
+                {"SignalWaitMsPerSec", new ColumnMetaData{Name="Signal Wait (ms/sec)",IsVisible=true } },
+                {"SignalWaitMsPerCorePerSec", new ColumnMetaData{Name="Signal Wait Time (ms/sec/core)",IsVisible=false } },
+                {"SignalWaitSec", new ColumnMetaData{Name="Signal Wait (sec)",IsVisible=false } },
+                {"TotalWaitSec", new ColumnMetaData{Name="Total Wait (sec)",IsVisible=false } },
+                {"WaitTimeMsPerSec", new ColumnMetaData{Name="Wait Time (ms/sec)",IsVisible=true } },
+                {"WaitTimeMsPerCorePerSec", new ColumnMetaData{Name="Wait Time (ms/sec/core)",IsVisible=false } },
+                {"WaitingTasksCount", new ColumnMetaData{Name="Waiting Tasks Count",IsVisible=false } }
             };
 
         private void PopulateMetricsMenu()
         {
             foreach (var itm in columns)
             {
-                tsMetrics.DropDownItems.Add(new ToolStripMenuItem(itm.Value.Alias, null, TsMetrics_Click) { Tag = itm.Key, Checked = itm.Value.isVisible, CheckOnClick = true });
+                tsMetrics.DropDownItems.Add(new ToolStripMenuItem(itm.Value.Name, null, TsMetrics_Click) { Tag = itm.Key, Checked = itm.Value.IsVisible, CheckOnClick = true });
             }
         }
 
         private void TsMetrics_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
-            columns[(string)ts.Tag].isVisible = ts.Checked;
+            columns[(string)ts.Tag].IsVisible = ts.Checked;
             WaitChart1.UpdateColumnVisibility(columns);
         }
 

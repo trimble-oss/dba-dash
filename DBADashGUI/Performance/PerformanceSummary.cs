@@ -390,22 +390,7 @@ namespace DBADashGUI.Performance
             Common.PromptSaveDataGridView(ref dgv);
         }
 
-        private void PromptColumnSelection(ref DataGridView gv)
-        {
-            using (var frm = new SelectColumns())
-            {
-                frm.Columns = gv.Columns;
-                frm.ShowDialog(this);
-                if (frm.DialogResult == DialogResult.OK)
-                {
-                    var dt = ((DataView)dgv.DataSource).Table;
-                    GenerateHistogram(ref dt);
-                    DeSelectView();
-                }
-            }
-        }
-
-        private void LoadPersistedColumnLayout(List<KeyValuePair<string, PersistedColumnLayout>> savedCols)
+    private void LoadPersistedColumnLayout(List<KeyValuePair<string, PersistedColumnLayout>> savedCols)
         {
             if (savedCols == null)
             {
@@ -423,7 +408,12 @@ namespace DBADashGUI.Performance
 
         private void StandardColumnsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            PromptColumnSelection(ref dgv);
+            if (dgv.PromptColumnSelection() == DialogResult.OK)
+            {
+                var dt = ((DataView)dgv.DataSource).Table;
+                GenerateHistogram(ref dt);
+                DeSelectView();
+            }
         }
 
         private void PerformanceCounterColumnsToolStripMenuItem_Click(object sender, EventArgs e)

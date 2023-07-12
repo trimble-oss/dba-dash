@@ -383,17 +383,12 @@ namespace DBADashGUI.Performance
 
         private void PromptColumnSelection(ref DataGridView gv)
         {
-            using (var frm = new SelectColumns())
+            if (dgv.PromptColumnSelection() == DialogResult.OK)
             {
-                frm.Columns = gv.Columns;
-                frm.ShowDialog(this);
-                if (frm.DialogResult == DialogResult.OK)
-                {
-                    UpdateHistogramsIfNeeded(ref gv);
-                    gv.AutoResizeColumns();
-                    gv.AutoResizeRows();
-                }
-            }
+                UpdateHistogramsIfNeeded(ref gv);
+                gv.AutoResizeColumns();
+                gv.AutoResizeRows();
+            };
         }
 
         private void TsCols_Click(object sender, EventArgs e)

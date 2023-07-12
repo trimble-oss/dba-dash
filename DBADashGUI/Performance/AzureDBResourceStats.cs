@@ -51,43 +51,43 @@ namespace DBADashGUI.Performance
 
         private readonly Dictionary<string, ColumnMetaData> DBColumns = new()
         {
-                {"avg_cpu_percent", new ColumnMetaData{Alias="Avg CPU %",isVisible=false } },
-                {"avg_data_io_percent", new ColumnMetaData{Alias="Avg Data %",isVisible=false } },
-                {"avg_log_write_percent", new ColumnMetaData{Alias="Avg Log Write %",isVisible=false } },
-                {"AvgDTUPercent", new ColumnMetaData{Alias="Avg DTU %",isVisible=false } },
-                {"avg_memory_usage_percent", new ColumnMetaData{Alias="Avg Memory %",isVisible=false } },
-                {"xtp_storage_percent", new ColumnMetaData{Alias="XTP Storage %",isVisible=false } },
-                {"avg_instance_cpu_percent", new ColumnMetaData{Alias="Avg CPU % (Instance)",isVisible=false } },
-                {"avg_instance_memory_percent", new ColumnMetaData{Alias="Avg Memory % (Instance)",isVisible=false } },
-                {"max_worker_percent", new ColumnMetaData{Alias="Max Worker %",isVisible=false } },
-                {"max_session_percent", new ColumnMetaData{Alias="Max Session %",isVisible=false } },
-                {"max_cpu_percent", new ColumnMetaData{Alias="Max CPU %",isVisible=true } },
-                {"max_data_io_percent", new ColumnMetaData{Alias="Max Data %",isVisible=true } },
-                {"max_log_write_percent", new ColumnMetaData{Alias="Max Log Write %",isVisible=true } },
-                {"max_instance_cpu_percent", new ColumnMetaData{Alias="Max CPU % (Instance)",isVisible=false } },
-                {"max_instance_memory_percent", new ColumnMetaData{Alias="Max Memory % (Instance)",isVisible=false } },
-                {"MaxDTUPercent", new ColumnMetaData{Alias="Max DTU %",isVisible=false} },
-                {"AvgDTUsUsed", new ColumnMetaData{Alias="Avg DTU",isVisible=false,axis=1} },
-                {"MaxDTUsUsed", new ColumnMetaData{Alias="Max DTU",isVisible=false,axis=1} },
-                {"dtu_limit", new ColumnMetaData{Alias="DTU Limit",isVisible=false,axis=1} },
-                {"cpu_limit", new ColumnMetaData{Alias="CPU Limit",isVisible=false,axis=1} },
+                {"avg_cpu_percent", new ColumnMetaData{Name="Avg CPU %",IsVisible=false } },
+                {"avg_data_io_percent", new ColumnMetaData{Name="Avg Data %",IsVisible=false } },
+                {"avg_log_write_percent", new ColumnMetaData{Name="Avg Log Write %",IsVisible=false } },
+                {"AvgDTUPercent", new ColumnMetaData{Name="Avg DTU %",IsVisible=false } },
+                {"avg_memory_usage_percent", new ColumnMetaData{Name="Avg Memory %",IsVisible=false } },
+                {"xtp_storage_percent", new ColumnMetaData{Name="XTP Storage %",IsVisible=false } },
+                {"avg_instance_cpu_percent", new ColumnMetaData{Name="Avg CPU % (Instance)",IsVisible=false } },
+                {"avg_instance_memory_percent", new ColumnMetaData{Name="Avg Memory % (Instance)",IsVisible=false } },
+                {"max_worker_percent", new ColumnMetaData{Name="Max Worker %",IsVisible=false } },
+                {"max_session_percent", new ColumnMetaData{Name="Max Session %",IsVisible=false } },
+                {"max_cpu_percent", new ColumnMetaData{Name="Max CPU %",IsVisible=true } },
+                {"max_data_io_percent", new ColumnMetaData{Name="Max Data %",IsVisible=true } },
+                {"max_log_write_percent", new ColumnMetaData{Name="Max Log Write %",IsVisible=true } },
+                {"max_instance_cpu_percent", new ColumnMetaData{Name="Max CPU % (Instance)",IsVisible=false } },
+                {"max_instance_memory_percent", new ColumnMetaData{Name="Max Memory % (Instance)",IsVisible=false } },
+                {"MaxDTUPercent", new ColumnMetaData{Name="Max DTU %",IsVisible=false} },
+                {"AvgDTUsUsed", new ColumnMetaData{Name="Avg DTU",IsVisible=false,axis=1} },
+                {"MaxDTUsUsed", new ColumnMetaData{Name="Max DTU",IsVisible=false,axis=1} },
+                {"dtu_limit", new ColumnMetaData{Name="DTU Limit",IsVisible=false,axis=1} },
+                {"cpu_limit", new ColumnMetaData{Name="CPU Limit",IsVisible=false,axis=1} },
             };
 
         private readonly Dictionary<string, ColumnMetaData> PoolColumns = new()
         {
-                {"avg_cpu_percent", new ColumnMetaData{Alias="Avg CPU %",isVisible=false } },
-                {"avg_data_io_percent", new ColumnMetaData{Alias="Avg Data %",isVisible=false } },
-                {"avg_log_write_percent", new ColumnMetaData{Alias="Avg Log Write %",isVisible=false } },
-                {"AvgDTUPercent", new ColumnMetaData{Alias="Avg DTU %",isVisible=false } },
-                {"max_worker_percent", new ColumnMetaData{Alias="Max Worker %",isVisible=false } },
-                {"max_session_percent", new ColumnMetaData{Alias="Max Session %",isVisible=false } },
-                {"max_cpu_percent", new ColumnMetaData{Alias="Max CPU %",isVisible=true } },
-                {"max_data_io_percent", new ColumnMetaData{Alias="Max Data %",isVisible=true } },
-                {"max_log_write_percent", new ColumnMetaData{Alias="Max Log Write %",isVisible=true } },
-                {"MaxDTUPercent", new ColumnMetaData{Alias="Max DTU %",isVisible=false} },
-                {"AvgDTUsUsed", new ColumnMetaData{Alias="Avg DTU",isVisible=false,axis=1} },
-                {"MaxDTUsUsed", new ColumnMetaData{Alias="Max DTU",isVisible=false,axis=1} },
-                {"dtu_limit", new ColumnMetaData{Alias="DTU Limit",isVisible=false,axis=1} }
+                {"avg_cpu_percent", new ColumnMetaData{Name="Avg CPU %",IsVisible=false } },
+                {"avg_data_io_percent", new ColumnMetaData{Name="Avg Data %",IsVisible=false } },
+                {"avg_log_write_percent", new ColumnMetaData{Name="Avg Log Write %",IsVisible=false } },
+                {"AvgDTUPercent", new ColumnMetaData{Name="Avg DTU %",IsVisible=false } },
+                {"max_worker_percent", new ColumnMetaData{Name="Max Worker %",IsVisible=false } },
+                {"max_session_percent", new ColumnMetaData{Name="Max Session %",IsVisible=false } },
+                {"max_cpu_percent", new ColumnMetaData{Name="Max CPU %",IsVisible=true } },
+                {"max_data_io_percent", new ColumnMetaData{Name="Max Data %",IsVisible=true } },
+                {"max_log_write_percent", new ColumnMetaData{Name="Max Log Write %",IsVisible=true } },
+                {"MaxDTUPercent", new ColumnMetaData{Name="Max DTU %",IsVisible=false} },
+                {"AvgDTUsUsed", new ColumnMetaData{Name="Avg DTU",IsVisible=false,axis=1} },
+                {"MaxDTUsUsed", new ColumnMetaData{Name="Max DTU",IsVisible=false,axis=1} },
+                {"dtu_limit", new ColumnMetaData{Name="DTU Limit",IsVisible=false,axis=1} }
             };
 
         private DataTable dt;
@@ -149,7 +149,7 @@ namespace DBADashGUI.Performance
                 y1Max = dtuLimit > y1Max ? dtuLimit : y1Max;
                 foreach (var kv in columns)
                 {
-                    if (kv.Value.isVisible)
+                    if (kv.Value.IsVisible)
                     {
                         var v = r[kv.Key] == DBNull.Value ? 0 : Convert.ToDouble(r[kv.Key]);
                         var endtime = (DateTime)r["end_time"];
@@ -163,13 +163,13 @@ namespace DBADashGUI.Performance
             chart1.Series = sc;
             foreach (var kv in columns)
             {
-                if (kv.Value.isVisible)
+                if (kv.Value.IsVisible)
                 {
                     var v = new ChartValues<DateTimePoint>();
                     v.AddRange(columns[kv.Key].Points);
                     sc.Add(new LineSeries
                     {
-                        Title = columns[kv.Key].Alias,
+                        Title = columns[kv.Key].Name,
                         Tag = kv.Key,
                         ScalesYAt = columns[kv.Key].axis,
                         LineSmoothness = SmoothLines ? 1 : 0,
@@ -186,7 +186,7 @@ namespace DBADashGUI.Performance
                 Title = "Time",
                 LabelFormatter = val => new System.DateTime((long)val).ToString(DateFormat)
             });
-            var y0visible = columns.Values.Where(c => c.isVisible && c.axis == 0).Any();
+            var y0visible = columns.Values.Where(c => c.IsVisible && c.axis == 0).Any();
             chart1.AxisY.Add(new Axis
             {
                 Title = "%",
@@ -195,7 +195,7 @@ namespace DBADashGUI.Performance
                 MaxValue = 100,
                 Visibility = y0visible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden
             });
-            var y1visible = columns.Values.Where(c => c.isVisible && c.axis == 1).Any();
+            var y1visible = columns.Values.Where(c => c.IsVisible && c.axis == 1).Any();
             if (y1visible)
             {
                 chart1.AxisY.Add(new Axis
@@ -214,12 +214,12 @@ namespace DBADashGUI.Performance
         {
             foreach (var k in columns)
             {
-                var dd = new ToolStripMenuItem(k.Value.Alias)
+                var dd = new ToolStripMenuItem(k.Value.Name)
                 {
                     Name = (string)k.Key,
                     CheckOnClick = true
                 };
-                dd.Checked = dd.Enabled && k.Value.isVisible;
+                dd.Checked = dd.Enabled && k.Value.IsVisible;
                 dd.Click += MeasureDropDown_Click;
                 tsMeasures.DropDownItems.Add(dd);
             }
@@ -228,7 +228,7 @@ namespace DBADashGUI.Performance
         private void MeasureDropDown_Click(object sender, EventArgs e)
         {
             var mnu = (ToolStripMenuItem)sender;
-            columns[mnu.Name].isVisible = mnu.Checked;
+            columns[mnu.Name].IsVisible = mnu.Checked;
             UpdateChart();
         }
 

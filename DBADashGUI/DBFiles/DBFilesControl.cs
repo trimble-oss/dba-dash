@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using Humanizer;
 using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.DBFiles
@@ -18,6 +19,7 @@ namespace DBADashGUI.DBFiles
 
         private List<Int32> InstanceIDs;
         private Int32? DatabaseID;
+        private string? DriveName;
 
         public bool IncludeCritical
         {
@@ -55,6 +57,8 @@ namespace DBADashGUI.DBFiles
             }
         }
 
+        public bool IsFileGroupLevel => tsFilegroup.Checked && tsLevel.Visible;
+
         private DataTable GetDBFiles()
         {
             var selectedTypes = FileTypes;
@@ -66,8 +70,9 @@ namespace DBADashGUI.DBFiles
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 if (DatabaseID != null) { cmd.Parameters.AddWithValue("DatabaseID", DatabaseID); }
                 cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
-                cmd.Parameters.AddWithValue("FilegroupLevel", tsFilegroup.Checked);
+                cmd.Parameters.AddWithValue("FilegroupLevel", IsFileGroupLevel);
                 cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+                cmd.Parameters.AddWithNullableValue("DriveName", DriveName);
                 if (selectedTypes.Count is > 0 and < 4)
                 {
                     cmd.Parameters.AddWithValue("Types", string.Join(",", selectedTypes));
@@ -81,18 +86,21 @@ namespace DBADashGUI.DBFiles
 
         public void SetContext(DBADashContext context)
         {
+            DriveName = context.DriveName;
             InstanceIDs = context.InstanceIDs.ToList();
             DatabaseID = (context.DatabaseID > 0 ? (Int32?)context.DatabaseID : null);
             IncludeCritical = true;
             IncludeWarning = true;
-            IncludeNA = DatabaseID != null;
-            IncludeOK = DatabaseID != null;
+            IncludeNA = DatabaseID != null || context.DriveName != null;
+            IncludeOK = DatabaseID != null || context.DriveName != null;
+            tsLevel.Visible = context.DriveName == null;
 
             RefreshData();
         }
 
         public void RefreshData()
         {
+            ToggleFileLevel(!IsFileGroupLevel);
             var dt = GetDBFiles();
             dgvFiles.AutoGenerateColumns = false;
             dgvFiles.DataSource = new DataView(dt);
@@ -100,6 +108,35 @@ namespace DBADashGUI.DBFiles
 
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
             configureDatabaseThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1 && DatabaseID > 0;
+
+            UpdateTotals();
+        }
+
+        private void UpdateTotals()
+        {
+            double totalSize;
+            int totalFiles;
+            if (IsFileGroupLevel)
+            {
+                totalFiles = dgvFiles.Rows
+                    .Cast<DataGridViewRow>()
+                    .Where(row => !row.IsNewRow && row.Cells["NumberOfFiles"].Value != null)
+                    .Sum(row => int.Parse(row.Cells["NumberOfFiles"].Value.ToString()));
+
+                totalSize = dgvFiles.Rows
+                    .Cast<DataGridViewRow>()
+                    .Where(row => !row.IsNewRow && row.Cells["SizeMB"].Value != null)
+                    .Sum(row => Convert.ToDouble(row.Cells["SizeMB"].Value.ToString()));
+            }
+            else
+            {
+                totalFiles = dgvFiles.RowCount;
+                totalSize = dgvFiles.Rows
+                    .Cast<DataGridViewRow>()
+                    .Where(row => !row.IsNewRow && row.Cells["FileLevel_FileSizeMB"].Value != null)
+                    .Sum(row => Convert.ToDouble(row.Cells["FileLevel_FileSizeMB"].Value.ToString()));
+            }
+            lblInfo.Text = $"File Count {totalFiles}. Total Size: {totalSize.Megabytes()}";
         }
 
         private void Status_Selected(object sender, EventArgs e)
@@ -108,7 +145,8 @@ namespace DBADashGUI.DBFiles
         }
 
         private static DBSpaceHistoryView DBSpaceHistoryViewForm = null;
-        private static void LoadDBSpaceHistory(int dbid,int? dbSpaceID,string instance,string dbName,string fileName)
+
+        private static void LoadDBSpaceHistory(int dbid, int? dbSpaceID, string instance, string dbName, string fileName)
         {
             DBSpaceHistoryViewForm?.Close();
             DBSpaceHistoryViewForm = new()
@@ -119,7 +157,7 @@ namespace DBADashGUI.DBFiles
                 DBName = dbName,
                 FileName = fileName
             };
-            DBSpaceHistoryViewForm.FormClosed += delegate{ DBSpaceHistoryViewForm = null; };
+            DBSpaceHistoryViewForm.FormClosed += delegate { DBSpaceHistoryViewForm = null; };
             DBSpaceHistoryViewForm.Show();
         }
 
@@ -222,20 +260,20 @@ namespace DBADashGUI.DBFiles
 
         private void TsFilegroup_Click(object sender, EventArgs e)
         {
-            ToggleFileLevel(false);
+            tsFilegroup.Checked = true;
+            tsFile.Checked = false;
             RefreshData();
         }
 
         private void TsFile_Click(object sender, EventArgs e)
         {
-            ToggleFileLevel(true);
+            tsFilegroup.Checked = false;
+            tsFile.Checked = true;
             RefreshData();
         }
 
         private void ToggleFileLevel(bool isFileLevel)
         {
-            tsFilegroup.Checked = !isFileLevel;
-            tsFile.Checked = isFileLevel;
             foreach (DataGridViewColumn col in dgvFiles.Columns)
             {
                 if (col.Name.StartsWith("FileLevel_"))

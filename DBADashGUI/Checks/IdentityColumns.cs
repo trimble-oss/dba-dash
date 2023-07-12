@@ -129,10 +129,7 @@ namespace DBADashGUI.Checks
 
         private void TsColumns_Click(object sender, EventArgs e)
         {
-            using (var frm = new SelectColumns() { Columns = dgv.Columns })
-            {
-                frm.ShowDialog(this);
-            }
+            dgv.PromptColumnSelection();
         }
 
         private void TsCopy_Click(object sender, EventArgs e)

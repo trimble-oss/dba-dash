@@ -41,7 +41,7 @@ namespace DBADashGUI.Performance
         {
             foreach (LineSeries s in Series.Cast<LineSeries>())
             {
-                s.Visibility = columns[(string)s.Tag].isVisible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                s.Visibility = columns[(string)s.Tag].IsVisible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
             }
         }
 
@@ -79,7 +79,7 @@ namespace DBADashGUI.Performance
                 v.AddRange(columns[s].Points);
                 sc.Add(new LineSeries
                 {
-                    Title = columns[s].Alias,
+                    Title = columns[s].Name,
                     Tag = s,
                     ScalesYAt = columns[s].axis,
                     PointGeometrySize = cnt <= 100 ? DefaultPointSize : 0,

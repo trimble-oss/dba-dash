@@ -98,10 +98,7 @@ namespace DBADashGUI
 
         private void TsCols_Click(object sender, EventArgs e)
         {
-            using (var frm = new SelectColumns() { Columns = dgvVersion.Columns })
-            {
-                frm.ShowDialog(this);
-            }
+            dgvVersion.PromptColumnSelection();
         }
     }
 }

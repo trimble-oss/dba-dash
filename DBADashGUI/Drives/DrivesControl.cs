@@ -1,6 +1,4 @@
-﻿using DBADashGUI.Drives;
-using Microsoft.Data.SqlClient;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
@@ -8,7 +6,7 @@ using System.Linq;
 using System.Windows.Forms;
 using static DBADashGUI.DBADashStatus;
 
-namespace DBADashGUI.Properties
+namespace DBADashGUI.Drives
 {
     public partial class DrivesControl : UserControl, ISetContext
     {
@@ -17,7 +15,7 @@ namespace DBADashGUI.Properties
             InitializeComponent();
         }
 
-        public Int32 DrivesViewMaxRows = 30;
+        public int DrivesViewMaxRows = 30;
         private DBADashContext context;
 
         public bool IncludeCritical
@@ -40,28 +38,14 @@ namespace DBADashGUI.Properties
             get => statusFilterToolStrip1.OK; set => statusFilterToolStrip1.OK = value;
         }
 
-        public bool gridview = false;
+        public bool gridView;
 
         private DataView dvDrives;
 
-        private DataTable GetDrives()
-        {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.Drives_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", context.RegularInstanceIDs));
-                cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
-                cmd.Parameters.AddWithValue("IncludeMetrics", includeAllMetricsToolStripMenuItem.Checked);
-                cmd.Parameters.AddWithValue("ShowHidden", context.RegularInstanceIDs.Count == 1 || Common.ShowHidden);
-
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                return dt;
-            }
-        }
+        private DataTable GetDrives() => CommonData.GetDrives(context.RegularInstanceIDs,
+            includeAllMetricsToolStripMenuItem.Checked, statusFilterToolStrip1.Critical, statusFilterToolStrip1.Warning,
+            statusFilterToolStrip1.NA, statusFilterToolStrip1.OK,
+            context.RegularInstanceIDs.Count == 1 || Common.ShowHidden, context.DriveName);
 
         public void SetContext(DBADashContext context)
         {
@@ -76,10 +60,10 @@ namespace DBADashGUI.Properties
         public void RefreshData()
         {
             pnlDrives.Controls.Clear();
-            DataTable dt = GetDrives();
+            var dt = GetDrives();
             dvDrives = new DataView(dt);
 
-            if (dt.Rows.Count > DrivesViewMaxRows || gridview)
+            if (dt.Rows.Count > DrivesViewMaxRows || gridView)
             {
                 ShowGridView();
             }
@@ -95,7 +79,7 @@ namespace DBADashGUI.Properties
 
         public void ShowGridView()
         {
-            gridview = true;
+            gridView = true;
             pnlDrives.Controls.Clear();
             pnlSpacing.Visible = false;
             dgv = new DataGridView
@@ -147,11 +131,11 @@ namespace DBADashGUI.Properties
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
-                var Status = (DBADashStatus.DBADashStatusEnum)row["Status"];
-                var SnapshotStatus = (DBADashStatus.DBADashStatusEnum)row["SnapshotStatus"];
+                var Status = (DBADashStatusEnum)row["Status"];
+                var SnapshotStatus = (DBADashStatusEnum)row["SnapshotStatus"];
                 dgv.Rows[idx].Cells["SnapshotAge"].SetStatusColor(SnapshotStatus);
                 if (row["DriveCheckType"] != DBNull.Value && (string)row["DriveCheckType"] == "G")
                 {
@@ -185,15 +169,15 @@ namespace DBADashGUI.Properties
             {
                 if (dgv.Columns[e.ColumnIndex].Name == "Configure")
                 {
-                    DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                    Configure((Int32)row["InstanceID"], (Int32)row["DriveID"]);
+                    var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+                    Configure((int)row["InstanceID"], (int)row["DriveID"]);
                 }
                 else if (dgv.Columns[e.ColumnIndex].Name == "History")
                 {
-                    DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+                    var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
                     var frm = new DriveHistoryView
                     {
-                        DriveID = (Int32)row["DriveID"],
+                        DriveID = (int)row["DriveID"],
                         Text = row["Instance"] + " | " + (string)row["Name"] + " " + (row["Label"] == DBNull.Value ? "" : (string)row["Label"])
                     };
                     frm.Show();
@@ -203,10 +187,11 @@ namespace DBADashGUI.Properties
 
         public void ShowDrivesView()
         {
-            gridview = false;
+            gridView = false;
             var driveControls = new List<DriveControl>();
             pnlDrives.Controls.Clear();
             pnlSpacing.Visible = true;
+
             foreach (DataRow r in dvDrives.Table.Rows)
             {
                 var drv = new DriveControl();
@@ -220,8 +205,8 @@ namespace DBADashGUI.Properties
                 drv.Drive.FreeSpaceGB = (decimal)r["FreeGB"];
                 drv.Drive.DriveStatus = (DBADashStatusEnum)r["Status"];
                 drv.Drive.Inherited = (bool)r["IsInheritedThreshold"];
-                drv.Drive.InstanceID = (Int32)r["InstanceID"];
-                drv.Drive.DriveID = (Int32)r["DriveID"];
+                drv.Drive.InstanceID = (int)r["InstanceID"];
+                drv.Drive.DriveID = (int)r["DriveID"];
                 drv.Drive.DriveCheckTypeChar = char.Parse((string)r["DriveCheckType"]);
                 drv.Drive.SnapshotDate = (DateTime)r["SnapshotDate"];
                 drv.Drive.SnapshotStatus = (DBADashStatusEnum)r["SnapshotStatus"];
@@ -238,11 +223,51 @@ namespace DBADashGUI.Properties
             {
                 pnlDrives.Controls.AddRange(driveControls.ToArray());
             }
+            AddHistory();
             tsDrivesView.Enabled = false;
             tsGridView.Enabled = true;
         }
 
-        public void Configure(Int32 InstanceID, Int32 DriveID)
+        private void AddHistory()
+        {
+            if (context.DriveName != null && dvDrives.Count == 1)
+            {
+                pnlDrives.Controls.Add(new Label()
+                {
+                    Text = Convert.ToString(dvDrives[0]["Label"]) + " (" + Convert.ToString(dvDrives[0]["Name"]) + ")",
+                    TextAlign = ContentAlignment.TopCenter,
+                    ForeColor = DashColors.TrimbleBlue,
+                    Font = new Font(Font.FontFamily, 20f, FontStyle.Bold),
+                    Dock = DockStyle.Top,
+                    Height = 50
+                });
+
+                var pnlHistory = new Panel
+                {
+                    Dock = DockStyle.Fill
+                };
+                pnlHistory.Controls.Add(new Label()
+                {
+                    Text = "History",
+                    TextAlign = ContentAlignment.TopCenter,
+                    ForeColor = DashColors.TrimbleBlue,
+                    Font = new Font(Font.FontFamily, 14f, FontStyle.Bold),
+                    Dock = DockStyle.Top,
+                    Height = 50
+                });
+                var history = new DriveHistory();
+                history.Name = context.DriveName;
+                history.DriveID = (int)dvDrives[0]["DriveID"];
+                history.Dock = DockStyle.Fill;
+                pnlHistory.Controls.Add(history);
+                pnlDrives.Controls.Add(pnlHistory);
+                history.BringToFront();
+                pnlHistory.BringToFront();
+                history.RefreshData();
+            }
+        }
+
+        public void Configure(int InstanceID, int DriveID)
         {
             var drv = DriveThreshold.GetDriveThreshold(InstanceID, DriveID);
             var frm = new DriveThresholdConfig
@@ -291,7 +316,7 @@ namespace DBADashGUI.Properties
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            if (!gridview)
+            if (!gridView)
             {
                 ShowGridView();
             }
@@ -304,13 +329,13 @@ namespace DBADashGUI.Properties
 
         private void IncludeAllMetricsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            gridview = true;
+            gridView = true;
             RefreshData();
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            if (!gridview)
+            if (!gridView)
             {
                 ShowGridView();
             }

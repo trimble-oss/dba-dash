@@ -1,4 +1,4 @@
-﻿namespace DBADashGUI.Properties
+﻿namespace DBADashGUI.Drives
 {
     partial class DrivesControl
     {

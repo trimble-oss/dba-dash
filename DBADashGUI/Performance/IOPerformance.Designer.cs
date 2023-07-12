@@ -28,143 +28,219 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.chartIO = new LiveCharts.WinForms.CartesianChart();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsMeasures = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsClose = new System.Windows.Forms.ToolStripButton();
-            this.tsUp = new System.Windows.Forms.ToolStripButton();
-            this.lblIOPerformance = new System.Windows.Forms.ToolStripLabel();
-            this.tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsDrives = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsFileGroup = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsIOSummary = new System.Windows.Forms.ToolStripButton();
-            this.toolStrip1.SuspendLayout();
-            this.SuspendLayout();
+            chartIO = new LiveCharts.WinForms.CartesianChart();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
+            tsClose = new System.Windows.Forms.ToolStripButton();
+            tsUp = new System.Windows.Forms.ToolStripButton();
+            lblIOPerformance = new System.Windows.Forms.ToolStripLabel();
+            tsMeasures = new System.Windows.Forms.ToolStripButton();
+            tsDrives = new System.Windows.Forms.ToolStripDropDownButton();
+            tsOptions = new System.Windows.Forms.ToolStripDropDownButton();
+            latencyLimitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsLatency10 = new System.Windows.Forms.ToolStripMenuItem();
+            tsLatency50 = new System.Windows.Forms.ToolStripMenuItem();
+            tsLatency100 = new System.Windows.Forms.ToolStripMenuItem();
+            tsLatency200 = new System.Windows.Forms.ToolStripMenuItem();
+            tsLatency500 = new System.Windows.Forms.ToolStripMenuItem();
+            tsLatency1000 = new System.Windows.Forms.ToolStripMenuItem();
+            tsLatency2000 = new System.Windows.Forms.ToolStripMenuItem();
+            tsLatency5000 = new System.Windows.Forms.ToolStripMenuItem();
+            tsFileGroup = new System.Windows.Forms.ToolStripDropDownButton();
+            tsIOSummary = new System.Windows.Forms.ToolStripButton();
+            toolStrip1.SuspendLayout();
+            SuspendLayout();
             // 
             // chartIO
             // 
-            this.chartIO.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartIO.Location = new System.Drawing.Point(0, 27);
-            this.chartIO.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.chartIO.Name = "chartIO";
-            this.chartIO.Size = new System.Drawing.Size(773, 341);
-            this.chartIO.TabIndex = 4;
-            this.chartIO.Text = "cartesianChart1";
+            chartIO.Dock = System.Windows.Forms.DockStyle.Fill;
+            chartIO.Location = new System.Drawing.Point(0, 27);
+            chartIO.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            chartIO.Name = "chartIO";
+            chartIO.Size = new System.Drawing.Size(773, 341);
+            chartIO.TabIndex = 4;
+            chartIO.Text = "cartesianChart1";
             // 
             // toolStrip1
             // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsDateGroup,
-            this.tsMeasures,
-            this.tsClose,
-            this.tsUp,
-            this.lblIOPerformance,
-            this.tsDrives,
-            this.tsFileGroup,
-            this.tsIOSummary});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(773, 27);
-            this.toolStrip1.TabIndex = 5;
-            this.toolStrip1.Text = "toolStrip1";
-            // 
-            // tsMeasures
-            // 
-            this.tsMeasures.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsMeasures.Image = global::DBADashGUI.Properties.Resources.AddComputedField_16x;
-            this.tsMeasures.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsMeasures.Name = "tsMeasures";
-            this.tsMeasures.Size = new System.Drawing.Size(34, 24);
-            this.tsMeasures.Text = "Measures";
-            // 
-            // tsClose
-            // 
-            this.tsClose.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsClose.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsClose.Image = global::DBADashGUI.Properties.Resources.Close_red_16x;
-            this.tsClose.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsClose.Name = "tsClose";
-            this.tsClose.Size = new System.Drawing.Size(29, 24);
-            this.tsClose.Text = "Close";
-            this.tsClose.Visible = false;
-            this.tsClose.Click += new System.EventHandler(this.TsClose_Click);
-            // 
-            // tsUp
-            // 
-            this.tsUp.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsUp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsUp.Image = global::DBADashGUI.Properties.Resources.arrow_Up_16xLG;
-            this.tsUp.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsUp.Name = "tsUp";
-            this.tsUp.Size = new System.Drawing.Size(29, 24);
-            this.tsUp.Text = "Move Up";
-            this.tsUp.Click += new System.EventHandler(this.TsUp_Click);
-            // 
-            // lblIOPerformance
-            // 
-            this.lblIOPerformance.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.lblIOPerformance.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblIOPerformance.Name = "lblIOPerformance";
-            this.lblIOPerformance.Size = new System.Drawing.Size(119, 24);
-            this.lblIOPerformance.Text = "IO Performance";
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsDateGroup, tsClose, tsUp, lblIOPerformance, tsMeasures, tsDrives, tsOptions, tsFileGroup, tsIOSummary });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new System.Drawing.Size(773, 27);
+            toolStrip1.TabIndex = 5;
+            toolStrip1.Text = "toolStrip1";
             // 
             // tsDateGroup
             // 
-            this.tsDateGroup.Image = global::DBADashGUI.Properties.Resources.Time_16x;
-            this.tsDateGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsDateGroup.Name = "tsDateGroup";
-            this.tsDateGroup.Size = new System.Drawing.Size(76, 24);
-            this.tsDateGroup.Text = "1min";
+            tsDateGroup.Image = Properties.Resources.Time_16x;
+            tsDateGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsDateGroup.Name = "tsDateGroup";
+            tsDateGroup.Size = new System.Drawing.Size(76, 24);
+            tsDateGroup.Text = "1min";
+            // 
+            // tsClose
+            // 
+            tsClose.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsClose.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsClose.Image = Properties.Resources.Close_red_16x;
+            tsClose.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClose.Name = "tsClose";
+            tsClose.Size = new System.Drawing.Size(29, 24);
+            tsClose.Text = "Close";
+            tsClose.Visible = false;
+            tsClose.Click += TsClose_Click;
+            // 
+            // tsUp
+            // 
+            tsUp.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsUp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsUp.Image = Properties.Resources.arrow_Up_16xLG;
+            tsUp.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsUp.Name = "tsUp";
+            tsUp.Size = new System.Drawing.Size(29, 24);
+            tsUp.Text = "Move Up";
+            tsUp.Click += TsUp_Click;
+            // 
+            // lblIOPerformance
+            // 
+            lblIOPerformance.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            lblIOPerformance.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            lblIOPerformance.Name = "lblIOPerformance";
+            lblIOPerformance.Size = new System.Drawing.Size(119, 24);
+            lblIOPerformance.Text = "IO Performance";
+            // 
+            // tsMeasures
+            // 
+            tsMeasures.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsMeasures.Image = Properties.Resources.AddComputedField_16x;
+            tsMeasures.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsMeasures.Name = "tsMeasures";
+            tsMeasures.Size = new System.Drawing.Size(29, 24);
+            tsMeasures.Text = "Measures";
+            tsMeasures.Click += TsMeasures_Click;
             // 
             // tsDrives
             // 
-            this.tsDrives.Image = global::DBADashGUI.Properties.Resources.Hard_Drive;
-            this.tsDrives.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsDrives.Name = "tsDrives";
-            this.tsDrives.Size = new System.Drawing.Size(34, 24);
+            tsDrives.Image = Properties.Resources.Hard_Drive;
+            tsDrives.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsDrives.Name = "tsDrives";
+            tsDrives.Size = new System.Drawing.Size(34, 24);
+            // 
+            // tsOptions
+            // 
+            tsOptions.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { latencyLimitToolStripMenuItem });
+            tsOptions.Image = Properties.Resources.SettingsOutline_16x;
+            tsOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsOptions.Name = "tsOptions";
+            tsOptions.Size = new System.Drawing.Size(34, 24);
+            tsOptions.Text = "Options";
+            // 
+            // latencyLimitToolStripMenuItem
+            // 
+            latencyLimitToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsLatency10, tsLatency50, tsLatency100, tsLatency200, tsLatency500, tsLatency1000, tsLatency2000, tsLatency5000 });
+            latencyLimitToolStripMenuItem.Name = "latencyLimitToolStripMenuItem";
+            latencyLimitToolStripMenuItem.Size = new System.Drawing.Size(179, 26);
+            latencyLimitToolStripMenuItem.Text = "Latency Limit";
+            // 
+            // tsLatency10
+            // 
+            tsLatency10.Name = "tsLatency10";
+            tsLatency10.Size = new System.Drawing.Size(124, 26);
+            tsLatency10.Text = "10";
+            tsLatency10.Click += SetLatencyLimit;
+            // 
+            // tsLatency50
+            // 
+            tsLatency50.Name = "tsLatency50";
+            tsLatency50.Size = new System.Drawing.Size(124, 26);
+            tsLatency50.Text = "50";
+            tsLatency50.Click += SetLatencyLimit;
+            // 
+            // tsLatency100
+            // 
+            tsLatency100.Name = "tsLatency100";
+            tsLatency100.Size = new System.Drawing.Size(124, 26);
+            tsLatency100.Text = "100";
+            tsLatency100.Click += SetLatencyLimit;
+            // 
+            // tsLatency200
+            // 
+            tsLatency200.Checked = true;
+            tsLatency200.CheckState = System.Windows.Forms.CheckState.Checked;
+            tsLatency200.Name = "tsLatency200";
+            tsLatency200.Size = new System.Drawing.Size(124, 26);
+            tsLatency200.Text = "200";
+            tsLatency200.Click += SetLatencyLimit;
+            // 
+            // tsLatency500
+            // 
+            tsLatency500.Name = "tsLatency500";
+            tsLatency500.Size = new System.Drawing.Size(124, 26);
+            tsLatency500.Text = "500";
+            tsLatency500.Click += SetLatencyLimit;
+            // 
+            // tsLatency1000
+            // 
+            tsLatency1000.Name = "tsLatency1000";
+            tsLatency1000.Size = new System.Drawing.Size(124, 26);
+            tsLatency1000.Text = "1000";
+            tsLatency1000.Click += SetLatencyLimit;
+            // 
+            // tsLatency2000
+            // 
+            tsLatency2000.Name = "tsLatency2000";
+            tsLatency2000.Size = new System.Drawing.Size(124, 26);
+            tsLatency2000.Text = "2000";
+            tsLatency2000.Click += SetLatencyLimit;
+            // 
+            // tsLatency5000
+            // 
+            tsLatency5000.Name = "tsLatency5000";
+            tsLatency5000.Size = new System.Drawing.Size(124, 26);
+            tsLatency5000.Text = "5000";
+            tsLatency5000.Click += SetLatencyLimit;
             // 
             // tsFileGroup
             // 
-            this.tsFileGroup.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
-            this.tsFileGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsFileGroup.Name = "tsFileGroup";
-            this.tsFileGroup.Size = new System.Drawing.Size(106, 24);
-            this.tsFileGroup.Text = "Filegroup";
-            this.tsFileGroup.Visible = false;
+            tsFileGroup.Image = Properties.Resources.FilterDropdown_16x;
+            tsFileGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsFileGroup.Name = "tsFileGroup";
+            tsFileGroup.Size = new System.Drawing.Size(106, 24);
+            tsFileGroup.Text = "Filegroup";
+            tsFileGroup.Visible = false;
             // 
             // tsIOSummary
             // 
-            this.tsIOSummary.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsIOSummary.Image = global::DBADashGUI.Properties.Resources.Table_16x;
-            this.tsIOSummary.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsIOSummary.Name = "tsIOSummary";
-            this.tsIOSummary.Size = new System.Drawing.Size(29, 24);
-            this.tsIOSummary.Text = "View Table Summary";
-            this.tsIOSummary.Click += new System.EventHandler(this.TsIOSummary_Click);
+            tsIOSummary.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsIOSummary.Image = Properties.Resources.Table_16x;
+            tsIOSummary.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsIOSummary.Name = "tsIOSummary";
+            tsIOSummary.Size = new System.Drawing.Size(29, 24);
+            tsIOSummary.Text = "View Table Summary";
+            tsIOSummary.Click += TsIOSummary_Click;
             // 
             // IOPerformance
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.chartIO);
-            this.Controls.Add(this.toolStrip1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "IOPerformance";
-            this.Size = new System.Drawing.Size(773, 368);
-            this.Load += new System.EventHandler(this.IOPerformance_Load);
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            Controls.Add(chartIO);
+            Controls.Add(toolStrip1);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "IOPerformance";
+            Size = new System.Drawing.Size(773, 368);
+            Load += IOPerformance_Load;
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
 
         private LiveCharts.WinForms.CartesianChart chartIO;
         private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.ToolStripDropDownButton tsMeasures;
         private System.Windows.Forms.ToolStripLabel lblIOPerformance;
         private System.Windows.Forms.ToolStripDropDownButton tsDrives;
         private System.Windows.Forms.ToolStripDropDownButton tsDateGroup;
@@ -172,5 +248,16 @@
         private System.Windows.Forms.ToolStripButton tsIOSummary;
         private System.Windows.Forms.ToolStripButton tsClose;
         private System.Windows.Forms.ToolStripButton tsUp;
+        private System.Windows.Forms.ToolStripDropDownButton tsOptions;
+        private System.Windows.Forms.ToolStripMenuItem latencyLimitToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem tsLatency10;
+        private System.Windows.Forms.ToolStripMenuItem tsLatency50;
+        private System.Windows.Forms.ToolStripMenuItem tsLatency100;
+        private System.Windows.Forms.ToolStripMenuItem tsLatency200;
+        private System.Windows.Forms.ToolStripMenuItem tsLatency500;
+        private System.Windows.Forms.ToolStripMenuItem tsLatency1000;
+        private System.Windows.Forms.ToolStripMenuItem tsLatency2000;
+        private System.Windows.Forms.ToolStripMenuItem tsLatency5000;
+        private System.Windows.Forms.ToolStripButton tsMeasures;
     }
 }

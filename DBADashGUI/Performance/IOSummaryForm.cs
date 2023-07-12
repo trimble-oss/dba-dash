@@ -30,6 +30,11 @@ namespace DBADashGUI.Performance
             get => ioSummary1.ToDate; set => ioSummary1.ToDate = value;
         }
 
+        public IOSummary.IOSummaryGroupByOptions GroupBy
+        {
+            get => ioSummary1.GroupBy;set=>ioSummary1.GroupBy= value;
+        }
+
         private void IOSummaryForm_Load(object sender, EventArgs e)
         {
             ioSummary1.RefreshData();

@@ -7,7 +7,8 @@
 	@IncludeOK BIT=0,
 	@FilegroupLevel BIT=1,
     @Types VARCHAR(50)=NULL,
-    @ShowHidden BIT=1
+    @ShowHidden BIT=1,
+    @DriveName NVARCHAR(256)=NULL
 )
 AS
 DECLARE @StatusSQL NVARCHAR(MAX)
@@ -86,7 +87,8 @@ WHERE 1=1
 			)' END + '
 ' + @StatusSQL + '
 ' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND F.DatabaseID = @DatabaseID' END + '
-' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND F.ShowInSummary=1' END
+' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND F.ShowInSummary=1' END + '
+' + CASE WHEN @DriveName IS NULL THEN '' ELSE 'AND F.physical_name LIKE @DriveName + ''%''' END
 
 PRINT @SQL
-EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX), @DatabaseID INT, @Types VARCHAR(50)', @InstanceIDs, @DatabaseID, @Types
+EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX), @DatabaseID INT, @Types VARCHAR(50),@DriveName NVARCHAR(256)', @InstanceIDs, @DatabaseID, @Types, @DriveName

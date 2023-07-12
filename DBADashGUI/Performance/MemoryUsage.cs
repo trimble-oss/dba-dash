@@ -256,7 +256,7 @@ namespace DBADashGUI.Performance
             }
             var columns = new Dictionary<string, ColumnMetaData>
             {
-                {selectedCounter, new ColumnMetaData{Alias=selectedCounterAlias,isVisible=true } }
+                {selectedCounter, new ColumnMetaData{Name=selectedCounterAlias,IsVisible=true } }
             };
             chartClerk.LegendLocation = LegendLocation.Top;
             chartClerk.AddDataTable(dt, columns, "SnapshotDate", false);

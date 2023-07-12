@@ -6,8 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Pickers;
+using Font = System.Drawing.Font;
 
 namespace DBADashGUI.Performance
 {
@@ -18,23 +21,36 @@ namespace DBADashGUI.Performance
             InitializeComponent();
         }
 
-        private Int32 mins;
+        private int mins;
         private DateTime ioTime = DateTime.MinValue;
-        private Int32 instanceID;
-        private Int32 dateGrouping;
+        private int instanceID;
+        private int dateGrouping;
         private bool smoothLines = true;
-        private Int32 databaseid = 0;
-        public Int32 PointSize;
+        private int databaseID;
+        public int PointSize;
         private string filegroup = "";
 
         public event EventHandler<EventArgs> Close;
 
         public event EventHandler<EventArgs> MoveUp;
 
+        private Dictionary<string, string> drives = new();
+
         public bool CloseVisible
         {
             get => tsClose.Visible;
             set => tsClose.Visible = value;
+        }
+
+        public int DateGrouping
+        {
+            get => dateGrouping;
+            set
+            {
+                dateGrouping = value;
+                tsDateGroup.Text = DateHelper.DateGroupString(dateGrouping);
+                mins = DateRange.DurationMins;
+            }
         }
 
         public string FileGroup
@@ -92,46 +108,79 @@ namespace DBADashGUI.Performance
         public IOMetric Metric
         { get => _metric; set { _metric = value; SetMetric(); } }
 
-        IMetric IMetricChart.Metric { get => Metric; }
+        public bool DateGroupingVisible
+        {
+            get => tsDateGroup.Visible; set => tsDateGroup.Visible = value;
+        }
 
-        private readonly Dictionary<string, ColumnMetaData> columns = new()
-            {
-                {"MBsec", new ColumnMetaData{Alias="MB/sec",isVisible=true } },
-                {"ReadMBsec", new ColumnMetaData{Alias="Read MB/sec",isVisible=false } },
-                {"WriteMBsec", new ColumnMetaData{Alias="Write MB/sec",isVisible=false } },
-                {"IOPs", new ColumnMetaData{Alias="IOPs",isVisible=true,axis=1 } },
-                {"ReadIOPs", new ColumnMetaData{Alias="Read IOPs",isVisible=false,axis=1 } },
-                {"WriteIOPs", new ColumnMetaData{Alias="Write IOPs",isVisible=false ,axis=1} },
-                {"Latency", new ColumnMetaData{Alias="Latency",isVisible=true,axis=2 } },
-                {"ReadLatency", new ColumnMetaData{Alias="Read Latency",isVisible=false,axis=2} },
-                {"WriteLatency", new ColumnMetaData{Alias="Write Latency",isVisible=false,axis=2 } },
-                {"MaxMBsec", new ColumnMetaData{Alias="Max MB/sec",isVisible=false } },
-                {"MaxReadMBsec", new ColumnMetaData{Alias="Max Read MB/sec",isVisible=false } },
-                {"MaxWriteMBsec", new ColumnMetaData{Alias="Max Write MB/sec",isVisible=false } },
-                {"MaxIOPs", new ColumnMetaData{Alias="Max IOPs",isVisible=false,axis=1 } },
-                {"MaxReadIOPs", new ColumnMetaData{Alias="Max Read IOPs",isVisible=false,axis=1 } },
-                {"MaxWriteIOPs", new ColumnMetaData{Alias="Max Write IOPs",isVisible=false ,axis=1} },
-                {"MaxLatency", new ColumnMetaData{Alias="Max Latency",isVisible=false,axis=2 } },
-                {"MaxReadLatency", new ColumnMetaData{Alias="Max Read Latency",isVisible=false ,axis=2} },
-                {"MaxWriteLatency", new ColumnMetaData{Alias="Max Write Latency",isVisible=false ,axis=2} }
-            };
+        public bool DriveVisible
+        {
+            get => tsDrives.Visible; set => tsDrives.Visible = value;
+        }
+
+        public bool MeasuresVisible
+        {
+            get => tsMeasures.Visible; set => tsMeasures.Visible = value;
+        }
+
+        public bool SummaryVisible
+        {
+            get => tsIOSummary.Visible; set => tsIOSummary.Visible = value;
+        }
+
+        public bool FileGroupVisible
+        {
+            get => tsFileGroup.Visible; set => tsFileGroup.Visible = value;
+        }
+
+        public bool OptionsVisible
+        {
+            get => tsOptions.Visible; set => tsOptions.Visible = value;
+        }
+
+        IMetric IMetricChart.Metric => Metric;
+
+        public static readonly Dictionary<string, ColumnMetaData> DefaultColumns = new()
+        {
+            { "MBsec", new ColumnMetaData { Name = "MB/sec", IsVisible = true } },
+            { "ReadMBsec", new ColumnMetaData { Name = "Read MB/sec", IsVisible = false } },
+            { "WriteMBsec", new ColumnMetaData { Name = "Write MB/sec", IsVisible = false } },
+            { "IOPs", new ColumnMetaData { Name = "IOPs", IsVisible = true, axis = 1 } },
+            { "ReadIOPs", new ColumnMetaData { Name = "Read IOPs", IsVisible = false, axis = 1 } },
+            { "WriteIOPs", new ColumnMetaData { Name = "Write IOPs", IsVisible = false, axis = 1 } },
+            { "Latency", new ColumnMetaData { Name = "Latency", IsVisible = true, axis = 2 } },
+            { "ReadLatency", new ColumnMetaData { Name = "Read Latency", IsVisible = false, axis = 2 } },
+            { "WriteLatency", new ColumnMetaData { Name = "Write Latency", IsVisible = false, axis = 2 } },
+            { "MaxMBsec", new ColumnMetaData { Name = "Max MB/sec", IsVisible = false } },
+            { "MaxReadMBsec", new ColumnMetaData { Name = "Max Read MB/sec", IsVisible = false } },
+            { "MaxWriteMBsec", new ColumnMetaData { Name = "Max Write MB/sec", IsVisible = false } },
+            { "MaxIOPs", new ColumnMetaData { Name = "Max IOPs", IsVisible = false, axis = 1 } },
+            { "MaxReadIOPs", new ColumnMetaData { Name = "Max Read IOPs", IsVisible = false, axis = 1 } },
+            { "MaxWriteIOPs", new ColumnMetaData { Name = "Max Write IOPs", IsVisible = false, axis = 1 } },
+            { "MaxLatency", new ColumnMetaData { Name = "Max Latency", IsVisible = false, axis = 2 } },
+            { "MaxReadLatency", new ColumnMetaData { Name = "Max Read Latency", IsVisible = false, axis = 2 } },
+            { "MaxWriteLatency", new ColumnMetaData { Name = "Max Write Latency", IsVisible = false, axis = 2 } }
+        };
+
+        private Dictionary<string, ColumnMetaData> _columns = DefaultColumns;
+
+        public Dictionary<string, ColumnMetaData> Columns
+        {
+            get => _columns;
+            set { _columns = value; UpdateMetricVisibility(); }
+        }
 
         private void SetMetric()
         {
-            AddMeasures();
-            foreach (ToolStripMenuItem mnu in tsMeasures.DropDownItems)
-            {
-                mnu.Checked = Metric.VisibleMetrics.Contains(mnu.Name);
-            }
             Drive = Metric.Drive;
         }
 
         private void PopulateFileGroupFilter()
         {
-            if (databaseid > 0)
+            if (databaseID > 0)
             {
                 tsFileGroup.DropDownItems.Clear();
-                var dt = CommonData.GetFileGroups(databaseid);
+                var dt = CommonData.GetFileGroups(databaseID);
                 foreach (DataRow r in dt.Rows)
                 {
                     string fg = r["FileGroup"] == DBNull.Value ? "{NULL}" : (string)r["FileGroup"];
@@ -155,34 +204,26 @@ namespace DBADashGUI.Performance
         private void Filegroup_Click(object sender, EventArgs e)
         {
             var mnu = (ToolStripMenuItem)sender;
-            if (mnu.Checked)
-            {
-                FileGroup = mnu.Text;
-            }
-            else
-            {
-                FileGroup = "";
-            }
+            FileGroup = mnu.Checked ? mnu.Text : "";
             RefreshData();
         }
 
         private void GetDrives()
         {
+            drives = new();
             tsDrives.DropDownItems.Clear();
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("DriveLetters_Get", cn) { CommandType = CommandType.StoredProcedure })
+
+            var dtDrives = CommonData.GetMetricDrives(instanceID);
+
+            foreach (DataRow drive in dtDrives.Rows)
             {
-                cn.Open();
-                cmd.Parameters.AddWithValue("@InstanceID", instanceID);
-                using var rdr = cmd.ExecuteReader();
-                while (rdr.Read())
-                {
-                    var name = (string)rdr["Name"];
-                    var label = rdr["Label"] == DBNull.Value ? "" : (string)rdr["Label"];
-                    var ddDrive = tsDrives.DropDownItems.Add(name + "     |     " + label);
-                    ddDrive.Tag = name;
-                    ddDrive.Click += DdDrive_Click;
-                }
+                var name = (string)drive["Name"];
+                var label = drive["Label"] == DBNull.Value ? "" : (string)drive["Label"];
+                label = name + (string.IsNullOrEmpty(label) ? string.Empty : "     |     " + label);
+                drives.Add(name, label);
+                var ddDrive = tsDrives.DropDownItems.Add(label);
+                ddDrive.Tag = name;
+                ddDrive.Click += DdDrive_Click;
             }
 
             var ddAll = tsDrives.DropDownItems.Add("{All}");
@@ -196,7 +237,7 @@ namespace DBADashGUI.Performance
             RefreshData();
         }
 
-        private DataTable IOStats(Int32 instanceid, DateTime from, DateTime to, Int32 DatabaseID, string drive)
+        private DataTable IOStats(int instanceid, DateTime from, DateTime to, int DatabaseID, string drive)
         {
             var dt = new DataTable();
 
@@ -229,33 +270,10 @@ namespace DBADashGUI.Performance
             return dt;
         }
 
-        public void AddMeasures()
-        {
-            if (tsMeasures.DropDownItems.Count == 0)
-            {
-                bool addVisible = Metric.VisibleMetrics.Count == 0;
-                foreach (var c in columns)
-                {
-                    ToolStripMenuItem dd = new(c.Value.Alias)
-                    {
-                        Name = (string)c.Key,
-                        CheckOnClick = true,
-                        Checked = c.Value.isVisible
-                    };
-                    dd.Click += MeasureDropDown_Click;
-                    tsMeasures.DropDownItems.Add(dd);
-                    if (addVisible && c.Value.isVisible)
-                    {
-                        Metric.VisibleMetrics.Add(c.Key);
-                    }
-                }
-            }
-        }
-
-        public void RefreshData(Int32 InstanceID, Int32 databaseID)
+        public void RefreshData(int InstanceID, int databaseID)
         {
             this.instanceID = InstanceID;
-            this.databaseid = databaseID;
+            this.databaseID = databaseID;
             FileGroup = "";
             PopulateFileGroupFilter();
             GetDrives();
@@ -267,92 +285,102 @@ namespace DBADashGUI.Performance
             RefreshData(InstanceID, -1);
         }
 
+        private static readonly string DateFormat = "HH:mm";
+        private static readonly string LongDateFormat = "yyyy-MM-dd HH:mm";
+
+        public Axis TimeAxis = new()
+        {
+            Title = "Time",
+            LabelFormatter = val => new DateTime((long)val).ToString(DateFormat)
+        };
+
+        public Axis MBsecAxis = new()
+        {
+            Title = "MB/sec",
+            LabelFormatter = val => val.ToString("0.0 MB"),
+            MinValue = 0
+        };
+
+        public Axis IOPsAxis = new()
+        {
+            Title = "IOPs",
+            LabelFormatter = val => val.ToString("0.0 IOPs"),
+            Position = AxisPosition.RightTop,
+            MinValue = 0
+        };
+
+        public Axis LatencyAxis = new()
+        {
+            Title = "Latency",
+            LabelFormatter = val => val.ToString("0.0ms"),
+            Position = AxisPosition.RightTop,
+            MinValue = 0,
+            MaxValue = 200
+        };
+
+        private double iopsMax;
+        private double mbMax;
+        public double IOPsAxisMaxValue => iopsMax;
+
+        public double MBAxisMaxValue => mbMax;
+
         public void RefreshData()
         {
             if (mins != DateRange.DurationMins)
             {
-                dateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 200);
-                tsDateGroup.Text = DateHelper.DateGroupString(dateGrouping);
-                mins = DateRange.DurationMins;
+                DateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 200);
             }
 
-            string DateFormat = "HH:mm";
-            if (mins > 1440)
-            {
-                DateFormat = "yyyy-MM-dd HH:mm";
-            }
-            var dt = IOStats(instanceID, DateRange.FromUTC, DateRange.ToUTC, databaseid, Metric.Drive);
+            TimeAxis.LabelFormatter = val => new DateTime((long)val).ToString(mins > 1440 ? LongDateFormat : DateFormat);
+
+            var dt = IOStats(instanceID, DateRange.FromUTC, DateRange.ToUTC, databaseID, Metric.Drive);
             var cnt = dt.Rows.Count;
 
-            foreach (ToolStripMenuItem ts in tsMeasures.DropDownItems)
+            foreach (var s in Columns.Keys)
             {
-                columns[ts.Name].isVisible = ts.Checked;
-            }
-            foreach (var s in columns.Keys)
-            {
-                columns[s].Points = new DateTimePoint[cnt];
+                Columns[s].Points = new DateTimePoint[cnt];
             }
 
-            Int32 i = 0;
+            int i = 0;
+            iopsMax = 0;
+            mbMax=0;
             foreach (DataRow r in dt.Rows)
             {
-                foreach (string s in columns.Keys)
+                foreach (string s in Columns.Keys)
                 {
                     var v = r[s] == DBNull.Value ? 0 : (double)(decimal)r[s];
                     ioTime = (DateTime)r["SnapshotDate"];
-                    columns[s].Points[i] = new DateTimePoint(ioTime.ToAppTimeZone(), v);
+                    Columns[s].Points[i] = new DateTimePoint(ioTime.ToAppTimeZone(), v);
+                    if (Columns[s].IsVisible && Columns[s].axis == 1)
+                    {
+                        iopsMax = Math.Max(iopsMax, v);
+                    }
+                    else if (Columns[s].IsVisible && Columns[s].axis == 0)
+                    {
+                        mbMax = Math.Max(mbMax, v);
+                    }
                 }
                 i++;
             }
 
-            SeriesCollection sc;
-
-            sc = new SeriesCollection();
+            var sc = new SeriesCollection();
             chartIO.Series = sc;
-            foreach (string s in columns.Keys)
+            foreach (string s in Columns.Keys)
             {
                 sc.Add(new LineSeries
                 {
-                    Title = columns[s].Alias,
+                    Title = Columns[s].Name,
                     Tag = s,
-                    ScalesYAt = columns[s].axis,
-                    PointGeometrySize = cnt <= 100 ? PointSize : 0,
+                    ScalesYAt = Columns[s].axis,
+                    PointGeometrySize = cnt <= 200 ? PointSize : 0,
                     LineSmoothness = SmoothLines ? 1 : 0
                 }
                 );
             }
-            chartIO.AxisX.Clear();
-            chartIO.AxisY.Clear();
-            chartIO.AxisX.Add(new Axis
-            {
-                Title = "Time",
-                LabelFormatter = val => new System.DateTime((long)val).ToString(DateFormat)
-            });
-            chartIO.AxisY.Add(new Axis
-            {
-                Title = "MB/sec",
-                LabelFormatter = val => val.ToString("0.0 MB"),
-                MinValue = 0
-            });
-            chartIO.AxisY.Add(new Axis
-            {
-                Title = "IOPs",
-                LabelFormatter = val => val.ToString("0.0 IOPs"),
-                Position = AxisPosition.RightTop,
-                MinValue = 0
-            });
-            chartIO.AxisY.Add(new Axis
-            {
-                Title = "Latency",
-                LabelFormatter = val => val.ToString("0.0ms"),
-                Position = AxisPosition.RightTop,
-                MinValue = 0,
-                MaxValue = 200
-            });
 
             foreach (LineSeries s in chartIO.Series.Cast<LineSeries>())
             {
-                var c = columns[(string)s.Tag];
+                var c = Columns[(string)s.Tag];
                 if (s.Values == null)
                 {
                     var v = new ChartValues<DateTimePoint>();
@@ -363,37 +391,54 @@ namespace DBADashGUI.Performance
                 {
                     s.Values.AddRange(c.Points);
                 }
-                s.Visibility = c.isVisible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                s.Visibility = c.IsVisible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
             }
             if (chartIO.Series[0].Values.Count == 1)
             {
                 chartIO.Series.Clear(); // fix tends to zero error
             }
-            lblIOPerformance.Text = databaseid > 0 ? "IO Performance: Database" : "IO Performance: Instance";
+            lblIOPerformance.Text = databaseID > 0 ? "IO Performance: Database" : (string.IsNullOrEmpty(Drive) ? "IO Performance: Instance" : "IO Performance: " + DriveLabel(Drive));
+        }
+
+        public string DriveLabel(string drive)
+        {
+            return drives.TryGetValue(Drive, out var label) ? label : drive;
+        }
+
+        private void UpdateMetricVisibility()
+        {
+            foreach (LineSeries s in chartIO.Series.Cast<LineSeries>())
+            {
+                var metricName = (string)s.Tag;
+                s.Visibility = Columns[metricName].IsVisible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+            }
         }
 
         private void MeasureDropDown_Click(object sender, EventArgs e)
         {
             var dd = (ToolStripMenuItem)sender;
             Metric.VisibleMetrics.Clear();
-            foreach (LineSeries s in chartIO.Series.Cast<LineSeries>())
+            Columns[dd.Name].IsVisible = dd.Checked;
+            if (dd.Checked)
             {
-                var metricName = (string)s.Tag;
-                if (metricName == dd.Name)
-                {
-                    s.Visibility = dd.Checked ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
-                }
-                if (s.Visibility == System.Windows.Visibility.Visible)
-                {
-                    Metric.VisibleMetrics.Add(metricName);
-                }
+                Metric.VisibleMetrics.Add(dd.Name);
             }
+            else
+            {
+                Metric.VisibleMetrics.Remove(dd.Name);
+            }
+            UpdateMetricVisibility();
         }
 
         private void IOPerformance_Load(object sender, EventArgs e)
         {
             DateHelper.AddDateGroups(tsDateGroup, TsDateGroup_Click);
-            AddMeasures();
+            chartIO.AxisX.Clear();
+            chartIO.AxisY.Clear();
+            chartIO.AxisX.Add(TimeAxis);
+            chartIO.AxisY.Add(MBsecAxis);
+            chartIO.AxisY.Add(IOPsAxis);
+            chartIO.AxisY.Add(LatencyAxis);
         }
 
         private void TsDateGroup_Click(object sender, EventArgs e)
@@ -404,18 +449,15 @@ namespace DBADashGUI.Performance
             RefreshData();
         }
 
-        private static IOSummaryForm SummaryForm = null;
+        private static IOSummaryForm SummaryForm;
 
         private void TsIOSummary_Click(object sender, EventArgs e)
         {
-            if (SummaryForm != null)
-            {
-                SummaryForm.Close();
-            }
+            SummaryForm?.Close();
             SummaryForm = new IOSummaryForm()
             {
                 InstanceID = instanceID,
-                DatabaseID = databaseid,
+                DatabaseID = databaseID,
                 FromDate = DateRange.FromUTC,
                 ToDate = DateRange.ToUTC
             };
@@ -426,12 +468,42 @@ namespace DBADashGUI.Performance
 
         private void TsClose_Click(object sender, EventArgs e)
         {
-            Close.Invoke(this, new EventArgs());
+            Close.Invoke(this, EventArgs.Empty);
         }
 
         private void TsUp_Click(object sender, EventArgs e)
         {
-            MoveUp.Invoke(this, new EventArgs());
+            MoveUp.Invoke(this, EventArgs.Empty);
+        }
+
+        private void SetLatencyLimit(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            SetLatencyLimit(Convert.ToDouble(ts.Text));
+        }
+
+        public void SetLatencyLimit(double latencyLimit)
+        {
+            LatencyAxis.MaxValue = latencyLimit;
+            foreach (ToolStripMenuItem itm in latencyLimitToolStripMenuItem.DropDownItems)
+            {
+                itm.Checked = Convert.ToInt64(itm.Text) == Convert.ToInt64(latencyLimit);
+            }
+        }
+
+        private void TsMeasures_Click(object sender, EventArgs e)
+        {
+            var selectableMetrics = Columns.Values
+                .Select(metric => (ISelectable)metric)
+                .ToList();
+
+            var colSelection = new SelectColumns() { Items = selectableMetrics, Text = "Select Measures" };
+            colSelection.ShowDialog();
+            if (colSelection.DialogResult == DialogResult.OK)
+            {
+                Columns.ApplyVisibility(colSelection.Items);
+            }
+            RefreshData();
         }
     }
 }

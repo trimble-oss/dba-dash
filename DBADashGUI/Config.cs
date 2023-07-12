@@ -15,10 +15,14 @@ namespace DBADashGUI
 
         private static readonly Lazy<int> _summaryCommandTimeout = new Lazy<int>(() => RepositorySettings.GetIntSetting("GUISummaryCommandTimeout", Common.ConnectionString) ?? _defaultCommandTimeout.Value);
 
+        private static readonly Lazy<int> _drivePerformanceMaxDrives = new Lazy<int>(() => RepositorySettings.GetIntSetting("GUIDrivePerformanceMaxDrives", Common.ConnectionString) ?? 8);
+
         public static int ClientSummaryCacheDuration => _clientSummaryCacheDuration.Value;
 
         public static int DefaultCommandTimeout => _defaultCommandTimeout.Value;
 
         public static int SummaryCommandTimeout => _summaryCommandTimeout.Value;
+
+        public static int DrivePerformanceMaxDrives => _drivePerformanceMaxDrives.Value;
     }
 }

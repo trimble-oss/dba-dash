@@ -58,7 +58,9 @@ namespace DBADashGUI
             Tags,
             AgentJobStep,
             InstanceFolder,
-            DatabasesFolder
+            DatabasesFolder,
+            Storage,
+            Drive
         }
 
         private DatabaseEngineEdition _engineEdition = DatabaseEngineEdition.Unknown;
@@ -80,6 +82,8 @@ namespace DBADashGUI
             }
         }
 
+        public string FriendlyFullPath => Type == TreeType.Drive ? FullPath[..^Text.Length].Replace("\\", " \\ ") + DriveName : FullPath.Replace("\\", " \\ ");
+
         private HashSet<int> _RegularInstanceIDs;
         private HashSet<int> _AzureInstanceIDs;
         private HashSet<int> _InstanceIDs;
@@ -89,6 +93,8 @@ namespace DBADashGUI
         private bool IsChildOfInstanceOrAzureInstance => InstanceID > 0 && !IsInstanceOrAzureInstance;
         private bool IsInstanceOrAzureDB => Type == TreeType.Instance || Type == TreeType.AzureDatabase;
         private bool IsInstanceOrAzureInstance => Type == TreeType.Instance || Type == TreeType.AzureInstance;
+
+        public string? DriveName;
 
         public DBADashContext Context
         {
@@ -108,7 +114,8 @@ namespace DBADashGUI
                     JobStepID = JobStepID,
                     Type = Type,
                     DatabaseName = DatabaseName,
-                    ParentType = Parent == null ? TreeType.DBADashRoot : SQLTreeItemParent.Type
+                    ParentType = Parent == null ? TreeType.DBADashRoot : SQLTreeItemParent.Type,
+                    DriveName = DriveName
                 };
                 return InternalContext;
             }
@@ -449,6 +456,7 @@ namespace DBADashGUI
                 case TreeType.HADR:
                     ImageIndex = 3;
                     break;
+
                 case TreeType.Configuration:
                     ImageIndex = 7;
                     break;
@@ -492,6 +500,12 @@ namespace DBADashGUI
                 case TreeType.InstanceFolder:
                     ImageIndex = 20;
                     break;
+
+                case TreeType.Storage:
+                case TreeType.Drive:
+                    ImageIndex = 21;
+                    break;
+
                 default:
                     ImageIndex = 5;
                     break;

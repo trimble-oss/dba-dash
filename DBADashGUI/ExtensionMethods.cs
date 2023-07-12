@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
+using DBADashGUI.Pickers;
 using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI
@@ -229,6 +230,56 @@ namespace DBADashGUI
             System.IO.File.WriteAllText(path, value);
             ProcessStartInfo psi = new() { FileName = path, UseShellExecute = true };
             Process.Start(psi);
+        }
+
+        public static List<ISelectable> ToSelectableList(this DataGridViewColumnCollection columns)=> columns.Cast<DataGridViewColumn>()
+                .Select(column => new SelectableColumn(column) as ISelectable)
+                .ToList();
+
+        public static void ApplyVisibility(this DataGridViewColumnCollection columns, List<ISelectable> selectables)
+        {
+            var columnDict = columns.Cast<DataGridViewColumn>()
+                .ToDictionary(c => c.HeaderText, c => c);
+
+            foreach (var selectable in selectables)
+            {
+                if (columnDict.TryGetValue(selectable.Name, out var column))
+                {
+                    column.Visible = selectable.IsVisible;
+                }
+            }
+        }
+        public static void ApplyVisibility(this Dictionary<string, ColumnMetaData> metrics, List<ISelectable> selectables) => selectables.Where(s => metrics.ContainsKey(s.Name))
+                .ToList()
+                .ForEach(s => metrics[s.Name].IsVisible = s.IsVisible);
+
+        public static DialogResult PromptColumnSelection(this DataGridView dgv)
+        {
+            using var frm = new SelectColumns() { Items = dgv.Columns.ToSelectableList() };
+            frm.ShowDialog(dgv);
+            if (frm.DialogResult == DialogResult.OK)
+            {
+                dgv.Columns.ApplyVisibility(frm.Items);
+            }
+
+            return frm.DialogResult;
+        }
+
+        public static double RoundUpToSignificantFigures(this double num, int n=1)
+        {
+            if (num == 0) return 0;
+            
+            double d = Math.Ceiling(Math.Log10(Math.Abs(num)));
+            int power = n - (int)d;
+
+            double magnitude = Math.Pow(10, power);
+            long shifted = Convert.ToInt64(Math.Ceiling(num * magnitude));
+            return shifted / magnitude;
+        }
+
+        public static List<ISelectable> ToSelectableList(this List<string> list)
+        {
+            return list.Select(s => new SelectableString(s) as ISelectable).ToList();
         }
     }
 }
