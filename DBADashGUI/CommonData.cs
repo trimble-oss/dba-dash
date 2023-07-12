@@ -3,12 +3,15 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Runtime.Caching;
 
 namespace DBADashGUI
 {
     internal static class CommonData
     {
         public static DataTable Instances;
+
+        static MemoryCache cache = MemoryCache.Default;
 
         public static void UpdateInstancesList(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "", string groupByTag = "")
         {
@@ -256,5 +259,52 @@ namespace DBADashGUI
                 cmd.ExecuteNonQuery();
             }
         }
+
+        public static DataTable GetDrives(HashSet<int> instanceIDs, bool includeMetrics, bool includeCritical, bool includeWarning, bool includeNA, bool includeOK, bool showHidden, string driveName,bool hasMetrics=false)
+        {
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.Drives_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", instanceIDs));
+            cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeCritical", DbType = System.Data.DbType.Boolean, Value = includeCritical });
+            cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeWarning", DbType = System.Data.DbType.Boolean, Value = includeWarning });
+            cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeNA", DbType = System.Data.DbType.Boolean, Value = includeNA });
+            cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeOK", DbType = System.Data.DbType.Boolean, Value = includeOK });
+            cmd.Parameters.AddWithNullableValue("DriveName", driveName);
+            cmd.Parameters.AddWithValue("IncludeMetrics", includeMetrics);
+            cmd.Parameters.AddWithValue("ShowHidden", showHidden);
+            cmd.Parameters.AddWithValue("HasMetrics", hasMetrics);
+
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            return dt;
+        }
+
+
+        public static DataTable GetMetricDrives(int instanceID,string driveName=null)
+        {
+            var key = "GetMetricDrives_" + instanceID + "_" + driveName;
+            if (cache.Get(key) is DataTable metricDrives) return metricDrives;
+
+            metricDrives = GetDrives(new HashSet<int>() { instanceID }, false, true, true, true, true, true, driveName,
+                true);
+            metricDrives.DefaultView.Sort = "Name";
+            metricDrives = metricDrives.DefaultView.ToTable();
+            var policy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(5) };
+            cache.Add(key, metricDrives, policy);
+
+            return metricDrives;
+        }
+
+        public static void ClearCache()
+        {
+            foreach (var element in cache)
+            {
+                cache.Remove(element.Key);
+            }
+        }
+        
     }
 }

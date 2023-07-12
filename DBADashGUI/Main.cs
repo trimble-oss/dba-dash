@@ -9,10 +9,13 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Printing.IndexedProperties;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DocumentFormat.OpenXml.Bibliography;
+using Humanizer;
+using Microsoft.SqlServer.Management.SqlParser.SqlCodeDom;
 using Version = System.Version;
 
 namespace DBADashGUI
@@ -70,7 +73,7 @@ namespace DBADashGUI
             get => (new List<TabPage>()
             {
                 tabPerformanceSummary, tabPerformance, tabSlowQueries, tabAzureDB, tabAzureSummary, tabPC,
-                tabObjectExecutionSummary, tabWaits, tabRunningQueries, tabMemory, tabJobStats, tabJobTimeline
+                tabObjectExecutionSummary, tabWaits, tabRunningQueries, tabMemory, tabJobStats, tabJobTimeline, tabDrivePerformance
             }).Contains(tabs.SelectedTab);
         }
 
@@ -359,9 +362,11 @@ namespace DBADashGUI
             var changes = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
             var hadr = new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR);
             var checks = new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks);
+            var storage = new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage);
             root.Nodes.Add(changes);
             root.Nodes.Add(checks);
             root.Nodes.Add(hadr);
+            root.Nodes.Add(storage);
             SQLTreeItem parentNode = root;
 
             var tags = String.Join(",", SelectedTags());
@@ -408,6 +413,8 @@ namespace DBADashGUI
                         AzureNode.Nodes.Add(new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration));
                         AzureNode.Nodes.Add(new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks));
                         AzureNode.Nodes.Add(new SQLTreeItem("Tags", SQLTreeItem.TreeType.Tags));
+                        var azStorage = new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage);
+                        AzureNode.Nodes.Add(azStorage);
                     }
 
                     var azureDBNode = new SQLTreeItem(db, SQLTreeItem.TreeType.AzureDatabase)
@@ -481,7 +488,9 @@ namespace DBADashGUI
             nodesToAdd.Add(changesNode);
             nodesToAdd.Add(new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks));
             nodesToAdd.Add(new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR));
-
+            var storage = new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage);
+            storage.AddDummyNode();
+            nodesToAdd.Add(storage);
             var dbNode = new SQLTreeItem("Databases", SQLTreeItem.TreeType.DatabasesFolder);
             dbNode.AddDummyNode();
             nodesToAdd.Add(dbNode);
@@ -490,6 +499,26 @@ namespace DBADashGUI
             jobs.AddDummyNode();
             nodesToAdd.Add(jobs);
             instanceNode.Nodes.AddRange(nodesToAdd.ToArray());
+        }
+
+        private void ExpandStorage(SQLTreeItem storage)
+        {
+            var drives = CommonData.GetDrives(storage.InstanceIDs, false, true, true, true, true, true, null);
+            storage.Nodes.Clear();
+            storage.Nodes.AddRange((from DataRow drive in drives.Rows
+                                    let driveLetter = Convert.ToString(drive["Name"])
+                                    let label = Convert.ToString(drive["Label"])
+                                    let PctFree = Convert.ToDouble(drive["PctFreeSpace"])
+                                    let TotalGB = Convert.ToDouble(drive["TotalGB"])
+                                    let FreeGB = Convert.ToDouble(drive["FreeGB"])
+                                    let UsedGB = TotalGB - FreeGB
+                                    let PctUsed = 1 - PctFree
+                                    let nameAndLetter = label + " (" + driveLetter + ")"
+                                    let color = DBADashStatus.GetStatusColour((DBADashStatus.DBADashStatusEnum)Convert.ToInt32(drive["Status"]), true)
+                                    let name = Common.AsciiProgressBar(PctUsed) + " " + nameAndLetter + "...." + UsedGB.Gigabytes().ToString("###,#.#") + "(" + PctUsed.ToString("P1") + ") Used of " + TotalGB.Gigabytes().Humanize("###,#.#")
+                                    orderby driveLetter
+                                    select new SQLTreeItem(name, SQLTreeItem.TreeType.Drive)
+                                    { DriveName = driveLetter, ForeColor = color }).Cast<TreeNode>().ToArray());
         }
 
         private void ExpandDatabases(SQLTreeItem dbFolder)
@@ -582,7 +611,7 @@ namespace DBADashGUI
                 allowedTabs.AddRange(new TabPage[]
                 {
                     tabPerformance, tabAzureSummary, tabAzureDB, tabPC, tabSlowQueries, tabObjectExecutionSummary,
-                    tabWaits, tabRunningQueries
+                    tabWaits, tabRunningQueries, tabFiles
                 });
             }
             else if (n.Type == SQLTreeItem.TreeType.Instance)
@@ -641,12 +670,12 @@ namespace DBADashGUI
                 allowedTabs.Add(tabSummary);
                 if (!IsAzureOnly && parent.Type != SQLTreeItem.TreeType.AzureInstance)
                 {
-                    allowedTabs.AddRange(new TabPage[] { tabDrives, tabJobs, tabLastGood, tabOSLoadedModules });
+                    allowedTabs.AddRange(new TabPage[] { tabJobs, tabLastGood, tabOSLoadedModules });
                 }
 
                 allowedTabs.AddRange(new TabPage[]
                 {
-                    tabFiles, tabDBADashErrorLog, tabCollectionDates, tabCustomChecks, tabSnapshotsSummary,
+                    tabDBADashErrorLog, tabCollectionDates, tabCustomChecks, tabSnapshotsSummary,
                     tabIdentityColumns
                 });
             }
@@ -661,6 +690,25 @@ namespace DBADashGUI
             else if (n.Type == SQLTreeItem.TreeType.DatabasesFolder)
             {
                 allowedTabs.Add(tabDBSpace);
+            }
+            else if (n.Type == SQLTreeItem.TreeType.Storage)
+            {
+                if (!IsAzureOnly && parent.Type != SQLTreeItem.TreeType.AzureInstance)
+                {
+                    allowedTabs.AddRange(new TabPage[] { tabDrives, tabDBSpace, tabFiles, tabTempDB });
+                    if (n.InstanceID > 0)
+                    {
+                        allowedTabs.Add(tabDrivePerformance);
+                    }
+                }
+                else
+                {
+                    allowedTabs.AddRange(new TabPage[] { tabDBSpace, tabFiles });
+                }
+            }
+            else if (n.Type == SQLTreeItem.TreeType.Drive)
+            {
+                allowedTabs.AddRange(new TabPage[] { tabDrives, tabFiles, tabDrivePerformance });
             }
 
             if (n.ObjectID > 0)
@@ -691,7 +739,7 @@ namespace DBADashGUI
 
             List<TabPage> allowedTabs = GetAllowedTabs();
 
-            this.Text = n.FullPath.Replace("\\", " \\ ");
+            this.Text = n.FriendlyFullPath;
 
             // Check if Tab pages match tabs currently loaded
             bool validatedTabs = true;
@@ -740,6 +788,10 @@ namespace DBADashGUI
                 else if (n.Type == SQLTreeItem.TreeType.Database)
                 {
                     n.AddDatabaseFolders();
+                }
+                else if (n.Type == SQLTreeItem.TreeType.Storage)
+                {
+                    ExpandStorage(n);
                 }
                 else
                 {
@@ -1060,7 +1112,6 @@ namespace DBADashGUI
             SetCheckedItemsBold(mnuTags);
         }
 
-
         public void SetCheckedItemsBold(ToolStripDropDownButton dropdownButton)
         {
             var hasCheckedChild = false;
@@ -1105,12 +1156,9 @@ namespace DBADashGUI
             return isCheckedOrHasCheckedChild;
         }
 
+        #endregion Tagging
 
-
-
-    #endregion Tagging
-
-    private DataRetention DataRetentionForm = null;
+        private DataRetention DataRetentionForm = null;
 
         private void DataRetentionToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1178,6 +1226,11 @@ namespace DBADashGUI
                     else if (e.Tab is "tabAzureSummary" or "tabPerformance")
                     {
                         tv1.SelectedNode = nInstance;
+                    }
+                    else if (e.Tab is "tabFiles" or "tabDrives")
+                    {
+                        nInstance.Expand();
+                        tv1.SelectedNode = nInstance.Nodes[3];
                     }
                     else
                     {

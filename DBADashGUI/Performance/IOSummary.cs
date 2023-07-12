@@ -44,6 +44,7 @@ namespace DBADashGUI.Performance
             }
             set
             {
+                AddGroupByOptions();
                 foreach (ToolStripMenuItem itm in tsGroupBy.DropDownItems)
                 {
                     itm.Checked = itm.Text == value.ToString();
@@ -83,6 +84,7 @@ namespace DBADashGUI.Performance
 
         private void AddGroupByOptions()
         {
+            if (tsGroupBy.DropDownItems.Count > 0) return;
             foreach (IOSummaryGroupByOptions val in Enum.GetValues(typeof(IOSummaryGroupByOptions)))
             {
                 ToolStripMenuItem item = new()

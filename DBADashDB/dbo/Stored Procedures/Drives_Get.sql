@@ -1,11 +1,13 @@
-﻿CREATE PROC [dbo].[Drives_Get](
+﻿CREATE PROC dbo.Drives_Get(
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@IncludeCritical BIT=1,
 	@IncludeWarning BIT=1,
 	@IncludeNA BIT=0,
 	@IncludeOK BIT=0,
 	@IncludeMetrics BIT=0,
-	@ShowHidden BIT=1
+	@ShowHidden BIT=1,
+	@DriveName NVARCHAR(256)=NULL,
+	@HasMetrics BIT=0
 )
 AS
 DECLARE @StatusSQL NVARCHAR(MAX)
@@ -83,9 +85,18 @@ WHERE ' + CASE WHEN @InstanceIDs IS NULL OR @InstanceIDs = ''
 						WHERE ss.value = D.InstanceID)' END + '
 ' + @StatusSQL + '
 ' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND D.ShowInSummary=1' END + '
+' + CASE WHEN @DriveName IS NULL THEN '' ELSE 'AND D.Name = @DriveName' END + '
+' + CASE WHEN @HasMetrics = 1 THEN 'AND EXISTS(
+										SELECT 1 
+										FROM dbo.DBIOStats IOS 
+										WHERE IOS.InstanceID = D.InstanceID 
+										AND IOS.DatabaseID=-1 
+										AND IOS.FileID = -1
+										AND IOS.Drive = CAST(LEFT(D.Name,1) AS CHAR(1))
+										) ' ELSE '' END + '
 ORDER BY Status DESC, PctFreeSpace DESC;'
 
-EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX)',@InstanceIDs
+EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX),@DriveName NVARCHAR(256)',@InstanceIDs,@DriveName
 GO
 GRANT EXECUTE
     ON OBJECT::[dbo].[Drives_Get] TO [Reports]

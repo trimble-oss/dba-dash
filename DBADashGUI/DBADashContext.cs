@@ -20,5 +20,7 @@ namespace DBADashGUI
 
         public SQLTreeItem.TreeType Type { get; set; }
         public SQLTreeItem.TreeType ParentType { get; set; }
+
+        public string DriveName { get; set; }
     }
 }

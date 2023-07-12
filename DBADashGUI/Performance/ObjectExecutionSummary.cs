@@ -411,21 +411,12 @@ namespace DBADashGUI.Performance
 
         private void TsCols_Click(object sender, EventArgs e)
         {
-            PromptColumnSelection(ref dgv);
-        }
-
-        private void PromptColumnSelection(ref DataGridView gv)
-        {
-            using (var frm = new SelectColumns())
+            if (dgv.PromptColumnSelection() == DialogResult.OK)
             {
-                frm.Columns = gv.Columns;
-                frm.ShowDialog(this);
-                if (frm.DialogResult == DialogResult.OK)
-                {
-                    gv.AutoResizeColumns();
-                    gv.AutoResizeRows();
-                }
+                dgv.AutoResizeColumns();
+                dgv.AutoResizeRows();
             }
         }
+
     }
 }

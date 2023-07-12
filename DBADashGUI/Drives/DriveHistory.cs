@@ -88,8 +88,8 @@ namespace DBADashGUI.Drives
             }
             var columns = new Dictionary<string, ColumnMetaData>
             {
-                {"SizeGB", new ColumnMetaData{Alias="Size (GB)",isVisible=true } },
-                {"UsedGB", new ColumnMetaData{Alias="Used (GB)",isVisible=true } }
+                {"SizeGB", new ColumnMetaData{Name="Size (GB)",IsVisible=true } },
+                {"UsedGB", new ColumnMetaData{Name="Used (GB)",IsVisible=true } }
             };
 
             foreach (var s in columns.Keys)
@@ -117,7 +117,7 @@ namespace DBADashGUI.Drives
                 v.AddRange(columns[s].Points);
                 sc.Add(new LineSeries
                 {
-                    Title = columns[s].Alias,
+                    Title = columns[s].Name,
                     Tag = s,
                     ScalesYAt = columns[s].axis,
                     LineSmoothness = SmoothLines ? 1 : 0,

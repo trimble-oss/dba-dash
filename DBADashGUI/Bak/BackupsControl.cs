@@ -529,18 +529,12 @@ namespace DBADashGUI.Backups
 
         private void TsCols_Click(object sender, EventArgs e)
         {
-            using (var frm = new SelectColumns() { Columns = dgvSummary.Columns })
-            {
-                frm.ShowDialog(this);
-            }
+            dgvSummary.PromptColumnSelection();
         }
 
         private void TsDetailCols_Click(object sender, EventArgs e)
         {
-            using (var frm = new SelectColumns() { Columns = dgvBackups.Columns })
-            {
-                frm.ShowDialog(this);
-            }
+            dgvBackups.PromptColumnSelection();
         }
     }
 }

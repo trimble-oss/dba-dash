@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI
+﻿using DBADashGUI.Drives;
+
+namespace DBADashGUI
 {
     partial class Main
     {
@@ -105,7 +107,7 @@
             tabTags = new System.Windows.Forms.TabPage();
             tags1 = new Tagging.Tags();
             tabDrives = new System.Windows.Forms.TabPage();
-            drivesControl1 = new Properties.DrivesControl();
+            drivesControl1 = new DrivesControl();
             tabBackups = new System.Windows.Forms.TabPage();
             backupsControl1 = new Backups.BackupsControl();
             tabLogShipping = new System.Windows.Forms.TabPage();
@@ -192,6 +194,8 @@
             osLoadedModules1 = new Checks.OSLoadedModules();
             tabJobTimeline = new System.Windows.Forms.TabPage();
             jobTimeline1 = new AgentJobs.JobTimeline();
+            tabDrivePerformance = new System.Windows.Forms.TabPage();
+            drivePerformance1 = new Performance.DrivePerformance();
             refresh1 = new Refresh();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -276,6 +280,7 @@
             tabIdentityColumns.SuspendLayout();
             tabOSLoadedModules.SuspendLayout();
             tabJobTimeline.SuspendLayout();
+            tabDrivePerformance.SuspendLayout();
             SuspendLayout();
             // 
             // TreeViewImageList
@@ -304,6 +309,7 @@
             TreeViewImageList.Images.SetKeyName(18, "CloudServer_16x.png");
             TreeViewImageList.Images.SetKeyName(19, "DataServer_16x_BWLight.png");
             TreeViewImageList.Images.SetKeyName(20, "FolderClosedBlue_16x.png");
+            TreeViewImageList.Images.SetKeyName(21, "");
             // 
             // menuStrip1
             // 
@@ -789,6 +795,7 @@
             tabs.Controls.Add(tabIdentityColumns);
             tabs.Controls.Add(tabOSLoadedModules);
             tabs.Controls.Add(tabJobTimeline);
+            tabs.Controls.Add(tabDrivePerformance);
             tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             tabs.Location = new System.Drawing.Point(0, 0);
             tabs.Name = "tabs";
@@ -1989,6 +1996,26 @@
             jobTimeline1.Size = new System.Drawing.Size(186, 61);
             jobTimeline1.TabIndex = 0;
             // 
+            // tabDrivePerformance
+            // 
+            tabDrivePerformance.Controls.Add(drivePerformance1);
+            tabDrivePerformance.Location = new System.Drawing.Point(4, 25);
+            tabDrivePerformance.Name = "tabDrivePerformance";
+            tabDrivePerformance.Padding = new System.Windows.Forms.Padding(3);
+            tabDrivePerformance.Size = new System.Drawing.Size(1631, 1246);
+            tabDrivePerformance.TabIndex = 46;
+            tabDrivePerformance.Text = "Drive Performance";
+            tabDrivePerformance.UseVisualStyleBackColor = true;
+            // 
+            // drivePerformance1
+            // 
+            drivePerformance1.Dock = System.Windows.Forms.DockStyle.Fill;
+            drivePerformance1.Location = new System.Drawing.Point(3, 3);
+            drivePerformance1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            drivePerformance1.Name = "drivePerformance1";
+            drivePerformance1.Size = new System.Drawing.Size(1625, 1240);
+            drivePerformance1.TabIndex = 0;
+            // 
             // refresh1
             // 
             refresh1.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
@@ -2307,6 +2334,7 @@
             tabIdentityColumns.ResumeLayout(false);
             tabOSLoadedModules.ResumeLayout(false);
             tabJobTimeline.ResumeLayout(false);
+            tabDrivePerformance.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -2331,7 +2359,7 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TabPage tabTags;
         private System.Windows.Forms.TabPage tabDrives;
-        private Properties.DrivesControl drivesControl1;
+        private DrivesControl drivesControl1;
         private System.Windows.Forms.TabPage tabBackups;
         private Backups.BackupsControl backupsControl1;
         private System.Windows.Forms.TabPage tabLogShipping;
@@ -2496,5 +2524,7 @@
         private System.Windows.Forms.ToolStripMenuItem showHiddenToolStripMenuItem;
         private System.Windows.Forms.TabPage tabJobTimeline;
         private AgentJobs.JobTimeline jobTimeline1;
+        private System.Windows.Forms.TabPage tabDrivePerformance;
+        private Performance.DrivePerformance drivePerformance1;
     }
 }

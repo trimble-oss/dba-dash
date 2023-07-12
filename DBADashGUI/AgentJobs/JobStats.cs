@@ -74,13 +74,13 @@ namespace DBADashGUI.AgentJobs
         }
 
         private readonly Dictionary<string, ColumnMetaData> columns = new() {
-              {"SucceededCount", new ColumnMetaData{Alias="Succeeded Count",isVisible=true,axis=1 } },
-                {"FailedCount", new ColumnMetaData{Alias="Failed Count",isVisible=true, axis=1  } },
-                {"RetryCount", new ColumnMetaData{Alias="Retry Count",isVisible=false,axis=1 } },
-                {"AvgDurationSec", new ColumnMetaData{Alias="Avg Duration",isVisible=true } },
-                {"MaxDurationSec", new ColumnMetaData{Alias="Max Duration",isVisible=false } },
-                {"MinDurationSec", new ColumnMetaData{Alias="Min Duration",isVisible=false } },
-                {"TotalDurationSec", new ColumnMetaData{Alias="Total Duration",isVisible=false } }
+              {"SucceededCount", new ColumnMetaData{Name="Succeeded Count",IsVisible=true,axis=1 } },
+                {"FailedCount", new ColumnMetaData{Name="Failed Count",IsVisible=true, axis=1  } },
+                {"RetryCount", new ColumnMetaData{Name="Retry Count",IsVisible=false,axis=1 } },
+                {"AvgDurationSec", new ColumnMetaData{Name="Avg Duration",IsVisible=true } },
+                {"MaxDurationSec", new ColumnMetaData{Name="Max Duration",IsVisible=false } },
+                {"MinDurationSec", new ColumnMetaData{Name="Min Duration",IsVisible=false } },
+                {"TotalDurationSec", new ColumnMetaData{Name="Total Duration",IsVisible=false } }
         };
 
         public void SetContext(DBADashContext context)
@@ -125,7 +125,7 @@ namespace DBADashGUI.AgentJobs
             }
             tsDateGroup.Visible = true;
             tsMeasures.Visible = true;
-            columns["RetryCount"].isVisible = columns["RetryCount"].isVisible && (StepID > 0 || selectedStepID > 0);
+            columns["RetryCount"].IsVisible = columns["RetryCount"].IsVisible && (StepID > 0 || selectedStepID > 0);
             tsMeasures.DropDownItems["RetryCount"].Enabled = StepID > 0 || selectedStepID > 0;
 
             splitContainer1.Panel1Collapsed = false;
@@ -177,12 +177,12 @@ namespace DBADashGUI.AgentJobs
             dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colView", HeaderText = "View", Text = "View", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
             foreach (var c in columns)
             {
-                var dd = new ToolStripMenuItem(c.Value.Alias)
+                var dd = new ToolStripMenuItem(c.Value.Name)
                 {
                     Name = (string)c.Key,
                     CheckOnClick = true
                 };
-                dd.Checked = dd.Enabled && c.Value.isVisible;
+                dd.Checked = dd.Enabled && c.Value.IsVisible;
                 dd.Click += MeasureDropDown_Click;
                 tsMeasures.DropDownItems.Add(dd);
             }
@@ -191,7 +191,7 @@ namespace DBADashGUI.AgentJobs
         private void MeasureDropDown_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
-            columns[ts.Name].isVisible = ts.Checked;
+            columns[ts.Name].IsVisible = ts.Checked;
             RefreshChart();
         }
 

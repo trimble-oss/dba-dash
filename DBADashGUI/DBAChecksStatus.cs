@@ -13,7 +13,7 @@ namespace DBADashGUI
             Acknowledged = 5
         }
 
-        public static Color GetStatusColour(DBADashStatusEnum status)
+        public static Color GetStatusColour(DBADashStatusEnum status, bool dark = false)
         {
             if (status == DBADashStatusEnum.Critical)
             {
@@ -25,7 +25,7 @@ namespace DBADashGUI
             }
             else if (status == DBADashStatusEnum.NA)
             {
-                return DashColors.NotApplicable;
+                return dark ? DashColors.TrimbleGray : DashColors.NotApplicable;
             }
             else if (status == DBADashStatusEnum.OK)
             {

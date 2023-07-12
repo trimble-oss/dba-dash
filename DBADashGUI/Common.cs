@@ -34,6 +34,7 @@ namespace DBADashGUI
             };
             connection.ConnectionString = builder.ToString();
             RepositoryDBConnection = connection;
+            CommonData.ClearCache();
         }
 
         public static Guid HighPerformancePowerPlanGUID
@@ -370,6 +371,25 @@ namespace DBADashGUI
             var psi = new ProcessStartInfo(Properties.Resources.ServiceConfigToolName) { UseShellExecute = true };
             Process.Start(psi);
             Application.Exit();
+        }
+
+        public static string AsciiProgressBar(double progress, int totalWidth = 10)
+        {
+            var totalWidthDouble = totalWidth * 2;  // Double width for half block resolution
+            var filledWidth = (int)Math.Round(totalWidthDouble * progress);
+
+            var fullBlocks = filledWidth / 2;
+            var fullBlockPart = new string('█', fullBlocks);
+
+            // Half blocks
+            var halfBlocks = filledWidth % 2;
+            var halfBlockPart = halfBlocks > 0 ? "▓" : "";
+
+            // Empty blocks
+            var emptyBlocks = totalWidthDouble / 2 - fullBlocks - halfBlocks;
+            var emptyBlockPart = new string('░', emptyBlocks);
+
+            return "[" + fullBlockPart + halfBlockPart + emptyBlockPart + "]";
         }
     }
 }

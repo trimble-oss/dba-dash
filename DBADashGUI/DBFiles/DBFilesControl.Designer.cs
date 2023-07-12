@@ -44,6 +44,7 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DBFilesControl));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -60,7 +61,6 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle30 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle32 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DBFilesControl));
             this.dgvFiles = new System.Windows.Forms.DataGridView();
             this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -98,6 +98,7 @@
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.tsExcel = new System.Windows.Forms.ToolStripButton();
+            this.statusFilterToolStrip1 = new DBADashGUI.StatusFilterToolStrip();
             this.tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
             this.configureDatabaseThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -140,9 +141,11 @@
             this.dataGridViewTextBoxColumn28 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn29 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn30 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.statusFilterToolStrip1 = new DBADashGUI.StatusFilterToolStrip();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.lblInfo = new System.Windows.Forms.ToolStripStatusLabel();
             ((System.ComponentModel.ISupportInitialize)(this.dgvFiles)).BeginInit();
             this.toolStrip1.SuspendLayout();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // dgvFiles
@@ -203,7 +206,6 @@
             this.dgvFiles.DefaultCellStyle = dataGridViewCellStyle15;
             this.dgvFiles.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvFiles.Location = new System.Drawing.Point(0, 27);
-            this.dgvFiles.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgvFiles.Name = "dgvFiles";
             this.dgvFiles.ReadOnly = true;
             dataGridViewCellStyle16.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -217,7 +219,7 @@
             this.dgvFiles.RowHeadersVisible = false;
             this.dgvFiles.RowHeadersWidth = 51;
             this.dgvFiles.RowTemplate.Height = 24;
-            this.dgvFiles.Size = new System.Drawing.Size(1616, 331);
+            this.dgvFiles.Size = new System.Drawing.Size(1414, 219);
             this.dgvFiles.TabIndex = 0;
             this.dgvFiles.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvFiles_CellContentClick);
             this.dgvFiles.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.DgvFiles_RowsAdded);
@@ -564,7 +566,7 @@
             this.tsType});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1616, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(1414, 27);
             this.toolStrip1.TabIndex = 3;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -574,7 +576,7 @@
             this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
+            this.tsRefresh.Size = new System.Drawing.Size(24, 24);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
@@ -584,7 +586,7 @@
             this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
+            this.tsCopy.Size = new System.Drawing.Size(24, 24);
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
@@ -594,9 +596,30 @@
             this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
             this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Size = new System.Drawing.Size(24, 24);
             this.tsExcel.Text = "Export Excel";
             this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
+            // 
+            // statusFilterToolStrip1
+            // 
+            this.statusFilterToolStrip1.Acknowledged = false;
+            this.statusFilterToolStrip1.AcknowledgedVisible = false;
+            this.statusFilterToolStrip1.Critical = true;
+            this.statusFilterToolStrip1.CriticalVisible = true;
+            this.statusFilterToolStrip1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
+            this.statusFilterToolStrip1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.statusFilterToolStrip1.Image = ((System.Drawing.Image)(resources.GetObject("statusFilterToolStrip1.Image")));
+            this.statusFilterToolStrip1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.statusFilterToolStrip1.NA = true;
+            this.statusFilterToolStrip1.Name = "statusFilterToolStrip1";
+            this.statusFilterToolStrip1.NAVisible = true;
+            this.statusFilterToolStrip1.OK = true;
+            this.statusFilterToolStrip1.OKVisible = true;
+            this.statusFilterToolStrip1.Size = new System.Drawing.Size(60, 24);
+            this.statusFilterToolStrip1.Text = "ALL";
+            this.statusFilterToolStrip1.Warning = true;
+            this.statusFilterToolStrip1.WarningVisible = true;
+            this.statusFilterToolStrip1.UserChangedStatusFilter += new System.EventHandler(this.Status_Selected);
             // 
             // tsConfigure
             // 
@@ -608,27 +631,27 @@
             this.tsConfigure.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
             this.tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsConfigure.Name = "tsConfigure";
-            this.tsConfigure.Size = new System.Drawing.Size(34, 24);
+            this.tsConfigure.Size = new System.Drawing.Size(33, 24);
             this.tsConfigure.Text = "Configure";
             // 
             // configureDatabaseThresholdsToolStripMenuItem
             // 
             this.configureDatabaseThresholdsToolStripMenuItem.Name = "configureDatabaseThresholdsToolStripMenuItem";
-            this.configureDatabaseThresholdsToolStripMenuItem.Size = new System.Drawing.Size(299, 26);
+            this.configureDatabaseThresholdsToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.configureDatabaseThresholdsToolStripMenuItem.Text = "Configure Database Thresholds";
             this.configureDatabaseThresholdsToolStripMenuItem.Click += new System.EventHandler(this.ConfigureDatabaseThresholdsToolStripMenuItem_Click);
             // 
             // configureInstanceThresholdsToolStripMenuItem
             // 
             this.configureInstanceThresholdsToolStripMenuItem.Name = "configureInstanceThresholdsToolStripMenuItem";
-            this.configureInstanceThresholdsToolStripMenuItem.Size = new System.Drawing.Size(299, 26);
+            this.configureInstanceThresholdsToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.configureInstanceThresholdsToolStripMenuItem.Text = "Configure Instance Thresholds";
             this.configureInstanceThresholdsToolStripMenuItem.Click += new System.EventHandler(this.ConfigureInstanceThresholdsToolStripMenuItem_Click);
             // 
             // configureRootThresholdsToolStripMenuItem
             // 
             this.configureRootThresholdsToolStripMenuItem.Name = "configureRootThresholdsToolStripMenuItem";
-            this.configureRootThresholdsToolStripMenuItem.Size = new System.Drawing.Size(299, 26);
+            this.configureRootThresholdsToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.configureRootThresholdsToolStripMenuItem.Text = "Configure Root Thresholds";
             this.configureRootThresholdsToolStripMenuItem.Click += new System.EventHandler(this.ConfigureRootThresholdsToolStripMenuItem_Click);
             // 
@@ -641,7 +664,7 @@
             this.tsLevel.Image = ((System.Drawing.Image)(resources.GetObject("tsLevel.Image")));
             this.tsLevel.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsLevel.Name = "tsLevel";
-            this.tsLevel.Size = new System.Drawing.Size(57, 24);
+            this.tsLevel.Size = new System.Drawing.Size(47, 24);
             this.tsLevel.Text = "Level";
             // 
             // tsFilegroup
@@ -650,14 +673,14 @@
             this.tsFilegroup.CheckOnClick = true;
             this.tsFilegroup.CheckState = System.Windows.Forms.CheckState.Checked;
             this.tsFilegroup.Name = "tsFilegroup";
-            this.tsFilegroup.Size = new System.Drawing.Size(155, 26);
+            this.tsFilegroup.Size = new System.Drawing.Size(124, 22);
             this.tsFilegroup.Text = "Filegroup";
             this.tsFilegroup.Click += new System.EventHandler(this.TsFilegroup_Click);
             // 
             // tsFile
             // 
             this.tsFile.Name = "tsFile";
-            this.tsFile.Size = new System.Drawing.Size(155, 26);
+            this.tsFile.Size = new System.Drawing.Size(124, 22);
             this.tsFile.Text = "File";
             this.tsFile.Click += new System.EventHandler(this.TsFile_Click);
             // 
@@ -672,7 +695,7 @@
             this.tsType.Image = ((System.Drawing.Image)(resources.GetObject("tsType.Image")));
             this.tsType.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsType.Name = "tsType";
-            this.tsType.Size = new System.Drawing.Size(54, 24);
+            this.tsType.Size = new System.Drawing.Size(44, 24);
             this.tsType.Text = "Type";
             // 
             // rOWSToolStripMenuItem
@@ -681,7 +704,7 @@
             this.rOWSToolStripMenuItem.CheckOnClick = true;
             this.rOWSToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.rOWSToolStripMenuItem.Name = "rOWSToolStripMenuItem";
-            this.rOWSToolStripMenuItem.Size = new System.Drawing.Size(174, 26);
+            this.rOWSToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.rOWSToolStripMenuItem.Tag = "0";
             this.rOWSToolStripMenuItem.Text = "ROWS";
             this.rOWSToolStripMenuItem.CheckedChanged += new System.EventHandler(this.TsTypes_Click);
@@ -692,7 +715,7 @@
             this.lOGToolStripMenuItem.CheckOnClick = true;
             this.lOGToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.lOGToolStripMenuItem.Name = "lOGToolStripMenuItem";
-            this.lOGToolStripMenuItem.Size = new System.Drawing.Size(174, 26);
+            this.lOGToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.lOGToolStripMenuItem.Tag = "1";
             this.lOGToolStripMenuItem.Text = "LOG";
             this.lOGToolStripMenuItem.CheckedChanged += new System.EventHandler(this.TsTypes_Click);
@@ -703,7 +726,7 @@
             this.fILESTREAMToolStripMenuItem.CheckOnClick = true;
             this.fILESTREAMToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.fILESTREAMToolStripMenuItem.Name = "fILESTREAMToolStripMenuItem";
-            this.fILESTREAMToolStripMenuItem.Size = new System.Drawing.Size(174, 26);
+            this.fILESTREAMToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.fILESTREAMToolStripMenuItem.Tag = "2";
             this.fILESTREAMToolStripMenuItem.Text = "FILESTREAM";
             this.fILESTREAMToolStripMenuItem.CheckedChanged += new System.EventHandler(this.TsTypes_Click);
@@ -714,7 +737,7 @@
             this.fULLTEXTToolStripMenuItem.CheckOnClick = true;
             this.fULLTEXTToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.fULLTEXTToolStripMenuItem.Name = "fULLTEXTToolStripMenuItem";
-            this.fULLTEXTToolStripMenuItem.Size = new System.Drawing.Size(174, 26);
+            this.fULLTEXTToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.fULLTEXTToolStripMenuItem.Tag = "4";
             this.fULLTEXTToolStripMenuItem.Text = "FULLTEXT";
             this.fULLTEXTToolStripMenuItem.CheckedChanged += new System.EventHandler(this.TsTypes_Click);
@@ -1028,40 +1051,36 @@
             this.dataGridViewTextBoxColumn30.Name = "dataGridViewTextBoxColumn30";
             this.dataGridViewTextBoxColumn30.Width = 139;
             // 
-            // statusFilterToolStrip1
+            // statusStrip1
             // 
-            this.statusFilterToolStrip1.Acknowledged = true;
-            this.statusFilterToolStrip1.AcknowledgedVisible = false;
-            this.statusFilterToolStrip1.Critical = true;
-            this.statusFilterToolStrip1.CriticalVisible = true;
-            this.statusFilterToolStrip1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
-            this.statusFilterToolStrip1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.statusFilterToolStrip1.Image = ((System.Drawing.Image)(resources.GetObject("statusFilterToolStrip1.Image")));
-            this.statusFilterToolStrip1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.statusFilterToolStrip1.NA = true;
-            this.statusFilterToolStrip1.Name = "statusFilterToolStrip1";
-            this.statusFilterToolStrip1.NAVisible = true;
-            this.statusFilterToolStrip1.OK = true;
-            this.statusFilterToolStrip1.OKVisible = true;
-            this.statusFilterToolStrip1.Size = new System.Drawing.Size(67, 24);
-            this.statusFilterToolStrip1.Text = "ALL";
-            this.statusFilterToolStrip1.Warning = true;
-            this.statusFilterToolStrip1.WarningVisible = true;
-            this.statusFilterToolStrip1.UserChangedStatusFilter += new System.EventHandler(this.Status_Selected);
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lblInfo});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 246);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(1414, 22);
+            this.statusStrip1.TabIndex = 4;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // lblInfo
+            // 
+            this.lblInfo.Name = "lblInfo";
+            this.lblInfo.Size = new System.Drawing.Size(0, 17);
             // 
             // DBFilesControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.dgvFiles);
             this.Controls.Add(this.toolStrip1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.Controls.Add(this.statusStrip1);
             this.Name = "DBFilesControl";
-            this.Size = new System.Drawing.Size(1616, 358);
+            this.Size = new System.Drawing.Size(1414, 268);
             this.Load += new System.EventHandler(this.DBFilesControl_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvFiles)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1149,5 +1168,7 @@
         private System.Windows.Forms.DataGridViewLinkColumn History;
         private System.Windows.Forms.DataGridViewLinkColumn Configure;
         private StatusFilterToolStrip statusFilterToolStrip1;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel lblInfo;
     }
 }

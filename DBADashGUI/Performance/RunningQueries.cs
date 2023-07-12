@@ -881,14 +881,7 @@ namespace DBADashGUI.Performance
 
         private void TsCols_Click(object sender, EventArgs e)
         {
-            PromptColumnSelection(ref dgv);
-        }
-
-        private void PromptColumnSelection(ref DataGridView gv)
-        {
-            using var frm = new SelectColumns();
-            frm.Columns = gv.Columns;
-            frm.ShowDialog(this);
+            dgv.PromptColumnSelection();
         }
 
         private void TsEditLimit_Click(object sender, EventArgs e)
