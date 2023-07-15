@@ -184,6 +184,12 @@ WHERE IsActive = 1
 AND state IN(3,4,5) /* Recovery Pending, Suspect, Emergency */
 GROUP BY InstanceID
 
+SELECT	EPS.InstanceID,
+		MIN(NULLIF(EPS.ElasticPoolStorageStatus,3)) ElasticPoolStorageStatus
+INTO #ElasticPoolStatus
+FROM dbo.AzureDBElasticPoolStorageStatus EPS
+GROUP BY EPS.InstanceID
+
 SELECT I.InstanceID,
 	I.Instance,
 	I.InstanceGroupName,
@@ -349,7 +355,7 @@ LEFT JOIN #CollectionErrorStatus errSummary  ON I.InstanceID = errSummary.Instan
 LEFT JOIN #FileGroupStatus F ON I.InstanceID = F.InstanceID
 LEFT JOIN #CollectionStatus SSD ON I.InstanceID = SSD.InstanceID
 LEFT JOIN #CustomChecksStatus cus ON cus.InstanceID = I.InstanceID
-LEFT JOIN dbo.AzureDBElasticPoolStorageStatus EPS ON I.InstanceID = EPS.InstanceID
+LEFT JOIN #ElasticPoolStatus EPS ON I.InstanceID = EPS.InstanceID
 LEFT JOIN #QueryStoreStatus QS ON QS.InstanceID = I.InstanceID
 LEFT JOIN #IdentityStatus Ident ON Ident.InstanceID = I.InstanceID
 LEFT JOIN #DatabaseStateStatus DBState ON I.InstanceID = DBState.InstanceID
