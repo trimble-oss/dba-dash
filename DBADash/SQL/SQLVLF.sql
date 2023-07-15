@@ -16,7 +16,7 @@ BEGIN
 	)
 
 	DECLARE @ProductMajorVersion INT
-	SET @ProductMajorVersion = CAST(SERVERPROPERTY('ProductMajorVersion') as INT)
+	SET @ProductMajorVersion = CAST(ISNULL(SERVERPROPERTY('ProductMajorVersion'),PARSENAME(CAST(SERVERPROPERTY('ProductVersion') AS NVARCHAR(128)), 4)) AS INT)
 
 	DECLARE DBs CURSOR FAST_FORWARD READ_ONLY FOR
 	SELECT name
@@ -31,25 +31,25 @@ BEGIN
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
 
-	SET @SQL =  N'USE ' + QUOTENAME(@DBName) + ';
-	DECLARE @LogInfo TABLE(
-		' + CASE WHEN @ProductMajorVersion>=11 THEN 'recoveryunitid INT ,' ELSE '' END + '
-		FileID SMALLINT ,
-		FileSize BIGINT ,
-		StartOffset BIGINT ,
-		FSeqNo BIGINT ,
-		[Status] TINYINT ,
-		Parity TINYINT ,
-		CreateLSN NUMERIC(38)
-		);
-	INSERT INTO @LogInfo
-	EXEC sp_executesql N''DBCC LOGINFO() WITH NO_INFOMSGS'';
-	INSERT INTO #VLF(database_id,VLFCount)
-	SELECT DB_ID(),@@ROWCOUNT'
+		SET @SQL =  N'USE ' + QUOTENAME(@DBName) + ';
+		DECLARE @LogInfo TABLE(
+			' + CASE WHEN @ProductMajorVersion>=11 THEN 'recoveryunitid INT ,' ELSE '' END + '
+			FileID SMALLINT ,
+			FileSize BIGINT ,
+			StartOffset BIGINT ,
+			FSeqNo BIGINT ,
+			[Status] TINYINT ,
+			Parity TINYINT ,
+			CreateLSN NUMERIC(38)
+			);
+		INSERT INTO @LogInfo
+		EXEC sp_executesql N''DBCC LOGINFO() WITH NO_INFOMSGS'';
+		INSERT INTO #VLF(database_id,VLFCount)
+		SELECT DB_ID(),@@ROWCOUNT'
 
-	EXEC  (	@SQL )
+		EXEC  (	@SQL )
 
-	FETCH NEXT FROM DBs INTO @DBName
+		FETCH NEXT FROM DBs INTO @DBName
 	END
 	CLOSE DBs
 	DEALLOCATE DBs
