@@ -85,6 +85,7 @@ Describe 'CI Workflow checks' {
 	      @{TableName="dbo.Waits"}
 	      @{TableName="dbo.Waits_60MIN"}
 	      @{TableName="dbo.WaitType"}
+		  @{TableName="dbo.BuildReference"}
     )
     It 'Check table counts for <TableName>' -TestCases $TableCountGreaterThanZeroTestCases {
         param($tableName)

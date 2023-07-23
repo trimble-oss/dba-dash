@@ -695,6 +695,10 @@
     <Build Include="dbo\Tables\Summary.sql" />
     <Build Include="dbo\Stored Procedures\Summary_Upd.sql" />
     <Build Include="dbo\Stored Procedures\Settings_Get.sql" />
+    <Build Include="dbo\Tables\BuildReference.sql" />
+    <Build Include="dbo\Stored Procedures\BuildReference_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\BuildReference_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Settings_Upd.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
@@ -743,6 +747,9 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <PreDeploy Include="Script.PreDeployment1.sql" />
   </ItemGroup>
   <Target Name="SetDacVersionToAssemblyVersion" AfterTargets="CoreCompile">
     <GetAssemblyIdentity AssemblyFiles="$(IntermediateTargetFullFileName)">

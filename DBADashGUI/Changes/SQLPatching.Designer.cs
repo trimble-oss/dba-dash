@@ -28,556 +28,669 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.dgv = new System.Windows.Forms.DataGridView();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.dgvVersion = new System.Windows.Forms.DataGridView();
-            this.toolStrip2 = new System.Windows.Forms.ToolStrip();
-            this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
-            this.tsRefreshVersion = new System.Windows.Forms.ToolStripButton();
-            this.tsCopyVersion = new System.Windows.Forms.ToolStripButton();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.tsCols = new System.Windows.Forms.ToolStripButton();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            this.tsRefreshHistory = new System.Windows.Forms.ToolStripButton();
-            this.tsCopyHistory = new System.Windows.Forms.ToolStripButton();
-            this.tsExcelHistory = new System.Windows.Forms.ToolStripButton();
-            this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colSQLVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colPatchDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colProductVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colEngineEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colEditionID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colProductLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colProductUpdateLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colProductUpdateReference = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colProductMajorVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colBuildType = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colProductBuild = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colResourceVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colResourceLastUpdateDateTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colLicenseType = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colNumLicences = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colWindowsCaption = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colWindowsRelease = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colWindowsSKU = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ChangedDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.OldVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.NewVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.OldProductLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.NewProductLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.OldProductUpdateLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.NewProductUpdateLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.OldEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.NewEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvVersion)).BeginInit();
-            this.toolStrip2.SuspendLayout();
-            this.toolStrip1.SuspendLayout();
-            this.SuspendLayout();
+            dgv = new System.Windows.Forms.DataGridView();
+            Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ChangedDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            OldVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            NewVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            OldProductLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            NewProductLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            OldProductUpdateLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            NewProductUpdateLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            OldEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            NewEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            splitContainer1 = new System.Windows.Forms.SplitContainer();
+            dgvVersion = new System.Windows.Forms.DataGridView();
+            colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colSQLVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colPatchDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colProductVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colEngineEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colEditionID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colProductLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colProductUpdateLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colProductUpdateReference = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colProductMajorVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colBuildType = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colProductBuild = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colResourceVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colResourceLastUpdateDateTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colLicenseType = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colNumLicences = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colWindowsCaption = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colWindowsRelease = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colWindowsSKU = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            toolStrip2 = new System.Windows.Forms.ToolStrip();
+            toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
+            tsRefreshVersion = new System.Windows.Forms.ToolStripButton();
+            tsCopyVersion = new System.Windows.Forms.ToolStripButton();
+            tsExcel = new System.Windows.Forms.ToolStripButton();
+            tsCols = new System.Windows.Forms.ToolStripButton();
+            tsConfig = new System.Windows.Forms.ToolStripDropDownButton();
+            thresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            sPBehindWarningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            sPBehindCriticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            cUBehindWarningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            cUBehindCriticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            daysUntilSupportEndsWarningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            daysUntilSupportEndsCriticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            daysUntilMainstreamSupportEndsWarningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            daysUntilMainstreamSupportEndsCriticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            buildReferenceAgeWarningThresholdToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            buildReferenceAgeCriticalThresholdToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            buildReferenceUpdateExclusionPeriodToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            resetToDefaultToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsViewBuildReference = new System.Windows.Forms.ToolStripButton();
+            tsUpdateBuildReference = new System.Windows.Forms.ToolStripButton();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            tsRefreshHistory = new System.Windows.Forms.ToolStripButton();
+            tsCopyHistory = new System.Windows.Forms.ToolStripButton();
+            tsExcelHistory = new System.Windows.Forms.ToolStripButton();
+            ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
+            splitContainer1.Panel1.SuspendLayout();
+            splitContainer1.Panel2.SuspendLayout();
+            splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvVersion).BeginInit();
+            toolStrip2.SuspendLayout();
+            toolStrip1.SuspendLayout();
+            SuspendLayout();
             // 
             // dgv
             // 
-            this.dgv.AllowUserToAddRows = false;
-            this.dgv.AllowUserToDeleteRows = false;
-            this.dgv.BackgroundColor = System.Drawing.Color.White;
-            this.dgv.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
-            this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Instance,
-            this.ChangedDate,
-            this.OldVersion,
-            this.NewVersion,
-            this.OldProductLevel,
-            this.NewProductLevel,
-            this.OldProductUpdateLevel,
-            this.NewProductUpdateLevel,
-            this.OldEdition,
-            this.NewEdition});
-            this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 27);
-            this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dgv.Name = "dgv";
-            this.dgv.ReadOnly = true;
-            this.dgv.RowHeadersVisible = false;
-            this.dgv.RowHeadersWidth = 51;
-            this.dgv.Size = new System.Drawing.Size(1204, 403);
-            this.dgv.TabIndex = 0;
-            // 
-            // splitContainer1
-            // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.splitContainer1.Name = "splitContainer1";
-            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitContainer1.Panel1
-            // 
-            this.splitContainer1.Panel1.Controls.Add(this.dgvVersion);
-            this.splitContainer1.Panel1.Controls.Add(this.toolStrip2);
-            // 
-            // splitContainer1.Panel2
-            // 
-            this.splitContainer1.Panel2.Controls.Add(this.dgv);
-            this.splitContainer1.Panel2.Controls.Add(this.toolStrip1);
-            this.splitContainer1.Size = new System.Drawing.Size(1204, 870);
-            this.splitContainer1.SplitterDistance = 435;
-            this.splitContainer1.SplitterWidth = 5;
-            this.splitContainer1.TabIndex = 1;
-            // 
-            // dgvVersion
-            // 
-            this.dgvVersion.AllowUserToAddRows = false;
-            this.dgvVersion.AllowUserToDeleteRows = false;
-            this.dgvVersion.BackgroundColor = System.Drawing.Color.White;
-            this.dgvVersion.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
-            this.dgvVersion.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvVersion.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.colInstance,
-            this.colSQLVersion,
-            this.colPatchDate,
-            this.colProductVersion,
-            this.colEdition,
-            this.colEngineEdition,
-            this.colEditionID,
-            this.colProductLevel,
-            this.colProductUpdateLevel,
-            this.colProductUpdateReference,
-            this.colProductMajorVersion,
-            this.colBuildType,
-            this.colProductBuild,
-            this.colResourceVersion,
-            this.colResourceLastUpdateDateTime,
-            this.colLicenseType,
-            this.colNumLicences,
-            this.colWindowsCaption,
-            this.colWindowsRelease,
-            this.colWindowsSKU});
-            this.dgvVersion.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvVersion.Location = new System.Drawing.Point(0, 27);
-            this.dgvVersion.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dgvVersion.Name = "dgvVersion";
-            this.dgvVersion.ReadOnly = true;
-            this.dgvVersion.RowHeadersVisible = false;
-            this.dgvVersion.RowHeadersWidth = 51;
-            this.dgvVersion.RowTemplate.Height = 24;
-            this.dgvVersion.Size = new System.Drawing.Size(1204, 408);
-            this.dgvVersion.TabIndex = 0;
-            // 
-            // toolStrip2
-            // 
-            this.toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripLabel2,
-            this.tsRefreshVersion,
-            this.tsCopyVersion,
-            this.tsExcel,
-            this.tsCols});
-            this.toolStrip2.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(1204, 27);
-            this.toolStrip2.TabIndex = 1;
-            this.toolStrip2.Text = "toolStrip2";
-            // 
-            // toolStripLabel2
-            // 
-            this.toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.toolStripLabel2.Name = "toolStripLabel2";
-            this.toolStripLabel2.Size = new System.Drawing.Size(94, 24);
-            this.toolStripLabel2.Text = "Version Info";
-            // 
-            // tsRefreshVersion
-            // 
-            this.tsRefreshVersion.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefreshVersion.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefreshVersion.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefreshVersion.Name = "tsRefreshVersion";
-            this.tsRefreshVersion.Size = new System.Drawing.Size(29, 24);
-            this.tsRefreshVersion.Text = "Refresh";
-            this.tsRefreshVersion.Click += new System.EventHandler(this.TsRefreshVersion_Click);
-            // 
-            // tsCopyVersion
-            // 
-            this.tsCopyVersion.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopyVersion.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopyVersion.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopyVersion.Name = "tsCopyVersion";
-            this.tsCopyVersion.Size = new System.Drawing.Size(29, 24);
-            this.tsCopyVersion.Text = "Copy";
-            this.tsCopyVersion.Click += new System.EventHandler(this.TsCopyVersion_Click);
-            // 
-            // tsExcel
-            // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
-            // 
-            // tsCols
-            // 
-            this.tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCols.Image = global::DBADashGUI.Properties.Resources.Column_16x;
-            this.tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCols.Name = "tsCols";
-            this.tsCols.Size = new System.Drawing.Size(29, 24);
-            this.tsCols.Text = "Columns";
-            this.tsCols.Click += new System.EventHandler(this.TsCols_Click);
-            // 
-            // toolStrip1
-            // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripLabel1,
-            this.tsRefreshHistory,
-            this.tsCopyHistory,
-            this.tsExcelHistory});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1204, 27);
-            this.toolStrip1.TabIndex = 1;
-            this.toolStrip1.Text = "toolStrip1";
-            // 
-            // toolStripLabel1
-            // 
-            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(61, 24);
-            this.toolStripLabel1.Text = "History";
-            // 
-            // tsRefreshHistory
-            // 
-            this.tsRefreshHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefreshHistory.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefreshHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefreshHistory.Name = "tsRefreshHistory";
-            this.tsRefreshHistory.Size = new System.Drawing.Size(29, 24);
-            this.tsRefreshHistory.Text = "Refresh";
-            this.tsRefreshHistory.Click += new System.EventHandler(this.TsRefreshHistory_Click);
-            // 
-            // tsCopyHistory
-            // 
-            this.tsCopyHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopyHistory.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopyHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopyHistory.Name = "tsCopyHistory";
-            this.tsCopyHistory.Size = new System.Drawing.Size(29, 24);
-            this.tsCopyHistory.Text = "Copy";
-            this.tsCopyHistory.Click += new System.EventHandler(this.TsCopyHistory_Click);
-            // 
-            // tsExcelHistory
-            // 
-            this.tsExcelHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcelHistory.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcelHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcelHistory.Name = "tsExcelHistory";
-            this.tsExcelHistory.Size = new System.Drawing.Size(29, 24);
-            this.tsExcelHistory.Text = "Export Excel";
-            this.tsExcelHistory.Click += new System.EventHandler(this.TsExcelHistory_Click);
-            // 
-            // colInstance
-            // 
-            this.colInstance.DataPropertyName = "InstanceDisplayName";
-            this.colInstance.HeaderText = "Instance";
-            this.colInstance.MinimumWidth = 6;
-            this.colInstance.Name = "colInstance";
-            this.colInstance.ReadOnly = true;
-            this.colInstance.Width = 90;
-            // 
-            // colSQLVersion
-            // 
-            this.colSQLVersion.DataPropertyName = "SQLVersion";
-            this.colSQLVersion.HeaderText = "Version";
-            this.colSQLVersion.MinimumWidth = 6;
-            this.colSQLVersion.Name = "colSQLVersion";
-            this.colSQLVersion.ReadOnly = true;
-            this.colSQLVersion.Width = 85;
-            // 
-            // colPatchDate
-            // 
-            this.colPatchDate.DataPropertyName = "PatchDate";
-            this.colPatchDate.HeaderText = "SQL Patch Date";
-            this.colPatchDate.MinimumWidth = 6;
-            this.colPatchDate.Name = "colPatchDate";
-            this.colPatchDate.ReadOnly = true;
-            this.colPatchDate.Width = 127;
-            // 
-            // colProductVersion
-            // 
-            this.colProductVersion.DataPropertyName = "ProductVersion";
-            this.colProductVersion.HeaderText = "Product Version";
-            this.colProductVersion.MinimumWidth = 6;
-            this.colProductVersion.Name = "colProductVersion";
-            this.colProductVersion.ReadOnly = true;
-            this.colProductVersion.Width = 127;
-            // 
-            // colEdition
-            // 
-            this.colEdition.DataPropertyName = "Edition";
-            this.colEdition.HeaderText = "Edition";
-            this.colEdition.MinimumWidth = 6;
-            this.colEdition.Name = "colEdition";
-            this.colEdition.ReadOnly = true;
-            this.colEdition.Width = 80;
-            // 
-            // colEngineEdition
-            // 
-            this.colEngineEdition.DataPropertyName = "EngineEdition";
-            this.colEngineEdition.HeaderText = "Engine Edition";
-            this.colEngineEdition.MinimumWidth = 6;
-            this.colEngineEdition.Name = "colEngineEdition";
-            this.colEngineEdition.ReadOnly = true;
-            this.colEngineEdition.Width = 118;
-            // 
-            // colEditionID
-            // 
-            this.colEditionID.DataPropertyName = "EditionID";
-            this.colEditionID.HeaderText = "Edition ID";
-            this.colEditionID.MinimumWidth = 6;
-            this.colEditionID.Name = "colEditionID";
-            this.colEditionID.ReadOnly = true;
-            this.colEditionID.Width = 90;
-            // 
-            // colProductLevel
-            // 
-            this.colProductLevel.DataPropertyName = "ProductLevel";
-            this.colProductLevel.HeaderText = "Product Level";
-            this.colProductLevel.MinimumWidth = 6;
-            this.colProductLevel.Name = "colProductLevel";
-            this.colProductLevel.ReadOnly = true;
-            this.colProductLevel.Width = 114;
-            // 
-            // colProductUpdateLevel
-            // 
-            this.colProductUpdateLevel.DataPropertyName = "ProductUpdateLevel";
-            this.colProductUpdateLevel.HeaderText = "Product Update Level";
-            this.colProductUpdateLevel.MinimumWidth = 6;
-            this.colProductUpdateLevel.Name = "colProductUpdateLevel";
-            this.colProductUpdateLevel.ReadOnly = true;
-            this.colProductUpdateLevel.Width = 128;
-            // 
-            // colProductUpdateReference
-            // 
-            this.colProductUpdateReference.DataPropertyName = "ProductUpdateReference";
-            this.colProductUpdateReference.HeaderText = "Product Update Reference";
-            this.colProductUpdateReference.MinimumWidth = 6;
-            this.colProductUpdateReference.Name = "colProductUpdateReference";
-            this.colProductUpdateReference.ReadOnly = true;
-            this.colProductUpdateReference.Width = 188;
-            // 
-            // colProductMajorVersion
-            // 
-            this.colProductMajorVersion.DataPropertyName = "ProductMajorVersion";
-            this.colProductMajorVersion.HeaderText = "Major Version";
-            this.colProductMajorVersion.MinimumWidth = 6;
-            this.colProductMajorVersion.Name = "colProductMajorVersion";
-            this.colProductMajorVersion.ReadOnly = true;
-            this.colProductMajorVersion.Width = 114;
-            // 
-            // colBuildType
-            // 
-            this.colBuildType.DataPropertyName = "ProductBuildType";
-            this.colBuildType.HeaderText = "Build Type";
-            this.colBuildType.MinimumWidth = 6;
-            this.colBuildType.Name = "colBuildType";
-            this.colBuildType.ReadOnly = true;
-            this.colBuildType.Width = 96;
-            // 
-            // colProductBuild
-            // 
-            this.colProductBuild.DataPropertyName = "ProductBuild";
-            this.colProductBuild.HeaderText = "Product Build";
-            this.colProductBuild.MinimumWidth = 6;
-            this.colProductBuild.Name = "colProductBuild";
-            this.colProductBuild.ReadOnly = true;
-            this.colProductBuild.Width = 111;
-            // 
-            // colResourceVersion
-            // 
-            this.colResourceVersion.DataPropertyName = "ResourceVersion";
-            this.colResourceVersion.HeaderText = "Resource Version";
-            this.colResourceVersion.MinimumWidth = 6;
-            this.colResourceVersion.Name = "colResourceVersion";
-            this.colResourceVersion.ReadOnly = true;
-            this.colResourceVersion.Width = 137;
-            // 
-            // colResourceLastUpdateDateTime
-            // 
-            this.colResourceLastUpdateDateTime.DataPropertyName = "ResourceLastUpdateDateTime";
-            this.colResourceLastUpdateDateTime.HeaderText = "Resource Last Update";
-            this.colResourceLastUpdateDateTime.MinimumWidth = 6;
-            this.colResourceLastUpdateDateTime.Name = "colResourceLastUpdateDateTime";
-            this.colResourceLastUpdateDateTime.ReadOnly = true;
-            this.colResourceLastUpdateDateTime.Width = 122;
-            // 
-            // colLicenseType
-            // 
-            this.colLicenseType.DataPropertyName = "LicenseType";
-            this.colLicenseType.HeaderText = "License Type";
-            this.colLicenseType.MinimumWidth = 6;
-            this.colLicenseType.Name = "colLicenseType";
-            this.colLicenseType.ReadOnly = true;
-            this.colLicenseType.Width = 112;
-            // 
-            // colNumLicences
-            // 
-            this.colNumLicences.DataPropertyName = "NumLicenses";
-            this.colNumLicences.HeaderText = "Num Licenses";
-            this.colNumLicences.MinimumWidth = 6;
-            this.colNumLicences.Name = "colNumLicences";
-            this.colNumLicences.ReadOnly = true;
-            this.colNumLicences.Width = 116;
-            // 
-            // colWindowsCaption
-            // 
-            this.colWindowsCaption.DataPropertyName = "WindowsCaption";
-            this.colWindowsCaption.HeaderText = "Windows Caption";
-            this.colWindowsCaption.MinimumWidth = 6;
-            this.colWindowsCaption.Name = "colWindowsCaption";
-            this.colWindowsCaption.ReadOnly = true;
-            this.colWindowsCaption.Width = 133;
-            // 
-            // colWindowsRelease
-            // 
-            this.colWindowsRelease.DataPropertyName = "WindowsRelease";
-            this.colWindowsRelease.HeaderText = "Windows Release";
-            this.colWindowsRelease.MinimumWidth = 6;
-            this.colWindowsRelease.Name = "colWindowsRelease";
-            this.colWindowsRelease.ReadOnly = true;
-            this.colWindowsRelease.Width = 136;
-            // 
-            // colWindowsSKU
-            // 
-            this.colWindowsSKU.DataPropertyName = "WindowsSKU";
-            this.colWindowsSKU.HeaderText = "Windows SKU";
-            this.colWindowsSKU.MinimumWidth = 6;
-            this.colWindowsSKU.Name = "colWindowsSKU";
-            this.colWindowsSKU.ReadOnly = true;
-            this.colWindowsSKU.Width = 115;
+            dgv.AllowUserToAddRows = false;
+            dgv.AllowUserToDeleteRows = false;
+            dgv.BackgroundColor = System.Drawing.Color.White;
+            dgv.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+            dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, ChangedDate, OldVersion, NewVersion, OldProductLevel, NewProductLevel, OldProductUpdateLevel, NewProductUpdateLevel, OldEdition, NewEdition });
+            dgv.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgv.Location = new System.Drawing.Point(0, 27);
+            dgv.Name = "dgv";
+            dgv.ReadOnly = true;
+            dgv.RowHeadersVisible = false;
+            dgv.RowHeadersWidth = 51;
+            dgv.Size = new System.Drawing.Size(1054, 298);
+            dgv.TabIndex = 0;
             // 
             // Instance
             // 
-            this.Instance.DataPropertyName = "InstanceDisplayName";
-            this.Instance.HeaderText = "Instance";
-            this.Instance.MinimumWidth = 6;
-            this.Instance.Name = "Instance";
-            this.Instance.ReadOnly = true;
-            this.Instance.Width = 90;
+            Instance.DataPropertyName = "InstanceDisplayName";
+            Instance.HeaderText = "Instance";
+            Instance.MinimumWidth = 6;
+            Instance.Name = "Instance";
+            Instance.ReadOnly = true;
+            Instance.Width = 90;
             // 
             // ChangedDate
             // 
-            this.ChangedDate.DataPropertyName = "ChangedDate";
-            this.ChangedDate.HeaderText = "Changed Date";
-            this.ChangedDate.MinimumWidth = 6;
-            this.ChangedDate.Name = "ChangedDate";
-            this.ChangedDate.ReadOnly = true;
-            this.ChangedDate.Width = 118;
+            ChangedDate.DataPropertyName = "ChangedDate";
+            ChangedDate.HeaderText = "Changed Date";
+            ChangedDate.MinimumWidth = 6;
+            ChangedDate.Name = "ChangedDate";
+            ChangedDate.ReadOnly = true;
+            ChangedDate.Width = 118;
             // 
             // OldVersion
             // 
-            this.OldVersion.DataPropertyName = "OldVersion";
-            this.OldVersion.HeaderText = "Old Version";
-            this.OldVersion.MinimumWidth = 6;
-            this.OldVersion.Name = "OldVersion";
-            this.OldVersion.ReadOnly = true;
-            this.OldVersion.Width = 102;
+            OldVersion.DataPropertyName = "OldVersion";
+            OldVersion.HeaderText = "Old Version";
+            OldVersion.MinimumWidth = 6;
+            OldVersion.Name = "OldVersion";
+            OldVersion.ReadOnly = true;
+            OldVersion.Width = 102;
             // 
             // NewVersion
             // 
-            this.NewVersion.DataPropertyName = "NewVersion";
-            this.NewVersion.HeaderText = "New Version";
-            this.NewVersion.MinimumWidth = 6;
-            this.NewVersion.Name = "NewVersion";
-            this.NewVersion.ReadOnly = true;
-            this.NewVersion.Width = 107;
+            NewVersion.DataPropertyName = "NewVersion";
+            NewVersion.HeaderText = "New Version";
+            NewVersion.MinimumWidth = 6;
+            NewVersion.Name = "NewVersion";
+            NewVersion.ReadOnly = true;
+            NewVersion.Width = 107;
             // 
             // OldProductLevel
             // 
-            this.OldProductLevel.DataPropertyName = "OldProductLevel";
-            this.OldProductLevel.HeaderText = "Old Product Level";
-            this.OldProductLevel.MinimumWidth = 6;
-            this.OldProductLevel.Name = "OldProductLevel";
-            this.OldProductLevel.ReadOnly = true;
-            this.OldProductLevel.Width = 137;
+            OldProductLevel.DataPropertyName = "OldProductLevel";
+            OldProductLevel.HeaderText = "Old Product Level";
+            OldProductLevel.MinimumWidth = 6;
+            OldProductLevel.Name = "OldProductLevel";
+            OldProductLevel.ReadOnly = true;
+            OldProductLevel.Width = 137;
             // 
             // NewProductLevel
             // 
-            this.NewProductLevel.DataPropertyName = "NewProductLevel";
-            this.NewProductLevel.HeaderText = "New Product Level";
-            this.NewProductLevel.MinimumWidth = 6;
-            this.NewProductLevel.Name = "NewProductLevel";
-            this.NewProductLevel.ReadOnly = true;
-            this.NewProductLevel.Width = 142;
+            NewProductLevel.DataPropertyName = "NewProductLevel";
+            NewProductLevel.HeaderText = "New Product Level";
+            NewProductLevel.MinimumWidth = 6;
+            NewProductLevel.Name = "NewProductLevel";
+            NewProductLevel.ReadOnly = true;
+            NewProductLevel.Width = 142;
             // 
             // OldProductUpdateLevel
             // 
-            this.OldProductUpdateLevel.DataPropertyName = "OldProductUpdateLevel";
-            this.OldProductUpdateLevel.HeaderText = "Old Product Update Level";
-            this.OldProductUpdateLevel.MinimumWidth = 6;
-            this.OldProductUpdateLevel.Name = "OldProductUpdateLevel";
-            this.OldProductUpdateLevel.ReadOnly = true;
-            this.OldProductUpdateLevel.Width = 152;
+            OldProductUpdateLevel.DataPropertyName = "OldProductUpdateLevel";
+            OldProductUpdateLevel.HeaderText = "Old Product Update Level";
+            OldProductUpdateLevel.MinimumWidth = 6;
+            OldProductUpdateLevel.Name = "OldProductUpdateLevel";
+            OldProductUpdateLevel.ReadOnly = true;
+            OldProductUpdateLevel.Width = 152;
             // 
             // NewProductUpdateLevel
             // 
-            this.NewProductUpdateLevel.DataPropertyName = "NewProductUpdateLevel";
-            this.NewProductUpdateLevel.HeaderText = "New Product Update Level";
-            this.NewProductUpdateLevel.MinimumWidth = 6;
-            this.NewProductUpdateLevel.Name = "NewProductUpdateLevel";
-            this.NewProductUpdateLevel.ReadOnly = true;
-            this.NewProductUpdateLevel.Width = 156;
+            NewProductUpdateLevel.DataPropertyName = "NewProductUpdateLevel";
+            NewProductUpdateLevel.HeaderText = "New Product Update Level";
+            NewProductUpdateLevel.MinimumWidth = 6;
+            NewProductUpdateLevel.Name = "NewProductUpdateLevel";
+            NewProductUpdateLevel.ReadOnly = true;
+            NewProductUpdateLevel.Width = 156;
             // 
             // OldEdition
             // 
-            this.OldEdition.DataPropertyName = "OldEdition";
-            this.OldEdition.HeaderText = "Old Edition";
-            this.OldEdition.MinimumWidth = 6;
-            this.OldEdition.Name = "OldEdition";
-            this.OldEdition.ReadOnly = true;
-            this.OldEdition.Width = 98;
+            OldEdition.DataPropertyName = "OldEdition";
+            OldEdition.HeaderText = "Old Edition";
+            OldEdition.MinimumWidth = 6;
+            OldEdition.Name = "OldEdition";
+            OldEdition.ReadOnly = true;
+            OldEdition.Width = 98;
             // 
             // NewEdition
             // 
-            this.NewEdition.DataPropertyName = "NewEdition";
-            this.NewEdition.HeaderText = "New Edition";
-            this.NewEdition.MinimumWidth = 6;
-            this.NewEdition.Name = "NewEdition";
-            this.NewEdition.ReadOnly = true;
-            this.NewEdition.Width = 102;
+            NewEdition.DataPropertyName = "NewEdition";
+            NewEdition.HeaderText = "New Edition";
+            NewEdition.MinimumWidth = 6;
+            NewEdition.Name = "NewEdition";
+            NewEdition.ReadOnly = true;
+            NewEdition.Width = 102;
+            // 
+            // splitContainer1
+            // 
+            splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitContainer1.Location = new System.Drawing.Point(0, 0);
+            splitContainer1.Name = "splitContainer1";
+            splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            splitContainer1.Panel1.Controls.Add(dgvVersion);
+            splitContainer1.Panel1.Controls.Add(toolStrip2);
+            // 
+            // splitContainer1.Panel2
+            // 
+            splitContainer1.Panel2.Controls.Add(dgv);
+            splitContainer1.Panel2.Controls.Add(toolStrip1);
+            splitContainer1.Size = new System.Drawing.Size(1054, 652);
+            splitContainer1.SplitterDistance = 323;
+            splitContainer1.TabIndex = 1;
+            // 
+            // dgvVersion
+            // 
+            dgvVersion.AllowUserToAddRows = false;
+            dgvVersion.AllowUserToDeleteRows = false;
+            dgvVersion.AllowUserToOrderColumns = true;
+            dgvVersion.BackgroundColor = System.Drawing.Color.White;
+            dgvVersion.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+            dgvVersion.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvVersion.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colInstance, colSQLVersion, colPatchDate, colProductVersion, colEdition, colEngineEdition, colEditionID, colProductLevel, colProductUpdateLevel, colProductUpdateReference, colProductMajorVersion, colBuildType, colProductBuild, colResourceVersion, colResourceLastUpdateDateTime, colLicenseType, colNumLicences, colWindowsCaption, colWindowsRelease, colWindowsSKU });
+            dgvVersion.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvVersion.Location = new System.Drawing.Point(0, 27);
+            dgvVersion.Name = "dgvVersion";
+            dgvVersion.ReadOnly = true;
+            dgvVersion.RowHeadersVisible = false;
+            dgvVersion.RowHeadersWidth = 51;
+            dgvVersion.RowTemplate.Height = 24;
+            dgvVersion.Size = new System.Drawing.Size(1054, 296);
+            dgvVersion.TabIndex = 0;
+            dgvVersion.CellContentClick += DgvVersion_CellContentClick;
+            dgvVersion.ColumnHeaderMouseClick += DgvVersion_ColumnHeaderMouseClick;
+            dgvVersion.RowsAdded += DgvVersion_RowsAdded;
+            // 
+            // colInstance
+            // 
+            colInstance.DataPropertyName = "InstanceDisplayName";
+            colInstance.HeaderText = "Instance";
+            colInstance.MinimumWidth = 6;
+            colInstance.Name = "colInstance";
+            colInstance.ReadOnly = true;
+            colInstance.Width = 90;
+            // 
+            // colSQLVersion
+            // 
+            colSQLVersion.DataPropertyName = "SQLVersion";
+            colSQLVersion.HeaderText = "Version";
+            colSQLVersion.MinimumWidth = 6;
+            colSQLVersion.Name = "colSQLVersion";
+            colSQLVersion.ReadOnly = true;
+            colSQLVersion.Width = 85;
+            // 
+            // colPatchDate
+            // 
+            colPatchDate.DataPropertyName = "PatchDate";
+            colPatchDate.HeaderText = "SQL Patch Date";
+            colPatchDate.MinimumWidth = 6;
+            colPatchDate.Name = "colPatchDate";
+            colPatchDate.ReadOnly = true;
+            colPatchDate.Width = 127;
+            // 
+            // colProductVersion
+            // 
+            colProductVersion.DataPropertyName = "ProductVersion";
+            colProductVersion.HeaderText = "Product Version";
+            colProductVersion.MinimumWidth = 6;
+            colProductVersion.Name = "colProductVersion";
+            colProductVersion.ReadOnly = true;
+            colProductVersion.Width = 127;
+            // 
+            // colEdition
+            // 
+            colEdition.DataPropertyName = "Edition";
+            colEdition.HeaderText = "Edition";
+            colEdition.MinimumWidth = 6;
+            colEdition.Name = "colEdition";
+            colEdition.ReadOnly = true;
+            colEdition.Width = 80;
+            // 
+            // colEngineEdition
+            // 
+            colEngineEdition.DataPropertyName = "EngineEdition";
+            colEngineEdition.HeaderText = "Engine Edition";
+            colEngineEdition.MinimumWidth = 6;
+            colEngineEdition.Name = "colEngineEdition";
+            colEngineEdition.ReadOnly = true;
+            colEngineEdition.Width = 118;
+            // 
+            // colEditionID
+            // 
+            colEditionID.DataPropertyName = "EditionID";
+            colEditionID.HeaderText = "Edition ID";
+            colEditionID.MinimumWidth = 6;
+            colEditionID.Name = "colEditionID";
+            colEditionID.ReadOnly = true;
+            colEditionID.Width = 90;
+            // 
+            // colProductLevel
+            // 
+            colProductLevel.DataPropertyName = "ProductLevel";
+            colProductLevel.HeaderText = "Product Level";
+            colProductLevel.MinimumWidth = 6;
+            colProductLevel.Name = "colProductLevel";
+            colProductLevel.ReadOnly = true;
+            colProductLevel.Width = 114;
+            // 
+            // colProductUpdateLevel
+            // 
+            colProductUpdateLevel.DataPropertyName = "ProductUpdateLevel";
+            colProductUpdateLevel.HeaderText = "Product Update Level";
+            colProductUpdateLevel.MinimumWidth = 6;
+            colProductUpdateLevel.Name = "colProductUpdateLevel";
+            colProductUpdateLevel.ReadOnly = true;
+            colProductUpdateLevel.Width = 128;
+            // 
+            // colProductUpdateReference
+            // 
+            colProductUpdateReference.DataPropertyName = "ProductUpdateReference";
+            colProductUpdateReference.HeaderText = "Product Update Reference";
+            colProductUpdateReference.MinimumWidth = 6;
+            colProductUpdateReference.Name = "colProductUpdateReference";
+            colProductUpdateReference.ReadOnly = true;
+            colProductUpdateReference.Width = 188;
+            // 
+            // colProductMajorVersion
+            // 
+            colProductMajorVersion.DataPropertyName = "ProductMajorVersion";
+            colProductMajorVersion.HeaderText = "Major Version";
+            colProductMajorVersion.MinimumWidth = 6;
+            colProductMajorVersion.Name = "colProductMajorVersion";
+            colProductMajorVersion.ReadOnly = true;
+            colProductMajorVersion.Width = 114;
+            // 
+            // colBuildType
+            // 
+            colBuildType.DataPropertyName = "ProductBuildType";
+            colBuildType.HeaderText = "Build Type";
+            colBuildType.MinimumWidth = 6;
+            colBuildType.Name = "colBuildType";
+            colBuildType.ReadOnly = true;
+            colBuildType.Width = 96;
+            // 
+            // colProductBuild
+            // 
+            colProductBuild.DataPropertyName = "ProductBuild";
+            colProductBuild.HeaderText = "Product Build";
+            colProductBuild.MinimumWidth = 6;
+            colProductBuild.Name = "colProductBuild";
+            colProductBuild.ReadOnly = true;
+            colProductBuild.Width = 111;
+            // 
+            // colResourceVersion
+            // 
+            colResourceVersion.DataPropertyName = "ResourceVersion";
+            colResourceVersion.HeaderText = "Resource Version";
+            colResourceVersion.MinimumWidth = 6;
+            colResourceVersion.Name = "colResourceVersion";
+            colResourceVersion.ReadOnly = true;
+            colResourceVersion.Width = 137;
+            // 
+            // colResourceLastUpdateDateTime
+            // 
+            colResourceLastUpdateDateTime.DataPropertyName = "ResourceLastUpdateDateTime";
+            colResourceLastUpdateDateTime.HeaderText = "Resource Last Update";
+            colResourceLastUpdateDateTime.MinimumWidth = 6;
+            colResourceLastUpdateDateTime.Name = "colResourceLastUpdateDateTime";
+            colResourceLastUpdateDateTime.ReadOnly = true;
+            colResourceLastUpdateDateTime.Width = 122;
+            // 
+            // colLicenseType
+            // 
+            colLicenseType.DataPropertyName = "LicenseType";
+            colLicenseType.HeaderText = "License Type";
+            colLicenseType.MinimumWidth = 6;
+            colLicenseType.Name = "colLicenseType";
+            colLicenseType.ReadOnly = true;
+            colLicenseType.Width = 112;
+            // 
+            // colNumLicences
+            // 
+            colNumLicences.DataPropertyName = "NumLicenses";
+            colNumLicences.HeaderText = "Num Licenses";
+            colNumLicences.MinimumWidth = 6;
+            colNumLicences.Name = "colNumLicences";
+            colNumLicences.ReadOnly = true;
+            colNumLicences.Width = 116;
+            // 
+            // colWindowsCaption
+            // 
+            colWindowsCaption.DataPropertyName = "WindowsCaption";
+            colWindowsCaption.HeaderText = "Windows Caption";
+            colWindowsCaption.MinimumWidth = 6;
+            colWindowsCaption.Name = "colWindowsCaption";
+            colWindowsCaption.ReadOnly = true;
+            colWindowsCaption.Width = 133;
+            // 
+            // colWindowsRelease
+            // 
+            colWindowsRelease.DataPropertyName = "WindowsRelease";
+            colWindowsRelease.HeaderText = "Windows Release";
+            colWindowsRelease.MinimumWidth = 6;
+            colWindowsRelease.Name = "colWindowsRelease";
+            colWindowsRelease.ReadOnly = true;
+            colWindowsRelease.Width = 136;
+            // 
+            // colWindowsSKU
+            // 
+            colWindowsSKU.DataPropertyName = "WindowsSKU";
+            colWindowsSKU.HeaderText = "Windows SKU";
+            colWindowsSKU.MinimumWidth = 6;
+            colWindowsSKU.Name = "colWindowsSKU";
+            colWindowsSKU.ReadOnly = true;
+            colWindowsSKU.Width = 115;
+            // 
+            // toolStrip2
+            // 
+            toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel2, tsRefreshVersion, tsCopyVersion, tsExcel, tsCols, tsConfig, tsViewBuildReference, tsUpdateBuildReference });
+            toolStrip2.Location = new System.Drawing.Point(0, 0);
+            toolStrip2.Name = "toolStrip2";
+            toolStrip2.Size = new System.Drawing.Size(1054, 27);
+            toolStrip2.TabIndex = 1;
+            toolStrip2.Text = "toolStrip2";
+            // 
+            // toolStripLabel2
+            // 
+            toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            toolStripLabel2.Name = "toolStripLabel2";
+            toolStripLabel2.Size = new System.Drawing.Size(74, 24);
+            toolStripLabel2.Text = "Version Info";
+            // 
+            // tsRefreshVersion
+            // 
+            tsRefreshVersion.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefreshVersion.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefreshVersion.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefreshVersion.Name = "tsRefreshVersion";
+            tsRefreshVersion.Size = new System.Drawing.Size(24, 24);
+            tsRefreshVersion.Text = "Refresh";
+            tsRefreshVersion.Click += TsRefreshVersion_Click;
+            // 
+            // tsCopyVersion
+            // 
+            tsCopyVersion.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopyVersion.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsCopyVersion.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopyVersion.Name = "tsCopyVersion";
+            tsCopyVersion.Size = new System.Drawing.Size(24, 24);
+            tsCopyVersion.Text = "Copy";
+            tsCopyVersion.Click += TsCopyVersion_Click;
+            // 
+            // tsExcel
+            // 
+            tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsExcel.Image = Properties.Resources.excel16x16;
+            tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcel.Name = "tsExcel";
+            tsExcel.Size = new System.Drawing.Size(24, 24);
+            tsExcel.Text = "Export Excel";
+            tsExcel.Click += TsExcel_Click;
+            // 
+            // tsCols
+            // 
+            tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCols.Image = Properties.Resources.Column_16x;
+            tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCols.Name = "tsCols";
+            tsCols.Size = new System.Drawing.Size(24, 24);
+            tsCols.Text = "Columns";
+            tsCols.Click += TsCols_Click;
+            // 
+            // tsConfig
+            // 
+            tsConfig.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsConfig.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { thresholdsToolStripMenuItem });
+            tsConfig.Image = Properties.Resources.SettingsOutline_16x;
+            tsConfig.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsConfig.Name = "tsConfig";
+            tsConfig.Size = new System.Drawing.Size(33, 24);
+            tsConfig.Text = "Config";
+            // 
+            // thresholdsToolStripMenuItem
+            // 
+            thresholdsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { sPBehindWarningToolStripMenuItem, sPBehindCriticalToolStripMenuItem, cUBehindWarningToolStripMenuItem, cUBehindCriticalToolStripMenuItem, daysUntilSupportEndsWarningToolStripMenuItem, daysUntilSupportEndsCriticalToolStripMenuItem, daysUntilMainstreamSupportEndsWarningToolStripMenuItem, daysUntilMainstreamSupportEndsCriticalToolStripMenuItem, buildReferenceAgeWarningThresholdToolStripMenuItem, buildReferenceAgeCriticalThresholdToolStripMenuItem, buildReferenceUpdateExclusionPeriodToolStripMenuItem, toolStripSeparator1, resetToDefaultToolStripMenuItem });
+            thresholdsToolStripMenuItem.Name = "thresholdsToolStripMenuItem";
+            thresholdsToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
+            thresholdsToolStripMenuItem.Text = "Thresholds";
+            // 
+            // sPBehindWarningToolStripMenuItem
+            // 
+            sPBehindWarningToolStripMenuItem.Name = "sPBehindWarningToolStripMenuItem";
+            sPBehindWarningToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            sPBehindWarningToolStripMenuItem.Tag = "GUISPBehindWarningThreshold";
+            sPBehindWarningToolStripMenuItem.Text = "SP Behind Warning";
+            sPBehindWarningToolStripMenuItem.Click += SetThreshold_Click;
+            // 
+            // sPBehindCriticalToolStripMenuItem
+            // 
+            sPBehindCriticalToolStripMenuItem.Name = "sPBehindCriticalToolStripMenuItem";
+            sPBehindCriticalToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            sPBehindCriticalToolStripMenuItem.Tag = "GUISPBehindCriticalThreshold";
+            sPBehindCriticalToolStripMenuItem.Text = "SP Behind Critical";
+            sPBehindCriticalToolStripMenuItem.Click += SetThreshold_Click;
+            // 
+            // cUBehindWarningToolStripMenuItem
+            // 
+            cUBehindWarningToolStripMenuItem.Name = "cUBehindWarningToolStripMenuItem";
+            cUBehindWarningToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            cUBehindWarningToolStripMenuItem.Tag = "GUICUBehindWarningThreshold";
+            cUBehindWarningToolStripMenuItem.Text = "CU Behind Warning";
+            cUBehindWarningToolStripMenuItem.Click += SetThreshold_Click;
+            // 
+            // cUBehindCriticalToolStripMenuItem
+            // 
+            cUBehindCriticalToolStripMenuItem.Name = "cUBehindCriticalToolStripMenuItem";
+            cUBehindCriticalToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            cUBehindCriticalToolStripMenuItem.Tag = "GUICUBehindCriticalThreshold";
+            cUBehindCriticalToolStripMenuItem.Text = "CU Behind Critical";
+            cUBehindCriticalToolStripMenuItem.Click += SetThreshold_Click;
+            // 
+            // daysUntilSupportEndsWarningToolStripMenuItem
+            // 
+            daysUntilSupportEndsWarningToolStripMenuItem.Name = "daysUntilSupportEndsWarningToolStripMenuItem";
+            daysUntilSupportEndsWarningToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            daysUntilSupportEndsWarningToolStripMenuItem.Tag = "GUIDaysUntilSupportEndsWarningThreshold";
+            daysUntilSupportEndsWarningToolStripMenuItem.Text = "Days Until Support Ends Warning";
+            daysUntilSupportEndsWarningToolStripMenuItem.Click += SetThreshold_Click;
+            // 
+            // daysUntilSupportEndsCriticalToolStripMenuItem
+            // 
+            daysUntilSupportEndsCriticalToolStripMenuItem.Name = "daysUntilSupportEndsCriticalToolStripMenuItem";
+            daysUntilSupportEndsCriticalToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            daysUntilSupportEndsCriticalToolStripMenuItem.Tag = "GUIDaysUntilSupportEndsCriticalThreshold";
+            daysUntilSupportEndsCriticalToolStripMenuItem.Text = "Days Until Support Ends Critical";
+            daysUntilSupportEndsCriticalToolStripMenuItem.Click += SetThreshold_Click;
+            // 
+            // daysUntilMainstreamSupportEndsWarningToolStripMenuItem
+            // 
+            daysUntilMainstreamSupportEndsWarningToolStripMenuItem.Name = "daysUntilMainstreamSupportEndsWarningToolStripMenuItem";
+            daysUntilMainstreamSupportEndsWarningToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            daysUntilMainstreamSupportEndsWarningToolStripMenuItem.Tag = "GUIDaysUntilMainstreamSupportEndsWarningThreshold";
+            daysUntilMainstreamSupportEndsWarningToolStripMenuItem.Text = "Days Until Mainstream Support Ends Warning";
+            daysUntilMainstreamSupportEndsWarningToolStripMenuItem.Click += SetThreshold_Click;
+            // 
+            // daysUntilMainstreamSupportEndsCriticalToolStripMenuItem
+            // 
+            daysUntilMainstreamSupportEndsCriticalToolStripMenuItem.Name = "daysUntilMainstreamSupportEndsCriticalToolStripMenuItem";
+            daysUntilMainstreamSupportEndsCriticalToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            daysUntilMainstreamSupportEndsCriticalToolStripMenuItem.Tag = "GUIDaysUntilMainstreamSupportEndsCriticalThreshold";
+            daysUntilMainstreamSupportEndsCriticalToolStripMenuItem.Text = "Days Until Mainstream Support Ends Critical";
+            daysUntilMainstreamSupportEndsCriticalToolStripMenuItem.Click += SetThreshold_Click;
+            // 
+            // buildReferenceAgeWarningThresholdToolStripMenuItem
+            // 
+            buildReferenceAgeWarningThresholdToolStripMenuItem.Name = "buildReferenceAgeWarningThresholdToolStripMenuItem";
+            buildReferenceAgeWarningThresholdToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            buildReferenceAgeWarningThresholdToolStripMenuItem.Tag = "GUIBuildReferenceAgeWarningThreshold";
+            buildReferenceAgeWarningThresholdToolStripMenuItem.Text = "Build Reference Age Warning Threshold";
+            buildReferenceAgeWarningThresholdToolStripMenuItem.Click += SetThreshold_Click;
+            // 
+            // buildReferenceAgeCriticalThresholdToolStripMenuItem
+            // 
+            buildReferenceAgeCriticalThresholdToolStripMenuItem.Name = "buildReferenceAgeCriticalThresholdToolStripMenuItem";
+            buildReferenceAgeCriticalThresholdToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            buildReferenceAgeCriticalThresholdToolStripMenuItem.Tag = "GUIBuildReferenceAgeCriticalThreshold";
+            buildReferenceAgeCriticalThresholdToolStripMenuItem.Text = "Build Reference Age Critical Threshold";
+            buildReferenceAgeCriticalThresholdToolStripMenuItem.Click += SetThreshold_Click;
+            // 
+            // buildReferenceUpdateExclusionPeriodToolStripMenuItem
+            // 
+            buildReferenceUpdateExclusionPeriodToolStripMenuItem.Name = "buildReferenceUpdateExclusionPeriodToolStripMenuItem";
+            buildReferenceUpdateExclusionPeriodToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            buildReferenceUpdateExclusionPeriodToolStripMenuItem.Tag = "GUIBuildReferenceUpdateExclusionPeriod";
+            buildReferenceUpdateExclusionPeriodToolStripMenuItem.Text = "Build Reference Update Exclusion Period";
+            buildReferenceUpdateExclusionPeriodToolStripMenuItem.ToolTipText = "Don't show a build reference is out of date warning if we have checked for updates in X days";
+            buildReferenceUpdateExclusionPeriodToolStripMenuItem.Click += SetThreshold_Click;
+            // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new System.Drawing.Size(311, 6);
+            // 
+            // resetToDefaultToolStripMenuItem
+            // 
+            resetToDefaultToolStripMenuItem.Name = "resetToDefaultToolStripMenuItem";
+            resetToDefaultToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            resetToDefaultToolStripMenuItem.Text = "Reset to Default";
+            resetToDefaultToolStripMenuItem.Click += ResetToDefaultToolStripMenuItem_Click;
+            // 
+            // tsViewBuildReference
+            // 
+            tsViewBuildReference.Image = Properties.Resources.Table_16x;
+            tsViewBuildReference.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsViewBuildReference.Name = "tsViewBuildReference";
+            tsViewBuildReference.Size = new System.Drawing.Size(113, 24);
+            tsViewBuildReference.Text = "Build Reference";
+            tsViewBuildReference.Click += TsViewBuildReference_Click;
+            // 
+            // tsUpdateBuildReference
+            // 
+            tsUpdateBuildReference.Image = Properties.Resources.CloudDownload_16x;
+            tsUpdateBuildReference.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsUpdateBuildReference.Name = "tsUpdateBuildReference";
+            tsUpdateBuildReference.Size = new System.Drawing.Size(154, 24);
+            tsUpdateBuildReference.Text = "Update Build Reference";
+            tsUpdateBuildReference.Click += TsUpdateBuildReference_Click;
+            // 
+            // toolStrip1
+            // 
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel1, tsRefreshHistory, tsCopyHistory, tsExcelHistory });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new System.Drawing.Size(1054, 27);
+            toolStrip1.TabIndex = 1;
+            toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripLabel1
+            // 
+            toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            toolStripLabel1.Name = "toolStripLabel1";
+            toolStripLabel1.Size = new System.Drawing.Size(47, 24);
+            toolStripLabel1.Text = "History";
+            // 
+            // tsRefreshHistory
+            // 
+            tsRefreshHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefreshHistory.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefreshHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefreshHistory.Name = "tsRefreshHistory";
+            tsRefreshHistory.Size = new System.Drawing.Size(24, 24);
+            tsRefreshHistory.Text = "Refresh";
+            tsRefreshHistory.Click += TsRefreshHistory_Click;
+            // 
+            // tsCopyHistory
+            // 
+            tsCopyHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopyHistory.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsCopyHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopyHistory.Name = "tsCopyHistory";
+            tsCopyHistory.Size = new System.Drawing.Size(24, 24);
+            tsCopyHistory.Text = "Copy";
+            tsCopyHistory.Click += TsCopyHistory_Click;
+            // 
+            // tsExcelHistory
+            // 
+            tsExcelHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsExcelHistory.Image = Properties.Resources.excel16x16;
+            tsExcelHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcelHistory.Name = "tsExcelHistory";
+            tsExcelHistory.Size = new System.Drawing.Size(24, 24);
+            tsExcelHistory.Text = "Export Excel";
+            tsExcelHistory.Click += TsExcelHistory_Click;
             // 
             // SQLPatching
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.splitContainer1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "SQLPatching";
-            this.Size = new System.Drawing.Size(1204, 870);
-            ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel1.PerformLayout();
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            this.splitContainer1.Panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
-            this.splitContainer1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvVersion)).EndInit();
-            this.toolStrip2.ResumeLayout(false);
-            this.toolStrip2.PerformLayout();
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            Controls.Add(splitContainer1);
+            Name = "SQLPatching";
+            Size = new System.Drawing.Size(1054, 652);
+            Load += SQLPatching_Load;
+            ((System.ComponentModel.ISupportInitialize)dgv).EndInit();
+            splitContainer1.Panel1.ResumeLayout(false);
+            splitContainer1.Panel1.PerformLayout();
+            splitContainer1.Panel2.ResumeLayout(false);
+            splitContainer1.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
+            splitContainer1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvVersion).EndInit();
+            toolStrip2.ResumeLayout(false);
+            toolStrip2.PerformLayout();
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            ResumeLayout(false);
         }
 
         #endregion
@@ -606,6 +719,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn NewProductUpdateLevel;
         private System.Windows.Forms.DataGridViewTextBoxColumn OldEdition;
         private System.Windows.Forms.DataGridViewTextBoxColumn NewEdition;
+        private System.Windows.Forms.ToolStripButton tsUpdateBuildReference;
         private System.Windows.Forms.DataGridViewTextBoxColumn colInstance;
         private System.Windows.Forms.DataGridViewTextBoxColumn colSQLVersion;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPatchDate;
@@ -626,5 +740,21 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colWindowsCaption;
         private System.Windows.Forms.DataGridViewTextBoxColumn colWindowsRelease;
         private System.Windows.Forms.DataGridViewTextBoxColumn colWindowsSKU;
+        private System.Windows.Forms.ToolStripButton tsViewBuildReference;
+        private System.Windows.Forms.ToolStripDropDownButton tsConfig;
+        private System.Windows.Forms.ToolStripMenuItem thresholdsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem sPBehindWarningToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem sPBehindCriticalToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cUBehindWarningToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cUBehindCriticalToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem daysUntilSupportEndsWarningToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem daysUntilSupportEndsCriticalToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem daysUntilMainstreamSupportEndsWarningToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem daysUntilMainstreamSupportEndsCriticalToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem resetToDefaultToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem buildReferenceAgeWarningThresholdToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem buildReferenceAgeCriticalThresholdToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem buildReferenceUpdateExclusionPeriodToolStripMenuItem;
     }
 }

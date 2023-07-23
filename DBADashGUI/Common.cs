@@ -391,5 +391,19 @@ namespace DBADashGUI
 
             return "[" + fullBlockPart + halfBlockPart + emptyBlockPart + "]";
         }
+
+        public static void SearchGoogle(string searchQuery)
+        {
+            var url = $"https://www.google.com/search?q={Uri.EscapeDataString(searchQuery)}";
+
+            try
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
     }
 }

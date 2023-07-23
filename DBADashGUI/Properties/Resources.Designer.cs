@@ -572,5 +572,23 @@ namespace DBADashGUI.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+
+        internal static System.Drawing.Bitmap CloudDownload_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("CloudDownload_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap WebURL_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("WebURL_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
