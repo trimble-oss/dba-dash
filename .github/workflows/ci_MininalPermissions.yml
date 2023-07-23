@@ -48,6 +48,12 @@ jobs:
           $version.ToString(3)
           Write-Output "BUILD_NUMBER=$($version.ToString(3))" >> $env:GITHUB_OUTPUT
 
+      - name: Get Build Reference
+        id: GetBuildReference
+        shell: powershell
+        run: | 
+                Invoke-WebRequest -Uri 'https://dataplat.github.io/assets/dbatools-buildref-index.json' -OutFile 'DBADashBuild\CLI\BuildReference.json'
+
       - name: Zip
         shell: powershell
         run: | 

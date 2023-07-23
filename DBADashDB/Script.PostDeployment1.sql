@@ -1897,4 +1897,10 @@ AND NOT EXISTS(SELECT 1
 	AND I.EngineEdition = 3 /* Enterprise */
 )
 
+UPDATE dbo.Instances 
+	SET ProductMinorVersion = TRY_CAST(PARSENAME(ProductVersion,3) AS INT),
+		ProductBuild= TRY_CAST(PARSENAME(ProductVersion,2) AS INT),
+		ProductRevision = TRY_CAST(PARSENAME(ProductVersion,1) AS INT)
+WHERE (ProductMinorVersion IS NULL OR ProductBuild IS NULL OR ProductRevision IS NULL)
+
 ALTER DATABASE [$(DatabaseName)] SET AUTO_UPDATE_STATISTICS_ASYNC ON WITH NO_WAIT

@@ -1,28 +1,72 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using DBADash;
+using DocumentFormat.OpenXml;
+using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI
 {
     internal static class Config
     {
-        private static readonly Lazy<int> _clientSummaryCacheDuration = new Lazy<int>(() => RepositorySettings.GetIntSetting("GUISummaryCacheDuration", Common.ConnectionString) ?? 60);
+        public static int ClientSummaryCacheDuration;
+        public static int DefaultCommandTimeout;
+        public static int SummaryCommandTimeout;
+        public static int DrivePerformanceMaxDrives;
+        public static int SPBehindWarningThreshold;
+        public static int SPBehindCriticalThreshold;
+        public static int CUBehindWarningThreshold;
+        public static int CUBehindCriticalThreshold;
+        public static int DaysUntilSupportEndsWarningThreshold;
+        public static int DaysUntilSupportEndsCriticalThreshold;
+        public static int DaysUntilMainstreamSupportEndsWarningThreshold;
+        public static int DaysUntilMainstreamSupportEndsCriticalThreshold;
+        public static int BuildReferenceAgeWarningThreshold;
+        public static int BuildReferenceAgeCriticalThreshold;
+        public static int BuildReferenceUpdateExclusionPeriod;
 
-        private static readonly Lazy<int> _defaultCommandTimeout = new Lazy<int>(() => RepositorySettings.GetIntSetting("GUIDefaultCommandTimeout", Common.ConnectionString) ?? 60);
+        static Config()
+        {
+            RefreshConfig();
+        }
 
-        private static readonly Lazy<int> _summaryCommandTimeout = new Lazy<int>(() => RepositorySettings.GetIntSetting("GUISummaryCommandTimeout", Common.ConnectionString) ?? _defaultCommandTimeout.Value);
+        public static void RefreshConfig()
+        {
+            Dictionary<string, object> settings = new();
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("Settings_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cn.Open();
+            using var rdr = cmd.ExecuteReader();
+            while (rdr.Read())
+            {
+                var setting = (string)rdr["SettingName"];
+                var value = rdr["SettingValue"].DBNullToNull();
+                settings.Add(setting, value);
+            }
+            ClientSummaryCacheDuration = settings.GetValueAsInt("GUISummaryCacheDuration", 60);
+            DefaultCommandTimeout = settings.GetValueAsInt("GUIDefaultCommandTimeout", 60);
+            SummaryCommandTimeout = settings.GetValueAsInt("GUISummaryCommandTimeout", DefaultCommandTimeout);
+            DrivePerformanceMaxDrives = settings.GetValueAsInt("GUIDrivePerformanceMaxDrives", 8);
+            SPBehindWarningThreshold = settings.GetValueAsInt("GUISPBehindWarningThreshold", 1);
+            SPBehindCriticalThreshold = settings.GetValueAsInt("GUISPBehindCriticalThreshold", 2);
+            CUBehindWarningThreshold = settings.GetValueAsInt("GUICUBehindWarningThreshold", 1);
+            CUBehindCriticalThreshold = settings.GetValueAsInt("GUICUBehindCriticalThreshold", 3);
+            DaysUntilMainstreamSupportEndsCriticalThreshold = settings.GetValueAsInt("GUIDaysUntilMainstreamSupportEndsCriticalThreshold", 0);
+            DaysUntilMainstreamSupportEndsWarningThreshold = settings.GetValueAsInt("GUIDaysUntilMainstreamSupportEndsWarningThreshold", 365);
+            DaysUntilSupportEndsCriticalThreshold = settings.GetValueAsInt("GUIDaysUntilSupportEndsCriticalThreshold", 0);
+            DaysUntilSupportEndsWarningThreshold = settings.GetValueAsInt("GUIDaysUntilSupportEndsWarningThreshold", 365);
+            BuildReferenceAgeWarningThreshold = settings.GetValueAsInt("GUIBuildReferenceAgeWarningThreshold", 45);
+            BuildReferenceAgeCriticalThreshold = settings.GetValueAsInt("GUIBuildReferenceAgeCriticalThreshold", 90);
+            BuildReferenceUpdateExclusionPeriod = settings.GetValueAsInt("GUIBuildReferenceUpdateExclusionPeriod", 2);
+        }
 
-        private static readonly Lazy<int> _drivePerformanceMaxDrives = new Lazy<int>(() => RepositorySettings.GetIntSetting("GUIDrivePerformanceMaxDrives", Common.ConnectionString) ?? 8);
-
-        public static int ClientSummaryCacheDuration => _clientSummaryCacheDuration.Value;
-
-        public static int DefaultCommandTimeout => _defaultCommandTimeout.Value;
-
-        public static int SummaryCommandTimeout => _summaryCommandTimeout.Value;
-
-        public static int DrivePerformanceMaxDrives => _drivePerformanceMaxDrives.Value;
+        public static int GetValueAsInt(object value, int defaultValue)
+        {
+            return int.TryParse(value?.ToString(), out var result) ? result : defaultValue;
+        }
     }
 }

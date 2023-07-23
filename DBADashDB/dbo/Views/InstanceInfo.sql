@@ -98,7 +98,9 @@ SELECT I.InstanceID,
             THEN 150 ELSE TRY_CAST(I.ProductMajorVersion AS INT)*10 END AS MaxSupportedCompatibilityLevel,
     I.InstanceDisplayName,
     I.ShowInSummary,
-    I.InstanceGroupName
+    I.InstanceGroupName,
+    I.ProductMinorVersion,
+    I.ProductRevision
 FROM dbo.Instances I
 LEFT JOIN dbo.DBADashAgent A ON I.CollectAgentID = A.DBADashAgentID
 CROSS APPLY dbo.SQLVersionName(I.EditionID,I.ProductVersion) v

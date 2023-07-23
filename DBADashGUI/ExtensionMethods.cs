@@ -232,7 +232,7 @@ namespace DBADashGUI
             Process.Start(psi);
         }
 
-        public static List<ISelectable> ToSelectableList(this DataGridViewColumnCollection columns)=> columns.Cast<DataGridViewColumn>()
+        public static List<ISelectable> ToSelectableList(this DataGridViewColumnCollection columns) => columns.Cast<DataGridViewColumn>()
                 .Select(column => new SelectableColumn(column) as ISelectable)
                 .ToList();
 
@@ -249,6 +249,7 @@ namespace DBADashGUI
                 }
             }
         }
+
         public static void ApplyVisibility(this Dictionary<string, ColumnMetaData> metrics, List<ISelectable> selectables) => selectables.Where(s => metrics.ContainsKey(s.Name))
                 .ToList()
                 .ForEach(s => metrics[s.Name].IsVisible = s.IsVisible);
@@ -265,10 +266,10 @@ namespace DBADashGUI
             return frm.DialogResult;
         }
 
-        public static double RoundUpToSignificantFigures(this double num, int n=1)
+        public static double RoundUpToSignificantFigures(this double num, int n = 1)
         {
             if (num == 0) return 0;
-            
+
             double d = Math.Ceiling(Math.Log10(Math.Abs(num)));
             int power = n - (int)d;
 
@@ -280,6 +281,27 @@ namespace DBADashGUI
         public static List<ISelectable> ToSelectableList(this List<string> list)
         {
             return list.Select(s => new SelectableString(s) as ISelectable).ToList();
+        }
+
+        public static object DBNullToNull(this object obj)
+        {
+            return obj == DBNull.Value ? null : obj;
+        }
+
+        public static int GetValueAsInt(this Dictionary<string, object> dict, string key, int defaultValue)
+        {
+            // Check if the key exists
+            if (dict.TryGetValue(key, out object value))
+            {
+                // Try to cast the value to an integer
+                if (value is int intValue)
+                {
+                    return intValue;
+                }
+            }
+
+            // If the key does not exist or the value is not an integer, return the default value
+            return defaultValue;
         }
     }
 }

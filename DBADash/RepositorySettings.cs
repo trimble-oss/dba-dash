@@ -29,6 +29,23 @@ namespace DBADash
             }
         }
 
+        public static void UpdateSetting(string SettingName, object SettingValue, string connectionString)
+        {
+            using var cn = new SqlConnection(connectionString);
+            using var cmd = new SqlCommand("Settings_Upd", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("SettingName", SettingName);
+            if (SettingValue == null)
+            {
+                cmd.Parameters.AddWithValue("SettingValue", DBNull.Value);
+            }
+            else
+            {
+                cmd.Parameters.AddWithValue("SettingValue", SettingValue);
+            }
+            cn.Open();
+            cmd.ExecuteNonQuery();
+        }
+
         public static int? GetIntSetting(string SettingName, string connectionString)
         {
             return (int?)GetSetting(SettingName, connectionString);

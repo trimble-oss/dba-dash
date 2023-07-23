@@ -217,6 +217,40 @@ namespace DBADash
                     }
                 }
             }
+
+            if (data.Tables.Contains("ServerProperties"))
+            {
+                var dtServerProperties = data.Tables["ServerProperties"];
+                if (dtServerProperties.Columns.Contains("ProductMajorVersion")) // Remove old string columns
+                {
+                    dtServerProperties.Columns.Remove("ProductMajorVersion");
+                    dtServerProperties.Columns.Remove("ProductBuild");
+                }
+
+                dtServerProperties.Columns.Add("ProductMajorVersion", typeof(int));
+                dtServerProperties.Columns.Add("ProductMinorVersion", typeof(int));
+                dtServerProperties.Columns.Add("ProductBuild", typeof(int));
+                dtServerProperties.Columns.Add("ProductRevision", typeof(int));
+
+                foreach (DataRow row in dtServerProperties.Rows)
+                {
+                    var sVersion = row["ProductVersion"] as string;
+                    if (string.IsNullOrEmpty(sVersion)) continue;
+                    try
+                    {
+                        var version = new Version(sVersion);
+                        row["ProductMajorVersion"] = version.Major;
+                        row["ProductMinorVersion"] = version.Minor;
+                        row["ProductBuild"] = version.Build;
+                        row["ProductRevision"] = version.Revision;
+                        continue;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Error parsing version info");
+                    }
+                }
+            }
         }
 
         public void Update()

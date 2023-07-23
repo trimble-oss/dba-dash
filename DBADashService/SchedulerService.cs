@@ -145,6 +145,30 @@ namespace DBADashService
                 Log.Error(ex, "Error scheduling collections.  Please check configuration.");
                 throw;
             }
+
+            try
+            {
+                UpdateBuildReferenceFromFile().Wait();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error updating build reference");
+            }
+        }
+
+        public async Task UpdateBuildReferenceFromFile()
+        {
+            var appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            var filePath = Path.Combine(appDirectory, "BuildReference.json");
+            if (!File.Exists(filePath)) return;
+            foreach (var d in config.AllDestinations.Where(cn => cn.Type == ConnectionType.SQL))
+            {
+                Log.Information("Updating BuildReference {connection}", d.ConnectionForPrint);
+                var jsonBuildReference = await File.ReadAllTextAsync(filePath);
+                await BuildReference.UpdateBuildReference(d.ConnectionString, jsonBuildReference);
+            }
+            Log.Debug("Remove {filePath}", filePath);
+            File.Delete(filePath);
         }
 
         public void Stop()
