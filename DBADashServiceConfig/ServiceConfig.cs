@@ -1155,10 +1155,10 @@ namespace DBADashServiceConfig
 
         private void SetCellsReadOnly(int row, ConnectionType connectionType)
         {
-            if (connectionType == ConnectionType.SQL) return;
             foreach (DataGridViewColumn col in dgvConnections.Columns)
             {
-                var isReadOnly = !(col.DataPropertyName == "WriteToSecondaryDestinations" || col.Name is "Delete" or "Edit");
+                var isReadOnly = connectionType != ConnectionType.SQL && !(col.DataPropertyName == "WriteToSecondaryDestinations" || col.Name is "Delete" or "Edit");
+
                 dgvConnections.Rows[row].Cells[col.Index].ReadOnly = isReadOnly;
                 dgvConnections.Rows[row].Cells[col.Index].Style.BackColor = isReadOnly ? Color.Silver : Color.White;
             }
