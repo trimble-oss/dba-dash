@@ -70,6 +70,16 @@ SET @ExcludeSessionID = REPLACE(@ExcludeSessionID,' ','')
 SET @SessionID = REPLACE(@SessionID,' ','')
 SET @Text = REPLACE(REPLACE(REPLACE(@Text,'[','[[]'),'_','[_]'),'%','[%]') -- Like encode input
 
+DECLARE @TimestampMins INT
+DECLARE @TimestampOffset INT
+IF @GroupBy LIKE 'timestamp%'
+BEGIN
+	SELECT	@TimestampMins = PARSENAME(@GroupBy,2), 
+			@TimestampOffset = PARSENAME(@GroupBy,1),
+			@GroupBy = 'timestamp'
+END
+
+
 DECLARE @GroupSQL NVARCHAR(MAX) = CASE @GroupBy WHEN 'ConnectionID' THEN 'I.ConnectionID' 
 												WHEN 'client_hostname' THEN 'SQ.client_hostname'  
 												WHEN 'username' THEN 'SQ.username'
@@ -81,6 +91,7 @@ DECLARE @GroupSQL NVARCHAR(MAX) = CASE @GroupBy WHEN 'ConnectionID' THEN 'I.Conn
 												WHEN 'session_id' THEN 'SQ.session_id'
 												WHEN 'InstanceDisplayName' THEN 'I.InstanceDisplayName' 
 												WHEN 'EventType' THEN 'SQ.event_type'
+												WHEN 'timestamp' THEN 'DATEADD(MINUTE, (DATEDIFF(MINUTE, 0, DATEADD(mi,@TimestampOffset,SQ.timestamp)) / @TimeStampMins) * @TimeStampMins, 0)'
 												ELSE 'InstanceDisplayName' END
 IF @Top<=0
 BEGIN
@@ -143,7 +154,7 @@ AND timestamp< @ToDate
 ' + CASE WHEN @EventType IS NULL THEN '' ELSE 'AND SQ.event_type = @EventType' END + '
 ' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND I.ShowInSummary=1' END + '
 GROUP BY ' + @GroupSQL +'
-ORDER BY SUM(Duration) DESC'
+ORDER BY ' + CASE WHEN @GroupBy ='timestamp' THEN 'Grp DESC' ELSE 'SUM(Duration) DESC' END
 
 SET @SQL = REPLACE(@SQL,'{Metric}',CASE WHEN @Metric = 'cpu_time' THEN 'cpu_time' ELSE 'Duration' END)
 
@@ -182,7 +193,9 @@ EXEC sp_executesql @SQL,N'@Instances IDs READONLY,
 						@LogicalReadsTo BIGINT,
 						@WritesFrom BIGINT,
 						@WritesTo BIGINT,
-						@EventType SYSNAME',
+						@EventType SYSNAME,
+						@TimestampMins INT,
+						@TimestampOffset INT',
 						@Instances,
 						@ObjectName,
 						@ClientHostName,
@@ -216,4 +229,6 @@ EXEC sp_executesql @SQL,N'@Instances IDs READONLY,
 						@LogicalReadsTo,
 						@WritesFrom,
 						@WritesTo,
-						@EventType
+						@EventType,
+						@TimestampMins,
+						@TimestampOffset
