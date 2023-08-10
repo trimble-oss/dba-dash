@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -17,10 +18,10 @@ namespace DBADashGUI
             InitializeComponent();
         }
 
-        private List<Int32> InstanceIDs;
+        private List<int> InstanceIDs;
         private string groupBy = "InstanceDisplayName";
         private string _db = "";
-        private bool savedLayoutLoaded = false;
+        private bool savedLayoutLoaded;
 
         public string DBName
         {
@@ -47,36 +48,44 @@ namespace DBADashGUI
         private long DurationFilterFrom => long.TryParse(txtDurationFrom.Text, out long value) ? value : -1;
         private long DurationFilterTo => long.TryParse(txtDurationTo.Text, out long value) ? value : long.MaxValue;
 
+        private DateTime FromLocal = DateTime.MinValue;
+        private DateTime ToLocal = DateTime.MaxValue;
+
+        private DateTime From => DateRange.FromUTC > FromLocal ? DateRange.FromUTC : FromLocal;
+        private DateTime To => DateRange.ToUTC < ToLocal ? DateRange.ToUTC : ToLocal;
+
         private bool IsFiltered() => txtText.Text.Length > 0 ||
-                  txtClient.Text.Length > 0 ||
-                  txtDatabase.Text.Length > 0 ||
-                  txtInstance.Text.Length > 0 ||
-                  txtObject.Text.Length > 0 ||
-                  txtUser.Text.Length > 0 ||
-                  txtApp.Text.Length > 0 ||
-                  txtResult.Text.Length > 0 ||
-                  txtSessionID.Text.Length > 0 ||
-                  txtExcludeText.Text.Length > 0 ||
-                  txtExcludeClient.Text.Length > 0 ||
-                  txtExcludeDatabase.Text.Length > 0 ||
-                  txtExcludeInstance.Text.Length > 0 ||
-                  txtExcludeObject.Text.Length > 0 ||
-                  txtExcludeUser.Text.Length > 0 ||
-                  txtExcludeApp.Text.Length > 0 ||
-                  txtExcludeResult.Text.Length > 0 ||
-                  txtExcludeSessionID.Text.Length > 0 ||
-                  txtDurationFrom.Text.Length > 0 ||
-                  txtDurationTo.Text.Length > 0 ||
-                  txtPhysicalReadsFrom.Text.Length > 0 ||
-                  txtPhysicalReadsTo.Text.Length > 0 ||
-                  txtLogicalReadsFrom.Text.Length > 0 ||
-                  txtLogicalReadsTo.Text.Length > 0 ||
-                  txtWritesFrom.Text.Length > 0 ||
-                  txtWritesTo.Text.Length > 0 ||
-                  txtCPUFrom.Text.Length > 0 ||
-                  txtCPUTo.Text.Length > 0 ||
-                  sqlbatchcompletedToolStripMenuItem.Checked != rpccompletedToolStripMenuItem.Checked
-                  ;
+                                     txtClient.Text.Length > 0 ||
+                                     txtDatabase.Text.Length > 0 ||
+                                     txtInstance.Text.Length > 0 ||
+                                     txtObject.Text.Length > 0 ||
+                                     txtUser.Text.Length > 0 ||
+                                     txtApp.Text.Length > 0 ||
+                                     txtResult.Text.Length > 0 ||
+                                     txtSessionID.Text.Length > 0 ||
+                                     txtExcludeText.Text.Length > 0 ||
+                                     txtExcludeClient.Text.Length > 0 ||
+                                     txtExcludeDatabase.Text.Length > 0 ||
+                                     txtExcludeInstance.Text.Length > 0 ||
+                                     txtExcludeObject.Text.Length > 0 ||
+                                     txtExcludeUser.Text.Length > 0 ||
+                                     txtExcludeApp.Text.Length > 0 ||
+                                     txtExcludeResult.Text.Length > 0 ||
+                                     txtExcludeSessionID.Text.Length > 0 ||
+                                     txtDurationFrom.Text.Length > 0 ||
+                                     txtDurationTo.Text.Length > 0 ||
+                                     txtPhysicalReadsFrom.Text.Length > 0 ||
+                                     txtPhysicalReadsTo.Text.Length > 0 ||
+                                     txtLogicalReadsFrom.Text.Length > 0 ||
+                                     txtLogicalReadsTo.Text.Length > 0 ||
+                                     txtWritesFrom.Text.Length > 0 ||
+                                     txtWritesTo.Text.Length > 0 ||
+                                     txtCPUFrom.Text.Length > 0 ||
+                                     txtCPUTo.Text.Length > 0 ||
+                                     FromLocal != DateTime.MinValue ||
+                                     ToLocal != DateTime.MaxValue ||
+                                     sqlbatchcompletedToolStripMenuItem.Checked !=
+                                     rpccompletedToolStripMenuItem.Checked;
 
         public void SetFilterFormatting()
         {
@@ -91,18 +100,24 @@ namespace DBADashGUI
             SetFilterFormatting(lblObject, lblIncludeObject, lblExcludeObject, txtObject, txtExcludeObject);
             SetFilterFormatting(lblResult, lblIncludeResult, lblExcludeResult, txtResult, txtExcludeResult);
             SetFilterFormatting(lblUser, lblIncludeUser, lblExcludeUser, txtUser, txtExcludeUser);
-            SetFilterFormatting(lblSessionID, lblIncludeSessionID, lblExcludeSessionID, txtSessionID, txtExcludeSessionID);
+            SetFilterFormatting(lblSessionID, lblIncludeSessionID, lblExcludeSessionID, txtSessionID,
+                txtExcludeSessionID);
             SetFilterFormatting(lblDuration, lblDurationFrom, lblDurationTo, txtDurationFrom, txtDurationTo);
             SetFilterFormatting(lblCPU, lblCPUFrom, lblCPUTo, txtCPUFrom, txtCPUTo);
-            SetFilterFormatting(lblLogicalReads, lblLogicalReadsFrom, lblLogicalReadsTo, txtLogicalReadsFrom, txtLogicalReadsTo);
-            SetFilterFormatting(lblPhysicalReads, lblPhysicalReadsFrom, lblPhysicalReadsTo, txtPhysicalReadsFrom, txtPhysicalReadsTo);
+            SetFilterFormatting(lblLogicalReads, lblLogicalReadsFrom, lblLogicalReadsTo, txtLogicalReadsFrom,
+                txtLogicalReadsTo);
+            SetFilterFormatting(lblPhysicalReads, lblPhysicalReadsFrom, lblPhysicalReadsTo, txtPhysicalReadsFrom,
+                txtPhysicalReadsTo);
             SetFilterFormatting(lblWrites, lblWritesFrom, lblWritesTo, txtWritesFrom, txtWritesTo);
-            lblEventType.Font = sqlbatchcompletedToolStripMenuItem.Checked == rpccompletedToolStripMenuItem.Checked ? regularFont : boldFont;
+            lblEventType.Font = sqlbatchcompletedToolStripMenuItem.Checked == rpccompletedToolStripMenuItem.Checked
+                ? regularFont
+                : boldFont;
             sqlbatchcompletedToolStripMenuItem.Font = regularFont;
             rpccompletedToolStripMenuItem.Font = regularFont;
         }
 
-        private void SetFilterFormatting(ToolStripMenuItem rootMnu, ToolStripMenuItem includeMnu, ToolStripMenuItem excludeMnu, ToolStripTextBox includeTxt, ToolStripTextBox excludeTxt)
+        private void SetFilterFormatting(ToolStripMenuItem rootMnu, ToolStripMenuItem includeMnu,
+            ToolStripMenuItem excludeMnu, ToolStripTextBox includeTxt, ToolStripTextBox excludeTxt)
         {
             var boldFont = new Font(tsFilter.Font, FontStyle.Bold);
             var regularFont = new Font(tsFilter.Font, FontStyle.Regular);
@@ -145,6 +160,7 @@ namespace DBADashGUI
             txtWritesTo.Text = "";
             rpccompletedToolStripMenuItem.Checked = false;
             sqlbatchcompletedToolStripMenuItem.Checked = false;
+            ResetTime();
             if (_db.Length > 0)
             {
                 groupBy = "object_name";
@@ -157,6 +173,7 @@ namespace DBADashGUI
             {
                 groupBy = "InstanceDisplayName";
             }
+
             SelectGroupBy();
         }
 
@@ -165,15 +182,19 @@ namespace DBADashGUI
             return Task<DataTable>.Factory.StartNew(() =>
             {
                 using (var cn = new SqlConnection(Common.ConnectionString))
-                using (var cmd = new SqlCommand("dbo.SlowQueriesSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout })
+                using (var cmd = new SqlCommand("dbo.SlowQueriesSummary_Get", cn)
+                {
+                    CommandType = CommandType.StoredProcedure,
+                    CommandTimeout = Config.DefaultCommandTimeout
+                })
                 using (var da = new SqlDataAdapter(cmd))
                 {
                     cn.Open();
 
                     cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                    cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                    cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                    cmd.Parameters.AddWithValue("GroupBy", groupBy);
+                    cmd.Parameters.AddWithValue("FromDate", From);
+                    cmd.Parameters.AddWithValue("ToDate", To);
+                    cmd.Parameters.AddWithValue("GroupBy", groupBy.Replace("{UTCOffset}", DateHelper.UtcOffset.ToString()));
                     cmd.Parameters.AddStringIfNotNullOrEmpty("ClientHostName", txtClient.Text);
                     cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceDisplayName", txtInstance.Text);
                     cmd.Parameters.AddStringIfNotNullOrEmpty("ClientAppName", txtApp.Text);
@@ -198,42 +219,52 @@ namespace DBADashGUI
                     {
                         cmd.Parameters.AddWithValue("DurationFromMs", Convert.ToInt64(txtDurationFrom.Text));
                     }
+
                     if (txtDurationTo.Text.Length > 0)
                     {
                         cmd.Parameters.AddWithValue("DurationToMs", Convert.ToInt64(txtDurationTo.Text));
                     }
+
                     if (txtCPUFrom.Text.Length > 0)
                     {
                         cmd.Parameters.AddWithValue("CPUFromMs", Convert.ToInt64(txtCPUFrom.Text));
                     }
+
                     if (txtCPUTo.Text.Length > 0)
                     {
                         cmd.Parameters.AddWithValue("CPUToMs", Convert.ToInt64(txtCPUTo.Text));
                     }
+
                     if (txtPhysicalReadsFrom.Text.Length > 0)
                     {
                         cmd.Parameters.AddWithValue("PhysicalReadsFrom", Convert.ToInt64(txtPhysicalReadsFrom.Text));
                     }
+
                     if (txtPhysicalReadsTo.Text.Length > 0)
                     {
                         cmd.Parameters.AddWithValue("PhysicalReadsTo", Convert.ToInt64(txtPhysicalReadsTo.Text));
                     }
+
                     if (txtLogicalReadsFrom.Text.Length > 0)
                     {
                         cmd.Parameters.AddWithValue("LogicalReadsFrom", Convert.ToInt64(txtLogicalReadsFrom.Text));
                     }
+
                     if (txtLogicalReadsTo.Text.Length > 0)
                     {
                         cmd.Parameters.AddWithValue("LogicalReadsTo", Convert.ToInt64(txtLogicalReadsTo.Text));
                     }
+
                     if (txtWritesFrom.Text.Length > 0)
                     {
                         cmd.Parameters.AddWithValue("WritesFrom", Convert.ToInt64(txtWritesFrom.Text));
                     }
+
                     if (txtWritesTo.Text.Length > 0)
                     {
                         cmd.Parameters.AddWithValue("WritesTo", Convert.ToInt64(txtWritesTo.Text));
                     }
+
                     if (sqlbatchcompletedToolStripMenuItem.Checked && !rpccompletedToolStripMenuItem.Checked)
                     {
                         cmd.Parameters.AddWithValue("Eventtype", "sql_batch_completed");
@@ -242,6 +273,7 @@ namespace DBADashGUI
                     {
                         cmd.Parameters.AddWithValue("EventType", "rpc_completed");
                     }
+
                     int top = Convert.ToInt32(tsTop.Tag);
                     cmd.Parameters.AddWithValue("Top", top);
                     cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
@@ -268,6 +300,7 @@ namespace DBADashGUI
                 LoadSavedLayout();
                 savedLayoutLoaded = true;
             }
+
             SetFilterFormatting();
             dgvSummary.Columns[0].Frozen = Common.FreezeKeyColumn;
             dgvSlow.DataSource = null;
@@ -292,6 +325,7 @@ namespace DBADashGUI
                             // scrollbars are missing in this situation so this is a workaround to resolve it
                             dgvSummary.Columns[0].Width = dgvSummary.Width / 2;
                         }
+
                         dgvSummary.DataSource = dt;
 
                         dgvSummary.Visible = true;
@@ -309,13 +343,13 @@ namespace DBADashGUI
             var boldFont = new Font(tsTop.Font, FontStyle.Bold);
             var regularFont = new Font(tsTop.Font, FontStyle.Regular);
             tsSummary.Invoke(() =>
-            {
-                tsTop.Font = Convert.ToInt32(tsTop.Tag) == RowCount ? boldFont : regularFont;
-                foreach (ToolStripMenuItem mnu in tsTop.DropDownItems)
                 {
-                    mnu.Font = tsTop.Tag == mnu.Tag ? boldFont : regularFont;
+                    tsTop.Font = Convert.ToInt32(tsTop.Tag) == RowCount ? boldFont : regularFont;
+                    foreach (ToolStripMenuItem mnu in tsTop.DropDownItems)
+                    {
+                        mnu.Font = tsTop.Tag == mnu.Tag ? boldFont : regularFont;
+                    }
                 }
-            }
             );
         }
 
@@ -325,6 +359,39 @@ namespace DBADashGUI
             groupBy = (string)selected.Tag;
             SelectGroupBy();
             RefreshData();
+        }
+
+        private void TimeCustomToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var top = Convert.ToInt32(tsTop.Tag);
+            var grouping = (int)(DateRange.TimeSpan.TotalMinutes / top);
+            grouping = grouping switch
+            {
+                < 5 => 5,
+                < 10 => 10,
+                < 20 => 20,
+                < 30 => 30,
+                < 60 => 60,
+                < 120 => 120,
+                < 240 => 240,
+                < 720 => 720,
+                _ => 1440,
+            };
+            var groupingInput = grouping.ToString(CultureInfo.InvariantCulture);
+            if (CommonShared.ShowInputDialog(ref groupingInput, "Enter a grouping value in minutes") == DialogResult.OK)
+            {
+                if (int.TryParse(groupingInput, out grouping))
+                {
+                    groupBy = "timestamp." + grouping.ToString() + "." + DateHelper.UtcOffset;
+                    timeCustomToolStripMenuItem.Tag = groupBy;
+                    SelectGroupBy();
+                    RefreshData();
+                }
+                else
+                {
+                    MessageBox.Show("Invalid input", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
 
         private void SelectGroupBy()
@@ -390,6 +457,15 @@ namespace DBADashGUI
                         sqlbatchcompletedToolStripMenuItem.Checked = selectedGroupValue == "sql_batch_completed";
                         rpccompletedToolStripMenuItem.Checked = selectedGroupValue == "rpc_completed";
                     }
+                    else if (groupBy.StartsWith("timestamp"))
+                    {
+                        var mins = int.Parse(groupBy.Split(".")[1]);
+
+                        FromLocal = Convert.ToDateTime(row["Grp"]).AddMinutes(-DateHelper.UtcOffset);
+                        ToLocal = FromLocal.AddMinutes(mins);
+                        timeToolStripMenuItem.Text = $"Time {FromLocal.ToAppTimeZone()} to {ToLocal.ToAppTimeZone()}";
+                        timeToolStripMenuItem.Enabled = true;
+                    }
                     else
                     {
                         throw new Exception($"Invalid group by: {groupBy}");
@@ -427,6 +503,7 @@ namespace DBADashGUI
                     {
                         groupBy = "Result";
                     }
+
                     SelectGroupBy();
                     RefreshData();
                 }
@@ -485,8 +562,8 @@ namespace DBADashGUI
 
         private void SlowQueries_Load(object sender, EventArgs e)
         {
-            Common.StyleGrid(ref dgvSummary);
-            Common.StyleGrid(ref dgvSlow);
+            CommonShared.StyleGrid(ref dgvSummary);
+            CommonShared.StyleGrid(ref dgvSlow);
             SelectGroupBy();
         }
 
@@ -496,22 +573,24 @@ namespace DBADashGUI
             RefreshData();
         }
 
-        private DataTable GetSlowQueriesDetail(long durationFrom = -1, long durationTo = -1, long cpuFrom = -1, long cpuTo = long.MaxValue, bool failed = false)
+        private DataTable GetSlowQueriesDetail(long durationFrom = -1, long durationTo = -1, long cpuFrom = -1,
+            long cpuTo = long.MaxValue, bool failed = false)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.SlowQueriesDetail_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var cmd = new SqlCommand("dbo.SlowQueriesDetail_Get", cn)
+            { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                 cmd.Parameters.AddWithValue("Top", pageSize);
                 if (failed)
                 {
                     cmd.Parameters.AddWithValue("ResultFailed", true);
                 }
 
+                DateTime from = From;
+                DateTime to = To;
                 string displayName = txtInstance.Text;
                 string client = txtClient.Text;
                 string user = txtUser.Text;
@@ -530,6 +609,7 @@ namespace DBADashGUI
                 {
                     eventType = "rpc_completed";
                 }
+
                 if (groupBy == "InstanceDisplayName")
                 {
                     displayName = selectedGroupValue;
@@ -570,15 +650,27 @@ namespace DBADashGUI
                 {
                     eventType = selectedGroupValue;
                 }
+                else if (groupBy.StartsWith("timestamp"))
+                {
+                    var mins = int.Parse(groupBy.Split(".")[1]);
+
+                    var dateGroupFrom = Convert.ToDateTime(selectedGroupValue).AddMinutes(-DateHelper.UtcOffset);
+                    var dateGroupTo = dateGroupFrom.AddMinutes(mins);
+                    from = dateGroupFrom > From ? dateGroupFrom : From;
+                    to = dateGroupTo < To ? dateGroupTo : To;
+                }
                 else
                 {
                     throw new Exception($"Invalid group by: {groupBy}");
                 }
+
                 long cpuFromMs = Math.Max(cpuFrom, CPUFilterFrom);
                 long cpuToMs = Math.Min(cpuTo, CPUFilterTo);
                 long durationFromMs = Math.Max(durationFrom, DurationFilterFrom);
                 long durationToMs = Math.Min(durationTo, DurationFilterTo);
 
+                cmd.Parameters.AddWithValue("FromDate", from);
+                cmd.Parameters.AddWithValue("ToDate", to);
                 cmd.Parameters.AddIfGreaterThanZero("CPUFromMs", cpuFromMs);
                 cmd.Parameters.AddIfLessThanMaxValue("CPUToMs", cpuToMs);
                 cmd.Parameters.AddIfGreaterThanZero("DurationFromMs", durationFromMs);
@@ -606,26 +698,32 @@ namespace DBADashGUI
                 {
                     cmd.Parameters.AddWithValue("PhysicalReadsFrom", Convert.ToInt64(txtPhysicalReadsFrom.Text));
                 }
+
                 if (txtPhysicalReadsTo.Text.Length > 0)
                 {
                     cmd.Parameters.AddWithValue("PhysicalReadsTo", Convert.ToInt64(txtPhysicalReadsTo.Text));
                 }
+
                 if (txtLogicalReadsFrom.Text.Length > 0)
                 {
                     cmd.Parameters.AddWithValue("LogicalReadsFrom", Convert.ToInt64(txtLogicalReadsFrom.Text));
                 }
+
                 if (txtLogicalReadsTo.Text.Length > 0)
                 {
                     cmd.Parameters.AddWithValue("LogicalReadsTo", Convert.ToInt64(txtLogicalReadsTo.Text));
                 }
+
                 if (txtWritesFrom.Text.Length > 0)
                 {
                     cmd.Parameters.AddWithValue("WritesFrom", Convert.ToInt64(txtWritesFrom.Text));
                 }
+
                 if (txtWritesTo.Text.Length > 0)
                 {
                     cmd.Parameters.AddWithValue("WritesTo", Convert.ToInt64(txtWritesTo.Text));
                 }
+
                 cmd.Parameters.AddStringIfNotNullOrEmpty("EventType", eventType);
                 var dt = new DataTable();
                 da.Fill(dt);
@@ -649,16 +747,18 @@ namespace DBADashGUI
                     r["text_trunc"] = txt.Length > 10000 ? txt[..10000] : txt;
                 }
             }
+
             DateHelper.ConvertUTCToAppTimeZone(ref dt);
             if (dt.Rows.Count == pageSize)
             {
-                lblPageSize.Text = string.Format("Top {0} rows", pageSize);
+                lblPageSize.Text = $"Top {pageSize} rows";
                 lblPageSize.Visible = true;
             }
             else
             {
                 lblPageSize.Visible = false;
             }
+
             dgvSlow.AutoGenerateColumns = false;
 
             dgvSlow.DataSource = dt;
@@ -690,7 +790,7 @@ namespace DBADashGUI
                 DateTime timestamp = Convert.ToDateTime(row["timestamp"]);
                 if (dgvSlow.Columns[e.ColumnIndex] == colText)
                 {
-                    string title = "SPID: " + sessionID + ", " + timestamp.ToString();
+                    string title = "SPID: " + sessionID + ", " + timestamp.ToString(CultureInfo.CurrentCulture);
                     Common.ShowCodeViewer((string)row["Text"], title);
                 }
                 else if (dgvSlow.Columns[e.ColumnIndex] == colSessionID)
@@ -735,8 +835,9 @@ namespace DBADashGUI
             }
             else
             {
-                tsTop.Text = "Top " + ts.Tag.ToString();
+                tsTop.Text = "Top " + ts.Tag;
             }
+
             tsTop.Tag = ts.Tag;
             RefreshData();
         }
@@ -826,7 +927,9 @@ namespace DBADashGUI
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var r = dgvSlow.Rows[idx];
-                var status = Convert.ToString(r.Cells["Result"].Value) == "0 - OK" ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Critical;
+                var status = Convert.ToString(r.Cells["Result"].Value) == "0 - OK"
+                    ? DBADashStatus.DBADashStatusEnum.OK
+                    : DBADashStatus.DBADashStatusEnum.Critical;
                 r.Cells["Result"].SetStatusColor(status);
             }
         }
@@ -849,7 +952,8 @@ namespace DBADashGUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error loading saved view\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error loading saved view\n" + ex.Message, "Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
 
@@ -893,18 +997,22 @@ namespace DBADashGUI
                 SlowQueryDetailSavedView saved = SlowQueryDetailSavedView.GetDefaultSavedView();
                 if (saved != null)
                 {
-                    if (MessageBox.Show("Remove saved layout?", "Reset", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    if (MessageBox.Show("Remove saved layout?", "Reset", MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Question) == DialogResult.Yes)
                     {
                         saved.Delete();
                         resetLayoutToolStripMenuItem.Enabled = false;
                         loadSavedToolStripMenuItem.Enabled = false;
-                        MessageBox.Show("The application defaults will be used the next time the application is started", "Reset", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show(
+                            "The application defaults will be used the next time the application is started", "Reset",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error deleting saved view\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error deleting saved view\n" + ex.Message, "Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
 
@@ -913,6 +1021,20 @@ namespace DBADashGUI
             var item = (ToolStripMenuItem)sender;
             tsMetric.CheckSingleItem(item);
             tsMetric.Text = item.Text;
+            RefreshData();
+        }
+
+        private void ResetTime()
+        {
+            FromLocal = DateTime.MinValue;
+            ToLocal = DateTime.MaxValue;
+            timeToolStripMenuItem.Text = "Time";
+            timeToolStripMenuItem.Enabled = false;
+        }
+
+        private void TimeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ResetTime();
             RefreshData();
         }
     }

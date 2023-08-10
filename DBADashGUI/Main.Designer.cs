@@ -426,7 +426,7 @@ namespace DBADashGUI
             // 
             minsToolStripMenuItem2.CheckOnClick = true;
             minsToolStripMenuItem2.Name = "minsToolStripMenuItem2";
-            minsToolStripMenuItem2.Size = new System.Drawing.Size(153, 28);
+            minsToolStripMenuItem2.Size = new System.Drawing.Size(224, 28);
             minsToolStripMenuItem2.Tag = "5";
             minsToolStripMenuItem2.Text = "5 Mins";
             minsToolStripMenuItem2.Click += TsTime_Click;
@@ -435,7 +435,7 @@ namespace DBADashGUI
             // 
             minsToolStripMenuItem1.CheckOnClick = true;
             minsToolStripMenuItem1.Name = "minsToolStripMenuItem1";
-            minsToolStripMenuItem1.Size = new System.Drawing.Size(153, 28);
+            minsToolStripMenuItem1.Size = new System.Drawing.Size(224, 28);
             minsToolStripMenuItem1.Tag = "10";
             minsToolStripMenuItem1.Text = "10 Mins";
             minsToolStripMenuItem1.Click += TsTime_Click;
@@ -444,7 +444,7 @@ namespace DBADashGUI
             // 
             minsToolStripMenuItem.CheckOnClick = true;
             minsToolStripMenuItem.Name = "minsToolStripMenuItem";
-            minsToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            minsToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
             minsToolStripMenuItem.Tag = "15";
             minsToolStripMenuItem.Text = "15 Mins";
             minsToolStripMenuItem.Click += TsTime_Click;
@@ -453,7 +453,7 @@ namespace DBADashGUI
             // 
             ts30Min.CheckOnClick = true;
             ts30Min.Name = "ts30Min";
-            ts30Min.Size = new System.Drawing.Size(153, 28);
+            ts30Min.Size = new System.Drawing.Size(224, 28);
             ts30Min.Tag = "30";
             ts30Min.Text = "30 Mins";
             ts30Min.Click += TsTime_Click;
@@ -463,7 +463,7 @@ namespace DBADashGUI
             ts1Hr.Checked = true;
             ts1Hr.CheckState = System.Windows.Forms.CheckState.Checked;
             ts1Hr.Name = "ts1Hr";
-            ts1Hr.Size = new System.Drawing.Size(153, 28);
+            ts1Hr.Size = new System.Drawing.Size(224, 28);
             ts1Hr.Tag = "60";
             ts1Hr.Text = "1Hr";
             ts1Hr.Click += TsTime_Click;
@@ -472,7 +472,7 @@ namespace DBADashGUI
             // 
             ts2Hr.CheckOnClick = true;
             ts2Hr.Name = "ts2Hr";
-            ts2Hr.Size = new System.Drawing.Size(153, 28);
+            ts2Hr.Size = new System.Drawing.Size(224, 28);
             ts2Hr.Tag = "120";
             ts2Hr.Text = "2Hr";
             ts2Hr.Click += TsTime_Click;
@@ -481,7 +481,7 @@ namespace DBADashGUI
             // 
             ts3Hr.CheckOnClick = true;
             ts3Hr.Name = "ts3Hr";
-            ts3Hr.Size = new System.Drawing.Size(153, 28);
+            ts3Hr.Size = new System.Drawing.Size(224, 28);
             ts3Hr.Tag = "180";
             ts3Hr.Text = "3Hr";
             ts3Hr.Click += TsTime_Click;
@@ -490,7 +490,7 @@ namespace DBADashGUI
             // 
             ts6Hr.CheckOnClick = true;
             ts6Hr.Name = "ts6Hr";
-            ts6Hr.Size = new System.Drawing.Size(153, 28);
+            ts6Hr.Size = new System.Drawing.Size(224, 28);
             ts6Hr.Tag = "360";
             ts6Hr.Text = "6Hr";
             ts6Hr.Click += TsTime_Click;
@@ -499,7 +499,7 @@ namespace DBADashGUI
             // 
             ts12Hr.CheckOnClick = true;
             ts12Hr.Name = "ts12Hr";
-            ts12Hr.Size = new System.Drawing.Size(153, 28);
+            ts12Hr.Size = new System.Drawing.Size(224, 28);
             ts12Hr.Tag = "720";
             ts12Hr.Text = "12Hr";
             ts12Hr.Click += TsTime_Click;
@@ -507,7 +507,7 @@ namespace DBADashGUI
             // dayToolStripMenuItem
             // 
             dayToolStripMenuItem.Name = "dayToolStripMenuItem";
-            dayToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            dayToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
             dayToolStripMenuItem.Tag = "1440";
             dayToolStripMenuItem.Text = "1 Day";
             dayToolStripMenuItem.Click += TsTime_Click;
@@ -515,7 +515,7 @@ namespace DBADashGUI
             // daysToolStripMenuItem
             // 
             daysToolStripMenuItem.Name = "daysToolStripMenuItem";
-            daysToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            daysToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
             daysToolStripMenuItem.Tag = "2880";
             daysToolStripMenuItem.Text = "2 Days";
             daysToolStripMenuItem.Click += TsTime_Click;
@@ -523,7 +523,7 @@ namespace DBADashGUI
             // daysToolStripMenuItem1
             // 
             daysToolStripMenuItem1.Name = "daysToolStripMenuItem1";
-            daysToolStripMenuItem1.Size = new System.Drawing.Size(153, 28);
+            daysToolStripMenuItem1.Size = new System.Drawing.Size(224, 28);
             daysToolStripMenuItem1.Tag = "4320";
             daysToolStripMenuItem1.Text = "3 Days";
             daysToolStripMenuItem1.Click += TsTime_Click;
@@ -531,7 +531,7 @@ namespace DBADashGUI
             // days7ToolStripMenuItem
             // 
             days7ToolStripMenuItem.Name = "days7ToolStripMenuItem";
-            days7ToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            days7ToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
             days7ToolStripMenuItem.Tag = "10080";
             days7ToolStripMenuItem.Text = "7 Days";
             days7ToolStripMenuItem.Click += TsTime_Click;
@@ -539,7 +539,7 @@ namespace DBADashGUI
             // days14toolStripMenuItem
             // 
             days14toolStripMenuItem.Name = "days14toolStripMenuItem";
-            days14toolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            days14toolStripMenuItem.Size = new System.Drawing.Size(224, 28);
             days14toolStripMenuItem.Tag = "20160";
             days14toolStripMenuItem.Text = "14 Days";
             days14toolStripMenuItem.Click += TsTime_Click;
@@ -547,7 +547,7 @@ namespace DBADashGUI
             // days28ToolStripMenuItem
             // 
             days28ToolStripMenuItem.Name = "days28ToolStripMenuItem";
-            days28ToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            days28ToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
             days28ToolStripMenuItem.Tag = "40320";
             days28ToolStripMenuItem.Text = "28 Days";
             days28ToolStripMenuItem.Click += TsTime_Click;
@@ -555,13 +555,13 @@ namespace DBADashGUI
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(150, 6);
+            toolStripSeparator1.Size = new System.Drawing.Size(221, 6);
             // 
             // dateToolStripMenuItem
             // 
             dateToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { dummyToolStripMenuItem });
             dateToolStripMenuItem.Name = "dateToolStripMenuItem";
-            dateToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            dateToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
             dateToolStripMenuItem.Tag = "Date";
             dateToolStripMenuItem.Text = "Date";
             dateToolStripMenuItem.DropDownOpening += DateToolStripMenuItem_Opening;
@@ -575,7 +575,7 @@ namespace DBADashGUI
             // tsCustom
             // 
             tsCustom.Name = "tsCustom";
-            tsCustom.Size = new System.Drawing.Size(153, 28);
+            tsCustom.Size = new System.Drawing.Size(224, 28);
             tsCustom.Tag = "-1";
             tsCustom.Text = "Custom";
             tsCustom.Click += TsCustomTime_Click;
@@ -1043,7 +1043,6 @@ namespace DBADashGUI
             // 
             // tags1
             // 
-            tags1.AllTags = null;
             tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             tags1.Location = new System.Drawing.Point(3, 3);
             tags1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -1999,10 +1998,10 @@ namespace DBADashGUI
             // tabDrivePerformance
             // 
             tabDrivePerformance.Controls.Add(drivePerformance1);
-            tabDrivePerformance.Location = new System.Drawing.Point(4, 25);
+            tabDrivePerformance.Location = new System.Drawing.Point(4, 29);
             tabDrivePerformance.Name = "tabDrivePerformance";
             tabDrivePerformance.Padding = new System.Windows.Forms.Padding(3);
-            tabDrivePerformance.Size = new System.Drawing.Size(1631, 1246);
+            tabDrivePerformance.Size = new System.Drawing.Size(192, 67);
             tabDrivePerformance.TabIndex = 46;
             tabDrivePerformance.Text = "Drive Performance";
             tabDrivePerformance.UseVisualStyleBackColor = true;
@@ -2013,7 +2012,7 @@ namespace DBADashGUI
             drivePerformance1.Location = new System.Drawing.Point(3, 3);
             drivePerformance1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             drivePerformance1.Name = "drivePerformance1";
-            drivePerformance1.Size = new System.Drawing.Size(1625, 1240);
+            drivePerformance1.Size = new System.Drawing.Size(186, 61);
             drivePerformance1.TabIndex = 0;
             // 
             // refresh1
