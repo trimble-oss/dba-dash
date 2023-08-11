@@ -17,7 +17,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace DBADashGUI
 {
-    public partial class Summary : UserControl, ISetContext
+    public partial class Summary : UserControl, ISetContext, IRefreshData
     {
         private List<int> refreshInstanceIDs;
         private bool refreshIncludeHidden;
@@ -107,7 +107,12 @@ namespace DBADashGUI
         private CancellationTokenSource cancellationTS = new();
         private bool savedLayoutLoaded;
 
-        public void RefreshData(bool forceRefresh = false, DateTime? forceRefreshDate = null)
+        public void RefreshData()
+        {
+            RefreshData(false, null);
+        }
+
+        public void RefreshData(bool forceRefresh, DateTime? forceRefreshDate = null)
         {
             if (!savedLayoutLoaded)
             {

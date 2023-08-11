@@ -301,6 +301,9 @@ namespace DBADashGUI
 
         private void LoadSelectedTab()
         {
+            DisableAutoRefresh();
+            setAutoRefreshToolStripMenuItem.Enabled = IsAutoRefreshApplicable;
+
             jobTimeline1.IsActive = false; // Don't re-draw timeline on resize unless control is active
             if (suppressLoadTab)
             {
@@ -1877,6 +1880,73 @@ namespace DBADashGUI
             LoadRepositoryConnections();
             repositories.Save();
             await SetConnection(connection);
+        }
+
+        private void SetAutoRefresh(object sender, EventArgs e)
+        {
+            var item = (ToolStripMenuItem)sender;
+            var interval = int.Parse((string)item.Tag);
+            if (interval == 0)
+            {
+                string strInterval = (autoRefreshTimer.Interval / 1000).ToString();
+                if (CommonShared.ShowInputDialog(ref strInterval, "Enter interval in seconds:") == DialogResult.OK)
+                {
+                    if (!int.TryParse(strInterval, out interval) || interval < 1)
+                    {
+                        MessageBox.Show("Invalid input", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                }
+            }
+            SetAutoRefresh(interval);
+        }
+
+        private void SetAutoRefresh(int interval)
+        {
+            autoRefreshTimer.Enabled = false;
+            autoRefreshTimer.Stop();
+            noneToolStripMenuItem.Checked = true;
+
+            if (interval > 0)
+            {
+                autoRefreshTimer.Interval = interval * 1000;
+                autoRefreshTimer.Enabled = true;
+                autoRefreshTimer.Start();
+            }
+
+            int checkCount = 0;
+            foreach (var itm in setAutoRefreshToolStripMenuItem.DropDownItems.OfType<ToolStripMenuItem>())
+            {
+                itm.Checked = int.Parse((string)itm.Tag) == interval;
+                if (itm.Checked)
+                {
+                    checkCount += 1;
+                }
+            }
+
+            if (checkCount == 0)
+            {
+                customToolStripMenuItem.Checked = true;
+            }
+        }
+
+        private void DisableAutoRefresh()
+        {
+            SetAutoRefresh(-1);
+        }
+
+        private bool IsAutoRefreshApplicable => tabs.SelectedTab != null && tabs.SelectedTab.Controls.OfType<IRefreshData>().Any();
+
+        private void AutoRefresh(object sender, EventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Minimized) // Skip auto refresh if app is minimized
+            {
+                return;
+            }
+            foreach (IRefreshData ctrl in tabs.SelectedTab.Controls.OfType<IRefreshData>())
+            {
+                ctrl.RefreshData();
+            }
         }
     }
 }
