@@ -245,7 +245,7 @@
     <PackageReference Include="LiveCharts.WinForms" Version="0.9.7.1" />
     <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1823.32" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1901.177" />
     <PackageReference Include="SpreadsheetLight" Version="3.5.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
