@@ -91,7 +91,7 @@ namespace DBADashGUI
 
         public void RefreshDataIfStale()
         {
-            if (lastRefresh==null || DateTime.UtcNow.Subtract(lastRefresh.Value).TotalSeconds > Config.ClientSummaryCacheDuration || ParametersChanged)
+            if (lastRefresh == null || DateTime.UtcNow.Subtract(lastRefresh.Value).TotalSeconds > Config.ClientSummaryCacheDuration || ParametersChanged)
             {
                 RefreshData();
             }
@@ -107,7 +107,7 @@ namespace DBADashGUI
         private CancellationTokenSource cancellationTS = new();
         private bool savedLayoutLoaded;
 
-        public void RefreshData(bool forceRefresh = false, DateTime? forceRefreshDate=null)
+        public void RefreshData(bool forceRefresh = false, DateTime? forceRefreshDate = null)
         {
             if (!savedLayoutLoaded)
             {
@@ -465,9 +465,20 @@ namespace DBADashGUI
             var sortCol = dgvSummary.Columns[e.ColumnIndex] == UptimeStatus ? "sqlserver_uptime" :
                 dgvSummary.Columns[e.ColumnIndex] == MemoryDumpStatus ? "LastMemoryDump" :
                 dgvSummary.Columns[e.ColumnIndex] == Instance ? "InstanceGroupName" :
+                dgvSummary.Columns[e.ColumnIndex] == colHidden ? "IsHidden" :
                 dgvSummary.Columns[e.ColumnIndex].Name;
-
-            dv.Sort = sortCol + (dv.Sort == sortCol ? " DESC" : "");
+            if (dgvSummary.Columns[e.ColumnIndex] == SnapshotAgeStatus)
+            {
+                dv.Sort = (dv.Sort == "SnapshotAgeStatus ASC, SnapshotAgeMax DESC" ? "SnapshotAgeStatus DESC, SnapshotAgeMax ASC" : "SnapshotAgeStatus ASC, SnapshotAgeMax DESC");
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == IdentityStatus)
+            {
+                dv.Sort = (dv.Sort == "IdentityStatus ASC, MaxIdentityPctUsed DESC" ? "IdentityStatus DESC, MaxIdentityPctUsed ASC" : "IdentityStatus ASC, MaxIdentityPctUsed DESC");
+            }
+            else
+            {
+                dv.Sort = sortCol + (dv.Sort == sortCol ? " DESC" : "");
+            }
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -538,12 +549,12 @@ namespace DBADashGUI
             lblRefreshTime.Font = WasRefreshed
                 ? new Font(lblRefreshTime.Font, FontStyle.Regular)
                 : new Font(lblRefreshTime.Font, FontStyle.Italic);
-            lblRefreshTime.Text = "Refresh Time: " + (lastRefresh==null ? string.Empty : lastRefresh.Value.ToAppTimeZone().ToString(CultureInfo.CurrentCulture));
+            lblRefreshTime.Text = "Refresh Time: " + (lastRefresh == null ? string.Empty : lastRefresh.Value.ToAppTimeZone().ToString(CultureInfo.CurrentCulture));
         }
 
         private void Timer1_Tick(object sender, EventArgs e)
         {
-            if (lastRefresh==null || DateTime.UtcNow.Subtract(lastRefresh.Value).TotalMinutes > 60)
+            if (lastRefresh == null || DateTime.UtcNow.Subtract(lastRefresh.Value).TotalMinutes > 60)
             {
                 lblRefreshTime.ForeColor = DBADashStatusEnum.Critical.GetColor();
                 timer1.Enabled = false;
