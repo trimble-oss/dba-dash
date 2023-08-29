@@ -1,8 +1,13 @@
+param(
+    [string]$Database = "DBADashDB_GitHubAction",
+	[string]$Server = "LOCALHOST"
+)
+
 Describe 'CI Workflow checks' {
     BeforeEach {
             $params = @{
-                ServerInstance = "LOCALHOST"
-                Database = "DBADashDB_GitHubAction"
+                ServerInstance = $Server
+                Database = $Database
             }
         }
     It 'Test Instance Count' {

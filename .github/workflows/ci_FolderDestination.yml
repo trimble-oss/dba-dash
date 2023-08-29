@@ -92,7 +92,7 @@ jobs:
           Set-Location $InstallPath
           ./dbadashconfig -a SetServiceName --ServiceName $ServiceName
           ./dbadashconfig -c $DBADashFolderDestination -a Add
-          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Initial Catalog=DBADashDB_GitHubAction;Encrypt=True;TrustServerCertificate=True;" -a SetDestination      
+          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Initial Catalog=DBADashDB_FromFolder;Encrypt=True;TrustServerCertificate=True;" -a SetDestination      
           "Install Service"
           ./DBADashService install --localsystem
 
@@ -124,7 +124,8 @@ jobs:
           Set-Location $InstallPath
           "Configure"
           ./dbadashconfig -a SetServiceName --ServiceName $ServiceName
-          ./dbadashconfig -c $DBADashFolderDestination -a SetDestination
+          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Initial Catalog=DBADashDB_Direct;Encrypt=True;TrustServerCertificate=True;" -a AddDestination
+          ./dbadashconfig -c $DBADashFolderDestination -a AddDestination
           ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Encrypt=True;TrustServerCertificate=True;" -a Add --PlanCollectionEnabled --SlowQueryThresholdMs 1000 --SchemaSnapshotDBs "*"       
           "Install Service"
           ./DBADashService install --localsystem
@@ -156,23 +157,40 @@ jobs:
         run: | 
           ./Scripts/Get-LogContent -LogPath  "C:\DBADashReadFromFolder\Logs"
 
-      - name: Output CollectionErrorLog
+      - name: Output CollectionErrorLog FromFolder
         shell: powershell
         run: | 
-          Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database "DBADashDB_GitHubAction" -Query "SELECT * FROM dbo.CollectionErrorLog" -TrustServerCertificate | Format-Table
+          Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database "DBADashDB_FromFolder" -Query "SELECT * FROM dbo.CollectionErrorLog" -TrustServerCertificate | Format-Table
 
-      - name: Output Table Counts
+      - name: Output CollectionErrorLog Direct
         shell: powershell
         run: | 
-          ./Scripts/Get-TableCounts -ServerInstance "LOCALHOST" -Database "DBADashDB_GitHubAction" 
+            Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database "DBADashDB_Direct" -Query "SELECT * FROM dbo.CollectionErrorLog" -TrustServerCertificate | Format-Table
 
-      - name: Run Pester Tests
+      - name: Output Table Counts FromFolder
+        shell: powershell
+        run: | 
+          ./Scripts/Get-TableCounts -ServerInstance "LOCALHOST" -Database "DBADashDB_FromFolder" 
+
+      - name: Output Table Counts Direct
+        shell: powershell
+        run: | 
+            ./Scripts/Get-TableCounts -ServerInstance "LOCALHOST" -Database "DBADashDB_Direct" 
+
+      - name: Run Pester Tests FromFolder
         shell: powershell
         run: |     
           Install-Module Pester -Force
           Import-Module Pester -PassThru
-          Invoke-Pester -Output Detailed Scripts\CI_Workflow.Tests.ps1
+          $container = New-PesterContainer -Path 'Scripts\CI_Workflow.Tests.ps1' -Data @{ Database = "DBADashDB_FromFolder" }
+          Invoke-Pester -Container $container -Output Detailed
 
+      - name: Run Pester Tests Direct
+        shell: powershell
+        run: |     
+            $container = New-PesterContainer -Path 'Scripts\CI_Workflow.Tests.ps1' -Data @{ Database = "DBADashDB_Direct" }
+            Invoke-Pester -Container $container -Output Detailed
+      
       - name: Output Log and Check for Errors (DBADashWriteToFolder)
         shell: powershell
         run: | 
