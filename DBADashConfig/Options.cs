@@ -93,7 +93,9 @@ namespace DBADashConfig
             SetServiceName,
             Encrypt,
             Decrypt,
-            SetConfigFileBackupRetention
+            SetConfigFileBackupRetention,
+            AddDestination,
+            RemoveDestination,
         }
     }
 }

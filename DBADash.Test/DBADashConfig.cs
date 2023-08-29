@@ -1,12 +1,7 @@
-﻿using DBADashConfig.Test;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using DBADash;
 
 namespace DBADashConfig.Test
@@ -71,6 +66,34 @@ namespace DBADashConfig.Test
 
             var cfg = BasicConfig.Load<CollectionConfig>();
             Assert.AreEqual(serviceName, cfg.ServiceName);
+        }
+
+        [TestMethod]
+        [DataRow(new string[] { "C:\\Test", "C:\\Test2", "C:\\Test3" })]
+        public void AddRemoveDestinationTest(string[] connectionStrings)
+        {
+            foreach (var connectionString in connectionStrings)
+            {
+                var cfg = BasicConfig.Load<CollectionConfig>();
+                var expectedCnt = cfg.AllDestinations.Count + 1;
+                var psi = new ProcessStartInfo("DBADashConfig",
+                    $"-a AddDestination -c \"{connectionString}\" --SkipValidation");
+                Helper.RunProcess(psi);
+
+                cfg = BasicConfig.Load<CollectionConfig>();
+                Assert.AreEqual(expectedCnt, cfg.AllDestinations.Count);
+            }
+
+            foreach (var connectionString in connectionStrings)
+            {
+                var cfg = BasicConfig.Load<CollectionConfig>();
+                var expectedCnt = cfg.AllDestinations.Count - 1;
+                var psi = new ProcessStartInfo("DBADashConfig",
+                    $"-a RemoveDestination -c \"{connectionString}\"");
+                Helper.RunProcess(psi);
+                cfg = BasicConfig.Load<CollectionConfig>();
+                Assert.AreEqual(expectedCnt, cfg.AllDestinations.Count);
+            }
         }
     }
 }
