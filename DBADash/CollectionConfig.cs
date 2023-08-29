@@ -129,10 +129,11 @@ namespace DBADash
         {
             get
             {
-                var all = new List<DBADashConnection>
+                var all = new List<DBADashConnection>();
+                if (!string.IsNullOrEmpty(Destination))
                 {
-                    DestinationConnection
-                };
+                    all.Add(DestinationConnection);
+                }
                 all.AddRange(SecondaryDestinationConnections);
                 return all;
             }

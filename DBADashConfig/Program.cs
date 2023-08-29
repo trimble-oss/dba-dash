@@ -3,8 +3,6 @@ using DBADash;
 using DBADashConfig;
 using Serilog;
 using System.Runtime.InteropServices;
-using Amazon.Auth.AccessControlPolicy;
-using Microsoft.SqlServer.Dac.KeyVault;
 using static DBADashConfig.Options;
 
 static void CommandLineUpgrade()
@@ -175,8 +173,11 @@ try
                       break;
                   // Set/Update the destination connection
                   case CommandLineActionOption.SetDestination when string.IsNullOrEmpty(o.ConnectionString):
+                  case CommandLineActionOption.AddDestination when string.IsNullOrEmpty(o.ConnectionString):
+                  case CommandLineActionOption.RemoveDestination when string.IsNullOrEmpty(o.ConnectionString):
                       throw new ArgumentException("ConnectionString required");
                   case CommandLineActionOption.SetDestination:
+                  case CommandLineActionOption.AddDestination when string.IsNullOrEmpty(config.Destination):
                       {
                           Log.Information("Setting destination connection");
                           config.Destination = o.ConnectionString;
@@ -185,6 +186,48 @@ try
                               Log.Information("Validating connection...");
                               config.ValidateDestination();
                               Log.Information("Validated");
+                          }
+
+                          break;
+                      }
+                  case CommandLineActionOption.AddDestination:
+                      {
+                          if (config.AllDestinations.Any(d => d.ConnectionString == o.ConnectionString))
+                          {
+                              Log.Information("Destination connection already exists");
+                          }
+                          var con = new DBADashConnection(o.ConnectionString);
+                          if (!o.SkipValidation)
+                          {
+                              Log.Information("Validating connection...");
+
+                              CollectionConfig.ValidateDestination(con);
+                              Log.Information("Validated");
+                          }
+                          Log.Information("Adding secondary destination");
+                          config.SecondaryDestinationConnections.Add(con);
+                          break;
+                      }
+                  case CommandLineActionOption.RemoveDestination:
+                      {
+                          var toRemove = new DBADashConnection(o.ConnectionString);
+                          if (config.Destination == o.ConnectionString || config.DestinationConnection.ConnectionForPrint == toRemove.ConnectionForPrint)
+                          {
+                              config.Destination = string.Empty;
+                              Log.Warning("Warning: Primary Destination removed.");
+                          }
+                          else
+                          {
+                              var found = config.SecondaryDestinationConnections.FirstOrDefault(d =>
+                                  d.ConnectionString == o.ConnectionString ||
+                                  d.ConnectionForPrint == toRemove.ConnectionForPrint);
+                              if (found == null)
+                              {
+                                  Log.Error("Destination connection not found");
+                                  return;
+                              }
+
+                              config.SecondaryDestinationConnections.Remove(found);
                           }
 
                           break;
