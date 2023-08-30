@@ -83,6 +83,7 @@ namespace DBADashGUI.Performance
             objectExecChart.AxisX.Clear();
             objectExecChart.AxisY.Clear();
             chartMaxDate = DateTime.MinValue;
+            lblExecution.Text = databaseid > 0 ? "Execution Stats: Database" : "Execution Stats: Instance";
 
             var dt = CommonData.ObjectExecutionStats(instanceID, databaseid, objectID, dateGrouping, Metric.Measure, DateRange.FromUTC, DateRange.ToUTC, "");
 
@@ -148,8 +149,6 @@ namespace DBADashGUI.Performance
             {
                 LabelFormatter = val => val.ToString(measures[Metric.Measure].LabelFormat)
             });
-
-            lblExecution.Text = databaseid > 0 ? "Excution Stats: Database" : "Execution Stats: Instance";
         }
 
         private class Measure
