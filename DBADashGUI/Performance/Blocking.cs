@@ -146,6 +146,8 @@ namespace DBADashGUI.Performance
             chartBlocking.Series = s1;
 
             lblBlocking.Text = databaseID > 0 ? "Blocking: Database" : "Blocking: Instance";
+            toolStrip1.BackColor = databaseID > 0 ? DashColors.DatabaseLevelTitleColor : Control.DefaultBackColor;
+            toolStrip1.ForeColor = toolStrip1.BackColor.ContrastColor();
         }
 
         private void ChartBlocking_DataClick(object sender, ChartPoint chartPoint)
