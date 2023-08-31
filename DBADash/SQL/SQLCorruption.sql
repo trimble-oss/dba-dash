@@ -17,8 +17,12 @@ BEGIN
 END
 IF OBJECT_ID('msdb.sys.dm_db_mirroring_auto_page_repair') IS NOT NULL
 BEGIN
-	--Query can be blocked by a database restore even if mirroring is not used, so check if mirroring is being used before running this query
-	IF EXISTS(select * from sys.database_mirroring_endpoints)
+	/*	
+		Only query sys.dm_db_mirroring_auto_page_repair if database mirroring is in use.   
+		* Query can be blocked by a database restore even if mirroring is not used
+		* Query can generate a dump if not run as sysadmin and there are databases in a RESTORING state. #682
+	*/
+	IF EXISTS(SELECT 1 FROM sys.database_mirroring WHERE mirroring_role IS NOT NULL)
 	BEGIN
 		INSERT INTO @Corruption(SourceTable,database_id,last_update_date,CountOfRows)
 		SELECT CAST(2 AS TINYINT) AS SourceTable,
