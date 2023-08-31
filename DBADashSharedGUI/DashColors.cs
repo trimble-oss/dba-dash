@@ -54,5 +54,7 @@
         public static readonly Color LinkColor = TrimbleBlueDark;
         public static readonly Color ProgressBarFrom = Color.White;
         public static readonly Color ProgressBarTo = Color.FromArgb(103, 176, 228);
+
+        public static Color DatabaseLevelTitleColor => TrimbleBlue;
     }
 }

@@ -343,7 +343,7 @@ namespace DBADashGUI.Performance
 
             int i = 0;
             iopsMax = 0;
-            mbMax=0;
+            mbMax = 0;
             foreach (DataRow r in dt.Rows)
             {
                 foreach (string s in Columns.Keys)
@@ -398,6 +398,8 @@ namespace DBADashGUI.Performance
                 chartIO.Series.Clear(); // fix tends to zero error
             }
             lblIOPerformance.Text = databaseID > 0 ? "IO Performance: Database" : (string.IsNullOrEmpty(Drive) ? "IO Performance: Instance" : "IO Performance: " + DriveLabel(Drive));
+            toolStrip1.BackColor = databaseID > 0 ? DashColors.DatabaseLevelTitleColor : Control.DefaultBackColor;
+            toolStrip1.ForeColor = toolStrip1.BackColor.ContrastColor();
         }
 
         public string DriveLabel(string drive)

@@ -84,6 +84,8 @@ namespace DBADashGUI.Performance
             objectExecChart.AxisY.Clear();
             chartMaxDate = DateTime.MinValue;
             lblExecution.Text = databaseid > 0 ? "Execution Stats: Database" : "Execution Stats: Instance";
+            toolStrip1.BackColor = databaseid > 0 ? DashColors.DatabaseLevelTitleColor : Control.DefaultBackColor;
+            toolStrip1.ForeColor = toolStrip1.BackColor.ContrastColor();
 
             var dt = CommonData.ObjectExecutionStats(instanceID, databaseid, objectID, dateGrouping, Metric.Measure, DateRange.FromUTC, DateRange.ToUTC, "");
 
