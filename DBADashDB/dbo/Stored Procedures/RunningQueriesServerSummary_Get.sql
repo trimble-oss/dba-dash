@@ -38,7 +38,9 @@ WITH T AS (
 		   S.CriticalWaitCount,
 		   S.CriticalWaitTime,
 		   S.TempDBWaitCount,
-		   S.TempDBWaitTimeMs,		   
+		   S.TempDBWaitTimeMs,
+		   S.SleepingSessionsCount,
+		   S.SleepingSessionsMaxIdleTimeMs,
 		   ROW_NUMBER() OVER(PARTITION BY S.InstanceID ORDER BY S.SnapshotDateUTC DESC) rnum
 	FROM dbo.RunningQueriesSummary S 
 	JOIN dbo.Instances I ON I.InstanceID = S.InstanceID
@@ -62,10 +64,14 @@ SELECT T.InstanceID,
        T.CriticalWaitTime,
 	   T.TempDBWaitCount,
 	   T.TempDBWaitTimeMs,
-	   TempDBHD.HumanDuration AS TempDBWaitTime
+	   TempDBHD.HumanDuration AS TempDBWaitTime,
+	   T.SleepingSessionsCount,
+       T.SleepingSessionsMaxIdleTimeMs,
+       MaxIdleHD.HumanDuration as MaxIdleTime
 FROM T 
 CROSS APPLY dbo.MillisecondsToHumanDuration (T.LongestRunningQueryMs) LongestHD
 CROSS APPLY dbo.MillisecondsToHumanDuration (T.BlockedQueriesWaitMs) BlockedHD
 CROSS APPLY dbo.MillisecondsToHumanDuration (T.TempDBWaitTimeMs) TempDBHD
+CROSS APPLY dbo.MillisecondsToHumanDuration (T.SleepingSessionsMaxIdleTimeMs) MaxIdleHD
 WHERE T.rnum = 1
 ORDER BY T.RunningQueries DESC

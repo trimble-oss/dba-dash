@@ -21,12 +21,16 @@ SELECT TOP(@MaxRows) I.InstanceID,
        S.CriticalWaitTime,
        S.TempDBWaitCount,
        S.TempDBWaitTimeMs,
-       TempDBHD.HumanDuration AS TempDBWaitTime
+       TempDBHD.HumanDuration AS TempDBWaitTime,
+       S.SleepingSessionsCount,
+       S.SleepingSessionsMaxIdleTimeMs,
+       MaxIdleHD.HumanDuration as MaxIdleTime
 FROM dbo.RunningQueriesSummary S
 JOIN dbo.Instances I ON I.InstanceID = S.InstanceID
 CROSS APPLY dbo.MillisecondsToHumanDuration (S.LongestRunningQueryMs) LongestHD
 CROSS APPLY dbo.MillisecondsToHumanDuration (S.BlockedQueriesWaitMs) BlockedHD
 CROSS APPLY dbo.MillisecondsToHumanDuration (S.TempDBWaitTimeMs) TempDBHD
+CROSS APPLY dbo.MillisecondsToHumanDuration (S.SleepingSessionsMaxIdleTimeMs) MaxIdleHD
 WHERE S.InstanceID = @InstanceID
 AND S.SnapshotDateUTC >=@FromDate
 AND S.SnapshotDateUTC < @ToDate

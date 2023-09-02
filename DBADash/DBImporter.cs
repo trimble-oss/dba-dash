@@ -181,6 +181,7 @@ namespace DBADash
                     dtSlowQueries.Columns.Add("session_id", typeof(int));
                 }
             }
+
             if (data.Tables.Contains("RunningQueries"))
             {
                 var dtRunningQueries = data.Tables["RunningQueries"];
@@ -188,7 +189,12 @@ namespace DBADash
                 {
                     dtRunningQueries.Columns.Add("login_time_utc", typeof(DateTime));
                 }
+                if (!dtRunningQueries.Columns.Contains("last_request_end_time_utc"))
+                {
+                    dtRunningQueries.Columns.Add("last_request_end_time_utc", typeof(DateTime));
+                }
             }
+
             if (data.Tables.Contains("IdentityColumns"))
             {
                 var dtIdentityColumns = data.Tables["IdentityColumns"];
@@ -221,7 +227,7 @@ namespace DBADash
             if (data.Tables.Contains("ServerProperties"))
             {
                 var dtServerProperties = data.Tables["ServerProperties"];
-                if(!dtServerProperties.Columns.Contains("ProductMinorVersion")) // Check we haven't already processed table
+                if (!dtServerProperties.Columns.Contains("ProductMinorVersion")) // Check we haven't already processed table
                 {
                     if (dtServerProperties.Columns.Contains("ProductMajorVersion")) // Remove old string columns
                     {
