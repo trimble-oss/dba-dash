@@ -49,6 +49,10 @@ SELECT Q.InstanceID,
     Q.client_interface_name,
     Q.start_time_utc,
     Q.last_request_start_time_utc,
+    Q.last_request_end_time_utc,
+    LastRequestDuration.HumanDuration as last_request_duration,
+    CASE WHEN status = 'sleeping' THEN DATEDIFF_BIG(ms,Q.last_request_end_time_utc,Q.SnapshotDateUTC)/1000.0 ELSE NULL END AS sleeping_session_idle_time_sec,
+    CASE WHEN status = 'sleeping' THEN TimeSinceLastRequestEnd.HumanDuration ELSE NULL END AS sleeping_session_idle_time,
     CONVERT(CHAR(90),Q.sql_handle,1) AS sql_handle,
     CONVERT(CHAR(90),Q.plan_handle,1) AS plan_handle,
     CONVERT(CHAR(18),Q.query_hash,1) AS query_hash,
@@ -111,3 +115,5 @@ OUTER APPLY dbo.RunningQueriesBlockingRecursiveStats(Q.InstanceID,Q.SnapshotDate
 OUTER APPLY dbo.RunningQueriesBlockingHierarchy(Q.InstanceID,Q.SnapshotDateUTC,Q.blocking_session_id) AS H
 CROSS APPLY dbo.MillisecondsToHumanDuration (RQBRS.BlockWaitTimeMs) AS BlockWaitTime
 CROSS APPLY dbo.MillisecondsToHumanDuration (RQBRS.BlockWaitTimeRecursiveMs) AS BlockWaitTimeRecursive
+CROSS APPLY dbo.MillisecondsToHumanDuration (DATEDIFF_BIG(ms,Q.last_request_end_time_utc,Q.SnapshotDateUTC)) AS TimeSinceLastRequestEnd
+CROSS APPLY dbo.MillisecondsToHumanDuration (DATEDIFF_BIG(ms,Q.last_request_start_time_utc,Q.last_request_end_time_utc)) AS LastRequestDuration

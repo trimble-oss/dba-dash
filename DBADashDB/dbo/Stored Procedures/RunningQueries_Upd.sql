@@ -47,7 +47,8 @@ BEGIN
 						   t.query_hash,
 						   t.query_plan_hash,
 						   t.login_time_utc,
-						ROW_NUMBER() OVER(PARTITION BY t.session_id ORDER BY t.cpu_time DESC) rnum
+						   t.last_request_end_time_utc,
+						   ROW_NUMBER() OVER(PARTITION BY t.session_id ORDER BY t.cpu_time DESC) rnum
 					FROM  @RunningQueries t
 	)
 	INSERT INTO @RunningQueriesDD
@@ -81,7 +82,8 @@ BEGIN
 	    plan_handle,
 	    query_hash,
 	    query_plan_hash,
-		login_time_utc
+		login_time_utc,
+		last_request_end_time_utc
 	)
 	SELECT  SnapshotDateUTC,
 	    session_id,
@@ -112,7 +114,8 @@ BEGIN
 	    plan_handle,
 	    query_hash,
 	    query_plan_hash,
-		login_time_utc
+		login_time_utc,
+		last_request_end_time_utc
 	FROM deDupe
 	WHERE deDupe.rnum=1
 
@@ -130,7 +133,9 @@ BEGIN
         CriticalWaitTime,
         TempDBWaitCount,
         TempDBWaitTimeMs,
-		SumMemoryGrant
+		SumMemoryGrant,
+		SleepingSessionsCount,
+		SleepingSessionsMaxIdleTimeMs
     )
     SELECT @InstanceID as InstanceID,
             R.SnapshotDateUTC,
@@ -146,7 +151,9 @@ BEGIN
 		    SUM(CASE WHEN WT.IsCriticalWait=1 THEN CAST(R.wait_time AS BIGINT) ELSE 0 END) CriticalWaitTime,
             SUM(calc.IsTempDB) as TempDBWaitCount,
             SUM(CASE WHEN calc.IsTempDB=1 THEN CAST(R.wait_time AS BIGINT) ELSE 0 END) AS TempDBWaitTimeMs,
-			ISNULL(SUM(R.granted_query_memory),0) AS SumMemoryGrant
+			ISNULL(SUM(R.granted_query_memory),0) AS SumMemoryGrant,
+			SUM(CASE WHEN R.open_transaction_count>0 AND R.status='sleeping' THEN 1 ELSE 0 END) AS SleepingSessionsCount,
+			MAX(CASE WHEN R.open_transaction_count>0 AND R.status='sleeping' THEN DATEDIFF_BIG(ms,R.last_request_end_time_utc,R.SnapshotDateUTC) ELSE NULL END) AS SleepingSessionsMaxIdleTimeMs
     FROM @RunningQueriesDD R 
     CROSS APPLY(SELECT DATEDIFF_BIG(ms,ISNULL(start_time_utc,last_request_start_time_utc),R.SnapshotDateUTC) AS Duration,
                         CASE WHEN wait_resource LIKE '2:%' 
@@ -174,9 +181,11 @@ BEGIN
 			CriticalWaitTime,
             TempDBWaitCount,
             TempDBWaitTimeMs,
-			SumMemoryGrant
+			SumMemoryGrant,
+			SleepingSessionsCount,
+			SleepingSessionsMaxIdleTimeMs
 		)
-		VALUES(@InstanceID,@SnapshotDate,0,0,0,0,0,0,0,0,0,0)
+		VALUES(@InstanceID,@SnapshotDate,0,0,0,0,0,0,0,0,0,0,0,NULL)
 	END
     /* Running Queries replaces legacy blocking snapshot collection */
     INSERT INTO dbo.BlockingSnapshotSummary(
@@ -229,7 +238,8 @@ BEGIN
         plan_handle,
         query_hash,
         query_plan_hash,
-		login_time_utc
+		login_time_utc,
+		last_request_end_time_utc
     )
     SELECT @InstanceID as InstanceID,
         SnapshotDateUTC,
@@ -261,7 +271,8 @@ BEGIN
         plan_handle,
         query_hash,
         query_plan_hash,
-		login_time_utc
+		login_time_utc,
+		last_request_end_time_utc
     FROM @RunningQueriesDD;
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  

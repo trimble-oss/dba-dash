@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
+using Humanizer;
 
 namespace DBADashGUI.Performance
 {
@@ -26,6 +27,7 @@ namespace DBADashGUI.Performance
         public int SessionID = 0;
 
         private int blockedCount;
+        private int idleCount;
         private int runningJobCount;
         private bool hasWaitResource;
         private long blockedWait;
@@ -53,15 +55,16 @@ namespace DBADashGUI.Performance
                 new DataGridViewTextBoxColumn() { HeaderText = "Granted Query Memory (Kb)", DataPropertyName = "granted_query_memory_kb", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
                 new DataGridViewTextBoxColumn() { HeaderText = "Command", DataPropertyName = "Command", Name = "colCommand", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
                 new DataGridViewTextBoxColumn() { HeaderText = "Status", DataPropertyName = "Status", Name = "colStatus", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                new DataGridViewTextBoxColumn() { Name="colIdleTime", HeaderText = "Idle Time", DataPropertyName = "sleeping_session_idle_time", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, ToolTipText = "Sleeping session idle time.  \nA sleeping session is waiting for work from the client application.  \nThis can be a problem if the session is sleeping for a long time and has an open transaction. \ne.g. Blocking or log growth due to the open transaction preventing log truncation.\nApplication code changes are required to fix sleeping sessions with open transactions.\n\nRed=Sleeping session that is causing blocking or has been idle for over 10min.\nYellow=Sleeping session with an open transaction that has been idle for longer than 1 second.", Visible = idleCount>0},
+                new DataGridViewTextBoxColumn() { Name="colIdleTimeSec", HeaderText = "Idle Time (sec)", DataPropertyName = "sleeping_session_idle_time_sec", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, ToolTipText = "Sleeping session idle time (seconds)", Visible = false},
                 new DataGridViewTextBoxColumn() { HeaderText = "Wait Time (ms)", DataPropertyName = "wait_time", Name = "colWaitTime", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
                 new DataGridViewTextBoxColumn() { HeaderText = "Wait Type", DataPropertyName = "wait_type", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
                 new DataGridViewLinkColumn() { HeaderText = "Top Session Waits", DataPropertyName = "TopSessionWaits", Name = "colTopSessionWaits", AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width = 50, SortMode = DataGridViewColumnSortMode.Automatic , LinkColor = DashColors.LinkColor},
                 new DataGridViewTextBoxColumn() { HeaderText = "Object ID", DataPropertyName = "object_id", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
                 new DataGridViewTextBoxColumn() { HeaderText = "Object Name", DataPropertyName = "object_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                new DataGridViewTextBoxColumn() { Name="colSnapshotDate", HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                new DataGridViewLinkColumn { Name="colSnapshotDateLink", HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible=false,LinkColor=DashColors.LinkColor },
+                new DataGridViewLinkColumn { Name="colSnapshotDateLink", HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, LinkColor=DashColors.LinkColor },
                 new DataGridViewTextBoxColumn() { HeaderText = "% Complete", DataPropertyName = "percent_complete", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
-                new DataGridViewTextBoxColumn() { HeaderText = "Open Transaction Count", DataPropertyName = "open_transaction_count", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
+                new DataGridViewTextBoxColumn() { Name="colOpenTransactionCount", HeaderText = "Open Transaction Count", DataPropertyName = "open_transaction_count", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
                 new DataGridViewTextBoxColumn() { HeaderText = "Transaction Isolation Level", DataPropertyName = "transaction_isolation_level", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40  },
                 new DataGridViewTextBoxColumn() { HeaderText = "Login Name", DataPropertyName = "login_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
                 new DataGridViewTextBoxColumn() { HeaderText = "Host Name", DataPropertyName = "host_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
@@ -71,8 +74,10 @@ namespace DBADashGUI.Performance
                 new DataGridViewTextBoxColumn() { HeaderText = "Job ID", DataPropertyName = "job_id", SortMode = DataGridViewColumnSortMode.Automatic, Visible = runningJobCount > 0, MinimumWidth = 40 },
                 new DataGridViewTextBoxColumn() { HeaderText = "Job Name", DataPropertyName = "job_name", SortMode = DataGridViewColumnSortMode.Automatic, Visible = runningJobCount > 0, MinimumWidth = 40 },
                 new DataGridViewTextBoxColumn() { HeaderText = "Client Interface Name", DataPropertyName = "client_interface_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                new DataGridViewTextBoxColumn() { HeaderText = "Start Time", DataPropertyName = "start_time", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                new DataGridViewTextBoxColumn() { HeaderText = "Last Request Start Time", DataPropertyName = "last_request_start_time", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Start Time", DataPropertyName = "start_time", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = false},
+                new DataGridViewTextBoxColumn() { HeaderText = "Last Request Start Time", DataPropertyName = "last_request_start_time", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = false},
+                new DataGridViewTextBoxColumn() { HeaderText = "Last Request End Time", DataPropertyName = "last_request_end_time", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = false},
+                new DataGridViewTextBoxColumn() { HeaderText = "Last Request Duration", DataPropertyName = "last_request_duration", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = false},
                 new DataGridViewLinkColumn()   { HeaderText = "Wait Resource", DataPropertyName = "wait_resource", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, LinkColor = DashColors.LinkColor, Name="colWaitResource"},
                 new DataGridViewTextBoxColumn() { HeaderText = "Wait Resource Type", DataPropertyName = "wait_resource_type", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
                 new DataGridViewTextBoxColumn() { HeaderText = "Wait Database ID", DataPropertyName = "wait_database_id", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
@@ -185,8 +190,6 @@ namespace DBADashGUI.Performance
                 snapshotDT = RunningQueriesForSession(SessionID, SnapshotDateFrom, SnapshotDateTo, InstanceID);
                 GetCounts();
                 LoadSnapshot(new DataView(snapshotDT));
-                dgv.Columns["colSnapshotDate"].Visible = false;
-                dgv.Columns["colSnapshotDateLink"].Visible = true;
             }
             else if (SnapshotDateFrom == SnapshotDateTo && InstanceID > 0 && SnapshotDateFrom > DateTime.MinValue) // Show a specific blocking snapshot (e.g. Blocking chart drill down)
             {
@@ -242,7 +245,9 @@ namespace DBADashGUI.Performance
                 new DataGridViewTextBoxColumn() { HeaderText = "Critical Wait Count", DataPropertyName = "CriticalWaitCount", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                 new DataGridViewTextBoxColumn() { HeaderText = "Critical Wait Time", DataPropertyName = "CriticalWaitTime", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                 new DataGridViewTextBoxColumn() { HeaderText = "TempDB Wait Count", DataPropertyName = "TempDBWaitCount", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
-                new DataGridViewTextBoxColumn() { HeaderText = "TempDB Wait Time", DataPropertyName = "TempDBWaitTime", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle }
+                new DataGridViewTextBoxColumn() { HeaderText = "TempDB Wait Time", DataPropertyName = "TempDBWaitTime", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
+                new DataGridViewTextBoxColumn() { HeaderText = "Sleeping Sessions Count", DataPropertyName = "SleepingSessionsCount", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "Count of sleeping sessions with open transactions. Sleeping sessions are waiting for input from the client application." },
+                new DataGridViewTextBoxColumn() { HeaderText = "Max Idle Time", DataPropertyName = "MaxIdleTime", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "Max idle time for sleeping sessions with open transactions. " }
             );
             dgv.DataSource = new DataView(dt);
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
@@ -265,6 +270,7 @@ namespace DBADashGUI.Performance
                 dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
                 dt.Columns["start_time_utc"].ColumnName = "start_time";
                 dt.Columns["last_request_start_time_utc"].ColumnName = "last_request_start_time";
+                dt.Columns["last_request_end_time_utc"].ColumnName = "last_request_end_time";
                 dt.Columns["login_time_utc"].ColumnName = "login_time";
                 return dt;
             }
@@ -329,6 +335,7 @@ namespace DBADashGUI.Performance
                 dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
                 dt.Columns["start_time_utc"].ColumnName = "start_time";
                 dt.Columns["last_request_start_time_utc"].ColumnName = "last_request_start_time";
+                dt.Columns["last_request_end_time_utc"].ColumnName = "last_request_end_time";
                 dt.Columns["login_time_utc"].ColumnName = "login_time";
                 return dt;
             }
@@ -379,6 +386,7 @@ namespace DBADashGUI.Performance
         {
             runningJobCount = snapshotDT.AsEnumerable().Count(r => r["job_id"] != DBNull.Value);
             blockedCount = snapshotDT.AsEnumerable().Count(r => Convert.ToInt16(r["blocking_session_id"]) != 0);
+            idleCount = snapshotDT.AsEnumerable().Count(r => Convert.ToInt64(r["sleeping_session_idle_time_sec"].DBNullToNull()) > 0);
             blockedWait = snapshotDT.AsEnumerable().Where(r => Convert.ToInt16(r["blocking_session_id"]) != 0 && r["wait_time"] != DBNull.Value).Sum(r => Convert.ToInt64(r["wait_time"]));
             hasWaitResource = snapshotDT.AsEnumerable().Any(r => r["wait_resource"] != DBNull.Value && !string.IsNullOrEmpty((string)r["wait_resource"]));
 
@@ -653,6 +661,7 @@ namespace DBADashGUI.Performance
         private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
+            if (dgv.RowCount == 0) return;
             dgv.FirstDisplayedScrollingRowIndex = 0; // Reset the scroll position if we click refresh as it's likely we are interested in new snapshots.
         }
 
@@ -669,6 +678,23 @@ namespace DBADashGUI.Performance
             else if ((new[] { "colBlockCount", "colBlockedCountRecursive", "colBlockingSessionID" }).Contains(dgv.Columns[e.ColumnIndex].Name))
             {
                 e.CellStyle.BackColor = Convert.ToInt32(e.Value) == 0 ? DashColors.Success : DashColors.Fail;
+            }
+            else if ((new[] { "colIdleTimeSec", "colIdleTime" }).Contains(dgv.Columns[e.ColumnIndex].Name))
+            {
+                var idleSec = Convert.ToDouble(dgv.Rows[e.RowIndex].Cells["colIdleTimeSec"].Value.DBNullToNull());
+                var openTranCnt = Convert.ToInt32(dgv.Rows[e.RowIndex].Cells["colOpenTransactionCount"].Value.DBNullToNull());
+                var blockedCnt = Convert.ToInt32(dgv.Rows[e.RowIndex].Cells["colBlockCount"].Value.DBNullToNull());
+                var statusColor = DashColors.NotApplicable;
+                if ((blockedCnt > 0 && openTranCnt > 0 && idleSec > 0) || (openTranCnt > 0 && idleSec > 600))
+                {
+                    statusColor = DashColors.Fail;
+                }
+                else if (openTranCnt > 0 && idleSec > 1)
+                {
+                    statusColor = DashColors.Warning;
+                }
+                e.CellStyle.BackColor = statusColor;
+                e.CellStyle.ForeColor = statusColor.ContrastColor();
             }
         }
 
