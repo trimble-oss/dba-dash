@@ -28,6 +28,8 @@ namespace DBADashGUI
         public static int BuildReferenceAgeWarningThreshold;
         public static int BuildReferenceAgeCriticalThreshold;
         public static int BuildReferenceUpdateExclusionPeriod;
+        public static double IdleWarningThresholdForSleepingSessionWithOpenTran;
+        public static double IdleCriticalThresholdForSleepingSessionWithOpenTran;
 
         static Config()
         {
@@ -62,6 +64,8 @@ namespace DBADashGUI
             BuildReferenceAgeWarningThreshold = settings.GetValueAsInt("GUIBuildReferenceAgeWarningThreshold", 45);
             BuildReferenceAgeCriticalThreshold = settings.GetValueAsInt("GUIBuildReferenceAgeCriticalThreshold", 90);
             BuildReferenceUpdateExclusionPeriod = settings.GetValueAsInt("GUIBuildReferenceUpdateExclusionPeriod", 2);
+            IdleWarningThresholdForSleepingSessionWithOpenTran = settings.GetValueAsDouble("IdleWarningThresholdForSleepingSessionWithOpenTran", 1);
+            IdleCriticalThresholdForSleepingSessionWithOpenTran = settings.GetValueAsDouble("IdleCriticalThresholdForSleepingSessionWithOpenTran", 600);
         }
 
         public static int GetValueAsInt(object value, int defaultValue)
