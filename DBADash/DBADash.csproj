@@ -90,20 +90,20 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.7.200.15" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.201.13" />
+    <PackageReference Include="AWSSDK.Core" Version="3.7.202.1" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.203.7" />
     <PackageReference Include="Azure.Core" Version="1.34.0" />
-    <PackageReference Include="Azure.Identity" Version="1.9.0" />
+    <PackageReference Include="Azure.Identity" Version="1.10.0" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.55.0" />
     <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="2.32.0" />
-    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.32.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="6.32.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="6.32.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.32.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.32.1" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.32.2" />
+    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="6.32.2" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="6.32.2" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.32.2" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.32.2" />
     <PackageReference Include="Microsoft.Management.Infrastructure" Version="2.0.0" />
     <PackageReference Include="Microsoft.SqlServer.Assessment" Version="1.1.17" />
     <PackageReference Include="Microsoft.SqlServer.Assessment.Authoring" Version="1.1.0" />
@@ -120,7 +120,7 @@
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="7.0.2" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.32.1" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.32.2" />
     <PackageReference Include="System.Memory" Version="4.5.5" />
     <PackageReference Include="System.Memory.Data" Version="7.0.0" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
