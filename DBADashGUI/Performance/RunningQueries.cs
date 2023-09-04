@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
 using Humanizer;
+using Humanizer.Localisation;
 
 namespace DBADashGUI.Performance
 {
@@ -31,12 +32,13 @@ namespace DBADashGUI.Performance
         private int runningJobCount;
         private bool hasWaitResource;
         private long blockedWait;
+        private string idleThresholdInfo => $"Red = Sleeping session with an open transaction that has been idle for longer than {TimeSpan.FromSeconds(Config.IdleCriticalThresholdForSleepingSessionWithOpenTran).Humanize(maxUnit: TimeUnit.Year, precision: 3)}.\nYellow=Sleeping session with an open transaction that has been idle for longer than {TimeSpan.FromSeconds(Config.IdleWarningThresholdForSleepingSessionWithOpenTran).Humanize(maxUnit: TimeUnit.Year, precision: 3)}.";
 
         private DataGridViewColumn[] RunningQueryColumns =>
-            new DataGridViewColumn[] {
-                new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", Name = "colInstance", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn},
-                new DataGridViewLinkColumn() { HeaderText = "Session ID", DataPropertyName = "session_id", Name = "colSessionID", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn },
-                new DataGridViewLinkColumn() { HeaderText = "Batch Text", DataPropertyName = "batch_text", Name = "colBatchText", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
+    new DataGridViewColumn[] {
+        new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", Name = "colInstance", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn},
+        new DataGridViewLinkColumn() { HeaderText = "Session ID", DataPropertyName = "session_id", Name = "colSessionID", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn },
+        new DataGridViewLinkColumn() { HeaderText = "Batch Text", DataPropertyName = "batch_text", Name = "colBatchText", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
                 new DataGridViewLinkColumn() { HeaderText = "Text", DataPropertyName = "text", Name = "colText", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
                 new DataGridViewLinkColumn() { HeaderText = "Plan", DataPropertyName="has_plan", Name = "colQueryPlan", SortMode = DataGridViewColumnSortMode.Automatic, Visible = true, LinkColor = DashColors.LinkColor, ToolTipText="Click link to view query plan" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Blocking Session ID", DataPropertyName = "blocking_session_id", Name = "colBlockingSessionID", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, ToolTipText = "ID of the session directly blocking the current query.  0 = Not blocked.", DefaultCellStyle = new DataGridViewCellStyle(){ ForeColor=Color.White } },
@@ -54,8 +56,8 @@ namespace DBADashGUI.Performance
                 new DataGridViewTextBoxColumn() { HeaderText = "Writes", DataPropertyName = "writes", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
                 new DataGridViewTextBoxColumn() { HeaderText = "Granted Query Memory (Kb)", DataPropertyName = "granted_query_memory_kb", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
                 new DataGridViewTextBoxColumn() { HeaderText = "Command", DataPropertyName = "Command", Name = "colCommand", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                new DataGridViewTextBoxColumn() { HeaderText = "Status", DataPropertyName = "Status", Name = "colStatus", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                new DataGridViewTextBoxColumn() { Name="colIdleTime", HeaderText = "Idle Time", DataPropertyName = "sleeping_session_idle_time", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, ToolTipText = "Sleeping session idle time.  \nA sleeping session is waiting for work from the client application.  \nThis can be a problem if the session is sleeping for a long time and has an open transaction. \ne.g. Blocking or log growth due to the open transaction preventing log truncation.\nApplication code changes are required to fix sleeping sessions with open transactions.\n\nRed=Sleeping session that is causing blocking or has been idle for over 10min.\nYellow=Sleeping session with an open transaction that has been idle for longer than 1 second.", Visible = idleCount>0},
+                new DataGridViewTextBoxColumn() { HeaderText = "Status", DataPropertyName = "Status", Name = "colStatus", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, ToolTipText = "Running - Query is currently running and consuming CPU cycles.\nRunnable - Ready to run, waiting for time on the CPU\nSuspended - Waiting on a resource.  e.g IO, lock\nPending - Waiting for a worker thread to become available.\nRollback - Transaction rollback is in progress.\nSleeping - No work to perform, waiting for next query from client application.\n\nRed = Sleeping session that is causing blocking."},
+                new DataGridViewTextBoxColumn() { Name="colIdleTime", HeaderText = "Idle Time", DataPropertyName = "sleeping_session_idle_time", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, ToolTipText = $"Sleeping session idle time.  \nA sleeping session is waiting for work from the client application.  \nThis can be a problem if the session is sleeping for a long time and has an open transaction. \ne.g. Blocking or log growth due to the open transaction preventing log truncation.\nApplication code changes are required to fix sleeping sessions with open transactions.\n\n{idleThresholdInfo}", Visible = idleCount>0},
                 new DataGridViewTextBoxColumn() { Name="colIdleTimeSec", HeaderText = "Idle Time (sec)", DataPropertyName = "sleeping_session_idle_time_sec", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, ToolTipText = "Sleeping session idle time (seconds)", Visible = false},
                 new DataGridViewTextBoxColumn() { HeaderText = "Wait Time (ms)", DataPropertyName = "wait_time", Name = "colWaitTime", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
                 new DataGridViewTextBoxColumn() { HeaderText = "Wait Type", DataPropertyName = "wait_type", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
@@ -247,7 +249,7 @@ namespace DBADashGUI.Performance
                 new DataGridViewTextBoxColumn() { HeaderText = "TempDB Wait Count", DataPropertyName = "TempDBWaitCount", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                 new DataGridViewTextBoxColumn() { HeaderText = "TempDB Wait Time", DataPropertyName = "TempDBWaitTime", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                 new DataGridViewTextBoxColumn() { HeaderText = "Sleeping Sessions Count", DataPropertyName = "SleepingSessionsCount", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "Count of sleeping sessions with open transactions. Sleeping sessions are waiting for input from the client application." },
-                new DataGridViewTextBoxColumn() { HeaderText = "Max Idle Time", DataPropertyName = "MaxIdleTime", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "Max idle time for sleeping sessions with open transactions. " }
+                new DataGridViewTextBoxColumn() { Name = "colMaxIdleTime", HeaderText = "Max Idle Time", DataPropertyName = "MaxIdleTime", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = $"Max idle time for sleeping sessions with open transactions.\n\n{idleThresholdInfo}" }
             );
             dgv.DataSource = new DataView(dt);
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
@@ -683,18 +685,41 @@ namespace DBADashGUI.Performance
             {
                 var idleSec = Convert.ToDouble(dgv.Rows[e.RowIndex].Cells["colIdleTimeSec"].Value.DBNullToNull());
                 var openTranCnt = Convert.ToInt32(dgv.Rows[e.RowIndex].Cells["colOpenTransactionCount"].Value.DBNullToNull());
-                var blockedCnt = Convert.ToInt32(dgv.Rows[e.RowIndex].Cells["colBlockCount"].Value.DBNullToNull());
-                var statusColor = DashColors.NotApplicable;
-                if ((blockedCnt > 0 && openTranCnt > 0 && idleSec > 0) || (openTranCnt > 0 && idleSec > 600))
+
+                var statusColor = openTranCnt switch
                 {
-                    statusColor = DashColors.Fail;
-                }
-                else if (openTranCnt > 0 && idleSec > 1)
-                {
-                    statusColor = DashColors.Warning;
-                }
+                    > 0 when idleSec > Config.IdleCriticalThresholdForSleepingSessionWithOpenTran => DashColors.Fail,
+                    > 0 when idleSec > Config.IdleWarningThresholdForSleepingSessionWithOpenTran => DashColors.Warning,
+                    _ => DashColors.NotApplicable
+                };
                 e.CellStyle.BackColor = statusColor;
                 e.CellStyle.ForeColor = statusColor.ContrastColor();
+            }
+            else if (dgv.Columns[e.ColumnIndex].Name == "colMaxIdleTime")
+            {
+                var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+                var idleSec = Convert.ToDouble(row["SleepingSessionsMaxIdleTimeMs"].DBNullToNull()) / 1000;
+                var statusColor =
+                    idleSec > Config.IdleCriticalThresholdForSleepingSessionWithOpenTran ? DashColors.Fail :
+                    idleSec > Config.IdleWarningThresholdForSleepingSessionWithOpenTran ? DashColors.Warning :
+                    DashColors.NotApplicable;
+                e.CellStyle.BackColor = statusColor;
+                e.CellStyle.ForeColor = statusColor.ContrastColor();
+            }
+            else if (dgv.Columns[e.ColumnIndex].Name == "colStatus")
+            {
+                var blockedCnt = Convert.ToInt32(dgv.Rows[e.RowIndex].Cells["colBlockCount"].Value.DBNullToNull());
+                if (e.Value != null && e.Value.ToString() == "sleeping" && blockedCnt > 0)
+                {
+                    e.CellStyle.BackColor = DashColors.Fail;
+                    e.CellStyle.ForeColor = DashColors.Fail.ContrastColor();
+                    dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = "Sleeping session with open transaction causing blocking";
+                }
+                else
+                {
+                    e.CellStyle.BackColor = Color.White;
+                    e.CellStyle.ForeColor = Color.Black;
+                }
             }
         }
 

@@ -303,5 +303,21 @@ namespace DBADashGUI
             // If the key does not exist or the value is not an integer, return the default value
             return defaultValue;
         }
+
+        public static double GetValueAsDouble(this Dictionary<string, object> dict, string key, double defaultValue)
+        {
+            // Check if the key exists
+            if (dict.TryGetValue(key, out object value))
+            {
+                // Try to cast the value to a double
+                if (double.TryParse(value.ToString(), out double dValue))
+                {
+                    return dValue;
+                }
+            }
+
+            // If the key does not exist or the value is not a double, return the default value
+            return defaultValue;
+        }
     }
 }
