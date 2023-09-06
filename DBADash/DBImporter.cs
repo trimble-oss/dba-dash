@@ -99,11 +99,7 @@ namespace DBADash
             if (data.Tables.Contains("DatabasesHADR"))
             {
                 var dtDatabasesHADR = data.Tables["DatabasesHADR"];
-                if (dtDatabasesHADR.Rows.Count == 0)
-                {
-                    data.Tables.Remove("DatabasesHADR");
-                }
-                else if (!dtDatabasesHADR.Columns.Contains("replica_id"))
+                if (!dtDatabasesHADR.Columns.Contains("replica_id"))
                 {
                     dtDatabasesHADR.Columns.Add("replica_id", typeof(Guid));
                     dtDatabasesHADR.Columns.Add("group_id", typeof(Guid));
