@@ -25,7 +25,7 @@ SELECT I.InstanceID,
        MAX(CD.Status) as [Snapshot Status],
        MAX(CD.SnapshotAge) as [Snapshot Age]
 FROM dbo.DatabasesHADR HADR
-JOIN dbo.Databases D ON D.DatabaseID = HADR.DatabaseID
+JOIN dbo.Databases D ON D.DatabaseID = HADR.DatabaseID AND HADR.InstanceID = D.InstanceID
 JOIN dbo.Instances I ON D.InstanceID = I.InstanceID
 LEFT JOIN dbo.AvailabilityReplicas AR ON D.InstanceID = AR.InstanceID
                                          AND AR.replica_id = HADR.replica_id
