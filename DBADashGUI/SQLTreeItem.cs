@@ -94,7 +94,7 @@ namespace DBADashGUI
         private bool IsInstanceOrAzureDB => Type == TreeType.Instance || Type == TreeType.AzureDatabase;
         private bool IsInstanceOrAzureInstance => Type == TreeType.Instance || Type == TreeType.AzureInstance;
 
-        public string? DriveName;
+        public string DriveName;
 
         public DBADashContext Context
         {
