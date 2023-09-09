@@ -19,7 +19,7 @@ namespace DBADashGUI.DBFiles
 
         private List<Int32> InstanceIDs;
         private Int32? DatabaseID;
-        private string? DriveName;
+        private string DriveName;
 
         public bool IncludeCritical
         {
