@@ -38,6 +38,10 @@ namespace DBADashGUI
 
         public static void RefreshConfig()
         {
+            if (string.IsNullOrEmpty(Common.ConnectionString))
+            {
+                return;
+            }
             Dictionary<string, object> settings = new();
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("Settings_Get", cn) { CommandType = CommandType.StoredProcedure };
