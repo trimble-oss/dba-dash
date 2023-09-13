@@ -2,6 +2,7 @@
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.Performance
 {
@@ -10,6 +11,7 @@ namespace DBADashGUI.Performance
         public PerformanceCounterThreshold()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         private DataTable counters;

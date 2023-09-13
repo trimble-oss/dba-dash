@@ -30,24 +30,6 @@
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle21 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -70,35 +52,25 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle39 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle40 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle41 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
             dgv = new System.Windows.Forms.DataGridView();
-            colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colDB = new System.Windows.Forms.DataGridViewLinkColumn();
-            colEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colServiceObjective = new System.Windows.Forms.DataGridViewLinkColumn();
-            colElasticPool = new System.Windows.Forms.DataGridViewLinkColumn();
-            dgv_DTUHistogram = new System.Windows.Forms.DataGridViewImageColumn();
-            dgv_CPUHistogram = new System.Windows.Forms.DataGridViewImageColumn();
-            dgv_DataHistogram = new System.Windows.Forms.DataGridViewImageColumn();
-            dgv_LogHistogram = new System.Windows.Forms.DataGridViewImageColumn();
-            colMaxDTU = new CustomProgressControl.DataGridViewProgressBarColumn();
-            colMaxDTUUsed = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colUnusedDTUs = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colAvgDTUPercent = new CustomProgressControl.DataGridViewProgressBarColumn();
-            colAVGDTUsUsed = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colMinDTULimit = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colDTULimitMax = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colMaxCPUPercent = new CustomProgressControl.DataGridViewProgressBarColumn();
-            colMaxDataPct = new CustomProgressControl.DataGridViewProgressBarColumn();
-            colMaxLog = new CustomProgressControl.DataGridViewProgressBarColumn();
-            colAvgCPUPct = new CustomProgressControl.DataGridViewProgressBarColumn();
-            colAvgDataPct = new CustomProgressControl.DataGridViewProgressBarColumn();
-            colAvgLogWrite = new CustomProgressControl.DataGridViewProgressBarColumn();
-            colAllocatedSpaceMB = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colUsedMB = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colMaxStorageSize = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colAlocatedPctMax = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colUsedPctMax = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colFileSnapshotAge = new System.Windows.Forms.DataGridViewTextBoxColumn();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
@@ -164,6 +136,34 @@
             toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             tsExcelPool = new System.Windows.Forms.ToolStripButton();
             tsPoolCols = new System.Windows.Forms.ToolStripButton();
+            colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colDB = new System.Windows.Forms.DataGridViewLinkColumn();
+            colEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colServiceObjective = new System.Windows.Forms.DataGridViewLinkColumn();
+            colElasticPool = new System.Windows.Forms.DataGridViewLinkColumn();
+            dgv_DTUHistogram = new System.Windows.Forms.DataGridViewImageColumn();
+            dgv_CPUHistogram = new System.Windows.Forms.DataGridViewImageColumn();
+            dgv_DataHistogram = new System.Windows.Forms.DataGridViewImageColumn();
+            dgv_LogHistogram = new System.Windows.Forms.DataGridViewImageColumn();
+            colMaxDTU = new CustomProgressControl.DataGridViewProgressBarColumn();
+            colMaxDTUUsed = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colUnusedDTUs = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colAvgDTUPercent = new CustomProgressControl.DataGridViewProgressBarColumn();
+            colAVGDTUsUsed = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colMinDTULimit = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colDTULimitMax = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colMaxCPUPercent = new CustomProgressControl.DataGridViewProgressBarColumn();
+            colMaxDataPct = new CustomProgressControl.DataGridViewProgressBarColumn();
+            colMaxLog = new CustomProgressControl.DataGridViewProgressBarColumn();
+            colAvgCPUPct = new CustomProgressControl.DataGridViewProgressBarColumn();
+            colAvgDataPct = new CustomProgressControl.DataGridViewProgressBarColumn();
+            colAvgLogWrite = new CustomProgressControl.DataGridViewProgressBarColumn();
+            colAllocatedSpaceMB = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colUsedMB = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colMaxStorageSize = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colAllocatedPctMax = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colUsedPctMax = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colFileSnapshotAge = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvPool).BeginInit();
@@ -189,7 +189,7 @@
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colInstance, colDB, colEdition, colServiceObjective, colElasticPool, dgv_DTUHistogram, dgv_CPUHistogram, dgv_DataHistogram, dgv_LogHistogram, colMaxDTU, colMaxDTUUsed, colUnusedDTUs, colAvgDTUPercent, colAVGDTUsUsed, colMinDTULimit, colDTULimitMax, colMaxCPUPercent, colMaxDataPct, colMaxLog, colAvgCPUPct, colAvgDataPct, colAvgLogWrite, colAllocatedSpaceMB, colUsedMB, colMaxStorageSize, colAlocatedPctMax, colUsedPctMax, colFileSnapshotAge });
+            dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colInstance, colDB, colEdition, colServiceObjective, colElasticPool, dgv_DTUHistogram, dgv_CPUHistogram, dgv_DataHistogram, dgv_LogHistogram, colMaxDTU, colMaxDTUUsed, colUnusedDTUs, colAvgDTUPercent, colAVGDTUsUsed, colMinDTULimit, colDTULimitMax, colMaxCPUPercent, colMaxDataPct, colMaxLog, colAvgCPUPct, colAvgDataPct, colAvgLogWrite, colAllocatedSpaceMB, colUsedMB, colMaxStorageSize, colAllocatedPctMax, colUsedPctMax, colFileSnapshotAge });
             dataGridViewCellStyle20.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle20.BackColor = System.Drawing.SystemColors.Window;
             dataGridViewCellStyle20.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -211,331 +211,6 @@
             dgv.CellContentClick += Dgv_CellContentClick;
             dgv.RowsAdded += Dgv_RowsAdded;
             dgv.Sorted += Dgv_Sorted;
-            // 
-            // colInstance
-            // 
-            colInstance.DataPropertyName = "Instance";
-            colInstance.HeaderText = "Instance";
-            colInstance.MinimumWidth = 6;
-            colInstance.Name = "colInstance";
-            colInstance.ReadOnly = true;
-            colInstance.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colInstance.Width = 90;
-            // 
-            // colDB
-            // 
-            colDB.DataPropertyName = "DB";
-            colDB.HeaderText = "DB";
-            colDB.MinimumWidth = 6;
-            colDB.Name = "colDB";
-            colDB.ReadOnly = true;
-            colDB.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colDB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            colDB.Width = 56;
-            // 
-            // colEdition
-            // 
-            colEdition.DataPropertyName = "edition";
-            colEdition.HeaderText = "Edition";
-            colEdition.MinimumWidth = 6;
-            colEdition.Name = "colEdition";
-            colEdition.ReadOnly = true;
-            colEdition.Width = 80;
-            // 
-            // colServiceObjective
-            // 
-            colServiceObjective.DataPropertyName = "service_objective";
-            colServiceObjective.HeaderText = "Service Objective";
-            colServiceObjective.LinkColor = System.Drawing.Color.Blue;
-            colServiceObjective.MinimumWidth = 6;
-            colServiceObjective.Name = "colServiceObjective";
-            colServiceObjective.ReadOnly = true;
-            colServiceObjective.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colServiceObjective.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            colServiceObjective.Width = 135;
-            // 
-            // colElasticPool
-            // 
-            colElasticPool.DataPropertyName = "elastic_pool_name";
-            colElasticPool.HeaderText = "Elastic Pool";
-            colElasticPool.MinimumWidth = 6;
-            colElasticPool.Name = "colElasticPool";
-            colElasticPool.ReadOnly = true;
-            colElasticPool.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colElasticPool.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            colElasticPool.Width = 101;
-            // 
-            // dgv_DTUHistogram
-            // 
-            dgv_DTUHistogram.HeaderText = "DTU Histogram";
-            dgv_DTUHistogram.MinimumWidth = 6;
-            dgv_DTUHistogram.Name = "dgv_DTUHistogram";
-            dgv_DTUHistogram.ReadOnly = true;
-            dgv_DTUHistogram.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            dgv_DTUHistogram.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            dgv_DTUHistogram.Visible = false;
-            dgv_DTUHistogram.Width = 123;
-            // 
-            // dgv_CPUHistogram
-            // 
-            dgv_CPUHistogram.HeaderText = "CPU Histogram";
-            dgv_CPUHistogram.MinimumWidth = 6;
-            dgv_CPUHistogram.Name = "dgv_CPUHistogram";
-            dgv_CPUHistogram.ReadOnly = true;
-            dgv_CPUHistogram.Visible = false;
-            dgv_CPUHistogram.Width = 99;
-            // 
-            // dgv_DataHistogram
-            // 
-            dgv_DataHistogram.HeaderText = "Data Histogram";
-            dgv_DataHistogram.MinimumWidth = 6;
-            dgv_DataHistogram.Name = "dgv_DataHistogram";
-            dgv_DataHistogram.ReadOnly = true;
-            dgv_DataHistogram.Visible = false;
-            dgv_DataHistogram.Width = 101;
-            // 
-            // dgv_LogHistogram
-            // 
-            dgv_LogHistogram.HeaderText = "Log Write Histogram";
-            dgv_LogHistogram.MinimumWidth = 6;
-            dgv_LogHistogram.Name = "dgv_LogHistogram";
-            dgv_LogHistogram.ReadOnly = true;
-            dgv_LogHistogram.Visible = false;
-            dgv_LogHistogram.Width = 129;
-            // 
-            // colMaxDTU
-            // 
-            colMaxDTU.DataPropertyName = "Max_DTUPercent";
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle2.Format = "0.#\\%";
-            dataGridViewCellStyle2.Padding = new System.Windows.Forms.Padding(4);
-            colMaxDTU.DefaultCellStyle = dataGridViewCellStyle2;
-            colMaxDTU.HeaderText = "Max DTU (%)";
-            colMaxDTU.MinimumWidth = 6;
-            colMaxDTU.Name = "colMaxDTU";
-            colMaxDTU.ReadOnly = true;
-            colMaxDTU.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colMaxDTU.Width = 111;
-            // 
-            // colMaxDTUUsed
-            // 
-            colMaxDTUUsed.DataPropertyName = "Max_DTUsUsed";
-            dataGridViewCellStyle3.Format = "N0";
-            colMaxDTUUsed.DefaultCellStyle = dataGridViewCellStyle3;
-            colMaxDTUUsed.HeaderText = "Max DTUs Used";
-            colMaxDTUUsed.MinimumWidth = 6;
-            colMaxDTUUsed.Name = "colMaxDTUUsed";
-            colMaxDTUUsed.ReadOnly = true;
-            colMaxDTUUsed.Width = 127;
-            // 
-            // colUnusedDTUs
-            // 
-            colUnusedDTUs.DataPropertyName = "UnusedDTU";
-            dataGridViewCellStyle4.Format = "N0";
-            colUnusedDTUs.DefaultCellStyle = dataGridViewCellStyle4;
-            colUnusedDTUs.HeaderText = "Unused DTUs";
-            colUnusedDTUs.MinimumWidth = 6;
-            colUnusedDTUs.Name = "colUnusedDTUs";
-            colUnusedDTUs.ReadOnly = true;
-            colUnusedDTUs.Width = 116;
-            // 
-            // colAvgDTUPercent
-            // 
-            colAvgDTUPercent.DataPropertyName = "Avg_DTUPercent";
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle5.Format = "0.#\\%";
-            dataGridViewCellStyle5.Padding = new System.Windows.Forms.Padding(4);
-            colAvgDTUPercent.DefaultCellStyle = dataGridViewCellStyle5;
-            colAvgDTUPercent.HeaderText = "Avg DTU %";
-            colAvgDTUPercent.MinimumWidth = 6;
-            colAvgDTUPercent.Name = "colAvgDTUPercent";
-            colAvgDTUPercent.ReadOnly = true;
-            colAvgDTUPercent.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colAvgDTUPercent.Width = 91;
-            // 
-            // colAVGDTUsUsed
-            // 
-            colAVGDTUsUsed.DataPropertyName = "Avg_DTUsUsed";
-            dataGridViewCellStyle6.Format = "N0";
-            colAVGDTUsUsed.DefaultCellStyle = dataGridViewCellStyle6;
-            colAVGDTUsUsed.HeaderText = "Avg DTUs Used";
-            colAVGDTUsUsed.MinimumWidth = 6;
-            colAVGDTUsUsed.Name = "colAVGDTUsUsed";
-            colAVGDTUsUsed.ReadOnly = true;
-            colAVGDTUsUsed.Width = 127;
-            // 
-            // colMinDTULimit
-            // 
-            colMinDTULimit.DataPropertyName = "Min_DTULimit";
-            dataGridViewCellStyle7.Format = "N0";
-            colMinDTULimit.DefaultCellStyle = dataGridViewCellStyle7;
-            colMinDTULimit.HeaderText = "DTU Limit (Min)";
-            colMinDTULimit.MinimumWidth = 6;
-            colMinDTULimit.Name = "colMinDTULimit";
-            colMinDTULimit.ReadOnly = true;
-            colMinDTULimit.Width = 124;
-            // 
-            // colDTULimitMax
-            // 
-            colDTULimitMax.DataPropertyName = "Max_DTULimit";
-            dataGridViewCellStyle8.Format = "N0";
-            colDTULimitMax.DefaultCellStyle = dataGridViewCellStyle8;
-            colDTULimitMax.HeaderText = "DTU Limit (Max)";
-            colDTULimitMax.MinimumWidth = 6;
-            colDTULimitMax.Name = "colDTULimitMax";
-            colDTULimitMax.ReadOnly = true;
-            colDTULimitMax.Width = 127;
-            // 
-            // colMaxCPUPercent
-            // 
-            colMaxCPUPercent.DataPropertyName = "MaxCPUPercent";
-            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle9.Format = "0.#\\%";
-            dataGridViewCellStyle9.Padding = new System.Windows.Forms.Padding(4);
-            colMaxCPUPercent.DefaultCellStyle = dataGridViewCellStyle9;
-            colMaxCPUPercent.HeaderText = "Max CPU %";
-            colMaxCPUPercent.MinimumWidth = 6;
-            colMaxCPUPercent.Name = "colMaxCPUPercent";
-            colMaxCPUPercent.ReadOnly = true;
-            colMaxCPUPercent.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colMaxCPUPercent.Width = 91;
-            // 
-            // colMaxDataPct
-            // 
-            colMaxDataPct.DataPropertyName = "MaxDataPercent";
-            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle10.Format = "0.#\\%";
-            dataGridViewCellStyle10.Padding = new System.Windows.Forms.Padding(4);
-            colMaxDataPct.DefaultCellStyle = dataGridViewCellStyle10;
-            colMaxDataPct.HeaderText = "Max Data %";
-            colMaxDataPct.MinimumWidth = 6;
-            colMaxDataPct.Name = "colMaxDataPct";
-            colMaxDataPct.ReadOnly = true;
-            colMaxDataPct.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colMaxDataPct.Width = 92;
-            // 
-            // colMaxLog
-            // 
-            colMaxLog.DataPropertyName = "MaxLogWritePercent";
-            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle11.Format = "0.#\\%";
-            dataGridViewCellStyle11.Padding = new System.Windows.Forms.Padding(4);
-            colMaxLog.DefaultCellStyle = dataGridViewCellStyle11;
-            colMaxLog.HeaderText = "Max Log Write %";
-            colMaxLog.MinimumWidth = 6;
-            colMaxLog.Name = "colMaxLog";
-            colMaxLog.ReadOnly = true;
-            colMaxLog.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colMaxLog.Width = 120;
-            // 
-            // colAvgCPUPct
-            // 
-            colAvgCPUPct.DataPropertyName = "AvgCPUPercent";
-            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle12.Format = "0.#\\%";
-            dataGridViewCellStyle12.Padding = new System.Windows.Forms.Padding(4);
-            colAvgCPUPct.DefaultCellStyle = dataGridViewCellStyle12;
-            colAvgCPUPct.HeaderText = "Avg CPU %";
-            colAvgCPUPct.MinimumWidth = 6;
-            colAvgCPUPct.Name = "colAvgCPUPct";
-            colAvgCPUPct.ReadOnly = true;
-            colAvgCPUPct.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colAvgCPUPct.Width = 90;
-            // 
-            // colAvgDataPct
-            // 
-            colAvgDataPct.DataPropertyName = "AvgDataPercent";
-            dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle13.Format = "0.#\\%";
-            dataGridViewCellStyle13.Padding = new System.Windows.Forms.Padding(4);
-            colAvgDataPct.DefaultCellStyle = dataGridViewCellStyle13;
-            colAvgDataPct.HeaderText = "Avg Data %";
-            colAvgDataPct.MinimumWidth = 6;
-            colAvgDataPct.Name = "colAvgDataPct";
-            colAvgDataPct.ReadOnly = true;
-            colAvgDataPct.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colAvgDataPct.Width = 91;
-            // 
-            // colAvgLogWrite
-            // 
-            colAvgLogWrite.DataPropertyName = "AvgLogWritePercent";
-            dataGridViewCellStyle14.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle14.Format = "0.#\\%";
-            dataGridViewCellStyle14.Padding = new System.Windows.Forms.Padding(4);
-            colAvgLogWrite.DefaultCellStyle = dataGridViewCellStyle14;
-            colAvgLogWrite.HeaderText = "Avg Log Write %";
-            colAvgLogWrite.MinimumWidth = 6;
-            colAvgLogWrite.Name = "colAvgLogWrite";
-            colAvgLogWrite.ReadOnly = true;
-            colAvgLogWrite.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colAvgLogWrite.Width = 119;
-            // 
-            // colAllocatedSpaceMB
-            // 
-            colAllocatedSpaceMB.DataPropertyName = "AllocatedSpaceMB";
-            dataGridViewCellStyle15.Format = "N0";
-            colAllocatedSpaceMB.DefaultCellStyle = dataGridViewCellStyle15;
-            colAllocatedSpaceMB.HeaderText = "Allocated Space MB";
-            colAllocatedSpaceMB.MinimumWidth = 6;
-            colAllocatedSpaceMB.Name = "colAllocatedSpaceMB";
-            colAllocatedSpaceMB.ReadOnly = true;
-            colAllocatedSpaceMB.Visible = false;
-            colAllocatedSpaceMB.Width = 125;
-            // 
-            // colUsedMB
-            // 
-            colUsedMB.DataPropertyName = "UsedSpaceMB";
-            dataGridViewCellStyle16.Format = "N0";
-            colUsedMB.DefaultCellStyle = dataGridViewCellStyle16;
-            colUsedMB.HeaderText = "Used MB";
-            colUsedMB.MinimumWidth = 6;
-            colUsedMB.Name = "colUsedMB";
-            colUsedMB.ReadOnly = true;
-            colUsedMB.Visible = false;
-            colUsedMB.Width = 125;
-            // 
-            // colMaxStorageSize
-            // 
-            colMaxStorageSize.DataPropertyName = "MaxStorageSizeMB";
-            dataGridViewCellStyle17.Format = "N0";
-            colMaxStorageSize.DefaultCellStyle = dataGridViewCellStyle17;
-            colMaxStorageSize.HeaderText = "Max Storage Size MB";
-            colMaxStorageSize.MinimumWidth = 6;
-            colMaxStorageSize.Name = "colMaxStorageSize";
-            colMaxStorageSize.ReadOnly = true;
-            colMaxStorageSize.Visible = false;
-            colMaxStorageSize.Width = 125;
-            // 
-            // colAlocatedPctMax
-            // 
-            colAlocatedPctMax.DataPropertyName = "AllocatedPctOfMaxSize";
-            dataGridViewCellStyle18.Format = "P1";
-            colAlocatedPctMax.DefaultCellStyle = dataGridViewCellStyle18;
-            colAlocatedPctMax.HeaderText = "Allocated % of Max Size";
-            colAlocatedPctMax.MinimumWidth = 6;
-            colAlocatedPctMax.Name = "colAlocatedPctMax";
-            colAlocatedPctMax.ReadOnly = true;
-            colAlocatedPctMax.Width = 125;
-            // 
-            // colUsedPctMax
-            // 
-            colUsedPctMax.DataPropertyName = "UsedPctOfMaxSize";
-            dataGridViewCellStyle19.Format = "P1";
-            colUsedPctMax.DefaultCellStyle = dataGridViewCellStyle19;
-            colUsedPctMax.HeaderText = "Used % Max Size";
-            colUsedPctMax.MinimumWidth = 6;
-            colUsedPctMax.Name = "colUsedPctMax";
-            colUsedPctMax.ReadOnly = true;
-            colUsedPctMax.Width = 125;
-            // 
-            // colFileSnapshotAge
-            // 
-            colFileSnapshotAge.DataPropertyName = "FileSnapshotAge";
-            colFileSnapshotAge.HeaderText = "File Snapshot Age";
-            colFileSnapshotAge.MinimumWidth = 6;
-            colFileSnapshotAge.Name = "colFileSnapshotAge";
-            colFileSnapshotAge.ReadOnly = true;
-            colFileSnapshotAge.Width = 125;
             // 
             // toolStrip1
             // 
@@ -1245,6 +920,331 @@
             tsPoolCols.Text = "Columns";
             tsPoolCols.Click += TsPoolCols_Click;
             // 
+            // colInstance
+            // 
+            colInstance.DataPropertyName = "Instance";
+            colInstance.HeaderText = "Instance";
+            colInstance.MinimumWidth = 6;
+            colInstance.Name = "colInstance";
+            colInstance.ReadOnly = true;
+            colInstance.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colInstance.Width = 90;
+            // 
+            // colDB
+            // 
+            colDB.DataPropertyName = "DB";
+            colDB.HeaderText = "DB";
+            colDB.MinimumWidth = 6;
+            colDB.Name = "colDB";
+            colDB.ReadOnly = true;
+            colDB.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colDB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            colDB.Width = 56;
+            // 
+            // colEdition
+            // 
+            colEdition.DataPropertyName = "edition";
+            colEdition.HeaderText = "Edition";
+            colEdition.MinimumWidth = 6;
+            colEdition.Name = "colEdition";
+            colEdition.ReadOnly = true;
+            colEdition.Width = 80;
+            // 
+            // colServiceObjective
+            // 
+            colServiceObjective.DataPropertyName = "service_objective";
+            colServiceObjective.HeaderText = "Service Objective";
+            colServiceObjective.LinkColor = System.Drawing.Color.Blue;
+            colServiceObjective.MinimumWidth = 6;
+            colServiceObjective.Name = "colServiceObjective";
+            colServiceObjective.ReadOnly = true;
+            colServiceObjective.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colServiceObjective.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            colServiceObjective.Width = 135;
+            // 
+            // colElasticPool
+            // 
+            colElasticPool.DataPropertyName = "elastic_pool_name";
+            colElasticPool.HeaderText = "Elastic Pool";
+            colElasticPool.MinimumWidth = 6;
+            colElasticPool.Name = "colElasticPool";
+            colElasticPool.ReadOnly = true;
+            colElasticPool.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colElasticPool.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            colElasticPool.Width = 101;
+            // 
+            // dgv_DTUHistogram
+            // 
+            dgv_DTUHistogram.HeaderText = "DTU Histogram";
+            dgv_DTUHistogram.MinimumWidth = 6;
+            dgv_DTUHistogram.Name = "dgv_DTUHistogram";
+            dgv_DTUHistogram.ReadOnly = true;
+            dgv_DTUHistogram.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            dgv_DTUHistogram.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            dgv_DTUHistogram.Visible = false;
+            dgv_DTUHistogram.Width = 123;
+            // 
+            // dgv_CPUHistogram
+            // 
+            dgv_CPUHistogram.HeaderText = "CPU Histogram";
+            dgv_CPUHistogram.MinimumWidth = 6;
+            dgv_CPUHistogram.Name = "dgv_CPUHistogram";
+            dgv_CPUHistogram.ReadOnly = true;
+            dgv_CPUHistogram.Visible = false;
+            dgv_CPUHistogram.Width = 99;
+            // 
+            // dgv_DataHistogram
+            // 
+            dgv_DataHistogram.HeaderText = "Data Histogram";
+            dgv_DataHistogram.MinimumWidth = 6;
+            dgv_DataHistogram.Name = "dgv_DataHistogram";
+            dgv_DataHistogram.ReadOnly = true;
+            dgv_DataHistogram.Visible = false;
+            dgv_DataHistogram.Width = 101;
+            // 
+            // dgv_LogHistogram
+            // 
+            dgv_LogHistogram.HeaderText = "Log Write Histogram";
+            dgv_LogHistogram.MinimumWidth = 6;
+            dgv_LogHistogram.Name = "dgv_LogHistogram";
+            dgv_LogHistogram.ReadOnly = true;
+            dgv_LogHistogram.Visible = false;
+            dgv_LogHistogram.Width = 129;
+            // 
+            // colMaxDTU
+            // 
+            colMaxDTU.DataPropertyName = "Max_DTUPercent";
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle2.Format = "0.#\\%";
+            dataGridViewCellStyle2.Padding = new System.Windows.Forms.Padding(4);
+            colMaxDTU.DefaultCellStyle = dataGridViewCellStyle2;
+            colMaxDTU.HeaderText = "Max DTU (%)";
+            colMaxDTU.MinimumWidth = 6;
+            colMaxDTU.Name = "colMaxDTU";
+            colMaxDTU.ReadOnly = true;
+            colMaxDTU.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colMaxDTU.Width = 111;
+            // 
+            // colMaxDTUUsed
+            // 
+            colMaxDTUUsed.DataPropertyName = "Max_DTUsUsed";
+            dataGridViewCellStyle3.Format = "N0";
+            colMaxDTUUsed.DefaultCellStyle = dataGridViewCellStyle3;
+            colMaxDTUUsed.HeaderText = "Max DTUs Used";
+            colMaxDTUUsed.MinimumWidth = 6;
+            colMaxDTUUsed.Name = "colMaxDTUUsed";
+            colMaxDTUUsed.ReadOnly = true;
+            colMaxDTUUsed.Width = 127;
+            // 
+            // colUnusedDTUs
+            // 
+            colUnusedDTUs.DataPropertyName = "UnusedDTU";
+            dataGridViewCellStyle4.Format = "N0";
+            colUnusedDTUs.DefaultCellStyle = dataGridViewCellStyle4;
+            colUnusedDTUs.HeaderText = "Unused DTUs";
+            colUnusedDTUs.MinimumWidth = 6;
+            colUnusedDTUs.Name = "colUnusedDTUs";
+            colUnusedDTUs.ReadOnly = true;
+            colUnusedDTUs.Width = 116;
+            // 
+            // colAvgDTUPercent
+            // 
+            colAvgDTUPercent.DataPropertyName = "Avg_DTUPercent";
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle5.Format = "0.#\\%";
+            dataGridViewCellStyle5.Padding = new System.Windows.Forms.Padding(4);
+            colAvgDTUPercent.DefaultCellStyle = dataGridViewCellStyle5;
+            colAvgDTUPercent.HeaderText = "Avg DTU %";
+            colAvgDTUPercent.MinimumWidth = 6;
+            colAvgDTUPercent.Name = "colAvgDTUPercent";
+            colAvgDTUPercent.ReadOnly = true;
+            colAvgDTUPercent.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colAvgDTUPercent.Width = 91;
+            // 
+            // colAVGDTUsUsed
+            // 
+            colAVGDTUsUsed.DataPropertyName = "Avg_DTUsUsed";
+            dataGridViewCellStyle6.Format = "N0";
+            colAVGDTUsUsed.DefaultCellStyle = dataGridViewCellStyle6;
+            colAVGDTUsUsed.HeaderText = "Avg DTUs Used";
+            colAVGDTUsUsed.MinimumWidth = 6;
+            colAVGDTUsUsed.Name = "colAVGDTUsUsed";
+            colAVGDTUsUsed.ReadOnly = true;
+            colAVGDTUsUsed.Width = 127;
+            // 
+            // colMinDTULimit
+            // 
+            colMinDTULimit.DataPropertyName = "Min_DTULimit";
+            dataGridViewCellStyle7.Format = "N0";
+            colMinDTULimit.DefaultCellStyle = dataGridViewCellStyle7;
+            colMinDTULimit.HeaderText = "DTU Limit (Min)";
+            colMinDTULimit.MinimumWidth = 6;
+            colMinDTULimit.Name = "colMinDTULimit";
+            colMinDTULimit.ReadOnly = true;
+            colMinDTULimit.Width = 124;
+            // 
+            // colDTULimitMax
+            // 
+            colDTULimitMax.DataPropertyName = "Max_DTULimit";
+            dataGridViewCellStyle8.Format = "N0";
+            colDTULimitMax.DefaultCellStyle = dataGridViewCellStyle8;
+            colDTULimitMax.HeaderText = "DTU Limit (Max)";
+            colDTULimitMax.MinimumWidth = 6;
+            colDTULimitMax.Name = "colDTULimitMax";
+            colDTULimitMax.ReadOnly = true;
+            colDTULimitMax.Width = 127;
+            // 
+            // colMaxCPUPercent
+            // 
+            colMaxCPUPercent.DataPropertyName = "MaxCPUPercent";
+            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle9.Format = "0.#\\%";
+            dataGridViewCellStyle9.Padding = new System.Windows.Forms.Padding(4);
+            colMaxCPUPercent.DefaultCellStyle = dataGridViewCellStyle9;
+            colMaxCPUPercent.HeaderText = "Max CPU %";
+            colMaxCPUPercent.MinimumWidth = 6;
+            colMaxCPUPercent.Name = "colMaxCPUPercent";
+            colMaxCPUPercent.ReadOnly = true;
+            colMaxCPUPercent.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colMaxCPUPercent.Width = 91;
+            // 
+            // colMaxDataPct
+            // 
+            colMaxDataPct.DataPropertyName = "MaxDataPercent";
+            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle10.Format = "0.#\\%";
+            dataGridViewCellStyle10.Padding = new System.Windows.Forms.Padding(4);
+            colMaxDataPct.DefaultCellStyle = dataGridViewCellStyle10;
+            colMaxDataPct.HeaderText = "Max Data %";
+            colMaxDataPct.MinimumWidth = 6;
+            colMaxDataPct.Name = "colMaxDataPct";
+            colMaxDataPct.ReadOnly = true;
+            colMaxDataPct.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colMaxDataPct.Width = 92;
+            // 
+            // colMaxLog
+            // 
+            colMaxLog.DataPropertyName = "MaxLogWritePercent";
+            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle11.Format = "0.#\\%";
+            dataGridViewCellStyle11.Padding = new System.Windows.Forms.Padding(4);
+            colMaxLog.DefaultCellStyle = dataGridViewCellStyle11;
+            colMaxLog.HeaderText = "Max Log Write %";
+            colMaxLog.MinimumWidth = 6;
+            colMaxLog.Name = "colMaxLog";
+            colMaxLog.ReadOnly = true;
+            colMaxLog.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colMaxLog.Width = 120;
+            // 
+            // colAvgCPUPct
+            // 
+            colAvgCPUPct.DataPropertyName = "AvgCPUPercent";
+            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle12.Format = "0.#\\%";
+            dataGridViewCellStyle12.Padding = new System.Windows.Forms.Padding(4);
+            colAvgCPUPct.DefaultCellStyle = dataGridViewCellStyle12;
+            colAvgCPUPct.HeaderText = "Avg CPU %";
+            colAvgCPUPct.MinimumWidth = 6;
+            colAvgCPUPct.Name = "colAvgCPUPct";
+            colAvgCPUPct.ReadOnly = true;
+            colAvgCPUPct.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colAvgCPUPct.Width = 90;
+            // 
+            // colAvgDataPct
+            // 
+            colAvgDataPct.DataPropertyName = "AvgDataPercent";
+            dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle13.Format = "0.#\\%";
+            dataGridViewCellStyle13.Padding = new System.Windows.Forms.Padding(4);
+            colAvgDataPct.DefaultCellStyle = dataGridViewCellStyle13;
+            colAvgDataPct.HeaderText = "Avg Data %";
+            colAvgDataPct.MinimumWidth = 6;
+            colAvgDataPct.Name = "colAvgDataPct";
+            colAvgDataPct.ReadOnly = true;
+            colAvgDataPct.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colAvgDataPct.Width = 91;
+            // 
+            // colAvgLogWrite
+            // 
+            colAvgLogWrite.DataPropertyName = "AvgLogWritePercent";
+            dataGridViewCellStyle14.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle14.Format = "0.#\\%";
+            dataGridViewCellStyle14.Padding = new System.Windows.Forms.Padding(4);
+            colAvgLogWrite.DefaultCellStyle = dataGridViewCellStyle14;
+            colAvgLogWrite.HeaderText = "Avg Log Write %";
+            colAvgLogWrite.MinimumWidth = 6;
+            colAvgLogWrite.Name = "colAvgLogWrite";
+            colAvgLogWrite.ReadOnly = true;
+            colAvgLogWrite.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colAvgLogWrite.Width = 119;
+            // 
+            // colAllocatedSpaceMB
+            // 
+            colAllocatedSpaceMB.DataPropertyName = "AllocatedSpaceMB";
+            dataGridViewCellStyle15.Format = "N0";
+            colAllocatedSpaceMB.DefaultCellStyle = dataGridViewCellStyle15;
+            colAllocatedSpaceMB.HeaderText = "Allocated Space MB";
+            colAllocatedSpaceMB.MinimumWidth = 6;
+            colAllocatedSpaceMB.Name = "colAllocatedSpaceMB";
+            colAllocatedSpaceMB.ReadOnly = true;
+            colAllocatedSpaceMB.Visible = false;
+            colAllocatedSpaceMB.Width = 125;
+            // 
+            // colUsedMB
+            // 
+            colUsedMB.DataPropertyName = "UsedSpaceMB";
+            dataGridViewCellStyle16.Format = "N0";
+            colUsedMB.DefaultCellStyle = dataGridViewCellStyle16;
+            colUsedMB.HeaderText = "Used MB";
+            colUsedMB.MinimumWidth = 6;
+            colUsedMB.Name = "colUsedMB";
+            colUsedMB.ReadOnly = true;
+            colUsedMB.Visible = false;
+            colUsedMB.Width = 125;
+            // 
+            // colMaxStorageSize
+            // 
+            colMaxStorageSize.DataPropertyName = "MaxStorageSizeMB";
+            dataGridViewCellStyle17.Format = "N0";
+            colMaxStorageSize.DefaultCellStyle = dataGridViewCellStyle17;
+            colMaxStorageSize.HeaderText = "Max Storage Size MB";
+            colMaxStorageSize.MinimumWidth = 6;
+            colMaxStorageSize.Name = "colMaxStorageSize";
+            colMaxStorageSize.ReadOnly = true;
+            colMaxStorageSize.Visible = false;
+            colMaxStorageSize.Width = 125;
+            // 
+            // colAllocatedPctMax
+            // 
+            colAllocatedPctMax.DataPropertyName = "AllocatedPctOfMaxSize";
+            dataGridViewCellStyle18.Format = "P1";
+            colAllocatedPctMax.DefaultCellStyle = dataGridViewCellStyle18;
+            colAllocatedPctMax.HeaderText = "Allocated % of Max Size";
+            colAllocatedPctMax.MinimumWidth = 6;
+            colAllocatedPctMax.Name = "colAllocatedPctMax";
+            colAllocatedPctMax.ReadOnly = true;
+            colAllocatedPctMax.Width = 125;
+            // 
+            // colUsedPctMax
+            // 
+            colUsedPctMax.DataPropertyName = "UsedPctOfMaxSize";
+            dataGridViewCellStyle19.Format = "P1";
+            colUsedPctMax.DefaultCellStyle = dataGridViewCellStyle19;
+            colUsedPctMax.HeaderText = "Used % Max Size";
+            colUsedPctMax.MinimumWidth = 6;
+            colUsedPctMax.Name = "colUsedPctMax";
+            colUsedPctMax.ReadOnly = true;
+            colUsedPctMax.Width = 125;
+            // 
+            // colFileSnapshotAge
+            // 
+            colFileSnapshotAge.DataPropertyName = "FileSnapshotAge";
+            colFileSnapshotAge.HeaderText = "File Snapshot Age";
+            colFileSnapshotAge.MinimumWidth = 6;
+            colFileSnapshotAge.Name = "colFileSnapshotAge";
+            colFileSnapshotAge.ReadOnly = true;
+            colFileSnapshotAge.Width = 125;
+            // 
             // AzureSummary
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -1313,34 +1313,6 @@
         private System.Windows.Forms.ToolStripButton tsExcelPool;
         private System.Windows.Forms.ToolStripButton tsCols;
         private System.Windows.Forms.ToolStripButton tsPoolCols;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colInstance;
-        private System.Windows.Forms.DataGridViewLinkColumn colDB;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colEdition;
-        private System.Windows.Forms.DataGridViewLinkColumn colServiceObjective;
-        private System.Windows.Forms.DataGridViewLinkColumn colElasticPool;
-        private System.Windows.Forms.DataGridViewImageColumn dgv_DTUHistogram;
-        private System.Windows.Forms.DataGridViewImageColumn dgv_CPUHistogram;
-        private System.Windows.Forms.DataGridViewImageColumn dgv_DataHistogram;
-        private System.Windows.Forms.DataGridViewImageColumn dgv_LogHistogram;
-        private CustomProgressControl.DataGridViewProgressBarColumn colMaxDTU;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colMaxDTUUsed;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colUnusedDTUs;
-        private CustomProgressControl.DataGridViewProgressBarColumn colAvgDTUPercent;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colAVGDTUsUsed;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colMinDTULimit;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colDTULimitMax;
-        private CustomProgressControl.DataGridViewProgressBarColumn colMaxCPUPercent;
-        private CustomProgressControl.DataGridViewProgressBarColumn colMaxDataPct;
-        private CustomProgressControl.DataGridViewProgressBarColumn colMaxLog;
-        private CustomProgressControl.DataGridViewProgressBarColumn colAvgCPUPct;
-        private CustomProgressControl.DataGridViewProgressBarColumn colAvgDataPct;
-        private CustomProgressControl.DataGridViewProgressBarColumn colAvgLogWrite;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colAllocatedSpaceMB;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colUsedMB;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colMaxStorageSize;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colAlocatedPctMax;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colUsedPctMax;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colFileSnapshotAge;
         private System.Windows.Forms.DataGridViewTextBoxColumn poolInstance;
         private System.Windows.Forms.DataGridViewLinkColumn colPoolName;
         private System.Windows.Forms.DataGridViewImageColumn dgvPool_DTUHistogram;
@@ -1366,5 +1338,33 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colStorageLimit;
         private System.Windows.Forms.DataGridViewTextBoxColumn colCurrentUsedGB;
         private System.Windows.Forms.DataGridViewTextBoxColumn colCurrentFreeGB;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colInstance;
+        private System.Windows.Forms.DataGridViewLinkColumn colDB;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colEdition;
+        private System.Windows.Forms.DataGridViewLinkColumn colServiceObjective;
+        private System.Windows.Forms.DataGridViewLinkColumn colElasticPool;
+        private System.Windows.Forms.DataGridViewImageColumn dgv_DTUHistogram;
+        private System.Windows.Forms.DataGridViewImageColumn dgv_CPUHistogram;
+        private System.Windows.Forms.DataGridViewImageColumn dgv_DataHistogram;
+        private System.Windows.Forms.DataGridViewImageColumn dgv_LogHistogram;
+        private CustomProgressControl.DataGridViewProgressBarColumn colMaxDTU;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colMaxDTUUsed;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colUnusedDTUs;
+        private CustomProgressControl.DataGridViewProgressBarColumn colAvgDTUPercent;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colAVGDTUsUsed;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colMinDTULimit;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colDTULimitMax;
+        private CustomProgressControl.DataGridViewProgressBarColumn colMaxCPUPercent;
+        private CustomProgressControl.DataGridViewProgressBarColumn colMaxDataPct;
+        private CustomProgressControl.DataGridViewProgressBarColumn colMaxLog;
+        private CustomProgressControl.DataGridViewProgressBarColumn colAvgCPUPct;
+        private CustomProgressControl.DataGridViewProgressBarColumn colAvgDataPct;
+        private CustomProgressControl.DataGridViewProgressBarColumn colAvgLogWrite;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colAllocatedSpaceMB;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colUsedMB;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colMaxStorageSize;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colAllocatedPctMax;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colUsedPctMax;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colFileSnapshotAge;
     }
 }

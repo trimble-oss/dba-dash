@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.Performance
 {
@@ -172,7 +173,7 @@ namespace DBADashGUI.Performance
             SetDataSourceWithFilter();
             dgv.Columns.AddRange(Columns.ToArray());
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-
+            dgv.ApplyTheme();
             if (splitContainer1.Panel1Collapsed == false)
             {
                 RefreshChart();
@@ -327,13 +328,13 @@ namespace DBADashGUI.Performance
                     var row = (DataRowView)r.DataBoundItem;
                     double diffAvgDurationPct = row["diff_avg_duration_pct"] == DBNull.Value ? 0d : Convert.ToDouble(row["diff_avg_duration_pct"]);
                     double diffAvgCPUPct = row["diff_avg_cpu_pct"] == DBNull.Value ? 0d : Convert.ToDouble(row["diff_avg_cpu_pct"]);
-                    r.Cells["Diff Avg Duration (%)"].SetStatusColor(DiffColourFromDouble(diffAvgDurationPct));
-                    r.Cells["Diff Avg CPU (%)"].SetStatusColor(DiffColourFromDouble(diffAvgCPUPct));
+                    r.Cells["Diff Avg Duration (%)"].SetColor(DiffColorFromDouble(diffAvgDurationPct));
+                    r.Cells["Diff Avg CPU (%)"].SetColor(DiffColorFromDouble(diffAvgCPUPct));
                 }
             }
         }
 
-        private static Color DiffColourFromDouble(double value)
+        private static Color DiffColorFromDouble(double value)
         {
             return value switch
             {
@@ -417,6 +418,5 @@ namespace DBADashGUI.Performance
                 dgv.AutoResizeRows();
             }
         }
-
     }
 }

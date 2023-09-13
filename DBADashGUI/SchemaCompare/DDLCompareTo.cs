@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI
 {
-    public partial class DDLCompareTo : Form
+    public partial class DDLCompareTo : Form, IThemedControl
     {
-
-        readonly DiffControl diffControl = new();
+        private readonly DiffControl diffControl = new();
 
         public List<int> SelectedTags;
 
@@ -23,10 +23,8 @@ namespace DBADashGUI
             InitializeComponent();
         }
 
-
         private void DDLCompareTo_Load(object sender, EventArgs e)
         {
-
             pnlCompare.Controls.Add(diffControl);
             diffControl.Dock = DockStyle.Fill;
             var instances = CommonData.GetInstancesWithDDLSnapshot(SelectedTags);
@@ -35,7 +33,6 @@ namespace DBADashGUI
             cboInstanceA.DataSource = new BindingSource(instances, null);
 
             cboInstanceB.DataSource = new BindingSource(instances, null);
-
 
             cboObjectTypeA.DisplayMember = "Value";
             cboObjectTypeA.ValueMember = "Key";
@@ -51,7 +48,6 @@ namespace DBADashGUI
             cboDatabaseA.SelectedValue = DatabaseID_A;
             cboObjectA.SelectedValue = ObjectID_A;
             cboDate_A.SelectedValue = SnapshotDate_A;
-
 
             cboInstanceB.SelectedItem = Instance_A;
             cboDatabaseB.SelectedIndex = cboDatabaseB.FindStringExact(cboDatabaseA.Text);
@@ -105,14 +101,12 @@ namespace DBADashGUI
             cbo.DropDownWidth = DropDownWidth(cbo);
         }
 
-
         private static void GetDatabases(ComboBox cbo, string instanceGroupName)
         {
             var databases = CommonData.GetDatabasesWithDDLSnapshot(instanceGroupName);
             cbo.DataSource = databases;
             cbo.ValueMember = "DatabaseID";
             cbo.DisplayMember = "DatabaseName";
-
         }
 
         private void CboInstanceA_SelectedIndexedChanged(object sender, EventArgs e)
@@ -188,7 +182,6 @@ namespace DBADashGUI
                     diffControl.OldText = Common.DDL(ddlID);
                 }
             }
-
         }
 
         private void CboDate_B_SelectedIndexChanged(object sender, EventArgs e)
@@ -203,6 +196,17 @@ namespace DBADashGUI
                 var ddlID = (long)row["DDLID"];
                 diffControl.NewText = Common.DDL(ddlID);
             }
+        }
+
+        void IThemedControl.ApplyTheme(BaseTheme theme)
+        {
+            foreach (Control control in this.Controls)
+            {
+                control.ApplyTheme(theme);
+            }
+            panel1.BackColor = theme.PanelBackColor;
+            panel1.ForeColor = theme.PanelForeColor;
+            diffControl.ApplyTheme(theme);
         }
     }
 }

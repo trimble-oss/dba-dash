@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.CollectionDates
 {
@@ -13,7 +14,7 @@ namespace DBADashGUI.CollectionDates
         public CollectionDates()
         {
             InitializeComponent();
-            Common.StyleGrid(ref dgvCollectionDates);
+            dgvCollectionDates.ApplyTheme();
         }
 
         private List<Int32> InstanceIDs { get; set; }

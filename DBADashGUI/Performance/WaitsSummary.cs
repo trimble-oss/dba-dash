@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.Performance
 {
@@ -181,7 +182,7 @@ namespace DBADashGUI.Performance
 
         private void WaitsSummary_Load(object sender, EventArgs e)
         {
-            Common.StyleGrid(ref dgv);
+            dgv.ApplyTheme();
             DateHelper.AddDateGroups(tsDateGroup, TsDateGroups_Click);
             PopulateColumnsMenu();
             PopulateMetricsMenu();

@@ -4,6 +4,7 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashServiceConfig
 {
@@ -12,6 +13,7 @@ namespace DBADashServiceConfig
         public DBDeploy()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         // public Version DACVersion;

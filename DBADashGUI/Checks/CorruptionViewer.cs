@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI
 {
@@ -8,6 +9,7 @@ namespace DBADashGUI
         public CorruptionViewer()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         public void SetContext(DBADashContext context)

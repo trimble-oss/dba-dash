@@ -3,6 +3,7 @@ using System;
 using System.Data;
 using System.Text;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI
 {
@@ -11,6 +12,7 @@ namespace DBADashGUI
         public ManageInstances()
         {
             InitializeComponent();
+            this.ApplyTheme();
             tsFilterError.ForeColor = DashColors.Fail;
         }
 
@@ -23,7 +25,6 @@ namespace DBADashGUI
 
         private void ManageInstances_Load(object sender, EventArgs e)
         {
-            Common.StyleGrid(ref dgv);
             RefreshData();
         }
 
@@ -32,12 +33,10 @@ namespace DBADashGUI
             var dt = CommonData.GetInstances(Tags, null);
             dgv.AutoGenerateColumns = false;
             dgv.DataSource = new DataView(dt);
-
         }
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var r = dgv.Rows[idx];
@@ -48,7 +47,6 @@ namespace DBADashGUI
                     dgv.Rows[idx].Cells[colDeleteRestore.Index].Value = isActive ? "Mark Deleted" : "Restore";
                 }
             }
-
         }
 
         private static void MarkInstanceDeleted(int InstanceID, bool IsActive)
@@ -94,7 +92,6 @@ namespace DBADashGUI
                     RefreshData();
                 }
                 activeFlagChanged = true;
-
             }
             else if (e.RowIndex >= 0 && e.ColumnIndex == colHidden.Index)
             {
@@ -132,7 +129,7 @@ namespace DBADashGUI
 
                 if (sbFilter.Length > 0)
                 {
-                    sbFilter.Remove(0, 5); // Remove AND 
+                    sbFilter.Remove(0, 5); // Remove AND
                 }
 
                 ((DataView)dgv.DataSource).RowFilter = sbFilter.ToString();

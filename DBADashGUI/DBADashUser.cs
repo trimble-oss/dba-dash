@@ -1,7 +1,9 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADashGUI.Theme;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
 using System.Windows;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace DBADashGUI
 {
@@ -14,21 +16,25 @@ namespace DBADashGUI
 
         public static bool HasManageGlobalViews = false;
 
-        public static void SetUserTimeZone(TimeZoneInfo timeZone)
+        public static TimeZoneInfo UserTimeZone = TimeZoneInfo.Local;
+
+        public static void Update()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("DBADash.User_TimeZone_Upd", cn) { CommandType = CommandType.StoredProcedure })
+            using (var cmd = new SqlCommand("DBADash.User_Upd", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("UserID", UserID);
-                if (timeZone == TimeZoneInfo.Local)
+                if (DateHelper.AppTimeZone == TimeZoneInfo.Local)
                 {
                     cmd.Parameters.AddWithValue("TimeZone", DBNull.Value);
                 }
                 else
                 {
-                    cmd.Parameters.AddWithValue("TimeZone", timeZone.Id);
+                    cmd.Parameters.AddWithValue("TimeZone", UserTimeZone);
                 }
+
+                cmd.Parameters.AddWithValue("Theme", SelectedTheme.ThemeIdentifier.ToString());
                 cmd.ExecuteNonQuery();
             }
         }
@@ -43,9 +49,8 @@ namespace DBADashGUI
                 var pUserID = new SqlParameter("UserID", SqlDbType.Int) { Direction = ParameterDirection.Output };
                 var pManageGlobalViews = new SqlParameter("ManageGlobalViews", SqlDbType.Bit) { Direction = ParameterDirection.Output };
                 var pTZ = new SqlParameter("TimeZone", SqlDbType.VarChar, 50) { Direction = ParameterDirection.Output };
-                cmd.Parameters.Add(pUserID);
-                cmd.Parameters.Add(pManageGlobalViews);
-                cmd.Parameters.Add(pTZ);
+                var pTheme = new SqlParameter("Theme", SqlDbType.VarChar, 50) { Direction = ParameterDirection.Output };
+                cmd.Parameters.AddRange(new SqlParameter[] { pUserID, pManageGlobalViews, pTZ, pTheme });
                 cmd.ExecuteNonQuery();
                 int id = Convert.ToInt32(pUserID.Value);
                 if (id > 0)
@@ -57,14 +62,19 @@ namespace DBADashGUI
                         string tzID = (string)pTZ.Value;
                         try
                         {
-                            DateHelper.AppTimeZone = TimeZoneInfo.FindSystemTimeZoneById(tzID);
+                            UserTimeZone = TimeZoneInfo.FindSystemTimeZoneById(tzID);
+                            DateHelper.AppTimeZone = UserTimeZone;
                         }
                         catch
                         {
                             MessageBox.Show("Time zone not found " + tzID, "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                             DateHelper.AppTimeZone = TimeZoneInfo.Local;
+                            UserTimeZone = TimeZoneInfo.Local;
                         }
                     }
+                    var themeType = Enum.TryParse(pTheme.Value as string, out ThemeType result) ? result : ThemeType.Default;
+
+                    SetTheme(themeType);
                 }
                 else
                 {
@@ -72,5 +82,27 @@ namespace DBADashGUI
                 }
             }
         }
+
+        public static void SetTheme(ThemeType type)
+        {
+            switch (type)
+            {
+                case ThemeType.Default:
+                    SelectedTheme = new BaseTheme();
+                    break;
+
+                case ThemeType.Dark:
+                    SelectedTheme = new DarkTheme();
+                    break;
+
+                case ThemeType.White:
+                    SelectedTheme = new WhiteTheme();
+                    break;
+            }
+        }
+
+       
+
+        public static BaseTheme SelectedTheme { get=>ThemeExtensions.CurrentTheme; set=>ThemeExtensions.CurrentTheme = value; }
     }
 }

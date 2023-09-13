@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.Backups
@@ -125,7 +126,7 @@ namespace DBADashGUI.Backups
                 new DataGridViewTextBoxColumn() { HeaderText = "Encryptor_Type", DataPropertyName = "encryptor_type" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Compression Algorithm", DataPropertyName = "compression_algorithm" }
             );
-
+            dgvBackups.ApplyTheme();
             dgvBackups.DataSource = dtBackups;
             dgvBackups.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
@@ -213,7 +214,7 @@ namespace DBADashGUI.Backups
                 new DataGridViewTextBoxColumn() { HeaderText = "Log Compression Algorithm", DataPropertyName = "LogCompressionAlgorithm" },
                 new DataGridViewLinkColumn() { HeaderText = "Configure", Text = "Configure", UseColumnTextForLinkValue = true, SortMode = DataGridViewColumnSortMode.NotSortable, Name = "Configure", LinkColor = DashColors.LinkColor }
             );
-
+            dgvBackups.ApplyTheme();
             dgvBackups.DataSource = new DataView(GetBackups());
             dgvBackups.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
 
@@ -297,6 +298,7 @@ namespace DBADashGUI.Backups
                     new DataGridViewLinkColumn() { HeaderText = "Configure", Text = "Configure", UseColumnTextForLinkValue = true, SortMode = DataGridViewColumnSortMode.NotSortable, Name = "Configure", LinkColor = DashColors.LinkColor }
                     );
             }
+            dgvSummary.ApplyTheme();
             dgvSummary.Columns[0].Frozen = Common.FreezeKeyColumn;
             dgvSummary.DataSource = new DataView(dt);
             splitContainer1.SplitterDistance = (dgvSummary.Rows.Count * 24) + dgvSummary.ColumnHeadersHeight + 24; // Set size based on row count, header size and scrollbar

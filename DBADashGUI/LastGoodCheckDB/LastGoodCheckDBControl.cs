@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.LastGoodCheckDB
 {
@@ -75,22 +76,15 @@ namespace DBADashGUI.LastGoodCheckDB
 
         private void DgvLastGoodCheckDB_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvLastGoodCheckDB.Rows[idx].DataBoundItem;
-                var Status = (DBADashStatus.DBADashStatusEnum)row["Status"];
-                var statusC = Status.GetColor();
+                var status = (DBADashStatus.DBADashStatusEnum)row["Status"];
+
                 var r = dgvLastGoodCheckDB.Rows[idx];
-                r.Cells["LastGoodCheckDBTime"].SetStatusColor(statusC);
-                r.Cells["DaysSinceLastGoodCheckDB"].SetStatusColor(statusC);
-                if ((string)row["ConfiguredLevel"] == "Database")
-                {
-                    r.Cells["Configure"].Style.Font = new Font(dgvLastGoodCheckDB.Font, FontStyle.Bold);
-                }
-                else
-                {
-                    r.Cells["Configure"].Style.Font = new Font(dgvLastGoodCheckDB.Font, FontStyle.Regular);
-                }
+                r.Cells["LastGoodCheckDBTime"].SetStatusColor(status);
+                r.Cells["DaysSinceLastGoodCheckDB"].SetStatusColor(status);
+                r.Cells["Configure"].Style.Font = (string)row["ConfiguredLevel"] == "Database" ? new Font(dgvLastGoodCheckDB.Font, FontStyle.Bold) : new Font(dgvLastGoodCheckDB.Font, FontStyle.Regular);
             }
         }
 
@@ -153,7 +147,7 @@ namespace DBADashGUI.LastGoodCheckDB
 
         private void LastGoodCheckDB_Load(object sender, EventArgs e)
         {
-            Common.StyleGrid(ref dgvLastGoodCheckDB);
+            dgvLastGoodCheckDB.ApplyTheme();
         }
     }
 }

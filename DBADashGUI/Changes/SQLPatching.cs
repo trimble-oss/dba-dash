@@ -12,6 +12,7 @@ using Amazon.Runtime.Internal.Transform;
 using CommandLine;
 using DBADash;
 using DBADashGUI.Changes;
+using DBADashGUI.Theme;
 using static System.Net.WebRequestMethods;
 
 namespace DBADashGUI
@@ -188,7 +189,7 @@ namespace DBADashGUI
         {
             dgvVersion.Columns.Clear();
             dgvVersion.Columns.AddRange(ColumnsList.ToArray());
-            CommonShared.StyleGrid(ref dgvVersion);
+            dgvVersion.ApplyTheme();
             SetThresholdsMenuText();
         }
 

@@ -35,6 +35,7 @@
     <None Remove="SQL\CorruptionInfo.sql" />
     <None Remove="SQL\DecipherWaitResource.sql" />
     <None Remove="SQL\FindPlan.sql" />
+    <None Remove="SyntaxHighlighting\SQL-Light.xshd" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
@@ -216,11 +217,12 @@
     <Compile Update="Tagging\Tags.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <EmbeddedResource Include="Resources\PowerShell-Mode.xshd" />
-    <EmbeddedResource Include="Resources\SQL-Mode.xshd" />
+    <EmbeddedResource Include="SyntaxHighlighting\PowerShell.xshd" />
+    <EmbeddedResource Include="SyntaxHighlighting\SQL-Dark.xshd" />
     <EmbeddedResource Include="SQL\CorruptionInfo.sql" />
     <EmbeddedResource Include="SQL\DecipherWaitResource.sql" />
     <EmbeddedResource Include="SQL\FindPlan.sql" />
+    <EmbeddedResource Include="SyntaxHighlighting\SQL-Light.xshd" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="DatabaseUnknown_16x.ico" />

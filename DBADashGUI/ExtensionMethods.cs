@@ -8,7 +8,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using DBADashGUI.Pickers;
+using Microsoft.SqlServer.Management.Smo;
 using static DBADashGUI.DBADashStatus;
+using SpreadsheetLight;
 
 namespace DBADashGUI
 {
@@ -48,31 +50,44 @@ namespace DBADashGUI
             return dt;
         }
 
-        public static Color GetColor(this DBADashStatusEnum value)
+        public static Color GetBackColor(this DBADashStatusEnum value)
         {
-            return DBADashStatus.GetStatusColour(value);
+            return DBADashStatus.GetStatusBackColor(value);
         }
 
-        public static Color ContrastColor(this Color value)
+        public static Color GetForeColor(this DBADashStatusEnum value)
         {
-            return ((value.R * 0.299) + (value.G * 0.587) + (value.B * 0.114)) > 186 ? Color.Black : Color.White;
+            return DBADashStatus.GetStatusForeColor(value);
         }
 
-        public static void SetStatusColor(this DataGridViewCell cell, Color StatusColor)
+        public static void SetColor(this DataGridViewCell cell, Color backColor, Color foreColor, Color selectionBackColor, Color selectionForeColor)
         {
-            cell.Style.BackColor = StatusColor;
-            cell.Style.ForeColor = StatusColor.ContrastColor();
+            cell.Style.BackColor = backColor;
+            cell.Style.ForeColor = foreColor;
             if (cell.GetType() == typeof(DataGridViewLinkCell))
             {
-                ((DataGridViewLinkCell)cell).LinkColor = StatusColor.ContrastColor();
-                ((DataGridViewLinkCell)cell).VisitedLinkColor = StatusColor.ContrastColor();
+                ((DataGridViewLinkCell)cell).LinkColor = foreColor;
+                ((DataGridViewLinkCell)cell).VisitedLinkColor = foreColor;
+                ((DataGridViewLinkCell)cell).ActiveLinkColor = selectionForeColor;
             }
-            cell.Style.SelectionBackColor = StatusColor == Color.White || StatusColor == DashColors.NotApplicable ? Color.Empty : ControlPaint.Light(StatusColor);
+
+            cell.Style.SelectionForeColor = selectionForeColor;
+            cell.Style.SelectionBackColor = selectionBackColor;
+        }
+
+        public static void SetColor(this DataGridViewCell cell, Color backColor, Color foreColor)
+        {
+            SetColor(cell, backColor, foreColor, backColor.AdjustBasedOnLuminance(), foreColor);
+        }
+
+        public static void SetColor(this DataGridViewCell cell, Color backColor)
+        {
+            SetColor(cell, backColor, backColor.ContrastColor());
         }
 
         public static void SetStatusColor(this DataGridViewCell cell, DBADashStatusEnum Status)
         {
-            cell.SetStatusColor(Status.GetColor());
+            cell.SetColor(Status.GetBackColor(), Status.GetForeColor(), Status.GetBackColor().AdjustBasedOnLuminance(), Status.GetForeColor());
         }
 
         public static string ToHexString(this Color c) => $"#{c.R:X2}{c.G:X2}{c.B:X2}";
@@ -257,6 +272,7 @@ namespace DBADashGUI
         public static DialogResult PromptColumnSelection(this DataGridView dgv)
         {
             using var frm = new SelectColumns() { Items = dgv.Columns.ToSelectableList() };
+            frm.ApplyTheme(DBADashUser.SelectedTheme);
             frm.ShowDialog(dgv);
             if (frm.DialogResult == DialogResult.OK)
             {
@@ -319,6 +335,7 @@ namespace DBADashGUI
             // If the key does not exist or the value is not a double, return the default value
             return defaultValue;
         }
+
         public static bool IsNumericType(this Type type)
         {
             switch (Type.GetTypeCode(type))
@@ -335,6 +352,7 @@ namespace DBADashGUI
                 case TypeCode.UInt32:
                 case TypeCode.UInt64:
                     return true;
+
                 default:
                     return false;
             }

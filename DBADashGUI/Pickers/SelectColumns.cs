@@ -4,10 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
+using Control = System.Windows.Forms.Control;
 
 namespace DBADashGUI
 {
-    public partial class SelectColumns : Form
+    public partial class SelectColumns : Form, IThemedControl
     {
         public SelectColumns()
         {
@@ -96,6 +98,15 @@ namespace DBADashGUI
                 ToggleSelected();
             }
         }
-    }
 
+        public void ApplyTheme(BaseTheme theme)
+        {
+            foreach (Control control in this.Controls)
+            {
+                control.ApplyTheme(theme);
+            }
+            this.ForeColor = theme.ForegroundColor;
+            this.BackColor = theme.BackgroundColor;
+        }
+    }
 }

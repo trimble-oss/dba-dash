@@ -12,6 +12,7 @@ using System.ServiceProcess;
 using System.Text;
 using System.Windows.Forms;
 using CronExpressionDescriptor;
+using DBADashGUI.Theme;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 using Newtonsoft.Json;
 using static DBADash.DBADashConnection;
@@ -23,6 +24,7 @@ namespace DBADashServiceConfig
         public ServiceConfig()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         private string originalJson = "";
@@ -344,6 +346,7 @@ namespace DBADashServiceConfig
             RefreshServiceStatus();
             ValidateDestination();
             RefreshEncryption();
+            dgvConnections.ApplyTheme();
         }
 
         private void SetOriginalJson()

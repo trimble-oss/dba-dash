@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashServiceConfig
 {
@@ -8,6 +9,7 @@ namespace DBADashServiceConfig
         public S3Browser()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         public string AccessKey;

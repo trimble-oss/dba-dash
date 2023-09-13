@@ -6,11 +6,12 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 using static DBADashGUI.Main;
 
 namespace DBADashGUI.Performance
 {
-    public partial class PerformanceSummary : UserControl, ISetContext, IRefreshData
+    public partial class PerformanceSummary : UserControl, ISetContext, IRefreshData, IThemedControl
     {
         //public List<Int32> InstanceIDs;
         private DBADashContext context;
@@ -37,7 +38,7 @@ namespace DBADashGUI.Performance
         {
             MigratePerformanceSummaryView();
             savedViewMenuItem1.LoadItemsAndSelectDefault();
-
+            dgv.ApplyTheme(DBADashUser.SelectedTheme);
             dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
             dgv.DataSource = null;
             var dt = GetPerformanceSummary();
@@ -236,7 +237,7 @@ namespace DBADashGUI.Performance
 
         private void PerformanceSummary_Load(object sender, EventArgs e)
         {
-            Common.StyleGrid(ref dgv);
+            dgv.ApplyTheme();
             AddHistCols(dgv, "col");
         }
 
@@ -337,7 +338,7 @@ namespace DBADashGUI.Performance
                     }
                     else
                     {
-                        r.Cells[pcCol].SetStatusColor(Color.White);
+                        r.Cells[pcCol].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
                     }
                 }
 
@@ -390,7 +391,7 @@ namespace DBADashGUI.Performance
             Common.PromptSaveDataGridView(ref dgv);
         }
 
-    private void LoadPersistedColumnLayout(List<KeyValuePair<string, PersistedColumnLayout>> savedCols)
+        private void LoadPersistedColumnLayout(List<KeyValuePair<string, PersistedColumnLayout>> savedCols)
         {
             if (savedCols == null)
             {
@@ -422,6 +423,7 @@ namespace DBADashGUI.Performance
             {
                 SelectedCounters = SelectedPerformanceCounters
             };
+            frm.ApplyTheme();
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
@@ -514,6 +516,14 @@ namespace DBADashGUI.Performance
                     savedViewMenuItem1.RefreshItems();
                     tsDeleteView.Visible = false;
                 }
+            }
+        }
+
+        void IThemedControl.ApplyTheme(BaseTheme theme)
+        {
+            foreach (Control control in this.Controls)
+            {
+                control.ApplyTheme(theme);
             }
         }
     }

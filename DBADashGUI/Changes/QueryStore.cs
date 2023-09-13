@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.Changes
 {
@@ -56,6 +57,7 @@ namespace DBADashGUI.Changes
                 Common.PivotDGV(ref dgv);
             }
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgv.ApplyTheme();
         }
 
         private void SetCols()
@@ -188,15 +190,15 @@ namespace DBADashGUI.Changes
                 if (summaryMode)
                 {
                     var readOnlyAttention = (int)row["QS_READ_ONLY_ATT"];
-                    dgv.Rows[idx].Cells["col_READ_ONLY"].SetStatusColor(readOnlyAttention > 0 ? DashColors.Warning : Color.White);
+                    dgv.Rows[idx].Cells["col_READ_ONLY"].SetStatusColor(readOnlyAttention > 0 ? DBADashStatus.DBADashStatusEnum.Warning : DBADashStatus.DBADashStatusEnum.OK);
 
                     var qsErrorCount = (int)row["QS_ERROR"];
-                    dgv.Rows[idx].Cells["col_ERROR"].SetStatusColor(qsErrorCount > 0 ? DashColors.Fail : Color.White);
+                    dgv.Rows[idx].Cells["col_ERROR"].SetStatusColor(qsErrorCount > 0 ? DBADashStatus.DBADashStatusEnum.Critical : DBADashStatus.DBADashStatusEnum.OK);
                 }
                 else if (dbsMode)
                 {
                     var readOnlyErrorState = (bool)row["IsReadOnlyErrorState"];
-                    dgv.Rows[idx].Cells["col_ReadOnlyReason"].SetStatusColor(readOnlyErrorState ? DashColors.Warning : Color.White);
+                    dgv.Rows[idx].Cells["col_ReadOnlyReason"].SetStatusColor(readOnlyErrorState ? DBADashStatus.DBADashStatusEnum.Warning : DBADashStatus.DBADashStatusEnum.OK);
                 }
                 if (dbsMode || summaryMode)
                 {

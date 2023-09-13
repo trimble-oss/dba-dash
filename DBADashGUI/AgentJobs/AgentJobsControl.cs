@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.AgentJobs
 {
@@ -336,8 +337,8 @@ namespace DBADashGUI.AgentJobs
 
         private void AgentJobsControl_Load(object sender, EventArgs e)
         {
-            Common.StyleGrid(ref dgvJobHistory);
-            Common.StyleGrid(ref dgvJobs);
+            dgvJobHistory.ApplyTheme();
+            dgvJobs.ApplyTheme();
         }
 
         private void UserChangedStatusFilter(object sender, EventArgs e)

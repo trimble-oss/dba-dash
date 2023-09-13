@@ -3,6 +3,7 @@ using System;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.CollectionDates
 {
@@ -11,7 +12,7 @@ namespace DBADashGUI.CollectionDates
         public CollectionErrors()
         {
             InitializeComponent();
-            Common.StyleGrid(ref dgvDBADashErrors);
+            dgvDBADashErrors.ApplyTheme();
             txtContext.BackColor = DashColors.BluePale;
             txtMessage.BackColor = DashColors.BluePale;
             txtSource.BackColor = DashColors.BluePale;

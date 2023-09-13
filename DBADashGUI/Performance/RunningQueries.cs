@@ -7,8 +7,10 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 using Humanizer;
 using Humanizer.Localisation;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace DBADashGUI.Performance
 {
@@ -205,6 +207,7 @@ namespace DBADashGUI.Performance
                     HighlightSnapshot(highlightSnapshot.Value, highlight);
                 }
             }
+            dgv.ApplyTheme(DBADashUser.SelectedTheme);
         }
 
         /// <summary>If we are not filtered for a specific instance then show server level summary</summary>
@@ -360,6 +363,7 @@ namespace DBADashGUI.Performance
 
             currentSnapshotDate = snapshotDate;
             tsBack.Enabled = SnapshotDateFrom == DateTime.MinValue;
+            dgv.ApplyTheme(DBADashUser.SelectedTheme);
         }
 
         /// <summary>Load a running queries snapshot</summary>
@@ -381,6 +385,7 @@ namespace DBADashGUI.Performance
             dgv.Columns["colQueryPlanHash"].Width = 70;
             tsGroupBy.Enabled = dgv.Rows.Count > 1;
             tsBlockingFilter.Visible = SessionID == 0;
+            dgv.ApplyTheme();
         }
 
         /// <summary>Get counts from the running queries snapshot table. e.g. Blocking counts</summary>
@@ -578,6 +583,7 @@ namespace DBADashGUI.Performance
             dgvSessionWaits.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             sessionToolStripMenuItem.Tag = sessionid;
             lblWaitsForSession.Text = "Waits For Session ID: " + sessionid.ToString();
+            dgvSessionWaits.ApplyTheme(DBADashUser.SelectedTheme);
         }
 
         private void ShowRunningQueriesForSnapshotDate(DataRowView row)
@@ -679,46 +685,42 @@ namespace DBADashGUI.Performance
             }
             else if ((new[] { "colBlockCount", "colBlockedCountRecursive", "colBlockingSessionID" }).Contains(dgv.Columns[e.ColumnIndex].Name))
             {
-                e.CellStyle.BackColor = Convert.ToInt32(e.Value) == 0 ? DashColors.Success : DashColors.Fail;
+                dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].SetStatusColor(Convert.ToInt32(e.Value) == 0 ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Critical);
             }
             else if ((new[] { "colIdleTimeSec", "colIdleTime" }).Contains(dgv.Columns[e.ColumnIndex].Name))
             {
                 var idleSec = Convert.ToDouble(dgv.Rows[e.RowIndex].Cells["colIdleTimeSec"].Value.DBNullToNull());
                 var openTranCnt = Convert.ToInt32(dgv.Rows[e.RowIndex].Cells["colOpenTransactionCount"].Value.DBNullToNull());
 
-                var statusColor = openTranCnt switch
+                var status = openTranCnt switch
                 {
-                    > 0 when idleSec > Config.IdleCriticalThresholdForSleepingSessionWithOpenTran => DashColors.Fail,
-                    > 0 when idleSec > Config.IdleWarningThresholdForSleepingSessionWithOpenTran => DashColors.Warning,
-                    _ => DashColors.NotApplicable
+                    > 0 when idleSec > Config.IdleCriticalThresholdForSleepingSessionWithOpenTran => DBADashStatus.DBADashStatusEnum.Critical,
+                    > 0 when idleSec > Config.IdleWarningThresholdForSleepingSessionWithOpenTran => DBADashStatus.DBADashStatusEnum.Warning,
+                    _ => DBADashStatus.DBADashStatusEnum.NA
                 };
-                e.CellStyle.BackColor = statusColor;
-                e.CellStyle.ForeColor = statusColor.ContrastColor();
+                dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].SetStatusColor(status);
             }
             else if (dgv.Columns[e.ColumnIndex].Name == "colMaxIdleTime")
             {
                 var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
                 var idleSec = Convert.ToDouble(row["SleepingSessionsMaxIdleTimeMs"].DBNullToNull()) / 1000;
-                var statusColor =
-                    idleSec > Config.IdleCriticalThresholdForSleepingSessionWithOpenTran ? DashColors.Fail :
-                    idleSec > Config.IdleWarningThresholdForSleepingSessionWithOpenTran ? DashColors.Warning :
-                    DashColors.NotApplicable;
-                e.CellStyle.BackColor = statusColor;
-                e.CellStyle.ForeColor = statusColor.ContrastColor();
+                var status =
+                    idleSec > Config.IdleCriticalThresholdForSleepingSessionWithOpenTran ? DBADashStatus.DBADashStatusEnum.Critical :
+                    idleSec > Config.IdleWarningThresholdForSleepingSessionWithOpenTran ? DBADashStatus.DBADashStatusEnum.Warning :
+                    DBADashStatus.DBADashStatusEnum.NA;
+                dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].SetStatusColor(status);
             }
             else if (dgv.Columns[e.ColumnIndex].Name == "colStatus")
             {
                 var blockedCnt = Convert.ToInt32(dgv.Rows[e.RowIndex].Cells["colBlockCount"].Value.DBNullToNull());
                 if (e.Value != null && e.Value.ToString() == "sleeping" && blockedCnt > 0)
                 {
-                    e.CellStyle.BackColor = DashColors.Fail;
-                    e.CellStyle.ForeColor = DashColors.Fail.ContrastColor();
+                    dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].SetStatusColor(DBADashStatus.DBADashStatusEnum.Critical);
                     dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = "Sleeping session with open transaction causing blocking";
                 }
                 else
                 {
-                    e.CellStyle.BackColor = Color.White;
-                    e.CellStyle.ForeColor = Color.Black;
+                    dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
                 }
             }
         }
@@ -777,6 +779,7 @@ namespace DBADashGUI.Performance
             );
             dgv.DataSource = new DataView(groupedDT);
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgv.ApplyTheme();
             tsBlockingFilter.Visible = false;
         }
 

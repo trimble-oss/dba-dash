@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.Checks
 {
@@ -72,6 +73,7 @@ namespace DBADashGUI.Checks
                 new DataGridViewTextBoxColumn() { HeaderText = "Description", DataPropertyName = "description" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Name", DataPropertyName = "name" }
                 );
+            dgv.ApplyTheme();
         }
 
         private void LoadSummaryCols()
@@ -83,6 +85,7 @@ namespace DBADashGUI.Checks
                 new DataGridViewTextBoxColumn() { Name = "colStatus", HeaderText = "Status", DataPropertyName = "StatusDescription" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Notes", DataPropertyName = "Notes" }
                 );
+            dgv.ApplyTheme();
         }
 
         private DataTable GetOSLoadedModuleSummary()

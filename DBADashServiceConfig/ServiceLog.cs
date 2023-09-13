@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashServiceConfig
 {
@@ -14,6 +15,7 @@ namespace DBADashServiceConfig
         public ServiceLog()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         private void ServiceLog_Load(object sender, EventArgs e)

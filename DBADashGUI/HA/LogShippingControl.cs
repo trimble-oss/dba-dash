@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.LogShipping
 {
@@ -75,6 +76,7 @@ namespace DBADashGUI.LogShipping
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Restore Date of Oldest File", DataPropertyName = "MinLastRestoreCompleted" });
                     dgvSummary.Columns.Add(new DataGridViewLinkColumn() { Name = "Configure", HeaderText = "Configure", Text = "Configure", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
                 }
+                dgvSummary.ApplyTheme();
                 dgvSummary.DataSource = new DataView(dt);
                 dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
@@ -110,7 +112,7 @@ namespace DBADashGUI.LogShipping
         public LogShippingControl()
         {
             InitializeComponent();
-            Common.StyleGrid(ref dgvLogShipping);
+            dgvLogShipping.ApplyTheme();
         }
 
         private void TsFilter_Click(object sender, EventArgs e)

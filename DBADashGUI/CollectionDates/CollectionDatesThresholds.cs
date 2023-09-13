@@ -2,6 +2,7 @@
 using System;
 using System.Data;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.CollectionDates
 {
@@ -10,6 +11,7 @@ namespace DBADashGUI.CollectionDates
         public CollectionDatesThresholds()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         public Int32 InstanceID { get; set; }

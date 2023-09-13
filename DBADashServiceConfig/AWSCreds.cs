@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 using Quartz.Util;
 
 namespace DBADashServiceConfig
@@ -34,6 +35,7 @@ namespace DBADashServiceConfig
         public AWSCreds()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         private void bttnOK_Click(object sender, EventArgs e)

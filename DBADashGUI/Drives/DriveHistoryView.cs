@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.Drives
 {
@@ -8,6 +9,7 @@ namespace DBADashGUI.Drives
         public DriveHistoryView()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         public string ConnectionString;

@@ -3,6 +3,8 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
+
 namespace DBADashGUI.Checks
 {
     public partial class UptimeThresholdConfig : Form
@@ -10,6 +12,7 @@ namespace DBADashGUI.Checks
         public UptimeThresholdConfig()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         public int InstanceID { get; set; }

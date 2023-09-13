@@ -4,6 +4,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.Drives
@@ -125,6 +126,7 @@ namespace DBADashGUI.Drives
             dgv.RowsAdded += Dgv_RowsAdded;
             pnlDrives.Controls.Add(dgv);
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgv.ApplyTheme();
             tsGridView.Enabled = false;
             tsDrivesView.Enabled = dvDrives.Table.Rows.Count <= DrivesViewMaxRows;
         }
@@ -140,14 +142,14 @@ namespace DBADashGUI.Drives
                 if (row["DriveCheckType"] != DBNull.Value && (string)row["DriveCheckType"] == "G")
                 {
                     dgv.Rows[idx].Cells["FreeGB"].SetStatusColor(Status);
-                    dgv.Rows[idx].Cells["PctFreeSpace"].SetStatusColor(Color.White);
+                    dgv.Rows[idx].Cells["PctFreeSpace"].SetStatusColor(DBADashStatusEnum.NA);
                     dgv.Rows[idx].Cells["Warning"].Style.Format = "0.0 GB";
                     dgv.Rows[idx].Cells["Critical"].Style.Format = "0.0 GB";
                 }
                 else
                 {
                     dgv.Rows[idx].Cells["PctFreeSpace"].SetStatusColor(Status);
-                    dgv.Rows[idx].Cells["FreeGB"].SetStatusColor(Color.White);
+                    dgv.Rows[idx].Cells["FreeGB"].SetStatusColor(DBADashStatusEnum.NA);
                     dgv.Rows[idx].Cells["Warning"].Style.Format = "P2";
                     dgv.Rows[idx].Cells["Critical"].Style.Format = "P2";
                 }
@@ -212,6 +214,7 @@ namespace DBADashGUI.Drives
                 drv.Drive.SnapshotStatus = (DBADashStatusEnum)r["SnapshotStatus"];
                 drv.DisplayInstanceName = context.RegularInstanceIDs.Count > 1;
                 drv.Dock = DockStyle.Top;
+                drv.ApplyTheme();
                 driveControls.Add(drv);
             }
 
@@ -256,6 +259,7 @@ namespace DBADashGUI.Drives
                     Height = 50
                 });
                 var history = new DriveHistory();
+                history.ApplyTheme();
                 history.Name = context.DriveName;
                 history.DriveID = (int)dvDrives[0]["DriveID"];
                 history.Dock = DockStyle.Fill;
@@ -345,5 +349,6 @@ namespace DBADashGUI.Drives
             dgv.Columns["Configure"].Visible = true;
             dgv.Columns["History"].Visible = true;
         }
+
     }
 }

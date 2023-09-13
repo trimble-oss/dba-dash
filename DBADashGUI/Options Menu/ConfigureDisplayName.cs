@@ -3,6 +3,7 @@ using System;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI
 {
@@ -21,6 +22,7 @@ namespace DBADashGUI
 
         private void ConfigureDisplayName_Load(object sender, EventArgs e)
         {
+            this.ApplyTheme();
             SetCols();
             RefreshData();
         }
@@ -29,8 +31,8 @@ namespace DBADashGUI
         {
             dgv.AutoGenerateColumns = false;
             dgv.Columns.AddRange(
-                new DataGridViewTextBoxColumn() { Name = "colConnectionID", DataPropertyName = "ConnectionID", HeaderText = "ConnectionID", ReadOnly = true, DefaultCellStyle = new DataGridViewCellStyle() { BackColor = DashColors.GrayLight } },
-                new DataGridViewTextBoxColumn() { DataPropertyName = "Instance", HeaderText = "Instance", ReadOnly = true, DefaultCellStyle = new DataGridViewCellStyle() { BackColor = DashColors.GrayLight } },
+                new DataGridViewTextBoxColumn() { Name = "colConnectionID", DataPropertyName = "ConnectionID", HeaderText = "ConnectionID", ReadOnly = true, DefaultCellStyle = new DataGridViewCellStyle() { BackColor = DashColors.GrayLight, ForeColor = Color.Black } },
+                new DataGridViewTextBoxColumn() { DataPropertyName = "Instance", HeaderText = "Instance", ReadOnly = true, DefaultCellStyle = new DataGridViewCellStyle() { BackColor = DashColors.GrayLight, ForeColor = Color.Black } },
                 new DataGridViewTextBoxColumn() { Name = "colDisplayName", DataPropertyName = "InstanceDisplayName", HeaderText = "Display Name", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill }
             );
         }
@@ -86,7 +88,7 @@ namespace DBADashGUI
 
         private void Dgv_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            // Highlight displayname column if it's been edited from the default value
+            // Highlight display name column if it's been edited from the default value
             if (e.ColumnIndex == 2)
             {
                 if (Convert.ToString(dgv.Rows[e.RowIndex].Cells[0].Value) == Convert.ToString(dgv.Rows[e.RowIndex].Cells[2].Value))

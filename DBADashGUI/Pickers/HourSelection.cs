@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI
 {
@@ -11,6 +12,7 @@ namespace DBADashGUI
         public HourSelection()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         public List<int> SelectedHours

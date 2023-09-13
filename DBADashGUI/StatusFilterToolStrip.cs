@@ -40,11 +40,11 @@ namespace DBADashGUI
         public bool AnyChecked => (MenuOK.Checked && OKVisible) || (MenuWarning.Checked && WarningVisible) || (MenuCritical.Checked && CriticalVisible) || (MenuNA.Checked && NAVisible) || (MenuAcknowledged.Checked && AcknowledgedVisible);
         public bool AllUnchecked => !AnyChecked;
 
-        private readonly ToolStripMenuItem MenuOK = new() { Text = "OK", BackColor = DBADashStatus.DBADashStatusEnum.OK.GetColor(), ForeColor = DBADashStatus.DBADashStatusEnum.OK.GetColor().ContrastColor(), CheckOnClick = true };
-        private readonly ToolStripMenuItem MenuWarning = new() { Text = "Warning", BackColor = DBADashStatus.DBADashStatusEnum.Warning.GetColor(), ForeColor = DBADashStatus.DBADashStatusEnum.Warning.GetColor().ContrastColor(), CheckOnClick = true };
-        private readonly ToolStripMenuItem MenuCritical = new() { Text = "Critical", BackColor = DBADashStatus.DBADashStatusEnum.Critical.GetColor(), ForeColor = DBADashStatus.DBADashStatusEnum.Critical.GetColor().ContrastColor(), CheckOnClick = true };
-        private readonly ToolStripMenuItem MenuNA = new() { Text = "N/A", BackColor = DBADashStatus.DBADashStatusEnum.NA.GetColor(), ForeColor = DBADashStatus.DBADashStatusEnum.NA.GetColor().ContrastColor(), CheckOnClick = true };
-        private readonly ToolStripMenuItem MenuAcknowledged = new() { Text = "Acknowledged", BackColor = DBADashStatus.DBADashStatusEnum.Acknowledged.GetColor(), ForeColor = DBADashStatus.DBADashStatusEnum.Acknowledged.GetColor().ContrastColor(), CheckOnClick = true };
+        private readonly ToolStripMenuItem MenuOK = new() { Text = "OK", BackColor = DBADashStatus.DBADashStatusEnum.OK.GetBackColor(), ForeColor = DBADashStatus.DBADashStatusEnum.OK.GetBackColor().ContrastColor(), CheckOnClick = true };
+        private readonly ToolStripMenuItem MenuWarning = new() { Text = "Warning", BackColor = DBADashStatus.DBADashStatusEnum.Warning.GetBackColor(), ForeColor = DBADashStatus.DBADashStatusEnum.Warning.GetBackColor().ContrastColor(), CheckOnClick = true };
+        private readonly ToolStripMenuItem MenuCritical = new() { Text = "Critical", BackColor = DBADashStatus.DBADashStatusEnum.Critical.GetBackColor(), ForeColor = DBADashStatus.DBADashStatusEnum.Critical.GetBackColor().ContrastColor(), CheckOnClick = true };
+        private readonly ToolStripMenuItem MenuNA = new() { Text = "N/A", BackColor = DBADashStatus.DBADashStatusEnum.NA.GetBackColor(), ForeColor = DBADashStatus.DBADashStatusEnum.NA.GetBackColor().ContrastColor(), CheckOnClick = true };
+        private readonly ToolStripMenuItem MenuAcknowledged = new() { Text = "Acknowledged", BackColor = DBADashStatus.DBADashStatusEnum.Acknowledged.GetBackColor(), ForeColor = DBADashStatus.DBADashStatusEnum.Acknowledged.GetBackColor().ContrastColor(), CheckOnClick = true };
         private readonly ToolStripMenuItem MenuCheckAll = new() { Text = "Check ALL" };
 
         public bool AcknowledgedVisible { get => MenuAcknowledged.Available; set => MenuAcknowledged.Available = value; }

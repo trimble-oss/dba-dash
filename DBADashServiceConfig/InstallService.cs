@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.ServiceProcess;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashServiceConfig
 {
@@ -13,6 +14,7 @@ namespace DBADashServiceConfig
         public InstallService()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         public string ServiceName { get; set; }

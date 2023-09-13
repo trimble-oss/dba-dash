@@ -62,7 +62,7 @@ namespace DBADashGUI.Changes
                 string configName = (string)r["name"];
                 var idx = dgvConfig.Columns[configName].Index;
                 row.Cells[idx].Value = r["value"];
-                row.Cells[idx].SetStatusColor((bool)r["IsDefault"] ? DashColors.GreenPale : DashColors.YellowPale);
+                row.Cells[idx].SetStatusColor((bool)r["IsDefault"] ? DBADashStatus.DBADashStatusEnum.NA : DBADashStatus.DBADashStatusEnum.WarningLow);
                 if (!(bool)r["IsDefault"])
                 {
                     row.Cells[idx].Style.Font = new Font(dgvConfig.Font, FontStyle.Bold);

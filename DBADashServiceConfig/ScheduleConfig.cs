@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashServiceConfig
 {
@@ -72,6 +73,7 @@ namespace DBADashServiceConfig
                 }
             }
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
+            dgv.ApplyTheme();
         }
 
         public static string GetScheduleDescription(string schedule)

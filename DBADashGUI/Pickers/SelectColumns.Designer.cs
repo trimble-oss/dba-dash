@@ -30,14 +30,14 @@
         {
             components = new System.ComponentModel.Container();
             dgvCols = new System.Windows.Forms.DataGridView();
+            colIsVisible = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            colColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             bttnOK = new System.Windows.Forms.Button();
             bttnCancel = new System.Windows.Forms.Button();
             lnkAll = new System.Windows.Forms.LinkLabel();
             lnkNone = new System.Windows.Forms.LinkLabel();
             lnkSelected = new System.Windows.Forms.LinkLabel();
             toolTip1 = new System.Windows.Forms.ToolTip(components);
-            colIsVisible = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            colColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)dgvCols).BeginInit();
             SuspendLayout();
             // 
@@ -59,9 +59,30 @@
             dgvCols.TabIndex = 0;
             dgvCols.KeyPress += DgvCols_KeyPress;
             // 
+            // colIsVisible
+            // 
+            colIsVisible.DataPropertyName = "IsVisible";
+            colIsVisible.HeaderText = "";
+            colIsVisible.MinimumWidth = 6;
+            colIsVisible.Name = "colIsVisible";
+            colIsVisible.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colIsVisible.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            colIsVisible.Width = 50;
+            // 
+            // colColumn
+            // 
+            colColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            colColumn.DataPropertyName = "Name";
+            colColumn.HeaderText = "Item";
+            colColumn.MinimumWidth = 6;
+            colColumn.Name = "colColumn";
+            colColumn.ReadOnly = true;
+            colColumn.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            // 
             // bttnOK
             // 
             bttnOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            bttnOK.ForeColor = System.Drawing.Color.Black;
             bttnOK.Location = new System.Drawing.Point(281, 502);
             bttnOK.Name = "bttnOK";
             bttnOK.Size = new System.Drawing.Size(94, 29);
@@ -73,6 +94,7 @@
             // bttnCancel
             // 
             bttnCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            bttnCancel.ForeColor = System.Drawing.Color.Black;
             bttnCancel.Location = new System.Drawing.Point(171, 502);
             bttnCancel.Name = "bttnCancel";
             bttnCancel.Size = new System.Drawing.Size(94, 29);
@@ -120,26 +142,6 @@
             lnkSelected.Text = "Toggle Selected";
             toolTip1.SetToolTip(lnkSelected, "Check/Uncheck all the selected items.  Use spacebar to activate from the keyboard.");
             lnkSelected.LinkClicked += LnkSelected_LinkClicked;
-            // 
-            // colIsVisible
-            // 
-            colIsVisible.DataPropertyName = "IsVisible";
-            colIsVisible.HeaderText = "";
-            colIsVisible.MinimumWidth = 6;
-            colIsVisible.Name = "colIsVisible";
-            colIsVisible.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colIsVisible.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            colIsVisible.Width = 50;
-            // 
-            // colColumn
-            // 
-            colColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            colColumn.DataPropertyName = "Name";
-            colColumn.HeaderText = "Item";
-            colColumn.MinimumWidth = 6;
-            colColumn.Name = "colColumn";
-            colColumn.ReadOnly = true;
-            colColumn.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             // 
             // SelectColumns
             // 

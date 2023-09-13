@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.LogShipping
 {
@@ -8,6 +9,7 @@ namespace DBADashGUI.LogShipping
         public LogShippingThresholdsConfig()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         public Int32 InstanceID;

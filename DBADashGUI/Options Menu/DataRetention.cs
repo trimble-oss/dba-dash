@@ -2,6 +2,8 @@
 using System;
 using System.Data;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
+
 namespace DBADashGUI
 {
     public partial class DataRetention : Form
@@ -9,11 +11,11 @@ namespace DBADashGUI
         public DataRetention()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         private void DataRetention_Load(object sender, EventArgs e)
         {
-            Common.StyleGrid(ref dgv);
             try
             {
                 RefreshData();
@@ -60,7 +62,6 @@ namespace DBADashGUI
                 string tableName = (string)dgv["colTableName", e.RowIndex].Value;
                 if (Common.ShowInputDialog(ref sDays, "Enter number of days") == DialogResult.OK)
                 {
-
                     if (Int32.TryParse(sDays, out int newRetention))
                     {
                         if (newRetention != days)
@@ -80,8 +81,6 @@ namespace DBADashGUI
                     {
                         MessageBox.Show("Please enter an integer number of days for retention", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
-
-
                 }
             }
         }
@@ -114,7 +113,6 @@ namespace DBADashGUI
             cn.Open();
             SqlCommand cmd = new("dbo.PurgeData", cn);
             cmd.ExecuteNonQuery();
-
         }
 
         private void TsPurge_Click(object sender, EventArgs e)

@@ -10,32 +10,39 @@ namespace DBADashGUI
             Warning = 2,
             NA = 3,
             OK = 4,
-            Acknowledged = 5
+            Acknowledged = 5,
+            WarningLow = 6,
+            Information = 7
         }
 
-        public static Color GetStatusColour(DBADashStatusEnum status, bool dark = false)
+        public static Color GetStatusBackColor(DBADashStatusEnum status)
         {
-            if (status == DBADashStatusEnum.Critical)
+            return status switch
             {
-                return DashColors.Fail;
-            }
-            else if (status == DBADashStatusEnum.Warning)
+                DBADashStatusEnum.Critical => DBADashUser.SelectedTheme.CriticalBackColor,
+                DBADashStatusEnum.Warning => DBADashUser.SelectedTheme.WarningBackColor,
+                DBADashStatusEnum.NA => DBADashUser.SelectedTheme.NotApplicableBackColor,
+                DBADashStatusEnum.OK => DBADashUser.SelectedTheme.SuccessBackColor,
+                DBADashStatusEnum.Acknowledged => DBADashUser.SelectedTheme.AcknowledgedBackColor,
+                DBADashStatusEnum.WarningLow => DBADashUser.SelectedTheme.WarningLowBackColor,
+                DBADashStatusEnum.Information => DBADashUser.SelectedTheme.InformationBackColor,
+                _ => DashColors.RedPale
+            };
+        }
+
+        public static Color GetStatusForeColor(DBADashStatusEnum status)
+        {
+            return status switch
             {
-                return DashColors.Warning;
-            }
-            else if (status == DBADashStatusEnum.NA)
-            {
-                return dark ? DashColors.TrimbleGray : DashColors.NotApplicable;
-            }
-            else if (status == DBADashStatusEnum.OK)
-            {
-                return DashColors.Success;
-            }
-            else if (status == DBADashStatusEnum.Acknowledged)
-            {
-                return DashColors.BlueLight;
-            }
-            return DashColors.RedPale;
+                DBADashStatusEnum.Critical => DBADashUser.SelectedTheme.CriticalForeColor,
+                DBADashStatusEnum.Warning => DBADashUser.SelectedTheme.WarningForeColor,
+                DBADashStatusEnum.NA => DBADashUser.SelectedTheme.NotApplicableForeColor,
+                DBADashStatusEnum.OK => DBADashUser.SelectedTheme.SuccessForeColor,
+                DBADashStatusEnum.Acknowledged => DBADashUser.SelectedTheme.AcknowledgedForeColor,
+                DBADashStatusEnum.WarningLow => DBADashUser.SelectedTheme.WarningLowForeColor,
+                DBADashStatusEnum.Information => DBADashUser.SelectedTheme.InformationForeColor,
+                _ => DashColors.RedPale
+            };
         }
 
         public static void SetProgressBarColor(DBADashStatusEnum status, ref CustomProgressControl.DataGridViewProgressBarCell pCell)

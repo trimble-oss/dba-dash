@@ -26,13 +26,15 @@ namespace DBADashGUI.AgentJobs
 <html>
     <head>
         <style>
-            .tt {background-color:#ffffff;  color: #004f83 ; padding: 0px 0px 0px 0px;font-size: 15px;font-family: Arial, Helvetica, sans-serif; }
-            .tt h1 {color: #ffffff; background-color:" + DashColors.Success.ToHexString() + @"; font-family: Arial, Helvetica, sans-serif; border: 1px solid #252a2e; text-align: center;font-size: 15px }
-            .ttf {background-color:#ffffff; color: #004f83 ; padding: 0px 0px 0px 0px;font-size: 15px;font-family: Arial, Helvetica, sans-serif; }
-            .ttf h1 {color: #ffffff; background-color:" + DashColors.Fail.ToHexString() + @"; font-family: Arial, Helvetica, sans-serif; border: 1px solid #252a2e; text-align: center;font-size: 15px }
-            .ttw {background-color:#ffffff; color: #004f83 ; padding: 0px 0px 0px 0px;font-size: 15px;font-family: Arial, Helvetica, sans-serif; }
-            .ttw h1 {color: #ffffff; background-color:" + DashColors.Warning.ToHexString() + @"; font-family: Arial, Helvetica, sans-serif; border: 1px solid #252a2e; text-align: center;font-size: 15px }
-            h1 {color: #ffffff; background-color:#0063a3; font-family: Arial, Helvetica, sans-serif; border: 1px solid #252a2e; text-align: center;}
+            .tt { padding: 0px 0px 0px 0px; }
+            .tt h1 {color: ##SUCCESS_F_COLOR##; background-color:##SUCCESS_B_COLOR##; font-family: Arial, Helvetica, sans-serif; border: 1px solid #252a2e; text-align: center;font-size: 15px }
+            .ttf { padding: 0px 0px 0px 0px; }
+            .ttf h1 {color: ##FAIL_F_COLOR##;; background-color:##FAIL_B_COLOR##; font-family: Arial, Helvetica, sans-serif; border: 1px solid #252a2e; text-align: center;font-size: 15px }
+            .ttw { padding: 0px 0px 0px 0px;}
+            .ttw h1 {color: ##WARNING_F_COLOR##; background-color:##WARNING_B_COLOR##; font-family: Arial, Helvetica, sans-serif; border: 1px solid #252a2e; text-align: center;font-size: 15px }
+            h1 {color: ##TITLE_F_COLOR##; background-color:##TITLE_B_COLOR##; font-family: Arial, Helvetica, sans-serif; border: 1px solid #252a2e; text-align: center;}
+            body {background-color: ##BODY_B_COLOR##; color: ##BODY_F_COLOR## }
+            div.google-visualization-tooltip { background-color: ##TOOLTIP_B_COLOR##; color: ##TOOLTIP_F_COLOR##; font-size: 15px;font-family: Arial, Helvetica, sans-serif;  }
         </style>
         <script type=""text/javascript"" src=""https://www.gstatic.com/charts/loader.js""></script>
         <script type=""text/javascript"">
@@ -78,15 +80,16 @@ namespace DBADashGUI.AgentJobs
                     timeline: {
                         colorByRowLabel: true,
                         rowLabelStyle: {
-                            color: '#004f83'
+                            color: '##LABEL_COLOR##'
                         }
                     },
-                    backgroundColor: '#ffffff',
+                    backgroundColor: '##CHART_B_COLOR##',
                     alternatingRowStyle: false,
                     height: ##HEIGHT##,
                     hAxis: {
                         format: '##DATEFORMAT##'
-                    }
+                    },
+                    tooltip: { isHtml: true },
                 };
 
                 google.visualization.events.addListener(chart, 'ready', function() {
@@ -94,7 +97,7 @@ namespace DBADashGUI.AgentJobs
                     var rects = container.getElementsByTagName('rect');
                     Array.prototype.forEach.call(rects, function(rect) {
                         if (rect.getAttribute('stroke') === '#9a9a9a') {
-                            rect.setAttribute('stroke', '#004f83');
+                            rect.setAttribute('stroke', '##GRID_COLOR##');
                             rect.setAttribute('stroke-width', '');
                             rect.setAttribute('stroke-dasharray', '1,1');
                         }
@@ -103,25 +106,15 @@ namespace DBADashGUI.AgentJobs
                     // find <path> elements for vertical/horizontal gridlines
                     var paths = container.getElementsByTagName('path');
                     Array.prototype.forEach.call(paths, function(path) {
-                        // vertical
-                        if ((path.getAttribute('stroke') === '#ffffff') || (path.getAttribute('stroke') === '#e6e6e6')) {
-                            path.setAttribute('stroke', '#004f83');
-                            path.setAttribute('stroke-dasharray', '1,1');
-                        }
-                        // horizontal
-                        if (path.getAttribute('stroke') === '#b7b7b7') {
-                            path.setAttribute('stroke', '#004f83');
-                            path.setAttribute('stroke-width', '0.5');
-                            path.setAttribute('stroke-dasharray', '1,1');
-                        }
+                        path.setAttribute('stroke', '##GRID_COLOR##');
+                        path.setAttribute('stroke-dasharray', '1,1');
+                        path.setAttribute('stroke-width', '0.5');
                     });
 
                     // find <text> elements for formatting axis labels
                     var labels = container.getElementsByTagName('text');
                     Array.prototype.forEach.call(labels, function(label) {
-                        if (label.getAttribute('text-anchor') === 'middle') {
-                            label.setAttribute('fill', '#004f83');
-                        }
+                        label.setAttribute('fill', '##LABEL_COLOR##');
                     });
                 });
 
@@ -135,12 +128,13 @@ namespace DBADashGUI.AgentJobs
   </body>
 </html>";
 
-        private static readonly string NoDataHTMLTemplate = @"
+        private const string NoDataHTMLTemplate = @"
 <html>
     <head>
         <style>
-            h1 {color: #ffffff; background-color:#0063a3; font-family: Arial, Helvetica, sans-serif; border: 1px solid #252a2e; text-align: center;}
-            h3 {color: #0063a3; font-family: Arial, Helvetica, sans-serif;}
+            h1 {color: ##TITLE_F_COLOR##; background-color:##TITLE_B_COLOR##; font-family: Arial, Helvetica, sans-serif; border: 1px solid #252a2e; text-align: center;}
+            h3 {font-family: Arial, Helvetica, sans-serif;}
+            body {background-color: ##BODY_B_COLOR##; color: ##BODY_F_COLOR## }
         </style>
     </head>
     <body>
@@ -318,7 +312,7 @@ namespace DBADashGUI.AgentJobs
         {
             if (dt.Rows.Count == 0)
             {
-                html = NoDataHTMLTemplate.Replace("##SERVERNAME##", context.InstanceName);
+                html = ReplaceColors(NoDataHTMLTemplate.Replace("##SERVERNAME##", context.InstanceName));
                 return;
             }
             StringBuilder sb = new();
@@ -374,8 +368,28 @@ namespace DBADashGUI.AgentJobs
                     tlr.End.ToString("s", System.Globalization.CultureInfo.InvariantCulture));
                 previousTlr = tlr;
             }
-            html = template.Replace("##DATEFORMAT##", DateFormat).Replace("##SERVERNAME##", context.InstanceName).Replace("##HEIGHT##", ChartHeight(rowCount).ToString()).ToString();
+            html = ReplaceColors(template.Replace("##DATEFORMAT##", DateFormat).Replace("##SERVERNAME##", context.InstanceName).Replace("##HEIGHT##", ChartHeight(rowCount).ToString()));
             html = html.Replace("##DATA##", sb.ToString());
+        }
+
+        private static string ReplaceColors(string html)
+        {
+            var theme = DBADashUser.SelectedTheme;
+            return html.Replace("##WARNING_B_COLOR##", theme.WarningBackColor.ToHexString())
+                .Replace("##WARNING_F_COLOR##", theme.WarningForeColor.ToHexString())
+                .Replace("##FAIL_B_COLOR##", theme.CriticalBackColor.ToHexString())
+                .Replace("##FAIL_F_COLOR##", theme.CriticalForeColor.ToHexString())
+                .Replace("##SUCCESS_B_COLOR##", theme.SuccessBackColor.ToHexString())
+                .Replace("##SUCCESS_F_COLOR##", theme.SuccessForeColor.ToHexString())
+                .Replace("##TITLE_F_COLOR##", theme.TimelineTitleForeColor.ToHexString())
+                .Replace("##TITLE_B_COLOR##", theme.TimelineTitleBackColor.ToHexString())
+                .Replace("##BODY_B_COLOR##", theme.TimelineBodyBackColor.ToHexString())
+                .Replace("##BODY_F_COLOR##", theme.TimelineBodyForeColor.ToHexString())
+                .Replace("##LABEL_COLOR##", theme.TimelineLabelColor.ToHexString())
+                .Replace("##CHART_B_COLOR##", theme.TimelineChartBackColor.ToHexString())
+                .Replace("##GRID_COLOR##", theme.TimelineGridColor.ToHexString())
+                .Replace("##TOOLTIP_B_COLOR##", theme.TimelineToolTipBackColor.ToHexString())
+                .Replace("##TOOLTIP_F_COLOR##", theme.TimelineToolTipForeColor.ToHexString());
         }
 
         private static int ChartHeight(int rows)

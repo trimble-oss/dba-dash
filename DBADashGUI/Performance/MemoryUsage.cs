@@ -1,4 +1,5 @@
-﻿using LiveCharts;
+﻿using DBADashGUI.Theme;
+using LiveCharts;
 using LiveCharts.Wpf;
 using Microsoft.Data.SqlClient;
 using System;
@@ -26,7 +27,7 @@ namespace DBADashGUI.Performance
         private string selectedClerk;
         private string selectedCounter;
         private string selectedCounterAlias;
-        readonly ToolTip dgvToolTip = new() { AutomaticDelay = 100, AutoPopDelay = 60000, ReshowDelay = 100 };
+        private readonly ToolTip dgvToolTip = new() { AutomaticDelay = 100, AutoPopDelay = 60000, ReshowDelay = 100 };
         private int previousDurationMins = 0;
 
         private enum ChartViews
@@ -117,6 +118,7 @@ namespace DBADashGUI.Performance
                 performanceCounters1.RefreshData();
             }
         }
+
         private void RefreshClerkLineChart()
         {
             if (ChartView == ChartViews.MemoryClerk)
@@ -140,6 +142,7 @@ namespace DBADashGUI.Performance
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate" });
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colPagesPct", HeaderText = "Pages %", DataPropertyName = "Pct", DefaultCellStyle = new DataGridViewCellStyle() { Format = "P1" } });
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colDescription", HeaderText = "Description", DataPropertyName = "MemoryClerkDescription" });
+                dgv.ApplyTheme();
             }
             dgv.DataSource = dt;
 
@@ -186,7 +189,6 @@ namespace DBADashGUI.Performance
 
             pieChart1.Series = sc;
             pieChart1.LegendLocation = LegendLocation.Bottom;
-
         }
 
         public DataTable GetMemoryUsage()
@@ -362,7 +364,6 @@ namespace DBADashGUI.Performance
             RefreshCurrentTab();
         }
 
-
         private void Dgv_CellMouseEnter(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
@@ -380,6 +381,7 @@ namespace DBADashGUI.Performance
             performanceCounterSummaryGrid1.CounterSelected += PerformanceCounterSummaryGrid1_CounterSelected;
             DateHelper.AddDateGroups(tsDateGroup, TsDateGroup_Click);
         }
+
         private void TsDateGroup_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;

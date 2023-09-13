@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.Tagging
 {
-    public partial class Tags : UserControl, INavigation, ISetContext
+    public partial class Tags : UserControl, INavigation, ISetContext, IThemedControl
     {
         public Tags()
         {
@@ -128,6 +129,7 @@ namespace DBADashGUI.Tagging
             dgvReport.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn });
             dgvReport.DataSource = dt;
             dgvReport.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgvReport.ApplyTheme();
         }
 
         private void DgvReport_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -207,6 +209,17 @@ namespace DBADashGUI.Tagging
                 var tag = new InstanceTag() { Instance = InstanceName, TagID = tagid, TagName = tagName, TagValue = tagValue, IsTagged = isTagged, InstanceID = InstanceID };
                 tag.Save();
             }
+        }
+
+        public void ApplyTheme(BaseTheme theme)
+        {
+            foreach (Control c in this.Controls)
+            {
+                c.ApplyTheme(theme);
+            }
+
+            panel1.ForeColor = theme.PanelForeColor;
+            panel1.BackColor = theme.PanelBackColor;
         }
     }
 }

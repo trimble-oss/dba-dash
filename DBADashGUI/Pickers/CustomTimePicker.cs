@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.Performance
 {
@@ -8,6 +9,7 @@ namespace DBADashGUI.Performance
         public CustomTimePicker()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         public DateTime FromDate
@@ -31,5 +33,6 @@ namespace DBADashGUI.Performance
             this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
+
     }
 }

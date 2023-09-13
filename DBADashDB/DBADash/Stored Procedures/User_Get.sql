@@ -2,13 +2,15 @@
 	@UserName NVARCHAR(128),
 	@UserID INT OUT,
 	@ManageGlobalViews BIT OUT,
-	@TimeZone VARCHAR(50) OUT
+	@TimeZone VARCHAR(50) OUT,
+	@Theme VARCHAR(50)=NULL OUT
 )
 AS
 SELECT @ManageGlobalViews = IS_ROLEMEMBER('db_owner') | IS_ROLEMEMBER('ManageGlobalViews')
 
 SELECT	@UserID = UserID,
-		@TimeZone = TimeZone
+		@TimeZone = TimeZone,
+		@Theme = Theme
 FROM DBADash.Users 
 WHERE UserName = @UserName
 

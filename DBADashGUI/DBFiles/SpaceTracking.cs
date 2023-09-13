@@ -9,6 +9,7 @@ using System.Drawing;
 using System.Drawing.Text;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI
 {
@@ -157,13 +158,13 @@ namespace DBADashGUI
             if (disable)
             {
                 ((DataGridViewLinkColumn)dgv.Columns["colName"]).LinkBehavior = LinkBehavior.NeverUnderline;
-                ((DataGridViewLinkColumn)dgv.Columns["colName"]).LinkColor = Color.Black;
-                ((DataGridViewLinkColumn)dgv.Columns["colName"]).ActiveLinkColor = Color.Black;
+                ((DataGridViewLinkColumn)dgv.Columns["colName"]).LinkColor = DBADashUser.SelectedTheme.ForegroundColor;
+                ((DataGridViewLinkColumn)dgv.Columns["colName"]).ActiveLinkColor = DBADashUser.SelectedTheme.ForegroundColor;
             }
             else
             {
-                ((DataGridViewLinkColumn)dgv.Columns["colName"]).LinkColor = DashColors.LinkColor;
-                ((DataGridViewLinkColumn)dgv.Columns["colName"]).ActiveLinkColor = DashColors.LinkColor;
+                ((DataGridViewLinkColumn)dgv.Columns["colName"]).LinkColor = DBADashUser.SelectedTheme.LinkColor;
+                ((DataGridViewLinkColumn)dgv.Columns["colName"]).ActiveLinkColor = DBADashUser.SelectedTheme.LinkColor;
                 ((DataGridViewLinkColumn)dgv.Columns["colName"]).LinkBehavior = LinkBehavior.AlwaysUnderline;
             }
         }
@@ -252,7 +253,7 @@ namespace DBADashGUI
                 new DataGridViewTextBoxColumn() { Name = "colUsedTB", DataPropertyName = "UsedTB", HeaderText = "Used (TB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = false },
                 new DataGridViewLinkColumn() { Name = "colHistory", HeaderText = "History", Text = "View", UseColumnTextForLinkValue = true }
                 );
-            Common.StyleGrid(ref dgv);
+            dgv.ApplyTheme();
         }
 
         private void SetUnit(object sender, EventArgs e)

@@ -681,7 +681,7 @@
     <Build Include="dbo\Stored Procedures\OSLoadedModulesStatus_Add.sql" />
     <Build Include="dbo\Stored Procedures\Instance_ShowInSummary_Upd.sql" />
     <Build Include="dbo\Functions\TagValue.sql" />
-    <Build Include="DBADash\Stored Procedures\User_TimeZone_Upd.sql" />
+    <Build Include="DBADash\Stored Procedures\User_Upd.sql" />
     <Build Include="dbo\Stored Procedures\JobTimeline_Get.sql" />
     <Build Include="dbo\Stored Procedures\JobCategories_Get.sql" />
     <Build Include="dbo\Stored Procedures\JobErrorAck.sql" />
