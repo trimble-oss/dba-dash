@@ -1,10 +1,12 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Forms;
+using System.Windows.Media;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI
 {
-    public partial class DiffControl : UserControl
+    public partial class DiffControl : UserControl, IThemedControl
     {
         public DiffControl()
         {
@@ -102,6 +104,19 @@ namespace DBADashGUI
         private void TsDiff_Click(object sender, EventArgs e)
         {
             Mode = ViewMode.Diff;
+        }
+
+        public void ApplyTheme(BaseTheme theme)
+        {
+            this.Controls.ApplyTheme(theme);
+            diffViewer1 = new DiffPlex.Wpf.Controls.DiffViewer();
+            elDiffViewer.Child = diffViewer1;
+            diffViewer1.Foreground = new SolidColorBrush(theme.ForegroundColor.ToMediaColor());
+            diffViewer1.Background= new SolidColorBrush(theme.BackgroundColor.ToMediaColor());
+            diffViewer1.NewText = newText;
+            diffViewer1.OldText = oldText;
+            codeEditor1.Text = newText;
+            SetMode();
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
+using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.HA
 {
@@ -111,7 +112,7 @@ namespace DBADashGUI.HA
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             bool isSummary = SummaryMode;
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
                 var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["CollectionDateStatus"];
@@ -125,26 +126,22 @@ namespace DBADashGUI.HA
                 {
                     var mirroringState = row["mirroring_state"] == DBNull.Value ? Int16.MinValue : Convert.ToInt16(row["mirroring_state"]);
                     var witnessState = row["mirroring_witness_state"] == DBNull.Value ? Int16.MinValue : Convert.ToInt16(row["mirroring_witness_state"]);
-                    var colour = DashColors.Fail;
-                    if (mirroringState is 4 or 6)
+
+                    var mirroringStateStatus = mirroringState switch
                     {
-                        colour = DashColors.Success;
-                    }
-                    else if (mirroringState == 2)
+                        4 or 6 => DBADashStatusEnum.OK,
+                        2 => DBADashStatusEnum.Warning,
+                        _ => DBADashStatusEnum.Critical
+                    };
+
+                    var witnessStatus = witnessState switch
                     {
-                        colour = DashColors.Warning;
-                    }
-                    var witnessColour = DashColors.NotApplicable;
-                    if (witnessState == 1)
-                    {
-                        witnessColour = DashColors.Success;
-                    }
-                    else if (witnessState == 2)
-                    {
-                        witnessColour = DashColors.Fail;
-                    }
-                    dgv.Rows[idx].Cells["mirroring_witness_state"].SetStatusColor(witnessColour);
-                    dgv.Rows[idx].Cells["mirroring_state"].SetStatusColor(colour);
+                        1 => DBADashStatusEnum.OK,
+                        2 => DBADashStatusEnum.Critical,
+                        _ => DBADashStatusEnum.NA
+                    };
+                    dgv.Rows[idx].Cells["mirroring_witness_state"].SetStatusColor(witnessStatus);
+                    dgv.Rows[idx].Cells["mirroring_state"].SetStatusColor(mirroringStateStatus);
                 }
             }
         }

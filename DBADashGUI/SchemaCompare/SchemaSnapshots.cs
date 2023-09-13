@@ -6,6 +6,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 using static DBADashGUI.DiffControl;
 
 namespace DBADashGUI.Changes
@@ -201,9 +202,9 @@ namespace DBADashGUI.Changes
 
         private void SchemaSnapshots_Load(object sender, EventArgs e)
         {
-            Common.StyleGrid(ref gvSnapshots);
-            Common.StyleGrid(ref gvSnapshotsDetail);
-            Common.StyleGrid(ref dgvInstanceSummary);
+            gvSnapshots.ApplyTheme();
+            gvSnapshotsDetail.ApplyTheme();
+            dgvInstanceSummary.ApplyTheme();
             splitSnapshotSummary.Dock = DockStyle.Fill;
         }
 

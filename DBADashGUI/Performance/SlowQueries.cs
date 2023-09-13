@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI
 {
@@ -327,7 +328,7 @@ namespace DBADashGUI
                         }
 
                         dgvSummary.DataSource = dt;
-
+                        dgvSummary.ApplyTheme(DBADashUser.SelectedTheme);
                         dgvSummary.Visible = true;
                     });
                 }
@@ -562,8 +563,8 @@ namespace DBADashGUI
 
         private void SlowQueries_Load(object sender, EventArgs e)
         {
-            CommonShared.StyleGrid(ref dgvSummary);
-            CommonShared.StyleGrid(ref dgvSlow);
+            dgvSummary.ApplyTheme();
+            dgvSlow.ApplyTheme();
             SelectGroupBy();
         }
 
@@ -766,6 +767,7 @@ namespace DBADashGUI
             {
                 AutoSizeDetailGridColumns();
             }
+            dgvSlow.ApplyTheme(DBADashUser.SelectedTheme);
         }
 
         private void AutoSizeDetailGridColumns()

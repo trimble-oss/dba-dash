@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -105,6 +106,7 @@ namespace DBADashGUI.Changes
                 if (previousVersion != version && previousVersion != "")
                 {
                     row.DefaultCellStyle.BackColor = DashColors.YellowPale;
+                    row.DefaultCellStyle.ForeColor = Color.Black;
                 }
 
                 lastDevice = device;

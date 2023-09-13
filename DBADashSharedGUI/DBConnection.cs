@@ -1,12 +1,16 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADashGUI.Theme;
+using Microsoft.Data.SqlClient;
+using System.Runtime.Versioning;
 
 namespace DBADash
 {
+    [SupportedOSPlatform("windows")]
     public partial class DBConnection : Form
     {
         public DBConnection()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         string connectionString = String.Empty;

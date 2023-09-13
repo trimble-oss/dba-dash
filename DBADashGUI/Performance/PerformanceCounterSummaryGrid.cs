@@ -4,19 +4,21 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.Performance
 {
     public class PerformanceCounterSummaryGrid : DataGridView
     {
-
         public Int32 InstanceID { get; set; }
         public string SearchText { get; set; }
         public List<int> Counters { get; set; }
 
         public event EventHandler<CounterSelectedEventArgs> CounterSelected;
+
         public event EventHandler<TextSelectedEventArgs> TextSelected;
+
         public bool ObjectLink = true;
         public bool CounterLink = true;
         public bool InstanceLink = true;
@@ -26,6 +28,7 @@ namespace DBADashGUI.Performance
             public int CounterID { get; set; }
             public string CounterName { get; set; }
         }
+
         public class TextSelectedEventArgs : EventArgs
         {
             public string Text { get; set; }
@@ -47,8 +50,6 @@ namespace DBADashGUI.Performance
             RowsAdded += PerformanceCounterSummaryGrid_RowsAdded;
             CellContentClick += PerformanceCounterSummaryGrid_CellContentClick;
         }
-
-
 
         private void RefreshSummary()
         {
@@ -84,15 +85,14 @@ namespace DBADashGUI.Performance
                 DataSource = dt;
 
                 AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                this.ApplyTheme();
             }
         }
-
 
         private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshSummary();
         }
-
 
         private void PerformanceCounterSummaryGrid_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -134,7 +134,6 @@ namespace DBADashGUI.Performance
                             RefreshSummary();
                         }
                     }
-
                 }
             }
         }
@@ -146,10 +145,10 @@ namespace DBADashGUI.Performance
                 var row = (DataRowView)Rows[idx].DataBoundItem;
                 if (row["CriticalFrom"] == DBNull.Value && row["CriticalTo"] == DBNull.Value && row["WarningFrom"] == DBNull.Value && row["WarningTo"] == DBNull.Value && row["GoodFrom"] == DBNull.Value && row["GoodTo"] == DBNull.Value)
                 {
-                    Rows[idx].Cells["colMinValue"].SetStatusColor(Color.White);
-                    Rows[idx].Cells["colMaxValue"].SetStatusColor(Color.White);
-                    Rows[idx].Cells["colAVGValue"].SetStatusColor(Color.White);
-                    Rows[idx].Cells["colCurrentValue"].SetStatusColor(Color.White);
+                    Rows[idx].Cells["colMinValue"].SetStatusColor(DBADashStatusEnum.NA);
+                    Rows[idx].Cells["colMaxValue"].SetStatusColor(DBADashStatusEnum.NA);
+                    Rows[idx].Cells["colAVGValue"].SetStatusColor(DBADashStatusEnum.NA);
+                    Rows[idx].Cells["colCurrentValue"].SetStatusColor(DBADashStatusEnum.NA);
                 }
                 else
                 {
@@ -158,8 +157,6 @@ namespace DBADashGUI.Performance
                     Rows[idx].Cells["colAVGValue"].SetStatusColor((DBADashStatusEnum)row["AvgValueStatus"]);
                     Rows[idx].Cells["colCurrentValue"].SetStatusColor((DBADashStatusEnum)row["CurrentValueStatus"]);
                 }
-
-
             }
         }
 
@@ -190,7 +187,5 @@ namespace DBADashGUI.Performance
         {
             RefreshSummary();
         }
-
-
     }
 }

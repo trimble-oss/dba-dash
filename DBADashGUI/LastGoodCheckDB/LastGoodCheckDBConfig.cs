@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.LastGoodCheckDB
 {
@@ -43,6 +44,7 @@ namespace DBADashGUI.LastGoodCheckDB
         public LastGoodCheckDBConfig()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         private void ChkEnabled_CheckedChanged(object sender, EventArgs e)

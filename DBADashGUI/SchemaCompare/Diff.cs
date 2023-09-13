@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DocumentFormat.OpenXml.Drawing;
+using System;
 using System.Windows.Forms;
 using static DBADashGUI.DiffControl;
 
@@ -20,6 +21,7 @@ namespace DBADashGUI
 
         public void SetText(string oldText, string newText, ViewMode mode = ViewMode.Diff)
         {
+            diff1.ApplyTheme(DBADashUser.SelectedTheme);
             AddDiffControl();
             diff1.OldText = oldText;
             diff1.NewText = newText;

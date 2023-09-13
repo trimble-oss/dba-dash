@@ -4,6 +4,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.Checks
 {
@@ -12,6 +13,7 @@ namespace DBADashGUI.Checks
         public OSLoadedModuleStatus()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         DataTable dt;

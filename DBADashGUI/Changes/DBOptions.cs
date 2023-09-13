@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.Changes
 {
@@ -133,6 +134,7 @@ namespace DBADashGUI.Changes
                 dgv.AutoGenerateColumns = false;
                 dgv.Columns.Clear();
                 dgv.Columns.AddRange(SummaryCols);
+                dgv.ApplyTheme();
                 dgv.DataSource = dt;
                 dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
@@ -187,6 +189,7 @@ namespace DBADashGUI.Changes
                 dgv.Columns[1].Frozen = Common.FreezeKeyColumn; //hidden
                 dgv.Columns[2].Frozen = Common.FreezeKeyColumn; //hidden
                 dgv.Columns[3].Frozen = Common.FreezeKeyColumn;
+                dgv.ApplyTheme();
             }
         }
 
@@ -218,6 +221,7 @@ namespace DBADashGUI.Changes
                 dgvHistory.AutoGenerateColumns = false;
                 dgvHistory.DataSource = dt;
                 dgvHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                dgvHistory.ApplyTheme();
             }
         }
 
@@ -320,8 +324,8 @@ namespace DBADashGUI.Changes
                 r.Cells["is_auto_shrink_on"].SetStatusColor(r.Cells["is_auto_shrink_on"].Value as bool? == false
                     ? DBADashStatus.DBADashStatusEnum.OK
                     : DBADashStatus.DBADashStatusEnum.Critical);
-                r.Cells["LastGoodCheckDBStatus"].SetStatusColor(((DBADashStatus.DBADashStatusEnum)Convert.ToInt32(r.Cells["LastGoodCheckDBStatus"].Value)).GetColor());
-                r.Cells["LastGoodCheckDbTime"].SetStatusColor(((DBADashStatus.DBADashStatusEnum)Convert.ToInt32(r.Cells["LastGoodCheckDBStatus"].Value)).GetColor());
+                r.Cells["LastGoodCheckDBStatus"].SetStatusColor((DBADashStatus.DBADashStatusEnum)Convert.ToInt32(r.Cells["LastGoodCheckDBStatus"].Value));
+                r.Cells["LastGoodCheckDbTime"].SetStatusColor((DBADashStatus.DBADashStatusEnum)Convert.ToInt32(r.Cells["LastGoodCheckDBStatus"].Value));
 
                 if (Convert.ToInt32(r.Cells["database_id"].Value) == 4) // msdb
                 {
@@ -409,31 +413,31 @@ namespace DBADashGUI.Changes
                 {
                     if (r.Cells[col].Value == DBNull.Value)
                     {
-                        r.Cells[col].SetStatusColor(DashColors.NotApplicable);
+                        r.Cells[col].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
                     }
                     else
                     {
-                        r.Cells[col].SetStatusColor((int)r.Cells[col].Value > 0 ? DashColors.Warning : DashColors.Success);
+                        r.Cells[col].SetStatusColor((int)r.Cells[col].Value > 0 ? DBADashStatus.DBADashStatusEnum.Warning : DBADashStatus.DBADashStatusEnum.OK);
                     }
                 }
                 foreach (var col in criticalCols)
                 {
                     if (r.Cells[col].Value == DBNull.Value)
                     {
-                        r.Cells[col].SetStatusColor(DashColors.NotApplicable);
+                        r.Cells[col].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
                     }
                     else
                     {
-                        r.Cells[col].SetStatusColor((int)r.Cells[col].Value > 0 ? DashColors.Fail : DashColors.Success);
+                        r.Cells[col].SetStatusColor((int)r.Cells[col].Value > 0 ? DBADashStatus.DBADashStatusEnum.Critical : DBADashStatus.DBADashStatusEnum.OK);
                     }
                 }
-                Color vlfStatusColor = DashColors.NotApplicable;
+                var vlfStatus = DBADashStatus.DBADashStatusEnum.NA;
                 if (r.Cells["Max VLF Count"].Value != DBNull.Value)
                 {
-                    vlfStatusColor = (int)r.Cells["Max VLF Count"].Value > MAX_VLF_CRITICAL_THRESHOLD ? DashColors.Fail : ((int)r.Cells["Max VLF Count"].Value > MAX_VLF_WARNING_THRESHOLD ? DashColors.Warning : DashColors.Success);
+                    vlfStatus = (int)r.Cells["Max VLF Count"].Value > MAX_VLF_CRITICAL_THRESHOLD ? DBADashStatus.DBADashStatusEnum.Critical : ((int)r.Cells["Max VLF Count"].Value > MAX_VLF_WARNING_THRESHOLD ? DBADashStatus.DBADashStatusEnum.Warning : DBADashStatus.DBADashStatusEnum.OK);
                 }
 
-                r.Cells["Max VLF Count"].SetStatusColor(vlfStatusColor);
+                r.Cells["Max VLF Count"].SetStatusColor(vlfStatus);
             }
         }
 

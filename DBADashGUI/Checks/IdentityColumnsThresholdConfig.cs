@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Smo;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -18,6 +19,7 @@ namespace DBADashGUI.Checks
         public IdentityColumnsThresholdConfig()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         public int InstanceID { get; set; }

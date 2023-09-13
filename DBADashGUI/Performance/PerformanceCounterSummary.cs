@@ -4,6 +4,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.Performance
 {
@@ -61,7 +62,6 @@ namespace DBADashGUI.Performance
             }
         }
 
-
         private void PerformanceCounterSummary_Load(object sender, EventArgs e)
         {
             splitContainer1.Panel1Collapsed = true;
@@ -95,6 +95,7 @@ namespace DBADashGUI.Performance
 
         private void AddChartControl(IMetricChart chart)
         {
+            ((Control)chart).ApplyTheme();
             chart.Close += Chart_Close;
             chart.MoveUp += Chart_MoveUp;
             chart.MoveUpVisible = layout1.Controls.Count > 0;
@@ -210,7 +211,6 @@ namespace DBADashGUI.Performance
         private void IOToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AddChartControl(new IOPerformance());
-
         }
 
         private void WaitsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -244,13 +244,11 @@ namespace DBADashGUI.Performance
             DeSelectView();
         }
 
-
         private void DeSelectView()
         {
             savedViewMenuItem1.ClearSelectedItem();
             tsDeleteView.Visible = false;
         }
-
 
         private void LoadSelectedView(string _selectedView, bool isGlobal, string serializedObject)
         {
@@ -289,9 +287,7 @@ namespace DBADashGUI.Performance
             }
             savedViewMenuItem1.SelectItem(_selectedView, isGlobal);
             splitContainer1.Visible = true;
-
         }
-
 
         private void TsSaveView_Click(object sender, EventArgs e)
         {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.DBFiles
 {
@@ -8,6 +9,7 @@ namespace DBADashGUI.DBFiles
         public DBSpaceHistoryView()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         public Int32 DatabaseID { get => dbSpaceHistory1.DatabaseID; set => dbSpaceHistory1.DatabaseID = value; }

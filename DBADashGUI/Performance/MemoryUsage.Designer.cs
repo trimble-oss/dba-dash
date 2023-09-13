@@ -1,4 +1,6 @@
 ﻿
+using DBADashGUI.Theme;
+
 namespace DBADashGUI.Performance
 {
     partial class MemoryUsage
@@ -44,7 +46,7 @@ namespace DBADashGUI.Performance
             this.tsPieChart = new System.Windows.Forms.ToolStripButton();
             this.performanceCounters1 = new DBADashGUI.Performance.PerformanceCounters();
             this.pieChart1 = new LiveCharts.WinForms.PieChart();
-            this.tab1 = new System.Windows.Forms.TabControl();
+            this.tab1 = new ThemedTabControl();
             this.tabClerks = new System.Windows.Forms.TabPage();
             this.tabConfig = new System.Windows.Forms.TabPage();
             this.dgvConfig = new System.Windows.Forms.DataGridView();
@@ -368,7 +370,7 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.ToolStripButton tsExcel;
-        private System.Windows.Forms.TabControl tab1;
+        private ThemedTabControl tab1;
         private System.Windows.Forms.TabPage tabClerks;
         private System.Windows.Forms.TabPage tabConfig;
         private System.Windows.Forms.DataGridView dgvConfig;

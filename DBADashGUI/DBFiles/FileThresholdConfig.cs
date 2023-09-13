@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.DBFiles
 {
@@ -8,6 +9,7 @@ namespace DBADashGUI.DBFiles
         public FileThresholdConfig()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         public int InstanceID;

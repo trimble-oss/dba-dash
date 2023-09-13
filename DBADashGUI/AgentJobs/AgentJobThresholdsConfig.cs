@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.AgentJobs
 {
@@ -89,6 +90,7 @@ namespace DBADashGUI.AgentJobs
         public AgentJobThresholdsConfig()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         private void AgentJobThresholdsConfig_Load(object sender, EventArgs e)

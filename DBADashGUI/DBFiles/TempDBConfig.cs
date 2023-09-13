@@ -5,10 +5,11 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.DBFiles
 {
-    public partial class TempDBConfig : UserControl, ISetContext
+    public partial class TempDBConfig : UserControl, ISetContext, IRefreshData
     {
         public TempDBConfig()
         {
@@ -23,7 +24,7 @@ namespace DBADashGUI.DBFiles
             RefreshData();
         }
 
-        private void RefreshData()
+        public void RefreshData()
         {
             dgvTempDB.Columns[0].Frozen = Common.FreezeKeyColumn;
             using (var cn = new SqlConnection(Common.ConnectionString))
@@ -64,17 +65,17 @@ namespace DBADashGUI.DBFiles
                 var traceFlagReq = (bool)row["IsTraceFlagRequired"];
                 var T1118 = (bool)row["T1118"];
                 var T1117 = (bool)row["T1117"];
-                Color insufficientFilesColor = insufficientFiles ? DashColors.Warning : Color.White;
-                dgvTempDB.Rows[idx].Cells[colNumberOfDataFiles.Index].SetStatusColor(insufficientFilesColor);
-                dgvTempDB.Rows[idx].Cells[colInsufficientFiles.Index].SetStatusColor(insufficientFilesColor);
-                dgvTempDB.Rows[idx].Cells[colEvenSize.Index].SetStatusColor(evenSized ? DashColors.Success : DashColors.Warning);
-                dgvTempDB.Rows[idx].Cells[colEvenGrowth.Index].SetStatusColor(evenGrowth ? DashColors.Success : DashColors.Warning);
-                dgvTempDB.Rows[idx].Cells[colT1117.Index].SetStatusColor(traceFlagReq ? (T1117 ? DashColors.Success : DashColors.Warning) : (T1117 ? DashColors.YellowLight : DashColors.GrayLight));
-                dgvTempDB.Rows[idx].Cells[colT1118.Index].SetStatusColor(traceFlagReq ? (T1118 ? DashColors.Success : DashColors.Warning) : (T1118 ? DashColors.YellowLight : DashColors.GrayLight));
-                Color memoryOptimizedColor = row["IsTempDBMetadataMemoryOptimized"] == DBNull.Value ? DashColors.GrayLight : ((bool)row["IsTempDBMetadataMemoryOptimized"] ? DashColors.Success : DashColors.BlueLight);
-                Color logFilesColor = (Int32)row["NumberOfLogFiles"] > 1 ? DashColors.Warning : DashColors.Success;
-                dgvTempDB.Rows[idx].Cells[colTempDBMemoryOpt.Index].SetStatusColor(memoryOptimizedColor);
-                dgvTempDB.Rows[idx].Cells[colNumberOfLogFiles.Index].SetStatusColor(logFilesColor);
+                var insufficientFilesStatus = insufficientFiles ? DBADashStatusEnum.Warning : DBADashStatusEnum.NA;
+                dgvTempDB.Rows[idx].Cells[colNumberOfDataFiles.Index].SetStatusColor(insufficientFilesStatus);
+                dgvTempDB.Rows[idx].Cells[colInsufficientFiles.Index].SetStatusColor(insufficientFilesStatus);
+                dgvTempDB.Rows[idx].Cells[colEvenSize.Index].SetStatusColor(evenSized ? DBADashStatusEnum.OK : DBADashStatusEnum.Warning);
+                dgvTempDB.Rows[idx].Cells[colEvenGrowth.Index].SetStatusColor(evenGrowth ? DBADashStatusEnum.OK : DBADashStatusEnum.Warning);
+                dgvTempDB.Rows[idx].Cells[colT1117.Index].SetStatusColor(traceFlagReq ? (T1117 ? DBADashStatusEnum.OK : DBADashStatusEnum.Warning) : (T1117 ? DBADashStatusEnum.WarningLow : DBADashStatusEnum.NA));
+                dgvTempDB.Rows[idx].Cells[colT1118.Index].SetStatusColor(traceFlagReq ? (T1118 ? DBADashStatusEnum.OK : DBADashStatusEnum.Warning) : (T1118 ? DBADashStatusEnum.WarningLow : DBADashStatusEnum.NA));
+                var memoryOptimizedStatus = row["IsTempDBMetadataMemoryOptimized"] == DBNull.Value ? DBADashStatusEnum.NA : ((bool)row["IsTempDBMetadataMemoryOptimized"] ? DBADashStatusEnum.OK : DBADashStatusEnum.Information);
+                var logFilesStatus = (Int32)row["NumberOfLogFiles"] > 1 ? DBADashStatusEnum.Warning : DBADashStatusEnum.OK;
+                dgvTempDB.Rows[idx].Cells[colTempDBMemoryOpt.Index].SetStatusColor(memoryOptimizedStatus);
+                dgvTempDB.Rows[idx].Cells[colNumberOfLogFiles.Index].SetStatusColor(logFilesStatus);
             }
         }
 

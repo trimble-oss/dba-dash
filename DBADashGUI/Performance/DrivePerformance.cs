@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.Performance
 {
@@ -99,7 +100,7 @@ namespace DBADashGUI.Performance
                 io.SetLatencyLimit(LatencyLimit);
                 io.RefreshData(Context.InstanceID);
                 io.Close += Io_Close;
-
+                io.ApplyTheme();
                 layout1.RowCount++;
                 layout1.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
                 layout1.Controls.Add(io);
@@ -116,6 +117,7 @@ namespace DBADashGUI.Performance
         {
             foreach (IOPerformance io in layout1.Controls.OfType<IOPerformance>())
             {
+                io.ApplyTheme();
                 io.RefreshData();
             }
             if (synchronizeAxisToolStripMenuItem.Checked)
@@ -173,6 +175,7 @@ namespace DBADashGUI.Performance
                 .ToList();
 
             var colSelection = new SelectColumns() { Items = selectableMetrics, Text = "Select Measures" };
+            colSelection.ApplyTheme();
             colSelection.ShowDialog();
             if (colSelection.DialogResult == DialogResult.OK)
             {
@@ -189,6 +192,7 @@ namespace DBADashGUI.Performance
         private void TsDrives_Click(object sender, EventArgs e)
         {
             using var frm = new SelectColumns() { Items = drives, Text = "Select Drives" };
+            frm.ApplyTheme();
             frm.ShowDialog(this);
             if (frm.DialogResult == DialogResult.OK)
             {
@@ -204,6 +208,7 @@ namespace DBADashGUI.Performance
             SummaryForm?.Close();
             SummaryForm = new IOSummaryForm()
             { InstanceID = Context.InstanceID, FromDate = DateRange.FromUTC, ToDate = DateRange.ToUTC, GroupBy = IOSummary.IOSummaryGroupByOptions.Drive };
+            SummaryForm.ApplyTheme();
             SummaryForm.Show();
             SummaryForm.FormClosed += delegate { SummaryForm = null; };
             SummaryForm.Show();

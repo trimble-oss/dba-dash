@@ -5,6 +5,8 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
+using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.Changes
 {
@@ -115,7 +117,7 @@ namespace DBADashGUI.Changes
                         row.Cells[idx].ToolTipText = "Alert configured without notification";
                     }
 
-                    row.Cells[idx].SetStatusColor(enabled ? (notification ? DashColors.Success : DashColors.Warning) : DashColors.Fail);
+                    row.Cells[idx].SetStatusColor(enabled ? (notification ? DBADashStatusEnum.OK : DBADashStatusEnum.Warning) : DBADashStatusEnum.Critical);
                 }
                 lastInstance = instance;
             }
@@ -145,6 +147,7 @@ namespace DBADashGUI.Changes
             {
                 dgvAlerts.Columns.AddRange(Cols);
                 dgvAlerts.AutoGenerateColumns = false;
+                dgvAlerts.ApplyTheme();
             }
             dgvAlerts.DataSource = dt;
             dgvAlerts.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);

@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 using Humanizer;
 using static DBADashGUI.DBADashStatus;
 
@@ -315,7 +316,7 @@ namespace DBADashGUI.DBFiles
 
         private void DBFilesControl_Load(object sender, EventArgs e)
         {
-            Common.StyleGrid(ref dgvFiles);
+            dgvFiles.ApplyTheme();
         }
     }
 }

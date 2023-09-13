@@ -5,20 +5,20 @@ using System.Windows.Forms.DataVisualization.Charting;
 
 namespace DBADashGUI
 {
-    class Histogram
+    internal class Histogram
     {
-
         public static Bitmap GetHistogram(List<double> values, Int32 width, Int32 height, bool ColorPoints)
         {
             var chart = new Chart();
             var chartArea = new ChartArea();
+            chart.BackColor = DBADashUser.SelectedTheme.BackgroundColor;
+            chartArea.BackColor = DBADashUser.SelectedTheme.BackgroundColor;
             chart.ChartAreas.Add(chartArea);
             chartArea.AxisY.Enabled = AxisEnabled.False;
             chartArea.AxisY.MajorGrid.Enabled = false;
             chartArea.AxisX.MajorGrid.Enabled = false;
             chartArea.AxisX.Interval = 1;
             chartArea.AxisX.LabelStyle.Enabled = false;
-
 
             var s = chart.Series.Add("s1");
             s.Points.DataBindY(values);

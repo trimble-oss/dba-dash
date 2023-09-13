@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI.DBFiles
+﻿using DBADashGUI.Theme;
+
+namespace DBADashGUI.DBFiles
 {
     partial class FileThresholdConfig
     {
@@ -34,7 +36,7 @@
             this.bttnCancel = new System.Windows.Forms.Button();
             this.bttnUpdate = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.tab1 = new System.Windows.Forms.TabControl();
+            this.tab1 = new ThemedTabControl();
             this.tabData = new System.Windows.Forms.TabPage();
             this.dataConfig = new DBADashGUI.DBFiles.FileThresholdConfigControl();
             this.tabLog = new System.Windows.Forms.TabPage();
@@ -221,7 +223,7 @@
         private System.Windows.Forms.Button bttnCancel;
         private System.Windows.Forms.Button bttnUpdate;
         private System.Windows.Forms.ToolTip toolTip1;
-        private System.Windows.Forms.TabControl tab1;
+        private ThemedTabControl tab1;
         private System.Windows.Forms.TabPage tabData;
         private FileThresholdConfigControl dataConfig;
         private System.Windows.Forms.TabPage tabLog;

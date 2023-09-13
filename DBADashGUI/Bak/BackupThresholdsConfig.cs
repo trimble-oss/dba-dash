@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.Backups
 {
@@ -12,6 +13,7 @@ namespace DBADashGUI.Backups
         public BackupThresholdsConfig()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         private void GetThresholds()

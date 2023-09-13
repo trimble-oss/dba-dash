@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.AgentJobs
 {
@@ -112,6 +113,7 @@ namespace DBADashGUI.AgentJobs
             var dt = GetJobStatsSummary();
             dgv.DataSource = dt;
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgv.ApplyTheme();
         }
 
         private void RefreshChart()

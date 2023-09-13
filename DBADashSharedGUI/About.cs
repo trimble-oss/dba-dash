@@ -4,6 +4,7 @@ using Octokit;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Versioning;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI
 {
@@ -16,6 +17,7 @@ namespace DBADashGUI
             this.labelVersion.Text = AssemblyVersion;
             this.labelCopyright.Text = AssemblyCopyright;
             this.labelCompanyName.Text = AssemblyCompany;
+            this.ApplyTheme();
         }
 
         #region Assembly Attribute Accessors

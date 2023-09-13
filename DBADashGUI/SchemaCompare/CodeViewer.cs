@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DBADashGUI.Theme;
+using System;
 using System.Windows.Forms;
 
 namespace DBADashGUI
@@ -15,7 +16,12 @@ namespace DBADashGUI
 
         public string SQL
         {
-            get => codeEditor1.Text; set => codeEditor1.Text = value;
+            get => codeEditor1.Text;
+            set
+            {
+                codeEditor1.Text = value;
+                this.ApplyTheme(DBADashUser.SelectedTheme);
+            }
         }
 
         private void BttnCopy_Click(object sender, EventArgs e)

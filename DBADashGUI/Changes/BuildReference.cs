@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI.Changes
@@ -121,7 +122,7 @@ namespace DBADashGUI.Changes
         {
             dgv.AutoGenerateColumns = false;
             dgv.Columns.AddRange(ColumnsList.ToArray());
-            CommonShared.StyleGrid(ref dgv);
+            dgv.ApplyTheme();
             var list = new List<ToolStripItem>();
             foreach (var link in Links)
             {

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashServiceConfig
 {
@@ -16,6 +17,7 @@ namespace DBADashServiceConfig
         public EncryptionConfig()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         public BasicConfig.EncryptionOptions EncryptionOption

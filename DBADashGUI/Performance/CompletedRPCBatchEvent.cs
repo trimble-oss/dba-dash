@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.Performance
 {
@@ -11,6 +12,7 @@ namespace DBADashGUI.Performance
         public CompletedRPCBatchEvent()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         public int SessionID;

@@ -3,11 +3,12 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI
 {
-    public partial class DriveControl : UserControl
+    public partial class DriveControl : UserControl, IThemedControl
     {
         public bool DisplayInstanceName { get; set; }
 
@@ -29,6 +30,7 @@ namespace DBADashGUI
                 SetDrive();
             }
         }
+
 
         private void SetDrive()
         {
@@ -53,7 +55,7 @@ namespace DBADashGUI
                 lblThresholds.Text = "Disabled";
             }
             lblThresholds.Font = drive.Inherited ? new Font(lblThresholds.Font, FontStyle.Italic) : new Font(lblThresholds.Font, FontStyle.Bold);
-            pbSpace.BackColor = drive.DriveStatus.GetColor();
+            pbSpace.BackColor = drive.DriveStatus.GetBackColor();
             pbSpace.ForeColor = Color.White;
             if (drive.DriveStatus == DBADashStatusEnum.Critical)
             {
@@ -75,18 +77,20 @@ namespace DBADashGUI
             picStatus.Visible = (drive.DriveStatus != DBADashStatusEnum.NA);
 
             lblUpdated.Text = "Updated " + drive.SnapshotDate.ToString("yyyy-MM-dd HH:mm") + " (" + DateHelper.AppNow.Subtract(drive.SnapshotDate).TotalMinutes.ToString("N0") + "min ago)";
+            UpdateSnapshotStatus();
+        }
 
-            lblUpdated.ForeColor = drive.SnapshotStatus.GetColor();
+        private void UpdateSnapshotStatus()
+        {
+            lblUpdated.ForeColor = drive.SnapshotStatus.GetBackColor();
             if (drive.SnapshotStatus == DBADashStatusEnum.NA)
             {
-                lblUpdated.ForeColor = Color.Black;
+                lblUpdated.ForeColor = DBADashUser.SelectedTheme.ForegroundColor;
             }
         }
 
         private void DriveControl_Load(object sender, EventArgs e)
         {
-            lnkThreshold.LinkColor = DashColors.LinkColor;
-            lnkHistory.LinkColor = DashColors.LinkColor;
             SetDrive();
         }
 
@@ -121,6 +125,15 @@ namespace DBADashGUI
             };
             DriveHistoryViewForm.FormClosed += delegate { DriveHistoryViewForm = null; };
             DriveHistoryViewForm.Show();
+        }
+
+        void IThemedControl.ApplyTheme(BaseTheme theme)
+        {
+            this.BackColor = theme.BackgroundColor;
+            this.ForeColor = theme.ForegroundColor;
+            lnkHistory.ApplyTheme(theme);
+            lnkThreshold.ApplyTheme(theme);
+            UpdateSnapshotStatus();
         }
     }
 }

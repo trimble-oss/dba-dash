@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 using static DBADashGUI.DBADashStatus;
 using static DBADashGUI.Main;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -114,6 +115,7 @@ namespace DBADashGUI
 
         public void RefreshData(bool forceRefresh, DateTime? forceRefreshDate = null)
         {
+            if (context == null) return;
             if (!savedLayoutLoaded)
             {
                 LoadSavedLayout();
@@ -141,6 +143,7 @@ namespace DBADashGUI
                 {
                     GroupSummaryByTest(ref dt);
                     UpdateSummary(ref dt);
+                    AutoSizeSplitter();
                 }
                 catch (Exception ex)
                 {
@@ -232,11 +235,15 @@ namespace DBADashGUI
             }
             tests.Values.CopyToDataTable(grouped, LoadOption.OverwriteChanges);
 
-            dv = new DataView(grouped, TestRowFilter, "DisplayText", DataViewRowState.CurrentRows);
+            var dvTestSummary = new DataView(grouped, TestRowFilter, "DisplayText", DataViewRowState.CurrentRows);
             dgvTests.Invoke((Action)(() =>
             {
-                dgvTests.DataSource = dv;
+                dgvTests.DataSource = dvTestSummary;
             }));
+        }
+
+        private void AutoSizeSplitter()
+        {
             // Auto size split container
             if (dgvTests.Rows.Count > 0)
             {
@@ -306,7 +313,7 @@ namespace DBADashGUI
             toolStrip1.Invoke(() =>
             {
                 UpdateRefreshTime();
-                lblRefreshTime.ForeColor = DBADashStatusEnum.OK.GetColor();
+                lblRefreshTime.ForeColor = DBADashStatusEnum.OK.GetBackColor();
             }
             );
             refresh1.Invoke((Action)(() => refresh1.Visible = false));
@@ -345,7 +352,7 @@ namespace DBADashGUI
                     : DateTime.UtcNow.Subtract((DateTime)row["DetectedCorruptionDateUtc"]).Humanize(1);
                 if (row["IsAgentRunning"] != DBNull.Value && (bool)row["IsAgentRunning"] == false)
                 {
-                    dgvSummary.Rows[idx].Cells["JobStatus"].SetStatusColor(Color.Black);
+                    dgvSummary.Rows[idx].Cells["JobStatus"].SetStatusColor(DBADashStatusEnum.Critical);
                     dgvSummary.Rows[idx].Cells["JobStatus"].Value = "Not Running";
                 }
 
@@ -561,12 +568,12 @@ namespace DBADashGUI
         {
             if (lastRefresh == null || DateTime.UtcNow.Subtract(lastRefresh.Value).TotalMinutes > 60)
             {
-                lblRefreshTime.ForeColor = DBADashStatusEnum.Critical.GetColor();
+                lblRefreshTime.ForeColor = DBADashStatusEnum.Critical.GetBackColor();
                 timer1.Enabled = false;
             }
             else if (DateTime.UtcNow.Subtract(lastRefresh.Value).TotalMinutes > 10)
             {
-                lblRefreshTime.ForeColor = DBADashStatusEnum.Warning.GetColor();
+                lblRefreshTime.ForeColor = DBADashStatusEnum.Warning.GetBackColor();
             }
         }
 
@@ -596,7 +603,7 @@ namespace DBADashGUI
                 var rowStatus = DBADashStatusEnum.NA;
                 foreach (var status in (DBADashStatusEnum[])Enum.GetValues(typeof(DBADashStatusEnum)))
                 {
-                    if (!row.Row.Table.Columns.Contains(status.ToString())) return;
+                    if (!row.Row.Table.Columns.Contains(status.ToString())) break;
                     if ((int)row[status.ToString()] > 0)
                     {
                         gridRow.Cells[status.ToString()].SetStatusColor(status);
@@ -732,5 +739,6 @@ namespace DBADashGUI
             CommonData.AcknowledgeInstanceUptime(-1);
             RefreshData(true);
         }
+
     }
 }

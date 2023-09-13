@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.Performance
 {
@@ -15,6 +16,7 @@ namespace DBADashGUI.Performance
         public WaitSummaryDialog()
         {
             InitializeComponent();
+            this.ApplyTheme();
         }
 
         DBADashContext context;

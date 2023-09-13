@@ -13,14 +13,16 @@ using System.Printing.IndexedProperties;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 using DocumentFormat.OpenXml.Bibliography;
 using Humanizer;
+using ICSharpCode.AvalonEdit.Utils;
 using Microsoft.SqlServer.Management.SqlParser.SqlCodeDom;
 using Version = System.Version;
 
 namespace DBADashGUI
 {
-    public partial class Main : Form, IMessageFilter
+    public partial class Main : Form, IMessageFilter, IThemedControl
     {
         public class InstanceSelectedEventArgs : EventArgs
         {
@@ -31,6 +33,7 @@ namespace DBADashGUI
 
         private readonly CommandLineOptions commandLine;
         private readonly List<int> commandLineTags = new();
+        private TabPage[] AllTabs;
 
         public Main(CommandLineOptions opts)
         {
@@ -114,6 +117,7 @@ namespace DBADashGUI
 
         private async void Main_Load(object sender, EventArgs e)
         {
+            AllTabs = tabs.TabPages.OfType<TabPage>().ToArray();
             await CommonShared.CheckForIncompleteUpgrade();
             if (Upgrade.IsUpgradeIncomplete) return;
             if (Properties.Settings.Default.SettingsUpgradeRequired)
@@ -126,7 +130,7 @@ namespace DBADashGUI
             lblVersion.Text = "Version: " + System.Reflection.Assembly.GetEntryAssembly().GetName().Version;
             tabs.TabPages.Clear();
             tabs.TabPages.Add(tabDBADash);
-            Common.StyleGrid(ref gvHistory);
+
             dbOptions1.SummaryMode = true;
             splitSchemaSnapshot.Panel1.Controls.Add(diffSchemaSnapshot);
             diffSchemaSnapshot.Dock = DockStyle.Fill;
@@ -153,6 +157,13 @@ namespace DBADashGUI
                 }
             }
             await SetConnection(repositories.GetDefaultConnection());
+            this.ApplyTheme();
+            CheckTheme();
+            this.WindowState = FormWindowState.Maximized;
+            if (splitMain.SplitterDistance > 400)
+            {
+                splitMain.SplitterDistance = 400;
+            }
         }
 
         public async Task SetConnection(RepositoryConnection connection)
@@ -309,7 +320,7 @@ namespace DBADashGUI
             {
                 return;
             }
-
+            // tabs.SelectedTab?.ApplyTheme();
             SaveContext();
 
             SQLTreeItem n = tv1.SelectedSQLTreeItem();
@@ -517,7 +528,7 @@ namespace DBADashGUI
                                     let UsedGB = TotalGB - FreeGB
                                     let PctUsed = 1 - PctFree
                                     let nameAndLetter = label + " (" + driveLetter + ")"
-                                    let color = DBADashStatus.GetStatusColour((DBADashStatus.DBADashStatusEnum)Convert.ToInt32(drive["Status"]), true)
+                                    let color = DBADashStatus.GetStatusBackColor((DBADashStatus.DBADashStatusEnum)Convert.ToInt32(drive["Status"]))
                                     let name = Common.AsciiProgressBar(PctUsed) + " " + nameAndLetter + "...." + UsedGB.Gigabytes().ToString("###,#.#") + "(" + PctUsed.ToString("P1") + ") Used of " + TotalGB.Gigabytes().Humanize("###,#.#")
                                     orderby driveLetter
                                     select new SQLTreeItem(name, SQLTreeItem.TreeType.Drive)
@@ -1380,6 +1391,7 @@ namespace DBADashGUI
                     SnapshotDate_A = (DateTime)row["SnapshotValidFrom"],
                     SelectedTags = SelectedTags()
                 };
+                frm.ApplyTheme();
                 frm.ShowDialog();
             }
         }
@@ -1411,6 +1423,7 @@ namespace DBADashGUI
                 SelectedInstanceA = n.InstanceName,
                 SelectedDatabaseA = new DatabaseItem() { DatabaseID = n.DatabaseID, DatabaseName = n.DatabaseName }
             };
+            DBDiffForm.ApplyTheme();
             DBDiffForm.FormClosed += delegate { DBDiffForm = null; };
             DBDiffForm.Show();
         }
@@ -1426,6 +1439,7 @@ namespace DBADashGUI
                 InstanceID_A = selected.InstanceID
             };
             JobDiffForm.FormClosed += delegate { JobDiffForm = null; };
+            JobDiffForm.ApplyTheme();
             JobDiffForm.Show();
         }
 
@@ -1742,7 +1756,8 @@ namespace DBADashGUI
             if (MessageBox.Show("Save time zone: " + DateHelper.AppTimeZone.DisplayName, "Save",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                DBADashUser.SetUserTimeZone(DateHelper.AppTimeZone);
+                DBADashUser.UserTimeZone = DateHelper.AppTimeZone;
+                DBADashUser.Update();
                 MessageBox.Show($"Time zone will be set to {DateHelper.AppTimeZone.DisplayName} on application start.",
                     "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -1947,6 +1962,54 @@ namespace DBADashGUI
             {
                 ctrl.RefreshData();
             }
+        }
+
+        private void DefaultToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetTheme(new BaseTheme());
+        }
+
+        private void DarkToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetTheme(new DarkTheme());
+        }
+
+        private void LightToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetTheme(new WhiteTheme());
+        }
+
+        private void CheckTheme()
+        {
+            defaultToolStripMenuItem.Checked = DBADashUser.SelectedTheme.ThemeIdentifier == ThemeType.Default;
+            darkToolStripMenuItem.Checked = DBADashUser.SelectedTheme.ThemeIdentifier == ThemeType.Dark;
+            whiteToolStripMenuItem.Checked = DBADashUser.SelectedTheme.ThemeIdentifier == ThemeType.White;
+        }
+
+        private void SetTheme(BaseTheme theme)
+        {
+            DBADashUser.SelectedTheme = theme;
+            DBADashUser.Update();
+            CheckTheme();
+            this.ApplyTheme(theme);
+            foreach (var ctrl in tabs.SelectedTab?.Controls.OfType<IRefreshData>()!)
+            {
+                ctrl.RefreshData();
+            }
+        }
+
+        void IThemedControl.ApplyTheme(BaseTheme theme)
+        {
+            this.Controls.ApplyTheme(theme);
+
+            foreach (var tab in AllTabs)
+            {
+                tab.ApplyTheme();
+            }
+            pnlSearch.BackColor = theme.SearchBackColor;
+            cboTimeZone.BackColor = theme.TimeZoneBackColor;
+            cboTimeZone.ForeColor = theme.TimeZoneForeColor;
+            cboTimeZone.FlatStyle = FlatStyle.Flat;
         }
     }
 }

@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.Performance
 {
-    public partial class SelectPerformanceCounters : Form
+    public partial class SelectPerformanceCounters : Form, IThemedControl
     {
         public SelectPerformanceCounters()
         {
@@ -109,6 +110,17 @@ namespace DBADashGUI.Performance
         private void BttnCancel_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        public void ApplyTheme(BaseTheme theme)
+        {
+            foreach (Control child in Controls)
+            {
+                child.ApplyTheme(theme);
+            }
+            panel1.BackColor = theme.PanelBackColor;
+            panel1.ForeColor = theme.ForegroundColor;
+            lblSearch.ForeColor = theme.ForegroundColor;
         }
     }
 }

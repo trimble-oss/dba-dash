@@ -2,10 +2,11 @@
 using System;
 using System.Data;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI
 {
-    public partial class JobDiff : Form
+    public partial class JobDiff : Form, IThemedControl
     {
         public JobDiff()
         {
@@ -15,7 +16,7 @@ namespace DBADashGUI
         public int InstanceID_A { get; set; }
         public int InstanceID_B { get; set; }
 
-        DataTable GetJobDiff()
+        private DataTable GetJobDiff()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.Job_Diff", cn) { CommandType = CommandType.StoredProcedure })
@@ -55,10 +56,11 @@ namespace DBADashGUI
             InstanceID_A = ((InstanceItem)cboA.SelectedItem).InstanceID;
         }
 
-        class InstanceItem
+        private class InstanceItem
         {
             public int InstanceID { get; set; }
             public string Instance { get; set; }
+
             public override string ToString()
             {
                 return Instance;
@@ -93,6 +95,16 @@ namespace DBADashGUI
                 diffControl1.NewText = B;
                 diffControl1.Mode = DiffControl.ViewMode.Diff;
             }
+        }
+
+        public void ApplyTheme(BaseTheme theme)
+        {
+            foreach (Control child in Controls)
+            {
+                child.ApplyTheme(theme);
+            }
+            panel1.BackColor = theme.PanelBackColor;
+            panel1.ForeColor = theme.ForegroundColor;
         }
     }
 }

@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI
 {
-    public partial class DBDiff : Form
+    public partial class DBDiff : Form, IThemedControl
     {
         public List<int> SelectedTags;
 
@@ -363,6 +364,17 @@ namespace DBADashGUI
             {
                 this.Cursor = Cursors.Default;
             }
+        }
+
+        void IThemedControl.ApplyTheme(BaseTheme theme)
+        {
+            foreach (Control control in this.Controls)
+            {
+                control.ApplyTheme(theme);
+            }
+            panel1.BackColor = theme.PanelBackColor;
+            panel1.ForeColor = theme.PanelForeColor;
+            diffControl.ApplyTheme(theme);
         }
     }
 }

@@ -500,6 +500,7 @@ namespace DBADashGUI.Performance
                 .ToList();
 
             var colSelection = new SelectColumns() { Items = selectableMetrics, Text = "Select Measures" };
+            colSelection.ApplyTheme(DBADashUser.SelectedTheme);
             colSelection.ShowDialog();
             if (colSelection.DialogResult == DialogResult.OK)
             {

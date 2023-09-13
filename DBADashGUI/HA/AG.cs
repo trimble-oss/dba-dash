@@ -5,6 +5,8 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
+using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.HA
 {
@@ -57,7 +59,7 @@ namespace DBADashGUI.HA
             }
             DateHelper.ConvertUTCToAppTimeZone(ref dt);
             dgv.DataSource = dt;
-
+            dgv.ApplyTheme();
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
@@ -139,23 +141,23 @@ namespace DBADashGUI.HA
                     r.Cells["Snapshot Age"].SetStatusColor(snapshotStatus);
                     if (instanceId > 0)
                     {
-                        var syncStateStatus = Convert.ToString(row["Sync Health"]) == "HEALTHY" ? DashColors.Success :
-                                 Convert.ToString(row["Sync Health"]) == "PARTIALLY_HEALTHY" ? DashColors.Warning : DashColors.Fail;
+                        var syncStateStatus = Convert.ToString(row["Sync Health"]) == "HEALTHY" ? DBADashStatusEnum.OK :
+                                 Convert.ToString(row["Sync Health"]) == "PARTIALLY_HEALTHY" ? DBADashStatusEnum.Warning : DBADashStatusEnum.Critical;
                         r.Cells["Sync State"].SetStatusColor(syncStateStatus);
                     }
                     else
                     {
-                        r.Cells["Not Synchronizing"].SetStatusColor((int)row["Not Synchronizing"] > 0 ? DashColors.Fail : Color.White);
-                        r.Cells["Remote Not Synchronizing"].SetStatusColor((int)row["Remote Not Synchronizing"] > 0 ? DashColors.Fail : Color.White);
-                        r.Cells["Synchronized"].SetStatusColor((int)row["Synchronized"] > 0 ? DashColors.Success : Color.White);
-                        r.Cells["Remote Synchronized"].SetStatusColor((int)row["Remote Synchronized"] > 0 ? DashColors.Success : Color.White);
-                        r.Cells["Reverting"].SetStatusColor((int)row["Reverting"] > 0 ? DashColors.Warning : Color.White);
-                        r.Cells["Remote Reverting"].SetStatusColor((int)row["Remote Reverting"] > 0 ? DashColors.Warning : Color.White);
-                        r.Cells["Initializing"].SetStatusColor((int)row["Initializing"] > 0 ? DashColors.Warning : Color.White);
-                        r.Cells["Remote Initializing"].SetStatusColor((int)row["Remote Initializing"] > 0 ? DashColors.Warning : Color.White);
+                        r.Cells["Not Synchronizing"].SetStatusColor((int)row["Not Synchronizing"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
+                        r.Cells["Remote Not Synchronizing"].SetStatusColor((int)row["Remote Not Synchronizing"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
+                        r.Cells["Synchronized"].SetStatusColor((int)row["Synchronized"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
+                        r.Cells["Remote Synchronized"].SetStatusColor((int)row["Remote Synchronized"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
+                        r.Cells["Reverting"].SetStatusColor((int)row["Reverting"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
+                        r.Cells["Remote Reverting"].SetStatusColor((int)row["Remote Reverting"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
+                        r.Cells["Initializing"].SetStatusColor((int)row["Initializing"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
+                        r.Cells["Remote Initializing"].SetStatusColor((int)row["Remote Initializing"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
                     }
-                    var syncHealthStatus = Convert.ToString(row["Sync Health"]) == "HEALTHY" ? DashColors.Success :
-                                                     Convert.ToString(row["Sync Health"]) == "PARTIALLY_HEALTHY" ? DashColors.Warning : DashColors.Fail;
+                    var syncHealthStatus = Convert.ToString(row["Sync Health"]) == "HEALTHY" ? DBADashStatusEnum.OK :
+                                                     Convert.ToString(row["Sync Health"]) == "PARTIALLY_HEALTHY" ? DBADashStatusEnum.Warning : DBADashStatusEnum.Critical;
                     dgv.Rows[idx].Cells["Sync Health"].SetStatusColor(syncHealthStatus);
                 }
             }
