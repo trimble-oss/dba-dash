@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using DBADashGUI.Theme;
+using SortOrder = System.Windows.Forms.SortOrder;
 
 namespace DBADashGUI.AgentJobs
 {
@@ -27,6 +28,8 @@ namespace DBADashGUI.AgentJobs
         public bool IncludeOK { get => statusFilterToolStrip1.OK; set => statusFilterToolStrip1.OK = value; }
 
         public bool IncludeAcknowledged { get => statusFilterToolStrip1.Acknowledged; set => statusFilterToolStrip1.Acknowledged = value; }
+
+        private bool DoAutoSize = true;
 
         public void SetContext(DBADashContext context)
         {
@@ -70,8 +73,17 @@ namespace DBADashGUI.AgentJobs
                 jobStep1.Visible = false;
                 var dt = GetJobs();
                 dgvJobs.AutoGenerateColumns = false;
-                dgvJobs.DataSource = new DataView(dt);
-                dgvJobs.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                var sort = "";
+                if (dgvJobs.SortedColumn != null)
+                {
+                    sort = dgvJobs.SortedColumn.DataPropertyName + (dgvJobs.SortOrder == SortOrder.Descending ? " DESC" : " ASC");
+                }
+                dgvJobs.DataSource = new DataView(dt, "", sort, DataViewRowState.CurrentRows);
+                if (DoAutoSize) // AutoResize on first refresh only.  Persist user column widths after that.
+                {
+                    dgvJobs.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                    DoAutoSize = false;
+                }
                 configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
                 if (context.JobID != Guid.Empty && dt.Rows.Count == 1)
                 {
