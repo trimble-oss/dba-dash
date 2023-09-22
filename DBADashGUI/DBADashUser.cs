@@ -31,7 +31,7 @@ namespace DBADashGUI
                 }
                 else
                 {
-                    cmd.Parameters.AddWithValue("TimeZone", UserTimeZone);
+                    cmd.Parameters.AddWithValue("TimeZone", UserTimeZone.Id);
                 }
 
                 cmd.Parameters.AddWithValue("Theme", SelectedTheme.ThemeIdentifier.ToString());
