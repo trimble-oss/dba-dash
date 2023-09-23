@@ -1,30 +1,61 @@
 # DBA Dash - SQL Server Monitoring Tool
 
-![DBA Dash Performance](Docs/DBADash_Performance_small.png)
+![DBA Dash Performance](Docs/DBADash_LightAndDark.png)
 
 ## Download
 
 [Download](https://github.com/trimble-oss/dba-dash/releases)
 
-## [Website](https://dbadash.com) 🆕
+## [Website](https://dbadash.com) 
 
 Documentation is now available on [dbadash.com](https://dbadash.com), including an easy to follow [quick start](https://dbadash.com/docs/setup/quick-start/) guide.
 
 ## Project Summary
 
-DBA Dash is a tool for SQL Server DBAs to assist with daily checks, performance monitoring and change tracking.
+DBA Dash is a tool for SQL Server DBAs to assist with daily checks, performance monitoring and change tracking.  You can be up and running within minutes and it will provide you with a wealth of information that will make your life as a DBA easier.
 
-- Backups Agent Jobs, DBCC, Corruption, Drive space
-- Availability Groups, Log Shipping, Mirroring
-- [OS Performance Counters + Custom Metrics](https://dbadash.com/docs/help/os-performance-counters/)
-- Stored Procedure/Function/Trigger execution stats
-- [Capture slow queries](https://dbadash.com/docs/help/slow-queries/) (Extended Event trace)
-- Azure DB monitoring
-- Track changes to configuration, SQL Patching, drivers etc.
-- [Schema change tracking](https://dbadash.com/docs/help/schema-snapshots/). 
-- Agent Job change tracking
+- Daily DBA Checks
+  - Backups
+  - Last Good DBCC check
+  - Corruption
+  - Drive space
+  - Agent Jobs
+  - Availability Groups
+  - Log Shipping
+  - Mirroring
+  - Identity Columns
+  - [Custom Checks](https://dbadash.com/docs/help/custom-checks/) and more
+- Performance
+  - [OS Performance Counters + Custom Metrics](https://dbadash.com/docs/help/os-performance-counters/)
+  - Stored Procedure/Function/Trigger execution stats
+  - Waits
+  - Memory
+  - Snapshot of running queries
+  - IO Performance
+  - Blocking
+  - [Capture slow queries](https://dbadash.com/docs/help/slow-queries/) (Extended Event trace)
+  - Azure DB monitoring
+- Track configuration
+   - sys.configuration settings
+   - SQL Patching
+   - Hardware
+   - Trace Flags
+   - Alerts
+   - Drivers
+   - TempDB and Database files
+   - Resource Governor
+   - Database options
+   - Query Store
+   - [Schema changes](https://dbadash.com/docs/help/schema-snapshots/)
+
+    *Track configuration across your SQL Server estate, automatically logging when changes occur*
+    
+- Agent Jobs
+  - DDL Tracking
+  - Agent job timeline view
+  - Agent job performance monitoring
+  - Highlight job failures across all your SQL instances
 - Option to monitor instances in isolated environments via S3 bucket.
-- [Custom Checks](https://dbadash.com/docs/help/custom-checks/)
 
  [What DBA Dash collects and when](https://dbadash.com/docs/help/schedule/)
 
