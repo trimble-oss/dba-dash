@@ -60,6 +60,12 @@ namespace DBADashGUI
             return DBADashStatus.GetStatusForeColor(value);
         }
 
+        public static void SetStatusColor(this DataGridViewCellStyle value, DBADashStatusEnum Status)
+        {
+            value.BackColor = Status.GetBackColor();
+            value.ForeColor = Status.GetForeColor();
+        }
+
         public static void SetColor(this DataGridViewCell cell, Color backColor, Color foreColor, Color selectionBackColor, Color selectionForeColor)
         {
             cell.Style.BackColor = backColor;

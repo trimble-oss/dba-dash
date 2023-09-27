@@ -28,7 +28,7 @@ namespace DBADashGUI.Performance
         public DateTime SnapshotDateFrom;
         public DateTime SnapshotDateTo;
         public int SessionID = 0;
-
+        public Guid JobId = Guid.Empty;
         private int blockedCount;
         private int idleCount;
         private int runningJobCount;
@@ -168,7 +168,7 @@ namespace DBADashGUI.Performance
             UpdateRowLimit();
             tsEditLimit.Visible = false;
             lblRowLimit.Visible = false;
-            tsWaitsFilter.Enabled = SessionID == 0;
+            tsWaitsFilter.Enabled = SessionID == 0 && JobId == Guid.Empty;
             tsGroupByFilter.Visible = false;
             splitContainer1.Panel2Collapsed = true;
             dgvSessionWaits.DataSource = null;
@@ -192,6 +192,13 @@ namespace DBADashGUI.Performance
             {
                 tsGetLatest.Visible = false;
                 snapshotDT = RunningQueriesForSession(SessionID, SnapshotDateFrom, SnapshotDateTo, InstanceID);
+                GetCounts();
+                LoadSnapshot(new DataView(snapshotDT));
+            }
+            else if (JobId != Guid.Empty)
+            {
+                tsGetLatest.Visible = false;
+                snapshotDT = RunningQueriesForJob(JobId, SnapshotDateFrom, SnapshotDateTo, InstanceID);
                 GetCounts();
                 LoadSnapshot(new DataView(snapshotDT));
             }
@@ -266,6 +273,28 @@ namespace DBADashGUI.Performance
             using (var da = new SqlDataAdapter(cmd))
             {
                 cmd.Parameters.AddWithValue("SessionID", sessionID);
+                cmd.Parameters.Add(new SqlParameter("SnapshotDateFrom", fromDate) { DbType = DbType.DateTime2 });
+                cmd.Parameters.Add(new SqlParameter("SnapshotDateTo", toDate) { DbType = DbType.DateTime2 });
+                cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                DataTable dt = new();
+                da.Fill(dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
+                dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
+                dt.Columns["start_time_utc"].ColumnName = "start_time";
+                dt.Columns["last_request_start_time_utc"].ColumnName = "last_request_start_time";
+                dt.Columns["last_request_end_time_utc"].ColumnName = "last_request_end_time";
+                dt.Columns["login_time_utc"].ColumnName = "login_time";
+                return dt;
+            }
+        }
+
+        private static DataTable RunningQueriesForJob(Guid JobId, DateTime fromDate, DateTime toDate, int instanceID)
+        {
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("RunningQueriesForJob_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
+            {
+                cmd.Parameters.AddWithValue("JobID", JobId);
                 cmd.Parameters.Add(new SqlParameter("SnapshotDateFrom", fromDate) { DbType = DbType.DateTime2 });
                 cmd.Parameters.Add(new SqlParameter("SnapshotDateTo", toDate) { DbType = DbType.DateTime2 });
                 cmd.Parameters.AddWithValue("InstanceID", instanceID);
@@ -384,7 +413,7 @@ namespace DBADashGUI.Performance
             dgv.Columns["colQueryHash"].Width = 70;
             dgv.Columns["colQueryPlanHash"].Width = 70;
             tsGroupBy.Enabled = dgv.Rows.Count > 1;
-            tsBlockingFilter.Visible = SessionID == 0;
+            tsBlockingFilter.Visible = SessionID == 0 && JobId == Guid.Empty;
             dgv.ApplyTheme();
         }
 
@@ -399,7 +428,7 @@ namespace DBADashGUI.Performance
 
             tsBlockingFilter.Text = $"Blocking ({blockedCount} Blocked)";
             tsBlockingFilter.Enabled = blockedCount > 0;
-            tsStatus.Visible = SessionID == 0;
+            tsStatus.Visible = SessionID == 0 && JobId == Guid.Empty;
             tsStatus.Text =
                 $"Blocked Sessions: {blockedCount}, Blocked Wait Time: {TimeSpan.FromMilliseconds(blockedWait):dd\\ hh\\:mm\\:ss}, Running Jobs {runningJobCount}";
             tsStatus.Font = blockedCount > 0 ? new Font(tsStatus.Font, FontStyle.Bold) : new Font(tsStatus.Font, FontStyle.Regular);

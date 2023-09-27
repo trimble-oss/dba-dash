@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Performance;
 using DBADashGUI.Theme;
 using SortOrder = System.Windows.Forms.SortOrder;
 
@@ -31,6 +32,8 @@ namespace DBADashGUI.AgentJobs
 
         private bool DoAutoSize = true;
 
+        public bool ShowSteps { get => showJobStepsToolStripMenuItem.Checked; set => showJobStepsToolStripMenuItem.Checked = value; }
+
         public void SetContext(DBADashContext context)
         {
             this.context = context;
@@ -43,6 +46,7 @@ namespace DBADashGUI.AgentJobs
             IncludeAcknowledged = true;
             InstanceIDs = context.RegularInstanceIDs.ToList();
 
+            SetSplitterDistance();
             RefreshData();
         }
 
@@ -286,6 +290,8 @@ namespace DBADashGUI.AgentJobs
             colHistory.Visible = true;
         }
 
+        private RunningQueriesViewer RunningViewer = null;
+
         private void DgvJobHistory_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
@@ -299,6 +305,19 @@ namespace DBADashGUI.AgentJobs
                 else if (e.ColumnIndex == colMessage.Index)
                 {
                     Convert.ToString(row["Message"]).OpenAsTextFile();
+                }
+                else if (e.ColumnIndex == colRunDuration.Index || e.ColumnIndex == colRunDurationSec.Index)
+                {
+                    var from = ((DateTime)dgvJobHistory.Rows[e.RowIndex].Cells[colRunDateTime.Index].Value).ToUniversalTime();
+                    var to = from.AddSeconds(
+                        Convert.ToDouble(dgvJobHistory.Rows[e.RowIndex].Cells[colRunDurationSec.Index].Value));
+                    var jobId = (Guid)row["job_id"];
+                    var id = (int)row["InstanceID"];
+                    RunningViewer?.Close();
+                    RunningViewer = new() { SnapshotDateFrom = from, SnapshotDateTo = to, InstanceID = id, JobId = jobId };
+
+                    RunningViewer.FormClosed += delegate { RunningViewer = null; };
+                    RunningViewer.Show();
                 }
             }
         }
@@ -375,6 +394,57 @@ namespace DBADashGUI.AgentJobs
                     AcknowledgeJobErrors(instanceID, jobID, false);
                 }
                 RefreshData();
+            }
+        }
+
+        private void ResizeForm(object sender, EventArgs e)
+        {
+            SetSplitterDistance();
+        }
+
+        private void SetSplitterDistance()
+        {
+            var newSplitterDistance = (context == null || context.JobID == Guid.Empty)
+                ? splitContainer1.Height / 2
+                : 150;
+
+            try
+            {
+                splitContainer1.SplitterDistance = newSplitterDistance;
+            }
+            catch (InvalidOperationException)
+            {
+                // Ignore error that can occur if you resize the control to too small a size
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                // Ignore error that can occur if you resize the control to too small a size
+            }
+        }
+
+        private void DgvJobHistory_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+            bool formatSteps = ShowSteps;
+            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            {
+                var row = (DataRowView)dgvJobHistory.Rows[idx].DataBoundItem;
+                var statusString = row["run_status_description"] as string;
+                var stepId = (int)row["step_id"];
+                var status = statusString switch
+                {
+                    "Succeeded" => DBADashStatus.DBADashStatusEnum.OK,
+                    "Failed" => DBADashStatus.DBADashStatusEnum.Critical,
+                    _ => DBADashStatus.DBADashStatusEnum.Warning
+                };
+                dgvJobHistory.Rows[idx].Cells["colRunStatus"].SetStatusColor(status);
+                if (stepId == 0 && ShowSteps)
+                {
+                    dgvJobHistory.Rows[idx].DefaultCellStyle.Font = new Font(dgvJobHistory.Font, FontStyle.Bold);
+                }
+                else if (ShowSteps)
+                {
+                    dgvJobHistory.Rows[idx].DefaultCellStyle.Font = new Font(dgvJobHistory.Font, FontStyle.Italic);
+                }
             }
         }
     }

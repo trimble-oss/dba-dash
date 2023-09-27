@@ -27,6 +27,11 @@ namespace DBADashGUI.Performance
             get => runningQueries1.InstanceID; set => runningQueries1.InstanceID = value;
         }
 
+        public Guid JobId
+        {
+            get => runningQueries1.JobId; set => runningQueries1.JobId = value;
+        }
+
         private void RunningQueriesViewer_Load(object sender, EventArgs e)
         {
             runningQueries1.RefreshData();

@@ -453,8 +453,11 @@ namespace DBADashGUI
 
                 case TreeType.Folder:
                 case TreeType.DatabasesFolder:
-                case TreeType.HADR:
                     ImageIndex = 3;
+                    break;
+
+                case TreeType.HADR:
+                    ImageIndex = 23;
                     break;
 
                 case TreeType.Configuration:
@@ -470,7 +473,7 @@ namespace DBADashGUI
                     break;
 
                 case TreeType.AgentJobs:
-                    ImageIndex = 3;
+                    ImageIndex = 22;
                     break;
 
                 case TreeType.DBAChecks:

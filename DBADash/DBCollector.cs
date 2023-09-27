@@ -16,6 +16,9 @@ using System.Runtime.Caching;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
+using System.Text.RegularExpressions;
+using Microsoft.SqlServer.Management.SqlParser.Metadata;
 
 namespace DBADash
 {
@@ -71,7 +74,8 @@ namespace DBADash
         MemoryUsage,
         SchemaSnapshot,
         IdentityColumns,
-        Instance
+        Instance,
+        RunningJobs
     }
 
     public enum HostPlatform
@@ -907,10 +911,69 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             {
                 CollectRunningQueries();
             }
+            else if (collectionType == CollectionType.RunningJobs)
+            {
+                CollectRunningJobs();
+            }
             else
             {
                 AddDT(collectionTypeString, SqlStrings.GetSqlString(collectionType), collectionType.GetCommandTimeout(), param);
             }
+        }
+
+        private void CollectRunningJobs()
+        {
+            using var cn = new SqlConnection(ConnectionString);
+            using var cmd = new SqlCommand(SqlStrings.RunningJobs, cn);
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            var rdr = cmd.ExecuteReader();
+            var dtRunningJobs = new DataTable("RunningJobs");
+            dtRunningJobs.Load(rdr);
+            dtRunningJobs.Columns.Add("current_execution_step_id", typeof(int));
+            dtRunningJobs.Columns.Add("current_execution_step_name", typeof(string));
+            dtRunningJobs.Columns.Add("current_retry_attempt", typeof(int));
+            dtRunningJobs.Columns.Add("current_execution_status", typeof(int));
+
+            var spHelpJobInfo = new Dictionary<Guid, (int ExecutionStepID, string ExecutionStep, int RetryAttempts, int ExecutionStatus)>();
+
+            while (rdr.Read())
+            {
+                var step = rdr["current_execution_step"] as string;
+                var jobId = (Guid)rdr["job_id"];
+                var retry = (int)rdr["current_retry_attempt"];
+                var status = (int)rdr["current_execution_status"];
+
+                ParseJobStep(step, out int stepId, out string stepName);
+                spHelpJobInfo[jobId] = (stepId, stepName, retry, status);
+            }
+
+            foreach (DataRow row in dtRunningJobs.Rows)
+            {
+                var jobId = (Guid)row["job_id"];
+                if (!spHelpJobInfo.TryGetValue(jobId, out var info)) continue;
+                row["current_execution_step_id"] = info.ExecutionStepID;
+                row["current_execution_step_name"] = info.ExecutionStep;
+                row["current_retry_attempt"] = info.RetryAttempts;
+                row["current_execution_status"] = info.ExecutionStatus;
+            }
+            Data.Tables.Add(dtRunningJobs);
+        }
+
+        private static bool ParseJobStep(string jobStepAndId, out int stepId, out string stepName)
+        {
+            stepId = -1;
+            stepName = jobStepAndId;
+
+            // Using regular expression to extract ID and name
+            var pattern = @"(\d+) \(([^)]+)\)";
+            var match = Regex.Match(jobStepAndId, pattern);
+
+            if (!match.Success) return false;
+            if (match.Groups.Count != 3) return false;
+            if (!int.TryParse(match.Groups[1].Value, out stepId)) return false;
+            stepName = match.Groups[2].Value;
+            return true;
         }
 
         private void CollectRunningQueries()

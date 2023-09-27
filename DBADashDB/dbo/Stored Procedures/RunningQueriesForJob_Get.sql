@@ -1,10 +1,13 @@
-﻿CREATE PROC dbo.RunningQueriesForSession_Get(
+﻿CREATE PROC dbo.RunningQueriesForJob_Get(
 	@InstanceID INT,
 	@SnapshotDateFrom DATETIME2(7),
     @SnapshotDateTo DATETIME2(7),
-    @SessionID INT
+    @JobID UNIQUEIDENTIFIER=NULL
 )
 AS
+DECLARE @AppName NVARCHAR(128)
+SET @AppName = 'SQLAgent - TSQL JobStep (Job ' + CONVERT(VARCHAR,CAST(@JobID AS BINARY(16)),1) + '%'
+
 SELECT InstanceID,
        InstanceDisplayName,
        Duration,
@@ -80,5 +83,5 @@ FROM dbo.RunningQueriesInfo Q
 WHERE Q.SnapshotDateUTC >= @SnapshotDateFrom 
 AND Q.SnapshotDateUTC < @SnapshotDateTo
 AND Q.InstanceID = @InstanceID
-AND Q.session_id = @SessionID
+AND Q.program_name LIKE @AppName
 ORDER BY Q.SnapshotDateUTC
