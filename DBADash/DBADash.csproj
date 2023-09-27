@@ -22,6 +22,7 @@
     <None Remove="SQL\SQLIdentityColumns.sql" />
     <None Remove="SQL\SQLJobs.sql" />
     <None Remove="SQL\SQLJobSteps.sql" />
+    <None Remove="SQL\SQLRunningJobs.sql" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
@@ -69,6 +70,7 @@
 	<EmbeddedResource Include="SQL\SQLPerformanceCounters.sql" />
 	<EmbeddedResource Include="SQL\SQLRemoveEventSessions.sql" />
 	<EmbeddedResource Include="SQL\SQLRemoveEventSessionsAzure.sql" />
+	<EmbeddedResource Include="SQL\SQLRunningJobs.sql" />
 	<EmbeddedResource Include="SQL\SQLRunningQueries.sql" />
 	<EmbeddedResource Include="SQL\SQLServerExtraProperties.sql" />
 	<EmbeddedResource Include="SQL\SQLServerPermissions.sql" />

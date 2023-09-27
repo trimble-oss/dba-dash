@@ -208,6 +208,8 @@ namespace DBADashGUI
             jobTimeline1 = new AgentJobs.JobTimeline();
             tabDrivePerformance = new System.Windows.Forms.TabPage();
             drivePerformance1 = new Performance.DrivePerformance();
+            tabRunningJobs = new System.Windows.Forms.TabPage();
+            runningJobs1 = new AgentJobs.RunningJobs();
             refresh1 = new Refresh();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -294,6 +296,7 @@ namespace DBADashGUI
             tabOSLoadedModules.SuspendLayout();
             tabJobTimeline.SuspendLayout();
             tabDrivePerformance.SuspendLayout();
+            tabRunningJobs.SuspendLayout();
             SuspendLayout();
             // 
             // TreeViewImageList
@@ -323,6 +326,8 @@ namespace DBADashGUI
             TreeViewImageList.Images.SetKeyName(19, "DataServer_16x_BWLight.png");
             TreeViewImageList.Images.SetKeyName(20, "FolderClosedBlue_16x.png");
             TreeViewImageList.Images.SetKeyName(21, "");
+            TreeViewImageList.Images.SetKeyName(22, "MonthCalendar_16x.png");
+            TreeViewImageList.Images.SetKeyName(23, "LogicalDataCenterDiagram.ico");
             // 
             // menuStrip1
             // 
@@ -899,6 +904,7 @@ namespace DBADashGUI
             tabs.Controls.Add(tabOSLoadedModules);
             tabs.Controls.Add(tabJobTimeline);
             tabs.Controls.Add(tabDrivePerformance);
+            tabs.Controls.Add(tabRunningJobs);
             tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             tabs.Location = new System.Drawing.Point(0, 0);
             tabs.Name = "tabs";
@@ -1237,7 +1243,7 @@ namespace DBADashGUI
             tabJobs.Padding = new System.Windows.Forms.Padding(3);
             tabJobs.Size = new System.Drawing.Size(192, 67);
             tabJobs.TabIndex = 6;
-            tabJobs.Text = "Agent Jobs";
+            tabJobs.Text = "Job Status";
             tabJobs.UseVisualStyleBackColor = true;
             // 
             // agentJobsControl1
@@ -1251,6 +1257,7 @@ namespace DBADashGUI
             agentJobsControl1.Location = new System.Drawing.Point(3, 3);
             agentJobsControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             agentJobsControl1.Name = "agentJobsControl1";
+            agentJobsControl1.ShowSteps = false;
             agentJobsControl1.Size = new System.Drawing.Size(186, 61);
             agentJobsControl1.TabIndex = 0;
             // 
@@ -2119,6 +2126,27 @@ namespace DBADashGUI
             drivePerformance1.Size = new System.Drawing.Size(186, 61);
             drivePerformance1.TabIndex = 0;
             // 
+            // tabRunningJobs
+            // 
+            tabRunningJobs.Controls.Add(runningJobs1);
+            tabRunningJobs.Location = new System.Drawing.Point(4, 29);
+            tabRunningJobs.Name = "tabRunningJobs";
+            tabRunningJobs.Padding = new System.Windows.Forms.Padding(3);
+            tabRunningJobs.Size = new System.Drawing.Size(192, 67);
+            tabRunningJobs.TabIndex = 47;
+            tabRunningJobs.Text = "Running Jobs";
+            tabRunningJobs.UseVisualStyleBackColor = true;
+            // 
+            // runningJobs1
+            // 
+            runningJobs1.Dock = System.Windows.Forms.DockStyle.Fill;
+            runningJobs1.Location = new System.Drawing.Point(3, 3);
+            runningJobs1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            runningJobs1.MinimumDuration = 60;
+            runningJobs1.Name = "runningJobs1";
+            runningJobs1.Size = new System.Drawing.Size(186, 61);
+            runningJobs1.TabIndex = 0;
+            // 
             // refresh1
             // 
             refresh1.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
@@ -2443,6 +2471,7 @@ namespace DBADashGUI
             tabOSLoadedModules.ResumeLayout(false);
             tabJobTimeline.ResumeLayout(false);
             tabDrivePerformance.ResumeLayout(false);
+            tabRunningJobs.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -2646,5 +2675,7 @@ namespace DBADashGUI
         private System.Windows.Forms.ToolStripMenuItem defaultToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem darkToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem whiteToolStripMenuItem;
+        private System.Windows.Forms.TabPage tabRunningJobs;
+        private AgentJobs.RunningJobs runningJobs1;
     }
 }

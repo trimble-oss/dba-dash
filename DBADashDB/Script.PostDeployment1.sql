@@ -1367,7 +1367,8 @@ FROM
 (-1,'AzureDBResourceGovernance',125,180),
 (-1,'ResourceGovernorConfiguration',1445,2880),
 (-1,'MemoryUsage',5,10),
-(-1,'IdentityColumns',10080,20160)
+(-1,'IdentityColumns',10080,20160),
+(-1,'RunningJobs',5,10)
 ) T(InstanceID,Reference,WarningThreshold,CriticalThreshold)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.CollectionDatesThresholds CDT WHERE CDT.InstanceID = T.InstanceID AND CDT.Reference = T.Reference)
 

@@ -47,6 +47,7 @@ namespace DBADashService
                             {CollectionType.AvailabilityGroups, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },
                             {CollectionType.AvailabilityReplicas, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },
                             {CollectionType.MemoryUsage, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },
+                            {CollectionType.RunningJobs, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },
 
                             {CollectionType.ServerPrincipals, new CollectionSchedule(){ Schedule = midnight } },
                             {CollectionType.ServerRoleMembers, new CollectionSchedule(){ Schedule = midnight } },

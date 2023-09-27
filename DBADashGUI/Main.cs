@@ -377,10 +377,12 @@ namespace DBADashGUI
             var hadr = new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR);
             var checks = new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks);
             var storage = new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage);
+            var jobs = new SQLTreeItem("Jobs", SQLTreeItem.TreeType.AgentJobs);
             root.Nodes.Add(changes);
             root.Nodes.Add(checks);
             root.Nodes.Add(hadr);
             root.Nodes.Add(storage);
+            root.Nodes.Add(jobs);
             SQLTreeItem parentNode = root;
 
             var tags = String.Join(",", SelectedTags());
@@ -669,7 +671,14 @@ namespace DBADashGUI
             }
             else if (n.Type == SQLTreeItem.TreeType.AgentJobs)
             {
-                allowedTabs.AddRange(new TabPage[] { tabJobs, tabJobStats, tabJobTimeline });
+                if (parent.Type == SQLTreeItem.TreeType.DBADashRoot)
+                {
+                    allowedTabs.AddRange(new TabPage[] { tabJobs, tabRunningJobs });
+                }
+                else
+                {
+                    allowedTabs.AddRange(new TabPage[] { tabJobs, tabJobStats, tabJobTimeline, tabRunningJobs });
+                }
             }
             else if (n.Type == SQLTreeItem.TreeType.AgentJob)
             {
@@ -684,7 +693,7 @@ namespace DBADashGUI
                 allowedTabs.Add(tabSummary);
                 if (!IsAzureOnly && parent.Type != SQLTreeItem.TreeType.AzureInstance)
                 {
-                    allowedTabs.AddRange(new TabPage[] { tabJobs, tabLastGood, tabOSLoadedModules });
+                    allowedTabs.AddRange(new TabPage[] { tabLastGood, tabOSLoadedModules });
                 }
 
                 allowedTabs.AddRange(new TabPage[]
@@ -1227,10 +1236,10 @@ namespace DBADashGUI
                         nInstance.Expand();
                         tv1.SelectedNode = nInstance.Nodes[2];
                     }
-                    else if (e.Tab == "tabJobs" && parent == null) // Root Level (Jobs Uner Checks)
+                    else if (e.Tab == "tabJobs" && parent == null) // Root Level
                     {
                         nInstance.Expand();
-                        tv1.SelectedNode = nInstance.Nodes[1];
+                        tv1.SelectedNode = nInstance.Nodes[4];
                     }
                     else if (e.Tab == "tabJobs" && parent != null) // Instance Level Jobs tab
                     {
