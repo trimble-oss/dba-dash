@@ -73,7 +73,7 @@ OUTER APPLY(SELECT TOP(1)	JH.FinishDateTime AS LastStepFinishDateUtc,
 			AND JH.RunDateTime >= CAST(RJ.start_execution_date_utc AS DATETIME2(2))
 			AND JH.RunDateTime < CAST(GETUTCDATE() AS DATETIME2(2))
 			AND JH.step_id = RJ.last_executed_step_id
-			ORDER BY JH.instance_id
+			ORDER BY JH.RunDateTime DESC
 			) AS H
 CROSS APPLY dbo.SecondsToHumanDuration(H.CurrentStepRunDurationSec) HDCurrentStep
 CROSS APPLY dbo.SecondsToHumanDuration(H.LastStepRunDurationSec) HDLastStep
