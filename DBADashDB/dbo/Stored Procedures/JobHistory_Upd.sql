@@ -28,6 +28,20 @@ FROM @JobHistory T
 WHERE NOT EXISTS(SELECT 1 FROM dbo.Jobs J WHERE J.job_id = T.job_id AND J.InstanceID = @InstanceID)
 GROUP BY job_id
 
+DECLARE @max_instance_id INT=-1
+SELECT TOP(1) @max_instance_id = m.instance_id
+FROM sys.partitions p
+OUTER APPLY(SELECT MAX(instance_id) AS instance_id
+			FROM dbo.JobHistory 
+			WHERE InstanceID = @InstanceID
+			AND $PARTITION.PF_JobHistory(RunDateTime) = p.partition_number
+			) m
+WHERE p.object_id = OBJECT_ID('dbo.JobHistory')
+AND p.index_id=1
+AND p.rows > 0
+AND m.instance_id IS NOT NULL
+ORDER BY p.partition_number DESC
+
 BEGIN TRAN
 
 INSERT INTO dbo.JobHistory(
@@ -73,13 +87,7 @@ OUTER APPLY
                + (((jh.run_duration - ((jh.run_duration / 10000) * 10000)) / 100) * 60)
                + (jh.run_duration - (jh.run_duration / 100) * 100) AS RunDurationSec
     ) dt
-WHERE NOT EXISTS(
-			SELECT 1 
-			FROM dbo.JobHistory H
-			WHERE H.instance_id = JH.instance_id 
-			AND H.InstanceID = @InstanceID
-			);
-
+WHERE jh.instance_id > @max_instance_id;
 
 WITH L AS (
 	SELECT job_id,
