@@ -221,7 +221,7 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
 
     # If service exists, start it back up
     if($serviceName -ne $null){
-        Write-Host "Start Service"
+        Write-Host "Starting Service. This can take some time while the repository database is upgraded..."
         Start-Service $serviceName
     }
     # Option to start GUI after upgrade
