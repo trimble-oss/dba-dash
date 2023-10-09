@@ -115,8 +115,8 @@ namespace DBADashGUI.AgentJobs
                     : Convert.ToInt32(dgvRunningJobs.Rows[idx].Cells["colRetryAttempt"].Value) > 0
                     ? DBADashStatus.DBADashStatusEnum.Warning
                     : DBADashStatus.DBADashStatusEnum.OK;
-                var avgRunDuration = (int)row["AvgRunDurationSec"];
-                var maxRunDuration = (int)row["MaxRunDurationSec"];
+                var avgRunDuration = (int?)(row["AvgRunDurationSec"].DBNullToNull());
+                var maxRunDuration = (int?)(row["MaxRunDurationSec"].DBNullToNull());
                 var runningTime = (int)row["RunningTimeSec"];
                 var executionStatus = row["current_execution_status"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : (int)row["current_execution_status"] == 1 ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning;
 
@@ -124,6 +124,7 @@ namespace DBADashGUI.AgentJobs
                 {
                     _ when runningTime < (avgRunDuration * 1.10) => DBADashStatus.DBADashStatusEnum.OK,
                     _ when runningTime < (maxRunDuration * 1.10) => DBADashStatus.DBADashStatusEnum.Warning,
+                    _ when avgRunDuration == null || maxRunDuration == null => DBADashStatus.DBADashStatusEnum.NA,
                     _ => DBADashStatus.DBADashStatusEnum.Critical
                 };
                 dgvRunningJobs.Rows[idx].Cells["colStatus"].SetStatusColor(executionStatus);
