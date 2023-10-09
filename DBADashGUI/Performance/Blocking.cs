@@ -1,4 +1,5 @@
-﻿using LiveCharts;
+﻿using DBADashGUI.Theme;
+using LiveCharts;
 using LiveCharts.Configurations;
 using LiveCharts.Wpf;
 using Microsoft.Data.SqlClient;
@@ -146,8 +147,8 @@ namespace DBADashGUI.Performance
             chartBlocking.Series = s1;
 
             lblBlocking.Text = databaseID > 0 ? "Blocking: Database" : "Blocking: Instance";
-            toolStrip1.BackColor = databaseID > 0 ? DashColors.DatabaseLevelTitleColor : Control.DefaultBackColor;
-            toolStrip1.ForeColor = toolStrip1.BackColor.ContrastColor();
+            toolStrip1.Tag = databaseID > 0 ? "ALT": null; // set tag to ALT to use the alternate menu renderer
+            toolStrip1.ApplyTheme(DBADashUser.SelectedTheme);
         }
 
         private void ChartBlocking_DataClick(object sender, ChartPoint chartPoint)

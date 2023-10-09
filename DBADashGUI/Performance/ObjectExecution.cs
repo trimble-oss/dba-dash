@@ -1,4 +1,5 @@
-﻿using LiveCharts;
+﻿using DBADashGUI.Theme;
+using LiveCharts;
 using LiveCharts.Configurations;
 using LiveCharts.Defaults;
 using LiveCharts.Wpf;
@@ -84,9 +85,8 @@ namespace DBADashGUI.Performance
             objectExecChart.AxisY.Clear();
             chartMaxDate = DateTime.MinValue;
             lblExecution.Text = databaseid > 0 ? "Execution Stats: Database" : "Execution Stats: Instance";
-            toolStrip1.BackColor = databaseid > 0 ? DashColors.DatabaseLevelTitleColor : Control.DefaultBackColor;
-            toolStrip1.ForeColor = toolStrip1.BackColor.ContrastColor();
-
+            toolStrip1.Tag = databaseid > 0 ? "ALT" : null; // set tag to ALT to use the alternate menu renderer
+            toolStrip1.ApplyTheme(DBADashUser.SelectedTheme);
             var dt = CommonData.ObjectExecutionStats(instanceID, databaseid, objectID, dateGrouping, Metric.Measure, DateRange.FromUTC, DateRange.ToUTC, "");
 
             if (dt.Rows.Count == 0)

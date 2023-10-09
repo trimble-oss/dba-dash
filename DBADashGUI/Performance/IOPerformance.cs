@@ -10,6 +10,7 @@ using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
 using DBADashGUI.Pickers;
+using DBADashGUI.Theme;
 using Font = System.Drawing.Font;
 
 namespace DBADashGUI.Performance
@@ -398,8 +399,8 @@ namespace DBADashGUI.Performance
                 chartIO.Series.Clear(); // fix tends to zero error
             }
             lblIOPerformance.Text = databaseID > 0 ? "IO Performance: Database" : (string.IsNullOrEmpty(Drive) ? "IO Performance: Instance" : "IO Performance: " + DriveLabel(Drive));
-            toolStrip1.BackColor = databaseID > 0 ? DashColors.DatabaseLevelTitleColor : Control.DefaultBackColor;
-            toolStrip1.ForeColor = toolStrip1.BackColor.ContrastColor();
+            toolStrip1.Tag = databaseID > 0 ? "ALT" : null; // set tag to ALT to use the alternate menu renderer
+            toolStrip1.ApplyTheme(DBADashUser.SelectedTheme);
         }
 
         public string DriveLabel(string drive)
