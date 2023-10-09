@@ -111,12 +111,26 @@ namespace DBADashGUI.Theme
 
         public static void ApplyTheme(this ToolStrip menu, BaseTheme theme)
         {
-            menu.Renderer = theme is DarkTheme ? new DarkModeMenuRenderer() : new LightModeMenuRenderer();
+            if (menu.Tag !=null && (string)menu.Tag == "ALT")
+            {
+                menu.Renderer = theme is DarkTheme ? new DarkModeAltMenuRenderer() : new LightModeAltMenuRenderer();
+            }
+            else
+            {
+                menu.Renderer = theme is DarkTheme ? new DarkModeMenuRenderer() : new LightModeMenuRenderer();
+            }
         }
 
         public static void ApplyTheme(this MenuStrip menu, BaseTheme theme)
         {
-            menu.Renderer = theme is DarkTheme ? new DarkModeMenuRenderer() : new LightModeMenuRenderer();
+            if (menu.Tag != null && (string)menu.Tag == "ALT")
+            {
+                menu.Renderer = theme is DarkTheme ? new DarkModeAltMenuRenderer() : new LightModeAltMenuRenderer();
+            }
+            else
+            {
+                menu.Renderer = theme is DarkTheme ? new DarkModeMenuRenderer() : new LightModeMenuRenderer();
+            }
         }
 
         public static void ApplyTheme(this CheckedListBox chkL, BaseTheme theme)
