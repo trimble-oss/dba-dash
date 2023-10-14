@@ -11,6 +11,7 @@ GRANT SELECT ON SCHEMA::dbo TO Reports
 GRANT EXECUTE ON SCHEMA::Report TO Reports;
 GRANT SELECT ON SCHEMA::DBADash TO App;
 GRANT EXECUTE ON SCHEMA::DBADash TO App;
+GRANT EXECUTE ON SCHEMA::UserReport TO RunUserReports;
 /************/
 MERGE INTO [dbo].[SysConfigOptions] AS [Target]
 USING (VALUES

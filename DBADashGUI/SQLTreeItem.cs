@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
+using DBADashGUI.CustomReports;
 
 namespace DBADashGUI
 {
@@ -60,7 +62,9 @@ namespace DBADashGUI
             InstanceFolder,
             DatabasesFolder,
             Storage,
-            Drive
+            Drive,
+            ReportsFolder,
+            CustomReport
         }
 
         private DatabaseEngineEdition _engineEdition = DatabaseEngineEdition.Unknown;
@@ -96,6 +100,8 @@ namespace DBADashGUI
 
         public string DriveName;
 
+        public CustomReport Report;
+
         public DBADashContext Context
         {
             get
@@ -115,7 +121,8 @@ namespace DBADashGUI
                     Type = Type,
                     DatabaseName = DatabaseName,
                     ParentType = Parent == null ? TreeType.DBADashRoot : SQLTreeItemParent.Type,
-                    DriveName = DriveName
+                    DriveName = DriveName,
+                    Report = Report,
                 };
                 return InternalContext;
             }
@@ -509,6 +516,14 @@ namespace DBADashGUI
                     ImageIndex = 21;
                     break;
 
+                case TreeType.CustomReport:
+                    ImageIndex = 24;
+                    break;
+
+                case TreeType.ReportsFolder:
+                    ImageIndex = 25;
+                    break;
+
                 default:
                     ImageIndex = 5;
                     break;
@@ -536,6 +551,20 @@ namespace DBADashGUI
             AddRefreshContextMenu(this);
         }
 
+        public void AddReportsFolder(IEnumerable<CustomReport> reports)
+        {
+            var reportsNode = new SQLTreeItem("Reports", SQLTreeItem.TreeType.ReportsFolder);
+            foreach (var report in reports)
+            {
+                var reportNode = new SQLTreeItem(report.ReportName, SQLTreeItem.TreeType.CustomReport) { Report = report };
+                reportsNode.Nodes.Add(reportNode);
+            }
+            if (reportsNode.Nodes.Count > 0)
+            {
+                this.Nodes.Add(reportsNode);
+            }
+        }
+
         public void AddDatabaseFolders()
         {
             var nTables = NewFolder("Tables", "U", true);
@@ -554,7 +583,7 @@ namespace DBADashGUI
             var nXML = NewFolder("XML Schema Collections", "XSC", true);
             var nSeq = NewFolder("Sequences", "SO", true);
             var nTriggers = NewFolder("Triggers", "TA,TR", true);
-
+            AddReportsFolder(CustomReports.CustomReports.GetCustomReports().DatabaseLevelReports);
             nTypes.Nodes.Add(nTableTypes);
             nTypes.Nodes.Add(nDataTypes);
             nTypes.Nodes.Add(nUserDefinedTypes);

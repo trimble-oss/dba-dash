@@ -21,7 +21,7 @@ namespace DacpacUtility
                 IgnoreIndexOptions = true,
                 IgnoreUserSettingsObjects = true,
                 IgnoreRoleMembership = true,
-                DropObjectsNotInSource = true,
+                DropObjectsNotInSource = false,
                 BlockOnPossibleDataLoss = false,
                 RegisterDataTierApplication = false,
                 BlockWhenDriftDetected = false,
