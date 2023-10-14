@@ -13,6 +13,7 @@ using System.Printing.IndexedProperties;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DBADashGUI.CustomReports;
 using DBADashGUI.Theme;
 using DocumentFormat.OpenXml.Bibliography;
 using Humanizer;
@@ -34,6 +35,7 @@ namespace DBADashGUI
         private readonly CommandLineOptions commandLine;
         private readonly List<int> commandLineTags = new();
         private TabPage[] AllTabs;
+        private CustomReports.CustomReports customReports = new();
 
         public Main(CommandLineOptions opts)
         {
@@ -77,7 +79,7 @@ namespace DBADashGUI
             {
                 tabPerformanceSummary, tabPerformance, tabSlowQueries, tabAzureDB, tabAzureSummary, tabPC,
                 tabObjectExecutionSummary, tabWaits, tabRunningQueries, tabMemory, tabJobStats, tabJobTimeline, tabDrivePerformance
-            }).Contains(tabs.SelectedTab);
+            }).Contains(tabs.SelectedTab) || (tabs.SelectedTab == tabCustomReport && ((SQLTreeItem)tv1.SelectedNode).Report.TimeFilterSupported);
         }
 
         private bool IsAzureOnly;
@@ -126,6 +128,7 @@ namespace DBADashGUI
                 Properties.Settings.Default.SettingsUpgradeRequired = false;
                 Properties.Settings.Default.Save();
             }
+
             mnuTags.Visible = !commandLine.NoTagMenu;
             lblVersion.Text = "Version: " + System.Reflection.Assembly.GetEntryAssembly().GetName().Version;
             tabs.TabPages.Clear();
@@ -138,7 +141,8 @@ namespace DBADashGUI
             LoadRepositoryConnections();
             if (repositories.Count == 0) // We don't have a connection to the repository DB yet
             {
-                if (File.Exists(Properties.Resources.ServiceConfigToolName)) // The service configuration tool exists (Not the GUI only package).  Give user the option to configure the service or connect to an existing repository.
+                if (File.Exists(Properties.Resources
+                        .ServiceConfigToolName)) // The service configuration tool exists (Not the GUI only package).  Give user the option to configure the service or connect to an existing repository.
                 {
                     using var frm = new ConnectionOptions();
                     frm.ShowDialog();
@@ -148,6 +152,7 @@ namespace DBADashGUI
                         return;
                     }
                 }
+
                 // Prompt the user to connect to an existing DBA Dash repository DB.
                 await AddConnection();
                 if (repositories.Count == 0)
@@ -156,6 +161,7 @@ namespace DBADashGUI
                     return;
                 }
             }
+
             await SetConnection(repositories.GetDefaultConnection());
             this.ApplyTheme();
             CheckTheme();
@@ -163,6 +169,32 @@ namespace DBADashGUI
             if (splitMain.SplitterDistance > 400)
             {
                 splitMain.SplitterDistance = 400;
+            }
+
+            customReportView1.ReportNameChanged += CustomReport_ReportNameChanged;
+        }
+
+        private void CustomReport_ReportNameChanged(object sender, EventArgs e)
+        {
+            UpdateReportNameInTreeView(tv1.Nodes);
+            tabCustomReport.Text = ((SQLTreeItem)tv1.SelectedNode).Report.ReportName;
+        }
+
+        private static void UpdateReportNameInTreeView(TreeNodeCollection nodes)
+        {
+            foreach (TreeNode node in nodes)
+            {
+                if (node is not SQLTreeItem sqlNode) continue;
+                if (sqlNode.Type == SQLTreeItem.TreeType.CustomReport)
+                {
+                    sqlNode.Text = sqlNode.Report.ReportName;
+                }
+
+                // Recursively update child nodes if they exist
+                if (sqlNode.Nodes.Count > 0)
+                {
+                    UpdateReportNameInTreeView(sqlNode.Nodes);
+                }
             }
         }
 
@@ -198,6 +230,7 @@ namespace DBADashGUI
             try
             {
                 DBADashUser.GetUser();
+                customReports = CustomReports.CustomReports.GetCustomReports();
                 GetCommandLineTags();
                 GetTreeLayout();
                 BuildTagMenu(commandLineTags);
@@ -383,6 +416,9 @@ namespace DBADashGUI
             root.Nodes.Add(hadr);
             root.Nodes.Add(storage);
             root.Nodes.Add(jobs);
+
+            root.AddReportsFolder(customReports.RootLevelReports);
+
             SQLTreeItem parentNode = root;
 
             var tags = String.Join(",", SelectedTags());
@@ -431,6 +467,7 @@ namespace DBADashGUI
                         AzureNode.Nodes.Add(new SQLTreeItem("Tags", SQLTreeItem.TreeType.Tags));
                         var azStorage = new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage);
                         AzureNode.Nodes.Add(azStorage);
+                        AzureNode.AddReportsFolder(customReports.InstanceLevelReports);
                     }
 
                     var azureDBNode = new SQLTreeItem(db, SQLTreeItem.TreeType.AzureDatabase)
@@ -515,6 +552,7 @@ namespace DBADashGUI
             jobs.AddDummyNode();
             nodesToAdd.Add(jobs);
             instanceNode.Nodes.AddRange(nodesToAdd.ToArray());
+            instanceNode.AddReportsFolder(customReports.InstanceLevelReports);
         }
 
         private void ExpandStorage(SQLTreeItem storage)
@@ -732,6 +770,11 @@ namespace DBADashGUI
             else if (n.Type == SQLTreeItem.TreeType.Drive)
             {
                 allowedTabs.AddRange(new TabPage[] { tabDrives, tabFiles, tabDrivePerformance });
+            }
+            else if (n.Type == SQLTreeItem.TreeType.CustomReport)
+            {
+                tabCustomReport.Text = n.Report.ReportName;
+                allowedTabs.Add(tabCustomReport);
             }
 
             if (n.ObjectID > 0)

@@ -108,6 +108,7 @@
     <Folder Include="DBADash" />
     <Folder Include="DBADash\Tables" />
     <Folder Include="DBADash\Stored Procedures" />
+    <Folder Include="UserReport" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\LogRestoreThresholds.sql" />
@@ -705,6 +706,12 @@
     <Build Include="dbo\Stored Procedures\RunningJobs_Get.sql" />
     <Build Include="dbo\Views\RunningJobsInfo.sql" />
     <Build Include="dbo\Stored Procedures\RunningQueriesForJob_Get.sql" />
+    <Build Include="dbo\Stored Procedures\CustomReport_Get.sql" />
+    <Build Include="Security\UserReport.sql" />
+    <Build Include="dbo\Stored Procedures\UserReportMetaData_Upd.sql" />
+    <Build Include="Security\RunUserReports.sql" />
+    <Build Include="dbo\Tables\CustomReport.sql" />
+    <Build Include="dbo\Stored Procedures\CustomReport_Upd.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

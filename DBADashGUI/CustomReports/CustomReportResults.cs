@@ -1,0 +1,27 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DBADashGUI.CustomReports
+{
+    public class CustomReportResult
+    {
+        /// <summary>
+        /// Mapping of column names returned from SQL to aliases used in grid
+        /// </summary>
+        public Dictionary<string, string> ColumnAlias { get; set; } = new();
+
+        public Dictionary<string, string> CellFormatString { get; set; } = new();
+
+        /// <summary>
+        /// Option to exclude DateTime columns from automatic time zone conversion
+        /// </summary>
+        public List<string> DoNotConvertToLocalTimeZone { get; set; } = new();
+
+        public List<KeyValuePair<string, PersistedColumnLayout>> ColumnLayout { get; set; } = new();
+
+        public string ResultName { get; set; }
+    }
+}

@@ -210,6 +210,8 @@ namespace DBADashGUI
             drivePerformance1 = new Performance.DrivePerformance();
             tabRunningJobs = new System.Windows.Forms.TabPage();
             runningJobs1 = new AgentJobs.RunningJobs();
+            tabCustomReport = new System.Windows.Forms.TabPage();
+            customReportView1 = new CustomReports.CustomReportView();
             refresh1 = new Refresh();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -297,6 +299,7 @@ namespace DBADashGUI
             tabJobTimeline.SuspendLayout();
             tabDrivePerformance.SuspendLayout();
             tabRunningJobs.SuspendLayout();
+            tabCustomReport.SuspendLayout();
             SuspendLayout();
             // 
             // TreeViewImageList
@@ -328,6 +331,8 @@ namespace DBADashGUI
             TreeViewImageList.Images.SetKeyName(21, "");
             TreeViewImageList.Images.SetKeyName(22, "MonthCalendar_16x.png");
             TreeViewImageList.Images.SetKeyName(23, "LogicalDataCenterDiagram.ico");
+            TreeViewImageList.Images.SetKeyName(24, "Report_16x.png");
+            TreeViewImageList.Images.SetKeyName(25, "FileDialogReport_16x.png");
             // 
             // menuStrip1
             // 
@@ -905,6 +910,7 @@ namespace DBADashGUI
             tabs.Controls.Add(tabJobTimeline);
             tabs.Controls.Add(tabDrivePerformance);
             tabs.Controls.Add(tabRunningJobs);
+            tabs.Controls.Add(tabCustomReport);
             tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             tabs.Location = new System.Drawing.Point(0, 0);
             tabs.Name = "tabs";
@@ -1152,7 +1158,6 @@ namespace DBADashGUI
             // 
             // tags1
             // 
-            tags1.AllTags = null;
             tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             tags1.Location = new System.Drawing.Point(3, 3);
             tags1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -2147,6 +2152,26 @@ namespace DBADashGUI
             runningJobs1.Size = new System.Drawing.Size(186, 61);
             runningJobs1.TabIndex = 0;
             // 
+            // tabCustomReport
+            // 
+            tabCustomReport.Controls.Add(customReportView1);
+            tabCustomReport.Location = new System.Drawing.Point(4, 29);
+            tabCustomReport.Name = "tabCustomReport";
+            tabCustomReport.Padding = new System.Windows.Forms.Padding(3);
+            tabCustomReport.Size = new System.Drawing.Size(192, 67);
+            tabCustomReport.TabIndex = 48;
+            tabCustomReport.Text = "Report";
+            tabCustomReport.UseVisualStyleBackColor = true;
+            // 
+            // customReportView1
+            // 
+            customReportView1.Dock = System.Windows.Forms.DockStyle.Fill;
+            customReportView1.Location = new System.Drawing.Point(3, 3);
+            customReportView1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            customReportView1.Name = "customReportView1";
+            customReportView1.Size = new System.Drawing.Size(186, 61);
+            customReportView1.TabIndex = 0;
+            // 
             // refresh1
             // 
             refresh1.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
@@ -2472,6 +2497,7 @@ namespace DBADashGUI
             tabJobTimeline.ResumeLayout(false);
             tabDrivePerformance.ResumeLayout(false);
             tabRunningJobs.ResumeLayout(false);
+            tabCustomReport.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -2677,5 +2703,7 @@ namespace DBADashGUI
         private System.Windows.Forms.ToolStripMenuItem whiteToolStripMenuItem;
         private System.Windows.Forms.TabPage tabRunningJobs;
         private AgentJobs.RunningJobs runningJobs1;
+        private System.Windows.Forms.TabPage tabCustomReport;
+        private CustomReports.CustomReportView customReportView1;
     }
 }

@@ -363,5 +363,22 @@ namespace DBADashGUI
                     return false;
             }
         }
+
+        public static SqlParameter Clone(this SqlParameter original)
+        {
+            return new SqlParameter
+            {
+                ParameterName = original.ParameterName,
+                SqlDbType = original.SqlDbType,
+                Direction = original.Direction,
+                Size = original.Size,
+                Value = original.Value,
+                IsNullable = original.IsNullable,
+                Precision = original.Precision,
+                Scale = original.Scale,
+                SourceColumn = original.SourceColumn,
+                SourceVersion = original.SourceVersion
+            };
+        }
     }
 }

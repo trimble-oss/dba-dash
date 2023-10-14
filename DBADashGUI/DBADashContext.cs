@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DBADashGUI.CustomReports;
 
 namespace DBADashGUI
 {
@@ -22,5 +23,7 @@ namespace DBADashGUI
         public SQLTreeItem.TreeType ParentType { get; set; }
 
         public string DriveName { get; set; }
+
+        public CustomReport Report { get; set; }
     }
 }
