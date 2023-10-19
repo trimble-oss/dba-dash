@@ -1,44 +1,44 @@
-﻿<!-- 
+﻿<!--
 	Create a copy of this file called PerformanceCountersCustom.xml to modify
 	For help: https://dbadash.com/docs/help/os-performance-counters/
 -->
 <Counters>
-  <Counter object_name="Buffer Manager" counter_name="Buffer cache hit ratio" instance_name="" />
-  <Counter object_name="Buffer Manager" counter_name="Buffer cache hit ratio base" instance_name="" />
-  <Counter object_name="Buffer Manager" counter_name="Lazy writes/sec" instance_name="" />
-  <Counter object_name="Buffer Manager" counter_name="Checkpoint pages/sec" instance_name="" />
-  <Counter object_name="Buffer Manager" counter_name="Free list stalls/sec" instance_name="" />
-  <Counter object_name="Buffer Manager" counter_name="Page life expectancy" instance_name="" />
-  <Counter object_name="Buffer Manager" counter_name="Page reads/sec" />
-  <Counter object_name="Buffer Manager" counter_name="Page writes/sec" />
-  <Counter object_name="SQL Statistics" counter_name="SQL Compilations/sec" instance_name="" />
-  <Counter object_name="SQL Statistics" counter_name="SQL Re-Compilations/sec" instance_name="" />
-  <Counter object_name="SQL Statistics" counter_name="Batch Requests/sec" instance_name="" />
-  <Counter object_name="General Statistics" counter_name="Active Temp Tables" />
-  <Counter object_name="General Statistics" counter_name="Temp Tables Creation Rate" instance_name="" />
-  <Counter object_name="General Statistics" counter_name="Temp Tables For Destruction" instance_name="" />
-  <Counter object_name="General Statistics" counter_name="Processes blocked" />
-  <Counter object_name="Locks" counter_name="Number of Deadlocks/sec" instance_name="_Total" />
-  <Counter object_name="Locks" counter_name="Lock Waits/sec" instance_name="_Total" />
-  <Counter object_name="Locks" counter_name="Lock Wait Time (ms)" instance_name="_Total" />
-  <Counter object_name="Locks" counter_name="Average Wait Time (ms)" instance_name="_Total" />
-  <Counter object_name="Locks" counter_name="Average Wait Time Base" instance_name="_Total" />
-  <Counter object_name="Access Methods" counter_name="Page Splits/sec" instance_name="" />
-  <Counter object_name="Access Methods" counter_name="Forwarded Records/sec" instance_name="" />
-  <Counter object_name="Memory Manager" counter_name="Memory Grants Pending" />
-  <Counter object_name="Memory Manager" counter_name="Granted Workspace Memory (KB)" />
-  <Counter object_name="Memory Manager" counter_name="Total Server Memory (KB)" />
-  <Counter object_name="Memory Manager" counter_name="Free Memory (KB)" />
-  <Counter object_name="Memory Manager" counter_name="Target Server Memory (KB)" />
-  <Counter object_name="Memory Manager" counter_name="Stolen Server Memory (KB)" />
-  <Counter object_name="Resource Pool Stats" counter_name="Active memory grant amount (KB)" />
-  <Counter object_name="Resource Pool Stats" counter_name="Memory grant timeouts/sec" />
-  <Counter object_name="Resource Pool Stats" counter_name="Pending memory grants count" />
-  <Counter object_name="Wait Statistics" counter_name="Memory grant queue waits" />
-  <Counter object_name="Plan Cache" counter_name="Cache Object Counts" />
-  <Counter object_name="Plan Cache" counter_name="Cache Pages" />
-  <Counter object_name="sys.dm_os_sys_memory" counter_name="*"/>
-  <Counter object_name="sys.dm_os_nodes" counter_name="*" />
-  <!--<Counter object_name="sys.dm_os_schedulers" counter_name="*" />-->
-  <Counter object_name="Databases" counter_name="Transactions/sec" instance_name="_Total" />
+	<Counter object_name="Buffer Manager" counter_name="Buffer cache hit ratio" instance_name="" />
+	<Counter object_name="Buffer Manager" counter_name="Buffer cache hit ratio base" instance_name="" />
+	<Counter object_name="Buffer Manager" counter_name="Lazy writes/sec" instance_name="" />
+	<Counter object_name="Buffer Manager" counter_name="Checkpoint pages/sec" instance_name="" />
+	<Counter object_name="Buffer Manager" counter_name="Free list stalls/sec" instance_name="" />
+	<Counter object_name="Buffer Manager" counter_name="Page life expectancy" instance_name="" />
+	<Counter object_name="Buffer Manager" counter_name="Page reads/sec" />
+	<Counter object_name="Buffer Manager" counter_name="Page writes/sec" />
+	<Counter object_name="SQL Statistics" counter_name="SQL Compilations/sec" instance_name="" />
+	<Counter object_name="SQL Statistics" counter_name="SQL Re-Compilations/sec" instance_name="" />
+	<Counter object_name="SQL Statistics" counter_name="Batch Requests/sec" instance_name="" />
+	<Counter object_name="General Statistics" counter_name="Active Temp Tables" />
+	<Counter object_name="General Statistics" counter_name="Temp Tables Creation Rate" instance_name="" />
+	<Counter object_name="General Statistics" counter_name="Temp Tables For Destruction" instance_name="" />
+	<Counter object_name="General Statistics" counter_name="Processes blocked" />
+	<Counter object_name="Locks" counter_name="Number of Deadlocks/sec" instance_name="_Total" />
+	<Counter object_name="Locks" counter_name="Lock Waits/sec" instance_name="_Total" />
+	<Counter object_name="Locks" counter_name="Lock Wait Time (ms)" instance_name="_Total" />
+	<Counter object_name="Locks" counter_name="Average Wait Time (ms)" instance_name="_Total" />
+	<Counter object_name="Locks" counter_name="Average Wait Time Base" instance_name="_Total" />
+	<Counter object_name="Access Methods" counter_name="Page Splits/sec" instance_name="" />
+	<Counter object_name="Access Methods" counter_name="Forwarded Records/sec" instance_name="" />
+	<Counter object_name="Memory Manager" counter_name="Memory Grants Pending" />
+	<Counter object_name="Memory Manager" counter_name="Granted Workspace Memory (KB)" />
+	<Counter object_name="Memory Manager" counter_name="Total Server Memory (KB)" />
+	<Counter object_name="Memory Manager" counter_name="Free Memory (KB)" />
+	<Counter object_name="Memory Manager" counter_name="Target Server Memory (KB)" />
+	<Counter object_name="Memory Manager" counter_name="Stolen Server Memory (KB)" />
+	<Counter object_name="Resource Pool Stats" counter_name="Active memory grant amount (KB)" />
+	<Counter object_name="Resource Pool Stats" counter_name="Memory grant timeouts/sec" />
+	<Counter object_name="Resource Pool Stats" counter_name="Pending memory grants count" />
+	<Counter object_name="Wait Statistics" counter_name="Memory grant queue waits" />
+	<Counter object_name="Plan Cache" counter_name="Cache Object Counts" />
+	<Counter object_name="Plan Cache" counter_name="Cache Pages" />
+	<Counter object_name="sys.dm_os_sys_memory" counter_name="*" />
+	<Counter object_name="sys.dm_os_nodes" counter_name="*" />
+	<Counter object_name="sys.dm_os_schedulers" counter_name="*" />
+	<Counter object_name="Databases" counter_name="Transactions/sec" instance_name="_Total" />
 </Counters>
