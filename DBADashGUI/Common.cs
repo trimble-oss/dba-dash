@@ -8,7 +8,6 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Windows.Forms;
-using Amazon.S3.Model;
 
 namespace DBADashGUI
 {
@@ -193,7 +192,7 @@ namespace DBADashGUI
                 {
                     if (!cell.Visible) continue;
                     colIndex += 1;
-                    if (string.IsNullOrEmpty(cell.FormattedValue as string)) continue;
+
                     var cellType = cell.ValueType;
                     SLStyle style = sl.CreateStyle();
                     string format = string.IsNullOrEmpty(cell.Style.Format) ? cell.InheritedStyle.Format : cell.Style.Format;
@@ -216,25 +215,37 @@ namespace DBADashGUI
                         sl.SetCellStyle(rowIndex, colIndex, style);
                     }
 
-                    if (cellType.IsNumericType())
+                    try
                     {
-                        if (!decimal.TryParse(cell.FormattedValue as string, out var decimalValue))
+                        if (cellType == typeof(bool))
                         {
-                            decimalValue = Convert.ToDecimal(cell.Value);
+                            sl.SetCellValue(rowIndex, colIndex, (bool)cell.Value);
                         }
-                        sl.SetCellValue(rowIndex, colIndex, Convert.ToDecimal(decimalValue));
+                        else if (cellType.IsNumericType())
+                        {
+                            if (!decimal.TryParse(cell.FormattedValue as string, out var decimalValue))
+                            {
+                                decimalValue = Convert.ToDecimal(cell.Value);
+                            }
+
+                            sl.SetCellValue(rowIndex, colIndex, Convert.ToDecimal(decimalValue));
+                        }
+                        else if (cellType == typeof(DateTime))
+                        {
+                            sl.SetCellValue(rowIndex, colIndex, Convert.ToDateTime(cell.Value));
+                        }
+                        else if (cellType == typeof(byte[]))
+                        {
+                            sl.SetCellValue(rowIndex, colIndex, Convert.ToString(cell.Value));
+                        }
+                        else
+                        {
+                            sl.SetCellValue(rowIndex, colIndex, Convert.ToString(cell.FormattedValue));
+                        }
                     }
-                    else if (cellType == typeof(DateTime))
+                    catch (Exception ex)
                     {
-                        sl.SetCellValue(rowIndex, colIndex, Convert.ToDateTime(cell.Value));
-                    }
-                    else if (cellType == typeof(byte[]))
-                    {
-                        sl.SetCellValue(rowIndex, colIndex, Convert.ToString(cell.Value));
-                    }
-                    else
-                    {
-                        sl.SetCellValue(rowIndex, colIndex, Convert.ToString(cell.FormattedValue));
+                        Debug.WriteLine(ex.ToString());
                     }
                 }
             }
