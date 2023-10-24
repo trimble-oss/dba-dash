@@ -36,6 +36,7 @@
             tsCols = new System.Windows.Forms.ToolStripButton();
             tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
             setTitleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            setDescriptionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             saveLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             resetLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             renameResultsetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -47,6 +48,8 @@
             splitContainer2 = new System.Windows.Forms.SplitContainer();
             lblParamsRequired = new System.Windows.Forms.Label();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
+            statusStrip1 = new System.Windows.Forms.StatusStrip();
+            lblDescription = new System.Windows.Forms.ToolStripStatusLabel();
             ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
             toolStrip1.SuspendLayout();
             pnlParams.SuspendLayout();
@@ -58,6 +61,7 @@
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
+            statusStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // dgv
@@ -73,7 +77,7 @@
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
             dgv.RowTemplate.Height = 29;
-            dgv.Size = new System.Drawing.Size(414, 584);
+            dgv.Size = new System.Drawing.Size(414, 562);
             dgv.TabIndex = 0;
             // 
             // toolStrip1
@@ -129,7 +133,7 @@
             // tsConfigure
             // 
             tsConfigure.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { setTitleToolStripMenuItem, saveLayoutToolStripMenuItem, resetLayoutToolStripMenuItem, renameResultsetToolStripMenuItem });
+            tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { setTitleToolStripMenuItem, setDescriptionToolStripMenuItem, saveLayoutToolStripMenuItem, resetLayoutToolStripMenuItem, renameResultsetToolStripMenuItem });
             tsConfigure.Image = Properties.Resources.SettingsOutline_16x;
             tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsConfigure.Name = "tsConfigure";
@@ -139,28 +143,35 @@
             // setTitleToolStripMenuItem
             // 
             setTitleToolStripMenuItem.Name = "setTitleToolStripMenuItem";
-            setTitleToolStripMenuItem.Size = new System.Drawing.Size(209, 26);
+            setTitleToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             setTitleToolStripMenuItem.Text = "Set Title";
             setTitleToolStripMenuItem.Click += SetTitleToolStripMenuItem_Click;
+            // 
+            // setDescriptionToolStripMenuItem
+            // 
+            setDescriptionToolStripMenuItem.Name = "setDescriptionToolStripMenuItem";
+            setDescriptionToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            setDescriptionToolStripMenuItem.Text = "Set Description";
+            setDescriptionToolStripMenuItem.Click += SetDescriptionToolStripMenuItem_Click;
             // 
             // saveLayoutToolStripMenuItem
             // 
             saveLayoutToolStripMenuItem.Name = "saveLayoutToolStripMenuItem";
-            saveLayoutToolStripMenuItem.Size = new System.Drawing.Size(209, 26);
+            saveLayoutToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             saveLayoutToolStripMenuItem.Text = "Save Layout";
             saveLayoutToolStripMenuItem.Click += SaveLayoutToolStripMenuItem_Click;
             // 
             // resetLayoutToolStripMenuItem
             // 
             resetLayoutToolStripMenuItem.Name = "resetLayoutToolStripMenuItem";
-            resetLayoutToolStripMenuItem.Size = new System.Drawing.Size(209, 26);
+            resetLayoutToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             resetLayoutToolStripMenuItem.Text = "Reset Layout";
             resetLayoutToolStripMenuItem.Click += ResetLayoutToolStripMenuItem_Click;
             // 
             // renameResultsetToolStripMenuItem
             // 
             renameResultsetToolStripMenuItem.Name = "renameResultsetToolStripMenuItem";
-            renameResultsetToolStripMenuItem.Size = new System.Drawing.Size(209, 26);
+            renameResultsetToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             renameResultsetToolStripMenuItem.Text = "Rename Resultset";
             renameResultsetToolStripMenuItem.Click += RenameResultsetToolStripMenuItem_Click;
             // 
@@ -197,7 +208,7 @@
             lnkParams.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             lnkParams.Location = new System.Drawing.Point(0, 0);
             lnkParams.Name = "lnkParams";
-            lnkParams.Size = new System.Drawing.Size(824, 289);
+            lnkParams.Size = new System.Drawing.Size(824, 274);
             lnkParams.TabIndex = 2;
             lnkParams.TabStop = true;
             lnkParams.Text = "Set Parameters";
@@ -210,7 +221,7 @@
             pnlParams.Dock = System.Windows.Forms.DockStyle.Fill;
             pnlParams.Location = new System.Drawing.Point(0, 0);
             pnlParams.Name = "pnlParams";
-            pnlParams.Size = new System.Drawing.Size(824, 584);
+            pnlParams.Size = new System.Drawing.Size(824, 562);
             pnlParams.TabIndex = 3;
             // 
             // splitContainer2
@@ -230,8 +241,8 @@
             // 
             splitContainer2.Panel2.Controls.Add(lblParamsRequired);
             splitContainer2.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            splitContainer2.Size = new System.Drawing.Size(824, 584);
-            splitContainer2.SplitterDistance = 289;
+            splitContainer2.Size = new System.Drawing.Size(824, 562);
+            splitContainer2.SplitterDistance = 274;
             splitContainer2.TabIndex = 4;
             // 
             // lblParamsRequired
@@ -240,7 +251,7 @@
             lblParamsRequired.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             lblParamsRequired.Location = new System.Drawing.Point(0, 0);
             lblParamsRequired.Name = "lblParamsRequired";
-            lblParamsRequired.Size = new System.Drawing.Size(824, 291);
+            lblParamsRequired.Size = new System.Drawing.Size(824, 284);
             lblParamsRequired.TabIndex = 3;
             lblParamsRequired.Text = "Parameters are required to run the report";
             lblParamsRequired.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -258,9 +269,30 @@
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(pnlParams);
-            splitContainer1.Size = new System.Drawing.Size(1242, 584);
+            splitContainer1.Size = new System.Drawing.Size(1242, 562);
             splitContainer1.SplitterDistance = 414;
             splitContainer1.TabIndex = 4;
+            // 
+            // statusStrip1
+            // 
+            statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { lblDescription });
+            statusStrip1.Location = new System.Drawing.Point(0, 590);
+            statusStrip1.Name = "statusStrip1";
+            statusStrip1.ShowItemToolTips = true;
+            statusStrip1.Size = new System.Drawing.Size(1242, 22);
+            statusStrip1.TabIndex = 5;
+            statusStrip1.Text = "statusStrip1";
+            // 
+            // lblDescription
+            // 
+            lblDescription.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            lblDescription.Name = "lblDescription";
+            lblDescription.Size = new System.Drawing.Size(1227, 20);
+            lblDescription.Spring = true;
+            lblDescription.Text = "Description...";
+            lblDescription.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            lblDescription.Visible = false;
             // 
             // CustomReportView
             // 
@@ -268,6 +300,7 @@
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             Controls.Add(splitContainer1);
             Controls.Add(toolStrip1);
+            Controls.Add(statusStrip1);
             Name = "CustomReportView";
             Size = new System.Drawing.Size(1242, 612);
             ((System.ComponentModel.ISupportInitialize)dgv).EndInit();
@@ -282,6 +315,8 @@
             splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
+            statusStrip1.ResumeLayout(false);
+            statusStrip1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -307,5 +342,8 @@
         private System.Windows.Forms.ToolStripComboBox cboResults;
         private System.Windows.Forms.ToolStripLabel lblSelectResults;
         private System.Windows.Forms.ToolStripMenuItem renameResultsetToolStripMenuItem;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel lblDescription;
+        private System.Windows.Forms.ToolStripMenuItem setDescriptionToolStripMenuItem;
     }
 }

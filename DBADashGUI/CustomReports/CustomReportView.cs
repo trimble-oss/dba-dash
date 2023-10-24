@@ -1,21 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Drawing.Text;
-using System.Linq;
-using System.Management;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Xml.Linq;
-using DBADashGUI.Performance;
+﻿using DBADashGUI.Performance;
 using Microsoft.Data.SqlClient;
-
+using System;
+using System.Collections.Generic;
 using System.Data;
-
-using System.Runtime.CompilerServices;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace DBADashGUI.CustomReports
 {
@@ -336,6 +325,9 @@ namespace DBADashGUI.CustomReports
             customParams = report.GetCustomSqlParameters();
             tsParameters.Enabled = customParams.Count > 0;
             tsConfigure.Visible = report.CanEditReport;
+            lblDescription.Text = report.Description;
+            statusStrip1.Visible = !string.IsNullOrEmpty(report.Description);
+            lblDescription.Visible = !string.IsNullOrEmpty(report.Description);
             if (report.DeserializationException != null)
             {
                 MessageBox.Show(
@@ -440,6 +432,17 @@ namespace DBADashGUI.CustomReports
                 suppressCboResultsIndexChanged = false;
                 report.Update();
             }
+        }
+
+        private void SetDescriptionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var description = report.Description;
+            if (CommonShared.ShowInputDialog(ref description, "Enter description") != DialogResult.OK) return;
+            report.Description = description;
+            report.Update();
+            lblDescription.Text = report.Description;
+            statusStrip1.Visible = !string.IsNullOrEmpty(report.Description);
+            lblDescription.Visible = !string.IsNullOrEmpty(report.Description);
         }
     }
 }
