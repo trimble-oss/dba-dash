@@ -23,6 +23,8 @@ namespace DBADashGUI.CustomReports
 
         public string ReportName { get; set; }
 
+        public string Description { get; set; }
+
         [JsonIgnore]
         public Params Params { get; set; }
 
@@ -34,7 +36,7 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         [JsonIgnore]
         public IEnumerable<Param> UserParams => Params == null ? new List<Param>() : Params.ParamList.Where(p =>
-                                                    !(new string[] { "@INSTANCEIDS", "@INSTANCEID", "@DATABASEID", "@FROMDATE", "@TODATE" }).Contains(p.ParamName.ToUpper()));
+                                                            !(new string[] { "@INSTANCEIDS", "@INSTANCEID", "@DATABASEID", "@FROMDATE", "@TODATE" }).Contains(p.ParamName.ToUpper()));
 
         [JsonIgnore]
         public bool IsRootLevel => Params != null && Params.ParamList.Any(p => p.ParamName.ToUpper() == "@INSTANCEIDS");
@@ -55,8 +57,8 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         [JsonIgnore]
         public bool TimeFilterSupported => Params.ParamList.Any(p =>
-                                                    p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
-                                                    p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase));
+                                                            p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
+                                                            p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase));
 
         /// <summary>
         /// Save customizations
