@@ -147,9 +147,13 @@ namespace DBADashGUI.HA
                     }
                     else
                     {
+                        var secondaryReplicas = (int)row["Secondary Replicas"];
+                        var primaryReplicas = (int)row["Primary Replicas"];
+                        var totalReplicas = primaryReplicas+secondaryReplicas;
+
                         r.Cells["Not Synchronizing"].SetStatusColor((int)row["Not Synchronizing"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
                         r.Cells["Remote Not Synchronizing"].SetStatusColor((int)row["Remote Not Synchronizing"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
-                        r.Cells["Synchronized"].SetStatusColor((int)row["Synchronized"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
+                        r.Cells["Synchronized"].SetStatusColor((int)row["Synchronized"] == totalReplicas ? DBADashStatusEnum.OK : DBADashStatusEnum.WarningLow);
                         r.Cells["Remote Synchronized"].SetStatusColor((int)row["Remote Synchronized"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
                         r.Cells["Reverting"].SetStatusColor((int)row["Reverting"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
                         r.Cells["Remote Reverting"].SetStatusColor((int)row["Remote Reverting"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
