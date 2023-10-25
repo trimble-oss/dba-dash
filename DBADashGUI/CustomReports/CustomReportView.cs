@@ -411,6 +411,8 @@ namespace DBADashGUI.CustomReports
         {
             report.CustomReportResults[selectedTableIndex].ColumnLayout = new();
             report.Update();
+            dgv.Columns.Clear();
+            RefreshData();
         }
 
         private void CboResults_SelectedIndexChanged(object sender, EventArgs e)
