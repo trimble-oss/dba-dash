@@ -1115,6 +1115,7 @@ namespace DBADashGUI
 
         private void ClearTag_Click(object sender, EventArgs e)
         {
+            customReports = CustomReports.CustomReports.GetCustomReports(true);
             isClearTags = true;
             mnuTags.Font = Font = new Font(mnuTags.Font, mnuTags.Font.Style & ~FontStyle.Bold);
             ClearTags(mnuTags.DropDownItems);
