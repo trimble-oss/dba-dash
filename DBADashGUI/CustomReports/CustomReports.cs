@@ -23,9 +23,9 @@ namespace DBADashGUI.CustomReports
 
         private static Guid connectionId = Guid.Empty;
 
-        public static CustomReports GetCustomReports()
+        public static CustomReports GetCustomReports(bool forceRefresh = false)
         {
-            if (connectionId != Common.ConnectionGUID) // Check if connection has changed
+            if (connectionId != Common.ConnectionGUID || forceRefresh) // Check if connection has changed
             {
                 _customReports = null;
                 connectionId = Common.ConnectionGUID;
