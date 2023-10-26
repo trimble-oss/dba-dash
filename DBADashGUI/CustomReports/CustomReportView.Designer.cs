@@ -37,9 +37,10 @@
             tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
             setTitleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             setDescriptionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            renameResultSetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             saveLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             resetLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            renameResultsetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            scriptReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsParameters = new System.Windows.Forms.ToolStripButton();
             cboResults = new System.Windows.Forms.ToolStripComboBox();
             lblSelectResults = new System.Windows.Forms.ToolStripLabel();
@@ -133,7 +134,7 @@
             // tsConfigure
             // 
             tsConfigure.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { setTitleToolStripMenuItem, setDescriptionToolStripMenuItem, saveLayoutToolStripMenuItem, resetLayoutToolStripMenuItem, renameResultsetToolStripMenuItem });
+            tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { setTitleToolStripMenuItem, setDescriptionToolStripMenuItem, renameResultSetToolStripMenuItem, saveLayoutToolStripMenuItem, resetLayoutToolStripMenuItem, scriptReportToolStripMenuItem });
             tsConfigure.Image = Properties.Resources.SettingsOutline_16x;
             tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsConfigure.Name = "tsConfigure";
@@ -142,38 +143,56 @@
             // 
             // setTitleToolStripMenuItem
             // 
+            setTitleToolStripMenuItem.Image = Properties.Resources.Rename_16x;
             setTitleToolStripMenuItem.Name = "setTitleToolStripMenuItem";
             setTitleToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             setTitleToolStripMenuItem.Text = "Set Title";
+            setTitleToolStripMenuItem.ToolTipText = "Change the name of the report";
             setTitleToolStripMenuItem.Click += SetTitleToolStripMenuItem_Click;
             // 
             // setDescriptionToolStripMenuItem
             // 
+            setDescriptionToolStripMenuItem.Image = Properties.Resources.Rename_16x;
             setDescriptionToolStripMenuItem.Name = "setDescriptionToolStripMenuItem";
             setDescriptionToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             setDescriptionToolStripMenuItem.Text = "Set Description";
+            setDescriptionToolStripMenuItem.ToolTipText = "Add a description for the report";
             setDescriptionToolStripMenuItem.Click += SetDescriptionToolStripMenuItem_Click;
+            // 
+            // renameResultSetToolStripMenuItem
+            // 
+            renameResultSetToolStripMenuItem.Image = Properties.Resources.Rename_16x;
+            renameResultSetToolStripMenuItem.Name = "renameResultSetToolStripMenuItem";
+            renameResultSetToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            renameResultSetToolStripMenuItem.Text = "Rename Result Set";
+            renameResultSetToolStripMenuItem.Click += RenameResultSetToolStripMenuItem_Click;
             // 
             // saveLayoutToolStripMenuItem
             // 
+            saveLayoutToolStripMenuItem.Image = Properties.Resources.Save_16x;
             saveLayoutToolStripMenuItem.Name = "saveLayoutToolStripMenuItem";
             saveLayoutToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             saveLayoutToolStripMenuItem.Text = "Save Layout";
+            saveLayoutToolStripMenuItem.ToolTipText = "Saves column visibility, order and size";
             saveLayoutToolStripMenuItem.Click += SaveLayoutToolStripMenuItem_Click;
             // 
             // resetLayoutToolStripMenuItem
             // 
+            resetLayoutToolStripMenuItem.Image = Properties.Resources.Undo_grey_16x;
             resetLayoutToolStripMenuItem.Name = "resetLayoutToolStripMenuItem";
             resetLayoutToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             resetLayoutToolStripMenuItem.Text = "Reset Layout";
+            resetLayoutToolStripMenuItem.ToolTipText = "Resets column visibility, order and size";
             resetLayoutToolStripMenuItem.Click += ResetLayoutToolStripMenuItem_Click;
             // 
-            // renameResultsetToolStripMenuItem
+            // scriptReportToolStripMenuItem
             // 
-            renameResultsetToolStripMenuItem.Name = "renameResultsetToolStripMenuItem";
-            renameResultsetToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            renameResultsetToolStripMenuItem.Text = "Rename Resultset";
-            renameResultsetToolStripMenuItem.Click += RenameResultsetToolStripMenuItem_Click;
+            scriptReportToolStripMenuItem.Image = Properties.Resources.SQLScript_16x;
+            scriptReportToolStripMenuItem.Name = "scriptReportToolStripMenuItem";
+            scriptReportToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            scriptReportToolStripMenuItem.Text = "Script Report";
+            scriptReportToolStripMenuItem.ToolTipText = "Generate a script for this custom report to share with other users of DBA Dash";
+            scriptReportToolStripMenuItem.Click += ScriptReportToolStripMenuItem_Click;
             // 
             // tsParameters
             // 
@@ -208,7 +227,7 @@
             lnkParams.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             lnkParams.Location = new System.Drawing.Point(0, 0);
             lnkParams.Name = "lnkParams";
-            lnkParams.Size = new System.Drawing.Size(824, 274);
+            lnkParams.Size = new System.Drawing.Size(824, 273);
             lnkParams.TabIndex = 2;
             lnkParams.TabStop = true;
             lnkParams.Text = "Set Parameters";
@@ -242,7 +261,7 @@
             splitContainer2.Panel2.Controls.Add(lblParamsRequired);
             splitContainer2.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
             splitContainer2.Size = new System.Drawing.Size(824, 562);
-            splitContainer2.SplitterDistance = 274;
+            splitContainer2.SplitterDistance = 273;
             splitContainer2.TabIndex = 4;
             // 
             // lblParamsRequired
@@ -251,7 +270,7 @@
             lblParamsRequired.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             lblParamsRequired.Location = new System.Drawing.Point(0, 0);
             lblParamsRequired.Name = "lblParamsRequired";
-            lblParamsRequired.Size = new System.Drawing.Size(824, 284);
+            lblParamsRequired.Size = new System.Drawing.Size(824, 285);
             lblParamsRequired.TabIndex = 3;
             lblParamsRequired.Text = "Parameters are required to run the report";
             lblParamsRequired.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -341,9 +360,10 @@
         private System.Windows.Forms.ToolStripMenuItem resetLayoutToolStripMenuItem;
         private System.Windows.Forms.ToolStripComboBox cboResults;
         private System.Windows.Forms.ToolStripLabel lblSelectResults;
-        private System.Windows.Forms.ToolStripMenuItem renameResultsetToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem renameResultSetToolStripMenuItem;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel lblDescription;
         private System.Windows.Forms.ToolStripMenuItem setDescriptionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem scriptReportToolStripMenuItem;
     }
 }

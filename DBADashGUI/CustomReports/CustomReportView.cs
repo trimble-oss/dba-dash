@@ -4,7 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
+using DocumentFormat.OpenXml.Office2016.Drawing.Command;
+using Microsoft.SqlServer.Management.Smo;
+using Microsoft.SqlServer.Management.Common;
 
 namespace DBADashGUI.CustomReports
 {
@@ -214,7 +218,7 @@ namespace DBADashGUI.CustomReports
             {
                 cboResults.Items.Add(report.CustomReportResults[i].ResultName);
             }
-            renameResultsetToolStripMenuItem.Visible = cboResults.Items.Count > 1;
+            renameResultSetToolStripMenuItem.Visible = cboResults.Items.Count > 1;
             cboResults.Visible = cboResults.Items.Count > 1;
             lblSelectResults.Visible = cboResults.Items.Count > 1;
             cboResults.SelectedIndex = selectedTableIndex < cboResults.Items.Count ? selectedTableIndex : 0;
@@ -403,12 +407,16 @@ namespace DBADashGUI.CustomReports
 
         private void SaveLayoutToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (MessageBox.Show("Save Layout (column visibility, order and size)?", "Save", MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question) != DialogResult.Yes) return;
             report.CustomReportResults[selectedTableIndex].ColumnLayout = dgv.GetColumnLayout();
             report.Update();
         }
 
         private void ResetLayoutToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (MessageBox.Show("Reset Layout (column visibility, order and size)?", "Reset", MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question) != DialogResult.Yes) return;
             report.CustomReportResults[selectedTableIndex].ColumnLayout = new();
             report.Update();
             dgv.Columns.Clear();
@@ -423,7 +431,7 @@ namespace DBADashGUI.CustomReports
             ShowTable();
         }
 
-        private void RenameResultsetToolStripMenuItem_Click(object sender, EventArgs e)
+        private void RenameResultSetToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var name = cboResults.SelectedItem.ToString();
             if (CommonShared.ShowInputDialog(ref name, "Enter name") == DialogResult.OK)
@@ -445,6 +453,59 @@ namespace DBADashGUI.CustomReports
             lblDescription.Text = report.Description;
             statusStrip1.Visible = !string.IsNullOrEmpty(report.Description);
             lblDescription.Visible = !string.IsNullOrEmpty(report.Description);
+        }
+
+        private void ScriptReportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                ScriptReport();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error scripting report:" + ex.Message, "Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        private void ScriptReport()
+        {
+            using var cn = new SqlConnection(Common.ConnectionString);
+            var serverCn = new ServerConnection(cn);
+            var server = new Server(serverCn);
+            var db = server.Databases[cn.Database];
+
+            var proc = db.StoredProcedures[report.ProcedureName, report.SchemaName];
+
+            if (proc != null)
+            {
+                var options = new ScriptingOptions() { ScriptForCreateOrAlter = true, ScriptBatchTerminator = true, EnforceScriptingOptions = true }; /* EnforceScriptingOptions = true is required to generate CREATE OR ALTER */
+
+                var parts = proc.Script(options);
+                var sb = new StringBuilder();
+                sb.AppendFormat("/*\n\t{0}\n\t{1}\n\n\tCustom report for DBA Dash.\n\thttp://dbadash.com\n\tGenerated: {2:yyyy-MM-dd HH:mm:ss} \n*/\n\n",
+                    report.ReportName.Replace("*/", ""), report.Description.Replace("*/", ""), DateTime.Now);
+                foreach (var part in parts)
+                {
+                    sb.AppendLine(part);
+                    sb.AppendLine("GO");
+                }
+
+                var meta = report.Serialize();
+                sb.AppendLine();
+                sb.AppendLine("/* Report customizations in GUI */");
+                sb.AppendFormat("DELETE dbo.CustomReport\nWHERE SchemaName = '{0}'\nAND ProcedureName = '{1}'\n\n", report.SchemaName.SqlSingleQuote(), report.ProcedureName.SqlSingleQuote());
+                sb.AppendLine("INSERT INTO dbo.CustomReport(SchemaName,ProcedureName,MetaData)");
+                sb.AppendFormat("VALUES('{0}','{1}','{2}')", report.SchemaName.SqlSingleQuote(),
+                    report.ProcedureName.SqlSingleQuote(), meta.SqlSingleQuote());
+
+                var frm = new CodeViewer() { SQL = sb.ToString() };
+                frm.ShowDialog();
+            }
+            else
+            {
+                MessageBox.Show($"Unable to find procedure {report.QualifiedProcedureName}", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
     }
 }

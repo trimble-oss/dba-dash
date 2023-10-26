@@ -36,7 +36,7 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         [JsonIgnore]
         public IEnumerable<Param> UserParams => Params == null ? new List<Param>() : Params.ParamList.Where(p =>
-                                                            !(new string[] { "@INSTANCEIDS", "@INSTANCEID", "@DATABASEID", "@FROMDATE", "@TODATE" }).Contains(p.ParamName.ToUpper()));
+                                                                    !(new string[] { "@INSTANCEIDS", "@INSTANCEID", "@DATABASEID", "@FROMDATE", "@TODATE" }).Contains(p.ParamName.ToUpper()));
 
         [JsonIgnore]
         public bool IsRootLevel => Params != null && Params.ParamList.Any(p => p.ParamName.ToUpper() == "@INSTANCEIDS");
@@ -57,15 +57,15 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         [JsonIgnore]
         public bool TimeFilterSupported => Params.ParamList.Any(p =>
-                                                            p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
-                                                            p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase));
+                                                                    p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
+                                                                    p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase));
 
         /// <summary>
         /// Save customizations
         /// </summary>
         public void Update()
         {
-            var meta = JsonConvert.SerializeObject(this, Formatting.Indented, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore });
+            var meta = Serialize();
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("dbo.CustomReport_Upd", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("ProcedureName", ProcedureName);
@@ -74,6 +74,10 @@ namespace DBADashGUI.CustomReports
             cn.Open();
             cmd.ExecuteNonQuery();
         }
+
+        public string Serialize() => JsonConvert.SerializeObject(this, Formatting.Indented,
+            new JsonSerializerSettings
+            { NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore });
 
         /// <summary>
         /// Convert list of parameters for the report to list of CustomSqlParameters
