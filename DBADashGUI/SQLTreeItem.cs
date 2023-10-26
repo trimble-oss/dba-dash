@@ -1,10 +1,9 @@
-﻿using Microsoft.SqlServer.Management.Common;
+﻿using DBADashGUI.CustomReports;
+using Microsoft.SqlServer.Management.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using System.Windows.Forms.DataVisualization.Charting;
-using DBADashGUI.CustomReports;
 
 namespace DBADashGUI
 {
@@ -551,7 +550,7 @@ namespace DBADashGUI
             AddRefreshContextMenu(this);
         }
 
-        public void AddReportsFolder(IEnumerable<CustomReport> reports)
+        public static SQLTreeItem GetReportsFolder(IEnumerable<CustomReport> reports)
         {
             var reportsNode = new SQLTreeItem("Reports", SQLTreeItem.TreeType.ReportsFolder);
             foreach (var report in reports)
@@ -559,6 +558,13 @@ namespace DBADashGUI
                 var reportNode = new SQLTreeItem(report.ReportName, SQLTreeItem.TreeType.CustomReport) { Report = report };
                 reportsNode.Nodes.Add(reportNode);
             }
+
+            return reportsNode;
+        }
+
+        public void AddReportsFolder(IEnumerable<CustomReport> reports)
+        {
+            var reportsNode = GetReportsFolder(reports);
             if (reportsNode.Nodes.Count > 0)
             {
                 this.Nodes.Add(reportsNode);
@@ -800,6 +806,11 @@ namespace DBADashGUI
                 }
             }
             return null;
+        }
+
+        public SQLTreeItem FindChildOfType(TreeType type)
+        {
+            return this.Nodes.Cast<SQLTreeItem>().FirstOrDefault(n => n.Type == type);
         }
     }
 }

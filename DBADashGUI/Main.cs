@@ -1273,22 +1273,22 @@ namespace DBADashGUI
                     if (e.Tab is "tabAlerts" or "tabQS" or "tabDBOptions") // Configuration Node
                     {
                         nInstance.Expand();
-                        tv1.SelectedNode = nInstance.Nodes[0];
+                        tv1.SelectedNode = nInstance.FindChildOfType(SQLTreeItem.TreeType.Configuration);
                     }
                     else if (e.Tab is "tabMirroring" or "tabLogShipping" or "tabBackups" or "tabAG")
                     {
                         nInstance.Expand();
-                        tv1.SelectedNode = nInstance.Nodes[2];
+                        tv1.SelectedNode = nInstance.FindChildOfType(SQLTreeItem.TreeType.HADR);
                     }
                     else if (e.Tab == "tabJobs" && parent == null) // Root Level
                     {
                         nInstance.Expand();
-                        tv1.SelectedNode = nInstance.Nodes[4];
+                        tv1.SelectedNode = nInstance.FindChildOfType(SQLTreeItem.TreeType.AgentJobs);
                     }
                     else if (e.Tab == "tabJobs" && parent != null) // Instance Level Jobs tab
                     {
                         nInstance.Expand();
-                        tv1.SelectedNode = nInstance.LastNode;
+                        tv1.SelectedNode = nInstance.FindChildOfType(SQLTreeItem.TreeType.AgentJobs);
                     }
                     else if (e.Tab is "tabAzureSummary" or "tabPerformance")
                     {
@@ -1297,7 +1297,7 @@ namespace DBADashGUI
                     else if (e.Tab is "tabFiles" or "tabDrives")
                     {
                         nInstance.Expand();
-                        tv1.SelectedNode = nInstance.Nodes[3];
+                        tv1.SelectedNode = nInstance.FindChildOfType(SQLTreeItem.TreeType.Storage);
                     }
                     else
                     {
