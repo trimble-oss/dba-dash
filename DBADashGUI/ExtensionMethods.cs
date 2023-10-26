@@ -380,5 +380,12 @@ namespace DBADashGUI
                 SourceVersion = original.SourceVersion
             };
         }
+
+        /// <summary>
+        /// Replace single ' quote with two single quotes ''.  Only to be used where input can't be parameterized
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static string SqlSingleQuote(this string value) => value.Replace("'", "''");
     }
 }
