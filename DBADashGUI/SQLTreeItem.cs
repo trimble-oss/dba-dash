@@ -309,9 +309,9 @@ namespace DBADashGUI
 
         private bool hasInstanceName = false;
         private string instanceName = null;
-        private Int32 instanceID = 0;
+        private int instanceID = 0;
 
-        public Int32 InstanceID
+        public int InstanceID
         {
             get => instanceID > 0 ? instanceID : this.Parent == null ? 0 : SQLTreeItemParent.InstanceID;
             set => instanceID = value;
@@ -353,7 +353,7 @@ namespace DBADashGUI
 
         public string _objectName;
         public string _schemaName;
-        private Int32 _databaseID = -1;
+        private int _databaseID = -1;
         private string databaseName;
 
         public string ObjectName
@@ -362,9 +362,9 @@ namespace DBADashGUI
         public string SchemaName
         { get => _schemaName; set { _schemaName = value; this.Name = FullName(); } }
 
-        public Int64 ObjectID { get; set; }
+        public long ObjectID { get; set; }
 
-        public Int32 DatabaseID
+        public int DatabaseID
         {
             get
             {
@@ -394,7 +394,7 @@ namespace DBADashGUI
             {
                 if (Type is TreeType.DBADashRoot or TreeType.Instance or TreeType.AzureInstance)
                 {
-                    return String.Empty;
+                    return string.Empty;
                 }
                 else if (Type is TreeType.Database or TreeType.AzureDatabase)
                 {
@@ -658,7 +658,7 @@ namespace DBADashGUI
             n.ContextMenuStrip = ctxMnu;
         }
 
-        public String FilterText = "";
+        public string FilterText = "";
 
         private void MnuFilter_Click(object sender, EventArgs e)
         {

@@ -15,7 +15,7 @@ namespace DBADashGUI.Performance
             InitializeComponent();
         }
 
-        private Int32 InstanceID { get; set; }
+        private int InstanceID { get; set; }
 
         public void SetContext(DBADashContext context)
         {
@@ -254,7 +254,7 @@ namespace DBADashGUI.Performance
         {
             MetricsSavedView view = null;
 
-            if (serializedObject != String.Empty)
+            if (serializedObject != string.Empty)
             {
                 try
                 {
@@ -272,7 +272,7 @@ namespace DBADashGUI.Performance
                 layout1.Controls.Clear();
                 splitContainer1.Panel1Collapsed = true;
                 ShowGrid(true);
-                tsDeleteView.Visible = serializedObject != String.Empty && (!isGlobal || DBADashUser.HasManageGlobalViews); // Don't show for "None", but allow user to delete a view that fails to deserialize
+                tsDeleteView.Visible = serializedObject != string.Empty && (!isGlobal || DBADashUser.HasManageGlobalViews); // Don't show for "None", but allow user to delete a view that fails to deserialize
             }
             else
             {
@@ -322,7 +322,7 @@ namespace DBADashGUI.Performance
 
         private void TsDeleteView_Click(object sender, EventArgs e)
         {
-            if (savedViewMenuItem1.SelectedSavedView != String.Empty)
+            if (savedViewMenuItem1.SelectedSavedView != string.Empty)
             {
                 if (MessageBox.Show("Delete " + savedViewMenuItem1.SelectedSavedView, "Delete View", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {

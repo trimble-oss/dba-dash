@@ -13,7 +13,7 @@ namespace DBADashGUI.Drives
         }
 
         public string ConnectionString;
-        public Int32 DriveID;
+        public int DriveID;
 
         private void DriveHistoryView_Load(object sender, EventArgs e)
         {

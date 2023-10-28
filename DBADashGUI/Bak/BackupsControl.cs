@@ -315,7 +315,7 @@ namespace DBADashGUI.Backups
         {
             if (dgvBackups.Columns.Contains("LastFull"))
             {
-                for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+                for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
                 {
                     var row = (DataRowView)dgvBackups.Rows[idx].DataBoundItem;
                     var fullBackupStatus = (DBADashStatus.DBADashStatusEnum)row["FullBackupStatus"];
@@ -346,14 +346,7 @@ namespace DBADashGUI.Backups
                         dgvBackups.Rows[idx].Cells["LastFGDiff"].SetStatusColor(DBADashStatusEnum.NA);
                     }
                     dgvBackups.Rows[idx].Cells["SnapshotAge"].SetStatusColor(snapshotStatus);
-                    if ((string)row["ThresholdsConfiguredLevel"] == "Database")
-                    {
-                        dgvBackups.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvBackups.Font, FontStyle.Bold);
-                    }
-                    else
-                    {
-                        dgvBackups.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvBackups.Font, FontStyle.Regular);
-                    }
+                    dgvBackups.Rows[idx].Cells["Configure"].Style.Font = (string)row["ThresholdsConfiguredLevel"] == "Database" ? new Font(dgvBackups.Font, FontStyle.Bold) : new Font(dgvBackups.Font, FontStyle.Regular);
                 }
             }
         }
@@ -365,18 +358,18 @@ namespace DBADashGUI.Backups
                 var row = (DataRowView)dgvBackups.Rows[e.RowIndex].DataBoundItem;
                 if (dgvBackups.Columns[e.ColumnIndex].Name == "Configure")
                 {
-                    ConfigureThresholds((Int32)row["InstanceID"], (Int32)row["DatabaseID"]);
+                    ConfigureThresholds((int)row["InstanceID"], (int)row["DatabaseID"]);
                 }
                 else if (dgvBackups.Columns[e.ColumnIndex].HeaderText == "Database")
                 {
-                    DatabaseID = (Int32)row["DatabaseID"];
+                    DatabaseID = (int)row["DatabaseID"];
                     tsBack.Enabled = true;
                     RefreshDataLocal();
                 }
             }
         }
 
-        private void ConfigureThresholds(Int32 InstanceID, Int32 DatabaseID)
+        private void ConfigureThresholds(int InstanceID, int DatabaseID)
         {
             var frm = new BackupThresholdsConfig
             {
@@ -429,7 +422,7 @@ namespace DBADashGUI.Backups
 
         private void DgvSummary_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvSummary.Rows[idx].DataBoundItem;
                 var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["SnapshotAgeStatus"];
@@ -478,7 +471,7 @@ namespace DBADashGUI.Backups
                 else if (dgvSummary.Columns[e.ColumnIndex].Name == "Configure")
                 {
                     var row = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
-                    ConfigureThresholds((Int32)row["InstanceID"], -1);
+                    ConfigureThresholds((int)row["InstanceID"], -1);
                 }
             }
         }

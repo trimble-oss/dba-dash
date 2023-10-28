@@ -32,7 +32,7 @@ namespace DBADashGUI.Performance
             set => tsUp.Visible = value;
         }
 
-        public Int32 InstanceID { get; set; }
+        public int InstanceID { get; set; }
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }
 
@@ -45,11 +45,11 @@ namespace DBADashGUI.Performance
         IMetric IMetricChart.Metric { get => Metric; }
 
         public bool SmoothLines = false;
-        public Int32 PointSize = 5;
+        public int PointSize = 5;
 
         private int durationMins;
 
-        private Int32 DateGrouping;
+        private int DateGrouping;
         private DataTable dt;
 
         private void SelectAggregate()
@@ -106,7 +106,7 @@ namespace DBADashGUI.Performance
                 minValue = value < minValue ? value : minValue;
                 values.Add(new DateTimePoint((DateTime)r["SnapshotDate"], value));
             }
-            Int32 pointSize = PointSize;
+            int pointSize = PointSize;
             if (dt.Rows.Count > 500)
             {
                 pointSize = 0;

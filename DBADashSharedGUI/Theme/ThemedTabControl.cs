@@ -17,7 +17,7 @@ namespace DBADashGUI.Theme
         protected override void OnPaint(PaintEventArgs e)
         {
             // Draw the background of the TabControl
-            e.Graphics.Clear(theme.TabBackColor); 
+            e.Graphics.Clear(theme.TabBackColor);
 
             // Draw each TabPage header
             for (int i = 0; i < this.TabCount; i++)
@@ -37,14 +37,14 @@ namespace DBADashGUI.Theme
                 {
                     e.Graphics.FillRectangle(brush, rect);
                 }
-                using (Pen pen = new Pen(theme.TabBorderColor, 0.1f))
+                using (var pen = new Pen(theme.TabBorderColor, 0.1f))
                 {
                     e.Graphics.DrawRectangle(pen, rect);
                 }
 
                 using (Brush brush = new SolidBrush(textColor)) // Text color
                 {
-                    StringFormat sf = new StringFormat
+                    var sf = new StringFormat
                     {
                         Alignment = StringAlignment.Center,
                         LineAlignment = StringAlignment.Center

@@ -12,8 +12,8 @@ namespace DBADashGUI.Performance
 {
     public partial class AzureDBResourceStats : UserControl, ISetContext, IRefreshData
     {
-        public Int32 InstanceID;
-        public string ElasticPoolName = String.Empty;
+        public int InstanceID;
+        public string ElasticPoolName = string.Empty;
 
         public AzureDBResourceStats()
         {
@@ -35,9 +35,9 @@ namespace DBADashGUI.Performance
             _ => "yyyy-MM-dd HH:mm"
         };
 
-        private Int32 _dateGrouping = 0;
+        private int _dateGrouping = 0;
 
-        public Int32 DateGrouping
+        public int DateGrouping
         {
             get => _dateGrouping;
             set
@@ -106,14 +106,7 @@ namespace DBADashGUI.Performance
 
         private void RefreshDataLocal()
         {
-            if (ElasticPoolName == string.Empty)
-            {
-                dt = GetAzureDBResourceStats();
-            }
-            else
-            {
-                dt = GetAzurePoolResourceStats();
-            }
+            dt = ElasticPoolName == string.Empty ? GetAzureDBResourceStats() : GetAzurePoolResourceStats();
 
             UpdateChart();
         }
@@ -135,11 +128,11 @@ namespace DBADashGUI.Performance
                 columns[s].Points = new DateTimePoint[cnt];
             }
 
-            Int32 i = 0;
-            Int32 y1Max = 1;
+            int i = 0;
+            int y1Max = 1;
             foreach (DataRow r in dt.Rows)
             {
-                var dtuLimit = r["dtu_limit"] == DBNull.Value ? 0 : (Int32)r["dtu_limit"];
+                var dtuLimit = r["dtu_limit"] == DBNull.Value ? 0 : (int)r["dtu_limit"];
                 if (ElasticPoolName == string.Empty)
                 {
                     var cpuLimit = r["cpu_Limit"] == DBNull.Value ? 0 : Convert.ToInt32(r["cpu_limit"]);
@@ -280,14 +273,7 @@ namespace DBADashGUI.Performance
 
         private void AzureDBResourceStats_Load(object sender, EventArgs e)
         {
-            if (ElasticPoolName == string.Empty)
-            {
-                columns = DBColumns;
-            }
-            else
-            {
-                columns = PoolColumns;
-            }
+            columns = ElasticPoolName == string.Empty ? DBColumns : PoolColumns;
             AddMeasures();
             DateHelper.AddDateGroups(tsDateGrouping, TsDateGrouping_Click);
         }

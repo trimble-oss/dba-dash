@@ -35,19 +35,19 @@ namespace DBADash
 
         public CollectionSchedules CollectionSchedules
         {
-            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL ? collectionSchedules : null;
+            get => SourceConnection is { Type: ConnectionType.SQL } ? collectionSchedules : null;
             set => collectionSchedules = value;
         }
 
         public PlanCollectionThreshold RunningQueryPlanThreshold
         {
-            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL ? runningQueryPlanThreshold : null;
+            get => SourceConnection is { Type: ConnectionType.SQL } ? runningQueryPlanThreshold : null;
             set => runningQueryPlanThreshold = value;
         }
 
         public string SchemaSnapshotDBs
         {
-            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL ? schemaSnapshotDBs : string.Empty;
+            get => SourceConnection is { Type: ConnectionType.SQL } ? schemaSnapshotDBs : string.Empty;
             set => schemaSnapshotDBs = value;
         }
 
@@ -61,7 +61,7 @@ namespace DBADash
         [JsonIgnore]
         public bool PlanCollectionEnabled
         {
-            get => RunningQueryPlanThreshold != null && RunningQueryPlanThreshold.PlanCollectionEnabled;
+            get => RunningQueryPlanThreshold is { PlanCollectionEnabled: true };
             set => RunningQueryPlanThreshold = value ? PlanCollectionThreshold.DefaultThreshold : null;
         }
 
@@ -136,47 +136,47 @@ namespace DBADash
         [DefaultValue(false)]
         public bool NoWMI
         {
-            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL && noWMI;
+            get => SourceConnection is { Type: ConnectionType.SQL } && noWMI;
             set => noWMI = value;
         }
 
         public Int32 SlowQuerySessionMaxMemoryKB
         {
-            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL ? slowQuerySessionMaxMemoryKB : 0;
+            get => SourceConnection is { Type: ConnectionType.SQL } ? slowQuerySessionMaxMemoryKB : 0;
             set => slowQuerySessionMaxMemoryKB = value;
         }
 
         public Int32 SlowQueryTargetMaxMemoryKB
         {
-            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL ? slowQueryTargetMaxMemoryKB : 0;
+            get => SourceConnection is { Type: ConnectionType.SQL } ? slowQueryTargetMaxMemoryKB : 0;
             set => slowQueryTargetMaxMemoryKB = value;
         }
 
         [DefaultValue(true)]
         public bool UseDualEventSession
         {
-            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL ? useDualXESesion : false;
+            get => SourceConnection is { Type: ConnectionType.SQL } && useDualXESesion;
             set => useDualXESesion = value;
         }
 
         [DefaultValue(-1)]
-        public Int32 SlowQueryThresholdMs
+        public int SlowQueryThresholdMs
         {
-            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL ? slowQueryThresholdMs : -1;
+            get => SourceConnection is { Type: ConnectionType.SQL } ? slowQueryThresholdMs : -1;
             set => slowQueryThresholdMs = value;
         }
 
         [DefaultValue(false)]
         public bool PersistXESessions
         {
-            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL && persistXESessions; set => persistXESessions = value;
+            get => SourceConnection is { Type: ConnectionType.SQL } && persistXESessions; set => persistXESessions = value;
         }
 
         private bool _collectSessionWaits = true;
 
         public bool CollectSessionWaits
         {
-            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL && _collectSessionWaits; set => _collectSessionWaits = value;
+            get => SourceConnection is { Type: ConnectionType.SQL } && _collectSessionWaits; set => _collectSessionWaits = value;
         }
 
         public DBADashSource(string source)

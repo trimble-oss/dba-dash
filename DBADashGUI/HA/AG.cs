@@ -17,7 +17,7 @@ namespace DBADashGUI.HA
             InitializeComponent();
         }
 
-        private List<Int32> InstanceIDs;
+        private List<int> InstanceIDs;
         private int instanceId = -1;
 
         public bool CanNavigateBack { get => tsBack.Enabled; }
@@ -63,7 +63,7 @@ namespace DBADashGUI.HA
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-        public static DataTable GetAvailabilityGroup(Int32 InstanceID)
+        public static DataTable GetAvailabilityGroup(int InstanceID)
         {
             using (SqlConnection cn = new(Common.ConnectionString))
             using (SqlCommand cmd = new("AvailabilityGroup_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -132,7 +132,7 @@ namespace DBADashGUI.HA
         {
             if (dgv.Columns.Contains("Snapshot Date"))
             {
-                for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+                for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
                 {
                     var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
                     var r = dgv.Rows[idx];

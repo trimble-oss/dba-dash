@@ -22,9 +22,9 @@ namespace DBADashGUI.DBFiles
 
         private readonly string connectionString = Common.ConnectionString;
 
-        private Int32 _databaseID;
+        private int _databaseID;
 
-        public Int32 DatabaseID
+        public int DatabaseID
         {
             get => _databaseID;
             set
@@ -47,10 +47,10 @@ namespace DBADashGUI.DBFiles
 
         public string NumberFormat { get; set; } = "N1";
 
-        private Int32? _dataspaceid = null;
+        private int? _dataspaceid = null;
         private DataTable HistoryDT;
 
-        public Int32? DataSpaceID
+        public int? DataSpaceID
         {
             get => _dataspaceid;
             set
@@ -67,7 +67,7 @@ namespace DBADashGUI.DBFiles
 
         public string DateFormat = "yyyy-MM-dd";
 
-        private Int32 Days = 90;
+        private int Days = 90;
 
         private DateTime customFrom;
         private DateTime customTo;
@@ -89,7 +89,7 @@ namespace DBADashGUI.DBFiles
 
         private DateTime To => Days > 0 ? DateTime.UtcNow.Date.AddDays(1) : customTo;
 
-        private Int32 PointSize => pointsToolStripMenuItem.Checked ? 10 : 0;
+        private int PointSize => pointsToolStripMenuItem.Checked ? 10 : 0;
 
         private string _unit = "MB";
 
@@ -149,7 +149,7 @@ namespace DBADashGUI.DBFiles
                 columns[s].Points = new DateTimePoint[cnt];
             }
 
-            Int32 i = 0;
+            int i = 0;
             foreach (DataRow r in HistoryDT.Rows)
             {
                 foreach (string s in columns.Keys)
@@ -208,7 +208,7 @@ namespace DBADashGUI.DBFiles
                 cmd.Parameters.AddStringIfNotNullOrEmpty("DBName", DBName);
                 cmd.Parameters.AddWithNullableValue("DataSpaceID", DataSpaceID);
 
-                if (FileName != null && FileName.Length > 0)
+                if (!string.IsNullOrEmpty(FileName))
                 {
                     cmd.Parameters.AddWithValue("FileName", FileName);
                 }
@@ -239,7 +239,7 @@ namespace DBADashGUI.DBFiles
 
         private void Days_Click(object sender, EventArgs e)
         {
-            Days = Int32.Parse((string)((ToolStripMenuItem)sender).Tag);
+            Days = int.Parse((string)((ToolStripMenuItem)sender).Tag);
             SetTimeChecked();
             RefreshData();
         }
@@ -322,7 +322,7 @@ namespace DBADashGUI.DBFiles
             foreach (DataRow r in dt.Rows)
             {
                 string fg = r["FileGroup"] == DBNull.Value ? "{NULL}" : (string)r["FileGroup"];
-                Int32? dataspaceid = r["data_space_id"] == DBNull.Value ? null : (Int32?)r["data_space_id"];
+                int? dataspaceid = r["data_space_id"] == DBNull.Value ? null : (int?)r["data_space_id"];
                 if (dataspaceid != null)
                 {
                     var mnu = new ToolStripMenuItem(fg)
@@ -359,14 +359,7 @@ namespace DBADashGUI.DBFiles
         private void MnuFile_Click(object sender, EventArgs e)
         {
             var mnu = (ToolStripMenuItem)sender;
-            if (mnu.Checked)
-            {
-                FileName = "";
-            }
-            else
-            {
-                FileName = mnu.Text;
-            }
+            FileName = mnu.Checked ? "" : mnu.Text;
             SetFileChecked();
             RefreshData();
         }
@@ -392,7 +385,7 @@ namespace DBADashGUI.DBFiles
             }
             else
             {
-                DataSpaceID = (Int32?)mnu.Tag;
+                DataSpaceID = (int?)mnu.Tag;
             }
             SetFGChecked();
             RefreshData();
@@ -404,7 +397,7 @@ namespace DBADashGUI.DBFiles
             tsFileGroup.Font = DataSpaceID == null ? new Font(tsFileGroup.Font, FontStyle.Regular) : new Font(tsFileGroup.Font, FontStyle.Bold);
             foreach (ToolStripMenuItem mnu in tsFileGroup.DropDownItems)
             {
-                mnu.Checked = (Int32?)mnu.Tag == DataSpaceID;
+                mnu.Checked = (int?)mnu.Tag == DataSpaceID;
                 if (mnu.Checked) { tsFileGroup.Text = mnu.Text; };
                 mnu.Font = mnu.Checked ? new Font(mnu.Font, FontStyle.Bold) : new Font(mnu.Font, FontStyle.Regular);
             }

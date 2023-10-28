@@ -14,7 +14,7 @@ namespace DBADashGUI.CollectionDates
             this.ApplyTheme();
         }
 
-        public Int32 InstanceID { get; set; }
+        public int InstanceID { get; set; }
 
         private string _reference;
 
@@ -26,14 +26,14 @@ namespace DBADashGUI.CollectionDates
             get => optInherit.Checked; set => optInherit.Checked = value;
         }
 
-        public Int32 WarningThreshold
+        public int WarningThreshold
         {
-            get => (Int32)numWarning.Value; set => numWarning.Value = value;
+            get => (int)numWarning.Value; set => numWarning.Value = value;
         }
 
-        public Int32 CriticalThreshold
+        public int CriticalThreshold
         {
-            get => (Int32)numCritical.Value; set => numCritical.Value = value;
+            get => (int)numCritical.Value; set => numCritical.Value = value;
         }
 
         public bool Disabled
@@ -58,8 +58,8 @@ namespace DBADashGUI.CollectionDates
                     chkReferences.Items.Add(reference, CheckState.Checked);
                     if (rdr["WarningThreshold"] != DBNull.Value && rdr["CriticalThreshold"] != DBNull.Value)
                     {
-                        WarningThreshold = (Int32)rdr["WarningThreshold"];
-                        CriticalThreshold = (Int32)rdr["CriticalThreshold"];
+                        WarningThreshold = (int)rdr["WarningThreshold"];
+                        CriticalThreshold = (int)rdr["CriticalThreshold"];
                         optEnabled.Checked = true;
                     }
                     else

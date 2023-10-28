@@ -7,8 +7,8 @@ namespace DBADashGUI.Backups
     public partial class BackupThresholdsConfig : Form
     {
 
-        public Int32 InstanceID = -1;
-        public Int32 DatabaseID = -1;
+        public int InstanceID = -1;
+        public int DatabaseID = -1;
 
         public BackupThresholdsConfig()
         {
@@ -22,8 +22,8 @@ namespace DBADashGUI.Backups
             if (thresholds.FullCritical != null && thresholds.FullWarning != null)
             {
                 chkFull.Checked = true;
-                numFullCritical.Value = (Int32)thresholds.FullCritical;
-                numFullWarning.Value = (Int32)thresholds.FullWarning;
+                numFullCritical.Value = (int)thresholds.FullCritical;
+                numFullWarning.Value = (int)thresholds.FullWarning;
             }
             else
             {
@@ -33,8 +33,8 @@ namespace DBADashGUI.Backups
             if (thresholds.DiffCritical != null && thresholds.DiffWarning != null)
             {
                 chkDiff.Checked = true;
-                numDiffCritical.Value = (Int32)thresholds.DiffCritical;
-                numDiffWarning.Value = (Int32)thresholds.DiffWarning;
+                numDiffCritical.Value = (int)thresholds.DiffCritical;
+                numDiffWarning.Value = (int)thresholds.DiffWarning;
             }
             else
             {
@@ -44,8 +44,8 @@ namespace DBADashGUI.Backups
             if (thresholds.LogCritical != null && thresholds.LogWarning != null)
             {
                 chkLog.Checked = true;
-                numLogCritical.Value = (Int32)thresholds.LogCritical;
-                numLogWarning.Value = (Int32)thresholds.LogWarning;
+                numLogCritical.Value = (int)thresholds.LogCritical;
+                numLogWarning.Value = (int)thresholds.LogWarning;
             }
             else
             {
@@ -85,12 +85,12 @@ namespace DBADashGUI.Backups
                     ExcludedDBs = txtExcluded.Text.Trim(),
                     MinimumAge = Convert.ToInt32(numMinimumAge.Value)
                 };
-                if (chkFull.Checked) { thresholds.FullCritical = (Int32?)numFullCritical.Value; }
-                if (chkFull.Checked) { thresholds.FullWarning = (Int32?)numFullWarning.Value; }
-                if (chkDiff.Checked) { thresholds.DiffCritical = (Int32?)numDiffCritical.Value; }
-                if (chkDiff.Checked) { thresholds.DiffWarning = (Int32?)numDiffWarning.Value; }
-                if (chkLog.Checked) { thresholds.LogCritical = (Int32?)numLogCritical.Value; }
-                if (chkLog.Checked) { thresholds.LogWarning = (Int32?)numLogWarning.Value; }
+                if (chkFull.Checked) { thresholds.FullCritical = (int?)numFullCritical.Value; }
+                if (chkFull.Checked) { thresholds.FullWarning = (int?)numFullWarning.Value; }
+                if (chkDiff.Checked) { thresholds.DiffCritical = (int?)numDiffCritical.Value; }
+                if (chkDiff.Checked) { thresholds.DiffWarning = (int?)numDiffWarning.Value; }
+                if (chkLog.Checked) { thresholds.LogCritical = (int?)numLogCritical.Value; }
+                if (chkLog.Checked) { thresholds.LogWarning = (int?)numLogWarning.Value; }
                 return thresholds;
             }
         }

@@ -15,7 +15,7 @@ namespace DBADashGUI.Checks
             InitializeComponent();
         }
 
-        private List<Int32> InstanceIDs;
+        private List<int> InstanceIDs;
 
         public bool IncludeCritical
         {
@@ -129,10 +129,10 @@ namespace DBADashGUI.Checks
             using var cmd = new SqlCommand("dbo.CustomCheckContext_Get", cn) { CommandType = CommandType.StoredProcedure };
 
             cn.Open();
-            cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
 
             using var rdr = cmd.ExecuteReader();
-            Int32 i = 0;
+            int i = 0;
             while (rdr.Read())
             {
                 if (i >= 30)
@@ -194,10 +194,10 @@ namespace DBADashGUI.Checks
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("dbo.CustomCheckTest_Get", cn) { CommandType = CommandType.StoredProcedure };
             cn.Open();
-            cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
 
             using var rdr = cmd.ExecuteReader();
-            Int32 i = 0;
+            int i = 0;
             while (rdr.Read())
             {
                 if (i >= 30)
@@ -219,28 +219,14 @@ namespace DBADashGUI.Checks
         private void DdTest_Click(object sender, EventArgs e)
         {
             var itm = (ToolStripMenuItem)sender;
-            if (itm.Checked)
-            {
-                Test = itm.Text;
-            }
-            else
-            {
-                Test = null;
-            }
+            Test = itm.Checked ? itm.Text : null;
             RefreshCustomChecks();
         }
 
         private void DdContext_Click(object sender, EventArgs e)
         {
             var itm = (ToolStripMenuItem)sender;
-            if (itm.Checked)
-            {
-                Context = null;
-            }
-            else
-            {
-                Context = itm.Text;
-            }
+            Context = itm.Checked ? null : itm.Text;
             RefreshCustomChecks();
         }
 
@@ -260,7 +246,7 @@ namespace DBADashGUI.Checks
             using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
-                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
                 cmd.Parameters.AddWithNullableValue("Context", context);
                 cmd.Parameters.AddWithNullableValue("Test", test);
@@ -284,7 +270,7 @@ namespace DBADashGUI.Checks
             tsRefresh.Visible = !isHistory;
         }
 
-        private void GetHistory(Int32 InstanceID, string test, string context)
+        private void GetHistory(int InstanceID, string test, string context)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.CustomChecksHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -316,7 +302,7 @@ namespace DBADashGUI.Checks
 
         private void DgvCustom_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvCustom.Rows[idx].DataBoundItem;
                 var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row["Status"]);
@@ -352,7 +338,7 @@ namespace DBADashGUI.Checks
                 }
                 else if (e.ColumnIndex == History.Index)
                 {
-                    GetHistory((Int32)row["InstanceID"], (string)row["Test"], (string)row["Context"]);
+                    GetHistory((int)row["InstanceID"], (string)row["Test"], (string)row["Context"]);
                 }
             }
         }

@@ -5,7 +5,7 @@ namespace DBADashGUI.Performance
 {
     public class Counter
     {
-        public Int32 CounterID { get; set; }
+        public int CounterID { get; set; }
         public string ObjectName { get; set; }
         public string CounterName { get; set; }
         public string InstanceName { get; set; }

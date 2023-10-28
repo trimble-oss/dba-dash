@@ -58,7 +58,7 @@ namespace DBADashGUI.AgentJobs
             {
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("JobID", JobID);
-                if(JobID == Guid.Empty)
+                if (JobID == Guid.Empty)
                 {
                     cmd.Parameters.AddWithValue("StepID", 0);
                 }
@@ -135,7 +135,7 @@ namespace DBADashGUI.AgentJobs
             var rowCount = dt.Rows.Count;
             if (rowCount > 2000)
             {
-                MessageBox.Show(string.Format("Too many data points({0}) to display in chart", rowCount), "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"Too many data points({rowCount}) to display in chart", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             chart1.Series.Clear();

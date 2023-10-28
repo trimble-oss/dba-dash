@@ -57,12 +57,12 @@ namespace DBADashGUI
         {
             if (e.RowIndex >= 0 && dgv.Columns[e.ColumnIndex].Name == "colRetentionDays")
             {
-                Int32 days = (Int32)dgv[e.ColumnIndex, e.RowIndex].Value;
+                int days = (int)dgv[e.ColumnIndex, e.RowIndex].Value;
                 string sDays = days.ToString();
                 string tableName = (string)dgv["colTableName", e.RowIndex].Value;
                 if (Common.ShowInputDialog(ref sDays, "Enter number of days") == DialogResult.OK)
                 {
-                    if (Int32.TryParse(sDays, out int newRetention))
+                    if (int.TryParse(sDays, out int newRetention))
                     {
                         if (newRetention != days)
                         {

@@ -90,8 +90,8 @@ namespace DBADashGUI.DBFiles
             {
                 lblDriveCritical.Text = "MB";
                 lblDriveWarning.Text = "MB";
-                numCritical.Maximum = Int32.MaxValue;
-                numWarning.Maximum = Int32.MaxValue;
+                numCritical.Maximum = int.MaxValue;
+                numWarning.Maximum = int.MaxValue;
             }
             else
             {

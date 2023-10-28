@@ -52,7 +52,7 @@ namespace DBADashGUI.Performance
             {
                 Counters = CommonData.GetCounters();
                 AddAggSelectionColumns();
-                if (selectedCounters != null && selectedCounters.Count > 0)
+                if (selectedCounters is { Count: > 0 })
                 {
                     foreach (DataRow row in Counters.Rows)
                     {
@@ -91,7 +91,7 @@ namespace DBADashGUI.Performance
         private void TxtSearch_TextChanged(object sender, EventArgs e)
         {
             var dv = (DataView)dgvCounters.DataSource;
-            dv.RowFilter = String.Format("counter_name LIKE '*{0}*' OR object_name LIKE '*{0}*' OR instance_name LIKE '*{0}*'", txtSearch.Text.Replace("'", ""));
+            dv.RowFilter = string.Format("counter_name LIKE '*{0}*' OR object_name LIKE '*{0}*' OR instance_name LIKE '*{0}*'", txtSearch.Text.Replace("'", ""));
         }
 
         private void BttnClear_Click(object sender, EventArgs e)

@@ -26,13 +26,13 @@ namespace DBADashGUI.Performance
         //public string measure = "TotalDuration";
         public DateTimePoint x;
 
-        private Int32 instanceID;
+        private int instanceID;
         private DateTime chartMaxDate = DateTime.MinValue;
 
-        private Int32 mins;
-        private Int64 objectID;
-        private Int32 databaseid = 0;
-        private Int32 dateGrouping;
+        private int mins;
+        private long objectID;
+        private int databaseid = 0;
+        private int dateGrouping;
 
         public event EventHandler<EventArgs> Close;
 
@@ -54,7 +54,7 @@ namespace DBADashGUI.Performance
 
         IMetric IMetricChart.Metric { get => Metric; }
 
-        public void RefreshData(Int32 instanceID, Int64 objectID, Int32 databaseID)
+        public void RefreshData(int instanceID, long objectID, int databaseID)
         {
             this.instanceID = instanceID;
             if (mins != DateRange.DurationMins)

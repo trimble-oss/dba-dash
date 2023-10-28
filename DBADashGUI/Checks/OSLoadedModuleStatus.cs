@@ -16,7 +16,7 @@ namespace DBADashGUI.Checks
             this.ApplyTheme();
         }
 
-        DataTable dt;
+        private DataTable dt;
 
         private static DataTable GetOSLoadedModulesStatus()
         {
@@ -51,7 +51,6 @@ namespace DBADashGUI.Checks
                 new DataGridViewTextBoxColumn() { Name = "colNotes", HeaderText = "Notes", DataPropertyName = "Notes" },
                 new DataGridViewCheckBoxColumn() { Name = "colIsSystem", HeaderText = "Is System", DataPropertyName = "IsSystem", ReadOnly = true }
                 );
-
         }
 
         private void RefreshData()
@@ -59,8 +58,6 @@ namespace DBADashGUI.Checks
             dt = GetOSLoadedModulesStatus();
             dgv.DataSource = new DataView(dt, chkSystem.Checked ? "" : "IsSystem=0", "", DataViewRowState.CurrentRows);
         }
-
-
 
         private static void DeleteOSLoadedModulesStatus(int ID)
         {
@@ -73,7 +70,7 @@ namespace DBADashGUI.Checks
             }
         }
 
-        private static int AddOSLoadedModulesStatus(string Name, string Company, string Description, Int16 Status, string Notes)
+        private static int AddOSLoadedModulesStatus(string Name, string Company, string Description, short Status, string Notes)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.OSLoadedModulesStatus_Add", cn) { CommandType = CommandType.StoredProcedure })
@@ -91,7 +88,7 @@ namespace DBADashGUI.Checks
             }
         }
 
-        private static void UpdateOSLoadedModulesStatus(int ID, string Name, string Company, string Description, Int16 Status, string Notes)
+        private static void UpdateOSLoadedModulesStatus(int ID, string Name, string Company, string Description, short Status, string Notes)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.OSLoadedModulesStatus_Upd", cn) { CommandType = CommandType.StoredProcedure })
@@ -129,7 +126,6 @@ namespace DBADashGUI.Checks
             }
         }
 
-
         /// <summary>
         /// Add default values when user is adding a new row.  % will match everything.
         /// </summary>
@@ -143,8 +139,6 @@ namespace DBADashGUI.Checks
             e.Row.Cells["colIsSystem"].Value = false;
             e.Row.Cells["colStatus"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Critical);
         }
-
-
 
         /// <summary>
         /// Check that status is between 1 and 4
@@ -170,7 +164,6 @@ namespace DBADashGUI.Checks
                     return;
                 }
             }
-
         }
 
         private static void ShowStatusValidationError()
@@ -201,16 +194,14 @@ namespace DBADashGUI.Checks
             this.DialogResult = DialogResult.OK;
         }
 
-
         /// <summary>
         /// Return true if user has made any edits to the grid/table.
         /// </summary>
         private bool HasChanges()
         {
             DataTable dtAll = dt.GetChanges();
-            return dtAll != null && dtAll.Rows.Count > 0;
+            return dtAll is { Rows.Count: > 0 };
         }
-
 
         /// <summary>
         /// Save changes and refresh the os loaded module status
@@ -267,14 +258,12 @@ namespace DBADashGUI.Checks
             }
         }
 
-
-
         /// <summary>
         /// Apply formatting
         /// </summary>
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = dgv.Rows[idx];
                 if (row != null)
@@ -316,5 +305,4 @@ namespace DBADashGUI.Checks
             }
         }
     }
-
 }

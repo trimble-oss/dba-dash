@@ -1352,7 +1352,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
 
                 if (!string.IsNullOrEmpty(instanceId))
                 {
-                    activePowerPlanGUID = Guid.Parse(instanceId.Substring(instanceId.Length - 38, 38));
+                    activePowerPlanGUID = Guid.Parse(instanceId.AsSpan(instanceId.Length - 38, 38));
                 }
             }
             catch (Exception ex)

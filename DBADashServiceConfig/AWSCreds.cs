@@ -38,12 +38,12 @@ namespace DBADashServiceConfig
             this.ApplyTheme();
         }
 
-        private void bttnOK_Click(object sender, EventArgs e)
+        private void BttnOK_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.OK;
         }
 
-        private void bttnCancel_Click(object sender, EventArgs e)
+        private void BttnCancel_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
         }

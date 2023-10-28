@@ -11,7 +11,7 @@ namespace DBADashGUI.LastGoodCheckDB
 {
     public partial class LastGoodCheckDBControl : UserControl, ISetContext
     {
-        private List<Int32> InstanceIDs;
+        private List<int> InstanceIDs;
 
         public bool IncludeCritical
         {
@@ -95,12 +95,12 @@ namespace DBADashGUI.LastGoodCheckDB
                 if (dgvLastGoodCheckDB.Columns[e.ColumnIndex].HeaderText == "Configure")
                 {
                     var row = (DataRowView)dgvLastGoodCheckDB.Rows[e.RowIndex].DataBoundItem;
-                    ConfigureThresholds((Int32)row["InstanceID"], (Int32)row["DatabaseID"]);
+                    ConfigureThresholds((int)row["InstanceID"], (int)row["DatabaseID"]);
                 }
             }
         }
 
-        public void ConfigureThresholds(Int32 InstanceID, Int32 DatabaseID)
+        public void ConfigureThresholds(int InstanceID, int DatabaseID)
         {
             var frm = new LastGoodCheckDBConfig();
             var threshold = LastGoodCheckDBThreshold.GetLastGoodCheckDBThreshold(InstanceID, DatabaseID);

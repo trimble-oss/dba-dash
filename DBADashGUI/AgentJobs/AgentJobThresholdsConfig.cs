@@ -6,11 +6,9 @@ namespace DBADashGUI.AgentJobs
 {
     public partial class AgentJobThresholdsConfig : Form
     {
-
-        public Int32 InstanceID;
+        public int InstanceID;
         public Guid JobID;
         public string connectionString;
-
 
         private void GetConfig()
         {
@@ -22,18 +20,18 @@ namespace DBADashGUI.AgentJobs
             chkTimeSinceLast.Checked = threshold.TimeSinceLastFailureCritical != null && threshold.TimeSinceLastFailureWarning != null;
             chkTimeSinceLastSucceeded.Checked = threshold.TimeSinceLastSucceededCritical != null && threshold.TimeSinceLastSucceededWarning != null;
             chkInherit.Checked = threshold.IsInherited;
-            numTimeSinceLastCritical.Value = threshold.TimeSinceLastFailureCritical == null ? 0 : (Int32)threshold.TimeSinceLastFailureCritical;
-            numTimeSinceLastWarning.Value = threshold.TimeSinceLastFailureWarning == null ? 0 : (Int32)threshold.TimeSinceLastFailureWarning;
-            numJobStep7DaysCritical.Value = threshold.JobStepFails7DaysCritical == null ? 0 : (Int32)threshold.JobStepFails7DaysCritical;
-            numJobStep7DaysWarning.Value = threshold.JobStepFails7DaysWarning == null ? 0 : (Int32)threshold.JobStepFails7DaysWarning;
-            numFailCount7DaysCritical.Value = threshold.FailCount7DaysCritical == null ? 0 : (Int32)threshold.FailCount7DaysCritical;
-            numFailCount7DaysWarning.Value = threshold.FailCount7DaysWarning == null ? 0 : (Int32)threshold.FailCount7DaysWarning;
-            numJobStep24HrsCritical.Value = threshold.JobStepFails24HrsCritical == null ? 0 : (Int32)threshold.JobStepFails24HrsCritical;
-            numJobStep24HrsWarning.Value = threshold.JobStepFails24HrsWarning == null ? 0 : (Int32)threshold.JobStepFails24HrsWarning;
-            numFailCount24HrsCritical.Value = threshold.FailCount24HrsCritical == null ? 0 : (Int32)threshold.FailCount24HrsCritical;
-            numFailCount24HrsWarning.Value = threshold.FailCount24HrsWarning == null ? 0 : (Int32)threshold.FailCount24HrsWarning;
-            numTimeSinceLastSucceededCritical.Value = threshold.TimeSinceLastSucceededCritical == null ? 0 : (Int32)threshold.TimeSinceLastSucceededCritical;
-            numTimeSinceLastSucceededWarning.Value = threshold.TimeSinceLastSucceededWarning == null ? 0 : (Int32)threshold.TimeSinceLastSucceededWarning;
+            numTimeSinceLastCritical.Value = threshold.TimeSinceLastFailureCritical ?? 0;
+            numTimeSinceLastWarning.Value = threshold.TimeSinceLastFailureWarning ?? 0;
+            numJobStep7DaysCritical.Value = threshold.JobStepFails7DaysCritical ?? 0;
+            numJobStep7DaysWarning.Value = threshold.JobStepFails7DaysWarning ?? 0;
+            numFailCount7DaysCritical.Value = threshold.FailCount7DaysCritical ?? 0;
+            numFailCount7DaysWarning.Value = threshold.FailCount7DaysWarning ?? 0;
+            numJobStep24HrsCritical.Value = threshold.JobStepFails24HrsCritical ?? 0;
+            numJobStep24HrsWarning.Value = threshold.JobStepFails24HrsWarning ?? 0;
+            numFailCount24HrsCritical.Value = threshold.FailCount24HrsCritical ?? 0;
+            numFailCount24HrsWarning.Value = threshold.FailCount24HrsWarning ?? 0;
+            numTimeSinceLastSucceededCritical.Value = threshold.TimeSinceLastSucceededCritical ?? 0;
+            numTimeSinceLastSucceededWarning.Value = threshold.TimeSinceLastSucceededWarning ?? 0;
             chkLastFailIsCritical.Checked = threshold.LastFailIsCritical;
             chkLastFailIsWarning.Checked = threshold.LastFailIsWarning;
         }
@@ -49,34 +47,34 @@ namespace DBADashGUI.AgentJobs
                 };
                 if (chkFailCount24Hrs.Checked)
                 {
-                    threshold.FailCount24HrsCritical = (Int32?)numFailCount24HrsCritical.Value;
-                    threshold.FailCount24HrsWarning = (Int32?)numFailCount24HrsWarning.Value;
+                    threshold.FailCount24HrsCritical = (int?)numFailCount24HrsCritical.Value;
+                    threshold.FailCount24HrsWarning = (int?)numFailCount24HrsWarning.Value;
                 }
                 if (chkFailCount7Days.Checked)
                 {
-                    threshold.FailCount7DaysCritical = (Int32?)numFailCount7DaysCritical.Value;
-                    threshold.FailCount7DaysWarning = (Int32?)numFailCount7DaysWarning.Value;
+                    threshold.FailCount7DaysCritical = (int?)numFailCount7DaysCritical.Value;
+                    threshold.FailCount7DaysWarning = (int?)numFailCount7DaysWarning.Value;
                 }
 
                 if (chkJobStep24Hrs.Checked)
                 {
-                    threshold.JobStepFails24HrsCritical = (Int32?)numJobStep24HrsCritical.Value;
-                    threshold.JobStepFails24HrsWarning = (Int32?)numJobStep24HrsWarning.Value;
+                    threshold.JobStepFails24HrsCritical = (int?)numJobStep24HrsCritical.Value;
+                    threshold.JobStepFails24HrsWarning = (int?)numJobStep24HrsWarning.Value;
                 }
                 if (chkJobStep7Days.Checked)
                 {
-                    threshold.JobStepFails7DaysCritical = (Int32?)numJobStep7DaysCritical.Value;
-                    threshold.JobStepFails7DaysWarning = (Int32?)numJobStep7DaysWarning.Value;
+                    threshold.JobStepFails7DaysCritical = (int?)numJobStep7DaysCritical.Value;
+                    threshold.JobStepFails7DaysWarning = (int?)numJobStep7DaysWarning.Value;
                 }
                 if (chkTimeSinceLast.Checked)
                 {
-                    threshold.TimeSinceLastFailureCritical = (Int32?)numTimeSinceLastCritical.Value;
-                    threshold.TimeSinceLastFailureWarning = (Int32?)numTimeSinceLastWarning.Value;
+                    threshold.TimeSinceLastFailureCritical = (int?)numTimeSinceLastCritical.Value;
+                    threshold.TimeSinceLastFailureWarning = (int?)numTimeSinceLastWarning.Value;
                 }
                 if (chkTimeSinceLastSucceeded.Checked)
                 {
-                    threshold.TimeSinceLastSucceededCritical = (Int32?)numTimeSinceLastSucceededCritical.Value;
-                    threshold.TimeSinceLastSucceededWarning = (Int32)numTimeSinceLastSucceededWarning.Value;
+                    threshold.TimeSinceLastSucceededCritical = (int?)numTimeSinceLastSucceededCritical.Value;
+                    threshold.TimeSinceLastSucceededWarning = (int)numTimeSinceLastSucceededWarning.Value;
                 }
 
                 threshold.IsInherited = chkInherit.Checked;
@@ -85,7 +83,6 @@ namespace DBADashGUI.AgentJobs
                 return threshold;
             }
         }
-
 
         public AgentJobThresholdsConfig()
         {

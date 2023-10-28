@@ -10,8 +10,8 @@ namespace DBADashGUI.Changes
 {
     public partial class ResourceGovernor : UserControl, INavigation, ISetContext
     {
-        private List<Int32> InstanceIDs;
-        private List<Int32> backupInstanceIDs;
+        private List<int> InstanceIDs;
+        private List<int> backupInstanceIDs;
 
         public bool CanNavigateBack => tsBack.Enabled;
 
@@ -58,7 +58,7 @@ namespace DBADashGUI.Changes
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-        private static DataTable GetResourceGovernorConfiguration(List<Int32> InstanceIDs)
+        private static DataTable GetResourceGovernorConfiguration(List<int> InstanceIDs)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.ResourceGovernorConfiguration_Get", cn) { CommandType = CommandType.StoredProcedure })

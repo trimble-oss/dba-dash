@@ -38,7 +38,7 @@ namespace DBADashGUI
         /// <summary>
         /// Return Utc offset for app time zone
         /// </summary>
-        public static Int32 UtcOffset => (int)Math.Ceiling(AppTimeZone.GetUtcOffset(DateTime.UtcNow).TotalMinutes);
+        public static int UtcOffset => (int)Math.Ceiling(AppTimeZone.GetUtcOffset(DateTime.UtcNow).TotalMinutes);
 
         /// <summary>
         /// Add Date group menu.  None, 1min, 2min etc
@@ -64,7 +64,7 @@ namespace DBADashGUI
         /// <returns></returns>
         public static DataTable ConvertUTCToAppTimeZone(ref DataTable dt, List<string> convertCols = null)
         {
-            List<Int32> convertColsIdx = new();
+            List<int> convertColsIdx = new();
             if (convertCols == null || convertCols.Count == 0)
             {
                 foreach (DataColumn col in dt.Columns)
@@ -104,9 +104,9 @@ namespace DBADashGUI
         /// <param name="Mins">Duration in minutes</param>
         /// <param name="MaxPoints">Max points for chart</param>
         /// <returns>Int value for the date grouping in minutes</returns>
-        public static Int32 DateGrouping(Int32 Mins, Int32 MaxPoints)
+        public static int DateGrouping(int Mins, int MaxPoints)
         {
-            Int32 lastMins = 0;
+            int lastMins = 0;
 
             foreach (var mins in DateHelper.DateGroups.OrderBy(k => k.Key)
                 .Select(k => k.Key)
@@ -122,7 +122,7 @@ namespace DBADashGUI
             return lastMins; // We are over MaxPoints but have ran out of date groups so return the last date group.
         }
 
-        public static string DateGroupString(Int32 mins)
+        public static string DateGroupString(int mins)
         {
             return (DateHelper.DateGroups.Where(k => k.Key == mins).First()).Value;
         }

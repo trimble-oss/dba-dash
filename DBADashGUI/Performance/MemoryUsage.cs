@@ -159,10 +159,10 @@ namespace DBADashGUI.Performance
             pieChart1.Series.Clear();
 
             static string labelPoint(ChartPoint chartPoint) =>
-            string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation);
+                $"{chartPoint.SeriesView.Title} ({chartPoint.Participation:P})";
             SeriesCollection sc = new();
-            Double other = 0;
-            Double otherPct = 0;
+            double other = 0;
+            double otherPct = 0;
             bool dataLabels;
             foreach (DataRow r in dt.Rows)
             {

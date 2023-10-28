@@ -23,43 +23,29 @@ namespace DBADashGUI.SchemaCompare
 
         private void SetHighlighting(byte[] highlightingResource)
         {
-            using (var stream = new MemoryStream(highlightingResource))
-            {
-                using (var reader = new System.Xml.XmlTextReader(stream))
-                {
-                    txtCode.SyntaxHighlighting =
-                        ICSharpCode.AvalonEdit.Highlighting.Xshd.HighlightingLoader.Load(reader,
-                        ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance);
-                }
-            }
+            using var stream = new MemoryStream(highlightingResource);
+            using var reader = new System.Xml.XmlTextReader(stream);
+            txtCode.SyntaxHighlighting =
+                ICSharpCode.AvalonEdit.Highlighting.Xshd.HighlightingLoader.Load(reader,
+                    ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance);
         }
 
         public bool ShowLineNumbers
         {
-            get
-            {
-                return txtCode.ShowLineNumbers;
-            }
-            set
-            {
-                txtCode.ShowLineNumbers = value;
-            }
+            get => txtCode.ShowLineNumbers;
+            set => txtCode.ShowLineNumbers = value;
         }
 
-        private byte[] GetResource(string resourceName)
+        private static byte[] GetResource(string resourceName)
         {
             // assuming the resource is located at "NamespaceName.ResourceName.extension"
             var assembly = Assembly.GetExecutingAssembly();
 
-            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-            {
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    stream.CopyTo(ms);
-                    byte[] resourceBytes = ms.ToArray();
-                    return resourceBytes;
-                }
-            }
+            using Stream stream = assembly.GetManifestResourceStream(resourceName);
+            using MemoryStream ms = new();
+            stream.CopyTo(ms);
+            byte[] resourceBytes = ms.ToArray();
+            return resourceBytes;
         }
 
         private void SetHighlighting()

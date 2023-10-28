@@ -15,7 +15,7 @@ namespace DBADashGUI.HA
             InitializeComponent();
         }
 
-        private List<Int32> InstanceIDs;
+        private List<int> InstanceIDs;
 
         public bool SummaryMode
         {
@@ -124,8 +124,8 @@ namespace DBADashGUI.HA
                 }
                 else
                 {
-                    var mirroringState = row["mirroring_state"] == DBNull.Value ? Int16.MinValue : Convert.ToInt16(row["mirroring_state"]);
-                    var witnessState = row["mirroring_witness_state"] == DBNull.Value ? Int16.MinValue : Convert.ToInt16(row["mirroring_witness_state"]);
+                    var mirroringState = row["mirroring_state"] == DBNull.Value ? short.MinValue : Convert.ToInt16(row["mirroring_state"]);
+                    var witnessState = row["mirroring_witness_state"] == DBNull.Value ? short.MinValue : Convert.ToInt16(row["mirroring_witness_state"]);
 
                     var mirroringStateStatus = mirroringState switch
                     {

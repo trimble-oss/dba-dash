@@ -53,7 +53,7 @@ namespace DBADashServiceConfig
             }
             else
             {
-                txtLog.Text = string.Format("Log folder does not exist '{0}'. This is created when the service is started.", logsFolder);
+                txtLog.Text = $"Log folder does not exist '{logsFolder}'. This is created when the service is started.";
             }
         }
 
@@ -91,7 +91,7 @@ namespace DBADashServiceConfig
             }
             else
             {
-                txtLog.Text = String.Format("File not found '{0}'", filePath);
+                txtLog.Text = $"File not found '{filePath}'";
             }
         }
 

@@ -174,17 +174,17 @@ namespace DBADashGUI
 
         private static void GetTextForRow(DataRow row, out string a, out string b)
         {
-            a = String.Empty;
-            b = String.Empty;
+            a = string.Empty;
+            b = string.Empty;
             if (row["A_Text"] == DBNull.Value)
             {
                 if (row["DDLID_A"] != DBNull.Value)
                 {
-                    a = Common.DDL((Int64)row["DDLID_A"]);
+                    a = Common.DDL((long)row["DDLID_A"]);
                 }
                 if (row["DDLID_B"] != DBNull.Value)
                 {
-                    b = Common.DDL((Int64)row["DDLID_B"]);
+                    b = Common.DDL((long)row["DDLID_B"]);
                 }
                 if ((string)row["DiffType"] == "Diff" && a.Trim() == b.Trim())
                 {
@@ -277,7 +277,7 @@ namespace DBADashGUI
             GetSnapshotDates(cboDate_A, ((DatabaseItem)cboDatabaseA.SelectedItem).DatabaseID);
         }
 
-        private static void GetSnapshotDates(ComboBox cbo, Int32 DatabaseID)
+        private static void GetSnapshotDates(ComboBox cbo, int DatabaseID)
         {
             cbo.Items.Clear();
             using (var cn = new SqlConnection(Common.ConnectionString))

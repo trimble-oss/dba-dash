@@ -9,8 +9,8 @@ namespace DBADashGUI
     {
 
         public bool Inherited { get; set; } = false;
-        public Int32 InstanceID { get; set; }
-        public Int32 DriveID { get; set; }
+        public int InstanceID { get; set; }
+        public int DriveID { get; set; }
 
         public decimal WarningThreshold { get; set; }
         public decimal CriticalThreshold { get; set; }
@@ -63,7 +63,7 @@ namespace DBADashGUI
         }
 
 
-        public static DriveThreshold GetDriveThreshold(Int32 InstanceID, Int32 DriveID)
+        public static DriveThreshold GetDriveThreshold(int InstanceID, int DriveID)
         {
             DriveThreshold drv = new()
             {

@@ -18,7 +18,7 @@ namespace DBADashGUI.Performance
             InitializeComponent();
         }
 
-        private List<Int32> InstanceIDs;
+        private List<int> InstanceIDs;
 
         public void SetContext(DBADashContext context)
         {
@@ -126,7 +126,7 @@ namespace DBADashGUI.Performance
                         var hist = new List<double>();
                         double total = 0;
 
-                        for (Int32 i = 10; i <= 100; i += 10)
+                        for (int i = 10; i <= 100; i += 10)
                         {
                             var v = Convert.ToDouble(row[histogram + i.ToString()]);
                             hist.Add(v);
@@ -139,7 +139,7 @@ namespace DBADashGUI.Performance
                         }
                         else
                         {
-                            for (Int32 i = 10; i <= 100; i += 10)
+                            for (int i = 10; i <= 100; i += 10)
                             {
                                 var v = Convert.ToDouble(row[histogram + i.ToString()]);
                                 sbToolTip.AppendLine((i - 10).ToString() + " to " + i.ToString() + "% | " + v.ToString("N0") + " (" + (v / total).ToString("P2") + ")");
@@ -222,7 +222,7 @@ namespace DBADashGUI.Performance
                 {
                     FromDate = DateRange.FromUTC,
                     ToDate = DateRange.ToUTC,
-                    InstanceID = (Int32)row["InstanceID"]
+                    InstanceID = (int)row["InstanceID"]
                 };
                 if (col == colElasticPool)
                 {
@@ -240,7 +240,7 @@ namespace DBADashGUI.Performance
             else if (e.RowIndex >= 0 && col == colServiceObjective)
             {
                 DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                var frm = new ResourceGovernanceViewer() { InstanceID = (Int32)row["InstanceID"], DatabaseName = (string)row["DB"] };
+                var frm = new ResourceGovernanceViewer() { InstanceID = (int)row["InstanceID"], DatabaseName = (string)row["DB"] };
                 frm.ApplyTheme();
                 frm.Show();
             }
@@ -257,7 +257,7 @@ namespace DBADashGUI.Performance
                 {
                     FromDate = DateRange.FromUTC,
                     ToDate = DateRange.ToUTC,
-                    InstanceID = (Int32)row["InstanceID"],
+                    InstanceID = (int)row["InstanceID"],
                     ElasticPoolName = pool,
                     Text = instance + " | " + pool
                 };

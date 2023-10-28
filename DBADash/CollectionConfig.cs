@@ -100,7 +100,7 @@ namespace DBADash
         }
 
         [JsonIgnore]
-        public List<DBADashConnection> SecondaryDestinationConnections { get; set; } = new List<DBADashConnection>();
+        public List<DBADashConnection> SecondaryDestinationConnections { get; set; } = new();
 
         // Required for serialization
         public string[] SecondaryDestinations

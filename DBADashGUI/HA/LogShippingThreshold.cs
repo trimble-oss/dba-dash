@@ -6,17 +6,17 @@ namespace DBADashGUI.LogShipping
 {
     public class LogShippingThreshold
     {
-        public Int32 InstanceID { get; set; }
-        public Int32 DatabaseID { get; set; }
-        public Int32? LatencyWarningThreshold { get; set; } = null;
-        public Int32? LatencyCriticalThreshold { get; set; } = null;
-        public Int32? TimeSinceLastWarningThreshold { get; set; } = null;
-        public Int32? TimeSinceLastCriticalThreshold { get; set; } = null;
-        public Int32 NewDatabaseExcludePeriod { get; set; } = 1440;
+        public int InstanceID { get; set; }
+        public int DatabaseID { get; set; }
+        public int? LatencyWarningThreshold { get; set; } = null;
+        public int? LatencyCriticalThreshold { get; set; } = null;
+        public int? TimeSinceLastWarningThreshold { get; set; } = null;
+        public int? TimeSinceLastCriticalThreshold { get; set; } = null;
+        public int NewDatabaseExcludePeriod { get; set; } = 1440;
 
         public bool Inherited { get; set; }
 
-        public static LogShippingThreshold GetLogShippingThreshold(Int32 InstanceID, Int32 DatabaseID)
+        public static LogShippingThreshold GetLogShippingThreshold(int InstanceID, int DatabaseID)
         {
             LogShippingThreshold threshold = new()
             {
@@ -36,15 +36,15 @@ namespace DBADashGUI.LogShipping
                 {
                     if (rdr["LatencyCriticalThreshold"] != DBNull.Value && rdr["LatencyWarningThreshold"] != DBNull.Value)
                     {
-                        threshold.LatencyCriticalThreshold = (Int32?)rdr["LatencyCriticalThreshold"];
-                        threshold.LatencyWarningThreshold = (Int32?)rdr["LatencyWarningThreshold"];
+                        threshold.LatencyCriticalThreshold = (int?)rdr["LatencyCriticalThreshold"];
+                        threshold.LatencyWarningThreshold = (int?)rdr["LatencyWarningThreshold"];
                     }
                     if (rdr["TimeSinceLastCriticalThreshold"] != DBNull.Value && rdr["TimeSinceLastWarningThreshold"] != DBNull.Value)
                     {
-                        threshold.TimeSinceLastCriticalThreshold = (Int32?)rdr["TimeSinceLastCriticalThreshold"];
-                        threshold.TimeSinceLastWarningThreshold = (Int32?)rdr["TimeSinceLastWarningThreshold"];
+                        threshold.TimeSinceLastCriticalThreshold = (int?)rdr["TimeSinceLastCriticalThreshold"];
+                        threshold.TimeSinceLastWarningThreshold = (int?)rdr["TimeSinceLastWarningThreshold"];
                     }
-                    threshold.NewDatabaseExcludePeriod = (Int32)rdr["NewDatabaseExcludePeriodMin"];
+                    threshold.NewDatabaseExcludePeriod = (int)rdr["NewDatabaseExcludePeriodMin"];
                     threshold.Inherited = false;
                     if (rdr.Read())
                     {

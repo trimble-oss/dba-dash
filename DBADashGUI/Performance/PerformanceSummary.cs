@@ -153,7 +153,7 @@ namespace DBADashGUI.Performance
 
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", context.InstanceIDs));
 
-                var counters = String.Join(",", SelectedPerformanceCounters.Values.Select(pc => pc.CounterID));
+                var counters = string.Join(",", SelectedPerformanceCounters.Values.Select(pc => pc.CounterID));
                 cmd.Parameters.AddWithValue("Counters", counters);
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
@@ -217,7 +217,7 @@ namespace DBADashGUI.Performance
                     if (row["CPU10"] != DBNull.Value)
                     {
                         StringBuilder sbToolTip = new();
-                        for (Int32 i = 10; i <= 100; i += 10)
+                        for (int i = 10; i <= 100; i += 10)
                         {
                             var v = Convert.ToDouble(row["CPU" + i.ToString()]);
                             hist.Add(v);
@@ -258,13 +258,13 @@ namespace DBADashGUI.Performance
                     PerformanceSummarySavedView view = new() { Name = viewName };
                     bool save = false;
                     string jsonCounters = Properties.Settings.Default.PerformanceSummaryPerformanceCounters;
-                    if (!String.IsNullOrEmpty(jsonCounters))
+                    if (!string.IsNullOrEmpty(jsonCounters))
                     {
                         view.SelectedPerformanceCounters = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<int, Counter>>(jsonCounters);
                         save = true;
                     }
                     string jsonLayout = Properties.Settings.Default.PerformanceSummaryCols;
-                    if (!String.IsNullOrEmpty(jsonLayout))
+                    if (!string.IsNullOrEmpty(jsonLayout))
                     {
                         view.ColumnLayout = Newtonsoft.Json.JsonConvert.DeserializeObject<List<KeyValuePair<string, PersistedColumnLayout>>>(jsonLayout);
                         save = true;
@@ -273,8 +273,8 @@ namespace DBADashGUI.Performance
                     {
                         view.Save();
                     }
-                    Properties.Settings.Default.PerformanceSummaryCols = String.Empty;
-                    Properties.Settings.Default.PerformanceSummaryPerformanceCounters = String.Empty;
+                    Properties.Settings.Default.PerformanceSummaryCols = string.Empty;
+                    Properties.Settings.Default.PerformanceSummaryPerformanceCounters = string.Empty;
                     Properties.Settings.Default.PerformanceSummaryMigrated = true;
                     Properties.Settings.Default.Save();
                 }
@@ -317,7 +317,7 @@ namespace DBADashGUI.Performance
                                                                 )
                                                                 .Select(col => col.DataPropertyName)
                                                                 .ToList();
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var r = dgv.Rows[idx];
                 var row = (DataRowView)r.DataBoundItem;
@@ -382,7 +382,7 @@ namespace DBADashGUI.Performance
             if (e.RowIndex >= 0 && e.ColumnIndex == 0)
             {
                 DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (Int32)row["InstanceID"], Tab = "tabPerformance" });
+                Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (int)row["InstanceID"], Tab = "tabPerformance" });
             }
         }
 
@@ -475,7 +475,7 @@ namespace DBADashGUI.Performance
         private void SavedViewSelected(object sender, SavedViewSelectedEventArgs e)
         {
             selectedview = null;
-            if (e.SerializedObject != String.Empty)
+            if (e.SerializedObject != string.Empty)
             {
                 try
                 {
@@ -491,7 +491,7 @@ namespace DBADashGUI.Performance
                 SelectedPerformanceCounters.Clear();
                 AddPerformanceCounterColsToGrid();
                 LoadPersistedColumnLayout(standardLayout);
-                tsDeleteView.Visible = e.SerializedObject != String.Empty && (!e.IsGlobal || DBADashUser.HasManageGlobalViews); // Don't show for "None" but allow user to delete a view that failed to deserialize
+                tsDeleteView.Visible = e.SerializedObject != string.Empty && (!e.IsGlobal || DBADashUser.HasManageGlobalViews); // Don't show for "None" but allow user to delete a view that failed to deserialize
             }
             else
             {

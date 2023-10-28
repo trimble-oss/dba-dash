@@ -17,7 +17,7 @@ namespace DBADashGUI.Changes
             InitializeComponent();
         }
 
-        private List<Int32> InstanceIDs;
+        private List<int> InstanceIDs;
 
         private static readonly DataGridViewColumn[] Cols ={
                 new DataGridViewLinkColumn(){ Name="Acknowledge", HeaderText="Acknowledge", Text="Acknowledge", LinkColor = DashColors.LinkColor, SortMode = DataGridViewColumnSortMode.Automatic},
@@ -108,8 +108,8 @@ namespace DBADashGUI.Changes
                     string alertName = (string)r[pivotCol];
                     var idx = dgvAlertsConfig.Columns[alertName].Index;
 
-                    bool enabled = (Byte)r["enabled"] == 0x1;
-                    bool notification = (Int32)r["has_notification"] > 0;
+                    bool enabled = (byte)r["enabled"] == 0x1;
+                    bool notification = (int)r["has_notification"] > 0;
 
                     row.Cells[idx].Value = enabled ? "Y" + (notification ? "" : "**") : "N";
                     if (enabled && !notification)
@@ -190,7 +190,7 @@ namespace DBADashGUI.Changes
 
         private void DgvAlerts_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvAlerts.Rows[idx].DataBoundItem;
                 var status = (DBADashStatus.DBADashStatusEnum)row["AlertStatus"];

@@ -34,7 +34,7 @@ namespace DBADashGUI.Drives
 
         private readonly string connectionString = Common.ConnectionString;
 
-        public Int32 DriveID { get; set; }
+        public int DriveID { get; set; }
 
         public bool SmoothLines
         {
@@ -43,7 +43,7 @@ namespace DBADashGUI.Drives
 
         public string DateFormat => DateGroupingMins < 1440 ? "yyyy-MM-dd HH:mm" : "yyyy-MM-dd";
 
-        private Int32 Days = 7;
+        private int Days = 7;
         private DateTime customFrom;
         private DateTime customTo;
 
@@ -55,9 +55,9 @@ namespace DBADashGUI.Drives
                     ? new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, DateTime.UtcNow.Hour, 0, 0).AddHours(1)
                     : customTo;
 
-        private Int32 PointSize => pointsToolStripMenuItem.Checked ? 10 : 0;
+        private int PointSize => pointsToolStripMenuItem.Checked ? 10 : 0;
 
-        private Int32 DateGroupingMins
+        private int DateGroupingMins
         {
             get
             {
@@ -97,7 +97,7 @@ namespace DBADashGUI.Drives
                 columns[s].Points = new DateTimePoint[cnt];
             }
 
-            Int32 i = 0;
+            int i = 0;
             foreach (DataRow r in driveSnapshotDT.Rows)
             {
                 foreach (string s in columns.Keys)
@@ -162,7 +162,7 @@ namespace DBADashGUI.Drives
 
         private void Days_Click(object sender, EventArgs e)
         {
-            Days = Int32.Parse((string)((ToolStripMenuItem)sender).Tag);
+            Days = int.Parse((string)((ToolStripMenuItem)sender).Tag);
             SetTimeChecked();
             RefreshData();
         }

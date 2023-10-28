@@ -236,13 +236,15 @@ namespace DBADashServiceConfig
                     }
                     else if (status.VersionStatus == DBValidations.DBVersionStatusEnum.AppUpgradeRequired)
                     {
-                        lblVersionInfo.Text = String.Format("Repository database version {0} is newer than dac version {1}.  Please update this app.", status.DBVersion.ToString(), status.DACVersion.ToString());
+                        lblVersionInfo.Text =
+                            $"Repository database version {status.DBVersion} is newer than dac version {status.DACVersion}.  Please update this app.";
                         lblVersionInfo.ForeColor = DashColors.Fail;
                         bttnDeployDatabase.Enabled = false;
                     }
                     else
                     {
-                        lblVersionInfo.Text = String.Format("Repository database version {0}  requires upgrade to {1}.  Database will be upgraded on service start.", status.DBVersion.ToString(), status.DACVersion.ToString());
+                        lblVersionInfo.Text =
+                            $"Repository database version {status.DBVersion}  requires upgrade to {status.DACVersion}.  Database will be upgraded on service start.";
                         lblVersionInfo.ForeColor = DashColors.Fail;
                         bttnDeployDatabase.Enabled = true;
                     }
@@ -465,7 +467,7 @@ namespace DBADashServiceConfig
                 numBackupRetention.Value = collectionConfig.ConfigBackupRetentionDays;
                 txtSummaryRefreshCron.Text = collectionConfig.SummaryRefreshCron;
                 chkSummaryRefresh.Checked = !string.IsNullOrEmpty(collectionConfig.SummaryRefreshCron);
-                updateSummaryCron();
+                UpdateSummaryCron();
                 UpdateScanInterval();
                 SetDgv();
                 RefreshEncryption();
@@ -724,14 +726,7 @@ namespace DBADashServiceConfig
                 chkPersistXESession.Checked = src.PersistXESessions;
                 chkSlowQueryThreshold.Checked = (src.SlowQueryThresholdMs != -1);
                 chkScriptJobs.Checked = src.ScriptAgentJobs;
-                if (chkSlowQueryThreshold.Checked)
-                {
-                    numSlowQueryThreshold.Value = src.SlowQueryThresholdMs;
-                }
-                else
-                {
-                    numSlowQueryThreshold.Value = 0;
-                }
+                numSlowQueryThreshold.Value = chkSlowQueryThreshold.Checked ? src.SlowQueryThresholdMs : 0;
 
                 txtSnapshotDBs.Text = src.SchemaSnapshotDBs;
                 chkDualSession.Checked = src.UseDualEventSession;
@@ -864,7 +859,7 @@ namespace DBADashServiceConfig
             }
             else
             {
-                if (MessageBox.Show(String.Format("Found {0} new connections.  Add connections to config file?", newConnections.Count), "Scan", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                if (MessageBox.Show($"Found {newConnections.Count} new connections.  Add connections to config file?", "Scan", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     collectionConfig.AddConnections(newConnections);
                     SetJson();
@@ -1174,14 +1169,7 @@ namespace DBADashServiceConfig
 
         private void UpdateSaveButton()
         {
-            if (txtJson.Text != originalJson)
-            {
-                bttnSave.Font = new Font(bttnSave.Font, FontStyle.Bold);
-            }
-            else
-            {
-                bttnSave.Font = new Font(bttnSave.Font, FontStyle.Regular);
-            }
+            bttnSave.Font = txtJson.Text != originalJson ? new Font(bttnSave.Font, FontStyle.Bold) : new Font(bttnSave.Font, FontStyle.Regular);
         }
 
         private void LnkStart_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -1268,7 +1256,7 @@ namespace DBADashServiceConfig
             SetJson();
         }
 
-        private void bttnAWS_Click(object sender, EventArgs e)
+        private void BttnAWS_Click(object sender, EventArgs e)
         {
             var frm = new AWSCreds()
             {
@@ -1287,7 +1275,7 @@ namespace DBADashServiceConfig
             RefreshEncryption();
         }
 
-        private void bttnEncryption_Click(object sender, EventArgs e)
+        private void BttnEncryption_Click(object sender, EventArgs e)
         {
             var frm = new EncryptionConfig() { EncryptionOption = collectionConfig.EncryptionOption, EncryptionPassword = collectionConfig.EncryptionOption == BasicConfig.EncryptionOptions.Encrypt ? EncryptedConfig.GetPassword() : null };
             frm.ShowDialog();
@@ -1335,23 +1323,23 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void chkSummaryRefresh_CheckedChanged(object sender, EventArgs e)
+        private void ChkSummaryRefresh_CheckedChanged(object sender, EventArgs e)
         {
             txtSummaryRefreshCron.Enabled = chkSummaryRefresh.Checked;
             if (!IsSetFromJson)
             {
                 txtSummaryRefreshCron.Text = chkSummaryRefresh.Checked ? "120" : string.Empty;
-                updateSummaryCron();
+                UpdateSummaryCron();
                 SetJson();
             }
         }
 
-        private void txtSummaryRefreshCron_Validated(object sender, EventArgs e)
+        private void TxtSummaryRefreshCron_Validated(object sender, EventArgs e)
         {
-            updateSummaryCron();
+            UpdateSummaryCron();
         }
 
-        private void updateSummaryCron()
+        private void UpdateSummaryCron()
         {
             try
             {

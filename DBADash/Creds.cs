@@ -12,33 +12,33 @@ namespace DBADash
 {
     internal class Creds
     {
-        private static string userKeyFolder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DBADash");
+        private static string UserKeyFolder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DBADash");
 
         [SupportedOSPlatform("windows")]
         public static void SetPassword(string target, string password)
         {
-            string fileName = target + ".key";
-            string filePath = Path.Combine(userKeyFolder, fileName);
-            Directory.CreateDirectory(userKeyFolder);
+            var fileName = target + ".key";
+            var filePath = Path.Combine(UserKeyFolder, fileName);
+            Directory.CreateDirectory(UserKeyFolder);
             File.WriteAllText(filePath, password.UserEncryptString());
         }
 
         [SupportedOSPlatform("windows")]
         public static void Remove(string target)
         {
-            string fileName = target + ".key";
-            string filePath = Path.Combine(userKeyFolder, fileName);
+            var fileName = target + ".key";
+            var filePath = Path.Combine(UserKeyFolder, fileName);
             File.Delete(filePath);
         }
 
         [SupportedOSPlatform("windows")]
         public static string GetPassword(string target)
         {
-            string fileName = target + ".key";
-            string filePath = Path.Combine(userKeyFolder, fileName);
+            var fileName = target + ".key";
+            var filePath = Path.Combine(UserKeyFolder, fileName);
             if (File.Exists(filePath))
             {
-                string password = File.ReadAllText(filePath);
+                var password = File.ReadAllText(filePath);
                 return password.UserDecryptString();
             }
             else

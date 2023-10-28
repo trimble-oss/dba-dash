@@ -16,7 +16,7 @@ namespace DBADashGUI.DBFiles
             InitializeComponent();
         }
 
-        private List<Int32> InstanceIDs;
+        private List<int> InstanceIDs;
 
         public void SetContext(DBADashContext context)
         {
@@ -55,7 +55,7 @@ namespace DBADashGUI.DBFiles
 
         private void DgvTempDB_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var r = dgvTempDB.Rows[idx];
                 var row = (DataRowView)r.DataBoundItem;
@@ -73,7 +73,7 @@ namespace DBADashGUI.DBFiles
                 dgvTempDB.Rows[idx].Cells[colT1117.Index].SetStatusColor(traceFlagReq ? (T1117 ? DBADashStatusEnum.OK : DBADashStatusEnum.Warning) : (T1117 ? DBADashStatusEnum.WarningLow : DBADashStatusEnum.NA));
                 dgvTempDB.Rows[idx].Cells[colT1118.Index].SetStatusColor(traceFlagReq ? (T1118 ? DBADashStatusEnum.OK : DBADashStatusEnum.Warning) : (T1118 ? DBADashStatusEnum.WarningLow : DBADashStatusEnum.NA));
                 var memoryOptimizedStatus = row["IsTempDBMetadataMemoryOptimized"] == DBNull.Value ? DBADashStatusEnum.NA : ((bool)row["IsTempDBMetadataMemoryOptimized"] ? DBADashStatusEnum.OK : DBADashStatusEnum.Information);
-                var logFilesStatus = (Int32)row["NumberOfLogFiles"] > 1 ? DBADashStatusEnum.Warning : DBADashStatusEnum.OK;
+                var logFilesStatus = (int)row["NumberOfLogFiles"] > 1 ? DBADashStatusEnum.Warning : DBADashStatusEnum.OK;
                 dgvTempDB.Rows[idx].Cells[colTempDBMemoryOpt.Index].SetStatusColor(memoryOptimizedStatus);
                 dgvTempDB.Rows[idx].Cells[colNumberOfLogFiles.Index].SetStatusColor(logFilesStatus);
             }

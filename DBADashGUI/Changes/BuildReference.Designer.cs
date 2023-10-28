@@ -93,7 +93,7 @@
             latestToolStripMenuItem.Name = "latestToolStripMenuItem";
             latestToolStripMenuItem.Size = new System.Drawing.Size(140, 26);
             latestToolStripMenuItem.Text = "Latest";
-            latestToolStripMenuItem.Click += latestToolStripMenuItem_Click;
+            latestToolStripMenuItem.Click += LatestToolStripMenuItem_Click;
             // 
             // tsCopy
             // 

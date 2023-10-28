@@ -11,13 +11,13 @@ namespace DBADashGUI.Pickers
         public SelectableString(string name)
         {
             Name = name;
-            IsVisible = true; 
+            IsVisible = true;
         }
 
-        public SelectableString(string name,bool isVisible)
+        public SelectableString(string name, bool isVisible)
         {
             Name = name;
-            IsVisible = IsVisible;
+            IsVisible = isVisible;
         }
 
         public string Name { get; set; }

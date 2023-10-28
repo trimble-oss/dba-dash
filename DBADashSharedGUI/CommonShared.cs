@@ -27,7 +27,7 @@ namespace DBADashSharedGUI
         [SupportedOSPlatform("windows")]
         public static void ShowAbout(string connectionString, IWin32Window owner, bool StartGUIOnUpgrade)
         {
-            Version dbVersion = new Version();
+            Version dbVersion = new();
             if (!string.IsNullOrEmpty(connectionString))
             {
                 try

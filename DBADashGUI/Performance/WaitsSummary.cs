@@ -147,7 +147,7 @@ namespace DBADashGUI.Performance
 
         private void RefreshChart()
         {
-            if (selectedWaitType == null || selectedWaitType == String.Empty)
+            if (selectedWaitType == null || selectedWaitType == string.Empty)
             {
                 splitContainer1.Panel1Collapsed = true;
             }

@@ -14,7 +14,7 @@ namespace DBADashGUI
             InitializeComponent();
         }
 
-        private List<Int32> InstanceIDs;
+        private List<int> InstanceIDs;
 
         public void SetContext(DBADashContext context)
         {
@@ -87,14 +87,14 @@ namespace DBADashGUI
 
         private void DgvHardware_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx++)
+            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx++)
             {
                 var r = dgvHardware.Rows[idx];
                 var row = (DataRowView)r.DataBoundItem;
                 var ifiStatus = row["InstantFileInitializationEnabled"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : ((bool)row["InstantFileInitializationEnabled"] ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning);
-                var offlineSchedulerStatus = row["OfflineSchedulers"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : ((Int32)row["OfflineSchedulers"] == 0 ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Critical);
+                var offlineSchedulerStatus = row["OfflineSchedulers"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : ((int)row["OfflineSchedulers"] == 0 ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Critical);
                 var ppStatus = row["ActivePowerPlanGUID"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : ((Guid)row["ActivePowerPlanGUID"] == Common.HighPerformancePowerPlanGUID ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning);
-                var priorityStatus = row["os_priority_class"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : ((Int32)row["os_priority_class"] == 32 ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning);
+                var priorityStatus = row["os_priority_class"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : ((int)row["os_priority_class"] == 32 ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning);
                 var affinityStatus = row["affinity_type_desc"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : ((string)row["affinity_type_desc"] == "AUTO" ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning);
 
                 r.Cells[colAffinity.Index].SetStatusColor(affinityStatus);

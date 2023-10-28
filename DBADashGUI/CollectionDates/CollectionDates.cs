@@ -17,7 +17,7 @@ namespace DBADashGUI.CollectionDates
             dgvCollectionDates.ApplyTheme();
         }
 
-        private List<Int32> InstanceIDs { get; set; }
+        private List<int> InstanceIDs { get; set; }
 
         public bool IncludeCritical
         {
@@ -81,7 +81,7 @@ namespace DBADashGUI.CollectionDates
             RefreshData();
         }
 
-        private void ConfigureThresholds(Int32 InstanceID, DataRowView row)
+        private void ConfigureThresholds(int InstanceID, DataRowView row)
         {
             using var frm = new CollectionDatesThresholds
             {
@@ -93,8 +93,8 @@ namespace DBADashGUI.CollectionDates
             }
             else
             {
-                frm.WarningThreshold = (Int32)row["WarningThreshold"];
-                frm.CriticalThreshold = (Int32)row["CriticalThreshold"];
+                frm.WarningThreshold = (int)row["WarningThreshold"];
+                frm.CriticalThreshold = (int)row["CriticalThreshold"];
             }
             if ((string)row["ConfiguredLevel"] != "Instance")
             {
@@ -115,7 +115,7 @@ namespace DBADashGUI.CollectionDates
                 var row = (DataRowView)dgvCollectionDates.Rows[e.RowIndex].DataBoundItem;
                 if (dgvCollectionDates.Columns[e.ColumnIndex].HeaderText == "Configure Instance")
                 {
-                    var InstanceID = (Int32)row["InstanceID"];
+                    var InstanceID = (int)row["InstanceID"];
                     ConfigureThresholds(InstanceID, row);
                 }
                 else if (dgvCollectionDates.Columns[e.ColumnIndex].HeaderText == "Configure Root")
@@ -127,7 +127,7 @@ namespace DBADashGUI.CollectionDates
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvCollectionDates.Rows[idx].DataBoundItem;
                 if (row != null)
@@ -136,14 +136,7 @@ namespace DBADashGUI.CollectionDates
 
                     dgvCollectionDates.Rows[idx].Cells["SnapshotAge"].SetStatusColor(Status);
 
-                    if ((string)row["ConfiguredLevel"] == "Instance")
-                    {
-                        dgvCollectionDates.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvCollectionDates.Font, FontStyle.Bold);
-                    }
-                    else
-                    {
-                        dgvCollectionDates.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvCollectionDates.Font, FontStyle.Regular);
-                    }
+                    dgvCollectionDates.Rows[idx].Cells["Configure"].Style.Font = (string)row["ConfiguredLevel"] == "Instance" ? new Font(dgvCollectionDates.Font, FontStyle.Bold) : new Font(dgvCollectionDates.Font, FontStyle.Regular);
                 }
             }
         }

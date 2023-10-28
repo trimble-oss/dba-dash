@@ -24,11 +24,7 @@ namespace DBADashConfig.Test
             psi.RedirectStandardOutput = true;
             psi.RedirectStandardError = true;
 
-            using var p = Process.Start(psi);
-            if (p == null)
-            {
-                throw new Exception("Process is NULL");
-            }
+            using var p = Process.Start(psi) ?? throw new Exception("Process is NULL");
             p.WaitForExit();
             var output = p.StandardOutput.ReadToEnd();
             var error = p.StandardError.ReadToEnd();

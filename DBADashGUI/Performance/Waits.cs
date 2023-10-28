@@ -28,10 +28,10 @@ namespace DBADashGUI.Performance
         }
 
         public DateTimePoint x;
-        private Int32 instanceID;
+        private int instanceID;
         private DateTime lastWait = DateTime.MinValue;
-        private Int32 dateGrouping;
-        private Int32 mins;
+        private int dateGrouping;
+        private int mins;
         private DataTable dt;
 
         public event EventHandler<EventArgs> Close;
@@ -74,7 +74,7 @@ namespace DBADashGUI.Performance
 
         IMetric IMetricChart.Metric { get => Metric; }
 
-        public void RefreshData(Int32 instanceID)
+        public void RefreshData(int instanceID)
         {
             this.instanceID = instanceID;
 

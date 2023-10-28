@@ -9,6 +9,6 @@ namespace DBADashGUI
         public string Name { get; set; }
         public bool IsVisible { get; set; }
         public DateTimePoint[] Points;
-        public Int32 axis = 0;
+        public int axis = 0;
     }
 }

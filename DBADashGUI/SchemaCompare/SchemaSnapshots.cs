@@ -18,12 +18,12 @@ namespace DBADashGUI.Changes
             InitializeComponent();
         }
 
-        private readonly Int32 currentSummaryPageSize = 100;
+        private readonly int currentSummaryPageSize = 100;
         private int currentSummaryPage = 1;
-        private Int32 InstanceID;
+        private int InstanceID;
         private string InstanceName;
-        private Int32 DatabaseID;
-        private List<Int32> InstanceIDs;
+        private int DatabaseID;
+        private List<int> InstanceIDs;
 
         public bool CanNavigateBack { get => tsBack.Enabled; }
 
@@ -50,7 +50,7 @@ namespace DBADashGUI.Changes
             {
                 var row = (DataRowView)gvSnapshots.SelectedRows[0].DataBoundItem;
                 DateTime snapshotDateUTC = ((DateTime)row["SnapshotDate"]).AppTimeZoneToUtc();
-                Int32 databaseID = (Int32)row["DatabaseID"];
+                int databaseID = (int)row["DatabaseID"];
 
                 DataSet ds = DdlSnapshotDiff(snapshotDateUTC, databaseID);
                 gvSnapshotsDetail.AutoGenerateColumns = false;
@@ -67,12 +67,12 @@ namespace DBADashGUI.Changes
                 string ddl = "";
                 if (row["NewDDLID"] != DBNull.Value)
                 {
-                    ddl = Common.DDL((Int64)row["NewDDLID"]);
+                    ddl = Common.DDL((long)row["NewDDLID"]);
                 }
                 string ddlOld = "";
                 if (row["OldDDLID"] != DBNull.Value)
                 {
-                    ddlOld = Common.DDL((Int64)row["OldDDLID"]);
+                    ddlOld = Common.DDL((long)row["OldDDLID"]);
                 }
                 ViewMode mode = e.ColumnIndex == colDiff.Index ? ViewMode.Diff : ViewMode.Code;
                 var frm = new Diff();
@@ -92,7 +92,7 @@ namespace DBADashGUI.Changes
 
         public void RefreshData()
         {
-            if (InstanceID > 0 || (InstanceName != null && InstanceName.Length > 0))
+            if (InstanceID > 0 || InstanceName is { Length: > 0 })
             {
                 LoadSnapshots();
                 tsBack.Enabled = true;
@@ -153,7 +153,7 @@ namespace DBADashGUI.Changes
             splitSnapshotSummary.Visible = true;
             dgvInstanceSummary.Visible = false;
             gvSnapshotsDetail.DataSource = null;
-            currentSummaryPage = Int32.Parse(tsSummaryPageSize.Text);
+            currentSummaryPage = int.Parse(tsSummaryPageSize.Text);
             var dt = GetDDLSnapshots(pageNum);
             gvSnapshots.AutoGenerateColumns = false;
             gvSnapshots.DataSource = dt;
@@ -176,7 +176,7 @@ namespace DBADashGUI.Changes
 
         private void TsSummaryPageSize_Validated(object sender, EventArgs e)
         {
-            if (Int32.Parse(tsSummaryPageSize.Text) != currentSummaryPage)
+            if (int.Parse(tsSummaryPageSize.Text) != currentSummaryPage)
             {
                 LoadSnapshots(1);
             }
@@ -213,7 +213,7 @@ namespace DBADashGUI.Changes
             if (e.RowIndex >= 0 && e.ColumnIndex == colDB.Index)
             {
                 var row = (DataRowView)gvSnapshots.Rows[e.RowIndex].DataBoundItem;
-                DatabaseID = (Int32)row["DatabaseID"];
+                DatabaseID = (int)row["DatabaseID"];
                 RefreshData();
             }
             else if (e.RowIndex >= 0 && e.ColumnIndex == colExport.Index)
@@ -225,7 +225,7 @@ namespace DBADashGUI.Changes
 
         private void Export(DataRowView row)
         {
-            var dbid = (Int32)row["DatabaseID"];
+            var dbid = (int)row["DatabaseID"];
             var db = (string)row["DB"];
             var snapshotDate = (DateTime)row["SnapshotDate"];
             using var ofd = new FolderBrowserDialog() { Description = "Select a folder" };

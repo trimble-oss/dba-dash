@@ -16,9 +16,9 @@ namespace DBADashGUI.Performance
             InitializeComponent();
         }
 
-        private Int32 InstanceID;
+        private int InstanceID;
         private double maxBlockedTime = 0;
-        private Int32 databaseID = 0;
+        private int databaseID = 0;
 
         public bool CloseVisible
         {
@@ -29,7 +29,7 @@ namespace DBADashGUI.Performance
 
         public event EventHandler<EventArgs> MoveUp;
 
-        public void RefreshData(Int32 InstanceID, Int32 databaseID)
+        public void RefreshData(int InstanceID, int databaseID)
         {
             this.InstanceID = InstanceID;
             this.databaseID = databaseID;
@@ -96,15 +96,15 @@ namespace DBADashGUI.Performance
             maxBlockedTime = 0;
 
             var points = new BlockingPoint[dt.Rows.Count];
-            Int32 i = 0;
+            int i = 0;
             double Ymax = 100;
 
             foreach (DataRow r in dt.Rows)
             {
                 var dtm = (DateTime)r["SnapshotDateUTC"];
-                var blockedCnt = (Int32)r["BlockedSessionCount"];
-                var blockedTime = (Int64)r["BlockedWaitTime"];
-                var snapshotID = (Int32)r["BlockingSnapshotID"];
+                var blockedCnt = (int)r["BlockedSessionCount"];
+                var blockedTime = (long)r["BlockedWaitTime"];
+                var snapshotID = (int)r["BlockingSnapshotID"];
                 if (blockedTime > maxBlockedTime)
                 {
                     maxBlockedTime = blockedTime;
@@ -183,15 +183,15 @@ namespace DBADashGUI.Performance
 
 internal class BlockingPoint
 {
-    public Int32 SnapshotID { get; set; }
+    public int SnapshotID { get; set; }
 
     public DateTime SnapshotDate { get; set; }
 
-    public Int32 BlockedSessions { get; set; }
+    public int BlockedSessions { get; set; }
 
-    public Int64 BlockedWaitTime { get; set; }
+    public long BlockedWaitTime { get; set; }
 
-    public BlockingPoint(Int32 snapshotID, DateTime snapshotDate, Int32 blockedSessions, Int64 blockedWaitTime)
+    public BlockingPoint(int snapshotID, DateTime snapshotDate, int blockedSessions, long blockedWaitTime)
     {
         this.SnapshotID = snapshotID;
         this.BlockedSessions = blockedSessions;

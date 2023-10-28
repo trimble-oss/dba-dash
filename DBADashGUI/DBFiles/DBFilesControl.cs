@@ -18,8 +18,8 @@ namespace DBADashGUI.DBFiles
             InitializeComponent();
         }
 
-        private List<Int32> InstanceIDs;
-        private Int32? DatabaseID;
+        private List<int> InstanceIDs;
+        private int? DatabaseID;
         private string DriveName;
 
         public bool IncludeCritical
@@ -89,7 +89,7 @@ namespace DBADashGUI.DBFiles
         {
             DriveName = context.DriveName;
             InstanceIDs = context.InstanceIDs.ToList();
-            DatabaseID = (context.DatabaseID > 0 ? (Int32?)context.DatabaseID : null);
+            DatabaseID = (context.DatabaseID > 0 ? (int?)context.DatabaseID : null);
             IncludeCritical = true;
             IncludeWarning = true;
             IncludeNA = DatabaseID != null || context.DriveName != null;
@@ -169,7 +169,7 @@ namespace DBADashGUI.DBFiles
                 var row = (DataRowView)dgvFiles.Rows[e.RowIndex].DataBoundItem;
                 if (dgvFiles.Columns[e.ColumnIndex].HeaderText == "Configure")
                 {
-                    ConfigureThresholds((Int32)row["InstanceID"], (Int32)row["DatabaseID"], (Int32)row["data_space_id"]);
+                    ConfigureThresholds((int)row["InstanceID"], (int)row["DatabaseID"], (int)row["data_space_id"]);
                 }
                 else if (dgvFiles.Columns[e.ColumnIndex].HeaderText == "History")
                 {
@@ -178,7 +178,7 @@ namespace DBADashGUI.DBFiles
             }
         }
 
-        public void ConfigureThresholds(Int32 InstanceID, Int32 DatabaseID, Int32 DataSpaceID)
+        public void ConfigureThresholds(int InstanceID, int DatabaseID, int DataSpaceID)
         {
             var frm = new FileThresholdConfig
             {
@@ -195,7 +195,7 @@ namespace DBADashGUI.DBFiles
 
         private void DgvFiles_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvFiles.Rows[idx].DataBoundItem;
                 var Status = (DBADashStatus.DBADashStatusEnum)row["FreeSpaceStatus"];
@@ -228,7 +228,7 @@ namespace DBADashGUI.DBFiles
         {
             if (InstanceIDs.Count == 1 && DatabaseID > 0)
             {
-                ConfigureThresholds(InstanceIDs[0], (Int32)DatabaseID, -1);
+                ConfigureThresholds(InstanceIDs[0], (int)DatabaseID, -1);
             }
         }
 
@@ -287,24 +287,10 @@ namespace DBADashGUI.DBFiles
         private void TsTypes_Click(object sender, EventArgs e)
         {
             var selectedTypes = FileTypes;
-            if (selectedTypes.Count is > 0 and < 4)
-            {
-                tsType.Font = new Font(tsType.Font, FontStyle.Bold);
-            }
-            else
-            {
-                tsType.Font = new Font(tsType.Font, FontStyle.Regular);
-            }
+            tsType.Font = selectedTypes.Count is > 0 and < 4 ? new Font(tsType.Font, FontStyle.Bold) : new Font(tsType.Font, FontStyle.Regular);
             foreach (ToolStripMenuItem itm in tsType.DropDownItems)
             {
-                if (itm.Checked)
-                {
-                    itm.Font = new Font(itm.Font, FontStyle.Bold);
-                }
-                else
-                {
-                    itm.Font = new Font(itm.Font, FontStyle.Regular);
-                }
+                itm.Font = itm.Checked ? new Font(itm.Font, FontStyle.Bold) : new Font(itm.Font, FontStyle.Regular);
             }
             RefreshData();
         }

@@ -44,7 +44,7 @@ namespace DBADashServiceConfig
                 {
                     SqlConnectionStringBuilder builder = new(value);
 
-                    if (builder.InitialCatalog != null && builder.InitialCatalog.Length > 0 && builder.InitialCatalog != "master")
+                    if (!string.IsNullOrEmpty(builder.InitialCatalog) && builder.InitialCatalog != "master")
                     {
                         db = builder.InitialCatalog;
                     }

@@ -13,7 +13,7 @@ namespace DBADashGUI.AgentJobs
 {
     public partial class AgentJobsControl : UserControl, ISetContext
     {
-        private List<Int32> InstanceIDs;
+        private List<int> InstanceIDs;
         private int? instance_id = null;
         private int instanceId;
         private Guid jobID;
@@ -132,7 +132,7 @@ namespace DBADashGUI.AgentJobs
             }
         }
 
-        private void ConfigureThresholds(Int32 InstanceID, Guid jobID)
+        private void ConfigureThresholds(int InstanceID, Guid jobID)
         {
             var frm = new AgentJobThresholdsConfig
             {
@@ -154,7 +154,7 @@ namespace DBADashGUI.AgentJobs
                 var row = (DataRowView)dgvJobs.Rows[e.RowIndex].DataBoundItem;
                 if (dgvJobs.Columns[e.ColumnIndex].HeaderText == "Configure")
                 {
-                    ConfigureThresholds((Int32)row["InstanceID"], (Guid)row["job_id"]);
+                    ConfigureThresholds((int)row["InstanceID"], (Guid)row["job_id"]);
                 }
                 else if (dgvJobs.Columns[e.ColumnIndex] == colHistory)
                 {
@@ -174,7 +174,7 @@ namespace DBADashGUI.AgentJobs
         {
             if (row["job_id"] != DBNull.Value)
             {
-                instanceId = (Int32)row["InstanceID"];
+                instanceId = (int)row["InstanceID"];
                 jobID = (Guid)row["job_id"];
                 tsJobName.Text = (string)row["Instance"] + " | " + (string)row["name"];
                 instance_id = null;
@@ -225,7 +225,7 @@ namespace DBADashGUI.AgentJobs
 
         private void DgvJobs_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvJobs.Rows[idx].DataBoundItem;
                 var jobStatus = (DBADashStatus.DBADashStatusEnum)row["JobStatus"];
@@ -245,14 +245,7 @@ namespace DBADashGUI.AgentJobs
                 dgvJobs.Rows[idx].Cells["FailCount7Days"].SetStatusColor(failCount7DaysStatus);
                 dgvJobs.Rows[idx].Cells["JobStepFails24Hrs"].SetStatusColor(stepFailCount24HrsStatus);
                 dgvJobs.Rows[idx].Cells["JobStepFails7Days"].SetStatusColor(stepFailCount7DaysStatus);
-                if ((string)row["ConfiguredLevel"] == "Job")
-                {
-                    dgvJobs.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvJobs.Font, FontStyle.Bold);
-                }
-                else
-                {
-                    dgvJobs.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvJobs.Font, FontStyle.Regular);
-                }
+                dgvJobs.Rows[idx].Cells["Configure"].Style.Font = (string)row["ConfiguredLevel"] == "Job" ? new Font(dgvJobs.Font, FontStyle.Bold) : new Font(dgvJobs.Font, FontStyle.Regular);
                 dgvJobs.Rows[idx].Cells["Acknowledge"].Value = jobStatus switch
                 {
                     DBADashStatus.DBADashStatusEnum.Critical or DBADashStatus.DBADashStatusEnum.Warning => "Acknowledge",
@@ -379,19 +372,20 @@ namespace DBADashGUI.AgentJobs
 
         private void AcknowledgeErrorsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DataView dt = (DataView)dgvJobs.DataSource;
+            var dt = (DataView)dgvJobs.DataSource;
             var warningsAndFailures = dt.Table.Select("JobStatus IN(1,2)");
             if (warningsAndFailures.Length == 0)
             {
                 MessageBox.Show("No warnings/failures to acknowledge", "Acknowledge Failures", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            else if (MessageBox.Show(string.Format("Are you sure you want to acknowledge {0} job failure(s)?", warningsAndFailures.Length), "Acknowledge Failures", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            else if (MessageBox.Show(
+                         $"Are you sure you want to acknowledge {warningsAndFailures.Length} job failure(s)?", "Acknowledge Failures", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 foreach (DataRow row in warningsAndFailures)
                 {
-                    Guid jobID = (Guid)row["job_id"];
-                    int instanceID = (int)row["InstanceID"];
-                    AcknowledgeJobErrors(instanceID, jobID, false);
+                    var id = (Guid)row["job_id"];
+                    var instanceID = (int)row["InstanceID"];
+                    AcknowledgeJobErrors(instanceID, id, false);
                 }
                 RefreshData();
             }
@@ -424,8 +418,7 @@ namespace DBADashGUI.AgentJobs
 
         private void DgvJobHistory_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            bool formatSteps = ShowSteps;
-            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvJobHistory.Rows[idx].DataBoundItem;
                 var statusString = row["run_status_description"] as string;
