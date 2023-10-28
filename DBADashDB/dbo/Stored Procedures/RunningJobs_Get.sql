@@ -1,5 +1,5 @@
 ﻿CREATE PROC RunningJobs_Get(
-	@InstanceIDs IDS READONLY,
+	@InstanceIDs IDs READONLY,
 	@MinimumDurationSec INT = 0 
 )
 AS
