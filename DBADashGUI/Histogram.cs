@@ -7,7 +7,7 @@ namespace DBADashGUI
 {
     internal class Histogram
     {
-        public static Bitmap GetHistogram(List<double> values, Int32 width, Int32 height, bool ColorPoints)
+        public static Bitmap GetHistogram(List<double> values, int width, int height, bool ColorPoints)
         {
             var chart = new Chart();
             var chartArea = new ChartArea();

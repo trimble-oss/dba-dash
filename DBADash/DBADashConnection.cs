@@ -75,7 +75,7 @@ namespace DBADash
             }
         }
 
-        public DBADashConnection MasterConnection() => new DBADashConnection(MasterConnectionString);
+        public DBADashConnection MasterConnection() => new(MasterConnectionString);
 
         public string EncryptedConnectionString
         {

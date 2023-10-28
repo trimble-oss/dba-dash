@@ -14,7 +14,7 @@ namespace DBADashGUI.Performance
         public DateTime FromDate;
         public DateTime ToDate;
         public string ElasticPoolName { get { return azureDBResourceStats1.ElasticPoolName; } set { azureDBResourceStats1.ElasticPoolName = value; } }
-        public Int32 InstanceID { get { return azureDBResourceStats1.InstanceID; } set { azureDBResourceStats1.InstanceID = value; } }
+        public int InstanceID { get { return azureDBResourceStats1.InstanceID; } set { azureDBResourceStats1.InstanceID = value; } }
 
         private void AzureDBResourceStatsView_Load(object sender, EventArgs e)
         {

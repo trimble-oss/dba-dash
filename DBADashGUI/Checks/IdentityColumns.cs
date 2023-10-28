@@ -146,7 +146,7 @@ namespace DBADashGUI.Checks
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
                 var SnapshotStatus = (DBADashStatus.DBADashStatusEnum)row["SnapshotStatus"];

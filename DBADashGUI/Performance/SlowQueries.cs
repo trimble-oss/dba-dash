@@ -407,7 +407,7 @@ namespace DBADashGUI
             }
         }
 
-        public Int32 pageSize = 1000;
+        public int pageSize = 1000;
 
         private void DgvSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -732,7 +732,7 @@ namespace DBADashGUI
             }
         }
 
-        private void LoadSlowQueriesDetail(Int32 metricFrom = -1, Int32 metricTo = -1, bool failed = false)
+        private void LoadSlowQueriesDetail(int metricFrom = -1, int metricTo = -1, bool failed = false)
         {
             long durationFrom = !IsCPU && metricFrom > 0 ? Convert.ToInt64(metricFrom) * 1000 : -1;
             long durationTo = !IsCPU && metricTo > 0 ? Convert.ToInt64(metricTo) * 1000 : long.MaxValue;
@@ -906,7 +906,7 @@ namespace DBADashGUI
             {
                 RefreshData();
             }
-            else if (!Char.IsDigit(e.KeyChar) && !Char.IsControl(e.KeyChar))
+            else if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar))
             {
                 e.Handled = true;
             }
@@ -918,7 +918,7 @@ namespace DBADashGUI
             {
                 RefreshData();
             }
-            else if (!Char.IsDigit(e.KeyChar) && !Char.IsControl(e.KeyChar) && !(e.KeyChar == ','))
+            else if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar) && !(e.KeyChar == ','))
             {
                 e.Handled = true;
             }
@@ -926,7 +926,7 @@ namespace DBADashGUI
 
         private void DgvSlow_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var r = dgvSlow.Rows[idx];
                 var status = Convert.ToString(r.Cells["Result"].Value) == "0 - OK"

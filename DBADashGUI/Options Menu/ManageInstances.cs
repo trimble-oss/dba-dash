@@ -37,7 +37,7 @@ namespace DBADashGUI
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var r = dgv.Rows[idx];
                 var row = (DataRowView)r.DataBoundItem;
@@ -78,7 +78,7 @@ namespace DBADashGUI
             if (e.RowIndex >= 0 && e.ColumnIndex == colDeleteRestore.Index)
             {
                 var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                var InstanceID = (Int32)row["InstanceID"];
+                var InstanceID = (int)row["InstanceID"];
                 var isActive = (bool)row["IsActive"];
                 isActive = !isActive;
                 try
@@ -155,7 +155,7 @@ namespace DBADashGUI
                 try
                 {
                     var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                    var InstanceID = (Int32)row["InstanceID"];
+                    var InstanceID = (int)row["InstanceID"];
                     var showInSummary = !(bool)row["IsHidden"];
 
                     UpdateShowInSummary(InstanceID, showInSummary);

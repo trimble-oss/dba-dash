@@ -20,8 +20,8 @@ namespace DBADashGUI
             InitializeComponent();
         }
 
-        private List<Int32> InstanceIDs;
-        private Int32 DatabaseID = -1;
+        private List<int> InstanceIDs;
+        private int DatabaseID = -1;
         private string DBName = "";
         private string InstanceGroupName = "";
         public bool CanNavigateBack => tsBack.Enabled;
@@ -64,7 +64,7 @@ namespace DBADashGUI
 
         private void RefreshDataLocal()
         {
-            tsContext.Text = InstanceGroupName + (String.IsNullOrEmpty(DBName) ? "" : " \\ " + DBName);
+            tsContext.Text = InstanceGroupName + (string.IsNullOrEmpty(DBName) ? "" : " \\ " + DBName);
             var dt = GetDBSpace();
             dgv.AutoGenerateColumns = false;
             dgv.DataSource = dt;
@@ -72,7 +72,7 @@ namespace DBADashGUI
             pieChart1.Series.Clear();
 
             static string labelPoint(ChartPoint chartPoint) =>
-            string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation);
+                $"{chartPoint.SeriesView.Title} ({chartPoint.Participation:P})";
             SeriesCollection sc = new();
             var other = (double)0;
             foreach (DataRow r in dt.Rows)

@@ -145,7 +145,7 @@ namespace DBADashGUI
         {
             if (cboObjectA.SelectedValue != null)
             {
-                long ObjectID = (Int64)cboObjectA.SelectedValue;
+                long ObjectID = (long)cboObjectA.SelectedValue;
                 GetSnapshots(cboDate_A, ObjectID);
             }
         }
@@ -162,7 +162,7 @@ namespace DBADashGUI
         {
             if (cboObjectB.SelectedValue != null)
             {
-                long ObjectID = (Int64)cboObjectB.SelectedValue;
+                long ObjectID = (long)cboObjectB.SelectedValue;
                 GetSnapshots(cboDate_B, ObjectID);
             }
         }

@@ -58,7 +58,7 @@ namespace DBADashGUI
             {
                 oldText = value;
                 diffViewer1.OldText = value;
-                copyLeftToolStripMenuItem.Enabled = value != null && value.Length > 0; ;
+                copyLeftToolStripMenuItem.Enabled = value is { Length: > 0 }; ;
             }
         }
 
@@ -71,7 +71,7 @@ namespace DBADashGUI
                 newText = value;
                 codeEditor1.Text = value;
                 diffViewer1.NewText = value;
-                copyRightToolStripMenuItem.Enabled = value != null && value.Length > 0;
+                copyRightToolStripMenuItem.Enabled = value is { Length: > 0 };
             }
         }
 
@@ -112,7 +112,7 @@ namespace DBADashGUI
             diffViewer1 = new DiffPlex.Wpf.Controls.DiffViewer();
             elDiffViewer.Child = diffViewer1;
             diffViewer1.Foreground = new SolidColorBrush(theme.ForegroundColor.ToMediaColor());
-            diffViewer1.Background= new SolidColorBrush(theme.BackgroundColor.ToMediaColor());
+            diffViewer1.Background = new SolidColorBrush(theme.BackgroundColor.ToMediaColor());
             diffViewer1.NewText = newText;
             diffViewer1.OldText = oldText;
             codeEditor1.Text = newText;

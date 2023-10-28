@@ -12,8 +12,8 @@ namespace DBADashGUI.DBFiles
             this.ApplyTheme();
         }
 
-        public Int32 DatabaseID { get => dbSpaceHistory1.DatabaseID; set => dbSpaceHistory1.DatabaseID = value; }
-        public Int32? DataSpaceID { get => dbSpaceHistory1.DataSpaceID; set => dbSpaceHistory1.DataSpaceID = value; }
+        public int DatabaseID { get => dbSpaceHistory1.DatabaseID; set => dbSpaceHistory1.DatabaseID = value; }
+        public int? DataSpaceID { get => dbSpaceHistory1.DataSpaceID; set => dbSpaceHistory1.DataSpaceID = value; }
         public string InstanceGroupName { get => dbSpaceHistory1.InstanceGroupName; set => dbSpaceHistory1.InstanceGroupName = value; }
         public string DBName { get => dbSpaceHistory1.DBName; set => dbSpaceHistory1.DBName = value; }
         public string FileName { get => dbSpaceHistory1.FileName; set => dbSpaceHistory1.FileName = value; }
@@ -23,16 +23,15 @@ namespace DBADashGUI.DBFiles
         private void DBSpaceHistoryView_Load(object sender, EventArgs e)
         {
             this.Text = InstanceGroupName;
-            if (DBName != null && DBName.Length > 0)
+            if (!string.IsNullOrEmpty(DBName))
             {
                 this.Text += " | " + DBName;
             }
-            if (FileName != null && FileName.Length > 0)
+            if (!string.IsNullOrEmpty(FileName))
             {
                 this.Text += " | " + FileName;
             }
             dbSpaceHistory1.RefreshData();
-
         }
     }
 }

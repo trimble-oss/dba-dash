@@ -12,8 +12,8 @@ namespace DBADashGUI.LogShipping
             this.ApplyTheme();
         }
 
-        public Int32 InstanceID;
-        public Int32 DatabaseID;
+        public int InstanceID;
+        public int DatabaseID;
 
         private void ChkLRLatency_CheckedChanged(object sender, EventArgs e)
         {
@@ -51,13 +51,13 @@ namespace DBADashGUI.LogShipping
                 };
                 if (chkLRLatency.Checked & !chkLRInherit.Checked)
                 {
-                    threshold.LatencyCriticalThreshold = (Int32?)numLRLatencyCritical.Value;
-                    threshold.LatencyWarningThreshold = (Int32?)numLRLatencyWarning.Value;
+                    threshold.LatencyCriticalThreshold = (int?)numLRLatencyCritical.Value;
+                    threshold.LatencyWarningThreshold = (int?)numLRLatencyWarning.Value;
                 }
                 if (chkLRTimeSinceLast.Checked & !chkLRInherit.Checked)
                 {
-                    threshold.TimeSinceLastCriticalThreshold = (Int32?)numLRTimeSinceLastCritical.Value;
-                    threshold.TimeSinceLastWarningThreshold = (Int32?)numLRTimeSinceLastWarning.Value;
+                    threshold.TimeSinceLastCriticalThreshold = (int?)numLRTimeSinceLastCritical.Value;
+                    threshold.TimeSinceLastWarningThreshold = (int?)numLRTimeSinceLastWarning.Value;
                 }
                 return threshold;
             }
@@ -69,14 +69,14 @@ namespace DBADashGUI.LogShipping
                 numExcludePeriod.Value = value.NewDatabaseExcludePeriod;
                 if (chkLRTimeSinceLast.Checked)
                 {
-                    numLRTimeSinceLastCritical.Value = (Int32)value.TimeSinceLastCriticalThreshold;
-                    numLRTimeSinceLastWarning.Value = (Int32)value.TimeSinceLastWarningThreshold;
+                    numLRTimeSinceLastCritical.Value = (int)value.TimeSinceLastCriticalThreshold;
+                    numLRTimeSinceLastWarning.Value = (int)value.TimeSinceLastWarningThreshold;
                 }
                 chkLRLatency.Checked = value.LatencyCriticalThreshold != null && value.LatencyWarningThreshold != null;
                 if (chkLRLatency.Checked)
                 {
-                    numLRLatencyCritical.Value = (Int32)value.LatencyCriticalThreshold;
-                    numLRLatencyWarning.Value = (Int32)value.LatencyWarningThreshold;
+                    numLRLatencyCritical.Value = (int)value.LatencyCriticalThreshold;
+                    numLRLatencyWarning.Value = (int)value.LatencyWarningThreshold;
                 }
                 if (InstanceID == -1)
                 {

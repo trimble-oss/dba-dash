@@ -86,8 +86,8 @@ namespace DBADashGUI
             pnlThresholds.Enabled = true;
             lblDriveCritical.Text = "GB";
             lblDriveWarning.Text = "GB";
-            numDriveCritical.Maximum = Int32.MaxValue;
-            numDriveWarning.Maximum = Int32.MaxValue;
+            numDriveCritical.Maximum = int.MaxValue;
+            numDriveWarning.Maximum = int.MaxValue;
         }
 
         private void OptPercent_CheckedChanged(object sender, EventArgs e)

@@ -36,8 +36,8 @@ namespace DBADashGUI
             var dt = CommonData.GetInstances(default, default, false);
             foreach (DataRow row in dt.Rows)
             {
-                var a = new InstanceItem() { Instance = (string)row["InstanceGroupName"], InstanceID = (Int32)row["InstanceID"] };
-                var b = new InstanceItem() { Instance = (string)row["InstanceGroupName"], InstanceID = (Int32)row["InstanceID"] };
+                var a = new InstanceItem() { Instance = (string)row["InstanceGroupName"], InstanceID = (int)row["InstanceID"] };
+                var b = new InstanceItem() { Instance = (string)row["InstanceGroupName"], InstanceID = (int)row["InstanceID"] };
                 cboA.Items.Add(a);
                 cboB.Items.Add(b);
                 if (InstanceID_A == a.InstanceID)

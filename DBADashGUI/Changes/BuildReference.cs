@@ -75,7 +75,7 @@ namespace DBADashGUI.Changes
             dv.Sort = "Major DESC,Minor DESC,Build DESC,Revision DESC";
         }
 
-        public DataTable GetBuildReference()
+        public static DataTable GetBuildReference()
         {
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("dbo.BuildReference_Get", cn) { CommandType = CommandType.StoredProcedure };
@@ -113,7 +113,7 @@ namespace DBADashGUI.Changes
             SetRowFilter();
         }
 
-        private void latestToolStripMenuItem_Click(object sender, EventArgs e)
+        private void LatestToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SetRowFilter();
         }

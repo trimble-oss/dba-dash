@@ -10,7 +10,7 @@ namespace DBADashGUI.Performance
 {
     internal class CartesianChartWithDataTable : LiveCharts.WinForms.CartesianChart
     {
-        public Int32 DefaultPointSize = 10;
+        public int DefaultPointSize = 10;
         private double _defaultLineSmoothness = 0.5;
 
         public double DefaultLineSmoothness
@@ -57,7 +57,7 @@ namespace DBADashGUI.Performance
                 columns[s].Points = new DateTimePoint[cnt];
             }
 
-            Int32 i = 0;
+            int i = 0;
             foreach (DataRow r in dt.Rows)
             {
                 foreach (string s in columns.Keys)

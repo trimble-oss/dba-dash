@@ -24,7 +24,7 @@ namespace DBADashGUI
             InitializeComponent();
         }
 
-        private List<Int32> InstanceIDs;
+        private List<int> InstanceIDs;
 
         private readonly List<DataGridViewColumn> ColumnsList = new()
         {
@@ -234,8 +234,7 @@ namespace DBADashGUI
             {
                 case "colKBList":
                     {
-                        var KBs = dgvVersion.Rows[e.RowIndex].Cells[e.ColumnIndex].Value as string;
-                        if (KBs == null) return;
+                        if (dgvVersion.Rows[e.RowIndex].Cells[e.ColumnIndex].Value is not string KBs) return;
                         foreach (var KB in KBs.Split(","))
                         {
                             CommonShared.OpenURL("https://support.microsoft.com/help/" + KB.Trim());
@@ -245,8 +244,7 @@ namespace DBADashGUI
                     }
                 case "colProductUpdateReference":
                     {
-                        var KB = dgvVersion.Rows[e.RowIndex].Cells[e.ColumnIndex].Value as string;
-                        if (KB == null) return;
+                        if (dgvVersion.Rows[e.RowIndex].Cells[e.ColumnIndex].Value is not string KB) return;
                         CommonShared.OpenURL("https://support.microsoft.com/help/" + KB.Replace("KB", "").Trim());
                         break;
                     }
@@ -305,10 +303,10 @@ namespace DBADashGUI
 
         private void SetThresholdsMenuText()
         {
-            sPBehindCriticalToolStripMenuItem.Text = $"SP Behind Critical ({Config.SPBehindCriticalThreshold.ToString()})";
-            sPBehindWarningToolStripMenuItem.Text = $"SP Behind Warning ({Config.SPBehindWarningThreshold.ToString()})";
-            cUBehindCriticalToolStripMenuItem.Text = $"CU Behind Critical ({Config.CUBehindCriticalThreshold.ToString()})";
-            cUBehindWarningToolStripMenuItem.Text = $"CU Behind Warning ({Config.CUBehindWarningThreshold.ToString()})";
+            sPBehindCriticalToolStripMenuItem.Text = $"SP Behind Critical ({Config.SPBehindCriticalThreshold})";
+            sPBehindWarningToolStripMenuItem.Text = $"SP Behind Warning ({Config.SPBehindWarningThreshold})";
+            cUBehindCriticalToolStripMenuItem.Text = $"CU Behind Critical ({Config.CUBehindCriticalThreshold})";
+            cUBehindWarningToolStripMenuItem.Text = $"CU Behind Warning ({Config.CUBehindWarningThreshold})";
             daysUntilMainstreamSupportEndsCriticalToolStripMenuItem.Text = $"Days Until Mainstream Support Ends Critical ({Config.DaysUntilMainstreamSupportEndsCriticalThreshold})";
             daysUntilMainstreamSupportEndsWarningToolStripMenuItem.Text = $"Days Until Mainstream Support Ends Warning ({Config.DaysUntilMainstreamSupportEndsWarningThreshold})";
             daysUntilSupportEndsCriticalToolStripMenuItem.Text = $"Days Until Support Ends Critical ({Config.DaysUntilSupportEndsCriticalThreshold})";

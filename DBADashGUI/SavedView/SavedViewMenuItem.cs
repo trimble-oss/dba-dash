@@ -151,13 +151,13 @@ namespace DBADashGUI
             }
             SetText("View");
             Font = new Font(this.Font, FontStyle.Regular);
-            _selectedSavedView = String.Empty;
+            _selectedSavedView = string.Empty;
             connectionGUID = Common.ConnectionGUID; // Detect if we have changed connection to the repository DB for LoadItems
         }
 
         public void ClearSelectedItem()
         {
-            SelectItem(String.Empty, false);
+            SelectItem(string.Empty, false);
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace DBADashGUI
                 mnu.Checked = isSelected;
                 mnu.Font = isSelected ? new Font(mnu.Font, FontStyle.Bold) : new Font(mnu.Font, FontStyle.Regular);
             }
-            if (selectedItem != noneText && selectedItem != String.Empty)
+            if (selectedItem != noneText && selectedItem != string.Empty)
             {
                 SetText("View: " + selectedItem);
                 Font = new Font(this.Font, FontStyle.Bold);
@@ -199,7 +199,7 @@ namespace DBADashGUI
             string serializedObject;
             if (isGlobal)
             {
-                serializedObject = mnu.Text == noneText ? String.Empty : _globalSavedViews[mnu.Text];
+                serializedObject = mnu.Text == noneText ? string.Empty : _globalSavedViews[mnu.Text];
             }
             else
             {

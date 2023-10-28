@@ -29,7 +29,7 @@ namespace DBADashServiceConfig
                 {
                     string folder = txtFolder.Text.Trim(new char[] { ' ', '/' });
 
-                    return string.Format("https://{0}.s3.amazonaws.com/{1}", cboBuckets.Text, folder);
+                    return $"https://{cboBuckets.Text}.s3.amazonaws.com/{folder}";
                 }
                 else
                 {

@@ -51,11 +51,9 @@ namespace DBADashGUI
             Common.TryDeleteTempFiles();
         }
 
-        private readonly string jsonPath = Common.JsonConfigPath;
-
-        private Int64 currentObjectID;
-        private Int32 currentPage = 1;
-        private Int32 currentPageSize = 100;
+        private long currentObjectID;
+        private int currentPage = 1;
+        private int currentPageSize = 100;
         private readonly DiffControl diffSchemaSnapshot = new();
         private bool suppressLoadTab = false;
 
@@ -84,7 +82,7 @@ namespace DBADashGUI
 
         private bool IsAzureOnly;
         private bool ShowCounts = false;
-        private string GroupByTag = String.Empty;
+        private string GroupByTag = string.Empty;
         private readonly List<TreeContext> VisitedNodes = new();
         private bool suppressSaveContext = false;
 
@@ -107,7 +105,7 @@ namespace DBADashGUI
         {
             get
             {
-                string searchString = String.Empty;
+                string searchString = string.Empty;
                 if (txtSearch.Text.Trim().Length > 0)
                 {
                     searchString = "%" + txtSearch.Text.Trim() + "%";
@@ -300,9 +298,7 @@ namespace DBADashGUI
             if (compare < 0)
             {
                 var promptUpgrade = MessageBox.Show(
-                    String.Format(
-                        "The version of this GUI app ({0}.{1}) is OLDER than the repository database. Please upgrade to version {2}.{3}{4}Would you like to run the upgrade script now?",
-                        appVersion.Major, appVersion.Minor, dbVersion.Major, dbVersion.Minor, Environment.NewLine),
+                    $"The version of this GUI app ({appVersion.Major}.{appVersion.Minor}) is OLDER than the repository database. Please upgrade to version {dbVersion.Major}.{dbVersion.Minor}{Environment.NewLine}Would you like to run the upgrade script now?",
                     "Upgrade GUI", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (promptUpgrade == DialogResult.Yes)
                 {
@@ -320,21 +316,17 @@ namespace DBADashGUI
             else if (compare > 0)
             {
                 MessageBox.Show(
-                    String.Format(
-                        "The version of this GUI app ({0}.{1}) is NEWER than the repository database ({2}.{3}). You might experience issues using the GUI.  Please upgrade the repository database.",
-                        appVersion.Major, appVersion.Minor, dbVersion.Major, dbVersion.Minor), "Upgrade Agent",
+                    $"The version of this GUI app ({appVersion.Major}.{appVersion.Minor}) is NEWER than the repository database ({dbVersion.Major}.{dbVersion.Minor}). You might experience issues using the GUI.  Please upgrade the repository database.", "Upgrade Agent",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
         private void GetCommandLineTags()
         {
-            if (commandLine.TagFilters != null && commandLine.TagFilters.Length > 0)
+            if (string.IsNullOrEmpty(commandLine.TagFilters)) return;
+            foreach (var t in DBADashTag.GetTags(commandLine.TagFilters))
             {
-                foreach (var t in DBADashTag.GetTags(commandLine.TagFilters))
-                {
-                    commandLineTags.Add(t.TagID);
-                }
+                commandLineTags.Add(t.TagID);
             }
         }
 
@@ -421,7 +413,7 @@ namespace DBADashGUI
 
             SQLTreeItem parentNode = root;
 
-            var tags = String.Join(",", SelectedTags());
+            var tags = string.Join(",", SelectedTags());
 
             CommonData.UpdateInstancesList(tagIDs: tags, searchString: SearchString, groupByTag: GroupByTag);
 
@@ -431,7 +423,7 @@ namespace DBADashGUI
             {
                 string instance = (string)row["Instance"];
                 string displayName = (string)row["InstanceDisplayName"];
-                Int32 instanceID = (Int32)row["InstanceID"];
+                int instanceID = (int)row["InstanceID"];
                 bool showInSummary = (bool)row["ShowInSummary"];
                 string tagGroup = Convert.ToString(row["TagGroup"]);
 
@@ -472,7 +464,7 @@ namespace DBADashGUI
 
                     var azureDBNode = new SQLTreeItem(db, SQLTreeItem.TreeType.AzureDatabase)
                     {
-                        DatabaseID = (Int32)row["AzureDatabaseID"],
+                        DatabaseID = (int)row["AzureDatabaseID"],
                         InstanceID = instanceID,
                         DatabaseName = db
                     };
@@ -555,7 +547,7 @@ namespace DBADashGUI
             instanceNode.AddReportsFolder(customReports.InstanceLevelReports);
         }
 
-        private void ExpandStorage(SQLTreeItem storage)
+        private static void ExpandStorage(SQLTreeItem storage)
         {
             var drives = CommonData.GetDrives(storage.InstanceIDs, false, true, true, true, true, true, null);
             storage.Nodes.Clear();
@@ -575,7 +567,7 @@ namespace DBADashGUI
                                     { DriveName = driveLetter, ForeColor = color }).Cast<TreeNode>().ToArray());
         }
 
-        private void ExpandDatabases(SQLTreeItem dbFolder)
+        private static void ExpandDatabases(SQLTreeItem dbFolder)
         {
             List<TreeNode> nodesToAdd = new();
             var systemNode = new SQLTreeItem("System Databases", SQLTreeItem.TreeType.Folder);
@@ -597,13 +589,13 @@ namespace DBADashGUI
 
                         var n = new SQLTreeItem(nodeName, SQLTreeItem.TreeType.Database)
                         {
-                            DatabaseID = (Int32)rdr["DatabaseID"],
-                            InstanceID = (Int32)rdr["InstanceID"],
+                            DatabaseID = (int)rdr["DatabaseID"],
+                            InstanceID = (int)rdr["InstanceID"],
                             DatabaseName = db
                         };
                         if (rdr["ObjectID"] != DBNull.Value)
                         {
-                            n.ObjectID = (Int64)rdr["ObjectID"];
+                            n.ObjectID = (long)rdr["ObjectID"];
                         }
 
                         n.AddDummyNode();
@@ -630,7 +622,7 @@ namespace DBADashGUI
                 string type = ((string)r[1]).Trim();
                 var objN = new SQLTreeItem((string)r[3], (string)r[2], type)
                 {
-                    ObjectID = (Int64)r[0]
+                    ObjectID = (long)r[0]
                 };
                 n.Nodes.Add(objN);
             }
@@ -709,14 +701,9 @@ namespace DBADashGUI
             }
             else if (n.Type == SQLTreeItem.TreeType.AgentJobs)
             {
-                if (parent.Type == SQLTreeItem.TreeType.DBADashRoot)
-                {
-                    allowedTabs.AddRange(new TabPage[] { tabJobs, tabRunningJobs });
-                }
-                else
-                {
-                    allowedTabs.AddRange(new TabPage[] { tabJobs, tabJobStats, tabJobTimeline, tabRunningJobs });
-                }
+                allowedTabs.AddRange(parent.Type == SQLTreeItem.TreeType.DBADashRoot
+                    ? new TabPage[] { tabJobs, tabRunningJobs }
+                    : new TabPage[] { tabJobs, tabJobStats, tabJobTimeline, tabRunningJobs });
             }
             else if (n.Type == SQLTreeItem.TreeType.AgentJob)
             {
@@ -888,7 +875,7 @@ namespace DBADashGUI
 
         #region SchemaSnapshots
 
-        private void LoadDDL(Int64 DDLID, Int64 DDLIDOld)
+        private void LoadDDL(long DDLID, long DDLIDOld)
         {
             string newText = Common.DDL(DDLID);
             string oldText = Common.DDL(DDLIDOld);
@@ -896,11 +883,11 @@ namespace DBADashGUI
             diffSchemaSnapshot.NewText = newText;
         }
 
-        private void GetHistory(Int64 ObjectID, Int32 PageNum = 1)
+        private void GetHistory(long ObjectID, int PageNum = 1)
         {
             diffSchemaSnapshot.OldText = "";
             diffSchemaSnapshot.NewText = "";
-            currentPageSize = Int32.Parse(tsPageSize.Text);
+            currentPageSize = int.Parse(tsPageSize.Text);
             DataTable dt = CommonData.GetDDLHistoryForObject(ObjectID, PageNum, currentPageSize);
 
             gvHistory.AutoGenerateColumns = false;
@@ -918,15 +905,15 @@ namespace DBADashGUI
             if (gvHistory.SelectedRows.Count == 1)
             {
                 var row = (DataRowView)gvHistory.SelectedRows[0].DataBoundItem;
-                Int64 ddlID;
-                Int64 ddlIDOld;
+                long ddlID;
+                long ddlIDOld;
                 if (row["DDLID"] == DBNull.Value)
                 {
                     ddlID = -1;
                 }
                 else
                 {
-                    ddlID = (Int64)row["DDLID"];
+                    ddlID = (long)row["DDLID"];
                 }
 
                 if (row["DDLIDOld"] == DBNull.Value)
@@ -935,7 +922,7 @@ namespace DBADashGUI
                 }
                 else
                 {
-                    ddlIDOld = (Int64)row["DDLIDOld"];
+                    ddlIDOld = (long)row["DDLIDOld"];
                 }
 
                 LoadDDL(ddlID, ddlIDOld);
@@ -954,7 +941,7 @@ namespace DBADashGUI
 
         private void TsPageSize_Validated(object sender, EventArgs e)
         {
-            if (Int32.Parse(tsPageSize.Text) != currentPageSize)
+            if (int.Parse(tsPageSize.Text) != currentPageSize)
             {
                 GetHistory(currentObjectID, 1);
             }
@@ -979,7 +966,7 @@ namespace DBADashGUI
         {
             mnuTags.DropDownItems.Clear();
 
-            string currentTag = String.Empty;
+            string currentTag = string.Empty;
             ToolStripMenuItem mTagName = new();
             ToolStripMenuItem mSystemTags = new("System Tags");
             mSystemTags.Font = new Font(mSystemTags.Font, FontStyle.Italic);
@@ -1172,9 +1159,9 @@ namespace DBADashGUI
             if (isClearTags) return;
             AddInstanes();
             var mnuTag = (ToolStripMenuItem)sender;
-            while (mnuTag.OwnerItem is not null and ToolStripMenuItem)
+            while (mnuTag.OwnerItem is ToolStripMenuItem item)
             {
-                mnuTag = (ToolStripMenuItem)mnuTag.OwnerItem;
+                mnuTag = item;
             }
             SetCheckedItemsBold(mnuTags);
         }
@@ -1265,7 +1252,7 @@ namespace DBADashGUI
                 try
                 {
                     var parent = nInstance.Parent;
-                    if (parent != null && !parent.IsExpanded)
+                    if (parent is { IsExpanded: false })
                     {
                         parent.Expand();
                     }
@@ -1305,7 +1292,7 @@ namespace DBADashGUI
                         tv1.SelectedNode = nInstance.Nodes[1];
                     }
 
-                    if (e.Tab != null && e.Tab.Length > 0)
+                    if (e.Tab is { Length: > 0 })
                     {
                         if (tabs.TabPages.ContainsKey(e.Tab))
                         {
@@ -1344,14 +1331,7 @@ namespace DBADashGUI
 
         private void CheckTime(string tag)
         {
-            if (tag != "60")
-            {
-                tsTime.Font = new Font(tsTime.Font, FontStyle.Bold);
-            }
-            else
-            {
-                tsTime.Font = new Font(tsTime.Font, FontStyle.Regular);
-            }
+            tsTime.Font = tag != "60" ? new Font(tsTime.Font, FontStyle.Bold) : new Font(tsTime.Font, FontStyle.Regular);
 
             foreach (var itm in tsTime.DropDownItems)
             {
@@ -1411,7 +1391,7 @@ namespace DBADashGUI
             ManageInstancesForm?.Close();
             ManageInstancesForm = new ManageInstances
             {
-                Tags = String.Join(",", SelectedTags())
+                Tags = string.Join(",", SelectedTags())
             };
             ManageInstancesForm.FormClosing += delegate
             {
@@ -1511,7 +1491,7 @@ namespace DBADashGUI
             ConfigureDisplayNameForm?.Close();
             ConfigureDisplayNameForm = new ConfigureDisplayName()
             {
-                TagIDs = String.Join(",", SelectedTags()),
+                TagIDs = string.Join(",", SelectedTags()),
                 SearchString = SearchString
             };
             ConfigureDisplayNameForm.FormClosing += delegate
@@ -1902,7 +1882,7 @@ namespace DBADashGUI
             await AddConnection();
         }
 
-        private string GetNewConnectionString()
+        private static string GetNewConnectionString()
         {
             string connectionString = Common.ConnectionString;
             if (string.IsNullOrEmpty(connectionString))
@@ -1920,7 +1900,6 @@ namespace DBADashGUI
 
         private async Task AddConnection()
         {
-            var oldConnection = Common.RepositoryDBConnection;
             using var frm = new DBConnection() { ConnectionString = GetNewConnectionString() };
             frm.ShowDialog();
             if (frm.DialogResult != DialogResult.OK) return;

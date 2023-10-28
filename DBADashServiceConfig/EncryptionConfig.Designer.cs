@@ -49,7 +49,7 @@
             this.lnkGenerate.TabIndex = 12;
             this.lnkGenerate.TabStop = true;
             this.lnkGenerate.Text = "Generate";
-            this.lnkGenerate.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkGenerate_LinkClicked);
+            this.lnkGenerate.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkGenerate_LinkClicked);
             // 
             // lnkShowHide
             // 
@@ -61,7 +61,7 @@
             this.lnkShowHide.TabIndex = 10;
             this.lnkShowHide.TabStop = true;
             this.lnkShowHide.Text = "Show";
-            this.lnkShowHide.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkShowHide_LinkClicked);
+            this.lnkShowHide.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkShowHide_LinkClicked);
             // 
             // bttnUpdate
             // 
@@ -71,7 +71,7 @@
             this.bttnUpdate.TabIndex = 9;
             this.bttnUpdate.Text = "&Update";
             this.bttnUpdate.UseVisualStyleBackColor = true;
-            this.bttnUpdate.Click += new System.EventHandler(this.bttnUpdate_Click);
+            this.bttnUpdate.Click += new System.EventHandler(this.BttnUpdate_Click);
             // 
             // label19
             // 
@@ -113,7 +113,7 @@
             this.chkEncrypt.TabIndex = 14;
             this.chkEncrypt.Text = "Encrypt";
             this.chkEncrypt.UseVisualStyleBackColor = true;
-            this.chkEncrypt.CheckedChanged += new System.EventHandler(this.chkEncrypt_CheckedChanged);
+            this.chkEncrypt.CheckedChanged += new System.EventHandler(this.ChkEncrypt_CheckedChanged);
             // 
             // bttnCancel
             // 
@@ -123,7 +123,7 @@
             this.bttnCancel.TabIndex = 15;
             this.bttnCancel.Text = "&Cancel";
             this.bttnCancel.UseVisualStyleBackColor = true;
-            this.bttnCancel.Click += new System.EventHandler(this.bttnCancel_Click);
+            this.bttnCancel.Click += new System.EventHandler(this.BttnCancel_Click);
             // 
             // EncryptionConfig
             // 

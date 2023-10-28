@@ -17,7 +17,7 @@ namespace DBADashGUI.CustomReports
         public event EventHandler ReportNameChanged;
 
         private ContextMenuStrip columnContextMenu;
-        private readonly ToolStripMenuItem convertLocalMenuItem = new ToolStripMenuItem("Convert to local timezone") { Checked = true, CheckOnClick = true };
+        private readonly ToolStripMenuItem convertLocalMenuItem = new("Convert to local timezone") { Checked = true, CheckOnClick = true };
         private int clickedColumnIndex = -1;
         private DataSet reportDS;
         private int selectedTableIndex = 0;

@@ -14,11 +14,11 @@ namespace DBADashGUI.Performance
 
         private DBADashContext context;
 
-        private Int64 ObjectID;
+        private long ObjectID;
 
         private int InstanceID { get => context.InstanceID; }
 
-        private Int32 DatabaseID { get => context.DatabaseID; }
+        private int DatabaseID { get => context.DatabaseID; }
 
         private bool objectMode;
 

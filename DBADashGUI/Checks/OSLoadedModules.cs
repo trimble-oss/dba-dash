@@ -119,7 +119,7 @@ namespace DBADashGUI.Checks
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
                 var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row["Status"] == DBNull.Value ? 3 : row["Status"]);

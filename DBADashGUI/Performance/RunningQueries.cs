@@ -1,4 +1,7 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADashGUI.Theme;
+using Humanizer;
+using Humanizer.Localisation;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -7,10 +10,6 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
-using Humanizer;
-using Humanizer.Localisation;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace DBADashGUI.Performance
 {
@@ -34,7 +33,7 @@ namespace DBADashGUI.Performance
         private int runningJobCount;
         private bool hasWaitResource;
         private long blockedWait;
-        private string idleThresholdInfo => $"Red = Sleeping session with an open transaction that has been idle for longer than {TimeSpan.FromSeconds(Config.IdleCriticalThresholdForSleepingSessionWithOpenTran).Humanize(maxUnit: TimeUnit.Year, precision: 3)}.\nYellow=Sleeping session with an open transaction that has been idle for longer than {TimeSpan.FromSeconds(Config.IdleWarningThresholdForSleepingSessionWithOpenTran).Humanize(maxUnit: TimeUnit.Year, precision: 3)}.";
+        private static string IdleThresholdInfo => $"Red = Sleeping session with an open transaction that has been idle for longer than {TimeSpan.FromSeconds(Config.IdleCriticalThresholdForSleepingSessionWithOpenTran).Humanize(maxUnit: TimeUnit.Year, precision: 3)}.\nYellow=Sleeping session with an open transaction that has been idle for longer than {TimeSpan.FromSeconds(Config.IdleWarningThresholdForSleepingSessionWithOpenTran).Humanize(maxUnit: TimeUnit.Year, precision: 3)}.";
 
         private DataGridViewColumn[] RunningQueryColumns =>
     new DataGridViewColumn[] {
@@ -59,7 +58,7 @@ namespace DBADashGUI.Performance
                 new DataGridViewTextBoxColumn() { HeaderText = "Granted Query Memory (Kb)", DataPropertyName = "granted_query_memory_kb", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
                 new DataGridViewTextBoxColumn() { HeaderText = "Command", DataPropertyName = "Command", Name = "colCommand", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
                 new DataGridViewTextBoxColumn() { HeaderText = "Status", DataPropertyName = "Status", Name = "colStatus", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, ToolTipText = "Running - Query is currently running and consuming CPU cycles.\nRunnable - Ready to run, waiting for time on the CPU\nSuspended - Waiting on a resource.  e.g IO, lock\nPending - Waiting for a worker thread to become available.\nRollback - Transaction rollback is in progress.\nSleeping - No work to perform, waiting for next query from client application.\n\nRed = Sleeping session that is causing blocking."},
-                new DataGridViewTextBoxColumn() { Name="colIdleTime", HeaderText = "Idle Time", DataPropertyName = "sleeping_session_idle_time", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, ToolTipText = $"Sleeping session idle time.  \nA sleeping session is waiting for work from the client application.  \nThis can be a problem if the session is sleeping for a long time and has an open transaction. \ne.g. Blocking or log growth due to the open transaction preventing log truncation.\nApplication code changes are required to fix sleeping sessions with open transactions.\n\n{idleThresholdInfo}", Visible = idleCount>0},
+                new DataGridViewTextBoxColumn() { Name="colIdleTime", HeaderText = "Idle Time", DataPropertyName = "sleeping_session_idle_time", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, ToolTipText = $"Sleeping session idle time.  \nA sleeping session is waiting for work from the client application.  \nThis can be a problem if the session is sleeping for a long time and has an open transaction. \ne.g. Blocking or log growth due to the open transaction preventing log truncation.\nApplication code changes are required to fix sleeping sessions with open transactions.\n\n{IdleThresholdInfo}", Visible = idleCount>0},
                 new DataGridViewTextBoxColumn() { Name="colIdleTimeSec", HeaderText = "Idle Time (sec)", DataPropertyName = "sleeping_session_idle_time_sec", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, ToolTipText = "Sleeping session idle time (seconds)", Visible = false},
                 new DataGridViewTextBoxColumn() { HeaderText = "Wait Time (ms)", DataPropertyName = "wait_time", Name = "colWaitTime", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
                 new DataGridViewTextBoxColumn() { HeaderText = "Wait Type", DataPropertyName = "wait_type", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
@@ -259,7 +258,7 @@ namespace DBADashGUI.Performance
                 new DataGridViewTextBoxColumn() { HeaderText = "TempDB Wait Count", DataPropertyName = "TempDBWaitCount", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                 new DataGridViewTextBoxColumn() { HeaderText = "TempDB Wait Time", DataPropertyName = "TempDBWaitTime", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                 new DataGridViewTextBoxColumn() { HeaderText = "Sleeping Sessions Count", DataPropertyName = "SleepingSessionsCount", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "Count of sleeping sessions with open transactions. Sleeping sessions are waiting for input from the client application." },
-                new DataGridViewTextBoxColumn() { Name = "colMaxIdleTime", HeaderText = "Max Idle Time", DataPropertyName = "MaxIdleTime", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = $"Max idle time for sleeping sessions with open transactions.\n\n{idleThresholdInfo}" }
+                new DataGridViewTextBoxColumn() { Name = "colMaxIdleTime", HeaderText = "Max Idle Time", DataPropertyName = "MaxIdleTime", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = $"Max idle time for sleeping sessions with open transactions.\n\n{IdleThresholdInfo}" }
             );
             dgv.DataSource = new DataView(dt);
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
@@ -552,7 +551,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void DecipherWaitResource(DataRowView row)
+        private static void DecipherWaitResource(DataRowView row)
         {
             var waitResource = Convert.ToString(row["wait_resource"]);
             var instance = Convert.ToString(row["InstanceDisplayName"]);

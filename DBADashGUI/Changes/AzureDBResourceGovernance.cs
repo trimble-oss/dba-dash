@@ -15,7 +15,7 @@ namespace DBADashGUI.Changes
             InitializeComponent();
         }
 
-        public List<Int32> InstanceIDs;
+        public List<int> InstanceIDs;
 
         public void SetContext(DBADashContext context)
         {
@@ -39,7 +39,7 @@ namespace DBADashGUI.Changes
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-        public static DataTable GetAzureDBResourceGovernance(List<Int32> instanceIDs)
+        public static DataTable GetAzureDBResourceGovernance(List<int> instanceIDs)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.AzureDBResourceGovernance_Get", cn) { CommandType = CommandType.StoredProcedure })

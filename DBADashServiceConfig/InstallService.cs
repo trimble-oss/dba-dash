@@ -56,7 +56,8 @@ namespace DBADashServiceConfig
 
                     if (String.IsNullOrEmpty(domain) && !creds.UserName.StartsWith(".\\"))
                     {
-                        var input = MessageBox.Show(String.Format("Warning domain hasn't been specified.  Is this a local user account?\n\nSelect Yes to use {0} (local) \nSelect No to use {1} (domain)", Environment.MachineName, Environment.UserDomainName), "", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                        var input = MessageBox.Show(
+                            $"Warning domain hasn't been specified.  Is this a local user account?\n\nSelect Yes to use {Environment.MachineName} (local) \nSelect No to use {Environment.UserDomainName} (domain)", "", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
                         if (input == DialogResult.Yes)
                         {
                             domain = Environment.MachineName;

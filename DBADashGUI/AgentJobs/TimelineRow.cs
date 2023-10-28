@@ -49,7 +49,7 @@ namespace DBADashGUI.AgentJobs
         /// <summary>
         /// Get a HTML formatted tooltip for the job execution
         /// </summary>
-        public string ToolTip => String.Format("<span class=\"{5}\"><h1>{0}</h1>Step {9}: {6}<br/>Start: {1}<br/>End: {2}<br/>{8}: {3}<br/>Executions: {7}<br/>Status: {4}</span>",
+        public string ToolTip => string.Format("<span class=\"{5}\"><h1>{0}</h1>Step {9}: {6}<br/>Start: {1}<br/>End: {2}<br/>{8}: {3}<br/>Executions: {7}<br/>Status: {4}</span>",
                              HttpUtility.HtmlEncode(JobName),
                              ActualStart.ToString(),
                              ActualEnd.ToString(),

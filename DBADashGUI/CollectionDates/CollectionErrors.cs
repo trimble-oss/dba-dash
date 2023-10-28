@@ -22,11 +22,11 @@ namespace DBADashGUI.CollectionDates
             SetFilterHighlight(txtInstance, instanceToolStripMenuItem);
         }
 
-        private Int32 InstanceID { get; set; }
+        private int InstanceID { get; set; }
         private string InstanceGroupName { get; set; }
         private int _days;
 
-        public Int32 Days
+        public int Days
         {
             get
             {
@@ -101,19 +101,19 @@ namespace DBADashGUI.CollectionDates
         {
             get
             {
-                if (!String.IsNullOrEmpty(txtSource.Text.Trim()))
+                if (!string.IsNullOrEmpty(txtSource.Text.Trim()))
                 {
                     return true;
                 }
-                if (!String.IsNullOrEmpty(txtContext.Text.Trim()))
+                if (!string.IsNullOrEmpty(txtContext.Text.Trim()))
                 {
                     return true;
                 }
-                if (!String.IsNullOrEmpty(txtMessage.Text.Trim()))
+                if (!string.IsNullOrEmpty(txtMessage.Text.Trim()))
                 {
                     return true;
                 }
-                if (!String.IsNullOrEmpty(txtInstance.Text.Trim()))
+                if (!string.IsNullOrEmpty(txtInstance.Text.Trim()))
                 {
                     return true;
                 }
@@ -186,10 +186,10 @@ namespace DBADashGUI.CollectionDates
 
         private void ClearFilters()
         {
-            txtSource.Text = String.Empty;
-            txtMessage.Text = String.Empty;
-            txtContext.Text = String.Empty;
-            txtInstance.Text = String.Empty;
+            txtSource.Text = string.Empty;
+            txtMessage.Text = string.Empty;
+            txtContext.Text = string.Empty;
+            txtInstance.Text = string.Empty;
         }
 
         private void TsClearFilters_Click(object sender, EventArgs e)
@@ -228,14 +228,7 @@ namespace DBADashGUI.CollectionDates
 
         private static void SetFilterHighlight(ToolStripTextBox txt, ToolStripMenuItem lbl)
         {
-            if (!String.IsNullOrEmpty(txt.Text.Trim()))
-            {
-                lbl.Font = new Font(lbl.Font, FontStyle.Bold);
-            }
-            else
-            {
-                lbl.Font = new Font(lbl.Font, FontStyle.Regular);
-            }
+            lbl.Font = !string.IsNullOrEmpty(txt.Text.Trim()) ? new Font(lbl.Font, FontStyle.Bold) : new Font(lbl.Font, FontStyle.Regular);
         }
     }
 }

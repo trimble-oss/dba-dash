@@ -27,7 +27,6 @@ namespace DBADashGUI.Changes
                 da.Fill(dt);
                 DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 return dt;
-
             }
         }
 
@@ -49,26 +48,17 @@ namespace DBADashGUI.Changes
 
         private void Dgv_SelectionChanged(object sender, EventArgs e)
         {
-            if (dgv.SelectedRows.Count == 1)
-            {
-                var row = (DataRowView)dgv.SelectedRows[0].DataBoundItem;
-                long DDLID = (long)row["DDLID"];
-                long DDLIDold = row["PreviousDDLID"] == DBNull.Value ? -1 : (long)row["PreviousDDLID"];
+            if (dgv.SelectedRows.Count != 1) return;
+            var row = (DataRowView)dgv.SelectedRows[0].DataBoundItem;
+            long DDLID = (long)row["DDLID"];
+            long DDLIDold = row["PreviousDDLID"] == DBNull.Value ? -1 : (long)row["PreviousDDLID"];
 
-                string newText = Common.DDL(DDLID);
-                string oldText = DDLIDold > 0 ? Common.DDL(DDLIDold) : "";
+            string newText = Common.DDL(DDLID);
+            string oldText = DDLIDold > 0 ? Common.DDL(DDLIDold) : "";
 
-                diffControl1.OldText = oldText;
-                diffControl1.NewText = newText;
-                if (string.IsNullOrEmpty(oldText))
-                {
-                    diffControl1.Mode = DiffControl.ViewMode.Code;
-                }
-                else
-                {
-                    diffControl1.Mode = DiffControl.ViewMode.Diff;
-                }
-            }
+            diffControl1.OldText = oldText;
+            diffControl1.NewText = newText;
+            diffControl1.Mode = string.IsNullOrEmpty(oldText) ? DiffControl.ViewMode.Code : DiffControl.ViewMode.Diff;
         }
     }
 }

@@ -129,7 +129,7 @@
             this.bttnCancel.TabIndex = 18;
             this.bttnCancel.Text = "&Cancel";
             this.bttnCancel.UseVisualStyleBackColor = true;
-            this.bttnCancel.Click += new System.EventHandler(this.bttnCancel_Click);
+            this.bttnCancel.Click += new System.EventHandler(this.BttnCancel_Click);
             // 
             // bttnOK
             // 
@@ -139,7 +139,7 @@
             this.bttnOK.TabIndex = 19;
             this.bttnOK.Text = "&OK";
             this.bttnOK.UseVisualStyleBackColor = true;
-            this.bttnOK.Click += new System.EventHandler(this.bttnOK_Click);
+            this.bttnOK.Click += new System.EventHandler(this.BttnOK_Click);
             // 
             // AWSCreds
             // 

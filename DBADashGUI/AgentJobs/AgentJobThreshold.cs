@@ -7,27 +7,27 @@ namespace DBADashGUI.AgentJobs
     public class AgentJobThreshold
     {
         public bool IsInherited;
-        public Int32 InstanceID { get; set; }
+        public int InstanceID { get; set; }
         public Guid JobID { get; set; } = Guid.Empty;
-        public Int32? TimeSinceLastFailureWarning { get; set; }
-        public Int32? TimeSinceLastFailureCritical { get; set; }
-        public Int32? TimeSinceLastSucceededCritical { get; set; }
-        public Int32? TimeSinceLastSucceededWarning { get; set; }
-        public Int32? FailCount24HrsWarning { get; set; }
-        public Int32? FailCount24HrsCritical { get; set; }
-        public Int32? FailCount7DaysWarning { get; set; }
-        public Int32? FailCount7DaysCritical { get; set; }
+        public int? TimeSinceLastFailureWarning { get; set; }
+        public int? TimeSinceLastFailureCritical { get; set; }
+        public int? TimeSinceLastSucceededCritical { get; set; }
+        public int? TimeSinceLastSucceededWarning { get; set; }
+        public int? FailCount24HrsWarning { get; set; }
+        public int? FailCount24HrsCritical { get; set; }
+        public int? FailCount7DaysWarning { get; set; }
+        public int? FailCount7DaysCritical { get; set; }
 
-        public Int32? JobStepFails24HrsWarning { get; set; }
-        public Int32? JobStepFails24HrsCritical { get; set; }
+        public int? JobStepFails24HrsWarning { get; set; }
+        public int? JobStepFails24HrsCritical { get; set; }
 
-        public Int32? JobStepFails7DaysWarning { get; set; }
-        public Int32? JobStepFails7DaysCritical { get; set; }
+        public int? JobStepFails7DaysWarning { get; set; }
+        public int? JobStepFails7DaysCritical { get; set; }
 
         public bool LastFailIsCritical { get; set; }
         public bool LastFailIsWarning { get; set; }
 
-        public static AgentJobThreshold GetAgentJobThreshold(Int32 InstanceID, Guid JobID, string connectionString)
+        public static AgentJobThreshold GetAgentJobThreshold(int InstanceID, Guid JobID, string connectionString)
         {
             var threshold = new AgentJobThreshold
             {
@@ -99,9 +99,9 @@ namespace DBADashGUI.AgentJobs
             }
         }
 
-        private static Int32? ColumnToNullableInt32(SqlDataReader rdr, string columnName)
+        private static int? ColumnToNullableInt32(SqlDataReader rdr, string columnName)
         {
-            return rdr[columnName] == DBNull.Value ? null : (Int32?)rdr[columnName];
+            return rdr[columnName] == DBNull.Value ? null : (int?)rdr[columnName];
         }
     }
 }

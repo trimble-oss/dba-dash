@@ -14,7 +14,7 @@ namespace DBADashGUI.Changes
             InitializeComponent();
         }
 
-        private List<Int32> InstanceIDs;
+        private List<int> InstanceIDs;
 
         // Pivot data returned by TraceFlags_Get by trace flag
         private DataTable GetTraceFlags()
@@ -44,7 +44,7 @@ namespace DBADashGUI.Changes
                         }
                         if (rdr["TraceFlag"] != DBNull.Value)
                         {
-                            var flag = (Int16)rdr["TraceFlag"];
+                            var flag = (short)rdr["TraceFlag"];
                             var colName = "T" + flag.ToString();
                             var validFrom = (DateTime)rdr["ValidFrom"];
                             if (!dt.Columns.Contains(colName))

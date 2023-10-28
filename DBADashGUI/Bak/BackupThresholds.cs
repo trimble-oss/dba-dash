@@ -6,16 +6,16 @@ namespace DBADashGUI.Backups
 {
     public class BackupThresholds
     {
-        public Int32 InstanceID { get; set; }
-        public Int32 DatabaseID { get; set; }
-        public Int32? FullWarning { get; set; } = null;
-        public Int32? FullCritical { get; set; } = null;
-        public Int32? DiffWarning { get; set; } = null;
-        public Int32? DiffCritical { get; set; } = null;
-        public Int32? LogWarning { get; set; } = null;
-        public Int32? LogCritical { get; set; } = null;
+        public int InstanceID { get; set; }
+        public int DatabaseID { get; set; }
+        public int? FullWarning { get; set; } = null;
+        public int? FullCritical { get; set; } = null;
+        public int? DiffWarning { get; set; } = null;
+        public int? DiffCritical { get; set; } = null;
+        public int? LogWarning { get; set; } = null;
+        public int? LogCritical { get; set; } = null;
 
-        public Int32 MinimumAge { get; set; } = 0;
+        public int MinimumAge { get; set; } = 0;
 
         public bool Inherit { get; set; } = false;
         public bool UsePartial { get; set; } = false;
@@ -24,7 +24,7 @@ namespace DBADashGUI.Backups
         public string ExcludedDBs { get; set; } = string.Empty;
 
 
-        public static BackupThresholds GetThresholds(Int32 InstanceID, Int32 DatabaseID)
+        public static BackupThresholds GetThresholds(int InstanceID, int DatabaseID)
         {
             BackupThresholds thresholds = new();
             using (var cn = new SqlConnection(Common.ConnectionString))
@@ -39,21 +39,21 @@ namespace DBADashGUI.Backups
                     if (rdr["FullBackupCriticalThreshold"] != DBNull.Value && rdr["FullBackupWarningThreshold"] != DBNull.Value)
                     {
 
-                        thresholds.FullCritical = (Int32)rdr["FullBackupCriticalThreshold"];
-                        thresholds.FullWarning = (Int32)rdr["FullBackupWarningThreshold"];
+                        thresholds.FullCritical = (int)rdr["FullBackupCriticalThreshold"];
+                        thresholds.FullWarning = (int)rdr["FullBackupWarningThreshold"];
                     }
                     if (rdr["DiffBackupCriticalThreshold"] != DBNull.Value && rdr["DiffBackupWarningThreshold"] != DBNull.Value)
                     {
-                        thresholds.DiffCritical = (Int32)rdr["DiffBackupCriticalThreshold"];
-                        thresholds.DiffWarning = (Int32)rdr["DiffBackupWarningThreshold"];
+                        thresholds.DiffCritical = (int)rdr["DiffBackupCriticalThreshold"];
+                        thresholds.DiffWarning = (int)rdr["DiffBackupWarningThreshold"];
                     }
 
                     if (rdr["LogBackupCriticalThreshold"] != DBNull.Value && rdr["LogBackupWarningThreshold"] != DBNull.Value)
                     {
-                        thresholds.LogCritical = (Int32)rdr["LogBackupCriticalThreshold"];
-                        thresholds.LogWarning = (Int32)rdr["LogBackupWarningThreshold"];
+                        thresholds.LogCritical = (int)rdr["LogBackupCriticalThreshold"];
+                        thresholds.LogWarning = (int)rdr["LogBackupWarningThreshold"];
                     }
-                    thresholds.MinimumAge = rdr["MinimumAge"] == DBNull.Value ? 0 : (Int32)rdr["MinimumAge"];
+                    thresholds.MinimumAge = rdr["MinimumAge"] == DBNull.Value ? 0 : (int)rdr["MinimumAge"];
                     thresholds.UsePartial = (bool)rdr["ConsiderPartialBackups"];
                     thresholds.UseFG = (bool)rdr["ConsiderFGBackups"];
                     thresholds.ExcludedDBs = Convert.ToString(rdr["ExcludedDatabases"]);

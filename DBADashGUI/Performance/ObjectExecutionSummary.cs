@@ -17,9 +17,9 @@ namespace DBADashGUI.Performance
         }
 
         private string Instance { get; set; }
-        private Int32 InstanceID { get; set; }
-        private Int32 DatabaseID { get; set; }
-        private Int64 ObjectID { get; set; }
+        private int InstanceID { get; set; }
+        private int DatabaseID { get; set; }
+        private long ObjectID { get; set; }
 
         public string Types
         {
@@ -45,7 +45,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private Int32 compareOffset = 0;
+        private int compareOffset = 0;
         private DateTime _compareTo = DateTime.MinValue;
         private DateTime _compareFrom = DateTime.MinValue;
         private DataTable dt;
@@ -165,7 +165,7 @@ namespace DBADashGUI.Performance
             var dt = GetObjectExecutionStatsSummary();
             if (dt.Rows.Count == 1)
             {
-                RefreshChart((Int64)dt.Rows[0]["ObjectID"], (string)dt.Rows[0]["ObjectName"]);
+                RefreshChart((long)dt.Rows[0]["ObjectID"], (string)dt.Rows[0]["ObjectName"]);
             }
             dgv.Columns.Clear();
             dgv.AutoGenerateColumns = false;
@@ -257,7 +257,7 @@ namespace DBADashGUI.Performance
 
         private void TsSetOffset_Click(object sender, EventArgs e)
         {
-            compareOffset = Int32.Parse((string)((ToolStripMenuItem)sender).Tag);
+            compareOffset = int.Parse((string)((ToolStripMenuItem)sender).Tag);
             CheckOffset();
             RefreshData();
         }
@@ -270,7 +270,7 @@ namespace DBADashGUI.Performance
                 if (itm.GetType() == typeof(ToolStripMenuItem))
                 {
                     var ts = (ToolStripMenuItem)itm;
-                    ts.Checked = Int32.Parse((string)itm.Tag) == compareOffset;
+                    ts.Checked = int.Parse((string)itm.Tag) == compareOffset;
                     if (ts.Checked)
                     {
                         tsCompare.Text = "Compare To: " + ts.Text;
@@ -322,7 +322,7 @@ namespace DBADashGUI.Performance
         {
             if (dgv.Columns.Contains("Diff Avg Duration (%)"))
             {
-                for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+                for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
                 {
                     var r = dgv.Rows[idx];
                     var row = (DataRowView)r.DataBoundItem;
@@ -364,7 +364,7 @@ namespace DBADashGUI.Performance
             objectExecutionLineChart1.RefreshData();
         }
 
-        private void RefreshChart(Int64 objectID, string title)
+        private void RefreshChart(long objectID, string title)
         {
             splitContainer1.Panel1Collapsed = false;
 
@@ -387,7 +387,7 @@ namespace DBADashGUI.Performance
                 if (dgv.Columns[e.ColumnIndex].Name == "Name")
                 {
                     var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                    RefreshChart((Int64)row["ObjectID"], (string)row["ObjectName"]);
+                    RefreshChart((long)row["ObjectID"], (string)row["ObjectName"]);
                 }
             }
         }

@@ -14,7 +14,7 @@ namespace DBADashGUI.Changes
             InitializeComponent();
         }
 
-        public List<Int32> InstanceIDs;
+        public List<int> InstanceIDs;
 
         private DataTable GetConfiguration()
         {

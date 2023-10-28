@@ -111,7 +111,8 @@ namespace DBADashGUI.AgentJobs
             }
             catch (Exception ex2)
             {
-                WebViewCtrl.NavigateToString(String.Format("<html><body style='background-color:{0};color:#ffffff'>Error loading HTML:<br/>{1}</body></html>", DashColors.Fail.ToHexString(), HttpUtility.HtmlEncode(ex.ToString()) + "<br/>" + HttpUtility.HtmlEncode(ex2.ToString())));
+                WebViewCtrl.NavigateToString(
+                    $"<html><body style='background-color:{DashColors.Fail.ToHexString()};color:#ffffff'>Error loading HTML:<br/>{HttpUtility.HtmlEncode(ex.ToString()) + "<br/>" + HttpUtility.HtmlEncode(ex2.ToString())}</body></html>");
             }
         }
 

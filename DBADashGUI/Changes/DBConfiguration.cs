@@ -15,8 +15,8 @@ namespace DBADashGUI.Changes
             InitializeComponent();
         }
 
-        private List<Int32> InstanceIDs;
-        private Int32 DatabaseID = -1;
+        private List<int> InstanceIDs;
+        private int DatabaseID = -1;
 
         public void SetContext(DBADashContext context)
         {
@@ -58,12 +58,12 @@ namespace DBADashGUI.Changes
                 DataGridViewTextBoxColumn col = new() { HeaderText = (string)r["name"], Name = (string)r["name"] };
                 dgvConfig.Columns.Add(col);
             }
-            Int32 lastDB = -1;
+            int lastDB = -1;
             List<DataGridViewRow> rows = new();
             DataGridViewRow row = null;
             foreach (DataRow r in dt.Rows)
             {
-                Int32 dbid = (Int32)r["DatabaseID"];
+                int dbid = (int)r["DatabaseID"];
                 if (dbid != lastDB)
                 {
                     row = new DataGridViewRow();

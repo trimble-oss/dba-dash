@@ -26,11 +26,11 @@ namespace DBADash
         public bool IsRDS => ComputerNetBIOSName.StartsWith("EC2AMAZ-");
 
         // Extended events only supported on Standard and Enterprise editions for RDS
-        public bool IsXESupported => IsRDS && !(EngineEdition == DatabaseEngineEdition.Standard || EngineEdition == DatabaseEngineEdition.Enterprise) ? false : GetXESupported(MajorVersion);
+        public bool IsXESupported => (!IsRDS || EngineEdition is DatabaseEngineEdition.Standard or DatabaseEngineEdition.Enterprise) && GetXESupported(MajorVersion);
 
         public static int GetMajorVersion(string ProductVersion)
         {
-            return Int32.Parse(ProductVersion[..ProductVersion.IndexOf('.')]);
+            return int.Parse(ProductVersion[..ProductVersion.IndexOf('.')]);
         }
 
         public static bool GetXESupported(string ProductVersion)
@@ -47,28 +47,25 @@ namespace DBADash
         public static ConnectionInfo GetConnectionInfo(string connectionString)
         {
             var connectionInfo = new ConnectionInfo();
-            using (var cn = new SqlConnection(connectionString))
-            using (var cmd = new SqlCommand("SELECT SERVERPROPERTY('EngineEdition'),SERVERPROPERTY('ProductVersion'),DB_NAME(),@@SERVERNAME,SERVERPROPERTY('ComputerNamePhysicalNetBIOS')", cn))
+            using var cn = new SqlConnection(connectionString);
+            using var cmd = new SqlCommand("SELECT SERVERPROPERTY('EngineEdition'),SERVERPROPERTY('ProductVersion'),DB_NAME(),@@SERVERNAME,SERVERPROPERTY('ComputerNamePhysicalNetBIOS')", cn);
+            cn.Open();
+            using var rdr = cmd.ExecuteReader();
+            rdr.Read();
+            connectionInfo.EngineEditionValue = rdr.GetInt32(0);
+            try
             {
-                cn.Open();
-                using (var rdr = cmd.ExecuteReader())
-                {
-                    rdr.Read();
-                    connectionInfo.EngineEditionValue = rdr.GetInt32(0);
-                    try
-                    {
-                        connectionInfo.EngineEdition = (DatabaseEngineEdition)connectionInfo.EngineEditionValue;
-                    }
-                    catch
-                    {
-                        connectionInfo.EngineEdition = DatabaseEngineEdition.Unknown;
-                    }
-                    connectionInfo.ProductVersion = rdr.GetString(1);
-                    connectionInfo.DatabaseName = rdr.GetString(2);
-                    connectionInfo.ServerName = rdr.GetString(3);
-                    connectionInfo.ComputerNetBIOSName = rdr.IsDBNull(4) ? "" : rdr.GetString(4);  /* ComputerNamePhysicalNetBIOS is NULL for AzureDB */
-                }
+                connectionInfo.EngineEdition = (DatabaseEngineEdition)connectionInfo.EngineEditionValue;
             }
+            catch
+            {
+                connectionInfo.EngineEdition = DatabaseEngineEdition.Unknown;
+            }
+            connectionInfo.ProductVersion = rdr.GetString(1);
+            connectionInfo.DatabaseName = rdr.GetString(2);
+            connectionInfo.ServerName = rdr.GetString(3);
+            connectionInfo.ComputerNetBIOSName = rdr.IsDBNull(4) ? "" : rdr.GetString(4);  /* ComputerNamePhysicalNetBIOS is NULL for AzureDB */
+
             return connectionInfo;
         }
     }

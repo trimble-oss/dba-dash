@@ -445,7 +445,7 @@ namespace DBADashGUI.AgentJobs
 
         private void WebView2_SetupCompleted()
         {
-            this.Invoke(() => RefreshData());
+            this.Invoke(RefreshData);
         }
     }
 }

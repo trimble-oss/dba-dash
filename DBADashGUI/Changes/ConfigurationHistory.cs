@@ -14,7 +14,7 @@ namespace DBADashGUI
             InitializeComponent();
         }
 
-        private List<Int32> InstanceIDs;
+        private List<int> InstanceIDs;
 
         public void SetContext(DBADashContext context)
         {

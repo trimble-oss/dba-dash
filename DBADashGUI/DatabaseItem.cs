@@ -4,7 +4,7 @@ namespace DBADashGUI
 {
     public class DatabaseItem
     {
-        public Int32 DatabaseID { get; set; }
+        public int DatabaseID { get; set; }
         public string DatabaseName { get; set; }
 
         public override string ToString()

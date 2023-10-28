@@ -226,7 +226,7 @@ namespace DBADashGUI
         /// <param name="value">Parameter value</param>
         internal static SqlParameter AddIfLessThanMaxValue(this SqlParameterCollection p, string parameterName, long value)
         {
-            if (value != Int64.MaxValue)
+            if (value != long.MaxValue)
                 return p.AddWithValue(parameterName, value);
             else
                 return null;
@@ -344,24 +344,21 @@ namespace DBADashGUI
 
         public static bool IsNumericType(this Type type)
         {
-            switch (Type.GetTypeCode(type))
+            return Type.GetTypeCode(type) switch
             {
-                case TypeCode.Byte:
-                case TypeCode.Decimal:
-                case TypeCode.Double:
-                case TypeCode.Int16:
-                case TypeCode.Int32:
-                case TypeCode.Int64:
-                case TypeCode.SByte:
-                case TypeCode.Single:
-                case TypeCode.UInt16:
-                case TypeCode.UInt32:
-                case TypeCode.UInt64:
-                    return true;
-
-                default:
-                    return false;
-            }
+                TypeCode.Byte => true,
+                TypeCode.Decimal => true,
+                TypeCode.Double => true,
+                TypeCode.Int16 => true,
+                TypeCode.Int32 => true,
+                TypeCode.Int64 => true,
+                TypeCode.SByte => true,
+                TypeCode.Single => true,
+                TypeCode.UInt16 => true,
+                TypeCode.UInt32 => true,
+                TypeCode.UInt64 => true,
+                _ => false
+            };
         }
 
         public static SqlParameter Clone(this SqlParameter original)

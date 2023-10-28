@@ -17,10 +17,10 @@ namespace DBADash
 
         public bool PlanCollectionEnabled => CPUThreshold != Int32.MaxValue || MemoryGrantThreshold != Int32.MaxValue || DurationThreshold != Int32.MaxValue;
 
-        public static PlanCollectionThreshold DefaultThreshold => new PlanCollectionThreshold() { CPUThreshold = 1000, DurationThreshold = 10000, MemoryGrantThreshold = 6400, CountThreshold = 2 };
+        public static PlanCollectionThreshold DefaultThreshold => new() { CPUThreshold = 1000, DurationThreshold = 10000, MemoryGrantThreshold = 6400, CountThreshold = 2 };
 
-        public static PlanCollectionThreshold PlanCollectionDisabledThreshold => new PlanCollectionThreshold();
+        public static PlanCollectionThreshold PlanCollectionDisabledThreshold => new();
 
-        public static PlanCollectionThreshold CollectAllPlansThreshold => new PlanCollectionThreshold() { CountThreshold = 0, CPUThreshold = 0, DurationThreshold = 0, MemoryGrantThreshold = 0 };
+        public static PlanCollectionThreshold CollectAllPlansThreshold => new() { CountThreshold = 0, CPUThreshold = 0, DurationThreshold = 0, MemoryGrantThreshold = 0 };
     }
 }

@@ -497,7 +497,7 @@ namespace DBADashServiceConfig
             bttnAWS.Text = "AWS Credentials";
             toolTip1.SetToolTip(bttnAWS, "Used when writing to a S3 bucket destination or reading from a S3 bucket.  Alternatively, use an instance profile to avoid storing credentials in the config.  Or consider using an encrypted config.");
             bttnAWS.UseVisualStyleBackColor = true;
-            bttnAWS.Click += bttnAWS_Click;
+            bttnAWS.Click += BttnAWS_Click;
             // 
             // chkLogInternalPerfCounters
             // 
@@ -602,7 +602,7 @@ namespace DBADashServiceConfig
             chkSummaryRefresh.Size = new System.Drawing.Size(18, 17);
             chkSummaryRefresh.TabIndex = 44;
             chkSummaryRefresh.UseVisualStyleBackColor = true;
-            chkSummaryRefresh.CheckedChanged += chkSummaryRefresh_CheckedChanged;
+            chkSummaryRefresh.CheckedChanged += ChkSummaryRefresh_CheckedChanged;
             // 
             // txtSummaryRefreshCron
             // 
@@ -612,7 +612,7 @@ namespace DBADashServiceConfig
             txtSummaryRefreshCron.Name = "txtSummaryRefreshCron";
             txtSummaryRefreshCron.Size = new System.Drawing.Size(114, 27);
             txtSummaryRefreshCron.TabIndex = 42;
-            txtSummaryRefreshCron.Validated += txtSummaryRefreshCron_Validated;
+            txtSummaryRefreshCron.Validated += TxtSummaryRefreshCron_Validated;
             // 
             // lnkDeleteConfigBackups
             // 
@@ -653,7 +653,7 @@ namespace DBADashServiceConfig
             bttnEncryption.TabIndex = 37;
             bttnEncryption.Text = "Configure Encryption";
             bttnEncryption.UseVisualStyleBackColor = true;
-            bttnEncryption.Click += bttnEncryption_Click;
+            bttnEncryption.Click += BttnEncryption_Click;
             // 
             // numIdentityCollectionThreshold
             // 

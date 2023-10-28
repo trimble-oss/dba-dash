@@ -13,9 +13,9 @@ namespace DBADashGUI.Performance
             InitializeComponent();
         }
 
-        public Int32 InstanceID;
+        public int InstanceID;
         public string Instance;
-        public Int64 ObjectID;
+        public long ObjectID;
         private int dateGrouping;
         private int durationMins;
         public DateTime FromDate;
@@ -97,7 +97,7 @@ namespace DBADashGUI.Performance
         private void TsGroup_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
-            dateGrouping = (Int32)ts.Tag;
+            dateGrouping = (int)ts.Tag;
             tsGroup.Text = DateHelper.DateGroupString(dateGrouping);
             RefreshData();
         }

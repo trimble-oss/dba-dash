@@ -127,12 +127,12 @@ namespace DBADashGUI.LogShipping
                 if (dgvLogShipping.Columns[e.ColumnIndex].HeaderText == "Configure")
                 {
                     var row = (DataRowView)dgvLogShipping.Rows[e.RowIndex].DataBoundItem;
-                    ConfigureThresholds((Int32)row["InstanceID"], (Int32)row["DatabaseID"]);
+                    ConfigureThresholds((int)row["InstanceID"], (int)row["DatabaseID"]);
                 }
             }
         }
 
-        public void ConfigureThresholds(Int32 InstanceID, Int32 DatabaseID)
+        public void ConfigureThresholds(int InstanceID, int DatabaseID)
         {
             var frm = new LogShippingThresholdsConfig
             {
@@ -161,21 +161,14 @@ namespace DBADashGUI.LogShipping
 
         private void DgvLogShipping_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvLogShipping.Rows[idx].DataBoundItem;
-                var Status = (DBADashStatus.DBADashStatusEnum)row["Status"];
+                var status = (DBADashStatus.DBADashStatusEnum)row["Status"];
                 var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["SnapshotAgeStatus"];
                 dgvLogShipping.Rows[idx].Cells["SnapshotAge"].SetStatusColor(snapshotStatus);
-                dgvLogShipping.Rows[idx].Cells["Status"].SetStatusColor(Status);
-                if ((string)row["ThresholdConfiguredLevel"] == "Database")
-                {
-                    dgvLogShipping.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvLogShipping.Font, FontStyle.Bold);
-                }
-                else
-                {
-                    dgvLogShipping.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvLogShipping.Font, FontStyle.Regular);
-                }
+                dgvLogShipping.Rows[idx].Cells["Status"].SetStatusColor(status);
+                dgvLogShipping.Rows[idx].Cells["Configure"].Style.Font = (string)row["ThresholdConfiguredLevel"] == "Database" ? new Font(dgvLogShipping.Font, FontStyle.Bold) : new Font(dgvLogShipping.Font, FontStyle.Regular);
             }
         }
 
@@ -214,7 +207,7 @@ namespace DBADashGUI.LogShipping
                 }
                 else if (dgvSummary.Columns[e.ColumnIndex].HeaderText == "Configure")
                 {
-                    ConfigureThresholds((Int32)r["InstanceID"], -1);
+                    ConfigureThresholds((int)r["InstanceID"], -1);
                 }
             }
         }
@@ -239,7 +232,7 @@ namespace DBADashGUI.LogShipping
 
         private void DgvSummary_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvSummary.Rows[idx].DataBoundItem;
                 var Status = (DBADashStatus.DBADashStatusEnum)row["Status"];

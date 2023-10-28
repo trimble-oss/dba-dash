@@ -25,12 +25,12 @@ namespace DBADashGUI.Performance
 
         public event EventHandler<EventArgs> MoveUp;
 
-        public Int32 InstanceID { get; set; }
-        private Int32 DateGrouping;
+        public int InstanceID { get; set; }
+        private int DateGrouping;
         private bool smoothLines = true;
         private int durationMins;
 
-        public Int32 PointSize;
+        public int PointSize;
 
         public bool SmoothLines
         {
@@ -115,9 +115,9 @@ namespace DBADashGUI.Performance
                 while (rdr.Read())
                 {
                     var eventTime = (DateTime)rdr["EventTime"];
-                    sqlProcessValues.Add(new DateTimePoint(eventTime.ToAppTimeZone(), Decimal.ToDouble((decimal)rdr["SQLProcessCPU"]) / 100.0));
-                    otherValues.Add(new DateTimePoint(eventTime.ToAppTimeZone(), Decimal.ToDouble((decimal)rdr["OtherCPU"]) / 100.0));
-                    maxValues.Add(new DateTimePoint(eventTime.ToAppTimeZone(), Decimal.ToDouble((decimal)rdr["MaxCPU"]) / 100.0));
+                    sqlProcessValues.Add(new DateTimePoint(eventTime.ToAppTimeZone(), decimal.ToDouble((decimal)rdr["SQLProcessCPU"]) / 100.0));
+                    otherValues.Add(new DateTimePoint(eventTime.ToAppTimeZone(), decimal.ToDouble((decimal)rdr["OtherCPU"]) / 100.0));
+                    maxValues.Add(new DateTimePoint(eventTime.ToAppTimeZone(), decimal.ToDouble((decimal)rdr["MaxCPU"]) / 100.0));
                 }
 
                 SeriesCollection s1 = new()

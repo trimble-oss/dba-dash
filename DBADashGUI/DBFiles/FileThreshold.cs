@@ -7,9 +7,9 @@ namespace DBADashGUI.DBFiles
     public class FileThreshold
     {
         public bool Inherited { get; set; }
-        public Int32 InstanceID { get; set; }
-        public Int32 DatabaseID { get; set; }
-        public Int32 DataSpaceID { get; set; }
+        public int InstanceID { get; set; }
+        public int DatabaseID { get; set; }
+        public int DataSpaceID { get; set; }
 
         public decimal WarningThreshold { get; set; }
         public decimal CriticalThreshold { get; set; }
@@ -75,9 +75,9 @@ namespace DBADashGUI.DBFiles
             {
                 return this;
             }
-            Int32 _DataSpaceID = DataSpaceID == 0 ? 0 : -1;
-            Int32 _DatabaseID = this.DataSpaceID is (-1) or 0 ? -1 : this.DatabaseID;
-            Int32 _InstanceID = this.DatabaseID == -1 ? -1 : this.InstanceID;
+            int _DataSpaceID = DataSpaceID == 0 ? 0 : -1;
+            int _DatabaseID = this.DataSpaceID is (-1) or 0 ? -1 : this.DatabaseID;
+            int _InstanceID = this.DatabaseID == -1 ? -1 : this.InstanceID;
             var threshold = GetFileThreshold(_InstanceID, _DatabaseID, _DataSpaceID);
             if (threshold.Inherited && InstanceID != -1)
             {
@@ -89,7 +89,7 @@ namespace DBADashGUI.DBFiles
             }
         }
 
-        public static FileThreshold GetFileThreshold(Int32 InstanceID, Int32 DatabaseID, Int32 DataSpaceID)
+        public static FileThreshold GetFileThreshold(int InstanceID, int DatabaseID, int DataSpaceID)
         {
             FileThreshold threshold = new()
             {

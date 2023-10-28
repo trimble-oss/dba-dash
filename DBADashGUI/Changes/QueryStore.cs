@@ -17,7 +17,7 @@ namespace DBADashGUI.Changes
         }
 
         private string Instance = string.Empty;
-        private List<Int32> InstanceIDs;
+        private List<int> InstanceIDs;
         private int DatabaseID = -1;
 
         public bool CanNavigateBack => tsBack.Enabled;
@@ -159,7 +159,7 @@ namespace DBADashGUI.Changes
             }
             else
             {
-                Instance = String.Empty;
+                Instance = string.Empty;
             }
             RefreshData();
             return true;
@@ -184,7 +184,7 @@ namespace DBADashGUI.Changes
         {
             bool summaryMode = dgv.Columns.Contains("col_READ_ONLY");
             bool dbsMode = dgv.Columns.Contains("colDB)");
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
                 if (summaryMode)

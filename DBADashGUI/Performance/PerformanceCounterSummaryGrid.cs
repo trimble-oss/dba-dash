@@ -11,7 +11,7 @@ namespace DBADashGUI.Performance
 {
     public class PerformanceCounterSummaryGrid : DataGridView
     {
-        public Int32 InstanceID { get; set; }
+        public int InstanceID { get; set; }
         public string SearchText { get; set; }
         public List<int> Counters { get; set; }
 
@@ -62,11 +62,11 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                if (!String.IsNullOrEmpty(SearchText))
+                if (!string.IsNullOrEmpty(SearchText))
                 {
                     cmd.Parameters.AddWithValue("Search", $"%{SearchText}%");
                 }
-                if (Counters != null && Counters.Count > 0)
+                if (Counters is { Count: > 0 })
                 {
                     cmd.Parameters.AddWithValue("Counters", string.Join(",", Counters));
                 }
@@ -140,7 +140,7 @@ namespace DBADashGUI.Performance
 
         private void PerformanceCounterSummaryGrid_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)Rows[idx].DataBoundItem;
                 if (row["CriticalFrom"] == DBNull.Value && row["CriticalTo"] == DBNull.Value && row["WarningFrom"] == DBNull.Value && row["WarningTo"] == DBNull.Value && row["GoodFrom"] == DBNull.Value && row["GoodTo"] == DBNull.Value)

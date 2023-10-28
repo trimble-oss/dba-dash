@@ -91,14 +91,7 @@ namespace DBADashGUI
             // Highlight display name column if it's been edited from the default value
             if (e.ColumnIndex == 2)
             {
-                if (Convert.ToString(dgv.Rows[e.RowIndex].Cells[0].Value) == Convert.ToString(dgv.Rows[e.RowIndex].Cells[2].Value))
-                {
-                    e.CellStyle.Font = new Font(e.CellStyle.Font, FontStyle.Regular);
-                }
-                else
-                {
-                    e.CellStyle.Font = new Font(e.CellStyle.Font, FontStyle.Bold);
-                }
+                e.CellStyle.Font = Convert.ToString(dgv.Rows[e.RowIndex].Cells[0].Value) == Convert.ToString(dgv.Rows[e.RowIndex].Cells[2].Value) ? new Font(e.CellStyle.Font, FontStyle.Regular) : new Font(e.CellStyle.Font, FontStyle.Bold);
             }
         }
 

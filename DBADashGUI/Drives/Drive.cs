@@ -20,7 +20,7 @@ namespace DBADashGUI
     [TypeConverter(typeof(DriveTypeConverter))]
     public class Drive : DriveThreshold
     {
-        private const Int64 bytesPerGB = 1073741824;
+        private const long bytesPerGB = 1073741824;
 
         public string InstanceName;
         public DBADashStatusEnum DriveStatus;
@@ -73,21 +73,21 @@ namespace DBADashGUI
 
         public decimal FreeSpaceGB
         {
-            get => FreeSpace / (decimal)bytesPerGB; set => FreeSpace = (Int64)(value * bytesPerGB);
+            get => FreeSpace / (decimal)bytesPerGB; set => FreeSpace = (long)(value * bytesPerGB);
         }
 
         public decimal DriveCapacityGB
         {
-            get => DriveCapacity / (decimal)bytesPerGB; set => DriveCapacity = (Int64)(value * bytesPerGB);
+            get => DriveCapacity / (decimal)bytesPerGB; set => DriveCapacity = (long)(value * bytesPerGB);
         }
 
         public double PercentFreeSpace => DriveCapacity == 0 ? 0 : (FreeSpace * 1.0 / DriveCapacity) * 100;
 
         public double PercentUsedSpace => 100d - PercentFreeSpace;
 
-        public Int64 DriveCapacity { get; set; } = 0;
+        public long DriveCapacity { get; set; } = 0;
 
-        public Int64 FreeSpace { get; set; } = 0;
+        public long FreeSpace { get; set; } = 0;
 
         public override string ToString() => DriveLabel + " (" + DriveLetter + ")";
     }

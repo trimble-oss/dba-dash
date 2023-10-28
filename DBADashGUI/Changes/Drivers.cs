@@ -15,7 +15,7 @@ namespace DBADashGUI.Changes
             InitializeComponent();
         }
 
-        private List<Int32> InstanceIDs;
+        private List<int> InstanceIDs;
         private string provider = "";
         private string searchText = "";
 
@@ -73,16 +73,16 @@ namespace DBADashGUI.Changes
                     dgvDrivers.Columns.Add(col);
                 }
             }
-            string lastDevice = String.Empty;
-            string lastProvider = String.Empty;
-            string previousVersion = String.Empty;
+            string lastDevice = string.Empty;
+            string lastProvider = string.Empty;
+            string previousVersion = string.Empty;
             List<DataGridViewRow> rows = new();
             DataGridViewRow row = null;
             foreach (DataRow r in dt.Select("", "DriverProviderName,DeviceName"))
             {
                 string device = r["DeviceName"] == DBNull.Value ? "" : (string)r["DeviceName"];
                 string provider = r["DriverProviderName"] == DBNull.Value ? "" : (string)r["DriverProviderName"];
-                if (provider == String.Empty && device == String.Empty)
+                if (provider == string.Empty && device == string.Empty)
                 {
                     continue;
                 }

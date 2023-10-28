@@ -15,9 +15,9 @@ namespace DBADashGUI.LastGoodCheckDB
             {
 
                 threshold.Inherit = chkInherit.Visible && chkInherit.Checked;
-                threshold.WarningThreshold = chkEnabled.Checked ? (Int32?)numWarning.Value : null;
-                threshold.CriticalThreshold = chkEnabled.Checked ? (Int32?)numCritical.Value : null;
-                threshold.MinimumAge = chkEnabled.Checked ? (Int32)numMinimumAge.Value : 0;
+                threshold.WarningThreshold = chkEnabled.Checked ? (int?)numWarning.Value : null;
+                threshold.CriticalThreshold = chkEnabled.Checked ? (int?)numCritical.Value : null;
+                threshold.MinimumAge = chkEnabled.Checked ? (int)numMinimumAge.Value : 0;
                 threshold.ExcludedDatabases = chkEnabled.Checked ? txtExcluded.Text : string.Empty;
                 return threshold;
 
@@ -31,8 +31,8 @@ namespace DBADashGUI.LastGoodCheckDB
                 txtExcluded.Text = threshold.ExcludedDatabases;
                 if (threshold.WarningThreshold != null && threshold.CriticalThreshold != null)
                 {
-                    numWarning.Value = (Int32)threshold.WarningThreshold;
-                    numCritical.Value = (Int32)threshold.CriticalThreshold;
+                    numWarning.Value = (int)threshold.WarningThreshold;
+                    numCritical.Value = (int)threshold.CriticalThreshold;
                 }
                 else
                 {

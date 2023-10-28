@@ -28,8 +28,6 @@ namespace CustomProgressControl
             DefaultCellStyle.Format = "0.#\\%";
             DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
         }
-
-
     }
 
     /// <summary>
@@ -110,14 +108,7 @@ namespace CustomProgressControl
             int progressWidth = imgWidth * progressVal / 100;
             if (progressWidth <= 0)
             {
-                if (progressVal > 0)
-                {
-                    progressWidth = 1;
-                }
-                else
-                {
-                    progressWidth = 0;
-                }
+                progressWidth = progressVal > 0 ? 1 : 0;
             }
 
             // Calculate the font
@@ -165,7 +156,6 @@ namespace CustomProgressControl
                     // Set the X horizontal position
                     switch (cellStyle.Alignment)
                     {
-
                         case DataGridViewContentAlignment.BottomLeft:
                         case DataGridViewContentAlignment.MiddleLeft:
                         case DataGridViewContentAlignment.TopLeft:
@@ -191,6 +181,7 @@ namespace CustomProgressControl
                             }
                     }
                 }
+
                 #endregion [Font Placement Calc]
             }
 
@@ -220,8 +211,6 @@ namespace CustomProgressControl
                     g.DrawString(formattedValue.ToString(), cellStyle.Font, fontBrush, fontPlacement);
                 }
             }
-
         }
     }
-
 }

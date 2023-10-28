@@ -43,9 +43,9 @@ namespace DBADashGUI
                 lblDriveLabel.Text = drive.DriveLabel + " (" + drive.DriveLetter + ")";
             }
 
-            pbSpace.Value = (Int32)drive.PercentUsedSpace;
+            pbSpace.Value = (int)drive.PercentUsedSpace;
 
-            lblFree.Text = String.Format("{0:0.0} GB free ({2:0.0}%) of {1:0.0} GB", drive.FreeSpaceGB, drive.DriveCapacityGB, drive.PercentFreeSpace);
+            lblFree.Text = string.Format("{0:0.0} GB free ({2:0.0}%) of {1:0.0} GB", drive.FreeSpaceGB, drive.DriveCapacityGB, drive.PercentFreeSpace);
             var pctGB = drive.DriveCheckType == Drive.DriveCheckTypeEnum.Percent ? "%" : "GB";
             var warning = drive.DriveCheckType == Drive.DriveCheckTypeEnum.Percent ? drive.WarningThreshold * 100 : drive.WarningThreshold;
             var critical = drive.DriveCheckType == Drive.DriveCheckTypeEnum.Percent ? drive.CriticalThreshold * 100 : drive.CriticalThreshold;
