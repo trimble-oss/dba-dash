@@ -18,7 +18,9 @@ using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Microsoft.SqlServer.Management.SqlParser.Metadata;
+using Octokit;
 
 namespace DBADash
 {
@@ -125,7 +127,7 @@ namespace DBADash
 
         private readonly MemoryCache cache = MemoryCache.Default;
         private readonly Stopwatch swatch = new();
-        private CollectionType currentCollection;
+        private string currentCollection;
         private Version SQLVersion = new();
 
         private bool IsTableValuedConstructorsSupported => SQLVersion.Major > 9;
@@ -215,7 +217,7 @@ namespace DBADash
             dtInternalPerfCounters.Rows.Add(row);
         }
 
-        private void StartCollection(CollectionType type)
+        private void StartCollection(string type)
         {
             swatch.Reset();
             swatch.Start();
@@ -226,16 +228,34 @@ namespace DBADash
         {
             if (!swatch.IsRunning) return;
             swatch.Stop();
-            Log.Debug("Collect {0} on {1} completed in {2}ms", currentCollection.ToString(), instanceName, swatch.ElapsedMilliseconds);
-            LogInternalPerformanceCounter("DBADash", "Collection Duration (ms)", currentCollection.ToString(), Convert.ToDecimal(swatch.Elapsed.TotalMilliseconds));
+            Log.Debug("Collect {0} on {1} completed in {2}ms", currentCollection, instanceName, swatch.ElapsedMilliseconds);
+            LogInternalPerformanceCounter("DBADash", "Collection Duration (ms)", currentCollection, Convert.ToDecimal(swatch.Elapsed.TotalMilliseconds));
+        }
+
+        private static readonly HashSet<int> ExcludedErrorCodes = new()
+        {
+            -2, // retryPolicy excludes query timeout #581
+            2812, // Could not find stored procedure '%.*ls'.
+            349,  // The procedure "%.*ls" has no parameter named "%.*ls".
+            500,  // Trying to pass a table-valued parameter with %d column(s) where the corresponding user-defined table type requires %d column(s).
+            245   // Conversion failed when converting the %ls value '%.*ls' to data type %ls.
+        };
+
+        public static bool ShouldRetry(Exception ex)
+        {
+            if (ex is SqlException sqlEx)
+            {
+                return !ExcludedErrorCodes.Contains(sqlEx.Number);
+            }
+            return true;
         }
 
         private void Startup(string serviceName)
         {
             noWMI = Source.NoWMI;
             dashAgent = DBADashAgent.GetCurrent(serviceName);
-            // retryPolicy excludes query timeout #581
-            retryPolicy = Policy.Handle<Exception>(e => e is not SqlException { Number: -2 })
+
+            retryPolicy = Policy.Handle<Exception>(ShouldRetry)
                 .WaitAndRetry(new[]
                 {
                     TimeSpan.FromSeconds(2),
@@ -309,7 +329,7 @@ namespace DBADash
 
         public void GetInstance()
         {
-            StartCollection(CollectionType.Instance);
+            StartCollection(CollectionType.Instance.ToString());
             var dt = GetDT("DBADash", SqlStrings.Instance, CollectionCommandTimeout.GetDefaultCommandTimeout());
             AddDBADashServiceMetaData(ref dt);
 
@@ -386,6 +406,47 @@ namespace DBADash
             {
                 Collect(type);
             }
+        }
+
+        public void Collect(Dictionary<string, CustomCollection> customCollections)
+        {
+            foreach (var customCollection in customCollections)
+            {
+                var collectionReference = "UserData." + customCollection.Key;
+                try
+                {
+                    retryPolicy.Execute(
+                        _ =>
+                        {
+                            StartCollection(collectionReference);
+                            Collect(customCollection);
+                            StopCollection();
+                        },
+                        new Context(collectionReference)
+                    );
+                }
+                catch (SqlException ex) when (ex.Number == 2812)
+                {
+                    var message = $"Warning: Custom collection stored procedure {customCollection.Value.ProcedureName} doesn't exist";
+                    LogDBError(collectionReference, message);
+                    Log.Error(ex, message);
+                }
+                catch (Exception ex)
+                {
+                    StopCollection();
+                    LogError(ex, collectionReference);
+                }
+            }
+        }
+
+        public void Collect(KeyValuePair<string, CustomCollection> customCollection)
+        {
+            using var cn = new SqlConnection(ConnectionString);
+            using var cmd = new SqlCommand(customCollection.Value.ProcedureName, cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = customCollection.Value.CommandTimeout ?? CollectionCommandTimeout.GetDefaultCommandTimeout() };
+            using var da = new SqlDataAdapter(cmd);
+            var dt = new DataTable("UserData." + customCollection.Key);
+            da.Fill(dt);
+            Data.Tables.Add(dt);
         }
 
         private static string EnumToString(Enum en)
@@ -478,7 +539,7 @@ namespace DBADash
                 retryPolicy.Execute(
                   _ =>
                   {
-                      StartCollection(collectionType);
+                      StartCollection(collectionType.ToString());
                       ExecuteCollection(collectionType);
                       StopCollection();
                   },

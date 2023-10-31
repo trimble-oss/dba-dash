@@ -26,7 +26,7 @@ namespace DBADash
             UpgradeDS();
             this.connectionString = connectionString;
 
-            retryPolicy = Policy.Handle<Exception>()
+            retryPolicy = Policy.Handle<Exception>(ShouldRetry)
                 .WaitAndRetry(new[]
                 {
                     TimeSpan.FromSeconds(2),
@@ -38,12 +38,27 @@ namespace DBADash
                 });
         }
 
+        private static readonly HashSet<int> ExcludedErrorCodes = new()
+        {
+            2812, // Could not find stored procedure '%.*ls'.
+            349,  // The procedure "%.*ls" has no parameter named "%.*ls".
+            500,  // Trying to pass a table-valued parameter with %d column(s) where the corresponding user-defined table type requires %d column(s).
+            245   // Conversion failed when converting the %ls value '%.*ls' to data type %ls.
+        };
+
+        public static bool ShouldRetry(Exception ex)
+        {
+            if (ex is SqlException sqlEx)
+            {
+                return !ExcludedErrorCodes.Contains(sqlEx.Number);
+            }
+            return true;
+        }
+
         public void TestConnection()
         {
-            using (var cn = new SqlConnection(connectionString))
-            {
-                cn.Open();
-            }
+            using var cn = new SqlConnection(connectionString);
+            cn.Open();
         }
 
         // Adds error to Errors datatable to be imported into CollectionErrorLog table later.
@@ -258,6 +273,21 @@ namespace DBADash
             }
         }
 
+        private readonly HashSet<string> tablesToProcess = new()
+        {
+            "Databases", "Drives", "ServerProperties", "Backups", "AgentJobs", "LogRestores", "DBFiles", "DBConfig",
+            "Corruption", "DatabasesHADR", "SysConfig", "OSInfo", "TraceFlags", "CPU", "Drivers",
+            "BlockingSnapshot", "IOStats", "Waits", "OSLoadedModules", "DBTuningOptions", "AzureDBResourceStats",
+            "AzureDBServiceObjectives", "AzureDBElasticPoolResourceStats", "SlowQueries",
+            "SlowQueriesStats", "LastGoodCheckDB", "Alerts", "ObjectExecutionStats", "ServerPrincipals",
+            "ServerRoleMembers", "ServerPermissions", "DatabasePrincipals", "DatabaseRoleMembers",
+            "DatabasePermissions", "CustomChecks", "PerformanceCounters", "VLF", "DatabaseMirroring",
+            "Jobs", "JobHistory", "AvailabilityReplicas", "AvailabilityGroups", "JobSteps",
+            "DatabaseQueryStoreOptions", "ResourceGovernorConfiguration", "AzureDBResourceGovernance",
+            "RunningQueries", "QueryText", "QueryPlans", "InternalPerformanceCounters", "MemoryUsage",
+            "SessionWaits", "IdentityColumns", "RunningJobs"
+        };
+
         public void Update()
         {
             List<Exception> exceptions = new();
@@ -270,37 +300,28 @@ namespace DBADash
               new Context("Instance")
             );
 
-            string[] tables = { "Databases","Drives", "ServerProperties", "Backups", "AgentJobs", "LogRestores", "DBFiles", "DBConfig", "Corruption", "DatabasesHADR", "SysConfig", "OSInfo", "TraceFlags", "CPU", "Drivers",
-                                    "BlockingSnapshot", "IOStats", "Waits", "OSLoadedModules", "DBTuningOptions", "AzureDBResourceStats", "AzureDBServiceObjectives", "AzureDBElasticPoolResourceStats", "SlowQueries",
-                                    "SlowQueriesStats", "LastGoodCheckDB", "Alerts", "ObjectExecutionStats", "ServerPrincipals", "ServerRoleMembers", "ServerPermissions", "DatabasePrincipals", "DatabaseRoleMembers",
-                                    "DatabasePermissions", "CustomChecks", "PerformanceCounters", "VLF", "DatabaseMirroring", "Jobs", "JobHistory","AvailabilityReplicas","AvailabilityGroups","JobSteps",
-                                    "DatabaseQueryStoreOptions", "ResourceGovernorConfiguration","AzureDBResourceGovernance","RunningQueries","QueryText","QueryPlans","InternalPerformanceCounters","MemoryUsage","SessionWaits","IdentityColumns","RunningJobs" };
+            var tablesInDataSet = new HashSet<string>(data.Tables
+                .Cast<DataTable>()
+                .Select(dt => dt.TableName));
 
-            var tablesInDataSet = data.Tables
-                 .Cast<DataTable>()
-                 .Select(dt => dt.TableName);
-
-            // Process standard tables in list order. Process Databases first as some collections will need the list of databases to be populated.
-            foreach (string tableName in tables.Where(t => tablesInDataSet.Contains(t)))
+            // Process Databases first as some collections will need the list of databases to be populated.
+            if (tablesInDataSet.Contains("Databases"))
             {
-                try
+                TryUpdate("Databases", ref exceptions);
+            }
+            foreach (var tableName in tablesInDataSet.Where(tableName => tableName != "Databases"))
+            {
+                if (tablesToProcess.Contains(tableName) || tableName.StartsWith("UserData."))
                 {
-                    retryPolicy.Execute(
-                          context => Update(tableName),
-                          new Context(tableName)
-                      );
-                }
-                catch (Exception ex)
-                {
-                    LogError(tableName, ex);
-                    exceptions.Add(ex);
+                    TryUpdate(tableName, ref exceptions);
                 }
             }
+
             // Process tables that are database schema snapshots
-            string snapshotPrefix = "Snapshot_";
-            foreach (string tableName in tablesInDataSet.Where(t => t.StartsWith(snapshotPrefix)))
+            const string snapshotPrefix = "Snapshot_";
+            foreach (var tableName in tablesInDataSet.Where(t => t.StartsWith(snapshotPrefix)))
             {
-                string databaseName = tableName[snapshotPrefix.Length..];
+                var databaseName = tableName[snapshotPrefix.Length..];
                 try
                 {
                     retryPolicy.Execute(
@@ -361,13 +382,13 @@ namespace DBADash
                     }
                     else
                     {
-                        throw new Exception("Extended properies missing from schema snapshot");
+                        throw new Exception("Extended properties missing from schema snapshot");
                     }
                     string snapshotOptions = (string)dtSS.ExtendedProperties["SnapshotOptions"];
-                    byte[] snapshptOptionsHash;
+                    byte[] snapshotOptionsHash;
                     using (var crypt = SHA256.Create())
                     {
-                        snapshptOptionsHash = crypt.ComputeHash(System.Text.Encoding.ASCII.GetBytes(snapshotOptions));
+                        snapshotOptionsHash = crypt.ComputeHash(System.Text.Encoding.ASCII.GetBytes(snapshotOptions));
                     }
                     cmd.Parameters.AddWithValue("ss", dtSS);
                     cmd.Parameters.AddWithValue("InstanceID", instanceID);
@@ -376,7 +397,7 @@ namespace DBADash
                     cmd.Parameters.AddWithValue("StartTime", StartTime);
                     cmd.Parameters.AddWithValue("EndTime", EndTime);
                     cmd.Parameters.AddWithValue("SnapshotOptions", snapshotOptions);
-                    cmd.Parameters.AddWithValue("SnapshotOptionsHash", snapshptOptionsHash);
+                    cmd.Parameters.AddWithValue("SnapshotOptionsHash", snapshotOptionsHash);
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -424,21 +445,62 @@ namespace DBADash
             }
         }
 
+        private void TryUpdate(string tableName, ref List<Exception> exceptions)
+        {
+            try
+            {
+                retryPolicy.Execute(
+                    context => Update(tableName),
+                    new Context(tableName)
+                );
+            }
+            catch (SqlException ex) when (ex.Number == 2812 && tableName.StartsWith("UserData."))
+            {
+                var ex2 = new Exception(
+                    "Warning: The stored procedure for custom collection not found.  Please create the stored procedure. ",
+                    ex);
+                LogError(tableName, ex2);
+                exceptions.Add(ex2);
+            }
+            catch (SqlException ex) when (ex.Number == 349 && tableName.StartsWith("UserData."))
+            {
+                var ex2 = new Exception(
+                    "Warning: The stored procedure for custom collection does not have the required parameters.  Please update the stored procedure. ",
+                    ex);
+                LogError(tableName, ex2);
+                exceptions.Add(ex2);
+            }
+            catch (SqlException ex) when (ex.Number == 500 && tableName.StartsWith("UserData."))
+            {
+                var ex2 = new Exception(
+                    "Warning: The associated used defined table type for the custom collection does not have the correct number of columns. ",
+                    ex);
+                LogError(tableName, ex2);
+                exceptions.Add(ex2);
+            }
+            catch (Exception ex)
+            {
+                LogError(tableName, ex);
+                exceptions.Add(ex);
+            }
+        }
+
         private void Update(string tableName)
         {
+            var procName = (tableName.StartsWith("UserData.") ? "" : "dbo.") + tableName + "_Upd";
+            var paramName = tableName.Replace("UserData.", "");
             var dt = data.Tables[tableName];
-            using (var cn = new SqlConnection(connectionString))
-            using (var cmd = new SqlCommand(dt.TableName + "_Upd", cn) { CommandTimeout = commandTimeout, CommandType = CommandType.StoredProcedure })
+            if (dt == null) return;
+            using var cn = new SqlConnection(connectionString);
+            using var cmd = new SqlCommand(procName, cn) { CommandTimeout = commandTimeout, CommandType = CommandType.StoredProcedure };
+            cn.Open();
+            if (dt.Rows.Count > 0)
             {
-                cn.Open();
-                if (dt.Rows.Count > 0)
-                {
-                    cmd.Parameters.AddWithValue(dt.TableName, dt);
-                }
-                cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
-                cmd.ExecuteNonQuery();
+                cmd.Parameters.AddWithValue(paramName, dt);
             }
+            cmd.Parameters.AddWithValue("InstanceID", instanceID);
+            cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+            cmd.ExecuteNonQuery();
         }
 
         public void InsertErrors()

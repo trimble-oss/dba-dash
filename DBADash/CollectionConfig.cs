@@ -25,6 +25,8 @@ namespace DBADash
         public bool LogInternalPerformanceCounters = false;
         public int? IdentityCollectionThreshold = null;
         public CollectionSchedules CollectionSchedules;
+        public Dictionary<string, CustomCollection> CustomCollections { get; set; } = new();
+
         public string SummaryRefreshCron { get; set; }
 
         public CollectionSchedules GetSchedules()
