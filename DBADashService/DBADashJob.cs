@@ -84,13 +84,15 @@ namespace DBADashService
         {
             var types = JsonConvert.DeserializeObject<CollectionType[]>(dataMap.GetString("Type"));
             bool collectJobs = types.Contains(CollectionType.Jobs);
+
+            var customCollections = JsonConvert.DeserializeObject<Dictionary<string, CustomCollection>>(dataMap.GetString("CustomCollections"));
             if (collectJobs)
             {
                 types = types.Where(t => t != CollectionType.Jobs).ToArray<CollectionType>(); // Remove Jobs collection - we will save this to last
             }
             try
             {
-                if (types.Length > 0) // Might be zero if we are only collecting Jobs in this batch (collected in the next section)
+                if (types.Length > 0 || customCollections.Count > 0) // Might be zero if we are only collecting Jobs in this batch (collected in the next section)
                 {
                     // Value used to disable future collections of SlowQueries if we encounter a not supported error on a RDS instance not running Standard or Enterprise edition
                     bool dataMapExtendedEventsNotSupported = dataMap.GetBooleanValue("IsExtendedEventsNotSupportedException");
@@ -118,12 +120,23 @@ namespace DBADashService
                         collector.Collect(types);
                         if (!dataMapExtendedEventsNotSupported && collector.IsExtendedEventsNotSupportedException)
                         {
-                            // We encounterd an error setting up extended events on a RDS instance because it's only supported for Standard and Enterprise editions.  Disable the collection
+                            // We encountered an error setting up extended events on a RDS instance because it's only supported for Standard and Enterprise editions.  Disable the collection
                             Log.Information("Disabling Extended events collection for {0}.  Instance type doesn't support extended events", cfg.SourceConnection.ConnectionForPrint);
                             dataMap.Put("IsExtendedEventsNotSupportedException", true);
                         }
                         dataMap.Put("Job_instance_id", collector.Job_instance_id); // Store instance_id so we can get new history only on next run
                         op.Complete();
+                    }
+
+                    if (customCollections.Count > 0)
+                    {
+                        using (var op = Operation.Begin("Collect Custom Collections {types} from instance {instance}",
+                                   string.Join(", ", customCollections.Select(s => s.Key).ToArray()),
+                                   cfg.SourceConnection.ConnectionForPrint))
+                        {
+                            collector.Collect(customCollections);
+                            op.Complete();
+                        }
                     }
 
                     string fileName = DBADashSource.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);

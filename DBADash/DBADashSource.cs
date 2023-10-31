@@ -1,6 +1,7 @@
 ﻿using DBADashService;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using Microsoft.SqlServer.Dac.Model;
 using static DBADash.DBADashConnection;
@@ -18,18 +19,19 @@ namespace DBADash
             DriveAndDatabase = 5
         }
 
-        private Int32 slowQueryThresholdMs = -1;
+        private int slowQueryThresholdMs = -1;
         private CollectionSchedules collectionSchedules;
         private PlanCollectionThreshold runningQueryPlanThreshold;
         private string schemaSnapshotDBs;
         private bool noWMI;
-        private Int32 slowQuerySessionMaxMemoryKB = 4096;
-        private Int32 slowQueryTargetMaxMemoryKB = -1;
+        private int slowQuerySessionMaxMemoryKB = 4096;
+        private int slowQueryTargetMaxMemoryKB = -1;
         private bool persistXESessions = false;
-        private bool useDualXESesion = true;
+        private bool useDualXESession = true;
         public bool WriteToSecondaryDestinations { get; set; } = true;
         public string ConnectionID { get; set; }
         public bool ScriptAgentJobs { get; set; } = true;
+        private Dictionary<string, CustomCollection> customCollections = new();
 
         public IOCollectionLevels IOCollectionLevel { get; set; } = IOCollectionLevels.Full;
 
@@ -37,6 +39,12 @@ namespace DBADash
         {
             get => SourceConnection is { Type: ConnectionType.SQL } ? collectionSchedules : null;
             set => collectionSchedules = value;
+        }
+
+        public Dictionary<string, CustomCollection> CustomCollections
+        {
+            get => SourceConnection is { Type: ConnectionType.SQL } ? customCollections : null;
+            set => customCollections = value;
         }
 
         public PlanCollectionThreshold RunningQueryPlanThreshold
@@ -69,7 +77,7 @@ namespace DBADash
         public int PlanCollectionCPUThreshold
         {
             get => RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL
-                    ? Int32.MaxValue
+                    ? int.MaxValue
                     : RunningQueryPlanThreshold.CPUThreshold;
             set
             {
@@ -81,7 +89,7 @@ namespace DBADash
         [JsonIgnore]
         public int PlanCollectionMemoryGrantThreshold
         {
-            get => RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL ? Int32.MaxValue : RunningQueryPlanThreshold.MemoryGrantThreshold;
+            get => RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL ? int.MaxValue : RunningQueryPlanThreshold.MemoryGrantThreshold;
             set
             {
                 RunningQueryPlanThreshold ??= PlanCollectionThreshold.PlanCollectionDisabledThreshold;
@@ -92,7 +100,7 @@ namespace DBADash
         [JsonIgnore]
         public int PlanCollectionDurationThreshold
         {
-            get => RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL ? Int32.MaxValue : RunningQueryPlanThreshold.DurationThreshold;
+            get => RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL ? int.MaxValue : RunningQueryPlanThreshold.DurationThreshold;
             set
             {
                 RunningQueryPlanThreshold ??= PlanCollectionThreshold.PlanCollectionDisabledThreshold;
@@ -103,7 +111,7 @@ namespace DBADash
         [JsonIgnore]
         public int PlanCollectionCountThreshold
         {
-            get => RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL ? Int32.MaxValue : RunningQueryPlanThreshold.CountThreshold;
+            get => RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL ? int.MaxValue : RunningQueryPlanThreshold.CountThreshold;
             set
             {
                 RunningQueryPlanThreshold ??= PlanCollectionThreshold.PlanCollectionDisabledThreshold;
@@ -140,13 +148,13 @@ namespace DBADash
             set => noWMI = value;
         }
 
-        public Int32 SlowQuerySessionMaxMemoryKB
+        public int SlowQuerySessionMaxMemoryKB
         {
             get => SourceConnection is { Type: ConnectionType.SQL } ? slowQuerySessionMaxMemoryKB : 0;
             set => slowQuerySessionMaxMemoryKB = value;
         }
 
-        public Int32 SlowQueryTargetMaxMemoryKB
+        public int SlowQueryTargetMaxMemoryKB
         {
             get => SourceConnection is { Type: ConnectionType.SQL } ? slowQueryTargetMaxMemoryKB : 0;
             set => slowQueryTargetMaxMemoryKB = value;
@@ -155,8 +163,8 @@ namespace DBADash
         [DefaultValue(true)]
         public bool UseDualEventSession
         {
-            get => SourceConnection is { Type: ConnectionType.SQL } && useDualXESesion;
-            set => useDualXESesion = value;
+            get => SourceConnection is { Type: ConnectionType.SQL } && useDualXESession;
+            set => useDualXESession = value;
         }
 
         [DefaultValue(-1)]

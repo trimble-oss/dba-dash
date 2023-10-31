@@ -310,28 +310,47 @@ namespace DBADashService
             {
                 srcSchedule = schedules;
             }
+            var customCollections = src.CustomCollections.CombineCollections(config.CustomCollections);
+
             if (srcSchedule.OnServiceStartCollection.Length > 0)
             {
                 Log.Information("Trigger on startup collections for {source} to collect {collection}", src.SourceConnection.ConnectionForPrint, srcSchedule.OnServiceStartCollection);
-                IJobDetail serviceStartJob = GetJob(srcSchedule.OnServiceStartCollection, src, cfgString);
+                var onStartCustom = customCollections
+                    .Where(c => c.Value.RunOnServiceStart)
+                    .ToDictionary(c => c.Key, c => c.Value);
+
+                var serviceStartJob = GetJob(srcSchedule.OnServiceStartCollection, src, cfgString, onStartCustom);
                 scheduler.AddJob(serviceStartJob, true).ConfigureAwait(false).GetAwaiter().GetResult();
                 await scheduler.TriggerJob(serviceStartJob.Key);
             }
             if (src.SourceConnection.Type == ConnectionType.SQL)
             {
-                foreach (var s in srcSchedule.GroupedBySchedule)
+                var groupedSchedule = srcSchedule.GroupedBySchedule;
+                foreach (var schedule in customCollections
+                     .GroupBy(c => c.Value.Schedule)
+                     .Where(c => !groupedSchedule.ContainsKey(c.Key))
+                     .Select(c => c.Key))
                 {
-                    IJobDetail job = GetJob(s.Value, src, cfgString);
-                    Log.Information("Add schedule for {source} to collect {collection} on schedule {schedule}", src.SourceConnection.ConnectionForPrint, s.Value, s.Key);
+                    groupedSchedule.Add(schedule, Array.Empty<CollectionType>());
+                }
+
+                foreach (var s in groupedSchedule)
+                {
+                    var custom = customCollections
+                        .Where(c => c.Value.Schedule == s.Key)
+                        .ToDictionary(c => c.Key, c => c.Value);
+                    var job = GetJob(s.Value, src, cfgString, custom);
+                    Log.Information("Add schedule for {source} to collect {collection},{custom} on schedule {schedule}", src.SourceConnection.ConnectionForPrint, s.Value, custom.Keys, s.Key);
                     ScheduleJob(s.Key, job);
                 }
+
                 if (src.SchemaSnapshotDBs != null && src.SchemaSnapshotDBs.Length > 0)
                 {
                     var snapshotSchedule = srcSchedule[CollectionType.SchemaSnapshot];
                     if (!string.IsNullOrEmpty(snapshotSchedule.Schedule))
                     {
                         Log.Information("Add schedule for {source} to collect Schema Snapshots on schedule {schedule}", src.SourceConnection.ConnectionForPrint, snapshotSchedule.Schedule);
-                        IJobDetail job = JobBuilder.Create<SchemaSnapshotJob>()
+                        var job = JobBuilder.Create<SchemaSnapshotJob>()
                                 .UsingJobData("Source", src.SourceConnection.ConnectionString)
                                 .UsingJobData("CFG", cfgString)
                                 .UsingJobData("SchemaSnapshotDBs", src.SchemaSnapshotDBs)
@@ -348,7 +367,7 @@ namespace DBADashService
             }
             else if (src.SourceConnection.Type is ConnectionType.Directory or ConnectionType.AWSS3)
             {
-                IJobDetail job = GetJob(null, src, cfgString);
+                var job = GetJob(null, src, cfgString, null);
                 Log.Information("Add schedule for {source} to import on schedule {schedule}", src.SourceConnection.ConnectionForPrint, CollectionSchedule.DefaultImportSchedule);
                 ScheduleJob(CollectionSchedule.DefaultImportSchedule.Schedule, job);
             }
@@ -390,7 +409,7 @@ namespace DBADashService
             });
         }
 
-        private static IJobDetail GetJob(CollectionType[] types, DBADashSource src, string cfgString)
+        private static IJobDetail GetJob(CollectionType[] types, DBADashSource src, string cfgString, Dictionary<string, CustomCollection> customCollections)
         {
             return JobBuilder.Create<DBADashJob>()
                      .UsingJobData("Type", JsonConvert.SerializeObject(types))
@@ -398,6 +417,7 @@ namespace DBADashService
                      .UsingJobData("CFG", cfgString)
                      .UsingJobData("Job_instance_id", 0)
                      .UsingJobData("SourceType", JsonConvert.SerializeObject(src.SourceConnection.Type))
+                     .UsingJobData("CustomCollections", JsonConvert.SerializeObject(customCollections))
                      .StoreDurably(true)
                     .Build();
         }

@@ -1,5 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace DBADash
@@ -11,7 +13,6 @@ namespace DBADash
             var array = new string[sc2.Count];
             sc2.CopyTo(array, 0);
             sc1.AddRange(array);
-
         }
 
         //https://stackoverflow.com/questions/5417070/c-sharp-version-of-sql-like
@@ -30,6 +31,23 @@ namespace DBADash
         {
             if (string.IsNullOrEmpty(value)) return value;
             return value.Length <= maxLength ? value : value[..maxLength];
+        }
+
+        /// <summary>
+        /// Add items from dict2 to dict1 if they don't already exist in dict1.  If they do exist, use the value from dict1.
+        /// </summary>
+        /// <param name="dict1"></param>
+        /// <param name="dict2"></param>
+        /// <returns></returns>
+        public static Dictionary<string, CustomCollection> CombineCollections(
+            this Dictionary<string, CustomCollection> dict1, Dictionary<string, CustomCollection> dict2)
+        {
+            var result = new Dictionary<string, CustomCollection>(dict1);
+            foreach (var item in dict2.Where(item => !result.ContainsKey(item.Key)))
+            {
+                result.Add(item.Key, item.Value);
+            }
+            return result;
         }
     }
 }
