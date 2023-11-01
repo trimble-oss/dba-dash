@@ -1354,5 +1354,18 @@ namespace DBADashServiceConfig
                 lblSummaryRefreshCron.ForeColor = DashColors.Fail;
             }
         }
+
+        private void BttnCustomCollections_Click(object sender, EventArgs e)
+        {
+            var connectionString = collectionConfig.SourceConnections.Where(c => c.SourceConnection.Type == ConnectionType.SQL).Select(c => c.SourceConnection.ConnectionString).FirstOrDefault("");
+            var dlg = new DBConnection() { ConnectionString = connectionString };
+            dlg.ShowDialog();
+            if (dlg.DialogResult != DialogResult.OK) return;
+
+            var frm = new ManageCustomCollections() { CustomCollections = collectionConfig.CustomCollections, ConnectionString = dlg.ConnectionString };
+            if (frm.ShowDialog() != DialogResult.OK) return;
+            collectionConfig.CustomCollections = frm.CustomCollections;
+            SetJson();
+        }
     }
 }

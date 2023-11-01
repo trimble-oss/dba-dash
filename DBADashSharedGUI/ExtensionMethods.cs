@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,7 +33,23 @@ namespace DBADashSharedGUI
         {
             return ((value.R * 0.299) + (value.G * 0.587) + (value.B * 0.114)) > 186 ? Color.Black : Color.White;
         }
+
+        public static string GetDataTypeString(this DbColumn col)
+        {
+            var dataTypeName = col.DataTypeName?.ToUpper() ?? "???";
+
+            var typeDetails = dataTypeName switch
+            {
+                // Handle types with column size
+                "VARCHAR" or "NVARCHAR" or "VARBINARY" or "CHAR" or "NCHAR" => col.ColumnSize == int.MaxValue ? "(MAX)" : $"({col.ColumnSize})",
+                // Handle types with precision and scale
+                "DECIMAL" or "NUMERIC" => $"({col.NumericPrecision},{col.NumericScale})",
+                _ => ""
+            };
+
+            var nullability = (col.AllowDBNull ?? true) ? " NULL" : " NOT NULL";
+
+            return $"{dataTypeName}{typeDetails}{nullability}";
+        }
     }
-
-
 }
