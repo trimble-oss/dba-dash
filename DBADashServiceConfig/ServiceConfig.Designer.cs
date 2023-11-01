@@ -133,6 +133,7 @@ namespace DBADashServiceConfig
             label7 = new System.Windows.Forms.Label();
             txtDestination = new System.Windows.Forms.TextBox();
             tab1 = new ThemedTabControl();
+            bttnCustomCollections = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
@@ -563,6 +564,7 @@ namespace DBADashServiceConfig
             // 
             // groupBox3
             // 
+            groupBox3.Controls.Add(bttnCustomCollections);
             groupBox3.Controls.Add(lblSummaryRefreshCron);
             groupBox3.Controls.Add(chkSummaryRefresh);
             groupBox3.Controls.Add(label3);
@@ -1357,6 +1359,16 @@ namespace DBADashServiceConfig
             tab1.Size = new System.Drawing.Size(1137, 765);
             tab1.TabIndex = 22;
             // 
+            // bttnCustomCollections
+            // 
+            bttnCustomCollections.Location = new System.Drawing.Point(624, 149);
+            bttnCustomCollections.Name = "bttnCustomCollections";
+            bttnCustomCollections.Size = new System.Drawing.Size(197, 55);
+            bttnCustomCollections.TabIndex = 46;
+            bttnCustomCollections.Text = "Custom Collections";
+            bttnCustomCollections.UseVisualStyleBackColor = true;
+            bttnCustomCollections.Click += BttnCustomCollections_Click;
+            // 
             // ServiceConfig
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -1515,6 +1527,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox txtSummaryRefreshCron;
         private System.Windows.Forms.Label lblConfigFileRetention;
+        private System.Windows.Forms.Button bttnCustomCollections;
     }
 }
 
