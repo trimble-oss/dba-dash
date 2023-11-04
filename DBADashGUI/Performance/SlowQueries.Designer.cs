@@ -91,6 +91,7 @@
             usernameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             hourToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             dayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            timeCustomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsMetric = new System.Windows.Forms.ToolStripDropDownButton();
             durationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             cPUToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -232,7 +233,6 @@
             dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn19 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            timeCustomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)dgvSummary).BeginInit();
             tsSummary.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvSlow).BeginInit();
@@ -253,12 +253,13 @@
             dgvSummary.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Grp, _lt5, _5to10, _10to20, _20to30, _30to60, _1to5min, _5to10min, _10to30min, _30to60min, _1hrPlus, Total, Failed, TotalDuration, TotalCPU, TotalIO, TotalPhysicalIO });
             dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvSummary.Location = new System.Drawing.Point(0, 0);
+            dgvSummary.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvSummary.Name = "dgvSummary";
             dgvSummary.ReadOnly = true;
             dgvSummary.RowHeadersVisible = false;
             dgvSummary.RowHeadersWidth = 51;
             dgvSummary.RowTemplate.Height = 24;
-            dgvSummary.Size = new System.Drawing.Size(1600, 362);
+            dgvSummary.Size = new System.Drawing.Size(1829, 485);
             dgvSummary.TabIndex = 0;
             dgvSummary.CellContentClick += DgvSummary_CellContentClick;
             // 
@@ -469,7 +470,7 @@
             tsSummary.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
             tsSummary.Location = new System.Drawing.Point(0, 0);
             tsSummary.Name = "tsSummary";
-            tsSummary.Size = new System.Drawing.Size(1600, 27);
+            tsSummary.Size = new System.Drawing.Size(1829, 27);
             tsSummary.TabIndex = 3;
             tsSummary.Text = "toolStrip1";
             // 
@@ -479,7 +480,7 @@
             tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsRefresh.Name = "tsRefresh";
-            tsRefresh.Size = new System.Drawing.Size(24, 24);
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
             tsRefresh.Text = "Refresh";
             tsRefresh.Click += TsRefresh_Click;
             // 
@@ -490,13 +491,13 @@
             tsGroup.Image = (System.Drawing.Image)resources.GetObject("tsGroup.Image");
             tsGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsGroup.Name = "tsGroup";
-            tsGroup.Size = new System.Drawing.Size(69, 19);
+            tsGroup.Size = new System.Drawing.Size(84, 24);
             tsGroup.Text = "Group By";
             // 
             // appToolStripMenuItem
             // 
             appToolStripMenuItem.Name = "appToolStripMenuItem";
-            appToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            appToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             appToolStripMenuItem.Tag = "client_app_name";
             appToolStripMenuItem.Text = "App";
             appToolStripMenuItem.Click += GroupBy_Click;
@@ -504,7 +505,7 @@
             // clientToolStripMenuItem
             // 
             clientToolStripMenuItem.Name = "clientToolStripMenuItem";
-            clientToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            clientToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             clientToolStripMenuItem.Tag = "client_hostname";
             clientToolStripMenuItem.Text = "Client";
             clientToolStripMenuItem.Click += GroupBy_Click;
@@ -512,7 +513,7 @@
             // databaseNameToolStripMenuItem
             // 
             databaseNameToolStripMenuItem.Name = "databaseNameToolStripMenuItem";
-            databaseNameToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            databaseNameToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             databaseNameToolStripMenuItem.Tag = "DatabaseName";
             databaseNameToolStripMenuItem.Text = "Database Name";
             databaseNameToolStripMenuItem.Click += GroupBy_Click;
@@ -520,7 +521,7 @@
             // eventTypeToolStripMenuItem
             // 
             eventTypeToolStripMenuItem.Name = "eventTypeToolStripMenuItem";
-            eventTypeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            eventTypeToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             eventTypeToolStripMenuItem.Tag = "EventType";
             eventTypeToolStripMenuItem.Text = "Event Type";
             eventTypeToolStripMenuItem.Click += GroupBy_Click;
@@ -530,7 +531,7 @@
             instanceToolStripMenuItem.Checked = true;
             instanceToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             instanceToolStripMenuItem.Name = "instanceToolStripMenuItem";
-            instanceToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            instanceToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             instanceToolStripMenuItem.Tag = "InstanceDisplayName";
             instanceToolStripMenuItem.Text = "Instance";
             instanceToolStripMenuItem.Click += GroupBy_Click;
@@ -538,7 +539,7 @@
             // objectNameToolStripMenuItem
             // 
             objectNameToolStripMenuItem.Name = "objectNameToolStripMenuItem";
-            objectNameToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            objectNameToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             objectNameToolStripMenuItem.Tag = "object_name";
             objectNameToolStripMenuItem.Text = "Object Name";
             objectNameToolStripMenuItem.Click += GroupBy_Click;
@@ -546,7 +547,7 @@
             // resultToolStripMenuItem1
             // 
             resultToolStripMenuItem1.Name = "resultToolStripMenuItem1";
-            resultToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            resultToolStripMenuItem1.Size = new System.Drawing.Size(199, 26);
             resultToolStripMenuItem1.Tag = "Result";
             resultToolStripMenuItem1.Text = "Result";
             resultToolStripMenuItem1.Click += GroupBy_Click;
@@ -554,7 +555,7 @@
             // sessionIDToolStripMenuItem
             // 
             sessionIDToolStripMenuItem.Name = "sessionIDToolStripMenuItem";
-            sessionIDToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            sessionIDToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             sessionIDToolStripMenuItem.Tag = "session_id";
             sessionIDToolStripMenuItem.Text = "Session ID";
             sessionIDToolStripMenuItem.Click += GroupBy_Click;
@@ -562,7 +563,7 @@
             // textToolStripMenuItem
             // 
             textToolStripMenuItem.Name = "textToolStripMenuItem";
-            textToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            textToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             textToolStripMenuItem.Tag = "text";
             textToolStripMenuItem.Text = "Text";
             textToolStripMenuItem.Click += GroupBy_Click;
@@ -570,7 +571,7 @@
             // usernameToolStripMenuItem
             // 
             usernameToolStripMenuItem.Name = "usernameToolStripMenuItem";
-            usernameToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            usernameToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             usernameToolStripMenuItem.Tag = "username";
             usernameToolStripMenuItem.Text = "Username";
             usernameToolStripMenuItem.Click += GroupBy_Click;
@@ -578,7 +579,7 @@
             // hourToolStripMenuItem
             // 
             hourToolStripMenuItem.Name = "hourToolStripMenuItem";
-            hourToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            hourToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             hourToolStripMenuItem.Tag = "timestamp.60.{UTCOffset}";
             hourToolStripMenuItem.Text = "Time - Hour";
             hourToolStripMenuItem.Click += GroupBy_Click;
@@ -586,10 +587,17 @@
             // dayToolStripMenuItem
             // 
             dayToolStripMenuItem.Name = "dayToolStripMenuItem";
-            dayToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            dayToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             dayToolStripMenuItem.Tag = "timestamp.1440.{UTCOffset}";
             dayToolStripMenuItem.Text = "Time - Day";
             dayToolStripMenuItem.Click += GroupBy_Click;
+            // 
+            // timeCustomToolStripMenuItem
+            // 
+            timeCustomToolStripMenuItem.Name = "timeCustomToolStripMenuItem";
+            timeCustomToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            timeCustomToolStripMenuItem.Text = "Time - Custom";
+            timeCustomToolStripMenuItem.Click += TimeCustomToolStripMenuItem_Click;
             // 
             // tsMetric
             // 
@@ -597,7 +605,7 @@
             tsMetric.Image = Properties.Resources.AddComputedField_16x;
             tsMetric.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsMetric.Name = "tsMetric";
-            tsMetric.Size = new System.Drawing.Size(86, 24);
+            tsMetric.Size = new System.Drawing.Size(101, 24);
             tsMetric.Text = "Duration";
             // 
             // durationToolStripMenuItem
@@ -605,14 +613,14 @@
             durationToolStripMenuItem.Checked = true;
             durationToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             durationToolStripMenuItem.Name = "durationToolStripMenuItem";
-            durationToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
+            durationToolStripMenuItem.Size = new System.Drawing.Size(150, 26);
             durationToolStripMenuItem.Text = "Duration";
             durationToolStripMenuItem.Click += Metric_Selected;
             // 
             // cPUToolStripMenuItem
             // 
             cPUToolStripMenuItem.Name = "cPUToolStripMenuItem";
-            cPUToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
+            cPUToolStripMenuItem.Size = new System.Drawing.Size(150, 26);
             cPUToolStripMenuItem.Text = "CPU";
             cPUToolStripMenuItem.Click += Metric_Selected;
             // 
@@ -622,42 +630,42 @@
             tsFilter.Image = Properties.Resources.FilterDropdown_16x;
             tsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsFilter.Name = "tsFilter";
-            tsFilter.Size = new System.Drawing.Size(66, 24);
+            tsFilter.Size = new System.Drawing.Size(76, 24);
             tsFilter.Text = "Filter";
             // 
             // lblApp
             // 
             lblApp.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblIncludeApp, txtApp, lblExcludeApp, txtExcludeApp });
             lblApp.Name = "lblApp";
-            lblApp.Size = new System.Drawing.Size(151, 22);
+            lblApp.Size = new System.Drawing.Size(188, 26);
             lblApp.Text = "App";
             lblApp.ToolTipText = "% Wildcard character supported";
             // 
             // lblIncludeApp
             // 
             lblIncludeApp.Name = "lblIncludeApp";
-            lblIncludeApp.Size = new System.Drawing.Size(260, 22);
+            lblIncludeApp.Size = new System.Drawing.Size(274, 26);
             lblIncludeApp.Text = "Include:";
             // 
             // txtApp
             // 
             txtApp.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
             txtApp.Name = "txtApp";
-            txtApp.Size = new System.Drawing.Size(200, 23);
+            txtApp.Size = new System.Drawing.Size(200, 27);
             txtApp.KeyPress += Filter_KeyPress;
             txtApp.TextChanged += Filter_TextChanged;
             // 
             // lblExcludeApp
             // 
             lblExcludeApp.Name = "lblExcludeApp";
-            lblExcludeApp.Size = new System.Drawing.Size(260, 22);
+            lblExcludeApp.Size = new System.Drawing.Size(274, 26);
             lblExcludeApp.Text = "Exclude:";
             // 
             // txtExcludeApp
             // 
             txtExcludeApp.BackColor = System.Drawing.Color.FromArgb(251, 212, 215);
             txtExcludeApp.Name = "txtExcludeApp";
-            txtExcludeApp.Size = new System.Drawing.Size(200, 23);
+            txtExcludeApp.Size = new System.Drawing.Size(200, 27);
             txtExcludeApp.KeyPress += Filter_KeyPress;
             txtExcludeApp.TextChanged += Filter_TextChanged;
             // 
@@ -665,35 +673,35 @@
             // 
             lblClient.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblIncludeClient, txtClient, lblExcludeClient, txtExcludeClient });
             lblClient.Name = "lblClient";
-            lblClient.Size = new System.Drawing.Size(151, 22);
+            lblClient.Size = new System.Drawing.Size(188, 26);
             lblClient.Text = "Client";
             lblClient.ToolTipText = "% Wildcard character supported";
             // 
             // lblIncludeClient
             // 
             lblIncludeClient.Name = "lblIncludeClient";
-            lblIncludeClient.Size = new System.Drawing.Size(260, 22);
+            lblIncludeClient.Size = new System.Drawing.Size(274, 26);
             lblIncludeClient.Text = "Include:";
             // 
             // txtClient
             // 
             txtClient.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
             txtClient.Name = "txtClient";
-            txtClient.Size = new System.Drawing.Size(200, 23);
+            txtClient.Size = new System.Drawing.Size(200, 27);
             txtClient.KeyPress += Filter_KeyPress;
             txtClient.TextChanged += Filter_TextChanged;
             // 
             // lblExcludeClient
             // 
             lblExcludeClient.Name = "lblExcludeClient";
-            lblExcludeClient.Size = new System.Drawing.Size(260, 22);
+            lblExcludeClient.Size = new System.Drawing.Size(274, 26);
             lblExcludeClient.Text = "Exclude:";
             // 
             // txtExcludeClient
             // 
             txtExcludeClient.BackColor = System.Drawing.Color.FromArgb(251, 212, 215);
             txtExcludeClient.Name = "txtExcludeClient";
-            txtExcludeClient.Size = new System.Drawing.Size(200, 23);
+            txtExcludeClient.Size = new System.Drawing.Size(200, 27);
             txtExcludeClient.KeyPress += Filter_KeyPress;
             txtExcludeClient.TextChanged += Filter_TextChanged;
             // 
@@ -701,34 +709,34 @@
             // 
             lblCPU.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblCPUFrom, txtCPUFrom, lblCPUTo, txtCPUTo });
             lblCPU.Name = "lblCPU";
-            lblCPU.Size = new System.Drawing.Size(151, 22);
+            lblCPU.Size = new System.Drawing.Size(188, 26);
             lblCPU.Text = "CPU";
             // 
             // lblCPUFrom
             // 
             lblCPUFrom.Name = "lblCPUFrom";
-            lblCPUFrom.Size = new System.Drawing.Size(260, 22);
+            lblCPUFrom.Size = new System.Drawing.Size(274, 26);
             lblCPUFrom.Text = "From (ms):";
             // 
             // txtCPUFrom
             // 
             txtCPUFrom.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
             txtCPUFrom.Name = "txtCPUFrom";
-            txtCPUFrom.Size = new System.Drawing.Size(200, 23);
+            txtCPUFrom.Size = new System.Drawing.Size(200, 27);
             txtCPUFrom.KeyPress += Filter_Numeric_KeyPress;
             txtCPUFrom.TextChanged += Filter_TextChanged;
             // 
             // lblCPUTo
             // 
             lblCPUTo.Name = "lblCPUTo";
-            lblCPUTo.Size = new System.Drawing.Size(260, 22);
+            lblCPUTo.Size = new System.Drawing.Size(274, 26);
             lblCPUTo.Text = "To (ms):";
             // 
             // txtCPUTo
             // 
             txtCPUTo.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
             txtCPUTo.Name = "txtCPUTo";
-            txtCPUTo.Size = new System.Drawing.Size(200, 23);
+            txtCPUTo.Size = new System.Drawing.Size(200, 27);
             txtCPUTo.KeyPress += Filter_Numeric_KeyPress;
             txtCPUTo.TextChanged += Filter_TextChanged;
             // 
@@ -736,35 +744,35 @@
             // 
             lblDatabase.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblIncludeDatabase, txtDatabase, lblExcludeDatabase, txtExcludeDatabase });
             lblDatabase.Name = "lblDatabase";
-            lblDatabase.Size = new System.Drawing.Size(151, 22);
+            lblDatabase.Size = new System.Drawing.Size(188, 26);
             lblDatabase.Text = "Database";
             lblDatabase.ToolTipText = "% Wildcard character supported";
             // 
             // lblIncludeDatabase
             // 
             lblIncludeDatabase.Name = "lblIncludeDatabase";
-            lblIncludeDatabase.Size = new System.Drawing.Size(260, 22);
+            lblIncludeDatabase.Size = new System.Drawing.Size(274, 26);
             lblIncludeDatabase.Text = "Include:";
             // 
             // txtDatabase
             // 
             txtDatabase.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
             txtDatabase.Name = "txtDatabase";
-            txtDatabase.Size = new System.Drawing.Size(200, 23);
+            txtDatabase.Size = new System.Drawing.Size(200, 27);
             txtDatabase.KeyPress += Filter_KeyPress;
             txtDatabase.TextChanged += Filter_TextChanged;
             // 
             // lblExcludeDatabase
             // 
             lblExcludeDatabase.Name = "lblExcludeDatabase";
-            lblExcludeDatabase.Size = new System.Drawing.Size(260, 22);
+            lblExcludeDatabase.Size = new System.Drawing.Size(274, 26);
             lblExcludeDatabase.Text = "Exclude:";
             // 
             // txtExcludeDatabase
             // 
             txtExcludeDatabase.BackColor = System.Drawing.Color.FromArgb(251, 212, 215);
             txtExcludeDatabase.Name = "txtExcludeDatabase";
-            txtExcludeDatabase.Size = new System.Drawing.Size(200, 23);
+            txtExcludeDatabase.Size = new System.Drawing.Size(200, 27);
             txtExcludeDatabase.KeyPress += Filter_KeyPress;
             txtExcludeDatabase.TextChanged += Filter_TextChanged;
             // 
@@ -772,34 +780,34 @@
             // 
             lblDuration.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblDurationFrom, txtDurationFrom, lblDurationTo, txtDurationTo });
             lblDuration.Name = "lblDuration";
-            lblDuration.Size = new System.Drawing.Size(151, 22);
+            lblDuration.Size = new System.Drawing.Size(188, 26);
             lblDuration.Text = "Duration";
             // 
             // lblDurationFrom
             // 
             lblDurationFrom.Name = "lblDurationFrom";
-            lblDurationFrom.Size = new System.Drawing.Size(260, 22);
+            lblDurationFrom.Size = new System.Drawing.Size(274, 26);
             lblDurationFrom.Text = "From (ms):";
             // 
             // txtDurationFrom
             // 
             txtDurationFrom.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
             txtDurationFrom.Name = "txtDurationFrom";
-            txtDurationFrom.Size = new System.Drawing.Size(200, 23);
+            txtDurationFrom.Size = new System.Drawing.Size(200, 27);
             txtDurationFrom.KeyPress += Filter_Numeric_KeyPress;
             txtDurationFrom.TextChanged += Filter_TextChanged;
             // 
             // lblDurationTo
             // 
             lblDurationTo.Name = "lblDurationTo";
-            lblDurationTo.Size = new System.Drawing.Size(260, 22);
+            lblDurationTo.Size = new System.Drawing.Size(274, 26);
             lblDurationTo.Text = "To (ms):";
             // 
             // txtDurationTo
             // 
             txtDurationTo.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
             txtDurationTo.Name = "txtDurationTo";
-            txtDurationTo.Size = new System.Drawing.Size(200, 23);
+            txtDurationTo.Size = new System.Drawing.Size(200, 27);
             txtDurationTo.KeyPress += Filter_Numeric_KeyPress;
             txtDurationTo.TextChanged += Filter_TextChanged;
             // 
@@ -807,35 +815,35 @@
             // 
             lblInstance.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblIncludeInstance, txtInstance, lblExcludeInstance, txtExcludeInstance });
             lblInstance.Name = "lblInstance";
-            lblInstance.Size = new System.Drawing.Size(151, 22);
+            lblInstance.Size = new System.Drawing.Size(188, 26);
             lblInstance.Text = "Instance";
             lblInstance.ToolTipText = "% Wildcard character supported";
             // 
             // lblIncludeInstance
             // 
             lblIncludeInstance.Name = "lblIncludeInstance";
-            lblIncludeInstance.Size = new System.Drawing.Size(260, 22);
+            lblIncludeInstance.Size = new System.Drawing.Size(274, 26);
             lblIncludeInstance.Text = "Include:";
             // 
             // txtInstance
             // 
             txtInstance.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
             txtInstance.Name = "txtInstance";
-            txtInstance.Size = new System.Drawing.Size(200, 23);
+            txtInstance.Size = new System.Drawing.Size(200, 27);
             txtInstance.KeyPress += Filter_KeyPress;
             txtInstance.TextChanged += Filter_TextChanged;
             // 
             // lblExcludeInstance
             // 
             lblExcludeInstance.Name = "lblExcludeInstance";
-            lblExcludeInstance.Size = new System.Drawing.Size(260, 22);
+            lblExcludeInstance.Size = new System.Drawing.Size(274, 26);
             lblExcludeInstance.Text = "Exclude:";
             // 
             // txtExcludeInstance
             // 
             txtExcludeInstance.BackColor = System.Drawing.Color.FromArgb(251, 212, 215);
             txtExcludeInstance.Name = "txtExcludeInstance";
-            txtExcludeInstance.Size = new System.Drawing.Size(200, 23);
+            txtExcludeInstance.Size = new System.Drawing.Size(200, 27);
             txtExcludeInstance.KeyPress += Filter_KeyPress;
             txtExcludeInstance.TextChanged += Filter_TextChanged;
             // 
@@ -843,34 +851,34 @@
             // 
             lblLogicalReads.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblLogicalReadsFrom, txtLogicalReadsFrom, lblLogicalReadsTo, txtLogicalReadsTo });
             lblLogicalReads.Name = "lblLogicalReads";
-            lblLogicalReads.Size = new System.Drawing.Size(151, 22);
+            lblLogicalReads.Size = new System.Drawing.Size(188, 26);
             lblLogicalReads.Text = "Logical Reads";
             // 
             // lblLogicalReadsFrom
             // 
             lblLogicalReadsFrom.Name = "lblLogicalReadsFrom";
-            lblLogicalReadsFrom.Size = new System.Drawing.Size(260, 22);
+            lblLogicalReadsFrom.Size = new System.Drawing.Size(274, 26);
             lblLogicalReadsFrom.Text = "From:";
             // 
             // txtLogicalReadsFrom
             // 
             txtLogicalReadsFrom.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
             txtLogicalReadsFrom.Name = "txtLogicalReadsFrom";
-            txtLogicalReadsFrom.Size = new System.Drawing.Size(200, 23);
+            txtLogicalReadsFrom.Size = new System.Drawing.Size(200, 27);
             txtLogicalReadsFrom.KeyPress += Filter_Numeric_KeyPress;
             txtLogicalReadsFrom.TextChanged += Filter_TextChanged;
             // 
             // lblLogicalReadsTo
             // 
             lblLogicalReadsTo.Name = "lblLogicalReadsTo";
-            lblLogicalReadsTo.Size = new System.Drawing.Size(260, 22);
+            lblLogicalReadsTo.Size = new System.Drawing.Size(274, 26);
             lblLogicalReadsTo.Text = "To:";
             // 
             // txtLogicalReadsTo
             // 
             txtLogicalReadsTo.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
             txtLogicalReadsTo.Name = "txtLogicalReadsTo";
-            txtLogicalReadsTo.Size = new System.Drawing.Size(200, 23);
+            txtLogicalReadsTo.Size = new System.Drawing.Size(200, 27);
             txtLogicalReadsTo.KeyPress += Filter_Numeric_KeyPress;
             txtLogicalReadsTo.TextChanged += Filter_TextChanged;
             // 
@@ -878,35 +886,35 @@
             // 
             lblObject.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblIncludeObject, txtObject, lblExcludeObject, txtExcludeObject });
             lblObject.Name = "lblObject";
-            lblObject.Size = new System.Drawing.Size(151, 22);
+            lblObject.Size = new System.Drawing.Size(188, 26);
             lblObject.Text = "Object";
             lblObject.ToolTipText = "% Wildcard character supported";
             // 
             // lblIncludeObject
             // 
             lblIncludeObject.Name = "lblIncludeObject";
-            lblIncludeObject.Size = new System.Drawing.Size(260, 22);
+            lblIncludeObject.Size = new System.Drawing.Size(274, 26);
             lblIncludeObject.Text = "Include:";
             // 
             // txtObject
             // 
             txtObject.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
             txtObject.Name = "txtObject";
-            txtObject.Size = new System.Drawing.Size(200, 23);
+            txtObject.Size = new System.Drawing.Size(200, 27);
             txtObject.KeyPress += Filter_KeyPress;
             txtObject.TextChanged += Filter_TextChanged;
             // 
             // lblExcludeObject
             // 
             lblExcludeObject.Name = "lblExcludeObject";
-            lblExcludeObject.Size = new System.Drawing.Size(260, 22);
+            lblExcludeObject.Size = new System.Drawing.Size(274, 26);
             lblExcludeObject.Text = "Exclude:";
             // 
             // txtExcludeObject
             // 
             txtExcludeObject.BackColor = System.Drawing.Color.FromArgb(251, 212, 215);
             txtExcludeObject.Name = "txtExcludeObject";
-            txtExcludeObject.Size = new System.Drawing.Size(200, 23);
+            txtExcludeObject.Size = new System.Drawing.Size(200, 27);
             txtExcludeObject.KeyPress += Filter_KeyPress;
             txtExcludeObject.TextChanged += Filter_TextChanged;
             // 
@@ -914,34 +922,34 @@
             // 
             lblPhysicalReads.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblPhysicalReadsFrom, txtPhysicalReadsFrom, lblPhysicalReadsTo, txtPhysicalReadsTo });
             lblPhysicalReads.Name = "lblPhysicalReads";
-            lblPhysicalReads.Size = new System.Drawing.Size(151, 22);
+            lblPhysicalReads.Size = new System.Drawing.Size(188, 26);
             lblPhysicalReads.Text = "Physical Reads";
             // 
             // lblPhysicalReadsFrom
             // 
             lblPhysicalReadsFrom.Name = "lblPhysicalReadsFrom";
-            lblPhysicalReadsFrom.Size = new System.Drawing.Size(260, 22);
+            lblPhysicalReadsFrom.Size = new System.Drawing.Size(274, 26);
             lblPhysicalReadsFrom.Text = "From:";
             // 
             // txtPhysicalReadsFrom
             // 
             txtPhysicalReadsFrom.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
             txtPhysicalReadsFrom.Name = "txtPhysicalReadsFrom";
-            txtPhysicalReadsFrom.Size = new System.Drawing.Size(200, 23);
+            txtPhysicalReadsFrom.Size = new System.Drawing.Size(200, 27);
             txtPhysicalReadsFrom.KeyPress += Filter_Numeric_KeyPress;
             txtPhysicalReadsFrom.TextChanged += Filter_TextChanged;
             // 
             // lblPhysicalReadsTo
             // 
             lblPhysicalReadsTo.Name = "lblPhysicalReadsTo";
-            lblPhysicalReadsTo.Size = new System.Drawing.Size(260, 22);
+            lblPhysicalReadsTo.Size = new System.Drawing.Size(274, 26);
             lblPhysicalReadsTo.Text = "To:";
             // 
             // txtPhysicalReadsTo
             // 
             txtPhysicalReadsTo.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
             txtPhysicalReadsTo.Name = "txtPhysicalReadsTo";
-            txtPhysicalReadsTo.Size = new System.Drawing.Size(200, 23);
+            txtPhysicalReadsTo.Size = new System.Drawing.Size(200, 27);
             txtPhysicalReadsTo.KeyPress += Filter_Numeric_KeyPress;
             txtPhysicalReadsTo.TextChanged += Filter_TextChanged;
             // 
@@ -949,35 +957,35 @@
             // 
             lblResult.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblIncludeResult, txtResult, lblExcludeResult, txtExcludeResult });
             lblResult.Name = "lblResult";
-            lblResult.Size = new System.Drawing.Size(151, 22);
+            lblResult.Size = new System.Drawing.Size(188, 26);
             lblResult.Text = "Result";
             lblResult.ToolTipText = "% Wildcard character supported";
             // 
             // lblIncludeResult
             // 
             lblIncludeResult.Name = "lblIncludeResult";
-            lblIncludeResult.Size = new System.Drawing.Size(260, 22);
+            lblIncludeResult.Size = new System.Drawing.Size(274, 26);
             lblIncludeResult.Text = "Include:";
             // 
             // txtResult
             // 
             txtResult.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
             txtResult.Name = "txtResult";
-            txtResult.Size = new System.Drawing.Size(200, 23);
+            txtResult.Size = new System.Drawing.Size(200, 27);
             txtResult.KeyPress += Filter_KeyPress;
             txtResult.TextChanged += Filter_TextChanged;
             // 
             // lblExcludeResult
             // 
             lblExcludeResult.Name = "lblExcludeResult";
-            lblExcludeResult.Size = new System.Drawing.Size(260, 22);
+            lblExcludeResult.Size = new System.Drawing.Size(274, 26);
             lblExcludeResult.Text = "Exclude:";
             // 
             // txtExcludeResult
             // 
             txtExcludeResult.BackColor = System.Drawing.Color.FromArgb(251, 212, 215);
             txtExcludeResult.Name = "txtExcludeResult";
-            txtExcludeResult.Size = new System.Drawing.Size(200, 23);
+            txtExcludeResult.Size = new System.Drawing.Size(200, 27);
             txtExcludeResult.KeyPress += Filter_KeyPress;
             txtExcludeResult.TextChanged += Filter_TextChanged;
             // 
@@ -985,35 +993,35 @@
             // 
             lblSessionID.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblIncludeSessionID, txtSessionID, lblExcludeSessionID, txtExcludeSessionID });
             lblSessionID.Name = "lblSessionID";
-            lblSessionID.Size = new System.Drawing.Size(151, 22);
+            lblSessionID.Size = new System.Drawing.Size(188, 26);
             lblSessionID.Text = "Session ID";
             lblSessionID.ToolTipText = "Comma separated list of IDs";
             // 
             // lblIncludeSessionID
             // 
             lblIncludeSessionID.Name = "lblIncludeSessionID";
-            lblIncludeSessionID.Size = new System.Drawing.Size(260, 22);
+            lblIncludeSessionID.Size = new System.Drawing.Size(274, 26);
             lblIncludeSessionID.Text = "Include:";
             // 
             // txtSessionID
             // 
             txtSessionID.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
             txtSessionID.Name = "txtSessionID";
-            txtSessionID.Size = new System.Drawing.Size(200, 23);
+            txtSessionID.Size = new System.Drawing.Size(200, 27);
             txtSessionID.KeyPress += Filter_NumericPlusComma_KeyPress;
             txtSessionID.TextChanged += Filter_TextChanged;
             // 
             // lblExcludeSessionID
             // 
             lblExcludeSessionID.Name = "lblExcludeSessionID";
-            lblExcludeSessionID.Size = new System.Drawing.Size(260, 22);
+            lblExcludeSessionID.Size = new System.Drawing.Size(274, 26);
             lblExcludeSessionID.Text = "Exclude:";
             // 
             // txtExcludeSessionID
             // 
             txtExcludeSessionID.BackColor = System.Drawing.Color.FromArgb(251, 212, 215);
             txtExcludeSessionID.Name = "txtExcludeSessionID";
-            txtExcludeSessionID.Size = new System.Drawing.Size(200, 23);
+            txtExcludeSessionID.Size = new System.Drawing.Size(200, 27);
             txtExcludeSessionID.KeyPress += Filter_NumericPlusComma_KeyPress;
             txtExcludeSessionID.TextChanged += Filter_TextChanged;
             // 
@@ -1021,35 +1029,35 @@
             // 
             lblText.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblIncludeText, txtText, lblExcludeText, txtExcludeText });
             lblText.Name = "lblText";
-            lblText.Size = new System.Drawing.Size(151, 22);
+            lblText.Size = new System.Drawing.Size(188, 26);
             lblText.Text = "Text";
             lblText.ToolTipText = "Matches anywhere in the string";
             // 
             // lblIncludeText
             // 
             lblIncludeText.Name = "lblIncludeText";
-            lblIncludeText.Size = new System.Drawing.Size(260, 22);
+            lblIncludeText.Size = new System.Drawing.Size(274, 26);
             lblIncludeText.Text = "Include:";
             // 
             // txtText
             // 
             txtText.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
             txtText.Name = "txtText";
-            txtText.Size = new System.Drawing.Size(200, 23);
+            txtText.Size = new System.Drawing.Size(200, 27);
             txtText.KeyPress += Filter_KeyPress;
             txtText.TextChanged += Filter_TextChanged;
             // 
             // lblExcludeText
             // 
             lblExcludeText.Name = "lblExcludeText";
-            lblExcludeText.Size = new System.Drawing.Size(260, 22);
+            lblExcludeText.Size = new System.Drawing.Size(274, 26);
             lblExcludeText.Text = "Exclude:";
             // 
             // txtExcludeText
             // 
             txtExcludeText.BackColor = System.Drawing.Color.FromArgb(251, 212, 215);
             txtExcludeText.Name = "txtExcludeText";
-            txtExcludeText.Size = new System.Drawing.Size(200, 23);
+            txtExcludeText.Size = new System.Drawing.Size(200, 27);
             txtExcludeText.KeyPress += Filter_KeyPress;
             txtExcludeText.TextChanged += Filter_TextChanged;
             // 
@@ -1057,35 +1065,35 @@
             // 
             lblUser.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblIncludeUser, txtUser, lblExcludeUser, txtExcludeUser });
             lblUser.Name = "lblUser";
-            lblUser.Size = new System.Drawing.Size(151, 22);
+            lblUser.Size = new System.Drawing.Size(188, 26);
             lblUser.Text = "User";
             lblUser.ToolTipText = "% Wildcard character supported";
             // 
             // lblIncludeUser
             // 
             lblIncludeUser.Name = "lblIncludeUser";
-            lblIncludeUser.Size = new System.Drawing.Size(260, 22);
+            lblIncludeUser.Size = new System.Drawing.Size(274, 26);
             lblIncludeUser.Text = "Include:";
             // 
             // txtUser
             // 
             txtUser.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
             txtUser.Name = "txtUser";
-            txtUser.Size = new System.Drawing.Size(200, 23);
+            txtUser.Size = new System.Drawing.Size(200, 27);
             txtUser.KeyPress += Filter_KeyPress;
             txtUser.TextChanged += Filter_TextChanged;
             // 
             // lblExcludeUser
             // 
             lblExcludeUser.Name = "lblExcludeUser";
-            lblExcludeUser.Size = new System.Drawing.Size(260, 22);
+            lblExcludeUser.Size = new System.Drawing.Size(274, 26);
             lblExcludeUser.Text = "Exclude:";
             // 
             // txtExcludeUser
             // 
             txtExcludeUser.BackColor = System.Drawing.Color.FromArgb(251, 212, 215);
             txtExcludeUser.Name = "txtExcludeUser";
-            txtExcludeUser.Size = new System.Drawing.Size(200, 23);
+            txtExcludeUser.Size = new System.Drawing.Size(200, 27);
             txtExcludeUser.KeyPress += Filter_KeyPress;
             txtExcludeUser.TextChanged += Filter_TextChanged;
             // 
@@ -1093,34 +1101,34 @@
             // 
             lblWrites.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblWritesFrom, txtWritesFrom, lblWritesTo, txtWritesTo });
             lblWrites.Name = "lblWrites";
-            lblWrites.Size = new System.Drawing.Size(151, 22);
+            lblWrites.Size = new System.Drawing.Size(188, 26);
             lblWrites.Text = "Writes";
             // 
             // lblWritesFrom
             // 
             lblWritesFrom.Name = "lblWritesFrom";
-            lblWritesFrom.Size = new System.Drawing.Size(260, 22);
+            lblWritesFrom.Size = new System.Drawing.Size(274, 26);
             lblWritesFrom.Text = "From:";
             // 
             // txtWritesFrom
             // 
             txtWritesFrom.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
             txtWritesFrom.Name = "txtWritesFrom";
-            txtWritesFrom.Size = new System.Drawing.Size(200, 23);
+            txtWritesFrom.Size = new System.Drawing.Size(200, 27);
             txtWritesFrom.KeyPress += Filter_Numeric_KeyPress;
             txtWritesFrom.TextChanged += Filter_TextChanged;
             // 
             // lblWritesTo
             // 
             lblWritesTo.Name = "lblWritesTo";
-            lblWritesTo.Size = new System.Drawing.Size(260, 22);
+            lblWritesTo.Size = new System.Drawing.Size(274, 26);
             lblWritesTo.Text = "To:";
             // 
             // txtWritesTo
             // 
             txtWritesTo.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
             txtWritesTo.Name = "txtWritesTo";
-            txtWritesTo.Size = new System.Drawing.Size(200, 23);
+            txtWritesTo.Size = new System.Drawing.Size(200, 27);
             txtWritesTo.KeyPress += Filter_Numeric_KeyPress;
             txtWritesTo.TextChanged += Filter_TextChanged;
             // 
@@ -1128,7 +1136,7 @@
             // 
             lblEventType.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { rpccompletedToolStripMenuItem, sqlbatchcompletedToolStripMenuItem });
             lblEventType.Name = "lblEventType";
-            lblEventType.Size = new System.Drawing.Size(151, 22);
+            lblEventType.Size = new System.Drawing.Size(188, 26);
             lblEventType.Text = "Event Type";
             // 
             // rpccompletedToolStripMenuItem
@@ -1137,7 +1145,7 @@
             rpccompletedToolStripMenuItem.CheckOnClick = true;
             rpccompletedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             rpccompletedToolStripMenuItem.Name = "rpccompletedToolStripMenuItem";
-            rpccompletedToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            rpccompletedToolStripMenuItem.Size = new System.Drawing.Size(232, 26);
             rpccompletedToolStripMenuItem.Text = "rpc_completed";
             rpccompletedToolStripMenuItem.CheckedChanged += EventType_CheckedChanged;
             rpccompletedToolStripMenuItem.Click += EventType_Click;
@@ -1148,26 +1156,26 @@
             sqlbatchcompletedToolStripMenuItem.CheckOnClick = true;
             sqlbatchcompletedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             sqlbatchcompletedToolStripMenuItem.Name = "sqlbatchcompletedToolStripMenuItem";
-            sqlbatchcompletedToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            sqlbatchcompletedToolStripMenuItem.Size = new System.Drawing.Size(232, 26);
             sqlbatchcompletedToolStripMenuItem.Text = "sql_batch_completed";
             sqlbatchcompletedToolStripMenuItem.CheckedChanged += EventType_CheckedChanged;
             // 
             // timeToolStripMenuItem
             // 
             timeToolStripMenuItem.Name = "timeToolStripMenuItem";
-            timeToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
+            timeToolStripMenuItem.Size = new System.Drawing.Size(188, 26);
             timeToolStripMenuItem.Text = "Time";
             timeToolStripMenuItem.Click += TimeToolStripMenuItem_Click;
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new System.Drawing.Size(148, 6);
+            toolStripSeparator2.Size = new System.Drawing.Size(185, 6);
             // 
             // resetToolStripMenuItem
             // 
             resetToolStripMenuItem.Name = "resetToolStripMenuItem";
-            resetToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
+            resetToolStripMenuItem.Size = new System.Drawing.Size(188, 26);
             resetToolStripMenuItem.Text = "Reset";
             resetToolStripMenuItem.Click += ResetToolStripMenuItem_Click;
             // 
@@ -1178,14 +1186,14 @@
             tsTop.Image = (System.Drawing.Image)resources.GetObject("tsTop.Image");
             tsTop.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsTop.Name = "tsTop";
-            tsTop.Size = new System.Drawing.Size(54, 19);
+            tsTop.Size = new System.Drawing.Size(68, 24);
             tsTop.Tag = "20";
             tsTop.Text = "Top 20";
             // 
             // tsTop10
             // 
             tsTop10.Name = "tsTop10";
-            tsTop10.Size = new System.Drawing.Size(98, 22);
+            tsTop10.Size = new System.Drawing.Size(124, 26);
             tsTop10.Tag = "10";
             tsTop10.Text = "10";
             tsTop10.Click += TsTop_Click;
@@ -1193,7 +1201,7 @@
             // tsTop20
             // 
             tsTop20.Name = "tsTop20";
-            tsTop20.Size = new System.Drawing.Size(98, 22);
+            tsTop20.Size = new System.Drawing.Size(124, 26);
             tsTop20.Tag = "20";
             tsTop20.Text = "20";
             tsTop20.Click += TsTop_Click;
@@ -1201,7 +1209,7 @@
             // tsTop50
             // 
             tsTop50.Name = "tsTop50";
-            tsTop50.Size = new System.Drawing.Size(98, 22);
+            tsTop50.Size = new System.Drawing.Size(124, 26);
             tsTop50.Tag = "50";
             tsTop50.Text = "50";
             tsTop50.Click += TsTop_Click;
@@ -1209,7 +1217,7 @@
             // tsTop100
             // 
             tsTop100.Name = "tsTop100";
-            tsTop100.Size = new System.Drawing.Size(98, 22);
+            tsTop100.Size = new System.Drawing.Size(124, 26);
             tsTop100.Tag = "100";
             tsTop100.Text = "100";
             tsTop100.Click += TsTop_Click;
@@ -1217,7 +1225,7 @@
             // tsTop500
             // 
             tsTop500.Name = "tsTop500";
-            tsTop500.Size = new System.Drawing.Size(98, 22);
+            tsTop500.Size = new System.Drawing.Size(124, 26);
             tsTop500.Tag = "500";
             tsTop500.Text = "500";
             tsTop500.Click += TsTop_Click;
@@ -1225,7 +1233,7 @@
             // tsTop1000
             // 
             tsTop1000.Name = "tsTop1000";
-            tsTop1000.Size = new System.Drawing.Size(98, 22);
+            tsTop1000.Size = new System.Drawing.Size(124, 26);
             tsTop1000.Tag = "1000";
             tsTop1000.Text = "1000";
             tsTop1000.Click += TsTop_Click;
@@ -1233,7 +1241,7 @@
             // tsTopAll
             // 
             tsTopAll.Name = "tsTopAll";
-            tsTopAll.Size = new System.Drawing.Size(98, 22);
+            tsTopAll.Size = new System.Drawing.Size(124, 26);
             tsTopAll.Tag = "-1";
             tsTopAll.Text = "ALL";
             tsTopAll.Click += TsTop_Click;
@@ -1244,7 +1252,7 @@
             tsCopySummary.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopySummary.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCopySummary.Name = "tsCopySummary";
-            tsCopySummary.Size = new System.Drawing.Size(24, 24);
+            tsCopySummary.Size = new System.Drawing.Size(29, 24);
             tsCopySummary.Text = "Copy";
             tsCopySummary.Click += TsCopySummary_Click;
             // 
@@ -1254,7 +1262,7 @@
             tsExcel.Image = Properties.Resources.excel16x16;
             tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExcel.Name = "tsExcel";
-            tsExcel.Size = new System.Drawing.Size(24, 24);
+            tsExcel.Size = new System.Drawing.Size(29, 24);
             tsExcel.Text = "Export Excel";
             tsExcel.Click += TsExcel_Click;
             // 
@@ -1267,13 +1275,14 @@
             dgvSlow.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvSlow.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, DatabaseName, event_type, object_name, timestamp, colDuration, duration, cpu_time, logical_reads, physical_reads, Writes, username, client_hostname, client_app_name, Result, colSessionID, colText });
             dgvSlow.Dock = System.Windows.Forms.DockStyle.Fill;
-            dgvSlow.Location = new System.Drawing.Point(0, 43);
+            dgvSlow.Location = new System.Drawing.Point(0, 48);
+            dgvSlow.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvSlow.Name = "dgvSlow";
             dgvSlow.ReadOnly = true;
             dgvSlow.RowHeadersVisible = false;
             dgvSlow.RowHeadersWidth = 51;
             dgvSlow.RowTemplate.Height = 24;
-            dgvSlow.Size = new System.Drawing.Size(1600, 593);
+            dgvSlow.Size = new System.Drawing.Size(1829, 807);
             dgvSlow.TabIndex = 4;
             dgvSlow.CellContentClick += DgvSlow_CellContentClick;
             dgvSlow.RowsAdded += DgvSlow_RowsAdded;
@@ -1449,6 +1458,7 @@
             // 
             splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             splitContainer1.Location = new System.Drawing.Point(0, 27);
+            splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             splitContainer1.Name = "splitContainer1";
             splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -1464,8 +1474,9 @@
             splitContainer1.Panel2.Controls.Add(dgvSlow);
             splitContainer1.Panel2.Controls.Add(toolStrip2);
             splitContainer1.Panel2.Controls.Add(lblPageSize);
-            splitContainer1.Size = new System.Drawing.Size(1600, 1002);
-            splitContainer1.SplitterDistance = 362;
+            splitContainer1.Size = new System.Drawing.Size(1829, 1345);
+            splitContainer1.SplitterDistance = 485;
+            splitContainer1.SplitterWidth = 5;
             splitContainer1.TabIndex = 5;
             // 
             // tsRunning
@@ -1474,7 +1485,7 @@
             tsRunning.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRunningBack });
             tsRunning.Location = new System.Drawing.Point(0, 0);
             tsRunning.Name = "tsRunning";
-            tsRunning.Size = new System.Drawing.Size(1600, 27);
+            tsRunning.Size = new System.Drawing.Size(1829, 27);
             tsRunning.TabIndex = 2;
             tsRunning.Text = "toolStrip3";
             // 
@@ -1484,8 +1495,8 @@
             tsRunningBack.Image = Properties.Resources.Previous_grey_16x;
             tsRunningBack.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsRunningBack.Name = "tsRunningBack";
-            tsRunningBack.Size = new System.Drawing.Size(24, 24);
-            tsRunningBack.Text = "toolStripButton1";
+            tsRunningBack.Size = new System.Drawing.Size(29, 24);
+            tsRunningBack.Text = "Back";
             tsRunningBack.Click += TsRunningBack_Click;
             // 
             // refresh1
@@ -1495,9 +1506,9 @@
             refresh1.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             refresh1.ForeColor = System.Drawing.Color.White;
             refresh1.Location = new System.Drawing.Point(0, 0);
-            refresh1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            refresh1.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             refresh1.Name = "refresh1";
-            refresh1.Size = new System.Drawing.Size(1600, 362);
+            refresh1.Size = new System.Drawing.Size(1829, 485);
             refresh1.TabIndex = 3;
             refresh1.Visible = false;
             // 
@@ -1505,9 +1516,9 @@
             // 
             runningQueries1.Dock = System.Windows.Forms.DockStyle.Fill;
             runningQueries1.Location = new System.Drawing.Point(0, 0);
-            runningQueries1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            runningQueries1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             runningQueries1.Name = "runningQueries1";
-            runningQueries1.Size = new System.Drawing.Size(1600, 362);
+            runningQueries1.Size = new System.Drawing.Size(1829, 485);
             runningQueries1.TabIndex = 1;
             runningQueries1.Visible = false;
             // 
@@ -1515,9 +1526,9 @@
             // 
             toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
             toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsCopyDetail, tsExcelDetail, tsView });
-            toolStrip2.Location = new System.Drawing.Point(0, 16);
+            toolStrip2.Location = new System.Drawing.Point(0, 21);
             toolStrip2.Name = "toolStrip2";
-            toolStrip2.Size = new System.Drawing.Size(1600, 27);
+            toolStrip2.Size = new System.Drawing.Size(1829, 27);
             toolStrip2.TabIndex = 6;
             toolStrip2.Text = "toolStrip2";
             // 
@@ -1527,7 +1538,7 @@
             tsCopyDetail.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopyDetail.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCopyDetail.Name = "tsCopyDetail";
-            tsCopyDetail.Size = new System.Drawing.Size(24, 24);
+            tsCopyDetail.Size = new System.Drawing.Size(29, 24);
             tsCopyDetail.Text = "Copy";
             tsCopyDetail.Click += TsCopyDetail_Click;
             // 
@@ -1537,7 +1548,7 @@
             tsExcelDetail.Image = Properties.Resources.excel16x16;
             tsExcelDetail.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExcelDetail.Name = "tsExcelDetail";
-            tsExcelDetail.Size = new System.Drawing.Size(24, 24);
+            tsExcelDetail.Size = new System.Drawing.Size(29, 24);
             tsExcelDetail.Text = "Export Excel";
             tsExcelDetail.Click += TsExcelDetail_Click;
             // 
@@ -1547,7 +1558,7 @@
             tsView.Image = Properties.Resources.Table_16x;
             tsView.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsView.Name = "tsView";
-            tsView.Size = new System.Drawing.Size(65, 24);
+            tsView.Size = new System.Drawing.Size(75, 24);
             tsView.Text = "View";
             // 
             // autoSizeColumnsToolStripMenuItem
@@ -1556,21 +1567,21 @@
             autoSizeColumnsToolStripMenuItem.CheckOnClick = true;
             autoSizeColumnsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             autoSizeColumnsToolStripMenuItem.Name = "autoSizeColumnsToolStripMenuItem";
-            autoSizeColumnsToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            autoSizeColumnsToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
             autoSizeColumnsToolStripMenuItem.Text = "Auto Size Columns";
             autoSizeColumnsToolStripMenuItem.Click += AutoSizeColumnsToolStripMenuItem_Click;
             // 
             // loadSavedToolStripMenuItem
             // 
             loadSavedToolStripMenuItem.Name = "loadSavedToolStripMenuItem";
-            loadSavedToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            loadSavedToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
             loadSavedToolStripMenuItem.Text = "Load Saved";
             loadSavedToolStripMenuItem.Click += LoadSavedToolStripMenuItem_Click;
             // 
             // resetLayoutToolStripMenuItem
             // 
             resetLayoutToolStripMenuItem.Name = "resetLayoutToolStripMenuItem";
-            resetLayoutToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            resetLayoutToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
             resetLayoutToolStripMenuItem.Text = "Reset";
             resetLayoutToolStripMenuItem.ToolTipText = "Remove the saved layout.  The default layout will be used next time the application is loaded.";
             resetLayoutToolStripMenuItem.Click += ResetToolStripMenuItem1_Click;
@@ -1579,7 +1590,7 @@
             // 
             saveToolStripMenuItem.Image = Properties.Resources.Save_16x;
             saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            saveToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
             saveToolStripMenuItem.Text = "Save";
             saveToolStripMenuItem.Click += SaveToolStripMenuItem_Click;
             // 
@@ -1589,7 +1600,7 @@
             lblPageSize.ForeColor = System.Drawing.Color.Red;
             lblPageSize.Location = new System.Drawing.Point(0, 0);
             lblPageSize.Name = "lblPageSize";
-            lblPageSize.Size = new System.Drawing.Size(1600, 16);
+            lblPageSize.Size = new System.Drawing.Size(1829, 21);
             lblPageSize.TabIndex = 5;
             lblPageSize.Text = "Top 1000 rows";
             lblPageSize.Visible = false;
@@ -1783,21 +1794,15 @@
             dataGridViewTextBoxColumn19.ReadOnly = true;
             dataGridViewTextBoxColumn19.Width = 125;
             // 
-            // timeCustomToolStripMenuItem
-            // 
-            timeCustomToolStripMenuItem.Name = "timeCustomToolStripMenuItem";
-            timeCustomToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            timeCustomToolStripMenuItem.Text = "Time - Custom";
-            timeCustomToolStripMenuItem.Click += TimeCustomToolStripMenuItem_Click;
-            // 
             // SlowQueries
             // 
-            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             Controls.Add(splitContainer1);
             Controls.Add(tsSummary);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             Name = "SlowQueries";
-            Size = new System.Drawing.Size(1600, 1029);
+            Size = new System.Drawing.Size(1829, 1372);
             Load += SlowQueries_Load;
             ((System.ComponentModel.ISupportInitialize)dgvSummary).EndInit();
             tsSummary.ResumeLayout(false);
