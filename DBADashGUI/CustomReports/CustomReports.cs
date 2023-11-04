@@ -72,7 +72,7 @@ namespace DBADashGUI.CustomReports
                 {
                     try
                     {
-                        customReport = JsonConvert.DeserializeObject<CustomReport>(meta);
+                        customReport = JsonConvert.DeserializeObject<CustomReport>(meta, new JsonSerializerSettings() { SerializationBinder = new SimpleBinder(), TypeNameHandling = TypeNameHandling.Auto });
                     }
                     catch (Exception ex)
                     {

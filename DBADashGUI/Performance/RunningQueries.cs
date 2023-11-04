@@ -443,10 +443,7 @@ namespace DBADashGUI.Performance
             else
             {
                 var plan = (string)row["query_plan"];
-                var path = System.IO.Path.GetTempFileName() + ".sqlplan";
-                System.IO.File.WriteAllText(path, plan);
-                var psi = new ProcessStartInfo(path) { UseShellExecute = true };
-                Process.Start(psi);
+                Common.ShowQueryPlan(plan);
             }
         }
 

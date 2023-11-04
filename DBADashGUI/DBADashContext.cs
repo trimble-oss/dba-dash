@@ -4,7 +4,7 @@ using DBADashGUI.CustomReports;
 
 namespace DBADashGUI
 {
-    public class DBADashContext
+    public class DBADashContext : ICloneable
     {
         public HashSet<int> InstanceIDs;
         public HashSet<int> AzureInstanceIDs;
@@ -25,5 +25,11 @@ namespace DBADashGUI
         public string DriveName { get; set; }
 
         public CustomReport Report { get; set; }
+
+        public object Clone()
+        {
+            var clone = (DBADashContext)MemberwiseClone();
+            return clone;
+        }
     }
 }

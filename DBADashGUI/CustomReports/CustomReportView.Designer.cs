@@ -80,6 +80,7 @@
             dgv.RowTemplate.Height = 29;
             dgv.Size = new System.Drawing.Size(414, 562);
             dgv.TabIndex = 0;
+            dgv.CellContentClick += Dgv_CellContentClick;
             // 
             // toolStrip1
             // 
@@ -227,7 +228,7 @@
             lnkParams.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             lnkParams.Location = new System.Drawing.Point(0, 0);
             lnkParams.Name = "lnkParams";
-            lnkParams.Size = new System.Drawing.Size(824, 273);
+            lnkParams.Size = new System.Drawing.Size(824, 271);
             lnkParams.TabIndex = 2;
             lnkParams.TabStop = true;
             lnkParams.Text = "Set Parameters";
@@ -261,7 +262,7 @@
             splitContainer2.Panel2.Controls.Add(lblParamsRequired);
             splitContainer2.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
             splitContainer2.Size = new System.Drawing.Size(824, 562);
-            splitContainer2.SplitterDistance = 273;
+            splitContainer2.SplitterDistance = 271;
             splitContainer2.TabIndex = 4;
             // 
             // lblParamsRequired
@@ -270,7 +271,7 @@
             lblParamsRequired.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             lblParamsRequired.Location = new System.Drawing.Point(0, 0);
             lblParamsRequired.Name = "lblParamsRequired";
-            lblParamsRequired.Size = new System.Drawing.Size(824, 285);
+            lblParamsRequired.Size = new System.Drawing.Size(824, 287);
             lblParamsRequired.TabIndex = 3;
             lblParamsRequired.Text = "Parameters are required to run the report";
             lblParamsRequired.TextAlign = System.Drawing.ContentAlignment.TopCenter;

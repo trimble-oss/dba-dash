@@ -1,5 +1,6 @@
 ﻿using DBADash;
 using DBADashGUI;
+using Microsoft.SqlServer.Management.Common;
 using System.Diagnostics;
 using System.Runtime.Versioning;
 
@@ -9,8 +10,21 @@ namespace DBADashSharedGUI
     {
         public static void OpenURL(string url)
         {
+            if (!IsValidUrl(url))
+            {
+                throw new InvalidArgumentException("Invalid URL: " + url);
+            };
             var psi = new ProcessStartInfo(url) { UseShellExecute = true };
             Process.Start(psi);
+        }
+
+        public static bool IsValidUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url)) return false;
+
+            var result = Uri.TryCreate(url, UriKind.Absolute, out var uriResult)
+                         && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+            return result;
         }
 
         [SupportedOSPlatform("windows")]
