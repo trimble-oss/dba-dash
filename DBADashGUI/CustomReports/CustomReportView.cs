@@ -1,14 +1,14 @@
 ﻿using DBADashGUI.Performance;
+using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
+using Microsoft.SqlServer.Management.Common;
+using Microsoft.SqlServer.Management.Smo;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using DocumentFormat.OpenXml.Office2016.Drawing.Command;
-using Microsoft.SqlServer.Management.Smo;
-using Microsoft.SqlServer.Management.Common;
 
 namespace DBADashGUI.CustomReports
 {
@@ -29,21 +29,64 @@ namespace DBADashGUI.CustomReports
             InitializeComponent();
             ShowParamPrompt(false);
             InitializeContextMenu();
+            this.ApplyTheme();
         }
 
         private void InitializeContextMenu()
         {
-            // Create ContextMenuStrip and add a "Rename Column" item
             columnContextMenu = new ContextMenuStrip();
-            var renameColumnMenuItem = new ToolStripMenuItem("Rename Column");
-            var setFormatStringMenuItem = new ToolStripMenuItem("Set Format String");
+            var renameColumnMenuItem = new ToolStripMenuItem("Rename Column", Properties.Resources.Rename_16x);
+            var setFormatStringMenuItem = new ToolStripMenuItem("Set Format String", Properties.Resources.Percentage_16x);
+            var addLink = new ToolStripMenuItem("Add Link", Properties.Resources.WebURL_16x);
             renameColumnMenuItem.Click += RenameColumnMenuItem_Click;
             convertLocalMenuItem.Click += ConvertLocalMenuItem_Click;
             setFormatStringMenuItem.Click += SetFormatStringMenuItem_Click;
+            addLink.Click += AddLink_Click;
             columnContextMenu.Items.Add(renameColumnMenuItem);
             columnContextMenu.Items.Add(convertLocalMenuItem);
             columnContextMenu.Items.Add(setFormatStringMenuItem);
+            columnContextMenu.Items.Add(addLink);
             dgv.MouseUp += Dgv_MouseUp;
+        }
+
+        private void AddLink_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var customReportResult = report.CustomReportResults[selectedTableIndex];
+                var col = dgv.Columns[clickedColumnIndex].DataPropertyName;
+                var linkColumnInfo = customReportResult.LinkColumns?.ContainsKey(col) == true
+                    ? customReportResult.LinkColumns[col]
+                    : null;
+                var colList = dgv.Columns.Cast<DataGridViewColumn>().Select(c => c.DataPropertyName).ToList();
+                var frm = new LinkColumnTypeSelector()
+                { LinkColumnInfo = linkColumnInfo, ColumnList = colList, Context = context, LinkColumn = col };
+                frm.ShowDialog();
+                if (frm.DialogResult != DialogResult.OK) return;
+                customReportResult.LinkColumns ??= new();
+                if (frm.LinkColumnInfo == null)
+                {
+                    customReportResult.LinkColumns.Remove(col);
+                }
+                else if (customReportResult.LinkColumns.ContainsKey(col))
+                {
+                    customReportResult.LinkColumns[col] = frm.LinkColumnInfo;
+                }
+                else
+                {
+                    customReportResult.LinkColumns.Add(col, frm.LinkColumnInfo);
+                }
+
+                dgv.Columns.Clear();
+                doAutoSize = true;
+                report.Update();
+                ShowTable();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error adding link: " + ex.Message, "Error", MessageBoxButtons.OK,
+                                       MessageBoxIcon.Error);
+            }
         }
 
         private void SetFormatStringMenuItem_Click(object sender, EventArgs e)
@@ -175,29 +218,62 @@ namespace DBADashGUI.CustomReports
             }
         }
 
-        private void ApplyCellFormats()
+        private void SetDataSource(DataTable dt)
         {
-            foreach (var f in report.CustomReportResults[selectedTableIndex].CellFormatString)
+            if (dgv.Columns.Count == 0)
             {
-                dgv.Columns[f.Key]!.DefaultCellStyle.Format = f.Value;
+                AddColumns(dt);
+            }
+
+            dgv.DataSource = dt;
+            dgv.ApplyTheme();
+        }
+
+        /// <summary>
+        /// Add columns to data grid view based on the columns in the data table and user preferences for column alias, cell format string and link columns
+        /// </summary>
+        /// <param name="dt"></param>
+        private void AddColumns(DataTable dt)
+        {
+            var customReportResults = report.CustomReportResults[selectedTableIndex];
+            foreach (DataColumn dataColumn in dt.Columns)
+            {
+                DataGridViewColumn column;
+
+                if (customReportResults.LinkColumns.ContainsKey(dataColumn.ColumnName))
+                {
+                    column = new DataGridViewLinkColumn();
+                }
+                else if (dataColumn.DataType == typeof(bool))
+                {
+                    column = new DataGridViewCheckBoxColumn();
+                }
+                else
+                {
+                    column = new DataGridViewTextBoxColumn();
+                }
+
+                column.SortMode = DataGridViewColumnSortMode.Automatic;
+                column.DefaultCellStyle.Format =
+                    customReportResults.CellFormatString
+                        .ContainsKey(dataColumn.ColumnName)
+                        ? customReportResults.CellFormatString[dataColumn.ColumnName]
+                        : "";
+
+                column.DataPropertyName = dataColumn.ColumnName;
+                column.Name = dataColumn.ColumnName;
+                column.HeaderText =
+                    customReportResults.ColumnAlias.ContainsKey(column.DataPropertyName)
+                        ? customReportResults.ColumnAlias[column.DataPropertyName]
+                        : dataColumn.Caption;
+                column.ValueType = dataColumn.DataType;
+                dgv.Columns.Add(column);
             }
         }
 
         /// <summary>
-        /// Rename columns if user has supplied aliases
+        /// Results combobox allows user to select which result set to display if the report returns multiple result sets
         /// </summary>
-        private void RenameColumns()
-        {
-            if (!(report.CustomReportResults[selectedTableIndex].ColumnAlias?.Count > 0)) return;
-            foreach (DataGridViewColumn column in dgv.Columns)
-            {
-                if (report.CustomReportResults[selectedTableIndex].ColumnAlias.TryGetValue(column.DataPropertyName, out var newHeaderText))
-                {
-                    column.HeaderText = newHeaderText;
-                }
-            }
-        }
-
         private void LoadResultsCombo()
         {
             suppressCboResultsIndexChanged = true;
@@ -266,9 +342,9 @@ namespace DBADashGUI.CustomReports
             }
             var dt = reportDS.Tables[selectedTableIndex];
             ConvertDateTimeColsToLocalTimeZone(dt);
-            dgv.DataSource = dt;
-            RenameColumns();
-            ApplyCellFormats();
+
+            SetDataSource(dt);
+
             if (report.CustomReportResults[selectedTableIndex].ColumnLayout.Count > 0) dgv.LoadColumnLayout(report.CustomReportResults[selectedTableIndex].ColumnLayout);
             else if (doAutoSize) dgv.AutoResizeColumns();
             doAutoSize = false;
@@ -321,12 +397,17 @@ namespace DBADashGUI.CustomReports
 
         public void SetContext(DBADashContext context)
         {
+            SetContext(context, null);
+        }
+
+        public void SetContext(DBADashContext context, List<CustomSqlParameter> sqlParams)
+        {
             doAutoSize = true;
             selectedTableIndex = 0;
             dgv.Columns.Clear();
             this.context = context;
             report = context.Report;
-            customParams = report.GetCustomSqlParameters();
+            customParams = sqlParams ?? report.GetCustomSqlParameters();
             tsParameters.Enabled = customParams.Count > 0;
             tsConfigure.Visible = report.CanEditReport;
             lblDescription.Text = report.Description;
@@ -484,7 +565,7 @@ namespace DBADashGUI.CustomReports
                 var parts = proc.Script(options);
                 var sb = new StringBuilder();
                 sb.AppendFormat("/*\n\t{0}\n\t{1}\n\n\tCustom report for DBA Dash.\n\thttp://dbadash.com\n\tGenerated: {2:yyyy-MM-dd HH:mm:ss} \n*/\n\n",
-                    report.ReportName.Replace("*/", ""), report.Description.Replace("*/", ""), DateTime.Now);
+                    report.ReportName.Replace("*/", ""), report.Description?.Replace("*/", ""), DateTime.Now);
                 foreach (var part in parts)
                 {
                     sb.AppendLine(part);
@@ -499,12 +580,29 @@ namespace DBADashGUI.CustomReports
                 sb.AppendFormat("VALUES('{0}','{1}','{2}')", report.SchemaName.SqlSingleQuote(),
                     report.ProcedureName.SqlSingleQuote(), meta.SqlSingleQuote());
 
-                var frm = new CodeViewer() { SQL = sb.ToString() };
+                var frm = new CodeViewer() { Code = sb.ToString() };
                 frm.ShowDialog();
             }
             else
             {
                 MessageBox.Show($"Unable to find procedure {report.QualifiedProcedureName}", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            var colName = dgv.Columns[e.ColumnIndex].DataPropertyName;
+            LinkColumnInfo linkColumnInfo = null;
+            report.CustomReportResults[selectedTableIndex].LinkColumns?.TryGetValue(colName, out linkColumnInfo);
+            try
+            {
+                linkColumnInfo?.Navigate(context, dgv.Rows[e.RowIndex]);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error navigating to link: " + ex.Message, "Error", MessageBoxButtons.OK,
+                                       MessageBoxIcon.Error);
             }
         }
     }

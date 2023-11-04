@@ -23,5 +23,7 @@ namespace DBADashGUI.CustomReports
         public List<KeyValuePair<string, PersistedColumnLayout>> ColumnLayout { get; set; } = new();
 
         public string ResultName { get; set; }
+
+        public Dictionary<string, LinkColumnInfo> LinkColumns { get; set; } = new();
     }
 }

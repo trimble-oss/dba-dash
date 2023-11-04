@@ -8,6 +8,9 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Windows.Forms;
+using DBADashGUI.SchemaCompare;
+using System.Xml.Linq;
+using System.Xml;
 
 namespace DBADashGUI
 {
@@ -294,26 +297,21 @@ namespace DBADashGUI
             return new DataGridViewCellStyle() { Format = format };
         }
 
-        public static void ShowCodeViewer(string sql, string title = "")
+        public static void ShowCodeViewer(string sql, string title = "", CodeEditor.CodeEditorModes Language = CodeEditor.CodeEditorModes.SQL)
         {
-            if (FrmCodeViewer == null || FrmCodeViewer.IsDisposed || FrmCodeViewer.Disposing)
+            FrmCodeViewer?.Close();
+            FrmCodeViewer = new CodeViewer
             {
-                FrmCodeViewer = new CodeViewer() { DisposeOnClose = false };
-            }
-            FrmCodeViewer.SQL = sql;
-            FrmCodeViewer.Text = "Code Viewer" + (string.IsNullOrEmpty(title) ? "" : " - " + title);
+                Language = Language,
+                Code = sql,
+                Text = "Code Viewer" + (string.IsNullOrEmpty(title) ? "" : " - " + title)
+            };
             if (FrmCodeViewer.WindowState == FormWindowState.Minimized)
             {
                 FrmCodeViewer.WindowState = FormWindowState.Normal;
             }
-            if (FrmCodeViewer.Visible)
-            {
-                FrmCodeViewer.Activate();
-            }
-            else
-            {
-                FrmCodeViewer.Show();
-            }
+            FrmCodeViewer.FormClosed += (s, e) => FrmCodeViewer = null;
+            FrmCodeViewer.Show();
         }
 
         public static Image Base64StringAsImage(string base64String)
@@ -393,6 +391,40 @@ namespace DBADashGUI
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
+            }
+        }
+
+        public static void ShowQueryPlan(string plan)
+        {
+            if (!IsValidExecutionPlan(plan))
+            {
+                throw new Exception("Invalid execution plan");
+            }
+            var path = System.IO.Path.GetTempFileName() + ".sqlplan";
+            System.IO.File.WriteAllText(path, plan);
+            var psi = new ProcessStartInfo(path) { UseShellExecute = true };
+            Process.Start(psi);
+        }
+
+        /// <summary>
+        /// Validate that a string is a valid SQL Server XML execution plan.  Basic validation to check that XML is well-formed and has a root node of ShowPlanXML
+        /// </summary>
+        /// <param name="xmlString">String to validate</param>
+        /// <returns></returns>
+        public static bool IsValidExecutionPlan(string xmlString)
+        {
+            if (string.IsNullOrEmpty(xmlString)) return false;
+            try
+            {
+                var doc = XDocument.Parse(xmlString);
+
+                // Basic validation check :The root node is ShowPlanXML
+                return doc.Root is { Name.LocalName: "ShowPlanXML" };
+            }
+            catch (XmlException)
+            {
+                // The XML is not well-formed
+                return false;
             }
         }
     }

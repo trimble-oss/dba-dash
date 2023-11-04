@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Bson;
+using Newtonsoft.Json.Serialization;
 
 namespace DBADashGUI.CustomReports
 {
@@ -36,7 +37,7 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         [JsonIgnore]
         public IEnumerable<Param> UserParams => Params == null ? new List<Param>() : Params.ParamList.Where(p =>
-                                                                    !(new string[] { "@INSTANCEIDS", "@INSTANCEID", "@DATABASEID", "@FROMDATE", "@TODATE" }).Contains(p.ParamName.ToUpper()));
+                                                                                                            !(new string[] { "@INSTANCEIDS", "@INSTANCEID", "@DATABASEID", "@FROMDATE", "@TODATE" }).Contains(p.ParamName.ToUpper()));
 
         [JsonIgnore]
         public bool IsRootLevel => Params != null && Params.ParamList.Any(p => p.ParamName.ToUpper() == "@INSTANCEIDS");
@@ -57,8 +58,8 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         [JsonIgnore]
         public bool TimeFilterSupported => Params.ParamList.Any(p =>
-                                                                    p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
-                                                                    p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase));
+                                                                                                            p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
+                                                                                                            p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase));
 
         /// <summary>
         /// Save customizations
@@ -77,12 +78,29 @@ namespace DBADashGUI.CustomReports
 
         public string Serialize() => JsonConvert.SerializeObject(this, Formatting.Indented,
             new JsonSerializerSettings
-            { NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore });
+            { NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore, TypeNameHandling = TypeNameHandling.Auto, SerializationBinder = new SimpleBinder() });
 
         /// <summary>
         /// Convert list of parameters for the report to list of CustomSqlParameters
         /// </summary>
         /// <returns></returns>
         public List<CustomSqlParameter> GetCustomSqlParameters() => UserParams.Select(p => p.CreateParameter()).ToList();
+    }
+
+    public class SimpleBinder : DefaultSerializationBinder
+    {
+        public override void BindToName(Type serializedType, out string assemblyName, out string typeName)
+        {
+            assemblyName = null; // Ignore the assembly name
+            typeName = serializedType.Name; // Use only the class name without namespace
+        }
+
+        public override Type BindToType(string assemblyName, string typeName)
+        {
+            var currentAssembly = typeof(SimpleBinder).Assembly;
+            var currentNamespace = this.GetType().Namespace;
+            var type = currentAssembly.GetType($"{currentNamespace}.{typeName}") ?? base.BindToType(assemblyName, typeName);
+            return type;
+        }
     }
 }

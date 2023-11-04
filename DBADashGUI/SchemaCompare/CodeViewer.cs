@@ -1,6 +1,7 @@
 ﻿using DBADashGUI.Theme;
 using System;
 using System.Windows.Forms;
+using DBADashGUI.SchemaCompare;
 
 namespace DBADashGUI
 {
@@ -14,7 +15,13 @@ namespace DBADashGUI
 
         public bool DisposeOnClose { get; set; } = true;
 
-        public string SQL
+        public CodeEditor.CodeEditorModes Language
+        {
+            get => codeEditor1.Mode;
+            set => codeEditor1.Mode = value;
+        }
+
+        public string Code
         {
             get => codeEditor1.Text;
             set
