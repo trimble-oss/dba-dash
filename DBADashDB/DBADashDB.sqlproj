@@ -712,6 +712,7 @@
     <Build Include="Security\RunUserReports.sql" />
     <Build Include="dbo\Tables\CustomReport.sql" />
     <Build Include="dbo\Stored Procedures\CustomReport_Upd.sql" />
+    <Build Include="Security\UserData.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
