@@ -42,6 +42,10 @@ namespace DBADash
         public static Dictionary<string, CustomCollection> CombineCollections(
             this Dictionary<string, CustomCollection> dict1, Dictionary<string, CustomCollection> dict2)
         {
+            if (dict1 == null && dict2 == null) return new Dictionary<string, CustomCollection>();
+            if (dict2 == null) return dict1;
+            if (dict1 == null) return dict2;
+
             var result = new Dictionary<string, CustomCollection>(dict1);
             foreach (var item in dict2.Where(item => !result.ContainsKey(item.Key)))
             {
