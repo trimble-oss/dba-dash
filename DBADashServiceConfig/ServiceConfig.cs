@@ -312,7 +312,8 @@ namespace DBADashServiceConfig
             dgvConnections.Columns.Add(new DataGridViewComboBoxColumn() { DataPropertyName = "IOCollectionLevel", HeaderText = "IO Collection Level", DataSource = Enum.GetValues(typeof(DBADashSource.IOCollectionLevels)) });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "WriteToSecondaryDestinations", HeaderText = "Write to Secondary Destinations" });
             dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Schedule", HeaderText = "Schedule", Text = "Schedule", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
-            dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Edit", HeaderText = "Edit", Text = "Edit", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
+            dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "CustomCollections", HeaderText = "Custom Collections", Text = "View/Edit", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
+            dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Edit", HeaderText = "Copy Connection", Text = "Copy", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
             dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Delete", HeaderText = "Delete", Text = "Delete", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
 
             txtJson.MaxLength = 0;
@@ -1081,6 +1082,28 @@ namespace DBADashServiceConfig
                 else
                 {
                     MessageBox.Show("Custom schedule configuration is only available for SQL connections", "Schedule", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            else if (e.RowIndex >= 0 && e.ColumnIndex == dgvConnections.Columns["CustomCollections"].Index)
+            {
+                var src = (DBADashSource)dgvConnections.Rows[e.RowIndex].DataBoundItem;
+                if (src.SourceConnection.Type == ConnectionType.SQL)
+                {
+                    var frm = new ManageCustomCollections()
+                    {
+                        CustomCollections = src.CustomCollections,
+                        ConnectionString = src.SourceConnection.ConnectionString
+                    };
+                    frm.ShowDialog();
+                    if (frm.DialogResult == DialogResult.OK)
+                    {
+                        src.CustomCollections = frm.CustomCollections;
+                        dgvConnections.Refresh();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Custom collections are only available for SQL connections", "Custom Collections", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             UpdateFromGrid();
