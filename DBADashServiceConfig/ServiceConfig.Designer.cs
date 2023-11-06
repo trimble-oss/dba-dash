@@ -67,6 +67,7 @@ namespace DBADashServiceConfig
             txtJson = new System.Windows.Forms.TextBox();
             tabOther = new System.Windows.Forms.TabPage();
             groupBox3 = new System.Windows.Forms.GroupBox();
+            bttnCustomCollections = new System.Windows.Forms.Button();
             lblSummaryRefreshCron = new System.Windows.Forms.Label();
             chkSummaryRefresh = new System.Windows.Forms.CheckBox();
             txtSummaryRefreshCron = new System.Windows.Forms.TextBox();
@@ -107,6 +108,7 @@ namespace DBADashServiceConfig
             txtGrantThreshold = new System.Windows.Forms.TextBox();
             label16 = new System.Windows.Forms.Label();
             tabAddConnectionOther = new System.Windows.Forms.TabPage();
+            bttnCustomCollectionsNew = new System.Windows.Forms.Button();
             chkWriteToSecondaryDestinations = new System.Windows.Forms.CheckBox();
             lblIOCollectionLevel = new System.Windows.Forms.Label();
             cboIOLevel = new System.Windows.Forms.ComboBox();
@@ -133,7 +135,6 @@ namespace DBADashServiceConfig
             label7 = new System.Windows.Forms.Label();
             txtDestination = new System.Windows.Forms.TextBox();
             tab1 = new ThemedTabControl();
-            bttnCustomCollections = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
@@ -587,6 +588,16 @@ namespace DBADashServiceConfig
             groupBox3.TabStop = false;
             groupBox3.Text = "Miscellaneous";
             // 
+            // bttnCustomCollections
+            // 
+            bttnCustomCollections.Location = new System.Drawing.Point(624, 149);
+            bttnCustomCollections.Name = "bttnCustomCollections";
+            bttnCustomCollections.Size = new System.Drawing.Size(197, 55);
+            bttnCustomCollections.TabIndex = 46;
+            bttnCustomCollections.Text = "Custom Collections";
+            bttnCustomCollections.UseVisualStyleBackColor = true;
+            bttnCustomCollections.Click += BttnCustomCollections_Click;
+            // 
             // lblSummaryRefreshCron
             // 
             lblSummaryRefreshCron.AutoSize = true;
@@ -1026,6 +1037,7 @@ namespace DBADashServiceConfig
             // 
             // tabAddConnectionOther
             // 
+            tabAddConnectionOther.Controls.Add(bttnCustomCollectionsNew);
             tabAddConnectionOther.Controls.Add(chkWriteToSecondaryDestinations);
             tabAddConnectionOther.Controls.Add(lblIOCollectionLevel);
             tabAddConnectionOther.Controls.Add(cboIOLevel);
@@ -1045,6 +1057,16 @@ namespace DBADashServiceConfig
             tabAddConnectionOther.TabIndex = 3;
             tabAddConnectionOther.Text = "Other";
             tabAddConnectionOther.UseVisualStyleBackColor = true;
+            // 
+            // bttnCustomCollectionsNew
+            // 
+            bttnCustomCollectionsNew.Location = new System.Drawing.Point(860, 8);
+            bttnCustomCollectionsNew.Name = "bttnCustomCollectionsNew";
+            bttnCustomCollectionsNew.Size = new System.Drawing.Size(193, 37);
+            bttnCustomCollectionsNew.TabIndex = 32;
+            bttnCustomCollectionsNew.Text = "Custom Collections";
+            bttnCustomCollectionsNew.UseVisualStyleBackColor = true;
+            bttnCustomCollectionsNew.Click += BttnCustomCollectionsNew_Click;
             // 
             // chkWriteToSecondaryDestinations
             // 
@@ -1359,16 +1381,6 @@ namespace DBADashServiceConfig
             tab1.Size = new System.Drawing.Size(1137, 765);
             tab1.TabIndex = 22;
             // 
-            // bttnCustomCollections
-            // 
-            bttnCustomCollections.Location = new System.Drawing.Point(624, 149);
-            bttnCustomCollections.Name = "bttnCustomCollections";
-            bttnCustomCollections.Size = new System.Drawing.Size(197, 55);
-            bttnCustomCollections.TabIndex = 46;
-            bttnCustomCollections.Text = "Custom Collections";
-            bttnCustomCollections.UseVisualStyleBackColor = true;
-            bttnCustomCollections.Click += BttnCustomCollections_Click;
-            // 
             // ServiceConfig
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -1528,6 +1540,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.TextBox txtSummaryRefreshCron;
         private System.Windows.Forms.Label lblConfigFileRetention;
         private System.Windows.Forms.Button bttnCustomCollections;
+        private System.Windows.Forms.Button bttnCustomCollectionsNew;
     }
 }
 

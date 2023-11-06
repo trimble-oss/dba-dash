@@ -25,12 +25,27 @@ namespace DBADashServiceConfig
         {
             InitializeComponent();
             this.ApplyTheme();
+            CustomCollectionsNew = new();
         }
 
         private string originalJson = "";
         private CollectionConfig collectionConfig = new();
         private ServiceController svcCtrl;
         private bool isInstalled = false;
+        private Dictionary<string, CustomCollection> _customCollectionsNew;
+
+        private string[] NewSourceConnections => txtSource.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+
+        private Dictionary<string, CustomCollection> CustomCollectionsNew
+        {
+            get => _customCollectionsNew;
+            set
+            {
+                _customCollectionsNew = value;
+                bttnCustomCollectionsNew.Text = $"Custom Collections ({_customCollectionsNew?.Count ?? 0})";
+                bttnCustomCollectionsNew.Font = _customCollectionsNew?.Count > 0 ? new Font(bttnCustomCollectionsNew.Font, FontStyle.Bold) : new Font(bttnCustomCollectionsNew.Font, FontStyle.Regular);
+            }
+        }
 
         private void BttnAdd_Click(object sender, EventArgs e)
         {
@@ -50,7 +65,7 @@ namespace DBADashServiceConfig
             bool addUnvalidated = false;
             bool doNotAddUnvalidated = false;
             bool doesNotHaveUpdateApproval = false;
-            foreach (string splitSource in txtSource.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None))
+            foreach (string splitSource in NewSourceConnections)
             {
                 string sourceString = splitSource.Trim();
                 if (string.IsNullOrEmpty(splitSource))
@@ -81,8 +96,9 @@ namespace DBADashServiceConfig
                     CollectSessionWaits = chkCollectSessionWaits.Checked,
                     ScriptAgentJobs = chkScriptJobs.Checked,
                     IOCollectionLevel = (DBADashSource.IOCollectionLevels)cboIOLevel.SelectedItem,
-                    WriteToSecondaryDestinations = chkWriteToSecondaryDestinations.Checked
+                    WriteToSecondaryDestinations = chkWriteToSecondaryDestinations.Checked,
                 };
+                src.CustomCollections = src.SourceConnection.Type == ConnectionType.SQL ? CustomCollectionsNew : null;
                 bool validated = ValidateSource(sourceString);
 
                 string validationError = "";
@@ -750,6 +766,7 @@ namespace DBADashServiceConfig
             {
                 src.RunningQueryPlanThreshold = null;
             }
+            CustomCollectionsNew = src.CustomCollections;
             SetAvailableOptionsForSource();
         }
 
@@ -1389,6 +1406,36 @@ namespace DBADashServiceConfig
             if (frm.ShowDialog() != DialogResult.OK) return;
             collectionConfig.CustomCollections = frm.CustomCollections;
             SetJson();
+        }
+
+        private void BttnCustomCollectionsNew_Click(object sender, EventArgs e)
+        {
+            var connectionString = NewSourceConnections[0];
+            var src = new DBADashSource(connectionString);
+            if (src.SourceConnection.Type == ConnectionType.SQL)
+            {
+                try
+                {
+                    src.SourceConnection.Validate();
+                    connectionString = src.SourceConnection.ConnectionString;
+                }
+                catch
+                {
+                    var dlg = new DBConnection() { ConnectionString = connectionString };
+                    dlg.ShowDialog();
+                    if (dlg.DialogResult != DialogResult.OK) return;
+                }
+            }
+            else
+            {
+                MessageBox.Show("Invalid connection type for custom collections", "Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                return;
+            }
+
+            var frm = new ManageCustomCollections() { CustomCollections = CustomCollectionsNew, ConnectionString = connectionString };
+            if (frm.ShowDialog() != DialogResult.OK) return;
+            CustomCollectionsNew = frm.CustomCollections;
         }
     }
 }
