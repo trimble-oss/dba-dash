@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ManageCustomCollections));
             txtName = new System.Windows.Forms.TextBox();
             lblName = new System.Windows.Forms.Label();
             cboProcedureName = new System.Windows.Forms.ComboBox();
@@ -53,6 +54,7 @@
             lblCron = new System.Windows.Forms.Label();
             linkLabel3 = new System.Windows.Forms.LinkLabel();
             linkLabel4 = new System.Windows.Forms.LinkLabel();
+            toolTip1 = new System.Windows.Forms.ToolTip(components);
             ((System.ComponentModel.ISupportInitialize)numTimeout).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dgvCustom).BeginInit();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
@@ -74,6 +76,7 @@
             lblName.Size = new System.Drawing.Size(123, 20);
             lblName.TabIndex = 1;
             lblName.Text = "Collection Name:";
+            toolTip1.SetToolTip(lblName, resources.GetString("lblName.ToolTip"));
             // 
             // cboProcedureName
             // 
@@ -93,6 +96,7 @@
             label1.Size = new System.Drawing.Size(127, 20);
             label1.TabIndex = 3;
             label1.Text = "Stored Procedure:";
+            toolTip1.SetToolTip(label1, resources.GetString("label1.ToolTip"));
             // 
             // txtCron
             // 
@@ -110,6 +114,7 @@
             label2.Size = new System.Drawing.Size(114, 20);
             label2.TabIndex = 5;
             label2.Text = "Schedule (Cron)";
+            toolTip1.SetToolTip(label2, "Either specify a Quartz compatible cron or enter an interval time in seconds");
             // 
             // numTimeout
             // 
@@ -142,6 +147,7 @@
             label3.Size = new System.Drawing.Size(67, 20);
             label3.TabIndex = 8;
             label3.Text = "Timeout:";
+            toolTip1.SetToolTip(label3, "Specify a command timout for your query if required. ");
             // 
             // dgvCustom
             // 
@@ -177,6 +183,7 @@
             chkRunOnStart.Size = new System.Drawing.Size(159, 24);
             chkRunOnStart.TabIndex = 9;
             chkRunOnStart.Text = "Run on service start";
+            toolTip1.SetToolTip(chkRunOnStart, "Option to run the collection when the service starts instead of waiting until the next schedule.  ");
             chkRunOnStart.UseVisualStyleBackColor = true;
             // 
             // bttnUpdate
@@ -365,5 +372,6 @@
         private System.Windows.Forms.Label lblCron;
         private System.Windows.Forms.LinkLabel linkLabel4;
         private System.Windows.Forms.LinkLabel linkLabel3;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }

@@ -117,6 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>275, 17</value>
+  </metadata>
+  <data name="lblName.ToolTip" xml:space="preserve">
+    <value>Name of the collection.  
+This impacts the name of the stored procedure DBA Dash will call to import the collection.  It also impacts the name of the user defined table type that is used as input for the stored procedure.
+Click the Get Script link after adding the collection for examples.</value>
+  </data>
+  <data name="label1.ToolTip" xml:space="preserve">
+    <value>Stored procedure to run.  
+DBA Dash service account needs to have EXECUTE permission on the stored procedure.
+If you need to specify parameters, either set default values on the stored procedure or create a new stored procedure that passes the required parameter values.</value>
+  </data>
   <metadata name="errorProvider1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>

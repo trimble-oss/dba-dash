@@ -342,7 +342,8 @@ ORDER BY ProcName", cn);
         {
             cboProcedureName.Text = CustomCollections[name].ProcedureName;
             txtCron.Text = CustomCollections[name].Schedule;
-            numTimeout.Value = Convert.ToDecimal(CustomCollections[name].CommandTimeout);
+            chkDefaultTimeout.Checked = CustomCollections[name].CommandTimeout == null;
+            numTimeout.Value = CustomCollections[name].CommandTimeout == null ? numTimeout.Value : Convert.ToDecimal(CustomCollections[name].CommandTimeout);
             chkRunOnStart.Checked = CustomCollections[name].RunOnServiceStart;
             txtName.Text = name;
         }
