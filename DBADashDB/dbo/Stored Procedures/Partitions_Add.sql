@@ -1,64 +1,38 @@
 ﻿CREATE PROC dbo.Partitions_Add
 AS
+DECLARE @SchemaName SYSNAME
 DECLARE @TableName SYSNAME
 DECLARE @PeriodType CHAR(1)
 DECLARE @PeriodCount INT
-DECLARE @DaysInFuture INT=14
 DECLARE @ErrorMessages NVARCHAR(MAX)=''
-DECLARE @PartitionedTables TABLE(
-	TableName SYSNAME PRIMARY KEY,
-	PeriodType CHAR(1),
-	PeriodCount INT
-)
-INSERT INTO @PartitionedTables
-VALUES -- Daily Partitions
-	('Waits','d',14),
-	('CPU','d',14),
-	('AzureDBResourceStats','d',14),
-	('AzureDBElasticPoolResourceStats','d',14),
-	('ObjectExecutionStats','d',14),
-	('DBIOStats','d',14),
-	('SlowQueries','d',14),
-	('CustomChecksHistory','d',14),
-	('PerformanceCounters','d',14),
-	('JobHistory','d',14),
-	('RunningQueries','d',14),
-	('MemoryUsage','d',14),
-	('SessionWaits','d',14),
-	-- Monthly Partitions
-	('AzureDBElasticPoolResourceStats_60MIN','m',3),
-	('AzureDBResourceStats_60MIN','m',3),
-	('CPU_60MIN','m',3),
-	('DBIOStats_60MIN','m',3),
-	('Waits_60MIN','m',3),
-	('ObjectExecutionStats_60MIN','m',3),
-	('PerformanceCounters_60MIN','m',3),
-	('JobStats_60MIN','m',3),
-	('IdentityColumnsHistory','m',3)
 
 DECLARE cDaily CURSOR FAST_FORWARD LOCAL FOR 
-			SELECT TableName,
+			SELECT	SchemaName,
+					TableName,
 					PeriodType,
 					PeriodCount
-			FROM @PartitionedTables
+			FROM dbo.PartitionConfiguration PC			
 			WHERE NOT EXISTS(SELECT 1 
-							FROM dbo.PartitionBoundaryHelper('PF_' + TableName,TableName) h
+							FROM dbo.PartitionHelper PH
 							WHERE (
-									( DATEDIFF(d, GETUTCDATE(), lb) >= PeriodCount AND PeriodType='d')
-									OR (DATEDIFF(m, GETUTCDATE(), lb) >= PeriodCount AND PeriodType='m')
+									( DATEDIFF(d, GETUTCDATE(), PH.LowerBound) >= PC.PeriodCount AND PC.PeriodType='d')
+									OR (DATEDIFF(m, GETUTCDATE(), PH.LowerBound) >= PC.PeriodCount AND PC.PeriodType='m')
 								)
+							AND PH.TableName = PC.TableName
+							AND PH.SchemaName = PC.SchemaName
 							)
-			ORDER BY TableName
+											
+			ORDER BY IsSystem DESC, TableName
 
 OPEN cDaily
 WHILE 1=1
 BEGIN
-	FETCH NEXT FROM cDaily INTO @TableName,@PeriodType,@PeriodCount
+	FETCH NEXT FROM cDaily INTO @SchemaName, @TableName,@PeriodType,@PeriodCount
 	IF @@FETCH_STATUS <> 0 
 		BREAK
 	PRINT @TableName
 	BEGIN TRY
-		EXEC dbo.Partitions_Create @TableName = @TableName,@PeriodCount=@PeriodCount,@PeriodType=@PeriodType
+		EXEC dbo.Partitions_Create @SchemaName=@SchemaName, @TableName = @TableName,@PeriodCount=@PeriodCount,@PeriodType=@PeriodType
 	END TRY
 	BEGIN CATCH
 		IF @@TRANCOUNT>0
