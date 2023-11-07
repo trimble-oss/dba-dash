@@ -235,10 +235,18 @@ namespace DBADash
         private static readonly HashSet<int> ExcludedErrorCodes = new()
         {
             -2, // retryPolicy excludes query timeout #581
-            2812, // Could not find stored procedure '%.*ls'.
+            218, // Could not find the type '%.*ls'. Either it does not exist or you do not have the necessary permission.
+            219, // The type '%.*ls' already exists, or you do not have permission to create it.
+            229, // The %ls permission was denied on the object '%.*ls', database '%.*ls', schema '%.*ls'.
+            230, //	The %ls permission was denied on the column '%.*ls' of the object '%.*ls', database '%.*ls', schema '%.*ls'.
+            245,   // Conversion failed when converting the %ls value '%.*ls' to data type %ls.
+            262, // %ls permission denied in database '%.*ls'.
+            297, //The user does not have permission to perform this action.
+            300, // %ls permission was denied on object '%.*ls', database '%.*ls'.
             349,  // The procedure "%.*ls" has no parameter named "%.*ls".
             500,  // Trying to pass a table-valued parameter with %d column(s) where the corresponding user-defined table type requires %d column(s).
-            245   // Conversion failed when converting the %ls value '%.*ls' to data type %ls.
+            2812, // Could not find stored procedure '%.*ls'.
+            6335, // XML datatype instance has too many levels of nested nodes. Maximum allowed depth is %d levels.
         };
 
         public static bool ShouldRetry(Exception ex)
