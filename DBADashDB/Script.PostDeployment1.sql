@@ -1,9 +1,6 @@
 ﻿/*
 	Post-Deployment section
 */
-:r ."\dbo\Functions\PartitionBoundaryHelper.sql"
-:r ."\dbo\Functions\PartitionFunctionName.sql"
-
 /* Security */
 GRANT SELECT ON SCHEMA::dbo TO App
 GRANT EXECUTE ON SCHEMA::dbo TO App;
@@ -1906,3 +1903,15 @@ UPDATE dbo.Instances
 WHERE (ProductMinorVersion IS NULL OR ProductBuild IS NULL OR ProductRevision IS NULL)
 
 ALTER DATABASE [$(DatabaseName)] SET AUTO_UPDATE_STATISTICS_ASYNC ON WITH NO_WAIT
+
+/* Cleanup old objects */
+IF OBJECT_ID('dbo.PartitionBoundaryHelper') IS NOT NULL
+BEGIN
+	PRINT 'Drop dbo.PartitionBoundaryHelper'
+	DROP FUNCTION dbo.PartitionBoundaryHelper
+END
+IF OBJECT_ID('dbo.PartitionFunctionName') IS NOT NULL
+BEGIN
+	PRINT 'Drop dbo.PartitionFunctionName'
+	DROP FUNCTION dbo.PartitionFunctionName
+END

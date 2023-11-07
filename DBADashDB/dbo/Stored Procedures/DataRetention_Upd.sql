@@ -1,19 +1,33 @@
-﻿CREATE PROC dbo.DataRetention_Upd(@TableName SYSNAME,@RetentionDays INT)
+﻿CREATE PROC dbo.DataRetention_Upd(
+	@SchemaName SYSNAME='dbo',
+	@TableName SYSNAME,
+	@RetentionDays INT,
+	@Validate BIT=1
+)
 AS
 UPDATE dbo.DataRetention
-SET RetentionDays = @RetentionDays
+	SET RetentionDays = @RetentionDays
 WHERE TableName =@TableName
+AND SchemaName = @SchemaName
+
 IF @@ROWCOUNT=0
 BEGIN
-	IF EXISTS(SELECT * FROM dbo.PartitionFunctionName(@TableName))
+	IF @Validate = 0 
+		OR EXISTS(
+				SELECT 1 
+				FROM dbo.PartitionHelper PH
+				WHERE PH.TableName = @TableName
+				AND PH.SchemaName = @SchemaName
+			)
 	BEGIN
 		INSERT INTO dbo.DataRetention
 		(
+			SchemaName,
 			TableName,
 			RetentionDays
 		)
 		VALUES
-		(@TableName,@RetentionDays)
+		(@SchemaName,@TableName,@RetentionDays)
 	END
 	ELSE
 	BEGIN

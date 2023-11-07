@@ -245,7 +245,6 @@
     <Build Include="Report\Stored Procedures\LogShippingSummary_Get.sql" />
     <Build Include="dbo\Tables\Waits_60MIN.sql" />
     <Build Include="dbo\Views\NonDefaultDBConfig.sql" />
-    <None Include="dbo\Functions\PartitionBoundaryHelper.sql" />
     <Build Include="dbo\Stored Procedures\PartitionTable_Cleanup.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
@@ -408,7 +407,6 @@
     <Build Include="Storage\PS_DBIOStats.sql" />
     <Build Include="dbo\Tables\CPU_60MIN.sql" />
     <Build Include="dbo\Stored Procedures\DBSpace_Get.sql" />
-    <None Include="dbo\Functions\PartitionFunctionName.sql" />
     <Build Include="dbo\Stored Procedures\DataRetention_Upd.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
@@ -713,6 +711,8 @@
     <Build Include="dbo\Tables\CustomReport.sql" />
     <Build Include="dbo\Stored Procedures\CustomReport_Upd.sql" />
     <Build Include="Security\UserData.sql" />
+    <Build Include="dbo\Views\PartitionHelper.sql" />
+    <Build Include="dbo\Views\PartitionConfiguration.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

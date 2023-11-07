@@ -2,7 +2,9 @@
 AS
 SET NOCOUNT ON
 SET XACT_ABORT ON
-DECLARE @TableName SYSNAME,@RetentionDays INT
+DECLARE @SchemaName SYSNAME
+DECLARE @TableName SYSNAME
+DECLARE @RetentionDays INT
 DECLARE @Errors VARCHAR(MAX) = ''
 DECLARE @Error VARCHAR(MAX)
 /*	Prevent simultaneous execution of partition cleanup.
@@ -23,21 +25,28 @@ AND (S.SettingValue < DATEADD(mi,-20,GETUTCDATE())
 IF @@ROWCOUNT= 1
 BEGIN
 	DECLARE cTables CURSOR FAST_FORWARD LOCAL FOR
-		SELECT DR.TableName,DR.RetentionDays
+		SELECT	DR.SchemaName,
+				DR.TableName,
+				DR.RetentionDays
 		FROM dbo.DataRetention DR
-		CROSS APPLY dbo.PartitionFunctionName(DR.TableName) PF
 		WHERE DR.RetentionDays > 0
+		AND EXISTS(	SELECT 1
+					FROM dbo.PartitionHelper PH
+					WHERE PH.SchemaName = DR.SchemaName
+					AND PH.TableName = DR.TableName
+					)
+		ORDER BY CASE WHEN DR.SchemaName = 'dbo' THEN 1 ELSE 2 END, DR.TableName
 	
 	OPEN cTables
 	WHILE 1=1
 	BEGIN
-		FETCH NEXT FROM cTables INTO @TableName,@RetentionDays
+		FETCH NEXT FROM cTables INTO @SchemaName, @TableName, @RetentionDays
 		IF @@FETCH_STATUS<>0
 			BREAK
 		PRINT 'Cleanup ' + @TableName
 
 		BEGIN TRY
-			EXEC dbo.PartitionTable_Cleanup @TableName=@TableName,@DaysToKeep=@RetentionDays
+			EXEC dbo.PartitionTable_Cleanup @SchemaName = @SchemaName, @TableName=@TableName, @DaysToKeep=@RetentionDays
 		END TRY 
 		BEGIN CATCH 
 			/* Continue processing if there is an issue with partition switching for a particular table and throw error at end */

@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.Partitions_Create(
 	@TableName SYSNAME,
+	@SchemaName SYSNAME='dbo',
 	@PeriodCount INT,
 	/* Valid values : m (Month)
 					  d (Day)
@@ -13,13 +14,15 @@ AS
 */
 DECLARE @PartitionFunction SYSNAME
 DECLARE @PartitionScheme SYSNAME
+DECLARE @Boundary DATETIME2
 
-SELECT TOP(1) @PartitionScheme = ps.name,
-       @PartitionFunction = pf.name
-FROM sys.indexes i
-JOIN sys.partition_schemes ps ON ps.data_space_id = i.data_space_id
-JOIN sys.partition_functions pf  ON pf.function_id = ps.function_id
-WHERE i.object_id = OBJECT_ID(@TableName);
+SELECT TOP(1)	@Boundary= PH.LowerBound, 
+				@PartitionScheme= PH.PartitionSchemeName, 
+				@PartitionFunction = PH.PartitionFunctionName
+FROM dbo.PartitionHelper PH
+WHERE PH.TableName = @TableName
+AND PH.SchemaName = @SchemaName
+ORDER BY PH.partition_number DESC
 
 IF (@PartitionFunction IS NULL)
 BEGIN
@@ -34,11 +37,6 @@ END
 
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = N'
-DECLARE @Boundary DATETIME2(3)
-SELECT TOP(1) @Boundary= lb 
-FROM dbo.PartitionBoundaryHelper(@PartitionFunction,@TableName)
-ORDER BY partition_number DESC
-
 SELECT @Boundary = CASE WHEN @Boundary IS NULL THEN DATEADD(' + @PeriodType + ', DATEDIFF(' + @PeriodType + ', 0, GETUTCDATE())-1, 0) 
 					WHEN @Boundary < GETUTCDATE() THEN DATEADD(' + @PeriodType + ', DATEDIFF(' + @PeriodType + ', 0, GETUTCDATE()), 0) 
 					ELSE @Boundary END
@@ -70,6 +68,6 @@ BEGIN;
 	RETURN;
 END
 
-EXEC sp_executesql @SQL,N'@PartitionFunction SYSNAME,@TableName SYSNAME,@PeriodCount INT',@PartitionFunction,@TableName,@PeriodCount
+EXEC sp_executesql @SQL,N'@PeriodCount INT,@Boundary DATETIME2',@PeriodCount,@Boundary
 
 COMMIT
