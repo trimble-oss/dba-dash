@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using DBADash;
 using DBADashGUI.SchemaCompare;
+using DocumentFormat.OpenXml.Office2010.Ink;
 using Newtonsoft.Json;
 using static DBADashGUI.SchemaCompare.CodeEditor;
 
@@ -16,14 +17,14 @@ namespace DBADashGUI.CustomReports
 {
     public abstract class LinkColumnInfo
     {
-        public abstract void Navigate(DBADashContext context, DataGridViewRow row);
+        public abstract void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex);
     }
 
     public class UrlLinkColumnInfo : LinkColumnInfo
     {
         public string TargetColumn { get; set; }
 
-        public override void Navigate(DBADashContext context, DataGridViewRow row)
+        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex)
         {
             var url = row.Cells[TargetColumn].Value.DBNullToNull().ToString() ?? string.Empty;
             if (CommonShared.IsValidUrl(url))
@@ -57,7 +58,7 @@ namespace DBADashGUI.CustomReports
             }
         }
 
-        public override void Navigate(DBADashContext context, DataGridViewRow row)
+        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex)
         {
             var text = row.Cells[TargetColumn].Value.DBNullToNull() as string;
             if (string.IsNullOrEmpty(text)) return;
@@ -69,7 +70,7 @@ namespace DBADashGUI.CustomReports
     {
         public string TargetColumn { get; set; }
 
-        public override void Navigate(DBADashContext context, DataGridViewRow row)
+        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex)
         {
             var queryPlan = row.Cells[TargetColumn].Value.DBNullToNull() as string;
             if (!Common.IsValidExecutionPlan(queryPlan))
@@ -89,7 +90,7 @@ namespace DBADashGUI.CustomReports
 
         private CustomReportViewer customReportViewer;
 
-        public override void Navigate(DBADashContext context, DataGridViewRow row)
+        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex)
         {
             customReportViewer?.Close();
             var report = CustomReports.GetCustomReports().FirstOrDefault(r => r.ProcedureName == ReportProcedureName);
@@ -102,7 +103,12 @@ namespace DBADashGUI.CustomReports
                 var param = customParams.FirstOrDefault(p => p.Param.ParameterName == mapping.Key);
                 if (param == null) continue;
                 param.UseDefaultValue = false;
-                param.Param.Value = row.Cells[mapping.Value].Value;
+                var value = row.Cells[mapping.Value].Value;
+                if (row.Cells[mapping.Value].ValueType == typeof(DateTime) && !context.Report.CustomReportResults[selectedTableIndex].DoNotConvertToLocalTimeZone.Contains(mapping.Value))
+                {
+                    value = ((DateTime)value).AppTimeZoneToUtc();
+                }
+                param.Param.Value = value;
             }
             customReportViewer = new CustomReportViewer() { Context = newContext, CustomParams = customParams };
             customReportViewer.FormClosed += (s, e) => customReportViewer = null;
