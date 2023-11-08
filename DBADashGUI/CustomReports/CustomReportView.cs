@@ -597,7 +597,7 @@ namespace DBADashGUI.CustomReports
             report.CustomReportResults[selectedTableIndex].LinkColumns?.TryGetValue(colName, out linkColumnInfo);
             try
             {
-                linkColumnInfo?.Navigate(context, dgv.Rows[e.RowIndex]);
+                linkColumnInfo?.Navigate(context, dgv.Rows[e.RowIndex], selectedTableIndex);
             }
             catch (Exception ex)
             {
