@@ -3,6 +3,7 @@ using DBADashGUI;
 using Microsoft.SqlServer.Management.Common;
 using System.Diagnostics;
 using System.Runtime.Versioning;
+using DBADashGUI.Theme;
 
 namespace DBADashSharedGUI
 {
@@ -89,57 +90,100 @@ namespace DBADashSharedGUI
             Application.Exit();
         }
 
-        public static DialogResult ShowInputDialog(ref string input, string title, char passwordChar = '\0')
+        [SupportedOSPlatform("windows")]
+        public static DialogResult ShowInputDialog(ref string input, string title, char passwordChar = '\0', string? description = null)
         {
-            System.Drawing.Size size = new(400, 80);
-            Form inputBox = new()
+            var inputBox = new Form
             {
-                FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog,
-                ClientSize = size,
-                Text = title,
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                StartPosition = FormStartPosition.CenterParent,
                 MaximizeBox = false,
                 MinimizeBox = false,
-                StartPosition = FormStartPosition.CenterParent,
-                BackColor = DashColors.TrimbleBlueDark
+                Text = title
             };
 
-            System.Windows.Forms.TextBox textBox = new()
+            var panel = new TableLayoutPanel
             {
-                Size = new System.Drawing.Size(size.Width - 10, 25),
-                Location = new System.Drawing.Point(5, 5),
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 3, // One for the description, one for the textbox, one for the button row
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                Padding = new Padding(10)
+            };
+            inputBox.Controls.Add(panel);
+
+            // If a description is provided, add a label for it
+            if (!string.IsNullOrEmpty(description))
+            {
+                var descriptionLabel = new Label
+                {
+                    AutoSize = true,
+                    Text = description,
+                    Margin = new Padding(5),
+                    TextAlign = ContentAlignment.MiddleLeft
+                };
+                panel.Controls.Add(descriptionLabel, 0, 0);
+            }
+            else
+            {
+                // Reduce the row count if there is no description
+                panel.RowCount = 2;
+            }
+
+            var textBox = new TextBox
+            {
+                Dock = DockStyle.Top,
                 Text = input,
+                MinimumSize = new Size(400, 30),
                 PasswordChar = passwordChar
             };
-            inputBox.Controls.Add(textBox);
+            panel.Controls.Add(textBox, 0, 1);
 
-            Button okButton = new()
+            // Panel for buttons
+            var buttonPanel = new FlowLayoutPanel
             {
-                DialogResult = System.Windows.Forms.DialogResult.OK,
-                Name = "okButton",
-                Size = new System.Drawing.Size(75, 30),
+                Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.RightToLeft,
+                Padding = new Padding(5),
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink
+            };
+            panel.Controls.Add(buttonPanel, 0, 2);
+
+            var okButton = new Button
+            {
+                DialogResult = DialogResult.OK,
                 Text = "&OK",
-                Location = new System.Drawing.Point(size.Width - 80 - 80, 39),
-                BackColor = SystemColors.Control
+                Width = 75,
+                Height = 30,
+                Margin = new Padding(5)
             };
-            inputBox.Controls.Add(okButton);
+            buttonPanel.Controls.Add(okButton);
 
-            Button cancelButton = new()
+            var cancelButton = new Button
             {
-                DialogResult = System.Windows.Forms.DialogResult.Cancel,
-                Name = "cancelButton",
-                Size = new System.Drawing.Size(75, 30),
+                DialogResult = DialogResult.Cancel,
                 Text = "&Cancel",
-                Location = new System.Drawing.Point(size.Width - 80, 39),
-                BackColor = SystemColors.Control
+                Width = 75,
+                Height = 30,
+                Margin = new Padding(5)
             };
-            inputBox.Controls.Add(cancelButton);
+            buttonPanel.Controls.Add(cancelButton);
 
+            // Set the form's AcceptButton and CancelButton properties to handle the Enter and Escape keys
             inputBox.AcceptButton = okButton;
             inputBox.CancelButton = cancelButton;
 
-            DialogResult result = inputBox.ShowDialog();
-            input = textBox.Text;
-            return result;
+            // Size the form to fit the contents with some padding
+            inputBox.AutoSize = true;
+            inputBox.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+
+            inputBox.ApplyTheme();
+            // Show the form as a modal dialog box
+            var result = inputBox.ShowDialog();
+            input = textBox.Text; // Update the input parameter with the text entered by the user
+            return result; // Return the result of the dialog box
         }
     }
 }
