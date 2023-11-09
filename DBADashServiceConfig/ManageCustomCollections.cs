@@ -391,7 +391,7 @@ ORDER BY ProcName", cn);
 
             sb.AppendLine("INSERT INTO dbo.CustomReport(SchemaName,ProcedureName,MetaData)");
             sb.AppendLine(
-                $"VALUES('UserReport','{Name} Snapshots','{{ \"CustomReportResults\": {{  \"0\": {{   \"LinkColumns\": {{ \"SnapshotDate\": {{ \"$type\": \"DrillDownLinkColumnInfo\", \"ReportProcedureName\": \"{Name} Example\",  \"ColumnToParameterMap\": {{ \"@SnapshotDate\": \"SnapshotDate\" }} }} }} }} }} }}')");
+                $"VALUES('UserReport','{name} Snapshots','{{ \"CustomReportResults\": {{  \"0\": {{   \"LinkColumns\": {{ \"SnapshotDate\": {{ \"$type\": \"DrillDownLinkColumnInfo\", \"ReportProcedureName\": \"{name} Example\",  \"ColumnToParameterMap\": {{ \"@SnapshotDate\": \"SnapshotDate\" }} }} }} }} }} }}')");
 
             /* Create initial partitions */
             if (usePartitions)
@@ -414,7 +414,7 @@ ORDER BY ProcName", cn);
             sb.AppendLine($"DROP PROC [UserReport].[{name} Snapshots]");
             sb.AppendLine("GO");
             sb.AppendLine(
-                $"DELETE dbo.CustomReport WHERE SchemaName = 'UserReport' AND ProcedureName IN('{Name} Snapshots','{Name} Example')");
+                $"DELETE dbo.CustomReport WHERE SchemaName = 'UserReport' AND ProcedureName IN('{name} Snapshots','{name} Example')");
             sb.AppendLine("GO");
             if (usePartitions)
             {
