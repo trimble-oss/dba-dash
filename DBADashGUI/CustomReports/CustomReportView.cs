@@ -345,9 +345,31 @@ namespace DBADashGUI.CustomReports
 
             SetDataSource(dt);
 
-            if (report.CustomReportResults[selectedTableIndex].ColumnLayout.Count > 0) dgv.LoadColumnLayout(report.CustomReportResults[selectedTableIndex].ColumnLayout);
-            else if (doAutoSize) dgv.AutoResizeColumns();
-            doAutoSize = false;
+            SetColumnLayout();
+        }
+
+        private void SetColumnLayout()
+        {
+            const int maxWidth = 400;
+            if (report.CustomReportResults[selectedTableIndex].ColumnLayout.Count > 0)
+            {
+                dgv.LoadColumnLayout(report.CustomReportResults[selectedTableIndex].ColumnLayout);
+            }
+            else if (doAutoSize)
+            {
+                dgv.AutoResizeColumns();
+                // Ensure column size is not excessive
+                foreach (DataGridViewColumn column in dgv.Columns)
+                {
+                    if (column.Width <= maxWidth) continue;
+                    column.Width = maxWidth;
+                }
+            }
+
+            if (dgv.Rows.Count > 0)
+            {
+                doAutoSize = false;
+            }
         }
 
         /// <summary>
@@ -501,6 +523,7 @@ namespace DBADashGUI.CustomReports
             report.CustomReportResults[selectedTableIndex].ColumnLayout = new();
             report.Update();
             dgv.Columns.Clear();
+            doAutoSize = true;
             RefreshData();
         }
 
