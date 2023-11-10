@@ -233,7 +233,8 @@ ORDER BY ProcName", cn);
 
             var sb = new StringBuilder();
             /* Boilerplate */
-            sb.AppendLine("/*");
+
+            sb.AppendLine("/***************************************************************************************************************************");
             sb.AppendLine($"\tDBA Dash script to setup custom collection for {name} custom collection");
             sb.AppendLine();
             sb.AppendLine($"\tGenerated: {DateTime.Now}");
@@ -252,17 +253,17 @@ ORDER BY ProcName", cn);
             sb.AppendLine("\tIf you remove the DELETE statement, consider data retention for the collection");
             sb.AppendLine();
             sb.AppendLine("\t** WARNING: Consider the cost of running your custom data collection **");
-            sb.AppendLine("*/");
+            sb.AppendLine("***************************************************************************************************************************/");
             sb.AppendLine();
 
             /* Data retention & partitioning function/scheme creation */
             if (usePartitions)
             {
-                sb.AppendLine("/*** SET RETENTION ***");
+                sb.AppendLine("/*** Set Retention ***");
                 sb.AppendLine("How long should we keep the collected data?");
                 sb.AppendLine(
                     "Daily partitions will be created to make it efficient to clear out old data.  If retention is over 365 days, monthly partitions will be used instead");
-                sb.AppendLine("*/");
+                sb.AppendLine("*********************/");
                 sb.AppendLine($"DECLARE @RetentionDays INT = {retentionDays}");
                 sb.AppendLine("/* Create partition function and scheme to make it efficient to clear out old data */");
                 sb.AppendLine($"CREATE PARTITION FUNCTION [PF_UserData_{name}](DATETIME2) AS RANGE RIGHT FOR VALUES()");
@@ -338,15 +339,19 @@ ORDER BY ProcName", cn);
             sb.AppendLine("GO");
             sb.AppendLine();
 
+            sb.AppendLine("/***************************************************************************************************************************");
+            sb.AppendLine("*                                               Custom Reports                                                             *");
+            sb.AppendLine("***************************************************************************************************************************/");
+
             /* Create example report */
-            sb.AppendLine("/*");
-            sb.AppendLine("\tCustom report example. Returns data collected associated with the last collection");
-            sb.AppendLine("*/");
             sb.AppendLine("GO");
+            sb.AppendLine("/*");
+            sb.AppendLine("\tCustom report example. Returns data collected associated with the last collection or from a specific snapshot if specified");
+            sb.AppendLine("*/");
             sb.AppendLine($"CREATE PROC [UserReport].[{name} Example]");
             sb.AppendLine("(");
             sb.AppendLine("\t@InstanceIDs IDs READONLY,");
-            sb.Append("\t@SnapshotDate DATETIME2 = NULL");
+            sb.AppendLine("\t@SnapshotDate DATETIME2 = NULL");
             sb.AppendLine(")");
             sb.AppendLine("AS");
             sb.AppendLine("WITH T AS (");
@@ -372,6 +377,9 @@ ORDER BY ProcName", cn);
             sb.AppendLine("GO");
 
             /* Create snapshot report with drill down */
+            sb.AppendLine("/*");
+            sb.AppendLine("\tCustom report example. Lists available snapshots within the specified time period");
+            sb.AppendLine("*/");
             sb.AppendLine($"CREATE PROC [UserReport].[{name} Snapshots]");
             sb.AppendLine("(");
             sb.AppendLine("\t@InstanceID INT,");
@@ -386,7 +394,7 @@ ORDER BY ProcName", cn);
             sb.AppendLine("\tAND UD.SnapshotDate >= @FromDate");
             sb.AppendLine("\tAND UD.SnapshotDate < @ToDate");
             sb.AppendLine("GROUP BY UD.SnapshotDate");
-            sb.AppendLine("ORDER BY UD.SnapshotDate");
+            sb.AppendLine("ORDER BY UD.SnapshotDate DESC");
             sb.AppendLine("GO");
 
             sb.AppendLine("INSERT INTO dbo.CustomReport(SchemaName,ProcedureName,MetaData)");
