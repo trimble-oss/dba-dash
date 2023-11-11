@@ -228,17 +228,27 @@ ORDER BY ProcName", cn);
                     $"\t[{s.ColumnName.Replace("]", "]]")}] {s.GetDataTypeString()}"));
 
             var colsSelect = ColsSelect(schema, "");
-            var colsSelectWithUDPrefix = ColsSelect(schema, "\tUD.");
+            var colsSelectWithUDPrefix = ColsSelect(schema, "\t\tUD.");
             var colsSelectWithTPrefix = ColsSelect(schema, "T.");
 
             var sb = new StringBuilder();
             /* Boilerplate */
-
-            sb.AppendLine("/***************************************************************************************************************************");
-            sb.AppendLine($"\tDBA Dash script to setup custom collection for {name} custom collection");
+            sb.AppendLine("/*");
+            sb.AppendLine("----------------------------------------------------------");
+            sb.AppendLine("|   ____   ____     _      ____               _          |");
+            sb.AppendLine("|  |  _ \\ | __ )   / \\    |  _ \\   __ _  ___ | |__       |");
+            sb.AppendLine("|  | | | ||  _ \\  / _ \\   | | | | / _` |/ __|| '_ \\      |");
+            sb.AppendLine("|  | |_| || |_) |/ ___ \\  | |_| || (_| |\\__ \\| | | |     |");
+            sb.AppendLine("|  |____/ |____//_/   \\_\\ |____/  \\__,_||___/|_| |_|     |");
+            sb.AppendLine("|                                                        |");
+            sb.AppendLine("|  DBA Dash - Custom Collection Setup Script             |");
+            sb.AppendLine($"|  Generated: {DateTime.Now.ToString("yyyy-MM-dd HH:mm")}                           |");
+            sb.AppendLine($"|  Version {Upgrade.CurrentVersion().ToString(3)}".PadRight(57) + "|");
+            sb.AppendLine("----------------------------------------------------------");
             sb.AppendLine();
-            sb.AppendLine($"\tGenerated: {DateTime.Now}");
-            sb.AppendLine($"\tVersion {Upgrade.CurrentVersion().ToString(3)}");
+            sb.AppendLine();
+            sb.AppendLine($"\tScript to setup {name} custom collection");
+
             sb.AppendLine();
             sb.AppendLine(
                 "\tThis script is designed to be used as a template to allow fast setup of custom data collections.");
@@ -252,27 +262,39 @@ ORDER BY ProcName", cn);
                 $"\tThe data collected in previous snapshots is replaced.  Remove the DELETE statement in the UserData.{name}_Upd stored procedure to keep old snapshots.");
             sb.AppendLine("\tIf you remove the DELETE statement, consider data retention for the collection");
             sb.AppendLine();
-            sb.AppendLine("\t** WARNING: Consider the cost of running your custom data collection **");
-            sb.AppendLine("***************************************************************************************************************************/");
+            sb.AppendLine("\t!! WARNING: Consider the cost of running your custom data collection !!");
+            sb.AppendLine("*/");
             sb.AppendLine();
 
             /* Data retention & partitioning function/scheme creation */
             if (usePartitions)
             {
-                sb.AppendLine("/*** Set Retention ***");
-                sb.AppendLine("How long should we keep the collected data?");
-                sb.AppendLine(
-                    "Daily partitions will be created to make it efficient to clear out old data.  If retention is over 365 days, monthly partitions will be used instead");
-                sb.AppendLine("*********************/");
+                sb.AppendLine("/***************************************************************************************************************************");
+                sb.AppendLine("*                                               Set Retention                                                              *");
+                sb.AppendLine("***************************************************************************************************************************/");
+                sb.AppendLine("/*");
+                sb.AppendLine("\tHow long should we keep the collected data?");
+                sb.AppendLine("\tDaily partitions will be created to make it efficient to clear out old data.");
+                sb.AppendLine("\tIf retention is over 365 days, monthly partitions will be used instead");
+                sb.AppendLine("*/");
                 sb.AppendLine($"DECLARE @RetentionDays INT = {retentionDays}");
+                sb.AppendLine();
+                sb.AppendLine(
+                    $"EXEC dbo.DataRetention_Upd @SchemaName ='UserData', @TableName = '{name}',@RetentionDays=@RetentionDays, @Validate=0");
+                sb.AppendLine();
+                sb.AppendLine("/***************************************************************************************************************************");
+                sb.AppendLine("*                                               Setup partitioning                                                         *");
+                sb.AppendLine("***************************************************************************************************************************/");
                 sb.AppendLine("/* Create partition function and scheme to make it efficient to clear out old data */");
                 sb.AppendLine($"CREATE PARTITION FUNCTION [PF_UserData_{name}](DATETIME2) AS RANGE RIGHT FOR VALUES()");
                 sb.AppendLine(
                     $"CREATE PARTITION SCHEME [PS_UserData_{name}] AS PARTITION [PF_UserData_{name}] ALL TO([PRIMARY])");
-                sb.AppendLine(
-                    $"EXEC dbo.DataRetention_Upd @SchemaName ='UserData', @TableName = '{name}',@RetentionDays=@RetentionDays, @Validate=0");
+                sb.AppendLine("GO");
+                sb.AppendLine();
             }
-
+            sb.AppendLine("/***************************************************************************************************************************");
+            sb.AppendLine("*                                               Create table to store data                                                 *");
+            sb.AppendLine("***************************************************************************************************************************/");
             /* Create table type used to import data */
             sb.AppendLine("/* Create user defined type so we can pass the collected data to our stored procedure */");
             sb.AppendLine($"CREATE TYPE UserData.[{name}] AS TABLE (");
@@ -291,11 +313,13 @@ ORDER BY ProcName", cn);
             sb.AppendLine(
                 "\t/* Warning: Script just creates a clustered index on InstanceID and SnapshotDate. Consider replacing this, adding a primary key and other indexes if required */");
             sb.AppendLine($"\tINDEX IX_UserData_{name} CLUSTERED(InstanceID,SnapshotDate)");
-            sb.AppendLine(")" + (usePartitions ? $" ON [PS_UserData_{name}](SnapshotDate);" : ""));
+            sb.AppendLine(")" + (usePartitions ? $" ON [PS_UserData_{name}](SnapshotDate)" : ""));
+            sb.AppendLine("WITH(DATA_COMPRESSION=PAGE);");
             sb.AppendLine("GO");
-
+            sb.AppendLine("/***************************************************************************************************************************");
+            sb.AppendLine("*                                               Create procedure for import                                                *");
+            sb.AppendLine("***************************************************************************************************************************/");
             /* Create procedure to handle our data import */
-            sb.AppendLine("/* Create procedure to handle our data import */");
             sb.AppendLine("GO");
             sb.AppendLine($"CREATE PROCEDURE UserData.[{name}_Upd]");
             sb.AppendLine("(");
@@ -334,6 +358,7 @@ ORDER BY ProcName", cn);
                 sb.AppendLine("COMMIT TRAN");
             }
             sb.AppendLine();
+            sb.AppendLine("/* Log the data collection */");
             sb.AppendLine(
                 $"EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,\n\t\t@Reference = 'UserData.{name}',\n\t\t@SnapshotDate = @SnapshotDate");
             sb.AppendLine("GO");
@@ -376,63 +401,102 @@ ORDER BY ProcName", cn);
             sb.AppendLine("OPTION(RECOMPILE)");
             sb.AppendLine("GO");
 
-            /* Create snapshot report with drill down */
-            sb.AppendLine("/*");
-            sb.AppendLine("\tCustom report example. Lists available snapshots within the specified time period");
-            sb.AppendLine("*/");
-            sb.AppendLine($"CREATE PROC [UserReport].[{name} Snapshots]");
-            sb.AppendLine("(");
-            sb.AppendLine("\t@InstanceID INT,");
-            sb.AppendLine("\t@FromDate DATETIME2,");
-            sb.AppendLine("\t@ToDate DATETIME2");
-            sb.AppendLine(")");
-            sb.AppendLine("AS");
-            sb.AppendLine("SELECT\tUD.SnapshotDate,");
-            sb.AppendLine("\t\t\tCOUNT(*) AS [Row Count]");
-            sb.AppendLine($"FROM UserData.[{name}] UD");
-            sb.AppendLine("WHERE UD.InstanceID = @InstanceID");
-            sb.AppendLine("\tAND UD.SnapshotDate >= @FromDate");
-            sb.AppendLine("\tAND UD.SnapshotDate < @ToDate");
-            sb.AppendLine("GROUP BY UD.SnapshotDate");
-            sb.AppendLine("ORDER BY UD.SnapshotDate DESC");
-            sb.AppendLine("GO");
-
-            sb.AppendLine("INSERT INTO dbo.CustomReport(SchemaName,ProcedureName,MetaData)");
-            sb.AppendLine(
-                $"VALUES('UserReport','{name} Snapshots','{{ \"CustomReportResults\": {{  \"0\": {{   \"LinkColumns\": {{ \"SnapshotDate\": {{ \"$type\": \"DrillDownLinkColumnInfo\", \"ReportProcedureName\": \"{name} Example\",  \"ColumnToParameterMap\": {{ \"@SnapshotDate\": \"SnapshotDate\" }} }} }} }} }} }}')");
-
-            /* Create initial partitions */
+            // Snapshot report only makes sense if we are retaining previous snapshots
             if (usePartitions)
             {
-                sb.AppendLine("/* Create initial partitions */");
+                /* Create snapshot report with drill down */
+                sb.AppendLine("/*");
+                sb.AppendLine("\tCustom report example. Lists available snapshots within the specified time period");
+                sb.AppendLine("*/");
+                sb.AppendLine($"CREATE PROC [UserReport].[{name} Snapshots]");
+                sb.AppendLine("(");
+                sb.AppendLine("\t@InstanceID INT,");
+                sb.AppendLine("\t@FromDate DATETIME2,");
+                sb.AppendLine("\t@ToDate DATETIME2");
+                sb.AppendLine(")");
+                sb.AppendLine("AS");
+                sb.AppendLine("SELECT\tUD.SnapshotDate,");
+                sb.AppendLine("\t\t\tCOUNT(*) AS [Row Count]");
+                sb.AppendLine($"FROM UserData.[{name}] UD");
+                sb.AppendLine("WHERE UD.InstanceID = @InstanceID");
+                sb.AppendLine("AND UD.SnapshotDate >= @FromDate");
+                sb.AppendLine("AND UD.SnapshotDate < @ToDate");
+                sb.AppendLine("GROUP BY UD.SnapshotDate");
+                sb.AppendLine("ORDER BY UD.SnapshotDate DESC");
+                sb.AppendLine("GO");
+                sb.AppendLine("/* Add metadata for drill down */");
+                sb.AppendLine("INSERT INTO dbo.CustomReport(SchemaName,ProcedureName,MetaData)");
+                sb.AppendLine(
+                    $"VALUES('UserReport','{name} Snapshots','{{ \"CustomReportResults\": {{  \"0\": {{   \"LinkColumns\": {{ \"SnapshotDate\": {{ \"$type\": \"DrillDownLinkColumnInfo\", \"ReportProcedureName\": \"{name} Example\",  \"ColumnToParameterMap\": {{ \"@SnapshotDate\": \"SnapshotDate\" }} }} }} }} }} }}')");
+                sb.AppendLine("GO");
+                sb.AppendLine();
+            }
+
+            // Create initial partitions
+            if (usePartitions)
+            {
+                sb.AppendLine("/***************************************************************************************************************************");
+                sb.AppendLine("*                                               Create initial partitions                                                 *");
+                sb.AppendLine("***************************************************************************************************************************/");
+                sb.AppendLine();
                 sb.AppendLine("EXEC dbo.Partitions_Add");
+                sb.AppendLine();
             }
 
-            /* Create script to remove objects created */
-            sb.AppendLine("/*");
-            sb.AppendLine("--Script to remove objects that were created");
-            sb.AppendLine($"DROP PROC UserData.[{name}_Upd]");
-            sb.AppendLine("GO");
-            sb.AppendLine($"DROP TYPE UserData.[{name}]");
-            sb.AppendLine("GO");
-            sb.AppendLine($"DROP TABLE UserData.[{name}]");
-            sb.AppendLine("GO");
-            sb.AppendLine($"DROP PROC [UserReport].[{name} Example]");
-            sb.AppendLine("GO");
-            sb.AppendLine($"DROP PROC [UserReport].[{name} Snapshots]");
-            sb.AppendLine("GO");
-            sb.AppendLine(
-                $"DELETE dbo.CustomReport WHERE SchemaName = 'UserReport' AND ProcedureName IN('{name} Snapshots','{name} Example')");
-            sb.AppendLine("GO");
-            if (usePartitions)
-            {
-                sb.AppendLine($"DROP PARTITION SCHEME [PS_UserData_{name}]");
-                sb.AppendLine("GO");
-                sb.AppendLine($"DROP PARTITION FUNCTION [PF_UserData_{name}]");
-                sb.AppendLine("GO");
-                sb.AppendLine($"DELETE dbo.DataRetention WHERE SchemaName = 'UserData' AND TableName = '{name}'");
-            }
-            sb.AppendLine("*/");
+            // Create script to remove objects created
+            sb.AppendLine("/***************************************************************************************************************************");
+            sb.AppendLine("*                                   Cleanup script to remove objects created                                               *");
+            sb.AppendLine("****************************************************************************************************************************");
+
+            // Import procedure
+            sb.AppendLine($"IF EXISTS (SELECT * FROM sys.procedures WHERE Name = N'{name}_Upd' AND schema_id = SCHEMA_ID('UserData'))");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine($"    DROP PROC UserData.[{name}_Upd]");
+            sb.AppendLine("END");
+
+            // Type
+            sb.AppendLine($"IF EXISTS (SELECT * FROM sys.types WHERE is_user_defined = 1 AND name = N'{name}' AND schema_id = SCHEMA_ID('UserData'))");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine($"    DROP TYPE UserData.[{name}]");
+            sb.AppendLine("END");
+
+            // Table
+            sb.AppendLine($"IF EXISTS (SELECT * FROM sys.tables WHERE Name = N'{name}' AND schema_id = SCHEMA_ID('UserData'))");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine($"    DROP TABLE UserData.[{name}]");
+            sb.AppendLine("END");
+
+            // User Report #1
+            sb.AppendLine($"IF EXISTS (SELECT * FROM sys.procedures WHERE Name = N'{name} Example' AND schema_id = SCHEMA_ID('UserReport'))");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine($"    DROP PROC [UserReport].[{name} Example]");
+            sb.AppendLine("END");
+
+            // User Report #2
+            sb.AppendLine($"IF EXISTS (SELECT * FROM sys.procedures WHERE Name = N'{name} Snapshots' AND schema_id = SCHEMA_ID('UserReport'))");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine($"    DROP PROC [UserReport].[{name} Snapshots]");
+            sb.AppendLine("END");
+
+            // Remove report data
+            sb.AppendLine($"DELETE dbo.CustomReport WHERE SchemaName = 'UserReport' AND ProcedureName IN('{name} Snapshots','{name} Example')");
+
+            // Check if the partition scheme exists before dropping
+            sb.AppendLine($"IF EXISTS (SELECT * FROM sys.partition_schemes WHERE name = N'PS_UserData_{name}')");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine($"    DROP PARTITION SCHEME [PS_UserData_{name}]");
+            sb.AppendLine("END");
+
+            // Check if the partition function exists before dropping
+            sb.AppendLine($"IF EXISTS (SELECT * FROM sys.partition_functions WHERE name = N'PF_UserData_{name}')");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine($"    DROP PARTITION FUNCTION [PF_UserData_{name}]");
+            sb.AppendLine("END");
+
+            // Check if the DataRetention entry exists before deleting
+            sb.AppendLine($"DELETE dbo.DataRetention WHERE SchemaName = 'UserData' AND TableName = '{name}'");
+
+            sb.AppendLine("****************************************************************************************************************************/");
 
             StartStopGetScript(false);
             this.Invoke(() =>
