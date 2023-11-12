@@ -37,7 +37,7 @@ namespace DBADashSharedGUI
         public static string GetDataTypeString(this DbColumn col)
         {
             var dataTypeName = col.DataTypeName?.ToUpper() ?? "???";
-
+            dataTypeName = dataTypeName == "DATETIME" ? "DATETIME2" : dataTypeName; // DATETIME2 has more precision for same storage size.  Also simplifies script generation.
             var typeDetails = dataTypeName switch
             {
                 // Handle types with column size
