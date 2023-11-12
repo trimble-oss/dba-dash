@@ -1,25 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Data.Common;
-using System.Drawing;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml;
-using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
 using DBADash;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
-using Microsoft.SqlServer.Management.SqlParser.Metadata;
-using Microsoft.Web.WebView2.Core;
-using Microsoft.Web.WebView2.Core.Raw;
-using static Microsoft.SqlServer.TransactSql.ScriptDom.SensitivityClassification;
 
 namespace DBADashServiceConfig
 {
@@ -110,11 +101,11 @@ ORDER BY ProcName", cn);
                     items.Add(rdr.GetString(0));
                 }
 
-                cboProcedureName.Invoke(new Action(() =>
+                cboProcedureName.Invoke(() =>
                 {
                     cboProcedureName.Items.Clear();
                     cboProcedureName.Items.AddRange(items.ToArray());
-                }));
+                });
             }
             catch (Exception ex)
             {
@@ -231,7 +222,7 @@ ORDER BY ProcName", cn);
                 schema.Select(s =>
                     $"\t[{s.ColumnName.Replace("]", "]]")}] {s.GetDataTypeString()}"));
 
-            var colsSelect = ColsSelect(schema, "");
+            var colsSelect = ColsSelect(schema);
             var colsSelectWithUDPrefix = ColsSelect(schema, "\t\tUD.");
             var colsSelectWithTPrefix = ColsSelect(schema, "T.");
 
@@ -750,7 +741,7 @@ ORDER BY ProcName", cn);
                 txtName.Text = CleanName(txtName.Text);
         }
 
-        private string baseText = null;
+        private string baseText;
 
         private void Timer1_Tick(object sender, EventArgs e)
         {
