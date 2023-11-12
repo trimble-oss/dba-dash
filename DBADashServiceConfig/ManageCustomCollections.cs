@@ -16,6 +16,7 @@ using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
 using DBADash;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
+using Microsoft.SqlServer.Management.SqlParser.Metadata;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Core.Raw;
 using static Microsoft.SqlServer.TransactSql.ScriptDom.SensitivityClassification;
@@ -223,6 +224,9 @@ ORDER BY ProcName", cn);
             using var rdr = cmd.ExecuteReader();
             var schema = rdr.GetColumnSchema();
 
+            var hasSnapshotDateColumn = schema.Any(s => s.ColumnName.Equals("SnapshotDate", StringComparison.InvariantCultureIgnoreCase));
+            var hasInstanceIDColumn = schema.Any(s => s.ColumnName.Equals("InstanceID", StringComparison.InvariantCultureIgnoreCase));
+
             var colsSchema = string.Join("," + Environment.NewLine,
                 schema.Select(s =>
                     $"\t[{s.ColumnName.Replace("]", "]]")}] {s.GetDataTypeString()}"));
@@ -258,11 +262,12 @@ ORDER BY ProcName", cn);
             sb.AppendLine(
                 $"\tThe collected data will be inserted into a table called UserData.{name} with additional columns for InstanceID and SnapshotDate");
             sb.AppendLine("\tThe InstanceID column can be joined to dbo.Instances");
-            sb.AppendLine(
-                $"\tThe data collected in previous snapshots is replaced.  Remove the DELETE statement in the UserData.{name}_Upd stored procedure to keep old snapshots.");
-            sb.AppendLine("\tIf you remove the DELETE statement, consider data retention for the collection");
             sb.AppendLine();
             sb.AppendLine("\t!! WARNING: Consider the cost of running your custom data collection !!");
+            sb.Append(hasSnapshotDateColumn
+                ? "\t!! WARNING: Collecting has SnapshotDate column.  This will be used in place of @SnapshotDate parameter !!\n"
+                : "");
+            sb.Append(hasInstanceIDColumn ? "\t!! WARNING: Collection has a column 'InstanceID' which conflicts with @InstanceID parameter. This will need to be resolved manually !!\n" : "");
             sb.AppendLine("*/");
             sb.AppendLine();
 
@@ -296,7 +301,7 @@ ORDER BY ProcName", cn);
             sb.AppendLine("*                                               Create table to store data                                                 *");
             sb.AppendLine("***************************************************************************************************************************/");
             /* Create table type used to import data */
-            sb.AppendLine("/* Create user defined type so we can pass the collected data to our stored procedure */");
+            sb.AppendLine("/* Create user defined type so we can pass the collected data to the stored procedure */");
             sb.AppendLine($"CREATE TYPE UserData.[{name}] AS TABLE (");
             sb.AppendLine(colsSchema);
             sb.AppendLine(");");
@@ -308,7 +313,10 @@ ORDER BY ProcName", cn);
             /* Create table to store the collected data */
             sb.AppendLine($"CREATE TABLE UserData.[{name}] (");
             sb.AppendLine("\t[InstanceID] INT NOT NULL,");
-            sb.AppendLine("\t[SnapshotDate] DATETIME2 NOT NULL,");
+            sb.Append(hasSnapshotDateColumn
+                ? ""
+                : "\t[SnapshotDate] DATETIME2 NOT NULL,\n");
+
             sb.AppendLine(colsSchema);
             sb.AppendLine(
                 "\t/* Warning: Script just creates a clustered index on InstanceID and SnapshotDate. Consider replacing this, adding a primary key and other indexes if required */");
@@ -323,8 +331,15 @@ ORDER BY ProcName", cn);
             sb.AppendLine("GO");
             sb.AppendLine($"CREATE PROCEDURE UserData.[{name}_Upd]");
             sb.AppendLine("(");
+            sb.AppendLine("\t/* InstanceID value from dbo.Instances table (Unique ID associated with the instance) */");
             sb.AppendLine("\t@InstanceID INT,");
+            sb.AppendLine("\t/*");
+            sb.AppendLine("\t@SnapshotDate represents the time of the data collection in UTC. ");
+            sb.AppendLine("\tIt's the time all the collections within the same batch (scheduled time) started.");
+            sb.AppendLine("\tYou can have your query return 'SYSUTCDATETIME() AS SnapshotDate' if you need higher accuracy");
+            sb.AppendLine("\t*/");
             sb.AppendLine("\t@SnapshotDate DATETIME2,");
+            sb.AppendLine("\t/* Table-valued parameter with the contents of our custom data collection */");
             sb.AppendLine($"\t@{name} [{name}] READONLY");
             sb.AppendLine(")");
             sb.AppendLine("AS");
@@ -344,12 +359,12 @@ ORDER BY ProcName", cn);
             sb.AppendLine($"INSERT INTO UserData.[{name}]");
             sb.AppendLine("(");
             sb.AppendLine("\t[InstanceID],");
-            sb.AppendLine("\t[SnapshotDate],");
+            sb.Append(hasSnapshotDateColumn ? "" : "\t[SnapshotDate],\n");
             sb.AppendLine(colsSelect);
             sb.AppendLine(")");
             sb.AppendLine("SELECT");
             sb.AppendLine("\t@InstanceID AS InstanceID,");
-            sb.AppendLine("\t@SnapshotDate AS SnapshotDate,");
+            sb.Append(hasSnapshotDateColumn ? "" : "\t@SnapshotDate AS SnapshotDate,\n");
             sb.AppendLine(colsSelect);
             sb.AppendLine($"FROM @{name}");
             sb.AppendLine();
@@ -367,21 +382,26 @@ ORDER BY ProcName", cn);
             sb.AppendLine("/***************************************************************************************************************************");
             sb.AppendLine("*                                               Custom Reports                                                             *");
             sb.AppendLine("***************************************************************************************************************************/");
-
+            sb.AppendLine("/* https://dbadash.com/docs/how-to/create-custom-reports/ */");
             /* Create example report */
             sb.AppendLine("GO");
             sb.AppendLine("/*");
-            sb.AppendLine("\tCustom report example. Returns data collected associated with the last collection or from a specific snapshot if specified");
+            sb.AppendLine("\tCustom report example. Returns data associated with the last collection or from a specific snapshot if specified.");
+            sb.AppendLine("\tReport is available at root and instance level");
             sb.AppendLine("*/");
             sb.AppendLine($"CREATE PROC [UserReport].[{name} Example]");
             sb.AppendLine("(");
+            sb.AppendLine(
+                "\t/* Table-valued parameter passing a list of InstanceIDs (dbo.Instance table) associated with the current context in DBA Dash */");
             sb.AppendLine("\t@InstanceIDs IDs READONLY,");
+            sb.AppendLine(
+                "\t/* Optional @SnapshotDate parameter to show the data associated with a specific snapshot.  Otherwise the last snapshot is shown. UTC */");
             sb.AppendLine("\t@SnapshotDate DATETIME2 = NULL");
             sb.AppendLine(")");
             sb.AppendLine("AS");
             sb.AppendLine("WITH T AS (");
             sb.AppendLine("\tSELECT\tI.InstanceDisplayName AS Instance,");
-            sb.AppendLine("\t\t\tUD.SnapshotDate,");
+            sb.Append(hasSnapshotDateColumn ? "" : "\t\t\tUD.SnapshotDate,\n");
             sb.AppendLine(colsSelectWithUDPrefix + ",");
             sb.AppendLine("\t\t\t/* Get the last snapshot for each instance (RNK=1) */");
             sb.AppendLine("\t\t\tRANK() OVER(PARTITION BY UD.InstanceID ORDER BY UD.SnapshotDate DESC) RNK");
@@ -394,7 +414,7 @@ ORDER BY ProcName", cn);
             sb.AppendLine("\tAND (@SnapshotDate IS NULL OR UD.SnapshotDate = @SnapshotDate)");
             sb.AppendLine(")");
             sb.AppendLine("SELECT T.Instance,");
-            sb.AppendLine("\tT.SnapshotDate,");
+            sb.Append(hasSnapshotDateColumn ? "" : "\tT.SnapshotDate,\n");
             sb.AppendLine(colsSelectWithTPrefix);
             sb.AppendLine("FROM T");
             sb.AppendLine("WHERE T.RNK = 1");
@@ -406,11 +426,14 @@ ORDER BY ProcName", cn);
             {
                 /* Create snapshot report with drill down */
                 sb.AppendLine("/*");
-                sb.AppendLine("\tCustom report example. Lists available snapshots within the specified time period");
+                sb.AppendLine("\tCustom report example. Lists available snapshots within the specified time period.");
+                sb.AppendLine("\tReport is available at instance level.");
                 sb.AppendLine("*/");
                 sb.AppendLine($"CREATE PROC [UserReport].[{name} Snapshots]");
                 sb.AppendLine("(");
+                sb.AppendLine("\t/* InstanceID associated with the current instance in DBA Dash (dbo.Instances table) */");
                 sb.AppendLine("\t@InstanceID INT,");
+                sb.AppendLine("\t/* Show snapshots between @FromDate and @ToDate (UTC). DBA Dash will supply these based on selected date range. */");
                 sb.AppendLine("\t@FromDate DATETIME2,");
                 sb.AppendLine("\t@ToDate DATETIME2");
                 sb.AppendLine(")");
