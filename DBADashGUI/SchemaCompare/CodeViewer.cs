@@ -49,5 +49,10 @@ namespace DBADashGUI
                 this.Hide();
             }
         }
+
+        private void tsWrapText_Click(object sender, EventArgs e)
+        {
+            codeEditor1.WordWrap = !codeEditor1.WordWrap;
+        }
     }
 }

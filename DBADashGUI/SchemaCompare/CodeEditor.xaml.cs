@@ -36,6 +36,12 @@ namespace DBADashGUI.SchemaCompare
             set => txtCode.ShowLineNumbers = value;
         }
 
+        public bool WordWrap
+        {
+            get => txtCode.WordWrap;
+            set => txtCode.WordWrap = value;
+        }
+
         private static byte[] GetResource(string resourceName)
         {
             // assuming the resource is located at "NamespaceName.ResourceName.extension"
