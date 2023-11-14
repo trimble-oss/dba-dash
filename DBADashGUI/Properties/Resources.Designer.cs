@@ -626,5 +626,14 @@ namespace DBADashGUI.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+
+        internal static System.Drawing.Bitmap WordWrap_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("WordWrap_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

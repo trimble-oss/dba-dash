@@ -29,73 +29,83 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CodeViewer));
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.bttnCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsLineNumbers = new System.Windows.Forms.ToolStripButton();
-            this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
-            this.codeEditor1 = new DBADashGUI.SchemaCompare.CodeEditor();
-            this.toolStrip1.SuspendLayout();
-            this.SuspendLayout();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            bttnCopy = new System.Windows.Forms.ToolStripButton();
+            tsLineNumbers = new System.Windows.Forms.ToolStripButton();
+            tsWrapText = new System.Windows.Forms.ToolStripButton();
+            elementHost1 = new System.Windows.Forms.Integration.ElementHost();
+            codeEditor1 = new DBADashGUI.SchemaCompare.CodeEditor();
+            toolStrip1.SuspendLayout();
+            SuspendLayout();
             // 
             // toolStrip1
             // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.bttnCopy,
-            this.tsLineNumbers});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(800, 31);
-            this.toolStrip1.TabIndex = 1;
-            this.toolStrip1.Text = "toolStrip1";
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { bttnCopy, tsLineNumbers, tsWrapText });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new System.Drawing.Size(800, 27);
+            toolStrip1.TabIndex = 1;
+            toolStrip1.Text = "toolStrip1";
             // 
             // bttnCopy
             // 
-            this.bttnCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.bttnCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.bttnCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.bttnCopy.Name = "bttnCopy";
-            this.bttnCopy.Size = new System.Drawing.Size(29, 28);
-            this.bttnCopy.Text = "Copy";
-            this.bttnCopy.Click += new System.EventHandler(this.BttnCopy_Click);
+            bttnCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            bttnCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
+            bttnCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            bttnCopy.Name = "bttnCopy";
+            bttnCopy.Size = new System.Drawing.Size(29, 24);
+            bttnCopy.Text = "Copy";
+            bttnCopy.Click += BttnCopy_Click;
             // 
             // tsLineNumbers
             // 
-            this.tsLineNumbers.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsLineNumbers.Image = global::DBADashGUI.Properties.Resources.List_NumberedHS;
-            this.tsLineNumbers.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsLineNumbers.Name = "tsLineNumbers";
-            this.tsLineNumbers.Size = new System.Drawing.Size(29, 28);
-            this.tsLineNumbers.Text = "Toggle Line Numbers";
-            this.tsLineNumbers.Click += new System.EventHandler(this.TsLineNumbers_Click);
+            tsLineNumbers.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsLineNumbers.Image = Properties.Resources.List_NumberedHS;
+            tsLineNumbers.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsLineNumbers.Name = "tsLineNumbers";
+            tsLineNumbers.Size = new System.Drawing.Size(29, 24);
+            tsLineNumbers.Text = "Toggle Line Numbers";
+            tsLineNumbers.Click += TsLineNumbers_Click;
+            // 
+            // tsWrapText
+            // 
+            tsWrapText.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsWrapText.Image = Properties.Resources.WordWrap_16x;
+            tsWrapText.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsWrapText.Name = "tsWrapText";
+            tsWrapText.Size = new System.Drawing.Size(29, 24);
+            tsWrapText.Text = "Wrap Text";
+            tsWrapText.Click += tsWrapText_Click;
             // 
             // elementHost1
             // 
-            this.elementHost1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.elementHost1.Location = new System.Drawing.Point(0, 31);
-            this.elementHost1.Name = "elementHost1";
-            this.elementHost1.Size = new System.Drawing.Size(800, 419);
-            this.elementHost1.TabIndex = 2;
-            this.elementHost1.Text = "elementHost1";
-            this.elementHost1.Child = this.codeEditor1;
+            elementHost1.Dock = System.Windows.Forms.DockStyle.Fill;
+            elementHost1.Location = new System.Drawing.Point(0, 27);
+            elementHost1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            elementHost1.Name = "elementHost1";
+            elementHost1.Size = new System.Drawing.Size(800, 535);
+            elementHost1.TabIndex = 2;
+            elementHost1.Text = "elementHost1";
+            elementHost1.Child = codeEditor1;
             // 
             // CodeViewer
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.elementHost1);
-            this.Controls.Add(this.toolStrip1);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "CodeViewer";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Code Viewer";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.CodeViewer_FormClosing);
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(800, 562);
+            Controls.Add(elementHost1);
+            Controls.Add(toolStrip1);
+            Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "CodeViewer";
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            Text = "Code Viewer";
+            FormClosing += CodeViewer_FormClosing;
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -104,5 +114,6 @@
         private System.Windows.Forms.Integration.ElementHost elementHost1;
         private SchemaCompare.CodeEditor codeEditor1;
         private System.Windows.Forms.ToolStripButton tsLineNumbers;
+        private System.Windows.Forms.ToolStripButton tsWrapText;
     }
 }
