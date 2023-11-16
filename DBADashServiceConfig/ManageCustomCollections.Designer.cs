@@ -55,6 +55,7 @@
             linkLabel3 = new System.Windows.Forms.LinkLabel();
             linkLabel4 = new System.Windows.Forms.LinkLabel();
             toolTip1 = new System.Windows.Forms.ToolTip(components);
+            linkLabel5 = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)numTimeout).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dgvCustom).BeginInit();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
@@ -160,7 +161,7 @@
             dgvCustom.RowHeadersVisible = false;
             dgvCustom.RowHeadersWidth = 51;
             dgvCustom.RowTemplate.Height = 29;
-            dgvCustom.Size = new System.Drawing.Size(797, 256);
+            dgvCustom.Size = new System.Drawing.Size(807, 256);
             dgvCustom.TabIndex = 13;
             dgvCustom.CellContentClick += DgvCustom_CellContentClick;
             dgvCustom.CellEndEdit += DgvCustom_CellEndEdit;
@@ -189,7 +190,7 @@
             // bttnUpdate
             // 
             bttnUpdate.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            bttnUpdate.Location = new System.Drawing.Point(715, 561);
+            bttnUpdate.Location = new System.Drawing.Point(725, 561);
             bttnUpdate.Name = "bttnUpdate";
             bttnUpdate.Size = new System.Drawing.Size(94, 29);
             bttnUpdate.TabIndex = 14;
@@ -200,7 +201,7 @@
             // bttnCancel
             // 
             bttnCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            bttnCancel.Location = new System.Drawing.Point(603, 561);
+            bttnCancel.Location = new System.Drawing.Point(613, 561);
             bttnCancel.Name = "bttnCancel";
             bttnCancel.Size = new System.Drawing.Size(94, 29);
             bttnCancel.TabIndex = 15;
@@ -308,11 +309,24 @@
             linkLabel4.Text = "2hr";
             linkLabel4.LinkClicked += SetCron;
             // 
+            // linkLabel5
+            // 
+            linkLabel5.AutoSize = true;
+            linkLabel5.Location = new System.Drawing.Point(407, 107);
+            linkLabel5.Name = "linkLabel5";
+            linkLabel5.Size = new System.Drawing.Size(59, 20);
+            linkLabel5.TabIndex = 16;
+            linkLabel5.TabStop = true;
+            linkLabel5.Tag = "";
+            linkLabel5.Text = "Disable";
+            linkLabel5.LinkClicked += SetCron;
+            // 
             // ManageCustomCollections
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(821, 602);
+            ClientSize = new System.Drawing.Size(831, 602);
+            Controls.Add(linkLabel5);
             Controls.Add(linkLabel4);
             Controls.Add(linkLabel3);
             Controls.Add(lblCron);
@@ -373,5 +387,6 @@
         private System.Windows.Forms.LinkLabel linkLabel4;
         private System.Windows.Forms.LinkLabel linkLabel3;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.LinkLabel linkLabel5;
     }
 }

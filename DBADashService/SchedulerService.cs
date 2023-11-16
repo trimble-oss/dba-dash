@@ -336,6 +336,7 @@ namespace DBADashService
 
                 foreach (var s in groupedSchedule)
                 {
+                    if (string.IsNullOrEmpty(s.Key)) continue; /* Collection is disabled */
                     var custom = customCollections
                         .Where(c => c.Value.Schedule == s.Key)
                         .ToDictionary(c => c.Key, c => c.Value);
