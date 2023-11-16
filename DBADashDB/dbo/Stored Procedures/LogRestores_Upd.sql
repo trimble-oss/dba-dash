@@ -12,16 +12,18 @@ BEGIN TRAN
 
 	DELETE L 
 	FROM dbo.LogRestores  L
-	WHERE EXISTS(SELECT 1 FROM dbo.Databases D WHERE InstanceID = @InstanceID AND D.DatabaseID = L.DatabaseID)
+	WHERE InstanceID = @InstanceID
 
 	INSERT INTO dbo.LogRestores(
+			InstanceID,
 			DatabaseID,
 			restore_date,
 			backup_start_date,
 			last_file,
 			backup_time_zone
 	)
-	SELECT D.DatabaseID,
+	SELECT	D.InstanceID,
+			D.DatabaseID,
 			L.restore_date,
 			L.backup_start_date,
 			L.last_file,

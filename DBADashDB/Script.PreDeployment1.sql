@@ -21,3 +21,20 @@ IF OBJECT_ID('dbo.DatabasesHADR') IS NOT NULL
 BEGIN
 	TRUNCATE TABLE dbo.DatabasesHADR
 END
+/* 
+	If LogRestores table doesn't have an InstanceID column, 
+	clear out existing data to allow schema change.  Data is copied to LogRestoresTemp table and re-imported.
+ */
+IF OBJECT_ID('dbo.LogRestores') IS NOT NULL 
+	AND COLUMNPROPERTY(OBJECT_ID('dbo.LogRestores'),'InstanceID','ColumnID') IS NULL
+BEGIN
+	SELECT 	DatabaseID,
+			restore_date,
+			backup_start_date,
+			last_file,
+			backup_time_zone 
+	INTO dbo.LogRestoresTemp
+	FROM dbo.LogRestores
+
+	TRUNCATE TABLE dbo.LogRestores
+END

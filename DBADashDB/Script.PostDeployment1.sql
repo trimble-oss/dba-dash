@@ -1915,3 +1915,30 @@ BEGIN
 	PRINT 'Drop dbo.PartitionFunctionName'
 	DROP FUNCTION dbo.PartitionFunctionName
 END
+/* Migrate LogRestores data from old schema */
+IF OBJECT_ID('dbo.LogRestoresTemp') IS NOT NULL
+BEGIN 
+
+	INSERT INTO dbo.LogRestores(
+			InstanceID,
+			DatabaseID,
+			restore_date,
+			backup_start_date,
+			last_file,
+			backup_time_zone
+	)
+	SELECT	D.InstanceID,
+			T.DatabaseID,
+			T.restore_date,
+			T.backup_start_date,
+			T.last_file,
+			T.backup_time_zone	 
+	FROM dbo.LogRestoresTemp T
+	JOIN dbo.Databases D ON D.DatabaseID = T.DatabaseID
+	WHERE NOT EXISTS(SELECT 1 
+					FROM dbo.LogRestores LR 
+					WHERE LR.InstanceID = D.InstanceID
+					AND LR.DatabaseID = T.DatabaseID
+					)
+	DROP TABLE dbo.LogRestoresTemp
+END
