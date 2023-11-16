@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
 using DBADash;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
@@ -23,6 +25,8 @@ namespace DBADashServiceConfig
             get => _customCollections;
             set => _customCollections = value.DeepCopy();
         }
+
+        private static KeyValuePair<string, CustomCollection> CustomCollectionClipboard=new();
 
         public string ConnectionString { get; set; }
         private bool IsScheduleValid = true;
@@ -80,6 +84,7 @@ namespace DBADashServiceConfig
         private void CustomCollections_Load(object sender, EventArgs e)
         {
             LoadData();
+            SetCollection(CustomCollectionClipboard);
             Task.Run(LoadProcs);
         }
 
@@ -535,6 +540,21 @@ ORDER BY ProcName", cn);
             numTimeout.Value = CustomCollections[name].CommandTimeout == null ? numTimeout.Value : Convert.ToDecimal(CustomCollections[name].CommandTimeout);
             chkRunOnStart.Checked = CustomCollections[name].RunOnServiceStart;
             txtName.Text = name;
+            if (!CustomCollections.TryGetValue(name, out var value)) return;
+            KeyValuePair<string, CustomCollection> collection = new(name, value);
+            SetCollection(collection);
+            CustomCollectionClipboard = new KeyValuePair<string, CustomCollection>(txtName.Text, GetCustomCollection());
+        }
+
+        private void SetCollection(KeyValuePair<string, CustomCollection> collection)
+        {
+            if(collection.Value==null) return;
+            cboProcedureName.Text = collection.Value.ProcedureName;
+            txtCron.Text = collection.Value.Schedule;
+            chkDefaultTimeout.Checked = collection.Value.CommandTimeout == null;
+            numTimeout.Value = collection.Value.CommandTimeout == null ? numTimeout.Value : Convert.ToDecimal(collection.Value.CommandTimeout);
+            chkRunOnStart.Checked = collection.Value.RunOnServiceStart;
+            txtName.Text = collection.Key;
         }
 
         private void DeleteRecord(string name)
@@ -590,16 +610,20 @@ ORDER BY ProcName", cn);
                     DialogResult.Yes) return;
                 CustomCollections.Remove(txtName.Text);
             }
+            var collection = GetCustomCollection();
+            CustomCollections.Add(txtName.Text, collection);
+            LoadData();
+        }
 
-            var collection = new CustomCollection()
+        private CustomCollection GetCustomCollection()
+        {
+            return new CustomCollection()
             {
                 CommandTimeout = chkDefaultTimeout.Checked ? null : Convert.ToInt32(numTimeout.Value),
                 ProcedureName = cboProcedureName.Text,
                 RunOnServiceStart = chkRunOnStart.Checked,
                 Schedule = txtCron.Text
             };
-            CustomCollections.Add(txtName.Text, collection);
-            LoadData();
         }
 
         private void BttnUpdate_Click(object sender, EventArgs e)
