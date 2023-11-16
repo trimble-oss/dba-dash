@@ -24,7 +24,7 @@ SELECT I.InstanceID,
 FROM dbo.Instances I 
 JOIN dbo.Databases D ON I.InstanceID = D.InstanceID
 JOIN dbo.CollectionDatesStatus SSD ON SSD.InstanceID = I.InstanceID AND SSD.Reference='LogRestores'
-LEFT JOIN dbo.LogRestores LR ON LR.DatabaseID = D.DatabaseID
+LEFT JOIN dbo.LogRestores LR ON LR.DatabaseID = D.DatabaseID AND LR.InstanceID = D.InstanceID
 OUTER APPLY(SELECT TOP(1) T.* 
 			FROM dbo.LogRestoreThresholds T 
 			WHERE (D.InstanceID = T.InstanceID OR T.InstanceID = -1)
