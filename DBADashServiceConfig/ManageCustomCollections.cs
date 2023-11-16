@@ -26,7 +26,7 @@ namespace DBADashServiceConfig
             set => _customCollections = value.DeepCopy();
         }
 
-        private static KeyValuePair<string, CustomCollection> CustomCollectionClipboard=new();
+        private static KeyValuePair<string, CustomCollection> CustomCollectionClipboard = new();
 
         public string ConnectionString { get; set; }
         private bool IsScheduleValid = true;
@@ -46,7 +46,7 @@ namespace DBADashServiceConfig
             new DataGridViewTextBoxColumn()
             {
                 Name = "Schedule", HeaderText = "Schedule", DataPropertyName = "Schedule",
-                SortMode = DataGridViewColumnSortMode.Automatic, Width = 60
+                SortMode = DataGridViewColumnSortMode.Automatic, Width = 80
             },
             new DataGridViewTextBoxColumn()
             {
@@ -548,7 +548,7 @@ ORDER BY ProcName", cn);
 
         private void SetCollection(KeyValuePair<string, CustomCollection> collection)
         {
-            if(collection.Value==null) return;
+            if (collection.Value == null) return;
             cboProcedureName.Text = collection.Value.ProcedureName;
             txtCron.Text = collection.Value.Schedule;
             chkDefaultTimeout.Checked = collection.Value.CommandTimeout == null;
@@ -789,6 +789,10 @@ ORDER BY ProcName", cn);
         {
             var link = (LinkLabel)sender;
             txtCron.Text = link.Tag.ToString();
+            if (string.IsNullOrEmpty(txtCron.Text))
+            {
+                chkRunOnStart.Checked = false;
+            }
         }
 
         private void TxtCron_TextChanged(object sender, EventArgs e)
