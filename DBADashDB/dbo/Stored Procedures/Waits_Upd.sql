@@ -4,6 +4,8 @@
     @SnapshotDate DATETIME2(2)
 )
 AS
+SET XACT_ABORT ON
+SET NOCOUNT ON
 IF EXISTS(SELECT wait_type 
         FROM @Waits
         EXCEPT 
@@ -18,6 +20,8 @@ BEGIN
     SELECT WaitType 
     FROM dbo.WaitType WITH(UPDLOCK,HOLDLOCK)
 END
+
+BEGIN TRAN
 
 INSERT INTO dbo.Waits(InstanceID,SnapshotDate,WaitTypeID,waiting_tasks_count,wait_time_ms,signal_wait_time_ms,sample_ms_diff)
 SELECT @InstanceID,
@@ -58,9 +62,13 @@ SELECT @InstanceID,
        signal_wait_time_ms
 FROM @Waits;
 
+COMMIT
+
 /* Update 60min aggregation */
 BEGIN TRAN
-DECLARE @MaxDate DATETIME
+
+DECLARE @Tomorrow DATETIME2(2) = CAST(DATEADD(d,1,GETUTCDATE()) AS DATE)
+DECLARE @MaxDate DATETIME2(2)
 SELECT @MaxDate = ISNULL(MAX(SnapshotDate),'19000101') 
 FROM dbo.Waits_60MIN 
 WHERE InstanceID = @InstanceID
@@ -79,20 +87,24 @@ INSERT INTO dbo.Waits_60MIN
     signal_wait_time_ms,
     sample_ms_diff
 )
-SELECT InstanceID,
-	CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,SnapshotDate,120),0,14) + ':00',120) AS SnapshotDate,
-	WaitTypeID,
-	SUM(waiting_tasks_count) waiting_tasks_count,
-	SUM(wait_time_ms) wait_time_ms,
-	SUM(signal_wait_time_ms) signal_wait_ms,
-	MAX(SUM(sample_ms_diff)) OVER(PARTITION BY InstanceID,CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,SnapshotDate,120),0,14) + ':00',120)) sample_ms_diff
+SELECT w.InstanceID,
+	DG.DateGroup AS SnapshotDate,
+	w.WaitTypeID,
+	SUM(w.waiting_tasks_count) waiting_tasks_count,
+	SUM(w.wait_time_ms) wait_time_ms,
+	SUM(w.signal_wait_time_ms) signal_wait_ms,
+	MAX(SUM(w.sample_ms_diff)) OVER(PARTITION BY w.InstanceID,DG.DateGroup) sample_ms_diff
 FROM dbo.Waits w
+CROSS APPLY dbo.DateGroupingMins(SnapshotDate,60) DG
 WHERE w.InstanceID=@InstanceID
-AND SnapshotDate >= @MaxDate
-GROUP BY InstanceID,
-	CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,SnapshotDate,120),0,14) + ':00',120),
-	WaitTypeID
+AND w.SnapshotDate >= @MaxDate
+AND w.SnapshotDate < @Tomorrow
+AND w.sample_ms_diff < 86400000
+GROUP BY w.InstanceID,
+	DG.DateGroup,
+	w.WaitTypeID
  OPTION(OPTIMIZE FOR(@MaxDate='99991231'))
+
 COMMIT
 /* **************** */
 
