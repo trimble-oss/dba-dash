@@ -16,11 +16,12 @@ namespace DBADash
         private readonly Policy retryPolicy;
         private int? instanceID;
         private DateTime snapshotDate;
-        private static readonly int commandTimeout = 60;
+        private readonly int CommandTimeout;
         private readonly DBADashAgent importAgent;
 
-        public DBImporter(DataSet data, string connectionString, DBADashAgent importAgent)
+        public DBImporter(DataSet data, string connectionString, DBADashAgent importAgent, int commandTimeout = 60)
         {
+            CommandTimeout = commandTimeout;
             this.importAgent = importAgent;
             this.data = data;
             UpgradeDS();
@@ -364,7 +365,7 @@ namespace DBADash
             try
             {
                 using (var cn = new SqlConnection(connectionString))
-                using (var cmd = new SqlCommand("DDLSnapshot_Add", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout })
+                using (var cmd = new SqlCommand("DDLSnapshot_Add", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout })
                 {
                     cn.Open();
                     DateTime StartTime;
@@ -413,7 +414,7 @@ namespace DBADash
             {
                 var r = data.Tables["ServerExtraProperties"].Rows[0];
                 using (var cn = new SqlConnection(connectionString))
-                using (var cmd = new SqlCommand("ServerExtraProperties_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout })
+                using (var cmd = new SqlCommand("ServerExtraProperties_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout })
                 {
                     cn.Open();
                     cmd.Parameters.AddWithValue("InstanceID", instanceID);
@@ -492,7 +493,7 @@ namespace DBADash
             var dt = data.Tables[tableName];
             if (dt == null) return;
             using var cn = new SqlConnection(connectionString);
-            using var cmd = new SqlCommand(procName, cn) { CommandTimeout = commandTimeout, CommandType = CommandType.StoredProcedure };
+            using var cmd = new SqlCommand(procName, cn) { CommandTimeout = CommandTimeout, CommandType = CommandType.StoredProcedure };
             cn.Open();
             if (dt.Rows.Count > 0)
             {
@@ -505,10 +506,10 @@ namespace DBADash
 
         public void InsertErrors()
         {
-            InsertErrors(connectionString, instanceID, snapshotDate, data);
+            InsertErrors(connectionString, instanceID, snapshotDate, data, CommandTimeout);
         }
 
-        public static void InsertErrors(string connectionString, Int32? instanceID, DateTime SnapshotDate, DataSet ds)
+        public static void InsertErrors(string connectionString, Int32? instanceID, DateTime SnapshotDate, DataSet ds, int commandTimeout)
         {
             if (ds.Tables.Contains("Errors") && ds.Tables["Errors"].Rows.Count > 0)
             {
@@ -539,7 +540,7 @@ namespace DBADash
         private Int32 UpdateInstance(ref DataRow rInstance)
         {
             using (var cn = new SqlConnection(connectionString))
-            using (var cmd = new SqlCommand("Instance_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout })
+            using (var cmd = new SqlCommand("Instance_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout })
             {
                 cn.Open();
 

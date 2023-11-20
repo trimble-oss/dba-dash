@@ -12,6 +12,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Timers;
+using Microsoft.Data.SqlClient;
 using static DBADash.DBADashConnection;
 
 namespace DBADashService
@@ -200,13 +201,14 @@ namespace DBADashService
             foreach (DBADashConnection d in config.AllDestinations.Where(cn => cn.Type == ConnectionType.SQL))
             {
                 i += 1;
-                string maintenanceCron = config.GetMaintenanceCron();
-
-                IJobDetail job = JobBuilder.Create<MaintenanceJob>()
+                var maintenanceCron = config.GetMaintenanceCron();
+                var job = JobBuilder.Create<MaintenanceJob>()
                         .WithIdentity("MaintenanceJob" + i.ToString())
+                        .UsingJobData("PurgeDataCommandTimeout", config.PurgeDataCommandTimeout ?? 600)
+                        .UsingJobData("AddPartitionsCommandTimeout", config.AddPartitionsCommandTimeout ?? 300)
                         .UsingJobData("ConnectionString", d.ConnectionString)
                         .Build();
-                ITrigger trigger = TriggerBuilder.Create()
+                var trigger = TriggerBuilder.Create()
                 .StartNow()
                 .WithCronSchedule(maintenanceCron)
                 .Build();

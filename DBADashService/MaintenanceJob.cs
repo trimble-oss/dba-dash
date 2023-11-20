@@ -5,6 +5,7 @@ using System;
 using System.Data;
 using System.Threading.Tasks;
 using DBADash;
+using SerilogTimings;
 
 namespace DBADashService
 {
@@ -12,11 +13,13 @@ namespace DBADashService
     {
         public Task Execute(IJobExecutionContext context)
         {
-            JobDataMap dataMap = context.JobDetail.JobDataMap;
-            string connectionString = dataMap.GetString("ConnectionString");
+            var dataMap = context.JobDetail.JobDataMap;
+            var connectionString = dataMap.GetString("ConnectionString");
+            var addPartitionsCommandTimeout = dataMap.GetInt("AddPartitionsCommandTimeout");
+            var purgeDataCommandTimeout = dataMap.GetInt("PurgeDataCommandTimeout");
             try
             {
-                AddPartitions(connectionString);
+                AddPartitions(connectionString, addPartitionsCommandTimeout);
             }
             catch (Exception ex)
             {
@@ -24,7 +27,7 @@ namespace DBADashService
             }
             try
             {
-                PurgeData(connectionString);
+                PurgeData(connectionString, purgeDataCommandTimeout);
             }
             catch (Exception ex)
             {
@@ -34,31 +37,31 @@ namespace DBADashService
             return Task.CompletedTask;
         }
 
-        public static void AddPartitions(string connectionString)
+        public static void AddPartitions(string connectionString, int commandTimeout)
         {
-            var cn = new SqlConnection(connectionString);
-            using (cn)
+            using (var op = Operation.Begin("AddPartitions"))
             {
-                using (var cmd = new SqlCommand("dbo.Partitions_Add", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = 120 })
-                {
-                    cn.Open();
-                    Log.Information("Maintenance: Creating partitions");
-                    cmd.ExecuteNonQuery();
-                }
+                using var cn = new SqlConnection(connectionString);
+                using var cmd = new SqlCommand("dbo.Partitions_Add", cn)
+                { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout };
+                cn.Open();
+                Log.Information("Maintenance: Creating partitions");
+                cmd.ExecuteNonQuery();
+                op.Complete();
             }
         }
 
-        public static void PurgeData(string connectionString)
+        public static void PurgeData(string connectionString, int commandTimeout)
         {
-            var cn = new SqlConnection(connectionString);
-            using (cn)
+            using (var op = Operation.Begin("PurgeData"))
             {
-                using (var cmd = new SqlCommand("dbo.PurgeData", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = 600 })
-                {
-                    cn.Open();
-                    Log.Information("Maintenance : PurgeData");
-                    cmd.ExecuteNonQuery();
-                }
+                using var cn = new SqlConnection(connectionString);
+                using var cmd = new SqlCommand("dbo.PurgeData", cn)
+                { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout };
+                cn.Open();
+                Log.Information("Maintenance : PurgeData");
+                cmd.ExecuteNonQuery();
+                op.Complete();
             }
         }
 
@@ -78,7 +81,7 @@ namespace DBADashService
                 dtErrors.Rows.Add(rError);
                 DataSet ds = new();
                 ds.Tables.Add(dtErrors);
-                DBADash.DBImporter.InsertErrors(connectionString, null, DateTime.UtcNow, ds);
+                DBADash.DBImporter.InsertErrors(connectionString, null, DateTime.UtcNow, ds, 60);
             }
             catch (Exception ex2)
             {
