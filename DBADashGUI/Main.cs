@@ -227,6 +227,7 @@ namespace DBADashGUI
             Common.SetConnectionString(connection);
             try
             {
+                Config.RefreshConfig();
                 DBADashUser.GetUser();
                 customReports = CustomReports.CustomReports.GetCustomReports();
                 GetCommandLineTags();
@@ -235,6 +236,7 @@ namespace DBADashGUI
                 AddInstanes();
                 AddTimeZoneMenus();
                 SetConnectionState(true);
+                ThemeExtensions.CellToolTipMaxLength = Config.CellToolTipMaxLength;
             }
             catch (Exception ex)
             {

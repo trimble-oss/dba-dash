@@ -7,6 +7,7 @@ using ComboBox = System.Windows.Forms.ComboBox;
 using Control = System.Windows.Forms.Control;
 using TextBox = System.Windows.Forms.TextBox;
 using TreeView = System.Windows.Forms.TreeView;
+using System;
 
 namespace DBADashGUI.Theme
 {
@@ -17,6 +18,8 @@ namespace DBADashGUI.Theme
     public static class ThemeExtensions
     {
         public static BaseTheme CurrentTheme { get; set; } = new BaseTheme();
+
+        public static int CellToolTipMaxLength { get; set; } = 1000;
 
         public static void ApplyTheme(this Control control)
         {
@@ -111,7 +114,7 @@ namespace DBADashGUI.Theme
 
         public static void ApplyTheme(this ToolStrip menu, BaseTheme theme)
         {
-            if (menu.Tag !=null && (string)menu.Tag == "ALT")
+            if (menu.Tag != null && (string)menu.Tag == "ALT")
             {
                 menu.Renderer = theme is DarkTheme ? new DarkModeAltMenuRenderer() : new LightModeAltMenuRenderer();
             }
@@ -188,6 +191,12 @@ namespace DBADashGUI.Theme
             {
                 col.LinkColor = theme.LinkColor;
             }
+            dgv.ShowCellToolTips = CellToolTipMaxLength > 0;
+            dgv.CellFormatting -= TruncateTooltipTextHandler;
+            if (CellToolTipMaxLength > 0)
+            {
+                dgv.CellFormatting += TruncateTooltipTextHandler;
+            }
         }
 
         public static void ApplyTheme(this TreeView tv, BaseTheme theme)
@@ -201,6 +210,19 @@ namespace DBADashGUI.Theme
             chart.BackColor = theme.BackgroundColor;
             chart.ForeColor = theme.ForegroundColor;
             chart.DefaultLegend.Foreground = new SolidColorBrush(theme.ForegroundColor.ToMediaColor());
+        }
+
+        public static void TruncateTooltipTextHandler(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.Value == null) return;
+            if (sender is not DataGridView gridView) return;
+
+            var currentTooltip = gridView.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText;
+
+            if (currentTooltip.Length <= CellToolTipMaxLength) return;
+            var tooltipText = CellToolTipMaxLength > 0 ? string.Concat(currentTooltip.AsSpan(0, CellToolTipMaxLength), "...") : "";
+
+            gridView.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = tooltipText;
         }
     }
 }

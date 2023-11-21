@@ -30,6 +30,7 @@ namespace DBADashGUI
         public static int BuildReferenceUpdateExclusionPeriod;
         public static double IdleWarningThresholdForSleepingSessionWithOpenTran;
         public static double IdleCriticalThresholdForSleepingSessionWithOpenTran;
+        public static int CellToolTipMaxLength;
 
         static Config()
         {
@@ -70,6 +71,7 @@ namespace DBADashGUI
             BuildReferenceUpdateExclusionPeriod = settings.GetValueAsInt("GUIBuildReferenceUpdateExclusionPeriod", 2);
             IdleWarningThresholdForSleepingSessionWithOpenTran = settings.GetValueAsDouble("IdleWarningThresholdForSleepingSessionWithOpenTran", 1);
             IdleCriticalThresholdForSleepingSessionWithOpenTran = settings.GetValueAsDouble("IdleCriticalThresholdForSleepingSessionWithOpenTran", 600);
+            CellToolTipMaxLength = settings.GetValueAsInt("GUICellToolTipMaxLength", 1000);
         }
 
         public static int GetValueAsInt(object value, int defaultValue)
