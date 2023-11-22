@@ -33,68 +33,72 @@ namespace DBADashGUI.Performance
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RunningQueries));
-            this.dgv = new System.Windows.Forms.DataGridView();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.tsCols = new System.Windows.Forms.ToolStripButton();
-            this.tsBack = new System.Windows.Forms.ToolStripButton();
-            this.tsGetLatest = new System.Windows.Forms.ToolStripButton();
-            this.tsNext = new System.Windows.Forms.ToolStripButton();
-            this.lblSnapshotDate = new System.Windows.Forms.ToolStripLabel();
-            this.tsGroupBy = new System.Windows.Forms.ToolStripDropDownButton();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.databaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.hostNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.loginNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.objectNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.planHandleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.programToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.queryHashToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.queryPlanHashToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.sQLHandleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.statusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.waitResourceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.waitTypeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.noneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsPrevious = new System.Windows.Forms.ToolStripButton();
-            this.tsBlockingFilter = new System.Windows.Forms.ToolStripDropDownButton();
-            this.showRootBlockersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.clearBlockingFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsGroupByFilter = new System.Windows.Forms.ToolStripLabel();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.tsStatus = new System.Windows.Forms.ToolStripStatusLabel();
-            this.lblRowLimit = new System.Windows.Forms.ToolStripStatusLabel();
-            this.tsEditLimit = new System.Windows.Forms.ToolStripStatusLabel();
-            this.dgvSessionWaits = new System.Windows.Forms.DataGridView();
-            this.toolStrip2 = new System.Windows.Forms.ToolStrip();
-            this.lblWaitsForSession = new System.Windows.Forms.ToolStripLabel();
-            this.tsSessionWaitCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsSessionWaitExcel = new System.Windows.Forms.ToolStripButton();
-            this.tsWaitsFilter = new System.Windows.Forms.ToolStripDropDownButton();
-            this.allSessionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.summaryViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.sessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
-            this.toolStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
-            this.statusStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvSessionWaits)).BeginInit();
-            this.toolStrip2.SuspendLayout();
-            this.SuspendLayout();
+            dgv = new System.Windows.Forms.DataGridView();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            tsRefresh = new System.Windows.Forms.ToolStripButton();
+            tsCopy = new System.Windows.Forms.ToolStripButton();
+            tsExcel = new System.Windows.Forms.ToolStripButton();
+            tsCols = new System.Windows.Forms.ToolStripButton();
+            tsBack = new System.Windows.Forms.ToolStripButton();
+            tsGetLatest = new System.Windows.Forms.ToolStripButton();
+            tsNext = new System.Windows.Forms.ToolStripButton();
+            lblSnapshotDate = new System.Windows.Forms.ToolStripLabel();
+            tsGroupBy = new System.Windows.Forms.ToolStripDropDownButton();
+            toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            databaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            hostNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            loginNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            objectNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            planHandleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            programToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            queryHashToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            queryPlanHashToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            sQLHandleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            statusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            waitResourceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            waitTypeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            noneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsPrevious = new System.Windows.Forms.ToolStripButton();
+            tsBlockingFilter = new System.Windows.Forms.ToolStripDropDownButton();
+            showRootBlockersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            blockedQueriesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            blockingQueriesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            blockedOrBlockingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
+            clearBlockingFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsGroupByFilter = new System.Windows.Forms.ToolStripLabel();
+            splitContainer1 = new System.Windows.Forms.SplitContainer();
+            statusStrip1 = new System.Windows.Forms.StatusStrip();
+            tsStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            lblRowLimit = new System.Windows.Forms.ToolStripStatusLabel();
+            tsEditLimit = new System.Windows.Forms.ToolStripStatusLabel();
+            dgvSessionWaits = new System.Windows.Forms.DataGridView();
+            toolStrip2 = new System.Windows.Forms.ToolStrip();
+            lblWaitsForSession = new System.Windows.Forms.ToolStripLabel();
+            tsSessionWaitCopy = new System.Windows.Forms.ToolStripButton();
+            tsSessionWaitExcel = new System.Windows.Forms.ToolStripButton();
+            tsWaitsFilter = new System.Windows.Forms.ToolStripDropDownButton();
+            allSessionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            summaryViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            sessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
+            toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
+            splitContainer1.Panel1.SuspendLayout();
+            splitContainer1.Panel2.SuspendLayout();
+            splitContainer1.SuspendLayout();
+            statusStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvSessionWaits).BeginInit();
+            toolStrip2.SuspendLayout();
+            SuspendLayout();
             // 
             // dgv
             // 
-            this.dgv.AllowUserToAddRows = false;
-            this.dgv.AllowUserToDeleteRows = false;
-            this.dgv.AllowUserToOrderColumns = true;
-            this.dgv.BackgroundColor = System.Drawing.Color.White;
+            dgv.AllowUserToAddRows = false;
+            dgv.AllowUserToDeleteRows = false;
+            dgv.AllowUserToOrderColumns = true;
+            dgv.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -102,8 +106,8 @@ namespace DBADashGUI.Performance
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
             dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -111,12 +115,12 @@ namespace DBADashGUI.Performance
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgv.DefaultCellStyle = dataGridViewCellStyle2;
-            this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 0);
-            this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dgv.Name = "dgv";
-            this.dgv.ReadOnly = true;
+            dgv.DefaultCellStyle = dataGridViewCellStyle2;
+            dgv.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgv.Location = new System.Drawing.Point(0, 0);
+            dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dgv.Name = "dgv";
+            dgv.ReadOnly = true;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -124,484 +128,476 @@ namespace DBADashGUI.Performance
             dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgv.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
-            this.dgv.RowHeadersVisible = false;
-            this.dgv.RowHeadersWidth = 51;
-            this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(1090, 376);
-            this.dgv.TabIndex = 0;
-            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellContentClick);
-            this.dgv.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.Dgv_CellFormatting);
+            dgv.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dgv.RowHeadersVisible = false;
+            dgv.RowHeadersWidth = 51;
+            dgv.RowTemplate.Height = 24;
+            dgv.Size = new System.Drawing.Size(1090, 376);
+            dgv.TabIndex = 0;
+            dgv.CellContentClick += Dgv_CellContentClick;
+            dgv.CellFormatting += Dgv_CellFormatting;
             // 
             // toolStrip1
             // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsRefresh,
-            this.tsCopy,
-            this.tsExcel,
-            this.tsCols,
-            this.tsBack,
-            this.tsGetLatest,
-            this.tsNext,
-            this.lblSnapshotDate,
-            this.tsGroupBy,
-            this.tsPrevious,
-            this.tsBlockingFilter,
-            this.tsGroupByFilter});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1090, 27);
-            this.toolStrip1.TabIndex = 1;
-            this.toolStrip1.Text = "Group By";
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsCols, tsBack, tsGetLatest, tsNext, lblSnapshotDate, tsGroupBy, tsPrevious, tsBlockingFilter, tsGroupByFilter });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new System.Drawing.Size(1090, 27);
+            toolStrip1.TabIndex = 1;
+            toolStrip1.Text = "Group By";
             // 
             // tsRefresh
             // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
+            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Name = "tsRefresh";
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Text = "Refresh";
+            tsRefresh.Click += TsRefresh_Click;
             // 
             // tsCopy
             // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
+            tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopy.Name = "tsCopy";
+            tsCopy.Size = new System.Drawing.Size(29, 24);
+            tsCopy.Text = "Copy";
+            tsCopy.Click += TsCopy_Click;
             // 
             // tsExcel
             // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export to Excel";
-            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
+            tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsExcel.Image = Properties.Resources.excel16x16;
+            tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcel.Name = "tsExcel";
+            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Text = "Export to Excel";
+            tsExcel.Click += TsExcel_Click;
             // 
             // tsCols
             // 
-            this.tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCols.Image = global::DBADashGUI.Properties.Resources.Column_16x;
-            this.tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCols.Name = "tsCols";
-            this.tsCols.Size = new System.Drawing.Size(29, 24);
-            this.tsCols.Text = "Columns";
-            this.tsCols.Click += new System.EventHandler(this.TsCols_Click);
+            tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCols.Image = Properties.Resources.Column_16x;
+            tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCols.Name = "tsCols";
+            tsCols.Size = new System.Drawing.Size(29, 24);
+            tsCols.Text = "Columns";
+            tsCols.Click += TsCols_Click;
             // 
             // tsBack
             // 
-            this.tsBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsBack.Enabled = false;
-            this.tsBack.Image = global::DBADashGUI.Properties.Resources.Previous_grey_16x;
-            this.tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsBack.Name = "tsBack";
-            this.tsBack.Size = new System.Drawing.Size(29, 24);
-            this.tsBack.Text = "Back";
-            this.tsBack.Click += new System.EventHandler(this.TsBack_Click);
+            tsBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsBack.Enabled = false;
+            tsBack.Image = Properties.Resources.Previous_grey_16x;
+            tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsBack.Name = "tsBack";
+            tsBack.Size = new System.Drawing.Size(29, 24);
+            tsBack.Text = "Back";
+            tsBack.Click += TsBack_Click;
             // 
             // tsGetLatest
             // 
-            this.tsGetLatest.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsGetLatest.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsGetLatest.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsGetLatest.Name = "tsGetLatest";
-            this.tsGetLatest.Size = new System.Drawing.Size(99, 24);
-            this.tsGetLatest.Text = "Get Latest";
-            this.tsGetLatest.Click += new System.EventHandler(this.TsGetLatest_Click);
+            tsGetLatest.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsGetLatest.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsGetLatest.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsGetLatest.Name = "tsGetLatest";
+            tsGetLatest.Size = new System.Drawing.Size(99, 24);
+            tsGetLatest.Text = "Get Latest";
+            tsGetLatest.Click += TsGetLatest_Click;
             // 
             // tsNext
             // 
-            this.tsNext.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsNext.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsNext.Image = global::DBADashGUI.Properties.Resources.arrow_Forward_16xLG;
-            this.tsNext.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsNext.Name = "tsNext";
-            this.tsNext.Size = new System.Drawing.Size(29, 24);
-            this.tsNext.Text = "Next Snapshot";
-            this.tsNext.Click += new System.EventHandler(this.TsNext_Click);
+            tsNext.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsNext.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsNext.Image = Properties.Resources.arrow_Forward_16xLG;
+            tsNext.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsNext.Name = "tsNext";
+            tsNext.Size = new System.Drawing.Size(29, 24);
+            tsNext.Text = "Next Snapshot";
+            tsNext.Click += TsNext_Click;
             // 
             // lblSnapshotDate
             // 
-            this.lblSnapshotDate.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.lblSnapshotDate.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblSnapshotDate.Name = "lblSnapshotDate";
-            this.lblSnapshotDate.Size = new System.Drawing.Size(115, 24);
-            this.lblSnapshotDate.Text = "Snapshot Date:";
-            this.lblSnapshotDate.Visible = false;
+            lblSnapshotDate.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            lblSnapshotDate.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            lblSnapshotDate.Name = "lblSnapshotDate";
+            lblSnapshotDate.Size = new System.Drawing.Size(115, 24);
+            lblSnapshotDate.Text = "Snapshot Date:";
+            lblSnapshotDate.Visible = false;
             // 
             // tsGroupBy
             // 
-            this.tsGroupBy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsGroupBy.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem1,
-            this.databaseToolStripMenuItem,
-            this.hostNameToolStripMenuItem,
-            this.loginNameToolStripMenuItem,
-            this.objectNameToolStripMenuItem,
-            this.planHandleToolStripMenuItem,
-            this.programToolStripMenuItem,
-            this.queryHashToolStripMenuItem,
-            this.queryPlanHashToolStripMenuItem,
-            this.sQLHandleToolStripMenuItem,
-            this.statusToolStripMenuItem,
-            this.waitResourceToolStripMenuItem,
-            this.waitTypeToolStripMenuItem,
-            this.toolStripSeparator1,
-            this.noneToolStripMenuItem});
-            this.tsGroupBy.Enabled = false;
-            this.tsGroupBy.Image = ((System.Drawing.Image)(resources.GetObject("tsGroupBy.Image")));
-            this.tsGroupBy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsGroupBy.Name = "tsGroupBy";
-            this.tsGroupBy.Size = new System.Drawing.Size(84, 24);
-            this.tsGroupBy.Text = "Group By";
+            tsGroupBy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            tsGroupBy.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripMenuItem1, databaseToolStripMenuItem, hostNameToolStripMenuItem, loginNameToolStripMenuItem, objectNameToolStripMenuItem, planHandleToolStripMenuItem, programToolStripMenuItem, queryHashToolStripMenuItem, queryPlanHashToolStripMenuItem, sQLHandleToolStripMenuItem, statusToolStripMenuItem, waitResourceToolStripMenuItem, waitTypeToolStripMenuItem, toolStripSeparator1, noneToolStripMenuItem });
+            tsGroupBy.Enabled = false;
+            tsGroupBy.Image = (System.Drawing.Image)resources.GetObject("tsGroupBy.Image");
+            tsGroupBy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsGroupBy.Name = "tsGroupBy";
+            tsGroupBy.Size = new System.Drawing.Size(84, 24);
+            tsGroupBy.Text = "Group By";
             // 
             // toolStripMenuItem1
             // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(236, 26);
-            this.toolStripMenuItem1.Tag = "client_interface_name";
-            this.toolStripMenuItem1.Text = "Client Interface Name";
-            this.toolStripMenuItem1.Click += new System.EventHandler(this.TsGroupBy_Click);
+            toolStripMenuItem1.Name = "toolStripMenuItem1";
+            toolStripMenuItem1.Size = new System.Drawing.Size(236, 26);
+            toolStripMenuItem1.Tag = "client_interface_name";
+            toolStripMenuItem1.Text = "Client Interface Name";
+            toolStripMenuItem1.Click += TsGroupBy_Click;
             // 
             // databaseToolStripMenuItem
             // 
-            this.databaseToolStripMenuItem.Name = "databaseToolStripMenuItem";
-            this.databaseToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
-            this.databaseToolStripMenuItem.Tag = "database_name";
-            this.databaseToolStripMenuItem.Text = "Database";
-            this.databaseToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
+            databaseToolStripMenuItem.Name = "databaseToolStripMenuItem";
+            databaseToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            databaseToolStripMenuItem.Tag = "database_name";
+            databaseToolStripMenuItem.Text = "Database";
+            databaseToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // hostNameToolStripMenuItem
             // 
-            this.hostNameToolStripMenuItem.Name = "hostNameToolStripMenuItem";
-            this.hostNameToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
-            this.hostNameToolStripMenuItem.Tag = "host_name";
-            this.hostNameToolStripMenuItem.Text = "Host Name";
-            this.hostNameToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
+            hostNameToolStripMenuItem.Name = "hostNameToolStripMenuItem";
+            hostNameToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            hostNameToolStripMenuItem.Tag = "host_name";
+            hostNameToolStripMenuItem.Text = "Host Name";
+            hostNameToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // loginNameToolStripMenuItem
             // 
-            this.loginNameToolStripMenuItem.Name = "loginNameToolStripMenuItem";
-            this.loginNameToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
-            this.loginNameToolStripMenuItem.Tag = "login_name";
-            this.loginNameToolStripMenuItem.Text = "Login Name";
-            this.loginNameToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
+            loginNameToolStripMenuItem.Name = "loginNameToolStripMenuItem";
+            loginNameToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            loginNameToolStripMenuItem.Tag = "login_name";
+            loginNameToolStripMenuItem.Text = "Login Name";
+            loginNameToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // objectNameToolStripMenuItem
             // 
-            this.objectNameToolStripMenuItem.Name = "objectNameToolStripMenuItem";
-            this.objectNameToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
-            this.objectNameToolStripMenuItem.Tag = "object_name";
-            this.objectNameToolStripMenuItem.Text = "Object Name";
-            this.objectNameToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
+            objectNameToolStripMenuItem.Name = "objectNameToolStripMenuItem";
+            objectNameToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            objectNameToolStripMenuItem.Tag = "object_name";
+            objectNameToolStripMenuItem.Text = "Object Name";
+            objectNameToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // planHandleToolStripMenuItem
             // 
-            this.planHandleToolStripMenuItem.Name = "planHandleToolStripMenuItem";
-            this.planHandleToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
-            this.planHandleToolStripMenuItem.Tag = "plan_handle";
-            this.planHandleToolStripMenuItem.Text = "Plan Handle";
-            this.planHandleToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
+            planHandleToolStripMenuItem.Name = "planHandleToolStripMenuItem";
+            planHandleToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            planHandleToolStripMenuItem.Tag = "plan_handle";
+            planHandleToolStripMenuItem.Text = "Plan Handle";
+            planHandleToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // programToolStripMenuItem
             // 
-            this.programToolStripMenuItem.Name = "programToolStripMenuItem";
-            this.programToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
-            this.programToolStripMenuItem.Tag = "program_name";
-            this.programToolStripMenuItem.Text = "Program";
-            this.programToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
+            programToolStripMenuItem.Name = "programToolStripMenuItem";
+            programToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            programToolStripMenuItem.Tag = "program_name";
+            programToolStripMenuItem.Text = "Program";
+            programToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // queryHashToolStripMenuItem
             // 
-            this.queryHashToolStripMenuItem.Name = "queryHashToolStripMenuItem";
-            this.queryHashToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
-            this.queryHashToolStripMenuItem.Tag = "query_hash";
-            this.queryHashToolStripMenuItem.Text = "Query Hash";
-            this.queryHashToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
+            queryHashToolStripMenuItem.Name = "queryHashToolStripMenuItem";
+            queryHashToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            queryHashToolStripMenuItem.Tag = "query_hash";
+            queryHashToolStripMenuItem.Text = "Query Hash";
+            queryHashToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // queryPlanHashToolStripMenuItem
             // 
-            this.queryPlanHashToolStripMenuItem.Name = "queryPlanHashToolStripMenuItem";
-            this.queryPlanHashToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
-            this.queryPlanHashToolStripMenuItem.Tag = "query_plan_hash";
-            this.queryPlanHashToolStripMenuItem.Text = "Query Plan Hash";
-            this.queryPlanHashToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
+            queryPlanHashToolStripMenuItem.Name = "queryPlanHashToolStripMenuItem";
+            queryPlanHashToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            queryPlanHashToolStripMenuItem.Tag = "query_plan_hash";
+            queryPlanHashToolStripMenuItem.Text = "Query Plan Hash";
+            queryPlanHashToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // sQLHandleToolStripMenuItem
             // 
-            this.sQLHandleToolStripMenuItem.Name = "sQLHandleToolStripMenuItem";
-            this.sQLHandleToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
-            this.sQLHandleToolStripMenuItem.Tag = "sql_handle";
-            this.sQLHandleToolStripMenuItem.Text = "SQL Handle";
-            this.sQLHandleToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
+            sQLHandleToolStripMenuItem.Name = "sQLHandleToolStripMenuItem";
+            sQLHandleToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            sQLHandleToolStripMenuItem.Tag = "sql_handle";
+            sQLHandleToolStripMenuItem.Text = "SQL Handle";
+            sQLHandleToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // statusToolStripMenuItem
             // 
-            this.statusToolStripMenuItem.Name = "statusToolStripMenuItem";
-            this.statusToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
-            this.statusToolStripMenuItem.Tag = "status";
-            this.statusToolStripMenuItem.Text = "Status";
-            this.statusToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
+            statusToolStripMenuItem.Name = "statusToolStripMenuItem";
+            statusToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            statusToolStripMenuItem.Tag = "status";
+            statusToolStripMenuItem.Text = "Status";
+            statusToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // waitResourceToolStripMenuItem
             // 
-            this.waitResourceToolStripMenuItem.Name = "waitResourceToolStripMenuItem";
-            this.waitResourceToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
-            this.waitResourceToolStripMenuItem.Tag = "wait_resource";
-            this.waitResourceToolStripMenuItem.Text = "Wait Resource";
-            this.waitResourceToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
+            waitResourceToolStripMenuItem.Name = "waitResourceToolStripMenuItem";
+            waitResourceToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            waitResourceToolStripMenuItem.Tag = "wait_resource";
+            waitResourceToolStripMenuItem.Text = "Wait Resource";
+            waitResourceToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // waitTypeToolStripMenuItem
             // 
-            this.waitTypeToolStripMenuItem.Name = "waitTypeToolStripMenuItem";
-            this.waitTypeToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
-            this.waitTypeToolStripMenuItem.Tag = "wait_type";
-            this.waitTypeToolStripMenuItem.Text = "Wait Type";
-            this.waitTypeToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
+            waitTypeToolStripMenuItem.Name = "waitTypeToolStripMenuItem";
+            waitTypeToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            waitTypeToolStripMenuItem.Tag = "wait_type";
+            waitTypeToolStripMenuItem.Text = "Wait Type";
+            waitTypeToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // toolStripSeparator1
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(233, 6);
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new System.Drawing.Size(233, 6);
             // 
             // noneToolStripMenuItem
             // 
-            this.noneToolStripMenuItem.Name = "noneToolStripMenuItem";
-            this.noneToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
-            this.noneToolStripMenuItem.Text = "None";
-            this.noneToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
+            noneToolStripMenuItem.Name = "noneToolStripMenuItem";
+            noneToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            noneToolStripMenuItem.Text = "None";
+            noneToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // tsPrevious
             // 
-            this.tsPrevious.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsPrevious.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsPrevious.Image = global::DBADashGUI.Properties.Resources.arrow_back_16xLG;
-            this.tsPrevious.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsPrevious.Name = "tsPrevious";
-            this.tsPrevious.Size = new System.Drawing.Size(29, 24);
-            this.tsPrevious.Text = "Previous Snapshot";
-            this.tsPrevious.Click += new System.EventHandler(this.TsPrevious_Click);
+            tsPrevious.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsPrevious.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsPrevious.Image = Properties.Resources.arrow_back_16xLG;
+            tsPrevious.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsPrevious.Name = "tsPrevious";
+            tsPrevious.Size = new System.Drawing.Size(29, 24);
+            tsPrevious.Text = "Previous Snapshot";
+            tsPrevious.Click += TsPrevious_Click;
             // 
             // tsBlockingFilter
             // 
-            this.tsBlockingFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.showRootBlockersToolStripMenuItem,
-            this.clearBlockingFilterToolStripMenuItem});
-            this.tsBlockingFilter.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
-            this.tsBlockingFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsBlockingFilter.Name = "tsBlockingFilter";
-            this.tsBlockingFilter.Size = new System.Drawing.Size(100, 24);
-            this.tsBlockingFilter.Text = "Blocking";
+            tsBlockingFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { showRootBlockersToolStripMenuItem, blockedQueriesToolStripMenuItem, blockingQueriesToolStripMenuItem, blockedOrBlockingToolStripMenuItem, toolStripMenuItem2, clearBlockingFilterToolStripMenuItem });
+            tsBlockingFilter.Image = Properties.Resources.FilterDropdown_16x;
+            tsBlockingFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsBlockingFilter.Name = "tsBlockingFilter";
+            tsBlockingFilter.Size = new System.Drawing.Size(100, 24);
+            tsBlockingFilter.Text = "Blocking";
             // 
             // showRootBlockersToolStripMenuItem
             // 
-            this.showRootBlockersToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.showRootBlockersToolStripMenuItem.Name = "showRootBlockersToolStripMenuItem";
-            this.showRootBlockersToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.showRootBlockersToolStripMenuItem.Text = "Show Root Blockers";
-            this.showRootBlockersToolStripMenuItem.Click += new System.EventHandler(this.ShowRootBlockersToolStripMenuItem_Click);
+            showRootBlockersToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            showRootBlockersToolStripMenuItem.Name = "showRootBlockersToolStripMenuItem";
+            showRootBlockersToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            showRootBlockersToolStripMenuItem.Text = "Root Blockers";
+            showRootBlockersToolStripMenuItem.ToolTipText = "Queries holding locks that are required by other queries that are not themselves blocked waiting for locks held by another query.";
+            showRootBlockersToolStripMenuItem.Click += ShowRootBlockersToolStripMenuItem_Click;
+            // 
+            // blockedQueriesToolStripMenuItem
+            // 
+            blockedQueriesToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            blockedQueriesToolStripMenuItem.Name = "blockedQueriesToolStripMenuItem";
+            blockedQueriesToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            blockedQueriesToolStripMenuItem.Text = "Blocked Queries";
+            blockedQueriesToolStripMenuItem.ToolTipText = "Queries waiting on locks held by other queries";
+            blockedQueriesToolStripMenuItem.Click += BlockedQueriesToolStripMenuItem_Click;
+            // 
+            // blockingQueriesToolStripMenuItem
+            // 
+            blockingQueriesToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            blockingQueriesToolStripMenuItem.Name = "blockingQueriesToolStripMenuItem";
+            blockingQueriesToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            blockingQueriesToolStripMenuItem.Text = "Blocking Queries";
+            blockingQueriesToolStripMenuItem.ToolTipText = "Queries holding locks that are needed by other queries";
+            blockingQueriesToolStripMenuItem.Click += BlockingQueriesToolStripMenuItem_Click;
+            // 
+            // blockedOrBlockingToolStripMenuItem
+            // 
+            blockedOrBlockingToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            blockedOrBlockingToolStripMenuItem.Name = "blockedOrBlockingToolStripMenuItem";
+            blockedOrBlockingToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            blockedOrBlockingToolStripMenuItem.Text = "Blocked Or Blocking";
+            blockedOrBlockingToolStripMenuItem.ToolTipText = "Queries either waiting for locks or holding locks required by other queries";
+            blockedOrBlockingToolStripMenuItem.Click += BlockedOrBlockingToolStripMenuItem_Click;
+            // 
+            // toolStripMenuItem2
+            // 
+            toolStripMenuItem2.Name = "toolStripMenuItem2";
+            toolStripMenuItem2.Size = new System.Drawing.Size(223, 6);
             // 
             // clearBlockingFilterToolStripMenuItem
             // 
-            this.clearBlockingFilterToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.clearBlockingFilterToolStripMenuItem.Name = "clearBlockingFilterToolStripMenuItem";
-            this.clearBlockingFilterToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.clearBlockingFilterToolStripMenuItem.Text = "Clear Blocking Filter";
-            this.clearBlockingFilterToolStripMenuItem.Click += new System.EventHandler(this.ClearBlockingFilterToolStripMenuItem_Click);
+            clearBlockingFilterToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            clearBlockingFilterToolStripMenuItem.Name = "clearBlockingFilterToolStripMenuItem";
+            clearBlockingFilterToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            clearBlockingFilterToolStripMenuItem.Text = "Clear Blocking Filter";
+            clearBlockingFilterToolStripMenuItem.Click += ClearBlockingFilterToolStripMenuItem_Click;
             // 
             // tsGroupByFilter
             // 
-            this.tsGroupByFilter.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.tsGroupByFilter.Name = "tsGroupByFilter";
-            this.tsGroupByFilter.Size = new System.Drawing.Size(127, 24);
-            this.tsGroupByFilter.Text = "{Group By Filter}";
-            this.tsGroupByFilter.Visible = false;
+            tsGroupByFilter.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            tsGroupByFilter.Name = "tsGroupByFilter";
+            tsGroupByFilter.Size = new System.Drawing.Size(127, 24);
+            tsGroupByFilter.Text = "{Group By Filter}";
+            tsGroupByFilter.Visible = false;
             // 
             // splitContainer1
             // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 27);
-            this.splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.splitContainer1.Name = "splitContainer1";
-            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitContainer1.Location = new System.Drawing.Point(0, 27);
+            splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            splitContainer1.Name = "splitContainer1";
+            splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.dgv);
-            this.splitContainer1.Panel1.Controls.Add(this.statusStrip1);
+            splitContainer1.Panel1.Controls.Add(dgv);
+            splitContainer1.Panel1.Controls.Add(statusStrip1);
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.dgvSessionWaits);
-            this.splitContainer1.Panel2.Controls.Add(this.toolStrip2);
-            this.splitContainer1.Size = new System.Drawing.Size(1090, 568);
-            this.splitContainer1.SplitterDistance = 402;
-            this.splitContainer1.SplitterWidth = 5;
-            this.splitContainer1.TabIndex = 2;
+            splitContainer1.Panel2.Controls.Add(dgvSessionWaits);
+            splitContainer1.Panel2.Controls.Add(toolStrip2);
+            splitContainer1.Size = new System.Drawing.Size(1090, 568);
+            splitContainer1.SplitterDistance = 402;
+            splitContainer1.SplitterWidth = 5;
+            splitContainer1.TabIndex = 2;
             // 
             // statusStrip1
             // 
-            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsStatus,
-            this.lblRowLimit,
-            this.tsEditLimit});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 376);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1090, 26);
-            this.statusStrip1.TabIndex = 1;
-            this.statusStrip1.Text = "statusStrip1";
+            statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsStatus, lblRowLimit, tsEditLimit });
+            statusStrip1.Location = new System.Drawing.Point(0, 376);
+            statusStrip1.Name = "statusStrip1";
+            statusStrip1.Size = new System.Drawing.Size(1090, 26);
+            statusStrip1.TabIndex = 1;
+            statusStrip1.Text = "statusStrip1";
             // 
             // tsStatus
             // 
-            this.tsStatus.Name = "tsStatus";
-            this.tsStatus.Size = new System.Drawing.Size(0, 20);
+            tsStatus.Name = "tsStatus";
+            tsStatus.Size = new System.Drawing.Size(0, 20);
             // 
             // lblRowLimit
             // 
-            this.lblRowLimit.ForeColor = System.Drawing.Color.Red;
-            this.lblRowLimit.Name = "lblRowLimit";
-            this.lblRowLimit.Size = new System.Drawing.Size(590, 20);
-            this.lblRowLimit.Text = "Row Limit exceeded.  Select a narrower date range to view older snapshots or edit" +
-    " limit.";
-            this.lblRowLimit.Visible = false;
+            lblRowLimit.ForeColor = System.Drawing.Color.Red;
+            lblRowLimit.Name = "lblRowLimit";
+            lblRowLimit.Size = new System.Drawing.Size(590, 20);
+            lblRowLimit.Text = "Row Limit exceeded.  Select a narrower date range to view older snapshots or edit limit.";
+            lblRowLimit.Visible = false;
             // 
             // tsEditLimit
             // 
-            this.tsEditLimit.IsLink = true;
-            this.tsEditLimit.Name = "tsEditLimit";
-            this.tsEditLimit.Size = new System.Drawing.Size(72, 20);
-            this.tsEditLimit.Text = "Edit Limit";
-            this.tsEditLimit.Click += new System.EventHandler(this.TsEditLimit_Click);
+            tsEditLimit.IsLink = true;
+            tsEditLimit.Name = "tsEditLimit";
+            tsEditLimit.Size = new System.Drawing.Size(72, 20);
+            tsEditLimit.Text = "Edit Limit";
+            tsEditLimit.Click += TsEditLimit_Click;
             // 
             // dgvSessionWaits
             // 
-            this.dgvSessionWaits.AllowUserToAddRows = false;
-            this.dgvSessionWaits.AllowUserToDeleteRows = false;
-            this.dgvSessionWaits.BackgroundColor = System.Drawing.Color.AliceBlue;
-            this.dgvSessionWaits.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvSessionWaits.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvSessionWaits.Location = new System.Drawing.Point(0, 27);
-            this.dgvSessionWaits.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dgvSessionWaits.Name = "dgvSessionWaits";
-            this.dgvSessionWaits.ReadOnly = true;
-            this.dgvSessionWaits.RowHeadersVisible = false;
-            this.dgvSessionWaits.RowHeadersWidth = 51;
-            this.dgvSessionWaits.RowTemplate.Height = 24;
-            this.dgvSessionWaits.Size = new System.Drawing.Size(1090, 134);
-            this.dgvSessionWaits.TabIndex = 0;
-            this.dgvSessionWaits.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvSessionWaits_CellContentClick);
+            dgvSessionWaits.AllowUserToAddRows = false;
+            dgvSessionWaits.AllowUserToDeleteRows = false;
+            dgvSessionWaits.BackgroundColor = System.Drawing.Color.AliceBlue;
+            dgvSessionWaits.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvSessionWaits.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvSessionWaits.Location = new System.Drawing.Point(0, 27);
+            dgvSessionWaits.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dgvSessionWaits.Name = "dgvSessionWaits";
+            dgvSessionWaits.ReadOnly = true;
+            dgvSessionWaits.RowHeadersVisible = false;
+            dgvSessionWaits.RowHeadersWidth = 51;
+            dgvSessionWaits.RowTemplate.Height = 24;
+            dgvSessionWaits.Size = new System.Drawing.Size(1090, 134);
+            dgvSessionWaits.TabIndex = 0;
+            dgvSessionWaits.CellContentClick += DgvSessionWaits_CellContentClick;
             // 
             // toolStrip2
             // 
-            this.toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.lblWaitsForSession,
-            this.tsSessionWaitCopy,
-            this.tsSessionWaitExcel,
-            this.tsWaitsFilter});
-            this.toolStrip2.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(1090, 27);
-            this.toolStrip2.TabIndex = 1;
-            this.toolStrip2.Text = "toolStrip2";
+            toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { lblWaitsForSession, tsSessionWaitCopy, tsSessionWaitExcel, tsWaitsFilter });
+            toolStrip2.Location = new System.Drawing.Point(0, 0);
+            toolStrip2.Name = "toolStrip2";
+            toolStrip2.Size = new System.Drawing.Size(1090, 27);
+            toolStrip2.TabIndex = 1;
+            toolStrip2.Text = "toolStrip2";
             // 
             // lblWaitsForSession
             // 
-            this.lblWaitsForSession.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.lblWaitsForSession.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblWaitsForSession.Name = "lblWaitsForSession";
-            this.lblWaitsForSession.Size = new System.Drawing.Size(159, 24);
-            this.lblWaitsForSession.Text = "Waits For Session ID: ";
+            lblWaitsForSession.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            lblWaitsForSession.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            lblWaitsForSession.Name = "lblWaitsForSession";
+            lblWaitsForSession.Size = new System.Drawing.Size(159, 24);
+            lblWaitsForSession.Text = "Waits For Session ID: ";
             // 
             // tsSessionWaitCopy
             // 
-            this.tsSessionWaitCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsSessionWaitCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsSessionWaitCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsSessionWaitCopy.Name = "tsSessionWaitCopy";
-            this.tsSessionWaitCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsSessionWaitCopy.Text = "Copy";
-            this.tsSessionWaitCopy.Click += new System.EventHandler(this.TsSessionWaitCopy_Click);
+            tsSessionWaitCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsSessionWaitCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsSessionWaitCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsSessionWaitCopy.Name = "tsSessionWaitCopy";
+            tsSessionWaitCopy.Size = new System.Drawing.Size(29, 24);
+            tsSessionWaitCopy.Text = "Copy";
+            tsSessionWaitCopy.Click += TsSessionWaitCopy_Click;
             // 
             // tsSessionWaitExcel
             // 
-            this.tsSessionWaitExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsSessionWaitExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsSessionWaitExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsSessionWaitExcel.Name = "tsSessionWaitExcel";
-            this.tsSessionWaitExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsSessionWaitExcel.Text = "Excel";
-            this.tsSessionWaitExcel.Click += new System.EventHandler(this.TsSessionWaitExcel_Click);
+            tsSessionWaitExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsSessionWaitExcel.Image = Properties.Resources.excel16x16;
+            tsSessionWaitExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsSessionWaitExcel.Name = "tsSessionWaitExcel";
+            tsSessionWaitExcel.Size = new System.Drawing.Size(29, 24);
+            tsSessionWaitExcel.Text = "Excel";
+            tsSessionWaitExcel.Click += TsSessionWaitExcel_Click;
             // 
             // tsWaitsFilter
             // 
-            this.tsWaitsFilter.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsWaitsFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.allSessionsToolStripMenuItem,
-            this.summaryViewToolStripMenuItem,
-            this.sessionToolStripMenuItem});
-            this.tsWaitsFilter.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
-            this.tsWaitsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsWaitsFilter.Name = "tsWaitsFilter";
-            this.tsWaitsFilter.Size = new System.Drawing.Size(34, 24);
-            this.tsWaitsFilter.Text = "Filter";
+            tsWaitsFilter.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsWaitsFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { allSessionsToolStripMenuItem, summaryViewToolStripMenuItem, sessionToolStripMenuItem });
+            tsWaitsFilter.Image = Properties.Resources.FilterDropdown_16x;
+            tsWaitsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsWaitsFilter.Name = "tsWaitsFilter";
+            tsWaitsFilter.Size = new System.Drawing.Size(34, 24);
+            tsWaitsFilter.Text = "Filter";
             // 
             // allSessionsToolStripMenuItem
             // 
-            this.allSessionsToolStripMenuItem.Name = "allSessionsToolStripMenuItem";
-            this.allSessionsToolStripMenuItem.Size = new System.Drawing.Size(190, 26);
-            this.allSessionsToolStripMenuItem.Text = "All Sessions";
-            this.allSessionsToolStripMenuItem.Click += new System.EventHandler(this.AllSessionsToolStripMenuItem_Click);
+            allSessionsToolStripMenuItem.Name = "allSessionsToolStripMenuItem";
+            allSessionsToolStripMenuItem.Size = new System.Drawing.Size(190, 26);
+            allSessionsToolStripMenuItem.Text = "All Sessions";
+            allSessionsToolStripMenuItem.Click += AllSessionsToolStripMenuItem_Click;
             // 
             // summaryViewToolStripMenuItem
             // 
-            this.summaryViewToolStripMenuItem.Name = "summaryViewToolStripMenuItem";
-            this.summaryViewToolStripMenuItem.Size = new System.Drawing.Size(190, 26);
-            this.summaryViewToolStripMenuItem.Text = "Summary View";
-            this.summaryViewToolStripMenuItem.Click += new System.EventHandler(this.SummaryViewToolStripMenuItem_Click);
+            summaryViewToolStripMenuItem.Name = "summaryViewToolStripMenuItem";
+            summaryViewToolStripMenuItem.Size = new System.Drawing.Size(190, 26);
+            summaryViewToolStripMenuItem.Text = "Summary View";
+            summaryViewToolStripMenuItem.Click += SummaryViewToolStripMenuItem_Click;
             // 
             // sessionToolStripMenuItem
             // 
-            this.sessionToolStripMenuItem.Name = "sessionToolStripMenuItem";
-            this.sessionToolStripMenuItem.Size = new System.Drawing.Size(190, 26);
-            this.sessionToolStripMenuItem.Text = "Session ";
-            this.sessionToolStripMenuItem.Click += new System.EventHandler(this.SessionToolStripMenuItem_Click);
+            sessionToolStripMenuItem.Name = "sessionToolStripMenuItem";
+            sessionToolStripMenuItem.Size = new System.Drawing.Size(190, 26);
+            sessionToolStripMenuItem.Text = "Session ";
+            sessionToolStripMenuItem.Click += SessionToolStripMenuItem_Click;
             // 
             // RunningQueries
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.splitContainer1);
-            this.Controls.Add(this.toolStrip1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "RunningQueries";
-            this.Size = new System.Drawing.Size(1090, 595);
-            this.Load += new System.EventHandler(this.RunningQueries_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel1.PerformLayout();
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            this.splitContainer1.Panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
-            this.splitContainer1.ResumeLayout(false);
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvSessionWaits)).EndInit();
-            this.toolStrip2.ResumeLayout(false);
-            this.toolStrip2.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            Controls.Add(splitContainer1);
+            Controls.Add(toolStrip1);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "RunningQueries";
+            Size = new System.Drawing.Size(1090, 595);
+            Load += RunningQueries_Load;
+            ((System.ComponentModel.ISupportInitialize)dgv).EndInit();
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            splitContainer1.Panel1.ResumeLayout(false);
+            splitContainer1.Panel1.PerformLayout();
+            splitContainer1.Panel2.ResumeLayout(false);
+            splitContainer1.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
+            splitContainer1.ResumeLayout(false);
+            statusStrip1.ResumeLayout(false);
+            statusStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvSessionWaits).EndInit();
+            toolStrip2.ResumeLayout(false);
+            toolStrip2.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -651,5 +647,9 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripButton tsCols;
         private System.Windows.Forms.ToolStripStatusLabel lblRowLimit;
         private System.Windows.Forms.ToolStripStatusLabel tsEditLimit;
+        private System.Windows.Forms.ToolStripMenuItem blockedQueriesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem blockingQueriesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem blockedOrBlockingToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
     }
 }
