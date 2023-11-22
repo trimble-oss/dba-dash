@@ -377,6 +377,7 @@ namespace DBADashGUI.Performance
         /// <summary>Load a running queries snapshot for the specified date. skip parameter is used to return next snapshot (1) or previous snapshot (-1) </summary>
         private void LoadSnapshot(DateTime snapshotDate, int skip = 0)
         {
+            ClearBlocking();
             lblRowLimit.Visible = false;
             tsEditLimit.Visible = false;
             tsGroupByFilter.Visible = false;
@@ -530,10 +531,12 @@ namespace DBADashGUI.Performance
                     }
                 // Filter to show queries blocked directly by the selected session
                 case "colBlockCount":
+                    tsBack.Enabled = true;
                     ShowBlocking(Convert.ToInt16(dgv.Rows[e.RowIndex].Cells["colSessionID"].Value));
                     break;
                 // Filter to show queries blocked directly by the selected session
                 case "colBlockedCountRecursive":
+                    tsBack.Enabled = true;
                     ShowBlocking(Convert.ToInt16(dgv.Rows[e.RowIndex].Cells["colSessionID"].Value), true);
                     break;
 
@@ -909,6 +912,33 @@ namespace DBADashGUI.Performance
             ShowRootBlockers();
         }
 
+        private void BlockedQueriesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var dv = (DataView)dgv.DataSource;
+            dv.RowFilter = "blocking_session_id > 0";
+            tsBlockingFilter.Text = "Blocking : All Blocked Queries";
+            tsBack.Enabled = true;
+            tsBlockingFilter.Font = new Font(tsBlockingFilter.Font, FontStyle.Bold);
+        }
+
+        private void BlockedOrBlockingToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var dv = (DataView)dgv.DataSource;
+            dv.RowFilter = "blocking_session_id > 0 OR BlockCount>0";
+            tsBlockingFilter.Text = "Blocking : All Blocked or Blocking Queries";
+            tsBack.Enabled = true;
+            tsBlockingFilter.Font = new Font(tsBlockingFilter.Font, FontStyle.Bold);
+        }
+
+        private void BlockingQueriesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var dv = (DataView)dgv.DataSource;
+            dv.RowFilter = "BlockCount>0";
+            tsBlockingFilter.Text = "Blocking : All Blocking Queries";
+            tsBack.Enabled = true;
+            tsBlockingFilter.Font = new Font(tsBlockingFilter.Font, FontStyle.Bold);
+        }
+
         /// <summary>Filter to show root blockers - queries holding locks needed by other queries that are not blocked themselves</summary>
         public void ShowRootBlockers()
         {
@@ -937,6 +967,7 @@ namespace DBADashGUI.Performance
                 tsBlockingFilter.Text = $"Blocking : Blocked By {sessionID}";
             }
 
+            tsBack.Enabled = true;
             tsBlockingFilter.Font = new Font(tsBlockingFilter.Font, FontStyle.Bold);
         }
 
