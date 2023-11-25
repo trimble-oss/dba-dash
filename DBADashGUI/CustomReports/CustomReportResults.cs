@@ -25,5 +25,7 @@ namespace DBADashGUI.CustomReports
         public string ResultName { get; set; }
 
         public Dictionary<string, LinkColumnInfo> LinkColumns { get; set; } = new();
+
+        public CellHighlightingRuleSetCollection CellHighlightingRules { get; set; } = new();
     }
 }

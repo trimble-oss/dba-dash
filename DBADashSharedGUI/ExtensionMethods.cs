@@ -34,6 +34,11 @@ namespace DBADashSharedGUI
             return ((value.R * 0.299) + (value.G * 0.587) + (value.B * 0.114)) > 186 ? Color.Black : Color.White;
         }
 
+        public static Color ContrastColorTrimble(this Color value)
+        {
+            return ((value.R * 0.299) + (value.G * 0.587) + (value.B * 0.114)) > 186 ? DashColors.TrimbleBlueDark : DashColors.GrayLight;
+        }
+
         public static string GetDataTypeString(this DbColumn col)
         {
             var dataTypeName = col.DataTypeName?.ToUpper() ?? "???";

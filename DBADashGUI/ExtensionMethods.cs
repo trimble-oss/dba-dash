@@ -1,16 +1,15 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADashGUI.Pickers;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Windows.Forms;
-using DBADashGUI.Pickers;
-using Microsoft.SqlServer.Management.Smo;
+using Amazon.S3.Model;
+using DocumentFormat.OpenXml.Drawing;
 using static DBADashGUI.DBADashStatus;
-using SpreadsheetLight;
 
 namespace DBADashGUI
 {
@@ -384,5 +383,117 @@ namespace DBADashGUI
         /// <param name="value"></param>
         /// <returns></returns>
         public static string SqlSingleQuote(this string value) => value.Replace("'", "''");
+
+        public static int ToWin32(this Color color) => color.R | (color.G << 8) | (color.B << 16);
+
+        public static string GetDescription(this Font font)
+        {
+            return font.Name + ", " + font.Size + " " + font.Unit + ", " + font.Style;
+        }
+
+        /// <summary>
+        /// Changes the brightness of a color by adjusting its RGB values.
+        /// </summary>
+        /// <param name="color">The original color.</param>
+        /// <param name="correctionFactor">
+        /// The factor to adjust brightness. Positive values make the color lighter,
+        /// negative values make it darker. The range is typically between -1.0 and 1.0.
+        /// </param>
+        /// <returns>The adjusted color.</returns>
+        public static Color ChangeColorBrightness(this Color color, float correctionFactor)
+        {
+            // Convert RGB to HSL
+            color.ToHsl(out var hue, out var saturation, out var lightness);
+
+            // Adjust lightness
+            lightness += correctionFactor;
+            lightness = Math.Max(0, Math.Min(1, lightness)); // Clamp lightness between 0 and 1
+
+            // Convert back to RGB
+            return FromHsl(hue, saturation, lightness);
+        }
+
+        public static void ToHsl(this Color color, out double h, out double s, out double l)
+        {
+            var tolerance = 1e-6;
+            // Convert RGB to a 0-1 range.
+            var r = color.R / 255.0;
+            var g = color.G / 255.0;
+            var b = color.B / 255.0;
+
+            var max = Math.Max(r, Math.Max(g, b));
+            var min = Math.Min(r, Math.Min(g, b));
+
+            // Lightness is the average of the largest and smallest color components.
+            l = (max + min) / 2;
+
+            if (Math.Abs(max - min) < tolerance)
+            {
+                // Achromatic color (gray scale).
+                h = s = 0;
+            }
+            else
+            {
+                var delta = max - min;
+
+                // Saturation calculation.
+                s = l > 0.5 ? delta / (2 - max - min) : delta / (max + min);
+
+                // Hue calculation.
+                if (Math.Abs(max - r) < tolerance)
+                {
+                    h = (g - b) / delta + (g < b ? 6 : 0);
+                }
+                else if (Math.Abs(max - g) < tolerance)
+                {
+                    h = (b - r) / delta + 2;
+                }
+                else // if (Math.Abs(max - b) < Tolerance)
+                {
+                    h = (r - g) / delta + 4;
+                }
+
+                h /= 6;
+            }
+
+            // Convert hue to degrees.
+            h *= 360;
+        }
+
+        public static Color FromHsl(double h, double s, double l)
+        {
+            double r, g, b;
+
+            if (s == 0)
+            {
+                // Achromatic color (gray scale).
+                r = g = b = l;
+            }
+            else
+            {
+                double HueToRgb(double p, double q, double t)
+                {
+                    if (t < 0) t += 1;
+                    if (t > 1) t -= 1;
+                    return t switch
+                    {
+                        < 1.0 / 6 => p + (q - p) * 6 * t,
+                        < 1.0 / 2 => q,
+                        < 2.0 / 3 => p + (q - p) * (2.0 / 3 - t) * 6,
+                        _ => p
+                    };
+                }
+
+                var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                var p = 2 * l - q;
+
+                h /= 360; // Convert hue to [0,1] range
+                r = HueToRgb(p, q, h + 1.0 / 3);
+                g = HueToRgb(p, q, h);
+                b = HueToRgb(p, q, h - 1.0 / 3);
+            }
+
+            return Color.FromArgb((int)(r * 255), (int)(g * 255), (int)(b * 255));
+        }
     }
 }

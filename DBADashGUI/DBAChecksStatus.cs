@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 
 namespace DBADashGUI
 {
@@ -43,6 +44,18 @@ namespace DBADashGUI
                 DBADashStatusEnum.Information => DBADashUser.SelectedTheme.InformationForeColor,
                 _ => DashColors.RedPale
             };
+        }
+
+        public static DBADashStatusEnum? ConvertToDBADashStatusEnum(int value)
+        {
+            if (Enum.IsDefined(typeof(DBADashStatusEnum), value))
+            {
+                return (DBADashStatusEnum)value;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public static void SetProgressBarColor(DBADashStatusEnum status, ref CustomProgressControl.DataGridViewProgressBarCell pCell)

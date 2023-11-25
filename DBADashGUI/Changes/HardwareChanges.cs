@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADashGUI.CustomReports;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -85,24 +86,135 @@ namespace DBADashGUI
             Common.CopyDataGridViewToClipboard(dgv);
         }
 
+        private readonly CellHighlightingRuleSetCollection HighlightingRules = new()
+        {
+            {
+                "colInstantFileInitialization", new CellHighlightingRuleSet("colInstantFileInitialization")
+                {
+                    Rules = new List<CellHighlightingRule>
+                    {
+                        new CellHighlightingRule
+                        {
+                            ConditionType = CellHighlightingRule.ConditionTypes.Equals,
+                            Value1 = true.ToString(),
+                            Status = DBADashStatus.DBADashStatusEnum.OK,
+                        },
+                        new CellHighlightingRule
+                        {
+                            ConditionType = CellHighlightingRule.ConditionTypes.Equals,
+                            Value1 = false.ToString(),
+                            Status = DBADashStatus.DBADashStatusEnum.Warning,
+                        },
+                        new CellHighlightingRule
+                        {
+                            ConditionType = CellHighlightingRule.ConditionTypes.All,
+                            Status = DBADashStatus.DBADashStatusEnum.NA
+                        }
+                    }
+                }
+            },
+            {
+                "colOfflineSchedulers", new CellHighlightingRuleSet("colOfflineSchedulers")
+                {
+                    Rules = new List<CellHighlightingRule>
+                    {
+                        new CellHighlightingRule
+                        {
+                            ConditionType = CellHighlightingRule.ConditionTypes.Equals,
+                            Value1 = 0.ToString(),
+                            Status = DBADashStatus.DBADashStatusEnum.OK,
+                        },
+                        new CellHighlightingRule
+                        {
+                            ConditionType = CellHighlightingRule.ConditionTypes.GreaterThan,
+                            Value1 = 0.ToString(),
+                            Status = DBADashStatus.DBADashStatusEnum.Critical,
+                        },
+                        new CellHighlightingRule
+                        {
+                            ConditionType = CellHighlightingRule.ConditionTypes.All,
+                            Status = DBADashStatus.DBADashStatusEnum.NA
+                        }
+                    }
+                }
+            },
+            {
+                "colPowerPlan", new CellHighlightingRuleSet("ActivePowerPlanGUID",true)
+                {
+                    Rules = new List<CellHighlightingRule>
+                    {
+                        new CellHighlightingRule
+                        {
+                            ConditionType = CellHighlightingRule.ConditionTypes.IsNull,
+                            Status = DBADashStatus.DBADashStatusEnum.NA,
+                        },
+                        new CellHighlightingRule
+                        {
+                            ConditionType = CellHighlightingRule.ConditionTypes.Equals,
+                            Value1 = Common.HighPerformancePowerPlanGUID.ToString(),
+                            Status = DBADashStatus.DBADashStatusEnum.OK,
+                        },
+                        new CellHighlightingRule
+                        {
+                            ConditionType = CellHighlightingRule.ConditionTypes.All,
+                            Status = DBADashStatus.DBADashStatusEnum.Warning
+                        }
+                    }
+                }
+            },
+            {
+                "colPriority", new CellHighlightingRuleSet("os_priority_class",true)
+                {
+                    Rules = new List<CellHighlightingRule>
+                    {
+                        new CellHighlightingRule
+                        {
+                            ConditionType = CellHighlightingRule.ConditionTypes.IsNull,
+                            Status = DBADashStatus.DBADashStatusEnum.NA,
+                        },
+                        new CellHighlightingRule
+                        {
+                            ConditionType = CellHighlightingRule.ConditionTypes.Equals,
+                            Value1 = 32.ToString(),
+                            Status = DBADashStatus.DBADashStatusEnum.OK,
+                        },
+                        new CellHighlightingRule
+                        {
+                            ConditionType = CellHighlightingRule.ConditionTypes.All,
+                            Status = DBADashStatus.DBADashStatusEnum.Warning
+                        }
+                    }
+                }
+            },
+            {
+                "colAffinity", new CellHighlightingRuleSet("colAffinity")
+                {
+                    Rules = new List<CellHighlightingRule>
+                    {
+                        new CellHighlightingRule
+                        {
+                            ConditionType = CellHighlightingRule.ConditionTypes.IsNull,
+                            Status = DBADashStatus.DBADashStatusEnum.NA,
+                        },
+                        new CellHighlightingRule
+                        {
+                            ConditionType = CellHighlightingRule.ConditionTypes.Equals,
+                            Value1 = "AUTO",
+                            Status = DBADashStatus.DBADashStatusEnum.OK,
+                        },
+                        new CellHighlightingRule
+                        {
+                            ConditionType = CellHighlightingRule.ConditionTypes.All,
+                            Status = DBADashStatus.DBADashStatusEnum.Warning
+                        }
+                    }
+                }
+            }
+        };
+
         private void DgvHardware_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx++)
-            {
-                var r = dgvHardware.Rows[idx];
-                var row = (DataRowView)r.DataBoundItem;
-                var ifiStatus = row["InstantFileInitializationEnabled"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : ((bool)row["InstantFileInitializationEnabled"] ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning);
-                var offlineSchedulerStatus = row["OfflineSchedulers"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : ((int)row["OfflineSchedulers"] == 0 ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Critical);
-                var ppStatus = row["ActivePowerPlanGUID"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : ((Guid)row["ActivePowerPlanGUID"] == Common.HighPerformancePowerPlanGUID ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning);
-                var priorityStatus = row["os_priority_class"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : ((int)row["os_priority_class"] == 32 ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning);
-                var affinityStatus = row["affinity_type_desc"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : ((string)row["affinity_type_desc"] == "AUTO" ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning);
-
-                r.Cells[colAffinity.Index].SetStatusColor(affinityStatus);
-                r.Cells[colPriority.Index].SetStatusColor(priorityStatus);
-                r.Cells[colOfflineSchedulers.Index].SetStatusColor(offlineSchedulerStatus);
-                r.Cells[colPowerPlan.Index].SetStatusColor(ppStatus);
-                r.Cells[colInstantFileInitialization.Index].SetStatusColor(ifiStatus);
-            }
+            HighlightingRules.FormatRowsAdded(dgvHardware, e);
         }
 
         private void TsExcelHistory_Click(object sender, EventArgs e)

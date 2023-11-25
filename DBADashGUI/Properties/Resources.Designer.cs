@@ -10,8 +10,8 @@
 
 namespace DBADashGUI.Properties {
     using System;
-    
-    
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -19,371 +19,443 @@ namespace DBADashGUI.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder",
+        "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
-        
+    internal class Resources
+    {
+
         private static global::System.Resources.ResourceManager resourceMan;
-        
+
         private static global::System.Globalization.CultureInfo resourceCulture;
-        
-        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resources() {
+
+        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance",
+            "CA1811:AvoidUncalledPrivateCode")]
+        internal Resources()
+        {
         }
-        
+
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
-        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
-            get {
-                if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DBADashGUI.Properties.Resources", typeof(Resources).Assembly);
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState
+            .Advanced)]
+        internal static global::System.Resources.ResourceManager ResourceManager
+        {
+            get
+            {
+                if (object.ReferenceEquals(resourceMan, null))
+                {
+                    global::System.Resources.ResourceManager temp =
+                        new global::System.Resources.ResourceManager("DBADashGUI.Properties.Resources",
+                            typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
+
                 return resourceMan;
             }
         }
-        
+
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
-        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
-            get {
-                return resourceCulture;
-            }
-            set {
-                resourceCulture = value;
-            }
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState
+            .Advanced)]
+        internal static global::System.Globalization.CultureInfo Culture
+        {
+            get { return resourceCulture; }
+            set { resourceCulture = value; }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap _112_RefreshArrow_Green_16x16_72 {
-            get {
+        internal static System.Drawing.Bitmap _112_RefreshArrow_Green_16x16_72
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("112_RefreshArrow_Green_16x16_72", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap AddComputedField_16x {
-            get {
+        internal static System.Drawing.Bitmap AddComputedField_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("AddComputedField_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap arrow_back_16xLG {
-            get {
+        internal static System.Drawing.Bitmap arrow_back_16xLG
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("arrow_back_16xLG", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap arrow_Forward_16xLG {
-            get {
+        internal static System.Drawing.Bitmap arrow_Forward_16xLG
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("arrow_Forward_16xLG", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ASX_Copy_blue_16x {
-            get {
+        internal static System.Drawing.Bitmap ASX_Copy_blue_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("ASX_Copy_blue_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ASX_Copy_grey_16x {
-            get {
+        internal static System.Drawing.Bitmap ASX_Copy_grey_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("ASX_Copy_grey_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap AutoSum_16x {
-            get {
+        internal static System.Drawing.Bitmap AutoSum_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("AutoSum_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Code_16x {
-            get {
+        internal static System.Drawing.Bitmap Code_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("Code_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Column_16x {
-            get {
+        internal static System.Drawing.Bitmap Column_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("Column_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Diff_16x {
-            get {
+        internal static System.Drawing.Bitmap Diff_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("Diff_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Eraser_16x {
-            get {
+        internal static System.Drawing.Bitmap Eraser_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("Eraser_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap excel16x16 {
-            get {
+        internal static System.Drawing.Bitmap excel16x16
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("excel16x16", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap FilterDropdown_16x {
-            get {
+        internal static System.Drawing.Bitmap FilterDropdown_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("FilterDropdown_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Hard_Drive {
-            get {
+        internal static System.Drawing.Bitmap Hard_Drive
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("Hard_Drive", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Inline_16x {
-            get {
+        internal static System.Drawing.Bitmap Inline_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("Inline_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Inline_16x1 {
-            get {
+        internal static System.Drawing.Bitmap Inline_16x1
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("Inline_16x1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap LineChart_16x {
-            get {
+        internal static System.Drawing.Bitmap LineChart_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("LineChart_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap List_NumberedHS {
-            get {
+        internal static System.Drawing.Bitmap List_NumberedHS
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("List_NumberedHS", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Next_grey_16x {
-            get {
+        internal static System.Drawing.Bitmap Next_grey_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("Next_grey_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] PowerShell_Mode {
-            get {
+        internal static byte[] PowerShell_Mode
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("PowerShell_Mode", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Previous_grey_16x {
-            get {
+        internal static System.Drawing.Bitmap Previous_grey_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("Previous_grey_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to DBADashServiceConfigTool.exe.
         /// </summary>
-        internal static string ServiceConfigToolName {
-            get {
-                return ResourceManager.GetString("ServiceConfigToolName", resourceCulture);
-            }
+        internal static string ServiceConfigToolName
+        {
+            get { return ResourceManager.GetString("ServiceConfigToolName", resourceCulture); }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap SettingsOutline_16x {
-            get {
+        internal static System.Drawing.Bitmap SettingsOutline_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("SettingsOutline_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] SQL_Mode {
-            get {
+        internal static byte[] SQL_Mode
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("SQL_Mode", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap StartTime_16x {
-            get {
+        internal static System.Drawing.Bitmap StartTime_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("StartTime_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap StatusAnnotations_Warning_16xLG_color {
-            get {
+        internal static System.Drawing.Bitmap StatusAnnotations_Warning_16xLG_color
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("StatusAnnotations_Warning_16xLG_color", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap StatusAnnotations_Warning_32xLG_color {
-            get {
+        internal static System.Drawing.Bitmap StatusAnnotations_Warning_32xLG_color
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("StatusAnnotations_Warning_32xLG_color", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap StatusCriticalError_16x {
-            get {
+        internal static System.Drawing.Bitmap StatusCriticalError_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("StatusCriticalError_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap StatusOK_16x {
-            get {
+        internal static System.Drawing.Bitmap StatusOK_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("StatusOK_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap StopTime_16x {
-            get {
+        internal static System.Drawing.Bitmap StopTime_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("StopTime_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap SwitchSourceOrTarget_16x {
-            get {
+        internal static System.Drawing.Bitmap SwitchSourceOrTarget_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("SwitchSourceOrTarget_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Table_16x {
-            get {
+        internal static System.Drawing.Bitmap Table_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("Table_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Time_16x {
-            get {
+        internal static System.Drawing.Bitmap Time_16x
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("Time_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
@@ -632,6 +704,60 @@ namespace DBADashGUI.Properties {
             get
             {
                 object obj = ResourceManager.GetObject("WordWrap_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap ASX_Paste_blue_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("ASX_Paste_blue_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap GradientLinear_18x16
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("GradientLinear_18x16", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap arrow_Down_16xLG
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("arrow_Down_16xLG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap ReduceImageBrightness_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("ReduceImageBrightness_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap IncreaseImageBrightness_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("IncreaseImageBrightness_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap HighlightHS
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("HighlightHS", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

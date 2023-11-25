@@ -6,9 +6,15 @@ using Microsoft.SqlServer.Management.Smo;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Windows.Navigation;
+using DBADash;
+using DocumentFormat.OpenXml.Vml.Office;
+using Microsoft.SqlServer.Management.SqlScriptPublish;
 
 namespace DBADashGUI.CustomReports
 {
@@ -17,8 +23,10 @@ namespace DBADashGUI.CustomReports
         public event EventHandler ReportNameChanged;
 
         private ContextMenuStrip columnContextMenu;
+        private ContextMenuStrip cellContextMenu;
         private readonly ToolStripMenuItem convertLocalMenuItem = new("Convert to local timezone") { Checked = true, CheckOnClick = true };
         private int clickedColumnIndex = -1;
+        private int clickedRowIndex = -1;
         private DataSet reportDS;
         private int selectedTableIndex = 0;
         private bool doAutoSize = true;
@@ -29,6 +37,7 @@ namespace DBADashGUI.CustomReports
             InitializeComponent();
             ShowParamPrompt(false);
             InitializeContextMenu();
+            dgv.AutoGenerateColumns = false;
             this.ApplyTheme();
         }
 
@@ -38,15 +47,62 @@ namespace DBADashGUI.CustomReports
             var renameColumnMenuItem = new ToolStripMenuItem("Rename Column", Properties.Resources.Rename_16x);
             var setFormatStringMenuItem = new ToolStripMenuItem("Set Format String", Properties.Resources.Percentage_16x);
             var addLink = new ToolStripMenuItem("Add Link", Properties.Resources.WebURL_16x);
+            var rules = new ToolStripMenuItem("Highlighting Rules", Properties.Resources.HighlightHS);
             renameColumnMenuItem.Click += RenameColumnMenuItem_Click;
             convertLocalMenuItem.Click += ConvertLocalMenuItem_Click;
             setFormatStringMenuItem.Click += SetFormatStringMenuItem_Click;
             addLink.Click += AddLink_Click;
+            rules.Click += SetCellHighlightingRules;
             columnContextMenu.Items.Add(renameColumnMenuItem);
             columnContextMenu.Items.Add(convertLocalMenuItem);
             columnContextMenu.Items.Add(setFormatStringMenuItem);
             columnContextMenu.Items.Add(addLink);
+            columnContextMenu.Items.Add(rules);
             dgv.MouseUp += Dgv_MouseUp;
+
+            var highlight = new ToolStripMenuItem("Highlight");
+            cellContextMenu = new ContextMenuStrip();
+            cellContextMenu.Items.Add(highlight);
+            highlight.Click += SetCellHighlightingRules;
+            dgv.MouseUp += Dgv_MouseUp;
+        }
+
+        private void SetCellHighlightingRules(object sender, EventArgs e)
+        {
+            try
+            {
+                var customReportResult = report.CustomReportResults[selectedTableIndex];
+                var columnName = dgv.Columns[clickedColumnIndex].DataPropertyName;
+                customReportResult.CellHighlightingRules.TryGetValue(dgv.Columns[clickedColumnIndex].DataPropertyName,
+                    out var ruleSet);
+
+                var frm = new CellHighlightingRulesConfig()
+                {
+                    ColumnList = dgv.Columns,
+                    CellHighlightingRules = new KeyValuePair<string, CellHighlightingRuleSet>(columnName,
+                        ruleSet.DeepCopy() ?? new CellHighlightingRuleSet() { TargetColumn = columnName }),
+                    CellValue = clickedRowIndex >= 0 ? dgv.Rows[clickedRowIndex].Cells[clickedColumnIndex].Value : null,
+                    CellValueIsNull = clickedRowIndex >= 0 &&
+                                      dgv.Rows[clickedRowIndex].Cells[clickedColumnIndex].Value.DBNullToNull() == null
+                };
+
+                frm.ShowDialog();
+                if (frm.DialogResult != DialogResult.OK) return;
+                report.CustomReportResults[selectedTableIndex].CellHighlightingRules.Remove(columnName);
+                if (frm.CellHighlightingRules.Value is { HasRules: true })
+                {
+                    report.CustomReportResults[selectedTableIndex].CellHighlightingRules
+                        .Add(columnName, frm.CellHighlightingRules.Value);
+                }
+
+                report.Update();
+                ShowTable();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error setting highlighting rules: " + ex.Message, "Error", MessageBoxButtons.OK,
+                                       MessageBoxIcon.Error);
+            }
         }
 
         private void AddLink_Click(object sender, EventArgs e)
@@ -148,22 +204,34 @@ namespace DBADashGUI.CustomReports
             if (!report.CanEditReport || e.Button != MouseButtons.Right) return;
             // Perform a hit test to determine where the click occurred
             var hitTestInfo = dgv.HitTest(e.X, e.Y);
-
-            // If the click occurred on a column header
-            if (hitTestInfo.Type != DataGridViewHitTestType.ColumnHeader) return;
             clickedColumnIndex = hitTestInfo.ColumnIndex;
-            if (dgv.Columns[clickedColumnIndex].ValueType == typeof(DateTime)) // Show option for timezone conversion if column is DateTime
+            clickedRowIndex = hitTestInfo.RowIndex;
+            switch (hitTestInfo.Type)
             {
-                convertLocalMenuItem.Checked =
-                    !report.CustomReportResults[selectedTableIndex].DoNotConvertToLocalTimeZone.Contains(dgv.Columns[clickedColumnIndex].DataPropertyName);
-                convertLocalMenuItem.Visible = true;
+                case DataGridViewHitTestType.Cell:
+                    cellContextMenu.Show(dgv, e.Location);
+                    return;
+
+                case DataGridViewHitTestType.ColumnHeader:
+                    {
+                        if (dgv.Columns[clickedColumnIndex].ValueType ==
+                            typeof(DateTime)) // Show option for timezone conversion if column is DateTime
+                        {
+                            convertLocalMenuItem.Checked =
+                                !report.CustomReportResults[selectedTableIndex].DoNotConvertToLocalTimeZone
+                                    .Contains(dgv.Columns[clickedColumnIndex].DataPropertyName);
+                            convertLocalMenuItem.Visible = true;
+                        }
+                        else
+                        {
+                            convertLocalMenuItem.Visible = false;
+                        }
+
+                        // Show the context menu at the mouse position
+                        columnContextMenu.Show(dgv, e.Location);
+                        break;
+                    }
             }
-            else
-            {
-                convertLocalMenuItem.Visible = false;
-            }
-            // Show the context menu at the mouse position
-            columnContextMenu.Show(dgv, e.Location);
         }
 
         private void RenameColumnMenuItem_Click(object sender, EventArgs e)
@@ -223,10 +291,10 @@ namespace DBADashGUI.CustomReports
             if (dgv.Columns.Count == 0)
             {
                 AddColumns(dt);
+                dgv.ApplyTheme();
             }
-
+            dgv.DataSource = null;
             dgv.DataSource = dt;
-            dgv.ApplyTheme();
         }
 
         /// <summary>
@@ -627,6 +695,11 @@ namespace DBADashGUI.CustomReports
                 MessageBox.Show("Error navigating to link: " + ex.Message, "Error", MessageBoxButtons.OK,
                                        MessageBoxIcon.Error);
             }
+        }
+
+        private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+            report.CustomReportResults[selectedTableIndex].CellHighlightingRules.FormatRowsAdded(sender as DataGridView, e);
         }
     }
 }
