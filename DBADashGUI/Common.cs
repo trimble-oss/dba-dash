@@ -427,5 +427,62 @@ namespace DBADashGUI
                 return false;
             }
         }
+
+        public static int[] GetCustomColors()
+        {
+            return new int[]
+            {
+                DashColors.Warning.ToWin32(),
+                DashColors.Yellow.ToWin32(),
+                DashColors.YellowLight.ToWin32(),
+                DashColors.Fail.ToWin32(),
+                DashColors.Red.ToWin32(),
+                DashColors.RedLight.ToWin32(),
+                DashColors.RedPale.ToWin32(),
+                DashColors.Success.ToWin32(),
+                DashColors.Green.ToWin32(),
+                DashColors.GreenLight.ToWin32(),
+                DashColors.Information.ToWin32(),
+                DashColors.TrimbleBlue.ToWin32(),
+                DashColors.TrimbleBlueDark.ToWin32(),
+                DashColors.TrimbleGray.ToWin32(),
+                DashColors.GrayLight.ToWin32(),
+                DashColors.AvoidanceZone.ToWin32(),
+                DashColors.BluePale.ToWin32(),
+            };
+        }
+
+        public static Color? ShowColorDialog(Color currentColor)
+        {
+            using var colorDialog = new ColorDialog
+            {
+                Color = currentColor,
+                CustomColors = GetCustomColors()
+            };
+
+            if (colorDialog.ShowDialog() == DialogResult.OK)
+            {
+                return colorDialog.Color;
+            }
+
+            return null;
+        }
+
+        public static void ShowColorDialog(Control panel, Control textBox)
+        {
+            var selectedColor = ShowColorDialog(panel.BackColor);
+            if (!selectedColor.HasValue) return;
+            panel.BackColor = selectedColor.Value;
+            textBox.Text = selectedColor.Value.ToHexString();
+        }
+
+        public static void AdjustColorBrightness(Control panel, Control textBox, float correctionFactor)
+        {
+            var newColor = panel.BackColor.ChangeColorBrightness(correctionFactor);
+            panel.BackColor = newColor;
+            textBox.Text = newColor.ToHexString();
+        }
+
+        public const float ColorBrightnessIncrement = 0.05f;
     }
 }

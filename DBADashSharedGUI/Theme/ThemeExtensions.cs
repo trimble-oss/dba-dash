@@ -214,15 +214,24 @@ namespace DBADashGUI.Theme
 
         public static void TruncateTooltipTextHandler(object? sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.Value == null) return;
-            if (sender is not DataGridView gridView) return;
+            try
+            {
+                if (e.Value == null) return;
+                if (sender is not DataGridView gridView) return;
 
-            var currentTooltip = gridView.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText;
+                var currentTooltip = gridView.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText;
 
-            if (currentTooltip.Length <= CellToolTipMaxLength) return;
-            var tooltipText = CellToolTipMaxLength > 0 ? string.Concat(currentTooltip.AsSpan(0, CellToolTipMaxLength), "...") : "";
+                if (currentTooltip.Length <= CellToolTipMaxLength) return;
+                var tooltipText = CellToolTipMaxLength > 0
+                    ? string.Concat(currentTooltip.AsSpan(0, CellToolTipMaxLength), "...")
+                    : "";
 
-            gridView.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = tooltipText;
+                gridView.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = tooltipText;
+            }
+            catch
+            {
+                Console.WriteLine("Error truncating tooltip text");
+            }
         }
     }
 }
