@@ -60,7 +60,7 @@ namespace DBADashGUI.CustomReports
             columnContextMenu.Items.Add(rules);
             dgv.MouseUp += Dgv_MouseUp;
 
-            var highlight = new ToolStripMenuItem("Highlight");
+            var highlight = new ToolStripMenuItem("Highlight", Properties.Resources.HighlightHS);
             cellContextMenu = new ContextMenuStrip();
             cellContextMenu.Items.Add(highlight);
             highlight.Click += SetCellHighlightingRules;
