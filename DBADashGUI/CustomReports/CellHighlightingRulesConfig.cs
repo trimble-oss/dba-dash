@@ -670,6 +670,9 @@ namespace DBADashGUI.CustomReports
             cboStatus.ForeColor = status.GetForeColor();
         }
 
-        private static CellHighlightingRuleSet? SavedRules { get; set; }
+        /// <summary>
+        /// For Copy/Paste
+        /// </summary>
+        private static CellHighlightingRuleSet SavedRules { get; set; }
     }
 }
