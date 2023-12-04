@@ -100,7 +100,21 @@ SELECT I.InstanceID,
     I.ShowInSummary,
     I.InstanceGroupName,
     I.ProductMinorVersion,
-    I.ProductRevision
+    I.ProductRevision,
+    CASE    /* 2008-2014 advice.  Note: We will only know the NUMA node count on SQL 2014 and later.  */
+			WHEN I.ProductMajorVersion<=12 AND ISNULL(I.numa_node_count,1)=1 AND I.cpu_count <=8 THEN I.cpu_count /* Server with single NUMA node.  Less than or equal to eight logical processors	Keep MAXDOP at or below # of logical processors */
+			WHEN I.ProductMajorVersion<=12 AND ISNULL(I.numa_node_count,1)=1 AND I.cpu_count>8 THEN 8 /* Server with single NUMA node	Greater than eight logical processors	Keep MAXDOP at 8 */
+			WHEN I.ProductMajorVersion<=12 AND I.numa_node_count>1 AND I.cpu_count/I.numa_node_count <=8 THEN I.cpu_count/I.numa_node_count /* Server with multiple NUMA nodes. Less than or equal to eight logical processors per NUMA node	Keep MAXDOP at or below # of logical processors per NUMA node*/
+			WHEN I.ProductMajorVersion<=12 AND I.numa_node_count>1 AND I.cpu_count/I.numa_node_count > 8 THEN 8 /* Server with multiple NUMA nodes. Greater than eight logical processors per NUMA node	Keep MAXDOP at 8*/
+                      
+			/* 2016 + advice */
+			WHEN I.ProductMajorVersion>12 AND I.numa_node_count=1 AND I.cpu_count <=8 THEN I.cpu_count /* Server with single NUMA node.  Less than or equal to eight logical processors	Keep MAXDOP at or below # of logical processors */
+			WHEN I.ProductMajorVersion>12 AND I.numa_node_count=1 AND I.cpu_count>8 THEN 8 /* Server with single NUMA node	Greater than eight logical processors	Keep MAXDOP at 8 */
+			WHEN I.ProductMajorVersion>12 AND I.numa_node_count>1 AND I.cpu_count/I.numa_node_count <=16 THEN I.cpu_count/I.numa_node_count /* Server with multiple NUMA nodes	Less than or equal to 16 logical processors per NUMA node	Keep MAXDOP at or below # of logical processors per NUMA node */
+			WHEN I.ProductMajorVersion>12 AND I.numa_node_count>1 AND I.cpu_count/I.numa_node_count > 16 AND I.cpu_count/I.numa_node_count * 0.5 > 16 THEN 16 /* Server with multiple NUMA nodes	Greater than 16 logical processors per NUMA node	Keep MAXDOP at half the number of logical processors per NUMA node with a MAX value of 16 */
+			WHEN I.ProductMajorVersion>12 AND I.numa_node_count>1 AND I.cpu_count/I.numa_node_count > 16 AND I.cpu_count/I.numa_node_count * 0.5 <= 16 THEN CAST(I.cpu_count/I.numa_node_count*0.5 AS INT) /* Server with multiple NUMA nodes	Greater than 16 logical processors per NUMA node	Keep MAXDOP at half the number of logical processors per NUMA node with a MAX value of 16 */
+		ELSE NULL END AS MaxRecommendedMaxDOP,
+	1 AS MinRecommendedMaxDOP
 FROM dbo.Instances I
 LEFT JOIN dbo.DBADashAgent A ON I.CollectAgentID = A.DBADashAgentID
 CROSS APPLY dbo.SQLVersionName(I.EditionID,I.ProductVersion) v

@@ -28,134 +28,156 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.dgvConfig = new System.Windows.Forms.DataGridView();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
-            this.configuredOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            this.tsCols = new System.Windows.Forms.ToolStripButton();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvConfig)).BeginInit();
-            this.toolStrip1.SuspendLayout();
-            this.SuspendLayout();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Configuration));
+            dgvConfig = new System.Windows.Forms.DataGridView();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            tsRefresh = new System.Windows.Forms.ToolStripButton();
+            tsCopy = new System.Windows.Forms.ToolStripButton();
+            tsExcel = new System.Windows.Forms.ToolStripButton();
+            tsCols = new System.Windows.Forms.ToolStripButton();
+            toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
+            configuredOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            configuredALLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            adviceConfiguredALLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            adviceConfiguredToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            ((System.ComponentModel.ISupportInitialize)dgvConfig).BeginInit();
+            toolStrip1.SuspendLayout();
+            SuspendLayout();
             // 
             // dgvConfig
             // 
-            this.dgvConfig.AllowUserToAddRows = false;
-            this.dgvConfig.AllowUserToDeleteRows = false;
-            this.dgvConfig.BackgroundColor = System.Drawing.Color.White;
-            this.dgvConfig.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvConfig.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvConfig.Location = new System.Drawing.Point(0, 27);
-            this.dgvConfig.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dgvConfig.Name = "dgvConfig";
-            this.dgvConfig.ReadOnly = true;
-            this.dgvConfig.RowHeadersVisible = false;
-            this.dgvConfig.RowHeadersWidth = 51;
-            this.dgvConfig.Size = new System.Drawing.Size(568, 415);
-            this.dgvConfig.TabIndex = 0;
+            dgvConfig.AllowUserToAddRows = false;
+            dgvConfig.AllowUserToDeleteRows = false;
+            dgvConfig.BackgroundColor = System.Drawing.Color.White;
+            dgvConfig.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvConfig.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvConfig.Location = new System.Drawing.Point(0, 27);
+            dgvConfig.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dgvConfig.Name = "dgvConfig";
+            dgvConfig.ReadOnly = true;
+            dgvConfig.RowHeadersVisible = false;
+            dgvConfig.RowHeadersWidth = 51;
+            dgvConfig.Size = new System.Drawing.Size(568, 415);
+            dgvConfig.TabIndex = 0;
             // 
             // toolStrip1
             // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsRefresh,
-            this.tsCopy,
-            this.tsExcel,
-            this.tsCols,
-            this.toolStripDropDownButton1,
-            this.toolStripLabel1});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(568, 27);
-            this.toolStrip1.TabIndex = 1;
-            this.toolStrip1.Text = "toolStrip1";
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsCols, toolStripDropDownButton1, toolStripLabel1 });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new System.Drawing.Size(568, 27);
+            toolStrip1.TabIndex = 1;
+            toolStrip1.Text = "toolStrip1";
             // 
             // tsRefresh
             // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
+            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Name = "tsRefresh";
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Text = "Refresh";
+            tsRefresh.Click += TsRefresh_Click;
             // 
             // tsCopy
             // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
+            tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopy.Name = "tsCopy";
+            tsCopy.Size = new System.Drawing.Size(29, 24);
+            tsCopy.Text = "Copy";
+            tsCopy.Click += TsCopy_Click;
             // 
             // tsExcel
             // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
-            // 
-            // toolStripDropDownButton1
-            // 
-            this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.configuredOnlyToolStripMenuItem});
-            this.toolStripDropDownButton1.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
-            this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
-            this.toolStripDropDownButton1.Size = new System.Drawing.Size(34, 24);
-            this.toolStripDropDownButton1.Text = "Filter";
-            // 
-            // configuredOnlyToolStripMenuItem
-            // 
-            this.configuredOnlyToolStripMenuItem.CheckOnClick = true;
-            this.configuredOnlyToolStripMenuItem.Name = "configuredOnlyToolStripMenuItem";
-            this.configuredOnlyToolStripMenuItem.Size = new System.Drawing.Size(200, 26);
-            this.configuredOnlyToolStripMenuItem.Text = "Configured Only";
-            this.configuredOnlyToolStripMenuItem.Click += new System.EventHandler(this.ConfiguredOnlyToolStripMenuItem_Click);
-            // 
-            // toolStripLabel1
-            // 
-            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(106, 24);
-            this.toolStripLabel1.Text = "Configuration";
+            tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsExcel.Image = Properties.Resources.excel16x16;
+            tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcel.Name = "tsExcel";
+            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Text = "Export Excel";
+            tsExcel.Click += TsExcel_Click;
             // 
             // tsCols
             // 
-            this.tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCols.Image = global::DBADashGUI.Properties.Resources.Column_16x;
-            this.tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCols.Name = "tsCols";
-            this.tsCols.Size = new System.Drawing.Size(29, 24);
-            this.tsCols.Text = "Columns";
-            this.tsCols.Click += new System.EventHandler(this.TsCols_Click);
+            tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCols.Image = Properties.Resources.Column_16x;
+            tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCols.Name = "tsCols";
+            tsCols.Size = new System.Drawing.Size(29, 24);
+            tsCols.Text = "Columns";
+            tsCols.Click += TsCols_Click;
+            // 
+            // toolStripDropDownButton1
+            // 
+            toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { adviceConfiguredToolStripMenuItem, adviceConfiguredALLToolStripMenuItem, configuredOnlyToolStripMenuItem, configuredALLToolStripMenuItem });
+            toolStripDropDownButton1.Image = Properties.Resources.FilterDropdown_16x;
+            toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            toolStripDropDownButton1.Name = "toolStripDropDownButton1";
+            toolStripDropDownButton1.Size = new System.Drawing.Size(34, 24);
+            toolStripDropDownButton1.Text = "Filter";
+            // 
+            // configuredOnlyToolStripMenuItem
+            // 
+            configuredOnlyToolStripMenuItem.Name = "configuredOnlyToolStripMenuItem";
+            configuredOnlyToolStripMenuItem.Size = new System.Drawing.Size(255, 26);
+            configuredOnlyToolStripMenuItem.Text = "Configured";
+            configuredOnlyToolStripMenuItem.ToolTipText = "Only show values that have been changed from the default.";
+            configuredOnlyToolStripMenuItem.Click += ConfiguredOnlyToolStripMenuItem_Click;
+            // 
+            // configuredALLToolStripMenuItem
+            // 
+            configuredALLToolStripMenuItem.Name = "configuredALLToolStripMenuItem";
+            configuredALLToolStripMenuItem.Size = new System.Drawing.Size(255, 26);
+            configuredALLToolStripMenuItem.Text = "Configured - ALL";
+            configuredALLToolStripMenuItem.ToolTipText = "Show all configuration options and highlight based on using default values only";
+            configuredALLToolStripMenuItem.Click += ConfiguredOnlyToolStripMenuItem_Click;
+            // 
+            // adviceConfiguredALLToolStripMenuItem
+            // 
+            adviceConfiguredALLToolStripMenuItem.Checked = true;
+            adviceConfiguredALLToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            adviceConfiguredALLToolStripMenuItem.Name = "adviceConfiguredALLToolStripMenuItem";
+            adviceConfiguredALLToolStripMenuItem.Size = new System.Drawing.Size(255, 26);
+            adviceConfiguredALLToolStripMenuItem.Text = "Advice/Configured - ALL";
+            adviceConfiguredALLToolStripMenuItem.ToolTipText = "Show all configuration options with advice based highlighting\r\nBold = Default value has changed\r\nColor = Advice status.  See tooltip for info.\r\n";
+            adviceConfiguredALLToolStripMenuItem.Click += ConfiguredOnlyToolStripMenuItem_Click;
+            // 
+            // adviceConfiguredToolStripMenuItem
+            // 
+            adviceConfiguredToolStripMenuItem.Name = "adviceConfiguredToolStripMenuItem";
+            adviceConfiguredToolStripMenuItem.Size = new System.Drawing.Size(255, 26);
+            adviceConfiguredToolStripMenuItem.Text = "Advice/Configured";
+            adviceConfiguredToolStripMenuItem.ToolTipText = resources.GetString("adviceConfiguredToolStripMenuItem.ToolTipText");
+            adviceConfiguredToolStripMenuItem.Click += ConfiguredOnlyToolStripMenuItem_Click;
+            // 
+            // toolStripLabel1
+            // 
+            toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            toolStripLabel1.Name = "toolStripLabel1";
+            toolStripLabel1.Size = new System.Drawing.Size(106, 24);
+            toolStripLabel1.Text = "Configuration";
             // 
             // Configuration
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.White;
-            this.Controls.Add(this.dgvConfig);
-            this.Controls.Add(this.toolStrip1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "Configuration";
-            this.Size = new System.Drawing.Size(568, 442);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvConfig)).EndInit();
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            BackColor = System.Drawing.Color.White;
+            Controls.Add(dgvConfig);
+            Controls.Add(toolStrip1);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "Configuration";
+            Size = new System.Drawing.Size(568, 442);
+            ((System.ComponentModel.ISupportInitialize)dgvConfig).EndInit();
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -169,5 +191,8 @@
         private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.ToolStripButton tsExcel;
         private System.Windows.Forms.ToolStripButton tsCols;
+        private System.Windows.Forms.ToolStripMenuItem configuredALLToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem adviceConfiguredALLToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem adviceConfiguredToolStripMenuItem;
     }
 }
