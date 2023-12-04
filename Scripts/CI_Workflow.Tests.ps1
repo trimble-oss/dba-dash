@@ -91,6 +91,7 @@ Describe 'CI Workflow checks' {
 	      @{TableName="dbo.Waits_60MIN"}
 	      @{TableName="dbo.WaitType"}
 		  @{TableName="dbo.BuildReference"}
+		  @{TableName="dbo.IdentityColumns"}
     )
     It 'Check table counts for <TableName>' -TestCases $TableCountGreaterThanZeroTestCases {
         param($tableName)
@@ -112,3 +113,52 @@ Describe 'CI Workflow checks' {
 	}
 
 }
+
+Describe 'CI Workflow checks' {
+    BeforeEach {
+            $params = @{
+                ServerInstance = $Server
+                Database = $Database
+            }
+        }
+		It 'Check Instance_Del hard delete' {
+			$DeleteQuery = "/* !!! WARNING !!!
+			This script will hard delete all instances from the repository
+			*/
+			DECLARE @InstanceID INT
+	
+			WHILE 1=1
+			BEGIN
+	
+			SELECT TOP(1) @InstanceID = InstanceID 
+			FROM dbo.Instances 
+			IF @@ROWCOUNT=0
+				BREAK
+	
+			PRINT @InstanceID
+	
+			/* Perform soft delete */
+			EXEC dbo.Instance_Del @InstanceID = @InstanceID,  
+								@IsActive = 0, 
+								@HardDelete = 0
+	
+			/* Set snapshot date to allow us to perform hard delete without waiting 24hrs */
+			UPDATE dbo.CollectionDates
+			SET SnapshotDate = '19000101'
+			WHERE InstanceID = @InstanceID
+	
+			/* Delete the instance */
+			EXEC dbo.Instance_Del @InstanceID = @InstanceID,  
+								@IsActive = 0, 
+								@HardDelete = 1
+	
+			END"
+	
+			Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -Query $DeleteQuery -TrustServerCertificate
+	
+			$results= Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.Instances"
+			$results.cnt | Should -Be 0
+	
+		}
+}
+	

@@ -73,6 +73,10 @@ jobs:
           sqlcmd -S localhost -U sa -P dbatools.I0 -d tempdb -Q "SELECT @@version as Version;"
           sqlcmd -S localhost -U sa -P dbatools.I0 -d tempdb -Q "SELECT SERVERPROPERTY('Collation') AS Collation;"
 
+      - name: Create Identity Test DB
+        run: | 
+          sqlcmd -S localhost -U sa -P dbatools.I0 -d tempdb -Q "CREATE DATABASE TestIdentity"
+          sqlcmd -S localhost -U sa -P dbatools.I0 -d TestIdentity -Q "CREATE TABLE dbo.IdentityTest(ID TINYINT IDENTITY(1,1));DECLARE @i INT=1; WHILE @i <250 BEGIN INSERT INTO dbo.IdentityTest  DEFAULT VALUES; SET @i+=1; END"
 
       - name: Install Service to Read from Folder
         shell: powershell
