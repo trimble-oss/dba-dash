@@ -76,6 +76,11 @@ jobs:
           sqlcmd -S localhost -U sa -P dbatools.I0 -d tempdb -Q "SELECT @@version as Version;"
           sqlcmd -S localhost -U sa -P dbatools.I0 -d tempdb -Q "SELECT SERVERPROPERTY('Collation') AS Collation;"
 
+      - name: Create Identity Test DB
+        run: | 
+          sqlcmd -S localhost -U sa -P dbatools.I0 -d tempdb -Q "CREATE DATABASE TestIdentity"
+          sqlcmd -S localhost -U sa -P dbatools.I0 -d TestIdentity -Q "CREATE TABLE dbo.IdentityTest(ID TINYINT IDENTITY(1,1));DECLARE @i INT=1; WHILE @i <250 BEGIN INSERT INTO dbo.IdentityTest  DEFAULT VALUES; SET @i+=1; END"
+
       - name: Configure & Install DBA Dash as Service
         shell: powershell
         run: | 
@@ -124,7 +129,12 @@ jobs:
           Install-Module Pester -Force
           Import-Module Pester -PassThru
           Invoke-Pester -Output Detailed Scripts\CI_Workflow.Tests.ps1
-      
+
+      - name: Output Table Counts Following Delete
+        shell: powershell
+        run: | 
+            ./Scripts/Get-TableCounts -ServerInstance "LOCALHOST" -Database "DBADashDB_GitHubAction" 
+
       - name: Output Log and Check for Errors
         shell: powershell
         run: | 
