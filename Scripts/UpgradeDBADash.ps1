@@ -43,20 +43,30 @@ Param(
 # Check .NET Version
 # https://github.com/trimble-oss/dba-dash/issues/42
 ####################
-function CheckDotNetVersion(){
 
-    $MinVersion = [System.Version]::Parse("6.0.2")
+function CheckDotNetVersion([System.Version]$AppVersion){
+
+    $DotNet8AppVersion = [System.Version]::Parse("3.0.0")
+
+    if($AppVersion.CompareTo($DotNet8AppVersion) -ge 0){
+        $MinVersion = [System.Version]::Parse("8.0.0")
+    }
+    else{
+        $MinVersion = [System.Version]::Parse("6.0.2")
+    }
 
     $RuntimeVersions = dotnet --list-runtimes  | Where-Object { $_ -like "Microsoft.WindowsDesktop.App*" } 
 
     $VersionCheck = @($RuntimeVersions | Where-Object { [System.Version]::Parse(($_).Split(" ")[1]) -ge $MinVersion }).Count -ge 1
 
     if (!$VersionCheck){
-        Write-Warning ("Version of the .NET runtime appears to be out of date (Min Version: $MinVersion).  Please download the latest .NET 6 Desktop runtime.`n`nhttps://dotnet.microsoft.com/en-us/download/dotnet/6.0`n`nVersions detected:`n" + $RuntimeVersions)
-        $proceed = Read-Host "Are you sure you want to proceed (Y/N)"
-        if($proceed -ne "Y"){
-            return $false
+        if($MinVersion.Major -eq 8){
+            Write-Warning ("The version of the .NET runtime appears to be out of date (Min Version: $MinVersion).`nDBA Dash $DotNet8AppVersion and later require the .NET 8 runtime. Please download the latest .NET 8 Desktop runtime.`n`nhttps://dotnet.microsoft.com/en-us/download/dotnet/8.0`n`nVersions detected:`n" + $RuntimeVersions)
         }
+        else{
+            Write-Warning ("The version of the .NET runtime appears to be out of date (Min Version: $MinVersion).  Please download the latest .NET 6 Desktop runtime.`n`nhttps://dotnet.microsoft.com/en-us/download/dotnet/6.0`n`nVersions detected:`n" + $RuntimeVersions)
+        }
+        return $false      
     }
     return $true
 
@@ -164,7 +174,7 @@ else{
 if ($versionCompare -eq -1 -or $ForceUpgrade){  
     ## Check .NET version
     try {
-        if (!(CheckDotNetVersion)){
+        if (!(CheckDotNetVersion -AppVersion $newVersion)){
             return
         }
     }
