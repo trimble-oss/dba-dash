@@ -95,7 +95,7 @@ namespace DBADashService
                 if (types.Length > 0 || customCollections.Count > 0) // Might be zero if we are only collecting Jobs in this batch (collected in the next section)
                 {
                     // Value used to disable future collections of SlowQueries if we encounter a not supported error on a RDS instance not running Standard or Enterprise edition
-                    bool dataMapExtendedEventsNotSupported = dataMap.GetBooleanValue("IsExtendedEventsNotSupportedException");
+                    dataMap.TryGetBooleanValue("IsExtendedEventsNotSupportedException", out var dataMapExtendedEventsNotSupported);
                     var collector = new DBCollector(cfg, config.ServiceName)
                     {
                         Job_instance_id = dataMap.GetInt("Job_instance_id"),
