@@ -488,11 +488,19 @@ namespace DBADashServiceConfig
                 UpdateScanInterval();
                 SetDgv();
                 RefreshEncryption();
+                UpdateCustomCollectionCount();
             }
             finally
             {
                 IsSetFromJson = false;
             }
+        }
+
+        private void UpdateCustomCollectionCount()
+        {
+            bttnCustomCollections.Text = $"Custom Collections ({collectionConfig.CustomCollections.Count})";
+            bttnCustomCollections.Font = collectionConfig.CustomCollections.Count > 0 ? new Font(bttnCustomCollections.Font, FontStyle.Bold) : new Font(bttnCustomCollections.Font, FontStyle.Regular);
+            toolTip1.SetToolTip(bttnCustomCollections, collectionConfig.CustomCollections.Count > 0 ? string.Join(", ", collectionConfig.CustomCollections.Keys.OrderBy(k=>k)) : "No Custom Collections Defined");
         }
 
         private void SetJson()
@@ -1407,6 +1415,7 @@ namespace DBADashServiceConfig
             if (frm.ShowDialog() != DialogResult.OK) return;
             collectionConfig.CustomCollections = frm.CustomCollections;
             SetJson();
+            UpdateCustomCollectionCount();
         }
 
         private void BttnCustomCollectionsNew_Click(object sender, EventArgs e)
