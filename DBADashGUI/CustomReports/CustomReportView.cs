@@ -61,10 +61,70 @@ namespace DBADashGUI.CustomReports
             dgv.MouseUp += Dgv_MouseUp;
 
             var highlight = new ToolStripMenuItem("Highlight", Properties.Resources.HighlightHS);
+            var filterByValue = new ToolStripMenuItem("Filter By Value", Properties.Resources.Filter_16x) { Tag = false };
+            var excludeValue = new ToolStripMenuItem("Exclude Value", Properties.Resources.StopFilter_16x) { Tag = true };
             cellContextMenu = new ContextMenuStrip();
+            cellContextMenu.Items.Add(filterByValue);
+            cellContextMenu.Items.Add(excludeValue);
             cellContextMenu.Items.Add(highlight);
             highlight.Click += SetCellHighlightingRules;
+            excludeValue.Click += FilterByValue_Click;
+            filterByValue.Click += FilterByValue_Click;
             dgv.MouseUp += Dgv_MouseUp;
+        }
+
+        private void FilterByValue_Click(object sender, EventArgs e)
+        {
+            var exclude = (bool)((ToolStripMenuItem)sender).Tag;
+            var value = dgv.Rows[clickedRowIndex].Cells[clickedColumnIndex].Value;
+            var colName = dgv.Columns[clickedColumnIndex].DataPropertyName;
+            colName = EscapeColumnName(colName);
+            var filterValue = FormatFilterValue(value, exclude);
+
+            if (dgv.DataSource is not DataView dv) return;
+            var filter = dv.RowFilter;
+            if (!string.IsNullOrEmpty(filter))
+            {
+                filter += Environment.NewLine + " AND ";
+            }
+
+            filter += $"{colName} {filterValue}";
+
+            try
+            {
+                dv.RowFilter = filter;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error setting row filter: " + ex.Message, "Error", MessageBoxButtons.OK,
+                                                          MessageBoxIcon.Error);
+            }
+
+            tsClearFilter.Enabled = true;
+            tsClearFilter.Font = new Font(tsClearFilter.Font, FontStyle.Bold);
+            tsClearFilter.ToolTipText = dv.RowFilter;
+        }
+
+        private static string EscapeColumnName(string columnName)
+        {
+            return "[" + columnName.Replace("]", "]]") + "]";
+        }
+
+        private static string FormatFilterValue(object value, bool exclude)
+        {
+            var compare = (exclude ? "<>" : "=");
+            if (value.DBNullToNull() is null)
+            {
+                return exclude ? "IS NOT NULL" : "IS NULL";
+            }
+            else if (value.GetType().IsNumericType())
+            {
+                return compare + value.ToString();
+            }
+            else
+            {
+                return $"{compare} '" + value.ToString()?.Replace("'", "''") + "'";
+            }
         }
 
         private void SetCellHighlightingRules(object sender, EventArgs e)
@@ -294,7 +354,9 @@ namespace DBADashGUI.CustomReports
                 dgv.ApplyTheme();
             }
             dgv.DataSource = null;
-            dgv.DataSource = dt;
+            dgv.DataSource = new DataView(dt);
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Font = new Font(tsClearFilter.Font, FontStyle.Regular);
         }
 
         /// <summary>
@@ -700,6 +762,14 @@ namespace DBADashGUI.CustomReports
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             report.CustomReportResults[selectedTableIndex].CellHighlightingRules.FormatRowsAdded(sender as DataGridView, e);
+        }
+
+        private void TsClearFilter_Click(object sender, EventArgs e)
+        {
+            if (dgv.DataSource is not DataView dv) return;
+            dv.RowFilter = "";
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Font = new Font(tsClearFilter.Font, FontStyle.Regular);
         }
     }
 }
