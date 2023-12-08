@@ -178,8 +178,8 @@ namespace DBADashService
 
         private static void CollectJobs(DBADashSource cfg, JobDataMap dataMap)
         {
-            var jobLastCollected = dataMap.GetDateTime("JobCollectDate");
-            var jobLastModified = dataMap.GetDateTime("JobLastModified");
+            dataMap.TryGetDateTimeValue("JobCollectDate", out var jobLastCollected);
+            dataMap.TryGetDateTimeValue("JobLastModified", out var jobLastModified);
             var minsSinceLastCollection = DateTime.Now.Subtract(jobLastCollected).TotalMinutes;
             var forcedCollectionDate = jobLastCollected.AddMinutes(MAX_TIME_SINCE_LAST_JOB_COLLECTION);
 
