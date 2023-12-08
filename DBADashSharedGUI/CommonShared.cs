@@ -63,6 +63,7 @@ namespace DBADashSharedGUI
             frm.ShowDialog(owner);
         }
 
+        [SupportedOSPlatform("windows")]
         public static void StyleGrid(ref DataGridView dgv)
         {
             foreach (DataGridViewColumn col in dgv.Columns)
@@ -75,6 +76,7 @@ namespace DBADashSharedGUI
             }
         }
 
+        [SupportedOSPlatform("windows")]
         public static async Task CheckForIncompleteUpgrade()
         {
             if (!DBADash.Upgrade.IsUpgradeIncomplete) return;
