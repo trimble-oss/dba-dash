@@ -25,6 +25,7 @@ namespace DBADashGUI.CustomReports
         private ContextMenuStrip columnContextMenu;
         private ContextMenuStrip cellContextMenu;
         private readonly ToolStripMenuItem convertLocalMenuItem = new("Convert to local timezone") { Checked = true, CheckOnClick = true };
+        private readonly ToolStripMenuItem filterLike = new("LIKE", Properties.Resources.FilteredTextBox_16x);
         private int clickedColumnIndex = -1;
         private int clickedRowIndex = -1;
         private DataSet reportDS;
@@ -66,11 +67,50 @@ namespace DBADashGUI.CustomReports
             cellContextMenu = new ContextMenuStrip();
             cellContextMenu.Items.Add(filterByValue);
             cellContextMenu.Items.Add(excludeValue);
+            cellContextMenu.Items.Add(filterLike);
             cellContextMenu.Items.Add(highlight);
             highlight.Click += SetCellHighlightingRules;
             excludeValue.Click += FilterByValue_Click;
             filterByValue.Click += FilterByValue_Click;
+            filterLike.Click += FilterLike_Click;
             dgv.MouseUp += Dgv_MouseUp;
+        }
+
+        private void FilterLike_Click(object sender, EventArgs e)
+        {
+            var value = dgv.Rows[clickedRowIndex].Cells[clickedColumnIndex].Value.DBNullToNull()?.ToString();
+            var colName = dgv.Columns[clickedColumnIndex].DataPropertyName;
+
+            if (CommonShared.ShowInputDialog(ref value, "Enter value to filter by:", default, "Use % or * as wildcards") == DialogResult.Cancel) return;
+            if (string.IsNullOrEmpty(value)) return;
+            if (dgv.DataSource is not DataView dv) return;
+            var filter = dv.RowFilter;
+            if (!string.IsNullOrEmpty(filter))
+            {
+                filter += Environment.NewLine + " AND ";
+            }
+            value = EscapeValue(value);
+            filter += $"{colName} LIKE {value}";
+            SetFilter(filter);
+        }
+
+        private void SetFilter(string filter)
+        {
+            if (dgv.DataSource is not DataView dv) return;
+            var previousFilter = dv.RowFilter;
+            try
+            {
+                dv.RowFilter = filter;
+                tsClearFilter.Enabled = true;
+                tsClearFilter.Font = new Font(tsClearFilter.Font, FontStyle.Bold);
+                tsClearFilter.ToolTipText = dv.RowFilter;
+            }
+            catch (Exception ex)
+            {
+                dv.RowFilter = previousFilter;
+                MessageBox.Show("Error setting row filter: " + ex.Message, "Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
         }
 
         private void FilterByValue_Click(object sender, EventArgs e)
@@ -89,26 +129,15 @@ namespace DBADashGUI.CustomReports
             }
 
             filter += $"{colName} {filterValue}";
-
-            try
-            {
-                dv.RowFilter = filter;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error setting row filter: " + ex.Message, "Error", MessageBoxButtons.OK,
-                                                          MessageBoxIcon.Error);
-            }
-
-            tsClearFilter.Enabled = true;
-            tsClearFilter.Font = new Font(tsClearFilter.Font, FontStyle.Bold);
-            tsClearFilter.ToolTipText = dv.RowFilter;
+            SetFilter(filter);
         }
 
         private static string EscapeColumnName(string columnName)
         {
             return "[" + columnName.Replace("]", "]]") + "]";
         }
+
+        private static string EscapeValue(string value) => "'" + value.ToString()?.Replace("'", "''") + "'";
 
         private static string FormatFilterValue(object value, bool exclude)
         {
@@ -123,7 +152,7 @@ namespace DBADashGUI.CustomReports
             }
             else
             {
-                return $"{compare} '" + value.ToString()?.Replace("'", "''") + "'";
+                return $"{compare} " + EscapeValue(value.ToString());
             }
         }
 
@@ -269,6 +298,7 @@ namespace DBADashGUI.CustomReports
             switch (hitTestInfo.Type)
             {
                 case DataGridViewHitTestType.Cell:
+                    filterLike.Visible = dgv.Columns[clickedColumnIndex].ValueType == typeof(string);
                     cellContextMenu.Show(dgv, e.Location);
                     return;
 
@@ -357,6 +387,7 @@ namespace DBADashGUI.CustomReports
             dgv.DataSource = new DataView(dt);
             tsClearFilter.Enabled = false;
             tsClearFilter.Font = new Font(tsClearFilter.Font, FontStyle.Regular);
+            tsClearFilter.ToolTipText = string.Empty;
         }
 
         /// <summary>
@@ -767,9 +798,10 @@ namespace DBADashGUI.CustomReports
         private void TsClearFilter_Click(object sender, EventArgs e)
         {
             if (dgv.DataSource is not DataView dv) return;
-            dv.RowFilter = "";
+            dv.RowFilter = string.Empty;
             tsClearFilter.Enabled = false;
             tsClearFilter.Font = new Font(tsClearFilter.Font, FontStyle.Regular);
+            tsClearFilter.ToolTipText = string.Empty;
         }
     }
 }

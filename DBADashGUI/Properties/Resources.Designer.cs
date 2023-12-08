@@ -769,6 +769,16 @@ namespace DBADashGUI.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
+        internal static System.Drawing.Bitmap FilteredTextBox_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("FilteredTextBox_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+
     }
 }
