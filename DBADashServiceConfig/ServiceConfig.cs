@@ -328,7 +328,7 @@ namespace DBADashServiceConfig
             dgvConnections.Columns.Add(new DataGridViewComboBoxColumn() { DataPropertyName = "IOCollectionLevel", HeaderText = "IO Collection Level", DataSource = Enum.GetValues(typeof(DBADashSource.IOCollectionLevels)) });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "WriteToSecondaryDestinations", HeaderText = "Write to Secondary Destinations" });
             dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Schedule", HeaderText = "Schedule", Text = "Schedule", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
-            dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "CustomCollections", HeaderText = "Custom Collections", Text = "View/Edit", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
+            dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "CustomCollections", HeaderText = "Custom Collections", Text = "View/Edit", LinkColor = DashColors.LinkColor });
             dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Edit", HeaderText = "Copy Connection", Text = "Copy", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
             dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Delete", HeaderText = "Delete", Text = "Delete", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
 
@@ -1115,7 +1115,7 @@ namespace DBADashServiceConfig
                     if (frm.DialogResult == DialogResult.OK)
                     {
                         src.CustomCollections = frm.CustomCollections;
-                        dgvConnections.Refresh();
+                        SetDgv();
                     }
                 }
                 else
@@ -1188,6 +1188,7 @@ namespace DBADashServiceConfig
             {
                 var src = (DBADashSource)dgvConnections.Rows[i].DataBoundItem;
                 SetCellsReadOnly(i, src.SourceConnection.Type);
+                dgvConnections.Rows[i].Cells["CustomCollections"].Value = src.CustomCollections.Keys.Count==0 ? "Add Collection" : string.Join(", ",src.CustomCollections.Keys.OrderBy(key => key)); 
             }
         }
 
