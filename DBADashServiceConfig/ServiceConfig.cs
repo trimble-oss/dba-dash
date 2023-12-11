@@ -1196,7 +1196,12 @@ namespace DBADashServiceConfig
             {
                 var src = (DBADashSource)dgvConnections.Rows[i].DataBoundItem;
                 SetCellsReadOnly(i, src.SourceConnection.Type);
-                dgvConnections.Rows[i].Cells["CustomCollections"].Value = src.CustomCollections.Keys.Count==0 ? "Add Collection" : string.Join(", ",src.CustomCollections.Keys.OrderBy(key => key)); 
+                if (src.SourceConnection.Type == ConnectionType.SQL)
+                {
+                    dgvConnections.Rows[i].Cells["CustomCollections"].Value = src.CustomCollections==null || src.CustomCollections.Keys.Count == 0
+                        ? "Add Collection"
+                        : string.Join(", ", src.CustomCollections.Keys.OrderBy(key => key));
+                }
             }
         }
 
