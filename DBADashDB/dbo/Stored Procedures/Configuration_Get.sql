@@ -74,7 +74,7 @@ WITH T AS (
 			WHEN SC.configuration_id=1584 AND SC.value=1 THEN @OK /* Backup checksum default is enabled */
 			WHEN SC.configuration_id=1584 AND SC.value=0 THEN @WarningLow /* Backup checksum default is NOT enabled */
 			WHEN SC.configuration_id=1544 AND SC.value=2147483647 THEN @Warning /* Max Server memory should be set*/
-			WHEN SC.configuration_id=1544 AND I.PctMemoryAllocatedToBufferPool>1 OR (I.MemoryNotAllocatedToBufferPoolGB<4 AND I.PhysicalMemoryGB>16) THEN @Warning /* Max Server memory set too high */
+			WHEN SC.configuration_id=1544 AND (I.PctMemoryAllocatedToBufferPool>1 OR (I.MemoryNotAllocatedToBufferPoolGB<4 AND I.PhysicalMemoryGB>16)) THEN @Warning /* Max Server memory set too high */
 			WHEN SC.configuration_id=1544 THEN @Information
 			WHEN SC.configuration_id=1576 AND SC.value=0 THEN @WarningLow /* Remote DAC not enabled */
 			WHEN SC.configuration_id=1576 AND SC.value=1 THEN @OK /* Remote DAC enabled */
