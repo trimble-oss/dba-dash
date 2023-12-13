@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using Amazon.S3.Model;
 using DocumentFormat.OpenXml.Drawing;
 using static DBADashGUI.DBADashStatus;
+using System.Text;
+using System.Xml;
 
 namespace DBADashGUI
 {
@@ -494,6 +496,16 @@ namespace DBADashGUI
             }
 
             return Color.FromArgb((int)(r * 255), (int)(g * 255), (int)(b * 255));
+        }
+
+        public static string StripInvalidXmlChars(this string text)
+        {
+            var validXml = new StringBuilder();
+            foreach (var c in text.Where(XmlConvert.IsXmlChar))
+            {
+                validXml.Append(c);
+            }
+            return validXml.ToString();
         }
     }
 }

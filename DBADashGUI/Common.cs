@@ -152,12 +152,23 @@ namespace DBADashGUI
                     return;
                 }
             }
-            Common.SaveDataGridViewToXLSX(ref dgv, ofd.FileName);
+
+            try
+            {
+                Common.SaveDataGridViewToXLSX(ref dgv, ofd.FileName); // Assume there will be no invalid XML characters
+            }
+            catch (XmlException ex)
+            {
+                Debug.WriteLine("XmlException exporting to Excel, retrying with invalid XML characters removed",ex.ToString());
+                Common.SaveDataGridViewToXLSX(ref dgv, ofd.FileName, true); // Try again with invalid XML characters removed
+                Debug.WriteLine($"Invalid XML characters removed");
+            }
+
             var psi = new ProcessStartInfo(ofd.FileName) { UseShellExecute = true };
             Process.Start(psi);
         }
 
-        public static void SaveDataGridViewToXLSX(ref DataGridView dgv, string path)
+        public static void SaveDataGridViewToXLSX(ref DataGridView dgv, string path, bool replaceInvalidChars = false)
         {
             SLDocument sl = new();
             var colIndex = 1;
@@ -182,7 +193,9 @@ namespace DBADashGUI
 
                     var cellType = cell.ValueType;
                     var style = sl.CreateStyle();
-                    var format = string.IsNullOrEmpty(cell.Style.Format) ? cell.InheritedStyle.Format : cell.Style.Format;
+                    var format = string.IsNullOrEmpty(cell.Style.Format)
+                        ? cell.InheritedStyle.Format
+                        : cell.Style.Format;
                     format = format switch
                     {
                         "P1" => "0.0%",
@@ -193,10 +206,13 @@ namespace DBADashGUI
                     {
                         format = "yyyy-MM-dd HH:mm";
                     }
-                    if (!cell.Style.ForeColor.IsEmpty || !cell.Style.BackColor.IsEmpty || !string.IsNullOrEmpty(format))
+
+                    if (!cell.Style.ForeColor.IsEmpty || !cell.Style.BackColor.IsEmpty ||
+                        !string.IsNullOrEmpty(format))
                     {
                         var backColor = cell.Style.BackColor.IsEmpty ? Color.Transparent : cell.Style.BackColor;
-                        style.Fill.SetPattern(DocumentFormat.OpenXml.Spreadsheet.PatternValues.Solid, backColor, backColor);
+                        style.Fill.SetPattern(DocumentFormat.OpenXml.Spreadsheet.PatternValues.Solid, backColor,
+                            backColor);
                         style.SetFontColor(cell.Style.ForeColor);
                         style.FormatCode = format;
                         sl.SetCellStyle(rowIndex, colIndex, style);
@@ -227,7 +243,14 @@ namespace DBADashGUI
                         }
                         else
                         {
-                            sl.SetCellValue(rowIndex, colIndex, Convert.ToString(cell.FormattedValue));
+                            if (replaceInvalidChars)
+                            {
+                                sl.SetCellValue(rowIndex, colIndex, (Convert.ToString(cell.FormattedValue)).StripInvalidXmlChars());
+                            }
+                            else
+                            {
+                                sl.SetCellValue(rowIndex, colIndex, Convert.ToString(cell.FormattedValue));
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -236,16 +259,19 @@ namespace DBADashGUI
                     }
                 }
             }
+
             if (rowIndex > 1)
             {
                 var tbl = sl.CreateTable(1, 1, rowIndex, colIndex);
                 sl.InsertTable(tbl);
                 var headerStyle = sl.CreateStyle();
-                headerStyle.Fill.SetPattern(DocumentFormat.OpenXml.Spreadsheet.PatternValues.Solid, DashColors.TrimbleBlue, DashColors.TrimbleBlue);
+                headerStyle.Fill.SetPattern(DocumentFormat.OpenXml.Spreadsheet.PatternValues.Solid,
+                    DashColors.TrimbleBlue, DashColors.TrimbleBlue);
                 headerStyle.SetFontColor(Color.White);
                 headerStyle.SetFontBold(true);
                 sl.SetCellStyle(1, 1, 1, colIndex, headerStyle);
             }
+
             sl.AutoFitColumn(1, colIndex, 300);
             sl.SaveAs(path);
         }
