@@ -411,6 +411,12 @@ BEGIN
 
 	EXEC dbo.Waits_60MIN_Del @InstanceID=@InstanceID,@DaysToKeep=0
 
+	DELETE dbo.IdentityColumnsHistory 
+	WHERE InstanceID = @InstanceID
+
+	DELETE dbo.IdentityColumns 
+	WHERE InstanceID = @InstanceID
+
 	DELETE dbo.Databases 
 	WHERE InstanceID = @InstanceID
 
