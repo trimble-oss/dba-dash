@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using DBADashGUI.Theme;
+using Humanizer;
 
 namespace DBADashGUI.Performance
 {
@@ -45,23 +46,46 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private int compareOffset = 0;
+        private int CompareOffset=>int.Parse(SelectedCompareOffsetItem.Tag.ToString() ?? "-1");
+
         private DateTime _compareTo = DateTime.MinValue;
         private DateTime _compareFrom = DateTime.MinValue;
         private DataTable dt;
+
+        private ToolStripMenuItem SelectedCompareOffsetItem => tsCompare.DropDownItems.OfType<ToolStripMenuItem>().FirstOrDefault(mnu => mnu.Checked,tsNoCompare);
 
         private DateTime CompareTo
         {
             get
             {
-                var toDate = DateRange.ToUTC;
-                return compareOffset > 0
-                    ? new DateTime(toDate.Year, toDate.Month, toDate.Day, toDate.Hour, toDate.Minute, 0, DateTimeKind.Utc).AddMinutes(-compareOffset)
+                if (tsPreviousPeriod.Checked)
+                {
+                    return DateRange.FromUTC;
+                }
+                return CompareOffset > 0
+                    ? DateRange.ToUTC.AddMinutes(-CompareOffset)
                     : _compareTo;
             }
         }
 
-        private DateTime CompareFrom => compareOffset > 0 ? DateRange.FromUTC.AddMinutes(-compareOffset) : _compareFrom;
+        private DateTime CompareFrom
+        {
+            get
+            {
+                if (tsPreviousPeriod.Checked)
+                {
+                    return DateRange.FromUTC.AddSeconds(-DateRange.TimeSpan.TotalSeconds);
+                }
+                return CompareOffset > 0 ? DateRange.FromUTC.AddMinutes(-CompareOffset) :
+                    _compareFrom;
+            }
+
+        }
+
+        private bool HasCompare => CompareFrom != DateTime.MinValue && CompareFrom != DateTime.MaxValue &&
+                                   CompareTo != DateTime.MinValue && CompareTo != DateTime.MaxValue;
+
+
 
         private readonly List<DataGridViewColumn> StandardCols = new()
         {
@@ -156,28 +180,49 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-            if (objectExecutionLineChart1.InstanceID != InstanceID)
+            var status = DateRange.FromUTC.ToAppTimeZone() + " - " + DateRange.ToUTC.ToAppTimeZone() + (HasCompare ? " comparing to " + CompareFrom.ToAppTimeZone() + " - " + CompareTo.ToAppTimeZone() : "");
+            lblStatus.ForeColor = Color.Black;
+            lblStatus.Text = "Refreshing Data...";
+            this.Cursor = Cursors.WaitCursor;
+            Application.DoEvents();
+            try
             {
-                splitContainer1.Panel1Collapsed = true;
-            }
-            dgv.DataSource = null;
+                if (objectExecutionLineChart1.InstanceID != InstanceID)
+                {
+                    splitContainer1.Panel1Collapsed = true;
+                }
+                dgv.DataSource = null;
 
-            var dt = GetObjectExecutionStatsSummary();
-            if (dt.Rows.Count == 1)
-            {
-                RefreshChart((long)dt.Rows[0]["ObjectID"], (string)dt.Rows[0]["ObjectName"]);
-            }
-            dgv.Columns.Clear();
-            dgv.AutoGenerateColumns = false;
+                var dt = GetObjectExecutionStatsSummary();
+                if (dt.Rows.Count == 1)
+                {
+                    RefreshChart((long)dt.Rows[0]["ObjectID"], (string)dt.Rows[0]["ObjectName"]);
+                }
 
-            SetDataSourceWithFilter();
-            dgv.Columns.AddRange(Columns.ToArray());
-            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            dgv.ApplyTheme();
-            if (splitContainer1.Panel1Collapsed == false)
-            {
-                RefreshChart();
+
+                dgv.Columns.Clear();
+                dgv.AutoGenerateColumns = false;
+                tsCompare.Font = new Font(tsCompare.Font, HasCompare ? FontStyle.Bold : FontStyle.Regular);
+                SetDataSourceWithFilter();
+                dgv.Columns.AddRange(Columns.ToArray());
+                dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                dgv.ApplyTheme();
+                if (splitContainer1.Panel1Collapsed == false)
+                {
+                    RefreshChart();
+                }
             }
+            catch (Exception ex)
+            {
+                this.Cursor = Cursors.Default;
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                status = "Error: " + ex.Message;
+            }
+            finally{
+                
+                this.Cursor = Cursors.Default;
+            }
+            lblStatus.Text = status;
         }
 
         private DataTable GetObjectExecutionStatsSummary()
@@ -196,7 +241,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddIfGreaterThanZero("ObjectID", ObjectID);
                 cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
 
-                if (CompareFrom != DateTime.MinValue && CompareFrom != DateTime.MaxValue && CompareTo != DateTime.MinValue && CompareTo != DateTime.MaxValue)
+                if (HasCompare)
                 {
                     cmd.Parameters.AddWithValue("CompareFrom", CompareFrom);
                     cmd.Parameters.AddWithValue("CompareTo", CompareTo);
@@ -257,26 +302,17 @@ namespace DBADashGUI.Performance
 
         private void TsSetOffset_Click(object sender, EventArgs e)
         {
-            compareOffset = int.Parse((string)((ToolStripMenuItem)sender).Tag);
-            CheckOffset();
+            CheckCompareOffset((ToolStripMenuItem)sender);
             RefreshData();
         }
 
-        private void CheckOffset()
+        private void CheckCompareOffset(ToolStripItem ts)
         {
-            tsNoCompare.Checked = compareOffset == 0;
-            foreach (ToolStripItem itm in tsCompare.DropDownItems)
+            foreach (var itm in tsCompare.DropDownItems.OfType<ToolStripMenuItem>())
             {
-                if (itm.GetType() == typeof(ToolStripMenuItem))
-                {
-                    var ts = (ToolStripMenuItem)itm;
-                    ts.Checked = int.Parse((string)itm.Tag) == compareOffset;
-                    if (ts.Checked)
-                    {
-                        tsCompare.Text = "Compare To: " + ts.Text;
-                    }
-                }
+                itm.Checked = itm == ts;
             }
+            tsCompare.Text = "Compare To: " + ts.Text;
         }
 
         private void ObjectExecutionSummary_Load(object sender, EventArgs e)
@@ -296,10 +332,8 @@ namespace DBADashGUI.Performance
             {
                 _compareFrom = frm.FromDate.AppTimeZoneToUtc();
                 _compareTo = frm.ToDate.AppTimeZoneToUtc();
-                compareOffset = -1;
-                CheckOffset();
+                CheckCompareOffset(tsCustomCompare);
                 RefreshData();
-                tsCustomCompare.Checked = true;
             }
         }
 
@@ -418,5 +452,6 @@ namespace DBADashGUI.Performance
                 dgv.AutoResizeRows();
             }
         }
+
     }
 }
