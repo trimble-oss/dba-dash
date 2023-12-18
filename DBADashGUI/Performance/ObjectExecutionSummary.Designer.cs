@@ -28,363 +28,369 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.dgv = new System.Windows.Forms.DataGridView();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.tsCompare = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsTimeOffset = new System.Windows.Forms.ToolStripMenuItem();
-            this.ts24Hrs = new System.Windows.Forms.ToolStripMenuItem();
-            this.ts7Days = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsCustomCompare = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsNoCompare = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsCols = new System.Windows.Forms.ToolStripButton();
-            this.tsType = new System.Windows.Forms.ToolStripDropDownButton();
-            this.procedureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.triggerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.cLRProcedureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.cLRTriggerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.scalarFunctionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.extendedStoredProcedureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.lblSearch = new System.Windows.Forms.ToolStripLabel();
-            this.txtSearch = new System.Windows.Forms.ToolStripTextBox();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.splitChart = new System.Windows.Forms.SplitContainer();
-            this.objectExecutionLineChart1 = new DBADashGUI.Performance.ObjectExecutionLineChart();
-            this.compareObjectExecutionLineChart = new DBADashGUI.Performance.ObjectExecutionLineChart();
-            this.tmrSearch = new System.Windows.Forms.Timer(this.components);
-            ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
-            this.toolStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitChart)).BeginInit();
-            this.splitChart.Panel1.SuspendLayout();
-            this.splitChart.Panel2.SuspendLayout();
-            this.splitChart.SuspendLayout();
-            this.SuspendLayout();
+            components = new System.ComponentModel.Container();
+            dgv = new System.Windows.Forms.DataGridView();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            tsRefresh = new System.Windows.Forms.ToolStripButton();
+            tsCopy = new System.Windows.Forms.ToolStripButton();
+            tsExcel = new System.Windows.Forms.ToolStripButton();
+            tsCompare = new System.Windows.Forms.ToolStripDropDownButton();
+            tsPreviousPeriod = new System.Windows.Forms.ToolStripMenuItem();
+            ts24Hrs = new System.Windows.Forms.ToolStripMenuItem();
+            ts7Days = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            tsCustomCompare = new System.Windows.Forms.ToolStripMenuItem();
+            tsNoCompare = new System.Windows.Forms.ToolStripMenuItem();
+            tsCols = new System.Windows.Forms.ToolStripButton();
+            tsType = new System.Windows.Forms.ToolStripDropDownButton();
+            procedureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            triggerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            cLRProcedureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            cLRTriggerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            scalarFunctionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            extendedStoredProcedureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            lblSearch = new System.Windows.Forms.ToolStripLabel();
+            txtSearch = new System.Windows.Forms.ToolStripTextBox();
+            splitContainer1 = new System.Windows.Forms.SplitContainer();
+            splitChart = new System.Windows.Forms.SplitContainer();
+            objectExecutionLineChart1 = new ObjectExecutionLineChart();
+            compareObjectExecutionLineChart = new ObjectExecutionLineChart();
+            statusStrip1 = new System.Windows.Forms.StatusStrip();
+            lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            tmrSearch = new System.Windows.Forms.Timer(components);
+            ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
+            toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
+            splitContainer1.Panel1.SuspendLayout();
+            splitContainer1.Panel2.SuspendLayout();
+            splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitChart).BeginInit();
+            splitChart.Panel1.SuspendLayout();
+            splitChart.Panel2.SuspendLayout();
+            splitChart.SuspendLayout();
+            statusStrip1.SuspendLayout();
+            SuspendLayout();
             // 
             // dgv
             // 
-            this.dgv.AllowUserToAddRows = false;
-            this.dgv.AllowUserToDeleteRows = false;
-            this.dgv.BackgroundColor = System.Drawing.Color.White;
-            this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 0);
-            this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dgv.Name = "dgv";
-            this.dgv.ReadOnly = true;
-            this.dgv.RowHeadersVisible = false;
-            this.dgv.RowHeadersWidth = 51;
-            this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(1262, 323);
-            this.dgv.TabIndex = 0;
-            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellContentClick);
-            this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.Dgv_RowsAdded);
+            dgv.AllowUserToAddRows = false;
+            dgv.AllowUserToDeleteRows = false;
+            dgv.BackgroundColor = System.Drawing.Color.White;
+            dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgv.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgv.Location = new System.Drawing.Point(0, 0);
+            dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dgv.Name = "dgv";
+            dgv.ReadOnly = true;
+            dgv.RowHeadersVisible = false;
+            dgv.RowHeadersWidth = 51;
+            dgv.RowTemplate.Height = 24;
+            dgv.Size = new System.Drawing.Size(1262, 297);
+            dgv.TabIndex = 0;
+            dgv.CellContentClick += Dgv_CellContentClick;
+            dgv.RowsAdded += Dgv_RowsAdded;
             // 
             // toolStrip1
             // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsRefresh,
-            this.tsCopy,
-            this.tsExcel,
-            this.tsCompare,
-            this.tsCols,
-            this.tsType,
-            this.toolStripSeparator1,
-            this.lblSearch,
-            this.txtSearch});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1262, 27);
-            this.toolStrip1.TabIndex = 4;
-            this.toolStrip1.Text = "toolStrip1";
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsCompare, tsCols, tsType, toolStripSeparator1, lblSearch, txtSearch });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new System.Drawing.Size(1262, 27);
+            toolStrip1.TabIndex = 4;
+            toolStrip1.Text = "toolStrip1";
             // 
             // tsRefresh
             // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
+            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Name = "tsRefresh";
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Text = "Refresh";
+            tsRefresh.Click += TsRefresh_Click;
             // 
             // tsCopy
             // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
+            tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopy.Name = "tsCopy";
+            tsCopy.Size = new System.Drawing.Size(29, 24);
+            tsCopy.Text = "Copy";
+            tsCopy.Click += TsCopy_Click;
             // 
             // tsExcel
             // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
+            tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsExcel.Image = Properties.Resources.excel16x16;
+            tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcel.Name = "tsExcel";
+            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Text = "Export Excel";
+            tsExcel.Click += TsExcel_Click;
             // 
             // tsCompare
             // 
-            this.tsCompare.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsTimeOffset,
-            this.ts24Hrs,
-            this.ts7Days,
-            this.toolStripSeparator2,
-            this.tsCustomCompare,
-            this.tsNoCompare});
-            this.tsCompare.Image = global::DBADashGUI.Properties.Resources.Time_16x;
-            this.tsCompare.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCompare.Name = "tsCompare";
-            this.tsCompare.Size = new System.Drawing.Size(124, 24);
-            this.tsCompare.Text = "Compare To";
+            tsCompare.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsPreviousPeriod, ts24Hrs, ts7Days, toolStripSeparator2, tsCustomCompare, tsNoCompare });
+            tsCompare.Image = Properties.Resources.Time_16x;
+            tsCompare.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCompare.Name = "tsCompare";
+            tsCompare.Size = new System.Drawing.Size(124, 24);
+            tsCompare.Text = "Compare To";
             // 
-            // tsTimeOffset
+            // tsPreviousPeriod
             // 
-            this.tsTimeOffset.Name = "tsTimeOffset";
-            this.tsTimeOffset.Size = new System.Drawing.Size(193, 26);
-            this.tsTimeOffset.Tag = "60";
-            this.tsTimeOffset.Text = "Previous Period";
-            this.tsTimeOffset.Click += new System.EventHandler(this.TsSetOffset_Click);
+            tsPreviousPeriod.Font = new System.Drawing.Font("Segoe UI", 9F);
+            tsPreviousPeriod.Name = "tsPreviousPeriod";
+            tsPreviousPeriod.Size = new System.Drawing.Size(224, 26);
+            tsPreviousPeriod.Tag = "-1";
+            tsPreviousPeriod.Text = "Previous Period";
+            tsPreviousPeriod.Click += TsSetOffset_Click;
             // 
             // ts24Hrs
             // 
-            this.ts24Hrs.Name = "ts24Hrs";
-            this.ts24Hrs.Size = new System.Drawing.Size(193, 26);
-            this.ts24Hrs.Tag = "1440";
-            this.ts24Hrs.Text = "-24hrs offset";
-            this.ts24Hrs.Click += new System.EventHandler(this.TsSetOffset_Click);
+            ts24Hrs.Font = new System.Drawing.Font("Segoe UI", 9F);
+            ts24Hrs.Name = "ts24Hrs";
+            ts24Hrs.Size = new System.Drawing.Size(224, 26);
+            ts24Hrs.Tag = "1440";
+            ts24Hrs.Text = "-24hrs offset";
+            ts24Hrs.Click += TsSetOffset_Click;
             // 
             // ts7Days
             // 
-            this.ts7Days.Name = "ts7Days";
-            this.ts7Days.Size = new System.Drawing.Size(193, 26);
-            this.ts7Days.Tag = "10080";
-            this.ts7Days.Text = "-7 days offset";
-            this.ts7Days.Click += new System.EventHandler(this.TsSetOffset_Click);
+            ts7Days.Font = new System.Drawing.Font("Segoe UI", 9F);
+            ts7Days.Name = "ts7Days";
+            ts7Days.Size = new System.Drawing.Size(224, 26);
+            ts7Days.Tag = "10080";
+            ts7Days.Text = "-7 days offset";
+            ts7Days.Click += TsSetOffset_Click;
             // 
             // toolStripSeparator2
             // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(190, 6);
+            toolStripSeparator2.Name = "toolStripSeparator2";
+            toolStripSeparator2.Size = new System.Drawing.Size(221, 6);
             // 
             // tsCustomCompare
             // 
-            this.tsCustomCompare.Name = "tsCustomCompare";
-            this.tsCustomCompare.Size = new System.Drawing.Size(193, 26);
-            this.tsCustomCompare.Tag = "-1";
-            this.tsCustomCompare.Text = "Custom";
-            this.tsCustomCompare.Click += new System.EventHandler(this.TsCustomCompare_Click);
+            tsCustomCompare.Font = new System.Drawing.Font("Segoe UI", 9F);
+            tsCustomCompare.Name = "tsCustomCompare";
+            tsCustomCompare.Size = new System.Drawing.Size(224, 26);
+            tsCustomCompare.Tag = "-1";
+            tsCustomCompare.Text = "Custom";
+            tsCustomCompare.Click += TsCustomCompare_Click;
             // 
             // tsNoCompare
             // 
-            this.tsNoCompare.Checked = true;
-            this.tsNoCompare.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.tsNoCompare.Name = "tsNoCompare";
-            this.tsNoCompare.Size = new System.Drawing.Size(193, 26);
-            this.tsNoCompare.Tag = "0";
-            this.tsNoCompare.Text = "None";
-            this.tsNoCompare.Click += new System.EventHandler(this.TsSetOffset_Click);
+            tsNoCompare.Checked = true;
+            tsNoCompare.CheckState = System.Windows.Forms.CheckState.Checked;
+            tsNoCompare.Font = new System.Drawing.Font("Segoe UI", 9F);
+            tsNoCompare.Name = "tsNoCompare";
+            tsNoCompare.Size = new System.Drawing.Size(224, 26);
+            tsNoCompare.Tag = "-1";
+            tsNoCompare.Text = "None";
+            tsNoCompare.Click += TsSetOffset_Click;
             // 
             // tsCols
             // 
-            this.tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCols.Image = global::DBADashGUI.Properties.Resources.Column_16x;
-            this.tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCols.Name = "tsCols";
-            this.tsCols.Size = new System.Drawing.Size(29, 24);
-            this.tsCols.Text = "Columns";
-            this.tsCols.Click += new System.EventHandler(this.TsCols_Click);
+            tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCols.Image = Properties.Resources.Column_16x;
+            tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCols.Name = "tsCols";
+            tsCols.Size = new System.Drawing.Size(29, 24);
+            tsCols.Text = "Columns";
+            tsCols.Click += TsCols_Click;
             // 
             // tsType
             // 
-            this.tsType.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.procedureToolStripMenuItem,
-            this.triggerToolStripMenuItem,
-            this.cLRProcedureToolStripMenuItem,
-            this.cLRTriggerToolStripMenuItem,
-            this.scalarFunctionToolStripMenuItem,
-            this.extendedStoredProcedureToolStripMenuItem});
-            this.tsType.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
-            this.tsType.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsType.Name = "tsType";
-            this.tsType.Size = new System.Drawing.Size(74, 24);
-            this.tsType.Text = "Type";
+            tsType.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { procedureToolStripMenuItem, triggerToolStripMenuItem, cLRProcedureToolStripMenuItem, cLRTriggerToolStripMenuItem, scalarFunctionToolStripMenuItem, extendedStoredProcedureToolStripMenuItem });
+            tsType.Image = Properties.Resources.FilterDropdown_16x;
+            tsType.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsType.Name = "tsType";
+            tsType.Size = new System.Drawing.Size(74, 24);
+            tsType.Text = "Type";
             // 
             // procedureToolStripMenuItem
             // 
-            this.procedureToolStripMenuItem.CheckOnClick = true;
-            this.procedureToolStripMenuItem.Name = "procedureToolStripMenuItem";
-            this.procedureToolStripMenuItem.Size = new System.Drawing.Size(273, 26);
-            this.procedureToolStripMenuItem.Tag = "P";
-            this.procedureToolStripMenuItem.Text = "Procedure";
-            this.procedureToolStripMenuItem.Click += new System.EventHandler(this.TsType_Click);
+            procedureToolStripMenuItem.CheckOnClick = true;
+            procedureToolStripMenuItem.Name = "procedureToolStripMenuItem";
+            procedureToolStripMenuItem.Size = new System.Drawing.Size(273, 26);
+            procedureToolStripMenuItem.Tag = "P";
+            procedureToolStripMenuItem.Text = "Procedure";
+            procedureToolStripMenuItem.Click += TsType_Click;
             // 
             // triggerToolStripMenuItem
             // 
-            this.triggerToolStripMenuItem.CheckOnClick = true;
-            this.triggerToolStripMenuItem.Name = "triggerToolStripMenuItem";
-            this.triggerToolStripMenuItem.Size = new System.Drawing.Size(273, 26);
-            this.triggerToolStripMenuItem.Tag = "TR";
-            this.triggerToolStripMenuItem.Text = "Trigger";
-            this.triggerToolStripMenuItem.Click += new System.EventHandler(this.TsType_Click);
+            triggerToolStripMenuItem.CheckOnClick = true;
+            triggerToolStripMenuItem.Name = "triggerToolStripMenuItem";
+            triggerToolStripMenuItem.Size = new System.Drawing.Size(273, 26);
+            triggerToolStripMenuItem.Tag = "TR";
+            triggerToolStripMenuItem.Text = "Trigger";
+            triggerToolStripMenuItem.Click += TsType_Click;
             // 
             // cLRProcedureToolStripMenuItem
             // 
-            this.cLRProcedureToolStripMenuItem.CheckOnClick = true;
-            this.cLRProcedureToolStripMenuItem.Name = "cLRProcedureToolStripMenuItem";
-            this.cLRProcedureToolStripMenuItem.Size = new System.Drawing.Size(273, 26);
-            this.cLRProcedureToolStripMenuItem.Tag = "PC";
-            this.cLRProcedureToolStripMenuItem.Text = "CLR Procedure";
-            this.cLRProcedureToolStripMenuItem.Click += new System.EventHandler(this.TsType_Click);
+            cLRProcedureToolStripMenuItem.CheckOnClick = true;
+            cLRProcedureToolStripMenuItem.Name = "cLRProcedureToolStripMenuItem";
+            cLRProcedureToolStripMenuItem.Size = new System.Drawing.Size(273, 26);
+            cLRProcedureToolStripMenuItem.Tag = "PC";
+            cLRProcedureToolStripMenuItem.Text = "CLR Procedure";
+            cLRProcedureToolStripMenuItem.Click += TsType_Click;
             // 
             // cLRTriggerToolStripMenuItem
             // 
-            this.cLRTriggerToolStripMenuItem.CheckOnClick = true;
-            this.cLRTriggerToolStripMenuItem.Name = "cLRTriggerToolStripMenuItem";
-            this.cLRTriggerToolStripMenuItem.Size = new System.Drawing.Size(273, 26);
-            this.cLRTriggerToolStripMenuItem.Tag = "TA";
-            this.cLRTriggerToolStripMenuItem.Text = "CLR Trigger";
-            this.cLRTriggerToolStripMenuItem.Click += new System.EventHandler(this.TsType_Click);
+            cLRTriggerToolStripMenuItem.CheckOnClick = true;
+            cLRTriggerToolStripMenuItem.Name = "cLRTriggerToolStripMenuItem";
+            cLRTriggerToolStripMenuItem.Size = new System.Drawing.Size(273, 26);
+            cLRTriggerToolStripMenuItem.Tag = "TA";
+            cLRTriggerToolStripMenuItem.Text = "CLR Trigger";
+            cLRTriggerToolStripMenuItem.Click += TsType_Click;
             // 
             // scalarFunctionToolStripMenuItem
             // 
-            this.scalarFunctionToolStripMenuItem.CheckOnClick = true;
-            this.scalarFunctionToolStripMenuItem.Name = "scalarFunctionToolStripMenuItem";
-            this.scalarFunctionToolStripMenuItem.Size = new System.Drawing.Size(273, 26);
-            this.scalarFunctionToolStripMenuItem.Tag = "FN";
-            this.scalarFunctionToolStripMenuItem.Text = "Scalar Function";
-            this.scalarFunctionToolStripMenuItem.Click += new System.EventHandler(this.TsType_Click);
+            scalarFunctionToolStripMenuItem.CheckOnClick = true;
+            scalarFunctionToolStripMenuItem.Name = "scalarFunctionToolStripMenuItem";
+            scalarFunctionToolStripMenuItem.Size = new System.Drawing.Size(273, 26);
+            scalarFunctionToolStripMenuItem.Tag = "FN";
+            scalarFunctionToolStripMenuItem.Text = "Scalar Function";
+            scalarFunctionToolStripMenuItem.Click += TsType_Click;
             // 
             // extendedStoredProcedureToolStripMenuItem
             // 
-            this.extendedStoredProcedureToolStripMenuItem.CheckOnClick = true;
-            this.extendedStoredProcedureToolStripMenuItem.Name = "extendedStoredProcedureToolStripMenuItem";
-            this.extendedStoredProcedureToolStripMenuItem.Size = new System.Drawing.Size(273, 26);
-            this.extendedStoredProcedureToolStripMenuItem.Tag = "X";
-            this.extendedStoredProcedureToolStripMenuItem.Text = "Extended Stored Procedure";
-            this.extendedStoredProcedureToolStripMenuItem.Click += new System.EventHandler(this.TsType_Click);
+            extendedStoredProcedureToolStripMenuItem.CheckOnClick = true;
+            extendedStoredProcedureToolStripMenuItem.Name = "extendedStoredProcedureToolStripMenuItem";
+            extendedStoredProcedureToolStripMenuItem.Size = new System.Drawing.Size(273, 26);
+            extendedStoredProcedureToolStripMenuItem.Tag = "X";
+            extendedStoredProcedureToolStripMenuItem.Text = "Extended Stored Procedure";
+            extendedStoredProcedureToolStripMenuItem.Click += TsType_Click;
             // 
             // toolStripSeparator1
             // 
-            this.toolStripSeparator1.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 27);
+            toolStripSeparator1.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new System.Drawing.Size(6, 27);
             // 
             // lblSearch
             // 
-            this.lblSearch.Name = "lblSearch";
-            this.lblSearch.Size = new System.Drawing.Size(56, 24);
-            this.lblSearch.Text = "Search:";
+            lblSearch.Name = "lblSearch";
+            lblSearch.Size = new System.Drawing.Size(56, 24);
+            lblSearch.Text = "Search:";
             // 
             // txtSearch
             // 
-            this.txtSearch.Name = "txtSearch";
-            this.txtSearch.Size = new System.Drawing.Size(200, 27);
-            this.txtSearch.TextChanged += new System.EventHandler(this.TxtSearch_TextChanged);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new System.Drawing.Size(200, 27);
+            txtSearch.TextChanged += TxtSearch_TextChanged;
             // 
             // splitContainer1
             // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 27);
-            this.splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.splitContainer1.Name = "splitContainer1";
-            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitContainer1.Location = new System.Drawing.Point(0, 27);
+            splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            splitContainer1.Name = "splitContainer1";
+            splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.splitChart);
+            splitContainer1.Panel1.Controls.Add(splitChart);
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.dgv);
-            this.splitContainer1.Size = new System.Drawing.Size(1262, 1117);
-            this.splitContainer1.SplitterDistance = 789;
-            this.splitContainer1.SplitterWidth = 5;
-            this.splitContainer1.TabIndex = 6;
+            splitContainer1.Panel2.Controls.Add(dgv);
+            splitContainer1.Panel2.Controls.Add(statusStrip1);
+            splitContainer1.Size = new System.Drawing.Size(1262, 1117);
+            splitContainer1.SplitterDistance = 789;
+            splitContainer1.SplitterWidth = 5;
+            splitContainer1.TabIndex = 6;
             // 
             // splitChart
             // 
-            this.splitChart.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitChart.Location = new System.Drawing.Point(0, 0);
-            this.splitChart.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.splitChart.Name = "splitChart";
-            this.splitChart.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            splitChart.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitChart.Location = new System.Drawing.Point(0, 0);
+            splitChart.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            splitChart.Name = "splitChart";
+            splitChart.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
             // splitChart.Panel1
             // 
-            this.splitChart.Panel1.Controls.Add(this.objectExecutionLineChart1);
+            splitChart.Panel1.Controls.Add(objectExecutionLineChart1);
             // 
             // splitChart.Panel2
             // 
-            this.splitChart.Panel2.Controls.Add(this.compareObjectExecutionLineChart);
-            this.splitChart.Size = new System.Drawing.Size(1262, 789);
-            this.splitChart.SplitterDistance = 391;
-            this.splitChart.SplitterWidth = 5;
-            this.splitChart.TabIndex = 7;
+            splitChart.Panel2.Controls.Add(compareObjectExecutionLineChart);
+            splitChart.Size = new System.Drawing.Size(1262, 789);
+            splitChart.SplitterDistance = 391;
+            splitChart.SplitterWidth = 5;
+            splitChart.TabIndex = 7;
             // 
             // objectExecutionLineChart1
             // 
-            this.objectExecutionLineChart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.objectExecutionLineChart1.Location = new System.Drawing.Point(0, 0);
-            this.objectExecutionLineChart1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
-            this.objectExecutionLineChart1.Name = "objectExecutionLineChart1";
-            this.objectExecutionLineChart1.Size = new System.Drawing.Size(1262, 391);
-            this.objectExecutionLineChart1.TabIndex = 5;
-            this.objectExecutionLineChart1.Title = "abc";
+            objectExecutionLineChart1.Dock = System.Windows.Forms.DockStyle.Fill;
+            objectExecutionLineChart1.Location = new System.Drawing.Point(0, 0);
+            objectExecutionLineChart1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            objectExecutionLineChart1.Name = "objectExecutionLineChart1";
+            objectExecutionLineChart1.Size = new System.Drawing.Size(1262, 391);
+            objectExecutionLineChart1.TabIndex = 5;
+            objectExecutionLineChart1.Title = "abc";
             // 
             // compareObjectExecutionLineChart
             // 
-            this.compareObjectExecutionLineChart.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.compareObjectExecutionLineChart.Location = new System.Drawing.Point(0, 0);
-            this.compareObjectExecutionLineChart.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
-            this.compareObjectExecutionLineChart.Name = "compareObjectExecutionLineChart";
-            this.compareObjectExecutionLineChart.Size = new System.Drawing.Size(1262, 393);
-            this.compareObjectExecutionLineChart.TabIndex = 6;
-            this.compareObjectExecutionLineChart.Title = "abc";
+            compareObjectExecutionLineChart.Dock = System.Windows.Forms.DockStyle.Fill;
+            compareObjectExecutionLineChart.Location = new System.Drawing.Point(0, 0);
+            compareObjectExecutionLineChart.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            compareObjectExecutionLineChart.Name = "compareObjectExecutionLineChart";
+            compareObjectExecutionLineChart.Size = new System.Drawing.Size(1262, 393);
+            compareObjectExecutionLineChart.TabIndex = 6;
+            compareObjectExecutionLineChart.Title = "abc";
+            // 
+            // statusStrip1
+            // 
+            statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { lblStatus });
+            statusStrip1.Location = new System.Drawing.Point(0, 297);
+            statusStrip1.Name = "statusStrip1";
+            statusStrip1.Size = new System.Drawing.Size(1262, 26);
+            statusStrip1.TabIndex = 1;
+            statusStrip1.Text = "statusStrip1";
+            // 
+            // lblStatus
+            // 
+            lblStatus.Name = "lblStatus";
+            lblStatus.Size = new System.Drawing.Size(124, 20);
+            lblStatus.Text = "Refreshing Data...";
             // 
             // tmrSearch
             // 
-            this.tmrSearch.Interval = 1000;
-            this.tmrSearch.Tick += new System.EventHandler(this.TmrSearch_Tick);
+            tmrSearch.Interval = 1000;
+            tmrSearch.Tick += TmrSearch_Tick;
             // 
             // ObjectExecutionSummary
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.splitContainer1);
-            this.Controls.Add(this.toolStrip1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "ObjectExecutionSummary";
-            this.Size = new System.Drawing.Size(1262, 1144);
-            this.Load += new System.EventHandler(this.ObjectExecutionSummary_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
-            this.splitContainer1.ResumeLayout(false);
-            this.splitChart.Panel1.ResumeLayout(false);
-            this.splitChart.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitChart)).EndInit();
-            this.splitChart.ResumeLayout(false);
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            Controls.Add(splitContainer1);
+            Controls.Add(toolStrip1);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "ObjectExecutionSummary";
+            Size = new System.Drawing.Size(1262, 1144);
+            Load += ObjectExecutionSummary_Load;
+            ((System.ComponentModel.ISupportInitialize)dgv).EndInit();
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            splitContainer1.Panel1.ResumeLayout(false);
+            splitContainer1.Panel2.ResumeLayout(false);
+            splitContainer1.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
+            splitContainer1.ResumeLayout(false);
+            splitChart.Panel1.ResumeLayout(false);
+            splitChart.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitChart).EndInit();
+            splitChart.ResumeLayout(false);
+            statusStrip1.ResumeLayout(false);
+            statusStrip1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -399,7 +405,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem tsCustomCompare;
         private System.Windows.Forms.ToolStripMenuItem tsNoCompare;
-        private System.Windows.Forms.ToolStripMenuItem tsTimeOffset;
+        private System.Windows.Forms.ToolStripMenuItem tsPreviousPeriod;
         private System.Windows.Forms.ToolStripDropDownButton tsType;
         private System.Windows.Forms.ToolStripMenuItem procedureToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem triggerToolStripMenuItem;
@@ -417,5 +423,7 @@
         private System.Windows.Forms.ToolStripTextBox txtSearch;
         private System.Windows.Forms.Timer tmrSearch;
         private System.Windows.Forms.ToolStripButton tsCols;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel lblStatus;
     }
 }
