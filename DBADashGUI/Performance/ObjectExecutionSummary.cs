@@ -152,6 +152,7 @@ namespace DBADashGUI.Performance
                             DefaultCellStyle = col.DefaultCellStyle.Clone()
                         };
                         compareCol.DefaultCellStyle.BackColor = Color.BlanchedAlmond;
+                        compareCol.DefaultCellStyle.ForeColor = DashColors.TrimbleBlue;
                         _cols.Add(compareCol);
                         displayIdx += 1;
                         if (col.DataPropertyName is "avg_duration_sec" or "avg_cpu_sec")
