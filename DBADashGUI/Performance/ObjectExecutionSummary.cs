@@ -46,13 +46,13 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private int CompareOffset=>int.Parse(SelectedCompareOffsetItem.Tag.ToString() ?? "-1");
+        private int CompareOffset => int.Parse(SelectedCompareOffsetItem.Tag.ToString() ?? "-1");
 
         private DateTime _compareTo = DateTime.MinValue;
         private DateTime _compareFrom = DateTime.MinValue;
         private DataTable dt;
 
-        private ToolStripMenuItem SelectedCompareOffsetItem => tsCompare.DropDownItems.OfType<ToolStripMenuItem>().FirstOrDefault(mnu => mnu.Checked,tsNoCompare);
+        private ToolStripMenuItem SelectedCompareOffsetItem => tsCompare.DropDownItems.OfType<ToolStripMenuItem>().FirstOrDefault(mnu => mnu.Checked, tsNoCompare);
 
         private DateTime CompareTo
         {
@@ -79,13 +79,10 @@ namespace DBADashGUI.Performance
                 return CompareOffset > 0 ? DateRange.FromUTC.AddMinutes(-CompareOffset) :
                     _compareFrom;
             }
-
         }
 
         private bool HasCompare => CompareFrom != DateTime.MinValue && CompareFrom != DateTime.MaxValue &&
                                    CompareTo != DateTime.MinValue && CompareTo != DateTime.MaxValue;
-
-
 
         private readonly List<DataGridViewColumn> StandardCols = new()
         {
@@ -200,7 +197,6 @@ namespace DBADashGUI.Performance
                     RefreshChart((long)dt.Rows[0]["ObjectID"], (string)dt.Rows[0]["ObjectName"]);
                 }
 
-
                 dgv.Columns.Clear();
                 dgv.AutoGenerateColumns = false;
                 tsCompare.Font = new Font(tsCompare.Font, HasCompare ? FontStyle.Bold : FontStyle.Regular);
@@ -219,8 +215,8 @@ namespace DBADashGUI.Performance
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 status = "Error: " + ex.Message;
             }
-            finally{
-                
+            finally
+            {
                 this.Cursor = Cursors.Default;
             }
             lblStatus.Text = status;
@@ -304,6 +300,8 @@ namespace DBADashGUI.Performance
         private void TsSetOffset_Click(object sender, EventArgs e)
         {
             CheckCompareOffset((ToolStripMenuItem)sender);
+            _compareFrom = DateTime.MinValue;
+            _compareTo = DateTime.MinValue;
             RefreshData();
         }
 
@@ -453,6 +451,5 @@ namespace DBADashGUI.Performance
                 dgv.AutoResizeRows();
             }
         }
-
     }
 }
