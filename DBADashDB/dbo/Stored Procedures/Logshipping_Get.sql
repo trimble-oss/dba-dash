@@ -1,4 +1,4 @@
-﻿CREATE PROC dbo.Logshipping_Get(
+﻿CREATE PROC dbo.LogShipping_Get(
 		@InstanceIDs VARCHAR(MAX)=NULL,
 		@IncludeCritical BIT=1,
 		@IncludeWarning BIT=1,
@@ -54,6 +54,7 @@ SELECT LSS.InstanceID,
        LSS.LatencyOfLast,
        LSS.TotalTimeBehind,
        LSS.SnapshotAge,
+	   LSS.SnapshotDate,
        LSS.Status,
        LSS.StatusDescription,
 	   f.FileName AS last_file,
