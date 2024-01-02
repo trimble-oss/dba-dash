@@ -375,7 +375,8 @@ namespace DBADashGUI
                 Precision = original.Precision,
                 Scale = original.Scale,
                 SourceColumn = original.SourceColumn,
-                SourceVersion = original.SourceVersion
+                SourceVersion = original.SourceVersion,
+                UdtTypeName = original.UdtTypeName
             };
         }
 

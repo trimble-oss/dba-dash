@@ -32,7 +32,7 @@ namespace DBADashGUI.CustomReports
 
                 );
 
-            foreach (var param in Params)
+            foreach (var param in Params.Where(p => !CustomReport.SystemParamNames.Contains(p.Param.ParameterName, StringComparer.CurrentCultureIgnoreCase)))
             {
                 var row = dgv.Rows.Add(new object[] { param.Param.ParameterName, (param.Param.Value == DBNull.Value) && !param.UseDefaultValue, param.UseDefaultValue, param.Param.Value });
                 SetRowReadOnly(row);

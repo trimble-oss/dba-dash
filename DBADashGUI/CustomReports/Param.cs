@@ -40,6 +40,7 @@ namespace DBADashGUI.CustomReports
                 "BIT" => SqlDbType.Bit,
                 "DATETIME2" => SqlDbType.DateTime2,
                 "DATETIMEOFFSET" => SqlDbType.DateTimeOffset,
+                "IDS" => SqlDbType.Structured,
                 _ => SqlDbType.NVarChar
             };
             object value = ParamType switch
@@ -59,7 +60,7 @@ namespace DBADashGUI.CustomReports
             };
             return new CustomSqlParameter()
             {
-                Param = new SqlParameter() { ParameterName = ParamName, SqlDbType = type, Value = value },
+                Param = new SqlParameter() { ParameterName = ParamName, SqlDbType = type, Value = value},
                 UseDefaultValue = true
             };
         }
