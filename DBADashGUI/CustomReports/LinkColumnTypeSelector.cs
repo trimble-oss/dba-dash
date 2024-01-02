@@ -11,7 +11,6 @@ using System.Windows.Controls;
 using System.Windows.Forms;
 using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
-using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace DBADashGUI.CustomReports
 {
@@ -115,7 +114,7 @@ namespace DBADashGUI.CustomReports
             }
             else if (optDrillDown.Checked)
             {
-                var mapping = dgvMapping.Rows.Cast<DataGridViewRow>().Where(row => !string.IsNullOrEmpty(row.Cells[1].Value as string) && row.Cells[1].Value as string != NotMapped).ToDictionary(row => row.Cells[0].Value.ToString()!, row => row.Cells[1].Value.ToString());
+                var mapping = dgvMapping.Rows.Cast<DataGridViewRow>().Where(row => !string.IsNullOrEmpty(row.Cells[2].Value as string) && row.Cells[2].Value as string != NotMapped).ToDictionary(row => row.Cells[1].Value.ToString()!, row => row.Cells[2].Value.ToString());
 
                 LinkColumnInfo = new DrillDownLinkColumnInfo()
                 {
@@ -152,6 +151,7 @@ namespace DBADashGUI.CustomReports
         private void LoadReportParams()
         {
             dgvMapping.Columns.Clear();
+            dgvMapping.Columns.Add(new DataGridViewCheckBoxColumn() { Name = "IsSystem", HeaderText = "IsSystem" });
             dgvMapping.Columns.Add("ParamName", "Parameter Name");
             dgvMapping.Columns.Add(new DataGridViewComboBoxColumn()
             {
@@ -172,12 +172,16 @@ namespace DBADashGUI.CustomReports
             }
 
             if (report?.UserParams == null) return;
-            foreach (var p in report.UserParams)
+            foreach (var p in report.Params.ParamList.Where(p => !string.Equals(p.ParamName, "@InstanceIDs", StringComparison.InvariantCultureIgnoreCase)))
             {
+                bool isSystem = CustomReport.SystemParamNames.Contains(p.ParamName, StringComparer.OrdinalIgnoreCase);
                 var row = new DataGridViewRow();
                 row.CreateCells(dgvMapping);
-                row.Cells[0].Value = p.ParamName;
-                row.Cells[1].Value = mapping.ContainsKey(p.ParamName) ? mapping[p.ParamName] : NotMapped;
+                row.Cells[0].Value = isSystem;
+                row.Cells[1].Value = p.ParamName;
+                row.Cells[2].Value = mapping.ContainsKey(p.ParamName) ? mapping[p.ParamName] : NotMapped;
+                row.DefaultCellStyle.Font = isSystem ? new Font(dgvMapping.DefaultCellStyle.Font, FontStyle.Italic) : new Font(dgvMapping.DefaultCellStyle.Font, FontStyle.Regular);
+
                 dgvMapping.Rows.Add(row);
             }
         }

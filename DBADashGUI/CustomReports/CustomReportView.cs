@@ -542,29 +542,37 @@ namespace DBADashGUI.CustomReports
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand(report.QualifiedProcedureName, cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
             using var da = new SqlDataAdapter(cmd);
-            // Add context parameters
-            if (report.Params.ParamList.Any(p => p.ParamName.Equals("@InstanceIDs", StringComparison.InvariantCultureIgnoreCase)))
+
+            // Add system parameters unless they are overridden by user supplied parameters for drill down reports
+            var pInstanceIDs = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@InstanceIDs", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
+            if (pInstanceIDs != null)
             {
-                cmd.Parameters.AddWithValue("InstanceIDs", context.InstanceIDs.AsDataTable());
+                pInstanceIDs.Param.Value = context.InstanceIDs.AsDataTable();
             }
-            if (report.Params.ParamList.Any(p => p.ParamName.Equals("@InstanceID", StringComparison.InvariantCultureIgnoreCase)) && context.InstanceID > 0)
+            var pInstanceID = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@InstanceID", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
+            if (pInstanceID != null)
             {
-                cmd.Parameters.AddWithValue("InstanceID", context.InstanceID);
+                pInstanceID.Param.Value = context.InstanceID > 0 ? context.InstanceID : DBNull.Value;
             }
-            if (report.Params.ParamList.Any(p => p.ParamName.Equals("@DatabaseID", StringComparison.CurrentCultureIgnoreCase)) && context.DatabaseID > 0)
+            var pDatabaseID = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@DatabaseID", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
+            if (pDatabaseID != null)
             {
-                cmd.Parameters.AddWithValue("DatabaseID", context.DatabaseID);
+                pDatabaseID.Param.Value = context.DatabaseID > 0 ? context.DatabaseID : DBNull.Value;
             }
-            if (report.Params.ParamList.Any(p => p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase)))
+            var pFromDate = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@FromDate", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
+            if (pFromDate != null)
             {
-                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                pFromDate.Param.Value = DateRange.FromUTC;
             }
-            if (report.Params.ParamList.Any(p => p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase)))
+
+            var pToDate = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@ToDate", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
+            if (pToDate != null)
             {
-                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+                pToDate.Param.Value = DateRange.ToUTC;
             }
+
             // Add user supplied parameters
-            foreach (var p in customParams.Where(p => !p.UseDefaultValue))
+            foreach (var p in customParams.Where(p => !p.UseDefaultValue || CustomReport.SystemParamNames.Contains(p.Param.ParameterName, StringComparer.OrdinalIgnoreCase)))
             {
                 cmd.Parameters.Add(p.Param.Clone());
             }
