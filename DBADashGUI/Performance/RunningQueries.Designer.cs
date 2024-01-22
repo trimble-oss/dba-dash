@@ -45,6 +45,7 @@ namespace DBADashGUI.Performance
             lblSnapshotDate = new System.Windows.Forms.ToolStripLabel();
             tsGroupBy = new System.Windows.Forms.ToolStripDropDownButton();
             toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            contextInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             databaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             hostNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             loginNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -101,7 +102,7 @@ namespace DBADashGUI.Performance
             dgv.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -110,7 +111,7 @@ namespace DBADashGUI.Performance
             dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -123,7 +124,7 @@ namespace DBADashGUI.Performance
             dgv.ReadOnly = true;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -222,7 +223,7 @@ namespace DBADashGUI.Performance
             // lblSnapshotDate
             // 
             lblSnapshotDate.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            lblSnapshotDate.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            lblSnapshotDate.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             lblSnapshotDate.Name = "lblSnapshotDate";
             lblSnapshotDate.Size = new System.Drawing.Size(115, 24);
             lblSnapshotDate.Text = "Snapshot Date:";
@@ -231,7 +232,7 @@ namespace DBADashGUI.Performance
             // tsGroupBy
             // 
             tsGroupBy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            tsGroupBy.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripMenuItem1, databaseToolStripMenuItem, hostNameToolStripMenuItem, loginNameToolStripMenuItem, objectNameToolStripMenuItem, planHandleToolStripMenuItem, programToolStripMenuItem, queryHashToolStripMenuItem, queryPlanHashToolStripMenuItem, sQLHandleToolStripMenuItem, statusToolStripMenuItem, waitResourceToolStripMenuItem, waitTypeToolStripMenuItem, toolStripSeparator1, noneToolStripMenuItem });
+            tsGroupBy.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripMenuItem1, contextInfoToolStripMenuItem, databaseToolStripMenuItem, hostNameToolStripMenuItem, loginNameToolStripMenuItem, objectNameToolStripMenuItem, planHandleToolStripMenuItem, programToolStripMenuItem, queryHashToolStripMenuItem, queryPlanHashToolStripMenuItem, sQLHandleToolStripMenuItem, statusToolStripMenuItem, waitResourceToolStripMenuItem, waitTypeToolStripMenuItem, toolStripSeparator1, noneToolStripMenuItem });
             tsGroupBy.Enabled = false;
             tsGroupBy.Image = (System.Drawing.Image)resources.GetObject("tsGroupBy.Image");
             tsGroupBy.ImageTransparentColor = System.Drawing.Color.Magenta;
@@ -246,6 +247,14 @@ namespace DBADashGUI.Performance
             toolStripMenuItem1.Tag = "client_interface_name";
             toolStripMenuItem1.Text = "Client Interface Name";
             toolStripMenuItem1.Click += TsGroupBy_Click;
+            // 
+            // contextInfoToolStripMenuItem
+            // 
+            contextInfoToolStripMenuItem.Name = "contextInfoToolStripMenuItem";
+            contextInfoToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            contextInfoToolStripMenuItem.Tag = "context_info";
+            contextInfoToolStripMenuItem.Text = "Context Info";
+            contextInfoToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // databaseToolStripMenuItem
             // 
@@ -377,7 +386,7 @@ namespace DBADashGUI.Performance
             // 
             // showRootBlockersToolStripMenuItem
             // 
-            showRootBlockersToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            showRootBlockersToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F);
             showRootBlockersToolStripMenuItem.Name = "showRootBlockersToolStripMenuItem";
             showRootBlockersToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
             showRootBlockersToolStripMenuItem.Text = "Root Blockers";
@@ -386,7 +395,7 @@ namespace DBADashGUI.Performance
             // 
             // blockedQueriesToolStripMenuItem
             // 
-            blockedQueriesToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            blockedQueriesToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F);
             blockedQueriesToolStripMenuItem.Name = "blockedQueriesToolStripMenuItem";
             blockedQueriesToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
             blockedQueriesToolStripMenuItem.Text = "Blocked Queries";
@@ -395,7 +404,7 @@ namespace DBADashGUI.Performance
             // 
             // blockingQueriesToolStripMenuItem
             // 
-            blockingQueriesToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            blockingQueriesToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F);
             blockingQueriesToolStripMenuItem.Name = "blockingQueriesToolStripMenuItem";
             blockingQueriesToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
             blockingQueriesToolStripMenuItem.Text = "Blocking Queries";
@@ -404,7 +413,7 @@ namespace DBADashGUI.Performance
             // 
             // blockedOrBlockingToolStripMenuItem
             // 
-            blockedOrBlockingToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            blockedOrBlockingToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F);
             blockedOrBlockingToolStripMenuItem.Name = "blockedOrBlockingToolStripMenuItem";
             blockedOrBlockingToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
             blockedOrBlockingToolStripMenuItem.Text = "Blocked Or Blocking";
@@ -418,7 +427,7 @@ namespace DBADashGUI.Performance
             // 
             // clearBlockingFilterToolStripMenuItem
             // 
-            clearBlockingFilterToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            clearBlockingFilterToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F);
             clearBlockingFilterToolStripMenuItem.Name = "clearBlockingFilterToolStripMenuItem";
             clearBlockingFilterToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
             clearBlockingFilterToolStripMenuItem.Text = "Clear Blocking Filter";
@@ -426,7 +435,7 @@ namespace DBADashGUI.Performance
             // 
             // tsGroupByFilter
             // 
-            tsGroupByFilter.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            tsGroupByFilter.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             tsGroupByFilter.Name = "tsGroupByFilter";
             tsGroupByFilter.Size = new System.Drawing.Size(127, 24);
             tsGroupByFilter.Text = "{Group By Filter}";
@@ -516,7 +525,7 @@ namespace DBADashGUI.Performance
             // lblWaitsForSession
             // 
             lblWaitsForSession.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            lblWaitsForSession.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            lblWaitsForSession.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             lblWaitsForSession.Name = "lblWaitsForSession";
             lblWaitsForSession.Size = new System.Drawing.Size(159, 24);
             lblWaitsForSession.Text = "Waits For Session ID: ";
@@ -651,5 +660,6 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripMenuItem blockingQueriesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem blockedOrBlockingToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
+        private System.Windows.Forms.ToolStripMenuItem contextInfoToolStripMenuItem;
     }
 }

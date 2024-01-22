@@ -29,5 +29,6 @@
     query_hash BINARY(8) NULL,
     query_plan_hash BINARY(8) NULL,
     login_time_utc DATETIME NULL,
-    last_request_end_time_utc DATETIME NULL
+    last_request_end_time_utc DATETIME NULL,
+    context_info VARBINARY(128) NULL
 );

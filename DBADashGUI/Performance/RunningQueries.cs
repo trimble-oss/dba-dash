@@ -10,6 +10,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
+using DocumentFormat.OpenXml.Office2010.PowerPoint;
 
 namespace DBADashGUI.Performance
 {
@@ -33,6 +34,7 @@ namespace DBADashGUI.Performance
         private int runningJobCount;
         private bool hasWaitResource;
         private long blockedWait;
+        private bool hasContextInfo;
         private static string IdleThresholdInfo => $"Red = Sleeping session with an open transaction that has been idle for longer than {TimeSpan.FromSeconds(Config.IdleCriticalThresholdForSleepingSessionWithOpenTran).Humanize(maxUnit: TimeUnit.Year, precision: 3)}.\nYellow=Sleeping session with an open transaction that has been idle for longer than {TimeSpan.FromSeconds(Config.IdleWarningThresholdForSleepingSessionWithOpenTran).Humanize(maxUnit: TimeUnit.Year, precision: 3)}.";
 
         private DataGridViewColumn[] RunningQueryColumns =>
@@ -101,6 +103,7 @@ namespace DBADashGUI.Performance
                 new DataGridViewLinkColumn()  { HeaderText = "Plan Handle", DataPropertyName = "plan_handle", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colPlanHandle",LinkColor=DashColors.LinkColor  },
                 new DataGridViewLinkColumn()  { HeaderText = "Query Hash", DataPropertyName = "query_hash", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colQueryHash" ,LinkColor=DashColors.LinkColor },
                 new DataGridViewLinkColumn()  { HeaderText = "Query Plan Hash", DataPropertyName = "query_plan_hash", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colQueryPlanHash" ,LinkColor=DashColors.LinkColor },
+                new DataGridViewTextBoxColumn() { HeaderText = "Context Info", DataPropertyName = "context_info", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colContextInfo", Visible = hasContextInfo},
                 new DataGridViewTextBoxColumn { HeaderText = "InstanceID", DataPropertyName = "InstanceID", Name = "colInstanceID", Visible = false },
             };
 
@@ -277,13 +280,27 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("InstanceID", instanceID);
                 DataTable dt = new();
                 da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
-                dt.Columns["start_time_utc"].ColumnName = "start_time";
-                dt.Columns["last_request_start_time_utc"].ColumnName = "last_request_start_time";
-                dt.Columns["last_request_end_time_utc"].ColumnName = "last_request_end_time";
-                dt.Columns["login_time_utc"].ColumnName = "login_time";
+                ApplyTableModifications(dt);
                 return dt;
+            }
+        }
+
+        private static void ApplyTableModifications(DataTable dt)
+        {
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
+            dt.Columns["start_time_utc"].ColumnName = "start_time";
+            dt.Columns["last_request_start_time_utc"].ColumnName = "last_request_start_time";
+            dt.Columns["last_request_end_time_utc"].ColumnName = "last_request_end_time";
+            dt.Columns["login_time_utc"].ColumnName = "login_time";
+            dt.Columns["context_info"].ColumnName = "context_info_bin";
+            dt.Columns.Add("context_info", typeof(string));
+            foreach (DataRow row in dt.Rows)
+            {
+                var contextInfo = row["context_info_bin"] == DBNull.Value
+                    ? string.Empty
+                    : "0x" + Convert.ToHexString((byte[])row["context_info_bin"]);
+                row["context_info"] = contextInfo;
             }
         }
 
@@ -299,12 +316,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("InstanceID", instanceID);
                 DataTable dt = new();
                 da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
-                dt.Columns["start_time_utc"].ColumnName = "start_time";
-                dt.Columns["last_request_start_time_utc"].ColumnName = "last_request_start_time";
-                dt.Columns["last_request_end_time_utc"].ColumnName = "last_request_end_time";
-                dt.Columns["login_time_utc"].ColumnName = "login_time";
+                ApplyTableModifications(dt);
                 return dt;
             }
         }
@@ -364,12 +376,7 @@ namespace DBADashGUI.Performance
                 }
                 da.Fill(dt);
                 snapshotDate = Convert.ToDateTime(pSnapshotDate.Value);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
-                dt.Columns["start_time_utc"].ColumnName = "start_time";
-                dt.Columns["last_request_start_time_utc"].ColumnName = "last_request_start_time";
-                dt.Columns["last_request_end_time_utc"].ColumnName = "last_request_end_time";
-                dt.Columns["login_time_utc"].ColumnName = "login_time";
+                ApplyTableModifications(dt);
                 return dt;
             }
         }
@@ -401,6 +408,7 @@ namespace DBADashGUI.Performance
             dgv.DataSource = null;
             dgv.Columns.Clear();
             dgv.AutoGenerateColumns = false;
+            hasContextInfo = source.Cast<DataRowView>().Any(row => row["context_info"] as string != "0x");
             dgv.Columns.AddRange(RunningQueryColumns);
             dgv.DataSource = source;
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCellsExceptHeader);
