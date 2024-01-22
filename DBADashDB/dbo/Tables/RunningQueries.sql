@@ -31,6 +31,7 @@
     query_plan_hash BINARY(8) NULL,
     login_time_utc DATETIME NULL,
     last_request_end_time_utc DATETIME NULL,
+    context_info VARBINARY(128) NULL,
     CONSTRAINT PK_RunningQueries PRIMARY KEY(InstanceID,SnapshotDateUTC,session_id) WITH (DATA_COMPRESSION = PAGE) ON PS_RunningQueries(SnapshotDateUTC)
 ) ON PS_RunningQueries(SnapshotDateUTC);
 GO

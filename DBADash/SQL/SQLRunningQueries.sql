@@ -34,7 +34,8 @@ SELECT @SnapshotDateUTC as SnapshotDateUTC,
 	' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_requests'),'query_hash','ColumnID') IS NULL THEN 'CAST(NULL AS BINARY(8)) AS query_hash,' ELSE 'r.query_hash,' END + '
 	' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_requests'),'query_plan_hash','ColumnID') IS NULL THEN 'CAST(NULL AS BINARY(8)) AS query_plan_hash,' ELSE 'r.query_plan_hash,' END + '
 	DATEADD(mi,@UTCOffset, s.login_time) AS login_time_utc,
-	DATEADD(mi,@UTCOffset, s.last_request_end_time) AS last_request_end_time_utc
+	DATEADD(mi,@UTCOffset, s.last_request_end_time) AS last_request_end_time_utc,
+	s.context_info
 FROM sys.dm_exec_sessions s
 INNER JOIN sys.dm_exec_connections c ON c.session_id= s.session_id
 LEFT JOIN sys.dm_exec_requests r on s.session_id = r.session_id

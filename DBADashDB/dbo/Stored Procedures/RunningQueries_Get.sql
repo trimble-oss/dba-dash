@@ -104,7 +104,8 @@ SELECT InstanceID,
        login_time_utc,
        has_plan,
        statement_start_offset,
-       statement_end_offset
+       statement_end_offset,
+       context_info
 FROM dbo.RunningQueriesInfo Q
 WHERE Q.SnapshotDateUTC = @SnapshotDate
 AND Q.InstanceID = @InstanceID

@@ -205,6 +205,11 @@ namespace DBADash
                 {
                     dtRunningQueries.Columns.Add("last_request_end_time_utc", typeof(DateTime));
                 }
+
+                if (!dtRunningQueries.Columns.Contains("context_info"))
+                {
+                    dtRunningQueries.Columns.Add("context_info", typeof(byte[]));
+                }
             }
 
             if (data.Tables.Contains("IdentityColumns"))

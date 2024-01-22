@@ -76,7 +76,8 @@ SELECT Q.InstanceID,
     Q.login_time_utc,
     CASE WHEN QP.query_plan_compresed IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS has_plan,
     Q.statement_start_offset,
-    Q.statement_end_offset
+    Q.statement_end_offset,
+    Q.context_info
 FROM dbo.RunningQueries Q
 JOIN dbo.Instances I ON Q.InstanceID = I.InstanceID
 CROSS APPLY(SELECT CASE WHEN Q.start_time_utc < Q.SnapshotDateUTC OR Q.start_time_utc IS NULL  THEN DATEDIFF_BIG(ms,ISNULL(Q.start_time_utc,Q.last_request_start_time_utc),Q.SnapshotDateUTC) ELSE 0 END AS Duration) calc
