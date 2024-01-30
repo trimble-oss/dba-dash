@@ -44,7 +44,8 @@ INSERT INTO dbo.SlowQueries
 	client_app_name,
 	result,
 	Uniqueifier,
-	session_id
+	session_id,
+	context_info
 )
 SELECT @InstanceID,
 		ISNULL(D.DatabaseID,@AzureDatabaseID), /* For AzureDB, use @AzureDatabaseID if the database_id from the extended event doesn't match for some reason. (Issue #481) */
@@ -62,7 +63,8 @@ SELECT @InstanceID,
 		client_app_name,
 		result,
 		ROW_NUMBER() OVER(PARTITION BY timestamp ORDER BY timestamp), -- just to ensure uniqueness in key
-		session_id
+		session_id,
+		context_info
 FROM @SlowQueries SQ
 LEFT JOIN dbo.Databases D ON D.database_id = SQ.database_id AND D.InstanceID = @InstanceID AND D.IsActive=1
 WHERE timestamp > @MaxDate

@@ -4,25 +4,24 @@ using System.Xml.Linq;
 
 namespace DBADash
 {
-
-    class RingBufferTargetAttributes
+    internal class RingBufferTargetAttributes
     {
-        public Int32 Truncated;
-        public Int32 ProcessingTime;
-        public Int32 TotalEventsProcessed;
-        public Int32 EventCount;
-        public Int32 DroppedCount;
-        public Int32 MemoryUsed;
+        public int Truncated;
+        public int ProcessingTime;
+        public int TotalEventsProcessed;
+        public int EventCount;
+        public int DroppedCount;
+        public int MemoryUsed;
 
         public DataTable GetTable()
         {
             DataTable dt = new();
-            dt.Columns.Add("Truncated", typeof(Int32));
-            dt.Columns.Add("ProcessingTime", typeof(Int32));
-            dt.Columns.Add("TotalEventsProcessed", typeof(Int32));
-            dt.Columns.Add("EventCount", typeof(Int32));
-            dt.Columns.Add("DroppedCount", typeof(Int32));
-            dt.Columns.Add("MemoryUsed", typeof(Int32));
+            dt.Columns.Add("Truncated", typeof(int));
+            dt.Columns.Add("ProcessingTime", typeof(int));
+            dt.Columns.Add("TotalEventsProcessed", typeof(int));
+            dt.Columns.Add("EventCount", typeof(int));
+            dt.Columns.Add("DroppedCount", typeof(int));
+            dt.Columns.Add("MemoryUsed", typeof(int));
             var r = dt.NewRow();
             r["Truncated"] = Truncated;
             r["ProcessingTime"] = ProcessingTime;
@@ -35,71 +34,93 @@ namespace DBADash
         }
     }
 
-    class XETools
+    internal class XETools
     {
-        public static DataTable XEStrToDT(string xe, out RingBufferTargetAttributes ringBufferAtt)
+        private static DataTable GetXELSchema()
         {
             DataTable dt = new("XEL");
             dt.Columns.Add("event_type", typeof(string));
             dt.Columns.Add("object_name", typeof(string));
             dt.Columns.Add("timestamp", typeof(DateTime));
-            dt.Columns.Add("duration", typeof(Int64));
-            dt.Columns.Add("cpu_time", typeof(Int64));
-            dt.Columns.Add("logical_reads", typeof(Int64));
-            dt.Columns.Add("physical_reads", typeof(Int64));
-            dt.Columns.Add("writes", typeof(Int64));
+            dt.Columns.Add("duration", typeof(long));
+            dt.Columns.Add("cpu_time", typeof(long));
+            dt.Columns.Add("logical_reads", typeof(long));
+            dt.Columns.Add("physical_reads", typeof(long));
+            dt.Columns.Add("writes", typeof(long));
             dt.Columns.Add("username", typeof(string));
             dt.Columns.Add("batch_text", typeof(string));
             dt.Columns.Add("statement", typeof(string));
-            dt.Columns.Add("database_id", typeof(Int32));
+            dt.Columns.Add("database_id", typeof(int));
             dt.Columns.Add("client_hostname", typeof(string));
             dt.Columns.Add("client_app_name", typeof(string));
             dt.Columns.Add("result", typeof(string));
             dt.Columns.Add("session_id", typeof(int));
-            string name;
+            dt.Columns.Add("context_info", typeof(byte[]));
+            return dt;
+        }
+
+        public static DataTable XEStrToDT(string xe, out RingBufferTargetAttributes ringBufferAtt)
+        {
+            var dt = GetXELSchema();
             var el = XElement.Parse(xe);
             ringBufferAtt = new RingBufferTargetAttributes();
-            if (el.Attribute("truncated") != null)
-            {
-                ringBufferAtt.Truncated = Int32.Parse(el.Attribute("truncated").Value);
-            }
-            ringBufferAtt.DroppedCount = Int32.Parse(el.Attribute("droppedCount").Value);
-            ringBufferAtt.ProcessingTime = Int32.Parse(el.Attribute("processingTime").Value);
-            ringBufferAtt.EventCount = Int32.Parse(el.Attribute("eventCount").Value);
-            ringBufferAtt.MemoryUsed = Int32.Parse(el.Attribute("memoryUsed").Value);
-            ringBufferAtt.TotalEventsProcessed = Int32.Parse(el.Attribute("totalEventsProcessed").Value);
 
-            foreach (XElement evt in el.Elements("event"))
+            if (int.TryParse(el.Attribute("truncated")?.Value, out var truncatedValue))
+            {
+                ringBufferAtt.Truncated = truncatedValue;
+            }
+
+            ringBufferAtt.DroppedCount = int.TryParse(el.Attribute("droppedCount")?.Value, out var droppedCountValue)
+                ? droppedCountValue
+                : 0;
+            ringBufferAtt.ProcessingTime =
+                int.TryParse(el.Attribute("processingTime")?.Value, out var processingTimeValue)
+                    ? processingTimeValue
+                    : 0;
+            ringBufferAtt.EventCount = int.TryParse(el.Attribute("eventCount")?.Value, out var eventCountValue)
+                ? eventCountValue
+                : 0;
+            ringBufferAtt.MemoryUsed = int.TryParse(el.Attribute("memoryUsed")?.Value, out var memoryUsedValue)
+                ? memoryUsedValue
+                : 0;
+            ringBufferAtt.TotalEventsProcessed =
+                int.TryParse(el.Attribute("totalEventsProcessed")?.Value, out var totalEventsProcessedValue)
+                    ? totalEventsProcessedValue
+                    : 0;
+
+            foreach (var evt in el.Elements("event"))
             {
                 var r = dt.Rows.Add();
-                r["event_type"] = evt.Attribute("name").Value;
+                r["event_type"] = evt.Attribute("name")?.Value!;
+                var timestamp = evt.Attribute("timestamp")?.Value;
+                if (timestamp == null) continue;
+                r["timestamp"] = DateTime.Parse(timestamp).ToUniversalTime();
 
-                r["timestamp"] = DateTime.Parse(evt.Attribute("timestamp").Value).ToUniversalTime();
-
-                foreach (XElement data in evt.Elements("data"))
-                {
-                    name = data.Attribute("name").Value;
-                    if (name == "result")
-                    {
-                        r[name] = data.Element("value").Value + " - " + data.Element("text").Value;
-                    }
-                    else if (dt.Columns.Contains(name))
-                    {
-                        r[name] = data.Element("value").Value;
-                    }
-
-                }
-                foreach (XElement data in evt.Elements("action"))
-                {
-                    name = data.Attribute("name").Value;
-                    if (dt.Columns.Contains(name))
-                    {
-                        r[name] = data.Value;
-                    }
-                }
+                ProcessEventElements(evt, r, "data");
+                ProcessEventElements(evt, r, "action");
             }
 
             return dt;
+        }
+
+        private static void ProcessEventElements(XContainer evt, DataRow row, string elementType)
+        {
+            foreach (var data in evt.Elements(elementType))
+            {
+                var name = data.Attribute("name")?.Value;
+                if (name != null && row.Table.Columns.Contains(name))
+                {
+                    row[name] = elementType switch
+                    {
+                        "action" when name == "context_info" => Convert.FromHexString(data.Element("value")?.Value ??
+                            string.Empty),
+                        "data" when name == "result" => data.Element("value")?.Value + " - " + data.Element("text")?.Value,
+                        "data" => data.Element("value")?.Value ?? string.Empty,
+                        "action" => data.Value,
+                        _ => row[name]
+                    };
+                }
+            }
         }
     }
 }

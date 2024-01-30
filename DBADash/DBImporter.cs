@@ -192,6 +192,10 @@ namespace DBADash
                 {
                     dtSlowQueries.Columns.Add("session_id", typeof(int));
                 }
+                if (!dtSlowQueries.Columns.Contains("context_info"))
+                {
+                    dtSlowQueries.Columns.Add("context_info", typeof(byte[]));
+                }
             }
 
             if (data.Tables.Contains("RunningQueries"))

@@ -38,7 +38,9 @@
 	@EventType SYSNAME=NULL,
 	@Debug BIT=0,
 	@ShowHidden BIT=1,
-	@Metric VARCHAR(50)='duration' /* duration or cpu_time */
+	@Metric VARCHAR(50)='duration', /* duration or cpu_time */
+	@ContextInfo VARBINARY(128)=NULL,
+	@ExcludeContextInfo VARBINARY(128)=NULL
 )
 AS
 DECLARE @DurationFromUS BIGINT 
@@ -92,6 +94,7 @@ DECLARE @GroupSQL NVARCHAR(MAX) = CASE @GroupBy WHEN 'ConnectionID' THEN 'I.Conn
 												WHEN 'InstanceDisplayName' THEN 'I.InstanceDisplayName' 
 												WHEN 'EventType' THEN 'SQ.event_type'
 												WHEN 'timestamp' THEN 'DATEADD(MINUTE, (DATEDIFF(MINUTE, 0, DATEADD(mi,@TimestampOffset,SQ.timestamp)) / @TimeStampMins) * @TimeStampMins, 0)'
+												WHEN 'context_info' THEN 'CONVERT(VARCHAR(258),SQ.context_info,1)'
 												ELSE 'InstanceDisplayName' END
 IF @Top<=0
 BEGIN
@@ -153,6 +156,8 @@ AND timestamp< @ToDate
 ' + CASE WHEN @WritesTo IS NULL THEN '' ELSE 'AND SQ.writes < @WritesTo' END + '
 ' + CASE WHEN @EventType IS NULL THEN '' ELSE 'AND SQ.event_type = @EventType' END + '
 ' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND I.ShowInSummary=1' END + '
+' + CASE WHEN @ContextInfo IS NULL THEN '' ELSE 'AND SQ.context_info = @ContextInfo' END + '
+' + CASE WHEN @ExcludeContextInfo IS NULL THEN '' ELSE 'AND (SQ.context_info <> @ExcludeContextInfo OR SQ.context_info IS NULL)' END + '
 GROUP BY ' + @GroupSQL +'
 ORDER BY ' + CASE WHEN @GroupBy ='timestamp' THEN 'Grp DESC' ELSE 'SUM(Duration) DESC' END
 
@@ -195,7 +200,9 @@ EXEC sp_executesql @SQL,N'@Instances IDs READONLY,
 						@WritesTo BIGINT,
 						@EventType SYSNAME,
 						@TimestampMins INT,
-						@TimestampOffset INT',
+						@TimestampOffset INT,
+						@ContextInfo VARBINARY(128),
+						@ExcludeContextInfo VARBINARY(128)',
 						@Instances,
 						@ObjectName,
 						@ClientHostName,
@@ -231,4 +238,6 @@ EXEC sp_executesql @SQL,N'@Instances IDs READONLY,
 						@WritesTo,
 						@EventType,
 						@TimestampMins,
-						@TimestampOffset
+						@TimestampOffset,
+						@ContextInfo,
+						@ExcludeContextInfo

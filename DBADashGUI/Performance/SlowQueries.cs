@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DBADashGUI.Theme;
+using DocumentFormat.OpenXml.Bibliography;
 
 namespace DBADashGUI
 {
@@ -110,6 +111,7 @@ namespace DBADashGUI
             SetFilterFormatting(lblPhysicalReads, lblPhysicalReadsFrom, lblPhysicalReadsTo, txtPhysicalReadsFrom,
                 txtPhysicalReadsTo);
             SetFilterFormatting(lblWrites, lblWritesFrom, lblWritesTo, txtWritesFrom, txtWritesTo);
+            SetFilterFormatting(lblContextInfo, lblIncludeContextInfo, lblExcludeContextInfo, txtContextInfo, txtExcludeContextInfo);
             lblEventType.Font = sqlbatchcompletedToolStripMenuItem.Checked == rpccompletedToolStripMenuItem.Checked
                 ? regularFont
                 : boldFont;
@@ -159,6 +161,8 @@ namespace DBADashGUI
             txtLogicalReadsTo.Text = "";
             txtWritesFrom.Text = "";
             txtWritesTo.Text = "";
+            txtContextInfo.Text = "";
+            txtExcludeContextInfo.Text = "";
             rpccompletedToolStripMenuItem.Checked = false;
             sqlbatchcompletedToolStripMenuItem.Checked = false;
             ResetTime();
@@ -273,6 +277,30 @@ namespace DBADashGUI
                     else if (rpccompletedToolStripMenuItem.Checked && !sqlbatchcompletedToolStripMenuItem.Checked)
                     {
                         cmd.Parameters.AddWithValue("EventType", "rpc_completed");
+                    }
+                    if (txtContextInfo.Text.Length > 0)
+                    {
+                        try
+                        {
+                            cmd.Parameters.AddWithValue("ContextInfo",
+                                Convert.FromHexString(txtContextInfo.Text.Trim().RemoveHexPrefix()));
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Invalid Context Info\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                    if (txtExcludeContextInfo.Text.Length > 0)
+                    {
+                        try
+                        {
+                            cmd.Parameters.AddWithValue("ExcludeContextInfo",
+                                Convert.FromHexString(txtExcludeContextInfo.Text.Trim().RemoveHexPrefix()));
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Invalid Exclude Context Info\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                     }
 
                     int top = Convert.ToInt32(tsTop.Tag);
@@ -467,6 +495,10 @@ namespace DBADashGUI
                         timeToolStripMenuItem.Text = $"Time {FromLocal.ToAppTimeZone()} to {ToLocal.ToAppTimeZone()}";
                         timeToolStripMenuItem.Enabled = true;
                     }
+                    else if (groupBy == "context_info")
+                    {
+                        txtContextInfo.Text = selectedGroupValue;
+                    }
                     else
                     {
                         throw new Exception($"Invalid group by: {groupBy}");
@@ -602,6 +634,7 @@ namespace DBADashGUI
                 string text = txtText.Text;
                 string sessionid = txtSessionID.Text;
                 string eventType = "";
+                string contextInfo = txtContextInfo.Text;
                 if (sqlbatchcompletedToolStripMenuItem.Checked && !rpccompletedToolStripMenuItem.Checked)
                 {
                     eventType = "sql_batch_completed";
@@ -659,6 +692,10 @@ namespace DBADashGUI
                     var dateGroupTo = dateGroupFrom.AddMinutes(mins);
                     from = dateGroupFrom > From ? dateGroupFrom : From;
                     to = dateGroupTo < To ? dateGroupTo : To;
+                }
+                else if (groupBy == "context_info")
+                {
+                    contextInfo = selectedGroupValue;
                 }
                 else
                 {
@@ -725,9 +762,35 @@ namespace DBADashGUI
                     cmd.Parameters.AddWithValue("WritesTo", Convert.ToInt64(txtWritesTo.Text));
                 }
 
+                if (contextInfo.Length > 0)
+                {
+                    try
+                    {
+                        cmd.Parameters.AddWithValue("ContextInfo",
+                            Convert.FromHexString(contextInfo.Trim().RemoveHexPrefix()));
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Invalid Context Info\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                if (txtExcludeContextInfo.Text.Length > 0)
+                {
+                    try
+                    {
+                        cmd.Parameters.AddWithValue("ExcludeContextInfo",
+                            Convert.FromHexString(txtExcludeContextInfo.Text.Trim().RemoveHexPrefix()));
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Invalid Exclude Context Info\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+
                 cmd.Parameters.AddStringIfNotNullOrEmpty("EventType", eventType);
                 var dt = new DataTable();
                 da.Fill(dt);
+                Common.ReplaceBinaryContextInfoColumn(ref dt);
                 return dt;
             }
         }
@@ -761,6 +824,7 @@ namespace DBADashGUI
             }
 
             dgvSlow.AutoGenerateColumns = false;
+            dgvSlow.Columns["colContextInfo"].Visible = dt.Rows.Cast<DataRow>().Any(row => row["context_info"] != DBNull.Value && (row["context_info"] as string is not "0x" or "" or null));
 
             dgvSlow.DataSource = dt;
             if (autoSizeColumnsToolStripMenuItem.Checked)

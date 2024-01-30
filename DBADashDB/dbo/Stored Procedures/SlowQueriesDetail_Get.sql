@@ -37,7 +37,9 @@
 	@WritesFrom BIGINT=NULL,
 	@WritesTo BIGINT=NULL,
 	@EventType SYSNAME=NULL,
-	@ResultFailed BIT=NULL
+	@ResultFailed BIT=NULL,
+	@ContextInfo VARBINARY(128)=NULL,
+	@ExcludeContextInfo VARBINARY(128)=NULL
 )
 AS
 DECLARE @DurationFromUS BIGINT 
@@ -94,7 +96,8 @@ N'SELECT TOP(@Top) SQ.InstanceID,
        SQ.Uniqueifier,
 	   SQ.session_id,
 	   DATEADD(ms,-duration/1000,timestamp) AS start_time,
-	   HD.HumanDuration AS Duration
+	   HD.HumanDuration AS Duration,
+	   SQ.context_info
 FROM dbo.SlowQueries SQ
 JOIN dbo.Instances I ON I.InstanceID = SQ.InstanceID
 CROSS APPLY dbo.MillisecondsToHumanDuration(SQ.Duration/1000) HD
@@ -133,6 +136,8 @@ AND timestamp< @ToDate
 ' + CASE WHEN @WritesTo IS NULL THEN '' ELSE 'AND SQ.writes < @WritesTo' END + '
 ' + CASE WHEN @EventType IS NULL THEN '' ELSE 'AND SQ.event_type = @EventType' END + '
 ' + CASE WHEN @ResultFailed IS NULL THEN '' WHEN @ResultFailed = 1 THEN 'AND SQ.result <> ''0 - OK'''  ELSE 'AND SQ.result = ''0 - OK''' END + '
+' + CASE WHEN @ContextInfo IS NULL THEN '' ELSE 'AND SQ.context_info = @ContextInfo' END + '
+' + CASE WHEN @ExcludeContextInfo IS NULL THEN '' ELSE 'AND (SQ.context_info <> @ExcludeContextInfo OR SQ.context_info IS NULL)' END + '
 ' + @SortSQL
 
 EXEC sp_executesql @SQL,N'@Instances IDs READONLY,
@@ -168,7 +173,9 @@ EXEC sp_executesql @SQL,N'@Instances IDs READONLY,
 							@LogicalReadsTo BIGINT,
 							@WritesFrom BIGINT,
 							@WritesTo BIGINT,
-							@EventType SYSNAME',
+							@EventType SYSNAME,
+							@ContextInfo VARBINARY(128),
+							@ExcludeContextInfo VARBINARY(128)',
 							@Instances,
 							@ObjectName,
 							@ClientHostName,
@@ -201,4 +208,6 @@ EXEC sp_executesql @SQL,N'@Instances IDs READONLY,
 							@LogicalReadsTo,
 							@WritesFrom,
 							@WritesTo,
-							@EventType
+							@EventType,
+							@ContextInfo,
+							@ExcludeContextInfo
