@@ -293,15 +293,7 @@ namespace DBADashGUI.Performance
             dt.Columns["last_request_start_time_utc"].ColumnName = "last_request_start_time";
             dt.Columns["last_request_end_time_utc"].ColumnName = "last_request_end_time";
             dt.Columns["login_time_utc"].ColumnName = "login_time";
-            dt.Columns["context_info"].ColumnName = "context_info_bin";
-            dt.Columns.Add("context_info", typeof(string));
-            foreach (DataRow row in dt.Rows)
-            {
-                var contextInfo = row["context_info_bin"] == DBNull.Value
-                    ? string.Empty
-                    : "0x" + Convert.ToHexString((byte[])row["context_info_bin"]);
-                row["context_info"] = contextInfo;
-            }
+            Common.ReplaceBinaryContextInfoColumn(ref dt);
         }
 
         private static DataTable RunningQueriesForJob(Guid JobId, DateTime fromDate, DateTime toDate, int instanceID)
@@ -407,8 +399,13 @@ namespace DBADashGUI.Performance
         {
             dgv.DataSource = null;
             dgv.Columns.Clear();
+            if (source.Table == null)
+            {
+                return;
+            }
             dgv.AutoGenerateColumns = false;
-            hasContextInfo = source.Cast<DataRowView>().Any(row => row["context_info"] as string != "0x");
+            hasContextInfo = source.Table.Columns.Contains("context_info") && source.Cast<DataRowView>()
+                    .Any(row => (row["context_info"] as string ?? "0x") != "0x");
             dgv.Columns.AddRange(RunningQueryColumns);
             dgv.DataSource = source;
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCellsExceptHeader);

@@ -508,5 +508,10 @@ namespace DBADashGUI
             }
             return validXml.ToString();
         }
+
+        public static string RemoveHexPrefix(this string hexString)
+        {
+            return hexString.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? hexString[2..] : hexString;
+        }
     }
 }

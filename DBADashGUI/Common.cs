@@ -159,7 +159,7 @@ namespace DBADashGUI
             }
             catch (XmlException ex)
             {
-                Debug.WriteLine("XmlException exporting to Excel, retrying with invalid XML characters removed",ex.ToString());
+                Debug.WriteLine("XmlException exporting to Excel, retrying with invalid XML characters removed", ex.ToString());
                 Common.SaveDataGridViewToXLSX(ref dgv, ofd.FileName, true); // Try again with invalid XML characters removed
                 Debug.WriteLine($"Invalid XML characters removed");
             }
@@ -510,5 +510,20 @@ namespace DBADashGUI
         }
 
         public const float ColorBrightnessIncrement = 0.05f;
+
+        public static void ReplaceBinaryContextInfoColumn(ref DataTable dt)
+        {
+            if (!dt.Columns.Contains("context_info")) return;
+            if (dt.Columns.Contains("context_info_bin")) return;
+            dt.Columns["context_info"]!.ColumnName = "context_info_bin";
+            dt.Columns.Add("context_info", typeof(string));
+            foreach (DataRow row in dt.Rows)
+            {
+                var contextInfo = row["context_info_bin"] == DBNull.Value
+                    ? string.Empty
+                    : "0x" + Convert.ToHexString((byte[])row["context_info_bin"]);
+                row["context_info"] = contextInfo;
+            }
+        }
     }
 }

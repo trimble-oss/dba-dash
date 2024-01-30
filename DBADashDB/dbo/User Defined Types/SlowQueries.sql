@@ -14,5 +14,6 @@
     client_hostname sysname NULL,
     client_app_name sysname NULL,
     result sysname NULL,
-    session_id INT NULL
+    session_id INT NULL,
+    context_info VARBINARY(128) NULL
 );

@@ -16,6 +16,7 @@
     result sysname NULL,
     Uniqueifier SMALLINT NOT NULL,
     session_id INT NULL,
+    context_info VARBINARY(128) NULL,
     CONSTRAINT PK_SlowQueries PRIMARY KEY CLUSTERED (InstanceID ASC, timestamp ASC, Uniqueifier ASC) ON PS_SlowQueries([timestamp]),
     CONSTRAINT FK_SlowQueries_Instances FOREIGN KEY (InstanceID) REFERENCES dbo.Instances (InstanceID)
 ) ON PS_SlowQueries (timestamp);
