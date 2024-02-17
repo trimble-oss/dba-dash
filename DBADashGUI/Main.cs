@@ -405,11 +405,8 @@ namespace DBADashGUI
             var checks = new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks);
             var storage = new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage);
             var jobs = new SQLTreeItem("Jobs", SQLTreeItem.TreeType.AgentJobs);
-            root.Nodes.Add(changes);
-            root.Nodes.Add(checks);
-            root.Nodes.Add(hadr);
-            root.Nodes.Add(storage);
-            root.Nodes.Add(jobs);
+
+            root.Nodes.AddRange(new TreeNode[] { changes, checks, hadr, storage, jobs });
 
             root.AddReportsFolder(customReports.RootLevelReports);
 
@@ -432,6 +429,12 @@ namespace DBADashGUI
                 if (currentTagGroup != tagGroup && !string.IsNullOrEmpty(tagGroup))
                 {
                     parentNode = new SQLTreeItem(GroupByTag + ": " + tagGroup, SQLTreeItem.TreeType.InstanceFolder);
+                    changes = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
+                    hadr = new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR);
+                    checks = new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks);
+                    storage = new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage);
+                    jobs = new SQLTreeItem("Jobs", SQLTreeItem.TreeType.AgentJobs);
+                    parentNode.Nodes.AddRange(new TreeNode[] { changes, checks, hadr, storage, jobs });
                     root.Nodes.Add(parentNode);
                     currentTagGroup = tagGroup;
                 }
@@ -1236,7 +1239,7 @@ namespace DBADashGUI
 
             if (e.InstanceID <= 0 && string.IsNullOrEmpty(e.Instance)) // No Instance - Use root Level
             {
-                nInstance = tv1.Nodes[0].AsSQLTreeItem();
+                nInstance = root;
             }
             else
             {
