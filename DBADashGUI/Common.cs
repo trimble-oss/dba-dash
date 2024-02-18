@@ -1,5 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
-using SpreadsheetLight;
+using ClosedXML.Excel;
 using System;
 using System.Data;
 using System.Diagnostics;
@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using DBADashGUI.SchemaCompare;
 using System.Xml.Linq;
 using System.Xml;
+using DocumentFormat.OpenXml;
 
 namespace DBADashGUI
 {
@@ -170,18 +171,18 @@ namespace DBADashGUI
 
         public static void SaveDataGridViewToXLSX(ref DataGridView dgv, string path, bool replaceInvalidChars = false)
         {
-            SLDocument sl = new();
             var colIndex = 1;
             var rowIndex = 1;
+
+            using var workbook = new XLWorkbook();
+            var sheet = workbook.Worksheets.Add("Sheet1");
+
             foreach (DataGridViewColumn col in dgv.Columns)
             {
-                if (col.Visible)
-                {
-                    sl.SetCellValue(1, colIndex, col.HeaderText);
-                    colIndex++;
-                }
+                if (!col.Visible) continue;
+                sheet.Cell(1, colIndex).SetValue(col.HeaderText);
+                colIndex++;
             }
-
             foreach (DataGridViewRow row in dgv.Rows)
             {
                 colIndex = 0;
@@ -192,7 +193,7 @@ namespace DBADashGUI
                     colIndex += 1;
 
                     var cellType = cell.ValueType;
-                    var style = sl.CreateStyle();
+
                     var format = string.IsNullOrEmpty(cell.Style.Format)
                         ? cell.InheritedStyle.Format
                         : cell.Style.Format;
@@ -210,47 +211,45 @@ namespace DBADashGUI
                     if (!cell.Style.ForeColor.IsEmpty || !cell.Style.BackColor.IsEmpty ||
                         !string.IsNullOrEmpty(format))
                     {
+                        var xlCell = sheet.Cell(rowIndex, colIndex);
                         var backColor = cell.Style.BackColor.IsEmpty ? Color.Transparent : cell.Style.BackColor;
-                        style.Fill.SetPattern(DocumentFormat.OpenXml.Spreadsheet.PatternValues.Solid, backColor,
-                            backColor);
-                        style.SetFontColor(cell.Style.ForeColor);
-                        style.FormatCode = format;
-                        sl.SetCellStyle(rowIndex, colIndex, style);
+                        xlCell.Style.Fill.SetBackgroundColor(XLColor.FromColor(backColor));
+                        xlCell.Style.Font.SetFontColor(XLColor.FromColor(cell.Style.ForeColor));
+                        xlCell.Style.NumberFormat.Format = format;
                     }
 
                     try
                     {
-                        if (cellType == typeof(bool))
+                        if (cell.Value == DBNull.Value)
                         {
-                            sl.SetCellValue(rowIndex, colIndex, (bool)cell.Value);
+                            sheet.Cell(rowIndex, colIndex).SetValue(Convert.ToString(cell.FormattedValue));
+                        }
+                        else if (cellType == typeof(bool))
+                        {
+                            sheet.Cell(rowIndex, colIndex).SetValue((bool)cell.Value);
                         }
                         else if (cellType.IsNumericType())
                         {
                             if (!decimal.TryParse(cell.FormattedValue as string, out var decimalValue))
                             {
-                                decimalValue = Convert.ToDecimal(cell.Value);
+                                decimalValue = decimalValue;
                             }
 
-                            sl.SetCellValue(rowIndex, colIndex, Convert.ToDecimal(decimalValue));
+                            sheet.Cell(rowIndex, colIndex).SetValue(decimalValue);
                         }
                         else if (cellType == typeof(DateTime))
                         {
-                            sl.SetCellValue(rowIndex, colIndex, Convert.ToDateTime(cell.Value));
+                            sheet.Cell(rowIndex, colIndex).SetValue(Convert.ToDateTime(cell.Value));
                         }
                         else if (cellType == typeof(byte[]))
                         {
-                            sl.SetCellValue(rowIndex, colIndex, Convert.ToString(cell.Value));
+                            sheet.Cell(rowIndex, colIndex).SetValue(Convert.ToString(cell.Value));
                         }
                         else
                         {
-                            if (replaceInvalidChars)
-                            {
-                                sl.SetCellValue(rowIndex, colIndex, (Convert.ToString(cell.FormattedValue)).StripInvalidXmlChars());
-                            }
-                            else
-                            {
-                                sl.SetCellValue(rowIndex, colIndex, Convert.ToString(cell.FormattedValue));
-                            }
+                            sheet.Cell(rowIndex, colIndex).SetValue(replaceInvalidChars
+                                ? Convert.ToString(cell.FormattedValue).StripInvalidXmlChars()
+                                : Convert.ToString(cell.FormattedValue));
                         }
                     }
                     catch (Exception ex)
@@ -259,21 +258,19 @@ namespace DBADashGUI
                     }
                 }
             }
-
-            if (rowIndex > 1)
+            var table = sheet.Range(sheet.Cell(1, 1).Address, sheet.Cell(rowIndex, colIndex).Address).CreateTable();
+            table.Theme = XLTableTheme.None;
+            var header = sheet.Range(1, 1, 1, colIndex);
+            header.Style.Fill.SetBackgroundColor(XLColor.FromColor(DashColors.TrimbleBlue));
+            header.Style.Font.SetFontColor(XLColor.White);
+            header.Style.Font.SetBold();
+            var maxColumnWidth = 150;
+            sheet.Columns().AdjustToContents();
+            for (var i = 1; i <= colIndex; i++)
             {
-                var tbl = sl.CreateTable(1, 1, rowIndex, colIndex);
-                sl.InsertTable(tbl);
-                var headerStyle = sl.CreateStyle();
-                headerStyle.Fill.SetPattern(DocumentFormat.OpenXml.Spreadsheet.PatternValues.Solid,
-                    DashColors.TrimbleBlue, DashColors.TrimbleBlue);
-                headerStyle.SetFontColor(Color.White);
-                headerStyle.SetFontBold(true);
-                sl.SetCellStyle(1, 1, 1, colIndex, headerStyle);
+                sheet.Column(i).Width = Math.Min(sheet.Column(i).Width, maxColumnWidth);
             }
-
-            sl.AutoFitColumn(1, colIndex, 300);
-            sl.SaveAs(path);
+            workbook.SaveAs(path);
         }
 
         public static string ByteArrayToString(byte[] ba)
