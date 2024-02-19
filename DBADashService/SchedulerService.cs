@@ -10,14 +10,16 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Microsoft.Data.SqlClient;
 using static DBADash.DBADashConnection;
+using Microsoft.Extensions.Hosting;
 
 namespace DBADashService
 {
-    public class ScheduleService
+    public class ScheduleService : BackgroundService
     {
         private readonly IScheduler scheduler;
         public readonly CollectionConfig config;
@@ -125,9 +127,10 @@ namespace DBADashService
             }
         }
 
-        public void Start()
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            scheduler.Start();
+            stoppingToken.Register(Stop);
+            await scheduler.Start(stoppingToken);
             try
             {
                 UpgradeDB();
@@ -139,7 +142,7 @@ namespace DBADashService
             }
             try
             {
-                ScheduleJobsAsync().Wait();
+                await ScheduleJobsAsync().WaitAsync(stoppingToken);
             }
             catch (Exception ex)
             {
@@ -149,7 +152,7 @@ namespace DBADashService
 
             try
             {
-                UpdateBuildReferenceFromFile().Wait();
+                await UpdateBuildReferenceFromFile().WaitAsync(stoppingToken);
             }
             catch (Exception ex)
             {
