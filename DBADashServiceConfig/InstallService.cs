@@ -2,10 +2,13 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.ServiceProcess;
 using System.Windows.Forms;
+using DBADash;
 using DBADashGUI.Theme;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace DBADashServiceConfig
 {
@@ -21,78 +24,74 @@ namespace DBADashServiceConfig
 
         private bool InstallDBADashService()
         {
-            Process p = new();
-            var psi = new ProcessStartInfo()
-            {
-                FileName = "CMD.EXE"
-            };
-            string arg = "";
+            string username = null;
+            string password = null;
             switch (cboServiceCredentials.SelectedIndex)
             {
-                case 0:
-                    arg = "--localsystem";
+                case 0: // LocalSystem (default)
                     break;
 
                 case 1:
-                    arg = "--localservice";
+                    username = "NT AUTHORITY\\LocalService";
                     break;
 
                 case 2:
-                    arg = "--networkservice";
+                    username = "NT AUTHORITY\\NetworkService";
                     break;
 
                 case 3:
                     // Note: --interactive doesn't work on .NET 6 without a target OS.  Prompt user and pass as commandline arguments.
                     var creds = CredentialManager.PromptForCredentials(
                     captionText: ServiceName,
-                    messageText: "Please enter the credentials to run the DBA Dash service.\nNote: Check the security requirements for the service account in the applicaton documentation.\nEnter username in domain\\username format",
+                    messageText: "Please enter the credentials to run the DBA Dash service.\nNote: Check the security requirements for the service account in the application documentation.\nEnter username in domain\\username format",
                     saveCredential: CredentialSaveOption.Hidden
                     );
                     if (creds == null)
                     {
                         return false;
                     }
-                    string domain = creds.Domain;
+                    var domain = creds.Domain;
 
-                    if (String.IsNullOrEmpty(domain) && !creds.UserName.StartsWith(".\\"))
+                    if (string.IsNullOrEmpty(domain) && !creds.UserName.StartsWith(".\\"))
                     {
                         var input = MessageBox.Show(
                             $"Warning domain hasn't been specified.  Is this a local user account?\n\nSelect Yes to use {Environment.MachineName} (local) \nSelect No to use {Environment.UserDomainName} (domain)", "", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
-                        if (input == DialogResult.Yes)
+                        switch (input)
                         {
-                            domain = Environment.MachineName;
-                        }
-                        else if (input == DialogResult.No)
-                        {
-                            domain = Environment.UserDomainName;
-                        }
-                        else
-                        {
-                            return false;
+                            case DialogResult.Yes:
+                                domain = Environment.MachineName;
+                                break;
+
+                            case DialogResult.No:
+                                domain = Environment.UserDomainName;
+                                break;
+
+                            default:
+                                return false;
                         }
                     }
-                    string username = domain + "\\" + creds.UserName;
-                    if (String.IsNullOrEmpty(domain)) // UserName specified as .\User
+                    username = domain + "\\" + creds.UserName;
+                    if (string.IsNullOrEmpty(domain)) // UserName specified as .\User
                     {
                         username = creds.UserName;
                     }
-
-                    arg = "-username \"" + username + "\" -password \"" + creds.Password.Replace("\"", "\"\"") + "\"";
+                    password = creds.Password;
 
                     break;
             }
-            psi.UseShellExecute = false;
-            psi.CreateNoWindow = true;
-            psi.Arguments = "/c DBADashService Install " + arg;
-            psi.RedirectStandardOutput = true;
-            psi.RedirectStandardError = true;
 
-            p.OutputDataReceived += (sender, args) => txtOutput.AppendText(args.Data + Environment.NewLine);
-            p.StartInfo = psi;
-            p.Start();
-            p.BeginOutputReadLine();
-            p.WaitForExit();
-            System.Threading.Thread.Sleep(500);
+            try
+            {
+                var result = ServiceTools.InstallService(ServiceName, username, password,
+                    ServiceTools.StartMode.AutomaticDelayedStart);
+                txtOutput.AppendText(result.Output + Environment.NewLine);
+            }
+            catch (Exception ex)
+            {
+                txtOutput.AppendText(ex.Message + Environment.NewLine);
+                return false;
+            }
+
             return true;
         }
 
@@ -131,6 +130,9 @@ namespace DBADashServiceConfig
 
         private void InstallService_Load(object sender, EventArgs e)
         {
+            var args = ServiceTools.GetServiceInstallArgs(ServiceName, "YourDomain\\YourUser", "YourPassword",
+                ServiceTools.StartMode.AutomaticDelayedStart);
+            txtOutput.Text = txtOutput.Text.Replace("{CommandLine}", $"sc.exe {args}");
             cboServiceCredentials.SelectedIndex = 3;
         }
 

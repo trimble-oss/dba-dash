@@ -500,7 +500,7 @@ namespace DBADashServiceConfig
         {
             bttnCustomCollections.Text = $"Custom Collections ({collectionConfig.CustomCollections.Count})";
             bttnCustomCollections.Font = collectionConfig.CustomCollections.Count > 0 ? new Font(bttnCustomCollections.Font, FontStyle.Bold) : new Font(bttnCustomCollections.Font, FontStyle.Regular);
-            toolTip1.SetToolTip(bttnCustomCollections, collectionConfig.CustomCollections.Count > 0 ? string.Join(", ", collectionConfig.CustomCollections.Keys.OrderBy(k=>k)) : "No Custom Collections Defined");
+            toolTip1.SetToolTip(bttnCustomCollections, collectionConfig.CustomCollections.Count > 0 ? string.Join(", ", collectionConfig.CustomCollections.Keys.OrderBy(k => k)) : "No Custom Collections Defined");
         }
 
         private void SetJson()
@@ -525,7 +525,7 @@ namespace DBADashServiceConfig
                 var nameOfServiceFromPath = DBADash.ServiceTools.GetServiceNameFromPath();
                 var pathOfService = ServiceTools.GetPathOfService(collectionConfig.ServiceName);
 
-                if (!pathOfService.Contains(ServiceTools.ServicePath) && pathOfService != String.Empty)
+                if (!pathOfService.Contains(ServiceTools.ServicePath, StringComparison.CurrentCultureIgnoreCase) && pathOfService != string.Empty)
                 {
                     lblServiceWarning.Text = $"Warning service with name {collectionConfig.ServiceName} is installed at a different location: {pathOfService}";
                     lblServiceWarning.Visible = true;
@@ -688,17 +688,19 @@ namespace DBADashServiceConfig
 
         private void UninstallService()
         {
-            if (MessageBox.Show("Are you sure you want to remove the DBA Dash Windows service?", "Uninstall", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.Yes)
+            if (MessageBox.Show("Are you sure you want to remove the DBA Dash Windows service?", "Uninstall",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.Yes)
             {
-                Process p = new();
-                ProcessStartInfo psi = new()
+                try
                 {
-                    FileName = "CMD.EXE",
-                    Arguments = "/c DBADashService UnInstall"
-                };
-                p.StartInfo = psi;
-                p.Start();
-                p.WaitForExit();
+                    var result = ServiceTools.UninstallService(collectionConfig.ServiceName);
+                    MessageBox.Show(result.Output, "Uninstall", MessageBoxButtons.OK,
+                        result.Success ? MessageBoxIcon.Information : MessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
+                    PromptError(ex);
+                }
                 System.Threading.Thread.Sleep(500);
                 RefreshServiceStatus();
             }
@@ -1198,7 +1200,7 @@ namespace DBADashServiceConfig
                 SetCellsReadOnly(i, src.SourceConnection.Type);
                 if (src.SourceConnection.Type == ConnectionType.SQL)
                 {
-                    dgvConnections.Rows[i].Cells["CustomCollections"].Value = src.CustomCollections==null || src.CustomCollections.Keys.Count == 0
+                    dgvConnections.Rows[i].Cells["CustomCollections"].Value = src.CustomCollections == null || src.CustomCollections.Keys.Count == 0
                         ? "Add Collection"
                         : string.Join(", ", src.CustomCollections.Keys.OrderBy(key => key));
                 }
