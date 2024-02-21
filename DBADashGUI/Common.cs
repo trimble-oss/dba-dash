@@ -232,7 +232,7 @@ namespace DBADashGUI
                         {
                             if (!decimal.TryParse(cell.FormattedValue as string, out var decimalValue))
                             {
-                                decimalValue = decimalValue;
+                                decimalValue = Convert.ToDecimal(cell.Value);
                             }
 
                             sheet.Cell(rowIndex, colIndex).SetValue(decimalValue);
