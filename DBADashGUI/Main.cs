@@ -497,7 +497,7 @@ namespace DBADashGUI
                 foreach (SQLTreeItem n in root.Nodes.Cast<SQLTreeItem>()
                              .Where(t => t.Type == SQLTreeItem.TreeType.InstanceFolder))
                 {
-                    n.Text += "    {" + n.Nodes.Count + "}";
+                    n.Text += "    {" + n.Nodes.Cast<SQLTreeItem>().Count(child => child.Type is SQLTreeItem.TreeType.Instance or SQLTreeItem.TreeType.AzureInstance) + "}";
                 }
             }
 
