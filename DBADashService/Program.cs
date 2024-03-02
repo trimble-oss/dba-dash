@@ -13,6 +13,7 @@ using Microsoft.DotNet.PlatformAbstractions;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
+using CommandLine.Text;
 
 namespace DBADashService
 {
@@ -27,7 +28,7 @@ namespace DBADashService
             Log.Information("Running as service {RunningAsService}", !Environment.UserInteractive);
             var cfg = SchedulerServiceConfig.Config;
 
-            if (ProcessCommandLine(args, cfg))
+            if (Environment.UserInteractive && ProcessCommandLine(args, cfg)) // Commandline options are not processed when running as a service
             {
                 return;
             }
@@ -170,7 +171,11 @@ namespace DBADashService
                     {
                         if (errors.Any(e => e is not HelpRequestedError && e is not HelpVerbRequestedError && e is not VersionRequestedError))
                         {
-                            Log.Error("Invalid arguments.{args}", args);
+                            var sentenceBuilder = SentenceBuilder.Create();
+                            foreach (var error in errors)
+                            {
+                                Log.Error(sentenceBuilder.FormatError(error));
+                            }
                         }
 
                         result = true;
