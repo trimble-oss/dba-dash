@@ -22,7 +22,7 @@ namespace DBADash
             using var searcher = new ManagementObjectSearcher("root\\cimv2", "SELECT Name,PathName from Win32_Service");
 
             var collection = searcher.Get().Cast<ManagementBaseObject>()
-                .Where(service => ((string)service.GetPropertyValue("PathName"))?.Contains(path) == true)
+                .Where(service => ((string)service.GetPropertyValue("PathName"))?.Contains(path, StringComparison.InvariantCultureIgnoreCase) == true)
                 .Select(service => (string)service.GetPropertyValue("Name"));
 
             return collection.Any();
@@ -38,7 +38,7 @@ namespace DBADash
             using var searcher = new ManagementObjectSearcher("root\\cimv2", "SELECT Name from Win32_Service");
 
             var collection = searcher.Get().Cast<ManagementBaseObject>()
-                .Where(service => (string)service.GetPropertyValue("Name") == ServiceName)
+                .Where(service => string.Equals((string)service.GetPropertyValue("Name"), ServiceName, StringComparison.InvariantCultureIgnoreCase))
                 .Select(service => (string)service.GetPropertyValue("Name"));
 
             return collection.Any();
@@ -49,7 +49,7 @@ namespace DBADash
             using var searcher = new ManagementObjectSearcher("root\\cimv2", "SELECT Name,PathName from Win32_Service");
 
             var collection = searcher.Get().Cast<ManagementBaseObject>()
-                .Where(service => ((string)service.GetPropertyValue("PathName")).Contains(path))
+                .Where(service => ((string)service.GetPropertyValue("PathName")).Contains(path, StringComparison.InvariantCultureIgnoreCase))
                 .Select(service => (string)service.GetPropertyValue("Name"));
 
             return collection.FirstOrDefault(string.Empty);
@@ -60,7 +60,7 @@ namespace DBADash
             using var searcher = new ManagementObjectSearcher("root\\cimv2", "SELECT Name,PathName from Win32_Service");
 
             var collection = searcher.Get().Cast<ManagementBaseObject>()
-                .Where(service => (string)service.GetPropertyValue("Name") == ServiceName)
+                .Where(service => string.Equals((string)service.GetPropertyValue("Name"), ServiceName, StringComparison.InvariantCultureIgnoreCase))
                 .Select(service => (string)service.GetPropertyValue("PathName"));
 
             return collection.FirstOrDefault(string.Empty);
