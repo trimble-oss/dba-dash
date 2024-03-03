@@ -159,7 +159,7 @@ namespace DBADash
             {
                 throw new Exception($"Service {serviceName} is not installed");
             }
-            if (!string.Equals(path, ServicePath, StringComparison.CurrentCultureIgnoreCase))
+            if (!path.Contains(ServicePath, StringComparison.CurrentCultureIgnoreCase)) // path might also include -displayname and -servicename parameters if installed by Topshelf
             {
                 throw new Exception($"Service {serviceName} appears to be installed in a different path.  \nExpected: {ServicePath}.  \nActual: {path}");
             }
