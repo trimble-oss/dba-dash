@@ -2,8 +2,10 @@
 using Microsoft.SqlServer.Management.Common;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Windows.Forms;
+using DocumentFormat.OpenXml.Presentation;
 
 namespace DBADashGUI
 {
@@ -63,7 +65,8 @@ namespace DBADashGUI
             Storage,
             Drive,
             ReportsFolder,
-            CustomReport
+            CustomReport,
+            ElasticPool
         }
 
         private DatabaseEngineEdition _engineEdition = DatabaseEngineEdition.Unknown;
@@ -92,12 +95,14 @@ namespace DBADashGUI
         private HashSet<int> _InstanceIDs;
         private DBADashContext InternalContext;
         public SQLTreeItem SQLTreeItemParent => Parent.AsSQLTreeItem();
-        private bool IsChildOfInstanceOrAzureDB => InstanceID > 0 && !IsInstanceOrAzureDB;
+        private bool IsChildOfInstanceOrAzureDB => (InstanceID > 0 && !IsInstanceOrAzureDB) || Type == TreeType.ElasticPool;
         private bool IsChildOfInstanceOrAzureInstance => InstanceID > 0 && !IsInstanceOrAzureInstance;
         private bool IsInstanceOrAzureDB => Type == TreeType.Instance || Type == TreeType.AzureDatabase;
         private bool IsInstanceOrAzureInstance => Type == TreeType.Instance || Type == TreeType.AzureInstance;
 
         public string DriveName;
+
+        public string ElasticPoolName { get; set; }
 
         public CustomReport Report;
 
@@ -122,6 +127,8 @@ namespace DBADashGUI
                     ParentType = Parent == null ? TreeType.DBADashRoot : SQLTreeItemParent.Type,
                     DriveName = DriveName,
                     Report = Report,
+                    ElasticPoolName = ElasticPoolName,
+                    MasterInstanceID = MasterInstanceID
                 };
                 return InternalContext;
             }
@@ -183,6 +190,11 @@ namespace DBADashGUI
                     _RegularInstanceIDs.Add(this.instanceID);
                     _InstanceIDs.Add(this.instanceID);
                 }
+                else if (Type == TreeType.ElasticPool)
+                {
+                    _AzureInstanceIDs = Parent.Nodes.Cast<SQLTreeItem>().Where(n => n.Type == TreeType.AzureDatabase && string.Equals(n.ElasticPoolName, ElasticPoolName, StringComparison.InvariantCultureIgnoreCase)).Select(n=>n.InstanceID).ToHashSet();
+                    _InstanceIDs.UnionWith(_AzureInstanceIDs);
+                }
             }
         }
 
@@ -193,7 +205,7 @@ namespace DBADashGUI
         {
             get
             {
-                if (Type is TreeType.DBADashRoot or TreeType.AzureInstance or TreeType.InstanceFolder or TreeType.Instance or TreeType.AzureDatabase)
+                if (Type is TreeType.DBADashRoot or TreeType.AzureInstance or TreeType.InstanceFolder or TreeType.Instance or TreeType.AzureDatabase or TreeType.ElasticPool)
                 {
                     GetInstanceIDs();
                     return _InstanceIDs;
@@ -212,7 +224,7 @@ namespace DBADashGUI
         {
             get
             {
-                if (Type is TreeType.DBADashRoot or TreeType.AzureInstance or TreeType.InstanceFolder or TreeType.Instance or TreeType.AzureDatabase)
+                if (Type is TreeType.DBADashRoot or TreeType.AzureInstance or TreeType.InstanceFolder or TreeType.Instance or TreeType.AzureDatabase or TreeType.ElasticPool)
                 {
                     GetInstanceIDs();
                     return _RegularInstanceIDs;
@@ -231,7 +243,7 @@ namespace DBADashGUI
         {
             get
             {
-                if (Type is TreeType.DBADashRoot or TreeType.AzureInstance or TreeType.InstanceFolder or TreeType.Instance or TreeType.AzureDatabase)
+                if (Type is TreeType.DBADashRoot or TreeType.AzureInstance or TreeType.InstanceFolder or TreeType.Instance or TreeType.AzureDatabase or TreeType.ElasticPool)
                 {
                     GetInstanceIDs();
                     return _AzureInstanceIDs;
@@ -239,6 +251,24 @@ namespace DBADashGUI
                 else
                 {
                     return SQLTreeItemParent.AzureInstanceIDs;
+                }
+            }
+        }
+
+        public int MasterInstanceID
+        {
+            get
+            {
+                if (Type is TreeType.ElasticPool or TreeType.AzureInstance)
+                {
+                    return CommonData.Instances.Rows.Cast<DataRow>()
+                        .Where(r => string.Equals((string)r["Instance"], InstanceName, StringComparison.InvariantCultureIgnoreCase) && string.Equals((string)r["AzureDBName"].DBNullToNull(), "master", StringComparison.InvariantCultureIgnoreCase))
+                        .Select(r => (int)r["InstanceID"])
+                        .FirstOrDefault(0);
+                }
+                else
+                {
+                    return 0;
                 }
             }
         }
@@ -522,7 +552,9 @@ namespace DBADashGUI
                 case TreeType.ReportsFolder:
                     ImageIndex = 25;
                     break;
-
+                case TreeType.ElasticPool:                    
+                    ImageIndex = 26;
+                    break;
                 default:
                     ImageIndex = 5;
                     break;

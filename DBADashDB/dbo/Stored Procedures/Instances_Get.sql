@@ -21,9 +21,11 @@ SELECT  I.InstanceID,
 	I.InstanceGroupName,
 	I.ShowInSummary,
 	~I.ShowInSummary AS IsHidden,
-	' + CASE WHEN @GroupByTag IS NULL THEN 'CAST(NULL AS NVARCHAR(128)) as TagGroup' ELSE 'ISNULL(T.TagValue,''[N/A]'') AS TagGroup' END + '
+	' + CASE WHEN @GroupByTag IS NULL THEN 'CAST(NULL AS NVARCHAR(128)) as TagGroup' ELSE 'ISNULL(T.TagValue,''[N/A]'') AS TagGroup' END + ',
+	SO.elastic_pool_name
 FROM dbo.InstancesMatchingTags(@TagIDs) I
 LEFT JOIN dbo.Databases D ON D.InstanceID = I.InstanceID AND I.EngineEdition = 5 AND D.IsActive=1
+LEFT JOIN dbo.AzureDBServiceObjectives SO ON I.InstanceID = SO.InstanceID
 ' + CASE WHEN @GroupByTag IS NULL THEN '' ELSE 'OUTER APPLY dbo.TagValue(I.InstanceID,@GroupByTag,I.EngineEdition) T' END + '
 WHERE (D.InstanceID IS NOT NULL OR I.EngineEdition <> 5 OR I.EngineEdition IS NULL)
 ' + CASE WHEN @IsActive IS NULL THEN '' ELSE 'AND I.IsActive=@IsActive' END + '
