@@ -14,7 +14,8 @@
 		@Debug BIT=0,
 		@DaysOfWeek IDs READONLY, /* e.g. exclude weekends:  Monday,Tuesday,Wednesday,Thursday,Friday. Filter applied in local timezone (@UTCOffset) */
 		@Hours IDs READONLY, /* e.g. 9 to 5 :  9,10,11,12,13,14,15,16. Filter applied in local timezone (@UTCOffset)  */
-		@UTCOffset INT=0 /* Used for filtering on hours & weekday in current timezone */
+		@UTCOffset INT=0, /* Used for filtering on hours & weekday in current timezone */
+		@InstanceIDs IDs READONLY
 )
 AS
 SET DATEFIRST 1 /* Start week on Monday */
@@ -88,6 +89,7 @@ WITH base AS (
 	' + CASE WHEN @InstanceGroupName IS NULL THEN '' ELSE 'AND I.InstanceGroupName=@InstanceGroupName' END + '
 	' + CASE WHEN @Instance IS NULL THEN '' ELSE 'AND I.Instance=@Instance' END + '
 	' + CASE WHEN @InstanceID IS NULL THEN '' ELSE 'AND I.InstanceID=@InstanceID' END + '
+	' + CASE WHEN EXISTS(SELECT 1 FROM @InstanceIDs) THEN 'AND EXISTS(SELECT 1 FROM @InstanceIDs T WHERE T.ID = I.InstanceID)' ELSE '' END + '
 	' + CASE WHEN @Types IS NULL THEN '' ELSE 'AND EXISTS(SELECT 1 FROM STRING_SPLIT(@Types,'','') ss WHERE ss.Value =  O.ObjectType)' END + '
 	' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND D.DatabaseID = @DatabaseID' END + '
 	' + CASE WHEN @ObjectID IS NULL THEN '' ELSE 'AND OES.ObjectID = @ObjectID' END + '
@@ -130,6 +132,7 @@ compare as(
 	' + CASE WHEN @InstanceGroupName IS NULL THEN '' ELSE 'AND I.InstanceGroupName=@InstanceGroupName' END + '
 	' + CASE WHEN @Instance IS NULL THEN '' ELSE 'AND I.Instance=@Instance' END + '
 	' + CASE WHEN @InstanceID IS NULL THEN '' ELSE 'AND I.InstanceID=@InstanceID' END + '
+	' + CASE WHEN EXISTS(SELECT 1 FROM @InstanceIDs) THEN 'AND EXISTS(SELECT 1 FROM @InstanceIDs T WHERE T.ID = I.InstanceID)' ELSE '' END + '
 	' + CASE WHEN @Types IS NULL THEN '' ELSE 'AND EXISTS(SELECT 1 FROM STRING_SPLIT(@Types,'','') ss WHERE ss.Value =  O.ObjectType)' END + '
 	' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND D.DatabaseID = @DatabaseID' END + '
 	' + CASE WHEN @ObjectID IS NULL THEN '' ELSE 'AND OES.ObjectID = @ObjectID' END + '
@@ -195,7 +198,8 @@ EXEC sp_executesql @SQL,N'@InstanceID INT,
 						@Types VARCHAR(200),
 						@DatabaseID INT,
 						@ObjectID BIGINT,
-						@UTCOffset INT',
+						@UTCOffset INT,
+						@InstanceIDs IDs READONLY',
 						@InstanceID,
 						@Instance,
 						@InstanceGroupName,
@@ -206,5 +210,6 @@ EXEC sp_executesql @SQL,N'@InstanceID INT,
 						@Types,
 						@DatabaseID,
 						@ObjectID,
-						@UTCOffset
+						@UTCOffset,
+						@InstanceIDs
 ;

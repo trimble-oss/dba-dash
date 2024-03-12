@@ -13,6 +13,7 @@ using System.Printing.IndexedProperties;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using CommandLine;
 using DBADashGUI.CustomReports;
 using DBADashGUI.Theme;
 using DocumentFormat.OpenXml.Bibliography;
@@ -451,7 +452,7 @@ namespace DBADashGUI
 
                 if ((bool)row["IsAzure"])
                 {
-                    string db = (string)row["AzureDBName"];
+                    var db = (string)row["AzureDBName"];
                     if (AzureNode == null || AzureNode.InstanceName != instance)
                     {
                         AzureNode = new SQLTreeItem(instance, SQLTreeItem.TreeType.AzureInstance)
@@ -459,24 +460,46 @@ namespace DBADashGUI
                             EngineEdition = edition
                         };
                         parentNode.Nodes.Add(AzureNode);
-                        AzureNode.Nodes.Add(new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration));
-                        AzureNode.Nodes.Add(new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks));
-                        AzureNode.Nodes.Add(new SQLTreeItem("Tags", SQLTreeItem.TreeType.Tags));
-                        var azStorage = new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage);
-                        AzureNode.Nodes.Add(azStorage);
+                        AzureNode.Nodes.AddRange(
+                            new TreeNode[]
+                            {
+                                new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration),
+                                new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks),
+                                new SQLTreeItem("Tags", SQLTreeItem.TreeType.Tags),
+                                new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage)
+                            }
+                        );
+
                         AzureNode.AddReportsFolder(customReports.InstanceLevelReports);
+                        var poolNodes = CommonData.Instances.Rows.Cast<DataRow>()
+                            .Where(r => (string)r["Instance"] == instance && r["elastic_pool_name"] != DBNull.Value)
+                            .Select(r => (string)r["elastic_pool_name"])
+                            .Distinct()
+                            .OrderBy(r => r)
+                            .Select(poolName => (TreeNode)new SQLTreeItem(poolName, SQLTreeItem.TreeType.ElasticPool) { ElasticPoolName = poolName})
+                            .ToArray();
+
+                        AzureNode.Nodes.AddRange(poolNodes);
+
                     }
 
+                    var poolName = (string)row["elastic_pool_name"].DBNullToNull();
                     var azureDBNode = new SQLTreeItem(db, SQLTreeItem.TreeType.AzureDatabase)
                     {
                         DatabaseID = (int)row["AzureDatabaseID"],
                         InstanceID = instanceID,
-                        DatabaseName = db
+                        DatabaseName = db,
+                        ElasticPoolName = poolName,
+                        EngineEdition = edition,
                     };
-                    azureDBNode.Nodes.Add(new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration));
-                    azureDBNode.Nodes.Add(new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks));
+                    azureDBNode.Nodes.AddRange(
+                        new TreeNode[]
+                        {
+                            new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration),
+                            new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks)
+                            }
+                        );
                     azureDBNode.AddDatabaseFolders();
-                    azureDBNode.EngineEdition = edition;
                     AzureNode.Nodes.Add(azureDBNode);
                 }
                 else
@@ -639,6 +662,7 @@ namespace DBADashGUI
             var n = tv1.SelectedSQLTreeItem();
             var parent = n.SQLTreeItemParent;
             bool hasAzureDBs = n.AzureInstanceIDs.Count > 0;
+            
             if (n.Type is SQLTreeItem.TreeType.DBADashRoot or SQLTreeItem.TreeType.InstanceFolder)
             {
                 allowedTabs.AddRange(new TabPage[] { tabSummary, tabPerformanceSummary });
@@ -678,6 +702,13 @@ namespace DBADashGUI
                 allowedTabs.AddRange(new TabPage[]
                 {
                     tabPerformanceSummary, tabAzureSummary, tabSlowQueries, tabObjectExecutionSummary, tabRunningQueries
+                });
+            }
+            else if (n.Type == SQLTreeItem.TreeType.ElasticPool)
+            {
+                allowedTabs.AddRange(new TabPage[]
+                {
+                    tabAzureDB, tabPerformanceSummary, tabAzureSummary, tabSlowQueries, tabObjectExecutionSummary, tabRunningQueries, tabDBSpace
                 });
             }
             else if (n.Type == SQLTreeItem.TreeType.Configuration)
@@ -794,7 +825,7 @@ namespace DBADashGUI
             var suppress = suppressLoadTab;
             suppressLoadTab = true; // Don't Load tab while adding/removing tabs
             var n = tv1.SelectedSQLTreeItem();
-
+            tabAzureDB.Text = n.Type == SQLTreeItem.TreeType.ElasticPool ? "Pool" : "Azure DB";
             List<TabPage> allowedTabs = GetAllowedTabs();
 
             this.Text = n.FriendlyFullPath;
@@ -817,7 +848,7 @@ namespace DBADashGUI
                 tabs.TabPages.AddRange(allowedTabs.ToArray());
             }
 
-            suppressLoadTab = suppress; // Return tab load supression back to previous value
+            suppressLoadTab = suppress; // Return tab load suppression back to previous value
             LoadSelectedTab();
         }
 

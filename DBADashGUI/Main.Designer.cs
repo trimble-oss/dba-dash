@@ -333,6 +333,7 @@ namespace DBADashGUI
             TreeViewImageList.Images.SetKeyName(23, "LogicalDataCenterDiagram.ico");
             TreeViewImageList.Images.SetKeyName(24, "Report_16x.png");
             TreeViewImageList.Images.SetKeyName(25, "FileDialogReport_16x.png");
+            TreeViewImageList.Images.SetKeyName(26, "DatabaseGroup.png");
             // 
             // menuStrip1
             // 
@@ -522,7 +523,7 @@ namespace DBADashGUI
             // 
             tsTime.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             tsTime.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { minsToolStripMenuItem2, minsToolStripMenuItem1, minsToolStripMenuItem, ts30Min, ts1Hr, ts2Hr, ts3Hr, ts6Hr, ts12Hr, dayToolStripMenuItem, daysToolStripMenuItem, daysToolStripMenuItem1, days7ToolStripMenuItem, days14toolStripMenuItem, days28ToolStripMenuItem, toolStripSeparator1, dateToolStripMenuItem, tsCustom });
-            tsTime.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            tsTime.Font = new System.Drawing.Font("Segoe UI", 10F);
             tsTime.Image = Properties.Resources.Time_16x;
             tsTime.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsTime.Name = "tsTime";
@@ -787,7 +788,7 @@ namespace DBADashGUI
             // 
             bttnSearch.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             bttnSearch.Enabled = false;
-            bttnSearch.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            bttnSearch.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
             bttnSearch.ForeColor = System.Drawing.Color.Black;
             bttnSearch.Location = new System.Drawing.Point(232, 13);
             bttnSearch.Name = "bttnSearch";
@@ -801,7 +802,7 @@ namespace DBADashGUI
             // 
             txtSearch.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             txtSearch.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            txtSearch.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            txtSearch.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
             txtSearch.Location = new System.Drawing.Point(12, 13);
             txtSearch.Name = "txtSearch";
             txtSearch.Size = new System.Drawing.Size(214, 30);
@@ -1039,7 +1040,7 @@ namespace DBADashGUI
             gvHistory.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -1049,7 +1050,7 @@ namespace DBADashGUI
             gvHistory.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { ObjectName, SchemaName, ObjectType, SnapshotValidFrom, SnapshotValidTo, ObjectDateCreated, ObjectDateModified, colCompare });
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -1136,7 +1137,7 @@ namespace DBADashGUI
             // 
             label1.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
             label1.Dock = System.Windows.Forms.DockStyle.Top;
-            label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold);
             label1.ForeColor = System.Drawing.Color.White;
             label1.Location = new System.Drawing.Point(0, 0);
             label1.Name = "label1";
@@ -1158,7 +1159,6 @@ namespace DBADashGUI
             // 
             // tags1
             // 
-            tags1.AllTags = null;
             tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             tags1.Location = new System.Drawing.Point(3, 3);
             tags1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -2013,7 +2013,7 @@ namespace DBADashGUI
             // 
             lblVersion.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
             lblVersion.Dock = System.Windows.Forms.DockStyle.Bottom;
-            lblVersion.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
+            lblVersion.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Italic);
             lblVersion.ForeColor = System.Drawing.Color.White;
             lblVersion.Location = new System.Drawing.Point(3, 32);
             lblVersion.Name = "lblVersion";
@@ -2025,7 +2025,7 @@ namespace DBADashGUI
             // 
             lblSQLMonitoring.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
             lblSQLMonitoring.Dock = System.Windows.Forms.DockStyle.Top;
-            lblSQLMonitoring.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
+            lblSQLMonitoring.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Italic);
             lblSQLMonitoring.ForeColor = System.Drawing.Color.White;
             lblSQLMonitoring.Location = new System.Drawing.Point(3, 3);
             lblSQLMonitoring.Name = "lblSQLMonitoring";
@@ -2038,7 +2038,7 @@ namespace DBADashGUI
             // 
             lblDBADash.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
             lblDBADash.Dock = System.Windows.Forms.DockStyle.Fill;
-            lblDBADash.Font = new System.Drawing.Font("Segoe UI", 26F, System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
+            lblDBADash.Font = new System.Drawing.Font("Segoe UI", 26F, System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic);
             lblDBADash.ForeColor = System.Drawing.Color.White;
             lblDBADash.Location = new System.Drawing.Point(3, 3);
             lblDBADash.Name = "lblDBADash";
@@ -2166,7 +2166,9 @@ namespace DBADashGUI
             // 
             // customReportView1
             // 
+            customReportView1.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
             customReportView1.Dock = System.Windows.Forms.DockStyle.Fill;
+            customReportView1.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
             customReportView1.Location = new System.Drawing.Point(3, 3);
             customReportView1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             customReportView1.Name = "customReportView1";
@@ -2177,7 +2179,7 @@ namespace DBADashGUI
             // 
             refresh1.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
             refresh1.Dock = System.Windows.Forms.DockStyle.Fill;
-            refresh1.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            refresh1.Font = new System.Drawing.Font("Segoe UI", 11F);
             refresh1.ForeColor = System.Drawing.Color.White;
             refresh1.Location = new System.Drawing.Point(0, 0);
             refresh1.Margin = new System.Windows.Forms.Padding(4);
@@ -2422,7 +2424,7 @@ namespace DBADashGUI
             ClientSize = new System.Drawing.Size(1983, 1309);
             Controls.Add(splitMain);
             Controls.Add(menuStrip1);
-            Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
             MainMenuStrip = menuStrip1;
             Name = "Main";

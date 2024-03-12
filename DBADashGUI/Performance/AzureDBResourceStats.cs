@@ -94,7 +94,8 @@ namespace DBADashGUI.Performance
 
         public void SetContext(DBADashContext context)
         {
-            InstanceID = context.InstanceID;
+            InstanceID =context.MasterInstanceID;
+            ElasticPoolName=context.ElasticPoolName;
             RefreshData();
         }
 
