@@ -127,7 +127,7 @@
             dgvSummary.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -137,7 +137,7 @@
             dgvSummary.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, colHidden, MemoryDumpStatus, CorruptionStatus, LastGoodCheckDBStatus, AlertStatus, FullBackupStatus, DiffBackupStatus, LogBackupStatus, DriveStatus, JobStatus, IsAgentRunningStatus, LogShippingStatus, MirroringStatus, AGStatus, LogFreeSpaceStatus, FileFreeSpaceStatus, PctMaxSizeStatus, ElasticPoolStorageStatus, QueryStoreStatus, CustomCheckStatus, CollectionErrorStatus, SnapshotAgeStatus, DBMailStatus, IdentityStatus, DatabaseStateStatus, UptimeStatus });
             dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle7.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -485,7 +485,7 @@
             // 
             refresh1.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
             refresh1.Dock = System.Windows.Forms.DockStyle.Fill;
-            refresh1.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            refresh1.Font = new System.Drawing.Font("Segoe UI", 11F);
             refresh1.ForeColor = System.Drawing.Color.White;
             refresh1.Location = new System.Drawing.Point(0, 27);
             refresh1.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
@@ -518,7 +518,7 @@
             dgvTests.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle11.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle11.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle11.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             dataGridViewCellStyle11.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle11.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -527,7 +527,7 @@
             dgvTests.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle12.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle12.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle12.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             dataGridViewCellStyle12.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle12.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle12.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -539,7 +539,6 @@
             dgvTests.ReadOnly = true;
             dgvTests.RowHeadersVisible = false;
             dgvTests.RowHeadersWidth = 51;
-            dgvTests.RowTemplate.Height = 29;
             dgvTests.Size = new System.Drawing.Size(1800, 117);
             dgvTests.TabIndex = 0;
             dgvTests.CellContentClick += DgvTests_CellContentClick;
@@ -611,7 +610,7 @@
             // 
             // FullBackupStatus
             // 
-            FullBackupStatus.HeaderText = "Full Backup";
+            FullBackupStatus.HeaderText = "Backup FULL";
             FullBackupStatus.LinkColor = System.Drawing.Color.Black;
             FullBackupStatus.MinimumWidth = 6;
             FullBackupStatus.Name = "FullBackupStatus";
@@ -622,7 +621,7 @@
             // 
             // DiffBackupStatus
             // 
-            DiffBackupStatus.HeaderText = "Diff Backup";
+            DiffBackupStatus.HeaderText = "Backup DIFF";
             DiffBackupStatus.LinkColor = System.Drawing.Color.Black;
             DiffBackupStatus.MinimumWidth = 6;
             DiffBackupStatus.Name = "DiffBackupStatus";
@@ -633,7 +632,7 @@
             // 
             // LogBackupStatus
             // 
-            LogBackupStatus.HeaderText = "Log Backup";
+            LogBackupStatus.HeaderText = "Backup LOG";
             LogBackupStatus.LinkColor = System.Drawing.Color.Black;
             LogBackupStatus.MinimumWidth = 6;
             LogBackupStatus.Name = "LogBackupStatus";
