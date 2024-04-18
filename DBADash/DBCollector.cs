@@ -1197,7 +1197,12 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                 CollectOperatingSystemWMI();
                 CollectProcessorWMI();
             }
-            AddDT("ServerExtraProperties", SqlStrings.ServerExtraProperties, CollectionType.ServerExtraProperties.GetCommandTimeout());
+            var query = SqlStrings.ServerExtraProperties;
+            if (SQLVersion.Major <= 9)
+            {
+                query = query.Replace("DATETIMEOFFSET", "DATETIME");
+            }
+            AddDT("ServerExtraProperties", query, CollectionType.ServerExtraProperties.GetCommandTimeout());
             Data.Tables["ServerExtraProperties"]!.Columns.Add("WindowsCaption");
             if (manufacturer != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemManufacturer"] = manufacturer; }
             if (model != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemProductName"] = model; }
