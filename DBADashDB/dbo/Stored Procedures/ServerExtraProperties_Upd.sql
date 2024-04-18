@@ -17,7 +17,7 @@
 	@WindowsSP NVARCHAR(256)= NULL,
 	@WindowsSKU NVARCHAR(256)= NULL,
 	-----------------------------------
-	@LastMemoryDump DATETIME=NULL,
+	@LastMemoryDump DATETIMEOFFSET=NULL,
 	@MemoryDumpCount INT= NULL,
 	@WindowsCaption NVARCHAR(256)= NULL,
 	@DBMailStatus NVARCHAR(500) = NULL

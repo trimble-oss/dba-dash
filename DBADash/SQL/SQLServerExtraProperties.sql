@@ -76,7 +76,7 @@ BEGIN
 										WHERE is_enabled=1)
 										THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 END
-DECLARE @LastMemoryDump DATETIME
+DECLARE @LastMemoryDump DATETIMEOFFSET
 DECLARE @DumpCount INT
 IF OBJECT_ID('sys.dm_server_memory_dumps') IS NOT NULL
 BEGIN
