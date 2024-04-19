@@ -85,11 +85,11 @@
     ShowInSummary BIT NOT NULL CONSTRAINT DF_Instances DEFAULT(1),
     contained_availability_group_id UNIQUEIDENTIFIER NULL,
     contained_availability_group_name NVARCHAR(128) NULL,
+    ProductMinorVersion INT NULL,
+    ProductRevision INT NULL,
     InstanceDisplayName AS ISNULL(Alias,ConnectionID),
     InstanceGroupName AS CASE WHEN EngineEdition=5 THEN Instance ELSE ISNULL(Alias,ConnectionID) END,
     LastMemoryDumpUTC AS CONVERT(DATETIME2,LastMemoryDump,1),
-    ProductMinorVersion INT NULL,
-    ProductRevision INT NULL,
     CONSTRAINT PK_Instances PRIMARY KEY CLUSTERED (InstanceID ASC),
     CONSTRAINT FK_Instances_CollectAgent FOREIGN KEY(CollectAgentID) REFERENCES dbo.DBADashAgent(DBADashAgentID),
     CONSTRAINT FK_Instances_ImportAgent FOREIGN KEY(ImportAgentID) REFERENCES dbo.DBADashAgent(DBADashAgentID)
