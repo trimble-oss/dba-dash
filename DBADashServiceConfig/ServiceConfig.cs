@@ -16,6 +16,7 @@ using DBADashGUI.Theme;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 using Newtonsoft.Json;
 using static DBADash.DBADashConnection;
+using SortOrder = System.Windows.Forms.SortOrder;
 
 namespace DBADashServiceConfig
 {
@@ -302,6 +303,8 @@ namespace DBADashServiceConfig
 
         private async void ServiceConfig_Load(object sender, EventArgs e)
         {
+            dgvConnections.ColumnHeaderMouseClick += dgvConnections_ColumnHeaderMouseClick;
+
             await CommonShared.CheckForIncompleteUpgrade();
             if (Upgrade.IsUpgradeIncomplete) return;
 
@@ -366,6 +369,43 @@ namespace DBADashServiceConfig
             ValidateDestination();
             RefreshEncryption();
             dgvConnections.ApplyTheme();
+        }
+
+        private void dgvConnections_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            DataGridViewColumn column = dgvConnections.Columns[e.ColumnIndex];
+            if (dgvConnections.DataSource != null)
+            {
+                System.ComponentModel.ListSortDirection direction;
+                if (column.HeaderCell.SortGlyphDirection == SortOrder.Ascending || column.HeaderCell.SortGlyphDirection == SortOrder.None)
+                {
+                    direction = ListSortDirection.Descending;
+                }
+                else
+                {
+                    direction = ListSortDirection.Ascending;
+                }
+
+                if (column.DataPropertyName == "ConnectionString")
+                {
+                    collectionConfig.SourceConnections = direction == ListSortDirection.Ascending
+                        ? collectionConfig.SourceConnections.OrderBy(c => c.ConnectionString).ToList()
+                        : collectionConfig.SourceConnections.OrderByDescending(c => c.ConnectionString).ToList();
+                }
+                else if (column.DataPropertyName == "ConnectionID")
+                {
+                    collectionConfig.SourceConnections = direction == ListSortDirection.Ascending
+                        ? collectionConfig.SourceConnections.OrderBy(c => c.ConnectionID).ToList()
+                        : collectionConfig.SourceConnections.OrderByDescending(c => c.ConnectionID).ToList();
+                }
+                else
+                {
+                    return;
+                }
+
+                SetDgv();
+                column.HeaderCell.SortGlyphDirection = direction == ListSortDirection.Descending ? SortOrder.Descending : SortOrder.Ascending;
+            }
         }
 
         private void SetOriginalJson()
@@ -1068,7 +1108,6 @@ namespace DBADashServiceConfig
 
         private void UpdateFromGrid()
         {
-            collectionConfig.SourceConnections = (List<DBADashSource>)((BindingSource)dgvConnections.DataSource).DataSource;
             SetJson();
             SetConnectionCount();
             RefreshEncryption();
@@ -1152,7 +1191,7 @@ namespace DBADashServiceConfig
             currencyManager1.SuspendBinding();
             foreach (DataGridViewRow row in dgvConnections.Rows)
             {
-                if (string.IsNullOrEmpty(txtSearch.Text) || row.Cells["ConnectionString"].Value.ToString().ToLower().Contains(txtSearch.Text.ToLower()))
+                if (string.IsNullOrEmpty(txtSearch.Text) || (row.Cells["ConnectionString"].Value.ToString() ?? "").Contains(txtSearch.Text, StringComparison.CurrentCultureIgnoreCase) || (row.Cells["ConnectionID"].Value.ToString() ?? "").Contains(txtSearch.Text, StringComparison.CurrentCultureIgnoreCase))
                 {
                     row.Visible = true;
                 }
@@ -1189,7 +1228,7 @@ namespace DBADashServiceConfig
 
         private void LnkExample_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            txtSnapshotDBs.Text = "Database1,Database2,Databsase3";
+            txtSnapshotDBs.Text = "Database1,Database2,Database3";
         }
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
