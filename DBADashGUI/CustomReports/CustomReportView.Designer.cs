@@ -41,9 +41,9 @@
             saveLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             resetLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             scriptReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            tsParameters = new System.Windows.Forms.ToolStripButton();
             cboResults = new System.Windows.Forms.ToolStripComboBox();
             lblSelectResults = new System.Windows.Forms.ToolStripLabel();
+            tsParams = new System.Windows.Forms.ToolStripDropDownButton();
             tsClearFilter = new System.Windows.Forms.ToolStripButton();
             lnkParams = new System.Windows.Forms.LinkLabel();
             pnlParams = new System.Windows.Forms.Panel();
@@ -78,7 +78,6 @@
             dgv.ReadOnly = true;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
-            dgv.RowTemplate.Height = 29;
             dgv.Size = new System.Drawing.Size(414, 562);
             dgv.TabIndex = 0;
             dgv.CellContentClick += Dgv_CellContentClick;
@@ -87,7 +86,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsCols, tsConfigure, tsParameters, cboResults, lblSelectResults, tsClearFilter });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsCols, tsConfigure, cboResults, lblSelectResults, tsParams, tsClearFilter });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1242, 28);
@@ -197,16 +196,6 @@
             scriptReportToolStripMenuItem.ToolTipText = "Generate a script for this custom report to share with other users of DBA Dash";
             scriptReportToolStripMenuItem.Click += ScriptReportToolStripMenuItem_Click;
             // 
-            // tsParameters
-            // 
-            tsParameters.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsParameters.Image = Properties.Resources.ReportParameter_16x;
-            tsParameters.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsParameters.Name = "tsParameters";
-            tsParameters.Size = new System.Drawing.Size(29, 25);
-            tsParameters.Text = "Parameters";
-            tsParameters.Click += TsParameters_Click;
-            // 
             // cboResults
             // 
             cboResults.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
@@ -224,6 +213,15 @@
             lblSelectResults.Text = "Select Results:";
             lblSelectResults.Visible = false;
             // 
+            // tsParams
+            // 
+            tsParams.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsParams.Image = Properties.Resources.ReportParameter_16x;
+            tsParams.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsParams.Name = "tsParams";
+            tsParams.Size = new System.Drawing.Size(34, 25);
+            tsParams.Text = "Parameters";
+            // 
             // tsClearFilter
             // 
             tsClearFilter.Enabled = false;
@@ -237,10 +235,10 @@
             // lnkParams
             // 
             lnkParams.Dock = System.Windows.Forms.DockStyle.Fill;
-            lnkParams.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            lnkParams.Font = new System.Drawing.Font("Segoe UI", 16F);
             lnkParams.Location = new System.Drawing.Point(0, 0);
             lnkParams.Name = "lnkParams";
-            lnkParams.Size = new System.Drawing.Size(824, 268);
+            lnkParams.Size = new System.Drawing.Size(824, 267);
             lnkParams.TabIndex = 2;
             lnkParams.TabStop = true;
             lnkParams.Text = "Set Parameters";
@@ -274,16 +272,16 @@
             splitContainer2.Panel2.Controls.Add(lblParamsRequired);
             splitContainer2.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
             splitContainer2.Size = new System.Drawing.Size(824, 562);
-            splitContainer2.SplitterDistance = 268;
+            splitContainer2.SplitterDistance = 267;
             splitContainer2.TabIndex = 4;
             // 
             // lblParamsRequired
             // 
             lblParamsRequired.Dock = System.Windows.Forms.DockStyle.Fill;
-            lblParamsRequired.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            lblParamsRequired.Font = new System.Drawing.Font("Segoe UI", 10F);
             lblParamsRequired.Location = new System.Drawing.Point(0, 0);
             lblParamsRequired.Name = "lblParamsRequired";
-            lblParamsRequired.Size = new System.Drawing.Size(824, 290);
+            lblParamsRequired.Size = new System.Drawing.Size(824, 291);
             lblParamsRequired.TabIndex = 3;
             lblParamsRequired.Text = "Parameters are required to run the report";
             lblParamsRequired.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -362,7 +360,6 @@
         private System.Windows.Forms.ToolStripButton tsExcel;
         private System.Windows.Forms.ToolStripDropDownButton tsConfigure;
         private System.Windows.Forms.ToolStripMenuItem setTitleToolStripMenuItem;
-        private System.Windows.Forms.ToolStripButton tsParameters;
         private System.Windows.Forms.LinkLabel lnkParams;
         private System.Windows.Forms.Panel pnlParams;
         private System.Windows.Forms.Label lblParamsRequired;
@@ -379,5 +376,6 @@
         private System.Windows.Forms.ToolStripMenuItem setDescriptionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem scriptReportToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsClearFilter;
+        private System.Windows.Forms.ToolStripDropDownButton tsParams;
     }
 }

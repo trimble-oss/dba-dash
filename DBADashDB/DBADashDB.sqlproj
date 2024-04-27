@@ -713,6 +713,13 @@
     <Build Include="Security\UserData.sql" />
     <Build Include="dbo\Views\PartitionHelper.sql" />
     <Build Include="dbo\Views\PartitionConfiguration.sql" />
+    <Build Include="dbo\Tables\TableSize.sql" />
+    <Build Include="dbo\Stored Procedures\TableSize_Upd.sql" />
+    <Build Include="dbo\User Defined Types\TableSize.sql" />
+    <Build Include="dbo\Stored Procedures\TableSize_Get.sql" />
+    <Build Include="dbo\Stored Procedures\TableSizeHistory_Get.sql" />
+    <Build Include="Storage\PF_TableSize.sql" />
+    <Build Include="Storage\TableSize.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

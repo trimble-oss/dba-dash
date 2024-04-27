@@ -13,6 +13,7 @@ using System.Text;
 using System.Windows.Forms;
 using CronExpressionDescriptor;
 using DBADashGUI.Theme;
+using Microsoft.SqlServer.Management.SqlScriptPublish;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 using Newtonsoft.Json;
 using static DBADash.DBADashConnection;
@@ -330,6 +331,10 @@ namespace DBADashServiceConfig
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "HasCustomSchedule", HeaderText = "Custom Schedule" });
             dgvConnections.Columns.Add(new DataGridViewComboBoxColumn() { DataPropertyName = "IOCollectionLevel", HeaderText = "IO Collection Level", DataSource = Enum.GetValues(typeof(DBADashSource.IOCollectionLevels)) });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "WriteToSecondaryDestinations", HeaderText = "Write to Secondary Destinations" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "TableSizeCollectionThresholdMB", HeaderText = "Table Size Threshold MB", ToolTipText = "Only collect tables that are larger then the specified threshold" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "TableSizeDatabases", HeaderText = "Table Size Databases", ToolTipText = "Comma separated list of databases to collect table size. \ndb1,db2\t\t=Databases db1 & db2\n*,-db1\t\t=All databases except db1" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "TableSizeMaxTableThreshold", HeaderText = "Table Size Max Tables", ToolTipText = "Skip table size collection if database has a large number of tables" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "TableSizeMaxDatabaseThreshold", HeaderText = "Table Size Max Databases", ToolTipText = "Skip table size collection if instance has a large number of databases" });
             dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Schedule", HeaderText = "Schedule", Text = "Schedule", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
             dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "CustomCollections", HeaderText = "Custom Collections", Text = "View/Edit", LinkColor = DashColors.LinkColor });
             dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Edit", HeaderText = "Copy Connection", Text = "Copy", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
@@ -1492,6 +1497,25 @@ namespace DBADashServiceConfig
             var frm = new ManageCustomCollections() { CustomCollections = CustomCollectionsNew, ConnectionString = connectionString };
             if (frm.ShowDialog() != DialogResult.OK) return;
             CustomCollectionsNew = frm.CustomCollections;
+        }
+
+        private void DgvConnections_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
+        {
+            if (e.Control is not TextBox textBox) return;
+            textBox.KeyPress -= NumericKeyPress;
+            if ((dgvConnections.CurrentCell.OwningColumn.ValueType == typeof(int) ||
+                 dgvConnections.CurrentCell.OwningColumn.ValueType == typeof(int?)))
+            {
+                textBox.KeyPress += NumericKeyPress;
+            }
+        }
+
+        private static void NumericKeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && e.KeyChar != '-')
+            {
+                e.Handled = true; // Suppress the key press if it's not a digit or control character
+            }
         }
     }
 }

@@ -37,7 +37,6 @@ namespace DBADashGUI.CustomReports
         {
             InitializeComponent();
             ShowParamPrompt(false);
-            InitializeContextMenu();
             dgv.AutoGenerateColumns = false;
             this.ApplyTheme();
         }
@@ -45,21 +44,25 @@ namespace DBADashGUI.CustomReports
         private void InitializeContextMenu()
         {
             columnContextMenu = new ContextMenuStrip();
-            var renameColumnMenuItem = new ToolStripMenuItem("Rename Column", Properties.Resources.Rename_16x);
-            var setFormatStringMenuItem = new ToolStripMenuItem("Set Format String", Properties.Resources.Percentage_16x);
-            var addLink = new ToolStripMenuItem("Add Link", Properties.Resources.WebURL_16x);
-            var rules = new ToolStripMenuItem("Highlighting Rules", Properties.Resources.HighlightHS);
-            renameColumnMenuItem.Click += RenameColumnMenuItem_Click;
-            convertLocalMenuItem.Click += ConvertLocalMenuItem_Click;
-            setFormatStringMenuItem.Click += SetFormatStringMenuItem_Click;
-            addLink.Click += AddLink_Click;
-            rules.Click += SetCellHighlightingRules;
-            columnContextMenu.Items.Add(renameColumnMenuItem);
-            columnContextMenu.Items.Add(convertLocalMenuItem);
-            columnContextMenu.Items.Add(setFormatStringMenuItem);
-            columnContextMenu.Items.Add(addLink);
-            columnContextMenu.Items.Add(rules);
-            dgv.MouseUp += Dgv_MouseUp;
+            if (report.CanEditReport)
+            {
+                var renameColumnMenuItem = new ToolStripMenuItem("Rename Column", Properties.Resources.Rename_16x);
+                var setFormatStringMenuItem =
+                    new ToolStripMenuItem("Set Format String", Properties.Resources.Percentage_16x);
+                var addLink = new ToolStripMenuItem("Add Link", Properties.Resources.WebURL_16x);
+                var rules = new ToolStripMenuItem("Highlighting Rules", Properties.Resources.HighlightHS);
+                renameColumnMenuItem.Click += RenameColumnMenuItem_Click;
+                convertLocalMenuItem.Click += ConvertLocalMenuItem_Click;
+                setFormatStringMenuItem.Click += SetFormatStringMenuItem_Click;
+                addLink.Click += AddLink_Click;
+                rules.Click += SetCellHighlightingRules;
+                columnContextMenu.Items.Add(renameColumnMenuItem);
+                columnContextMenu.Items.Add(convertLocalMenuItem);
+                columnContextMenu.Items.Add(setFormatStringMenuItem);
+                columnContextMenu.Items.Add(addLink);
+                columnContextMenu.Items.Add(rules);
+                dgv.MouseUp += Dgv_MouseUp;
+            }
 
             var highlight = new ToolStripMenuItem("Highlight", Properties.Resources.HighlightHS);
             var filterByValue = new ToolStripMenuItem("Filter By Value", Properties.Resources.Filter_16x) { Tag = false };
@@ -68,7 +71,10 @@ namespace DBADashGUI.CustomReports
             cellContextMenu.Items.Add(filterByValue);
             cellContextMenu.Items.Add(excludeValue);
             cellContextMenu.Items.Add(filterLike);
-            cellContextMenu.Items.Add(highlight);
+            if (report.CanEditReport)
+            {
+                cellContextMenu.Items.Add(highlight);
+            }
             highlight.Click += SetCellHighlightingRules;
             excludeValue.Click += FilterByValue_Click;
             filterByValue.Click += FilterByValue_Click;
@@ -290,7 +296,8 @@ namespace DBADashGUI.CustomReports
         /// <param name="e"></param>
         private void Dgv_MouseUp(object sender, MouseEventArgs e)
         {
-            if (!report.CanEditReport || e.Button != MouseButtons.Right) return;
+            if (e.Button != MouseButtons.Right) return;
+
             // Perform a hit test to determine where the click occurred
             var hitTestInfo = dgv.HitTest(e.X, e.Y);
             clickedColumnIndex = hitTestInfo.ColumnIndex;
@@ -571,6 +578,12 @@ namespace DBADashGUI.CustomReports
                 pToDate.Param.Value = DateRange.ToUTC;
             }
 
+            var pObjectID = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@ObjectID", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
+            if (pObjectID != null)
+            {
+                pObjectID.Param.Value = context.ObjectID > 0 ? context.ObjectID : DBNull.Value;
+            }
+
             // Add user supplied parameters
             foreach (var p in customParams.Where(p => !p.UseDefaultValue || CustomReport.SystemParamNames.Contains(p.Param.ParameterName, StringComparer.OrdinalIgnoreCase)))
             {
@@ -599,7 +612,7 @@ namespace DBADashGUI.CustomReports
             this.context = context;
             report = context.Report;
             customParams = sqlParams ?? report.GetCustomSqlParameters();
-            tsParameters.Enabled = customParams.Count > 0;
+            tsParams.Enabled = customParams.Count > 0;
             tsConfigure.Visible = report.CanEditReport;
             lblDescription.Text = report.Description;
             statusStrip1.Visible = !string.IsNullOrEmpty(report.Description);
@@ -611,6 +624,79 @@ namespace DBADashGUI.CustomReports
                     report.DeserializationException.Message, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 report.DeserializationException = null;// Display the message once
             }
+            InitializeContextMenu();
+            AddPickers();
+            RefreshData();
+        }
+
+        private void AddPickers()
+        {
+            tsParams.DropDownItems.Clear();
+            if (report.Pickers == null)
+            {
+                tsParams.Click += TsParameters_Click;
+                return;
+            }
+            tsParams.Click -= TsParameters_Click;
+
+            var pickers = report.Pickers;
+            if (customParams.Any(p => p.Param.ParameterName.Equals("@Top", StringComparison.InvariantCultureIgnoreCase) && p.Param.SqlDbType == SqlDbType.Int) && !pickers.Any(p => p.ParameterName.Equals("@Top", StringComparison.InvariantCultureIgnoreCase)))
+            {
+                pickers.Add(Picker.CreateTopPicker());
+            }
+
+            foreach (var picker in report.Pickers.OrderBy(p => p.Name))
+            {
+                var param = customParams.FirstOrDefault(p =>
+                        p.Param.ParameterName.Equals(picker.ParameterName,
+                            StringComparison.InvariantCultureIgnoreCase));
+                if (param == null) continue;
+                if (param.UseDefaultValue && !string.IsNullOrEmpty(picker.DefaultValue))
+                {
+                    param.Param.Value = picker.DefaultValue;
+                    param.UseDefaultValue = false;
+                }
+                var pickerMenu = new ToolStripMenuItem(picker.Name);
+                foreach (var itm in picker.PickerItems)
+                {
+                    var item = new ToolStripMenuItem(itm.Value) { Tag = itm.Key };
+                    item.Checked = param.UseDefaultValue && string.IsNullOrEmpty(itm.Key) || !param.UseDefaultValue && param.Param.Value.Equals(itm.Key);
+                    item.Click += (sender, e) => PickerItem_Click(sender, e, itm, picker.ParameterName);
+                    pickerMenu.DropDownItems.Add(item);
+                }
+
+                tsParams.DropDownItems.Add(pickerMenu);
+            }
+
+            tsParams.DropDownItems.Add(new ToolStripSeparator());
+
+            var tsParameters = new ToolStripMenuItem("Parameters");
+            tsParameters.Click += TsParameters_Click;
+            tsParams.DropDownItems.Add(tsParameters);
+        }
+
+        private void PickerItem_Click(object sender, EventArgs eventArgs, KeyValuePair<string, string> itm, string paramName)
+        {
+            var menu = (ToolStripMenuItem)sender;
+            var param = customParams.First(p => p.Param.ParameterName.Equals(paramName, StringComparison.InvariantCultureIgnoreCase));
+            if (string.IsNullOrEmpty(itm.Key))
+            {
+                param.UseDefaultValue = true;
+            }
+            else
+            {
+                param.Param.Value = itm.Key;
+                param.UseDefaultValue = false;
+            }
+
+            if (menu.Owner != null)
+            {
+                foreach (var item in menu.Owner.Items.Cast<ToolStripMenuItem>())
+                {
+                    item.Checked = item == menu;
+                }
+            }
+
             RefreshData();
         }
 
@@ -668,6 +754,7 @@ namespace DBADashGUI.CustomReports
             if (frm.DialogResult == DialogResult.OK)
             {
                 customParams = frm.Params;
+                AddPickers();// Update checks on picker items
             }
             RefreshData();
         }

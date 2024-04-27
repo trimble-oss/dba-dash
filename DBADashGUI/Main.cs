@@ -234,7 +234,7 @@ namespace DBADashGUI
                 GetCommandLineTags();
                 GetTreeLayout();
                 BuildTagMenu(commandLineTags);
-                AddInstanes();
+                AddInstances();
                 AddTimeZoneMenus();
                 SetConnectionState(true);
                 ThemeExtensions.CellToolTipMaxLength = Config.CellToolTipMaxLength;
@@ -391,10 +391,10 @@ namespace DBADashGUI
 
         private void MnuRootRefresh_Click(object sender, EventArgs e)
         {
-            AddInstanes();
+            AddInstances();
         }
 
-        private void AddInstanes()
+        private void AddInstances()
         {
             VisitedNodes.Clear();
             tsBack.Enabled = false;
@@ -476,11 +476,10 @@ namespace DBADashGUI
                             .Select(r => (string)r["elastic_pool_name"])
                             .Distinct()
                             .OrderBy(r => r)
-                            .Select(poolName => (TreeNode)new SQLTreeItem(poolName, SQLTreeItem.TreeType.ElasticPool) { ElasticPoolName = poolName})
+                            .Select(poolName => (TreeNode)new SQLTreeItem(poolName, SQLTreeItem.TreeType.ElasticPool) { ElasticPoolName = poolName })
                             .ToArray();
 
                         AzureNode.Nodes.AddRange(poolNodes);
-
                     }
 
                     var poolName = (string)row["elastic_pool_name"].DBNullToNull();
@@ -662,7 +661,7 @@ namespace DBADashGUI
             var n = tv1.SelectedSQLTreeItem();
             var parent = n.SQLTreeItemParent;
             bool hasAzureDBs = n.AzureInstanceIDs.Count > 0;
-            
+
             if (n.Type is SQLTreeItem.TreeType.DBADashRoot or SQLTreeItem.TreeType.InstanceFolder)
             {
                 allowedTabs.AddRange(new TabPage[] { tabSummary, tabPerformanceSummary });
@@ -779,7 +778,7 @@ namespace DBADashGUI
             {
                 if (!IsAzureOnly && parent.Type != SQLTreeItem.TreeType.AzureInstance)
                 {
-                    allowedTabs.AddRange(new TabPage[] { tabDrives, tabDBSpace, tabFiles, tabTempDB });
+                    allowedTabs.AddRange(new TabPage[] { tabDrives, tabDBSpace, tabFiles, tabTempDB, tabTableSize });
                     if (n.InstanceID > 0)
                     {
                         allowedTabs.Add(tabDrivePerformance);
@@ -787,26 +786,36 @@ namespace DBADashGUI
                 }
                 else
                 {
-                    allowedTabs.AddRange(new TabPage[] { tabDBSpace, tabFiles });
+                    allowedTabs.AddRange(new TabPage[] { tabDBSpace, tabFiles, tabTableSize });
                 }
             }
             else if (n.Type == SQLTreeItem.TreeType.Drive)
             {
                 allowedTabs.AddRange(new TabPage[] { tabDrives, tabFiles, tabDrivePerformance });
             }
-            else if (n.Type == SQLTreeItem.TreeType.CustomReport)
+            else if (n.Type is SQLTreeItem.TreeType.CustomReport or SQLTreeItem.TreeType.SystemReport)
             {
                 tabCustomReport.Text = n.Report.ReportName;
                 allowedTabs.Add(tabCustomReport);
             }
+            else if (n.Type == SQLTreeItem.TreeType.Folder && n.Text == "Tables")
+            {
+                allowedTabs.Add(tabTableSize);
+            }
 
             if (n.ObjectID > 0)
             {
-                if (n.Type is SQLTreeItem.TreeType.StoredProcedure or SQLTreeItem.TreeType.CLRProcedure
-                    or SQLTreeItem.TreeType.ScalarFunction or SQLTreeItem.TreeType.CLRScalarFunction
-                    or SQLTreeItem.TreeType.Trigger or SQLTreeItem.TreeType.CLRTrigger)
+                switch (n.Type)
                 {
-                    allowedTabs.AddRange(new TabPage[] { tabObjectExecutionSummary, tabPerformance });
+                    case SQLTreeItem.TreeType.StoredProcedure or SQLTreeItem.TreeType.CLRProcedure
+                        or SQLTreeItem.TreeType.ScalarFunction or SQLTreeItem.TreeType.CLRScalarFunction
+                        or SQLTreeItem.TreeType.Trigger or SQLTreeItem.TreeType.CLRTrigger:
+                        allowedTabs.AddRange(new TabPage[] { tabObjectExecutionSummary, tabPerformance });
+                        break;
+
+                    case SQLTreeItem.TreeType.Table:
+                        allowedTabs.Add(tabTableSize);
+                        break;
                 }
 
                 allowedTabs.Add(tabSchema);
@@ -1122,13 +1131,13 @@ namespace DBADashGUI
         private void ShowCounts_Click(object sender, EventArgs e)
         {
             ShowCounts = ((ToolStripMenuItem)sender).Checked;
-            AddInstanes();
+            AddInstances();
         }
 
         private void GroupByTag_Click(object sender, EventArgs e)
         {
             GroupByTag = (string)((ToolStripMenuItem)sender).Tag;
-            AddInstanes();
+            AddInstances();
         }
 
         private void RefreshTag_Click(object sender, EventArgs e)
@@ -1143,7 +1152,7 @@ namespace DBADashGUI
             mnuTags.Font = Font = new Font(mnuTags.Font, mnuTags.Font.Style & ~FontStyle.Bold);
             ClearTags(mnuTags.DropDownItems);
             isClearTags = false;
-            AddInstanes();
+            AddInstances();
             this.Font = new Font(this.Font, FontStyle.Regular);
         }
 
@@ -1193,7 +1202,7 @@ namespace DBADashGUI
         private void MTagValue_CheckedChanged(object sender, EventArgs e)
         {
             if (isClearTags) return;
-            AddInstanes();
+            AddInstances();
             var mnuTag = (ToolStripMenuItem)sender;
             while (mnuTag.OwnerItem is ToolStripMenuItem item)
             {
@@ -1433,7 +1442,7 @@ namespace DBADashGUI
             {
                 if (ManageInstancesForm.InstanceActiveFlagChanged || ManageInstancesForm.InstanceSummaryVisibleChanged)
                 {
-                    AddInstanes(); // refresh the tree if instances deleted/restored
+                    AddInstances(); // refresh the tree if instances deleted/restored
                     if (tabs.SelectedTab == tabSummary)
                     {
                         summary1.RefreshData();
@@ -1477,7 +1486,7 @@ namespace DBADashGUI
 
         private void BttnSearch_Click(object sender, EventArgs e)
         {
-            AddInstanes();
+            AddInstances();
         }
 
         private static DBDiff DBDiffForm = null;
@@ -1516,7 +1525,7 @@ namespace DBADashGUI
         {
             if (e.KeyCode == Keys.Enter)
             {
-                AddInstanes();
+                AddInstances();
             }
         }
 
@@ -1534,7 +1543,7 @@ namespace DBADashGUI
             {
                 if (ConfigureDisplayNameForm.EditCount > 0)
                 {
-                    AddInstanes();
+                    AddInstances();
                 }
 
                 ConfigureDisplayNameForm = null;

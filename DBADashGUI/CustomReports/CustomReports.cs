@@ -15,13 +15,15 @@ namespace DBADashGUI.CustomReports
 {
     internal class CustomReports : List<CustomReport>
     {
-        public IEnumerable<CustomReport> RootLevelReports => this.Where(x => x.IsRootLevel);
-        public IEnumerable<CustomReport> InstanceLevelReports => this.Where(x => x.IsInstanceLevel);
-        public IEnumerable<CustomReport> DatabaseLevelReports => this.Where(x => x.IsDatabaseLevel);
+        public IEnumerable<CustomReport> RootLevelReports => this.Where(x => x.IsRootLevel).Union(SystemReports.Where(r => r.IsRootLevel));
+        public IEnumerable<CustomReport> InstanceLevelReports => this.Where(x => x.IsInstanceLevel).Union(SystemReports.Where(r => r.IsInstanceLevel));
+        public IEnumerable<CustomReport> DatabaseLevelReports => this.Where(x => x.IsDatabaseLevel).Union(SystemReports.Where(r => r.IsDatabaseLevel));
 
         private static CustomReports _customReports;
 
         private static Guid connectionId = Guid.Empty;
+
+        public static SystemReports SystemReports { get; } = new SystemReports();
 
         public static CustomReports GetCustomReports(bool forceRefresh = false)
         {

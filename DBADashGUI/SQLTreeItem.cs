@@ -66,7 +66,8 @@ namespace DBADashGUI
             Drive,
             ReportsFolder,
             CustomReport,
-            ElasticPool
+            ElasticPool,
+            SystemReport
         }
 
         private DatabaseEngineEdition _engineEdition = DatabaseEngineEdition.Unknown;
@@ -192,7 +193,7 @@ namespace DBADashGUI
                 }
                 else if (Type == TreeType.ElasticPool)
                 {
-                    _AzureInstanceIDs = Parent.Nodes.Cast<SQLTreeItem>().Where(n => n.Type == TreeType.AzureDatabase && string.Equals(n.ElasticPoolName, ElasticPoolName, StringComparison.InvariantCultureIgnoreCase)).Select(n=>n.InstanceID).ToHashSet();
+                    _AzureInstanceIDs = Parent.Nodes.Cast<SQLTreeItem>().Where(n => n.Type == TreeType.AzureDatabase && string.Equals(n.ElasticPoolName, ElasticPoolName, StringComparison.InvariantCultureIgnoreCase)).Select(n => n.InstanceID).ToHashSet();
                     _InstanceIDs.UnionWith(_AzureInstanceIDs);
                 }
             }
@@ -549,12 +550,18 @@ namespace DBADashGUI
                     ImageIndex = 24;
                     break;
 
+                case TreeType.SystemReport:
+                    ImageIndex = 27;
+                    break;
+
                 case TreeType.ReportsFolder:
                     ImageIndex = 25;
                     break;
-                case TreeType.ElasticPool:                    
+
+                case TreeType.ElasticPool:
                     ImageIndex = 26;
                     break;
+
                 default:
                     ImageIndex = 5;
                     break;
@@ -587,7 +594,7 @@ namespace DBADashGUI
             var reportsNode = new SQLTreeItem("Reports", SQLTreeItem.TreeType.ReportsFolder);
             foreach (var report in reports)
             {
-                var reportNode = new SQLTreeItem(report.ReportName, SQLTreeItem.TreeType.CustomReport) { Report = report };
+                var reportNode = new SQLTreeItem(report.ReportName, report is SystemReport ? SQLTreeItem.TreeType.SystemReport : SQLTreeItem.TreeType.CustomReport) { Report = report };
                 reportsNode.Nodes.Add(reportNode);
             }
 

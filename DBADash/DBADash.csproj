@@ -23,6 +23,7 @@
     <None Remove="SQL\SQLJobs.sql" />
     <None Remove="SQL\SQLJobSteps.sql" />
     <None Remove="SQL\SQLRunningJobs.sql" />
+    <None Remove="SQL\SQLTableSize.sql" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
@@ -82,6 +83,7 @@
 	<EmbeddedResource Include="SQL\SQLStopEventSessions.sql" />
 	<EmbeddedResource Include="SQL\SQLStopEventSessionsAzure.sql" />
 	<EmbeddedResource Include="SQL\SQLSysConfig.sql" />
+	<EmbeddedResource Include="SQL\SQLTableSize.sql" />
 	<EmbeddedResource Include="SQL\SQLTraceFlags.sql" />
 	<EmbeddedResource Include="SQL\SQLVLF.sql" />
 	<EmbeddedResource Include="SQL\SQLWaits.sql" />

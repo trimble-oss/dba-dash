@@ -295,7 +295,7 @@ namespace DBADash
             "Jobs", "JobHistory", "AvailabilityReplicas", "AvailabilityGroups", "JobSteps",
             "DatabaseQueryStoreOptions", "ResourceGovernorConfiguration", "AzureDBResourceGovernance",
             "RunningQueries", "QueryText", "QueryPlans", "InternalPerformanceCounters", "MemoryUsage",
-            "SessionWaits", "IdentityColumns", "RunningJobs"
+            "SessionWaits", "IdentityColumns", "RunningJobs", "TableSize"
         };
 
         public void Update()

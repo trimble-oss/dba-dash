@@ -10,7 +10,7 @@ namespace DBADash
     {
         private static CommandTimeoutSettings settings = new();
 
-        public static int GetDefaultCommandTimeout()=>settings.DefaultCommandTimeout;
+        public static int GetDefaultCommandTimeout() => settings.DefaultCommandTimeout;
 
         static CollectionCommandTimeout()
         {
@@ -46,7 +46,7 @@ namespace DBADash
                     }
                 };
                 settings = JsonConvert.DeserializeObject<CommandTimeoutSettings>(json, serializationOpts);
-                
+
                 Log.Information($"Custom command timeouts loaded from {filePath}");
             }
             catch (JsonException ex)
@@ -68,6 +68,7 @@ namespace DBADash
             // Defaults supplied in this class will be used unless user supplies value in commandTimeouts.json
             public Dictionary<CollectionType, int> CollectionCommandTimeouts { get; } = new()
             {
+                { CollectionType.TableSize, 900 },
                 { CollectionType.DatabasePermissions, 900 },
                 { CollectionType.DatabasePrincipals, 900 },
                 { CollectionType.DatabaseRoleMembers, 900 },
@@ -108,10 +109,8 @@ namespace DBADash
                 { CollectionType.AvailabilityReplicas, 120 },
                 { CollectionType.MemoryUsage, 120 }
             };
-            public int DefaultCommandTimeout { get; } = 60;
 
+            public int DefaultCommandTimeout { get; } = 60;
         }
     }
-
-
 }

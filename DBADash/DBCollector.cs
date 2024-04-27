@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Caching;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -77,7 +78,8 @@ namespace DBADash
         SchemaSnapshot,
         IdentityColumns,
         Instance,
-        RunningJobs
+        RunningJobs,
+        TableSize
     }
 
     public enum HostPlatform
@@ -95,7 +97,7 @@ namespace DBADash
         private DataTable dtInternalPerfCounters;
         public int PerformanceCollectionPeriodMins = 60;
         private string computerName;
-        private readonly CollectionType[] azureCollectionTypes = new[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.OSInfo, CollectionType.CustomChecks, CollectionType.PerformanceCounters, CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions, CollectionType.AzureDBResourceGovernance, CollectionType.RunningQueries, CollectionType.IdentityColumns };
+        private readonly CollectionType[] azureCollectionTypes = new[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.OSInfo, CollectionType.CustomChecks, CollectionType.PerformanceCounters, CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions, CollectionType.AzureDBResourceGovernance, CollectionType.RunningQueries, CollectionType.IdentityColumns, CollectionType.TableSize };
         private readonly CollectionType[] azureOnlyCollectionTypes = new[] { CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceGovernance };
         private readonly CollectionType[] azureMasterOnlyCollectionTypes = new[] { CollectionType.AzureDBElasticPoolResourceStats };
         public DBADashSource Source;
@@ -131,6 +133,11 @@ namespace DBADash
         private Version SQLVersion = new();
 
         private bool IsTableValuedConstructorsSupported => SQLVersion.Major > 9;
+
+        private const int TableSizeCollectionThresholdMBDefault = 100;
+        private const string TableSizeDatabasesDefault = "*";
+        private const int TableSizeMaxTableThresholdDefault = 2000;
+        private const int TableSizeMaxDatabaseThreshold = 500;
 
         public int Job_instance_id
         {
@@ -253,7 +260,7 @@ namespace DBADash
         {
             if (ex is SqlException sqlEx)
             {
-                return !ExcludedErrorCodes.Contains(sqlEx.Number);
+                return !ExcludedErrorCodes.Contains(sqlEx.Number) && sqlEx.Message != "Max databases exceeded for Table Size collection";
             }
             return true;
         }
@@ -527,6 +534,10 @@ namespace DBADash
             {
                 return false; // Required & collected by default
             }
+            else if (collectionType == CollectionType.TableSize && SQLVersion.Major <= 12 && !IsAzureDB)
+            {
+                return false; // Table size collection not supported on SQL 2014 and below
+            }
             else
             {
                 return true;
@@ -545,13 +556,13 @@ namespace DBADash
             try
             {
                 retryPolicy.Execute(
-                  _ =>
-                  {
-                      StartCollection(collectionType.ToString());
-                      ExecuteCollection(collectionType);
-                      StopCollection();
-                  },
-                  new Context(collectionTypeString)
+                    _ =>
+                    {
+                        StartCollection(collectionType.ToString());
+                        ExecuteCollection(collectionType);
+                        StopCollection();
+                    },
+                    new Context(collectionTypeString)
                 );
             }
             catch (Exception ex)
@@ -913,6 +924,14 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             else if (collectionType == CollectionType.IOStats)
             {
                 param = new[] { new SqlParameter("IOCollectionLevel", Source.IOCollectionLevel) };
+            }
+            else if (collectionType == CollectionType.TableSize)
+            {
+                param = new[] { new SqlParameter("SizeThresholdMB", Source.TableSizeCollectionThresholdMB ?? TableSizeCollectionThresholdMBDefault),
+                    new SqlParameter("TableSizeDatabases", Source.TableSizeDatabases ?? TableSizeDatabasesDefault),
+                    new SqlParameter("MaxTables", Source.TableSizeMaxTableThreshold ?? TableSizeMaxTableThresholdDefault ),
+                    new SqlParameter("MaxDatabases", Source.TableSizeMaxDatabaseThreshold ?? TableSizeMaxDatabaseThreshold)
+                };
             }
 
             if (collectionType == CollectionType.Drives)

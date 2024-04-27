@@ -93,7 +93,8 @@ namespace DBADashGUI.CustomReports
         public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex)
         {
             customReportViewer?.Close();
-            var report = CustomReports.GetCustomReports().FirstOrDefault(r => r.ProcedureName == ReportProcedureName);
+            var report = context.Report is SystemReport ? CustomReports.SystemReports.FirstOrDefault(r => r.ProcedureName == ReportProcedureName) : CustomReports.GetCustomReports().FirstOrDefault(r => r.ProcedureName == ReportProcedureName);
+
             if (report == null) return;
             var newContext = (DBADashContext)context.Clone();
             newContext.Report = report;
