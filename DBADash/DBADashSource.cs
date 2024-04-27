@@ -184,8 +184,17 @@ namespace DBADash
 
         public bool CollectSessionWaits
         {
-            get => SourceConnection is { Type: ConnectionType.SQL } && _collectSessionWaits; set => _collectSessionWaits = value;
+            get => SourceConnection is { Type: ConnectionType.SQL } && _collectSessionWaits;
+            set => _collectSessionWaits = value;
         }
+
+        public int? TableSizeCollectionThresholdMB { get; set; }
+
+        public int? TableSizeMaxDatabaseThreshold { get; set; }
+
+        public string TableSizeDatabases { get; set; }
+
+        public int? TableSizeMaxTableThreshold { get; set; }
 
         public DBADashSource(string source)
         {

@@ -170,7 +170,7 @@ namespace DBADashServiceConfig
             // bttnSave
             // 
             bttnSave.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            bttnSave.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            bttnSave.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             bttnSave.Location = new System.Drawing.Point(909, 16);
             bttnSave.Name = "bttnSave";
             bttnSave.Size = new System.Drawing.Size(101, 35);
@@ -203,7 +203,7 @@ namespace DBADashServiceConfig
             // lnkSourceConnections
             // 
             lnkSourceConnections.AutoSize = true;
-            lnkSourceConnections.Font = new System.Drawing.Font("Arial", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            lnkSourceConnections.Font = new System.Drawing.Font("Arial", 7.8F);
             lnkSourceConnections.LinkColor = System.Drawing.Color.Black;
             lnkSourceConnections.Location = new System.Drawing.Point(27, 25);
             lnkSourceConnections.Name = "lnkSourceConnections";
@@ -752,7 +752,7 @@ namespace DBADashServiceConfig
             // 
             // label10
             // 
-            label10.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
+            label10.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
             label10.Location = new System.Drawing.Point(585, 37);
             label10.Name = "label10";
             label10.Size = new System.Drawing.Size(504, 85);
@@ -777,7 +777,7 @@ namespace DBADashServiceConfig
             groupBox2.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             groupBox2.Controls.Add(tabSrcOptions);
             groupBox2.Controls.Add(bttnAdd);
-            groupBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            groupBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             groupBox2.Location = new System.Drawing.Point(10, 8);
             groupBox2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             groupBox2.Name = "groupBox2";
@@ -794,7 +794,7 @@ namespace DBADashServiceConfig
             tabSrcOptions.Controls.Add(tabExtendedEvents);
             tabSrcOptions.Controls.Add(tabRunningQueries);
             tabSrcOptions.Controls.Add(tabAddConnectionOther);
-            tabSrcOptions.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            tabSrcOptions.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             tabSrcOptions.Location = new System.Drawing.Point(16, 27);
             tabSrcOptions.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             tabSrcOptions.Name = "tabSrcOptions";
@@ -841,7 +841,7 @@ namespace DBADashServiceConfig
             // tabExtendedEvents
             // 
             tabExtendedEvents.Controls.Add(pnlExtendedEvents);
-            tabExtendedEvents.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            tabExtendedEvents.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             tabExtendedEvents.Location = new System.Drawing.Point(4, 29);
             tabExtendedEvents.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             tabExtendedEvents.Name = "tabExtendedEvents";
@@ -1177,7 +1177,7 @@ namespace DBADashServiceConfig
             groupBox1.Controls.Add(dgvConnections);
             groupBox1.Controls.Add(label13);
             groupBox1.Controls.Add(txtSearch);
-            groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             groupBox1.Location = new System.Drawing.Point(10, 325);
             groupBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             groupBox1.Name = "groupBox1";
@@ -1201,6 +1201,7 @@ namespace DBADashServiceConfig
             dgvConnections.Size = new System.Drawing.Size(1067, 315);
             dgvConnections.TabIndex = 23;
             dgvConnections.CellContentClick += DgvConnections_CellContentClick;
+            dgvConnections.EditingControlShowing += DgvConnections_EditingControlShowing;
             dgvConnections.RowsAdded += Dgv_RowsAdded;
             dgvConnections.RowValidated += Dgv_RowValidated;
             dgvConnections.UserDeletedRow += Dgv_UserDeletedRow;
@@ -1209,7 +1210,7 @@ namespace DBADashServiceConfig
             // 
             label13.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             label13.AutoSize = true;
-            label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             label13.Location = new System.Drawing.Point(830, 353);
             label13.Name = "label13";
             label13.Size = new System.Drawing.Size(53, 16);
@@ -1302,7 +1303,7 @@ namespace DBADashServiceConfig
             // lnkInstall
             // 
             lnkInstall.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            lnkInstall.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            lnkInstall.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold);
             lnkInstall.Image = Properties.Resources.install;
             lnkInstall.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             lnkInstall.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
@@ -1341,7 +1342,7 @@ namespace DBADashServiceConfig
             // lblVersionInfo
             // 
             lblVersionInfo.AutoSize = true;
-            lblVersionInfo.Font = new System.Drawing.Font("Arial", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            lblVersionInfo.Font = new System.Drawing.Font("Arial", 7.8F);
             lblVersionInfo.Location = new System.Drawing.Point(103, 127);
             lblVersionInfo.Name = "lblVersionInfo";
             lblVersionInfo.Size = new System.Drawing.Size(83, 16);

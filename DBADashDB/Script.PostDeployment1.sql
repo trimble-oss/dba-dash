@@ -1140,9 +1140,13 @@ FROM (VALUES('ObjectExecutionStats',120),
 				('CollectionErrorLog',14),
 				('MemoryUsage',30),
 				('SessionWaits',30),
-				('IdentityColumnsHistory',730)
+				('IdentityColumnsHistory',730),
+				('TableSize',730)
 				) AS t(TableName,RetentionDays)
-WHERE NOT EXISTS(SELECT 1 FROM dbo.DataRetention DR WHERE DR.TableName = T.TableName)
+WHERE NOT EXISTS(SELECT 1 
+				FROM dbo.DataRetention DR
+				WHERE DR.TableName = T.TableName
+				AND DR.SchemaName = 'dbo')
 
 DELETE dbo.OSLoadedModulesStatus
 WHERE IsSystem=1
@@ -1366,7 +1370,8 @@ FROM
 (-1,'ResourceGovernorConfiguration',1445,2880),
 (-1,'MemoryUsage',5,10),
 (-1,'IdentityColumns',10080,20160),
-(-1,'RunningJobs',5,10)
+(-1,'RunningJobs',5,10),
+(-1,'TableSize',4320,11520)
 ) T(InstanceID,Reference,WarningThreshold,CriticalThreshold)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.CollectionDatesThresholds CDT WHERE CDT.InstanceID = T.InstanceID AND CDT.Reference = T.Reference)
 

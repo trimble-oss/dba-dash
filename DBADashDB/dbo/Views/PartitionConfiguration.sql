@@ -29,7 +29,8 @@ VALUES -- Daily Partitions
 	('dbo','ObjectExecutionStats_60MIN','m',3,CAST(1 AS BIT)),
 	('dbo','PerformanceCounters_60MIN','m',3,CAST(1 AS BIT)),
 	('dbo','JobStats_60MIN','m',3,CAST(1 AS BIT)),
-	('dbo','IdentityColumnsHistory','m',3,CAST(1 AS BIT))
+	('dbo','IdentityColumnsHistory','m',3,CAST(1 AS BIT)),
+	('dbo','TableSize','m',3,CAST(1 AS BIT))
 	) T(SchemaName,TableName,PeriodType,PeriodCount,IsSystem)
 UNION ALL
 SELECT	SchemaName,

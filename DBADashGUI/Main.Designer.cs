@@ -212,6 +212,8 @@ namespace DBADashGUI
             runningJobs1 = new AgentJobs.RunningJobs();
             tabCustomReport = new System.Windows.Forms.TabPage();
             customReportView1 = new CustomReports.CustomReportView();
+            tabTableSize = new System.Windows.Forms.TabPage();
+            tableSize1 = new DBFiles.TableSize();
             refresh1 = new Refresh();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -300,6 +302,7 @@ namespace DBADashGUI
             tabDrivePerformance.SuspendLayout();
             tabRunningJobs.SuspendLayout();
             tabCustomReport.SuspendLayout();
+            tabTableSize.SuspendLayout();
             SuspendLayout();
             // 
             // TreeViewImageList
@@ -331,9 +334,11 @@ namespace DBADashGUI
             TreeViewImageList.Images.SetKeyName(21, "");
             TreeViewImageList.Images.SetKeyName(22, "MonthCalendar_16x.png");
             TreeViewImageList.Images.SetKeyName(23, "LogicalDataCenterDiagram.ico");
-            TreeViewImageList.Images.SetKeyName(24, "Report_16x.png");
+            TreeViewImageList.Images.SetKeyName(24, "System_Report_16x.png");
             TreeViewImageList.Images.SetKeyName(25, "FileDialogReport_16x.png");
             TreeViewImageList.Images.SetKeyName(26, "DatabaseGroup.png");
+            TreeViewImageList.Images.SetKeyName(27, "User_Report_16x.png");
+            TreeViewImageList.Images.SetKeyName(28, "Report_16x.png");
             // 
             // menuStrip1
             // 
@@ -912,6 +917,7 @@ namespace DBADashGUI
             tabs.Controls.Add(tabDrivePerformance);
             tabs.Controls.Add(tabRunningJobs);
             tabs.Controls.Add(tabCustomReport);
+            tabs.Controls.Add(tabTableSize);
             tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             tabs.Location = new System.Drawing.Point(0, 0);
             tabs.Name = "tabs";
@@ -1159,6 +1165,7 @@ namespace DBADashGUI
             // 
             // tags1
             // 
+            tags1.AllTags = null;
             tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             tags1.Location = new System.Drawing.Point(3, 3);
             tags1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -2175,6 +2182,25 @@ namespace DBADashGUI
             customReportView1.Size = new System.Drawing.Size(186, 61);
             customReportView1.TabIndex = 0;
             // 
+            // tabTableSize
+            // 
+            tabTableSize.Controls.Add(tableSize1);
+            tabTableSize.Location = new System.Drawing.Point(4, 29);
+            tabTableSize.Name = "tabTableSize";
+            tabTableSize.Padding = new System.Windows.Forms.Padding(3);
+            tabTableSize.Size = new System.Drawing.Size(192, 67);
+            tabTableSize.TabIndex = 49;
+            tabTableSize.Text = "Table Size";
+            tabTableSize.UseVisualStyleBackColor = true;
+            // 
+            // tableSize1
+            // 
+            tableSize1.Dock = System.Windows.Forms.DockStyle.Fill;
+            tableSize1.Location = new System.Drawing.Point(3, 3);
+            tableSize1.Name = "tableSize1";
+            tableSize1.Size = new System.Drawing.Size(186, 61);
+            tableSize1.TabIndex = 0;
+            // 
             // refresh1
             // 
             refresh1.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
@@ -2501,6 +2527,7 @@ namespace DBADashGUI
             tabDrivePerformance.ResumeLayout(false);
             tabRunningJobs.ResumeLayout(false);
             tabCustomReport.ResumeLayout(false);
+            tabTableSize.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -2708,5 +2735,7 @@ namespace DBADashGUI
         private AgentJobs.RunningJobs runningJobs1;
         private System.Windows.Forms.TabPage tabCustomReport;
         private CustomReports.CustomReportView customReportView1;
+        private System.Windows.Forms.TabPage tabTableSize;
+        private DBFiles.TableSize tableSize1;
     }
 }
