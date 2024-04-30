@@ -29,6 +29,7 @@ WITH T AS (
 				)
 	AND TS.SnapshotDate>=@MinSnapshotDate
 	AND (TS.DatabaseID = @DatabaseID OR @DatabaseID IS NULL)
+	AND I.IsActive=1
 )
 SELECT TOP(@Top) 
 	Latest.ObjectID,
@@ -53,5 +54,7 @@ JOIN dbo.DBObjects O ON Latest.ObjectID = O.ObjectID AND O.DatabaseID = Latest.D
 LEFT JOIN T Oldest ON Latest.Instance = Oldest.Instance AND Latest.DatabaseID = Oldest.DatabaseID AND Latest.ObjectID = Oldest.ObjectID AND Oldest.Oldest = 1
 LEFT JOIN dbo.CollectionDatesStatus SSD ON SSD.InstanceID = Latest.InstanceID AND SSD.Reference='TableSize'
 WHERE Latest.Latest = 1
+AND D.IsActive=1
+AND O.IsActive=1
 ORDER BY Latest.reserved_pages DESC
 OPTION(RECOMPILE)
