@@ -9,8 +9,7 @@ DECLARE @MinSnapshotDate DATETIME2
 SELECT @MinSnapshotDate = DATEADD(d,-@GrowthDays,SYSUTCDATETIME());
 
 WITH T AS (
-	SELECT	I.InstanceID,
-			I.InstanceDisplayName AS Instance,
+	SELECT	TS.InstanceID,		
 			TS.[SnapshotDate],
 			TS.DatabaseID,
 			TS.ObjectID,
@@ -21,20 +20,19 @@ WITH T AS (
 			TS.index_pages,
 			RANK() OVER(PARTITION BY TS.ObjectID ORDER BY TS.SnapshotDate DESC) Latest,
 			RANK() OVER(PARTITION BY TS.ObjectID ORDER BY TS.SnapshotDate ASC) Oldest
-	FROM dbo.TableSize TS
-	JOIN dbo.Instances I ON I.InstanceID = TS.InstanceID
+	FROM dbo.TableSize TS	
 	WHERE EXISTS(SELECT 1
 				FROM @InstanceIDs T
 				WHERE T.ID = TS.InstanceID
 				)
 	AND TS.SnapshotDate>=@MinSnapshotDate
 	AND (TS.DatabaseID = @DatabaseID OR @DatabaseID IS NULL)
-	AND I.IsActive=1
+	
 )
 SELECT TOP(@Top) 
 	Latest.ObjectID,
 	Latest.InstanceID,
-	Latest.Instance,
+	I.InstanceDisplayName AS Instance,
 	Latest.[SnapshotDate],
 	ISNULL(SSD.Status,3) AS SnapshotStatus,
 	D.name AS [DB],
@@ -49,12 +47,18 @@ SELECT TOP(@Top)
 	(Latest.used_pages - Oldest.used_pages)*8*1440.0 / NULLIF(DATEDIFF(mi,Oldest.SnapshotDate,Latest.SnapshotDate),0) AS Avg_KB_Per_Day,
 	NULLIF(DATEDIFF(mi,Oldest.SnapshotDate,Latest.SnapshotDate),0)/1440.0 AS CalcDays	
 FROM T Latest
+JOIN dbo.Instances I ON I.InstanceID = Latest.InstanceID
 JOIN dbo.Databases D ON D.DatabaseID = Latest.DatabaseID
 JOIN dbo.DBObjects O ON Latest.ObjectID = O.ObjectID AND O.DatabaseID = Latest.DatabaseID
-LEFT JOIN T Oldest ON Latest.Instance = Oldest.Instance AND Latest.DatabaseID = Oldest.DatabaseID AND Latest.ObjectID = Oldest.ObjectID AND Oldest.Oldest = 1
+LEFT JOIN T Oldest ON Latest.InstanceID = Oldest.InstanceID AND Latest.DatabaseID = Oldest.DatabaseID AND Latest.ObjectID = Oldest.ObjectID AND Oldest.Oldest = 1
 LEFT JOIN dbo.CollectionDatesStatus SSD ON SSD.InstanceID = Latest.InstanceID AND SSD.Reference='TableSize'
 WHERE Latest.Latest = 1
 AND D.IsActive=1
 AND O.IsActive=1
+AND I.IsActive=1
+AND EXISTS(SELECT 1
+				FROM @InstanceIDs T
+				WHERE T.ID = I.InstanceID
+				)
 ORDER BY Latest.reserved_pages DESC
 OPTION(RECOMPILE)
