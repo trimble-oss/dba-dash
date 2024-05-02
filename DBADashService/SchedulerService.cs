@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using DBADash.Messaging;
 using Microsoft.Data.SqlClient;
 using static DBADash.DBADashConnection;
 using Microsoft.Extensions.Hosting;
@@ -26,6 +27,7 @@ namespace DBADashService
         private System.Timers.Timer azureScanForNewDBsTimer;
         private System.Timers.Timer folderCleanupTimer;
         private readonly CollectionSchedules schedules;
+        private MessageProcessing messageProcessing;
 
         public ScheduleService()
         {
@@ -382,6 +384,12 @@ namespace DBADashService
         private async Task ScheduleJobsAsync()
         {
             Log.Information("Agent Version {version}", Assembly.GetEntryAssembly().GetName().Version);
+            messageProcessing = new MessageProcessing(config);
+            var messageTask = messageProcessing.ScheduleMessaging();
+            if (!messageTask.Wait(TimeSpan.FromSeconds(60)))
+            {
+                Log.Warning("Message processing setup timeout.  Proceeding with collection schedules");
+            }
 
             await ScheduleAndRunMaintenanceJobAsync();
             ScheduleSummaryRefresh();
@@ -397,6 +405,7 @@ namespace DBADashService
                 Interval = 14400000 // 4hrs
             };
             folderCleanupTimer.Elapsed += new System.Timers.ElapsedEventHandler(FolderCleanup);
+            await messageTask;
         }
 
         private async Task ScheduleCollectionsAsync(List<DBADashSource> connections)

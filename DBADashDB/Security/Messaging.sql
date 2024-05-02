@@ -1,0 +1,5 @@
+﻿CREATE SCHEMA Messaging
+    AUTHORIZATION [dbo];
+GO
+CREATE ROLE Messaging;
+GO

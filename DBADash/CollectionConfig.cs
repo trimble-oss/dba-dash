@@ -33,6 +33,8 @@ namespace DBADash
         public int? PurgeDataCommandTimeout { get; set; }
         public int? AddPartitionsCommandTimeout { get; set; }
 
+        public bool EnableMessaging { get; set; }
+
         public CollectionSchedules GetSchedules()
         {
             if (CollectionSchedules == null)
@@ -167,6 +169,8 @@ namespace DBADash
             }
             return wasEncryptionPerformed;
         }
+
+        public int? MessageThreads { get; set; }
 
         public void ValidateDestination()
         {

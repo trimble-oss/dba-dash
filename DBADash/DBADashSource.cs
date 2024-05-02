@@ -204,5 +204,16 @@ namespace DBADash
         public DBADashSource()
         {
         }
+
+        public string GetGeneratedConnectionID()
+        {
+            if (SourceConnection.Type != ConnectionType.SQL) return string.Empty;
+            if (!string.IsNullOrEmpty(generatedConnectionID)) return generatedConnectionID;
+            var collector = new DBCollector(this, "DBADashService");
+            generatedConnectionID = collector.ConnectionID;
+            return generatedConnectionID;
+        }
+
+        private string generatedConnectionID;
     }
 }

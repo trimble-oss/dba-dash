@@ -16,6 +16,8 @@ namespace DBADashGUI
 
         public static bool HasManageGlobalViews = false;
 
+        public static bool AllowMessaging;
+
         public static TimeZoneInfo UserTimeZone = TimeZoneInfo.Local;
 
         public static void Update()
@@ -48,15 +50,17 @@ namespace DBADashGUI
                 cmd.Parameters.AddWithValue("UserName", Environment.UserName);
                 var pUserID = new SqlParameter("UserID", SqlDbType.Int) { Direction = ParameterDirection.Output };
                 var pManageGlobalViews = new SqlParameter("ManageGlobalViews", SqlDbType.Bit) { Direction = ParameterDirection.Output };
+                var pAllowMessaging = new SqlParameter("AllowMessaging", SqlDbType.Bit) { Direction = ParameterDirection.Output };
                 var pTZ = new SqlParameter("TimeZone", SqlDbType.VarChar, 50) { Direction = ParameterDirection.Output };
                 var pTheme = new SqlParameter("Theme", SqlDbType.VarChar, 50) { Direction = ParameterDirection.Output };
-                cmd.Parameters.AddRange(new SqlParameter[] { pUserID, pManageGlobalViews, pTZ, pTheme });
+                cmd.Parameters.AddRange(new SqlParameter[] { pUserID, pManageGlobalViews, pTZ, pTheme, pAllowMessaging });
                 cmd.ExecuteNonQuery();
                 int id = Convert.ToInt32(pUserID.Value);
                 if (id > 0)
                 {
                     _UserID = (int)pUserID.Value;
                     HasManageGlobalViews = (bool)pManageGlobalViews.Value;
+                    AllowMessaging = (bool)pAllowMessaging.Value;
                     if (pTZ.Value != DBNull.Value)
                     {
                         string tzID = (string)pTZ.Value;
@@ -101,8 +105,6 @@ namespace DBADashGUI
             }
         }
 
-       
-
-        public static BaseTheme SelectedTheme { get=>ThemeExtensions.CurrentTheme; set=>ThemeExtensions.CurrentTheme = value; }
+        public static BaseTheme SelectedTheme { get => ThemeExtensions.CurrentTheme; set => ThemeExtensions.CurrentTheme = value; }
     }
 }

@@ -66,6 +66,9 @@ namespace DBADashServiceConfig
             tabJson = new System.Windows.Forms.TabPage();
             txtJson = new System.Windows.Forms.TextBox();
             tabOther = new System.Windows.Forms.TabPage();
+            groupBox6 = new System.Windows.Forms.GroupBox();
+            label4 = new System.Windows.Forms.Label();
+            chkEnableMessaging = new System.Windows.Forms.CheckBox();
             groupBox3 = new System.Windows.Forms.GroupBox();
             bttnCustomCollections = new System.Windows.Forms.Button();
             lblSummaryRefreshCron = new System.Windows.Forms.Label();
@@ -141,6 +144,7 @@ namespace DBADashServiceConfig
             panel1.SuspendLayout();
             tabJson.SuspendLayout();
             tabOther.SuspendLayout();
+            groupBox6.SuspendLayout();
             groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numBackupRetention).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numIdentityCollectionThreshold).BeginInit();
@@ -552,6 +556,7 @@ namespace DBADashServiceConfig
             // 
             // tabOther
             // 
+            tabOther.Controls.Add(groupBox6);
             tabOther.Controls.Add(groupBox3);
             tabOther.Controls.Add(groupBox4);
             tabOther.Location = new System.Drawing.Point(4, 29);
@@ -562,6 +567,37 @@ namespace DBADashServiceConfig
             tabOther.TabIndex = 5;
             tabOther.Text = "Options";
             tabOther.UseVisualStyleBackColor = true;
+            // 
+            // groupBox6
+            // 
+            groupBox6.Controls.Add(label4);
+            groupBox6.Controls.Add(chkEnableMessaging);
+            groupBox6.Location = new System.Drawing.Point(9, 436);
+            groupBox6.Name = "groupBox6";
+            groupBox6.Size = new System.Drawing.Size(1112, 125);
+            groupBox6.TabIndex = 39;
+            groupBox6.TabStop = false;
+            groupBox6.Text = "Messaging";
+            // 
+            // label4
+            // 
+            label4.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
+            label4.Location = new System.Drawing.Point(585, 23);
+            label4.Name = "label4";
+            label4.Size = new System.Drawing.Size(504, 86);
+            label4.TabIndex = 1;
+            label4.Text = "Allow the GUI to send messages to this service via the service broker.  e.g. To trigger collections to run on demand.";
+            // 
+            // chkEnableMessaging
+            // 
+            chkEnableMessaging.AutoSize = true;
+            chkEnableMessaging.Location = new System.Drawing.Point(18, 39);
+            chkEnableMessaging.Name = "chkEnableMessaging";
+            chkEnableMessaging.Size = new System.Drawing.Size(185, 24);
+            chkEnableMessaging.TabIndex = 0;
+            chkEnableMessaging.Text = "Enable Communication";
+            chkEnableMessaging.UseVisualStyleBackColor = true;
+            chkEnableMessaging.CheckedChanged += ChkEnableMessaging_CheckedChanged;
             // 
             // groupBox3
             // 
@@ -1404,6 +1440,8 @@ namespace DBADashServiceConfig
             tabJson.ResumeLayout(false);
             tabJson.PerformLayout();
             tabOther.ResumeLayout(false);
+            groupBox6.ResumeLayout(false);
+            groupBox6.PerformLayout();
             groupBox3.ResumeLayout(false);
             groupBox3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numBackupRetention).EndInit();
@@ -1542,6 +1580,9 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label lblConfigFileRetention;
         private System.Windows.Forms.Button bttnCustomCollections;
         private System.Windows.Forms.Button bttnCustomCollectionsNew;
+        private System.Windows.Forms.GroupBox groupBox6;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.CheckBox chkEnableMessaging;
     }
 }
 

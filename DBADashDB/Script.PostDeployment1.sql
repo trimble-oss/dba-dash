@@ -9,6 +9,7 @@ GRANT EXECUTE ON SCHEMA::Report TO Reports;
 GRANT SELECT ON SCHEMA::DBADash TO App;
 GRANT EXECUTE ON SCHEMA::DBADash TO App;
 GRANT EXECUTE ON SCHEMA::UserReport TO RunUserReports;
+GRANT EXECUTE ON SCHEMA::Messaging TO Messaging;
 /************/
 MERGE INTO [dbo].[SysConfigOptions] AS [Target]
 USING (VALUES

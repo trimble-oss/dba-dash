@@ -36,6 +36,7 @@
     <TargetFrameworkProfile />
     <AutoUpdateStatisticsAsynchronously>True</AutoUpdateStatisticsAsynchronously>
     <TargetRecoveryTimePeriod>60</TargetRecoveryTimePeriod>
+    <ServiceBrokerOption>EnableBroker</ServiceBrokerOption>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
@@ -109,6 +110,7 @@
     <Folder Include="DBADash\Tables" />
     <Folder Include="DBADash\Stored Procedures" />
     <Folder Include="UserReport" />
+    <Folder Include="Messaging" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\LogRestoreThresholds.sql" />
@@ -720,6 +722,13 @@
     <Build Include="dbo\Stored Procedures\TableSizeHistory_Get.sql" />
     <Build Include="Storage\PF_TableSize.sql" />
     <Build Include="Storage\TableSize.sql" />
+    <Build Include="Messaging\Setup.sql" />
+    <Build Include="Messaging\SendMessageFromGUIToService.sql" />
+    <Build Include="Messaging\ReceiveMessageToService.sql" />
+    <Build Include="Messaging\SendReplyFromServiceToGUI.sql" />
+    <Build Include="Messaging\ReceiveReplyFromServiceToGUI.sql" />
+    <Build Include="Security\Messaging.sql" />
+    <Build Include="Messaging\Cleanup.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

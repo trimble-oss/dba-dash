@@ -32,9 +32,14 @@ SELECT CD.InstanceID,
        CD.SnapshotAge,
 	   CD.HumanSnapshotAge,
        CD.SnapshotDate,
-       CD.ConfiguredLevel
+       CD.ConfiguredLevel,
+	   ImportAgentID,
+	   CollectAgentID,
+	   IA.MessagingEnabled & CA.MessagingEnabled AS MessagingEnabled
 FROM dbo.CollectionDatesStatus CD
 JOIN dbo.Instances I ON I.InstanceID = CD.InstanceID
+JOIN dbo.DBADashAgent IA ON I.ImportAgentID = IA.DBADashAgentID
+JOIN dbo.DBADashAgent CA ON I.CollectAgentID = CA.DBADashAgentID
 WHERE EXISTS(SELECT 1 FROM Statuses s WHERE CD.Status=s.Status)
 ' + CASE WHEN @InstanceIDs IS NULL THEN '' ELSE 'AND EXISTS(SELECT 1 FROM STRING_SPLIT(@InstanceIDs,'','') ss WHERE SS.value =  CD.InstanceID)' END + '
 ' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND I.ShowInSummary=1' END + ''

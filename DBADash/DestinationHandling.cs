@@ -9,25 +9,25 @@ using System.IO;
 using System.Threading.Tasks;
 using static DBADash.DBADashConnection;
 
-namespace DBADashService
+namespace DBADash
 {
     public class DestinationHandling
     {
         private const int DefaultCommandTimeout = 60;
 
-        public static async Task WriteAllDestinations(DataSet ds, DBADashSource src, string fileName)
+        public static async Task WriteAllDestinations(DataSet ds, DBADashSource src, string fileName, CollectionConfig cfg)
         {
             List<Exception> exceptions = new();
-            foreach (var d in SchedulerServiceConfig.Config.AllDestinations)
+            foreach (var d in cfg.AllDestinations)
             {
                 try
                 {
                     if (!src.WriteToSecondaryDestinations &&
-                        d != SchedulerServiceConfig.Config.DestinationConnection) continue;
+                        d != cfg.DestinationConnection) continue;
                     using (var op = Operation.Begin("Write to destination {destination} from {source}",
                                d.ConnectionForPrint, src.SourceConnection.ConnectionForPrint))
                     {
-                        await Write(ds, d, fileName);
+                        await Write(ds, d, fileName, cfg);
                         op.Complete();
                     }
                 }
@@ -43,25 +43,25 @@ namespace DBADashService
             }
         }
 
-        public static async Task Write(DataSet ds, DBADashConnection d, string fileName)
+        public static async Task Write(DataSet ds, DBADashConnection d, string fileName, CollectionConfig cfg)
         {
             switch (d.Type)
             {
                 case ConnectionType.AWSS3:
-                    await WriteS3(ds, d.ConnectionString, fileName);
+                    await WriteS3(ds, d.ConnectionString, fileName, cfg);
                     break;
 
                 case ConnectionType.Directory:
-                    WriteFolder(ds, d.ConnectionString, fileName);
+                    WriteFolder(ds, d.ConnectionString, fileName, cfg);
                     break;
 
                 case ConnectionType.SQL:
-                    WriteDB(ds, d.ConnectionString);
+                    WriteDB(ds, d.ConnectionString, cfg);
                     break;
             }
         }
 
-        public static async Task WriteS3(DataSet ds, string destination, string fileName)
+        public static async Task WriteS3(DataSet ds, string destination, string fileName, CollectionConfig cfg)
         {
             string extension = System.IO.Path.GetExtension(fileName);
             if (extension != ".xml")
@@ -72,7 +72,7 @@ namespace DBADashService
 
             var uri = new Amazon.S3.Util.AmazonS3Uri(destination);
 
-            using (var s3Cli = AWSTools.GetAWSClient(SchedulerServiceConfig.Config.AWSProfile, SchedulerServiceConfig.Config.AccessKey, SchedulerServiceConfig.Config.GetSecretKey(), uri))
+            using (var s3Cli = AWSTools.GetAWSClient(cfg.AWSProfile, cfg.AccessKey, cfg.GetSecretKey(), uri))
             {
                 var r = new Amazon.S3.Model.PutObjectRequest()
                 {
@@ -89,7 +89,7 @@ namespace DBADashService
             }
         }
 
-        public static void WriteFolder(DataSet ds, string destination, string fileName)
+        public static void WriteFolder(DataSet ds, string destination, string fileName, CollectionConfig cfg)
         {
             if (System.IO.Directory.Exists(destination))
             {
@@ -114,10 +114,10 @@ namespace DBADashService
             }
         }
 
-        public static void WriteDB(DataSet ds, string destination)
+        public static void WriteDB(DataSet ds, string destination, CollectionConfig cfg)
         {
-            var importAgent = DBADashAgent.GetCurrent(SchedulerServiceConfig.Config.ServiceName);
-            var importer = new DBImporter(ds, destination, importAgent, SchedulerServiceConfig.Config.ImportCommandTimeout ?? DefaultCommandTimeout);
+            var importAgent = DBADashAgent.GetCurrent(cfg.ServiceName);
+            var importer = new DBImporter(ds, destination, importAgent, cfg.ImportCommandTimeout ?? DefaultCommandTimeout);
             // Wait until we can connect to the repository DB.  If it's down, wait for it to become available.
             Policy.Handle<Exception>()
               .WaitAndRetryForever(retryAttempt =>

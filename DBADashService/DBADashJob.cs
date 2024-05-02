@@ -142,7 +142,7 @@ namespace DBADashService
                     string fileName = DBADashSource.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
                     try
                     {
-                        DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName).Wait();
+                        DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName, config).Wait();
 
                         collector.CacheCollectedText();
                         collector.CacheCollectedPlans();
@@ -150,7 +150,7 @@ namespace DBADashService
                     catch (Exception ex)
                     {
                         Log.Error(ex, "Error writing {filename} to destination.  File will be copied to {folder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
-                        DestinationHandling.WriteFolder(collector.Data, SchedulerServiceConfig.FailedMessageFolder, fileName);
+                        DestinationHandling.WriteFolder(collector.Data, SchedulerServiceConfig.FailedMessageFolder, fileName, config);
                     }
                 }
 
@@ -217,12 +217,12 @@ namespace DBADashService
                 string fileName = DBADashSource.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
                 try
                 {
-                    DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName).Wait();
+                    DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName, config).Wait();
                 }
                 catch (Exception ex)
                 {
                     Log.Error(ex, "Error writing {filename} to destination.  File will be copied to {folder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
-                    DestinationHandling.WriteFolder(collector.Data, SchedulerServiceConfig.FailedMessageFolder, fileName);
+                    DestinationHandling.WriteFolder(collector.Data, SchedulerServiceConfig.FailedMessageFolder, fileName, config);
                 }
             }
         }
@@ -304,7 +304,7 @@ namespace DBADashService
                     var ds = DataSetSerialization.DeserializeFromFile(f);
                     lock (Program.Locker.GetLock(GetID(ds)))
                     {
-                        DestinationHandling.WriteAllDestinations(ds, cfg, fileName).Wait();
+                        DestinationHandling.WriteAllDestinations(ds, cfg, fileName, config).Wait();
                     }
                 }
                 catch (Exception ex)
@@ -392,12 +392,12 @@ namespace DBADashService
                     string fileName = Path.GetFileName(s3Path);
                     try
                     {
-                        DestinationHandling.WriteAllDestinations(ds, cfg, fileName).Wait();
+                        DestinationHandling.WriteAllDestinations(ds, cfg, fileName, config).Wait();
                     }
                     catch (Exception ex)
                     {
                         Log.Error(ex, "Error importing file {filename}.  Writing file to failed message folder {folder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
-                        DestinationHandling.WriteFolder(ds, SchedulerServiceConfig.FailedMessageFolder, fileName);
+                        DestinationHandling.WriteFolder(ds, SchedulerServiceConfig.FailedMessageFolder, fileName, config);
                     }
                     finally
                     {

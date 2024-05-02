@@ -146,6 +146,9 @@ BEGIN
 	PRINT 'Skipping BlockingSnapshotSummary (Ran withing last 24hrs)'
 END
 
+/* Service Broker Cleanup */
+EXEC Messaging.Cleanup
+
 IF @Errors <> ''
 BEGIN;
 	THROW 51000,@Errors,1;

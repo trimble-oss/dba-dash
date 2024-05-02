@@ -3,6 +3,8 @@ using Newtonsoft.Json;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.IO.Compression;
+using System.IO;
 
 namespace DBADash
 {
@@ -52,6 +54,35 @@ namespace DBADash
                 result.Add(item.Key, item.Value);
             }
             return result;
+        }
+
+        public static byte[] Compress(this byte[] data)
+        {
+            using var sourceStream = new MemoryStream(data);
+            using var destinationStream = new MemoryStream();
+            sourceStream.CompressTo(destinationStream);
+            return destinationStream.ToArray();
+        }
+
+        public static byte[] Decompress(this byte[] data)
+        {
+            using var sourceStream = new MemoryStream(data);
+            using var destinationStream = new MemoryStream();
+            sourceStream.DecompressTo(destinationStream);
+            return destinationStream.ToArray();
+        }
+
+        public static void CompressTo(this Stream stream, Stream outputStream)
+        {
+            using var gZipStream = new GZipStream(outputStream, CompressionMode.Compress);
+            stream.CopyTo(gZipStream);
+            gZipStream.Flush();
+        }
+
+        public static void DecompressTo(this Stream stream, Stream outputStream)
+        {
+            using var gZipStream = new GZipStream(stream, CompressionMode.Decompress);
+            gZipStream.CopyTo(outputStream);
         }
     }
 }

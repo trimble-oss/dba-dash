@@ -41,6 +41,7 @@ namespace DBADashGUI.Performance
             tsCols = new System.Windows.Forms.ToolStripButton();
             tsBack = new System.Windows.Forms.ToolStripButton();
             tsGetLatest = new System.Windows.Forms.ToolStripButton();
+            tsTriggerCollection = new System.Windows.Forms.ToolStripButton();
             tsNext = new System.Windows.Forms.ToolStripButton();
             lblSnapshotDate = new System.Windows.Forms.ToolStripLabel();
             tsGroupBy = new System.Windows.Forms.ToolStripDropDownButton();
@@ -71,9 +72,9 @@ namespace DBADashGUI.Performance
             tsGroupByFilter = new System.Windows.Forms.ToolStripLabel();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
-            tsStatus = new System.Windows.Forms.ToolStripStatusLabel();
             lblRowLimit = new System.Windows.Forms.ToolStripStatusLabel();
             tsEditLimit = new System.Windows.Forms.ToolStripStatusLabel();
+            tsStatus = new System.Windows.Forms.ToolStripStatusLabel();
             dgvSessionWaits = new System.Windows.Forms.DataGridView();
             toolStrip2 = new System.Windows.Forms.ToolStrip();
             lblWaitsForSession = new System.Windows.Forms.ToolStripLabel();
@@ -141,7 +142,7 @@ namespace DBADashGUI.Performance
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsCols, tsBack, tsGetLatest, tsNext, lblSnapshotDate, tsGroupBy, tsPrevious, tsBlockingFilter, tsGroupByFilter });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsCols, tsBack, tsGetLatest, tsTriggerCollection, tsNext, lblSnapshotDate, tsGroupBy, tsPrevious, tsBlockingFilter, tsGroupByFilter });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1090, 27);
@@ -208,6 +209,17 @@ namespace DBADashGUI.Performance
             tsGetLatest.Size = new System.Drawing.Size(99, 24);
             tsGetLatest.Text = "Get Latest";
             tsGetLatest.Click += TsGetLatest_Click;
+            // 
+            // tsTriggerCollection
+            // 
+            tsTriggerCollection.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsTriggerCollection.Image = Properties.Resources.ProjectSystemModelRefresh_16x;
+            tsTriggerCollection.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsTriggerCollection.Name = "tsTriggerCollection";
+            tsTriggerCollection.Size = new System.Drawing.Size(151, 24);
+            tsTriggerCollection.Text = "Trigger Collection";
+            tsTriggerCollection.ToolTipText = "Trigger Collection & Refresh\r\nThis avoids the need to wait for the next collection by sending a message to the service to trigger the collection to run immediately.";
+            tsTriggerCollection.Click += TsTriggerCollection_Click;
             // 
             // tsNext
             // 
@@ -466,17 +478,12 @@ namespace DBADashGUI.Performance
             // statusStrip1
             // 
             statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsStatus, lblRowLimit, tsEditLimit });
+            statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { lblRowLimit, tsEditLimit, tsStatus });
             statusStrip1.Location = new System.Drawing.Point(0, 376);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new System.Drawing.Size(1090, 26);
             statusStrip1.TabIndex = 1;
             statusStrip1.Text = "statusStrip1";
-            // 
-            // tsStatus
-            // 
-            tsStatus.Name = "tsStatus";
-            tsStatus.Size = new System.Drawing.Size(0, 20);
             // 
             // lblRowLimit
             // 
@@ -493,6 +500,13 @@ namespace DBADashGUI.Performance
             tsEditLimit.Size = new System.Drawing.Size(72, 20);
             tsEditLimit.Text = "Edit Limit";
             tsEditLimit.Click += TsEditLimit_Click;
+            // 
+            // tsStatus
+            // 
+            tsStatus.Name = "tsStatus";
+            tsStatus.Size = new System.Drawing.Size(374, 20);
+            tsStatus.Spring = true;
+            tsStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // dgvSessionWaits
             // 
@@ -661,5 +675,6 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripMenuItem blockedOrBlockingToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem contextInfoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton tsTriggerCollection;
     }
 }
