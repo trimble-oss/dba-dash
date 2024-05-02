@@ -22,10 +22,15 @@ SELECT  I.InstanceID,
 	I.ShowInSummary,
 	~I.ShowInSummary AS IsHidden,
 	' + CASE WHEN @GroupByTag IS NULL THEN 'CAST(NULL AS NVARCHAR(128)) as TagGroup' ELSE 'ISNULL(T.TagValue,''[N/A]'') AS TagGroup' END + ',
-	SO.elastic_pool_name
+	SO.elastic_pool_name,
+	I.CollectAgentID,
+	I.ImportAgentID,
+	IA.MessagingEnabled & CA.MessagingEnabled AS MessagingEnabled
 FROM dbo.InstancesMatchingTags(@TagIDs) I
 LEFT JOIN dbo.Databases D ON D.InstanceID = I.InstanceID AND I.EngineEdition = 5 AND D.IsActive=1
 LEFT JOIN dbo.AzureDBServiceObjectives SO ON I.InstanceID = SO.InstanceID
+LEFT JOIN dbo.DBADashAgent IA ON I.ImportAgentID = IA.DBADashAgentID
+LEFT JOIN dbo.DBADashAgent CA ON I.CollectAgentID = CA.DBADashAgentID
 ' + CASE WHEN @GroupByTag IS NULL THEN '' ELSE 'OUTER APPLY dbo.TagValue(I.InstanceID,@GroupByTag,I.EngineEdition) T' END + '
 WHERE (D.InstanceID IS NOT NULL OR I.EngineEdition <> 5 OR I.EngineEdition IS NULL)
 ' + CASE WHEN @IsActive IS NULL THEN '' ELSE 'AND I.IsActive=@IsActive' END + '
@@ -39,3 +44,4 @@ BEGIN
 END
 
 EXEC sp_executesql @SQL,N'@TagIDs VARCHAR(MAX),@IsActive BIT,@SearchString NVARCHAR(128),@GroupByTag NVARCHAR(50)',@TagIDs,@IsActive,@SearchString,@GroupByTag
+

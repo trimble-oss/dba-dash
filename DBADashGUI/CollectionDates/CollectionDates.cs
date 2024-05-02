@@ -4,12 +4,20 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using Azure;
 using DBADashGUI.Theme;
+using DBADash.Messaging;
+using DBADash;
+using DBADashGUI.Interface;
+using DBADashGUI.Messaging;
+using Microsoft.VisualBasic;
 
 namespace DBADashGUI.CollectionDates
 {
-    public partial class CollectionDates : UserControl, ISetContext
+    public partial class CollectionDates : UserControl, ISetContext, IThemedControl, ISetStatus
     {
         public CollectionDates()
         {
@@ -63,17 +71,25 @@ namespace DBADashGUI.CollectionDates
             IncludeWarning = true;
             IncludeNA = context.InstanceID > 0;
             IncludeOK = context.InstanceID > 0;
+            lblStatus.Visible = false;
             RefreshData();
         }
 
         public void RefreshData()
         {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(RefreshData);
+                return;
+            }
             UseWaitCursor = true;
             DataTable dt = GetCollectionDates();
             dgvCollectionDates.AutoGenerateColumns = false;
             dgvCollectionDates.DataSource = new DataView(dt);
             dgvCollectionDates.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             UseWaitCursor = false;
+            dgvCollectionDates.Columns["colRun"]!.Visible = DBADashUser.AllowMessaging && dt.Rows.Cast<DataRow>().Any(r => r["MessagingEnabled"] != DBNull.Value && (bool)r["MessagingEnabled"]);
+            tsTrigger.Visible = DBADashUser.AllowMessaging && dt.Rows.Cast<DataRow>().Any(r => r["MessagingEnabled"] != DBNull.Value && (bool)r["MessagingEnabled"] && r["Status"] is 1 or 2);
         }
 
         private void Status_Selected(object sender, EventArgs e)
@@ -108,7 +124,7 @@ namespace DBADashGUI.CollectionDates
             }
         }
 
-        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private async void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
@@ -122,7 +138,34 @@ namespace DBADashGUI.CollectionDates
                 {
                     ConfigureThresholds(-1, row);
                 }
+                else if (dgvCollectionDates.Columns[e.ColumnIndex].HeaderText == "Run")
+                {
+                    var instance = (string)row["ConnectionID"];
+                    var agentID = (int)row["ImportAgentID"];
+                    var supportsMessaging = (bool)row["MessagingEnabled"];
+                    if (!supportsMessaging)
+                    {
+                        SetStatus("The associated DBA Dash service is not enabled for messaging", null, DashColors.Fail);
+                        return;
+                    }
+
+                    var collection = (string)row["Reference"];
+                    await CollectionMessaging.TriggerCollection(instance, collection, agentID, this);
+                }
             }
+        }
+
+        public void SetStatus(string message, string tooltip, Color color)
+        {
+            this.Invoke(() =>
+            {
+                lblStatus.Visible = true;
+                lblStatus.Text = message;
+                lblStatus.ToolTipText = tooltip;
+                lblStatus.IsLink = !string.IsNullOrEmpty(tooltip);
+                lblStatus.ForeColor = color;
+                lblStatus.LinkColor = color;
+            });
         }
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
@@ -158,6 +201,52 @@ namespace DBADashGUI.CollectionDates
         private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvCollectionDates);
+        }
+
+        private void LblStatus_Click(object sender, EventArgs e)
+        {
+            if (lblStatus.IsLink)
+            {
+                MessageBox.Show(lblStatus.ToolTipText, "Error Details", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public void ApplyTheme(BaseTheme theme)
+        {
+            dgvCollectionDates.ApplyTheme();
+        }
+
+        private async void TsTrigger_Click(object sender, EventArgs e)
+        {
+            RefreshData();
+            var dt = (dgvCollectionDates.DataSource as DataView)?.Table;
+            if (dt == null) return;
+            List<CollectionType> collectionTypes = new();
+            foreach (var row in dt.Rows.Cast<DataRow>().Where(r => r["Status"] is 1 or 2 && (bool)r["MessagingEnabled"]).GroupBy((r => r["ConnectionID"])))
+            {
+                var instance = (string)row.Key;
+                await TriggerCriticalAndWarningForConnectionID(instance, dt);
+            }
+        }
+
+        private async Task TriggerCriticalAndWarningForConnectionID(string connectionID, DataTable dt)
+        {
+            List<string> collectionTypes = new();
+            var agentID = 0;
+            foreach (var row in dt.Rows.Cast<DataRow>().Where(r => r["Status"] is 1 or 2 && (bool)r["MessagingEnabled"] && (string)r["ConnectionID"] == connectionID && (string)r["Reference"] is not "QueryPlan" or "QueryText").OrderBy((r => r["ConnectionID"])))
+            {
+                agentID = (int)row["ImportAgentID"];
+                collectionTypes.Add((string)row["Reference"]);
+            }
+            if (agentID == 0 || collectionTypes.Count == 0) return;
+            try
+            {
+                await CollectionMessaging.TriggerCollection(connectionID, collectionTypes, agentID, this);
+            }
+            catch (Exception ex)
+            {
+                SetStatus(ex.Message, ex.ToString(), DashColors.Fail);
+            }
         }
     }
 }

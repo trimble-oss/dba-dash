@@ -10,11 +10,14 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
+using DBADash;
+using DBADashGUI.Interface;
+using DBADashGUI.Messaging;
 using DocumentFormat.OpenXml.Office2010.PowerPoint;
 
 namespace DBADashGUI.Performance
 {
-    public partial class RunningQueries : UserControl, INavigation, ISetContext, IRefreshData
+    public partial class RunningQueries : UserControl, INavigation, ISetContext, IRefreshData, ISetStatus
     {
         public RunningQueries()
         {
@@ -121,6 +124,7 @@ namespace DBADashGUI.Performance
 
         public void SetContext(DBADashContext context)
         {
+            ShowLatestOnNextExecution = false;
             if (InstanceIDs != null && context.InstanceIDs.SetEquals(InstanceIDs) && InstanceID == context.InstanceID) // Context hasn't changed
             {
                 return;
@@ -182,10 +186,23 @@ namespace DBADashGUI.Performance
             tsPrevious.Visible = false;
             tsNext.Visible = false;
             tsGetLatest.Visible = true;
+            tsTriggerCollection.Visible = DBADashUser.AllowMessaging && !IsServerLevelSummary && JobId == Guid.Empty && SessionID == 0 && CollectionMessaging.IsMessagingEnabled(InstanceID);
         }
 
         public void RefreshData()
         {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(RefreshData);
+                return;
+            }
+
+            if (ShowLatestOnNextExecution)
+            {
+                LoadSnapshot(DateTime.MaxValue);
+                ShowLatestOnNextExecution = false;
+                return;
+            }
             SetHighlightBeforeRefresh(out var highlightSnapshot, out var highlight);
             Reset();
             ClearBlocking();
@@ -1030,6 +1047,27 @@ namespace DBADashGUI.Performance
                 Properties.Settings.Default.Save();
             }
             tsEditLimit.Text = $"Row Limit {Properties.Settings.Default.RunningQueriesSummaryMaxRows}";
+        }
+
+        private bool ShowLatestOnNextExecution;
+
+        private async void TsTriggerCollection_Click(object sender, EventArgs e)
+        {
+            ShowLatestOnNextExecution = true;
+            await CollectionMessaging.TriggerCollection(InstanceID, CollectionType.RunningQueries, this);
+        }
+
+        public void SetStatus(string message, string tooltip, Color color)
+        {
+            this.Invoke(() =>
+            {
+                tsStatus.Visible = true;
+                tsStatus.Text = message;
+                tsStatus.ToolTipText = tooltip;
+                tsStatus.IsLink = !string.IsNullOrEmpty(tooltip);
+                tsStatus.ForeColor = color;
+                tsStatus.LinkColor = color;
+            });
         }
     }
 }

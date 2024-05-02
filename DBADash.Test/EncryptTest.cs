@@ -1,6 +1,7 @@
 ﻿using DBADash;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using DBADash.Messaging;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace DBADashConfig.Test
@@ -71,6 +72,15 @@ namespace DBADashConfig.Test
             };
 
             Assert.ThrowsException<ArgumentNullException>(() => cfg.Serialize(BasicConfig.EncryptionOptions.Encrypt));
+        }
+
+        [TestMethod]
+        public void TestSerialization()
+        {
+            var x = new CollectionMessage(new CollectionType[] { CollectionType.Drives, CollectionType.TableSize }, "TEST");
+            var payload = x.Serialize();
+
+            var y = MessageBase.Deserialize(payload);
         }
     }
 }

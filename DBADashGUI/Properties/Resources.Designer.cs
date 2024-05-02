@@ -779,6 +779,14 @@ namespace DBADashGUI.Properties {
             }
         }
 
+        internal static System.Drawing.Bitmap ProjectSystemModelRefresh_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("ProjectSystemModelRefresh_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
 
     }
 }

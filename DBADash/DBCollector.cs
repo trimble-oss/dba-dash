@@ -114,6 +114,7 @@ namespace DBADash
         private DatabaseEngineEdition engineEdition;
         private DBADashAgent dashAgent;
         public bool IsExtendedEventsNotSupportedException;
+        private bool DisableRetry;
 
         public const int DefaultIdentityCollectionThreshold = 5;
 
@@ -138,6 +139,7 @@ namespace DBADash
         private const string TableSizeDatabasesDefault = "*";
         private const int TableSizeMaxTableThresholdDefault = 2000;
         private const int TableSizeMaxDatabaseThreshold = 500;
+        public string ConnectionID => Data.Tables["DBADash"]?.Rows[0]["ConnectionID"].ToString();
 
         public int Job_instance_id
         {
@@ -169,8 +171,9 @@ namespace DBADash
 
         public bool IsQueryStoreSupported => IsAzureDB || (!productVersion.StartsWith("8.") && !productVersion.StartsWith("9.") && !productVersion.StartsWith("10.") && !productVersion.StartsWith("11.") && !productVersion.StartsWith("12."));
 
-        public DBCollector(DBADashSource source, string serviceName)
+        public DBCollector(DBADashSource source, string serviceName, bool disableRetry = false)
         {
+            DisableRetry = disableRetry;
             Source = source;
             Startup(serviceName);
         }
@@ -256,8 +259,9 @@ namespace DBADash
             6335, // XML datatype instance has too many levels of nested nodes. Maximum allowed depth is %d levels.
         };
 
-        public static bool ShouldRetry(Exception ex)
+        public bool ShouldRetry(Exception ex)
         {
+            if (DisableRetry) return false;
             if (ex is SqlException sqlEx)
             {
                 return !ExcludedErrorCodes.Contains(sqlEx.Number) && sqlEx.Message != "Max databases exceeded for Table Size collection";

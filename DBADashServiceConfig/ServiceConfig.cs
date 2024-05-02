@@ -13,11 +13,13 @@ using System.Text;
 using System.Windows.Forms;
 using CronExpressionDescriptor;
 using DBADashGUI.Theme;
+using Microsoft.SqlServer.Management.SqlParser.SqlCodeDom;
 using Microsoft.SqlServer.Management.SqlScriptPublish;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 using Newtonsoft.Json;
 using static DBADash.DBADashConnection;
 using SortOrder = System.Windows.Forms.SortOrder;
+using System.Threading.Tasks;
 
 namespace DBADashServiceConfig
 {
@@ -120,6 +122,7 @@ namespace DBADashServiceConfig
                         {
                             src.SourceConnection.Validate();
                             validated = true;
+                            src.ConnectionID = src.GetGeneratedConnectionID();
                         }
                         catch (Exception ex)
                         {
@@ -529,6 +532,7 @@ namespace DBADashServiceConfig
                 numBackupRetention.Value = collectionConfig.ConfigBackupRetentionDays;
                 txtSummaryRefreshCron.Text = collectionConfig.SummaryRefreshCron;
                 chkSummaryRefresh.Checked = !string.IsNullOrEmpty(collectionConfig.SummaryRefreshCron);
+                chkEnableMessaging.Checked = collectionConfig.EnableMessaging;
                 UpdateSummaryCron();
                 UpdateScanInterval();
                 SetDgv();
@@ -1515,6 +1519,77 @@ namespace DBADashServiceConfig
             if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && e.KeyChar != '-')
             {
                 e.Handled = true; // Suppress the key press if it's not a digit or control character
+            }
+        }
+
+        private void ChkEnableMessaging_CheckedChanged(object sender, EventArgs e)
+        {
+            if (IsSetFromJson) return;
+            collectionConfig.EnableMessaging = chkEnableMessaging.Checked;
+            SetJson();
+            if (chkEnableMessaging.Checked)
+            {
+                if (!IsMessagingSupported())
+                {
+                    MessageBox.Show("The destination connection doesn't support messaging. Messaging requires the destination to support service broker.", "Messaging", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    chkEnableMessaging.Checked = false;
+                    return;
+                }
+            }
+            if (chkEnableMessaging.Checked && collectionConfig.SourceConnections.Exists(src => string.IsNullOrEmpty(src.ConnectionID)))
+            {
+                if (MessageBox.Show(
+                        "Messaging requires an explicit ConnectionID to be defined in the config file. One or more connections do not have a ConnectionID defined.\nWould you like to automatically populate this now?\n\nNote:This might take a while depending on the number of connections and their availability.",
+                        "Messaging", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+                {
+                    PopulateConnectionID();
+                }
+            }
+        }
+
+        private bool IsMessagingSupported()
+        {
+            try
+            {
+                return collectionConfig.DestinationConnection.Type == ConnectionType.SQL &&
+                       !collectionConfig.DestinationConnection.ConnectionInfo.IsAzureDB;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void PopulateConnectionID()
+        {
+            var errors = new StringBuilder(); // Using StringBuilder instead of StringBuilder() for consistency
+
+            // Use Parallel.ForEach to process the collection in parallel
+            Parallel.ForEach(collectionConfig.SourceConnections, src =>
+            {
+                if (!string.IsNullOrEmpty(src.ConnectionID) || src.SourceConnection.Type != ConnectionType.SQL) return;
+                try
+                {
+                    var collector = new DBCollector(src, collectionConfig.ServiceName, true);
+                    src.ConnectionID = src.GetGeneratedConnectionID();
+                }
+                catch (Exception ex)
+                {
+                    lock (errors) // Ensure thread safety when appending to the errors StringBuilder
+                    {
+                        errors.AppendLine($"Error getting ConnectionID for {src.SourceConnection.ConnectionForPrint}: {ex.Message}");
+                    }
+                }
+            });
+
+            // Check errors and display message
+            if (errors.Length > 0)
+            {
+                MessageBox.Show(errors.ToString(), "Errors", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                MessageBox.Show("ConnectionID populated successfully", "Messaging", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
     }

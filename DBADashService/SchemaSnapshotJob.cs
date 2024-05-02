@@ -68,7 +68,7 @@ namespace DBADashService
                             dsSnapshot.Tables.Add(dt);
 
                             string fileName = DBADashSource.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
-                            DestinationHandling.WriteAllDestinations(dsSnapshot, cfg, fileName).Wait();
+                            DestinationHandling.WriteAllDestinations(dsSnapshot, cfg, fileName, SchedulerServiceConfig.Config).Wait();
                             dsSnapshot.Tables.Remove(dt);
                         }
                         catch (Exception ex)

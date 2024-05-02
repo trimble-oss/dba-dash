@@ -3,9 +3,9 @@ using System;
 using System.Data;
 using System.IO;
 
-namespace DBADashService
+namespace DBADash
 {
-    internal class DataSetSerialization
+    public class DataSetSerialization
     {
         public static void SetDateTimeKind(DataSet ds) // Required for binary serialization to prevent dates captured in UTC from being converted to local timezone on deserialization
         {

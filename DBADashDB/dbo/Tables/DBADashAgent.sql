@@ -4,6 +4,7 @@
 	AgentServiceName NVARCHAR(256) NOT NULL,
 	AgentVersion VARCHAR(30) NOT NULL,
 	AgentPath NVARCHAR(260) NOT NULL,
+	MessagingEnabled BIT NOT NULL CONSTRAINT DF_DBADashAgent_MessagingEnabled DEFAULT(0),
 	CONSTRAINT PK_DBADashAgent PRIMARY KEY(DBADashAgentID),
 	INDEX IX_DBADashAgent UNIQUE NONCLUSTERED (AgentHostName,AgentServiceName)
 )

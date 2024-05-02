@@ -29,219 +29,252 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CollectionDates));
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.statusFilterToolStrip1 = new DBADashGUI.StatusFilterToolStrip();
-            this.dgvCollectionDates = new System.Windows.Forms.DataGridView();
-            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Reference = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.WarningThreshold = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CriticalThreshold = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SnapshotAge = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SnapshotDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Configure = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.ConfigureRoot = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.toolStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvCollectionDates)).BeginInit();
-            this.SuspendLayout();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            tsRefresh = new System.Windows.Forms.ToolStripButton();
+            tsCopy = new System.Windows.Forms.ToolStripButton();
+            tsExcel = new System.Windows.Forms.ToolStripButton();
+            statusFilterToolStrip1 = new StatusFilterToolStrip();
+            tsTrigger = new System.Windows.Forms.ToolStripButton();
+            dgvCollectionDates = new System.Windows.Forms.DataGridView();
+            Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            Reference = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            WarningThreshold = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            CriticalThreshold = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            SnapshotAge = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            SnapshotDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            Configure = new System.Windows.Forms.DataGridViewLinkColumn();
+            ConfigureRoot = new System.Windows.Forms.DataGridViewLinkColumn();
+            colRun = new System.Windows.Forms.DataGridViewLinkColumn();
+            statusStrip1 = new System.Windows.Forms.StatusStrip();
+            lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvCollectionDates).BeginInit();
+            statusStrip1.SuspendLayout();
+            SuspendLayout();
             // 
             // toolStrip1
             // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsRefresh,
-            this.tsCopy,
-            this.tsExcel,
-            this.statusFilterToolStrip1});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(882, 27);
-            this.toolStrip1.TabIndex = 2;
-            this.toolStrip1.Text = "toolStrip1";
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, statusFilterToolStrip1, tsTrigger });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new System.Drawing.Size(1357, 27);
+            toolStrip1.TabIndex = 2;
+            toolStrip1.Text = "toolStrip1";
             // 
             // tsRefresh
             // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
+            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Name = "tsRefresh";
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Text = "Refresh";
+            tsRefresh.Click += TsRefresh_Click;
             // 
             // tsCopy
             // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
+            tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopy.Name = "tsCopy";
+            tsCopy.Size = new System.Drawing.Size(29, 24);
+            tsCopy.Text = "Copy";
+            tsCopy.Click += TsCopy_Click;
             // 
             // tsExcel
             // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
+            tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsExcel.Image = Properties.Resources.excel16x16;
+            tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcel.Name = "tsExcel";
+            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Text = "Export Excel";
+            tsExcel.Click += TsExcel_Click;
             // 
             // statusFilterToolStrip1
             // 
-            this.statusFilterToolStrip1.Acknowledged = false;
-            this.statusFilterToolStrip1.AcknowledgedVisible = false;
-            this.statusFilterToolStrip1.Critical = true;
-            this.statusFilterToolStrip1.CriticalVisible = true;
-            this.statusFilterToolStrip1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
-            this.statusFilterToolStrip1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.statusFilterToolStrip1.Image = ((System.Drawing.Image)(resources.GetObject("statusFilterToolStrip1.Image")));
-            this.statusFilterToolStrip1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.statusFilterToolStrip1.NA = true;
-            this.statusFilterToolStrip1.Name = "statusFilterToolStrip1";
-            this.statusFilterToolStrip1.NAVisible = true;
-            this.statusFilterToolStrip1.OK = true;
-            this.statusFilterToolStrip1.OKVisible = true;
-            this.statusFilterToolStrip1.Size = new System.Drawing.Size(67, 24);
-            this.statusFilterToolStrip1.Text = "ALL";
-            this.statusFilterToolStrip1.Warning = true;
-            this.statusFilterToolStrip1.WarningVisible = true;
-            this.statusFilterToolStrip1.UserChangedStatusFilter += new System.EventHandler(this.Status_Selected);
+            statusFilterToolStrip1.Acknowledged = false;
+            statusFilterToolStrip1.AcknowledgedVisible = false;
+            statusFilterToolStrip1.Critical = true;
+            statusFilterToolStrip1.CriticalVisible = true;
+            statusFilterToolStrip1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
+            statusFilterToolStrip1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            statusFilterToolStrip1.Image = (System.Drawing.Image)resources.GetObject("statusFilterToolStrip1.Image");
+            statusFilterToolStrip1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            statusFilterToolStrip1.NA = true;
+            statusFilterToolStrip1.Name = "statusFilterToolStrip1";
+            statusFilterToolStrip1.NAVisible = true;
+            statusFilterToolStrip1.OK = true;
+            statusFilterToolStrip1.OKVisible = true;
+            statusFilterToolStrip1.Size = new System.Drawing.Size(67, 24);
+            statusFilterToolStrip1.Text = "ALL";
+            statusFilterToolStrip1.Warning = true;
+            statusFilterToolStrip1.WarningVisible = true;
+            statusFilterToolStrip1.UserChangedStatusFilter += Status_Selected;
+            // 
+            // tsTrigger
+            // 
+            tsTrigger.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsTrigger.Image = Properties.Resources.ProjectSystemModelRefresh_16x;
+            tsTrigger.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsTrigger.Name = "tsTrigger";
+            tsTrigger.Size = new System.Drawing.Size(192, 24);
+            tsTrigger.Text = "Trigger Warning, Critical";
+            tsTrigger.Click += TsTrigger_Click;
             // 
             // dgvCollectionDates
             // 
-            this.dgvCollectionDates.AllowUserToAddRows = false;
-            this.dgvCollectionDates.AllowUserToDeleteRows = false;
-            this.dgvCollectionDates.BackgroundColor = System.Drawing.Color.White;
-            this.dgvCollectionDates.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
-            this.dgvCollectionDates.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvCollectionDates.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Instance,
-            this.Reference,
-            this.WarningThreshold,
-            this.CriticalThreshold,
-            this.SnapshotAge,
-            this.SnapshotDate,
-            this.ConfiguredLevel,
-            this.Configure,
-            this.ConfigureRoot});
-            this.dgvCollectionDates.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvCollectionDates.Location = new System.Drawing.Point(0, 27);
-            this.dgvCollectionDates.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dgvCollectionDates.Name = "dgvCollectionDates";
-            this.dgvCollectionDates.ReadOnly = true;
-            this.dgvCollectionDates.RowHeadersVisible = false;
-            this.dgvCollectionDates.RowHeadersWidth = 51;
-            this.dgvCollectionDates.RowTemplate.Height = 24;
-            this.dgvCollectionDates.Size = new System.Drawing.Size(882, 354);
-            this.dgvCollectionDates.TabIndex = 3;
-            this.dgvCollectionDates.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellContentClick);
-            this.dgvCollectionDates.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.Dgv_RowsAdded);
+            dgvCollectionDates.AllowUserToAddRows = false;
+            dgvCollectionDates.AllowUserToDeleteRows = false;
+            dgvCollectionDates.BackgroundColor = System.Drawing.Color.White;
+            dgvCollectionDates.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+            dgvCollectionDates.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvCollectionDates.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, Reference, WarningThreshold, CriticalThreshold, SnapshotAge, SnapshotDate, ConfiguredLevel, Configure, ConfigureRoot, colRun });
+            dgvCollectionDates.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvCollectionDates.Location = new System.Drawing.Point(0, 27);
+            dgvCollectionDates.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dgvCollectionDates.Name = "dgvCollectionDates";
+            dgvCollectionDates.ReadOnly = true;
+            dgvCollectionDates.RowHeadersVisible = false;
+            dgvCollectionDates.RowHeadersWidth = 51;
+            dgvCollectionDates.RowTemplate.Height = 24;
+            dgvCollectionDates.Size = new System.Drawing.Size(1357, 457);
+            dgvCollectionDates.TabIndex = 3;
+            dgvCollectionDates.CellContentClick += Dgv_CellContentClick;
+            dgvCollectionDates.RowsAdded += Dgv_RowsAdded;
             // 
             // Instance
             // 
-            this.Instance.DataPropertyName = "InstanceDisplayName";
-            this.Instance.HeaderText = "Instance";
-            this.Instance.MinimumWidth = 6;
-            this.Instance.Name = "Instance";
-            this.Instance.ReadOnly = true;
-            this.Instance.Width = 90;
+            Instance.DataPropertyName = "InstanceDisplayName";
+            Instance.HeaderText = "Instance";
+            Instance.MinimumWidth = 6;
+            Instance.Name = "Instance";
+            Instance.ReadOnly = true;
+            Instance.Width = 90;
             // 
             // Reference
             // 
-            this.Reference.DataPropertyName = "Reference";
-            this.Reference.HeaderText = "Reference";
-            this.Reference.MinimumWidth = 6;
-            this.Reference.Name = "Reference";
-            this.Reference.ReadOnly = true;
-            this.Reference.Width = 103;
+            Reference.DataPropertyName = "Reference";
+            Reference.HeaderText = "Reference";
+            Reference.MinimumWidth = 6;
+            Reference.Name = "Reference";
+            Reference.ReadOnly = true;
+            Reference.Width = 103;
             // 
             // WarningThreshold
             // 
-            this.WarningThreshold.DataPropertyName = "WarningThreshold";
-            this.WarningThreshold.HeaderText = "Warning Threshold";
-            this.WarningThreshold.MinimumWidth = 6;
-            this.WarningThreshold.Name = "WarningThreshold";
-            this.WarningThreshold.ReadOnly = true;
-            this.WarningThreshold.Width = 154;
+            WarningThreshold.DataPropertyName = "WarningThreshold";
+            WarningThreshold.HeaderText = "Warning Threshold";
+            WarningThreshold.MinimumWidth = 6;
+            WarningThreshold.Name = "WarningThreshold";
+            WarningThreshold.ReadOnly = true;
+            WarningThreshold.Width = 154;
             // 
             // CriticalThreshold
             // 
-            this.CriticalThreshold.DataPropertyName = "CriticalThreshold";
-            this.CriticalThreshold.HeaderText = "Critical Threshold";
-            this.CriticalThreshold.MinimumWidth = 6;
-            this.CriticalThreshold.Name = "CriticalThreshold";
-            this.CriticalThreshold.ReadOnly = true;
-            this.CriticalThreshold.Width = 135;
+            CriticalThreshold.DataPropertyName = "CriticalThreshold";
+            CriticalThreshold.HeaderText = "Critical Threshold";
+            CriticalThreshold.MinimumWidth = 6;
+            CriticalThreshold.Name = "CriticalThreshold";
+            CriticalThreshold.ReadOnly = true;
+            CriticalThreshold.Width = 135;
             // 
             // SnapshotAge
             // 
-            this.SnapshotAge.DataPropertyName = "HumanSnapshotAge";
-            this.SnapshotAge.HeaderText = "Snapshot Age";
-            this.SnapshotAge.MinimumWidth = 6;
-            this.SnapshotAge.Name = "SnapshotAge";
-            this.SnapshotAge.ReadOnly = true;
-            this.SnapshotAge.Width = 122;
+            SnapshotAge.DataPropertyName = "HumanSnapshotAge";
+            SnapshotAge.HeaderText = "Snapshot Age";
+            SnapshotAge.MinimumWidth = 6;
+            SnapshotAge.Name = "SnapshotAge";
+            SnapshotAge.ReadOnly = true;
+            SnapshotAge.Width = 122;
             // 
             // SnapshotDate
             // 
-            this.SnapshotDate.DataPropertyName = "SnapshotDate";
-            this.SnapshotDate.HeaderText = "Snapshot Date";
-            this.SnapshotDate.MinimumWidth = 6;
-            this.SnapshotDate.Name = "SnapshotDate";
-            this.SnapshotDate.ReadOnly = true;
-            this.SnapshotDate.Width = 120;
+            SnapshotDate.DataPropertyName = "SnapshotDate";
+            SnapshotDate.HeaderText = "Snapshot Date";
+            SnapshotDate.MinimumWidth = 6;
+            SnapshotDate.Name = "SnapshotDate";
+            SnapshotDate.ReadOnly = true;
+            SnapshotDate.Width = 120;
             // 
             // ConfiguredLevel
             // 
-            this.ConfiguredLevel.DataPropertyName = "ConfiguredLevel";
-            this.ConfiguredLevel.HeaderText = "Configured Level";
-            this.ConfiguredLevel.MinimumWidth = 6;
-            this.ConfiguredLevel.Name = "ConfiguredLevel";
-            this.ConfiguredLevel.ReadOnly = true;
-            this.ConfiguredLevel.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.ConfiguredLevel.Width = 132;
+            ConfiguredLevel.DataPropertyName = "ConfiguredLevel";
+            ConfiguredLevel.HeaderText = "Configured Level";
+            ConfiguredLevel.MinimumWidth = 6;
+            ConfiguredLevel.Name = "ConfiguredLevel";
+            ConfiguredLevel.ReadOnly = true;
+            ConfiguredLevel.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            ConfiguredLevel.Width = 132;
             // 
             // Configure
             // 
-            this.Configure.HeaderText = "Configure Instance";
-            this.Configure.MinimumWidth = 6;
-            this.Configure.Name = "Configure";
-            this.Configure.ReadOnly = true;
-            this.Configure.Text = "Configure Instance";
-            this.Configure.UseColumnTextForLinkValue = true;
-            this.Configure.Width = 119;
+            Configure.HeaderText = "Configure Instance";
+            Configure.MinimumWidth = 6;
+            Configure.Name = "Configure";
+            Configure.ReadOnly = true;
+            Configure.Text = "Configure Instance";
+            Configure.UseColumnTextForLinkValue = true;
+            Configure.Width = 119;
             // 
             // ConfigureRoot
             // 
-            this.ConfigureRoot.HeaderText = "Configure Root";
-            this.ConfigureRoot.MinimumWidth = 6;
-            this.ConfigureRoot.Name = "ConfigureRoot";
-            this.ConfigureRoot.ReadOnly = true;
-            this.ConfigureRoot.Text = "Configure Root";
-            this.ConfigureRoot.UseColumnTextForLinkValue = true;
-            this.ConfigureRoot.Width = 98;
+            ConfigureRoot.HeaderText = "Configure Root";
+            ConfigureRoot.MinimumWidth = 6;
+            ConfigureRoot.Name = "ConfigureRoot";
+            ConfigureRoot.ReadOnly = true;
+            ConfigureRoot.Text = "Configure Root";
+            ConfigureRoot.UseColumnTextForLinkValue = true;
+            ConfigureRoot.Width = 98;
+            // 
+            // colRun
+            // 
+            colRun.HeaderText = "Run";
+            colRun.MinimumWidth = 6;
+            colRun.Name = "colRun";
+            colRun.ReadOnly = true;
+            colRun.Text = "Run Now";
+            colRun.UseColumnTextForLinkValue = true;
+            colRun.Width = 125;
+            // 
+            // statusStrip1
+            // 
+            statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { lblStatus });
+            statusStrip1.Location = new System.Drawing.Point(0, 484);
+            statusStrip1.Name = "statusStrip1";
+            statusStrip1.Size = new System.Drawing.Size(1357, 26);
+            statusStrip1.TabIndex = 4;
+            statusStrip1.Text = "statusStrip1";
+            // 
+            // lblStatus
+            // 
+            lblStatus.Name = "lblStatus";
+            lblStatus.Size = new System.Drawing.Size(1303, 20);
+            lblStatus.Spring = true;
+            lblStatus.Text = "Ready";
+            lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            lblStatus.Click += LblStatus_Click;
             // 
             // CollectionDates
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.dgvCollectionDates);
-            this.Controls.Add(this.toolStrip1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "CollectionDates";
-            this.Size = new System.Drawing.Size(882, 381);
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvCollectionDates)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            Controls.Add(dgvCollectionDates);
+            Controls.Add(toolStrip1);
+            Controls.Add(statusStrip1);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "CollectionDates";
+            Size = new System.Drawing.Size(1357, 510);
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvCollectionDates).EndInit();
+            statusStrip1.ResumeLayout(false);
+            statusStrip1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -251,6 +284,7 @@
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.ToolStripButton tsExcel;
+        private StatusFilterToolStrip statusFilterToolStrip1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
         private System.Windows.Forms.DataGridViewTextBoxColumn Reference;
         private System.Windows.Forms.DataGridViewTextBoxColumn WarningThreshold;
@@ -260,6 +294,9 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ConfiguredLevel;
         private System.Windows.Forms.DataGridViewLinkColumn Configure;
         private System.Windows.Forms.DataGridViewLinkColumn ConfigureRoot;
-        private StatusFilterToolStrip statusFilterToolStrip1;
+        private System.Windows.Forms.DataGridViewLinkColumn colRun;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel lblStatus;
+        private System.Windows.Forms.ToolStripButton tsTrigger;
     }
 }
