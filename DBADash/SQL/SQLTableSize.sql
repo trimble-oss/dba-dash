@@ -32,13 +32,13 @@ AND D.database_id <> 2
 AND EXISTS(
 		SELECT 1 
 		FROM STRING_SPLIT(@TableSizeDatabases,',') SS
-		WHERE (TRIM(SS.value) = D.name OR SS.value ='*')
+		WHERE (RTRIM(LTRIM(SS.value)) = D.name OR SS.value ='*')
 )
 AND NOT EXISTS(
 			SELECT 1 
 			FROM STRING_SPLIT(@TableSizeDatabases,',') SS
-			WHERE STUFF(TRIM(SS.value),1,1,'') = D.name 
-			AND TRIM(SS.value) LIKE '-%'
+			WHERE STUFF(RTRIM(LTRIM(SS.value)),1,1,'') = D.name 
+			AND RTRIM(LTRIM(SS.value)) LIKE '-%'
 	)
 
 IF @@ROWCOUNT > @MaxDatabases
