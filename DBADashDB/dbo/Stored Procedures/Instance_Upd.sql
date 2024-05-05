@@ -18,6 +18,7 @@
 	@ImportAgentID INT=NULL,
 	@contained_availability_group_id UNIQUEIDENTIFIER=NULL,
 	@contained_availability_group_name NVARCHAR(128)=NULL,
+	@EngineEdition INT=NULL,
 	@InstanceID INT OUT
 )
 AS
@@ -53,8 +54,8 @@ BEGIN
 	IF @InstanceID IS NULL
 	BEGIN
 		BEGIN TRAN
-		INSERT INTO dbo.Instances(Instance,ConnectionID,IsActive,EditionID,UTCOffset,CollectAgentID,ImportAgentID)
-		VALUES(@Instance,@ConnectionID,CAST(1 as BIT),@EditionID,@UTCOffset,@CollectAgentID,@ImportAgentID)
+		INSERT INTO dbo.Instances(Instance,ConnectionID,IsActive,EditionID,UTCOffset,CollectAgentID,ImportAgentID,EngineEdition)
+		VALUES(@Instance,@ConnectionID,CAST(1 as BIT),@EditionID,@UTCOffset,@CollectAgentID,@ImportAgentID,@EngineEdition)
 		SELECT @InstanceID = SCOPE_IDENTITY();
 
 		EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
@@ -78,7 +79,8 @@ BEGIN
 			CollectAgentID = @CollectAgentID,
 			ImportAgentID = @ImportAgentID,
 			contained_availability_group_id = @contained_availability_group_id,
-			contained_availability_group_name = @contained_availability_group_name 
+			contained_availability_group_name = @contained_availability_group_name,
+			EngineEdition =ISNULL(@EngineEdition,EngineEdition)
 		WHERE InstanceID = @InstanceID
 		AND EXISTS(SELECT Instance,
 						EditionID,
@@ -92,7 +94,8 @@ BEGIN
 						CollectAgentID,
 						ImportAgentID,
 						contained_availability_group_id,
-						contained_availability_group_name
+						contained_availability_group_name,
+						EngineEdition
 					EXCEPT
 					SELECT @Instance,
 							@EditionID,
@@ -106,7 +109,8 @@ BEGIN
 							@CollectAgentID,
 							@ImportAgentID,
 							@contained_availability_group_id,
-							@contained_availability_group_name
+							@contained_availability_group_name,
+							ISNULL(@EngineEdition,EngineEdition)
 					)
 
 		EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
