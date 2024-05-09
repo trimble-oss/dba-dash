@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[ObjectExecutionStats_Upd](
+﻿CREATE PROC dbo.ObjectExecutionStats_Upd(
     @ObjectExecutionStats dbo.ProcStats READONLY,
     @InstanceID INT,
     @SnapshotDate DATETIME2(3)
@@ -97,11 +97,17 @@ WITH t AS (
 		   END) AS IsCompile
 	FROM @ObjectExecutionStats a
 		LEFT JOIN Staging.ObjectExecutionStats b ON  a.object_id = b.object_id
-							 AND a.database_id = b.database_id
-							 AND a.cached_time = b.cached_time
-							 AND b.InstanceID = @InstanceID
-							 AND a.current_time_utc > b.current_time_utc
-							 AND a.total_elapsed_time>= b.total_elapsed_time
+                                                    AND a.database_id = b.database_id
+                                                    AND a.cached_time = b.cached_time
+                                                    AND b.InstanceID = @InstanceID
+                                                    AND a.current_time_utc > b.current_time_utc		
+                                                    -- Ensure we don't have negative values
+                                                    AND a.total_elapsed_time>= b.total_elapsed_time
+                                                    AND a.total_worker_time>= b.total_worker_time
+                                                    AND a.total_logical_reads>= b.total_logical_reads
+                                                    AND a.total_logical_writes>= b.total_logical_writes
+                                                    AND a.total_physical_reads>= b.total_physical_reads
+                                                    AND a.execution_count>= b.execution_count
 	JOIN dbo.Databases d ON a.database_id = d.database_id AND D.InstanceID=@InstanceID
 	JOIN dbo.DBObjects O ON a.object_name = O.ObjectName AND a.schema_name = O.SchemaName AND O.DatabaseID = d.DatabaseID AND O.ObjectType = a.type
 	WHERE D.IsActive=1
