@@ -209,9 +209,9 @@ namespace DBADash
             var cinfo = master.ConnectionInfo;
             if (string.IsNullOrEmpty(cinfo.ServerName))
             {
-                throw new Exception("@@SERVERNAME didn't return a value for this SQL instance.  You might need to fix this issue by running sp_addserver.");
+                Log.Warning("@@SERVERNAME returned NULL for {connection}.  Consider fixing with sp_addserver", destination.ConnectionForPrint);
             }
-            else if (cinfo.MajorVersion < 13 && cinfo.EngineEdition != Microsoft.SqlServer.Management.Common.DatabaseEngineEdition.SqlDatabase && cinfo.EngineEdition != Microsoft.SqlServer.Management.Common.DatabaseEngineEdition.SqlManagedInstance) // 13=2016, 12 might be Azure DB which is OK
+            if (cinfo.MajorVersion < 13 && cinfo.EngineEdition != Microsoft.SqlServer.Management.Common.DatabaseEngineEdition.SqlDatabase && cinfo.EngineEdition != Microsoft.SqlServer.Management.Common.DatabaseEngineEdition.SqlManagedInstance) // 13=2016, 12 might be Azure DB which is OK
             {
                 throw new Exception("DBA Dash repository database requires SQL 2016 SP1 or later");
             }

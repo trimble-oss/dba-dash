@@ -351,9 +351,14 @@ namespace DBADash
             StartCollection(CollectionType.Instance.ToString());
             var dt = GetDT("DBADash", SqlStrings.Instance, CollectionCommandTimeout.GetDefaultCommandTimeout());
             AddDBADashServiceMetaData(ref dt);
-
+            var clusterOrComputerName = (string)dt.Rows[0]["MachineName"];
             computerName = (string)dt.Rows[0]["ComputerNamePhysicalNetBIOS"];
             dbName = (string)dt.Rows[0]["DBName"];
+            if (dt.Rows[0]["Instance"] == DBNull.Value)
+            {
+                dt.Rows[0]["Instance"] = "";
+                Log.Warning("@@SERVERNAME returned NULL for {connection}.  Consider fixing with sp_addserver", Source.SourceConnection.ConnectionForPrint);
+            }
             instanceName = (string)dt.Rows[0]["Instance"];
             productVersion = (string)dt.Rows[0]["ProductVersion"];
             if (!Version.TryParse(productVersion, out SQLVersion))
@@ -403,6 +408,10 @@ namespace DBADash
                 else if (!string.IsNullOrEmpty(containedAGName)) // Use the name of the contained AG as the ConnectionID.
                 {
                     dt.Rows[0]["ConnectionID"] = containedAGName;
+                }
+                else if (string.IsNullOrEmpty(instanceName))
+                {
+                    dt.Rows[0]["ConnectionID"] = clusterOrComputerName;
                 }
                 else
                 {

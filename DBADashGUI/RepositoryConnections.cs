@@ -36,9 +36,9 @@ namespace DBADashGUI
         {
             var builder1 = new SqlConnectionStringBuilder(connectionString1);
             var builder2 = new SqlConnectionStringBuilder(connectionString2);
-            return builder1.DataSource == builder2.DataSource 
-                   && builder1.InitialCatalog == builder2.InitialCatalog 
-                   && builder1.UserID == builder2.UserID 
+            return builder1.DataSource == builder2.DataSource
+                   && builder1.InitialCatalog == builder2.InitialCatalog
+                   && builder1.UserID == builder2.UserID
                    && builder1.IntegratedSecurity == builder2.IntegratedSecurity;
         }
 
@@ -141,7 +141,7 @@ namespace DBADashGUI
         {
             using var cn = new SqlConnection(ConnectionString);
             cn.Open();
-            using var cmd = new SqlCommand("SELECT @@SERVERNAME + '\\' + DB_NAME() as Name", cn);
+            using var cmd = new SqlCommand("SELECT ISNULL(@@SERVERNAME,ISNULL(CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(128)),'')) + '\\' + DB_NAME() as Name", cn);
             return (string)cmd.ExecuteScalar();
         }
 

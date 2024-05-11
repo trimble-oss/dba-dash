@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 
 namespace DBADashServiceConfig
 {
-    public partial class ServiceConfig : Form
+    public partial class ServiceConfig : Form, IThemedControl
     {
         public ServiceConfig()
         {
@@ -131,6 +131,11 @@ namespace DBADashServiceConfig
                         }
                         System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
                     }
+
+                    if (string.IsNullOrEmpty(src.SourceConnection.ConnectionInfo.ServerName))
+                    {
+                        MessageBox.Show("Warning @@SERVERNAME returned NULL.  Consider fixing this using sp_addserver", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                     if (!addUnvalidated && !validated)
                     {
                         if (doNotAddUnvalidated)
@@ -212,6 +217,7 @@ namespace DBADashServiceConfig
         private bool ValidateDestination()
         {
             errorProvider1.SetError(txtDestination, null);
+            lblServerNameWarning.Visible = false;
             DBADashConnection dest = new(txtDestination.Text);
             lblVersionInfo.ForeColor = Color.Black;
             lblVersionInfo.Text = "";
@@ -242,6 +248,10 @@ namespace DBADashServiceConfig
             {
                 try
                 {
+                    if (string.IsNullOrEmpty(dest.MasterConnection().ConnectionInfo.ServerName))
+                    {
+                        lblServerNameWarning.Visible = true;
+                    }
                     var status = DBValidations.VersionStatus(dest.ConnectionString);
                     if (status.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB)
                     {
@@ -269,6 +279,7 @@ namespace DBADashServiceConfig
                         lblVersionInfo.ForeColor = DashColors.Fail;
                         bttnDeployDatabase.Enabled = true;
                     }
+
                     return true;
                 }
                 catch (Exception ex)
@@ -1591,6 +1602,17 @@ namespace DBADashServiceConfig
             {
                 MessageBox.Show("ConnectionID populated successfully", "Messaging", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
+        }
+
+        public void ApplyTheme(BaseTheme theme)
+        {
+            foreach (Control c in this.Controls)
+            {
+                c.ApplyTheme(theme);
+            }
+
+            lblServerNameWarning.ForeColor = theme.WarningForeColor;
+            lblServerNameWarning.BackColor = theme.WarningBackColor;
         }
     }
 }

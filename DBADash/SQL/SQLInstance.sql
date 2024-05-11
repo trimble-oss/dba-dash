@@ -31,7 +31,8 @@ BEGIN
 		SERVERPROPERTY('IsHadrEnabled') IsHadrEnabled,
 		SERVERPROPERTY('EngineEdition') EngineEdition,
 		@ContainedAGID as contained_availability_group_id,
-		@ContainedAGName AS contained_availability_group_name
+		@ContainedAGName AS contained_availability_group_name,
+		ISNULL(CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(128)),'') AS MachineName
 	FROM sys.dm_os_host_info
 END
 ELSE IF OBJECT_ID('sys.dm_os_windows_info') IS NOT NULL
@@ -52,7 +53,8 @@ BEGIN
 		SERVERPROPERTY('IsHadrEnabled') IsHadrEnabled,
 		SERVERPROPERTY('EngineEdition') EngineEdition,
 		@ContainedAGID as contained_availability_group_id,
-		@ContainedAGName AS contained_availability_group_name
+		@ContainedAGName AS contained_availability_group_name,
+		ISNULL(CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(128)),'') AS MachineName
 	FROM sys.dm_os_windows_info
 END
 ELSE
@@ -72,5 +74,6 @@ BEGIN
 		SERVERPROPERTY('IsHadrEnabled') IsHadrEnabled,
 		SERVERPROPERTY('EngineEdition') EngineEdition,
 		@ContainedAGID as contained_availability_group_id,
-		@ContainedAGName AS contained_availability_group_name
+		@ContainedAGName AS contained_availability_group_name,
+		ISNULL(CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(128)),'') AS MachineName
 END
