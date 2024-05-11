@@ -127,6 +127,7 @@ namespace DBADashServiceConfig
             label13 = new System.Windows.Forms.Label();
             txtSearch = new System.Windows.Forms.TextBox();
             tabDest = new System.Windows.Forms.TabPage();
+            lblServerNameWarning = new System.Windows.Forms.Label();
             lblServiceWarning = new System.Windows.Forms.Label();
             bttnAbout = new System.Windows.Forms.Button();
             groupBox5 = new System.Windows.Forms.GroupBox();
@@ -1265,6 +1266,7 @@ namespace DBADashServiceConfig
             // 
             // tabDest
             // 
+            tabDest.Controls.Add(lblServerNameWarning);
             tabDest.Controls.Add(lblServiceWarning);
             tabDest.Controls.Add(bttnAbout);
             tabDest.Controls.Add(groupBox5);
@@ -1284,6 +1286,17 @@ namespace DBADashServiceConfig
             tabDest.TabIndex = 2;
             tabDest.Text = "Destination:";
             tabDest.UseVisualStyleBackColor = true;
+            // 
+            // lblServerNameWarning
+            // 
+            lblServerNameWarning.AutoSize = true;
+            lblServerNameWarning.ForeColor = System.Drawing.Color.FromArgb(228, 147, 37);
+            lblServerNameWarning.Location = new System.Drawing.Point(103, 209);
+            lblServerNameWarning.Name = "lblServerNameWarning";
+            lblServerNameWarning.Size = new System.Drawing.Size(554, 20);
+            lblServerNameWarning.TabIndex = 25;
+            lblServerNameWarning.Text = "Warning @@SERVERNAME returned NULL.  Consider fixing this using sp_addserver";
+            lblServerNameWarning.Visible = false;
             // 
             // lblServiceWarning
             // 
@@ -1583,6 +1596,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.GroupBox groupBox6;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.CheckBox chkEnableMessaging;
+        private System.Windows.Forms.Label lblServerNameWarning;
     }
 }
 
