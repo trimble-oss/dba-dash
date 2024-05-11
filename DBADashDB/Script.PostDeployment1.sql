@@ -10,6 +10,37 @@ GRANT SELECT ON SCHEMA::DBADash TO App;
 GRANT EXECUTE ON SCHEMA::DBADash TO App;
 GRANT EXECUTE ON SCHEMA::UserReport TO RunUserReports;
 GRANT EXECUTE ON SCHEMA::Messaging TO Messaging;
+
+/* App ReadOnly role provides limited app access. Generate grant for stored procedures that end with _Get & inline functions*/
+DECLARE @GrantAppReadOnlySQL NVARCHAR(MAX);
+WITH Grants AS (
+		SELECT CONCAT('GRANT EXECUTE ON ',QUOTENAME(SCHEMA_NAME(schema_id)),'.',QUOTENAME(name),' TO AppReadOnly') GrantSQL
+		FROM sys.objects
+		WHERE name LIKE '%_Get' 
+		AND type = 'P'
+		AND SCHEMA_NAME(schema_id) IN('dbo','DBADash')
+		UNION ALL
+		SELECT CONCAT('GRANT SELECT ON ',QUOTENAME(SCHEMA_NAME(schema_id)),'.',QUOTENAME(name),' TO AppReadOnly')
+		FROM sys.objects
+		WHERE type = 'IF'
+		AND SCHEMA_NAME(schema_id) = 'dbo'
+)
+SELECT @GrantAppReadOnlySQL =
+	(SELECT '
+'+ GrantSQL
+		FROM Grants
+		FOR XML PATH(''),TYPE
+		).value('.','NVARCHAR(MAX)')
+
+
+GRANT SELECT ON SCHEMA::dbo TO AppReadOnly
+GRANT SELECT ON SCHEMA::DBADash TO AppReadOnly
+GRANT EXEC ON TYPE::dbo.IDs TO AppReadOnly
+-- for setting timezone & theme
+GRANT EXEC ON DBADash.User_Upd TO AppReadOnly
+
+EXEC sp_executesql @GrantAppReadOnlySQL 
+
 /************/
 MERGE INTO [dbo].[SysConfigOptions] AS [Target]
 USING (VALUES
