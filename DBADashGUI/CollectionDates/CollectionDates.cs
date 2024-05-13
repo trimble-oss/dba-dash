@@ -47,6 +47,8 @@ namespace DBADashGUI.CollectionDates
             get => statusFilterToolStrip1.OK; set => statusFilterToolStrip1.OK = value;
         }
 
+        private static readonly string[] NoTriggerCollectionTypes = new[] { "QueryPlans", "QueryText", "SlowQueriesStats", "InternalPerformanceCounters" };
+
         private DataTable GetCollectionDates()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
@@ -150,6 +152,11 @@ namespace DBADashGUI.CollectionDates
                     }
 
                     var collection = (string)row["Reference"];
+                    if (NoTriggerCollectionTypes.Contains(collection, StringComparer.OrdinalIgnoreCase))
+                    {
+                        SetStatus("This collection type cannot be triggered manually", null, DashColors.Warning);
+                        return;
+                    }
                     await CollectionMessaging.TriggerCollection(instance, collection, agentID, this);
                 }
             }
@@ -233,7 +240,12 @@ namespace DBADashGUI.CollectionDates
         {
             List<string> collectionTypes = new();
             var agentID = 0;
-            foreach (var row in dt.Rows.Cast<DataRow>().Where(r => r["Status"] is 1 or 2 && (bool)r["MessagingEnabled"] && (string)r["ConnectionID"] == connectionID && (string)r["Reference"] is not "QueryPlan" or "QueryText").OrderBy((r => r["ConnectionID"])))
+            foreach (var row in dt.Rows.Cast<DataRow>()
+                         .Where(r => r["Status"] is 1 or 2
+                                     && (bool)r["MessagingEnabled"]
+                                     && string.Equals((string)r["ConnectionID"], connectionID, StringComparison.OrdinalIgnoreCase)
+                                     && !NoTriggerCollectionTypes.Any(s => string.Equals((string)r["Reference"], s, StringComparison.OrdinalIgnoreCase)))
+                         .OrderBy(r => r["ConnectionID"]))
             {
                 agentID = (int)row["ImportAgentID"];
                 collectionTypes.Add((string)row["Reference"]);
