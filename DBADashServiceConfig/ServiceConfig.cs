@@ -1211,7 +1211,7 @@ namespace DBADashServiceConfig
             currencyManager1.SuspendBinding();
             foreach (DataGridViewRow row in dgvConnections.Rows)
             {
-                if (string.IsNullOrEmpty(txtSearch.Text) || (row.Cells["ConnectionString"].Value.ToString() ?? "").Contains(txtSearch.Text, StringComparison.CurrentCultureIgnoreCase) || (row.Cells["ConnectionID"].Value.ToString() ?? "").Contains(txtSearch.Text, StringComparison.CurrentCultureIgnoreCase))
+                if (string.IsNullOrEmpty(txtSearch.Text) || (row.Cells["ConnectionString"].Value as string ?? "").Contains(txtSearch.Text, StringComparison.CurrentCultureIgnoreCase) || (row.Cells["ConnectionID"].Value as string ?? "").Contains(txtSearch.Text, StringComparison.CurrentCultureIgnoreCase))
                 {
                     row.Visible = true;
                 }
