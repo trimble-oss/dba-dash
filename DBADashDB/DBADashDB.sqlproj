@@ -730,6 +730,7 @@
     <Build Include="Security\Messaging.sql" />
     <Build Include="Messaging\Cleanup.sql" />
     <Build Include="Security\AppReadOnly.sql" />
+    <Build Include="dbo\Stored Procedures\DBADashAgent_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

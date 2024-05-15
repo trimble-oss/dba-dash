@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,13 +12,16 @@ namespace DBADash.Messaging
     // Define a base class for message types
     public abstract class MessageBase : IMessage
     {
-        public abstract Task Process(CollectionConfig cfg, Guid handle);
+        public abstract Task<DataSet> Process(CollectionConfig cfg, Guid handle);
 
         public string SerializeString() => JsonConvert.SerializeObject(this, Formatting.Indented);
 
         public DateTime Created { get; set; } = DateTime.UtcNow;
 
         public bool IsExpired => DateTime.UtcNow - Created > TimeSpan.FromMinutes(5);
+
+        public DBADashAgent CollectAgent { get; set; }
+        public DBADashAgent ImportAgent { get; set; }
 
         public byte[] Serialize()
         {
@@ -45,5 +49,6 @@ namespace DBADash.Messaging
                 ? throw new ArgumentException($"Type {typeName} not found.")
                 : (MessageBase)JsonConvert.DeserializeObject(json, type);
         }
+
     }
 }

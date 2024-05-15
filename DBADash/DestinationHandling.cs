@@ -63,11 +63,12 @@ namespace DBADash
 
         public static async Task WriteS3(DataSet ds, string destination, string fileName, CollectionConfig cfg)
         {
-            string extension = System.IO.Path.GetExtension(fileName);
-            if (extension != ".xml")
+            if (ds.Tables.Contains("DBADash") && ds.Tables["DBADash"]!.Columns.Contains("S3Path"))
             {
-                fileName += ".xml";
+                ds.Tables["DBADash"].Rows[0]["S3Path"] = destination;
             }
+            string extension = System.IO.Path.GetExtension(fileName);
+
             DataSetSerialization.SetDateTimeKind(ds); // Required to prevent timezone conversion
 
             var uri = new Amazon.S3.Util.AmazonS3Uri(destination);
@@ -116,7 +117,7 @@ namespace DBADash
 
         public static void WriteDB(DataSet ds, string destination, CollectionConfig cfg)
         {
-            var importAgent = DBADashAgent.GetCurrent(cfg.ServiceName);
+            var importAgent = DBADashAgent.GetCurrent();
             var importer = new DBImporter(ds, destination, importAgent, cfg.ImportCommandTimeout ?? DefaultCommandTimeout);
             // Wait until we can connect to the repository DB.  If it's down, wait for it to become available.
             Policy.Handle<Exception>()

@@ -124,7 +124,7 @@ namespace DBADashService
         public bool RunOnServiceStart = true;
 
         private const string every1min = "0 * * ? * *";
-        private static readonly CollectionSchedule importSchedule = new() { Schedule = every1min };
+        private static readonly CollectionSchedule importSchedule = new() { Schedule = "10" };
         public static readonly CollectionSchedule DefaultImportSchedule = importSchedule;
     }
 }

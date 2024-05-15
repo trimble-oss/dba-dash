@@ -565,6 +565,9 @@ namespace DBADash
                     AgentVersion = (string)rInstance["AgentVersion"],
                     AgentPath = rInstance.Table.Columns.Contains("AgentPath") ? (string)rInstance["AgentPath"] : "",
                     AgentServiceName = rInstance.Table.Columns.Contains("AgentServiceName") ? (string)rInstance["AgentServiceName"] : "{DBADashService}",
+                    ServiceSQSQueueUrl = rInstance.Table.Columns.Contains("ServiceSQSQueueUrl") && rInstance["ServiceSQSQueueUrl"] !=DBNull.Value ? (string)rInstance["ServiceSQSQueueUrl"] : null,
+                    S3Path = rInstance.Table.Columns.Contains("S3Path") && rInstance["S3Path"]  !=DBNull.Value ? (string)rInstance["S3Path"] : null,
+                    MessagingEnabled = rInstance.Table.Columns.Contains("MessagingEnabled") && rInstance["MessagingEnabled"] != DBNull.Value && (bool)rInstance["MessagingEnabled"]
                 };
                 if (collectAgent.Equals(importAgent))
                 {

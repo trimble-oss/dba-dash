@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Azure;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Serilog;
 
 namespace DBADash.Messaging
 {
@@ -25,6 +27,8 @@ namespace DBADash.Messaging
         public Exception Exception { get; set; }
 
         public string Message { get; set; }
+
+        public string MessageDataPath { get; set; }
 
         [JsonIgnore] public DataSet Data { get; set; }
 
@@ -53,6 +57,26 @@ namespace DBADash.Messaging
                     Data = new DataSet();
                     Data.ReadXml(stream, XmlReadMode.ReadSchema);
                 }
+            }
+        }
+
+        public async Task DownloadData(CollectionConfig Config)
+        {
+            if (!string.IsNullOrWhiteSpace(MessageDataPath))
+            {
+                Log.Information("Downloading message data from {path}", MessageDataPath);
+                var uri = new Amazon.S3.Util.AmazonS3Uri(MessageDataPath);
+                using var s3Cli = await AWSTools.GetAWSClientAsync(Config.AWSProfile, Config.AccessKey, Config.GetSecretKey(), uri);
+               
+                using var s3Obj = await s3Cli.GetObjectAsync(uri.Bucket, uri.Key);
+
+                await using var responseStream = s3Obj.ResponseStream;
+
+                var ds = new DataSet();
+                ds.ReadXml(responseStream);
+                Data = ds;
+                Log.Information("Downloaded succeeded, removing data from bucket {path}", MessageDataPath);
+                await s3Cli.DeleteObjectAsync(uri.Bucket, uri.Key);
             }
         }
 

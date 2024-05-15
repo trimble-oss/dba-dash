@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO.Compression;
 using System.IO;
 using System.Linq;
@@ -45,7 +46,7 @@ namespace DBADash.Messaging
         {
         }
 
-        public override async Task Process(CollectionConfig cfg, Guid handle)
+        public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle)
         {
             if (IsExpired)
             {
@@ -63,9 +64,19 @@ namespace DBADash.Messaging
             collector.Collect(standardCollections.ToArray());
             collector.Collect(customCollections);
 
-            var fileName = DBADashSource.GenerateFileName(src.SourceConnection.ConnectionForFileName);
-            await DestinationHandling.WriteAllDestinations(collector.Data, src, fileName, cfg);
-            op.Complete();
+    
+            if (CollectAgent.S3Path != null)
+            {
+                op.Complete();
+                return collector.Data;
+            }
+            else
+            {
+                var fileName = DBADashSource.GenerateFileName(src.SourceConnection.ConnectionForFileName);
+                await DestinationHandling.WriteAllDestinations(collector.Data, src, fileName, cfg);
+                op.Complete();
+                return null;
+            }
         }
 
         private (List<CollectionType>, Dictionary<string, CustomCollection>) ParseCollectionTypes(DBADashSource src, CollectionConfig cfg)

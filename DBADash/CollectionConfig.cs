@@ -35,6 +35,8 @@ namespace DBADash
 
         public bool EnableMessaging { get; set; }
 
+        public string ServiceSQSQueueUrl { get; set; }
+
         public CollectionSchedules GetSchedules()
         {
             if (CollectionSchedules == null)
@@ -348,6 +350,11 @@ namespace DBADash
             }
 
             return base.ContainsSensitive();
+        }
+
+        public  DBADashConnection GetDestination(string hash)
+        {
+            return DestinationConnection.Hash == hash ? DestinationConnection : SecondaryDestinationConnections.FirstOrDefault(c => c.Hash == hash);
         }
     }
 }

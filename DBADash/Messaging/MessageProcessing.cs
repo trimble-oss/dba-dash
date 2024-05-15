@@ -44,7 +44,7 @@ namespace DBADash.Messaging
         public MessageProcessing(CollectionConfig config)
         {
             Config = config;
-            Agent = DBADashAgent.GetCurrent(Config.ServiceName);
+            Agent = DBADashAgent.GetCurrent();
             MessageThreads = config.MessageThreads ?? DefaultMessageThreads;
             MessageSemaphore = new SemaphoreSlim(MessageThreads);
         }
@@ -182,6 +182,7 @@ namespace DBADash.Messaging
 
         public async Task ProcessMessage(DBADashConnection dest, Guid handle, string type, byte[] message)
         {
+            bool endConversation = true;
             try
             {
                 await MessageSemaphore.WaitAsync(); // Limit the number of messages processed at once
@@ -196,8 +197,21 @@ namespace DBADash.Messaging
                         { Type = ResponseMessage.ResponseTypes.Failure, Message = "Message is Expired." }).Serialize(),
                         dest.ConnectionString);
                 }
+                else if (msg.CollectAgent.AgentIdentifier != DBADashAgent.GetCurrent().AgentIdentifier)
+                {
+                    // The message needs to be relayed to the remote agent via SQS queue
+                    await SendReplyMessage(handle,
+                                               (new ResponseMessage()
+                                               { Type = ResponseMessage.ResponseTypes.Progress, Message = "Message relay to remote service" }).Serialize(),
+                                                                      dest.ConnectionString);
+              
+                       //get hash of dest - pass it in the sqs message so it can be passed back and we know which destination
+                   await AWSTools.SendSQSMessageAsync(Config,Convert.ToBase64String(msg.Serialize()),DBADashAgent.GetCurrent().AgentIdentifier,msg.CollectAgent.AgentIdentifier,handle,msg.CollectAgent.ServiceSQSQueueUrl, SendMessageType,dest.Hash) ;
+                   endConversation = false;
+                }
                 else
                 {
+                    // Message is for this agent.  Process the message
                     await msg.Process(Config, handle);
                     await SendReplyMessage(handle,
                         (new ResponseMessage()
@@ -213,7 +227,10 @@ namespace DBADash.Messaging
             finally
             {
                 MessageSemaphore.Release();
-                await EndConversation(handle, dest.ConnectionString);
+                if (endConversation)
+                {
+                    await EndConversation(handle, dest.ConnectionString);
+                }
             }
         }
 

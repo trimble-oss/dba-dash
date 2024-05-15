@@ -5,6 +5,10 @@
 	AgentVersion VARCHAR(30) NOT NULL,
 	AgentPath NVARCHAR(260) NOT NULL,
 	MessagingEnabled BIT NOT NULL CONSTRAINT DF_DBADashAgent_MessagingEnabled DEFAULT(0),
+	ServiceSQSQueueUrl NVARCHAR(256) NULL,
+	AgentIdentifier CHAR(22) NOT NULL CONSTRAINT DF_DBADAshAgent_AgentIdentifier DEFAULT(LEFT(CONCAT('Temp.',REPLACE(NEWID(),'-','')),22)),
+	S3Path NVARCHAR(256) NULL,
 	CONSTRAINT PK_DBADashAgent PRIMARY KEY(DBADashAgentID),
-	INDEX IX_DBADashAgent UNIQUE NONCLUSTERED (AgentHostName,AgentServiceName)
+	INDEX IX_DBADashAgent UNIQUE NONCLUSTERED (AgentHostName,AgentServiceName),
+	INDEX IX_DBADashAgent_AgentIdentifier UNIQUE NONCLUSTERED (AgentIdentifier)
 )
