@@ -119,21 +119,28 @@ namespace DBADash
             return DecryptString(value, DataProtectionScope.LocalMachine);
         }
 
+        public static string GetHash(string input)=>GetShortHash(input, 64);
+
         public static string GetShortHash(string input, int length = 8)
         {
-            using SHA256 sha256Hash = SHA256.Create();
-            // ComputeHash - returns byte array
-            var bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(input));
-
-            // Convert byte array to a string
-            var builder = new StringBuilder();
-            foreach (var t in bytes)
+            if (length is < 0 or > 64) // SHA256 produces a 64-character hex string
             {
-                builder.Append(t.ToString("x2"));
+                throw new ArgumentOutOfRangeException(nameof(length), "Length must be between 0 and 64.");
+            }
+            var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(input));
+
+            var builder = new StringBuilder(length); // Initialize StringBuilder with the exact length needed
+            for (var i = 0; i < bytes.Length && builder.Length < length; i++)
+            {
+                // Append each byte as a two-character hexadecimal string
+                builder.Append(bytes[i].ToString("x2"));
+                if (builder.Length > length) // If appending the last byte exceeds the desired length
+                {
+                    builder.Length = length; // Truncate the StringBuilder to the desired length
+                }
             }
 
-            // Return the first 'length' characters of the hash
-            return builder.ToString()[..length];
+            return builder.ToString();
         }
     }
 }

@@ -26,6 +26,7 @@ namespace DBADash
         private string encryptedConnectionString = "";
         private string connectionString = "";
         private ConnectionType connectionType;
+        private string _hash;
 
         public bool WasEncrypted => wasEncryptionPerformed;
 
@@ -53,6 +54,7 @@ namespace DBADash
             encryptedConnectionString = GetConnectionStringWithEncryptedPassword(value);
             connectionString = GetDecryptedConnectionString(value);
             connectionType = GetConnectionType(value);
+            _hash = EncryptText.GetHash(connectionString);
         }
 
         [JsonIgnore]
@@ -245,6 +247,9 @@ namespace DBADash
                 return connectionString;
             }
         }
+
+        [JsonIgnore]
+        public string Hash => EncryptText.GetHash(ConnectionString);
 
         public string ConnectionForFileName
         {

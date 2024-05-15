@@ -3,13 +3,23 @@
 	@AgentVersion VARCHAR(30),
 	@AgentServiceName NVARCHAR(256),
 	@AgentPath NVARCHAR(260),
+	@ServiceSQSQueueUrl NVARCHAR(256)=NULL,
+	@AgentIdentifier CHAR(22)=NULL,
+	@S3Path NVARCHAR(256)=NULL,
+	@MessagingEnabled BIT=0,
 	@DBADashAgentID INT OUT
 )
 AS
 DECLARE @UpdateAgent BIT = 0
 
 SELECT @DBADashAgentID = DBADashAgentID,
-	@UpdateAgent = (CASE WHEN @AgentPath <> AgentPath OR @AgentVersion <> AgentVersion THEN 1 ELSE 0 END)
+	@UpdateAgent = CASE WHEN 
+						EXISTS(
+								SELECT @AgentPath, @AgentVersion, @ServiceSQSQueueUrl, @AgentIdentifier,@S3Path,@MessagingEnabled
+								EXCEPT
+								SELECT AgentPath, AgentVersion, ServiceSQSQueueUrl, AgentIdentifier, S3Path, MessagingEnabled
+								)
+					THEN 1 ELSE 0 END
 FROM dbo.DBADashAgent
 WHERE AgentHostName = @AgentHostName
 AND AgentServiceName = @AgentServiceName
@@ -17,8 +27,8 @@ AND AgentServiceName = @AgentServiceName
 IF @DBADashAgentID IS NULL
 BEGIN
 
-	INSERT INTO dbo.DBADashAgent(AgentHostName,AgentServiceName,AgentVersion,AgentPath)
-	SELECT @AgentHostName,@AgentServiceName,@AgentVersion,@AgentPath
+	INSERT INTO dbo.DBADashAgent(AgentHostName,AgentServiceName,AgentVersion,AgentPath,ServiceSQSQueueUrl,AgentIdentifier,S3Path,MessagingEnabled)
+	SELECT @AgentHostName,@AgentServiceName,@AgentVersion,@AgentPath,@ServiceSQSQueueUrl,ISNULL(@AgentIdentifier,LEFT(CONCAT('Temp.',REPLACE(NEWID(),'-','')),22)), @S3Path, @MessagingEnabled
 	WHERE NOT EXISTS(SELECT 1 
 				FROM dbo.DBADashAgent WITH(UPDLOCK,HOLDLOCK) 
 				WHERE AgentHostName = @AgentHostName 
@@ -37,6 +47,10 @@ IF @UpdateAgent=1
 BEGIN
 	UPDATE dbo.DBADashAgent
 		SET AgentPath = @AgentPath,
-			AgentVersion = @AgentVersion
+			AgentVersion = @AgentVersion,
+			ServiceSQSQueueUrl = @ServiceSQSQueueUrl,
+			AgentIdentifier = ISNULL(@AgentIdentifier,LEFT(CONCAT('Temp.',REPLACE(NEWID(),'-','')),22)),
+			S3Path = @S3Path,
+			MessagingEnabled = @MessagingEnabled
 	WHERE DBADashAgentID = @DBADashAgentID;
 END

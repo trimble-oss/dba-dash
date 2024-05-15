@@ -28,17 +28,17 @@ namespace DBADashGUI.Messaging
         private static readonly object LockObject = new();
         private const int CollectionDialogLifetime = 120;
 
-        public static async Task TriggerCollection(string connectionID, CollectionType type, int agentID, ISetStatus control)
+        public static async Task TriggerCollection(string connectionID, CollectionType type,int collectAgentID, int importAgentID, ISetStatus control)
         {
-            await TriggerCollection(connectionID, new List<string>() { Enum.GetName(type) }, agentID, control);
+            await TriggerCollection(connectionID, new List<string>() { Enum.GetName(type) }, collectAgentID,importAgentID, control);
         }
 
-        public static async Task TriggerCollection(string connectionID, string type, int agentID, ISetStatus control)
+        public static async Task TriggerCollection(string connectionID, string type, int collectAgentID,int importAgentID, ISetStatus control)
         {
-            await TriggerCollection(connectionID, new List<string>() { type }, agentID, control);
+            await TriggerCollection(connectionID, new List<string>() { type }, collectAgentID,importAgentID, control);
         }
 
-        public static async Task TriggerCollection(string connectionID, List<string> types, int agentID,
+        public static async Task TriggerCollection(string connectionID, List<string> types, int collectAgentID,int importAgentID,
             ISetStatus control)
         {
             if (PendingRequests >= PendingRequestsThreshold)
@@ -63,11 +63,13 @@ namespace DBADashGUI.Messaging
 
             var typesString = string.Join(", ", types.Select(s => s.ToString()));
             var messageBase = $"{typesString} collection for {connectionID}: ";
-            var x = new CollectionMessage(types, connectionID);
+            var collectAgent = DBADashAgent.GetDBADashAgent(Common.ConnectionString,collectAgentID);
+            var importAgent = DBADashAgent.GetDBADashAgent(Common.ConnectionString,importAgentID);
+            var x = new CollectionMessage(types, connectionID) {CollectAgent = collectAgent,ImportAgent = importAgent };
 
             var payload = x.Serialize();
             var messageGroup = Guid.NewGuid();
-            await MessageProcessing.SendMessageToService(payload, agentID, messageGroup, Common.ConnectionString, CollectionDialogLifetime);
+            await MessageProcessing.SendMessageToService(payload, importAgentID, messageGroup, Common.ConnectionString, CollectionDialogLifetime);
             control.SetStatus(messageBase + "SENT", "", DashColors.Information);
             foreach (var type in types)
             {
@@ -83,13 +85,14 @@ namespace DBADashGUI.Messaging
             if (row == null) return;
             var connectionID = (string)row["ConnectionID"];
             var MessagingEnabled = (bool)row["MessagingEnabled"];
-            var agentID = (int)row["ImportAgentID"];
+            var importAgentID = (int)row["ImportAgentID"];
+            var collectAgentID = (int)row["CollectAgentID"];
             if (!MessagingEnabled)
             {
                 MessageBox.Show("Messaging is not enabled for this instance", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            await TriggerCollection(connectionID, type, agentID, control);
+            await TriggerCollection(connectionID, type, collectAgentID, importAgentID, control);
         }
 
         public static bool IsMessagingEnabled(int InstanceID)

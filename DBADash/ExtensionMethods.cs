@@ -84,5 +84,10 @@ namespace DBADash
             using var gZipStream = new GZipStream(stream, CompressionMode.Decompress);
             gZipStream.CopyTo(outputStream);
         }
+
+        public static string AppendToUrl(this string url,string appendString)
+        {
+            return (url.EndsWith('/') ? url : url + '/') + appendString;
+        }
     }
 }

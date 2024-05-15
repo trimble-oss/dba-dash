@@ -383,6 +383,8 @@ namespace DBADashService
             }
         }
 
+        private SQSMessageProcessing sqsMessageProcessing;
+
         private async Task ScheduleJobsAsync()
         {
             Log.Information("Agent Version {version}", Assembly.GetEntryAssembly().GetName().Version);
@@ -408,6 +410,11 @@ namespace DBADashService
             };
             folderCleanupTimer.Elapsed += new System.Timers.ElapsedEventHandler(FolderCleanup);
             await messageTask;
+            if (!string.IsNullOrEmpty(config.ServiceSQSQueueUrl))
+            {
+                sqsMessageProcessing = new SQSMessageProcessing(config);
+                _ = sqsMessageProcessing.ProcessSQSQueue(DBADashAgent.GetCurrent().AgentIdentifier);
+            }
         }
 
         private async Task ScheduleCollectionsAsync(List<DBADashSource> connections)

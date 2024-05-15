@@ -143,7 +143,8 @@ namespace DBADashGUI.CollectionDates
                 else if (dgvCollectionDates.Columns[e.ColumnIndex].HeaderText == "Run")
                 {
                     var instance = (string)row["ConnectionID"];
-                    var agentID = (int)row["ImportAgentID"];
+                    var importAgentID = (int)row["ImportAgentID"];
+                    var collectAgentID = (int)row["CollectAgentID"];
                     var supportsMessaging = (bool)row["MessagingEnabled"];
                     if (!supportsMessaging)
                     {
@@ -157,7 +158,7 @@ namespace DBADashGUI.CollectionDates
                         SetStatus("This collection type cannot be triggered manually", null, DashColors.Warning);
                         return;
                     }
-                    await CollectionMessaging.TriggerCollection(instance, collection, agentID, this);
+                    await CollectionMessaging.TriggerCollection(instance, collection,collectAgentID,importAgentID, this);
                 }
             }
         }
@@ -239,7 +240,8 @@ namespace DBADashGUI.CollectionDates
         private async Task TriggerCriticalAndWarningForConnectionID(string connectionID, DataTable dt)
         {
             List<string> collectionTypes = new();
-            var agentID = 0;
+            var importAgentID = 0;
+            var collectAgentID = 0;
             foreach (var row in dt.Rows.Cast<DataRow>()
                          .Where(r => r["Status"] is 1 or 2
                                      && (bool)r["MessagingEnabled"]
@@ -247,13 +249,14 @@ namespace DBADashGUI.CollectionDates
                                      && !NoTriggerCollectionTypes.Any(s => string.Equals((string)r["Reference"], s, StringComparison.OrdinalIgnoreCase)))
                          .OrderBy(r => r["ConnectionID"]))
             {
-                agentID = (int)row["ImportAgentID"];
+                importAgentID = (int)row["ImportAgentID"];
+                collectAgentID = (int)row["CollectAgentID"];
                 collectionTypes.Add((string)row["Reference"]);
             }
-            if (agentID == 0 || collectionTypes.Count == 0) return;
+            if (importAgentID == 0 || collectionTypes.Count == 0) return;
             try
             {
-                await CollectionMessaging.TriggerCollection(connectionID, collectionTypes, agentID, this);
+                await CollectionMessaging.TriggerCollection(connectionID, collectionTypes, collectAgentID,importAgentID, this);
             }
             catch (Exception ex)
             {

@@ -177,7 +177,7 @@ namespace DBADash
         {
             DisableRetry = disableRetry;
             Source = source;
-            Startup(serviceName);
+            Startup();
         }
 
         private void LogError(Exception ex, string errorSource, string errorContext = "Collect")
@@ -271,10 +271,10 @@ namespace DBADash
             return true;
         }
 
-        private void Startup(string serviceName)
+        private void Startup()
         {
             noWMI = Source.NoWMI;
-            dashAgent = DBADashAgent.GetCurrent(serviceName);
+            dashAgent = DBADashAgent.GetCurrent();
 
             retryPolicy = Policy.Handle<Exception>(ShouldRetry)
                 .WaitAndRetry(new[]
@@ -340,12 +340,17 @@ namespace DBADash
                 new DataColumn("ConnectionID", typeof(string)),
                 new DataColumn("AgentHostName", typeof(string)),
                 new DataColumn("AgentServiceName", typeof(string)),
-                new DataColumn("AgentPath", typeof(string))
+                new DataColumn("AgentPath", typeof(string)),
+                new DataColumn("ServiceSQSQueueUrl",typeof(string)),
+                new DataColumn("S3Path",typeof(string)),
+                new DataColumn("MessagingEnabled", typeof(bool))
             });
             dt.Rows[0]["AgentVersion"] = dashAgent.AgentVersion;
             dt.Rows[0]["AgentHostName"] = dashAgent.AgentHostName;
             dt.Rows[0]["AgentServiceName"] = dashAgent.AgentServiceName;
             dt.Rows[0]["AgentPath"] = dashAgent.AgentPath;
+            dt.Rows[0]["ServiceSQSQueueUrl"] = dashAgent.ServiceSQSQueueUrl;
+            dt.Rows[0]["MessagingEnabled"] = dashAgent.MessagingEnabled;
         }
 
         public void GetInstance()

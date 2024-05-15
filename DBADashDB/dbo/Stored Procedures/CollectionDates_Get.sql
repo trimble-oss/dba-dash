@@ -35,7 +35,7 @@ SELECT CD.InstanceID,
        CD.ConfiguredLevel,
 	   ImportAgentID,
 	   CollectAgentID,
-	   IA.MessagingEnabled & CA.MessagingEnabled AS MessagingEnabled
+	   CASE WHEN IA.MessagingEnabled=1 AND CA.MessagingEnabled=1 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS MessagingEnabled
 FROM dbo.CollectionDatesStatus CD
 JOIN dbo.Instances I ON I.InstanceID = CD.InstanceID
 JOIN dbo.DBADashAgent IA ON I.ImportAgentID = IA.DBADashAgentID
