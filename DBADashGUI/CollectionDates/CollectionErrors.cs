@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
@@ -22,8 +23,10 @@ namespace DBADashGUI.CollectionDates
             SetFilterHighlight(txtInstance, instanceToolStripMenuItem);
         }
 
-        private int InstanceID { get; set; }
-        private string InstanceGroupName { get; set; }
+        private DBADashContext Context;
+
+        private int InstanceID => Context.InstanceID;
+        private string InstanceGroupName => Context.InstanceName;
         private int _days;
 
         public int Days
@@ -54,7 +57,7 @@ namespace DBADashGUI.CollectionDates
             }
         }
 
-        private static DataTable GetErrorLog(int instanceID, string instanceGroupName, string instanceDisplayName, string errorSource, string errorContext, string errorMessage, int Days)
+        private static DataTable GetErrorLog(int instanceID, string instanceGroupName, string instanceDisplayName, string errorSource, string errorContext, string errorMessage, int Days, HashSet<int> instanceIds)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.CollectionErrorLog_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -66,6 +69,7 @@ namespace DBADashGUI.CollectionDates
                 cmd.Parameters.AddStringIfNotNullOrEmpty("ErrorSource", errorSource);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("ErrorContext", errorContext);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("ErrorMessage", errorMessage);
+                cmd.Parameters.AddWithValue("InstanceIDs", instanceIds.AsDataTable());
                 cmd.Parameters.AddWithValue("Days", Days);
                 DataTable dt = new();
                 da.Fill(dt);
@@ -76,8 +80,7 @@ namespace DBADashGUI.CollectionDates
 
         public void SetContext(DBADashContext context)
         {
-            InstanceID = context.InstanceID;
-            InstanceGroupName = context.InstanceName;
+            Context = context;
             Days = 1;
             RefreshData();
         }
@@ -91,7 +94,7 @@ namespace DBADashGUI.CollectionDates
         private void RefreshDataLocal()
         {
             tsFilter.Font = IsFiltered ? new Font(tsFilter.Font, FontStyle.Bold) : new Font(tsFilter.Font, FontStyle.Regular);
-            DataTable dt = GetErrorLog(InstanceID, InstanceGroupName, txtInstance.Text.Trim(), txtSource.Text.Trim(), txtContext.Text.Trim(), txtMessage.Text.Trim(), Days);
+            DataTable dt = GetErrorLog(InstanceID, InstanceGroupName, txtInstance.Text.Trim(), txtSource.Text.Trim(), txtContext.Text.Trim(), txtMessage.Text.Trim(), Days, Context.InstanceIDs);
             dgvDBADashErrors.AutoGenerateColumns = false;
             dgvDBADashErrors.DataSource = dt;
             dgvDBADashErrors.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);

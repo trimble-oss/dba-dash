@@ -5,7 +5,8 @@
 	@ErrorSource VARCHAR(100)=NULL,
 	@ErrorContext VARCHAR(100)=NULL,
 	@ErrorMessage VARCHAR(200)=NULL,
-	@InstanceDisplayName NVARCHAR(128)=NULL
+	@InstanceDisplayName NVARCHAR(128)=NULL,
+	@InstanceIDs IDs READONLY
 )
 AS
 SELECT I.Instance,
@@ -24,5 +25,16 @@ AND E.ErrorDate>=DATEADD(d,-@Days,GETUTCDATE())
 AND (E.ErrorSource = @ErrorSource OR @ErrorSource IS NULL)
 AND (E.ErrorMessage LIKE '%' + @ErrorMessage + '%' OR @ErrorMessage IS NULL)
 AND (E.ErrorContext = @ErrorContext OR @ErrorContext IS NULL)
+-- Error doesn't belong to an Instance, or it belongs to one of the selected Instances, or no Instances are selected
+AND (I.InstanceID IS NULL	
+	OR EXISTS(SELECT 1 
+			FROM @InstanceIDs T
+			WHERE T.ID = I.InstanceID
+			)
+	OR NOT EXISTS(
+			SELECT 1 
+			FROM @InstanceIDs T
+			)	
+	)
 ORDER BY E.ErrorDate DESC
 OPTION(RECOMPILE)
