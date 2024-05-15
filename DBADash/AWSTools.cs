@@ -2,12 +2,17 @@
 using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
 using Amazon.S3;
+using Amazon.S3.Util;
 using Serilog;
 using System;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 namespace DBADash
 {
     public class AWSTools
     {
+        private static readonly ConcurrentDictionary<string, RegionEndpoint> BucketRegionCache = new ConcurrentDictionary<string, RegionEndpoint>();
+
         public static AWSCredentials GetAWSCredentialsFromProfile(string profileName)
         {
             var credentialProfileStoreChain = new CredentialProfileStoreChain();
@@ -24,7 +29,7 @@ namespace DBADash
             {
                 cred = new BasicAWSCredentials(accessKey, secretKey);
             }
-            else if (profile != null && profile.Length > 0)
+            else if (profile is { Length: > 0 })
             {
                 try
                 {
@@ -43,26 +48,17 @@ namespace DBADash
             return cred;
         }
 
-        public static Amazon.S3.AmazonS3Client GetAWSClient(string profile, string accessKey, string secretKey, Amazon.S3.Util.AmazonS3Uri uri)
+        public static async Task<AmazonS3Client> GetAWSClientAsync(string profile, string accessKey, string secretKey, AmazonS3Uri uri)
         {
-            AWSCredentials cred = GetCredentials(profile, accessKey, secretKey);
-
-            using (Amazon.S3.AmazonS3Client cli = new(cred, RegionEndpoint.EUWest2))
+            var cred = GetCredentials(profile, accessKey, secretKey);
+            if (!BucketRegionCache.TryGetValue(uri.Bucket, out var AWSRegion))
             {
-
-                RegionEndpoint AWSRegion;
-                if (uri.Region != null)
-                {
-                    AWSRegion = uri.Region;
-                }
-                else
-                {
-                    AWSRegion = RegionEndpoint.GetBySystemName(cli.GetBucketLocationAsync(uri.Bucket).Result.Location);
-                }
-                var s3Cli = new AmazonS3Client(cred, AWSRegion);
-                return s3Cli;
+                using var tempClient = new AmazonS3Client(cred, RegionEndpoint.EUWest2);
+                AWSRegion = uri.Region ?? RegionEndpoint.GetBySystemName((await tempClient.GetBucketLocationAsync(uri.Bucket)).Location);
+                BucketRegionCache.TryAdd(uri.Bucket, AWSRegion);
             }
 
+            return new AmazonS3Client(cred, AWSRegion);
         }
     }
 }

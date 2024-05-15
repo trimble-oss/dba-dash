@@ -71,22 +71,22 @@ namespace DBADash
             DataSetSerialization.SetDateTimeKind(ds); // Required to prevent timezone conversion
 
             var uri = new Amazon.S3.Util.AmazonS3Uri(destination);
-
-            using (var s3Cli = AWSTools.GetAWSClient(cfg.AWSProfile, cfg.AccessKey, cfg.GetSecretKey(), uri))
+            
+            using var s3Cli = await AWSTools.GetAWSClientAsync(cfg.AWSProfile, cfg.AccessKey, cfg.GetSecretKey(), uri);
+            
+            var r = new Amazon.S3.Model.PutObjectRequest()
             {
-                var r = new Amazon.S3.Model.PutObjectRequest()
-                {
-                    BucketName = uri.Bucket,
-                    Key = (uri.Key + "/" + fileName).Replace("//", "/")
-                };
+                BucketName = uri.Bucket,
+                Key = (uri.Key + "/" + fileName).Replace("//", "/")
+            };
 
-                using (var ms = new MemoryStream())
-                {
-                    ds.WriteXml(ms, XmlWriteMode.WriteSchema);
-                    r.InputStream = ms;
-                    await s3Cli.PutObjectAsync(r);
-                }
+            using (var ms = new MemoryStream())
+            {
+                ds.WriteXml(ms, XmlWriteMode.WriteSchema);
+                r.InputStream = ms;
+                await s3Cli.PutObjectAsync(r);
             }
+            
         }
 
         public static void WriteFolder(DataSet ds, string destination, string fileName, CollectionConfig cfg)
