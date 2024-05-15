@@ -5,16 +5,19 @@ using Quartz;
 using Serilog;
 using SerilogTimings;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using static DBADash.DBADashConnection;
 
 namespace DBADashService
 {
-    [DisallowConcurrentExecution, PersistJobDataAfterExecution]
+
+   [DisallowConcurrentExecution, PersistJobDataAfterExecution]
     public class DBADashJob : IJob
     {
         private static readonly CollectionConfig config = SchedulerServiceConfig.Config;
@@ -31,50 +34,63 @@ namespace DBADashService
         /// </summary>
         public static string ParseInstance(string fileName)
         {
-            return fileName[25..fileName.LastIndexOf("_")];
+            return fileName[25..fileName.LastIndexOf('_')];
         }
 
-        public Task Execute(IJobExecutionContext context)
+        public async Task Execute(IJobExecutionContext context)
         {
             Log.Information("Processing Job : " + context.JobDetail.Key);
-            JobDataMap dataMap = context.JobDetail.JobDataMap;
+            var dataMap = context.JobDetail.JobDataMap;
             var cfg = JsonConvert.DeserializeObject<DBADashSource>(dataMap.GetString("CFG"));
 
             try
             {
-                if (cfg.SourceConnection.Type == ConnectionType.Directory)
+                switch (cfg.SourceConnection.Type)
                 {
-                    Log.Debug("Wait for lock {0}", context.JobDetail.Key);
-                    // Ensures that this folder can only be processed by 1 job instance at a time.
-                    // Note: DisallowConcurrentExecution didn't prevent triggered at startup job from overlapping with the scheduled one
-                    lock (Program.Locker.GetLock(cfg.ConnectionString))
+                    case ConnectionType.Directory:
                     {
-                        Log.Debug("Lock acquired {0}", context.JobDetail.Key);
-                        CollectFolder(cfg);
+                        Log.Debug("Wait for lock {0}", context.JobDetail.Key);
+                        // Ensures that this folder can only be processed by 1 job instance at a time.
+                        // Note: DisallowConcurrentExecution didn't prevent triggered at startup job from overlapping with the scheduled one
+                        lock (Program.Locker.GetLock(cfg.ConnectionString))
+                        {
+                            Log.Debug("Lock acquired {0}", context.JobDetail.Key);
+                            CollectFolder(cfg);
+                        }
+
+                        break;
                     }
-                }
-                else if (cfg.SourceConnection.Type == ConnectionType.AWSS3)
-                {
-                    Log.Debug("Wait for lock {0}", context.JobDetail.Key);
-                    // Ensures that S3 folder can only be processed by 1 job instance at a time.
-                    // Note: DisallowConcurrentExecution didn't prevent triggered at startup job from overlapping with the scheduled one
-                    lock (Program.Locker.GetLock(cfg.ConnectionString))
+                    case ConnectionType.AWSS3:
                     {
-                        Log.Debug("Lock acquired {0}", context.JobDetail.Key);
-                        CollectS3(cfg);
+                        Log.Debug("Wait for lock {0}", context.JobDetail.Key);
+                        // Ensures that S3 folder can only be processed by 1 job instance at a time.
+                        // Note: DisallowConcurrentExecution didn't prevent triggered at startup job from overlapping with the scheduled one
+                        var semaphore =  ScheduleService.Locker.GetOrAdd(cfg.ConnectionString, _ => new SemaphoreSlim(1, 1));
+                        await semaphore.WaitAsync();
+                        try
+                        {
+                            Log.Debug("Lock acquired {0}", context.JobDetail.Key);
+                            await CollectS3(cfg);
+                        }
+                        finally
+                        {
+                            semaphore.Release();
+                        }
+
+                        break;
                     }
-                }
-                else
-                {
-                    CollectSQL(cfg, dataMap, context);
+                    case ConnectionType.SQL:
+                        CollectSQL(cfg, dataMap, context);
+                        break;
+                    case ConnectionType.Invalid:
+                    default:
+                        throw new Exception("Invalid Connection Type");
                 }
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "JobExecute");
             }
-
-            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -83,7 +99,7 @@ namespace DBADashService
         private static void CollectSQL(DBADashSource cfg, JobDataMap dataMap, IJobExecutionContext context)
         {
             var types = JsonConvert.DeserializeObject<CollectionType[]>(dataMap.GetString("Type"));
-            bool collectJobs = types.Contains(CollectionType.Jobs);
+            var collectJobs = types.Contains(CollectionType.Jobs);
 
             var customCollections = JsonConvert.DeserializeObject<Dictionary<string, CustomCollection>>(dataMap.GetString("CustomCollections"));
             if (collectJobs)
@@ -139,7 +155,7 @@ namespace DBADashService
                         }
                     }
 
-                    string fileName = DBADashSource.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
+                    var fileName = DBADashSource.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
                     try
                     {
                         DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName, config).Wait();
@@ -214,7 +230,7 @@ namespace DBADashService
                 dataMap.Put("JobLastModified", collector.JobLastModified);
                 dataMap.Put("JobCollectDate", DateTime.Now);
 
-                string fileName = DBADashSource.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
+                var fileName = DBADashSource.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
                 try
                 {
                     DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName, config).Wait();
@@ -245,13 +261,13 @@ namespace DBADashService
                     instance = "default";
                     Log.Warning("Unable to parse Instance from {0}: {1}", path, ex.Message);
                 }
-                if (filesToProcessByInstance.ContainsKey(instance))
+                if (filesToProcessByInstance.TryGetValue(instance, out var value))
                 {
-                    filesToProcessByInstance[instance].Add(path);
+                    value.Add(path);
                 }
                 else
                 {
-                    filesToProcessByInstance.Add(instance, new() { path });
+                    filesToProcessByInstance.Add(instance, new List<string> { path });
                 }
             }
             return filesToProcessByInstance;
@@ -262,7 +278,7 @@ namespace DBADashService
         /// </summary>
         private static void CollectFolder(DBADashSource cfg)
         {
-            string folder = cfg.GetSource();
+            var folder = cfg.GetSource();
             Log.Logger.Information("Import from folder {folder}", folder);
             if (System.IO.Directory.Exists(folder))
             {
@@ -298,7 +314,7 @@ namespace DBADashService
             foreach (string f in files)
             {
                 Log.Information("Processing file {0}", f);
-                string fileName = Path.GetFileName(f);
+                var fileName = Path.GetFileName(f);
                 try
                 {
                     var ds = DataSetSerialization.DeserializeFromFile(f);
@@ -322,13 +338,13 @@ namespace DBADashService
         /// <summary>
         /// Process The S3 bucket source.  Run a separate thread per instance and process the files for each instance sequentially in the order they were collected
         /// </summary>
-        private static void CollectS3(DBADashSource cfg)
+        private static async Task CollectS3(DBADashSource cfg)
         {
             Log.Information("Import from S3 {connection}", cfg.ConnectionString);
             try
             {
                 var uri = new Amazon.S3.Util.AmazonS3Uri(cfg.ConnectionString);
-                using var s3Cli = AWSTools.GetAWSClient(config.AWSProfile, config.AccessKey, config.GetSecretKey(), uri);
+                using var s3Cli = await AWSTools.GetAWSClientAsync(config.AWSProfile, config.AccessKey, config.GetSecretKey(), uri);
                 ListObjectsRequest request = new() { BucketName = uri.Bucket, Prefix = (uri.Key + "/DBADash_").Replace("//", "/") };
 
                 do
@@ -340,8 +356,8 @@ namespace DBADashService
                         resp = listObjectsTask.Result;
                     }
 
-                    List<string> fileList = resp.S3Objects.Where(f => f.Key.EndsWith(".xml")).Select(f => f.Key).ToList();
-                    Dictionary<string, List<string>> filesToProcessByInstance = GetFilesToProcessByInstance(fileList);
+                    var fileList = resp.S3Objects.Where(f => f.Key.EndsWith(".xml")).Select(f => f.Key).ToList();
+                    var filesToProcessByInstance = GetFilesToProcessByInstance(fileList);
 
                     Log.Information("Processing {0} files from {1}. Instance Count: {2}", resp.S3Objects.Count, uri.Key, filesToProcessByInstance.Count);
 
@@ -370,26 +386,25 @@ namespace DBADashService
         }
 
         /// <summary>
-        /// Process a given list of S3 files for a sepecific instance in order, writing collected data to DBA Dash repository database
+        /// Process a given list of S3 files for a specific instance in order, writing collected data to DBA Dash repository database
         /// </summary>
         private static void ProcessS3FileListForCollectS3(List<string> instanceFiles, Amazon.S3.AmazonS3Client s3Cli, Amazon.S3.Util.AmazonS3Uri uri, DBADashSource cfg)
         {
             instanceFiles.Sort(); // Ensure files are processed in order
-            foreach (string s3Path in instanceFiles)
+            foreach (var s3Path in instanceFiles)
             {
                 using var getObjectTask = s3Cli.GetObjectAsync(uri.Bucket, s3Path);
                 getObjectTask.Wait();
 
-                using GetObjectResponse response = getObjectTask.Result;
-                using Stream responseStream = response.ResponseStream;
-                DataSet ds;
+                using var response = getObjectTask.Result;
+                using var responseStream = response.ResponseStream;
 
-                ds = new DataSet();
+                var ds = new DataSet();
                 ds.ReadXml(responseStream);
 
                 lock (Program.Locker.GetLock(GetID(ds))) // Ensures we process 1 item at a time for each instance
                 {
-                    string fileName = Path.GetFileName(s3Path);
+                    var fileName = Path.GetFileName(s3Path);
                     try
                     {
                         DestinationHandling.WriteAllDestinations(ds, cfg, fileName, config).Wait();
@@ -401,7 +416,7 @@ namespace DBADashService
                     }
                     finally
                     {
-                        using Task<DeleteObjectResponse> deleteTask = s3Cli.DeleteObjectAsync(uri.Bucket, s3Path);
+                        using var deleteTask = s3Cli.DeleteObjectAsync(uri.Bucket, s3Path);
                         deleteTask.Wait();
                     }
                 }

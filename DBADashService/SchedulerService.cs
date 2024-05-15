@@ -17,6 +17,7 @@ using DBADash.Messaging;
 using Microsoft.Data.SqlClient;
 using static DBADash.DBADashConnection;
 using Microsoft.Extensions.Hosting;
+using System.Collections.Concurrent;
 
 namespace DBADashService
 {
@@ -28,6 +29,7 @@ namespace DBADashService
         private System.Timers.Timer folderCleanupTimer;
         private readonly CollectionSchedules schedules;
         private MessageProcessing messageProcessing;
+        public static readonly ConcurrentDictionary<string, SemaphoreSlim> Locker = new();
 
         public ScheduleService()
         {
