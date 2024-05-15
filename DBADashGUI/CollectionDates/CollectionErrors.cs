@@ -31,10 +31,7 @@ namespace DBADashGUI.CollectionDates
 
         public int Days
         {
-            get
-            {
-                return _days;
-            }
+            get => _days;
             set
             {
                 _days = value;
@@ -47,35 +44,27 @@ namespace DBADashGUI.CollectionDates
 
         public bool AckErrors
         {
-            get
-            {
-                return tsAckErrors.Visible;
-            }
-            set
-            {
-                tsAckErrors.Visible = value;
-            }
+            get => tsAckErrors.Visible;
+            set => tsAckErrors.Visible = value;
         }
 
         private static DataTable GetErrorLog(int instanceID, string instanceGroupName, string instanceDisplayName, string errorSource, string errorContext, string errorMessage, int Days, HashSet<int> instanceIds)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.CollectionErrorLog_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddIfGreaterThanZero("InstanceID", instanceID);
-                cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceGroupName", instanceGroupName);
-                cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceDisplayName", instanceDisplayName);
-                cmd.Parameters.AddStringIfNotNullOrEmpty("ErrorSource", errorSource);
-                cmd.Parameters.AddStringIfNotNullOrEmpty("ErrorContext", errorContext);
-                cmd.Parameters.AddStringIfNotNullOrEmpty("ErrorMessage", errorMessage);
-                cmd.Parameters.AddWithValue("InstanceIDs", instanceIds.AsDataTable());
-                cmd.Parameters.AddWithValue("Days", Days);
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.CollectionErrorLog_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddIfGreaterThanZero("InstanceID", instanceID);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceGroupName", instanceGroupName);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceDisplayName", instanceDisplayName);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("ErrorSource", errorSource);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("ErrorContext", errorContext);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("ErrorMessage", errorMessage);
+            cmd.Parameters.AddWithValue("InstanceIDs", instanceIds.AsDataTable());
+            cmd.Parameters.AddWithValue("Days", Days);
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            return dt;
         }
 
         public void SetContext(DBADashContext context)
@@ -100,29 +89,11 @@ namespace DBADashGUI.CollectionDates
             dgvDBADashErrors.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-        private bool IsFiltered
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(txtSource.Text.Trim()))
-                {
-                    return true;
-                }
-                if (!string.IsNullOrEmpty(txtContext.Text.Trim()))
-                {
-                    return true;
-                }
-                if (!string.IsNullOrEmpty(txtMessage.Text.Trim()))
-                {
-                    return true;
-                }
-                if (!string.IsNullOrEmpty(txtInstance.Text.Trim()))
-                {
-                    return true;
-                }
-                return false;
-            }
-        }
+        private bool IsFiltered =>
+            !string.IsNullOrWhiteSpace(txtSource.Text) ||
+            !string.IsNullOrWhiteSpace(txtContext.Text) ||
+            !string.IsNullOrWhiteSpace(txtMessage.Text) ||
+            !string.IsNullOrWhiteSpace(txtInstance.Text);
 
         private void TsErrorDays_Click(object sender, EventArgs e)
         {
@@ -147,13 +118,11 @@ namespace DBADashGUI.CollectionDates
 
         private static void AcknowledgeErrors()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.AcknowledgeErrors", cn) { CommandType = CommandType.StoredProcedure })
-            {
-                cn.Open();
-                cmd.ExecuteNonQuery();
-                MessageBox.Show("Errors up to current date acknowledged and cleared from summary page.", "Errors acknowledged", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.AcknowledgeErrors", cn) { CommandType = CommandType.StoredProcedure };
+            cn.Open();
+            cmd.ExecuteNonQuery();
+            MessageBox.Show("Errors up to current date acknowledged and cleared from summary page.", "Errors acknowledged", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
@@ -163,27 +132,25 @@ namespace DBADashGUI.CollectionDates
 
         private void DgvDBADashErrors_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex < 0) return;
+            if (e.ColumnIndex == ErrorMessage.Index)
             {
-                if (e.ColumnIndex == ErrorMessage.Index)
-                {
-                    Convert.ToString(dgvDBADashErrors.Rows[e.RowIndex].Cells[e.ColumnIndex].Value).OpenAsTextFile();
-                }
-                else if (e.ColumnIndex == ErrorSource.Index)
-                {
-                    txtSource.Text = Convert.ToString(dgvDBADashErrors.Rows[e.RowIndex].Cells[e.ColumnIndex].Value);
-                    RefreshDataLocal();
-                }
-                else if (e.ColumnIndex == ErrorContext.Index)
-                {
-                    txtContext.Text = Convert.ToString(dgvDBADashErrors.Rows[e.RowIndex].Cells[e.ColumnIndex].Value);
-                    RefreshDataLocal();
-                }
-                else if (e.ColumnIndex == Instance.Index)
-                {
-                    txtInstance.Text = Convert.ToString(dgvDBADashErrors.Rows[e.RowIndex].Cells[e.ColumnIndex].Value);
-                    RefreshDataLocal();
-                }
+                Convert.ToString(dgvDBADashErrors.Rows[e.RowIndex].Cells[e.ColumnIndex].Value).OpenAsTextFile();
+            }
+            else if (e.ColumnIndex == ErrorSource.Index)
+            {
+                txtSource.Text = Convert.ToString(dgvDBADashErrors.Rows[e.RowIndex].Cells[e.ColumnIndex].Value) ?? string.Empty;
+                RefreshDataLocal();
+            }
+            else if (e.ColumnIndex == ErrorContext.Index)
+            {
+                txtContext.Text = Convert.ToString(dgvDBADashErrors.Rows[e.RowIndex].Cells[e.ColumnIndex].Value) ?? string.Empty;
+                RefreshDataLocal();
+            }
+            else if (e.ColumnIndex == Instance.Index)
+            {
+                txtInstance.Text = Convert.ToString(dgvDBADashErrors.Rows[e.RowIndex].Cells[e.ColumnIndex].Value) ?? string.Empty;
+                RefreshDataLocal();
             }
         }
 
