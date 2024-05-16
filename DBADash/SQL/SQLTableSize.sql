@@ -32,12 +32,12 @@ AND D.database_id <> 2
 AND EXISTS(
 		SELECT 1 
 		FROM STRING_SPLIT(@TableSizeDatabases,',') SS
-		WHERE (RTRIM(LTRIM(SS.value)) = D.name OR SS.value ='*')
+		WHERE (RTRIM(LTRIM(SS.value)) = D.name COLLATE DATABASE_DEFAULT OR SS.value ='*')
 )
 AND NOT EXISTS(
 			SELECT 1 
 			FROM STRING_SPLIT(@TableSizeDatabases,',') SS
-			WHERE STUFF(RTRIM(LTRIM(SS.value)),1,1,'') = D.name 
+			WHERE STUFF(RTRIM(LTRIM(SS.value)),1,1,'') = D.name COLLATE DATABASE_DEFAULT
 			AND RTRIM(LTRIM(SS.value)) LIKE '-%'
 	)
 
