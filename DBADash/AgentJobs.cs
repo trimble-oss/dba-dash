@@ -14,6 +14,7 @@ namespace DBADash
         public AgentJobs(DBADashConnection source, SchemaSnapshotDBOptions options) : base(source, options)
         {
         }
+
         public AgentJobs(DBADashConnection source) : base(source)
         {
         }
@@ -71,20 +72,23 @@ namespace DBADash
             return jobStepDT;
         }
 
-        public void CollectJobs(ref DataSet ds, bool scriptJobs)
+        public void CollectJobs(ref DataSet ds, bool scriptJobs, bool isRDS)
         {
             DataTable jobsDT;
-            DataTable jobStepsDT;
             using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Run Jobs query on instance {instance}", SourceConnection.ConnectionForPrint))
             {
                 jobsDT = GetJobsDT();
                 op.Complete();
             }
-            using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Run JobsSteps query instance {instance}", SourceConnection.ConnectionForPrint))
+
+            DataTable jobStepsDT;
+            using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug)
+                       .Begin("Run JobsSteps query instance {instance}", SourceConnection.ConnectionForPrint))
             {
-                jobStepsDT = GetJobStepsDT();
+                jobStepsDT = isRDS ? GetJobStepsDTForRDS() : GetJobStepsDT();
                 op.Complete();
             }
+            ds.Tables.Add(jobStepsDT);
 
             if (scriptJobs)
             {
@@ -95,7 +99,6 @@ namespace DBADash
                 }
             }
             ds.Tables.Add(jobsDT);
-            ds.Tables.Add(jobStepsDT);
         }
 
         private void ScriptJobs(ref DataTable jobsDT)
@@ -131,7 +134,6 @@ namespace DBADash
                         op.Complete();
                     }
                 }
-
             }
         }
 
@@ -161,90 +163,39 @@ namespace DBADash
             }
         }
 
-        public void SnapshotJobs(ref DataSet ds)
+        public DataTable GetJobStepsDTForRDS()
         {
-            var jobDT = JobDataTableSchema();
             var jobStepDT = JobStepTableSchema();
-            List<Exception> errors = new();
-            using (var cn = new SqlConnection(ConnectionString))
+            using var cn = new SqlConnection(ConnectionString);
+            var instance = new Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
+            
+            foreach (Job job in instance.JobServer.Jobs)
             {
-                var instance = new Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
-                foreach (Job job in instance.JobServer.Jobs)
+                foreach (JobStep step in job.JobSteps)
                 {
-                    DataRow r = jobDT.NewRow();
-                    string sDDL;
-                    try
-                    {
-                        sDDL = SchemaSnapshotDB.StringCollectionToString(job.Script(ScriptingOptions));
-                    }
-                    catch (Exception ex)
-                    {
-                        string message = String.Format("Error scripting agent job `{0}` on {1}", job.Name, instance.Name);
-                        sDDL = "/*\n Error scripting job: \n" + ex.Message + "\n*/";
-                        errors.Add(new Exception(message, ex));
-                        Log.Error(ex, message);
-                    }
+                    var stepR = jobStepDT.NewRow();
+                    stepR["job_id"] = job.JobID;
+                    stepR["step_name"] = step.Name;
+                    stepR["database_name"] = step.DatabaseName;
+                    stepR["step_id"] = step.ID;
+                    stepR["subsystem"] = step.SubSystem;
+                    stepR["command"] = step.Command;
+                    stepR["cmdexec_success_code"] = step.CommandExecutionSuccessCode;
+                    stepR["on_success_action"] = step.OnSuccessAction;
+                    stepR["on_success_step_id"] = step.OnSuccessStep;
+                    stepR["on_fail_action"] = step.OnFailAction;
+                    stepR["on_fail_step_id"] = step.OnFailStep;
+                    stepR["database_user_name"] = step.DatabaseUserName;
+                    stepR["retry_attempts"] = step.RetryAttempts;
+                    stepR["retry_interval"] = step.RetryInterval;
+                    stepR["output_file_name"] = step.OutputFileName;
+                    stepR["proxy_name"] = step.ProxyName;
 
-                    var bDDL = Zip(sDDL);
-                    r["name"] = job.Name;
-                    r["job_id"] = job.JobID;
-                    r["enabled"] = job.IsEnabled;
-                    r["DDL"] = bDDL;
-                    r["DDLHash"] = ComputeHash(bDDL);
-                    r["date_created"] = job.DateCreated;
-                    r["date_modified"] = job.DateLastModified;
-                    r["category"] = job.Category;
-                    r["category_id"] = job.CategoryID;
-                    r["description"] = job.Description;
-                    r["version_number"] = job.VersionNumber;
-                    r["delete_level"] = job.DeleteLevel;
-                    r["notify_level_page"] = job.DeleteLevel;
-                    r["notify_level_netsend"] = job.NetSendLevel;
-                    r["notify_level_email"] = job.EmailLevel;
-                    r["notify_level_eventlog"] = job.EventLogLevel;
-                    r["notify_email_operator"] = job.OperatorToEmail;
-                    r["notify_netsend_operator"] = job.OperatorToNetSend;
-                    r["notify_page_operator"] = job.OperatorToPage;
-                    r["owner"] = job.OwnerLoginName;
-                    r["start_step_id"] = job.StartStepID;
-                    r["has_schedule"] = job.HasSchedule;
-                    r["has_server"] = job.HasServer;
-                    r["has_step"] = job.HasStep;
-                    jobDT.Rows.Add(r);
-
-                    foreach (Microsoft.SqlServer.Management.Smo.Agent.JobStep step in job.JobSteps)
-                    {
-                        var stepR = jobStepDT.NewRow();
-                        stepR["job_id"] = job.JobID;
-                        stepR["step_name"] = step.Name;
-                        stepR["database_name"] = step.DatabaseName;
-                        stepR["step_id"] = step.ID;
-                        stepR["subsystem"] = step.SubSystem;
-                        stepR["command"] = step.Command;
-                        stepR["cmdexec_success_code"] = step.CommandExecutionSuccessCode;
-                        stepR["on_success_action"] = step.OnSuccessAction;
-                        stepR["on_success_step_id"] = step.OnSuccessStep;
-                        stepR["on_fail_action"] = step.OnFailAction;
-                        stepR["on_fail_step_id"] = step.OnFailStep;
-                        stepR["database_user_name"] = step.DatabaseUserName;
-                        stepR["retry_attempts"] = step.RetryAttempts;
-                        stepR["retry_interval"] = step.RetryInterval;
-                        stepR["output_file_name"] = step.OutputFileName;
-                        stepR["proxy_name"] = step.ProxyName;
-
-                        jobStepDT.Rows.Add(stepR);
-
-                    }
+                    jobStepDT.Rows.Add(stepR);
                 }
             }
-            ds.Tables.Add(jobDT);
-            ds.Tables.Add(jobStepDT);
-            if (errors.Count > 0)
-            {
-                throw new AggregateException(errors);
-            }
+
+            return jobStepDT;
         }
-
-
     }
 }

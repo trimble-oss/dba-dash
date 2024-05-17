@@ -4,7 +4,7 @@
 	run_requested_date_utc DATETIME  NULL,
 	run_requested_source NVARCHAR(128) NULL,
 	queued_date_utc DATETIME NULL,
-	start_execution_date_utc DATETIME NOT NULL,
+	start_execution_date_utc DATETIME NULL,
 	last_executed_step_id INT NULL,
 	last_executed_step_date_utc DATETIME NULL,
 	SnapshotDate DATETIME NOT NULL,
