@@ -117,11 +117,12 @@ namespace DBADashGUI.AgentJobs
                     : DBADashStatus.DBADashStatusEnum.OK;
                 var avgRunDuration = (int?)(row["AvgRunDurationSec"].DBNullToNull());
                 var maxRunDuration = (int?)(row["MaxRunDurationSec"].DBNullToNull());
-                var runningTime = (int)row["RunningTimeSec"];
+                var runningTime = (int?)row["RunningTimeSec"].DBNullToNull();
                 var executionStatus = row["current_execution_status"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : (int)row["current_execution_status"] == 1 ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning;
 
                 var runningTimeStatus = runningTime switch
                 {
+                    null => DBADashStatus.DBADashStatusEnum.NA,
                     _ when runningTime < (avgRunDuration * 1.10) => DBADashStatus.DBADashStatusEnum.OK,
                     _ when runningTime < (maxRunDuration * 1.10) => DBADashStatus.DBADashStatusEnum.Warning,
                     _ when avgRunDuration == null || maxRunDuration == null => DBADashStatus.DBADashStatusEnum.NA,

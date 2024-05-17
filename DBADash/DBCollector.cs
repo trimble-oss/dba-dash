@@ -21,6 +21,7 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.SqlServer.Management.SqlParser.Metadata;
+using Microsoft.SqlServer.Management.SqlScriptPublish;
 using Octokit;
 
 namespace DBADash
@@ -104,6 +105,7 @@ namespace DBADash
         private bool noWMI;
         private bool IsAzureDB;
         private bool isAzureMasterDB;
+        private bool IsRDS;
         private string instanceName;
         private string dbName;
         private string productVersion;
@@ -382,6 +384,7 @@ namespace DBADash
             }
             if (!noWMI && computerName.StartsWith("EC2AMAZ-")) // Disable WMI collection for RDS
             {
+                IsRDS = true;
                 noWMI = true;
                 Log.Debug("WMI Disabled for RDS Instance: {0}", instanceName);
             }
@@ -530,7 +533,7 @@ namespace DBADash
                 // Don't need to collect these types for Azure MI
                 return false;
             }
-            else if ((new[] { CollectionType.JobHistory, CollectionType.AgentJobs, CollectionType.Jobs }).Contains(collectionType) && engineEdition == DatabaseEngineEdition.Express)
+            else if ((new[] { CollectionType.JobHistory, CollectionType.AgentJobs, CollectionType.Jobs, CollectionType.RunningJobs }).Contains(collectionType) && engineEdition == DatabaseEngineEdition.Express)
             {
                 // SQL Agent not supported on express
                 return false;
@@ -987,7 +990,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                     try
                     {
                         //ss.SnapshotJobs(ref Data);
-                        ss.CollectJobs(ref Data, Source.ScriptAgentJobs);
+                        ss.CollectJobs(ref Data, Source.ScriptAgentJobs,IsRDS);
                         JobLastModified = currentJobModified;
                     }
                     catch (Microsoft.SqlServer.Management.Smo.UnsupportedFeatureException ex)
@@ -1022,20 +1025,66 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             }
         }
 
-        private void CollectRunningJobs()
+
+        private DataTable GetRunningJobsSchema()
         {
-            using var cn = new SqlConnection(ConnectionString);
-            using var cmd = new SqlCommand(SqlStrings.RunningJobs, cn);
-            using var da = new SqlDataAdapter(cmd);
-            cn.Open();
-            var rdr = cmd.ExecuteReader();
             var dtRunningJobs = new DataTable("RunningJobs");
-            dtRunningJobs.Load(rdr);
+            dtRunningJobs.Columns.Add("job_id", typeof(Guid));
+            dtRunningJobs.Columns.Add("run_requested_date_utc", typeof(DateTime));
+            dtRunningJobs.Columns.Add("run_requested_source", typeof(string));
+            dtRunningJobs.Columns.Add("queued_date_utc", typeof(DateTime));
+            dtRunningJobs.Columns.Add("start_execution_date_utc", typeof(DateTime));
+            dtRunningJobs.Columns.Add("last_executed_step_id", typeof(int));
+            dtRunningJobs.Columns.Add("last_executed_step_date_utc", typeof(DateTime));
+            dtRunningJobs.Columns.Add("SnapshotDate", typeof(DateTime));
+
             dtRunningJobs.Columns.Add("current_execution_step_id", typeof(int));
             dtRunningJobs.Columns.Add("current_execution_step_name", typeof(string));
             dtRunningJobs.Columns.Add("current_retry_attempt", typeof(int));
             dtRunningJobs.Columns.Add("current_execution_status", typeof(int));
+            return dtRunningJobs;
+        }
 
+        private void CollectRunningJobsRDS() //Permissions Issue with msdb.dbo.syssessions prevents usual collection.  Get the data we can from sp_help_job
+        {
+            using var cn = new SqlConnection(ConnectionString);
+            using var cmd = new SqlCommand("msdb.dbo.sp_help_job", cn) { CommandType = CommandType.StoredProcedure};
+            cmd.Parameters.AddWithValue("@execution_status", 0);
+            cn.Open();
+            using var rdr = cmd.ExecuteReader();
+            var dtRunningJobs = GetRunningJobsSchema();
+            var snapshotDate = DateTime.UtcNow;
+            while (rdr.Read())
+            {
+                var row = dtRunningJobs.NewRow();
+                row["job_id"] = rdr["job_id"];
+                var step = rdr["current_execution_step"] as string;
+                ParseJobStep(step, out int stepId, out string stepName);
+                row["current_execution_step_id"] = stepId;
+                row["current_execution_step_name"] = stepName;
+                row["current_retry_attempt"] = rdr["current_retry_attempt"];
+                row["current_execution_status"] = rdr["current_execution_status"];
+                row["SnapshotDate"] = snapshotDate;
+                dtRunningJobs.Rows.Add(row);
+            }
+            Data.Tables.Add(dtRunningJobs);
+        }
+
+        private void CollectRunningJobs()
+        {
+            if (IsRDS)
+            {
+                CollectRunningJobsRDS();
+                return;
+            }
+            using var cn = new SqlConnection(ConnectionString);
+            using var cmd = new SqlCommand(SqlStrings.RunningJobs, cn);
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            using var rdr = cmd.ExecuteReader();
+            var dtRunningJobs = GetRunningJobsSchema();
+            dtRunningJobs.Load(rdr);
+            
             var spHelpJobInfo = new Dictionary<Guid, (int ExecutionStepID, string ExecutionStep, int RetryAttempts, int ExecutionStatus)>();
 
             while (rdr.Read())

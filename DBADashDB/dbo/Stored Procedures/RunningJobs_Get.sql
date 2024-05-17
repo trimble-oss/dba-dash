@@ -1,4 +1,4 @@
-﻿CREATE PROC RunningJobs_Get(
+﻿CREATE PROC dbo.RunningJobs_Get(
 	@InstanceIDs IDs READONLY,
 	@MinimumDurationSec INT = 0 
 )
@@ -39,6 +39,6 @@ WHERE EXISTS(
 				FROM @InstanceIDs I 
 				WHERE I.ID = RJ.InstanceID
 			)
-AND RJ.RunningTimeSec >= @MinimumDurationSec
+AND (RJ.RunningTimeSec >= @MinimumDurationSec OR RJ.RunningTimeSec IS NULL)
 ORDER BY RJ.start_execution_date_utc
 
