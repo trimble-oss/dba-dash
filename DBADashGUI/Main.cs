@@ -1281,7 +1281,7 @@ namespace DBADashGUI
 
             if (e.InstanceID <= 0 && string.IsNullOrEmpty(e.Instance)) // No Instance - Use root Level
             {
-                nInstance = root;
+                nInstance = root.Type == SQLTreeItem.TreeType.DBAChecks ? root.Parent.AsSQLTreeItem() : root;
             }
             else
             {
