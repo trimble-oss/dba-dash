@@ -377,16 +377,16 @@ namespace DBADash
                 LogDBError("Instance", "host_platform parse error");
                 platform = HostPlatform.Windows;
             }
-            if (!noWMI && platform == HostPlatform.Linux) // Disable WMI collection for Linux
+            if (platform == HostPlatform.Linux) // Disable WMI collection for Linux
             {
+                Log.Debug("Instance {0} is a Linux instance. WMI collections are disabled.", instanceName);
                 noWMI = true;
-                Log.Debug("WMI Disabled for Linux Instance: {0}", instanceName);
             }
-            if (!noWMI && computerName.StartsWith("EC2AMAZ-")) // Disable WMI collection for RDS
+            if (computerName.StartsWith("EC2AMAZ-")) // Disable WMI collection for RDS
             {
+                Log.Debug("Instance {0} is a RDS instance. WMI collections are disabled.", instanceName);
                 IsRDS = true;
                 noWMI = true;
-                Log.Debug("WMI Disabled for RDS Instance: {0}", instanceName);
             }
             if (engineEdition == DatabaseEngineEdition.SqlDatabase)
             {
