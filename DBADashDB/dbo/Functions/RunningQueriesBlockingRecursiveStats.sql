@@ -21,7 +21,7 @@ WITH R AS (
 	AND RQ.SnapshotDateUTC = @SnapshotDateUTC
 )
 SELECT COUNT(*) BlockCountRecursive, 
-	ISNULL(SUM(R.wait_time),0) BlockWaitTimeRecursiveMs,
+	ISNULL(SUM(CAST(R.wait_time AS BIGINT)),0) BlockWaitTimeRecursiveMs,
 	ISNULL(SUM(R.IsDirect),0) AS BlockCount,
-	ISNULL(SUM(CASE WHEN R.IsDirect=1 THEN R.wait_time ELSE 0 END),0) AS BlockWaitTimeMs
+	ISNULL(SUM(CASE WHEN R.IsDirect=1 THEN CAST(R.wait_time AS BIGINT) ELSE 0 END),0) AS BlockWaitTimeMs
 FROM R
