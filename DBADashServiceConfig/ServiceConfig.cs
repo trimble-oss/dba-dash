@@ -123,6 +123,11 @@ namespace DBADashServiceConfig
                             src.SourceConnection.Validate();
                             validated = true;
                             src.ConnectionID = src.GetGeneratedConnectionID();
+
+                            if (src.SourceConnection.Type == ConnectionType.SQL && string.IsNullOrEmpty(src.SourceConnection.ConnectionInfo.ServerName))
+                            {
+                                MessageBox.Show("Warning @@SERVERNAME returned NULL.  Consider fixing this using sp_addserver", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -132,10 +137,6 @@ namespace DBADashServiceConfig
                         System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
                     }
 
-                    if (string.IsNullOrEmpty(src.SourceConnection.ConnectionInfo.ServerName))
-                    {
-                        MessageBox.Show("Warning @@SERVERNAME returned NULL.  Consider fixing this using sp_addserver", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    }
                     if (!addUnvalidated && !validated)
                     {
                         if (doNotAddUnvalidated)
