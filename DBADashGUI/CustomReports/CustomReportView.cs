@@ -632,12 +632,13 @@ namespace DBADashGUI.CustomReports
         private void AddPickers()
         {
             tsParams.DropDownItems.Clear();
+            tsParams.Click -= TsParameters_Click;
             if (report.Pickers == null)
             {
                 tsParams.Click += TsParameters_Click;
+
                 return;
             }
-            tsParams.Click -= TsParameters_Click;
 
             var pickers = report.Pickers;
             if (customParams.Any(p => p.Param.ParameterName.Equals("@Top", StringComparison.InvariantCultureIgnoreCase) && p.Param.SqlDbType == SqlDbType.Int) && !pickers.Any(p => p.ParameterName.Equals("@Top", StringComparison.InvariantCultureIgnoreCase)))
