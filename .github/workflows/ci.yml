@@ -126,7 +126,7 @@ jobs:
       - name: Run Pester Tests
         shell: powershell
         run: |     
-          Install-Module Pester -Force
+          Install-Module Pester -Force -SkipPublisherCheck
           Import-Module Pester -PassThru
           Invoke-Pester -Output Detailed Scripts\CI_Workflow.Tests.ps1
 
