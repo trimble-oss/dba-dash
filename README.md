@@ -72,7 +72,7 @@ DBA Dash is a tool for SQL Server DBAs to assist with daily checks, performance 
 ## Prerequisites
 
 - Account to use for agent.  Review the [security doc](https://dbadash.com/docs/help/security/) for required permissions. 
-- [.NET Desktop Runtime 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) is used by DBA Dash.  You will be prompted to install the .NET runtime version 6 if it's not already installed.
+- [.NET Desktop Runtime 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) is used by DBA Dash.  You will be prompted to install the .NET runtime version 8 if it's not already installed.
 
 > **Note** 
 > It's possible to run as a console app under your own user account for testing purposes.
