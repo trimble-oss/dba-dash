@@ -67,6 +67,9 @@ namespace DBADashServiceConfig
             txtJson = new System.Windows.Forms.TextBox();
             tabOther = new System.Windows.Forms.TabPage();
             groupBox6 = new System.Windows.Forms.GroupBox();
+            label8 = new System.Windows.Forms.Label();
+            label6 = new System.Windows.Forms.Label();
+            txtSQS = new System.Windows.Forms.TextBox();
             label4 = new System.Windows.Forms.Label();
             chkEnableMessaging = new System.Windows.Forms.CheckBox();
             groupBox3 = new System.Windows.Forms.GroupBox();
@@ -242,7 +245,7 @@ namespace DBADashServiceConfig
             // 
             // bttnScanNow
             // 
-            bttnScanNow.Location = new System.Drawing.Point(441, 65);
+            bttnScanNow.Location = new System.Drawing.Point(420, 67);
             bttnScanNow.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             bttnScanNow.Name = "bttnScanNow";
             bttnScanNow.Size = new System.Drawing.Size(104, 37);
@@ -571,21 +574,51 @@ namespace DBADashServiceConfig
             // 
             // groupBox6
             // 
+            groupBox6.Controls.Add(label8);
+            groupBox6.Controls.Add(label6);
+            groupBox6.Controls.Add(txtSQS);
             groupBox6.Controls.Add(label4);
             groupBox6.Controls.Add(chkEnableMessaging);
             groupBox6.Location = new System.Drawing.Point(9, 436);
             groupBox6.Name = "groupBox6";
-            groupBox6.Size = new System.Drawing.Size(1112, 125);
+            groupBox6.Size = new System.Drawing.Size(1112, 162);
             groupBox6.TabIndex = 39;
             groupBox6.TabStop = false;
             groupBox6.Text = "Messaging";
             // 
+            // label8
+            // 
+            label8.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
+            label8.Location = new System.Drawing.Point(623, 80);
+            label8.Name = "label8";
+            label8.Size = new System.Drawing.Size(466, 45);
+            label8.TabIndex = 4;
+            label8.Text = "SQS Url only required to communicate with remote agents that connect to the repository via a S3 bucket";
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Location = new System.Drawing.Point(18, 80);
+            label6.Name = "label6";
+            label6.Size = new System.Drawing.Size(62, 20);
+            label6.TabIndex = 3;
+            label6.Text = "SQS Url:";
+            // 
+            // txtSQS
+            // 
+            txtSQS.Location = new System.Drawing.Point(247, 77);
+            txtSQS.Name = "txtSQS";
+            txtSQS.Size = new System.Drawing.Size(370, 27);
+            txtSQS.TabIndex = 2;
+            txtSQS.Validating += TxtSQS_Validating;
+            txtSQS.Validated += TxtSQS_Validated;
+            // 
             // label4
             // 
             label4.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
-            label4.Location = new System.Drawing.Point(585, 23);
+            label4.Location = new System.Drawing.Point(623, 23);
             label4.Name = "label4";
-            label4.Size = new System.Drawing.Size(504, 86);
+            label4.Size = new System.Drawing.Size(466, 86);
             label4.TabIndex = 1;
             label4.Text = "Allow the GUI to send messages to this service via the service broker.  e.g. To trigger collections to run on demand.";
             // 
@@ -790,9 +823,9 @@ namespace DBADashServiceConfig
             // label10
             // 
             label10.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
-            label10.Location = new System.Drawing.Point(585, 37);
+            label10.Location = new System.Drawing.Point(623, 37);
             label10.Name = "label10";
-            label10.Size = new System.Drawing.Size(504, 85);
+            label10.Size = new System.Drawing.Size(466, 85);
             label10.TabIndex = 24;
             label10.Text = resources.GetString("label10.Text");
             // 
@@ -1597,6 +1630,9 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.CheckBox chkEnableMessaging;
         private System.Windows.Forms.Label lblServerNameWarning;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TextBox txtSQS;
+        private System.Windows.Forms.Label label8;
     }
 }
 

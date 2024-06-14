@@ -545,6 +545,7 @@ namespace DBADashServiceConfig
                 txtSummaryRefreshCron.Text = collectionConfig.SummaryRefreshCron;
                 chkSummaryRefresh.Checked = !string.IsNullOrEmpty(collectionConfig.SummaryRefreshCron);
                 chkEnableMessaging.Checked = collectionConfig.EnableMessaging;
+                txtSQS.Text = collectionConfig.ServiceSQSQueueUrl;
                 UpdateSummaryCron();
                 UpdateScanInterval();
                 SetDgv();
@@ -1539,15 +1540,7 @@ namespace DBADashServiceConfig
             if (IsSetFromJson) return;
             collectionConfig.EnableMessaging = chkEnableMessaging.Checked;
             SetJson();
-            if (chkEnableMessaging.Checked)
-            {
-                if (!IsMessagingSupported())
-                {
-                    MessageBox.Show("The destination connection doesn't support messaging. Messaging requires the destination to support service broker.", "Messaging", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    chkEnableMessaging.Checked = false;
-                    return;
-                }
-            }
+
             if (chkEnableMessaging.Checked && collectionConfig.SourceConnections.Exists(src => string.IsNullOrEmpty(src.ConnectionID)))
             {
                 if (MessageBox.Show(
@@ -1559,20 +1552,7 @@ namespace DBADashServiceConfig
             }
         }
 
-        private bool IsMessagingSupported()
-        {
-            try
-            {
-                return collectionConfig.DestinationConnection.Type == ConnectionType.SQL &&
-                       !collectionConfig.DestinationConnection.ConnectionInfo.IsAzureDB;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        private void PopulateConnectionID()
+      private void PopulateConnectionID()
         {
             var errors = new StringBuilder(); // Using StringBuilder instead of StringBuilder() for consistency
 
@@ -1614,6 +1594,25 @@ namespace DBADashServiceConfig
 
             lblServerNameWarning.ForeColor = theme.WarningForeColor;
             lblServerNameWarning.BackColor = theme.WarningBackColor;
+        }
+
+        private void TxtSQS_Validated(object sender, EventArgs e)
+        {
+            if (IsSetFromJson) return;
+            collectionConfig.ServiceSQSQueueUrl = txtSQS.Text;
+            SetJson();
+        }
+
+        private void TxtSQS_Validating(object sender, CancelEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(txtSQS.Text) && !txtSQS.Text.StartsWith("https://sqs.", StringComparison.OrdinalIgnoreCase))
+            {
+                errorProvider1.SetError(txtSQS,"Invalid SQS Url");
+            }
+            else
+            {
+                errorProvider1.SetError(txtSQS, "");
+            }
         }
     }
 }
