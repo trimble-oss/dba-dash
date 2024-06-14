@@ -47,7 +47,7 @@ namespace DBADashGUI.CollectionDates
             get => statusFilterToolStrip1.OK; set => statusFilterToolStrip1.OK = value;
         }
 
-        private static readonly string[] NoTriggerCollectionTypes = new[] { "QueryPlans", "QueryText", "SlowQueriesStats", "InternalPerformanceCounters" };
+        private static readonly string[] NoTriggerCollectionTypes = new[] { "QueryPlans", "QueryText", "SlowQueriesStats", "InternalPerformanceCounters", "SessionWaits" };
 
         private DataTable GetCollectionDates()
         {
