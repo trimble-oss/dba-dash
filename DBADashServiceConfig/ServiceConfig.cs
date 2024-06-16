@@ -1541,7 +1541,7 @@ namespace DBADashServiceConfig
             collectionConfig.EnableMessaging = chkEnableMessaging.Checked;
             SetJson();
 
-            if (chkEnableMessaging.Checked && collectionConfig.SourceConnections.Exists(src => string.IsNullOrEmpty(src.ConnectionID)))
+            if (chkEnableMessaging.Checked && collectionConfig.SourceConnections.Exists(src => string.IsNullOrEmpty(src.ConnectionID) && src.SourceConnection.Type == ConnectionType.SQL))
             {
                 if (MessageBox.Show(
                         "Messaging requires an explicit ConnectionID to be defined in the config file. One or more connections do not have a ConnectionID defined.\nWould you like to automatically populate this now?\n\nNote:This might take a while depending on the number of connections and their availability.",
