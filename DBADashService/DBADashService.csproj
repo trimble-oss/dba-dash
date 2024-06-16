@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <OutputType>Exe</OutputType>
@@ -32,16 +32,16 @@
     <ProjectReference Include="..\DBADash\DBADash.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.7.304.1" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.308" />
-    <PackageReference Include="Azure.Core" Version="1.39.0" />
-    <PackageReference Include="Azure.Identity" Version="1.11.3" />
+    <PackageReference Include="AWSSDK.Core" Version="3.7.304.16" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.309.4" />
+    <PackageReference Include="Azure.Core" Version="1.40.0" />
+    <PackageReference Include="Azure.Identity" Version="1.11.4" />
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="Common.Logging" Version="3.4.1" />
     <PackageReference Include="Common.Logging.Core" Version="3.4.1" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.1" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="3.1.6" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
@@ -58,13 +58,13 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.61.0" />
-    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.61.0" />
-    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.5.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="7.5.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="7.5.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="7.5.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.5.1" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.61.3" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.61.3" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.6.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="7.6.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="7.6.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="7.6.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.6.0" />
     <PackageReference Include="Microsoft.SqlServer.Assessment" Version="1.1.17" />
     <PackageReference Include="Microsoft.SqlServer.Assessment.Authoring" Version="1.1.0" />
     <PackageReference Include="Microsoft.SqlServer.Management.SqlParser" Version="172.0.1" />
@@ -72,14 +72,14 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Polly" Version="8.4.0" />
     <PackageReference Include="Quartz" Version="3.9.0" />
-    <PackageReference Include="Serilog" Version="3.1.1" />
-    <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
-    <PackageReference Include="Serilog.Formatting.Compact" Version="2.0.0" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+    <PackageReference Include="Serilog" Version="4.0.0" />
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+    <PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.1" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
-    <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="4.1.0" />
-    <PackageReference Include="Serilog.Sinks.Seq" Version="7.0.1" />
+    <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="5.0.0" />
+    <PackageReference Include="Serilog.Sinks.Seq" Version="8.0.0" />
     <PackageReference Include="SerilogTimings" Version="3.1.0" />
     <PackageReference Include="System.Buffers" Version="4.5.1" />
     <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
@@ -87,7 +87,7 @@
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="8.0.1" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.5.1" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.6.0" />
     <PackageReference Include="System.IO" Version="4.3.0" />
     <PackageReference Include="System.Memory" Version="4.5.5" />
     <PackageReference Include="System.Memory.Data" Version="8.0.0" />
