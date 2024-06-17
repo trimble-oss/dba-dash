@@ -3,10 +3,12 @@ using Microsoft.SqlServer.Management.Smo;
 using Microsoft.SqlServer.Management.Smo.Broker;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Serilog;
 using SerilogTimings;
 using System;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DBADash
 {
@@ -35,10 +37,8 @@ namespace DBADash
         Trigger
     }
 
-
     public class SchemaSnapshotDBOptions
     {
-
         public bool DriAll = true;
         public bool Triggers = true;
         public bool FullTextIndexes = true;
@@ -56,7 +56,6 @@ namespace DBADash
             return new SchemaSnapshotDBObjectTypes[] { SchemaSnapshotDBObjectTypes.Database, SchemaSnapshotDBObjectTypes.Aggregate, SchemaSnapshotDBObjectTypes.Assembly, SchemaSnapshotDBObjectTypes.DDLTrigger, SchemaSnapshotDBObjectTypes.Schema, SchemaSnapshotDBObjectTypes.StoredProcedures, SchemaSnapshotDBObjectTypes.Synonym, SchemaSnapshotDBObjectTypes.Tables, SchemaSnapshotDBObjectTypes.UserDefinedDataType, SchemaSnapshotDBObjectTypes.UserDefinedFunction, SchemaSnapshotDBObjectTypes.UserDefinedTableType, SchemaSnapshotDBObjectTypes.UserDefinedType, SchemaSnapshotDBObjectTypes.View, SchemaSnapshotDBObjectTypes.XMLSchema, SchemaSnapshotDBObjectTypes.Roles, SchemaSnapshotDBObjectTypes.ApplicationRole, SchemaSnapshotDBObjectTypes.Sequence, SchemaSnapshotDBObjectTypes.ServiceBroker, SchemaSnapshotDBObjectTypes.Trigger };
         }
 
-
         public ScriptingOptions ScriptOptions()
         {
             var so = new ScriptingOptions
@@ -73,18 +72,16 @@ namespace DBADash
             };
             return so;
         }
-
     }
 
     public class SchemaSnapshotDB : SMOBaseClass
     {
         public SchemaSnapshotDB(DBADashConnection source, SchemaSnapshotDBOptions options) : base(source, options)
         {
-
         }
+
         public SchemaSnapshotDB(DBADashConnection source) : base(source)
         {
-
         }
 
         private static DataTable RgDTSchema()
@@ -162,9 +159,7 @@ namespace DBADash
                     row["max_outstanding_io_per_volume"] = rg.ServerVersion.Major >= 12 ? rg.MaxOutstandingIOPerVolume : 0; // Supported 2014 and later
                     row["script"] = StringCollectionToString(sc);
                     dtRG.Rows.Add(row);
-
                 }
-
             }
             return dtRG;
         }
@@ -182,7 +177,6 @@ namespace DBADash
 
         public DataTable SnapshotDB(string DBName)
         {
-
             using (var cn = new Microsoft.Data.SqlClient.SqlConnection(ConnectionString))
             using (var opSS = Operation.Begin("Schema snapshot {DBame}", DBName))
             {
@@ -365,12 +359,10 @@ namespace DBADash
                                 op.Complete();
                             }
                         }
-
                     }
                 }
                 opSS.Complete();
                 return dtSchema;
-
             }
         }
 
@@ -478,7 +470,7 @@ namespace DBADash
                 r["ObjectDateModified"] = "1900-01-01";
                 dtSchema.Rows.Add(r);
             }
-            if (db.Parent.VersionMajor >= 10) // Broker priorities supported on SQL 2008 
+            if (db.Parent.VersionMajor >= 10) // Broker priorities supported on SQL 2008
             {
                 foreach (BrokerPriority p in db.ServiceBroker.Priorities)
                 {
@@ -519,7 +511,6 @@ namespace DBADash
                 }
             }
         }
-
 
         private void AddAppRole(Database db, DataTable dtSchema)
         {
@@ -668,7 +659,6 @@ namespace DBADash
 
         private void AddSynonyms(Database db, DataTable dtSchema)
         {
-
             foreach (Synonym s in db.Synonyms)
             {
                 var r = dtSchema.NewRow();
@@ -715,7 +705,6 @@ namespace DBADash
 
         private void AddUserDefinedTableType(Database db, DataTable dtSchema)
         {
-
             db.PrefetchObjects(typeof(UserDefinedTableType), ScriptingOptions);
             foreach (UserDefinedTableType t in db.UserDefinedTableTypes)
             {
@@ -799,6 +788,7 @@ namespace DBADash
                         case UserDefinedFunctionType.Inline:
                             r["ObjectType"] = "IF";
                             break;
+
                         case UserDefinedFunctionType.Scalar:
                             if (f.ImplementationType == ImplementationType.SqlClr)
                             {
@@ -809,6 +799,7 @@ namespace DBADash
                                 r["ObjectType"] = "FN";
                             }
                             break;
+
                         case UserDefinedFunctionType.Table:
                             if (f.ImplementationType == ImplementationType.SqlClr)
                             {
@@ -819,6 +810,7 @@ namespace DBADash
                                 r["ObjectType"] = "TF";
                             }
                             break;
+
                         default:
                             r["ObjectType"] = "??";
                             break;
@@ -985,8 +977,54 @@ namespace DBADash
             }
         }
 
+        public static async Task GenerateSchemaSnapshots(CollectionConfig Config, DBADashSource src)
+        {
+            var connectionString = src.GetSource();
+            SqlConnectionStringBuilder builder = new(connectionString);
 
+            var collector = new DBCollector(src, Config.ServiceName);
+            var dsSnapshot = collector.Data;
+            var dbs = src.SchemaSnapshotDBs.Split(',');
 
+            await using var cn = new SqlConnection(connectionString);
+            var ss = new SchemaSnapshotDB(src.SourceConnection, Config.SchemaSnapshotOptions);
+            var instance = new Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
 
+            if (instance.ServerType == Microsoft.SqlServer.Management.Common.DatabaseEngineType.SqlAzureDatabase && builder.InitialCatalog is null or "master" or "")
+            {
+                return;
+            }
+            Log.Information("DB Snapshots from instance {source}", src.SourceConnection.ConnectionForPrint);
+
+            foreach (Database db in instance.Databases)
+            {
+                if (!db.IsUpdateable || !db.IsAccessible || db.IsSystemObject != false) continue;
+
+                var include = dbs.Any(strDB => strDB == "*" || string.Equals(strDB, db.Name, StringComparison.OrdinalIgnoreCase)) &&
+                              !dbs.Any(strDB => strDB.StartsWith('-') && string.Equals(strDB[1..], db.Name, StringComparison.OrdinalIgnoreCase));
+                if (!include) continue;
+
+                Log.Information("DB Snapshot {db} from instance {instance}", db.Name, builder.DataSource);
+                var StartTime = DateTime.UtcNow;
+                try
+                {
+                    var dt = ss.SnapshotDB(db.Name);
+                    var EndTime = DateTime.UtcNow;
+                    dt.TableName = "Snapshot_" + db.Name;
+                    dt.ExtendedProperties.Add("StartTimeBin", StartTime.ToBinary().ToString());
+                    dt.ExtendedProperties.Add("EndTimeBin", EndTime.ToBinary().ToString());
+                    dt.ExtendedProperties.Add("SnapshotOptions", JsonConvert.SerializeObject(Config.SchemaSnapshotOptions));
+                    dsSnapshot.Tables.Add(dt);
+
+                    var fileName = DBADashSource.GenerateFileName(src.SourceConnection.ConnectionForFileName);
+                    await DestinationHandling.WriteAllDestinations(dsSnapshot, src, fileName, Config);
+                    dsSnapshot.Tables.Remove(dt);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error creating schema snapshot {db}", db.Name);
+                }
+            }
+        }
     }
 }
