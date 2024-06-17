@@ -1,4 +1,4 @@
-﻿CREATE   PROC [dbo].[DDLSnapshot_Add](
+﻿CREATE   PROC dbo.DDLSnapshot_Add(
 	@ss dbo.DDLSnapshot READONLY,
 	@ConnectionId SYSNAME=NULL,
 	@InstanceID INT=NULL,
@@ -11,6 +11,7 @@
 )
 AS
 SET XACT_ABORT ON
+DECLARE @Ref VARCHAR(30)='SchemaSnapshot'
 DECLARE @Count INT=0
 DECLARE @DatabaseId INT
 DECLARE @ValidatedSnapshotDate DATETIME2(3)
@@ -195,3 +196,6 @@ BEGIN;
 		SELECT @DatabaseId,@SnapshotDate,@ValidatedSnapshotDate,@EndTime,DATEDIFF(ms,@StartTime,@EndTime)
 	COMMIT
 END
+EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
+										@Reference = @Ref,
+										@SnapshotDate = @SnapshotDate

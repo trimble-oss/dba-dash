@@ -60,11 +60,17 @@ namespace DBADash.Messaging
 
             var (standardCollections, customCollections) = ParseCollectionTypes(src, cfg);
 
+            if (standardCollections.Contains(CollectionType.SchemaSnapshot))
+            {
+                // Written to destinations as usual.  Could be additional delay to process.
+                // It's done DB at a time to limit the size of the data being processed.
+                await SchemaSnapshotDB.GenerateSchemaSnapshots(cfg, src);
+            }
+
             var collector = new DBCollector(src, cfg.ServiceName, true);
             collector.Collect(standardCollections.ToArray());
             collector.Collect(customCollections);
 
-    
             if (CollectAgent.S3Path != null)
             {
                 op.Complete();
@@ -95,11 +101,11 @@ namespace DBADash.Messaging
                 {
                     standardCollections.Add(CollectionType.DriversWMI);
                 }
-                else if (string.Equals(type,"QueryPlans", StringComparison.OrdinalIgnoreCase) || string.Equals(type, "QueryText", StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(type, "QueryPlans", StringComparison.OrdinalIgnoreCase) || string.Equals(type, "QueryText", StringComparison.OrdinalIgnoreCase))
                 {
                     throw new ArgumentException("QueryPlan and QueryText are collected as part of the RunningQueries collection");
                 }
-                else if (string.Equals(type,"SlowQueriesStats", StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(type, "SlowQueriesStats", StringComparison.OrdinalIgnoreCase))
                 {
                     throw new ArgumentException("SlowQueriesStats is collected as part of the SlowQueries collection");
                 }

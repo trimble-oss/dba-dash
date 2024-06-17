@@ -26,19 +26,19 @@ namespace DBADashGUI.Messaging
         private const int PendingRequestsThreshold = 10;
         private static readonly Dictionary<(string instanceName, string type), DateTime> LastTriggeredTimes = new();
         private static readonly object LockObject = new();
-        private const int CollectionDialogLifetime = 120;
+        private const int CollectionDialogLifetime = 600;
 
-        public static async Task TriggerCollection(string connectionID, CollectionType type,int collectAgentID, int importAgentID, ISetStatus control)
+        public static async Task TriggerCollection(string connectionID, CollectionType type, int collectAgentID, int importAgentID, ISetStatus control)
         {
-            await TriggerCollection(connectionID, new List<string>() { Enum.GetName(type) }, collectAgentID,importAgentID, control);
+            await TriggerCollection(connectionID, new List<string>() { Enum.GetName(type) }, collectAgentID, importAgentID, control);
         }
 
-        public static async Task TriggerCollection(string connectionID, string type, int collectAgentID,int importAgentID, ISetStatus control)
+        public static async Task TriggerCollection(string connectionID, string type, int collectAgentID, int importAgentID, ISetStatus control)
         {
-            await TriggerCollection(connectionID, new List<string>() { type }, collectAgentID,importAgentID, control);
+            await TriggerCollection(connectionID, new List<string>() { type }, collectAgentID, importAgentID, control);
         }
 
-        public static async Task TriggerCollection(string connectionID, List<string> types, int collectAgentID,int importAgentID,
+        public static async Task TriggerCollection(string connectionID, List<string> types, int collectAgentID, int importAgentID,
             ISetStatus control)
         {
             if (PendingRequests >= PendingRequestsThreshold)
@@ -63,9 +63,9 @@ namespace DBADashGUI.Messaging
 
             var typesString = string.Join(", ", types.Select(s => s.ToString()));
             var messageBase = $"{typesString} collection for {connectionID}: ";
-            var collectAgent = DBADashAgent.GetDBADashAgent(Common.ConnectionString,collectAgentID);
-            var importAgent = DBADashAgent.GetDBADashAgent(Common.ConnectionString,importAgentID);
-            var x = new CollectionMessage(types, connectionID) {CollectAgent = collectAgent,ImportAgent = importAgent };
+            var collectAgent = DBADashAgent.GetDBADashAgent(Common.ConnectionString, collectAgentID);
+            var importAgent = DBADashAgent.GetDBADashAgent(Common.ConnectionString, importAgentID);
+            var x = new CollectionMessage(types, connectionID) { CollectAgent = collectAgent, ImportAgent = importAgent };
 
             var payload = x.Serialize();
             var messageGroup = Guid.NewGuid();
