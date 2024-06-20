@@ -24,6 +24,8 @@ namespace DBADash.Messaging
 
         public string ConnectionID { get; set; }
 
+        public string DatabaseName { get; set; }
+
         public CollectionMessage(List<string> collectionTypes, string connectionID)
         {
             CollectionTypes = collectionTypes;
@@ -60,17 +62,30 @@ namespace DBADash.Messaging
 
             var (standardCollections, customCollections) = ParseCollectionTypes(src, cfg);
 
-            if (standardCollections.Contains(CollectionType.SchemaSnapshot))
-            {
-                // Written to destinations as usual.  Could be additional delay to process.
-                // It's done DB at a time to limit the size of the data being processed.
-                await SchemaSnapshotDB.GenerateSchemaSnapshots(cfg, src);
-            }
-
             var collector = new DBCollector(src, cfg.ServiceName, true);
             collector.Collect(standardCollections.ToArray());
             collector.Collect(customCollections);
 
+            if (standardCollections.Contains(CollectionType.SchemaSnapshot))
+            {
+
+                if (string.IsNullOrEmpty(DatabaseName)) // 
+                {
+                    // Snapshot all configured databases
+                    // Written to destinations as usual.  Could be additional delay to process.
+                    // It's done DB at a time to limit the size of the data being processed.
+                    Log.Information("Message {handle} requested schema snapshots for {instance}", handle,ConnectionID);
+                    await SchemaSnapshotDB.GenerateSchemaSnapshots(cfg, src);
+                }
+                else
+                {
+                    Log.Information("Message {handle} requested snapshot for database {DatabaseName} on {instance}", handle,DatabaseName,ConnectionID);
+                    var schema = new SchemaSnapshotDB(src.SourceConnection, cfg.SchemaSnapshotOptions);
+                    var dt = schema.SnapshotDB(DatabaseName);
+                    collector.Data.Tables.Add(dt);
+                }
+            }
+            
             if (CollectAgent.S3Path != null)
             {
                 op.Complete();
