@@ -5,22 +5,26 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADash;
+using DBADashGUI.Interface;
 using DBADashGUI.Theme;
 using Humanizer;
 using static DBADashGUI.DBADashStatus;
+using DBADashGUI.Messaging;
 
 namespace DBADashGUI.DBFiles
 {
-    public partial class DBFilesControl : UserControl, ISetContext
+    public partial class DBFilesControl : UserControl, ISetContext, ISetStatus
     {
         public DBFilesControl()
         {
             InitializeComponent();
         }
 
-        private List<int> InstanceIDs;
-        private int? DatabaseID;
-        private string DriveName;
+        private List<int> InstanceIDs=> CurrentContext?.InstanceIDs.ToList();
+        private int? DatabaseID=> (CurrentContext?.DatabaseID > 0 ? (int?)CurrentContext?.DatabaseID : null);
+        private string DriveName=> CurrentContext?.DriveName;
+        private DBADashContext CurrentContext;
 
         public bool IncludeCritical
         {
@@ -87,15 +91,14 @@ namespace DBADashGUI.DBFiles
 
         public void SetContext(DBADashContext context)
         {
-            DriveName = context.DriveName;
-            InstanceIDs = context.InstanceIDs.ToList();
-            DatabaseID = (context.DatabaseID > 0 ? (int?)context.DatabaseID : null);
+
             IncludeCritical = true;
             IncludeWarning = true;
             IncludeNA = DatabaseID != null || context.DriveName != null;
             IncludeOK = DatabaseID != null || context.DriveName != null;
             tsLevel.Visible = context.DriveName == null;
-
+            CurrentContext = context;
+            tsTrigger.Visible = context.CanMessage;
             RefreshData();
         }
 
@@ -103,14 +106,22 @@ namespace DBADashGUI.DBFiles
         {
             ToggleFileLevel(!IsFileGroupLevel);
             var dt = GetDBFiles();
-            dgvFiles.AutoGenerateColumns = false;
-            dgvFiles.DataSource = new DataView(dt);
-            dgvFiles.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            this.Invoke(() =>
+            {
+                dgvFiles.AutoGenerateColumns = false;
+                dgvFiles.DataSource = new DataView(dt);
+                dgvFiles.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
 
-            configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
-            configureDatabaseThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1 && DatabaseID > 0;
+                configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
+                configureDatabaseThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1 && DatabaseID > 0;
 
-            UpdateTotals();
+                UpdateTotals();
+            });
+        }
+
+        public void SetStatus(string message, string tooltip, Color color)
+        {
+            lblInfo.InvokeSetStatus(message, tooltip, color);
         }
 
         private void UpdateTotals()
@@ -137,7 +148,7 @@ namespace DBADashGUI.DBFiles
                     .Where(row => !row.IsNewRow && row.Cells["FileLevel_FileSizeMB"].Value != null)
                     .Sum(row => Convert.ToDouble(row.Cells["FileLevel_FileSizeMB"].Value.ToString()));
             }
-            lblInfo.Text = $"File Count {totalFiles}. Total Size: {totalSize.Megabytes()}";
+            SetStatus($"File Count {totalFiles}. Total Size: {totalSize.Megabytes()}", "",ThemeExtensions.CurrentTheme.ForegroundColor);
         }
 
         private void Status_Selected(object sender, EventArgs e)
@@ -303,6 +314,11 @@ namespace DBADashGUI.DBFiles
         private void DBFilesControl_Load(object sender, EventArgs e)
         {
             dgvFiles.ApplyTheme();
+        }
+
+        private async void TsTrigger_Click(object sender, EventArgs e)
+        {
+            await CollectionMessaging.TriggerCollection(CurrentContext.InstanceID,CollectionType.DBFiles, this);
         }
     }
 }
