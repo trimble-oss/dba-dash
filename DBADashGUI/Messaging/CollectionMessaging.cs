@@ -45,19 +45,19 @@ namespace DBADashGUI.Messaging
         }
 
         public static async Task TriggerCollection(string connectionID, List<string> types, int collectAgentID, int importAgentID,
-            ISetStatus control)
+            ISetStatus control,string db=null)
         {
             if (PendingRequests >= PendingRequestsThreshold)
             {
                 control.SetStatus("Too many pending requests", null, DashColors.Fail);
                 return;
             }
-
+            var key = db == null ? connectionID : connectionID + "\\" + db;
             foreach (var type in types)
             {
-                if (IsRecentlyTriggered(connectionID, type) && !RecentlyTriggeredExcludedList.Exists(ct => Enum.GetName(ct) == type))
+                if (IsRecentlyTriggered(key, type) && !RecentlyTriggeredExcludedList.Exists(ct => Enum.GetName(ct) == type))
                 {
-                    control.SetStatus($"Collection {type} already triggered recently for {connectionID}", null, DashColors.Fail);
+                    control.SetStatus($"Collection {type} already triggered recently for {key}", null, DashColors.Fail);
                     return;
                 }
                 else if (type is "QueryText" or "QueryPlans")
@@ -68,10 +68,12 @@ namespace DBADashGUI.Messaging
             }
 
             var typesString = string.Join(", ", types.Select(s => s.ToString()));
-            var messageBase = $"{typesString} collection for {connectionID}: ";
+            var messageBase = $"{typesString} collection for {key}: ";
+
+
             var collectAgent = DBADashAgent.GetDBADashAgent(Common.ConnectionString, collectAgentID);
             var importAgent = DBADashAgent.GetDBADashAgent(Common.ConnectionString, importAgentID);
-            var x = new CollectionMessage(types, connectionID) { CollectAgent = collectAgent, ImportAgent = importAgent };
+            var x = new CollectionMessage(types, connectionID) { CollectAgent = collectAgent, ImportAgent = importAgent, DatabaseName = db};
 
             var payload = x.Serialize();
             var messageGroup = Guid.NewGuid();
@@ -79,13 +81,13 @@ namespace DBADashGUI.Messaging
             control.SetStatus(messageBase + "SENT", "", DashColors.Information);
             foreach (var type in types)
             {
-                UpdateLastTriggeredTime(connectionID, type);
+                UpdateLastTriggeredTime(key, type);
             }
             IncrementPendingRequests();
             await Task.Run(() => ReceiveReply(messageGroup, messageBase, control));
         }
 
-        public static async Task TriggerCollection(int InstanceID, List<CollectionType> types, ISetStatus control)
+        public static async Task TriggerCollection(int InstanceID, List<CollectionType> types, ISetStatus control,string db=null)
         {
             var row = CommonData.Instances.AsEnumerable().FirstOrDefault(i => (int)i["InstanceID"] == InstanceID);
             if (row == null) return;
@@ -98,7 +100,7 @@ namespace DBADashGUI.Messaging
                 MessageBox.Show("Messaging is not enabled for this instance", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            await TriggerCollection(connectionID, types.Select(Enum.GetName).ToList(), collectAgentID, importAgentID, control);
+            await TriggerCollection(connectionID, types.Select(Enum.GetName).ToList(), collectAgentID, importAgentID, control,db);
         }
 
         public static async Task TriggerCollection(int InstanceID, CollectionType type, ISetStatus control)
