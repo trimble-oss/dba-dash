@@ -5,12 +5,15 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Interface;
 using DBADashGUI.Theme;
 using static DBADashGUI.DBADashStatus;
+using DBADash;
+using DBADashGUI.Messaging;
 
 namespace DBADashGUI.Backups
 {
-    public partial class BackupsControl : UserControl, INavigation, ISetContext
+    public partial class BackupsControl : UserControl, INavigation, ISetContext, ISetStatus, IRefreshData
     {
         public bool IncludeCritical
         {
@@ -39,6 +42,8 @@ namespace DBADashGUI.Backups
 
         private List<int> backupInstanceIDs;
 
+        private DBADashContext CurrentContext;
+
         public void SetContext(DBADashContext context)
         {
             InstanceIDs = context.RegularInstanceIDs.ToList();
@@ -53,13 +58,26 @@ namespace DBADashGUI.Backups
 
             backupInstanceIDs = new List<int>();
             tsBack.Enabled = false;
+            lblStatus.Text = "";
+            tsTrigger.Visible = context.CanMessage;
+            CurrentContext = context;
+            RefreshDataLocal();
+        }
+
+        public void RefreshData()
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(RefreshData);
+                return;
+            }
             RefreshDataLocal();
         }
 
         private void RefreshDataLocal()
         {
             RefreshSummary();
-            if (InstanceIDs.Count > 0 && (splitContainer1.SplitterDistance + 200) > splitContainer1.Height) // Sumary is taking up all the room so don't show DB level data.
+            if (InstanceIDs.Count > 0 && (splitContainer1.SplitterDistance + 200) > splitContainer1.Height) // Summary is taking up all the room so don't show DB level data.
             {
                 splitContainer1.Panel2Collapsed = true;
             }
@@ -458,14 +476,18 @@ namespace DBADashGUI.Backups
                 if (dgvSummary.Columns[e.ColumnIndex].Name == "Instance" && backupInstanceIDs.Count == 0)
                 {
                     DatabaseID = 0;
-                    DataRowView row = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
+                    var row = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
+                    var instanceId = (int)row["InstanceID"];
                     backupInstanceIDs = InstanceIDs;
-                    InstanceIDs = new List<int>() { (int)row["InstanceID"] };
+                    InstanceIDs = new List<int>() { instanceId };
                     IncludeCritical = true;
                     IncludeWarning = true;
                     IncludeOK = true;
                     IncludeNA = true;
                     tsBack.Enabled = true;
+                    var tempContext = (DBADashContext)CurrentContext.Clone();
+                    tempContext.InstanceID = instanceId;
+                    tsTrigger.Visible = tempContext.CanMessage;
                     RefreshDataLocal();
                 }
                 else if (dgvSummary.Columns[e.ColumnIndex].Name == "Configure")
@@ -493,6 +515,7 @@ namespace DBADashGUI.Backups
                 {
                     InstanceIDs = backupInstanceIDs;
                     backupInstanceIDs = new List<int>();
+                    tsTrigger.Visible = CurrentContext.CanMessage;
                 }
                 tsBack.Enabled = backupInstanceIDs.Count > 0;
                 IncludeCritical = true;
@@ -530,6 +553,21 @@ namespace DBADashGUI.Backups
         private void TsDetailCols_Click(object sender, EventArgs e)
         {
             dgvBackups.PromptColumnSelection();
+        }
+
+        public void SetStatus(string message, string tooltip, Color color)
+        {
+            lblStatus.InvokeSetStatus(message, tooltip, color);
+        }
+
+        private async void tsTrigger_Click(object sender, EventArgs e)
+        {
+            if (InstanceIDs.Count != 1)
+            {
+                lblStatus.Text = "Please select a single instance to trigger a collection";
+            }
+            var instanceId = InstanceIDs[0];
+            await CollectionMessaging.TriggerCollection(instanceId, new List<CollectionType>() { CollectionType.Backups, CollectionType.Databases}, this);
         }
     }
 }
