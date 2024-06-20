@@ -5,62 +5,90 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Interface;
 using DBADashGUI.Theme;
 using static DBADashGUI.DBADashStatus;
+using DBADash;
+using DBADashGUI.Messaging;
 
 namespace DBADashGUI.HA
 {
-    public partial class AG : UserControl, INavigation, ISetContext
+    public partial class AG : UserControl, INavigation, ISetContext, ISetStatus
     {
         public AG()
         {
             InitializeComponent();
         }
 
-        private List<int> InstanceIDs;
+        private List<int> InstanceIDs=> CurrentContext?.RegularInstanceIDs.ToList();
         private int instanceId = -1;
 
         public bool CanNavigateBack { get => tsBack.Enabled; }
+        private DBADashContext CurrentContext;
 
         public void SetContext(DBADashContext context)
         {
-            InstanceIDs = context.RegularInstanceIDs.ToList();
+            tsTrigger.Visible = context.CanMessage;
+            lblStatus.Visible = false;
+            CurrentContext = context;
+            ResetAndRefreshData();
+        }
+
+        public void ResetAndRefreshData()
+        {
+            instanceId = InstanceIDs.Count == 1 ? InstanceIDs[0] : -1;
             RefreshData();
+        }
+
+        public void SetStatus(string message, string tooltip, Color color)
+        {
+            lblStatus.InvokeSetStatus(message, tooltip, color);
         }
 
         public void RefreshData()
         {
-            instanceId = -1;
-            if (InstanceIDs.Count == 1)
+            this.Invoke(() =>
             {
-                instanceId = InstanceIDs[0];
-            }
-            RefreshDataLocal();
-        }
+                tsBack.Enabled = instanceId > 0 && InstanceIDs.Count > 1;
+                dgv.DataSource = null;
+                dgv.Columns.Clear();
+                DataTable dt;
 
-        private void RefreshDataLocal()
-        {
-            tsBack.Enabled = instanceId > 0 && InstanceIDs.Count > 1;
-            dgv.DataSource = null;
-            dgv.Columns.Clear();
-            DataTable dt;
+                dgv.Columns.Add(new DataGridViewTextBoxColumn()
+                {
+                    DataPropertyName = "InstanceID", Visible = false, Name = "colInstanceID",
+                    Frozen = Common.FreezeKeyColumn
+                });
+                dgv.Columns.Add(new DataGridViewTextBoxColumn()
+                {
+                    DataPropertyName = "Snapshot Status", Name = "colSnapshotStatus", Visible = false,
+                    Frozen = Common.FreezeKeyColumn
+                });
+                if (instanceId > 0)
+                {
+                    dt = GetAvailabilityGroup(instanceId);
+                    dgv.Columns.Add(new DataGridViewTextBoxColumn()
+                    {
+                        DataPropertyName = "Database", Name = "colDatabase", HeaderText = "Database",
+                        Frozen = Common.FreezeKeyColumn
+                    });
+                }
+                else
+                {
+                    dt = GetAvailabilityGroupSummary(InstanceIDs);
+                    dgv.Columns.Add(new DataGridViewLinkColumn()
+                    {
+                        HeaderText = "Instance", DataPropertyName = "Instance", Name = "colInstance",
+                        LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn,
+                        SortMode = DataGridViewColumnSortMode.Automatic
+                    });
+                }
 
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "InstanceID", Visible = false, Name = "colInstanceID", Frozen = Common.FreezeKeyColumn });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "Snapshot Status", Name = "colSnapshotStatus", Visible = false, Frozen = Common.FreezeKeyColumn });
-            if (instanceId > 0)
-            {
-                dt = GetAvailabilityGroup(instanceId);
-                dgv.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "Database", Name = "colDatabase", HeaderText = "Database", Frozen = Common.FreezeKeyColumn });
-            }
-            else
-            {
-                dt = GetAvailabilityGroupSummary(InstanceIDs);
-                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", Name = "colInstance", LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn, SortMode = DataGridViewColumnSortMode.Automatic });
-            }
-            DateHelper.ConvertUTCToAppTimeZone(ref dt);
-            dgv.DataSource = dt;
-            dgv.ApplyTheme();
-            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
+                dgv.DataSource = dt;
+                dgv.ApplyTheme();
+                dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            });
         }
 
         public static DataTable GetAvailabilityGroup(int InstanceID)
@@ -97,7 +125,7 @@ namespace DBADashGUI.HA
 
         private void TsRefresh_Click(object sender, EventArgs e)
         {
-            RefreshDataLocal();
+            RefreshData();
         }
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -106,7 +134,10 @@ namespace DBADashGUI.HA
             {
                 var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
                 instanceId = (int)row["InstanceID"];
-                RefreshDataLocal();
+                var tempContext = (DBADashContext)CurrentContext.Clone();
+                tempContext.InstanceID = instanceId;
+                tsTrigger.Visible = tempContext.CanMessage;
+                RefreshData();
             }
         }
 
@@ -119,7 +150,8 @@ namespace DBADashGUI.HA
         {
             if (CanNavigateBack)
             {
-                RefreshData();
+                ResetAndRefreshData();
+                tsTrigger.Visible = CurrentContext.CanMessage;
                 return true;
             }
             else
@@ -149,7 +181,7 @@ namespace DBADashGUI.HA
                     {
                         var secondaryReplicas = (int)row["Secondary Replicas"];
                         var primaryReplicas = (int)row["Primary Replicas"];
-                        var totalReplicas = primaryReplicas+secondaryReplicas;
+                        var totalReplicas = primaryReplicas + secondaryReplicas;
 
                         r.Cells["Not Synchronizing"].SetStatusColor((int)row["Not Synchronizing"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
                         r.Cells["Remote Not Synchronizing"].SetStatusColor((int)row["Remote Not Synchronizing"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
@@ -170,6 +202,11 @@ namespace DBADashGUI.HA
         private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgv);
+        }
+
+        private async void tsTrigger_Click(object sender, EventArgs e)
+        {
+            await CollectionMessaging.TriggerCollection(instanceId>0 ? instanceId : CurrentContext.InstanceID,new List<CollectionType>() { CollectionType.AvailabilityGroups, CollectionType.AvailabilityReplicas, CollectionType.DatabasesHADR}, this);
         }
     }
 }
