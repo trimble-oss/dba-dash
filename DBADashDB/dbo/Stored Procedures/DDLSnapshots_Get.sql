@@ -5,7 +5,8 @@
 	@PageNumber INT=1
 )
 AS
-SELECT I.InstanceGroupName,
+SELECT I.InstanceID,
+       I.InstanceGroupName,
        ss.DatabaseID,
        ss.SnapshotDate,
        ss.ValidatedDate,

@@ -3,15 +3,20 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using DBADashGUI.Interface;
 using DBADashGUI.Theme;
 using static DBADashGUI.DiffControl;
+using DBADash;
+using DBADashGUI.Messaging;
 
 namespace DBADashGUI.Changes
 {
-    public partial class SchemaSnapshots : UserControl, INavigation, ISetContext
+    public partial class SchemaSnapshots : UserControl, INavigation, ISetContext, ISetStatus
     {
         public SchemaSnapshots()
         {
@@ -24,6 +29,7 @@ namespace DBADashGUI.Changes
         private string InstanceName;
         private int DatabaseID;
         private List<int> InstanceIDs;
+        private DBADashContext CurrentContext;
 
         public bool CanNavigateBack { get => tsBack.Enabled; }
 
@@ -87,11 +93,20 @@ namespace DBADashGUI.Changes
             InstanceName = context.InstanceName;
             DatabaseID = context.DatabaseID;
             InstanceIDs = context.InstanceIDs.ToList();
+            lblStatus.Text = "";
+            tsTrigger.Visible = context.CanMessage;
+            CurrentContext = context;
+            colTriggerSnapshot.Visible = DBADashUser.AllowMessaging;
             RefreshData();
         }
 
         public void RefreshData()
         {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(RefreshData);
+                return;
+            }
             if (InstanceID > 0 || InstanceName is { Length: > 0 })
             {
                 LoadSnapshots();
@@ -102,6 +117,11 @@ namespace DBADashGUI.Changes
                 tsBack.Enabled = false;
                 LoadInstanceSummary();
             }
+        }
+
+        public void SetStatus(string message, string tooltip, Color color)
+        {
+            lblStatus.InvokeSetStatus(message, tooltip, color);
         }
 
         private DataTable DdlSnapshotInstanceSummary()
@@ -208,7 +228,7 @@ namespace DBADashGUI.Changes
             splitSnapshotSummary.Dock = DockStyle.Fill;
         }
 
-        private void GvSnapshots_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private async void GvSnapshots_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0 && e.ColumnIndex == colDB.Index)
             {
@@ -221,6 +241,28 @@ namespace DBADashGUI.Changes
                 var row = (DataRowView)gvSnapshots.Rows[e.RowIndex].DataBoundItem;
                 Export(row);
             }
+            else if (e.RowIndex >= 0 && e.ColumnIndex == colTriggerSnapshot.Index)
+            {
+                var row = (DataRowView)gvSnapshots.Rows[e.RowIndex].DataBoundItem;
+                await TriggerSchemaSnapshot(row);
+            }   
+        }
+
+        private async Task TriggerSchemaSnapshot(DataRowView row)
+        {
+            var _instanceID = (int)row["InstanceID"];
+            var db = (string)row["DB"];
+            var tempContext = (DBADashContext)CurrentContext.Clone();
+            tempContext.InstanceID = _instanceID;
+            if (tempContext.CanMessage)
+            {
+                await CollectionMessaging.TriggerCollection(_instanceID, new List<CollectionType> { CollectionType.SchemaSnapshot }, this, db);
+            }
+            else
+            {
+                SetStatus("Collections can't be triggered for this instance.", "Enable messaging in the service configuration tool to allow communication", DashColors.Warning);
+            }
+          
         }
 
         private void Export(DataRowView row)
@@ -310,6 +352,20 @@ namespace DBADashGUI.Changes
             else
             {
                 return false;
+            }
+        }
+
+        private async void tsTrigger_Click(object sender, EventArgs e)
+        {
+            if (InstanceID <=0)
+            {
+                lblStatus.Text = "Please select a single instance to trigger a collection";
+            }
+
+            if (MessageBox.Show("This collection might take some time to process depending on the number of databases and objects within those databases.  Are you sure you want to trigger a collection?", "Trigger Collection",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                await CollectionMessaging.TriggerCollection(InstanceID, CollectionType.SchemaSnapshot, this);
             }
         }
     }
