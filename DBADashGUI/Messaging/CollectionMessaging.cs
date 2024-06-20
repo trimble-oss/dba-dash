@@ -28,6 +28,12 @@ namespace DBADashGUI.Messaging
         private static readonly object LockObject = new();
         private const int CollectionDialogLifetime = 600;
 
+        private static List<CollectionType> RecentlyTriggeredExcludedList = new()
+        {
+            CollectionType.RunningQueries, CollectionType.AvailabilityGroups, CollectionType.AvailabilityReplicas,
+            CollectionType.DatabasesHADR
+        };
+
         public static async Task TriggerCollection(string connectionID, CollectionType type, int collectAgentID, int importAgentID, ISetStatus control)
         {
             await TriggerCollection(connectionID, new List<string>() { Enum.GetName(type) }, collectAgentID, importAgentID, control);
@@ -49,7 +55,7 @@ namespace DBADashGUI.Messaging
 
             foreach (var type in types)
             {
-                if (IsRecentlyTriggered(connectionID, type) && type != Enum.GetName(CollectionType.RunningQueries))
+                if (IsRecentlyTriggered(connectionID, type) && !RecentlyTriggeredExcludedList.Exists(ct => Enum.GetName(ct) == type))
                 {
                     control.SetStatus($"Collection {type} already triggered recently for {connectionID}", null, DashColors.Fail);
                     return;
@@ -79,7 +85,7 @@ namespace DBADashGUI.Messaging
             await Task.Run(() => ReceiveReply(messageGroup, messageBase, control));
         }
 
-        public static async Task TriggerCollection(int InstanceID, CollectionType type, ISetStatus control)
+        public static async Task TriggerCollection(int InstanceID, List<CollectionType> types, ISetStatus control)
         {
             var row = CommonData.Instances.AsEnumerable().FirstOrDefault(i => (int)i["InstanceID"] == InstanceID);
             if (row == null) return;
@@ -92,7 +98,12 @@ namespace DBADashGUI.Messaging
                 MessageBox.Show("Messaging is not enabled for this instance", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            await TriggerCollection(connectionID, type, collectAgentID, importAgentID, control);
+            await TriggerCollection(connectionID, types.Select(Enum.GetName).ToList(), collectAgentID, importAgentID, control);
+        }
+
+        public static async Task TriggerCollection(int InstanceID, CollectionType type, ISetStatus control)
+        {
+            await TriggerCollection(InstanceID, new List<CollectionType>() { type }, control);
         }
 
         public static bool IsMessagingEnabled(int InstanceID)
