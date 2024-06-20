@@ -513,5 +513,31 @@ namespace DBADashGUI
         {
             return hexString.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? hexString[2..] : hexString;
         }
+
+        public static void InvokeSetStatus(this ToolStripStatusLabel label, string message, string tooltip, Color color)
+        {
+            label.Owner?.Invoke(() =>
+            {
+                label.Visible = true;
+                label.Text = message;
+                label.ToolTipText = tooltip;
+                label.IsLink = !string.IsNullOrEmpty(tooltip);
+                label.ForeColor = color;
+                label.LinkColor = color;
+            });
+        }
+
+        public static void InvokeSetStatus(this ToolStripLabel label, string message, string tooltip, Color color)
+        {
+            label.Owner?.Invoke(() =>
+            {
+                label.Visible = true;
+                label.Text = message;
+                label.ToolTipText = tooltip;
+                label.IsLink = !string.IsNullOrEmpty(tooltip);
+                label.ForeColor = color;
+                label.LinkColor = color;
+            });
+        }
     }
 }

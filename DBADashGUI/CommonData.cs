@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Runtime.Caching;
+using DBADash;
 
 namespace DBADashGUI
 {
@@ -265,6 +266,15 @@ namespace DBADashGUI
             cache.Add(key, metricDrives, policy);
 
             return metricDrives;
+        }
+
+        public static DBADashAgent GetDBADashAgent(int agentID)
+        {
+            var cacheKey = "DBADashAgent_" + agentID;    
+            if (cache.Get(cacheKey) is DBADashAgent agent) return agent; 
+            agent =  DBADashAgent.GetDBADashAgent(Common.ConnectionString,agentID);
+            cache.Add(cacheKey, agent, DateTimeOffset.Now.AddMinutes(10));
+            return agent;
         }
 
         public static void ClearCache()
