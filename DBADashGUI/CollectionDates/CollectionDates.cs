@@ -165,15 +165,7 @@ namespace DBADashGUI.CollectionDates
 
         public void SetStatus(string message, string tooltip, Color color)
         {
-            this.Invoke(() =>
-            {
-                lblStatus.Visible = true;
-                lblStatus.Text = message;
-                lblStatus.ToolTipText = tooltip;
-                lblStatus.IsLink = !string.IsNullOrEmpty(tooltip);
-                lblStatus.ForeColor = color;
-                lblStatus.LinkColor = color;
-            });
+            lblStatus.InvokeSetStatus(message,tooltip, color);
         }
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
