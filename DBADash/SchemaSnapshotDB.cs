@@ -177,6 +177,8 @@ namespace DBADash
 
         public DataTable SnapshotDB(string DBName)
         {
+            var StartTime = DateTime.UtcNow;
+
             using (var cn = new Microsoft.Data.SqlClient.SqlConnection(ConnectionString))
             using (var opSS = Operation.Begin("Schema snapshot {DBame}", DBName))
             {
@@ -362,6 +364,11 @@ namespace DBADash
                     }
                 }
                 opSS.Complete();
+                var EndTime = DateTime.UtcNow;
+                dtSchema.TableName = "Snapshot_" + DBName;
+                dtSchema.ExtendedProperties.Add("StartTimeBin", StartTime.ToBinary().ToString());
+                dtSchema.ExtendedProperties.Add("EndTimeBin", EndTime.ToBinary().ToString());
+                dtSchema.ExtendedProperties.Add("SnapshotOptions", JsonConvert.SerializeObject(options));
                 return dtSchema;
             }
         }
@@ -1005,17 +1012,11 @@ namespace DBADash
                 if (!include) continue;
 
                 Log.Information("DB Snapshot {db} from instance {instance}", db.Name, builder.DataSource);
-                var StartTime = DateTime.UtcNow;
+                
                 try
                 {
                     var dt = ss.SnapshotDB(db.Name);
-                    var EndTime = DateTime.UtcNow;
-                    dt.TableName = "Snapshot_" + db.Name;
-                    dt.ExtendedProperties.Add("StartTimeBin", StartTime.ToBinary().ToString());
-                    dt.ExtendedProperties.Add("EndTimeBin", EndTime.ToBinary().ToString());
-                    dt.ExtendedProperties.Add("SnapshotOptions", JsonConvert.SerializeObject(Config.SchemaSnapshotOptions));
                     dsSnapshot.Tables.Add(dt);
-
                     var fileName = DBADashSource.GenerateFileName(src.SourceConnection.ConnectionForFileName);
                     await DestinationHandling.WriteAllDestinations(dsSnapshot, src, fileName, Config);
                     dsSnapshot.Tables.Remove(dt);
