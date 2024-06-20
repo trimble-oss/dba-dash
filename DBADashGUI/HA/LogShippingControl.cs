@@ -5,11 +5,14 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Interface;
 using DBADashGUI.Theme;
+using DBADash;
+using DBADashGUI.Messaging;
 
 namespace DBADashGUI.LogShipping
 {
-    public partial class LogShippingControl : UserControl, INavigation, ISetContext
+    public partial class LogShippingControl : UserControl, INavigation, ISetContext, ISetStatus
     {
         private List<int> InstanceIDs;
         private DBADashContext context;
@@ -44,7 +47,8 @@ namespace DBADashGUI.LogShipping
             IncludeWarning = true;
             IncludeCritical = true;
             InstanceIDs = context.RegularInstanceIDs.ToList();
-
+            tsTrigger.Visible = context.CanMessage;
+            lblStatus.Text = "";
             RefreshData();
         }
 
@@ -82,31 +86,46 @@ namespace DBADashGUI.LogShipping
             }
         }
 
+        private DataTable GetLogShippingDataTable()
+        {
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.LogShipping_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
+
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            dt.Columns["restore_date_utc"].ColumnName = "restore_date";
+            dt.Columns["backup_start_date_utc"].ColumnName = "backup_start_date";
+            return dt;
+        }
+
         public void RefreshData()
         {
-            tsBack.Enabled = (context.RegularInstanceIDs.Count > 1 && InstanceIDs.Count == 1);
-            RefreshSummary();
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.LogShipping_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
+            if (this.InvokeRequired)
             {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
-
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                dt.Columns["restore_date_utc"].ColumnName = "restore_date";
-                dt.Columns["backup_start_date_utc"].ColumnName = "backup_start_date";
-                dgvLogShipping.AutoGenerateColumns = false;
-                dgvLogShipping.Columns[0].Frozen = Common.FreezeKeyColumn;
-                dgvLogShipping.DataSource = new DataView(dt);
-                dgvLogShipping.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                this.Invoke(RefreshData);
+                return;
             }
+            RefreshSummary();
+            var dt = GetLogShippingDataTable();
+           
+            tsBack.Enabled = (context.RegularInstanceIDs.Count > 1 && InstanceIDs.Count == 1);
+            dgvLogShipping.AutoGenerateColumns = false;
+            dgvLogShipping.Columns[0].Frozen = Common.FreezeKeyColumn;
+            dgvLogShipping.DataSource = new DataView(dt);
+            dgvLogShipping.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
 
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
+        }
+
+        public void SetStatus(string message, string tooltip, Color color)
+        {
+            lblStatus.InvokeSetStatus(message, tooltip, color);
         }
 
         public LogShippingControl()
@@ -198,11 +217,15 @@ namespace DBADashGUI.LogShipping
                 var r = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
                 if (e.ColumnIndex == 0)
                 {
-                    InstanceIDs = new List<int> { (int)r["InstanceID"] };
+                    var instanceId = (int)r["InstanceID"];
+                    InstanceIDs = new List<int> { instanceId };
                     IncludeCritical = true;
                     IncludeNA = true;
                     IncludeOK = true;
                     IncludeWarning = true;
+                    var tempContext = (DBADashContext)context.Clone();
+                    tempContext.InstanceID = instanceId;
+                    tsTrigger.Visible = tempContext.CanMessage;
                     RefreshData();
                 }
                 else if (dgvSummary.Columns[e.ColumnIndex].HeaderText == "Configure")
@@ -262,6 +285,16 @@ namespace DBADashGUI.LogShipping
             Configure.Visible = false;
             Common.PromptSaveDataGridView(ref dgvLogShipping);
             Configure.Visible = true;
+        }
+
+        private async void tsTrigger_Click(object sender, EventArgs e)
+        {
+            if (InstanceIDs.Count !=1)
+            {
+                lblStatus.Text = "Please select a single instance to trigger a collection";
+            }
+            var instanceId= InstanceIDs[0];
+            await CollectionMessaging.TriggerCollection(instanceId, new List<CollectionType>() { CollectionType.LogRestores, CollectionType.Databases }, this);
         }
     }
 }
