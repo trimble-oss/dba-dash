@@ -29,235 +29,240 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DrivesControl));
-            this.pnlDrives = new System.Windows.Forms.Panel();
-            this.driveControl1 = new DBADashGUI.DriveControl();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.statusFilterToolStrip1 = new DBADashGUI.StatusFilterToolStrip();
-            this.tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
-            this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsGridView = new System.Windows.Forms.ToolStripButton();
-            this.tsDrivesView = new System.Windows.Forms.ToolStripButton();
-            this.tsColumns = new System.Windows.Forms.ToolStripDropDownButton();
-            this.includeAllMetricsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pnlSpacing = new System.Windows.Forms.Panel();
-            this.pnlDrives.SuspendLayout();
-            this.toolStrip1.SuspendLayout();
-            this.SuspendLayout();
+            pnlDrives = new System.Windows.Forms.Panel();
+            driveControl1 = new DriveControl();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            tsRefresh = new System.Windows.Forms.ToolStripButton();
+            tsCopy = new System.Windows.Forms.ToolStripButton();
+            tsExcel = new System.Windows.Forms.ToolStripButton();
+            statusFilterToolStrip1 = new StatusFilterToolStrip();
+            tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
+            configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsGridView = new System.Windows.Forms.ToolStripButton();
+            tsDrivesView = new System.Windows.Forms.ToolStripButton();
+            tsColumns = new System.Windows.Forms.ToolStripDropDownButton();
+            includeAllMetricsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsTrigger = new System.Windows.Forms.ToolStripButton();
+            pnlSpacing = new System.Windows.Forms.Panel();
+            statusStrip1 = new System.Windows.Forms.StatusStrip();
+            lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            pnlDrives.SuspendLayout();
+            toolStrip1.SuspendLayout();
+            statusStrip1.SuspendLayout();
+            SuspendLayout();
             // 
             // pnlDrives
             // 
-            this.pnlDrives.AutoScroll = true;
-            this.pnlDrives.Controls.Add(this.driveControl1);
-            this.pnlDrives.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlDrives.Location = new System.Drawing.Point(0, 47);
-            this.pnlDrives.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.pnlDrives.Name = "pnlDrives";
-            this.pnlDrives.Size = new System.Drawing.Size(735, 274);
-            this.pnlDrives.TabIndex = 3;
+            pnlDrives.AutoScroll = true;
+            pnlDrives.Controls.Add(driveControl1);
+            pnlDrives.Dock = System.Windows.Forms.DockStyle.Fill;
+            pnlDrives.Location = new System.Drawing.Point(0, 47);
+            pnlDrives.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            pnlDrives.Name = "pnlDrives";
+            pnlDrives.Size = new System.Drawing.Size(735, 250);
+            pnlDrives.TabIndex = 3;
             // 
             // driveControl1
             // 
-            this.driveControl1.DisplayInstanceName = false;
-            this.driveControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.driveControl1.Drive.CriticalThreshold = new decimal(new int[] {
-            0,
-            0,
-            0,
-            0});
-            this.driveControl1.Drive.DriveCapacity = ((long)(0));
-            this.driveControl1.Drive.DriveCapacityGB = new decimal(new int[] {
-            0,
-            0,
-            0,
-            0});
-            this.driveControl1.Drive.DriveCheckType = DBADashGUI.DriveThreshold.DriveCheckTypeEnum.None;
-            this.driveControl1.Drive.DriveCheckTypeChar = '-';
-            this.driveControl1.Drive.DriveID = 0;
-            this.driveControl1.Drive.DriveLabel = null;
-            this.driveControl1.Drive.DriveLetter = null;
-            this.driveControl1.Drive.FreeSpace = ((long)(0));
-            this.driveControl1.Drive.FreeSpaceGB = new decimal(new int[] {
-            0,
-            0,
-            0,
-            0});
-            this.driveControl1.Drive.Inherited = false;
-            this.driveControl1.Drive.InstanceID = 0;
-            this.driveControl1.Drive.SnapshotDate = new System.DateTime(((long)(0)));
-            this.driveControl1.Drive.WarningThreshold = new decimal(new int[] {
-            0,
-            0,
-            0,
-            0});
-            this.driveControl1.Location = new System.Drawing.Point(0, 0);
-            this.driveControl1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
-            this.driveControl1.Name = "driveControl1";
-            this.driveControl1.Size = new System.Drawing.Size(735, 274);
-            this.driveControl1.TabIndex = 0;
+            driveControl1.DisplayInstanceName = false;
+            driveControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            driveControl1.Drive.CriticalThreshold = new decimal(new int[] { 0, 0, 0, 0 });
+            driveControl1.Drive.DriveCapacity = 0L;
+            driveControl1.Drive.DriveCapacityGB = new decimal(new int[] { 0, 0, 0, 0 });
+            driveControl1.Drive.DriveCheckType = DriveThreshold.DriveCheckTypeEnum.None;
+            driveControl1.Drive.DriveCheckTypeChar = '-';
+            driveControl1.Drive.DriveID = 0;
+            driveControl1.Drive.DriveLabel = null;
+            driveControl1.Drive.DriveLetter = null;
+            driveControl1.Drive.FreeSpace = 0L;
+            driveControl1.Drive.FreeSpaceGB = new decimal(new int[] { 0, 0, 0, 0 });
+            driveControl1.Drive.Inherited = false;
+            driveControl1.Drive.InstanceID = 0;
+            driveControl1.Drive.SnapshotDate = new System.DateTime(0L);
+            driveControl1.Drive.WarningThreshold = new decimal(new int[] { 0, 0, 0, 0 });
+            driveControl1.Location = new System.Drawing.Point(0, 0);
+            driveControl1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            driveControl1.Name = "driveControl1";
+            driveControl1.Size = new System.Drawing.Size(735, 250);
+            driveControl1.TabIndex = 0;
             // 
             // toolStrip1
             // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsRefresh,
-            this.tsCopy,
-            this.tsExcel,
-            this.statusFilterToolStrip1,
-            this.tsConfigure,
-            this.tsGridView,
-            this.tsDrivesView,
-            this.tsColumns});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(735, 27);
-            this.toolStrip1.TabIndex = 7;
-            this.toolStrip1.Text = "toolStrip1";
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, statusFilterToolStrip1, tsConfigure, tsGridView, tsDrivesView, tsColumns, tsTrigger });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new System.Drawing.Size(735, 27);
+            toolStrip1.TabIndex = 7;
+            toolStrip1.Text = "toolStrip1";
             // 
             // tsRefresh
             // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
+            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Name = "tsRefresh";
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Text = "Refresh";
+            tsRefresh.Click += TsRefresh_Click;
             // 
             // tsCopy
             // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
+            tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopy.Name = "tsCopy";
+            tsCopy.Size = new System.Drawing.Size(29, 24);
+            tsCopy.Text = "Copy";
+            tsCopy.Click += TsCopy_Click;
             // 
             // tsExcel
             // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
+            tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsExcel.Image = Properties.Resources.excel16x16;
+            tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcel.Name = "tsExcel";
+            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Text = "Export Excel";
+            tsExcel.Click += TsExcel_Click;
             // 
             // statusFilterToolStrip1
             // 
-            this.statusFilterToolStrip1.Acknowledged = false;
-            this.statusFilterToolStrip1.AcknowledgedVisible = false;
-            this.statusFilterToolStrip1.Critical = true;
-            this.statusFilterToolStrip1.CriticalVisible = true;
-            this.statusFilterToolStrip1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
-            this.statusFilterToolStrip1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.statusFilterToolStrip1.Image = ((System.Drawing.Image)(resources.GetObject("statusFilterToolStrip1.Image")));
-            this.statusFilterToolStrip1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.statusFilterToolStrip1.NA = true;
-            this.statusFilterToolStrip1.Name = "statusFilterToolStrip1";
-            this.statusFilterToolStrip1.NAVisible = true;
-            this.statusFilterToolStrip1.OK = true;
-            this.statusFilterToolStrip1.OKVisible = true;
-            this.statusFilterToolStrip1.Size = new System.Drawing.Size(67, 24);
-            this.statusFilterToolStrip1.Text = "ALL";
-            this.statusFilterToolStrip1.Warning = true;
-            this.statusFilterToolStrip1.WarningVisible = true;
-            this.statusFilterToolStrip1.UserChangedStatusFilter += new System.EventHandler(this.Status_Selected);
+            statusFilterToolStrip1.Acknowledged = false;
+            statusFilterToolStrip1.AcknowledgedVisible = false;
+            statusFilterToolStrip1.Critical = true;
+            statusFilterToolStrip1.CriticalVisible = true;
+            statusFilterToolStrip1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
+            statusFilterToolStrip1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            statusFilterToolStrip1.Image = (System.Drawing.Image)resources.GetObject("statusFilterToolStrip1.Image");
+            statusFilterToolStrip1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            statusFilterToolStrip1.NA = true;
+            statusFilterToolStrip1.Name = "statusFilterToolStrip1";
+            statusFilterToolStrip1.NAVisible = true;
+            statusFilterToolStrip1.OK = true;
+            statusFilterToolStrip1.OKVisible = true;
+            statusFilterToolStrip1.Size = new System.Drawing.Size(67, 24);
+            statusFilterToolStrip1.Text = "ALL";
+            statusFilterToolStrip1.Warning = true;
+            statusFilterToolStrip1.WarningVisible = true;
+            statusFilterToolStrip1.UserChangedStatusFilter += Status_Selected;
             // 
             // tsConfigure
             // 
-            this.tsConfigure.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.configureInstanceThresholdsToolStripMenuItem,
-            this.configureRootThresholdsToolStripMenuItem});
-            this.tsConfigure.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
-            this.tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsConfigure.Name = "tsConfigure";
-            this.tsConfigure.Size = new System.Drawing.Size(34, 24);
-            this.tsConfigure.Text = "Configure";
+            tsConfigure.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { configureInstanceThresholdsToolStripMenuItem, configureRootThresholdsToolStripMenuItem });
+            tsConfigure.Image = Properties.Resources.SettingsOutline_16x;
+            tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsConfigure.Name = "tsConfigure";
+            tsConfigure.Size = new System.Drawing.Size(34, 24);
+            tsConfigure.Text = "Configure";
             // 
             // configureInstanceThresholdsToolStripMenuItem
             // 
-            this.configureInstanceThresholdsToolStripMenuItem.Name = "configureInstanceThresholdsToolStripMenuItem";
-            this.configureInstanceThresholdsToolStripMenuItem.Size = new System.Drawing.Size(290, 26);
-            this.configureInstanceThresholdsToolStripMenuItem.Text = "Configure Instance Thresholds";
-            this.configureInstanceThresholdsToolStripMenuItem.Click += new System.EventHandler(this.ConfigureInstanceThresholdsToolStripMenuItem_Click);
+            configureInstanceThresholdsToolStripMenuItem.Name = "configureInstanceThresholdsToolStripMenuItem";
+            configureInstanceThresholdsToolStripMenuItem.Size = new System.Drawing.Size(290, 26);
+            configureInstanceThresholdsToolStripMenuItem.Text = "Configure Instance Thresholds";
+            configureInstanceThresholdsToolStripMenuItem.Click += ConfigureInstanceThresholdsToolStripMenuItem_Click;
             // 
             // configureRootThresholdsToolStripMenuItem
             // 
-            this.configureRootThresholdsToolStripMenuItem.Name = "configureRootThresholdsToolStripMenuItem";
-            this.configureRootThresholdsToolStripMenuItem.Size = new System.Drawing.Size(290, 26);
-            this.configureRootThresholdsToolStripMenuItem.Text = "Configure Root Thresholds";
-            this.configureRootThresholdsToolStripMenuItem.Click += new System.EventHandler(this.ConfigureRootThresholdsToolStripMenuItem_Click);
+            configureRootThresholdsToolStripMenuItem.Name = "configureRootThresholdsToolStripMenuItem";
+            configureRootThresholdsToolStripMenuItem.Size = new System.Drawing.Size(290, 26);
+            configureRootThresholdsToolStripMenuItem.Text = "Configure Root Thresholds";
+            configureRootThresholdsToolStripMenuItem.Click += ConfigureRootThresholdsToolStripMenuItem_Click;
             // 
             // tsGridView
             // 
-            this.tsGridView.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsGridView.Image = global::DBADashGUI.Properties.Resources.Table_16x;
-            this.tsGridView.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsGridView.Name = "tsGridView";
-            this.tsGridView.Size = new System.Drawing.Size(29, 24);
-            this.tsGridView.Text = "Table View";
-            this.tsGridView.Click += new System.EventHandler(this.TsGridView_Click);
+            tsGridView.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsGridView.Image = Properties.Resources.Table_16x;
+            tsGridView.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsGridView.Name = "tsGridView";
+            tsGridView.Size = new System.Drawing.Size(29, 24);
+            tsGridView.Text = "Table View";
+            tsGridView.Click += TsGridView_Click;
             // 
             // tsDrivesView
             // 
-            this.tsDrivesView.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsDrivesView.Image = global::DBADashGUI.Properties.Resources.Hard_Drive;
-            this.tsDrivesView.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsDrivesView.Name = "tsDrivesView";
-            this.tsDrivesView.Size = new System.Drawing.Size(29, 24);
-            this.tsDrivesView.Text = "Drives View";
-            this.tsDrivesView.Click += new System.EventHandler(this.TsDrivesView_Click);
+            tsDrivesView.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsDrivesView.Image = Properties.Resources.Hard_Drive;
+            tsDrivesView.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsDrivesView.Name = "tsDrivesView";
+            tsDrivesView.Size = new System.Drawing.Size(29, 24);
+            tsDrivesView.Text = "Drives View";
+            tsDrivesView.Click += TsDrivesView_Click;
             // 
             // tsColumns
             // 
-            this.tsColumns.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsColumns.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.includeAllMetricsToolStripMenuItem});
-            this.tsColumns.Image = global::DBADashGUI.Properties.Resources.Column_16x;
-            this.tsColumns.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsColumns.Name = "tsColumns";
-            this.tsColumns.Size = new System.Drawing.Size(34, 24);
-            this.tsColumns.Text = "Columns";
+            tsColumns.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsColumns.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { includeAllMetricsToolStripMenuItem });
+            tsColumns.Image = Properties.Resources.Column_16x;
+            tsColumns.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsColumns.Name = "tsColumns";
+            tsColumns.Size = new System.Drawing.Size(34, 24);
+            tsColumns.Text = "Columns";
             // 
             // includeAllMetricsToolStripMenuItem
             // 
-            this.includeAllMetricsToolStripMenuItem.CheckOnClick = true;
-            this.includeAllMetricsToolStripMenuItem.Name = "includeAllMetricsToolStripMenuItem";
-            this.includeAllMetricsToolStripMenuItem.Size = new System.Drawing.Size(214, 26);
-            this.includeAllMetricsToolStripMenuItem.Text = "Include All Metrics";
-            this.includeAllMetricsToolStripMenuItem.Click += new System.EventHandler(this.IncludeAllMetricsToolStripMenuItem_Click);
+            includeAllMetricsToolStripMenuItem.CheckOnClick = true;
+            includeAllMetricsToolStripMenuItem.Name = "includeAllMetricsToolStripMenuItem";
+            includeAllMetricsToolStripMenuItem.Size = new System.Drawing.Size(214, 26);
+            includeAllMetricsToolStripMenuItem.Text = "Include All Metrics";
+            includeAllMetricsToolStripMenuItem.Click += IncludeAllMetricsToolStripMenuItem_Click;
+            // 
+            // tsTrigger
+            // 
+            tsTrigger.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsTrigger.Image = Properties.Resources.ProjectSystemModelRefresh_16x;
+            tsTrigger.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsTrigger.Name = "tsTrigger";
+            tsTrigger.Size = new System.Drawing.Size(151, 24);
+            tsTrigger.Text = "Trigger Collection";
+            tsTrigger.Visible = false;
+            tsTrigger.Click += TsTrigger_Click;
             // 
             // pnlSpacing
             // 
-            this.pnlSpacing.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlSpacing.Location = new System.Drawing.Point(0, 27);
-            this.pnlSpacing.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.pnlSpacing.Name = "pnlSpacing";
-            this.pnlSpacing.Size = new System.Drawing.Size(735, 20);
-            this.pnlSpacing.TabIndex = 8;
+            pnlSpacing.Dock = System.Windows.Forms.DockStyle.Top;
+            pnlSpacing.Location = new System.Drawing.Point(0, 27);
+            pnlSpacing.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            pnlSpacing.Name = "pnlSpacing";
+            pnlSpacing.Size = new System.Drawing.Size(735, 20);
+            pnlSpacing.TabIndex = 8;
+            // 
+            // statusStrip1
+            // 
+            statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { lblStatus });
+            statusStrip1.Location = new System.Drawing.Point(0, 297);
+            statusStrip1.Name = "statusStrip1";
+            statusStrip1.Size = new System.Drawing.Size(735, 24);
+            statusStrip1.TabIndex = 9;
+            statusStrip1.Text = "statusStrip1";
+            // 
+            // lblStatus
+            // 
+            lblStatus.Name = "lblStatus";
+            lblStatus.Size = new System.Drawing.Size(0, 18);
             // 
             // DrivesControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.pnlDrives);
-            this.Controls.Add(this.pnlSpacing);
-            this.Controls.Add(this.toolStrip1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "DrivesControl";
-            this.Size = new System.Drawing.Size(735, 321);
-            this.pnlDrives.ResumeLayout(false);
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            Controls.Add(pnlDrives);
+            Controls.Add(pnlSpacing);
+            Controls.Add(toolStrip1);
+            Controls.Add(statusStrip1);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "DrivesControl";
+            Size = new System.Drawing.Size(735, 321);
+            pnlDrives.ResumeLayout(false);
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            statusStrip1.ResumeLayout(false);
+            statusStrip1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -276,5 +281,8 @@
         private System.Windows.Forms.ToolStripMenuItem includeAllMetricsToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsExcel;
         private StatusFilterToolStrip statusFilterToolStrip1;
+        private System.Windows.Forms.ToolStripButton tsTrigger;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel lblStatus;
     }
 }
