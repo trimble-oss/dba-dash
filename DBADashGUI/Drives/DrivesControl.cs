@@ -4,12 +4,15 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADash;
+using DBADashGUI.Interface;
+using DBADashGUI.Messaging;
 using DBADashGUI.Theme;
 using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.Drives
 {
-    public partial class DrivesControl : UserControl, ISetContext
+    public partial class DrivesControl : UserControl, ISetContext, ISetStatus
     {
         public DrivesControl()
         {
@@ -55,25 +58,35 @@ namespace DBADashGUI.Drives
             IncludeOK = context.RegularInstanceIDs.Count == 1;
             IncludeWarning = true;
             IncludeCritical = true;
+            tsTrigger.Visible = context.CanMessage;
+            lblStatus.Visible = false;
             RefreshData();
         }
 
         public void RefreshData()
         {
-            pnlDrives.Controls.Clear();
             var dt = GetDrives();
             dvDrives = new DataView(dt);
 
-            if (dt.Rows.Count > DrivesViewMaxRows || gridView)
+            this.Invoke(() =>
             {
-                ShowGridView();
-            }
-            else
-            {
-                ShowDrivesView();
-            }
+                pnlDrives.Controls.Clear();
+                if (dt.Rows.Count > DrivesViewMaxRows || gridView)
+                {
+                    ShowGridView();
+                }
+                else
+                {
+                    ShowDrivesView();
+                }
 
-            configureInstanceThresholdsToolStripMenuItem.Enabled = context.RegularInstanceIDs.Count == 1;
+                configureInstanceThresholdsToolStripMenuItem.Enabled = context.RegularInstanceIDs.Count == 1;
+            });
+        }
+
+        public void SetStatus(string message, string tooltip, Color color)
+        {
+            lblStatus.InvokeSetStatus(message,tooltip,color);
         }
 
         private DataGridView dgv;
@@ -350,5 +363,9 @@ namespace DBADashGUI.Drives
             dgv.Columns["History"].Visible = true;
         }
 
+        private async void TsTrigger_Click(object sender, EventArgs e)
+        {
+            await CollectionMessaging.TriggerCollection(context.InstanceID, CollectionType.Drives, this);
+        }
     }
 }
