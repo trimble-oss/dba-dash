@@ -5,11 +5,14 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.Interface;
 using DBADashGUI.Theme;
+using DBADash;
+using DBADashGUI.Messaging;
 
 namespace DBADashGUI.LastGoodCheckDB
 {
-    public partial class LastGoodCheckDBControl : UserControl, ISetContext
+    public partial class LastGoodCheckDBControl : UserControl, ISetContext, ISetStatus
     {
         private List<int> InstanceIDs;
 
@@ -38,6 +41,8 @@ namespace DBADashGUI.LastGoodCheckDB
             InitializeComponent();
         }
 
+        private DBADashContext CurrentContext;
+
         public void SetContext(DBADashContext context)
         {
             InstanceIDs = context.RegularInstanceIDs.ToList();
@@ -45,28 +50,48 @@ namespace DBADashGUI.LastGoodCheckDB
             IncludeWarning = true;
             IncludeNA = context.InstanceID > 0;
             IncludeOK = context.InstanceID > 0;
+            CurrentContext = context;
+            lblStatus.Text = string.Empty;
+            tsTrigger.Visible = context.CanMessage;
             RefreshData();
         }
 
         public void RefreshData()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.LastGoodCheckDB_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
+            if (this.InvokeRequired)
             {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                dgvLastGoodCheckDB.AutoGenerateColumns = false;
-                dgvLastGoodCheckDB.DataSource = new DataView(dt);
-                dgvLastGoodCheckDB.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                this.Invoke(RefreshData);
+                return;
             }
+
+            var dt = GetLastGoodDBCC();
+            dgvLastGoodCheckDB.AutoGenerateColumns = false;
+            dgvLastGoodCheckDB.DataSource = new DataView(dt);
+            dgvLastGoodCheckDB.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
+        }
+
+        private DataTable GetLastGoodDBCC()
+        {
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.LastGoodCheckDB_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+
+            cn.Open();
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            return dt;
+        }
+
+        public void SetStatus(string message, string tooltip, Color color)
+        {
+            lblStatus.InvokeSetStatus(message, tooltip, color);
         }
 
         private void Status_Selected(object sender, EventArgs e)
@@ -148,6 +173,11 @@ namespace DBADashGUI.LastGoodCheckDB
         private void LastGoodCheckDB_Load(object sender, EventArgs e)
         {
             dgvLastGoodCheckDB.ApplyTheme();
+        }
+
+        private async void TsTrigger_Click(object sender, EventArgs e)
+        {
+            await CollectionMessaging.TriggerCollection(CurrentContext.InstanceID, new List<CollectionType>() { CollectionType.LastGoodCheckDB}, this);
         }
     }
 }

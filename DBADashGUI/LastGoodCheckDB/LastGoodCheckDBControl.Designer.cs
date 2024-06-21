@@ -32,249 +32,267 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LastGoodCheckDBControl));
-            this.dgvLastGoodCheckDB = new System.Windows.Forms.DataGridView();
-            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LastGoodCheckDbTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DaysSinceLastGoodCheckDB = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colCreateDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ExcludedFromCheck = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Configure = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.statusFilterToolStrip1 = new DBADashGUI.StatusFilterToolStrip();
-            this.tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
-            this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvLastGoodCheckDB)).BeginInit();
-            this.toolStrip1.SuspendLayout();
-            this.SuspendLayout();
+            dgvLastGoodCheckDB = new System.Windows.Forms.DataGridView();
+            Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            LastGoodCheckDbTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            DaysSinceLastGoodCheckDB = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colCreateDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ExcludedFromCheck = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            Configure = new System.Windows.Forms.DataGridViewLinkColumn();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            tsRefresh = new System.Windows.Forms.ToolStripButton();
+            tsCopy = new System.Windows.Forms.ToolStripButton();
+            tsExcel = new System.Windows.Forms.ToolStripButton();
+            statusFilterToolStrip1 = new StatusFilterToolStrip();
+            tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
+            configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsTrigger = new System.Windows.Forms.ToolStripButton();
+            statusStrip1 = new System.Windows.Forms.StatusStrip();
+            lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            ((System.ComponentModel.ISupportInitialize)dgvLastGoodCheckDB).BeginInit();
+            toolStrip1.SuspendLayout();
+            statusStrip1.SuspendLayout();
+            SuspendLayout();
             // 
             // dgvLastGoodCheckDB
             // 
-            this.dgvLastGoodCheckDB.AllowUserToAddRows = false;
-            this.dgvLastGoodCheckDB.AllowUserToDeleteRows = false;
-            this.dgvLastGoodCheckDB.BackgroundColor = System.Drawing.Color.White;
-            this.dgvLastGoodCheckDB.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+            dgvLastGoodCheckDB.AllowUserToAddRows = false;
+            dgvLastGoodCheckDB.AllowUserToDeleteRows = false;
+            dgvLastGoodCheckDB.BackgroundColor = System.Drawing.Color.White;
+            dgvLastGoodCheckDB.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgvLastGoodCheckDB.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            this.dgvLastGoodCheckDB.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvLastGoodCheckDB.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Instance,
-            this.Database,
-            this.LastGoodCheckDbTime,
-            this.DaysSinceLastGoodCheckDB,
-            this.colCreateDate,
-            this.ExcludedFromCheck,
-            this.Configure});
+            dgvLastGoodCheckDB.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dgvLastGoodCheckDB.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvLastGoodCheckDB.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, Database, LastGoodCheckDbTime, DaysSinceLastGoodCheckDB, colCreateDate, ExcludedFromCheck, Configure });
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgvLastGoodCheckDB.DefaultCellStyle = dataGridViewCellStyle2;
-            this.dgvLastGoodCheckDB.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvLastGoodCheckDB.Location = new System.Drawing.Point(0, 27);
-            this.dgvLastGoodCheckDB.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dgvLastGoodCheckDB.Name = "dgvLastGoodCheckDB";
-            this.dgvLastGoodCheckDB.ReadOnly = true;
+            dgvLastGoodCheckDB.DefaultCellStyle = dataGridViewCellStyle2;
+            dgvLastGoodCheckDB.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvLastGoodCheckDB.Location = new System.Drawing.Point(0, 27);
+            dgvLastGoodCheckDB.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dgvLastGoodCheckDB.Name = "dgvLastGoodCheckDB";
+            dgvLastGoodCheckDB.ReadOnly = true;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgvLastGoodCheckDB.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
-            this.dgvLastGoodCheckDB.RowHeadersVisible = false;
-            this.dgvLastGoodCheckDB.RowHeadersWidth = 51;
-            this.dgvLastGoodCheckDB.Size = new System.Drawing.Size(1250, 322);
-            this.dgvLastGoodCheckDB.TabIndex = 0;
-            this.dgvLastGoodCheckDB.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvLastGoodCheckDB_CellContentClick);
-            this.dgvLastGoodCheckDB.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.DgvLastGoodCheckDB_RowsAdded);
+            dgvLastGoodCheckDB.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dgvLastGoodCheckDB.RowHeadersVisible = false;
+            dgvLastGoodCheckDB.RowHeadersWidth = 51;
+            dgvLastGoodCheckDB.Size = new System.Drawing.Size(1250, 300);
+            dgvLastGoodCheckDB.TabIndex = 0;
+            dgvLastGoodCheckDB.CellContentClick += DgvLastGoodCheckDB_CellContentClick;
+            dgvLastGoodCheckDB.RowsAdded += DgvLastGoodCheckDB_RowsAdded;
             // 
             // Instance
             // 
-            this.Instance.DataPropertyName = "InstanceDisplayName";
-            this.Instance.HeaderText = "Instance";
-            this.Instance.MinimumWidth = 6;
-            this.Instance.Name = "Instance";
-            this.Instance.ReadOnly = true;
-            this.Instance.Width = 125;
+            Instance.DataPropertyName = "InstanceDisplayName";
+            Instance.HeaderText = "Instance";
+            Instance.MinimumWidth = 6;
+            Instance.Name = "Instance";
+            Instance.ReadOnly = true;
+            Instance.Width = 125;
             // 
             // Database
             // 
-            this.Database.DataPropertyName = "Name";
-            this.Database.HeaderText = "Database";
-            this.Database.MinimumWidth = 6;
-            this.Database.Name = "Database";
-            this.Database.ReadOnly = true;
-            this.Database.Width = 125;
+            Database.DataPropertyName = "Name";
+            Database.HeaderText = "Database";
+            Database.MinimumWidth = 6;
+            Database.Name = "Database";
+            Database.ReadOnly = true;
+            Database.Width = 125;
             // 
             // LastGoodCheckDbTime
             // 
-            this.LastGoodCheckDbTime.DataPropertyName = "LastGoodCheckDbTimeUTC";
-            this.LastGoodCheckDbTime.HeaderText = "Last Good Check DB";
-            this.LastGoodCheckDbTime.MinimumWidth = 6;
-            this.LastGoodCheckDbTime.Name = "LastGoodCheckDbTime";
-            this.LastGoodCheckDbTime.ReadOnly = true;
-            this.LastGoodCheckDbTime.Width = 125;
+            LastGoodCheckDbTime.DataPropertyName = "LastGoodCheckDbTimeUTC";
+            LastGoodCheckDbTime.HeaderText = "Last Good Check DB";
+            LastGoodCheckDbTime.MinimumWidth = 6;
+            LastGoodCheckDbTime.Name = "LastGoodCheckDbTime";
+            LastGoodCheckDbTime.ReadOnly = true;
+            LastGoodCheckDbTime.Width = 125;
             // 
             // DaysSinceLastGoodCheckDB
             // 
-            this.DaysSinceLastGoodCheckDB.DataPropertyName = "DaysSinceLastGoodCheckDB";
-            this.DaysSinceLastGoodCheckDB.HeaderText = "Days Since Last Good CheckDB";
-            this.DaysSinceLastGoodCheckDB.MinimumWidth = 6;
-            this.DaysSinceLastGoodCheckDB.Name = "DaysSinceLastGoodCheckDB";
-            this.DaysSinceLastGoodCheckDB.ReadOnly = true;
-            this.DaysSinceLastGoodCheckDB.Width = 125;
+            DaysSinceLastGoodCheckDB.DataPropertyName = "DaysSinceLastGoodCheckDB";
+            DaysSinceLastGoodCheckDB.HeaderText = "Days Since Last Good CheckDB";
+            DaysSinceLastGoodCheckDB.MinimumWidth = 6;
+            DaysSinceLastGoodCheckDB.Name = "DaysSinceLastGoodCheckDB";
+            DaysSinceLastGoodCheckDB.ReadOnly = true;
+            DaysSinceLastGoodCheckDB.Width = 125;
             // 
             // colCreateDate
             // 
-            this.colCreateDate.DataPropertyName = "create_date_utc";
-            this.colCreateDate.HeaderText = "Create Date";
-            this.colCreateDate.MinimumWidth = 6;
-            this.colCreateDate.Name = "colCreateDate";
-            this.colCreateDate.ReadOnly = true;
-            this.colCreateDate.Width = 125;
+            colCreateDate.DataPropertyName = "create_date_utc";
+            colCreateDate.HeaderText = "Create Date";
+            colCreateDate.MinimumWidth = 6;
+            colCreateDate.Name = "colCreateDate";
+            colCreateDate.ReadOnly = true;
+            colCreateDate.Width = 125;
             // 
             // ExcludedFromCheck
             // 
-            this.ExcludedFromCheck.DataPropertyName = "LastGoodCheckDBExcludedReason";
-            this.ExcludedFromCheck.HeaderText = "Excluded Reason";
-            this.ExcludedFromCheck.MinimumWidth = 6;
-            this.ExcludedFromCheck.Name = "ExcludedFromCheck";
-            this.ExcludedFromCheck.ReadOnly = true;
-            this.ExcludedFromCheck.Width = 125;
+            ExcludedFromCheck.DataPropertyName = "LastGoodCheckDBExcludedReason";
+            ExcludedFromCheck.HeaderText = "Excluded Reason";
+            ExcludedFromCheck.MinimumWidth = 6;
+            ExcludedFromCheck.Name = "ExcludedFromCheck";
+            ExcludedFromCheck.ReadOnly = true;
+            ExcludedFromCheck.Width = 125;
             // 
             // Configure
             // 
-            this.Configure.HeaderText = "Configure";
-            this.Configure.MinimumWidth = 6;
-            this.Configure.Name = "Configure";
-            this.Configure.ReadOnly = true;
-            this.Configure.Text = "Configure";
-            this.Configure.UseColumnTextForLinkValue = true;
-            this.Configure.Width = 125;
+            Configure.HeaderText = "Configure";
+            Configure.MinimumWidth = 6;
+            Configure.Name = "Configure";
+            Configure.ReadOnly = true;
+            Configure.Text = "Configure";
+            Configure.UseColumnTextForLinkValue = true;
+            Configure.Width = 125;
             // 
             // toolStrip1
             // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsRefresh,
-            this.tsCopy,
-            this.tsExcel,
-            this.statusFilterToolStrip1,
-            this.tsConfigure});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1250, 27);
-            this.toolStrip1.TabIndex = 4;
-            this.toolStrip1.Text = "toolStrip1";
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, statusFilterToolStrip1, tsConfigure, tsTrigger });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new System.Drawing.Size(1250, 27);
+            toolStrip1.TabIndex = 4;
+            toolStrip1.Text = "toolStrip1";
             // 
             // tsRefresh
             // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
+            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Name = "tsRefresh";
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Text = "Refresh";
+            tsRefresh.Click += TsRefresh_Click;
             // 
             // tsCopy
             // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
+            tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopy.Name = "tsCopy";
+            tsCopy.Size = new System.Drawing.Size(29, 24);
+            tsCopy.Text = "Copy";
+            tsCopy.Click += TsCopy_Click;
             // 
             // tsExcel
             // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
+            tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsExcel.Image = Properties.Resources.excel16x16;
+            tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcel.Name = "tsExcel";
+            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Text = "Export Excel";
+            tsExcel.Click += TsExcel_Click;
             // 
             // statusFilterToolStrip1
             // 
-            this.statusFilterToolStrip1.Acknowledged = false;
-            this.statusFilterToolStrip1.AcknowledgedVisible = false;
-            this.statusFilterToolStrip1.Critical = true;
-            this.statusFilterToolStrip1.CriticalVisible = true;
-            this.statusFilterToolStrip1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
-            this.statusFilterToolStrip1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.statusFilterToolStrip1.Image = ((System.Drawing.Image)(resources.GetObject("statusFilterToolStrip1.Image")));
-            this.statusFilterToolStrip1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.statusFilterToolStrip1.NA = true;
-            this.statusFilterToolStrip1.Name = "statusFilterToolStrip1";
-            this.statusFilterToolStrip1.NAVisible = true;
-            this.statusFilterToolStrip1.OK = true;
-            this.statusFilterToolStrip1.OKVisible = true;
-            this.statusFilterToolStrip1.Size = new System.Drawing.Size(67, 24);
-            this.statusFilterToolStrip1.Text = "ALL";
-            this.statusFilterToolStrip1.Warning = true;
-            this.statusFilterToolStrip1.WarningVisible = true;
-            this.statusFilterToolStrip1.UserChangedStatusFilter += new System.EventHandler(this.Status_Selected);
+            statusFilterToolStrip1.Acknowledged = false;
+            statusFilterToolStrip1.AcknowledgedVisible = false;
+            statusFilterToolStrip1.Critical = true;
+            statusFilterToolStrip1.CriticalVisible = true;
+            statusFilterToolStrip1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
+            statusFilterToolStrip1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            statusFilterToolStrip1.Image = (System.Drawing.Image)resources.GetObject("statusFilterToolStrip1.Image");
+            statusFilterToolStrip1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            statusFilterToolStrip1.NA = true;
+            statusFilterToolStrip1.Name = "statusFilterToolStrip1";
+            statusFilterToolStrip1.NAVisible = true;
+            statusFilterToolStrip1.OK = true;
+            statusFilterToolStrip1.OKVisible = true;
+            statusFilterToolStrip1.Size = new System.Drawing.Size(67, 24);
+            statusFilterToolStrip1.Text = "ALL";
+            statusFilterToolStrip1.Warning = true;
+            statusFilterToolStrip1.WarningVisible = true;
+            statusFilterToolStrip1.UserChangedStatusFilter += Status_Selected;
             // 
             // tsConfigure
             // 
-            this.tsConfigure.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.configureInstanceThresholdsToolStripMenuItem,
-            this.configureRootThresholdsToolStripMenuItem});
-            this.tsConfigure.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
-            this.tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsConfigure.Name = "tsConfigure";
-            this.tsConfigure.Size = new System.Drawing.Size(34, 24);
-            this.tsConfigure.Text = "Configure";
+            tsConfigure.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { configureInstanceThresholdsToolStripMenuItem, configureRootThresholdsToolStripMenuItem });
+            tsConfigure.Image = Properties.Resources.SettingsOutline_16x;
+            tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsConfigure.Name = "tsConfigure";
+            tsConfigure.Size = new System.Drawing.Size(34, 24);
+            tsConfigure.Text = "Configure";
             // 
             // configureInstanceThresholdsToolStripMenuItem
             // 
-            this.configureInstanceThresholdsToolStripMenuItem.Name = "configureInstanceThresholdsToolStripMenuItem";
-            this.configureInstanceThresholdsToolStripMenuItem.Size = new System.Drawing.Size(290, 26);
-            this.configureInstanceThresholdsToolStripMenuItem.Text = "Configure Instance Thresholds";
-            this.configureInstanceThresholdsToolStripMenuItem.Click += new System.EventHandler(this.ConfigureInstanceThresholdsToolStripMenuItem_Click);
+            configureInstanceThresholdsToolStripMenuItem.Name = "configureInstanceThresholdsToolStripMenuItem";
+            configureInstanceThresholdsToolStripMenuItem.Size = new System.Drawing.Size(290, 26);
+            configureInstanceThresholdsToolStripMenuItem.Text = "Configure Instance Thresholds";
+            configureInstanceThresholdsToolStripMenuItem.Click += ConfigureInstanceThresholdsToolStripMenuItem_Click;
             // 
             // configureRootThresholdsToolStripMenuItem
             // 
-            this.configureRootThresholdsToolStripMenuItem.Name = "configureRootThresholdsToolStripMenuItem";
-            this.configureRootThresholdsToolStripMenuItem.Size = new System.Drawing.Size(290, 26);
-            this.configureRootThresholdsToolStripMenuItem.Text = "Configure Root Thresholds";
-            this.configureRootThresholdsToolStripMenuItem.Click += new System.EventHandler(this.ConfigureRootThresholdsToolStripMenuItem_Click);
+            configureRootThresholdsToolStripMenuItem.Name = "configureRootThresholdsToolStripMenuItem";
+            configureRootThresholdsToolStripMenuItem.Size = new System.Drawing.Size(290, 26);
+            configureRootThresholdsToolStripMenuItem.Text = "Configure Root Thresholds";
+            configureRootThresholdsToolStripMenuItem.Click += ConfigureRootThresholdsToolStripMenuItem_Click;
+            // 
+            // tsTrigger
+            // 
+            tsTrigger.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsTrigger.Image = Properties.Resources.ProjectSystemModelRefresh_16x;
+            tsTrigger.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsTrigger.Name = "tsTrigger";
+            tsTrigger.Size = new System.Drawing.Size(151, 24);
+            tsTrigger.Text = "Trigger Collection";
+            tsTrigger.Visible = false;
+            tsTrigger.Click += TsTrigger_Click;
+            // 
+            // statusStrip1
+            // 
+            statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { lblStatus });
+            statusStrip1.Location = new System.Drawing.Point(0, 327);
+            statusStrip1.Name = "statusStrip1";
+            statusStrip1.Size = new System.Drawing.Size(1250, 22);
+            statusStrip1.TabIndex = 5;
+            statusStrip1.Text = "statusStrip1";
+            // 
+            // lblStatus
+            // 
+            lblStatus.Name = "lblStatus";
+            lblStatus.Size = new System.Drawing.Size(0, 16);
             // 
             // LastGoodCheckDBControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.dgvLastGoodCheckDB);
-            this.Controls.Add(this.toolStrip1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "LastGoodCheckDBControl";
-            this.Size = new System.Drawing.Size(1250, 349);
-            this.Load += new System.EventHandler(this.LastGoodCheckDB_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvLastGoodCheckDB)).EndInit();
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            Controls.Add(dgvLastGoodCheckDB);
+            Controls.Add(toolStrip1);
+            Controls.Add(statusStrip1);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "LastGoodCheckDBControl";
+            Size = new System.Drawing.Size(1250, 349);
+            Load += LastGoodCheckDB_Load;
+            ((System.ComponentModel.ISupportInitialize)dgvLastGoodCheckDB).EndInit();
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            statusStrip1.ResumeLayout(false);
+            statusStrip1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -295,5 +313,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ExcludedFromCheck;
         private System.Windows.Forms.DataGridViewLinkColumn Configure;
         private StatusFilterToolStrip statusFilterToolStrip1;
+        private System.Windows.Forms.ToolStripButton tsTrigger;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel lblStatus;
     }
 }
