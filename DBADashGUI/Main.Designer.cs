@@ -1748,7 +1748,6 @@ namespace DBADashGUI
             // 
             // customChecks1
             // 
-            customChecks1.Context = null;
             customChecks1.Dock = System.Windows.Forms.DockStyle.Fill;
             customChecks1.IncludeCritical = true;
             customChecks1.IncludeNA = false;
