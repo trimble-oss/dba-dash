@@ -84,6 +84,8 @@ namespace DBADash
         {
         }
 
+        private const string ErrorSource = "SchemaSnapshot";
+
         private static DataTable RgDTSchema()
         {
             DataTable dtRG = new()
@@ -175,7 +177,7 @@ namespace DBADash
             }
         }
 
-        public DataTable SnapshotDB(string DBName)
+        public DataTable SnapshotDB(string DBName, IErrorLogger errorLogger)
         {
             var StartTime = DateTime.UtcNow;
 
@@ -315,7 +317,7 @@ namespace DBADash
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Synonyms"))
                         {
-                            AddSynonyms(db, dtSchema);
+                            AddSynonyms(db, dtSchema,errorLogger);
                             op.Complete();
                         }
                     }
@@ -664,22 +666,29 @@ namespace DBADash
             }
         }
 
-        private void AddSynonyms(Database db, DataTable dtSchema)
+        private void AddSynonyms(Database db, DataTable dtSchema, IErrorLogger logger)
         {
             foreach (Synonym s in db.Synonyms)
             {
-                var r = dtSchema.NewRow();
-                var sDDL = StringCollectionToString(s.Script(ScriptingOptions));
-                var bDDL = Zip(sDDL);
-                r["ObjectName"] = s.Name;
-                r["SchemaName"] = s.Schema;
-                r["ObjectType"] = "SN";
-                r["object_id"] = s.ID;
-                r["DDL"] = bDDL;
-                r["DDLHash"] = ComputeHash(bDDL);
-                r["ObjectDateCreated"] = s.CreateDate;
-                r["ObjectDateModified"] = s.DateLastModified;
-                dtSchema.Rows.Add(r);
+                try
+                {
+                    var r = dtSchema.NewRow();
+                    var sDDL = StringCollectionToString(s.Script(ScriptingOptions));
+                    var bDDL = Zip(sDDL);
+                    r["ObjectName"] = s.Name;
+                    r["SchemaName"] = s.Schema;
+                    r["ObjectType"] = "SN";
+                    r["object_id"] = s.ID;
+                    r["DDL"] = bDDL;
+                    r["DDLHash"] = ComputeHash(bDDL);
+                    r["ObjectDateCreated"] = s.CreateDate;
+                    r["ObjectDateModified"] = s.DateLastModified;
+                    dtSchema.Rows.Add(r);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, ErrorSource, db.Name);
+                }
             }
         }
 
@@ -1012,19 +1021,30 @@ namespace DBADash
                 if (!include) continue;
 
                 Log.Information("DB Snapshot {db} from instance {instance}", db.Name, builder.DataSource);
-                
+                DataTable dt = null;
                 try
                 {
-                    var dt = ss.SnapshotDB(db.Name);
+                    dt = ss.SnapshotDB(db.Name, collector);
                     dsSnapshot.Tables.Add(dt);
-                    var fileName = DBADashSource.GenerateFileName(src.SourceConnection.ConnectionForFileName);
-                    await DestinationHandling.WriteAllDestinations(dsSnapshot, src, fileName, Config);
-                    dsSnapshot.Tables.Remove(dt);
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Error creating schema snapshot {db}", db.Name);
+                    collector.LogError(ex, "Error creating schema snapshot", db.Name);
                 }
+                try
+                {
+                    var fileName = DBADashSource.GenerateFileName(src.SourceConnection.ConnectionForFileName);
+                    await DestinationHandling.WriteAllDestinations(dsSnapshot, src, fileName, Config);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error writing schema snapshot {db} to destination", db.Name);
+                }
+                if (dt != null)
+                {
+                    dsSnapshot.Tables.Remove(dt);
+                }
+                collector.ClearErrors();
             }
         }
     }

@@ -89,7 +89,7 @@ namespace DBADash
         Windows
     }
 
-    public class DBCollector
+    public class DBCollector: IErrorLogger
     {
         public DataSet Data;
         private string ConnectionString => Source.SourceConnection.ConnectionString;
@@ -180,11 +180,18 @@ namespace DBADash
             Startup();
         }
 
-        private void LogError(Exception ex, string errorSource, string errorContext = "Collect")
+        public void LogError(Exception ex, string errorSource, string errorContext = "Collect")
         {
             Log.Error(ex, "{ErrorContext} {ErrorSource} {Connection}", errorContext, errorSource, Source.SourceConnection.ConnectionForPrint);
             LogDBError(errorSource, ex.ToString(), errorContext);
         }
+
+        public void ClearErrors()
+        {
+            dtErrors.Rows.Clear();
+        }
+
+        public int ErrorCount => dtErrors.Rows.Count;
 
         private void LogDBError(string errorSource, string errorMessage, string errorContext = "Collect")
         {
