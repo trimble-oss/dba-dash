@@ -81,7 +81,7 @@ namespace DBADash.Messaging
                 {
                     Log.Information("Message {handle} requested snapshot for database {DatabaseName} on {instance}", handle,DatabaseName,ConnectionID);
                     var schema = new SchemaSnapshotDB(src.SourceConnection, cfg.SchemaSnapshotOptions);
-                    var dt = schema.SnapshotDB(DatabaseName);
+                    var dt = schema.SnapshotDB(DatabaseName, collector);
                     collector.Data.Tables.Add(dt);
                 }
             }
@@ -98,6 +98,7 @@ namespace DBADash.Messaging
                 op.Complete();
                 return null;
             }
+
         }
 
         private (List<CollectionType>, Dictionary<string, CustomCollection>) ParseCollectionTypes(DBADashSource src, CollectionConfig cfg)
