@@ -27,7 +27,8 @@ namespace DBADash.Messaging
         private const int clearMessageVisibilityTimeout = 0; //ms
         private const int messageVisibilityTimeout = 10000; //ms
         private const int delayAfterReceivingMessageForDifferentAgent = 1000; // ms
-        private const int delayBetweenMessages = 1000; // ms
+        private const int delayBetweenMessages = 100; // ms
+        private const int errorDelay= 1000; // ms
         private AsyncRetryPolicy _retryPolicy;
         private readonly ConcurrentDictionary<string, SemaphoreSlim> _semaphores = new();
         private const int MaxDegreeOfParallelism = 2;
@@ -66,7 +67,6 @@ namespace DBADash.Messaging
                 MessageAttributeNames = new List<string> { "All" },
                 MessageSystemAttributeNames = new List<string> { MessageSystemAttributeName.SentTimestamp }
             };
-
             while (true)
             {
                 try
@@ -121,6 +121,7 @@ namespace DBADash.Messaging
                             {
                                 // Handle any exceptions that occurred during processing
                                 Log.Error(ex, $"Error processing message: {message.Body}");
+                                await Task.Delay(errorDelay); // Extra delay if error occurs to avoid burning CPU cycles
                             }
                         }
                     }
@@ -128,9 +129,10 @@ namespace DBADash.Messaging
                 catch (Exception ex)
                 {
                     Log.Error(ex, "Error receiving messages from SQS Queue");
+                    await Task.Delay(errorDelay); // Extra delay if error occurs to avoid burning CPU cycles
                 }
 
-                await Task.Delay(delayBetweenMessages);
+                await Task.Delay(delayBetweenMessages); // Wait a small amount of time before checking for more messages to avoid burning CPU cycles (shouldn't be required)  
             }
         }
 
