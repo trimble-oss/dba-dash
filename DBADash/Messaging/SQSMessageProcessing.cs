@@ -145,20 +145,7 @@ namespace DBADash.Messaging
             replySQS = string.Empty;
             replyAgent = string.Empty;
 
-            if (!message.MessageAttributes.TryGetValue("DBADashToIdentifier", out var targetAgent))
-            {
-                reason = "Message does not contain a DBADashToIdentifier attribute.";
-                deleteMessage = false;
-                return false;
-            }
-            if (targetAgent.StringValue != expectedAgent)
-            {
-                reason = $"Message is not intended for this agent.  Expected {expectedAgent} but received {targetAgent.StringValue}.  This is expected when using a shared queue.";
-                notForThisAgent = true;
-                deleteMessage = false;
-                return false;
-            }
-
+            /* Remove old messages regardless of target service.  This will prevent constant re-processing of old messages */
             if (!message.Attributes.TryGetValue(MessageSystemAttributeName.SentTimestamp, out var sentTimestamp))
             {
                 reason = "Message does not contain a SentTimestamp attribute.";
@@ -180,6 +167,21 @@ namespace DBADash.Messaging
                 return false;
             }
 
+            if (!message.MessageAttributes.TryGetValue("DBADashToIdentifier", out var targetAgent))
+            {
+                reason = "Message does not contain a DBADashToIdentifier attribute.";
+                deleteMessage = false;
+                return false;
+            }
+            /* Might be using a shared queue.  Keep the message. Visibility timeout adjusted to allow other service to pick up the message. */
+            if (targetAgent.StringValue != expectedAgent)
+            {
+                reason = $"Message is not intended for this agent.  Expected {expectedAgent} but received {targetAgent.StringValue}.  This is expected when using a shared queue.";
+                notForThisAgent = true;
+                deleteMessage = false;
+                return false;
+            }
+            
             if (!message.MessageAttributes.TryGetValue("MessageType", out var messageTypeAttribute))
             {
                 reason = "Message does not contain a MessageType attribute.";
