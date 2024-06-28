@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DBADash;
 using DBADashGUI.CustomReports;
+using Serilog;
 
 namespace DBADashGUI
 {
@@ -33,13 +34,25 @@ namespace DBADashGUI
 
         private int? _importAgentID;
         private int? _collectAgentID;
+        private Version? _productVersion;
+        private string? _connectionID;
+
+        public Version? ProductVersion
+        {
+            get
+            {
+                if(_productVersion != null) return _productVersion;
+                GetAdditionalInfo();
+                return _productVersion;
+            }
+        }
 
         public int? ImportAgentID
         {
             get
             {
                 if(_importAgentID != null || InstanceID <=0) return _importAgentID;
-                GetInstanceAgentInfo();
+                GetAdditionalInfo();
                 return _importAgentID;
             }
         }
@@ -49,20 +62,40 @@ namespace DBADashGUI
             get
             {
                 if(_collectAgentID != null || InstanceID<=0) return _collectAgentID;
-                GetInstanceAgentInfo();
+                GetAdditionalInfo();
                 return _collectAgentID;
+            }
+        }
+
+        public string ConnectionID
+        {
+            get
+            {
+                if(_connectionID != null) return _connectionID;
+                GetAdditionalInfo();
+                return _connectionID;
             }
         }
 
         private bool? _canMessage;
 
-        private void GetInstanceAgentInfo()
+        private void GetAdditionalInfo()
         {
             if(InstanceID<=0) return;
             var row =  CommonData.Instances.Select($"InstanceID={InstanceID}").FirstOrDefault();
             if (row == null) return;
             _collectAgentID = (int)row["CollectAgentID"];
             _importAgentID = (int)row["ImportAgentID"];
+            _connectionID = (string)row["ConnectionID"];
+            try
+            {
+                _productVersion = new Version((string)row["ProductVersion"]);
+            }
+            catch (Exception ex)
+            {
+                _productVersion = new Version(0, 0);
+                Log.Debug(ex, "Error parsing product version");
+            }
         }
 
         public bool CanMessage

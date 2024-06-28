@@ -17,7 +17,7 @@ using Microsoft.VisualBasic;
 
 namespace DBADashGUI.CollectionDates
 {
-    public partial class CollectionDates : UserControl, ISetContext, IThemedControl, ISetStatus
+    public partial class CollectionDates : UserControl, ISetContext, ISetStatus
     {
         public CollectionDates()
         {
@@ -158,14 +158,14 @@ namespace DBADashGUI.CollectionDates
                         SetStatus("This collection type cannot be triggered manually", null, DashColors.Warning);
                         return;
                     }
-                    await CollectionMessaging.TriggerCollection(instance, collection,collectAgentID,importAgentID, this);
+                    await CollectionMessaging.TriggerCollection(instance, collection, collectAgentID, importAgentID, this);
                 }
             }
         }
 
         public void SetStatus(string message, string tooltip, Color color)
         {
-            lblStatus.InvokeSetStatus(message,tooltip, color);
+            lblStatus.InvokeSetStatus(message, tooltip, color);
         }
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
@@ -203,19 +203,6 @@ namespace DBADashGUI.CollectionDates
             Common.PromptSaveDataGridView(ref dgvCollectionDates);
         }
 
-        private void LblStatus_Click(object sender, EventArgs e)
-        {
-            if (lblStatus.IsLink)
-            {
-                MessageBox.Show(lblStatus.ToolTipText, "Error Details", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        public void ApplyTheme(BaseTheme theme)
-        {
-            dgvCollectionDates.ApplyTheme();
-        }
-
         private async void TsTrigger_Click(object sender, EventArgs e)
         {
             RefreshData();
@@ -248,7 +235,7 @@ namespace DBADashGUI.CollectionDates
             if (importAgentID == 0 || collectionTypes.Count == 0) return;
             try
             {
-                await CollectionMessaging.TriggerCollection(connectionID, collectionTypes, collectAgentID,importAgentID, this);
+                await CollectionMessaging.TriggerCollection(connectionID, collectionTypes, collectAgentID, importAgentID, this);
             }
             catch (Exception ex)
             {

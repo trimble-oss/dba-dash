@@ -1,4 +1,5 @@
-﻿using DBADashGUI.Pickers;
+﻿using DBADashGUI.CustomReports;
+using DBADashGUI.Pickers;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -6,12 +7,11 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Windows.Forms;
-using Amazon.S3.Model;
-using DocumentFormat.OpenXml.Drawing;
-using static DBADashGUI.DBADashStatus;
 using System.Text;
+using System.Windows.Forms;
 using System.Xml;
+using DBADashGUI.Theme;
+using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI
 {
@@ -19,16 +19,19 @@ namespace DBADashGUI
     {
         public static string Truncate(this string value, int maxLength)
         {
-            if (string.IsNullOrEmpty(value)) { return value; }
+            if (string.IsNullOrEmpty(value))
+            {
+                return value;
+            }
 
             return value[..Math.Min(value.Length, maxLength)];
         }
 
         private static readonly HashSet<Type> NumericTypes = new()
         {
-            typeof(int),  typeof(double),  typeof(decimal),
-            typeof(long), typeof(short),   typeof(sbyte),
-            typeof(byte), typeof(ulong),   typeof(ushort),
+            typeof(int), typeof(double), typeof(decimal),
+            typeof(long), typeof(short), typeof(sbyte),
+            typeof(byte), typeof(ulong), typeof(ushort),
             typeof(uint), typeof(float)
         };
 
@@ -67,7 +70,8 @@ namespace DBADashGUI
             value.ForeColor = Status.GetForeColor();
         }
 
-        public static void SetColor(this DataGridViewCell cell, Color backColor, Color foreColor, Color selectionBackColor, Color selectionForeColor)
+        public static void SetColor(this DataGridViewCell cell, Color backColor, Color foreColor,
+            Color selectionBackColor, Color selectionForeColor)
         {
             cell.Style.BackColor = backColor;
             cell.Style.ForeColor = foreColor;
@@ -94,7 +98,8 @@ namespace DBADashGUI
 
         public static void SetStatusColor(this DataGridViewCell cell, DBADashStatusEnum Status)
         {
-            cell.SetColor(Status.GetBackColor(), Status.GetForeColor(), Status.GetBackColor().AdjustBasedOnLuminance(), Status.GetForeColor());
+            cell.SetColor(Status.GetBackColor(), Status.GetForeColor(), Status.GetBackColor().AdjustBasedOnLuminance(),
+                Status.GetForeColor());
         }
 
         public static string ToHexString(this Color c) => $"#{c.R:X2}{c.G:X2}{c.B:X2}";
@@ -105,19 +110,23 @@ namespace DBADashGUI
         internal static List<KeyValuePair<string, PersistedColumnLayout>> GetColumnLayout(this DataGridView dgv)
         {
             return dgv.Columns.Cast<DataGridViewColumn>()
-           .Select(c => new KeyValuePair<string, PersistedColumnLayout>(c.Name, new PersistedColumnLayout() { Visible = c.Visible, Width = c.Width, DisplayIndex = c.DisplayIndex }))
-           .ToList();
+                .Select(c => new KeyValuePair<string, PersistedColumnLayout>(c.Name,
+                    new PersistedColumnLayout()
+                    { Visible = c.Visible, Width = c.Width, DisplayIndex = c.DisplayIndex }))
+                .ToList();
         }
 
         /// <summary>
         /// Loads a saved column layout to the grid.  Size, position & visibility of columns
         /// </summary>
-        internal static void LoadColumnLayout(this DataGridView dgv, List<KeyValuePair<string, PersistedColumnLayout>> savedCols)
+        internal static void LoadColumnLayout(this DataGridView dgv,
+            List<KeyValuePair<string, PersistedColumnLayout>> savedCols)
         {
             if (savedCols == null)
             {
                 return;
             }
+
             foreach (DataGridViewColumn col in dgv.Columns)
             {
                 if (savedCols.Where(savedCol => savedCol.Key == col.Name).Count() == 1)
@@ -159,6 +168,7 @@ namespace DBADashGUI
             {
                 return p.AddWithValue(parameterName, value);
             }
+
             return null;
         }
 
@@ -168,12 +178,14 @@ namespace DBADashGUI
         /// <param name="p"></param>
         /// <param name="parameterName">Name of parameter</param>
         /// <param name="value">Parameter value</param>
-        internal static SqlParameter AddStringIfNotNullOrEmpty(this SqlParameterCollection p, string parameterName, string value)
+        internal static SqlParameter AddStringIfNotNullOrEmpty(this SqlParameterCollection p, string parameterName,
+            string value)
         {
             if (!string.IsNullOrEmpty(value))
             {
                 return p.AddWithValue(parameterName, value);
             }
+
             return null;
         }
 
@@ -183,7 +195,8 @@ namespace DBADashGUI
         /// <param name="p"></param>
         /// <param name="parameterName">Name of parameter</param>
         /// <param name="value">Parameter value</param>
-        internal static SqlParameter AddWithNullableValue(this SqlParameterCollection p, string parameterName, object value)
+        internal static SqlParameter AddWithNullableValue(this SqlParameterCollection p, string parameterName,
+            object value)
         {
             if (value == null)
                 return p.AddWithValue(parameterName, DBNull.Value);
@@ -197,7 +210,8 @@ namespace DBADashGUI
         /// <param name="p"></param>
         /// <param name="parameterName">Name of parameter</param>
         /// <param name="value">Parameter value</param>
-        internal static SqlParameter AddIfGreaterThanZero(this SqlParameterCollection p, string parameterName, int value)
+        internal static SqlParameter AddIfGreaterThanZero(this SqlParameterCollection p, string parameterName,
+            int value)
         {
             if (value > 0)
                 return p.AddWithValue(parameterName, value);
@@ -211,7 +225,8 @@ namespace DBADashGUI
         /// <param name="p"></param>
         /// <param name="parameterName">Name of parameter</param>
         /// <param name="value">Parameter value</param>
-        internal static SqlParameter AddIfGreaterThanZero(this SqlParameterCollection p, string parameterName, long value)
+        internal static SqlParameter AddIfGreaterThanZero(this SqlParameterCollection p, string parameterName,
+            long value)
         {
             if (value > 0)
                 return p.AddWithValue(parameterName, value);
@@ -225,7 +240,8 @@ namespace DBADashGUI
         /// <param name="p"></param>
         /// <param name="parameterName">Name of parameter</param>
         /// <param name="value">Parameter value</param>
-        internal static SqlParameter AddIfLessThanMaxValue(this SqlParameterCollection p, string parameterName, long value)
+        internal static SqlParameter AddIfLessThanMaxValue(this SqlParameterCollection p, string parameterName,
+            long value)
         {
             if (value != long.MaxValue)
                 return p.AddWithValue(parameterName, value);
@@ -254,9 +270,10 @@ namespace DBADashGUI
             Process.Start(psi);
         }
 
-        public static List<ISelectable> ToSelectableList(this DataGridViewColumnCollection columns) => columns.Cast<DataGridViewColumn>()
-                .Select(column => new SelectableColumn(column) as ISelectable)
-                .ToList();
+        public static List<ISelectable> ToSelectableList(this DataGridViewColumnCollection columns) => columns
+            .Cast<DataGridViewColumn>()
+            .Select(column => new SelectableColumn(column) as ISelectable)
+            .ToList();
 
         public static void ApplyVisibility(this DataGridViewColumnCollection columns, List<ISelectable> selectables)
         {
@@ -272,9 +289,10 @@ namespace DBADashGUI
             }
         }
 
-        public static void ApplyVisibility(this Dictionary<string, ColumnMetaData> metrics, List<ISelectable> selectables) => selectables.Where(s => metrics.ContainsKey(s.Name))
-                .ToList()
-                .ForEach(s => metrics[s.Name].IsVisible = s.IsVisible);
+        public static void ApplyVisibility(this Dictionary<string, ColumnMetaData> metrics,
+            List<ISelectable> selectables) => selectables.Where(s => metrics.ContainsKey(s.Name))
+            .ToList()
+            .ForEach(s => metrics[s.Name].IsVisible = s.IsVisible);
 
         public static DialogResult PromptColumnSelection(this DataGridView dgv)
         {
@@ -506,6 +524,7 @@ namespace DBADashGUI
             {
                 validXml.Append(c);
             }
+
             return validXml.ToString();
         }
 
@@ -514,17 +533,51 @@ namespace DBADashGUI
             return hexString.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? hexString[2..] : hexString;
         }
 
+        public static bool IsHex(this string hexString)
+        {
+            if (!hexString.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+            var hex = hexString[2..];
+            return hex.Length % 2 == 0 && hex.All(c => "0123456789ABCDEFabcdef".Contains(c));
+
+        }
+
+        public static byte[] HexStringToByteArray(this string hex)
+        {
+            if (!hex.IsHex())
+            {
+                return null;
+            }
+            var h = hex.RemoveHexPrefix();
+            return Enumerable.Range(0, h.Length)
+                .Where(x => x % 2 == 0)
+                .Select(x => Convert.ToByte(h.Substring(x, 2), 16))
+                .ToArray();
+        }
+
         public static void InvokeSetStatus(this ToolStripStatusLabel label, string message, string tooltip, Color color)
         {
             label.Owner?.Invoke(() =>
             {
                 label.Visible = true;
-                label.Text = message;
+                label.Text = message.Length > 200 ? message[..200] + "..." : message;
                 label.ToolTipText = tooltip;
                 label.IsLink = !string.IsNullOrEmpty(tooltip);
-                label.ForeColor = color;
-                label.LinkColor = color;
+                label.ForeColor =DBADashUser.SelectedTheme.ThemeIdentifier == ThemeType.Dark ? DBADashUser.SelectedTheme.ForegroundColor :  color;
+                label.LinkColor = DBADashUser.SelectedTheme.ThemeIdentifier == ThemeType.Dark ? DBADashUser.SelectedTheme.ForegroundColor : color;
+                label.Click -= StatusLabel_Click;
+                label.Click += StatusLabel_Click;
             });
+        }
+
+        private static void StatusLabel_Click(object sender, EventArgs e)
+        {
+            if (sender is ToolStripStatusLabel clickedLabel && !string.IsNullOrEmpty(clickedLabel.ToolTipText))
+            {
+                MessageBox.Show(clickedLabel.ToolTipText, "Error Details", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         public static void InvokeSetStatus(this ToolStripLabel label, string message, string tooltip, Color color)
@@ -532,12 +585,53 @@ namespace DBADashGUI
             label.Owner?.Invoke(() =>
             {
                 label.Visible = true;
-                label.Text = message;
+                label.Text = message.Length > 50 ? message[..200] + "..." : message;
                 label.ToolTipText = tooltip;
                 label.IsLink = !string.IsNullOrEmpty(tooltip);
                 label.ForeColor = color;
                 label.LinkColor = color;
             });
+        }
+
+        /// <summary>
+        /// Add columns to data grid view based on the columns in the data table and user preferences for column alias, cell format string and link columns
+        /// </summary>
+        /// <param name="dt">DataTable - columns will be added from here</param>
+        /// <param name="customReportResult">Types for each column</param>
+        public static void AddColumns(this DataGridView dgv, DataTable dt, CustomReportResult customReportResult)
+        {
+            foreach (DataColumn dataColumn in dt.Columns)
+            {
+                DataGridViewColumn column;
+
+                if (customReportResult.LinkColumns.ContainsKey(dataColumn.ColumnName))
+                {
+                    column = new DataGridViewLinkColumn();
+                }
+                else if (dataColumn.DataType == typeof(bool))
+                {
+                    column = new DataGridViewCheckBoxColumn();
+                }
+                else
+                {
+                    column = new DataGridViewTextBoxColumn();
+                }
+
+                column.SortMode = DataGridViewColumnSortMode.Automatic;
+                column.DefaultCellStyle.Format =
+                    customReportResult.CellFormatString.TryGetValue(dataColumn.ColumnName, out var value)
+                        ? value
+                        : "";
+
+                column.DataPropertyName = dataColumn.ColumnName;
+                column.Name = dataColumn.ColumnName;
+                column.HeaderText =
+                    customReportResult.ColumnAlias.TryGetValue(column.DataPropertyName, out var alias)
+                        ? alias
+                        : dataColumn.Caption;
+                column.ValueType = dataColumn.DataType;
+                dgv.Columns.Add(column);
+            }
         }
     }
 }

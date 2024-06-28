@@ -25,7 +25,8 @@ SELECT  I.InstanceID,
 	SO.elastic_pool_name,
 	I.CollectAgentID,
 	I.ImportAgentID,
-	IA.MessagingEnabled & CA.MessagingEnabled AS MessagingEnabled
+	IA.MessagingEnabled & CA.MessagingEnabled AS MessagingEnabled,
+	I.ProductVersion
 FROM dbo.InstancesMatchingTags(@TagIDs) I
 LEFT JOIN dbo.Databases D ON D.InstanceID = I.InstanceID AND I.EngineEdition = 5 AND D.IsActive=1
 LEFT JOIN dbo.AzureDBServiceObjectives SO ON I.InstanceID = SO.InstanceID

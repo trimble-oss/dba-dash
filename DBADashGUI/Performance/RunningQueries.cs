@@ -234,6 +234,7 @@ namespace DBADashGUI.Performance
                 }
             }
             dgv.ApplyTheme(DBADashUser.SelectedTheme);
+            tsEditLimit.LinkColor = DBADashUser.SelectedTheme.LinkColor;
         }
 
         /// <summary>If we are not filtered for a specific instance then show server level summary</summary>
@@ -454,7 +455,7 @@ namespace DBADashGUI.Performance
             tsStatus.Text =
                 $"Blocked Sessions: {blockedCount}, Blocked Wait Time: {TimeSpan.FromMilliseconds(blockedWait):dd\\ hh\\:mm\\:ss}, Running Jobs {runningJobCount}";
             tsStatus.Font = blockedCount > 0 ? new Font(tsStatus.Font, FontStyle.Bold) : new Font(tsStatus.Font, FontStyle.Regular);
-            tsStatus.ForeColor = blockedCount > 0 ? DashColors.Fail : DashColors.Success;
+            tsStatus.ForeColor =DBADashUser.SelectedTheme.ThemeIdentifier== ThemeType.Dark ? DBADashUser.SelectedTheme.ForegroundColor : blockedCount > 0 ? DashColors.Fail : DashColors.Success;
         }
 
         private static void ShowPlan(DataRowView row)

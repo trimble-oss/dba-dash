@@ -399,9 +399,10 @@ namespace DBADash.Messaging
                         Config);
                     return Task.CompletedTask;
                 });
+                responseMessage.Data = null;
             }
 
-            var payloadBin = Convert.FromBase64String(message.Body);
+            var payloadBin = responseMessage.Serialize();
 
             await _retryPolicy.ExecuteAsync(async () =>
             {

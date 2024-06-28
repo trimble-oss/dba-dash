@@ -58,7 +58,7 @@ namespace DBADash.Messaging
                 handle,
                 CollectionTypes,
                 ConnectionID);
-            var src = GetSourceConnection(ConnectionID, cfg);
+            var src = cfg.GetSourceConnection(ConnectionID);
 
             var (standardCollections, customCollections) = ParseCollectionTypes(src, cfg);
 
@@ -150,38 +150,6 @@ namespace DBADash.Messaging
             return (standardCollections, customCollections);
         }
 
-        public static DBADashSource GetSourceConnection(string connectionID, CollectionConfig cfg)
-        {
-            var src = cfg.SourceConnections.FirstOrDefault(s => string.Equals(s.ConnectionID, connectionID, StringComparison.InvariantCultureIgnoreCase));
-            if (src != null) // We have a match on ConnectionID
-            {
-                return src;
-            }
-            else if (connectionID.Contains('|') && cfg.ScanForAzureDBs) // We don't have a match but ConnectionID looks like an AzureDB connection.
-            {
-                // Try to find the master connection for this AzureDB
-                var masterInstanceName = connectionID.Split('|')[0] + "|master";
-                var masterSrc = cfg.SourceConnections.FirstOrDefault(s => string.Equals(s.ConnectionID, masterInstanceName, StringComparison.InvariantCultureIgnoreCase));
-                if (masterSrc != null)
-                {
-                    // Master connection found. Create a copy with the correct database name
-                    src = masterSrc.DeepCopy();
-                    src.ConnectionID = null;
-                    var builder = new SqlConnectionStringBuilder(masterSrc.SourceConnection.ConnectionString)
-                    {
-                        InitialCatalog = connectionID.Split('|')[1]
-                    };
-                    src.SourceConnection.ConnectionString = builder.ToString();
-                    var collector = new DBCollector(src, cfg.ServiceName);
-                    src.ConnectionID = collector.ConnectionID;
-                    // Double check that the generated ConnectionID matches the one we're looking for & return the connection
-                    if (string.Equals(src.ConnectionID, connectionID, StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        return src;
-                    }
-                }
-            }
-            throw new ArgumentException($"Unable to find instance with ConnectionID {connectionID}");
-        }
+
     }
 }

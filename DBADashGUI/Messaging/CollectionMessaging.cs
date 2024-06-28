@@ -16,6 +16,8 @@ using System.Windows.Interop;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using Amazon.Runtime.Internal.Transform;
+using System.Xml.Linq;
+using Serilog;
 
 namespace DBADashGUI.Messaging
 {
@@ -123,20 +125,26 @@ namespace DBADashGUI.Messaging
             {
                 var completed = false;
                 while (!completed)
-                {
-                    await using var cn = new SqlConnection(Common.ConnectionString);
-                    await using var cmd = new SqlCommand("Messaging.ReceiveReplyFromServiceToGUI", cn)
-                    { CommandType = CommandType.StoredProcedure, CommandTimeout = 0 };
-                    cmd.Parameters.AddWithValue("@ConversationGroupID", group);
-                    await cn.OpenAsync();
-                    await using var rdr = await cmd.ExecuteReaderAsync();
-                    if (!rdr.Read()) continue;
-                    var handle = (Guid)rdr["conversation_handle"];
-                    var type = (string)rdr["message_type_name"];
+                { 
+                    var reply = await ReceiveReply(group, CollectionDialogLifetime*1000);
+                    switch (reply.Type)
+                    {
+                        case ResponseMessage.ResponseTypes.Failure:
+                            control.SetStatus(messageBase + reply.Message, reply.Exception?.ToString(), DashColors.Fail);
+                            completed = true;
+                            break;
+                        case ResponseMessage.ResponseTypes.EndConversation:
+                            completed = true;
+                            break;
+                        case ResponseMessage.ResponseTypes.Progress:
+                            control.SetStatus(messageBase + reply.Message, null, DashColors.Information);
+                            break;
+                        case ResponseMessage.ResponseTypes.Success:
+                            control.SetStatus(messageBase + reply.Message, null, DashColors.Success);
+                            control.RefreshData();
+                            break;
+                    }
 
-                    var reply = rdr["message_body"] == DBNull.Value ? null : (byte[])rdr["message_body"];
-
-                    completed = await ProcessMessageAsync(type, reply, handle, messageBase, control);
                 }
             }
             catch (Exception ex)
@@ -150,62 +158,103 @@ namespace DBADashGUI.Messaging
             }
         }
 
-        private static async Task<bool> ProcessMessageAsync(string type, byte[] reply, Guid handle, string messageBase, ISetStatus control)
+        private static async Task<BrokerResponse> ReceiveReplyFromServiceBroker(Guid group, int timeout)
         {
-            switch (type)
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand("Messaging.ReceiveReplyFromServiceToGUI", cn)
+                { CommandType = CommandType.StoredProcedure, CommandTimeout = 0 };
+            cmd.Parameters.AddWithValue("@ConversationGroupID", group);
+            cmd.Parameters.AddWithValue("@Timeout", timeout);
+            await cn.OpenAsync();
+            await using var rdr = await cmd.ExecuteReaderAsync();
+            if (!rdr.Read()) throw new Exception("No results");
+            return new BrokerResponse()
             {
-                case MessageProcessing.EndDialogMessageType:
-                    await MessageProcessing.EndConversation(handle, Common.ConnectionString);
-                    return true;
+                Handle = (Guid)rdr["conversation_handle"],
+                Type = (string)rdr["message_type_name"],
+                Payload = rdr["message_body"] == DBNull.Value ? null : (byte[])rdr["message_body"]
+            };
+        }
 
+        public static async Task<ResponseMessage> ReceiveReply(Guid group, int timeout)
+        {
+            var reply = await ReceiveReplyFromServiceBroker(group, timeout);
+            var message = string.Empty;
+            switch (reply.Type)
+            {
                 case MessageProcessing.ErrorMessageType:
-                    await ProcessErrorMessageAsync(reply, handle, messageBase, control);
-                    return true;
+                    {
+                        try
+                        {
+                            message = Encoding.Unicode.GetString(reply.Payload ?? Array.Empty<byte>());
+                            message = ServiceBrokerXMLErrorToSimpleString(message);
+                            await MessageProcessing.EndConversation(reply.Handle, Common.ConnectionString);
+                            return new ResponseMessage()
+                            { Message = message, Type = ResponseMessage.ResponseTypes.Failure };
+                        }
+                        catch (Exception ex)
+                        {
+                            return new ResponseMessage()
+                            { Message = message + ex.Message, Type = ResponseMessage.ResponseTypes.Failure };
+                        }
+
+                    }
+                case MessageProcessing.EndDialogMessageType:
+                    try
+                    {
+                        await MessageProcessing.EndConversation(reply.Handle, Common.ConnectionString);
+                        return new ResponseMessage() { Type = ResponseMessage.ResponseTypes.EndConversation };
+                    }
+                    catch (Exception ex)
+                    {
+                        return new ResponseMessage() { Message = ex.ToString(), Type = ResponseMessage.ResponseTypes.EndConversation };
+                    }
 
                 case MessageProcessing.ReplyMessageType:
-                    return await ProcessReplyMessageAsync(reply, messageBase, control);
-
+                    {
+                        var msg = ResponseMessage.Deserialize(reply.Payload);
+                        return msg;
+                    }
                 default:
-                    control.SetStatus($"{messageBase}Unknown message type: {type}", null, DashColors.Fail);
-                    return false;
+                    return new ResponseMessage()
+                    { Message = $"Unknown message type: {reply.Type}", Type = ResponseMessage.ResponseTypes.Failure };
             }
+
         }
 
-        private static async Task ProcessErrorMessageAsync(byte[] reply, Guid handle, string messageBase, ISetStatus control)
+        public static string ServiceBrokerXMLErrorToSimpleString(string xml)
         {
-            var message = reply == null ? "{null}" : Encoding.Unicode.GetString(reply);
-            control.SetStatus($"{messageBase}{message}", message, DashColors.Fail);
-            await MessageProcessing.EndConversation(handle, Common.ConnectionString);
-        }
-
-        private static async Task<bool> ProcessReplyMessageAsync(byte[] reply, string messageBase, ISetStatus control)
-        {
-            if (reply == null || reply.Length == 0)
+            try
             {
-                control.SetStatus($"{messageBase}NULL reply", "Reply was NULL", DashColors.Fail);
-                return false;
+                var _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
+                if (xml.StartsWith(_byteOrderMarkUtf8))
+                {
+                    xml = xml.Remove(0, _byteOrderMarkUtf8.Length);
+                }
+                var errorElement = XElement.Parse(xml);
+                XNamespace ns = "http://schemas.microsoft.com/SQL/ServiceBroker/Error";
+                var codeElement = errorElement.Element(ns + "Code");
+                var descriptionElement = errorElement.Element(ns + "Description");
+
+                // If we have a code & description, return a formatted string
+                if (codeElement != null && descriptionElement != null)
+                {
+                    // Return the concatenated Code and Description
+                    return $"{codeElement.Value} {descriptionElement.Value}";
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(ex, "Error parsing XML error message");
+                // If an exception occurs (e.g., invalid XML), return the full text
             }
 
-            var msg = ResponseMessage.Deserialize(reply);
-            var color = msg.Type switch
-            {
-                ResponseMessage.ResponseTypes.Success => DashColors.Success,
-                ResponseMessage.ResponseTypes.Failure => DashColors.Fail,
-                ResponseMessage.ResponseTypes.Progress => DashColors.Information,
-                _ => Color.Black
-            };
-
-            control.SetStatus($"{messageBase}{msg.Message}", msg.Exception?.ToString(), color);
-
-            if (msg.Type == ResponseMessage.ResponseTypes.Success)
-            {
-                await Task.Delay(100);
-                control.RefreshData();
-            }
-
-            return false;
+            // Return the full text if elements are missing or an exception occurred
+            return xml;
         }
 
+
+        
         private static bool IsRecentlyTriggered(string instanceName, string typeName)
         {
             lock (LockObject)

@@ -256,7 +256,6 @@
             lblStatus.Spring = true;
             lblStatus.Text = "Ready";
             lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            lblStatus.Click += LblStatus_Click;
             // 
             // CollectionDates
             // 
