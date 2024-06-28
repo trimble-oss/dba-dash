@@ -212,10 +212,10 @@ namespace DBADash.Messaging
                 else
                 {
                     // Message is for this agent.  Process the message
-                    await msg.Process(Config, handle);
+                    var ds = await msg.Process(Config, handle);
                     await SendReplyMessage(handle,
                         (new ResponseMessage()
-                        { Type = ResponseMessage.ResponseTypes.Success, Message = "Completed" }).Serialize(),
+                        { Type = ResponseMessage.ResponseTypes.Success, Message = "Completed", Data = ds}).Serialize(),
                         dest.ConnectionString);
                 }
             }

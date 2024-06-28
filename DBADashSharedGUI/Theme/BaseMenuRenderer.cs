@@ -33,7 +33,11 @@ namespace DBADashGUI.Theme
 
         protected override void OnRenderItemText(ToolStripItemTextRenderEventArgs e)
         {
-            if (e.Item.Selected || e.Item.Pressed)
+            if (e.Item is ToolStripStatusLabel)
+            {
+                // Don't change the color of the status label
+            }
+            else if (e.Item.Selected || e.Item.Pressed)
             {
                 e.TextColor = SelectionForeColor;
             }

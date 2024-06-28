@@ -55,7 +55,7 @@ namespace DBADashGUI
                 settings.Add(setting, value);
             }
             ClientSummaryCacheDuration = settings.GetValueAsInt("GUISummaryCacheDuration", 60);
-            DefaultCommandTimeout = settings.GetValueAsInt("GUIDefaultCommandTimeout", 60);
+            DefaultCommandTimeout = settings.GetValueAsInt("GUIDefaultCommandTimeout", 120);
             SummaryCommandTimeout = settings.GetValueAsInt("GUISummaryCommandTimeout", DefaultCommandTimeout);
             DrivePerformanceMaxDrives = settings.GetValueAsInt("GUIDrivePerformanceMaxDrives", 8);
             SPBehindWarningThreshold = settings.GetValueAsInt("GUISPBehindWarningThreshold", 1);

@@ -356,5 +356,39 @@ namespace DBADash
         {
             return DestinationConnection.Hash == hash ? DestinationConnection : SecondaryDestinationConnections.FirstOrDefault(c => c.Hash == hash);
         }
+
+        public DBADashSource GetSourceConnection(string connectionID)
+        {
+            var src = SourceConnections.FirstOrDefault(s => string.Equals(s.ConnectionID, connectionID, StringComparison.InvariantCultureIgnoreCase));
+            if (src != null) // We have a match on ConnectionID
+            {
+                return src;
+            }
+            else if (connectionID.Contains('|') && ScanForAzureDBs) // We don't have a match but ConnectionID looks like an AzureDB connection.
+            {
+                // Try to find the master connection for this AzureDB
+                var masterInstanceName = connectionID.Split('|')[0] + "|master";
+                var masterSrc = SourceConnections.FirstOrDefault(s => string.Equals(s.ConnectionID, masterInstanceName, StringComparison.InvariantCultureIgnoreCase));
+                if (masterSrc != null)
+                {
+                    // Master connection found. Create a copy with the correct database name
+                    src = masterSrc.DeepCopy();
+                    src.ConnectionID = null;
+                    var builder = new SqlConnectionStringBuilder(masterSrc.SourceConnection.ConnectionString)
+                    {
+                        InitialCatalog = connectionID.Split('|')[1]
+                    };
+                    src.SourceConnection.ConnectionString = builder.ToString();
+                    var collector = new DBCollector(src, ServiceName);
+                    src.ConnectionID = collector.ConnectionID;
+                    // Double check that the generated ConnectionID matches the one we're looking for & return the connection
+                    if (string.Equals(src.ConnectionID, connectionID, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        return src;
+                    }
+                }
+            }
+            throw new ArgumentException($"Unable to find instance with ConnectionID {connectionID}");
+        }
     }
 }

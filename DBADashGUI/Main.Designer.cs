@@ -214,6 +214,8 @@ namespace DBADashGUI
             customReportView1 = new CustomReports.CustomReportView();
             tabTableSize = new System.Windows.Forms.TabPage();
             tableSize1 = new DBFiles.TableSize();
+            tabTopQueries = new System.Windows.Forms.TabPage();
+            queryStoreTop = new Performance.QueryStoreTopQueries();
             refresh1 = new Refresh();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -303,6 +305,7 @@ namespace DBADashGUI
             tabRunningJobs.SuspendLayout();
             tabCustomReport.SuspendLayout();
             tabTableSize.SuspendLayout();
+            tabTopQueries.SuspendLayout();
             SuspendLayout();
             // 
             // TreeViewImageList
@@ -918,6 +921,7 @@ namespace DBADashGUI
             tabs.Controls.Add(tabRunningJobs);
             tabs.Controls.Add(tabCustomReport);
             tabs.Controls.Add(tabTableSize);
+            tabs.Controls.Add(tabTopQueries);
             tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             tabs.Location = new System.Drawing.Point(0, 0);
             tabs.Name = "tabs";
@@ -1165,7 +1169,6 @@ namespace DBADashGUI
             // 
             // tags1
             // 
-            tags1.AllTags = null;
             tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             tags1.Location = new System.Drawing.Point(3, 3);
             tags1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -1748,6 +1751,7 @@ namespace DBADashGUI
             // 
             // customChecks1
             // 
+            customChecks1.CheckContext = null;
             customChecks1.Dock = System.Windows.Forms.DockStyle.Fill;
             customChecks1.IncludeCritical = true;
             customChecks1.IncludeNA = false;
@@ -2200,6 +2204,25 @@ namespace DBADashGUI
             tableSize1.Size = new System.Drawing.Size(186, 61);
             tableSize1.TabIndex = 0;
             // 
+            // tabTopQueries
+            // 
+            tabTopQueries.Controls.Add(queryStoreTop);
+            tabTopQueries.Location = new System.Drawing.Point(4, 25);
+            tabTopQueries.Name = "tabTopQueries";
+            tabTopQueries.Padding = new System.Windows.Forms.Padding(3);
+            tabTopQueries.Size = new System.Drawing.Size(1631, 1246);
+            tabTopQueries.TabIndex = 50;
+            tabTopQueries.Text = "Top Queries (Query Store)";
+            tabTopQueries.UseVisualStyleBackColor = true;
+            // 
+            // queryStoreTop
+            // 
+            queryStoreTop.Dock = System.Windows.Forms.DockStyle.Fill;
+            queryStoreTop.Location = new System.Drawing.Point(3, 3);
+            queryStoreTop.Name = "queryStoreTop";
+            queryStoreTop.Size = new System.Drawing.Size(1625, 1240);
+            queryStoreTop.TabIndex = 0;
+            // 
             // refresh1
             // 
             refresh1.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
@@ -2527,6 +2550,7 @@ namespace DBADashGUI
             tabRunningJobs.ResumeLayout(false);
             tabCustomReport.ResumeLayout(false);
             tabTableSize.ResumeLayout(false);
+            tabTopQueries.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -2736,5 +2760,7 @@ namespace DBADashGUI
         private CustomReports.CustomReportView customReportView1;
         private System.Windows.Forms.TabPage tabTableSize;
         private DBFiles.TableSize tableSize1;
+        private System.Windows.Forms.TabPage tabTopQueries;
+        private Performance.QueryStoreTopQueries queryStoreTop;
     }
 }

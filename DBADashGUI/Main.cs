@@ -79,7 +79,7 @@ namespace DBADashGUI
             get => (new List<TabPage>()
             {
                 tabPerformanceSummary, tabPerformance, tabSlowQueries, tabAzureDB, tabAzureSummary, tabPC,
-                tabObjectExecutionSummary, tabWaits, tabRunningQueries, tabMemory, tabJobStats, tabJobTimeline, tabDrivePerformance
+                tabObjectExecutionSummary, tabWaits, tabRunningQueries, tabMemory, tabJobStats, tabJobTimeline, tabDrivePerformance, tabTopQueries
             }).Contains(tabs.SelectedTab) || (tabs.SelectedTab == tabCustomReport && ((SQLTreeItem)tv1.SelectedNode).Report.TimeFilterSupported);
         }
 
@@ -664,6 +664,7 @@ namespace DBADashGUI
             var parent = n.SQLTreeItemParent;
             bool hasAzureDBs = n.AzureInstanceIDs.Count > 0;
 
+
             if (n.Type is SQLTreeItem.TreeType.DBADashRoot or SQLTreeItem.TreeType.InstanceFolder)
             {
                 allowedTabs.AddRange(new TabPage[] { tabSummary, tabPerformanceSummary });
@@ -679,7 +680,7 @@ namespace DBADashGUI
                 allowedTabs.AddRange(new TabPage[]
                 {
                     tabPerformance, tabObjectExecutionSummary, tabSlowQueries, tabFiles, tabSnapshotsSummary,
-                    tabDBSpace, tabDBConfiguration, tabDBOptions
+                    tabDBSpace, tabDBConfiguration, tabDBOptions, tabTopQueries
                 });
             }
             else if (n.Type == SQLTreeItem.TreeType.AzureDatabase)
@@ -687,7 +688,7 @@ namespace DBADashGUI
                 allowedTabs.AddRange(new TabPage[]
                 {
                     tabPerformance, tabAzureSummary, tabAzureDB, tabPC, tabSlowQueries, tabObjectExecutionSummary,
-                    tabWaits, tabRunningQueries, tabFiles
+                    tabWaits, tabRunningQueries, tabFiles, tabTopQueries
                 });
             }
             else if (n.Type == SQLTreeItem.TreeType.Instance)
@@ -695,7 +696,7 @@ namespace DBADashGUI
                 allowedTabs.AddRange(new TabPage[]
                 {
                     tabPerformanceSummary, tabPerformance, tabPC, tabObjectExecutionSummary, tabSlowQueries, tabWaits,
-                    tabRunningQueries, tabMemory
+                    tabRunningQueries, tabMemory,tabTopQueries
                 });
             }
             else if (n.Type == SQLTreeItem.TreeType.AzureInstance)
@@ -821,6 +822,19 @@ namespace DBADashGUI
                 }
 
                 allowedTabs.Add(tabSchema);
+            }
+
+            if (allowedTabs.Contains(tabSlowQueries) && n.Context.ProductVersion?.Major < 10)
+            {
+                allowedTabs.Remove(tabSlowQueries);
+            }
+            if (allowedTabs.Contains(tabTopQueries) && n.Context.ProductVersion?.Major < 13 && n.Context.AzureInstanceIDs.Count == 0)
+            {
+                allowedTabs.Remove(tabTopQueries);
+            }
+            if (allowedTabs.Contains(tabTopQueries) && !n.Context.CanMessage)
+            {
+                allowedTabs.Remove(tabTopQueries);
             }
 
             if (allowedTabs.Count == 0) // Display default tab if no tabs are applicable

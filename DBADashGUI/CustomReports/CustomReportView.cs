@@ -387,7 +387,8 @@ namespace DBADashGUI.CustomReports
         {
             if (dgv.Columns.Count == 0)
             {
-                AddColumns(dt);
+                var customReportResults = report.CustomReportResults[selectedTableIndex];
+                dgv.AddColumns(dt, customReportResults);
                 dgv.ApplyTheme();
             }
             dgv.DataSource = null;
@@ -395,48 +396,6 @@ namespace DBADashGUI.CustomReports
             tsClearFilter.Enabled = false;
             tsClearFilter.Font = new Font(tsClearFilter.Font, FontStyle.Regular);
             tsClearFilter.ToolTipText = string.Empty;
-        }
-
-        /// <summary>
-        /// Add columns to data grid view based on the columns in the data table and user preferences for column alias, cell format string and link columns
-        /// </summary>
-        /// <param name="dt"></param>
-        private void AddColumns(DataTable dt)
-        {
-            var customReportResults = report.CustomReportResults[selectedTableIndex];
-            foreach (DataColumn dataColumn in dt.Columns)
-            {
-                DataGridViewColumn column;
-
-                if (customReportResults.LinkColumns.ContainsKey(dataColumn.ColumnName))
-                {
-                    column = new DataGridViewLinkColumn();
-                }
-                else if (dataColumn.DataType == typeof(bool))
-                {
-                    column = new DataGridViewCheckBoxColumn();
-                }
-                else
-                {
-                    column = new DataGridViewTextBoxColumn();
-                }
-
-                column.SortMode = DataGridViewColumnSortMode.Automatic;
-                column.DefaultCellStyle.Format =
-                    customReportResults.CellFormatString
-                        .ContainsKey(dataColumn.ColumnName)
-                        ? customReportResults.CellFormatString[dataColumn.ColumnName]
-                        : "";
-
-                column.DataPropertyName = dataColumn.ColumnName;
-                column.Name = dataColumn.ColumnName;
-                column.HeaderText =
-                    customReportResults.ColumnAlias.ContainsKey(column.DataPropertyName)
-                        ? customReportResults.ColumnAlias[column.DataPropertyName]
-                        : dataColumn.Caption;
-                column.ValueType = dataColumn.DataType;
-                dgv.Columns.Add(column);
-            }
         }
 
         /// <summary>

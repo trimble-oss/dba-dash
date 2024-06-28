@@ -19,7 +19,8 @@ namespace DBADash.Messaging
         {
             Progress,
             Failure,
-            Success
+            Success,
+            EndConversation
         }
 
         public ResponseTypes Type { get; set; }
