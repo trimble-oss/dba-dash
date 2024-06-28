@@ -89,6 +89,7 @@
             dataGridViewTextBoxColumn28 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            refresh1 = new Refresh();
             ((System.ComponentModel.ISupportInitialize)dgvBackups).BeginInit();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -138,7 +139,7 @@
             dgvBackups.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             dgvBackups.RowHeadersVisible = false;
             dgvBackups.RowHeadersWidth = 51;
-            dgvBackups.Size = new System.Drawing.Size(1947, 470);
+            dgvBackups.Size = new System.Drawing.Size(1947, 471);
             dgvBackups.TabIndex = 0;
             dgvBackups.CellContentClick += DgvBackups_CellContentClick;
             dgvBackups.RowsAdded += DgvBackups_RowsAdded;
@@ -236,7 +237,7 @@
             tsTrigger.Size = new System.Drawing.Size(151, 24);
             tsTrigger.Text = "Trigger Collection";
             tsTrigger.Visible = false;
-            tsTrigger.Click += tsTrigger_Click;
+            tsTrigger.Click += TsTrigger_Click;
             // 
             // splitContainer1
             // 
@@ -255,7 +256,7 @@
             splitContainer1.Panel2.Controls.Add(dgvBackups);
             splitContainer1.Panel2.Controls.Add(toolStrip2);
             splitContainer1.Size = new System.Drawing.Size(1947, 763);
-            splitContainer1.SplitterDistance = 261;
+            splitContainer1.SplitterDistance = 260;
             splitContainer1.SplitterWidth = 5;
             splitContainer1.TabIndex = 2;
             // 
@@ -273,7 +274,7 @@
             dgvSummary.RowHeadersVisible = false;
             dgvSummary.RowHeadersWidth = 51;
             dgvSummary.RowTemplate.Height = 24;
-            dgvSummary.Size = new System.Drawing.Size(1947, 261);
+            dgvSummary.Size = new System.Drawing.Size(1947, 260);
             dgvSummary.TabIndex = 0;
             dgvSummary.CellContentClick += DgvSummary_CellContentClick;
             dgvSummary.RowsAdded += DgvSummary_RowsAdded;
@@ -639,6 +640,17 @@
             lblStatus.Name = "lblStatus";
             lblStatus.Size = new System.Drawing.Size(0, 16);
             // 
+            // refresh1
+            // 
+            refresh1.Dock = System.Windows.Forms.DockStyle.Fill;
+            refresh1.Font = new System.Drawing.Font("Segoe UI", 11F);
+            refresh1.Location = new System.Drawing.Point(0, 0);
+            refresh1.Margin = new System.Windows.Forms.Padding(4);
+            refresh1.Name = "refresh1";
+            refresh1.Size = new System.Drawing.Size(1947, 812);
+            refresh1.TabIndex = 1;
+            refresh1.Visible = false;
+            // 
             // BackupsControl
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -646,6 +658,7 @@
             Controls.Add(splitContainer1);
             Controls.Add(toolStrip1);
             Controls.Add(statusStrip1);
+            Controls.Add(refresh1);
             Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             Name = "BackupsControl";
             Size = new System.Drawing.Size(1947, 812);
@@ -716,5 +729,6 @@
         private System.Windows.Forms.ToolStripButton tsTrigger;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel lblStatus;
+        private Refresh refresh1;
     }
 }

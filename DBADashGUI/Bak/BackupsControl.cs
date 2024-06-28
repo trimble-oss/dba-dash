@@ -4,12 +4,17 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using DBADashGUI.Interface;
 using DBADashGUI.Theme;
 using static DBADashGUI.DBADashStatus;
 using DBADash;
 using DBADashGUI.Messaging;
+using DocumentFormat.OpenXml.Drawing.Charts;
+using DataTable = System.Data.DataTable;
+using System.Threading;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace DBADashGUI.Backups
 {
@@ -17,25 +22,29 @@ namespace DBADashGUI.Backups
     {
         public bool IncludeCritical
         {
-            get => statusFilterToolStrip1.Critical; set => statusFilterToolStrip1.Critical = value;
+            get => statusFilterToolStrip1.Critical;
+            set => statusFilterToolStrip1.Critical = value;
         }
 
         public bool IncludeWarning
         {
-            get => statusFilterToolStrip1.Warning; set => statusFilterToolStrip1.Warning = value;
+            get => statusFilterToolStrip1.Warning;
+            set => statusFilterToolStrip1.Warning = value;
         }
 
         public bool IncludeNA
         {
-            get => statusFilterToolStrip1.NA; set => statusFilterToolStrip1.NA = value;
+            get => statusFilterToolStrip1.NA;
+            set => statusFilterToolStrip1.NA = value;
         }
 
         public bool IncludeOK
         {
-            get => statusFilterToolStrip1.OK; set => statusFilterToolStrip1.OK = value;
+            get => statusFilterToolStrip1.OK;
+            set => statusFilterToolStrip1.OK = value;
         }
 
-        public bool CanNavigateBack { get => tsBack.Enabled; }
+        public bool CanNavigateBack => tsBack.Enabled;
 
         private List<int> InstanceIDs { get; set; }
         private int DatabaseID { get; set; }
@@ -43,9 +52,14 @@ namespace DBADashGUI.Backups
         private List<int> backupInstanceIDs;
 
         private DBADashContext CurrentContext;
+        private DateTime LastRefresh = DateTime.MinValue;
+        private const int BackupDataIsStaleThreshold = 600; // seconds
+        private CancellationTokenSource cancellationToken;
 
         public void SetContext(DBADashContext context)
         {
+            if (CurrentContext == context &&  DateTime.Now.Subtract(LastRefresh).TotalSeconds < BackupDataIsStaleThreshold) return;
+            LastRefresh = DateTime.Now;
             InstanceIDs = context.RegularInstanceIDs.ToList();
             IncludeNA = context.RegularInstanceIDs.Count == 1;
             IncludeOK = context.RegularInstanceIDs.Count == 1;
@@ -56,63 +70,89 @@ namespace DBADashGUI.Backups
             dgvBackups.DataSource = null;
             dgvBackups.Columns.Clear();
 
-            backupInstanceIDs = new List<int>();
+            backupInstanceIDs = new ();
             tsBack.Enabled = false;
             lblStatus.Text = "";
             tsTrigger.Visible = context.CanMessage;
+
             CurrentContext = context;
-            RefreshDataLocal();
+         
+            RunRefreshDataLocal();
         }
 
         public void RefreshData()
         {
-            if (this.InvokeRequired)
-            {
-                this.Invoke(RefreshData);
-                return;
-            }
-            RefreshDataLocal();
+           RunRefreshDataLocal();
         }
 
-        private void RefreshDataLocal()
+        private void RunRefreshDataLocal()
         {
-            RefreshSummary();
-            if (InstanceIDs.Count > 0 && (splitContainer1.SplitterDistance + 200) > splitContainer1.Height) // Summary is taking up all the room so don't show DB level data.
+            cancellationToken?.Cancel();
+            cancellationToken = new CancellationTokenSource();
+            Task.Run(()=>RefreshDataLocal(cancellationToken.Token));
+        }
+
+        private async Task RefreshDataLocal(CancellationToken token)
+        {
+            this.Invoke(() =>
             {
-                splitContainer1.Panel2Collapsed = true;
-            }
-            else
+                splitContainer1.Visible = false;
+                refresh1.ShowRefresh();
+            });
+
+            var summaryTask = GetBackupSummaryAsync(token);
+            var detailTask = DatabaseID > 0 ? GetLastBackupAsync(token) : GetBackupsAsync(token);
+
+       
+            try
             {
-                splitContainer1.Panel2Collapsed = false;
-                if (DatabaseID > 0)
+                await Task.WhenAll(summaryTask, detailTask);
+                if (token.IsCancellationRequested) return;
+
+                this.Invoke(() =>
                 {
-                    RefreshLastBackup();
-                }
-                else
-                {
-                    RefreshBackupsLocal();
-                }
-            }
-        }
+                    RefreshSummary(summaryTask.Result);
+                    if (DatabaseID > 0)
+                    {
+                        RefreshLastBackup(detailTask.Result);
+                    }
+                    else
+                    {
+                        RefreshBackupsLocal(detailTask.Result);
+                    }
+                    splitContainer1.Panel2Collapsed = (InstanceIDs.Count > 0 &&
+                                                       (splitContainer1.SplitterDistance + 200) > splitContainer1.Height); // Summary is taking up all the room so don't show DB level data.
 
-        private DataTable GetLastBackup()
-        {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new("dbo.LastBackup_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (SqlDataAdapter da = new(cmd))
+                    splitContainer1.Visible = true;
+                    refresh1.HideRefresh();
+                });
+            }
+            catch (Exception ex)
             {
-                cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                DataTable dtBackups = new();
-                da.Fill(dtBackups);
-                DateHelper.ConvertUTCToAppTimeZone(ref dtBackups);
-                return dtBackups;
+                if (token.IsCancellationRequested) return;
+                this.Invoke(() =>
+                {
+                    refresh1.SetFailed(ex.Message);
+                });
             }
+
         }
 
-        private void RefreshLastBackup()
+        private async Task<DataTable> GetLastBackupAsync(CancellationToken token)
         {
-            DataTable dtBackups = GetLastBackup();
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using SqlCommand cmd = new("dbo.LastBackup_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using SqlDataAdapter da = new(cmd);
+            await cn.OpenAsync(token);
+            cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+            DataTable dtBackups = new();
+            await Task.Run(() => { da.Fill(dtBackups); }, token);
+            DateHelper.ConvertUTCToAppTimeZone(ref dtBackups);
+            return dtBackups;
+        }
 
+        private void RefreshLastBackup(DataTable dtBackups)
+        {
             dgvBackups.DataSource = null;
             dgvBackups.AutoGenerateColumns = false;
             dgvBackups.Columns.Clear();
@@ -149,24 +189,25 @@ namespace DBADashGUI.Backups
             dgvBackups.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-        private DataTable GetBackups()
+        private async Task<DataTable> GetBackupsAsync(CancellationToken token)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new("dbo.Backups_Get", cn) { CommandType = CommandType.StoredProcedure })
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using SqlCommand cmd = new("dbo.Backups_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            await cn.OpenAsync(token);
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            DataTable dtBackups = new();
+            await Task.Run(() =>
             {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                SqlDataAdapter da = new(cmd);
-                DataTable dtBackups = new();
                 da.Fill(dtBackups);
-                DateHelper.ConvertUTCToAppTimeZone(ref dtBackups);
-                return dtBackups;
-            }
+            }, token);
+            DateHelper.ConvertUTCToAppTimeZone(ref dtBackups);
+            return dtBackups;
         }
 
-        private void RefreshBackupsLocal()
+        private void RefreshBackupsLocal(DataTable dt)
         {
             UseWaitCursor = true;
             configureInstanceThresholdsToolStripMenuItem.Enabled = (InstanceIDs.Count == 1);
@@ -233,32 +274,31 @@ namespace DBADashGUI.Backups
                 new DataGridViewLinkColumn() { HeaderText = "Configure", Text = "Configure", UseColumnTextForLinkValue = true, SortMode = DataGridViewColumnSortMode.NotSortable, Name = "Configure", LinkColor = DashColors.LinkColor }
             );
             dgvBackups.ApplyTheme();
-            dgvBackups.DataSource = new DataView(GetBackups());
+            dgvBackups.DataSource = new DataView(dt);
             dgvBackups.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
 
             UseWaitCursor = false;
         }
 
-        private DataTable GetBackupSummary()
+        private async Task<DataTable> GetBackupSummaryAsync(CancellationToken token)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new("dbo.BackupSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceIDs", InstanceIDs.AsDataTable());
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                SqlDataAdapter da = new(cmd);
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                return dt;
-            }
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using SqlCommand cmd = new("dbo.BackupSummary_Get", cn) { CommandType = CommandType.StoredProcedure };
+            await cn.OpenAsync(token);
+            cmd.Parameters.AddWithValue("InstanceIDs", InstanceIDs.AsDataTable());
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+
+            await using var rdr = await cmd.ExecuteReaderAsync(token);
+            DataTable dt = new();
+            dt.Load(rdr);
+
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            return dt;
         }
 
-        private void RefreshSummary()
+        private void RefreshSummary(DataTable dt)
         {
             UseWaitCursor = true;
-            DataTable dt = GetBackupSummary();
             dgvSummary.AutoGenerateColumns = false;
             if (dgvSummary.Columns.Count == 0)
             {
@@ -331,73 +371,69 @@ namespace DBADashGUI.Backups
 
         private void DgvBackups_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            if (dgvBackups.Columns.Contains("LastFull"))
+            if (!dgvBackups.Columns.Contains("LastFull")) return;
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
-                for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+                var row = (DataRowView)dgvBackups.Rows[idx].DataBoundItem;
+                var fullBackupStatus = (DBADashStatus.DBADashStatusEnum)row["FullBackupStatus"];
+                var diffBackupStatus = (DBADashStatus.DBADashStatusEnum)row["DiffBackupStatus"];
+                var logBackupStatus = (DBADashStatus.DBADashStatusEnum)row["LogBackupStatus"];
+                var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["SnapshotAgeStatus"];
+                dgvBackups.Rows[idx].Cells["LastFull"].SetStatusColor(fullBackupStatus);
+                dgvBackups.Rows[idx].Cells["LastDiff"].SetStatusColor(diffBackupStatus);
+                dgvBackups.Rows[idx].Cells["LastLog"].SetStatusColor(logBackupStatus);
+                if ((bool)row["ConsiderPartialBackups"])
                 {
-                    var row = (DataRowView)dgvBackups.Rows[idx].DataBoundItem;
-                    var fullBackupStatus = (DBADashStatus.DBADashStatusEnum)row["FullBackupStatus"];
-                    var diffBackupStatus = (DBADashStatus.DBADashStatusEnum)row["DiffBackupStatus"];
-                    var logBackupStatus = (DBADashStatus.DBADashStatusEnum)row["LogBackupStatus"];
-                    var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["SnapshotAgeStatus"];
-                    dgvBackups.Rows[idx].Cells["LastFull"].SetStatusColor(fullBackupStatus);
-                    dgvBackups.Rows[idx].Cells["LastDiff"].SetStatusColor(diffBackupStatus);
-                    dgvBackups.Rows[idx].Cells["LastLog"].SetStatusColor(logBackupStatus);
-                    if ((bool)row["ConsiderPartialBackups"])
-                    {
-                        dgvBackups.Rows[idx].Cells["LastPartial"].SetStatusColor(fullBackupStatus);
-                        dgvBackups.Rows[idx].Cells["LastPartialDiff"].SetStatusColor(diffBackupStatus);
-                    }
-                    else
-                    {
-                        dgvBackups.Rows[idx].Cells["LastPartial"].SetStatusColor(DBADashStatusEnum.NA);
-                        dgvBackups.Rows[idx].Cells["LastPartialDiff"].SetStatusColor(DBADashStatusEnum.NA);
-                    }
-                    if ((bool)row["ConsiderFGBackups"])
-                    {
-                        dgvBackups.Rows[idx].Cells["LastFG"].SetStatusColor(fullBackupStatus);
-                        dgvBackups.Rows[idx].Cells["LastFGDiff"].SetStatusColor(diffBackupStatus);
-                    }
-                    else
-                    {
-                        dgvBackups.Rows[idx].Cells["LastFG"].SetStatusColor(DBADashStatusEnum.NA);
-                        dgvBackups.Rows[idx].Cells["LastFGDiff"].SetStatusColor(DBADashStatusEnum.NA);
-                    }
-                    dgvBackups.Rows[idx].Cells["SnapshotAge"].SetStatusColor(snapshotStatus);
-                    dgvBackups.Rows[idx].Cells["Configure"].Style.Font = (string)row["ThresholdsConfiguredLevel"] == "Database" ? new Font(dgvBackups.Font, FontStyle.Bold) : new Font(dgvBackups.Font, FontStyle.Regular);
+                    dgvBackups.Rows[idx].Cells["LastPartial"].SetStatusColor(fullBackupStatus);
+                    dgvBackups.Rows[idx].Cells["LastPartialDiff"].SetStatusColor(diffBackupStatus);
                 }
+                else
+                {
+                    dgvBackups.Rows[idx].Cells["LastPartial"].SetStatusColor(DBADashStatusEnum.NA);
+                    dgvBackups.Rows[idx].Cells["LastPartialDiff"].SetStatusColor(DBADashStatusEnum.NA);
+                }
+                if ((bool)row["ConsiderFGBackups"])
+                {
+                    dgvBackups.Rows[idx].Cells["LastFG"].SetStatusColor(fullBackupStatus);
+                    dgvBackups.Rows[idx].Cells["LastFGDiff"].SetStatusColor(diffBackupStatus);
+                }
+                else
+                {
+                    dgvBackups.Rows[idx].Cells["LastFG"].SetStatusColor(DBADashStatusEnum.NA);
+                    dgvBackups.Rows[idx].Cells["LastFGDiff"].SetStatusColor(DBADashStatusEnum.NA);
+                }
+                dgvBackups.Rows[idx].Cells["SnapshotAge"].SetStatusColor(snapshotStatus);
+                dgvBackups.Rows[idx].Cells["Configure"].Style.Font = (string)row["ThresholdsConfiguredLevel"] == "Database" ? new Font(dgvBackups.Font, FontStyle.Bold) : new Font(dgvBackups.Font, FontStyle.Regular);
             }
         }
 
         private void DgvBackups_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0 && dgvBackups.Columns.Contains("Configure"))
+            if (e.RowIndex < 0 || !dgvBackups.Columns.Contains("Configure")) return;
+            var row = (DataRowView)dgvBackups.Rows[e.RowIndex].DataBoundItem;
+            if (dgvBackups.Columns[e.ColumnIndex].Name == "Configure")
             {
-                var row = (DataRowView)dgvBackups.Rows[e.RowIndex].DataBoundItem;
-                if (dgvBackups.Columns[e.ColumnIndex].Name == "Configure")
-                {
-                    ConfigureThresholds((int)row["InstanceID"], (int)row["DatabaseID"]);
-                }
-                else if (dgvBackups.Columns[e.ColumnIndex].HeaderText == "Database")
-                {
-                    DatabaseID = (int)row["DatabaseID"];
-                    tsBack.Enabled = true;
-                    RefreshDataLocal();
-                }
+                ConfigureThresholds((int)row["InstanceID"], (int)row["DatabaseID"]);
+            }
+            else if (dgvBackups.Columns[e.ColumnIndex].HeaderText == "Database")
+            {
+                DatabaseID = (int)row["DatabaseID"];
+                tsBack.Enabled = true;
+                RunRefreshDataLocal();
             }
         }
 
-        private void ConfigureThresholds(int InstanceID, int DatabaseID)
+        private void ConfigureThresholds(int instanceID, int databaseID)
         {
             var frm = new BackupThresholdsConfig
             {
-                InstanceID = InstanceID,
-                DatabaseID = DatabaseID
+                InstanceID = instanceID,
+                DatabaseID = databaseID
             };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
-                RefreshDataLocal();
+                RunRefreshDataLocal();
             }
         }
 
@@ -416,31 +452,31 @@ namespace DBADashGUI.Backups
 
         private void TsFilter_Click(object sender, EventArgs e)
         {
-            RefreshDataLocal();
+            RunRefreshDataLocal();
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
         {
-            RefreshDataLocal();
+           RunRefreshDataLocal();
         }
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            dgvSummary.Columns["Configure"].Visible = false;
+            dgvSummary.Columns["Configure"]!.Visible = false;
             Common.CopyDataGridViewToClipboard(dgvSummary);
             dgvSummary.Columns["Configure"].Visible = true;
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            dgvSummary.Columns["Configure"].Visible = false;
+            dgvSummary.Columns["Configure"]!.Visible = false;
             Common.PromptSaveDataGridView(ref dgvSummary);
-            dgvSummary.Columns["Configure"].Visible = true;
+            dgvSummary.Columns["Configure"]!.Visible = true;
         }
 
         private void DgvSummary_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvSummary.Rows[idx].DataBoundItem;
                 var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["SnapshotAgeStatus"];
@@ -448,21 +484,21 @@ namespace DBADashGUI.Backups
                 dgvSummary.Rows[idx].Cells["SnapshotAge"].SetStatusColor(snapshotStatus);
 
                 var okCols = new string[] { "FullOK", "DiffOK", "LogOK" };
-                foreach (string col in okCols)
+                foreach (var col in okCols)
                 {
-                    int value = Convert.ToInt32(dgvSummary.Rows[idx].Cells[col].Value);
+                    var value = Convert.ToInt32(dgvSummary.Rows[idx].Cells[col].Value);
                     dgvSummary.Rows[idx].Cells[col].SetStatusColor(value > 0 ? DBADashStatusEnum.OK : DBADashStatusEnum.NA);
                 }
                 var warningCols = new string[] { "FullWarning", "DiffWarning", "LogWarning" };
-                foreach (string col in warningCols)
+                foreach (var col in warningCols)
                 {
-                    int value = Convert.ToInt32(dgvSummary.Rows[idx].Cells[col].Value);
+                    var value = Convert.ToInt32(dgvSummary.Rows[idx].Cells[col].Value);
                     dgvSummary.Rows[idx].Cells[col].SetStatusColor(value > 0 ? DBADashStatusEnum.Warning : DBADashStatusEnum.NA);
                 }
                 var criticalCols = new string[] { "FullCritical", "DiffCritical", "LogCritical" };
-                foreach (string col in criticalCols)
+                foreach (var col in criticalCols)
                 {
-                    int value = Convert.ToInt32(dgvSummary.Rows[idx].Cells[col].Value);
+                    var value = Convert.ToInt32(dgvSummary.Rows[idx].Cells[col].Value);
                     dgvSummary.Rows[idx].Cells[col].SetStatusColor(value > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.NA);
                 }
                 dgvSummary.Rows[idx].Cells["Configure"].Style.Font = Convert.ToBoolean(row["InstanceThresholdConfiguration"]) ? new Font(dgvSummary.Font, FontStyle.Bold) : new Font(dgvSummary.Font, FontStyle.Regular);
@@ -471,30 +507,28 @@ namespace DBADashGUI.Backups
 
         private void DgvSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex < 0) return;
+            if (dgvSummary.Columns[e.ColumnIndex].Name == "Instance" && backupInstanceIDs.Count == 0)
             {
-                if (dgvSummary.Columns[e.ColumnIndex].Name == "Instance" && backupInstanceIDs.Count == 0)
-                {
-                    DatabaseID = 0;
-                    var row = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
-                    var instanceId = (int)row["InstanceID"];
-                    backupInstanceIDs = InstanceIDs;
-                    InstanceIDs = new List<int>() { instanceId };
-                    IncludeCritical = true;
-                    IncludeWarning = true;
-                    IncludeOK = true;
-                    IncludeNA = true;
-                    tsBack.Enabled = true;
-                    var tempContext = (DBADashContext)CurrentContext.Clone();
-                    tempContext.InstanceID = instanceId;
-                    tsTrigger.Visible = tempContext.CanMessage;
-                    RefreshDataLocal();
-                }
-                else if (dgvSummary.Columns[e.ColumnIndex].Name == "Configure")
-                {
-                    var row = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
-                    ConfigureThresholds((int)row["InstanceID"], -1);
-                }
+                DatabaseID = 0;
+                var row = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
+                var instanceId = (int)row["InstanceID"];
+                backupInstanceIDs = InstanceIDs;
+                InstanceIDs = new List<int>() { instanceId };
+                IncludeCritical = true;
+                IncludeWarning = true;
+                IncludeOK = true;
+                IncludeNA = true;
+                tsBack.Enabled = true;
+                var tempContext = (DBADashContext)CurrentContext.Clone();
+                tempContext.InstanceID = instanceId;
+                tsTrigger.Visible = tempContext.CanMessage;
+                RunRefreshDataLocal();
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex].Name == "Configure")
+            {
+                var row = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
+                ConfigureThresholds((int)row["InstanceID"], -1);
             }
         }
 
@@ -505,42 +539,37 @@ namespace DBADashGUI.Backups
 
         public bool NavigateBack()
         {
-            if (CanNavigateBack)
+            if (!CanNavigateBack) return false;
+            
+            if (DatabaseID > 0)
             {
-                if (DatabaseID > 0)
-                {
-                    DatabaseID = 0;
-                }
-                else
-                {
-                    InstanceIDs = backupInstanceIDs;
-                    backupInstanceIDs = new List<int>();
-                    tsTrigger.Visible = CurrentContext.CanMessage;
-                }
-                tsBack.Enabled = backupInstanceIDs.Count > 0;
-                IncludeCritical = true;
-                IncludeWarning = true;
-                IncludeOK = InstanceIDs.Count == 1;
-                IncludeNA = InstanceIDs.Count == 1;
-                RefreshDataLocal();
-                return true;
+                DatabaseID = 0;
             }
             else
             {
-                return false;
+                InstanceIDs = backupInstanceIDs;
+                backupInstanceIDs = new();
+                tsTrigger.Visible = CurrentContext.CanMessage;
             }
+            tsBack.Enabled = backupInstanceIDs.Count > 0;
+            IncludeCritical = true;
+            IncludeWarning = true;
+            IncludeOK = InstanceIDs.Count == 1;
+            IncludeNA = InstanceIDs.Count == 1;
+            RunRefreshDataLocal();
+            return true;
         }
 
         private void TsExcelDetail_Click(object sender, EventArgs e)
         {
-            dgvBackups.Columns["Configure"].Visible = false;
+            dgvBackups.Columns["Configure"]!.Visible = false;
             Common.PromptSaveDataGridView(ref dgvBackups);
-            dgvBackups.Columns["Configure"].Visible = true;
+            dgvBackups.Columns["Configure"]!.Visible = true;
         }
 
         private void TsCopyDetail_Click(object sender, EventArgs e)
         {
-            dgvBackups.Columns["Configure"].Visible = false;
+            dgvBackups.Columns["Configure"]!.Visible = false;
             Common.CopyDataGridViewToClipboard(dgvBackups);
             dgvBackups.Columns["Configure"].Visible = true;
         }
@@ -560,14 +589,14 @@ namespace DBADashGUI.Backups
             lblStatus.InvokeSetStatus(message, tooltip, color);
         }
 
-        private async void tsTrigger_Click(object sender, EventArgs e)
+        private async void TsTrigger_Click(object sender, EventArgs e)
         {
             if (InstanceIDs.Count != 1)
             {
-                lblStatus.Text = "Please select a single instance to trigger a collection";
+                lblStatus.Text = @"Please select a single instance to trigger a collection";
             }
             var instanceId = InstanceIDs[0];
-            await CollectionMessaging.TriggerCollection(instanceId, new List<CollectionType>() { CollectionType.Backups, CollectionType.Databases}, this);
+            await CollectionMessaging.TriggerCollection(instanceId, new List<CollectionType>() { CollectionType.Backups, CollectionType.Databases }, this);
         }
     }
 }
