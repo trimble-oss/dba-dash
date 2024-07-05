@@ -111,6 +111,7 @@ namespace DBADashGUI.Performance
                 From = new DateTimeOffset(DateRange.FromUTC, TimeSpan.Zero),
                 To = new DateTimeOffset(DateRange.ToUTC, TimeSpan.Zero),
                 IncludeWaits = IncludeWaits,
+                Lifetime = Config.DefaultCommandTimeout
             };
             lblStatus.InvokeSetStatus(messageSentMessage, string.Empty, DashColors.Information);
             await SendMessageAndProcessReply(message, dgv);
@@ -124,14 +125,14 @@ namespace DBADashGUI.Performance
                 lblStatus.InvokeSetStatus("No Import Agent", string.Empty, DashColors.Fail);
                 return;
             }
-            await MessageProcessing.SendMessageToService(message.Serialize(), (int)CurrentContext.ImportAgentID, messageGroup, Common.ConnectionString, Config.DefaultCommandTimeout);
+            await MessageProcessing.SendMessageToService(message.Serialize(), (int)CurrentContext.ImportAgentID, messageGroup, Common.ConnectionString, message.Lifetime);
             var completed = false;
             while (!completed)
             {
                 ResponseMessage reply;
                 try
                 {
-                    reply = await Messaging.CollectionMessaging.ReceiveReply(messageGroup, Config.DefaultCommandTimeout * 1000);
+                    reply = await Messaging.CollectionMessaging.ReceiveReply(messageGroup, message.Lifetime * 1000);
                 }
                 catch (Exception ex)
                 {
@@ -431,6 +432,7 @@ namespace DBADashGUI.Performance
                 From = new DateTimeOffset(DateRange.FromUTC, TimeSpan.Zero),
                 To = new DateTimeOffset(DateRange.ToUTC, TimeSpan.Zero),
                 IncludeWaits = IncludeWaits,
+                Lifetime = Config.DefaultCommandTimeout
             };
             Task.Run(() => SendMessageAndProcessReply(message, dgvDrillDown));
         }
