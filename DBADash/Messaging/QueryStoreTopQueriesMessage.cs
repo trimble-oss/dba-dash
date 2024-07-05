@@ -236,7 +236,7 @@ namespace DBADash.Messaging
         {
             await using var cn = new SqlConnection(connectionString);
             await cn.OpenAsync();
-            await using var cmd = new SqlCommand(SqlStrings.QueryStoreTopQueries, cn);
+            await using var cmd = new SqlCommand(SqlStrings.QueryStoreTopQueries, cn) {CommandTimeout = Lifetime};
             cmd.Parameters.AddWithValue("@Database", db);
             cmd.Parameters.AddWithValue("@FromDate", From);
             cmd.Parameters.AddWithValue("@ToDate ", To);

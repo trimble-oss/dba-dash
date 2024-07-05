@@ -18,7 +18,9 @@ namespace DBADash.Messaging
 
         public DateTime Created { get; set; } = DateTime.UtcNow;
 
-        public bool IsExpired => DateTime.UtcNow - Created > TimeSpan.FromMinutes(5);
+        public int Lifetime { get; set; } = 300;
+
+        public bool IsExpired => DateTime.UtcNow - Created > TimeSpan.FromSeconds(Lifetime);
 
         public DBADashAgent CollectAgent { get; set; }
         public DBADashAgent ImportAgent { get; set; }

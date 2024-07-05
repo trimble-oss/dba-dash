@@ -75,7 +75,7 @@ namespace DBADashGUI.Messaging
 
             var collectAgent = DBADashAgent.GetDBADashAgent(Common.ConnectionString, collectAgentID);
             var importAgent = DBADashAgent.GetDBADashAgent(Common.ConnectionString, importAgentID);
-            var x = new CollectionMessage(types, connectionID) { CollectAgent = collectAgent, ImportAgent = importAgent, DatabaseName = db};
+            var x = new CollectionMessage(types, connectionID) { CollectAgent = collectAgent, ImportAgent = importAgent, DatabaseName = db, Lifetime = CollectionDialogLifetime};
 
             var payload = x.Serialize();
             var messageGroup = Guid.NewGuid();
