@@ -96,30 +96,30 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.7.304.16" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.309.4" />
-    <PackageReference Include="AWSSDK.SQS" Version="3.7.301.19" />
+    <PackageReference Include="AWSSDK.Core" Version="3.7.304.25" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.310.2" />
+    <PackageReference Include="AWSSDK.SQS" Version="3.7.301.28" />
     <PackageReference Include="Azure.Core" Version="1.40.0" />
-    <PackageReference Include="Azure.Identity" Version="1.11.4" />
+    <PackageReference Include="Azure.Identity" Version="1.12.0" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.1" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.61.3" />
     <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.61.3" />
-    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.6.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="7.6.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="7.6.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="7.6.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.6.0" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.6.2" />
+    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="7.6.2" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="7.6.2" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="7.6.2" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.6.2" />
     <PackageReference Include="Microsoft.Management.Infrastructure" Version="3.0.0" />
     <PackageReference Include="Microsoft.SqlServer.Assessment" Version="1.1.17" />
     <PackageReference Include="Microsoft.SqlServer.Assessment.Authoring" Version="1.1.0" />
-    <PackageReference Include="Microsoft.SqlServer.DacFx" Version="162.3.563" />
+    <PackageReference Include="Microsoft.SqlServer.DacFx" Version="162.3.566" />
     <PackageReference Include="Microsoft.SqlServer.Management.SqlParser" Version="172.0.1" />
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="171.30.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Octokit" Version="12.0.0" />
-    <PackageReference Include="Polly" Version="8.4.0" />
+    <PackageReference Include="Octokit" Version="13.0.1" />
+    <PackageReference Include="Polly" Version="8.4.1" />
     <PackageReference Include="Serilog" Version="4.0.0" />
     <PackageReference Include="SerilogTimings" Version="3.1.0" />
     <PackageReference Include="System.Buffers" Version="4.5.1" />
@@ -128,7 +128,7 @@
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="8.0.1" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.6" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.6.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.6.2" />
     <PackageReference Include="System.Management" Version="8.0.0" />
     <PackageReference Include="System.Memory" Version="4.5.5" />
     <PackageReference Include="System.Memory.Data" Version="8.0.0" />
