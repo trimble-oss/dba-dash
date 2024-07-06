@@ -124,7 +124,7 @@
             tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExcel.Name = "tsExcel";
             tsExcel.Size = new System.Drawing.Size(29, 24);
-            tsExcel.Text = "toolStripButton1";
+            tsExcel.Text = "Export to Excel";
             tsExcel.Click += TsExcel_Click;
             // 
             // tsOptions
@@ -245,7 +245,7 @@
             queryToolStripMenuItem.Checked = true;
             queryToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             queryToolStripMenuItem.Name = "queryToolStripMenuItem";
-            queryToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            queryToolStripMenuItem.Size = new System.Drawing.Size(168, 26);
             queryToolStripMenuItem.Tag = "query_id";
             queryToolStripMenuItem.Text = "Query";
             queryToolStripMenuItem.Click += Select_GroupBy;
@@ -253,7 +253,7 @@
             // planToolStripMenuItem
             // 
             planToolStripMenuItem.Name = "planToolStripMenuItem";
-            planToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            planToolStripMenuItem.Size = new System.Drawing.Size(168, 26);
             planToolStripMenuItem.Tag = "plan_id";
             planToolStripMenuItem.Text = "Plan";
             planToolStripMenuItem.Click += Select_GroupBy;
@@ -261,7 +261,7 @@
             // planHashToolStripMenuItem
             // 
             planHashToolStripMenuItem.Name = "planHashToolStripMenuItem";
-            planHashToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            planHashToolStripMenuItem.Size = new System.Drawing.Size(168, 26);
             planHashToolStripMenuItem.Tag = "query_plan_hash";
             planHashToolStripMenuItem.Text = "Plan Hash";
             planHashToolStripMenuItem.Click += Select_GroupBy;
@@ -269,7 +269,7 @@
             // queryHashToolStripMenuItem
             // 
             queryHashToolStripMenuItem.Name = "queryHashToolStripMenuItem";
-            queryHashToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            queryHashToolStripMenuItem.Size = new System.Drawing.Size(168, 26);
             queryHashToolStripMenuItem.Tag = "query_hash";
             queryHashToolStripMenuItem.Text = "Query Hash";
             queryHashToolStripMenuItem.Click += Select_GroupBy;
