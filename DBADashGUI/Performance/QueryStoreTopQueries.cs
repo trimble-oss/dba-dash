@@ -2,18 +2,12 @@
 using DBADashGUI.CustomReports;
 using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
-using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
-using Amazon.Runtime.Internal.Transform;
-using System.Xml.Linq;
-using Serilog;
 
 namespace DBADashGUI.Performance
 {
@@ -48,7 +42,7 @@ namespace DBADashGUI.Performance
         private int top = 25;
         private int minimumPlanCount = 1;
 
-        private int GetMinimumPlanCount()=>minimumPlanCountToolStripMenuItem.Enabled ? minimumPlanCount : 1;
+        private int GetMinimumPlanCount() => minimumPlanCountToolStripMenuItem.Enabled ? minimumPlanCount : 1;
 
         private string sortColumn = "total_cpu_time_ms";
         private QueryStoreTopQueriesMessage.QueryStoreGroupByEnum groupBy = QueryStoreTopQueriesMessage.QueryStoreGroupByEnum.query_id;
@@ -167,6 +161,7 @@ namespace DBADashGUI.Performance
                                 }
 
                                 var dt = ds.Tables[0];
+                                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                                 if (message is PlanCollectionMessage)
                                 {
                                     LoadQueryPlan(dt);
@@ -177,7 +172,14 @@ namespace DBADashGUI.Performance
                                 _dgv.AddColumns(dt, topQueriesResult);
                                 _dgv.DataSource = new DataView(dt, null, $"{sortColumn} DESC",
                                     DataViewRowState.CurrentRows);
-                                _dgv.LoadColumnLayout(topQueriesResult.ColumnLayout);
+                                try
+                                {
+                                    _dgv.LoadColumnLayout(UserColumnLayout ?? topQueriesResult.ColumnLayout);
+                                }
+                                catch (Exception ex)
+                                {
+                                    lblStatus.InvokeSetStatus("Error loading column layout", ex.Message, DashColors.Fail);
+                                }
                                 _dgv.ApplyTheme();
                                 if (_dgv == dgvDrillDown)
                                 {
@@ -239,11 +241,14 @@ namespace DBADashGUI.Performance
                 { "avg_tempdb_space_used_kb","Avg TempDB KB"},
                 { "max_tempdb_space_used_kb","Max TempDB KB"},
                 { "num_plans", "Plan Count" },
+                { "num_queries", "Query Count" },
                 { "top_waits", "Top Waits" },
                 { "plan_forcing_type_desc","Plan Forcing"},
                 { "force_failure_count","Force Failure count"},
                 { "last_force_failure_reason_desc", "Last Forced Failure"},
-                 {"is_parallel_plan","Parallel"}
+                 {"is_parallel_plan","Parallel"},
+                 {"interval_start","Interval Start"},
+                 {"interval_end","Interval End"}
             },
             CellFormatString = new Dictionary<string, string>
             {
@@ -309,6 +314,12 @@ namespace DBADashGUI.Performance
                     new DrillDownLinkColumnInfo()
                     {
                     }
+                },
+                {
+                    "object_name",
+                    new DrillDownLinkColumnInfo()
+                    {
+                    }
                 }
             },
             ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>()
@@ -341,12 +352,15 @@ namespace DBADashGUI.Performance
                 new("avg_tempdb_space_used_kb", new PersistedColumnLayout() { Width = 80, Visible = true }),
                 new("max_tempdb_space_used_kb", new PersistedColumnLayout() { Width = 80, Visible = true }),
                 new("num_plans", new PersistedColumnLayout() { Width = 60, Visible = true }),
+                new("num_queries", new PersistedColumnLayout() { Width = 60, Visible = true }),
                 new("top_waits", new PersistedColumnLayout() { Width = 200, Visible = true }),
-                new ("plan_forcing_type_desc", new PersistedColumnLayout() { Width = 100, Visible = true }),
-                new ("force_failure_count", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new ("last_force_failure_reason_desc", new PersistedColumnLayout() { Width = 100, Visible = true }),
-                new ("is_parallel_plan", new PersistedColumnLayout() { Width = 70, Visible = true }),
+                new("plan_forcing_type_desc", new PersistedColumnLayout() { Width = 100, Visible = true }),
+                new("force_failure_count", new PersistedColumnLayout() { Width = 70, Visible = true }),
+                new("last_force_failure_reason_desc", new PersistedColumnLayout() { Width = 100, Visible = true }),
+                new("is_parallel_plan", new PersistedColumnLayout() { Width = 70, Visible = true }),
                 new("query_parameterization_type_desc", new PersistedColumnLayout() { Width = 100, Visible = true}),
+                new("interval_start", new PersistedColumnLayout() { Width = 150, Visible = false}),
+                new("interval_end", new PersistedColumnLayout() { Width = 150, Visible = false})
             },
             CellHighlightingRules =
             {
@@ -460,6 +474,14 @@ namespace DBADashGUI.Performance
             RefreshData();
         }
 
+        private void ObjectDrillDown(DataGridView _dgv, DataGridViewCellEventArgs e)
+        {
+            var objectName = Convert.ToString(_dgv.Rows[e.RowIndex].Cells["object_name"].Value);
+            txtObjectName.Text = objectName ?? string.Empty;
+            SetGroupBy(QueryStoreTopQueriesMessage.QueryStoreGroupByEnum.query_id);
+            RefreshData();
+        }
+
         private void PlanHashDrillDown(DataGridView _dgv, DataGridViewCellEventArgs e)
         {
             var hash = (string)_dgv.Rows[e.RowIndex].Cells["query_plan_hash"].FormattedValue;
@@ -508,6 +530,10 @@ namespace DBADashGUI.Performance
 
                 case "plan_forcing_type_desc":
                     PlanForcingDrillDown(_dgv, e);
+                    break;
+
+                case "object_name":
+                    ObjectDrillDown(_dgv, e);
                     break;
 
                 default:
@@ -604,6 +630,7 @@ namespace DBADashGUI.Performance
             menuItem.Checked = true;
             tsGroupBy.Text = $@"Group by {menuItem.Text}";
             minimumPlanCountToolStripMenuItem.Enabled = groupBy == QueryStoreTopQueriesMessage.QueryStoreGroupByEnum.query_id;
+            UserColumnLayout = null;
         }
 
         private void Dgv_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
@@ -629,6 +656,7 @@ namespace DBADashGUI.Performance
             tsNearestInterval.Checked = true;
             parallelPlansOnlyToolStripMenuItem.Checked = false;
             SetMinimumPlanCount(1);
+            UserColumnLayout = null;
         }
 
         private void ParallelPlans_CheckChanged(object sender, EventArgs e)
@@ -651,7 +679,7 @@ namespace DBADashGUI.Performance
         private void MinimumPlanCountToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var countString = minimumPlanCount.ToString();
-            if (CommonShared.ShowInputDialog(ref countString,"Enter minimum plan count:")== DialogResult.OK)
+            if (CommonShared.ShowInputDialog(ref countString, "Enter minimum plan count:") == DialogResult.OK)
             {
                 if (!int.TryParse(countString, out var count)) return;
                 SetMinimumPlanCount(count);
@@ -663,6 +691,19 @@ namespace DBADashGUI.Performance
             minimumPlanCountToolStripMenuItem.Text = @"Minimum Plan Count: " + count;
             minimumPlanCount = count;
             SetFilterBold();
+        }
+
+        private List<KeyValuePair<string, PersistedColumnLayout>> UserColumnLayout = null;
+
+        private void TsColumns_Click(object sender, EventArgs e)
+        {
+            dgv.PromptColumnSelection();
+            UserColumnLayout = dgv.GetColumnLayout();
+        }
+
+        private void IncludeWaitsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            UserColumnLayout = null;
         }
     }
 }

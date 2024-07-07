@@ -69,7 +69,7 @@ namespace DBADashGUI
             {
                 foreach (DataColumn col in dt.Columns)
                 {
-                    if (col.DataType == typeof(DateTime))
+                    if (col.DataType == typeof(DateTime) || col.DataType == typeof(DateTimeOffset))
                     {
                         convertColsIdx.Add(col.Ordinal);
                     }
@@ -86,11 +86,19 @@ namespace DBADashGUI
             {
                 foreach (DataRow row in dt.Rows)
                 {
-                    foreach (var col in convertColsIdx)
+                    foreach (var colIdx in convertColsIdx)
                     {
-                        if (row[col] != DBNull.Value)
+                        if (row[colIdx] != DBNull.Value)
                         {
-                            row[col] = ((DateTime)row[col]).ToAppTimeZone();
+                            var colType = dt.Columns[colIdx].DataType;
+                            if (colType == typeof(DateTime))
+                            {
+                                row[colIdx] = ((DateTime)row[colIdx]).ToAppTimeZone();
+                            }
+                            else if (colType == typeof(DateTimeOffset))
+                            {
+                                row[colIdx] = ((DateTimeOffset)row[colIdx]).ToAppTimeZone();
+                            }
                         }
                     }
                 }
@@ -141,6 +149,11 @@ namespace DBADashGUI
         public static DateTime AppTimeZoneToUtc(this DateTime value)
         {
             return TimeZoneInfo.ConvertTimeToUtc(value, AppTimeZone);
+        }
+
+        public static DateTimeOffset ToAppTimeZone(this DateTimeOffset value)
+        {
+            return TimeZoneInfo.ConvertTime(value, AppTimeZone);
         }
 
         /// <summary>

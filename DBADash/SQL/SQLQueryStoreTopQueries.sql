@@ -25,7 +25,7 @@ BEGIN
 	RAISERROR('Invalid database',11,1)
 	RETURN
 END
-IF @GroupBy NOT IN('query_id','plan_id','query_plan_hash','query_hash')
+IF @GroupBy NOT IN('query_id','plan_id','query_plan_hash','query_hash','object_id')
 BEGIN
 	RAISERROR('Invalid group by',11,1)
 	RETURN
@@ -70,13 +70,15 @@ SELECT TOP (@Top)
 		DB_NAME() AS DB,
 		',CASE WHEN @GroupBy = 'plan_id' THEN 'RS.plan_id,P.query_plan_hash,' ELSE '' END,'
 		',CASE WHEN @GroupBy IN('query_id', 'plan_id') THEN '
-		P.query_id query_id,
-		Q.object_id object_id,
+		P.query_id,
+		Q.object_id,
 		Q.query_hash,
 		ISNULL(OBJECT_NAME(Q.object_id),'''') object_name,
 		QT.query_sql_text query_sql_text,'
 		WHEN @GroupBy = 'query_hash' THEN 'Q.query_hash,'
 		WHEN @GroupBy = 'query_plan_hash' THEN 'P.query_plan_hash,'
+		WHEN @GroupBy = 'object_id' THEN 'Q.object_id,
+		ISNULL(OBJECT_NAME(Q.object_id),'''') object_name,'
 		ELSE NULL END, 
 		CASE WHEN @IncludeWaits = 1 THEN 'STUFF(
 				(SELECT TOP(3) '', '' + CONCAT(W.wait_category_desc, '' = '',SUM(W.total_query_wait_time_ms),''ms'')
@@ -113,8 +115,10 @@ SELECT TOP (@Top)
 		', CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.query_store_runtime_stats'),'avg_tempdb_space_used','ColumnId') IS NULL THEN '' ELSE 'SUM(RS.avg_tempdb_space_used*RS.count_executions)/NULLIF(SUM(RS.count_executions),0)*8 AS avg_tempdb_space_used_kb,' END,'
 		', CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.query_store_runtime_stats'),'max_tempdb_space_used','ColumnId') IS NULL THEN '' ELSE 'MAX(RS.max_tempdb_space_used)*8 AS max_tempdb_space_used_kb,' END + '
 		MAX(RS.max_dop) AS max_dop,
-		', CASE WHEN @GroupBy IN('query_id''plan_id') THEN 'Q.query_parameterization_type_desc,' ELSE '' END, '
-		', CASE WHEN @GroupBy = 'plan_id' THEN 'P.plan_forcing_type_desc,P.force_failure_count,P.last_force_failure_reason_desc,P.is_parallel_plan' ELSE 'COUNT(DISTINCT P.plan_id) num_plans' END, '
+		', CASE WHEN @GroupBy IN('query_id','plan_id') THEN 'Q.query_parameterization_type_desc,' ELSE 'COUNT(DISTINCT Q.query_id) AS num_queries,' END, '
+		', CASE WHEN @GroupBy = 'plan_id' THEN 'P.plan_forcing_type_desc,P.force_failure_count,P.last_force_failure_reason_desc,P.is_parallel_plan,' ELSE 'COUNT(DISTINCT P.plan_id) num_plans,' END, '
+		MIN(MIN(RS.first_execution_time)) OVER() interval_start,
+		MAX(MAX(RS.last_execution_time)) OVER() interval_end
 FROM sys.query_store_runtime_stats AS RS
 JOIN sys.query_store_plan AS P ON P.plan_id = RS.plan_id
 JOIN sys.query_store_query AS Q  ON Q.query_id = P.query_id
@@ -129,9 +133,11 @@ AND RS.runtime_stats_interval_id <= @interval_to
 ', CASE WHEN @QueryHash IS NOT NULL THEN 'AND Q.query_hash = @QueryHash' ELSE '' END,'
 ', CASE WHEN @QueryPlanHash IS NOT NULL THEN 'AND P.query_plan_hash = @QueryPlanHash' ELSE '' END,'
 ', CASE WHEN @ParallelPlans = 1 THEN 'AND P.is_parallel_plan = 1' ELSE '' END,'
+', CASE WHEN @GroupBy = 'object_id' THEN 'AND Q.object_id <> 0' ELSE '' END, '
 GROUP BY ',CASE WHEN @GroupBy = 'query_id' THEN 'P.query_id, QT.query_sql_text, Q.object_id,Q.query_hash,Q.query_parameterization_type_desc'
 			WHEN @GroupBy = 'query_plan_hash' THEN 'P.query_plan_hash'
 			WHEN @GroupBy = 'query_hash' THEN 'Q.query_hash'
+			WHEN @GroupBy = 'object_id' THEN 'Q.object_id'
 			WHEN @GroupBy = 'plan_id' THEN 'P.query_id, QT.query_sql_text, Q.object_id,Q.query_hash,Q.query_parameterization_type_desc,RS.plan_id,P.query_plan_hash,P.plan_forcing_type_desc,P.force_failure_count,P.last_force_failure_reason_desc,P.is_parallel_plan' 
 			ELSE NULL END, '
 ', CASE WHEN @MinimumPlanCount >1 THEN 'HAVING COUNT(DISTINCT RS.plan_id)>=@MinimumPlanCount' ELSE '' END,'

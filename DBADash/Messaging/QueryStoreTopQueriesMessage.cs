@@ -51,11 +51,12 @@ namespace DBADash.Messaging
             query_id,
             plan_id,
             query_hash,
-            query_plan_hash
+            query_plan_hash,
+            object_id
         }
 
         public bool NearestInterval { get; set; } = true;
-        
+
         private async Task<int> GetIdleSchedulerCount(string connectionString)
         {
             await using var cn = new SqlConnection(connectionString);
@@ -72,9 +73,9 @@ namespace DBADash.Messaging
             try
             {
                 idleSchedulerCount = await GetIdleSchedulerCount(connectionString);
-                Log.Debug("Idle scheduler count {idleSchedulerCount}",idleSchedulerCount);
+                Log.Debug("Idle scheduler count {idleSchedulerCount}", idleSchedulerCount);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.Error(ex, "Error getting idle scheduler count");
             }
@@ -137,7 +138,7 @@ namespace DBADash.Messaging
                 {
                     databases = new List<string> { DatabaseName };
                 }
-                Log.Debug("Collecting Query Store for databases: {databases} for message {handle}", databases,handle);
+                Log.Debug("Collecting Query Store for databases: {databases} for message {handle}", databases, handle);
                 var threadCount = 1;
                 switch (databases.Count)
                 {
@@ -145,15 +146,15 @@ namespace DBADash.Messaging
                         throw new Exception("No databases found with Query Store enabled");
                     case 1:
                         break;
+
                     default:
                         threadCount = await GetThreadCountBasedOnSchedulerAvailability(src.SourceConnection.ConnectionString);
-                        Log.Information("Processing message {handle} with thread count {maxDegreeOfParallelism}",handle, threadCount);
+                        Log.Information("Processing message {handle} with thread count {maxDegreeOfParallelism}", handle, threadCount);
                         break;
                 }
                 var resultTable = new DataTable();
-        
-           
-                var options = new ParallelOptions { MaxDegreeOfParallelism = threadCount};
+
+                var options = new ParallelOptions { MaxDegreeOfParallelism = threadCount };
 
                 // Use a concurrent bag to collect DataTables from parallel tasks.
                 var dataTables = new ConcurrentBag<DataTable>();
@@ -236,7 +237,7 @@ namespace DBADash.Messaging
         {
             await using var cn = new SqlConnection(connectionString);
             await cn.OpenAsync();
-            await using var cmd = new SqlCommand(SqlStrings.QueryStoreTopQueries, cn) {CommandTimeout = Lifetime};
+            await using var cmd = new SqlCommand(SqlStrings.QueryStoreTopQueries, cn) { CommandTimeout = Lifetime };
             cmd.Parameters.AddWithValue("@Database", db);
             cmd.Parameters.AddWithValue("@FromDate", From);
             cmd.Parameters.AddWithValue("@ToDate ", To);
@@ -246,9 +247,9 @@ namespace DBADash.Messaging
             cmd.Parameters.AddWithValue("@ObjectID", ObjectID is > 0 ? ObjectID.Value : DBNull.Value);
             cmd.Parameters.AddWithValue("@ObjectName", string.IsNullOrEmpty(ObjectName) ? DBNull.Value : ObjectName);
             cmd.Parameters.AddWithValue("@GroupBy", GroupBy.ToString());
-            var pQueryHash  = cmd.Parameters.Add("@QueryHash", SqlDbType.Binary, 8);
+            var pQueryHash = cmd.Parameters.Add("@QueryHash", SqlDbType.Binary, 8);
             pQueryHash.Value = QueryHash is not null ? QueryHash : DBNull.Value;
-            var pPlanHash = cmd.Parameters.Add("@QueryPlanHash", SqlDbType.Binary,8);
+            var pPlanHash = cmd.Parameters.Add("@QueryPlanHash", SqlDbType.Binary, 8);
             pPlanHash.Value = QueryPlanHash is not null ? QueryPlanHash : DBNull.Value;
             cmd.Parameters.AddWithValue("@QueryID", QueryID is > 0 ? QueryID.Value : DBNull.Value);
             cmd.Parameters.AddWithValue("@PlanID", PlanID is > 0 ? PlanID.Value : DBNull.Value);
