@@ -108,10 +108,10 @@ namespace DBADashGUI.Performance
                 Lifetime = Config.DefaultCommandTimeout
             };
             lblStatus.InvokeSetStatus(messageSentMessage, string.Empty, DashColors.Information);
-            await SendMessageAndProcessReply(message, dgv);
+            await SendMessageAndProcessReply(message, dgv, UserColumnLayout);
         }
 
-        private async Task SendMessageAndProcessReply(MessageBase message, DataGridView _dgv)
+        private async Task SendMessageAndProcessReply(MessageBase message, DataGridView _dgv, List<KeyValuePair<string, PersistedColumnLayout>> layout = null)
         {
             var messageGroup = Guid.NewGuid();
             if (CurrentContext.ImportAgentID == null)
@@ -174,7 +174,7 @@ namespace DBADashGUI.Performance
                                     DataViewRowState.CurrentRows);
                                 try
                                 {
-                                    _dgv.LoadColumnLayout(UserColumnLayout ?? topQueriesResult.ColumnLayout);
+                                    _dgv.LoadColumnLayout(layout ?? topQueriesResult.ColumnLayout);
                                 }
                                 catch (Exception ex)
                                 {
