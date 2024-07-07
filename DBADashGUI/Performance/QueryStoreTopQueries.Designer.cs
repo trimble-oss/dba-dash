@@ -37,6 +37,7 @@
             tsNearestInterval = new System.Windows.Forms.ToolStripMenuItem();
             includeWaitsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsReset = new System.Windows.Forms.ToolStripButton();
+            tsColumns = new System.Windows.Forms.ToolStripButton();
             tsExecute = new System.Windows.Forms.ToolStripButton();
             tsTop = new System.Windows.Forms.ToolStripDropDownButton();
             tsTop10 = new System.Windows.Forms.ToolStripMenuItem();
@@ -50,6 +51,7 @@
             planToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             planHashToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             queryHashToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            objectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsSort = new System.Windows.Forms.ToolStripDropDownButton();
             totalCPUToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             avgCPUToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -100,7 +102,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { TsCopy, tsExcel, tsOptions, tsReset, tsExecute, tsTop, tsGroupBy, tsSort, tsFilter, toolStripLabel1, txtObjectName, toolStripLabel2, txtPlan });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { TsCopy, tsExcel, tsOptions, tsReset, tsColumns, tsExecute, tsTop, tsGroupBy, tsSort, tsFilter, toolStripLabel1, txtObjectName, toolStripLabel2, txtPlan });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1408, 27);
@@ -143,7 +145,7 @@
             tsNearestInterval.CheckOnClick = true;
             tsNearestInterval.CheckState = System.Windows.Forms.CheckState.Checked;
             tsNearestInterval.Name = "tsNearestInterval";
-            tsNearestInterval.Size = new System.Drawing.Size(221, 26);
+            tsNearestInterval.Size = new System.Drawing.Size(224, 26);
             tsNearestInterval.Text = "Use nearest interval";
             tsNearestInterval.ToolTipText = "Use the nearest query store interval.  Uncheck to filter on first/last execution time";
             // 
@@ -153,8 +155,9 @@
             includeWaitsToolStripMenuItem.CheckOnClick = true;
             includeWaitsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             includeWaitsToolStripMenuItem.Name = "includeWaitsToolStripMenuItem";
-            includeWaitsToolStripMenuItem.Size = new System.Drawing.Size(221, 26);
+            includeWaitsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             includeWaitsToolStripMenuItem.Text = "Include Waits";
+            includeWaitsToolStripMenuItem.Click += IncludeWaitsToolStripMenuItem_Click;
             // 
             // tsReset
             // 
@@ -165,6 +168,16 @@
             tsReset.Size = new System.Drawing.Size(29, 24);
             tsReset.Text = "Reset";
             tsReset.Click += TsReset_Click;
+            // 
+            // tsColumns
+            // 
+            tsColumns.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsColumns.Image = Properties.Resources.Column_16x;
+            tsColumns.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsColumns.Name = "tsColumns";
+            tsColumns.Size = new System.Drawing.Size(29, 24);
+            tsColumns.Text = "Columns";
+            tsColumns.Click += TsColumns_Click;
             // 
             // tsExecute
             // 
@@ -233,7 +246,7 @@
             // 
             // tsGroupBy
             // 
-            tsGroupBy.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { queryToolStripMenuItem, planToolStripMenuItem, planHashToolStripMenuItem, queryHashToolStripMenuItem });
+            tsGroupBy.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { queryToolStripMenuItem, planToolStripMenuItem, planHashToolStripMenuItem, queryHashToolStripMenuItem, objectToolStripMenuItem });
             tsGroupBy.Image = Properties.Resources.GroupBy_16x;
             tsGroupBy.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsGroupBy.Name = "tsGroupBy";
@@ -245,7 +258,7 @@
             queryToolStripMenuItem.Checked = true;
             queryToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             queryToolStripMenuItem.Name = "queryToolStripMenuItem";
-            queryToolStripMenuItem.Size = new System.Drawing.Size(168, 26);
+            queryToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             queryToolStripMenuItem.Tag = "query_id";
             queryToolStripMenuItem.Text = "Query";
             queryToolStripMenuItem.Click += Select_GroupBy;
@@ -253,7 +266,7 @@
             // planToolStripMenuItem
             // 
             planToolStripMenuItem.Name = "planToolStripMenuItem";
-            planToolStripMenuItem.Size = new System.Drawing.Size(168, 26);
+            planToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             planToolStripMenuItem.Tag = "plan_id";
             planToolStripMenuItem.Text = "Plan";
             planToolStripMenuItem.Click += Select_GroupBy;
@@ -261,7 +274,7 @@
             // planHashToolStripMenuItem
             // 
             planHashToolStripMenuItem.Name = "planHashToolStripMenuItem";
-            planHashToolStripMenuItem.Size = new System.Drawing.Size(168, 26);
+            planHashToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             planHashToolStripMenuItem.Tag = "query_plan_hash";
             planHashToolStripMenuItem.Text = "Plan Hash";
             planHashToolStripMenuItem.Click += Select_GroupBy;
@@ -269,10 +282,18 @@
             // queryHashToolStripMenuItem
             // 
             queryHashToolStripMenuItem.Name = "queryHashToolStripMenuItem";
-            queryHashToolStripMenuItem.Size = new System.Drawing.Size(168, 26);
+            queryHashToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             queryHashToolStripMenuItem.Tag = "query_hash";
             queryHashToolStripMenuItem.Text = "Query Hash";
             queryHashToolStripMenuItem.Click += Select_GroupBy;
+            // 
+            // objectToolStripMenuItem
+            // 
+            objectToolStripMenuItem.Name = "objectToolStripMenuItem";
+            objectToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            objectToolStripMenuItem.Tag = "object_id";
+            objectToolStripMenuItem.Text = "Object";
+            objectToolStripMenuItem.Click += Select_GroupBy;
             // 
             // tsSort
             // 
@@ -511,5 +532,7 @@
         private System.Windows.Forms.ToolStripDropDownButton tsFilter;
         private System.Windows.Forms.ToolStripMenuItem parallelPlansOnlyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem minimumPlanCountToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem objectToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton tsColumns;
     }
 }
