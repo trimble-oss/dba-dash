@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using DBADash;
 using DocumentFormat.OpenXml;
 using Microsoft.Data.SqlClient;
@@ -34,7 +35,20 @@ namespace DBADashGUI
 
         static Config()
         {
-            RefreshConfig();
+            try
+            {
+                RefreshConfig();
+            }
+            catch (SqlException ex) when (ex.Number == 229)
+            {
+                MessageBox.Show(ex.Message + "\n\nThe App or AppReadOnly role can be used to grant access to the GUI", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error getting application settings\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
+            }
         }
 
         public static void RefreshConfig()
