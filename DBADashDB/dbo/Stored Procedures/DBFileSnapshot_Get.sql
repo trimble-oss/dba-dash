@@ -74,5 +74,5 @@ BEGIN
 	PRINT @SQL
 END
 
-EXEC sp_executesql @SQL,N'@DatabaseID INT,@FromDate DATETIME2(2),@ToDate DATETIME2(2),@FG SYSNAME,@GroupDatabaseID UNIQUEIDENTIFIER,@DataSpaceID INT,@InstanceGroupName SYSNAME,@DBName SYSNAME,@FileName SYSNAME',
-						@DatabaseID,@FromDate,@ToDate,@FG,@GroupDatabaseID,@DataSpaceID,@InstanceGroupName,@DBName,@FileName
+EXEC sp_executesql @SQL,N'@DatabaseID INT,@FromDate DATETIME2(2),@ToDate DATETIME2(2),@FG SYSNAME,@GroupDatabaseID UNIQUEIDENTIFIER,@DataSpaceID INT,@InstanceGroupName SYSNAME,@DBName SYSNAME,@FileName SYSNAME,@InstanceID INT',
+						@DatabaseID,@FromDate,@ToDate,@FG,@GroupDatabaseID,@DataSpaceID,@InstanceGroupName,@DBName,@FileName,@InstanceID
