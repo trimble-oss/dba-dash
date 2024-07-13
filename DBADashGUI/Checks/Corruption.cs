@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Runtime.CompilerServices;
 using System.Windows.Forms;
-using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.Data.SqlClient;
 using Color = System.Drawing.Color;
 
@@ -31,9 +29,9 @@ namespace DBADashGUI
             new DataGridViewLinkColumn() { Name = "Acknowledge",HeaderText = "Acknowledge",Text="Acknowledge", LinkColor = DashColors.LinkColor, DefaultCellStyle = new DataGridViewCellStyle() { BackColor = Color.White, ForeColor = Color.Black}, ToolTipText = "Click link to acknowledge issue after taking steps to identify the root cause of the corruption, repair if necessary and validate that the database is free of corruption."}
         };
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            this.context = context;
+            this.context = _context;
         }
 
         public void RefreshData()
@@ -78,7 +76,7 @@ namespace DBADashGUI
             }
         }
 
-        private void TsRefresh_Click(object sender, System.EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
@@ -121,14 +119,14 @@ namespace DBADashGUI
             }
         }
 
-        private void TsCopy_Click(object sender, System.EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             dgv.Columns["MoreInfo"]!.Visible = false;
             Common.CopyDataGridViewToClipboard(dgv);
             dgv.Columns["MoreInfo"]!.Visible = true;
         }
 
-        private void TsExcel_Click(object sender, System.EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             dgv.Columns["MoreInfo"]!.Visible = false;
             Common.PromptSaveDataGridView(dgv);

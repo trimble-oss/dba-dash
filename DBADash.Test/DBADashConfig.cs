@@ -33,7 +33,7 @@ namespace DBADashConfig.Test
             Helper.RunProcess(psi);
 
             var json = Helper.GetConfigJson();
-            var cfg = DBADash.CollectionConfig.Deserialize(json);
+            var cfg = CollectionConfig.Deserialize(json);
             Assert.AreEqual(RetentionDays, cfg.ConfigBackupRetentionDays);
         }
 
@@ -48,7 +48,7 @@ namespace DBADashConfig.Test
             Assert.IsTrue(BasicConfig.IsConfigFileEncrypted(), "Config file should be encrypted");
 
             psi = new ProcessStartInfo("DBADashConfig",
-                $"-a Decrypt");
+                "-a Decrypt");
             Helper.RunProcess(psi);
 
             Assert.IsFalse(BasicConfig.IsConfigFileEncrypted(), "Config file should not be encrypted");
@@ -69,7 +69,7 @@ namespace DBADashConfig.Test
         }
 
         [TestMethod]
-        [DataRow(new string[] { "C:\\Test", "C:\\Test2", "C:\\Test3" })]
+        [DataRow(new[] { "C:\\Test", "C:\\Test2", "C:\\Test3" })]
         public void AddRemoveDestinationTest(string[] connectionStrings)
         {
             foreach (var connectionString in connectionStrings)

@@ -14,7 +14,7 @@ namespace DBADashGUI.AgentJobs
     public partial class AgentJobsControl : UserControl, ISetContext
     {
         private List<int> InstanceIDs;
-        private int? instance_id = null;
+        private int? instance_id;
         private int instanceId;
         private Guid jobID;
         private int StepID = -1;
@@ -34,17 +34,17 @@ namespace DBADashGUI.AgentJobs
 
         public bool ShowSteps { get => showJobStepsToolStripMenuItem.Checked; set => showJobStepsToolStripMenuItem.Checked = value; }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            this.context = context;
+            this.context = _context;
 
-            StepID = context.JobStepID;
-            IncludeNA = context.RegularInstanceIDs.Count == 1;
-            IncludeOK = context.RegularInstanceIDs.Count == 1;
+            StepID = _context.JobStepID;
+            IncludeNA = _context.RegularInstanceIDs.Count == 1;
+            IncludeOK = _context.RegularInstanceIDs.Count == 1;
             IncludeWarning = true;
             IncludeCritical = true;
             IncludeAcknowledged = true;
-            InstanceIDs = context.RegularInstanceIDs.ToList();
+            InstanceIDs = _context.RegularInstanceIDs.ToList();
 
             SetSplitterDistance();
             RefreshData();
@@ -132,12 +132,12 @@ namespace DBADashGUI.AgentJobs
             }
         }
 
-        private void ConfigureThresholds(int InstanceID, Guid jobID)
+        private void ConfigureThresholds(int InstanceID, Guid _jobID)
         {
             var frm = new AgentJobThresholdsConfig
             {
                 InstanceID = InstanceID,
-                JobID = jobID,
+                JobID = _jobID,
                 connectionString = Common.ConnectionString
             };
             frm.ShowDialog();
@@ -163,7 +163,7 @@ namespace DBADashGUI.AgentJobs
                 }
                 else if (e.ColumnIndex == Acknowledge.Index)
                 {
-                    bool clear = (DBADashStatus.DBADashStatusEnum)row["JobStatus"] == DBADashStatus.DBADashStatusEnum.Acknowledged;
+                    var clear = (DBADashStatus.DBADashStatusEnum)row["JobStatus"] == DBADashStatus.DBADashStatusEnum.Acknowledged;
                     AcknowledgeJobErrors((int)row["InstanceID"], (Guid)row["job_id"], clear);
                     RefreshData();
                 }
@@ -191,7 +191,7 @@ namespace DBADashGUI.AgentJobs
             int? stepID = StepID;
             if (StepID < 0)
             {
-                stepID = showJobStepsToolStripMenuItem.Checked ? (int?)null : 0;
+                stepID = showJobStepsToolStripMenuItem.Checked ? null : 0;
             }
             stepID = instance_id == null ? stepID : null;
             colStepName.Visible = stepID != 0;
@@ -225,7 +225,7 @@ namespace DBADashGUI.AgentJobs
 
         private void DgvJobs_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvJobs.Rows[idx].DataBoundItem;
                 var jobStatus = (DBADashStatus.DBADashStatusEnum)row["JobStatus"];
@@ -283,7 +283,7 @@ namespace DBADashGUI.AgentJobs
             colHistory.Visible = true;
         }
 
-        private RunningQueriesViewer RunningViewer = null;
+        private RunningQueriesViewer RunningViewer;
 
         private void DgvJobHistory_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -373,7 +373,7 @@ namespace DBADashGUI.AgentJobs
         private void AcknowledgeErrorsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var dt = (DataView)dgvJobs.DataSource;
-            var warningsAndFailures = dt.Table.Select("JobStatus IN(1,2)");
+            var warningsAndFailures = dt.Table!.Select("JobStatus IN(1,2)");
             if (warningsAndFailures.Length == 0)
             {
                 MessageBox.Show("No warnings/failures to acknowledge", "Acknowledge Failures", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -381,7 +381,7 @@ namespace DBADashGUI.AgentJobs
             else if (MessageBox.Show(
                          $"Are you sure you want to acknowledge {warningsAndFailures.Length} job failure(s)?", "Acknowledge Failures", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                foreach (DataRow row in warningsAndFailures)
+                foreach (var row in warningsAndFailures)
                 {
                     var id = (Guid)row["job_id"];
                     var instanceID = (int)row["InstanceID"];

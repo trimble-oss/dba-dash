@@ -27,7 +27,7 @@ namespace DBADashGUI.Checks
                 cn.Open();
                 DataTable dt = new();
                 da.Fill(dt);
-                UniqueConstraint uc = new(new DataColumn[] { dt.Columns["Name"], dt.Columns["Description"], dt.Columns["Company"] });
+                UniqueConstraint uc = new(new[] { dt.Columns["Name"], dt.Columns["Description"], dt.Columns["Company"] });
                 dt.Constraints.Add(uc);
                 return dt;
             }
@@ -145,24 +145,18 @@ namespace DBADashGUI.Checks
         /// </summary>
         private void Dgv_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
         {
-            if (e.ColumnIndex == dgv.Columns["colStatus"].Index)
+            if (e.ColumnIndex != dgv.Columns["colStatus"].Index) return;
+            try
             {
-                try
-                {
-                    int status = Convert.ToInt32(e.FormattedValue);
-                    if (status is not (>= 1 and <= 4))
-                    {
-                        e.Cancel = true;
-                        ShowStatusValidationError();
-                        return;
-                    }
-                }
-                catch
-                {
-                    e.Cancel = true;
-                    ShowStatusValidationError();
-                    return;
-                }
+                var status = Convert.ToInt32(e.FormattedValue);
+                if (status is >= 1 and <= 4) return;
+                e.Cancel = true;
+                ShowStatusValidationError();
+            }
+            catch
+            {
+                e.Cancel = true;
+                ShowStatusValidationError();
             }
         }
 
@@ -191,7 +185,7 @@ namespace DBADashGUI.Checks
         private void BttnSave_Click(object sender, EventArgs e)
         {
             Save();
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         /// <summary>
@@ -199,7 +193,7 @@ namespace DBADashGUI.Checks
         /// </summary>
         private bool HasChanges()
         {
-            DataTable dtAll = dt.GetChanges();
+            var dtAll = dt.GetChanges();
             return dtAll is { Rows.Count: > 0 };
         }
 
@@ -210,14 +204,14 @@ namespace DBADashGUI.Checks
         {
             if (HasChanges())
             {
-                DataTable dtDeleted = dt.GetChanges(DataRowState.Deleted);
-                DataTable dtAdded = dt.GetChanges(DataRowState.Added);
-                DataTable dtModified = dt.GetChanges(DataRowState.Modified);
+                var dtDeleted = dt.GetChanges(DataRowState.Deleted);
+                var dtAdded = dt.GetChanges(DataRowState.Added);
+                var dtModified = dt.GetChanges(DataRowState.Modified);
                 try
                 {
                     if (dtDeleted != null)
                     {
-                        foreach (int id in dtDeleted.Rows.Cast<DataRow>().Select(row => Convert.ToInt32(row["ID", DataRowVersion.Original])))
+                        foreach (var id in dtDeleted.Rows.Cast<DataRow>().Select(row => Convert.ToInt32(row["ID", DataRowVersion.Original])))
                         {
                             DeleteOSLoadedModulesStatus(id);
                         }
@@ -226,7 +220,7 @@ namespace DBADashGUI.Checks
                     {
                         foreach (DataRow row in dtAdded.Rows)
                         {
-                            int id = AddOSLoadedModulesStatus((string)row["Name"], (string)row["Company"], (string)row["Description"], Convert.ToInt16(row["Status"]), Convert.ToString(row["Notes"]));
+                            var id = AddOSLoadedModulesStatus((string)row["Name"], (string)row["Company"], (string)row["Description"], Convert.ToInt16(row["Status"]), Convert.ToString(row["Notes"]));
                             row["ID"] = id;
                         }
                     }
@@ -263,16 +257,13 @@ namespace DBADashGUI.Checks
         /// </summary>
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = dgv.Rows[idx];
-                if (row != null)
-                {
-                    bool isSystem = Convert.ToBoolean(row.Cells["colIsSystem"].Value);
-                    row.ReadOnly = isSystem;
-                    row.DefaultCellStyle.BackColor = isSystem ? Color.LightGray : Color.White;
-                    FormatRow(row);
-                }
+                var isSystem = Convert.ToBoolean(row.Cells["colIsSystem"].Value);
+                row.ReadOnly = isSystem;
+                row.DefaultCellStyle.BackColor = isSystem ? Color.LightGray : Color.White;
+                FormatRow(row);
             }
         }
 
@@ -283,7 +274,7 @@ namespace DBADashGUI.Checks
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
 
         private void OSLoadedModuleStatus_FormClosing(object sender, FormClosingEventArgs e)

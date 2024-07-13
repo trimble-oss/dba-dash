@@ -42,7 +42,7 @@ namespace DBADashGUI.Performance
         private PerformanceCounterMetric _metric = new();
         public PerformanceCounterMetric Metric
         { get => _metric; set { _metric = value; SelectAggregate(); } }
-        IMetric IMetricChart.Metric { get => Metric; }
+        IMetric IMetricChart.Metric => Metric;
 
         public bool SmoothLines = false;
         public int PointSize = 5;
@@ -68,20 +68,18 @@ namespace DBADashGUI.Performance
             RefreshChart();
         }
 
-        public void RefreshData(int InstanceID)
+        public void RefreshData(int instanceID)
         {
-            this.InstanceID = InstanceID;
+            InstanceID = instanceID;
             RefreshData();
         }
 
         private void SetDateGroup(int mins)
         {
-            if (durationMins != mins) // Change dategroup only if date range has changed.
-            {
-                DateGrouping = DateHelper.DateGrouping(mins, 200);
-                tsDateGrouping.Text = DateHelper.DateGroupString(DateGrouping);
-                durationMins = mins;
-            }
+            if (durationMins == mins) return; // Change date group only if date range has changed.
+            DateGrouping = DateHelper.DateGrouping(mins, 200);
+            tsDateGrouping.Text = DateHelper.DateGroupString(DateGrouping);
+            durationMins = mins;
         }
 
         private void RefreshChart()
@@ -135,7 +133,7 @@ namespace DBADashGUI.Performance
             string format = "yyyy-MM-dd HH:mm";
             chart1.AxisX.Add(new Axis
             {
-                LabelFormatter = val => new System.DateTime((long)val).ToString(format)
+                LabelFormatter = val => new DateTime((long)val).ToString(format)
             });
             chart1.AxisY.Add(new Axis
             {
@@ -198,7 +196,7 @@ namespace DBADashGUI.Performance
                 itm.Checked = itm == sender;
                 if (itm.Checked)
                 {
-                    Metric.AggregateType = Enum.Parse<AggregateTypes>((string)itm.Tag);
+                    Metric.AggregateType = Enum.Parse<AggregateTypes>(((string)itm.Tag)!);
                     tsAgg.Text = itm.Text;
                 }
             }
@@ -207,12 +205,12 @@ namespace DBADashGUI.Performance
 
         private void TsClose_Click(object sender, EventArgs e)
         {
-            Close.Invoke(this, new EventArgs());
+            Close?.Invoke(this, EventArgs.Empty);
         }
 
         private void TsUp_Click(object sender, EventArgs e)
         {
-            MoveUp.Invoke(this, new EventArgs());
+            MoveUp?.Invoke(this, EventArgs.Empty);
         }
     }
 }

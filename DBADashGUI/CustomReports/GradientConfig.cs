@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Globalization;
 using System.Windows.Forms;
 using DBADashGUI.Theme;
 
@@ -64,7 +60,7 @@ namespace DBADashGUI.CustomReports
                 CellHighlightingRules.Add(new CellHighlightingRule
                 {
                     ConditionType = CellHighlightingRule.ConditionTypes.LessThan,
-                    Value1 = value.ToString(),
+                    Value1 = value.ToString(CultureInfo.CurrentCulture),
                     BackColor = backColor,
                     ForeColor = backColor.ContrastColorTrimble()
                 });
@@ -76,12 +72,12 @@ namespace DBADashGUI.CustomReports
                 ForeColor = pnlColor2.BackColor.ContrastColorTrimble()
             });
 
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
 
         private void GradientConfig_Load(object sender, EventArgs e)

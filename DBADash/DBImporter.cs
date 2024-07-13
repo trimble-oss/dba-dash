@@ -35,7 +35,7 @@ namespace DBADash
                     TimeSpan.FromSeconds(15)
                 }, (exception, timeSpan, retryCount, context) =>
                 {
-                    LogError((string)context.OperationKey, exception, "Import[Retrying]");
+                    LogError(context.OperationKey, exception, "Import[Retrying]");
                 });
         }
 
@@ -62,14 +62,14 @@ namespace DBADash
             cn.Open();
         }
 
-        // Adds error to Errors datatable to be imported into CollectionErrorLog table later.
+        // Adds error to Errors DataTable to be imported into CollectionErrorLog table later.
         private void LogError(string errorSource, Exception ex, string errorContext = "Import")
         {
             DataTable dtErrors;
             if (data.Tables.Contains("Errors"))
             {
                 dtErrors = data.Tables["Errors"];
-                if (dtErrors.Columns.Count == 0)
+                if (dtErrors!.Columns.Count == 0)
                 {
                     dtErrors.Columns.Add("ErrorSource");
                     dtErrors.Columns.Add("ErrorMessage");
@@ -103,24 +103,24 @@ namespace DBADash
             if (data.Tables.Contains("BlockingSnapshot"))
             {
                 var bss = data.Tables["BlockingSnapshot"];
-                if (!bss.Columns.Contains("session_status"))
+                if (!bss!.Columns.Contains("session_status"))
                 {
                     bss.Columns.Add("session_status");
                 }
                 if (!bss.Columns.Contains("transaction_isolation_level"))
                 {
-                    bss.Columns.Add("transaction_isolation_level", typeof(Int16));
+                    bss.Columns.Add("transaction_isolation_level", typeof(short));
                 }
             }
             if (data.Tables.Contains("DatabasesHADR"))
             {
                 var dtDatabasesHADR = data.Tables["DatabasesHADR"];
-                if (!dtDatabasesHADR.Columns.Contains("replica_id"))
+                if (!dtDatabasesHADR!.Columns.Contains("replica_id"))
                 {
                     dtDatabasesHADR.Columns.Add("replica_id", typeof(Guid));
                     dtDatabasesHADR.Columns.Add("group_id", typeof(Guid));
                     dtDatabasesHADR.Columns.Add("is_commit_participant", typeof(bool));
-                    dtDatabasesHADR.Columns.Add("database_state", typeof(Int16));
+                    dtDatabasesHADR.Columns.Add("database_state", typeof(short));
                     dtDatabasesHADR.Columns.Add("is_local", typeof(bool));
                     dtDatabasesHADR.Columns.Add("secondary_lag_seconds", typeof(long));
                 }
@@ -128,9 +128,9 @@ namespace DBADash
             if (data.Tables.Contains("Databases"))
             {
                 var dtDB = data.Tables["Databases"];
-                if (dtDB.Columns["owner_sid"].DataType == typeof(string))
+                if (dtDB!.Columns["owner_sid"]!.DataType == typeof(string))
                 {
-                    Int32 pos = dtDB.Columns["owner_sid"].Ordinal;
+                    var pos = dtDB.Columns["owner_sid"].Ordinal;
                     dtDB.Columns["owner_sid"].ColumnName = "owner_sid_string";
                     var newCol = dtDB.Columns.Add("owner_sid", typeof(byte[]));
                     foreach (DataRow r in dtDB.Rows)
@@ -148,9 +148,9 @@ namespace DBADash
             if (data.Tables.Contains("Backups"))
             {
                 var dtBackups = data.Tables["Backups"];
-                if (dtBackups.Columns.Contains("LastBackup"))
+                if (dtBackups!.Columns.Contains("LastBackup"))
                 {
-                    dtBackups.Columns["LastBackup"].ColumnName = "backup_start_date";
+                    dtBackups.Columns["LastBackup"]!.ColumnName = "backup_start_date";
                     dtBackups.Columns.Add("backup_finish_date", typeof(DateTime));
                     dtBackups.Columns.Add("backup_set_id", typeof(int));
                     dtBackups.Columns.Add("time_zone", typeof(short));
@@ -180,7 +180,7 @@ namespace DBADash
             if (data.Tables.Contains("LogRestores"))
             {
                 var dtLR = data.Tables["LogRestores"];
-                if (!dtLR.Columns.Contains("backup_time_zone"))
+                if (!dtLR!.Columns.Contains("backup_time_zone"))
                 {
                     dtLR.Columns.Add("backup_time_zone", typeof(short));
                 }
@@ -188,7 +188,7 @@ namespace DBADash
             if (data.Tables.Contains("SlowQueries"))
             {
                 var dtSlowQueries = data.Tables["SlowQueries"];
-                if (!dtSlowQueries.Columns.Contains("session_id"))
+                if (!dtSlowQueries!.Columns.Contains("session_id"))
                 {
                     dtSlowQueries.Columns.Add("session_id", typeof(int));
                 }
@@ -201,7 +201,7 @@ namespace DBADash
             if (data.Tables.Contains("RunningQueries"))
             {
                 var dtRunningQueries = data.Tables["RunningQueries"];
-                if (!dtRunningQueries.Columns.Contains("login_time_utc"))
+                if (!dtRunningQueries!.Columns.Contains("login_time_utc"))
                 {
                     dtRunningQueries.Columns.Add("login_time_utc", typeof(DateTime));
                 }
@@ -219,7 +219,7 @@ namespace DBADash
             if (data.Tables.Contains("IdentityColumns"))
             {
                 var dtIdentityColumns = data.Tables["IdentityColumns"];
-                if (!dtIdentityColumns.Columns.Contains("schema_name"))
+                if (!dtIdentityColumns!.Columns.Contains("schema_name"))
                 {
                     dtIdentityColumns.Columns.Add("schema_name", typeof(string));
                 }
@@ -227,7 +227,7 @@ namespace DBADash
             if (data.Tables.Contains("Corruption"))
             {
                 var dtCorruption = data.Tables["Corruption"];
-                if (!dtCorruption.Columns.Contains("CountOfRows"))
+                if (!dtCorruption!.Columns.Contains("CountOfRows"))
                 {
                     dtCorruption.Columns.Add("CountOfRows", typeof(int));
                 }
@@ -235,7 +235,7 @@ namespace DBADash
             if (data.Tables.Contains("IOStats"))
             {
                 var dtIOStats = data.Tables["IOStats"];
-                if (!dtIOStats.Columns.Contains("drive"))
+                if (!dtIOStats!.Columns.Contains("drive"))
                 {
                     dtIOStats.Columns.Add("drive", typeof(char));
                     foreach (DataRow row in dtIOStats.Rows)
@@ -248,7 +248,7 @@ namespace DBADash
             if (data.Tables.Contains("ServerProperties"))
             {
                 var dtServerProperties = data.Tables["ServerProperties"];
-                if (!dtServerProperties.Columns.Contains("ProductMinorVersion")) // Check we haven't already processed table
+                if (!dtServerProperties!.Columns.Contains("ProductMinorVersion")) // Check we haven't already processed table
                 {
                     if (dtServerProperties.Columns.Contains("ProductMajorVersion")) // Remove old string columns
                     {
@@ -272,7 +272,6 @@ namespace DBADash
                             row["ProductMinorVersion"] = version.Minor;
                             row["ProductBuild"] = version.Build;
                             row["ProductRevision"] = version.Revision;
-                            continue;
                         }
                         catch (Exception ex)
                         {
@@ -301,8 +300,8 @@ namespace DBADash
         public void Update()
         {
             List<Exception> exceptions = new();
-            var rInstance = data.Tables["DBADash"].Rows[0];
-            snapshotDate = (DateTime)rInstance["SnapshotDateUTC"];
+            var rInstance = data.Tables["DBADash"]?.Rows[0];
+            snapshotDate = (DateTime)rInstance!["SnapshotDateUTC"];
 
             // we need to get the instanceID to continue further.  retry based on policy then exception will be thrown to catch higher up
             instanceID = retryPolicy.Execute(
@@ -370,7 +369,7 @@ namespace DBADash
 
         private void UpdateSnapshot(string tableName, string databaseName)
         {
-            DataTable dtSS = data.Tables[tableName];
+            var dtSS = data.Tables[tableName];
             try
             {
                 using (var cn = new SqlConnection(connectionString))
@@ -379,7 +378,7 @@ namespace DBADash
                     cn.Open();
                     DateTime StartTime;
                     DateTime EndTime;
-                    if (dtSS.ExtendedProperties.ContainsKey("StartTime"))
+                    if (dtSS!.ExtendedProperties.ContainsKey("StartTime"))
                     {
                         // legacy
                         StartTime = Convert.ToDateTime(dtSS.ExtendedProperties["StartTime"]);
@@ -387,19 +386,15 @@ namespace DBADash
                     }
                     else if (dtSS.ExtendedProperties.Contains("StartTimeBin"))
                     {
-                        StartTime = DateTime.FromBinary(long.Parse((string)dtSS.ExtendedProperties["StartTimeBin"]));
-                        EndTime = DateTime.FromBinary(long.Parse((string)dtSS.ExtendedProperties["EndTimeBin"]));
+                        StartTime = DateTime.FromBinary(long.Parse(((string)dtSS.ExtendedProperties["StartTimeBin"])!));
+                        EndTime = DateTime.FromBinary(long.Parse(((string)dtSS.ExtendedProperties["EndTimeBin"])!));
                     }
                     else
                     {
                         throw new Exception("Extended properties missing from schema snapshot");
                     }
-                    string snapshotOptions = (string)dtSS.ExtendedProperties["SnapshotOptions"];
-                    byte[] snapshotOptionsHash;
-                    using (var crypt = SHA256.Create())
-                    {
-                        snapshotOptionsHash = crypt.ComputeHash(System.Text.Encoding.ASCII.GetBytes(snapshotOptions));
-                    }
+                    var snapshotOptions = (string)dtSS.ExtendedProperties["SnapshotOptions"];
+                    var snapshotOptionsHash = SHA256.HashData(System.Text.Encoding.ASCII.GetBytes(snapshotOptions!));
                     cmd.Parameters.AddWithValue("ss", dtSS);
                     cmd.Parameters.AddWithValue("InstanceID", instanceID);
                     cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
@@ -419,7 +414,7 @@ namespace DBADash
 
         private void UpdateServerExtraProperties()
         {
-            if (data.Tables.Contains("ServerExtraProperties") && data.Tables["ServerExtraProperties"].Rows.Count == 1)
+            if (data.Tables.Contains("ServerExtraProperties") && data.Tables["ServerExtraProperties"]!.Rows.Count == 1)
             {
                 var r = data.Tables["ServerExtraProperties"].Rows[0];
                 using (var cn = new SqlConnection(connectionString))
@@ -518,9 +513,9 @@ namespace DBADash
             InsertErrors(connectionString, instanceID, snapshotDate, data, CommandTimeout);
         }
 
-        public static void InsertErrors(string connectionString, Int32? instanceID, DateTime SnapshotDate, DataSet ds, int commandTimeout)
+        public static void InsertErrors(string connectionString, int? instanceID, DateTime SnapshotDate, DataSet ds, int commandTimeout)
         {
-            if (ds.Tables.Contains("Errors") && ds.Tables["Errors"].Rows.Count > 0)
+            if (ds.Tables.Contains("Errors") && ds.Tables["Errors"]!.Rows.Count > 0)
             {
                 if (ds.Tables["Errors"].Columns.Count == 2)
                 {
@@ -546,7 +541,7 @@ namespace DBADash
             }
         }
 
-        private Int32 UpdateInstance(ref DataRow rInstance)
+        private int UpdateInstance(ref DataRow rInstance)
         {
             using (var cn = new SqlConnection(connectionString))
             using (var cmd = new SqlCommand("Instance_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout })
@@ -558,7 +553,6 @@ namespace DBADash
                 cmd.Parameters.AddWithValue("SnapshotDate", (DateTime)rInstance["SnapshotDateUTC"]);
 
                 var importAgentID = importAgent.GetDBADashAgentID(connectionString);
-                int collectAgentID;
                 var collectAgent = new DBADashAgent()
                 {
                     AgentHostName = (string)rInstance["AgentHostName"],
@@ -569,14 +563,7 @@ namespace DBADash
                     S3Path = rInstance.Table.Columns.Contains("S3Path") && rInstance["S3Path"]  !=DBNull.Value ? (string)rInstance["S3Path"] : null,
                     MessagingEnabled = rInstance.Table.Columns.Contains("MessagingEnabled") && rInstance["MessagingEnabled"] != DBNull.Value && (bool)rInstance["MessagingEnabled"]
                 };
-                if (collectAgent.Equals(importAgent))
-                {
-                    collectAgentID = importAgentID;
-                }
-                else
-                {
-                    collectAgentID = collectAgent.GetDBADashAgentID(connectionString);
-                }
+                var collectAgentID = collectAgent.Equals(importAgent) ? importAgentID : collectAgent.GetDBADashAgentID(connectionString);
 
                 cmd.Parameters.AddWithValue("CollectAgentID", collectAgentID);
                 cmd.Parameters.AddWithValue("ImportAgentID", importAgentID);
@@ -606,7 +593,7 @@ namespace DBADash
                 var pInstanceID = cmd.Parameters.Add("InstanceID", SqlDbType.Int);
                 pInstanceID.Direction = ParameterDirection.Output;
                 cmd.ExecuteNonQuery();
-                return (Int32)pInstanceID.Value;
+                return (int)pInstanceID.Value;
             }
         }
     }

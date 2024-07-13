@@ -19,7 +19,7 @@ namespace DBADashGUI.Performance
 
         public class DateModel
         {
-            public System.DateTime DateTime { get; set; }
+            public DateTime DateTime { get; set; }
             public double Value { get; set; }
         }
 
@@ -31,7 +31,7 @@ namespace DBADashGUI.Performance
 
         private int mins;
         private long objectID;
-        private int databaseid = 0;
+        private int databaseid;
         private int dateGrouping;
 
         public event EventHandler<EventArgs> Close;
@@ -52,7 +52,7 @@ namespace DBADashGUI.Performance
 
         public ObjectExecutionMetric Metric { get; set; } = new();
 
-        IMetric IMetricChart.Metric { get => Metric; }
+        IMetric IMetricChart.Metric => Metric;
 
         public void RefreshData(int instanceID, long objectID, int databaseID)
         {
@@ -69,7 +69,7 @@ namespace DBADashGUI.Performance
             }
             this.objectID = objectID;
 
-            this.databaseid = databaseID;
+            databaseid = databaseID;
             RefreshData();
         }
 
@@ -87,14 +87,14 @@ namespace DBADashGUI.Performance
             lblExecution.Text = databaseid > 0 ? "Execution Stats: Database" : "Execution Stats: Instance";
             toolStrip1.Tag = databaseid > 0 ? "ALT" : null; // set tag to ALT to use the alternate menu renderer
             toolStrip1.ApplyTheme(DBADashUser.SelectedTheme);
-            var dt = CommonData.ObjectExecutionStats(instanceID, databaseid, objectID, dateGrouping, Metric.Measure, DateRange.FromUTC, DateRange.ToUTC, "");
+            var dt = CommonData.ObjectExecutionStats(instanceID, databaseid, objectID, dateGrouping, Metric.Measure, DateRange.FromUTC, DateRange.ToUTC);
 
             if (dt.Rows.Count == 0)
             {
                 return;
             }
             var dPoints = new Dictionary<string, ChartValues<DateTimePoint>>();
-            string current = string.Empty;
+            var current = string.Empty;
             ChartValues<DateTimePoint> values = new();
             foreach (DataRow r in dt.Rows)
             {
@@ -118,7 +118,7 @@ namespace DBADashGUI.Performance
                 values = new ChartValues<DateTimePoint>();
             }
 
-            CartesianMapper<DateTimePoint> dayConfig = Mappers.Xy<DateTimePoint>()
+            var dayConfig = Mappers.Xy<DateTimePoint>()
 .X(dateModel => dateModel.DateTime.Ticks / TimeSpan.FromMinutes(dateGrouping == 0 ? 1 : dateGrouping).Ticks)
 .Y(dateModel => dateModel.Value);
 
@@ -133,7 +133,7 @@ namespace DBADashGUI.Performance
             }
             objectExecChart.Series = s1;
 
-            string format = "t";
+            var format = "t";
             if (dateGrouping >= 1440)
             {
                 format = "yyyy-MM-dd";
@@ -156,8 +156,8 @@ namespace DBADashGUI.Performance
         private class Measure
         {
             public string Name { get; set; }
-            public string DisplayName { get; set; }
-            public string LabelFormat { get; set; }
+            public string DisplayName { get; init; }
+            public string LabelFormat { get; init; }
         }
 
         private class Measures : Dictionary<string, Measure>
@@ -230,12 +230,12 @@ namespace DBADashGUI.Performance
 
         private void TsClose_Click(object sender, EventArgs e)
         {
-            Close.Invoke(this, new EventArgs());
+            Close?.Invoke(this, EventArgs.Empty);
         }
 
         private void TsUp_Click(object sender, EventArgs e)
         {
-            MoveUp.Invoke(this, new EventArgs());
+            MoveUp?.Invoke(this, EventArgs.Empty);
         }
     }
 }

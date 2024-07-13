@@ -56,12 +56,12 @@ namespace DBADashGUI
 
         public static Color GetBackColor(this DBADashStatusEnum value)
         {
-            return DBADashStatus.GetStatusBackColor(value);
+            return GetStatusBackColor(value);
         }
 
         public static Color GetForeColor(this DBADashStatusEnum value)
         {
-            return DBADashStatus.GetStatusForeColor(value);
+            return GetStatusForeColor(value);
         }
 
         public static void SetStatusColor(this DataGridViewCellStyle value, DBADashStatusEnum Status)
@@ -129,9 +129,9 @@ namespace DBADashGUI
 
             foreach (DataGridViewColumn col in dgv.Columns)
             {
-                if (savedCols.Where(savedCol => savedCol.Key == col.Name).Count() == 1)
+                if (savedCols.Count(savedCol => savedCol.Key == col.Name) == 1)
                 {
-                    var savedCol = savedCols.Where(savedCol => savedCol.Key == col.Name).First();
+                    var savedCol = savedCols.First(savedCol => savedCol.Key == col.Name);
                     col.Visible = savedCol.Value.Visible;
                     col.Width = savedCol.Value.Width;
                     if (savedCol.Value.DisplayIndex >= 0)

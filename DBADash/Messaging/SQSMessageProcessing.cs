@@ -1,22 +1,14 @@
-﻿using Amazon.Runtime.Internal.Util;
-using Amazon.SQS;
+﻿using Amazon.SQS;
 using Amazon.SQS.Model;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
 using Polly.Retry;
 using Polly;
 using System.Collections.Concurrent;
 using System.Threading;
-using System.Reflection.Metadata;
 
 namespace DBADash.Messaging
 {
@@ -29,7 +21,7 @@ namespace DBADash.Messaging
         private const int delayAfterReceivingMessageForDifferentAgent = 1000; // ms
         private const int delayBetweenMessages = 100; // ms
         private const int errorDelay= 1000; // ms
-        private AsyncRetryPolicy _retryPolicy;
+        private readonly AsyncRetryPolicy _retryPolicy;
         private readonly ConcurrentDictionary<string, SemaphoreSlim> _semaphores = new();
         private const int MaxDegreeOfParallelism = 2;
         private const int SemaphoreTimeout = 2000; // ms
@@ -234,7 +226,6 @@ namespace DBADash.Messaging
         {
             var msg = await ValidateMessage(message, DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent);
             if (msg == null) return;
-            byte[] payload;
 
             // Implementations of MessageBase will process the message and return a DataSet or null
             var semaphore =
@@ -330,7 +321,6 @@ namespace DBADash.Messaging
             {
                 // Acknowledge the message is received before we start processing
                 Log.Debug($"Received message: {message.MessageId}");
-                byte[] payload;
                 var payloadBin = Convert.FromBase64String(message.Body);
                 msg = MessageBase.Deserialize(payloadBin);
 

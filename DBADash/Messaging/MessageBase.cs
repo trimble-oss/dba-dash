@@ -1,9 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -27,7 +25,7 @@ namespace DBADash.Messaging
 
         public byte[] Serialize()
         {
-            var typeName = this.GetType().AssemblyQualifiedName;
+            var typeName = GetType().AssemblyQualifiedName;
             var json = SerializeString();
             var jsonObject = JObject.Parse(json);
             jsonObject["__type"] = typeName;

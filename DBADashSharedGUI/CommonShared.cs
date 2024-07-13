@@ -14,7 +14,8 @@ namespace DBADashSharedGUI
             if (!IsValidUrl(url))
             {
                 throw new InvalidArgumentException("Invalid URL: " + url);
-            };
+            }
+
             var psi = new ProcessStartInfo(url) { UseShellExecute = true };
             Process.Start(psi);
         }
@@ -47,7 +48,7 @@ namespace DBADashSharedGUI
             {
                 try
                 {
-                    dbVersion = DBADash.DBValidations.GetDBVersion(connectionString);
+                    dbVersion = DBValidations.GetDBVersion(connectionString);
                 }
                 catch (Exception ex)
                 {
@@ -79,9 +80,9 @@ namespace DBADashSharedGUI
         [SupportedOSPlatform("windows")]
         public static async Task CheckForIncompleteUpgrade()
         {
-            if (!DBADash.Upgrade.IsUpgradeIncomplete) return;
+            if (!Upgrade.IsUpgradeIncomplete) return;
 
-            MessageBox.Show(DBADash.Upgrade.IncompleteUpgradeMessage, "Error", MessageBoxButtons.OK,
+            MessageBox.Show(Upgrade.IncompleteUpgradeMessage, "Error", MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
             if (MessageBox.Show("Retry upgrade?", "Retry", MessageBoxButtons.YesNo, MessageBoxIcon.Question) ==
                 DialogResult.Yes)
@@ -108,7 +109,7 @@ namespace DBADashSharedGUI
             {
                 Dock = DockStyle.Fill,
                 ColumnCount = 1,
-                RowCount = 3, // One for the description, one for the textbox, one for the button row
+                RowCount = 3, // One for the description, one for the text box, one for the button row
                 AutoSize = true,
                 AutoSizeMode = AutoSizeMode.GrowAndShrink,
                 Padding = new Padding(10)

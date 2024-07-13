@@ -53,7 +53,7 @@ namespace DBADash
 
         public static SchemaSnapshotDBObjectTypes[] DefaultSchemaSnapshotDBObjectTypes()
         {
-            return new SchemaSnapshotDBObjectTypes[] { SchemaSnapshotDBObjectTypes.Database, SchemaSnapshotDBObjectTypes.Aggregate, SchemaSnapshotDBObjectTypes.Assembly, SchemaSnapshotDBObjectTypes.DDLTrigger, SchemaSnapshotDBObjectTypes.Schema, SchemaSnapshotDBObjectTypes.StoredProcedures, SchemaSnapshotDBObjectTypes.Synonym, SchemaSnapshotDBObjectTypes.Tables, SchemaSnapshotDBObjectTypes.UserDefinedDataType, SchemaSnapshotDBObjectTypes.UserDefinedFunction, SchemaSnapshotDBObjectTypes.UserDefinedTableType, SchemaSnapshotDBObjectTypes.UserDefinedType, SchemaSnapshotDBObjectTypes.View, SchemaSnapshotDBObjectTypes.XMLSchema, SchemaSnapshotDBObjectTypes.Roles, SchemaSnapshotDBObjectTypes.ApplicationRole, SchemaSnapshotDBObjectTypes.Sequence, SchemaSnapshotDBObjectTypes.ServiceBroker, SchemaSnapshotDBObjectTypes.Trigger };
+            return new[] { SchemaSnapshotDBObjectTypes.Database, SchemaSnapshotDBObjectTypes.Aggregate, SchemaSnapshotDBObjectTypes.Assembly, SchemaSnapshotDBObjectTypes.DDLTrigger, SchemaSnapshotDBObjectTypes.Schema, SchemaSnapshotDBObjectTypes.StoredProcedures, SchemaSnapshotDBObjectTypes.Synonym, SchemaSnapshotDBObjectTypes.Tables, SchemaSnapshotDBObjectTypes.UserDefinedDataType, SchemaSnapshotDBObjectTypes.UserDefinedFunction, SchemaSnapshotDBObjectTypes.UserDefinedTableType, SchemaSnapshotDBObjectTypes.UserDefinedType, SchemaSnapshotDBObjectTypes.View, SchemaSnapshotDBObjectTypes.XMLSchema, SchemaSnapshotDBObjectTypes.Roles, SchemaSnapshotDBObjectTypes.ApplicationRole, SchemaSnapshotDBObjectTypes.Sequence, SchemaSnapshotDBObjectTypes.ServiceBroker, SchemaSnapshotDBObjectTypes.Trigger };
         }
 
         public ScriptingOptions ScriptOptions()
@@ -103,65 +103,61 @@ namespace DBADash
 
         public DataTable ResourceGovernorConfiguration()
         {
-            DataTable dtRG = RgDTSchema();
-            bool reconfigError = false;
-            using (var cn = new Microsoft.Data.SqlClient.SqlConnection(MasterConnectionString))
+            var dtRG = RgDTSchema();
+            var reConfigError = false;
+            using (var cn = new SqlConnection(MasterConnectionString))
             {
-                var instance = new Microsoft.SqlServer.Management.Smo.Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
-                if (instance.EngineEdition == Edition.EnterpriseOrDeveloper) //  RG is an enterprise only edition feature
-                {
-                    var rg = instance.ResourceGovernor;
-                    // Script RG configuration
-                    var sc = rg.Script();
-                    // Add classifier function script
-                    sc.Insert(0, ObjectDDL(MasterConnectionString, rg.ClassifierFunction));
+                var instance = new Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
+                if (instance.EngineEdition != Edition.EnterpriseOrDeveloper) return dtRG; //  RG is an enterprise only edition feature
+                var rg = instance.ResourceGovernor;
+                // Script RG configuration
+                var sc = rg.Script();
+                // Add classifier function script
+                sc.Insert(0, ObjectDDL(MasterConnectionString, rg.ClassifierFunction));
 
-                    // Script out resource pool configuration and workload groups
-                    foreach (ResourcePool pool in rg.ResourcePools)
+                // Script out resource pool configuration and workload groups
+                foreach (ResourcePool pool in rg.ResourcePools)
+                {
+                    if (pool.IsSystemObject && pool.ID == 1) continue; // Ignore internal pool which can't be configured
+                    try
                     {
-                        if (!(pool.IsSystemObject && pool.ID == 1)) // Ignore internal pool which can't be configured
+                        var poolSc = pool.Script();
+                        sc.AppendCollection(poolSc);
+                        foreach (WorkloadGroup wg in pool.WorkloadGroups)
                         {
-                            try
-                            {
-                                var poolSc = pool.Script();
-                                sc.AppendCollection(poolSc);
-                                foreach (WorkloadGroup wg in pool.WorkloadGroups)
-                                {
-                                    sc.AppendCollection(wg.Script());
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                if (ex.InnerException.Message == "The resource governor resource pool information is not complete. This can happen if a pool was created but the resource governor is not reconfigured.")
-                                {
-                                    // Might have an issue scripting if a pool is created without running ALTER RESOURCE GOVERNOR RECONFIGURE.  Ignore this error and add a comment to the script
-                                    sc.Add($"/* Unable to script pool {pool.Name} until resource governor is reconfigured */");
-                                    reconfigError = true;
-                                }
-                                else
-                                {
-                                    throw;
-                                }
-                            }
+                            sc.AppendCollection(wg.Script());
                         }
                     }
-                    if (rg.ServerVersion.Major >= 13) // Supported 2016 and later
+                    catch (Exception ex)
                     {
-                        foreach (ExternalResourcePool pool in rg.ExternalResourcePools)
+                        if (ex.InnerException?.Message == "The resource governor resource pool information is not complete. This can happen if a pool was created but the resource governor is not reconfigured.")
                         {
-                            var poolSc = pool.Script();
-                            sc.AppendCollection(poolSc);
+                            // Might have an issue scripting if a pool is created without running ALTER RESOURCE GOVERNOR RECONFIGURE.  Ignore this error and add a comment to the script
+                            sc.Add($"/* Unable to script pool {pool.Name} until resource governor is reconfigured */");
+                            reConfigError = true;
+                        }
+                        else
+                        {
+                            throw;
                         }
                     }
-                    var row = dtRG.NewRow();
-                    row["is_enabled"] = rg.Enabled;
-                    row["classifier_function"] = rg.ClassifierFunction;
-                    row["reconfiguration_error"] = reconfigError;
-                    row["reconfiguration_pending"] = rg.ReconfigurePending;
-                    row["max_outstanding_io_per_volume"] = rg.ServerVersion.Major >= 12 ? rg.MaxOutstandingIOPerVolume : 0; // Supported 2014 and later
-                    row["script"] = StringCollectionToString(sc);
-                    dtRG.Rows.Add(row);
                 }
+                if (rg.ServerVersion.Major >= 13) // Supported 2016 and later
+                {
+                    foreach (ExternalResourcePool pool in rg.ExternalResourcePools)
+                    {
+                        var poolSc = pool.Script();
+                        sc.AppendCollection(poolSc);
+                    }
+                }
+                var row = dtRG.NewRow();
+                row["is_enabled"] = rg.Enabled;
+                row["classifier_function"] = rg.ClassifierFunction;
+                row["reconfiguration_error"] = reConfigError;
+                row["reconfiguration_pending"] = rg.ReconfigurePending;
+                row["max_outstanding_io_per_volume"] = rg.ServerVersion.Major >= 12 ? rg.MaxOutstandingIOPerVolume : 0; // Supported 2014 and later
+                row["script"] = StringCollectionToString(sc);
+                dtRG.Rows.Add(row);
             }
             return dtRG;
         }
@@ -181,32 +177,29 @@ namespace DBADash
         {
             var StartTime = DateTime.UtcNow;
 
-            using (var cn = new Microsoft.Data.SqlClient.SqlConnection(ConnectionString))
-            using (var opSS = Operation.Begin("Schema snapshot {DBame}", DBName))
+            using (var cn = new SqlConnection(ConnectionString))
+            using (var opSS = Operation.Begin("Schema snapshot {dbName}", DBName))
             {
                 DataTable dtSchema = new("Schema_" + DBName);
                 dtSchema.Columns.Add("ObjectName");
                 dtSchema.Columns.Add("SchemaName");
                 dtSchema.Columns.Add("ObjectType");
-                dtSchema.Columns.Add("object_id", typeof(Int32));
+                dtSchema.Columns.Add("object_id", typeof(int));
                 dtSchema.Columns.Add("DDLHash", typeof(byte[]));
                 dtSchema.Columns.Add("DDL", typeof(byte[]));
                 dtSchema.Columns.Add("ObjectDateCreated", typeof(DateTime));
                 dtSchema.Columns.Add("ObjectDateModified", typeof(DateTime));
-                var instance = new Microsoft.SqlServer.Management.Smo.Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
+                var instance = new Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
                 instance.SetDefaultInitFields(typeof(Table), true);
 
                 var db = instance.Databases[DBName];
-                string sDDL;
-                byte[] bDDL;
-                DataRow r;
                 if (db.IsUpdateable && db.IsAccessible)
                 {
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Database))
                     {
-                        sDDL = StringCollectionToString(db.Script(ScriptingOptions));
-                        bDDL = Zip(sDDL);
-                        r = dtSchema.NewRow();
+                        var sDDL = StringCollectionToString(db.Script(ScriptingOptions));
+                        var bDDL = Zip(sDDL);
+                        var r = dtSchema.NewRow();
                         r["ObjectName"] = "Database";
                         r["SchemaName"] = "";
                         r["ObjectType"] = "DB";
@@ -219,7 +212,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Aggregate))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Aggregate"))
+                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "Aggregate"))
                         {
                             AddAggregate(db, dtSchema);
                             op.Complete();
@@ -227,7 +220,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Assembly))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Assembly"))
+                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "Assembly"))
                         {
                             AddAssembly(db, dtSchema);
                             op.Complete();
@@ -235,15 +228,15 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedType))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedType"))
+                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "UserDefinedType"))
                         {
-                            AddUserDefinedType(db, dtSchema); ;
+                            AddUserDefinedType(db, dtSchema);
                             op.Complete();
                         }
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.XMLSchema))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "XMLSchema"))
+                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "XMLSchema"))
                         {
                             AddXMLSchema(db, dtSchema);
                             op.Complete();
@@ -251,7 +244,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Schema))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Schema"))
+                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "Schema"))
                         {
                             AddSchema(db, dtSchema);
                             op.Complete();
@@ -259,7 +252,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Tables))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Tables"))
+                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "Tables"))
                         {
                             AddTables(db, dtSchema);
                             op.Complete();
@@ -267,7 +260,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.StoredProcedures))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "StoredProcedures"))
+                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "StoredProcedures"))
                         {
                             AddSPs(db, dtSchema);
                             op.Complete();
@@ -275,7 +268,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedFunction))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedFunctions"))
+                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "UserDefinedFunctions"))
                         {
                             AddUDFs(db, dtSchema);
                             op.Complete();
@@ -283,7 +276,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.View))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Views"))
+                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "Views"))
                         {
                             AddViews(db, dtSchema);
                             op.Complete();
@@ -291,7 +284,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedTableType) && instance.VersionMajor >= 10) // Support for User Defined Table Types added in SQL 2008
                     {
-                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedTableTypes"))
+                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "UserDefinedTableTypes"))
                         {
                             AddUserDefinedTableType(db, dtSchema);
                             op.Complete();
@@ -299,7 +292,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedDataType))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedDataTypes"))
+                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "UserDefinedDataTypes"))
                         {
                             AddUserDefinedDataType(db, dtSchema);
                             op.Complete();
@@ -307,7 +300,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.DDLTrigger))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "DDLTriggers"))
+                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "DDLTriggers"))
                         {
                             AddDDLTriggers(db, dtSchema);
                             op.Complete();
@@ -315,7 +308,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Synonym))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Synonyms"))
+                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "Synonyms"))
                         {
                             AddSynonyms(db, dtSchema,errorLogger);
                             op.Complete();
@@ -323,7 +316,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Roles))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Roles"))
+                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "Roles"))
                         {
                             AddRoles(db, dtSchema);
                             op.Complete();
@@ -331,7 +324,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Users))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Users"))
+                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "Users"))
                         {
                             AddUsers(db, dtSchema);
                             op.Complete();
@@ -339,7 +332,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.ApplicationRole))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "ApplicationRoles"))
+                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "ApplicationRoles"))
                         {
                             AddAppRole(db, dtSchema);
                             op.Complete();
@@ -347,7 +340,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Sequence))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Sequences"))
+                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "Sequences"))
                         {
                             AddSeq(db, dtSchema);
                             op.Complete();
@@ -357,7 +350,7 @@ namespace DBADash
                     {
                         if (instance.ServerType != Microsoft.SqlServer.Management.Common.DatabaseEngineType.SqlAzureDatabase)
                         {
-                            using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "ServiceBroker"))
+                            using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "ServiceBroker"))
                             {
                                 AddServiceBroker(db, dtSchema);
                                 op.Complete();
@@ -379,21 +372,19 @@ namespace DBADash
         {
             foreach (ServiceQueue q in db.ServiceBroker.Queues)
             {
-                if (!q.IsSystemObject)
-                {
-                    var r = dtSchema.NewRow();
-                    var sDDL = StringCollectionToString(q.Script(ScriptingOptions));
-                    var bDDL = Zip(sDDL);
-                    r["ObjectName"] = q.Name;
-                    r["SchemaName"] = q.Schema;
-                    r["ObjectType"] = "SQ";
-                    r["object_id"] = q.ID;
-                    r["DDL"] = bDDL;
-                    r["DDLHash"] = ComputeHash(bDDL);
-                    r["ObjectDateCreated"] = q.CreateDate;
-                    r["ObjectDateModified"] = q.DateLastModified;
-                    dtSchema.Rows.Add(r);
-                }
+                if (q.IsSystemObject) continue;
+                var r = dtSchema.NewRow();
+                var sDDL = StringCollectionToString(q.Script(ScriptingOptions));
+                var bDDL = Zip(sDDL);
+                r["ObjectName"] = q.Name;
+                r["SchemaName"] = q.Schema;
+                r["ObjectType"] = "SQ";
+                r["object_id"] = q.ID;
+                r["DDL"] = bDDL;
+                r["DDLHash"] = ComputeHash(bDDL);
+                r["ObjectDateCreated"] = q.CreateDate;
+                r["ObjectDateModified"] = q.DateLastModified;
+                dtSchema.Rows.Add(r);
             }
             foreach (ServiceRoute rt in db.ServiceBroker.Routes)
             {
@@ -412,57 +403,51 @@ namespace DBADash
             }
             foreach (MessageType m in db.ServiceBroker.MessageTypes)
             {
-                if (!m.IsSystemObject)
-                {
-                    var r = dtSchema.NewRow();
-                    var sDDL = StringCollectionToString(m.Script(ScriptingOptions));
-                    var bDDL = Zip(sDDL);
-                    r["ObjectName"] = m.Name;
-                    r["SchemaName"] = "";
-                    r["ObjectType"] = "SBM";
-                    r["object_id"] = m.ID;
-                    r["DDL"] = bDDL;
-                    r["DDLHash"] = ComputeHash(bDDL);
-                    r["ObjectDateCreated"] = "1900-01-01";
-                    r["ObjectDateModified"] = "1900-01-01";
-                    dtSchema.Rows.Add(r);
-                }
+                if (m.IsSystemObject) continue;
+                var r = dtSchema.NewRow();
+                var sDDL = StringCollectionToString(m.Script(ScriptingOptions));
+                var bDDL = Zip(sDDL);
+                r["ObjectName"] = m.Name;
+                r["SchemaName"] = "";
+                r["ObjectType"] = "SBM";
+                r["object_id"] = m.ID;
+                r["DDL"] = bDDL;
+                r["DDLHash"] = ComputeHash(bDDL);
+                r["ObjectDateCreated"] = "1900-01-01";
+                r["ObjectDateModified"] = "1900-01-01";
+                dtSchema.Rows.Add(r);
             }
             foreach (BrokerService s in db.ServiceBroker.Services)
             {
-                if (!s.IsSystemObject)
-                {
-                    var r = dtSchema.NewRow();
-                    var sDDL = StringCollectionToString(s.Script(ScriptingOptions));
-                    var bDDL = Zip(sDDL);
-                    r["ObjectName"] = s.Name;
-                    r["SchemaName"] = s.QueueSchema;
-                    r["ObjectType"] = "SBS";
-                    r["object_id"] = s.ID;
-                    r["DDL"] = bDDL;
-                    r["DDLHash"] = ComputeHash(bDDL);
-                    r["ObjectDateCreated"] = "1900-01-01";
-                    r["ObjectDateModified"] = "1900-01-01";
-                    dtSchema.Rows.Add(r);
-                }
+                if (s.IsSystemObject) continue;
+                var r = dtSchema.NewRow();
+                var sDDL = StringCollectionToString(s.Script(ScriptingOptions));
+                var bDDL = Zip(sDDL);
+                r["ObjectName"] = s.Name;
+                r["SchemaName"] = s.QueueSchema;
+                r["ObjectType"] = "SBS";
+                r["object_id"] = s.ID;
+                r["DDL"] = bDDL;
+                r["DDLHash"] = ComputeHash(bDDL);
+                r["ObjectDateCreated"] = "1900-01-01";
+                r["ObjectDateModified"] = "1900-01-01";
+                dtSchema.Rows.Add(r);
             }
             foreach (ServiceContract c in db.ServiceBroker.ServiceContracts)
             {
-                if (!c.IsSystemObject)
-                {
-                    var r = dtSchema.NewRow();
-                    var sDDL = StringCollectionToString(c.Script(ScriptingOptions));
-                    var bDDL = Zip(sDDL);
-                    r["ObjectName"] = c.Name;
-                    r["SchemaName"] = "";
-                    r["ObjectType"] = "SBC";
-                    r["object_id"] = c.ID;
-                    r["DDL"] = bDDL;
-                    r["DDLHash"] = ComputeHash(bDDL);
-                    r["ObjectDateCreated"] = "1900-01-01";
-                    r["ObjectDateModified"] = "1900-01-01";
-                    dtSchema.Rows.Add(r);
-                }
+                if (c.IsSystemObject) continue;
+                var r = dtSchema.NewRow();
+                var sDDL = StringCollectionToString(c.Script(ScriptingOptions));
+                var bDDL = Zip(sDDL);
+                r["ObjectName"] = c.Name;
+                r["SchemaName"] = "";
+                r["ObjectType"] = "SBC";
+                r["object_id"] = c.ID;
+                r["DDL"] = bDDL;
+                r["DDLHash"] = ComputeHash(bDDL);
+                r["ObjectDateCreated"] = "1900-01-01";
+                r["ObjectDateModified"] = "1900-01-01";
+                dtSchema.Rows.Add(r);
             }
             foreach (RemoteServiceBinding b in db.ServiceBroker.RemoteServiceBindings)
             {
@@ -479,45 +464,44 @@ namespace DBADash
                 r["ObjectDateModified"] = "1900-01-01";
                 dtSchema.Rows.Add(r);
             }
-            if (db.Parent.VersionMajor >= 10) // Broker priorities supported on SQL 2008
+
+            if (db.Parent.VersionMajor < 10) return; // Broker priorities supported on SQL 2008
+            
+            foreach (BrokerPriority p in db.ServiceBroker.Priorities)
             {
-                foreach (BrokerPriority p in db.ServiceBroker.Priorities)
-                {
-                    var r = dtSchema.NewRow();
-                    var sDDL = StringCollectionToString(p.Script(ScriptingOptions));
-                    var bDDL = Zip(sDDL);
-                    r["ObjectName"] = p.Name;
-                    r["SchemaName"] = "";
-                    r["ObjectType"] = "SBP";
-                    r["object_id"] = p.ID;
-                    r["DDL"] = bDDL;
-                    r["DDLHash"] = ComputeHash(bDDL);
-                    r["ObjectDateCreated"] = "1900-01-01";
-                    r["ObjectDateModified"] = "1900-01-01";
-                    dtSchema.Rows.Add(r);
-                }
+                var r = dtSchema.NewRow();
+                var sDDL = StringCollectionToString(p.Script(ScriptingOptions));
+                var bDDL = Zip(sDDL);
+                r["ObjectName"] = p.Name;
+                r["SchemaName"] = "";
+                r["ObjectType"] = "SBP";
+                r["object_id"] = p.ID;
+                r["DDL"] = bDDL;
+                r["DDLHash"] = ComputeHash(bDDL);
+                r["ObjectDateCreated"] = "1900-01-01";
+                r["ObjectDateModified"] = "1900-01-01";
+                dtSchema.Rows.Add(r);
             }
+            
         }
 
         private void AddSeq(Database db, DataTable dtSchema)
         {
-            if (db.ServerVersion.Major > 11) // 2012+
+            if (db.ServerVersion.Major <= 11) return; // 2012+
+            foreach (Sequence s in db.Sequences)
             {
-                foreach (Sequence s in db.Sequences)
-                {
-                    var r = dtSchema.NewRow();
-                    var sDDL = StringCollectionToString(s.Script(ScriptingOptions));
-                    var bDDL = Zip(sDDL);
-                    r["ObjectName"] = s.Name;
-                    r["SchemaName"] = s.Schema;
-                    r["ObjectType"] = "SO";
-                    r["object_id"] = s.ID;
-                    r["DDL"] = bDDL;
-                    r["DDLHash"] = ComputeHash(bDDL);
-                    r["ObjectDateCreated"] = s.CreateDate;
-                    r["ObjectDateModified"] = s.DateLastModified;
-                    dtSchema.Rows.Add(r);
-                }
+                var r = dtSchema.NewRow();
+                var sDDL = StringCollectionToString(s.Script(ScriptingOptions));
+                var bDDL = Zip(sDDL);
+                r["ObjectName"] = s.Name;
+                r["SchemaName"] = s.Schema;
+                r["ObjectType"] = "SO";
+                r["object_id"] = s.ID;
+                r["DDL"] = bDDL;
+                r["DDLHash"] = ComputeHash(bDDL);
+                r["ObjectDateCreated"] = s.CreateDate;
+                r["ObjectDateModified"] = s.DateLastModified;
+                dtSchema.Rows.Add(r);
             }
         }
 
@@ -544,21 +528,19 @@ namespace DBADash
         {
             foreach (User u in db.Users)
             {
-                if (!u.IsSystemObject)
-                {
-                    var r = dtSchema.NewRow();
-                    var sDDL = StringCollectionToString(u.Script(ScriptingOptions));
-                    var bDDL = Zip(sDDL);
-                    r["ObjectName"] = u.Name;
-                    r["SchemaName"] = "";
-                    r["ObjectType"] = "USR";
-                    r["object_id"] = u.ID;
-                    r["DDL"] = bDDL;
-                    r["DDLHash"] = ComputeHash(bDDL);
-                    r["ObjectDateCreated"] = u.CreateDate;
-                    r["ObjectDateModified"] = u.DateLastModified;
-                    dtSchema.Rows.Add(r);
-                }
+                if (u.IsSystemObject) continue;
+                var r = dtSchema.NewRow();
+                var sDDL = StringCollectionToString(u.Script(ScriptingOptions));
+                var bDDL = Zip(sDDL);
+                r["ObjectName"] = u.Name;
+                r["SchemaName"] = "";
+                r["ObjectType"] = "USR";
+                r["object_id"] = u.ID;
+                r["DDL"] = bDDL;
+                r["DDLHash"] = ComputeHash(bDDL);
+                r["ObjectDateCreated"] = u.CreateDate;
+                r["ObjectDateModified"] = u.DateLastModified;
+                dtSchema.Rows.Add(r);
             }
         }
 
@@ -566,21 +548,19 @@ namespace DBADash
         {
             foreach (DatabaseRole dbr in db.Roles)
             {
-                if (!dbr.IsFixedRole)
-                {
-                    var r = dtSchema.NewRow();
-                    var sDDL = StringCollectionToString(dbr.Script(ScriptingOptions));
-                    var bDDL = Zip(sDDL);
-                    r["ObjectName"] = dbr.Name;
-                    r["SchemaName"] = "";
-                    r["ObjectType"] = "ROL";
-                    r["object_id"] = dbr.ID;
-                    r["DDL"] = bDDL;
-                    r["DDLHash"] = ComputeHash(bDDL);
-                    r["ObjectDateCreated"] = dbr.CreateDate;
-                    r["ObjectDateModified"] = dbr.DateLastModified;
-                    dtSchema.Rows.Add(r);
-                }
+                if (dbr.IsFixedRole) continue;
+                var r = dtSchema.NewRow();
+                var sDDL = StringCollectionToString(dbr.Script(ScriptingOptions));
+                var bDDL = Zip(sDDL);
+                r["ObjectName"] = dbr.Name;
+                r["SchemaName"] = "";
+                r["ObjectType"] = "ROL";
+                r["object_id"] = dbr.ID;
+                r["DDL"] = bDDL;
+                r["DDLHash"] = ComputeHash(bDDL);
+                r["ObjectDateCreated"] = dbr.CreateDate;
+                r["ObjectDateModified"] = dbr.DateLastModified;
+                dtSchema.Rows.Add(r);
             }
         }
 
@@ -607,21 +587,19 @@ namespace DBADash
         {
             foreach (SqlAssembly a in db.Assemblies)
             {
-                if (!a.IsSystemObject)
-                {
-                    var r = dtSchema.NewRow();
-                    var sDDL = StringCollectionToString(a.Script(ScriptingOptions));
-                    var bDDL = Zip(sDDL);
-                    r["ObjectName"] = a.Name;
-                    r["SchemaName"] = "";
-                    r["ObjectType"] = "CLR";
-                    r["object_id"] = a.ID;
-                    r["DDL"] = bDDL;
-                    r["DDLHash"] = ComputeHash(bDDL);
-                    r["ObjectDateCreated"] = a.CreateDate;
-                    r["ObjectDateModified"] = DBNull.Value;
-                    dtSchema.Rows.Add(r);
-                }
+                if (a.IsSystemObject) continue;
+                var r = dtSchema.NewRow();
+                var sDDL = StringCollectionToString(a.Script(ScriptingOptions));
+                var bDDL = Zip(sDDL);
+                r["ObjectName"] = a.Name;
+                r["SchemaName"] = "";
+                r["ObjectType"] = "CLR";
+                r["object_id"] = a.ID;
+                r["DDL"] = bDDL;
+                r["DDLHash"] = ComputeHash(bDDL);
+                r["ObjectDateCreated"] = a.CreateDate;
+                r["ObjectDateModified"] = DBNull.Value;
+                dtSchema.Rows.Add(r);
             }
         }
 
@@ -648,21 +626,19 @@ namespace DBADash
         {
             foreach (Schema s in db.Schemas)
             {
-                if (!s.IsSystemObject)
-                {
-                    var r = dtSchema.NewRow();
-                    var sDDL = StringCollectionToString(s.Script(ScriptingOptions));
-                    var bDDL = Zip(sDDL);
-                    r["ObjectName"] = s.Name;
-                    r["SchemaName"] = "";
-                    r["ObjectType"] = "SCH";
-                    r["object_id"] = s.ID;
-                    r["DDL"] = bDDL;
-                    r["DDLHash"] = ComputeHash(bDDL);
-                    r["ObjectDateCreated"] = DBNull.Value;
-                    r["ObjectDateModified"] = DBNull.Value;
-                    dtSchema.Rows.Add(r);
-                }
+                if (s.IsSystemObject) continue;
+                var r = dtSchema.NewRow();
+                var sDDL = StringCollectionToString(s.Script(ScriptingOptions));
+                var bDDL = Zip(sDDL);
+                r["ObjectName"] = s.Name;
+                r["SchemaName"] = "";
+                r["ObjectType"] = "SCH";
+                r["object_id"] = s.ID;
+                r["DDL"] = bDDL;
+                r["DDLHash"] = ComputeHash(bDDL);
+                r["ObjectDateCreated"] = DBNull.Value;
+                r["ObjectDateModified"] = DBNull.Value;
+                dtSchema.Rows.Add(r);
             }
         }
 
@@ -697,15 +673,7 @@ namespace DBADash
             foreach (DatabaseDdlTrigger t in db.Triggers)
             {
                 var r = dtSchema.NewRow();
-                string sDDL;
-                if (t.IsEncrypted)
-                {
-                    sDDL = "/* Encrypted DDL Trigger */";
-                }
-                else
-                {
-                    sDDL = StringCollectionToString(t.Script(ScriptingOptions));
-                }
+                var sDDL = t.IsEncrypted ? "/* Encrypted DDL Trigger */" : StringCollectionToString(t.Script(ScriptingOptions));
                 var bDDL = Zip(sDDL);
                 r["ObjectName"] = t.Name;
                 r["SchemaName"] = "";
@@ -783,62 +751,60 @@ namespace DBADash
             db.PrefetchObjects(typeof(UserDefinedFunction), ScriptingOptions);
             foreach (UserDefinedFunction f in db.UserDefinedFunctions)
             {
-                if (!f.IsSystemObject)
+                if (f.IsSystemObject) continue;
+                var r = dtSchema.NewRow();
+                string sDDL;
+                if (f.IsEncrypted)
                 {
-                    var r = dtSchema.NewRow();
-                    string sDDL;
-                    if (f.IsEncrypted)
-                    {
-                        sDDL = "/* Encrypted Function */";
-                    }
-                    else
-                    {
-                        sDDL = f.TextHeader + Environment.NewLine + f.TextBody;
-                    }
-
-                    var bDDL = Zip(sDDL);
-                    r["ObjectName"] = f.Name;
-                    r["SchemaName"] = f.Schema;
-                    switch (f.FunctionType)
-                    {
-                        case UserDefinedFunctionType.Inline:
-                            r["ObjectType"] = "IF";
-                            break;
-
-                        case UserDefinedFunctionType.Scalar:
-                            if (f.ImplementationType == ImplementationType.SqlClr)
-                            {
-                                r["ObjectType"] = "FS";
-                            }
-                            else
-                            {
-                                r["ObjectType"] = "FN";
-                            }
-                            break;
-
-                        case UserDefinedFunctionType.Table:
-                            if (f.ImplementationType == ImplementationType.SqlClr)
-                            {
-                                r["ObjectType"] = "FT";
-                            }
-                            else
-                            {
-                                r["ObjectType"] = "TF";
-                            }
-                            break;
-
-                        default:
-                            r["ObjectType"] = "??";
-                            break;
-                    }
-
-                    r["object_id"] = f.ID;
-                    r["DDL"] = bDDL;
-                    r["DDLHash"] = ComputeHash(bDDL);
-                    r["ObjectDateCreated"] = f.CreateDate;
-                    r["ObjectDateModified"] = f.DateLastModified;
-                    dtSchema.Rows.Add(r);
+                    sDDL = "/* Encrypted Function */";
                 }
+                else
+                {
+                    sDDL = f.TextHeader + Environment.NewLine + f.TextBody;
+                }
+
+                var bDDL = Zip(sDDL);
+                r["ObjectName"] = f.Name;
+                r["SchemaName"] = f.Schema;
+                switch (f.FunctionType)
+                {
+                    case UserDefinedFunctionType.Inline:
+                        r["ObjectType"] = "IF";
+                        break;
+
+                    case UserDefinedFunctionType.Scalar:
+                        if (f.ImplementationType == ImplementationType.SqlClr)
+                        {
+                            r["ObjectType"] = "FS";
+                        }
+                        else
+                        {
+                            r["ObjectType"] = "FN";
+                        }
+                        break;
+
+                    case UserDefinedFunctionType.Table:
+                        if (f.ImplementationType == ImplementationType.SqlClr)
+                        {
+                            r["ObjectType"] = "FT";
+                        }
+                        else
+                        {
+                            r["ObjectType"] = "TF";
+                        }
+                        break;
+
+                    default:
+                        r["ObjectType"] = "??";
+                        break;
+                }
+
+                r["object_id"] = f.ID;
+                r["DDL"] = bDDL;
+                r["DDLHash"] = ComputeHash(bDDL);
+                r["ObjectDateCreated"] = f.CreateDate;
+                r["ObjectDateModified"] = f.DateLastModified;
+                dtSchema.Rows.Add(r);
             }
         }
 
@@ -847,32 +813,22 @@ namespace DBADash
             db.PrefetchObjects(typeof(View), ScriptingOptions);
             foreach (View v in db.Views)
             {
-                if (!v.IsSystemObject)
-                {
-                    var r = dtSchema.NewRow();
-                    string sDDL;
-                    if (v.IsEncrypted)
-                    {
-                        sDDL = "/* Encrypted View */";
-                    }
-                    else
-                    {
-                        sDDL = StringCollectionToString(v.Script(ScriptingOptions));
-                    }
+                if (v.IsSystemObject) continue;
+                var r = dtSchema.NewRow();
+                var sDDL = v.IsEncrypted ? "/* Encrypted View */" : StringCollectionToString(v.Script(ScriptingOptions));
 
-                    var bDDL = Zip(sDDL);
-                    r["ObjectName"] = v.Name;
-                    r["SchemaName"] = v.Schema;
-                    r["ObjectType"] = "V";
-                    r["object_id"] = v.ID;
-                    r["DDL"] = bDDL;
-                    r["DDLHash"] = ComputeHash(bDDL);
-                    r["ObjectDateCreated"] = v.CreateDate;
-                    r["ObjectDateModified"] = v.DateLastModified;
-                    dtSchema.Rows.Add(r);
+                var bDDL = Zip(sDDL);
+                r["ObjectName"] = v.Name;
+                r["SchemaName"] = v.Schema;
+                r["ObjectType"] = "V";
+                r["object_id"] = v.ID;
+                r["DDL"] = bDDL;
+                r["DDLHash"] = ComputeHash(bDDL);
+                r["ObjectDateCreated"] = v.CreateDate;
+                r["ObjectDateModified"] = v.DateLastModified;
+                dtSchema.Rows.Add(r);
 
-                    AddTriggers(v.Triggers, v.Schema, dtSchema);
-                }
+                AddTriggers(v.Triggers, v.Schema, dtSchema);
             }
         }
 
@@ -882,49 +838,47 @@ namespace DBADash
 
             foreach (StoredProcedure sp in db.StoredProcedures)
             {
-                if (!sp.IsSystemObject)
+                if (sp.IsSystemObject) continue;
+                var r = dtSchema.NewRow();
+                string sDDL;
+                if (sp.IsEncrypted)
                 {
-                    var r = dtSchema.NewRow();
-                    string sDDL;
-                    if (sp.IsEncrypted)
-                    {
-                        sDDL = "/* Encrypted stored procedure */";
-                    }
-                    else
-                    {
-                        sDDL = sp.TextHeader + Environment.NewLine + sp.TextBody;
-                    }
-                    if (sp.ImplementationType == ImplementationType.SqlClr)
-                    {
-                        r["ObjectType"] = "PC";
-                    }
-                    else
-                    {
-                        r["ObjectType"] = "P";
-                    }
-                    var bDDL = Zip(sDDL);
-                    r["ObjectName"] = sp.Name;
-                    r["SchemaName"] = sp.Schema;
-                    r["object_id"] = sp.ID;
-                    r["DDL"] = bDDL;
-                    r["DDLHash"] = ComputeHash(bDDL);
-                    r["ObjectDateCreated"] = sp.CreateDate;
-                    r["ObjectDateModified"] = sp.DateLastModified;
-                    dtSchema.Rows.Add(r);
+                    sDDL = "/* Encrypted stored procedure */";
                 }
+                else
+                {
+                    sDDL = sp.TextHeader + Environment.NewLine + sp.TextBody;
+                }
+                if (sp.ImplementationType == ImplementationType.SqlClr)
+                {
+                    r["ObjectType"] = "PC";
+                }
+                else
+                {
+                    r["ObjectType"] = "P";
+                }
+                var bDDL = Zip(sDDL);
+                r["ObjectName"] = sp.Name;
+                r["SchemaName"] = sp.Schema;
+                r["object_id"] = sp.ID;
+                r["DDL"] = bDDL;
+                r["DDLHash"] = ComputeHash(bDDL);
+                r["ObjectDateCreated"] = sp.CreateDate;
+                r["ObjectDateModified"] = sp.DateLastModified;
+                dtSchema.Rows.Add(r);
             }
         }
 
         private void AddTables(Database db, DataTable dtSchema)
         {
             db.PrefetchObjects(typeof(Table), ScriptingOptions);
-            bool includeTriggers = options.Triggers;
+            var includeTriggers = options.Triggers;
             foreach (Table t in db.Tables)
             {
                 if (!t.IsSystemObject)
                 {
                     var r = dtSchema.NewRow();
-                    bool hasEncryptedTriggers = false;
+                    var hasEncryptedTriggers = false;
                     // Don't script triggers if table contains encrypted triggers
                     if (includeTriggers)
                     {
@@ -962,34 +916,22 @@ namespace DBADash
 
         private void AddTriggers(TriggerCollection triggers, string schema, DataTable dtSchema)
         {
-            if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Trigger))
+            if (!options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Trigger)) return;
+            foreach (Trigger t in triggers)
             {
-                foreach (Trigger t in triggers)
-                {
-                    if (!t.IsSystemObject)
-                    {
-                        var r = dtSchema.NewRow();
-                        string sDDL;
-                        if (t.IsEncrypted)
-                        {
-                            sDDL = "/* Encrypted trigger */";
-                        }
-                        else
-                        {
-                            sDDL = StringCollectionToString(t.Script(ScriptingOptions));
-                        }
-                        var bDDL = Zip(sDDL);
-                        r["ObjectName"] = t.Name;
-                        r["SchemaName"] = schema;
-                        r["ObjectType"] = t.ImplementationType == ImplementationType.SqlClr ? "TA" : "TR";
-                        r["object_id"] = t.ID;
-                        r["DDL"] = bDDL;
-                        r["DDLHash"] = ComputeHash(bDDL);
-                        r["ObjectDateCreated"] = t.CreateDate;
-                        r["ObjectDateModified"] = t.DateLastModified;
-                        dtSchema.Rows.Add(r);
-                    }
-                }
+                if (t.IsSystemObject) continue;
+                var r = dtSchema.NewRow();
+                var sDDL = t.IsEncrypted ? "/* Encrypted trigger */" : StringCollectionToString(t.Script(ScriptingOptions));
+                var bDDL = Zip(sDDL);
+                r["ObjectName"] = t.Name;
+                r["SchemaName"] = schema;
+                r["ObjectType"] = t.ImplementationType == ImplementationType.SqlClr ? "TA" : "TR";
+                r["object_id"] = t.ID;
+                r["DDL"] = bDDL;
+                r["DDLHash"] = ComputeHash(bDDL);
+                r["ObjectDateCreated"] = t.CreateDate;
+                r["ObjectDateModified"] = t.DateLastModified;
+                dtSchema.Rows.Add(r);
             }
         }
 
@@ -1014,7 +956,7 @@ namespace DBADash
 
             foreach (Database db in instance.Databases)
             {
-                if (!db.IsUpdateable || !db.IsAccessible || db.IsSystemObject != false) continue;
+                if (!db.IsUpdateable || !db.IsAccessible || db.IsSystemObject) continue;
 
                 var include = dbs.Any(strDB => strDB == "*" || string.Equals(strDB, db.Name, StringComparison.OrdinalIgnoreCase)) &&
                               !dbs.Any(strDB => strDB.StartsWith('-') && string.Equals(strDB[1..], db.Name, StringComparison.OrdinalIgnoreCase));

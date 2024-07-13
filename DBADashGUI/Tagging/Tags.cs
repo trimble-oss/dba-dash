@@ -27,7 +27,7 @@ namespace DBADashGUI.Tagging
                 _allTags = value ?? new List<DBADashTag>();
                 cboTagName.Items.Clear();
                 cboTagName.Items.AddRange(
-                    _allTags.Where(t => !t.TagName.StartsWith("{"))
+                    _allTags.Where(t => !t.TagName.StartsWith('{'))
                         .Select(t => t.TagName)
                         .Distinct()
                         .ToArray<object>()
@@ -39,14 +39,14 @@ namespace DBADashGUI.Tagging
         private int InstanceID;
         private string InstanceName;
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            this.context = context;
-            if (context.InstanceIDs.Count == 1)
+            this.context = _context;
+            if (_context.InstanceIDs.Count == 1)
             {
-                InstanceID = context.InstanceIDs.First();
+                InstanceID = _context.InstanceIDs.First();
             }
-            InstanceName = context.InstanceName;
+            InstanceName = _context.InstanceName;
             RefreshData();
         }
 
@@ -56,7 +56,7 @@ namespace DBADashGUI.Tagging
 
         private void BttnAdd_Click(object sender, EventArgs e)
         {
-            if (cboTagName.Text.StartsWith("{"))
+            if (cboTagName.Text.StartsWith('{'))
             {
                 MessageBox.Show("Invalid TagName.  TagNames starting with { are system reserved.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
@@ -65,7 +65,7 @@ namespace DBADashGUI.Tagging
             InstanceTag newTag = new() { Instance = InstanceName, TagName = cboTagName.Text, TagValue = cboTagValue.Text, InstanceID = InstanceID };
             newTag.Save();
             RefreshData();
-            TagsChanged.Invoke(this, null);
+            TagsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private void CboTagName_SelectedValueChanged(object sender, EventArgs e)
@@ -73,7 +73,7 @@ namespace DBADashGUI.Tagging
             cboTagValue.Items.Clear();
 
             cboTagValue.Items.AddRange(AllTags.Where(t => t.TagName == cboTagName.Text)
-                                    .Select(t => (t.TagValue)).ToArray());
+                                    .Select(t => (object)t.TagValue).ToArray());
         }
 
         public void RefreshData()
@@ -101,13 +101,13 @@ namespace DBADashGUI.Tagging
 
             foreach (var t in tags)
             {
-                if (!t.TagName.StartsWith("{"))
+                if (!t.TagName.StartsWith('{'))
                 {
-                    dgvTags.Rows.Add(new object[] { t.TagID, t.IsTagged, t.TagName, t.TagValue });
+                    dgvTags.Rows.Add(t.TagID, t.IsTagged, t.TagName, t.TagValue);
                 }
                 else if (t.IsTagged)
                 {
-                    dgv.Rows.Add(new object[] { t.TagName.Replace("{", "").Replace("}", ""), t.TagValue });
+                    dgv.Rows.Add(t.TagName.Replace("{", "").Replace("}", ""), t.TagValue);
                 }
             }
             dgvTags.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
@@ -202,18 +202,18 @@ namespace DBADashGUI.Tagging
         {
             if (e.ColumnIndex == colCheck.Index && e.RowIndex >= 0)
             {
-                int tagid = (int)dgvTags.Rows[e.RowIndex].Cells[colTagID.Index].Value;
-                string tagName = (string)dgvTags.Rows[e.RowIndex].Cells[colTagName1.Index].Value;
-                string tagValue = (string)dgvTags.Rows[e.RowIndex].Cells[ColTagValue1.Index].Value;
-                bool isTagged = (bool)dgvTags.Rows[e.RowIndex].Cells[colCheck.Index].Value;
-                var tag = new InstanceTag() { Instance = InstanceName, TagID = tagid, TagName = tagName, TagValue = tagValue, IsTagged = isTagged, InstanceID = InstanceID };
+                var tagId = (int)dgvTags.Rows[e.RowIndex].Cells[colTagID.Index].Value;
+                var tagName = (string)dgvTags.Rows[e.RowIndex].Cells[colTagName1.Index].Value;
+                var tagValue = (string)dgvTags.Rows[e.RowIndex].Cells[ColTagValue1.Index].Value;
+                var isTagged = (bool)dgvTags.Rows[e.RowIndex].Cells[colCheck.Index].Value;
+                var tag = new InstanceTag() { Instance = InstanceName, TagID = tagId, TagName = tagName, TagValue = tagValue, IsTagged = isTagged, InstanceID = InstanceID };
                 tag.Save();
             }
         }
 
         public void ApplyTheme(BaseTheme theme)
         {
-            foreach (Control c in this.Controls)
+            foreach (Control c in Controls)
             {
                 c.ApplyTheme(theme);
             }

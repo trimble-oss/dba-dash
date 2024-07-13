@@ -1,15 +1,11 @@
-﻿using Octokit;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Serilog;
 using SerilogTimings;
-using static Microsoft.SqlServer.Management.SqlParser.Metadata.MetadataInfoProvider;
 using System.Collections.Concurrent;
 using System.Threading;
 

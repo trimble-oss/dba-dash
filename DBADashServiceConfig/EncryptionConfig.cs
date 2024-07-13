@@ -1,12 +1,5 @@
 ﻿using DBADash;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using DBADashGUI.Theme;
 
@@ -44,7 +37,7 @@ namespace DBADashServiceConfig
 
         private void LnkGenerate_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            txtPassword.Text = PasswordGenerator.Generate(20, true, true, true);
+            txtPassword.Text = PasswordGenerator.Generate();
             PasswordIsVisible = true;
         }
 
@@ -63,7 +56,6 @@ namespace DBADashServiceConfig
             if (chkEncrypt.Checked && string.IsNullOrEmpty(EncryptionPassword))
             {
                 MessageBox.Show("Password is required", "Password", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                return;
             }
             else
             {

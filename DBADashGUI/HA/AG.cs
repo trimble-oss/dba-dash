@@ -23,14 +23,14 @@ namespace DBADashGUI.HA
         private List<int> InstanceIDs=> CurrentContext?.RegularInstanceIDs.ToList();
         private int instanceId = -1;
 
-        public bool CanNavigateBack { get => tsBack.Enabled; }
+        public bool CanNavigateBack => tsBack.Enabled;
         private DBADashContext CurrentContext;
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            tsTrigger.Visible = context.CanMessage;
+            tsTrigger.Visible = _context.CanMessage;
             lblStatus.Visible = false;
-            CurrentContext = context;
+            CurrentContext = _context;
             ResetAndRefreshData();
         }
 
@@ -47,7 +47,7 @@ namespace DBADashGUI.HA
 
         public void RefreshData()
         {
-            this.Invoke(() =>
+            Invoke(() =>
             {
                 tsBack.Enabled = instanceId > 0 && InstanceIDs.Count > 1;
                 dgv.DataSource = null;
@@ -168,7 +168,7 @@ namespace DBADashGUI.HA
                 {
                     var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
                     var r = dgv.Rows[idx];
-                    var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["Snapshot Status"];
+                    var snapshotStatus = (DBADashStatusEnum)row["Snapshot Status"];
                     r.Cells["Snapshot Date"].SetStatusColor(snapshotStatus);
                     r.Cells["Snapshot Age"].SetStatusColor(snapshotStatus);
                     if (instanceId > 0)

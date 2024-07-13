@@ -46,7 +46,7 @@ namespace DBADashGUI
             if (!DisposeOnClose && e.CloseReason == CloseReason.UserClosing) // Option to prevent form from disposing (useful for single instance)
             {
                 e.Cancel = true;
-                this.Hide();
+                Hide();
             }
         }
 

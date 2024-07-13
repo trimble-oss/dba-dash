@@ -51,14 +51,14 @@ namespace DBADashGUI.Drives
             statusFilterToolStrip1.NA, statusFilterToolStrip1.OK,
             context.RegularInstanceIDs.Count == 1 || Common.ShowHidden, context.DriveName);
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            this.context = context;
-            IncludeNA = context.RegularInstanceIDs.Count == 1;
-            IncludeOK = context.RegularInstanceIDs.Count == 1;
+            this.context = _context;
+            IncludeNA = _context.RegularInstanceIDs.Count == 1;
+            IncludeOK = _context.RegularInstanceIDs.Count == 1;
             IncludeWarning = true;
             IncludeCritical = true;
-            tsTrigger.Visible = context.CanMessage;
+            tsTrigger.Visible = _context.CanMessage;
             lblStatus.Visible = false;
             RefreshData();
         }
@@ -68,7 +68,7 @@ namespace DBADashGUI.Drives
             var dt = GetDrives();
             dvDrives = new DataView(dt);
 
-            this.Invoke(() =>
+            Invoke(() =>
             {
                 pnlDrives.Controls.Clear();
                 if (dt.Rows.Count > DrivesViewMaxRows || gridView)

@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Serilog;
 using System;
-using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,10 +8,7 @@ using Microsoft.Extensions.Hosting;
 using System.Threading;
 using CommandLine;
 using DBADash;
-using Microsoft.DotNet.PlatformAbstractions;
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
 using CommandLine.Text;
 
 namespace DBADashService
@@ -33,10 +29,10 @@ namespace DBADashService
                 return;
             }
 
-            if (DBADash.Upgrade.IsUpgradeIncomplete)
+            if (Upgrade.IsUpgradeIncomplete)
             {
                 const string message =
-                    $"Incomplete upgrade of DBA Dash detected.  File '{DBADash.Upgrade.UpgradeFile}' found in directory. Upgrade might have failed due to locked files. More info: https://dbadash.com/upgrades/";
+                    $"Incomplete upgrade of DBA Dash detected.  File '{Upgrade.UpgradeFile}' found in directory. Upgrade might have failed due to locked files. More info: https://dbadash.com/upgrades/";
                 Log.Logger.Error(message);
                 throw new Exception(message);
             }

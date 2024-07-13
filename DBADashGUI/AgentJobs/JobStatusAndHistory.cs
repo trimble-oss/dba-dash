@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 namespace DBADashGUI.AgentJobs
 {
@@ -22,9 +14,9 @@ namespace DBADashGUI.AgentJobs
             get => agentJobsControl1.ShowSteps; set => agentJobsControl1.ShowSteps = value;
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            agentJobsControl1.SetContext(context);
+            agentJobsControl1.SetContext(_context);
         }
     }
 }

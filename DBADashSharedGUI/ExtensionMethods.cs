@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data.Common;
 
 namespace DBADashSharedGUI
 {
     public static class ExtensionMethods
     {
-        public static System.Windows.Media.Color ToMediaColor(this System.Drawing.Color color) => System.Windows.Media.Color.FromArgb(color.A, color.R, color.G, color.B);
+        public static System.Windows.Media.Color ToMediaColor(this Color color) => System.Windows.Media.Color.FromArgb(color.A, color.R, color.G, color.B);
 
         public static Color AdjustBasedOnLuminance(this Color color)
         {

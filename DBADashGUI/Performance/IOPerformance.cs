@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
-using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
 using DBADashGUI.Pickers;
@@ -92,7 +91,7 @@ namespace DBADashGUI.Performance
             set
             {
                 smoothLines = value;
-                foreach (LineSeries s in chartIO.Series.Cast<LineSeries>())
+                foreach (var s in chartIO.Series.Cast<LineSeries>())
                 {
                     s.LineSmoothness = smoothLines ? 1 : 0;
                 }
@@ -184,14 +183,14 @@ namespace DBADashGUI.Performance
                 var dt = CommonData.GetFileGroups(databaseID);
                 foreach (DataRow r in dt.Rows)
                 {
-                    string fg = r["FileGroup"] == DBNull.Value ? "{NULL}" : (string)r["FileGroup"];
+                    var fg = r["FileGroup"] == DBNull.Value ? "{NULL}" : (string)r["FileGroup"];
 
                     var mnu = new ToolStripMenuItem(fg)
                     {
                         Checked = fg == filegroup,
                         CheckOnClick = true
                     };
-                    mnu.Click += Filegroup_Click; ;
+                    mnu.Click += Filegroup_Click;
                     tsFileGroup.DropDownItems.Add(mnu);
                 }
                 tsFileGroup.Visible = tsFileGroup.DropDownItems.Count > 0;
@@ -273,7 +272,7 @@ namespace DBADashGUI.Performance
 
         public void RefreshData(int InstanceID, int databaseID)
         {
-            this.instanceID = InstanceID;
+            instanceID = InstanceID;
             this.databaseID = databaseID;
             FileGroup = "";
             PopulateFileGroupFilter();
@@ -319,11 +318,9 @@ namespace DBADashGUI.Performance
             MaxValue = 200
         };
 
-        private double iopsMax;
-        private double mbMax;
-        public double IOPsAxisMaxValue => iopsMax;
+        public double IOPsAxisMaxValue { get; private set; }
 
-        public double MBAxisMaxValue => mbMax;
+        public double MBAxisMaxValue { get; private set; }
 
         public void RefreshData()
         {
@@ -342,23 +339,23 @@ namespace DBADashGUI.Performance
                 Columns[s].Points = new DateTimePoint[cnt];
             }
 
-            int i = 0;
-            iopsMax = 0;
-            mbMax = 0;
+            var i = 0;
+            IOPsAxisMaxValue = 0;
+            MBAxisMaxValue = 0;
             foreach (DataRow r in dt.Rows)
             {
-                foreach (string s in Columns.Keys)
+                foreach (var s in Columns.Keys)
                 {
                     var v = r[s] == DBNull.Value ? 0 : (double)(decimal)r[s];
                     ioTime = (DateTime)r["SnapshotDate"];
                     Columns[s].Points[i] = new DateTimePoint(ioTime.ToAppTimeZone(), v);
                     if (Columns[s].IsVisible && Columns[s].axis == 1)
                     {
-                        iopsMax = Math.Max(iopsMax, v);
+                        IOPsAxisMaxValue = Math.Max(IOPsAxisMaxValue, v);
                     }
                     else if (Columns[s].IsVisible && Columns[s].axis == 0)
                     {
-                        mbMax = Math.Max(mbMax, v);
+                        MBAxisMaxValue = Math.Max(MBAxisMaxValue, v);
                     }
                 }
                 i++;
@@ -366,7 +363,7 @@ namespace DBADashGUI.Performance
 
             var sc = new SeriesCollection();
             chartIO.Series = sc;
-            foreach (string s in Columns.Keys)
+            foreach (var s in Columns.Keys)
             {
                 sc.Add(new LineSeries
                 {
@@ -379,7 +376,7 @@ namespace DBADashGUI.Performance
                 );
             }
 
-            foreach (LineSeries s in chartIO.Series.Cast<LineSeries>())
+            foreach (var s in chartIO.Series.Cast<LineSeries>())
             {
                 var c = Columns[(string)s.Tag];
                 if (s.Values == null)
@@ -410,27 +407,11 @@ namespace DBADashGUI.Performance
 
         private void UpdateMetricVisibility()
         {
-            foreach (LineSeries s in chartIO.Series.Cast<LineSeries>())
+            foreach (var s in chartIO.Series.Cast<LineSeries>())
             {
                 var metricName = (string)s.Tag;
                 s.Visibility = Columns[metricName].IsVisible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
             }
-        }
-
-        private void MeasureDropDown_Click(object sender, EventArgs e)
-        {
-            var dd = (ToolStripMenuItem)sender;
-            Metric.VisibleMetrics.Clear();
-            Columns[dd.Name].IsVisible = dd.Checked;
-            if (dd.Checked)
-            {
-                Metric.VisibleMetrics.Add(dd.Name);
-            }
-            else
-            {
-                Metric.VisibleMetrics.Remove(dd.Name);
-            }
-            UpdateMetricVisibility();
         }
 
         private void IOPerformance_Load(object sender, EventArgs e)

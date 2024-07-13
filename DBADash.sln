@@ -17,7 +17,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBADashConfig", "DBADashCon
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBADash.Test", "DBADash.Test\DBADash.Test.csproj", "{EF27ED83-107C-4C04-AE1E-6568C6520003}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBADashSharedGUI", "DBADashSharedGUI\DBADashSharedGUI.csproj", "{EAD0C906-86A2-4A12-80BC-582A25E557DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBADashSharedGUI", "DBADashSharedGUI\DBADashSharedGUI.csproj", "{EAD0C906-86A2-4A12-80BC-582A25E557DB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{30FF5BFF-FDD6-4A23-8A51-9B287A05A29E}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

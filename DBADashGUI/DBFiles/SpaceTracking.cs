@@ -5,8 +5,6 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
-using System.Drawing.Text;
 using System.Linq;
 using System.Windows.Forms;
 using DBADashGUI.Theme;
@@ -26,12 +24,12 @@ namespace DBADashGUI
         private string InstanceGroupName = "";
         public bool CanNavigateBack => tsBack.Enabled;
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = context.InstanceIDs.ToList();
-            DatabaseID = context.DatabaseID;
-            InstanceGroupName = context.InstanceName;
-            DBName = context.DatabaseName;
+            InstanceIDs = _context.InstanceIDs.ToList();
+            DatabaseID = _context.DatabaseID;
+            InstanceGroupName = _context.InstanceName;
+            DBName = _context.DatabaseName;
             RefreshData();
         }
 
@@ -39,7 +37,7 @@ namespace DBADashGUI
         {
             bool drillDownEnabled = DatabaseID > 0;
             tsBack.Enabled = false;
-            DiableHyperLinks(drillDownEnabled);
+            DisableHyperLinks(drillDownEnabled);
             RefreshDataLocal();
         }
 
@@ -115,11 +113,11 @@ namespace DBADashGUI
                     else if (DBName.Length == 0)
                     {
                         DBName = selectedGroupValue;
-                        DiableHyperLinks(true);
+                        DisableHyperLinks(true);
                     }
                     else
                     {
-                        DiableHyperLinks(true);
+                        DisableHyperLinks(true);
                         return;
                     }
                     tsBack.Enabled = true;
@@ -153,17 +151,17 @@ namespace DBADashGUI
             }
         }
 
-        private void DiableHyperLinks(bool disable)
+        private void DisableHyperLinks(bool disable)
         {
             if (disable)
             {
-                ((DataGridViewLinkColumn)dgv.Columns["colName"]).LinkBehavior = LinkBehavior.NeverUnderline;
+                (((DataGridViewLinkColumn)dgv.Columns["colName"])!).LinkBehavior = LinkBehavior.NeverUnderline;
                 ((DataGridViewLinkColumn)dgv.Columns["colName"]).LinkColor = DBADashUser.SelectedTheme.ForegroundColor;
                 ((DataGridViewLinkColumn)dgv.Columns["colName"]).ActiveLinkColor = DBADashUser.SelectedTheme.ForegroundColor;
             }
             else
             {
-                ((DataGridViewLinkColumn)dgv.Columns["colName"]).LinkColor = DBADashUser.SelectedTheme.LinkColor;
+                (((DataGridViewLinkColumn)dgv.Columns["colName"])!).LinkColor = DBADashUser.SelectedTheme.LinkColor;
                 ((DataGridViewLinkColumn)dgv.Columns["colName"]).ActiveLinkColor = DBADashUser.SelectedTheme.LinkColor;
                 ((DataGridViewLinkColumn)dgv.Columns["colName"]).LinkBehavior = LinkBehavior.AlwaysUnderline;
             }
@@ -199,7 +197,7 @@ namespace DBADashGUI
                     InstanceGroupName = "";
                     tsBack.Enabled = false;
                 }
-                DiableHyperLinks(false);
+                DisableHyperLinks(false);
                 RefreshDataLocal();
                 return true;
             }
@@ -209,7 +207,7 @@ namespace DBADashGUI
             }
         }
 
-        private static DBSpaceHistoryView DBSpaceHistoryViewForm = null;
+        private static DBSpaceHistoryView DBSpaceHistoryViewForm;
 
         private void TsHistory_Click(object sender, EventArgs e)
         {
@@ -263,7 +261,7 @@ namespace DBADashGUI
             {
                 itm.Checked = itm == selectedItem;
             }
-            foreach (string unit in new string[] { "MB", "GB", "TB" })
+            foreach (string unit in new[] { "MB", "GB", "TB" })
             {
                 dgv.Columns["colAllocated" + unit].Visible = Convert.ToString(selectedItem.Tag) == unit;
                 dgv.Columns["colUsed" + unit].Visible = Convert.ToString(selectedItem.Tag) == unit;
@@ -292,7 +290,7 @@ namespace DBADashGUI
             {
                 itm.Checked = itm == selectedItem;
             }
-            foreach (string unit in new string[] { "MB", "GB", "TB" })
+            foreach (string unit in new[] { "MB", "GB", "TB" })
             {
                 dgv.Columns["colAllocated" + unit].DefaultCellStyle = Common.DataGridViewCellStyle(Convert.ToString(selectedItem.Tag));
                 dgv.Columns["colUsed" + unit].DefaultCellStyle = Common.DataGridViewCellStyle(Convert.ToString(selectedItem.Tag));

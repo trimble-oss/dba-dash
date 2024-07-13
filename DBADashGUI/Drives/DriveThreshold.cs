@@ -8,7 +8,7 @@ namespace DBADashGUI
     public class DriveThreshold
     {
 
-        public bool Inherited { get; set; } = false;
+        public bool Inherited { get; set; }
         public int InstanceID { get; set; }
         public int DriveID { get; set; }
 

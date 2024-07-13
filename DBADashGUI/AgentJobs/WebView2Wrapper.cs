@@ -1,12 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
@@ -26,7 +20,7 @@ namespace DBADashGUI.AgentJobs
 
         public event WebView2SetupCompleted SetupCompleted;
 
-        public Microsoft.Web.WebView2.WinForms.WebView2 WebView2 => WebViewCtrl;
+        public Microsoft.Web.WebView2.WinForms.WebView2 WebView2 { get; private set; }
 
         /// <summary>
         /// Run EnsureCoreWebView2Async.  If WebView2 runtime isn't installed a download link will be displayed.  Error will be re-thrown
@@ -35,35 +29,36 @@ namespace DBADashGUI.AgentJobs
         {
             try
             {
-                await WebViewCtrl.EnsureCoreWebView2Async(null);
+                await WebView2.EnsureCoreWebView2Async(null);
             }
             catch (Microsoft.Web.WebView2.Core.WebView2RuntimeNotFoundException)
             {
                 pnlWebView2Required.Visible = true;
-                WebViewCtrl.Visible = false;
+                WebView2.Visible = false;
                 throw;
             }
             pnlWebView2Required.Visible = false;
-            WebViewCtrl.Visible = true;
+            WebView2.Visible = true;
         }
 
-        private static string WebView2SetupTempPath => Path.Combine(System.IO.Path.GetTempPath(), Common.TempFilePrefix + "MicrosoftEdgeWebview2Setup.exe");
+        private static string WebView2SetupTempPath => Path.Combine(Path.GetTempPath(), Common.TempFilePrefix + "MicrosoftEdgeWebview2Setup.exe");
 
         /// <summary>
         /// Download & Install WebView2 runtime.  Fire Setup_Completed event when finished.
         /// </summary>
         private void InstallWebView2(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string url = txtLink.Text;
-            string path = WebView2SetupTempPath;
+            var url = txtLink.Text;
+            var path = WebView2SetupTempPath;
             try
             {
-                if (System.IO.File.Exists(path))
+                if (File.Exists(path))
                 {
-                    System.IO.File.Delete(path);
+                    File.Delete(path);
                 }
                 Common.DownloadFile(path, url);
                 var pSetup = System.Diagnostics.Process.Start(path);
+                if (pSetup == null) return;
                 pSetup.EnableRaisingEvents = true;
                 pSetup.Exited += Setup_Completed;
             }
@@ -90,7 +85,7 @@ namespace DBADashGUI.AgentJobs
             }
             try
             {
-                WebViewCtrl.NavigateToString(html);
+                WebView2.NavigateToString(html);
             }
             catch (Exception ex)
             {
@@ -105,23 +100,23 @@ namespace DBADashGUI.AgentJobs
         {
             try
             {
-                string tempFilePath = Common.GetTempFilePath(".html"); // Generate a unique file.  Setting source to same file doesn't refresh
-                System.IO.File.WriteAllText(tempFilePath, html);
-                WebViewCtrl.Source = new Uri(tempFilePath);
+                var tempFilePath = Common.GetTempFilePath(".html"); // Generate a unique file.  Setting source to same file doesn't refresh
+                File.WriteAllText(tempFilePath, html);
+                WebView2.Source = new Uri(tempFilePath);
             }
             catch (Exception ex2)
             {
-                WebViewCtrl.NavigateToString(
+                WebView2.NavigateToString(
                     $"<html><body style='background-color:{DashColors.Fail.ToHexString()};color:#ffffff'>Error loading HTML:<br/>{HttpUtility.HtmlEncode(ex.ToString()) + "<br/>" + HttpUtility.HtmlEncode(ex2.ToString())}</body></html>");
             }
         }
 
         public async void CopyImageToClipboard()
         {
-            Task<string> t = WebViewCtrl.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", "{}");
-            string json = await t;
-            string base64Image = JObject.Parse(json).Value<string>("data");
-            Image img = Common.Base64StringAsImage(base64Image);
+            var t = WebView2.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", "{}");
+            var json = await t;
+            var base64Image = JObject.Parse(json).Value<string>("data");
+            var img = Common.Base64StringAsImage(base64Image);
             Clipboard.SetImage(img);
         }
     }

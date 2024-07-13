@@ -27,7 +27,7 @@ namespace DBADashServiceConfig
             {
                 if (!string.IsNullOrEmpty(cboBuckets.Text) & !String.IsNullOrEmpty(txtFolder.Text))
                 {
-                    string folder = txtFolder.Text.Trim(new char[] { ' ', '/' });
+                    var folder = txtFolder.Text.Trim(' ', '/');
 
                     return $"https://{cboBuckets.Text}.s3.amazonaws.com/{folder}";
                 }
@@ -75,12 +75,12 @@ namespace DBADashServiceConfig
                 MessageBox.Show("Please select a bucket", "Bucket required", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
     }
 }

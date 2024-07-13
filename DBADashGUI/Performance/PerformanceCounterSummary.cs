@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -17,9 +16,9 @@ namespace DBADashGUI.Performance
 
         private int InstanceID { get; set; }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceID = context.InstanceID;
+            InstanceID = _context.InstanceID;
             RefreshData();
         }
 

@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using DBADashSharedGUI;
+﻿using DBADashSharedGUI;
 using Color = System.Drawing.Color;
 
 namespace DBADashGUI.Theme

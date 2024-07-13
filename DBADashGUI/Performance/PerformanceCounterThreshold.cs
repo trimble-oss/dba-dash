@@ -70,12 +70,12 @@ namespace DBADashGUI.Performance
                 grpThresholds.Enabled = true;
                 numWarningFrom.Value = CoalesceDecimal(threshold.WarningFrom, inheritedThreshold.WarningFrom, inheritedThreshold.SystemWarningFrom);
                 numWarningTo.Value = CoalesceDecimal(threshold.WarningTo, inheritedThreshold.WarningTo, inheritedThreshold.SystemWarningTo);
-                numCriticalFrom.Value = CoalesceDecimal(threshold.CritialFrom, inheritedThreshold.CritialFrom, inheritedThreshold.SystemCritialFrom);
-                numCriticalTo.Value = CoalesceDecimal(threshold.CritialTo, inheritedThreshold.CritialTo, inheritedThreshold.SystemCritialTo);
+                numCriticalFrom.Value = CoalesceDecimal(threshold.CriticalFrom, inheritedThreshold.CriticalFrom, inheritedThreshold.SystemCriticalFrom);
+                numCriticalTo.Value = CoalesceDecimal(threshold.CriticalTo, inheritedThreshold.CriticalTo, inheritedThreshold.SystemCriticalTo);
                 numGoodFrom.Value = CoalesceDecimal(threshold.GoodFrom, inheritedThreshold.GoodFrom, inheritedThreshold.SystemGoodFrom);
-                numGoodTo.Value = CoalesceDecimal(threshold.GoodTo, inheritedThreshold.CritialTo, inheritedThreshold.SystemGoodTo);
+                numGoodTo.Value = CoalesceDecimal(threshold.GoodTo, inheritedThreshold.CriticalTo, inheritedThreshold.SystemGoodTo);
                 chkWarning.Checked = !(threshold.WarningFrom.HasValue && threshold.WarningTo.HasValue);
-                chkCritical.Checked = !(threshold.CritialFrom.HasValue && threshold.CritialTo.HasValue);
+                chkCritical.Checked = !(threshold.CriticalFrom.HasValue && threshold.CriticalTo.HasValue);
                 chkGood.Checked = !(threshold.GoodFrom.HasValue && threshold.GoodTo.HasValue);
             }
         }
@@ -134,14 +134,14 @@ namespace DBADashGUI.Performance
         {
             if (threshold != null)
             {
-                threshold.CritialFrom = chkCritical.Checked ? null : numCriticalFrom.Value;
-                threshold.CritialTo = chkCritical.Checked ? null : numCriticalTo.Value;
+                threshold.CriticalFrom = chkCritical.Checked ? null : numCriticalFrom.Value;
+                threshold.CriticalTo = chkCritical.Checked ? null : numCriticalTo.Value;
                 threshold.WarningFrom = chkWarning.Checked ? null : numWarningFrom.Value;
                 threshold.WarningTo = chkWarning.Checked ? null : numWarningTo.Value;
                 threshold.GoodFrom = chkGood.Checked ? null : numGoodFrom.Value;
                 threshold.GoodTo = chkGood.Checked ? null : numGoodTo.Value;
                 threshold.Update(chkUpdateAllInstances.Checked);
-                this.DialogResult = DialogResult.OK;
+                DialogResult = DialogResult.OK;
             }
             else
             {

@@ -13,16 +13,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Caching;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
 using System.Text.RegularExpressions;
-using System.Threading;
-using Microsoft.SqlServer.Management.SqlParser.Metadata;
-using Microsoft.SqlServer.Management.SqlScriptPublish;
-using Octokit;
 
 namespace DBADash
 {
@@ -116,7 +110,7 @@ namespace DBADash
         private DatabaseEngineEdition engineEdition;
         private DBADashAgent dashAgent;
         public bool IsExtendedEventsNotSupportedException;
-        private bool DisableRetry;
+        private readonly bool DisableRetry;
 
         public const int DefaultIdentityCollectionThreshold = 5;
 
@@ -265,7 +259,7 @@ namespace DBADash
             349,  // The procedure "%.*ls" has no parameter named "%.*ls".
             500,  // Trying to pass a table-valued parameter with %d column(s) where the corresponding user-defined table type requires %d column(s).
             2812, // Could not find stored procedure '%.*ls'.
-            6335, // XML datatype instance has too many levels of nested nodes. Maximum allowed depth is %d levels.
+            6335, // XML data type instance has too many levels of nested nodes. Maximum allowed depth is %d levels.
         };
 
         public bool ShouldRetry(Exception ex)
@@ -732,7 +726,7 @@ INSERT INTO @plans(plan_handle,statement_start_offset,statement_end_offset)
 VALUES");
 
             // Already have a distinct list by plan handle, hash and offsets.
-            // Filter this list by plans not already colllected and get a distinct list by handle and offsets (excluding the hash as this can cause duplicates in rare cases)
+            // Filter this list by plans not already collected and get a distinct list by handle and offsets (excluding the hash as this can cause duplicates in rare cases)
             var collectList = plans.Where(p => !cache.Contains(p.Key))
                 .GroupBy(p => Convert.ToBase64String(p.PlanHandle.Concat(BitConverter.GetBytes(p.StartOffset)).Concat(BitConverter.GetBytes(p.EndOffset)).ToArray()))
                 .Select(p => p.First())

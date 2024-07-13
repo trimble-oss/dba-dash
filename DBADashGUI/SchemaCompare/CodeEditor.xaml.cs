@@ -105,16 +105,13 @@ namespace DBADashGUI.SchemaCompare
 
         public string Text
         {
-            get
-            {
-                return txtCode.Text;
-            }
+            get => txtCode.Text;
             set
             {
                 var theme = DBADashUser.SelectedTheme;
                 SetHighlighting();
-                this.txtCode.Background = new SolidColorBrush(theme.CodeEditorBackColor.ToMediaColor());
-                this.txtCode.Foreground = new SolidColorBrush(theme.CodeEditorForeColor.ToMediaColor());
+                txtCode.Background = new SolidColorBrush(theme.CodeEditorBackColor.ToMediaColor());
+                txtCode.Foreground = new SolidColorBrush(theme.CodeEditorForeColor.ToMediaColor());
                 txtCode.Text = value;
             }
         }

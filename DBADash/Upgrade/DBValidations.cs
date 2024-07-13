@@ -42,9 +42,9 @@ namespace DBADash
 
         }
 
-        public static System.Version GetDBVersion(string connectionString)
+        public static Version GetDBVersion(string connectionString)
         {
-            string sql = @"IF EXISTS(
+            var sql = @"IF EXISTS(
 	SELECT * FROM sys.extended_properties
 	WHERE major_id=OBJECT_ID('DBVersionHistory')
 	AND name = 'AppID'
@@ -72,9 +72,9 @@ END
             using (var cmd = new SqlCommand(sql, cn))
             {
                 cn.Open();
-                string version = (string)cmd.ExecuteScalar();
+                var version = (string)cmd.ExecuteScalar();
                 version ??= "0.0.0.1";
-                return System.Version.Parse(version);
+                return Version.Parse(version);
             }
         }
 
@@ -92,7 +92,7 @@ END
             {
 
                 status.DBVersion = GetDBVersion(connectionString);
-                Int32 compare = status.DBVersion.CompareTo(status.DACVersion);
+                var compare = status.DBVersion.CompareTo(status.DACVersion);
                 if (compare == 0)
                 {
                     status.VersionStatus = DBVersionStatusEnum.OK;

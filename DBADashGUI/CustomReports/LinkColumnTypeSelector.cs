@@ -1,13 +1,7 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 using System.Windows.Forms;
 using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
@@ -133,12 +127,12 @@ namespace DBADashGUI.CustomReports
             {
                 LinkColumnInfo = null;
             }
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
 
         private void CboReport_SelectedIndexChanged(object sender, EventArgs e)
@@ -179,7 +173,7 @@ namespace DBADashGUI.CustomReports
                 row.CreateCells(dgvMapping);
                 row.Cells[0].Value = isSystem;
                 row.Cells[1].Value = p.ParamName;
-                row.Cells[2].Value = mapping.ContainsKey(p.ParamName) ? mapping[p.ParamName] : NotMapped;
+                row.Cells[2].Value = mapping.TryGetValue(p.ParamName, out var value) ? value : NotMapped;
                 row.DefaultCellStyle.Font = isSystem ? new Font(dgvMapping.DefaultCellStyle.Font, FontStyle.Italic) : new Font(dgvMapping.DefaultCellStyle.Font, FontStyle.Regular);
 
                 dgvMapping.Rows.Add(row);

@@ -11,10 +11,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 using static DBADashGUI.DBADashStatus;
 using static DBADashGUI.Main;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace DBADashGUI
 {
@@ -36,11 +34,11 @@ namespace DBADashGUI
 
         private Dictionary<string, bool> statusColumns;
 
-        private bool FocusedView { get => focusedViewToolStripMenuItem.Checked; }
+        private bool FocusedView => focusedViewToolStripMenuItem.Checked;
         private DBADashContext context;
         private bool ShowHidden => context.InstanceIDs.Count == 1 || Common.ShowHidden;
 
-        private CorruptionViewer CorruptionFrm = null;
+        private CorruptionViewer CorruptionFrm;
         private bool WasRefreshed;
 
         private readonly Dictionary<string, string> tabMapping = new() { { "FullBackupStatus", "tabBackups" }, { "LogShippingStatus", "tabLogShipping" }, { "DiffBackupStatus", "tabBackups" }, { "LogBackupStatus", "tabBackups" }, { "DriveStatus", "tabDrives" },
@@ -84,9 +82,9 @@ namespace DBADashGUI
             });
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            this.context = context;
+            this.context = _context;
             RefreshDataIfStale();
         }
 
@@ -110,7 +108,7 @@ namespace DBADashGUI
 
         public void RefreshData()
         {
-            RefreshData(false, null);
+            RefreshData(false);
         }
 
         public void RefreshData(bool forceRefresh, DateTime? forceRefreshDate = null)
@@ -135,10 +133,10 @@ namespace DBADashGUI
                 toolStrip1.Invoke(() => { tsRefresh.Enabled = true; tsClearFilter.Enabled = false; });
                 if (task.Exception != null)
                 {
-                    refresh1.Invoke(() => { refresh1.SetFailed("Error:" + task.Exception.ToString()); });
+                    refresh1.Invoke(() => { refresh1.SetFailed("Error:" + task.Exception); });
                     return Task.CompletedTask;
                 }
-                DataTable dt = task.Result;
+                var dt = task.Result;
                 try
                 {
                     GroupSummaryByTest(ref dt);
@@ -147,7 +145,7 @@ namespace DBADashGUI
                 }
                 catch (Exception ex)
                 {
-                    refresh1.Invoke(() => { refresh1.SetFailed("Error:" + ex.ToString()); });
+                    refresh1.Invoke(() => { refresh1.SetFailed("Error:" + ex); });
                 }
 
                 return Task.CompletedTask;
@@ -158,7 +156,7 @@ namespace DBADashGUI
         {
             try
             {
-                SummarySavedView saved = SummarySavedView.GetDefaultSavedView();
+                var saved = SummarySavedView.GetDefaultSavedView();
 
                 if (saved == null) return;
                 Common.ShowHidden = saved.ShowHidden;
@@ -199,13 +197,13 @@ namespace DBADashGUI
 
         private void GroupSummaryByTest(ref DataTable dt)
         {
-            DataTable grouped = GroupedByTestSchema();
+            var grouped = GroupedByTestSchema();
             Dictionary<string, DataRow> tests = new();
 
             // Add a row for each test with zeros/defaults
-            foreach (string statusCol in statusColumns.Keys)
+            foreach (var statusCol in statusColumns.Keys)
             {
-                DataRow row = grouped.NewRow();
+                var row = grouped.NewRow();
                 row["Test"] = statusCol;
                 row["DisplayText"] = dgvSummary.Columns[statusCol].HeaderText;
                 row["OK"] = 0;
@@ -221,10 +219,10 @@ namespace DBADashGUI
             // Add count of instances by status for each test
             foreach (DataRow row in dt.Rows)
             {
-                foreach (string statusCol in statusColumns.Keys)
+                foreach (var statusCol in statusColumns.Keys)
                 {
-                    DataRow groupedRow = tests[statusCol];
-                    var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[statusCol] == DBNull.Value ? 3 : row[statusCol]);
+                    var groupedRow = tests[statusCol];
+                    var status = (DBADashStatusEnum)Convert.ToInt32(row[statusCol] == DBNull.Value ? 3 : row[statusCol]);
                     groupedRow[status.ToString()] = (int)groupedRow[status.ToString()] + 1;
                     groupedRow["Total"] = (int)groupedRow["Total"] + 1;
                     if (status == DBADashStatusEnum.Warning || status == DBADashStatusEnum.Critical)
@@ -276,15 +274,15 @@ namespace DBADashGUI
         {
             GroupSummaryByTest(ref dt);
             dgvSummary.AutoGenerateColumns = false;
-            var cols = (statusColumns.Keys).ToList<string>();
+            var cols = (statusColumns.Keys).ToList();
             dt.Columns.Add("IsFocusedRow", typeof(bool));
             foreach (DataRow row in dt.Rows)
             {
-                bool isFocusedRow = false;
-                foreach (string col in cols)
+                var isFocusedRow = false;
+                foreach (var col in cols)
                 {
-                    var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[col] == DBNull.Value ? 3 : row[col]);
-                    if (!(status == DBADashStatus.DBADashStatusEnum.NA || (status == DBADashStatus.DBADashStatusEnum.OK && FocusedView)))
+                    var status = (DBADashStatusEnum)Convert.ToInt32(row[col] == DBNull.Value ? 3 : row[col]);
+                    if (!(status == DBADashStatusEnum.NA || (status == DBADashStatusEnum.OK && FocusedView)))
                     {
                         statusColumns[col] = true;
                         isFocusedRow = true;
@@ -326,17 +324,17 @@ namespace DBADashGUI
 
         private void DgvSummary_RowAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvSummary.Rows[idx].DataBoundItem;
-                bool isAzure = row["InstanceID"] == DBNull.Value;
-                var cols = (statusColumns.Keys).ToList<string>();
+                var isAzure = row["InstanceID"] == DBNull.Value;
+                var cols = (statusColumns.Keys).ToList();
                 foreach (var col in cols)
                 {
-                    var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[col] == DBNull.Value ? 3 : row[col]);
+                    var status = (DBADashStatusEnum)Convert.ToInt32(row[col] == DBNull.Value ? 3 : row[col]);
                     dgvSummary.Rows[idx].Cells[col].SetStatusColor(status);
                 }
-                string DBMailStatus = Convert.ToString(row["DBMailStatusDescription"]);
+                var DBMailStatus = Convert.ToString(row["DBMailStatusDescription"]);
                 dgvSummary.Rows[idx].Cells["DBMailStatus"].ToolTipText = DBMailStatus;
 
                 dgvSummary.Rows[idx].Cells["FullBackupStatus"].Value = isAzure ? "" : "View";
@@ -349,25 +347,25 @@ namespace DBADashGUI
                 dgvSummary.Rows[idx].Cells["QueryStoreStatus"].Value = (int)row["QueryStoreStatus"] == 3 ? "" : "View";
                 dgvSummary.Rows[idx].Cells["CorruptionStatus"].Value = row["DetectedCorruptionDateUtc"] == DBNull.Value
                     ? ""
-                    : DateTime.UtcNow.Subtract((DateTime)row["DetectedCorruptionDateUtc"]).Humanize(1);
+                    : DateTime.UtcNow.Subtract((DateTime)row["DetectedCorruptionDateUtc"]).Humanize();
                 if (row["IsAgentRunning"] != DBNull.Value && (bool)row["IsAgentRunning"] == false)
                 {
                     dgvSummary.Rows[idx].Cells["JobStatus"].SetStatusColor(DBADashStatusEnum.Critical);
                     dgvSummary.Rows[idx].Cells["JobStatus"].Value = "Not Running";
                 }
 
-                string uptimeString;
                 if (row["sqlserver_uptime"] != DBNull.Value)
                 {
-                    int uptime = (int)row["sqlserver_uptime"];
-                    int addUptime = (int)row["AdditionalUptime"];
+                    var uptime = (int)row["sqlserver_uptime"];
+                    var addUptime = (int)row["AdditionalUptime"];
+                    string uptimeString;
                     if (uptime < 120)
                     {
-                        uptimeString = uptime.ToString() + " Mins (+" + addUptime.ToString() + "mins)";
+                        uptimeString = uptime + " Mins (+" + addUptime + "mins)";
                     }
                     else if (uptime < 1440)
                     {
-                        uptimeString = (uptime / 60).ToString("0") + " Hours  (+" + addUptime.ToString() + "mins)";
+                        uptimeString = (uptime / 60).ToString("0") + " Hours  (+" + addUptime + "mins)";
                     }
                     else
                     {
@@ -382,22 +380,22 @@ namespace DBADashGUI
                 }
                 else
                 {
-                    int snapshotAgeMin = (int)row["SnapshotAgeMin"];
-                    int snapshotAgeMax = (int)row["SnapshotAgeMax"];
+                    var snapshotAgeMin = (int)row["SnapshotAgeMin"];
+                    var snapshotAgeMax = (int)row["SnapshotAgeMax"];
                     if (snapshotAgeMax == snapshotAgeMin)
                     {
                         dgvSummary.Rows[idx].Cells["SnapshotAgeStatus"].Value = snapshotAgeMax + "mins";
                     }
                     else
                     {
-                        dgvSummary.Rows[idx].Cells["SnapshotAgeStatus"].Value = snapshotAgeMin.ToString() + " to " + snapshotAgeMax.ToString() + "mins";
+                        dgvSummary.Rows[idx].Cells["SnapshotAgeStatus"].Value = snapshotAgeMin + " to " + snapshotAgeMax + "mins";
                     }
                 }
                 if (row["DaysSinceLastGoodCheckDB"] != DBNull.Value)
                 {
-                    dgvSummary.Rows[idx].Cells["LastGoodCheckDBStatus"].Value = ((int)row["DaysSinceLastGoodCheckDB"]).ToString() + " days";
+                    dgvSummary.Rows[idx].Cells["LastGoodCheckDBStatus"].Value = ((int)row["DaysSinceLastGoodCheckDB"]) + " days";
                 }
-                string oldestLastGoodCheckDB = "Unknown";
+                var oldestLastGoodCheckDB = "Unknown";
                 if (row["OldestLastGoodCheckDBTime"] != DBNull.Value)
                 {
                     if ((DateTime)row["OldestLastGoodCheckDBTime"] == DateTime.Parse("1900-01-01"))
@@ -417,37 +415,36 @@ namespace DBADashGUI
                                                                                "Last Good CheckDB Good:" + (int)row["LastGoodCheckDBHealthyCount"] + Environment.NewLine +
                                                                                "Last Good CheckDB NA:" + (int)row["LastGoodCheckDBNACount"] + Environment.NewLine +
                                                                                "Oldest Last Good CheckDB:" + oldestLastGoodCheckDB;
-                    ;
                 }
                 if (row["LastMemoryDump"] != DBNull.Value)
                 {
-                    DateTime lastMemoryDump = (DateTime)row["LastMemoryDump"];
-                    DateTime lastMemoryDumpUTC = (DateTime)row["LastMemoryDumpUTC"];
-                    int memoryDumpCount = (int)row["MemoryDumpCount"];
+                    var lastMemoryDump = (DateTime)row["LastMemoryDump"];
+                    var lastMemoryDumpUTC = (DateTime)row["LastMemoryDumpUTC"];
+                    var memoryDumpCount = (int)row["MemoryDumpCount"];
                     string lastMemoryDumpStr;
 
                     if (Math.Abs(lastMemoryDumpUTC.ToAppTimeZone().Subtract(lastMemoryDump).TotalMinutes) > 10)
                     {
-                        lastMemoryDumpStr = "Last Memory Dump (local time): " + lastMemoryDumpUTC.ToAppTimeZone().ToString() + Environment.NewLine +
-                           "Last Memory Dump (server time): " + lastMemoryDump.ToString() + Environment.NewLine +
-                           "Total Memory Dumps: " + memoryDumpCount; ;
+                        lastMemoryDumpStr = "Last Memory Dump (local time): " + lastMemoryDumpUTC.ToAppTimeZone().ToString(CultureInfo.CurrentCulture) + Environment.NewLine +
+                           "Last Memory Dump (server time): " + lastMemoryDump.ToString(CultureInfo.CurrentCulture) + Environment.NewLine +
+                           "Total Memory Dumps: " + memoryDumpCount;
                     }
                     else
                     {
-                        lastMemoryDumpStr = "Last Memory Dump: " + lastMemoryDumpUTC.ToAppTimeZone().ToString() + Environment.NewLine +
-                           "Total Memory Dumps: " + memoryDumpCount; ;
+                        lastMemoryDumpStr = "Last Memory Dump: " + lastMemoryDumpUTC.ToAppTimeZone().ToString(CultureInfo.CurrentCulture) + Environment.NewLine +
+                           "Total Memory Dumps: " + memoryDumpCount;
                     }
 
-                    dgvSummary.Rows[idx].Cells["MemoryDumpStatus"].Value = DateTime.UtcNow.Subtract(lastMemoryDumpUTC).Humanize(1);
+                    dgvSummary.Rows[idx].Cells["MemoryDumpStatus"].Value = DateTime.UtcNow.Subtract(lastMemoryDumpUTC).Humanize();
 
                     dgvSummary.Rows[idx].Cells["MemoryDumpStatus"].ToolTipText = lastMemoryDumpStr;
                 }
-                string lastAlert = "Never";
-                string lastAlertDays = "Never";
-                string lastCriticalAlert = "Never";
+                var lastAlert = "Never";
+                var lastAlertDays = "Never";
+                var lastCriticalAlert = "Never";
                 if (row["LastAlert"] != DBNull.Value)
                 {
-                    DateTime lastAlertD = (DateTime)row["LastAlert"];
+                    var lastAlertD = (DateTime)row["LastAlert"];
                     lastAlert = lastAlertD.ToAppTimeZone().ToString("yyyy-MM-dd HH:mm");
                     if (DateTime.UtcNow.Subtract(lastAlertD).TotalHours < 24)
                     {
@@ -462,7 +459,7 @@ namespace DBADashGUI
                 {
                     lastCriticalAlert = (((DateTime)row["LastCritical"]).ToAppTimeZone()).ToString("yyyy-MM-dd HH:mm");
                 }
-                int totalAlerts = row["TotalAlerts"] == DBNull.Value ? 0 : (int)row["TotalAlerts"];
+                var totalAlerts = row["TotalAlerts"] == DBNull.Value ? 0 : (int)row["TotalAlerts"];
 
                 dgvSummary.Rows[idx].Cells["AlertStatus"].Value = lastAlertDays;
                 dgvSummary.Rows[idx].Cells["AlertStatus"].ToolTipText = "Last Alert:" + lastAlert + Environment.NewLine +
@@ -596,7 +593,7 @@ namespace DBADashGUI
 
         private void DgvTests_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var gridRow = dgvTests.Rows[idx];
                 var row = (DataRowView)gridRow.DataBoundItem;
@@ -621,36 +618,34 @@ namespace DBADashGUI
         private void DgvTests_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
-            DataRowView row = (DataRowView)dgvTests.Rows[e.RowIndex].DataBoundItem;
-            string test = (string)row["Test"];
-            string tab = (string)tabMapping[test];
-            if (e.ColumnIndex == 0)
+            var row = (DataRowView)dgvTests.Rows[e.RowIndex].DataBoundItem;
+            var test = (string)row["Test"];
+            var tab = tabMapping[test];
+            switch (e.ColumnIndex)
             {
-                if (test == CorruptionStatus.Name)
-                {
+                case 0 when test == CorruptionStatus.Name:
                     ShowCorruptionViewer(context);
-                }
-                else if (string.IsNullOrEmpty(tab))
-                {
+                    break;
+                case 0 when string.IsNullOrEmpty(tab):
                     FilterByStatus(new List<DBADashStatusEnum>() { DBADashStatusEnum.Warning, DBADashStatusEnum.Critical }, test);
-                }
-                else
-                {
+                    break;
+                case 0:
                     Instance_Selected?.Invoke(this, new InstanceSelectedEventArgs() { InstanceID = context.InstanceID, Instance = context.InstanceName, Tab = tab });
-                }
-            }
-            else if (e.ColumnIndex is >= 1 and <= 5)
-            {
-                DBADashStatusEnum status = e.ColumnIndex switch
+                    break;
+                case >= 1 and <= 5:
                 {
-                    1 => DBADashStatusEnum.OK,
-                    2 => DBADashStatusEnum.Warning,
-                    3 => DBADashStatusEnum.Critical,
-                    4 => DBADashStatusEnum.NA,
-                    5 => DBADashStatusEnum.Acknowledged,
-                    _ => throw new Exception("Invalid ColumnIndex"),
-                };
-                FilterByStatus(status, test);
+                    var status = e.ColumnIndex switch
+                    {
+                        1 => DBADashStatusEnum.OK,
+                        2 => DBADashStatusEnum.Warning,
+                        3 => DBADashStatusEnum.Critical,
+                        4 => DBADashStatusEnum.NA,
+                        5 => DBADashStatusEnum.Acknowledged,
+                        _ => throw new Exception("Invalid ColumnIndex"),
+                    };
+                    FilterByStatus(status, test);
+                    break;
+                }
             }
         }
 
@@ -663,13 +658,13 @@ namespace DBADashGUI
         {
             var dv = (DataView)dgvSummary.DataSource;
             StringBuilder sbFilter = new();
-            foreach (DBADashStatusEnum status in statuses)
+            foreach (var status in statuses)
             {
                 if (sbFilter.Length > 0)
                 {
                     sbFilter.Append(" OR ");
                 }
-                sbFilter.Append(test + " = " + Convert.ToInt32(status).ToString());
+                sbFilter.Append(test + " = " + Convert.ToInt32(status));
             }
             dv.RowFilter = sbFilter.ToString();
             HideStatusColumns();

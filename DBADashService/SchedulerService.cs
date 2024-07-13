@@ -14,7 +14,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using DBADash.Messaging;
-using Microsoft.Data.SqlClient;
 using static DBADash.DBADashConnection;
 using Microsoft.Extensions.Hosting;
 using System.Collections.Concurrent;
@@ -40,15 +39,15 @@ namespace DBADashService
                 Log.Information("Custom schedules set at agent level");
             }
 
-            Int32 threads = config.ServiceThreads;
+            var threads = config.ServiceThreads;
             if (threads < 1)
             {
                 threads = 10;
-                Log.Logger.Information("Threads {threadcount} (default)", threads);
+                Log.Logger.Information("Threads {threadCount} (default)", threads);
             }
             else
             {
-                Log.Logger.Information("Threads {threadcount} (user)", threads);
+                Log.Logger.Information("Threads {threadCount} (user)", threads);
             }
 
             NameValueCollection props = new()
@@ -82,32 +81,25 @@ namespace DBADashService
                       Log.Error(exception, "Version check for repository database failed");
                   }).Execute(() => status = DBValidations.VersionStatus(d.ConnectionString));
 
-                if (status.VersionStatus == DBValidations.DBVersionStatusEnum.AppUpgradeRequired)
+                switch (status.VersionStatus)
                 {
-                    Log.Warning("This version of the app is older than the repository database and should be upgraded. DB {dbversion}.  App {appversion}", status.DACVersion, status.DBVersion);
-                }
-                else if (status.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB)
-                {
-                    if (config.AutoUpdateDatabase)
-                    {
+                    case DBValidations.DBVersionStatusEnum.AppUpgradeRequired:
+                        Log.Warning("This version of the app is older than the repository database and should be upgraded. DB {dbVersion}.  App {appVersion}", status.DACVersion, status.DBVersion);
+                        break;
+                    case DBValidations.DBVersionStatusEnum.CreateDB when config.AutoUpdateDatabase:
                         Log.Information("Validating destination");
                         CollectionConfig.ValidateDestination(d);
                         Log.Information("Create repository database");
                         DBValidations.UpgradeDBAsync(d.ConnectionString).Wait();
                         Log.Information("Repository database created");
-                    }
-                    else
-                    {
+                        break;
+                    case DBValidations.DBVersionStatusEnum.CreateDB:
                         throw new Exception("Repository database needs to be created.  Use to service configuration tool to deploy the repository database.");
-                    }
-                }
-                else if (status.VersionStatus == DBValidations.DBVersionStatusEnum.UpgradeRequired)
-                {
-                    if (config.AutoUpdateDatabase)
+                    case DBValidations.DBVersionStatusEnum.UpgradeRequired when config.AutoUpdateDatabase:
                     {
                         Log.Information("Validating destination");
                         CollectionConfig.ValidateDestination(d);
-                        Log.Information("Upgrade DB from {oldversion} to {newversion}", status.DBVersion.ToString(), status.DACVersion.ToString());
+                        Log.Information("Upgrade DB from {oldVersion} to {newVersion}", status.DBVersion.ToString(), status.DACVersion.ToString());
                         DBValidations.UpgradeDBAsync(d.ConnectionString).Wait();
                         status = DBValidations.VersionStatus(d.ConnectionString);
                         if (status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
@@ -116,17 +108,17 @@ namespace DBADashService
                         }
                         else
                         {
-                            throw new Exception(string.Format("Database version is {0} is not expected following upgrade to {1}", status.DBVersion.ToString(), status.DACVersion.ToString()));
+                            throw new Exception(
+                                $"Database version is {status.DBVersion} is not expected following upgrade to {status.DACVersion}");
                         }
+
+                        break;
                     }
-                    else
-                    {
+                    case DBValidations.DBVersionStatusEnum.UpgradeRequired:
                         throw new Exception("Database upgrade is required.  Enable auto updates or run the service configuration tool to update.");
-                    }
-                }
-                else if (status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
-                {
-                    Log.Information("Repository database version check OK {version}", status.DBVersion.ToString());
+                    case DBValidations.DBVersionStatusEnum.OK:
+                        Log.Information("Repository database version check OK {version}", status.DBVersion.ToString());
+                        break;
                 }
             }
         }
@@ -184,10 +176,10 @@ namespace DBADashService
             Log.Information("Pause schedules...");
             scheduler.Standby().ConfigureAwait(false).GetAwaiter().GetResult();
             Log.Information("Wait for jobs to complete...");
-            int waitCount = 0;
+            var waitCount = 0;
             while (scheduler.GetCurrentlyExecutingJobs().ConfigureAwait(false).GetAwaiter().GetResult().Count > 0)
             {
-                System.Threading.Thread.Sleep(500);
+                Thread.Sleep(500);
                 waitCount++;
                 if (waitCount > 60)
                 {
@@ -204,13 +196,13 @@ namespace DBADashService
 
         private async Task ScheduleAndRunMaintenanceJobAsync()
         {
-            Int32 i = 0;
-            foreach (DBADashConnection d in config.AllDestinations.Where(cn => cn.Type == ConnectionType.SQL))
+            var i = 0;
+            foreach (var d in config.AllDestinations.Where(cn => cn.Type == ConnectionType.SQL))
             {
                 i += 1;
                 var maintenanceCron = config.GetMaintenanceCron();
                 var job = JobBuilder.Create<MaintenanceJob>()
-                        .WithIdentity("MaintenanceJob" + i.ToString())
+                        .WithIdentity("MaintenanceJob" + i)
                         .UsingJobData("PurgeDataCommandTimeout", config.PurgeDataCommandTimeout ?? 600)
                         .UsingJobData("AddPartitionsCommandTimeout", config.AddPartitionsCommandTimeout ?? 300)
                         .UsingJobData("ConnectionString", d.ConnectionString)
@@ -229,11 +221,11 @@ namespace DBADashService
         {
             if (string.IsNullOrEmpty(config.SummaryRefreshCron)) return;
             var i = 0;
-            foreach (DBADashConnection d in config.AllDestinations.Where(cn => cn.Type == ConnectionType.SQL))
+            foreach (var d in config.AllDestinations.Where(cn => cn.Type == ConnectionType.SQL))
             {
                 i += 1;
-                IJobDetail job = JobBuilder.Create<SummaryRefreshJob>()
-                    .WithIdentity("SummaryRefreshJob" + i.ToString())
+                var job = JobBuilder.Create<SummaryRefreshJob>()
+                    .WithIdentity("SummaryRefreshJob" + i)
                     .UsingJobData("ConnectionString", d.ConnectionString)
                     .Build();
                 Log.Information("Schedule summary refresh on schedule {schedule}", config.SummaryRefreshCron);
@@ -256,13 +248,13 @@ namespace DBADashService
                 }
                 if (config.ScanForAzureDBsInterval > 0)
                 {
-                    Log.Information("Schedule Scan for new Azure DBS every {scaninterval} seconds", config.ScanForAzureDBsInterval);
+                    Log.Information("Schedule Scan for new Azure DBS every {scanInterval} seconds", config.ScanForAzureDBsInterval);
                     azureScanForNewDBsTimer = new System.Timers.Timer
                     {
                         Enabled = true,
                         Interval = config.ScanForAzureDBsInterval * 1000
                     };
-                    azureScanForNewDBsTimer.Elapsed += new System.Timers.ElapsedEventHandler(ScanForAzureDBs);
+                    azureScanForNewDBsTimer.Elapsed += ScanForAzureDBs;
                 }
             }
         }
@@ -271,7 +263,7 @@ namespace DBADashService
         {
             if (config.ScanForAzureDBs && src.SourceConnection.Type == ConnectionType.SQL)
             {
-                bool isAzureDBMaster = false;
+                var isAzureDBMaster = false;
 
                 try
                 {
@@ -308,9 +300,9 @@ namespace DBADashService
 
         private async Task ScheduleSourceAsync(DBADashSource src)
         {
-            string cfgString = JsonConvert.SerializeObject(src);
+            var cfgString = JsonConvert.SerializeObject(src);
             CollectionSchedules srcSchedule;
-            if (src.CollectionSchedules != null && src.CollectionSchedules.Count > 0)
+            if (src.CollectionSchedules is { Count: > 0 })
             {
                 srcSchedule = CollectionSchedules.Combine(schedules, src.CollectionSchedules);
                 Log.Information("Custom schedule defined for instance: {instance}", src.SourceConnection.ConnectionForPrint);
@@ -332,54 +324,60 @@ namespace DBADashService
                 scheduler.AddJob(serviceStartJob, true).ConfigureAwait(false).GetAwaiter().GetResult();
                 await scheduler.TriggerJob(serviceStartJob.Key);
             }
-            if (src.SourceConnection.Type == ConnectionType.SQL)
+            switch (src.SourceConnection.Type)
             {
-                var groupedSchedule = srcSchedule.GroupedBySchedule;
-                foreach (var schedule in customCollections
-                     .GroupBy(c => c.Value.Schedule)
-                     .Where(c => !groupedSchedule.ContainsKey(c.Key))
-                     .Select(c => c.Key))
+                case ConnectionType.SQL:
                 {
-                    groupedSchedule.Add(schedule, Array.Empty<CollectionType>());
-                }
-
-                foreach (var s in groupedSchedule)
-                {
-                    if (string.IsNullOrEmpty(s.Key)) continue; /* Collection is disabled */
-                    var custom = customCollections
-                        .Where(c => c.Value.Schedule == s.Key)
-                        .ToDictionary(c => c.Key, c => c.Value);
-                    var job = GetJob(s.Value, src, cfgString, custom);
-                    Log.Information("Add schedule for {source} to collect {collection},{custom} on schedule {schedule}", src.SourceConnection.ConnectionForPrint, s.Value, custom.Keys, s.Key);
-                    ScheduleJob(s.Key, job);
-                }
-
-                if (src.SchemaSnapshotDBs != null && src.SchemaSnapshotDBs.Length > 0)
-                {
-                    var snapshotSchedule = srcSchedule[CollectionType.SchemaSnapshot];
-                    if (!string.IsNullOrEmpty(snapshotSchedule.Schedule))
+                    var groupedSchedule = srcSchedule.GroupedBySchedule;
+                    foreach (var schedule in customCollections
+                                 .GroupBy(c => c.Value.Schedule)
+                                 .Where(c => !groupedSchedule.ContainsKey(c.Key))
+                                 .Select(c => c.Key))
                     {
-                        Log.Information("Add schedule for {source} to collect Schema Snapshots on schedule {schedule}", src.SourceConnection.ConnectionForPrint, snapshotSchedule.Schedule);
-                        var job = JobBuilder.Create<SchemaSnapshotJob>()
+                        groupedSchedule.Add(schedule, Array.Empty<CollectionType>());
+                    }
+
+                    foreach (var s in groupedSchedule)
+                    {
+                        if (string.IsNullOrEmpty(s.Key)) continue; /* Collection is disabled */
+                        var custom = customCollections
+                            .Where(c => c.Value.Schedule == s.Key)
+                            .ToDictionary(c => c.Key, c => c.Value);
+                        var job = GetJob(s.Value, src, cfgString, custom);
+                        Log.Information("Add schedule for {source} to collect {collection},{custom} on schedule {schedule}", src.SourceConnection.ConnectionForPrint, s.Value, custom.Keys, s.Key);
+                        ScheduleJob(s.Key, job);
+                    }
+
+                    if (src.SchemaSnapshotDBs is { Length: > 0 })
+                    {
+                        var snapshotSchedule = srcSchedule[CollectionType.SchemaSnapshot];
+                        if (!string.IsNullOrEmpty(snapshotSchedule.Schedule))
+                        {
+                            Log.Information("Add schedule for {source} to collect Schema Snapshots on schedule {schedule}", src.SourceConnection.ConnectionForPrint, snapshotSchedule.Schedule);
+                            var job = JobBuilder.Create<SchemaSnapshotJob>()
                                 .UsingJobData("Source", src.SourceConnection.ConnectionString)
                                 .UsingJobData("CFG", cfgString)
                                 .UsingJobData("SchemaSnapshotDBs", src.SchemaSnapshotDBs)
-                                    .Build();
+                                .Build();
 
-                        ScheduleJob(snapshotSchedule.Schedule, job);
+                            ScheduleJob(snapshotSchedule.Schedule, job);
 
-                        if (snapshotSchedule.RunOnServiceStart)
-                        {
-                            await scheduler.TriggerJob(job.Key);
+                            if (snapshotSchedule.RunOnServiceStart)
+                            {
+                                await scheduler.TriggerJob(job.Key);
+                            }
                         }
                     }
+
+                    break;
                 }
-            }
-            else if (src.SourceConnection.Type is ConnectionType.Directory or ConnectionType.AWSS3)
-            {
-                var job = GetJob(null, src, cfgString, null);
-                Log.Information("Add schedule for {source} to import on schedule {schedule}", src.SourceConnection.ConnectionForPrint, CollectionSchedule.DefaultImportSchedule);
-                ScheduleJob(CollectionSchedule.DefaultImportSchedule.Schedule, job);
+                case ConnectionType.Directory or ConnectionType.AWSS3:
+                {
+                    var job = GetJob(null, src, cfgString, null);
+                    Log.Information("Add schedule for {source} to import on schedule {schedule}", src.SourceConnection.ConnectionForPrint, CollectionSchedule.DefaultImportSchedule);
+                    ScheduleJob(CollectionSchedule.DefaultImportSchedule.Schedule, job);
+                    break;
+                }
             }
         }
 
@@ -408,7 +406,7 @@ namespace DBADashService
                 Enabled = true,
                 Interval = 14400000 // 4hrs
             };
-            folderCleanupTimer.Elapsed += new System.Timers.ElapsedEventHandler(FolderCleanup);
+            folderCleanupTimer.Elapsed += FolderCleanup;
             await messageTask;
             if (!string.IsNullOrEmpty(config.ServiceSQSQueueUrl))
             {
@@ -442,14 +440,15 @@ namespace DBADashService
                      .UsingJobData("Job_instance_id", 0)
                      .UsingJobData("SourceType", JsonConvert.SerializeObject(src.SourceConnection.Type))
                      .UsingJobData("CustomCollections", JsonConvert.SerializeObject(customCollections))
-                     .StoreDurably(true)
+                     .StoreDurably()
                     .Build();
         }
 
         private void ScheduleJob(string schedule, IJobDetail job)
         {
             ITrigger trigger;
-            if (int.TryParse(schedule, out int seconds)) // If it's an int, schedule is interval in seconds, otherwise use cron trigger
+            ArgumentNullException.ThrowIfNull(schedule);
+            if (int.TryParse(schedule, out var seconds)) // If it's an int, schedule is interval in seconds, otherwise use cron trigger
             {
                 trigger = TriggerBuilder.Create()
                  .StartNow()
@@ -523,8 +522,8 @@ namespace DBADashService
                     Log.Information("Maintenance: Failed Message Folder cleanup");
                     (from f in new DirectoryInfo(SchedulerServiceConfig.FailedMessageFolder).GetFiles()
                      where f.LastWriteTime < DateTime.Now.Subtract(TimeSpan.FromDays(7))
-                     && (f.Extension.ToLower() == ".xml" || f.Extension.ToLower() == ".json" || f.Extension.ToLower() == ".bin")
-                     && f.Name.ToLower().StartsWith("dbadash")
+                     && (f.Extension.Equals(".xml", StringComparison.CurrentCultureIgnoreCase) || f.Extension.Equals(".json", StringComparison.CurrentCultureIgnoreCase) || f.Extension.Equals(".bin", StringComparison.CurrentCultureIgnoreCase))
+                     && f.Name.StartsWith("dbadash", StringComparison.CurrentCultureIgnoreCase)
                      select f
                     ).ToList()
                         .ForEach(f => f.Delete());

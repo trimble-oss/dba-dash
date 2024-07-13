@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using DBADashGUI.Theme;
@@ -24,11 +23,11 @@ namespace DBADashGUI.Changes
 
         public bool CanNavigateForward => throw new NotImplementedException();
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = context.InstanceIDs.ToList();
-            Instance = context.InstanceName;
-            DatabaseID = context.DatabaseID;
+            InstanceIDs = _context.InstanceIDs.ToList();
+            Instance = _context.InstanceName;
+            DatabaseID = _context.DatabaseID;
             RefreshData();
         }
 
@@ -37,7 +36,7 @@ namespace DBADashGUI.Changes
             DataTable dt;
             tsBack.Visible = InstanceIDs.Count > 0;
             dgv.DataSource = null;
-            if (Instance != string.Empty && Instance != null)
+            if (!string.IsNullOrEmpty(Instance))
             {
                 tsBack.Enabled = true;
                 dt = GetDatabaseQueryStoreOptions();

@@ -9,7 +9,7 @@ namespace DBADashGUI
     /// </summary>
     internal class SlowQueryDetailSavedView : SavedView
     {
-        public override SavedView.ViewTypes Type => SavedView.ViewTypes.SlowQueryDetail;
+        public override ViewTypes Type => ViewTypes.SlowQueryDetail;
 
         public List<KeyValuePair<string, PersistedColumnLayout>> ColumnLayout;
 
@@ -27,7 +27,7 @@ namespace DBADashGUI
 
         public static SlowQueryDetailSavedView GetDefaultSavedView()
         {
-            var saved = SlowQueryDetailSavedView.GetSavedViews(DBADashUser.UserID).Where(x => x.Key == "Default").FirstOrDefault(new KeyValuePair<string, string>("Default", "")).Value;
+            var saved = GetSavedViews(DBADashUser.UserID).Where(x => x.Key == "Default").FirstOrDefault(new KeyValuePair<string, string>("Default", "")).Value;
             if (string.IsNullOrEmpty(saved))
             {
                 return null;

@@ -28,7 +28,7 @@ namespace DBADashGUI.Checks
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
 
         private void UpdateThresholds()
@@ -44,7 +44,7 @@ namespace DBADashGUI.Checks
         private void BttnUpdate_Click(object sender, EventArgs e)
         {
             UpdateThresholds();
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         private void ChkCritical_CheckedChanged(object sender, EventArgs e)
@@ -60,13 +60,13 @@ namespace DBADashGUI.Checks
         private void LnkClear_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             MemoryDumpThresholds.Acknowledge(true);
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         private void LnkAcknowledge_Click(object sender, LinkLabelLinkClickedEventArgs e)
         {
             MemoryDumpThresholds.Acknowledge();
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
     }
 }

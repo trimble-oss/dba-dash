@@ -23,9 +23,9 @@ namespace DBADashGUI.HA
             set => tsDetailSummary.Text = value ? "Detail" : "Summary";
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = context.RegularInstanceIDs.ToList();
+            InstanceIDs = _context.RegularInstanceIDs.ToList();
             RefreshData();
         }
 
@@ -115,11 +115,11 @@ namespace DBADashGUI.HA
             for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
-                var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["CollectionDateStatus"];
+                var snapshotStatus = (DBADashStatusEnum)row["CollectionDateStatus"];
                 dgv.Rows[idx].Cells["SnapshotAge"].SetStatusColor(snapshotStatus);
                 if (isSummary)
                 {
-                    var mirroringStatus = (DBADashStatus.DBADashStatusEnum)(row["MirroringStatus"] == DBNull.Value ? 3 : Convert.ToInt16(row["MirroringStatus"]));
+                    var mirroringStatus = (DBADashStatusEnum)(row["MirroringStatus"] == DBNull.Value ? 3 : Convert.ToInt16(row["MirroringStatus"]));
                     dgv.Rows[idx].Cells["SynchronizedCount"].SetStatusColor(mirroringStatus);
                 }
                 else

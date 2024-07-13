@@ -7,7 +7,6 @@ using ComboBox = System.Windows.Forms.ComboBox;
 using Control = System.Windows.Forms.Control;
 using TextBox = System.Windows.Forms.TextBox;
 using TreeView = System.Windows.Forms.TreeView;
-using System;
 
 namespace DBADashGUI.Theme
 {
@@ -17,7 +16,7 @@ namespace DBADashGUI.Theme
     [SupportedOSPlatform("windows")]
     public static class ThemeExtensions
     {
-        public static BaseTheme CurrentTheme { get; set; } = new BaseTheme();
+        public static BaseTheme CurrentTheme { get; set; } = new();
 
         public static int CellToolTipMaxLength { get; set; } = 1000;
 
@@ -164,7 +163,7 @@ namespace DBADashGUI.Theme
             diff.Foreground = new SolidColorBrush(theme.ForegroundColor.ToMediaColor());
         }
 
-        public static void ApplyTheme(this LiveCharts.WinForms.PieChart chart, BaseTheme theme)
+        public static void ApplyTheme(this PieChart chart, BaseTheme theme)
         {
             chart.BackColor = theme.BackgroundColor;
             chart.ForeColor = theme.ForegroundColor;
@@ -205,7 +204,7 @@ namespace DBADashGUI.Theme
             tv.ForeColor = theme.TreeViewForeColor;
         }
 
-        public static void ApplyTheme(this LiveCharts.WinForms.CartesianChart chart, BaseTheme theme)
+        public static void ApplyTheme(this CartesianChart chart, BaseTheme theme)
         {
             chart.BackColor = theme.BackgroundColor;
             chart.ForeColor = theme.ForegroundColor;

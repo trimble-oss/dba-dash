@@ -24,20 +24,20 @@ namespace DBADash
         public override bool Equals(Object obj)
         {
             //Check for null and compare run-time types.
-            if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+            if ((obj == null) || GetType() != obj.GetType())
             {
                 return false;
             }
             else
             {
-                Plan p = (Plan)obj;
-                return p.Key == this.Key;
+                var p = (Plan)obj;
+                return p.Key == Key;
             }
         }
 
         public bool Equals(Plan x, Plan y)
         {
-            return x.Key == y.Key;
+            return x?.Key == y?.Key;
         }
 
         public override int GetHashCode()

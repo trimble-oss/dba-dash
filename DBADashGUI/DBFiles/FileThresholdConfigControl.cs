@@ -35,7 +35,7 @@ namespace DBADashGUI.DBFiles
                 fileThres.PctMaxCheckEnabled = !chkMaxSizeDisable.Checked;
                 fileThres.PctMaxSizeCriticalThreshold = numMaxSizeCritical.Value / 100;
                 fileThres.PctMaxSizeWarningThreshold = numMaxSizeWarning.Value / 100;
-                fileThres.ZeroAuthgrowthOnly = chkZeroAutogrowthOnly.Checked;
+                fileThres.ZeroAutoGrowthOnly = chkZeroAutogrowthOnly.Checked;
                 return fileThres;
             }
             set
@@ -66,7 +66,7 @@ namespace DBADashGUI.DBFiles
                 numMaxSizeCritical.Value = setValueByThres.PctMaxSizeCriticalThreshold > 1 ? 100 : setValueByThres.PctMaxSizeCriticalThreshold * 100;
                 numMaxSizeWarning.Value = setValueByThres.PctMaxSizeWarningThreshold > 1 ? 100 : setValueByThres.PctMaxSizeWarningThreshold * 100;
                 chkMaxSizeDisable.Checked = !setValueByThres.PctMaxCheckEnabled;
-                chkZeroAutogrowthOnly.Checked = setValueByThres.ZeroAuthgrowthOnly;
+                chkZeroAutogrowthOnly.Checked = setValueByThres.ZeroAutoGrowthOnly;
                 if (fileThres.FileCheckType == FileThreshold.FileCheckTypeEnum.Percent)
                 {
                     numWarning.Value *= 100;

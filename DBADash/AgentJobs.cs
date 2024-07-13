@@ -106,24 +106,24 @@ namespace DBADash
             List<Exception> errors = new();
             using (var cn = new SqlConnection(ConnectionString))
             {
-                var instance = new Microsoft.SqlServer.Management.Smo.Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
-                int totalJobs = jobsDT.Rows.Count;
-                int cnt = 0;
+                var instance = new Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
+                var totalJobs = jobsDT.Rows.Count;
+                var cnt = 0;
                 foreach (DataRow row in jobsDT.Rows)
                 {
                     cnt++;
-                    string sDDL;
-                    string jobName = (string)row["name"];
-                    using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Script Job {number}/{totaljobs} ({pct}) {job} from {instance}", cnt, totalJobs, (cnt * 1.0 / totalJobs).ToString("P1"), jobName, SourceConnection.ConnectionForPrint))
+                    var jobName = (string)row["name"];
+                    using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Script Job {number}/{totalJobs} ({pct}) {job} from {instance}", cnt, totalJobs, (cnt * 1.0 / totalJobs).ToString("P1"), jobName, SourceConnection.ConnectionForPrint))
                     {
+                        string sDDL;
                         try
                         {
                             var job = instance.JobServer.Jobs[jobName];
-                            sDDL = SchemaSnapshotDB.StringCollectionToString(job.Script(ScriptingOptions));
+                            sDDL = StringCollectionToString(job.Script(ScriptingOptions));
                         }
                         catch (Exception ex)
                         {
-                            string message = String.Format("Error scripting agent job `{0}` on {1}", jobName, instance.Name);
+                            var message = $"Error scripting agent job `{jobName}` on {instance.Name}";
                             sDDL = "/*\n Error scripting job: \n" + ex.Message + "\n*/";
                             errors.Add(new Exception(message, ex));
                             Log.Error(ex, message);

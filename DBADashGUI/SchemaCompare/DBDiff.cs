@@ -87,9 +87,9 @@ namespace DBADashGUI
 
         private void GetObjectTypes()
         {
-            var objtypes = CommonData.GetObjectTypes();
+            var objTypes = CommonData.GetObjectTypes();
             chkObjectType.Items.Add("{all}", true);
-            foreach (string t in objtypes.Values)
+            foreach (var t in objTypes.Values)
             {
                 chkObjectType.Items.Add(t, true);
             }
@@ -143,12 +143,12 @@ namespace DBADashGUI
             chkIgnoreWhiteSpace.Checked = false;
             if (cboDatabaseA.SelectedItem != null && cboDatabaseB.SelectedItem != null)
             {
-                DataTable dt = DBCompare(DBID_A, DBID_B, Date_A, Date_B);
+                var dt = DBCompare(DBID_A, DBID_B, Date_A, Date_B);
                 dt.Columns.Add("A_Text");
                 dt.Columns.Add("B_Text");
                 dt.Columns.Add("WhitespaceDiff", typeof(bool));
                 gvDiff.AutoGenerateColumns = false;
-                string rowFilter = GetRowFilter();
+                var rowFilter = GetRowFilter();
                 dvDiff = new DataView(dt, rowFilter, "", DataViewRowState.CurrentRows);
                 gvDiff.DataSource = dvDiff;
                 gvDiff.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
@@ -166,7 +166,7 @@ namespace DBADashGUI
             if (gvDiff.SelectedRows.Count == 1)
             {
                 var row = (DataRowView)gvDiff.SelectedRows[0].DataBoundItem;
-                GetTextForRow(row.Row, out string a, out string b);
+                GetTextForRow(row.Row, out var a, out var b);
                 diffControl.OldText = a;
                 diffControl.NewText = b;
             }
@@ -251,7 +251,7 @@ namespace DBADashGUI
 
         private void ToggleCheck(bool state)
         {
-            for (int i = 0; i < chkObjectType.Items.Count; i++)
+            for (var i = 0; i < chkObjectType.Items.Count; i++)
                 chkObjectType.SetItemCheckState(i, (state ? CheckState.Checked : CheckState.Unchecked));
             CheckAllState = state;
         }
@@ -347,14 +347,14 @@ namespace DBADashGUI
         {
             try
             {
-                this.Cursor = Cursors.WaitCursor;
+                Cursor = Cursors.WaitCursor;
                 foreach (DataRow r in dvDiff.Table.Rows)
                 {
                     if ((string)r["DiffType"] == "Diff" && r["WhitespaceDiff"] == DBNull.Value)
                     {
                         GetTextForRow(r, out _, out _);
                     }
-                    if (r["WhitespaceDiff"] != DBNull.Value && (bool)r["WhitespaceDiff"] == true)
+                    if (r["WhitespaceDiff"] != DBNull.Value && (bool)r["WhitespaceDiff"])
                     {
                         r["DiffType"] = chkIgnoreWhiteSpace.Checked ? "Equal (Whitespace)" : "Diff";
                     }
@@ -362,13 +362,13 @@ namespace DBADashGUI
             }
             finally
             {
-                this.Cursor = Cursors.Default;
+                Cursor = Cursors.Default;
             }
         }
 
         void IThemedControl.ApplyTheme(BaseTheme theme)
         {
-            foreach (Control control in this.Controls)
+            foreach (Control control in Controls)
             {
                 control.ApplyTheme(theme);
             }

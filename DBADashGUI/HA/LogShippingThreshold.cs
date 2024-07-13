@@ -8,10 +8,10 @@ namespace DBADashGUI.LogShipping
     {
         public int InstanceID { get; set; }
         public int DatabaseID { get; set; }
-        public int? LatencyWarningThreshold { get; set; } = null;
-        public int? LatencyCriticalThreshold { get; set; } = null;
-        public int? TimeSinceLastWarningThreshold { get; set; } = null;
-        public int? TimeSinceLastCriticalThreshold { get; set; } = null;
+        public int? LatencyWarningThreshold { get; set; }
+        public int? LatencyCriticalThreshold { get; set; }
+        public int? TimeSinceLastWarningThreshold { get; set; }
+        public int? TimeSinceLastCriticalThreshold { get; set; }
         public int NewDatabaseExcludePeriod { get; set; } = 1440;
 
         public bool Inherited { get; set; }

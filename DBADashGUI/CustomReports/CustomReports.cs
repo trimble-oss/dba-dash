@@ -4,8 +4,6 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using Microsoft.Data.SqlClient;
@@ -23,7 +21,7 @@ namespace DBADashGUI.CustomReports
 
         private static Guid connectionId = Guid.Empty;
 
-        public static SystemReports SystemReports { get; } = new SystemReports();
+        public static SystemReports SystemReports { get; } = new();
 
         public static CustomReports GetCustomReports(bool forceRefresh = false)
         {

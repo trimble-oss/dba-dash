@@ -1,20 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms.Design;
 using System.Windows.Forms;
-using System.Windows.Media.Animation;
 using System.Drawing;
-using System.Runtime.CompilerServices;
 using Microsoft.Data.SqlClient;
-using DocumentFormat.OpenXml.Office.Word;
 
 namespace DBADashGUI
 {
     /// <summary>
-    /// Custom ToolStipDrownDownButton that shows status filters
+    /// Custom ToolStripDrownDownButton that shows status filters
     /// </summary>
     [ToolStripItemDesignerAvailability(ToolStripItemDesignerAvailability.ToolStrip)]
     public class StatusFilterToolStrip : ToolStripDropDownButton
@@ -67,7 +62,7 @@ namespace DBADashGUI
         private void CheckAll()
         {
             bool isChecked = !AllChecked;
-            foreach (ToolStripMenuItem itm in this.DropDownItems.OfType<ToolStripMenuItem>())
+            foreach (ToolStripMenuItem itm in DropDownItems.OfType<ToolStripMenuItem>())
             {
                 if (itm != MenuCheckAll)
                 {
@@ -91,7 +86,7 @@ namespace DBADashGUI
             MenuNA.Click += Status_Click;
 
             MenuCheckAll.Click += MenuCheckAll_Click;
-            this.DropDownItems.AddRange(new ToolStripItem[] { MenuCritical, MenuWarning, MenuNA, MenuOK, MenuAcknowledged, new ToolStripSeparator(), MenuCheckAll });
+            DropDownItems.AddRange(new ToolStripItem[] { MenuCritical, MenuWarning, MenuNA, MenuOK, MenuAcknowledged, new ToolStripSeparator(), MenuCheckAll });
         }
 
         private void Status_Click(object sender, EventArgs e)
@@ -116,16 +111,16 @@ namespace DBADashGUI
             if (AllChecked || !AnyChecked)
             {
                 Text = "ALL";
-                Font = new System.Drawing.Font(Font, System.Drawing.FontStyle.Regular);
+                Font = new Font(Font, FontStyle.Regular);
             }
             else if (AnyChecked)
             {
                 Text = ((Critical ? ",Critical" : "") + (Warning ? ",Warning" : "") + (OK ? ",OK" : "") + (NA ? ",NA" : "") + (Acknowledged ? ",Acknowledged" : ""))[1..];
-                Font = new System.Drawing.Font(Font, System.Drawing.FontStyle.Bold);
+                Font = new Font(Font, FontStyle.Bold);
             }
-            foreach (ToolStripMenuItem itm in this.DropDownItems.OfType<ToolStripMenuItem>())
+            foreach (ToolStripMenuItem itm in DropDownItems.OfType<ToolStripMenuItem>())
             {
-                itm.Font = itm.Checked ? new Font(itm.Font, System.Drawing.FontStyle.Bold) : new Font(itm.Font, System.Drawing.FontStyle.Regular);
+                itm.Font = itm.Checked ? new Font(itm.Font, FontStyle.Bold) : new Font(itm.Font, FontStyle.Regular);
             }
         }
     }

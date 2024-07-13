@@ -31,9 +31,9 @@ namespace DBADashGUI.Performance
             }
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceID = context.InstanceID;
+            InstanceID = _context.InstanceID;
             RefreshData();
         }
 
@@ -141,13 +141,13 @@ namespace DBADashGUI.Performance
         private void TsMetrics_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
-            columns[(string)ts.Tag].IsVisible = ts.Checked;
+            columns[((string)ts.Tag)!].IsVisible = ts.Checked;
             WaitChart1.UpdateColumnVisibility(columns);
         }
 
         private void RefreshChart()
         {
-            if (selectedWaitType == null || selectedWaitType == string.Empty)
+            if (string.IsNullOrEmpty(selectedWaitType))
             {
                 splitContainer1.Panel1Collapsed = true;
             }
@@ -158,7 +158,7 @@ namespace DBADashGUI.Performance
                 var dt = GetWaitsDT(selectedWaitType);
                 WaitChart1.LegendLocation = LiveCharts.LegendLocation.Bottom;
                 WaitChart1.Series.Clear();
-                WaitChart1.AddDataTable(dt, columns, "time", true);
+                WaitChart1.AddDataTable(dt, columns, "time");
                 WaitChart1.AxisX[0].MinValue = DateRange.FromUTC.ToAppTimeZone().Ticks;
                 WaitChart1.AxisX[0].MaxValue = DateRange.ToUTC.ToAppTimeZone().Ticks;
                 if (WaitChart1.AxisY.Count == 1)

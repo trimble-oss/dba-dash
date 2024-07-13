@@ -43,24 +43,24 @@ namespace DBADashGUI.LastGoodCheckDB
 
         private DBADashContext CurrentContext;
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = context.RegularInstanceIDs.ToList();
+            InstanceIDs = _context.RegularInstanceIDs.ToList();
             IncludeCritical = true;
             IncludeWarning = true;
-            IncludeNA = context.InstanceID > 0;
-            IncludeOK = context.InstanceID > 0;
-            CurrentContext = context;
+            IncludeNA = _context.InstanceID > 0;
+            IncludeOK = _context.InstanceID > 0;
+            CurrentContext = _context;
             lblStatus.Text = string.Empty;
-            tsTrigger.Visible = context.CanMessage;
+            tsTrigger.Visible = _context.CanMessage;
             RefreshData();
         }
 
         public void RefreshData()
         {
-            if (this.InvokeRequired)
+            if (InvokeRequired)
             {
-                this.Invoke(RefreshData);
+                Invoke(RefreshData);
                 return;
             }
 

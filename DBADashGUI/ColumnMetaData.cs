@@ -1,6 +1,5 @@
 ﻿using DBADashGUI.Pickers;
 using LiveCharts.Defaults;
-using System;
 
 namespace DBADashGUI
 {

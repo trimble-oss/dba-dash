@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,7 +8,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml;
 using DBADash;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
@@ -26,7 +24,7 @@ namespace DBADashServiceConfig
             set => _customCollections = value.DeepCopy();
         }
 
-        private static KeyValuePair<string, CustomCollection> CustomCollectionClipboard = new();
+        private static KeyValuePair<string, CustomCollection> CustomCollectionClipboard;
 
         public string ConnectionString { get; set; }
         private bool IsScheduleValid = true;
@@ -518,7 +516,7 @@ ORDER BY ProcName", cn);
             sb.AppendLine("****************************************************************************************************************************/");
 
             StartStopGetScript(false);
-            this.Invoke(() =>
+            Invoke(() =>
             {
                 Clipboard.SetText(sb.ToString());
                 MessageBox.Show("Script copied to clipboard", "Success", MessageBoxButtons.OK,
@@ -628,12 +626,12 @@ ORDER BY ProcName", cn);
 
         private void BttnUpdate_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
 
         private void ChkDefaultTimeout_CheckedChanged(object sender, EventArgs e)

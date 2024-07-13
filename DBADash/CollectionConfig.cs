@@ -1,7 +1,6 @@
 ﻿using DBADashService;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -14,7 +13,7 @@ namespace DBADash
     {
         public Int32 ServiceThreads = -1;
         private string _secretKey;
-        private bool wasEncryptionPerformed = false;
+        private bool wasEncryptionPerformed;
         private readonly string myString = "g&hAs2&mVOLwE6DqO!I5";
         public SchemaSnapshotDBOptions SchemaSnapshotOptions = null;
         public bool ScanForAzureDBs { get; set; } = true;
@@ -93,20 +92,13 @@ namespace DBADash
             }
         }
 
-        private readonly string defaultMaintenanceCron = "0 0 0/12 1/1 * ? *";
+        private const string defaultMaintenanceCron = "0 0 0/12 1/1 * ? *";
 
         public string MaintenanceScheduleCron { get; set; }
 
         public string GetMaintenanceCron()
         {
-            if (MaintenanceScheduleCron is null or "")
-            {
-                return defaultMaintenanceCron;
-            }
-            else
-            {
-                return MaintenanceScheduleCron;
-            }
+            return MaintenanceScheduleCron is null or "" ? defaultMaintenanceCron : MaintenanceScheduleCron;
         }
 
         [JsonIgnore]
@@ -127,7 +119,7 @@ namespace DBADash
             set
             {
                 SecondaryDestinationConnections = new List<DBADashConnection>();
-                foreach (string s in value.Distinct().ToArray())
+                foreach (var s in value.Distinct().ToArray())
                 {
                     SecondaryDestinationConnections.Add(new DBADashConnection(s));
                 }
@@ -185,7 +177,7 @@ namespace DBADash
             {
                 throw new Exception("Invalid connection string");
             }
-            else if (destination.Type == DBADashConnection.ConnectionType.SQL)
+            else if (destination.Type == ConnectionType.SQL)
             {
                 if (string.IsNullOrEmpty(destination.InitialCatalog()))
                 {
@@ -208,16 +200,16 @@ namespace DBADash
         private static void ValidateDestinationVersion(DBADashConnection destination)
         {
             var master = destination.MasterConnection();
-            var cinfo = master.ConnectionInfo;
-            if (string.IsNullOrEmpty(cinfo.ServerName))
+            var cInfo = master.ConnectionInfo;
+            if (string.IsNullOrEmpty(cInfo.ServerName))
             {
                 Log.Warning("@@SERVERNAME returned NULL for {connection}.  Consider fixing with sp_addserver", destination.ConnectionForPrint);
             }
-            if (cinfo.MajorVersion < 13 && cinfo.EngineEdition != Microsoft.SqlServer.Management.Common.DatabaseEngineEdition.SqlDatabase && cinfo.EngineEdition != Microsoft.SqlServer.Management.Common.DatabaseEngineEdition.SqlManagedInstance) // 13=2016, 12 might be Azure DB which is OK
+            if (cInfo.MajorVersion < 13 && cInfo.EngineEdition != Microsoft.SqlServer.Management.Common.DatabaseEngineEdition.SqlDatabase && cInfo.EngineEdition != Microsoft.SqlServer.Management.Common.DatabaseEngineEdition.SqlManagedInstance) // 13=2016, 12 might be Azure DB which is OK
             {
                 throw new Exception("DBA Dash repository database requires SQL 2016 SP1 or later");
             }
-            else if (cinfo.MajorVersion == 13 && (new Version(cinfo.ProductVersion)).CompareTo(new Version("13.0.4001.0")) < 0 && cinfo.EngineEdition != Microsoft.SqlServer.Management.Common.DatabaseEngineEdition.Enterprise)
+            else if (cInfo.MajorVersion == 13 && (new Version(cInfo.ProductVersion)).CompareTo(new Version("13.0.4001.0")) < 0 && cInfo.EngineEdition != Microsoft.SqlServer.Management.Common.DatabaseEngineEdition.Enterprise)
             { // Check if we are running SP1 for SQL 2016
                 throw new Exception("DBA Dash repository database requires SQL 2016 SP1 or later.  Please upgrade to SP1 or later.");
             }
@@ -237,8 +229,8 @@ namespace DBADash
                         {
                             return s;
                         }
-                        else if ((new string[] { "master", String.Empty }).Contains(s.SourceConnection.InitialCatalog().ToLower())
-                            && (new string[] { "master", String.Empty }).Contains(findConnection.InitialCatalog().ToLower()))
+                        else if ((new[] { "master", String.Empty }).Contains(s.SourceConnection.InitialCatalog().ToLower())
+                            && (new[] { "master", String.Empty }).Contains(findConnection.InitialCatalog().ToLower()))
                         {
                             return s;
                         }
@@ -294,7 +286,7 @@ namespace DBADash
             {
                 try
                 {
-                    if ((new string[] { "master", String.Empty }).Contains(cfg.SourceConnection.InitialCatalog()) && cfg.SourceConnection.ConnectionInfo.IsAzureMasterDB)
+                    if ((new[] { "master", String.Empty }).Contains(cfg.SourceConnection.InitialCatalog()) && cfg.SourceConnection.ConnectionInfo.IsAzureMasterDB)
                     {
                         newConnections.AddRange(GetNewAzureDBConnections(cfg));
                     }
@@ -320,7 +312,7 @@ namespace DBADash
                 while (rdr.Read())
                 {
                     builder.InitialCatalog = rdr.GetString(0);
-                    DBADashSource dbCn = masterConnection.DeepCopy();
+                    var dbCn = masterConnection.DeepCopy();
                     dbCn.SourceConnection.ConnectionString = builder.ConnectionString;
                     dbCn.ConnectionID = string.Empty;
 

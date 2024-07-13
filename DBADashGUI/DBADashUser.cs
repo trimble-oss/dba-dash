@@ -3,7 +3,6 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
 using System.Windows;
-using System.Windows.Forms.DataVisualization.Charting;
 
 namespace DBADashGUI
 {
@@ -11,10 +10,10 @@ namespace DBADashGUI
     {
         public static readonly int SystemUserID = -1;
 
-        private static int _UserID = 0;
-        public static int UserID { get => _UserID; }
+        private static int _UserID;
+        public static int UserID => _UserID;
 
-        public static bool HasManageGlobalViews = false;
+        public static bool HasManageGlobalViews;
 
         public static bool AllowMessaging;
 
@@ -53,7 +52,7 @@ namespace DBADashGUI
                 var pAllowMessaging = new SqlParameter("AllowMessaging", SqlDbType.Bit) { Direction = ParameterDirection.Output };
                 var pTZ = new SqlParameter("TimeZone", SqlDbType.VarChar, 50) { Direction = ParameterDirection.Output };
                 var pTheme = new SqlParameter("Theme", SqlDbType.VarChar, 50) { Direction = ParameterDirection.Output };
-                cmd.Parameters.AddRange(new SqlParameter[] { pUserID, pManageGlobalViews, pTZ, pTheme, pAllowMessaging });
+                cmd.Parameters.AddRange(new[] { pUserID, pManageGlobalViews, pTZ, pTheme, pAllowMessaging });
                 cmd.ExecuteNonQuery();
                 int id = Convert.ToInt32(pUserID.Value);
                 if (id > 0)

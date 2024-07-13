@@ -1,9 +1,6 @@
 ﻿using Humanizer;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Globalization;
 using System.Web;
 
 namespace DBADashGUI.AgentJobs
@@ -51,8 +48,8 @@ namespace DBADashGUI.AgentJobs
         /// </summary>
         public string ToolTip => string.Format("<span class=\"{5}\"><h1>{0}</h1>Step {9}: {6}<br/>Start: {1}<br/>End: {2}<br/>{8}: {3}<br/>Executions: {7}<br/>Status: {4}</span>",
                              HttpUtility.HtmlEncode(JobName),
-                             ActualStart.ToString(),
-                             ActualEnd.ToString(),
+                             ActualStart.ToString(CultureInfo.CurrentCulture),
+                             ActualEnd.ToString(CultureInfo.CurrentCulture),
                              TimeSpan.FromSeconds(Duration).Humanize(4),
                              Status.ToString(),
                              TooltipCSS,

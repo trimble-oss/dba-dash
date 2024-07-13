@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 namespace DBADashGUI
 {
     /// <summary>
-    /// A class inheriting SavedView is used to presist the state of a page.
+    /// A class inheriting SavedView is used to persist the state of a page.
     /// </summary>
     public abstract class SavedView
     {
@@ -29,7 +29,7 @@ namespace DBADashGUI
 
         public virtual string Serialize()
         {
-            string json = Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
             return json;
         }
 
@@ -79,7 +79,7 @@ namespace DBADashGUI
                 cn.Open();
                 cmd.Parameters.AddWithValue("UserID", UserID);
                 cmd.Parameters.AddWithValue("ViewType", type);
-                var savedViews = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase); ;
+                var savedViews = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 using (var rdr = cmd.ExecuteReader())
                 {
                     while (rdr.Read())

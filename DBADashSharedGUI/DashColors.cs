@@ -48,7 +48,7 @@
         public static readonly Color AvoidanceZone = Color.FromArgb(255, 223, 78, 178);
         public static readonly Color Information = Color.FromArgb(255, 1, 154, 235);
 
-        public static Color NotApplicable => DashColors.Gray0;
+        public static Color NotApplicable => Gray0;
 
         //Neutral Progression
         public static readonly Color GrayLight = Color.FromArgb(241, 241, 246);

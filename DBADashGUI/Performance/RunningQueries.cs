@@ -13,7 +13,6 @@ using System.Windows.Forms;
 using DBADash;
 using DBADashGUI.Interface;
 using DBADashGUI.Messaging;
-using DocumentFormat.OpenXml.Office2010.PowerPoint;
 
 namespace DBADashGUI.Performance
 {
@@ -122,17 +121,17 @@ namespace DBADashGUI.Performance
                 new DataGridViewLinkColumn() { HeaderText = "Help", Text = "help", UseColumnTextForLinkValue = true, Name = "colHelp", LinkColor = DashColors.LinkColor}
         };
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
             ShowLatestOnNextExecution = false;
-            if (InstanceIDs != null && context.InstanceIDs.SetEquals(InstanceIDs) && InstanceID == context.InstanceID) // Context hasn't changed
+            if (InstanceIDs != null && _context.InstanceIDs.SetEquals(InstanceIDs) && InstanceID == _context.InstanceID) // Context hasn't changed
             {
                 return;
             }
             currentSnapshotDate = DateTime.MinValue;
             dgv.DataSource = null;
-            InstanceIDs = context.InstanceIDs.ToList();
-            InstanceID = context.InstanceID;
+            InstanceIDs = _context.InstanceIDs.ToList();
+            InstanceID = _context.InstanceID;
             if (InstanceIDs is { Count: 1 })
             {
                 InstanceID = InstanceIDs[0];
@@ -191,9 +190,9 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-            if (this.InvokeRequired)
+            if (InvokeRequired)
             {
-                this.Invoke(RefreshData);
+                Invoke(RefreshData);
                 return;
             }
 
@@ -490,7 +489,7 @@ namespace DBADashGUI.Performance
         {
             if (e.RowIndex < 0) return;
             var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-            string colName = dgv.Columns[e.ColumnIndex].Name;
+            var colName = dgv.Columns[e.ColumnIndex].Name;
             switch (colName)
             {
                 // Drill down to view a snapshot from summary
@@ -510,7 +509,7 @@ namespace DBADashGUI.Performance
                 // New window with full batch text for query
                 case "colBatchText":
                     {
-                        string sql = (string)row["batch_text"];
+                        var sql = (string)row["batch_text"];
                         var title = "SPID: " + Convert.ToString(row["session_id"]) + " Batch Text";
                         Common.ShowCodeViewer(sql, title);
                         break;
@@ -584,8 +583,8 @@ namespace DBADashGUI.Performance
 
         private void GroupByFilter(DataGridViewCellEventArgs e, DataRowView row)
         {
-            string filter = dgv.Columns[e.ColumnIndex].DataPropertyName + "='" +
-                            Convert.ToString(row[dgv.Columns[e.ColumnIndex].DataPropertyName]).Replace("'", "''") + "'";
+            var filter = dgv.Columns[e.ColumnIndex].DataPropertyName + "='" +
+                         Convert.ToString(row[dgv.Columns[e.ColumnIndex].DataPropertyName]).Replace("'", "''") + "'";
             tsGroupByFilter.Text = filter;
             tsGroupByFilter.Visible = true;
             DataView dv;
@@ -627,13 +626,13 @@ namespace DBADashGUI.Performance
                 dgvSessionWaits.Columns.AddRange(sessionWaitColumns);
             }
 
-            var sessionid = (short)row["session_id"];
-            dgvSessionWaits.DataSource = GetSessionWaits(InstanceID, sessionid,
+            var sessionId = (short)row["session_id"];
+            dgvSessionWaits.DataSource = GetSessionWaits(InstanceID, sessionId,
                 Convert.ToDateTime(row["SnapshotDate"]).AppTimeZoneToUtc(),
                 Convert.ToDateTime(row["login_time"]).AppTimeZoneToUtc());
             dgvSessionWaits.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            sessionToolStripMenuItem.Tag = sessionid;
-            lblWaitsForSession.Text = "Waits For Session ID: " + sessionid.ToString();
+            sessionToolStripMenuItem.Tag = sessionId;
+            lblWaitsForSession.Text = "Waits For Session ID: " + sessionId;
             dgvSessionWaits.ApplyTheme(DBADashUser.SelectedTheme);
         }
 
@@ -902,24 +901,24 @@ namespace DBADashGUI.Performance
 
         private void AllSessionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            dgvSessionWaits.Columns["colSessionID"].Visible = true;
+            dgvSessionWaits.Columns["colSessionID"]!.Visible = true;
             dgvSessionWaits.DataSource = GetSessionWaits(InstanceID, null, currentSnapshotDate, null);
             lblWaitsForSession.Text = "All Sessions";
         }
 
         private void SummaryViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            dgvSessionWaits.Columns["colSessionID"].Visible = false;
+            dgvSessionWaits.Columns["colSessionID"]!.Visible = false;
             dgvSessionWaits.DataSource = GetSessionWaitSummary(InstanceID, currentSnapshotDate);
             lblWaitsForSession.Text = "Session Wait Summary";
         }
 
         private void SessionToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            dgvSessionWaits.Columns["colSessionID"].Visible = false;
-            var sessionid = (short)sessionToolStripMenuItem.Tag;
-            dgvSessionWaits.DataSource = GetSessionWaits(InstanceID, sessionid, currentSnapshotDate, null);
-            lblWaitsForSession.Text = "Waits For Session ID: " + sessionid.ToString();
+            dgvSessionWaits.Columns["colSessionID"]!.Visible = false;
+            var sessionId = (short)sessionToolStripMenuItem.Tag;
+            dgvSessionWaits.DataSource = GetSessionWaits(InstanceID, sessionId, currentSnapshotDate, null);
+            lblWaitsForSession.Text = "Waits For Session ID: " + sessionId;
         }
 
         private void DgvSessionWaits_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -1019,9 +1018,9 @@ namespace DBADashGUI.Performance
 
         private void TsEditLimit_Click(object sender, EventArgs e)
         {
-            string limit = Properties.Settings.Default.RunningQueriesSummaryMaxRows.ToString();
-            if (Common.ShowInputDialog(ref limit, "Enter row limit") != DialogResult.OK) return;
-            if (int.TryParse(limit, out int maxRows) && maxRows > 0)
+            var limit = Properties.Settings.Default.RunningQueriesSummaryMaxRows.ToString();
+            if (CommonShared.ShowInputDialog(ref limit, "Enter row limit") != DialogResult.OK) return;
+            if (int.TryParse(limit, out var maxRows) && maxRows > 0)
             {
                 Properties.Settings.Default.RunningQueriesSummaryMaxRows = maxRows;
                 Properties.Settings.Default.Save();
@@ -1060,7 +1059,7 @@ namespace DBADashGUI.Performance
 
         public void SetStatus(string message, string tooltip, Color color)
         {
-            this.Invoke(() =>
+            Invoke(() =>
             {
                 tsStatus.Visible = true;
                 tsStatus.Text = message;

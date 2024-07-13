@@ -39,16 +39,16 @@ namespace DBADashGUI.Checks
             get => statusFilterToolStrip1.OK; set => statusFilterToolStrip1.OK = value;
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = context.InstanceIDs.ToList();
-            DatabaseID = context.DatabaseID;
+            InstanceIDs = _context.InstanceIDs.ToList();
+            DatabaseID = _context.DatabaseID;
             IncludeCritical = true;
             IncludeWarning = true;
-            IncludeOK = !string.IsNullOrEmpty(context.InstanceName);
-            IncludeNA = !string.IsNullOrEmpty(context.InstanceName);
-            configureInstanceThresholdsToolStripMenuItem.Enabled = context.InstanceIDs.Count == 1;
-            configureDatabaseThresholdsToolStripMenuItem.Enabled = DatabaseID != -1 && context.InstanceIDs.Count == 1;
+            IncludeOK = !string.IsNullOrEmpty(_context.InstanceName);
+            IncludeNA = !string.IsNullOrEmpty(_context.InstanceName);
+            configureInstanceThresholdsToolStripMenuItem.Enabled = _context.InstanceIDs.Count == 1;
+            configureDatabaseThresholdsToolStripMenuItem.Enabled = DatabaseID != -1 && _context.InstanceIDs.Count == 1;
             RefreshData();
         }
 
@@ -60,7 +60,7 @@ namespace DBADashGUI.Checks
             }
             var dt = GetIdentityColumns();
             dgv.DataSource = dt;
-            dgv.Sort(dgv.Columns["colPctUsed"], ListSortDirection.Descending);
+            dgv.Sort(dgv.Columns["colPctUsed"]!, ListSortDirection.Descending);
             dgv.AutoResizeColumns();
         }
 

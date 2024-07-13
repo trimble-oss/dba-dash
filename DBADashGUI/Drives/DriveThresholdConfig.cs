@@ -22,17 +22,17 @@ namespace DBADashGUI
                 {
                     driveThres.WarningThreshold = numDriveWarning.Value / 100;
                     driveThres.CriticalThreshold = numDriveCritical.Value / 100;
-                    driveThres.DriveCheckType = Drive.DriveCheckTypeEnum.Percent;
+                    driveThres.DriveCheckType = DriveThreshold.DriveCheckTypeEnum.Percent;
                 }
                 if (optGB.Checked)
                 {
                     driveThres.WarningThreshold = numDriveWarning.Value;
                     driveThres.CriticalThreshold = numDriveCritical.Value;
-                    driveThres.DriveCheckType = Drive.DriveCheckTypeEnum.GB;
+                    driveThres.DriveCheckType = DriveThreshold.DriveCheckTypeEnum.GB;
                 }
                 if (OptDisabled.Checked)
                 {
-                    driveThres.DriveCheckType = Drive.DriveCheckTypeEnum.None;
+                    driveThres.DriveCheckType = DriveThreshold.DriveCheckTypeEnum.None;
                 }
 
                 return driveThres;
@@ -47,9 +47,9 @@ namespace DBADashGUI
                 }
                 if (!driveThres.Inherited)
                 {
-                    optGB.Checked = driveThres.DriveCheckType == Drive.DriveCheckTypeEnum.GB;
-                    optPercent.Checked = driveThres.DriveCheckType == Drive.DriveCheckTypeEnum.Percent;
-                    OptDisabled.Checked = driveThres.DriveCheckType == Drive.DriveCheckTypeEnum.None;
+                    optGB.Checked = driveThres.DriveCheckType == DriveThreshold.DriveCheckTypeEnum.GB;
+                    optPercent.Checked = driveThres.DriveCheckType == DriveThreshold.DriveCheckTypeEnum.Percent;
+                    OptDisabled.Checked = driveThres.DriveCheckType == DriveThreshold.DriveCheckTypeEnum.None;
                 }
                 else
                 {
@@ -57,7 +57,7 @@ namespace DBADashGUI
                 }
                 numDriveWarning.Value = driveThres.WarningThreshold;
                 numDriveCritical.Value = driveThres.CriticalThreshold;
-                if (driveThres.DriveCheckType == Drive.DriveCheckTypeEnum.Percent)
+                if (driveThres.DriveCheckType == DriveThreshold.DriveCheckTypeEnum.Percent)
                 {
                     numDriveWarning.Value *= 100;
                     numDriveCritical.Value *= 100;
@@ -67,8 +67,8 @@ namespace DBADashGUI
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
+            DialogResult = DialogResult.Cancel;
+            Close();
         }
 
         private void OptInherit_CheckedChanged(object sender, EventArgs e)
@@ -102,8 +102,8 @@ namespace DBADashGUI
         private void BttnUpdate_Click(object sender, EventArgs e)
         {
             DriveThreshold.UpdateThresholds();
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void DriveThresholdConfig_Load(object sender, EventArgs e)

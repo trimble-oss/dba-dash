@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-using System.Runtime.Versioning;
-using System.Windows.Forms;
+﻿using System.Runtime.Versioning;
 
 namespace DBADashGUI.Theme
 {
@@ -11,7 +9,7 @@ namespace DBADashGUI.Theme
 
         public ThemedTabControl()
         {
-            this.SetStyle(ControlStyles.UserPaint, true);
+            SetStyle(ControlStyles.UserPaint, true);
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -20,14 +18,14 @@ namespace DBADashGUI.Theme
             e.Graphics.Clear(theme.TabBackColor);
 
             // Draw each TabPage header
-            for (int i = 0; i < this.TabCount; i++)
+            for (int i = 0; i < TabCount; i++)
             {
-                Rectangle rect = this.GetTabRect(i);
+                Rectangle rect = GetTabRect(i);
 
                 var headerColor = theme.TabHeaderBackColor;
                 var textColor = theme.TabHeaderForeColor;
 
-                if (i == this.SelectedIndex)
+                if (i == SelectedIndex)
                 {
                     headerColor = theme.SelectedTabBackColor;
                     textColor = theme.SelectedTabForeColor;
@@ -50,7 +48,7 @@ namespace DBADashGUI.Theme
                         LineAlignment = StringAlignment.Center
                     };
 
-                    e.Graphics.DrawString(this.TabPages[i].Text, this.Font, brush, rect, sf);
+                    e.Graphics.DrawString(TabPages[i].Text, Font, brush, rect, sf);
                 }
             }
         }
@@ -63,8 +61,8 @@ namespace DBADashGUI.Theme
         public void ApplyTheme(BaseTheme theme)
         {
             this.theme = theme;
-            this.Controls.ApplyTheme(theme);
-            this.Invalidate();
+            Controls.ApplyTheme(theme);
+            Invalidate();
         }
     }
 }

@@ -13,7 +13,7 @@ namespace DBADash
             this.ApplyTheme();
         }
 
-        string connectionString = String.Empty;
+        string connectionString = string.Empty;
         public bool ValidateInitialCatalog = false;
 
         public string ConnectionString
@@ -72,7 +72,7 @@ namespace DBADash
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
 
         public static void TestConnection(string connectionString)
@@ -85,32 +85,25 @@ namespace DBADash
         {
             try
             {
-                this.Cursor = Cursors.WaitCursor;
-                if (ValidateInitialCatalog)
-                {
-                    TestConnection(ConnectionString);
-                }
-                else
-                {
-                    TestConnection(ConnectionStringWithoutInitialCatalog); // Try without initial catalog as DB might not have been created yet
-                }
+                Cursor = Cursors.WaitCursor;
+                TestConnection(ValidateInitialCatalog ? ConnectionString : ConnectionStringWithoutInitialCatalog); // Try without initial catalog as DB might not have been created yet
             }
             catch (Exception ex)
             {
-                this.Cursor = Cursors.Default;
-                MessageBox.Show("Error connecting to data source:" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Cursor = Cursors.Default;
+                MessageBox.Show(@"Error connecting to data source:" + ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             finally
             {
-                this.Cursor = Cursors.Default;
+                Cursor = Cursors.Default;
             }
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         private void DBConnection_Load(object sender, EventArgs e)
         {
-            if (txtServerName.Text == "localhost")
+            if (txtServerName.Text == @"localhost")
             {
                 txtServerName.Text = Environment.MachineName;
             }

@@ -61,8 +61,8 @@ namespace DBADashGUI.Changes
                 }
 
                 var configName = (string)r["name"];
-                var idx = dgvConfig.Columns[configName].Index;
-                row.Cells[idx].Value = r["value"];
+                var idx = dgvConfig.Columns[configName]!.Index;
+                row!.Cells[idx].Value = r["value"];
                 var isDefault = (bool?)r["IsDefault"].DBNullToNull();
 
                 DBADashStatus.DBADashStatusEnum status;

@@ -4,16 +4,12 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Azure;
 using DBADashGUI.Theme;
-using DBADash.Messaging;
 using DBADash;
 using DBADashGUI.Interface;
 using DBADashGUI.Messaging;
-using Microsoft.VisualBasic;
 
 namespace DBADashGUI.CollectionDates
 {
@@ -66,22 +62,22 @@ namespace DBADashGUI.CollectionDates
             }
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = context.InstanceIDs.ToList();
+            InstanceIDs = _context.InstanceIDs.ToList();
             IncludeCritical = true;
             IncludeWarning = true;
-            IncludeNA = context.InstanceID > 0;
-            IncludeOK = context.InstanceID > 0;
+            IncludeNA = _context.InstanceID > 0;
+            IncludeOK = _context.InstanceID > 0;
             lblStatus.Visible = false;
             RefreshData();
         }
 
         public void RefreshData()
         {
-            if (this.InvokeRequired)
+            if (InvokeRequired)
             {
-                this.Invoke(RefreshData);
+                Invoke(RefreshData);
                 return;
             }
             UseWaitCursor = true;

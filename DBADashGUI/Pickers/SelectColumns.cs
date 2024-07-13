@@ -1,5 +1,4 @@
 ﻿using DBADashGUI.Pickers;
-using DocumentFormat.OpenXml.Spreadsheet;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -33,9 +32,9 @@ namespace DBADashGUI
             dtItems.Columns.Add("Name", typeof(string));
             dtItems.Columns.Add("IsVisible", typeof(bool));
 
-            foreach (ISelectable item in items)
+            foreach (var item in items)
             {
-                dtItems.Rows.Add(new object[] { item.Name, item.IsVisible });
+                dtItems.Rows.Add(item.Name, item.IsVisible);
             }
             return dtItems;
         }
@@ -64,12 +63,12 @@ namespace DBADashGUI
             {
                 Items[i].IsVisible = (bool)dtItems.Rows[i]["IsVisible"];
             }
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
 
         private void ToggleSelected()
@@ -101,12 +100,12 @@ namespace DBADashGUI
 
         public void ApplyTheme(BaseTheme theme)
         {
-            foreach (Control control in this.Controls)
+            foreach (Control control in Controls)
             {
                 control.ApplyTheme(theme);
             }
-            this.ForeColor = theme.ForegroundColor;
-            this.BackColor = theme.BackgroundColor;
+            ForeColor = theme.ForegroundColor;
+            BackColor = theme.BackgroundColor;
         }
     }
 }

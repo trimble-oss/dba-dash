@@ -6,7 +6,6 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using DBADashGUI.Theme;
-using Humanizer;
 
 namespace DBADashGUI.Performance
 {
@@ -118,7 +117,7 @@ namespace DBADashGUI.Performance
             if (sender.GetType() == typeof(ToolStripMenuItem))
             {
                 var mnu = (ToolStripMenuItem)sender;
-                foreach (string name in new string[] { mnu.Text, "Compare " + mnu.Text })
+                foreach (string name in new[] { mnu.Text, "Compare " + mnu.Text })
                 {
                     if (dgv.Columns.Contains(name))
                     {
@@ -169,9 +168,9 @@ namespace DBADashGUI.Performance
             }
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            _context = context;
+            this._context = _context;
             RefreshData();
         }
 
@@ -180,7 +179,7 @@ namespace DBADashGUI.Performance
             var status = DateRange.FromUTC.ToAppTimeZone() + " - " + DateRange.ToUTC.ToAppTimeZone() + (HasCompare ? " comparing to " + CompareFrom.ToAppTimeZone() + " - " + CompareTo.ToAppTimeZone() : "");
             lblStatus.ForeColor = Color.Black;
             lblStatus.Text = "Refreshing Data...";
-            this.Cursor = Cursors.WaitCursor;
+            Cursor = Cursors.WaitCursor;
             Application.DoEvents();
             try
             {
@@ -210,13 +209,13 @@ namespace DBADashGUI.Performance
             }
             catch (Exception ex)
             {
-                this.Cursor = Cursors.Default;
+                Cursor = Cursors.Default;
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 status = "Error: " + ex.Message;
             }
             finally
             {
-                this.Cursor = Cursors.Default;
+                Cursor = Cursors.Default;
             }
             lblStatus.Text = status;
         }

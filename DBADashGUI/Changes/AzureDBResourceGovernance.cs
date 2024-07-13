@@ -17,9 +17,9 @@ namespace DBADashGUI.Changes
 
         public List<int> InstanceIDs;
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = context.AzureInstanceIDs.ToList();
+            InstanceIDs = _context.AzureInstanceIDs.ToList();
             RefreshData();
         }
 
@@ -27,7 +27,7 @@ namespace DBADashGUI.Changes
         {
             var dt = GetAzureDBResourceGovernance(InstanceIDs);
             dgv.DataSource = dt;
-            dgv.Columns["InstanceID"].Visible = false;
+            dgv.Columns["InstanceID"]!.Visible = false;
             foreach (DataGridViewColumn col in dgv.Columns)
             {
                 col.HeaderText = col.HeaderText.Titleize();

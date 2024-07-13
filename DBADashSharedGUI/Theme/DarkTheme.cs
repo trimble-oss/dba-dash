@@ -1,5 +1,4 @@
 ﻿using DBADashSharedGUI;
-using System.Drawing;
 
 namespace DBADashGUI.Theme
 {

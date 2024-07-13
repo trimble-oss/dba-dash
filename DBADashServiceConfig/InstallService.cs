@@ -1,14 +1,11 @@
 ﻿using Meziantou.Framework.Win32;
 using System;
-using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.ServiceProcess;
 using System.Windows.Forms;
 using DBADash;
 using DBADashGUI.Theme;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace DBADashServiceConfig
 {
@@ -82,8 +79,7 @@ namespace DBADashServiceConfig
 
             try
             {
-                var result = ServiceTools.InstallService(ServiceName, username, password,
-                    ServiceTools.StartMode.AutomaticDelayedStart);
+                var result = ServiceTools.InstallService(ServiceName, username, password);
                 txtOutput.AppendText(result.Output + Environment.NewLine);
             }
             catch (Exception ex)
@@ -123,22 +119,21 @@ namespace DBADashServiceConfig
             else
             {
                 MessageBox.Show("Service installation completed.  Please start the service to begin data collection.", "Service Install", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                this.DialogResult = DialogResult.OK;
-                this.Close();
+                DialogResult = DialogResult.OK;
+                Close();
             }
         }
 
         private void InstallService_Load(object sender, EventArgs e)
         {
-            var args = ServiceTools.GetServiceInstallArgs(ServiceName, "YourDomain\\YourUser", "YourPassword",
-                ServiceTools.StartMode.AutomaticDelayedStart);
+            var args = ServiceTools.GetServiceInstallArgs(ServiceName, "YourDomain\\YourUser", "YourPassword");
             txtOutput.Text = txtOutput.Text.Replace("{CommandLine}", $"sc.exe {args}");
             cboServiceCredentials.SelectedIndex = 3;
         }
 
         private void LnkPermissions_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            DBADashSharedGUI.CommonShared.OpenURL("https://dbadash.com/docs/help/security/");
+            CommonShared.OpenURL("https://dbadash.com/docs/help/security/");
         }
     }
 }

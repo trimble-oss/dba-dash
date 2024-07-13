@@ -63,8 +63,8 @@ namespace DBADashGUI.LastGoodCheckDB
         private void BttnUpdate_Click(object sender, EventArgs e)
         {
             Threshold.Save();
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            DialogResult = DialogResult.OK;
+            Close();
         }
     }
 }

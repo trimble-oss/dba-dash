@@ -11,7 +11,6 @@ using System.Windows.Forms;
 using DBADashGUI.SchemaCompare;
 using System.Xml.Linq;
 using System.Xml;
-using DocumentFormat.OpenXml;
 
 namespace DBADashGUI
 {
@@ -20,7 +19,7 @@ namespace DBADashGUI
         public static Guid ConnectionGUID => RepositoryDBConnection.ConnectionID;
 
         public static string ConnectionString => RepositoryDBConnection?.ConnectionString;
-        public static readonly string JsonConfigPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
+        public static readonly string JsonConfigPath = Path.Combine(Application.StartupPath, "ServiceConfig.json");
         public static bool FreezeKeyColumn { get; set; }
 
         public static bool IsApplicationRunning { get; set; } = false; /* Set to true if App is running - used to detect design time mode */
@@ -44,7 +43,7 @@ namespace DBADashGUI
 
         public static string DDL(long DDLID)
         {
-            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cn = new SqlConnection(ConnectionString);
             using var cmd = new SqlCommand("dbo.DDL_Get", cn) { CommandType = CommandType.StoredProcedure };
             cn.Open();
             cmd.Parameters.AddWithValue("DDLID", DDLID);
@@ -156,13 +155,13 @@ namespace DBADashGUI
 
             try
             {
-                Common.SaveDataGridViewToXLSX(ref dgv, ofd.FileName); // Assume there will be no invalid XML characters
+                SaveDataGridViewToXLSX(ref dgv, ofd.FileName); // Assume there will be no invalid XML characters
             }
             catch (XmlException ex)
             {
                 Debug.WriteLine("XmlException exporting to Excel, retrying with invalid XML characters removed", ex.ToString());
-                Common.SaveDataGridViewToXLSX(ref dgv, ofd.FileName, true); // Try again with invalid XML characters removed
-                Debug.WriteLine($"Invalid XML characters removed");
+                SaveDataGridViewToXLSX(ref dgv, ofd.FileName, true); // Try again with invalid XML characters removed
+                Debug.WriteLine("Invalid XML characters removed");
             }
 
             var psi = new ProcessStartInfo(ofd.FileName) { UseShellExecute = true };
@@ -356,7 +355,7 @@ namespace DBADashGUI
         internal static readonly string TempFilePrefix = "DBADashGUITemp_";
 
         internal static string GetTempFilePath(string extension)
-            => Path.Combine(Path.GetTempPath(), TempFilePrefix + Guid.NewGuid().ToString() + (extension.StartsWith(".") ? extension : "." + extension));
+            => Path.Combine(Path.GetTempPath(), TempFilePrefix + Guid.NewGuid() + (extension.StartsWith(".") ? extension : "." + extension));
 
         /// <summary>
         /// Delete temp files generated
@@ -373,7 +372,7 @@ namespace DBADashGUI
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error deleting temp file:" + ex.ToString());
+                Console.WriteLine("Error deleting temp file:" + ex);
             }
         }
 
@@ -423,8 +422,8 @@ namespace DBADashGUI
             {
                 throw new Exception("Invalid execution plan");
             }
-            var path = System.IO.Path.GetTempFileName() + ".sqlplan";
-            System.IO.File.WriteAllText(path, plan);
+            var path = Path.GetTempFileName() + ".sqlplan";
+            File.WriteAllText(path, plan);
             var psi = new ProcessStartInfo(path) { UseShellExecute = true };
             Process.Start(psi);
         }
@@ -453,7 +452,7 @@ namespace DBADashGUI
 
         public static int[] GetCustomColors()
         {
-            return new int[]
+            return new[]
             {
                 DashColors.Warning.ToWin32(),
                 DashColors.Yellow.ToWin32(),

@@ -1,5 +1,4 @@
 ﻿using CommandLine;
-using DBADash;
 
 namespace DBADashConfig
 {

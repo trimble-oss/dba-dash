@@ -12,14 +12,14 @@ namespace DBADashGUI.Performance
         public int? InstanceID { get; set; }
         public decimal? WarningFrom { get; set; }
         public decimal? WarningTo { get; set; }
-        public decimal? CritialFrom { get; set; }
-        public decimal? CritialTo { get; set; }
+        public decimal? CriticalFrom { get; set; }
+        public decimal? CriticalTo { get; set; }
         public decimal? GoodFrom { get; set; }
         public decimal? GoodTo { get; set; }
         public decimal? SystemWarningFrom { get; set; }
         public decimal? SystemWarningTo { get; set; }
-        public decimal? SystemCritialFrom { get; set; }
-        public decimal? SystemCritialTo { get; set; }
+        public decimal? SystemCriticalFrom { get; set; }
+        public decimal? SystemCriticalTo { get; set; }
         public decimal? SystemGoodFrom { get; set; }
         public decimal? SystemGoodTo { get; set; }
 
@@ -39,8 +39,8 @@ namespace DBADashGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("instance_name", CounterInstance);
                 }
-                cmd.Parameters.AddWithValue("CriticalFrom", CritialFrom.HasValue ? CritialFrom : DBNull.Value);
-                cmd.Parameters.AddWithValue("CriticalTo", CritialTo.HasValue ? CritialTo : DBNull.Value);
+                cmd.Parameters.AddWithValue("CriticalFrom", CriticalFrom.HasValue ? CriticalFrom : DBNull.Value);
+                cmd.Parameters.AddWithValue("CriticalTo", CriticalTo.HasValue ? CriticalTo : DBNull.Value);
                 cmd.Parameters.AddWithValue("WarningFrom", WarningFrom.HasValue ? WarningFrom : DBNull.Value);
                 cmd.Parameters.AddWithValue("WarningTo", WarningTo.HasValue ? WarningTo : DBNull.Value);
                 cmd.Parameters.AddWithValue("GoodFrom", GoodFrom.HasValue ? GoodFrom : DBNull.Value);
@@ -74,14 +74,14 @@ namespace DBADashGUI.Performance
                             ObjectName = ObjectName,
                             CounterName = CounterName,
                             CounterInstance = CounterInstance,
-                            CritialFrom = rdr["CriticalFrom"] == DBNull.Value ? null : (decimal)rdr["CriticalFrom"],
-                            CritialTo = rdr["CriticalTo"] == DBNull.Value ? null : (decimal)rdr["CriticalTo"],
+                            CriticalFrom = rdr["CriticalFrom"] == DBNull.Value ? null : (decimal)rdr["CriticalFrom"],
+                            CriticalTo = rdr["CriticalTo"] == DBNull.Value ? null : (decimal)rdr["CriticalTo"],
                             WarningFrom = rdr["WarningFrom"] == DBNull.Value ? null : (decimal)rdr["WarningFrom"],
                             WarningTo = rdr["WarningTo"] == DBNull.Value ? null : (decimal)rdr["WarningTo"],
                             GoodFrom = rdr["GoodFrom"] == DBNull.Value ? null : (decimal)rdr["GoodFrom"],
                             GoodTo = rdr["GoodTo"] == DBNull.Value ? null : (decimal)rdr["GoodTo"],
-                            SystemCritialFrom = rdr["SystemCriticalFrom"] == DBNull.Value ? null : (decimal)rdr["SystemCriticalFrom"],
-                            SystemCritialTo = rdr["SystemCriticalTo"] == DBNull.Value ? null : (decimal)rdr["SystemCriticalTo"],
+                            SystemCriticalFrom = rdr["SystemCriticalFrom"] == DBNull.Value ? null : (decimal)rdr["SystemCriticalFrom"],
+                            SystemCriticalTo = rdr["SystemCriticalTo"] == DBNull.Value ? null : (decimal)rdr["SystemCriticalTo"],
                             SystemWarningFrom = rdr["SystemWarningFrom"] == DBNull.Value ? null : (decimal)rdr["SystemWarningFrom"],
                             SystemWarningTo = rdr["SystemWarningTo"] == DBNull.Value ? null : (decimal)rdr["SystemWarningTo"],
                             SystemGoodFrom = rdr["SystemGoodFrom"] == DBNull.Value ? null : (decimal)rdr["SystemGoodFrom"],

@@ -23,20 +23,20 @@ namespace DBADashGUI.Performance
             dgvDrillDown.RowsAdded += (sender, args) => topQueriesResult.CellHighlightingRules.FormatRowsAdded((DataGridView)sender, args);
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            if (context != CurrentContext)
+            if (_context != CurrentContext)
             {
                 dgv.DataSource = null;
                 txtObjectName.Text = string.Empty;
                 txtPlan.Text = string.Empty;
                 splitContainer1.Panel2Collapsed = true;
                 dgvDrillDown.DataSource = null;
-                includeWaitsToolStripMenuItem.Enabled = context.ProductVersion?.Major >= 14 || context.AzureInstanceIDs.Count > 0;
+                includeWaitsToolStripMenuItem.Enabled = _context.ProductVersion?.Major >= 14 || _context.AzureInstanceIDs.Count > 0;
                 lblStatus.Text = string.Empty;
             }
-            tsExecute.Text = string.IsNullOrEmpty(context.DatabaseName) ? "Execute (ALL Databases)" : "Execute";
-            CurrentContext = context;
+            tsExecute.Text = string.IsNullOrEmpty(_context.DatabaseName) ? "Execute (ALL Databases)" : "Execute";
+            CurrentContext = _context;
         }
 
         private int top = 25;
@@ -151,7 +151,7 @@ namespace DBADashGUI.Performance
                         {
                             completed = false; // It's done but wait for end dialog
                             lblStatus.InvokeSetStatus(reply.Message, string.Empty, DashColors.Success);
-                            this.Invoke(() =>
+                            Invoke(() =>
                             {
                                 var ds = reply.Data;
                                 if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Columns.Count == 0)
@@ -553,7 +553,7 @@ namespace DBADashGUI.Performance
                                     $"EXEC sp_query_store_force_plan @query_id={queryId}, @plan_id={planId}\n\n" +
                                     $"/* Unforce Plan */\n" +
                                     $"EXEC sp_query_store_unforce_plan @query_id={queryId}, @plan_id={planId}";
-            Common.ShowCodeViewer(planForcingSQL, "Plan Force/Unforce SQL", CodeEditor.CodeEditorModes.SQL);
+            Common.ShowCodeViewer(planForcingSQL, "Plan Force/Unforce SQL");
         }
 
         private void Top_Select(object sender, EventArgs e)
@@ -693,7 +693,7 @@ namespace DBADashGUI.Performance
             SetFilterBold();
         }
 
-        private List<KeyValuePair<string, PersistedColumnLayout>> UserColumnLayout = null;
+        private List<KeyValuePair<string, PersistedColumnLayout>> UserColumnLayout;
 
         private void TsColumns_Click(object sender, EventArgs e)
         {

@@ -16,22 +16,22 @@ namespace DBADashGUI
 
         private void Reset()
         {
-            this.BackColor = DashColors.TrimbleBlue;
-            this.ForeColor = Color.White;
+            BackColor = DashColors.TrimbleBlue;
+            ForeColor = Color.White;
             lblRefresh.Text = baseText;
-            timer1.Enabled = this.Visible && Common.IsApplicationRunning;
+            timer1.Enabled = Visible && Common.IsApplicationRunning;
         }
 
         public void ShowRefresh()
         {
-            this.Visible = true;
+            Visible = true;
             Reset();
         }
 
         public void HideRefresh()
         {
             timer1.Enabled = false;
-            this.Visible = false;
+            Visible = false;
         }
 
         private readonly string baseText = "Refresh in progress";
@@ -57,8 +57,8 @@ namespace DBADashGUI
         public void SetMessage(string message, Color backColor, Color foreColor)
         {
             timer1.Enabled = false;
-            this.BackColor = backColor;
-            this.ForeColor = foreColor;
+            BackColor = backColor;
+            ForeColor = foreColor;
             lblRefresh.Text = message;
         }
     }

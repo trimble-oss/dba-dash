@@ -19,9 +19,9 @@ namespace DBADashGUI.Changes
         private string provider = "";
         private string searchText = "";
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = context.RegularInstanceIDs.ToList();
+            InstanceIDs = _context.RegularInstanceIDs.ToList();
             RefreshData();
         }
 

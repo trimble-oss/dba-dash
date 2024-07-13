@@ -6,15 +6,11 @@ using Microsoft.SqlServer.Management.Smo;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using System.Windows.Navigation;
 using DBADash;
-using DocumentFormat.OpenXml.Vml.Office;
-using Microsoft.SqlServer.Management.SqlScriptPublish;
 
 namespace DBADashGUI.CustomReports
 {
@@ -29,7 +25,7 @@ namespace DBADashGUI.CustomReports
         private int clickedColumnIndex = -1;
         private int clickedRowIndex = -1;
         private DataSet reportDS;
-        private int selectedTableIndex = 0;
+        private int selectedTableIndex;
         private bool doAutoSize = true;
         private bool suppressCboResultsIndexChanged;
 
@@ -143,7 +139,7 @@ namespace DBADashGUI.CustomReports
             return "[" + columnName.Replace("]", "]]") + "]";
         }
 
-        private static string EscapeValue(string value) => "'" + value.ToString()?.Replace("'", "''") + "'";
+        private static string EscapeValue(string value) => "'" + value?.Replace("'", "''") + "'";
 
         private static string FormatFilterValue(object value, bool exclude)
         {
@@ -154,7 +150,7 @@ namespace DBADashGUI.CustomReports
             }
             else if (value.GetType().IsNumericType())
             {
-                return compare + value.ToString();
+                return compare + value;
             }
             else
             {
@@ -206,8 +202,8 @@ namespace DBADashGUI.CustomReports
             {
                 var customReportResult = report.CustomReportResults[selectedTableIndex];
                 var col = dgv.Columns[clickedColumnIndex].DataPropertyName;
-                var linkColumnInfo = customReportResult.LinkColumns?.ContainsKey(col) == true
-                    ? customReportResult.LinkColumns[col]
+                var linkColumnInfo = customReportResult.LinkColumns?.TryGetValue(col, out var column) is true
+                    ? column
                     : null;
                 var colList = dgv.Columns.Cast<DataGridViewColumn>().Select(c => c.DataPropertyName).ToList();
                 var frm = new LinkColumnTypeSelector()
@@ -406,9 +402,9 @@ namespace DBADashGUI.CustomReports
             suppressCboResultsIndexChanged = true;
             for (var i = 0; i < reportDS.Tables.Count; i++)
             {
-                if (report.CustomReportResults.ContainsKey(i))
+                if (report.CustomReportResults.TryGetValue(i, out var result))
                 {
-                    report.CustomReportResults[i].ResultName ??= "Result" + i; // ensure we have a name
+                    result.ResultName ??= "Result" + i; // ensure we have a name
                 }
                 else
                 {
@@ -558,18 +554,18 @@ namespace DBADashGUI.CustomReports
         private CustomReport report;
         private List<CustomSqlParameter> customParams = new();
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            SetContext(context, null);
+            SetContext(_context, null);
         }
 
-        public void SetContext(DBADashContext context, List<CustomSqlParameter> sqlParams)
+        public void SetContext(DBADashContext _context, List<CustomSqlParameter> sqlParams)
         {
             doAutoSize = true;
             selectedTableIndex = 0;
             dgv.Columns.Clear();
-            this.context = context;
-            report = context.Report;
+            this.context = _context;
+            report = _context.Report;
             customParams = sqlParams ?? report.GetCustomSqlParameters();
             tsParams.Enabled = customParams.Count > 0;
             tsConfigure.Visible = report.CanEditReport;

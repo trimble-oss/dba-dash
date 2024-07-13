@@ -4,11 +4,9 @@ using DBADashGUI.Theme;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using Microsoft.Web.WebView2.Core.Raw;
 
 namespace DBADashGUI.CustomReports
 {
@@ -68,7 +66,7 @@ namespace DBADashGUI.CustomReports
             txtColumn.Text = CellHighlightingRules.Key;
             if (CellValue != null)
             {
-                txtValue1.Text = CellValue.ToString();
+                txtValue1.Text = CellValue.ToString() ?? string.Empty;
                 cboConditionType.SelectedItem = CellHighlightingRule.ConditionTypes.Equals;
             }
             else if (CellValueIsNull)
@@ -249,12 +247,12 @@ namespace DBADashGUI.CustomReports
                     }
                 }
             }
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
 
         private void Dgv_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
@@ -372,7 +370,7 @@ namespace DBADashGUI.CustomReports
             {
                 rule.Font = frm.Font;
                 RefreshGrid();
-            };
+            }
         }
 
         private void DeleteRule(int rowIndex)
@@ -440,7 +438,7 @@ namespace DBADashGUI.CustomReports
             if (frm.ShowDialog() == DialogResult.OK)
             {
                 SetSelectedFont(frm.Font);
-            };
+            }
         }
 
         private void SetSelectedFont(Font font)
@@ -485,7 +483,7 @@ namespace DBADashGUI.CustomReports
             var frm = new GradientConfig();
             if (frm.ShowDialog() != DialogResult.OK) return;
             CellHighlightingRules.Value.IsStatusColumn = false;
-            if (CellHighlightingRules.Value.Rules.Any() && MessageBox.Show("Overwrite existing rules?", "Overwrite", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (CellHighlightingRules.Value.Rules.Count != 0 && MessageBox.Show("Overwrite existing rules?", "Overwrite", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 CellHighlightingRules.Value.Rules = frm.CellHighlightingRules;
             }

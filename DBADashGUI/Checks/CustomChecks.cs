@@ -100,18 +100,18 @@ namespace DBADashGUI.Checks
 
         private readonly ToolStripMenuItem ddCustomContext = new("Custom");
         private ToolStripMenuItem ddCustomTest = new("Custom");
-        private string _checkContext = null;
-        private string test = null;
+        private string _checkContext;
+        private string test;
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = context.InstanceIDs.ToList();
+            InstanceIDs = _context.InstanceIDs.ToList();
             IncludeCritical = true;
             IncludeWarning = true;
-            IncludeNA = context.InstanceID > 0 || context.Type == SQLTreeItem.TreeType.AzureInstance;
-            IncludeOK = context.InstanceID > 0 || context.Type == SQLTreeItem.TreeType.AzureInstance;
-            CurrentContext = context;
-            tsTrigger.Visible = context.CanMessage;
+            IncludeNA = _context.InstanceID > 0 || _context.Type == SQLTreeItem.TreeType.AzureInstance;
+            IncludeOK = _context.InstanceID > 0 || _context.Type == SQLTreeItem.TreeType.AzureInstance;
+            CurrentContext = _context;
+            tsTrigger.Visible = _context.CanMessage;
             RefreshData();
         }
 
@@ -196,7 +196,7 @@ namespace DBADashGUI.Checks
                     break;
                 }
                 var ddTest = new ToolStripMenuItem((string)rdr[0]);
-                ddTest.Click += DdTest_Click; ;
+                ddTest.Click += DdTest_Click;
                 ddTest.CheckOnClick = true;
                 testToolStripMenuItem.DropDownItems.Add(ddTest);
                 i += 1;
@@ -223,9 +223,9 @@ namespace DBADashGUI.Checks
 
         public void RefreshData()
         {
-            if (this.InvokeRequired)
+            if (InvokeRequired)
             {
-                this.Invoke(RefreshData);
+                Invoke(RefreshData);
                 return;
             }
             RefreshContext();

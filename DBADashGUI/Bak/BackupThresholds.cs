@@ -8,18 +8,18 @@ namespace DBADashGUI.Backups
     {
         public int InstanceID { get; set; }
         public int DatabaseID { get; set; }
-        public int? FullWarning { get; set; } = null;
-        public int? FullCritical { get; set; } = null;
-        public int? DiffWarning { get; set; } = null;
-        public int? DiffCritical { get; set; } = null;
-        public int? LogWarning { get; set; } = null;
-        public int? LogCritical { get; set; } = null;
+        public int? FullWarning { get; set; }
+        public int? FullCritical { get; set; }
+        public int? DiffWarning { get; set; }
+        public int? DiffCritical { get; set; }
+        public int? LogWarning { get; set; }
+        public int? LogCritical { get; set; }
 
-        public int MinimumAge { get; set; } = 0;
+        public int MinimumAge { get; set; }
 
-        public bool Inherit { get; set; } = false;
-        public bool UsePartial { get; set; } = false;
-        public bool UseFG { get; set; } = false;
+        public bool Inherit { get; set; }
+        public bool UsePartial { get; set; }
+        public bool UseFG { get; set; }
 
         public string ExcludedDBs { get; set; } = string.Empty;
 

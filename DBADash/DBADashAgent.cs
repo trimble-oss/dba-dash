@@ -4,8 +4,6 @@ using System;
 using System.Reflection;
 using System.Runtime.Caching;
 using System.Security.Cryptography;
-using Azure.Core;
-using System.Collections.Generic;
 
 namespace DBADash
 {
@@ -67,13 +65,13 @@ namespace DBADash
 
         public override bool Equals(object obj)
         {
-            if (obj.GetType() == typeof(DBADashAgent))
+            if (obj?.GetType() == typeof(DBADashAgent))
             {
                 var compare = (DBADashAgent)obj;
-                if (this.AgentServiceName == compare.AgentServiceName
-                     && this.AgentHostName == compare.AgentHostName
-                    && this.AgentPath == compare.AgentPath
-                    && this.AgentVersion == compare.AgentVersion)
+                if (AgentServiceName == compare.AgentServiceName
+                     && AgentHostName == compare.AgentHostName
+                    && AgentPath == compare.AgentPath
+                    && AgentVersion == compare.AgentVersion)
                 {
                     return true;
                 }
@@ -90,7 +88,7 @@ namespace DBADash
 
         public override int GetHashCode()
         {
-            return string.Format("{0}|{1}|{2}|{3}", AgentServiceName, AgentHostName, AgentPath, AgentVersion).GetHashCode();
+            return $"{AgentServiceName}|{AgentHostName}|{AgentPath}|{AgentVersion}".GetHashCode();
         }
 
         private static DBADashAgent currentAgent;
@@ -136,7 +134,7 @@ namespace DBADash
                     AgentVersion = rdr["AgentVersion"].ToString(),
                     ServiceSQSQueueUrl = rdr["ServiceSQSQueueURL"].ToString(),
                     S3Path = rdr["S3Path"] == DBNull.Value ? null : rdr["S3Path"].ToString(),
-                    MessagingEnabled = rdr["MessagingEnabled"] == DBNull.Value ? false : (bool)rdr["MessagingEnabled"]
+                    MessagingEnabled = rdr["MessagingEnabled"] != DBNull.Value && (bool)rdr["MessagingEnabled"]
                 };
             }
             else

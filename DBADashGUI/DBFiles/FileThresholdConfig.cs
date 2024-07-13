@@ -15,7 +15,7 @@ namespace DBADashGUI.DBFiles
         public int InstanceID;
         public int DatabaseID;
         public int DataSpaceID;
-        private bool isLoaded = false;
+        private bool isLoaded;
 
         public bool IsDataConfig => DataSpaceID is (-1) or > 0;
 
@@ -23,8 +23,8 @@ namespace DBADashGUI.DBFiles
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
+            DialogResult = DialogResult.Cancel;
+            Close();
         }
 
         private void BttnUpdate_Click(object sender, EventArgs e)
@@ -37,8 +37,8 @@ namespace DBADashGUI.DBFiles
             {
                 logConfig.FileThreshold.UpdateThresholds();
             }
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void FileThresholdConfig_Load(object sender, EventArgs e)

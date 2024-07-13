@@ -18,10 +18,10 @@ namespace DBADashGUI.Changes
         private List<int> InstanceIDs;
         private int DatabaseID = -1;
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = context.InstanceIDs.ToList();
-            DatabaseID = context.DatabaseID;
+            InstanceIDs = _context.InstanceIDs.ToList();
+            DatabaseID = _context.DatabaseID;
 
             RefreshConfig();
             RefreshHistory();

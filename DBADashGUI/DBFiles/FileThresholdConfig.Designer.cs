@@ -121,7 +121,7 @@ namespace DBADashGUI.DBFiles
             0,
             0,
             65536});
-            fileThreshold3.ZeroAuthgrowthOnly = false;
+            fileThreshold3.ZeroAutoGrowthOnly = false;
             this.dataConfig.FileThreshold = fileThreshold3;
             this.dataConfig.Location = new System.Drawing.Point(3, 3);
             this.dataConfig.Name = "dataConfig";
@@ -169,7 +169,7 @@ namespace DBADashGUI.DBFiles
             0,
             0,
             65536});
-            fileThreshold4.ZeroAuthgrowthOnly = false;
+            fileThreshold4.ZeroAutoGrowthOnly = false;
             this.logConfig.FileThreshold = fileThreshold4;
             this.logConfig.Location = new System.Drawing.Point(3, 3);
             this.logConfig.Name = "logConfig";

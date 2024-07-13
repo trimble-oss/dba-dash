@@ -4,7 +4,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using DBADash;
-using Microsoft.SqlServer.Management.HadrModel;
 using static DBADashConfig.Test.Helper;
 
 namespace DBADashConfig.Test
@@ -16,8 +15,8 @@ namespace DBADashConfig.Test
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            Helper.CleanupConfig();
-            Assert.IsFalse(File.Exists(Helper.ServiceConfigPath));
+            CleanupConfig();
+            Assert.IsFalse(File.Exists(ServiceConfigPath));
         }
 
         [ClassCleanup]
@@ -30,13 +29,13 @@ namespace DBADashConfig.Test
         public void SetDBADashDestinationTest()
         {
             var builder = GetRandomConnectionString();
-            string dest = builder.ToString();
+            var dest = builder.ToString();
             var psi = new ProcessStartInfo("powershell",
                 $"-File \"Set-DBADashDestination.ps1\" -ConnectionString \"{dest}\" -SkipValidation");
-            Helper.RunProcess(psi);
+            RunProcess(psi);
 
-            string json = Helper.GetConfigJson();
-            var cfg = DBADash.CollectionConfig.Deserialize(json);
+            var json = GetConfigJson();
+            var cfg = CollectionConfig.Deserialize(json);
             Console.WriteLine(cfg.DestinationConnection.ConnectionString);
             Console.WriteLine(dest);
             Assert.IsTrue(cfg.DestinationConnection.ConnectionString == builder.ToString(), "Destination connection doesn't match what was specified");
@@ -53,9 +52,9 @@ namespace DBADashConfig.Test
         public void AddDBADashSourceTest(int slowQueryThreshold, bool planCollectionEnabled, int planCollectionCountThreshold, int planCollectionCPUThreshold, int planCollectionDurationThreshold, int PlanCollectionMemoryGrantThreshold, string schemaSnapshotDBs, DBADashSource.IOCollectionLevels IOCollectionLevel)
         {
             // Add connection
-            var cnt = Helper.GetConnectionCount();
+            var cnt = GetConnectionCount();
             var builder = GetRandomConnectionString();
-            string source = builder.ToString();
+            var source = builder.ToString();
             var psi = new ProcessStartInfo("powershell",
                 $"-File \"Add-DBADashSource.ps1\" -ConnectionString \"{source}\" --SkipValidation");
             RunProcess(psi);
@@ -67,7 +66,7 @@ namespace DBADashConfig.Test
             Assert.IsFalse(json.Contains(builder.Password), "Plain text password found in json");
 
             // Convert config to CollectionConfig object for additional checks
-            var cfg = DBADash.CollectionConfig.Deserialize(json);
+            var cfg = CollectionConfig.Deserialize(json);
             var newCnt = cfg.SourceConnections.Count;
             Assert.IsTrue(newCnt == cnt + 1, $"Expected {cnt + 1} source connections instead of {newCnt}");
             var src = cfg.GetSourceFromConnectionString(builder.ConnectionString);
@@ -96,7 +95,7 @@ namespace DBADashConfig.Test
             // Read config from disk again
             json = GetConfigJson();
             Console.WriteLine(json);
-            cfg = DBADash.CollectionConfig.Deserialize(json);
+            cfg = CollectionConfig.Deserialize(json);
 
             newCnt = cfg.SourceConnections.Count;
             // This time we should be replacing the existing connection - so the count will be the same
@@ -105,7 +104,7 @@ namespace DBADashConfig.Test
             Console.WriteLine(src.SlowQueryThresholdMs);
             // Check updates worked
             Assert.IsTrue(src.SlowQueryThresholdMs == slowQueryThreshold, "SlowQueryThresholdMs Test");
-            Assert.IsTrue(src.NoWMI == true, "NoWMI Test");
+            Assert.IsTrue(src.NoWMI, "NoWMI Test");
             Assert.IsTrue(src.PlanCollectionEnabled == planCollectionEnabled, "PlanCollectionEnabled Test");
             Assert.IsTrue(src.PlanCollectionCountThreshold == planCollectionCountThreshold, "PlanCollectionCountThreshold Test");
             Assert.IsTrue(src.PlanCollectionCPUThreshold == planCollectionCPUThreshold, "PlanCollectionCountThreshold Test");
@@ -113,11 +112,11 @@ namespace DBADashConfig.Test
             Assert.IsTrue(src.IOCollectionLevel == IOCollectionLevel, "IOCollectionLevel Test");
             if (string.IsNullOrEmpty(schemaSnapshotDBs))
             {
-                Assert.IsTrue(string.IsNullOrEmpty(src.SchemaSnapshotDBs), "SchemaSnaspshotDBs Test");
+                Assert.IsTrue(string.IsNullOrEmpty(src.SchemaSnapshotDBs), "SchemaSnapshotDBs Test");
             }
             else
             {
-                Assert.IsTrue(src.SchemaSnapshotDBs == schemaSnapshotDBs, "SchemaSnaspshotDBs Test");
+                Assert.IsTrue(src.SchemaSnapshotDBs == schemaSnapshotDBs, "SchemaSnapshotDBs Test");
             }
         }
     }

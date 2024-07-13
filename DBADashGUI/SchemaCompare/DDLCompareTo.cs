@@ -28,7 +28,7 @@ namespace DBADashGUI
             pnlCompare.Controls.Add(diffControl);
             diffControl.Dock = DockStyle.Fill;
             var instances = CommonData.GetInstancesWithDDLSnapshot(SelectedTags);
-            Dictionary<string, string> objtypes = CommonData.GetObjectTypes();
+            var objTypes = CommonData.GetObjectTypes();
 
             cboInstanceA.DataSource = new BindingSource(instances, null);
 
@@ -36,12 +36,12 @@ namespace DBADashGUI
 
             cboObjectTypeA.DisplayMember = "Value";
             cboObjectTypeA.ValueMember = "Key";
-            cboObjectTypeA.DataSource = new BindingSource(objtypes, null);
+            cboObjectTypeA.DataSource = new BindingSource(objTypes, null);
             cboObjectTypeA.SelectedValue = ObjectType_A.TrimEnd();
 
             cboObjectTypeB.DisplayMember = "Value";
             cboObjectTypeB.ValueMember = "Key";
-            cboObjectTypeB.DataSource = new BindingSource(objtypes, null);
+            cboObjectTypeB.DataSource = new BindingSource(objTypes, null);
             cboObjectTypeB.SelectedValue = ObjectType_A.TrimEnd();
 
             cboInstanceA.SelectedItem = Instance_A;
@@ -72,29 +72,22 @@ namespace DBADashGUI
 
         private static int DropDownWidth(ComboBox myCombo)
         {
-            int maxWidth = 0;
+            var maxWidth = 0;
             foreach (var obj in myCombo.Items)
             {
-                int temp = TextRenderer.MeasureText(myCombo.GetItemText(obj), myCombo.Font).Width;
+                var temp = TextRenderer.MeasureText(myCombo.GetItemText(obj), myCombo.Font).Width;
                 if (temp > maxWidth)
                 {
                     maxWidth = temp;
                 }
             }
             maxWidth += 20;
-            if (maxWidth < myCombo.Width)
-            {
-                return myCombo.Width;
-            }
-            else
-            {
-                return maxWidth;
-            }
+            return maxWidth < myCombo.Width ? myCombo.Width : maxWidth;
         }
 
         private static void GetObjects(ComboBox cbo, int DatabaseID, string type)
         {
-            DataTable dt = CommonData.GetDBObjects(DatabaseID, type);
+            var dt = CommonData.GetDBObjects(DatabaseID, type);
             cbo.DataSource = new BindingSource(dt, null);
             cbo.DisplayMember = "FullName";
             cbo.ValueMember = "ObjectID";
@@ -145,14 +138,14 @@ namespace DBADashGUI
         {
             if (cboObjectA.SelectedValue != null)
             {
-                long ObjectID = (long)cboObjectA.SelectedValue;
+                var ObjectID = (long)cboObjectA.SelectedValue;
                 GetSnapshots(cboDate_A, ObjectID);
             }
         }
 
         private static void GetSnapshots(ComboBox cbo, long ObjectID)
         {
-            DataTable dt = CommonData.GetDDLHistoryForObject(ObjectID, 1, 200);
+            var dt = CommonData.GetDDLHistoryForObject(ObjectID, 1, 200);
             cbo.DataSource = new BindingSource(dt, null);
             cbo.DisplayMember = "SnapshotValidFrom";
             cbo.ValueMember = "SnapshotValidFrom";
@@ -162,7 +155,7 @@ namespace DBADashGUI
         {
             if (cboObjectB.SelectedValue != null)
             {
-                long ObjectID = (long)cboObjectB.SelectedValue;
+                var ObjectID = (long)cboObjectB.SelectedValue;
                 GetSnapshots(cboDate_B, ObjectID);
             }
         }
@@ -200,7 +193,7 @@ namespace DBADashGUI
 
         void IThemedControl.ApplyTheme(BaseTheme theme)
         {
-            foreach (Control control in this.Controls)
+            foreach (Control control in Controls)
             {
                 control.ApplyTheme(theme);
             }

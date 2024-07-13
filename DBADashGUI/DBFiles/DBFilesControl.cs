@@ -22,7 +22,7 @@ namespace DBADashGUI.DBFiles
         }
 
         private List<int> InstanceIDs=> CurrentContext?.InstanceIDs.ToList();
-        private int? DatabaseID=> (CurrentContext?.DatabaseID > 0 ? (int?)CurrentContext?.DatabaseID : null);
+        private int? DatabaseID=> (CurrentContext?.DatabaseID > 0 ? CurrentContext?.DatabaseID : null);
         private string DriveName=> CurrentContext?.DriveName;
         private DBADashContext CurrentContext;
 
@@ -89,16 +89,16 @@ namespace DBADashGUI.DBFiles
             }
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
 
             IncludeCritical = true;
             IncludeWarning = true;
-            IncludeNA = DatabaseID != null || context.DriveName != null;
-            IncludeOK = DatabaseID != null || context.DriveName != null;
-            tsLevel.Visible = context.DriveName == null;
-            CurrentContext = context;
-            tsTrigger.Visible = context.CanMessage;
+            IncludeNA = DatabaseID != null || _context.DriveName != null;
+            IncludeOK = DatabaseID != null || _context.DriveName != null;
+            tsLevel.Visible = _context.DriveName == null;
+            CurrentContext = _context;
+            tsTrigger.Visible = _context.CanMessage;
             RefreshData();
         }
 
@@ -106,7 +106,7 @@ namespace DBADashGUI.DBFiles
         {
             ToggleFileLevel(!IsFileGroupLevel);
             var dt = GetDBFiles();
-            this.Invoke(() =>
+            Invoke(() =>
             {
                 dgvFiles.AutoGenerateColumns = false;
                 dgvFiles.DataSource = new DataView(dt);
@@ -133,7 +133,7 @@ namespace DBADashGUI.DBFiles
                 totalFiles = dgvFiles.Rows
                     .Cast<DataGridViewRow>()
                     .Where(row => !row.IsNewRow && row.Cells["NumberOfFiles"].Value != null)
-                    .Sum(row => int.Parse(row.Cells["NumberOfFiles"].Value.ToString()));
+                    .Sum(row => int.Parse(row.Cells["NumberOfFiles"].Value.ToString()!));
 
                 totalSize = dgvFiles.Rows
                     .Cast<DataGridViewRow>()
@@ -156,7 +156,7 @@ namespace DBADashGUI.DBFiles
             RefreshData();
         }
 
-        private static DBSpaceHistoryView DBSpaceHistoryViewForm = null;
+        private static DBSpaceHistoryView DBSpaceHistoryViewForm;
 
         private static void LoadDBSpaceHistory(int dbid, int? dbSpaceID, string instance, string dbName, string fileName)
         {
@@ -209,10 +209,10 @@ namespace DBADashGUI.DBFiles
             for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvFiles.Rows[idx].DataBoundItem;
-                var Status = (DBADashStatus.DBADashStatusEnum)row["FreeSpaceStatus"];
-                var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["FileSnapshotAgeStatus"];
-                var maxSizeStatus = (DBADashStatus.DBADashStatusEnum)row["PctMaxSizeStatus"];
-                var fgAutogrowStatus = (DBADashStatus.DBADashStatusEnum)row["FilegroupAutogrowStatus"];
+                var Status = (DBADashStatusEnum)row["FreeSpaceStatus"];
+                var snapshotStatus = (DBADashStatusEnum)row["FileSnapshotAgeStatus"];
+                var maxSizeStatus = (DBADashStatusEnum)row["PctMaxSizeStatus"];
+                var fgAutogrowStatus = (DBADashStatusEnum)row["FilegroupAutogrowStatus"];
                 string checkType = row["FreeSpaceCheckType"] == DBNull.Value ? "-" : (string)row["FreeSpaceCheckType"];
                 dgvFiles.Rows[idx].Cells["FileSnapshotAge"].SetStatusColor(snapshotStatus);
                 dgvFiles.Rows[idx].Cells["FilegroupPctMaxSize"].SetStatusColor(maxSizeStatus);

@@ -31,14 +31,11 @@ static void CommandLineUpgrade()
         {
             Log.Information($"Latest version is {latest.TagName}.  Upgrade is not available at this time. ");
         }
-
-        return;
     }
     catch (AggregateException ex) when (ex.InnerException != null &&
                                         ex.InnerException.GetType() == typeof(Octokit.NotFoundException))
     {
         Log.Error("Upgrade script is not available.  Please check the upgrade instructions on the GitHub page");
-        return;
     }
     catch (Exception ex)
     {
@@ -56,7 +53,7 @@ CollectionConfig config;
 try
 {
     Parser.Default.ParseArguments<Options>(args)
-          .WithParsed<Options>(o =>
+          .WithParsed(o =>
           {
               // Read config from json file or create a new config if the file doesn't exist
               if (!(BasicConfig.ConfigExists))
@@ -74,7 +71,7 @@ try
                   }
               }
 
-              Log.Information("Action:" + o.Option.ToString());
+              Log.Information("Action:" + o.Option);
               switch (o.Option)
               {
                   // Just return the name of the service
@@ -137,7 +134,7 @@ try
                           {
                               source.ConnectionID = o.ConnectionID;
                           }
-                          if (!string.IsNullOrEmpty(o.SchemaSnapshotDBs) && o.SchemaSnapshotDBs != "<null>") // <null> was added for powershell script as passing a blank string results in an error with commandline parser
+                          if (!string.IsNullOrEmpty(o.SchemaSnapshotDBs) && o.SchemaSnapshotDBs != "<null>") // <null> was added for PowerShell script as passing a blank string results in an error with commandline parser
                           {
                               source.SchemaSnapshotDBs = o.SchemaSnapshotDBs;
                           }
@@ -262,7 +259,7 @@ try
                               Log.Error("ServiceName is already in use");
                               return;
                           }
-                          if (DBADash.ServiceTools.IsServiceInstalledByPath()) // Check if the service is already installed by location on disk
+                          if (ServiceTools.IsServiceInstalledByPath()) // Check if the service is already installed by location on disk
                           {
                               Log.Error("Service is already installed.  Please uninstall before setting a new service name");
                               return;

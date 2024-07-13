@@ -5,7 +5,6 @@ using Quartz;
 using Serilog;
 using SerilogTimings;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -41,7 +40,7 @@ namespace DBADashService
         {
             Log.Information("Processing Job : " + context.JobDetail.Key);
             var dataMap = context.JobDetail.JobDataMap;
-            var cfg = JsonConvert.DeserializeObject<DBADashSource>(dataMap.GetString("CFG"));
+            var cfg = JsonConvert.DeserializeObject<DBADashSource>(dataMap.GetString("CFG")!);
 
             try
             {
@@ -98,13 +97,13 @@ namespace DBADashService
         /// </summary>
         private static void CollectSQL(DBADashSource cfg, JobDataMap dataMap, IJobExecutionContext context)
         {
-            var types = JsonConvert.DeserializeObject<CollectionType[]>(dataMap.GetString("Type"));
+            var types = JsonConvert.DeserializeObject<CollectionType[]>(dataMap.GetString("Type")!);
             var collectJobs = types.Contains(CollectionType.Jobs);
 
-            var customCollections = JsonConvert.DeserializeObject<Dictionary<string, CustomCollection>>(dataMap.GetString("CustomCollections"));
+            var customCollections = JsonConvert.DeserializeObject<Dictionary<string, CustomCollection>>(dataMap.GetString("CustomCollections")!);
             if (collectJobs)
             {
-                types = types.Where(t => t != CollectionType.Jobs).ToArray<CollectionType>(); // Remove Jobs collection - we will save this to last
+                types = types.Where(t => t != CollectionType.Jobs).ToArray(); // Remove Jobs collection - we will save this to last
             }
             try
             {
@@ -280,11 +279,11 @@ namespace DBADashService
         {
             var folder = cfg.GetSource();
             Log.Logger.Information("Import from folder {folder}", folder);
-            if (System.IO.Directory.Exists(folder))
+            if (Directory.Exists(folder))
             {
                 try
                 {
-                    var files = System.IO.Directory.EnumerateFiles(folder, "DBADash_*", SearchOption.TopDirectoryOnly).Where(f => f.EndsWith(".xml")).ToList();
+                    var files = Directory.EnumerateFiles(folder, "DBADash_*", SearchOption.TopDirectoryOnly).Where(f => f.EndsWith(".xml")).ToList();
 
                     Dictionary<string, List<string>> filesToProcessByInstance = GetFilesToProcessByInstance(files);
                     // Parallel processing of files for each instance, but process the files for a given instance in order
@@ -325,12 +324,12 @@ namespace DBADashService
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Error importing from {filename}.  File will be copied to {failedmessagefolder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
+                    Log.Error(ex, "Error importing from {filename}.  File will be copied to {failedMessageFolder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
                     File.Copy(f, Path.Combine(SchedulerServiceConfig.FailedMessageFolder, f));
                 }
                 finally
                 {
-                    System.IO.File.Delete(f);
+                    File.Delete(f);
                 }
             }
         }
