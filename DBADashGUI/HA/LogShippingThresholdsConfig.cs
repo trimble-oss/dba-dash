@@ -89,7 +89,7 @@ namespace DBADashGUI.LogShipping
         private void BttnUpdate_Click(object sender, EventArgs e)
         {
             Threshold.Save();
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         private void ChkExcludePeriod_CheckedChanged(object sender, EventArgs e)

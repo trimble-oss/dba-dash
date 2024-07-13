@@ -139,8 +139,8 @@ namespace DBADashGUI.AgentJobs
         private void BttnUpdate_Click(object sender, EventArgs e)
         {
             Threshold.Save(connectionString);
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void ChkLastFailIsWarning_CheckedChanged(object sender, EventArgs e)

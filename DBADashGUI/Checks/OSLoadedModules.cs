@@ -17,13 +17,13 @@ namespace DBADashGUI.Checks
 
         private List<int> InstanceIDs { get; set; }
         private int selectedInstanceID = -1;
-        private bool HasSelectedInstance { get => selectedInstanceID > 0; }
+        private bool HasSelectedInstance => selectedInstanceID > 0;
 
-        public bool CanNavigateBack { get => selectedInstanceID != -1; }
+        public bool CanNavigateBack => selectedInstanceID != -1;
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = context.RegularInstanceIDs.ToList();
+            InstanceIDs = _context.RegularInstanceIDs.ToList();
             RefreshData();
         }
 

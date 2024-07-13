@@ -23,7 +23,7 @@ namespace DBADash
         public const string AuthorURL = "https://github.com/DavidWiseman";
         public const string ServiceFileName = "DBADashService.exe";
         public const string UpgradeFile = "DBADash.Upgrade";
-        public const string IncompleteUpgradeMessage = $"Incomplete upgrade of DBA Dash detected.  File '{DBADash.Upgrade.UpgradeFile}' found in directory. Upgrade might have failed due to locked files. More info: https://dbadash.com/upgrades/";
+        public const string IncompleteUpgradeMessage = $"Incomplete upgrade of DBA Dash detected.  File '{UpgradeFile}' found in directory. Upgrade might have failed due to locked files. More info: https://dbadash.com/upgrades/";
 
         public static bool IsUpgradeIncomplete => File.Exists(Path.Combine(ApplicationPath, UpgradeFile));
 
@@ -56,7 +56,7 @@ namespace DBADash
             var client = new GitHubClient(new ProductHeaderValue(GITHUB_APP));
             var upgradeScript = await client.Repository.Content.GetRawContentByRef(GITHUB_OWNER, GITHUB_REPO, GITHUB_SCRIPTPATH + GITHUB_UPGRADESCRIPT, GITHUB_BRANCH);
 
-            await System.IO.File.WriteAllBytesAsync(GITHUB_UPGRADESCRIPTPATH, upgradeScript);
+            await File.WriteAllBytesAsync(GITHUB_UPGRADESCRIPTPATH, upgradeScript);
             // Note: Setting working directory via ProcessStartInfo doesn't work when using "runas" verb.
             var psi = new ProcessStartInfo()
             {
@@ -64,7 +64,7 @@ namespace DBADash
                 Arguments = "-NoProfile " + (noExit ? "-NoExit " : "") + "-ExecutionPolicy ByPass -Command &{" +
                                $"Set-Location -Path '{ApplicationPath}'; " +
                                $"./{GITHUB_UPGRADESCRIPT}" +
-                                            (tag == String.Empty ? string.Empty : " -Tag " + tag)
+                                            (tag == string.Empty ? string.Empty : " -Tag " + tag)
                                             + (startGUI ? " -StartGUI" : string.Empty)
                                             + (startConfig ? " -StartConfig" : string.Empty
                                             + $" -Repo \"{GITHUB_OWNER}/{GITHUB_REPO}\"")
@@ -80,7 +80,7 @@ namespace DBADash
 
         public static DeploymentTypes DeploymentType => File.Exists(Path.Combine(ApplicationPath, ServiceFileName)) ? DeploymentTypes.ServiceAndGUI : DeploymentTypes.GUI;
 
-        public static string LatestVersionLink => $"https://github.com/{Upgrade.GITHUB_OWNER}/{Upgrade.GITHUB_REPO}/releases/latest";
+        public static string LatestVersionLink => $"https://github.com/{GITHUB_OWNER}/{GITHUB_REPO}/releases/latest";
 
         public static bool IsAdministrator => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && new WindowsPrincipal(WindowsIdentity.GetCurrent())
             .IsInRole(WindowsBuiltInRole.Administrator);

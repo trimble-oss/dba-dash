@@ -3,15 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Navigation;
 using Microsoft.Data.SqlClient;
 using DBADash;
-using DocumentFormat.OpenXml.Office2010.PowerPoint;
-using Microsoft.Web.WebView2.Core.Raw;
-using ThirdParty.Json.LitJson;
 
 namespace DBADashGUI
 {
@@ -51,7 +45,7 @@ namespace DBADashGUI
         {
             var connection = this.FirstOrDefault(c => c.IsDefault);
 
-            if (connection == null && this.Count > 0)
+            if (connection == null && Count > 0)
             {
                 connection = this.First();
             }
@@ -113,7 +107,7 @@ namespace DBADashGUI
             {
                 return null;
             }
-            string jsonConfig = System.IO.File.ReadAllText(Common.JsonConfigPath);
+            string jsonConfig = File.ReadAllText(Common.JsonConfigPath);
             var cfg = BasicConfig.Deserialize(jsonConfig);
             if (cfg.DestinationConnection.Type == DBADashConnection.ConnectionType.SQL)
             {

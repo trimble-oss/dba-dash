@@ -13,14 +13,13 @@ namespace DBADash
 
         public static string GetSqlString(string name)
         {
-            string resourcePath = "DBADash.SQL.SQL" + name + ".sql";
+            var resourcePath = "DBADash.SQL.SQL" + name + ".sql";
             var assembly = Assembly.GetExecutingAssembly();
 
-            using (Stream stream = assembly.GetManifestResourceStream(resourcePath))
-            using (StreamReader reader = new(stream))
-            {
-                return reader.ReadToEnd();
-            }
+            using var stream = assembly.GetManifestResourceStream(resourcePath) ?? throw new Exception($"Resource {resourcePath} not found.");
+            using StreamReader reader = new(stream);
+
+            return reader.ReadToEnd();
         }
 
         public static string AgentJobs => GetSqlString("AgentJobs");

@@ -46,11 +46,11 @@ namespace DBADashGUI
             pbSpace.Value = (int)drive.PercentUsedSpace;
 
             lblFree.Text = string.Format("{0:0.0} GB free ({2:0.0}%) of {1:0.0} GB", drive.FreeSpaceGB, drive.DriveCapacityGB, drive.PercentFreeSpace);
-            var pctGB = drive.DriveCheckType == Drive.DriveCheckTypeEnum.Percent ? "%" : "GB";
-            var warning = drive.DriveCheckType == Drive.DriveCheckTypeEnum.Percent ? drive.WarningThreshold * 100 : drive.WarningThreshold;
-            var critical = drive.DriveCheckType == Drive.DriveCheckTypeEnum.Percent ? drive.CriticalThreshold * 100 : drive.CriticalThreshold;
+            var pctGB = drive.DriveCheckType == DriveThreshold.DriveCheckTypeEnum.Percent ? "%" : "GB";
+            var warning = drive.DriveCheckType == DriveThreshold.DriveCheckTypeEnum.Percent ? drive.WarningThreshold * 100 : drive.WarningThreshold;
+            var critical = drive.DriveCheckType == DriveThreshold.DriveCheckTypeEnum.Percent ? drive.CriticalThreshold * 100 : drive.CriticalThreshold;
             lblThresholds.Text = string.Format("Warning: {0:0.0}{1}, Critical:{2:0.0}{1}", warning, pctGB, critical);
-            if (drive.DriveCheckType == Drive.DriveCheckTypeEnum.None)
+            if (drive.DriveCheckType == DriveThreshold.DriveCheckTypeEnum.None)
             {
                 lblThresholds.Text = "Disabled";
             }
@@ -113,15 +113,15 @@ namespace DBADashGUI
             }
         }
 
-        private static DriveHistoryView DriveHistoryViewForm = null;
+        private static DriveHistoryView DriveHistoryViewForm;
 
         private void LnkHistory_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             DriveHistoryViewForm?.Close();
             DriveHistoryViewForm = new()
             {
-                DriveID = this.Drive.DriveID,
-                Text = this.Drive.InstanceName + " | " + this.Drive.DriveLetter + " " + this.Drive.DriveLabel
+                DriveID = Drive.DriveID,
+                Text = Drive.InstanceName + " | " + Drive.DriveLetter + " " + Drive.DriveLabel
             };
             DriveHistoryViewForm.FormClosed += delegate { DriveHistoryViewForm = null; };
             DriveHistoryViewForm.Show();
@@ -129,8 +129,8 @@ namespace DBADashGUI
 
         void IThemedControl.ApplyTheme(BaseTheme theme)
         {
-            this.BackColor = theme.BackgroundColor;
-            this.ForeColor = theme.ForegroundColor;
+            BackColor = theme.BackgroundColor;
+            ForeColor = theme.ForegroundColor;
             lnkHistory.ApplyTheme(theme);
             lnkThreshold.ApplyTheme(theme);
             UpdateSnapshotStatus();

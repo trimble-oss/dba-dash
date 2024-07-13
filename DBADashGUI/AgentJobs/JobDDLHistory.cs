@@ -30,10 +30,10 @@ namespace DBADashGUI.Changes
             }
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceID = context.InstanceID;
-            JobID = context.JobID;
+            InstanceID = _context.InstanceID;
+            JobID = _context.JobID;
             RefreshData();
         }
 
@@ -50,11 +50,11 @@ namespace DBADashGUI.Changes
         {
             if (dgv.SelectedRows.Count != 1) return;
             var row = (DataRowView)dgv.SelectedRows[0].DataBoundItem;
-            long DDLID = (long)row["DDLID"];
-            long DDLIDold = row["PreviousDDLID"] == DBNull.Value ? -1 : (long)row["PreviousDDLID"];
+            var DDLID = (long)row["DDLID"];
+            var DDLIDold = row["PreviousDDLID"] == DBNull.Value ? -1 : (long)row["PreviousDDLID"];
 
-            string newText = Common.DDL(DDLID);
-            string oldText = DDLIDold > 0 ? Common.DDL(DDLIDold) : "";
+            var newText = Common.DDL(DDLID);
+            var oldText = DDLIDold > 0 ? Common.DDL(DDLIDold) : "";
 
             diffControl1.OldText = oldText;
             diffControl1.NewText = newText;

@@ -1,16 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
-using Microsoft.SqlServer.Management.Smo;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace DBADashGUI.Checks
 {
@@ -119,12 +111,12 @@ namespace DBADashGUI.Checks
                 return;
             }
 
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult= DialogResult.Cancel;
+            DialogResult= DialogResult.Cancel;
         }
 
         private void ChkInherit_CheckedChanged(object sender, EventArgs e)

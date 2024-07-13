@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using DBADashGUI.Theme;
 
@@ -21,9 +14,9 @@ namespace DBADashGUI.Performance
 
         DBADashContext context;
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            this.context = context; 
+            this.context = _context; 
         }
 
         private void WaitSummaryDialog_Load(object sender, EventArgs e)

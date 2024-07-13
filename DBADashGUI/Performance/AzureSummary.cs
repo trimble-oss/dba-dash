@@ -20,9 +20,9 @@ namespace DBADashGUI.Performance
 
         private List<int> InstanceIDs;
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            this.InstanceIDs = context.AzureInstanceIDs.ToList();
+            InstanceIDs = _context.AzureInstanceIDs.ToList();
             RefreshData();
         }
 
@@ -109,7 +109,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private readonly string[] histograms = new string[] { "DTU", "CPU", "Data", "Log" };
+        private readonly string[] histograms = new[] { "DTU", "CPU", "Data", "Log" };
 
         private void GenerateHistogram(DataGridView gv)
         {
@@ -128,7 +128,7 @@ namespace DBADashGUI.Performance
 
                         for (int i = 10; i <= 100; i += 10)
                         {
-                            var v = Convert.ToDouble(row[histogram + i.ToString()]);
+                            var v = Convert.ToDouble(row[histogram + i]);
                             hist.Add(v);
                             total += v;
                         }
@@ -141,8 +141,8 @@ namespace DBADashGUI.Performance
                         {
                             for (int i = 10; i <= 100; i += 10)
                             {
-                                var v = Convert.ToDouble(row[histogram + i.ToString()]);
-                                sbToolTip.AppendLine((i - 10).ToString() + " to " + i.ToString() + "% | " + v.ToString("N0") + " (" + (v / total).ToString("P2") + ")");
+                                var v = Convert.ToDouble(row[histogram + i]);
+                                sbToolTip.AppendLine((i - 10) + " to " + i + "% | " + v.ToString("N0") + " (" + (v / total).ToString("P2") + ")");
                             }
                             r.Cells[colName].Value = Histogram.GetHistogram(hist, 200, 100, true);
                             r.Height = 100;
@@ -170,9 +170,9 @@ namespace DBADashGUI.Performance
                     var col = new DataGridViewTextBoxColumn()
                     {
                         Name = gv.Name + "_" + histogram + "Histogram_" + i,
-                        DataPropertyName = histogram + i.ToString(),
+                        DataPropertyName = histogram + i,
                         Visible = false,
-                        HeaderText = histogram + " Histogram " + (i - 10).ToString() + " to " + i.ToString() + "%"
+                        HeaderText = histogram + " Histogram " + (i - 10) + " to " + i + "%"
                     };
                     gv.Columns.Add(col);
                 }
@@ -294,7 +294,7 @@ namespace DBADashGUI.Performance
 
         private void ExportDGV(ExportTarget target)
         {
-            var visibleCols = (new DataGridViewColumn[] { dgv_CPUHistogram, dgv_DataHistogram, dgv_DTUHistogram, dgv_LogHistogram }).Where(col => col.Visible == true).ToList();
+            var visibleCols = (new DataGridViewColumn[] { dgv_CPUHistogram, dgv_DataHistogram, dgv_DTUHistogram, dgv_LogHistogram }).Where(col => col.Visible).ToList();
 
             foreach (var c in visibleCols)
             {
@@ -316,7 +316,7 @@ namespace DBADashGUI.Performance
 
         private void ExportDGVPool(ExportTarget target)
         {
-            var visibleCols = (new DataGridViewColumn[] { dgvPool_CPUHistogram, dgvPool_DataHistogram, dgvPool_DTUHistogram, dgvPool_LogHistogram }).Where(col => col.Visible == true).ToList();
+            var visibleCols = (new DataGridViewColumn[] { dgvPool_CPUHistogram, dgvPool_DataHistogram, dgvPool_DTUHistogram, dgvPool_LogHistogram }).Where(col => col.Visible).ToList();
 
             foreach (var c in visibleCols)
             {
@@ -355,7 +355,7 @@ namespace DBADashGUI.Performance
 
         private static bool HasHistograms(ref DataGridView gv)
         {
-            return gv.Columns.Cast<DataGridViewColumn>().Where(col => col.Name.Contains("Histogram") && col.Visible).Any();
+            return gv.Columns.Cast<DataGridViewColumn>().Any(col => col.Name.Contains("Histogram") && col.Visible);
         }
 
         private void UpdateHistogramsIfNeeded(ref DataGridView gv)
@@ -391,7 +391,7 @@ namespace DBADashGUI.Performance
                 UpdateHistogramsIfNeeded(ref gv);
                 gv.AutoResizeColumns();
                 gv.AutoResizeRows();
-            };
+            }
         }
 
         private void TsCols_Click(object sender, EventArgs e)

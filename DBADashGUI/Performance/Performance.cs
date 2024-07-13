@@ -16,33 +16,33 @@ namespace DBADashGUI.Performance
 
         private long ObjectID;
 
-        private int InstanceID { get => context.InstanceID; }
+        private int InstanceID => context.InstanceID;
 
-        private int DatabaseID { get => context.DatabaseID; }
+        private int DatabaseID => context.DatabaseID;
 
         private bool objectMode;
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            this.context = context;
-            objectMode = context.Type is not (SQLTreeItem.TreeType.Instance or SQLTreeItem.TreeType.Database or SQLTreeItem.TreeType.AzureDatabase or SQLTreeItem.TreeType.AzureInstance);
-            ObjectID = objectMode ? context.ObjectID : 0; // ObjectID should be 0 if we are at Instance/DB level.  Database object can have ObjectID is schema snapshots are used
+            this.context = _context;
+            objectMode = _context.Type is not (SQLTreeItem.TreeType.Instance or SQLTreeItem.TreeType.Database or SQLTreeItem.TreeType.AzureDatabase or SQLTreeItem.TreeType.AzureInstance);
+            ObjectID = objectMode ? _context.ObjectID : 0; // ObjectID should be 0 if we are at Instance/DB level.  Database object can have ObjectID is schema snapshots are used
             ioPerformance1.Visible = !objectMode;
             cpu1.Visible = !objectMode;
             waits1.Visible = !objectMode;
             blocking1.Visible = !objectMode;
-            this.tableLayoutPanel1.RowStyles[0].Height = objectMode ? 0 : 20;
-            this.tableLayoutPanel1.RowStyles[1].Height = objectMode ? 0 : 20;
-            this.tableLayoutPanel1.RowStyles[2].Height = objectMode ? 0 : 20;
-            this.tableLayoutPanel1.RowStyles[3].Height = objectMode ? 0 : 20;
-            this.tableLayoutPanel1.RowStyles[4].Height = objectMode ? 100 : 20;
+            tableLayoutPanel1.RowStyles[0].Height = objectMode ? 0 : 20;
+            tableLayoutPanel1.RowStyles[1].Height = objectMode ? 0 : 20;
+            tableLayoutPanel1.RowStyles[2].Height = objectMode ? 0 : 20;
+            tableLayoutPanel1.RowStyles[3].Height = objectMode ? 0 : 20;
+            tableLayoutPanel1.RowStyles[4].Height = objectMode ? 100 : 20;
 
             RefreshData();
         }
 
         public void RefreshData()
         {
-            this.SuspendLayout();
+            SuspendLayout();
             objectExecution1.SuspendLayout();
             ioPerformance1.SuspendLayout();
             cpu1.SuspendLayout();
@@ -59,7 +59,7 @@ namespace DBADashGUI.Performance
             }
 
             objectExecution1.RefreshData(InstanceID, ObjectID, DatabaseID);
-            this.ResumeLayout();
+            ResumeLayout();
             objectExecution1.ResumeLayout();
             ioPerformance1.ResumeLayout();
             cpu1.ResumeLayout();

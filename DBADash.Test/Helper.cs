@@ -54,7 +54,7 @@ namespace DBADashConfig.Test
             var builder = new SqlConnectionStringBuilder
             {
                 DataSource = Guid.NewGuid().ToString(),
-                InitialCatalog = "DABDashUnitTest" + Guid.NewGuid().ToString(),
+                InitialCatalog = "DABDashUnitTest" + Guid.NewGuid(),
                 Password = "TestEncryption",
                 ApplicationName = "DBADash"
             };

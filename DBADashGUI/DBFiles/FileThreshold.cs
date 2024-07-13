@@ -14,7 +14,7 @@ namespace DBADashGUI.DBFiles
         public decimal WarningThreshold { get; set; }
         public decimal CriticalThreshold { get; set; }
 
-        public bool ZeroAuthgrowthOnly { get; set; }
+        public bool ZeroAutoGrowthOnly { get; set; }
 
         public FileCheckTypeEnum FileCheckType { get; set; }
 
@@ -71,13 +71,13 @@ namespace DBADashGUI.DBFiles
 
         public FileThreshold GetInheritedThreshold()
         {
-            if (!this.Inherited)
+            if (!Inherited)
             {
                 return this;
             }
             int _DataSpaceID = DataSpaceID == 0 ? 0 : -1;
-            int _DatabaseID = this.DataSpaceID is (-1) or 0 ? -1 : this.DatabaseID;
-            int _InstanceID = this.DatabaseID == -1 ? -1 : this.InstanceID;
+            int _DatabaseID = DataSpaceID is (-1) or 0 ? -1 : DatabaseID;
+            int _InstanceID = DatabaseID == -1 ? -1 : InstanceID;
             var threshold = GetFileThreshold(_InstanceID, _DatabaseID, _DataSpaceID);
             if (threshold.Inherited && InstanceID != -1)
             {
@@ -126,7 +126,7 @@ namespace DBADashGUI.DBFiles
                     }
                     threshold.FileCheckTypeChar = char.Parse((string)rdr["FreeSpaceCheckType"]);
                     threshold.Inherited = false;
-                    threshold.ZeroAuthgrowthOnly = (bool)rdr["FreeSpaceCheckZeroAutogrowthOnly"];
+                    threshold.ZeroAutoGrowthOnly = (bool)rdr["FreeSpaceCheckZeroAutogrowthOnly"];
                     if (rdr.Read())
                     {
                         throw new Exception("More than 1 row returned");
@@ -178,7 +178,7 @@ namespace DBADashGUI.DBFiles
                     cmd.Parameters.AddWithValue("PctMaxSizeWarningThreshold", DBNull.Value);
                     cmd.Parameters.AddWithValue("PctMaxSizeCriticalThreshold", DBNull.Value);
                 }
-                cmd.Parameters.AddWithValue("FreeSpaceCheckZeroAutogrowthOnly", ZeroAuthgrowthOnly);
+                cmd.Parameters.AddWithValue("FreeSpaceCheckZeroAutoGrowthOnly", ZeroAutoGrowthOnly);
                 cmd.ExecuteNonQuery();
             }
         }

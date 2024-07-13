@@ -35,7 +35,7 @@ namespace DBADashGUI.Performance
             _ => "yyyy-MM-dd HH:mm"
         };
 
-        private int _dateGrouping = 0;
+        private int _dateGrouping;
 
         public int DateGrouping
         {
@@ -92,10 +92,10 @@ namespace DBADashGUI.Performance
 
         private DataTable dt;
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceID =context.MasterInstanceID;
-            ElasticPoolName=context.ElasticPoolName;
+            InstanceID =_context.MasterInstanceID;
+            ElasticPoolName=_context.ElasticPoolName;
             RefreshData();
         }
 
@@ -129,8 +129,8 @@ namespace DBADashGUI.Performance
                 columns[s].Points = new DateTimePoint[cnt];
             }
 
-            int i = 0;
-            int y1Max = 1;
+            var i = 0;
+            var y1Max = 1;
             foreach (DataRow r in dt.Rows)
             {
                 var dtuLimit = r["dtu_limit"] == DBNull.Value ? 0 : (int)r["dtu_limit"];
@@ -143,12 +143,10 @@ namespace DBADashGUI.Performance
                 y1Max = dtuLimit > y1Max ? dtuLimit : y1Max;
                 foreach (var kv in columns)
                 {
-                    if (kv.Value.IsVisible)
-                    {
-                        var v = r[kv.Key] == DBNull.Value ? 0 : Convert.ToDouble(r[kv.Key]);
-                        var endtime = (DateTime)r["end_time"];
-                        columns[kv.Key].Points[i] = new DateTimePoint(endtime, v);
-                    }
+                    if (!kv.Value.IsVisible) continue;
+                    var v = r[kv.Key] == DBNull.Value ? 0 : Convert.ToDouble(r[kv.Key]);
+                    var endTime = (DateTime)r["end_time"];
+                    columns[kv.Key].Points[i] = new DateTimePoint(endTime, v);
                 }
                 i++;
             }
@@ -178,9 +176,9 @@ namespace DBADashGUI.Performance
             chart1.AxisX.Add(new Axis
             {
                 Title = "Time",
-                LabelFormatter = val => new System.DateTime((long)val).ToString(DateFormat)
+                LabelFormatter = val => new DateTime((long)val).ToString(DateFormat)
             });
-            var y0visible = columns.Values.Where(c => c.IsVisible && c.axis == 0).Any();
+            var y0visible = columns.Values.Any(c => c.IsVisible && c.axis == 0);
             chart1.AxisY.Add(new Axis
             {
                 Title = "%",
@@ -189,7 +187,7 @@ namespace DBADashGUI.Performance
                 MaxValue = 100,
                 Visibility = y0visible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden
             });
-            var y1visible = columns.Values.Where(c => c.IsVisible && c.axis == 1).Any();
+            var y1visible = columns.Values.Any(c => c.IsVisible && c.axis == 1);
             if (y1visible)
             {
                 chart1.AxisY.Add(new Axis
@@ -210,7 +208,7 @@ namespace DBADashGUI.Performance
             {
                 var dd = new ToolStripMenuItem(k.Value.Name)
                 {
-                    Name = (string)k.Key,
+                    Name = k.Key,
                     CheckOnClick = true
                 };
                 dd.Checked = dd.Enabled && k.Value.IsVisible;
@@ -222,7 +220,7 @@ namespace DBADashGUI.Performance
         private void MeasureDropDown_Click(object sender, EventArgs e)
         {
             var mnu = (ToolStripMenuItem)sender;
-            columns[mnu.Name].IsVisible = mnu.Checked;
+            columns[mnu.Name!].IsVisible = mnu.Checked;
             UpdateChart();
         }
 
@@ -293,7 +291,7 @@ namespace DBADashGUI.Performance
 
         private void PointsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (LineSeries s in chart1.Series.Cast<LineSeries>())
+            foreach (var s in chart1.Series.Cast<LineSeries>())
             {
                 s.PointGeometrySize = PointSize;
             }

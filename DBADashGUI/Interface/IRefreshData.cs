@@ -1,6 +1,4 @@
-﻿using System.Windows.Forms;
-
-namespace DBADashGUI
+﻿namespace DBADashGUI
 {
     public interface IRefreshData
     {

@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
 using DBADashGUI.Theme;
@@ -51,9 +50,9 @@ namespace DBADashGUI.Changes
             get => pivotByAlertNameToolStripMenuItem.Checked; set => pivotByAlertNameToolStripMenuItem.Checked = value;
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = context.RegularInstanceIDs.ToList();
+            InstanceIDs = _context.RegularInstanceIDs.ToList();
             RefreshAlertConfig();
             RefreshAlerts();
         }
@@ -78,11 +77,11 @@ namespace DBADashGUI.Changes
             dgvAlertsConfig.Columns.Clear();
             dgvAlertsConfig.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", HeaderText = "Instance" });
 
-            DataTable dt = GetAlertsConfig();
+            var dt = GetAlertsConfig();
 
-            string pivotCol = UseAlertName ? "name" : "Alert";
+            var pivotCol = UseAlertName ? "name" : "Alert";
 
-            foreach (DataRow r in dt.DefaultView.ToTable(true, pivotCol).Select("", pivotCol))
+            foreach (var r in dt.DefaultView.ToTable(true, pivotCol).Select("", pivotCol))
             {
                 if (r[pivotCol] != DBNull.Value)
                 {
@@ -90,12 +89,12 @@ namespace DBADashGUI.Changes
                     dgvAlertsConfig.Columns.Add(col);
                 }
             }
-            string lastInstance = "";
+            var lastInstance = "";
             List<DataGridViewRow> rows = new();
             DataGridViewRow row = null;
             foreach (DataRow r in dt.Rows)
             {
-                string instance = (string)r["InstanceDisplayName"];
+                var instance = (string)r["InstanceDisplayName"];
                 if (instance != lastInstance)
                 {
                     row = new DataGridViewRow();
@@ -105,13 +104,13 @@ namespace DBADashGUI.Changes
                 }
                 if (r[pivotCol] != DBNull.Value)
                 {
-                    string alertName = (string)r[pivotCol];
+                    var alertName = (string)r[pivotCol];
                     var idx = dgvAlertsConfig.Columns[alertName].Index;
 
-                    bool enabled = (byte)r["enabled"] == 0x1;
-                    bool notification = (int)r["has_notification"] > 0;
+                    var enabled = (byte)r["enabled"] == 0x1;
+                    var notification = (int)r["has_notification"] > 0;
 
-                    row.Cells[idx].Value = enabled ? "Y" + (notification ? "" : "**") : "N";
+                    row!.Cells[idx].Value = enabled ? "Y" + (notification ? "" : "**") : "N";
                     if (enabled && !notification)
                     {
                         row.Cells[idx].ToolTipText = "Alert configured without notification";
@@ -142,7 +141,7 @@ namespace DBADashGUI.Changes
 
         private void RefreshAlerts()
         {
-            DataTable dt = GetAlerts();
+            var dt = GetAlerts();
             if (dgvAlerts.Columns.Count == 0)
             {
                 dgvAlerts.Columns.AddRange(Cols);
@@ -190,17 +189,17 @@ namespace DBADashGUI.Changes
 
         private void DgvAlerts_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvAlerts.Rows[idx].DataBoundItem;
-                var status = (DBADashStatus.DBADashStatusEnum)row["AlertStatus"];
+                var status = (DBADashStatusEnum)row["AlertStatus"];
                 dgvAlerts.Rows[idx].Cells["Last Occurrence"].SetStatusColor(status);
 
                 dgvAlerts.Rows[idx].Cells["Acknowledge"].Value = status switch
                 {
-                    DBADashStatus.DBADashStatusEnum.Acknowledged => "Clear",
-                    DBADashStatus.DBADashStatusEnum.Critical => "Acknowledge",
-                    DBADashStatus.DBADashStatusEnum.Warning => "Acknowledge",
+                    DBADashStatusEnum.Acknowledged => "Clear",
+                    DBADashStatusEnum.Critical => "Acknowledge",
+                    DBADashStatusEnum.Warning => "Acknowledge",
                     _ => ""
                 };
             }
@@ -211,12 +210,12 @@ namespace DBADashGUI.Changes
             if (e.RowIndex >= 0)
             {
                 var row = (DataRowView)dgvAlerts.Rows[e.RowIndex].DataBoundItem;
-                int id = (int)row["id"];
-                int instanceID = (int)row["InstanceID"];
-                var status = (DBADashStatus.DBADashStatusEnum)row["AlertStatus"];
+                var id = (int)row["id"];
+                var instanceID = (int)row["InstanceID"];
+                var status = (DBADashStatusEnum)row["AlertStatus"];
                 if (dgvAlerts.Columns[e.ColumnIndex].Name == "Acknowledge")
                 {
-                    AcknowledgeAlert(instanceID, id, status == DBADashStatus.DBADashStatusEnum.Acknowledged);
+                    AcknowledgeAlert(instanceID, id, status == DBADashStatusEnum.Acknowledged);
                     RefreshAlerts();
                 }
                 else if (dgvAlerts.Columns[e.ColumnIndex].Name == "Configure")
@@ -254,7 +253,7 @@ namespace DBADashGUI.Changes
                 .Distinct();
             foreach (var instanceID in instanceIDs)
             {
-                AcknowledgeAlert(instanceID, -1, false);
+                AcknowledgeAlert(instanceID, -1);
             }
             RefreshAlerts();
         }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -10,7 +9,7 @@ namespace DBADashServiceConfig
 {
     public partial class ServiceLog : Form
     {
-        private readonly string logsFolder = System.IO.Path.Combine(Application.StartupPath, "Logs");
+        private readonly string logsFolder = Path.Combine(Application.StartupPath, "Logs");
 
         public ServiceLog()
         {
@@ -21,13 +20,13 @@ namespace DBADashServiceConfig
         private void ServiceLog_Load(object sender, EventArgs e)
         {
             RefreshLogs();
-            Activated += new System.EventHandler(this.ServiceLog_Activated); // Scroll to end of log when form is activated (doesn't work in form load event)
+            Activated += ServiceLog_Activated; // Scroll to end of log when form is activated (doesn't work in form load event)
         }
 
         private void ServiceLog_Activated(object sender, EventArgs e)
         {
             // Scroll to end of log when form is activated (doesn't work in form load event)
-            Activated -= new System.EventHandler(this.ServiceLog_Activated);
+            Activated -= ServiceLog_Activated;
             txtLog.SelectionStart = txtLog.TextLength;
             txtLog.ScrollToCaret();
         }

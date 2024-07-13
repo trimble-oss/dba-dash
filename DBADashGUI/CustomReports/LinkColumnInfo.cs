@@ -1,15 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing.Design;
-using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADash;
-using DBADashGUI.SchemaCompare;
-using DocumentFormat.OpenXml.Office2010.Ink;
 using Newtonsoft.Json;
 using static DBADashGUI.SchemaCompare.CodeEditor;
 

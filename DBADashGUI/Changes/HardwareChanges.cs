@@ -17,9 +17,9 @@ namespace DBADashGUI
 
         private List<int> InstanceIDs;
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            this.InstanceIDs = context.RegularInstanceIDs.ToList();
+            InstanceIDs = _context.RegularInstanceIDs.ToList();
             RefreshData();
         }
 
@@ -93,19 +93,19 @@ namespace DBADashGUI
                 {
                     Rules = new List<CellHighlightingRule>
                     {
-                        new CellHighlightingRule
+                        new()
                         {
                             ConditionType = CellHighlightingRule.ConditionTypes.Equals,
                             Value1 = true.ToString(),
                             Status = DBADashStatus.DBADashStatusEnum.OK,
                         },
-                        new CellHighlightingRule
+                        new()
                         {
                             ConditionType = CellHighlightingRule.ConditionTypes.Equals,
                             Value1 = false.ToString(),
                             Status = DBADashStatus.DBADashStatusEnum.Warning,
                         },
-                        new CellHighlightingRule
+                        new()
                         {
                             ConditionType = CellHighlightingRule.ConditionTypes.All,
                             Status = DBADashStatus.DBADashStatusEnum.NA
@@ -118,19 +118,19 @@ namespace DBADashGUI
                 {
                     Rules = new List<CellHighlightingRule>
                     {
-                        new CellHighlightingRule
+                        new()
                         {
                             ConditionType = CellHighlightingRule.ConditionTypes.Equals,
                             Value1 = 0.ToString(),
                             Status = DBADashStatus.DBADashStatusEnum.OK,
                         },
-                        new CellHighlightingRule
+                        new()
                         {
                             ConditionType = CellHighlightingRule.ConditionTypes.GreaterThan,
                             Value1 = 0.ToString(),
                             Status = DBADashStatus.DBADashStatusEnum.Critical,
                         },
-                        new CellHighlightingRule
+                        new()
                         {
                             ConditionType = CellHighlightingRule.ConditionTypes.All,
                             Status = DBADashStatus.DBADashStatusEnum.NA
@@ -143,18 +143,18 @@ namespace DBADashGUI
                 {
                     Rules = new List<CellHighlightingRule>
                     {
-                        new CellHighlightingRule
+                        new()
                         {
                             ConditionType = CellHighlightingRule.ConditionTypes.IsNull,
                             Status = DBADashStatus.DBADashStatusEnum.NA,
                         },
-                        new CellHighlightingRule
+                        new()
                         {
                             ConditionType = CellHighlightingRule.ConditionTypes.Equals,
                             Value1 = Common.HighPerformancePowerPlanGUID.ToString(),
                             Status = DBADashStatus.DBADashStatusEnum.OK,
                         },
-                        new CellHighlightingRule
+                        new()
                         {
                             ConditionType = CellHighlightingRule.ConditionTypes.All,
                             Status = DBADashStatus.DBADashStatusEnum.Warning
@@ -167,18 +167,18 @@ namespace DBADashGUI
                 {
                     Rules = new List<CellHighlightingRule>
                     {
-                        new CellHighlightingRule
+                        new()
                         {
                             ConditionType = CellHighlightingRule.ConditionTypes.IsNull,
                             Status = DBADashStatus.DBADashStatusEnum.NA,
                         },
-                        new CellHighlightingRule
+                        new()
                         {
                             ConditionType = CellHighlightingRule.ConditionTypes.Equals,
                             Value1 = 32.ToString(),
                             Status = DBADashStatus.DBADashStatusEnum.OK,
                         },
-                        new CellHighlightingRule
+                        new()
                         {
                             ConditionType = CellHighlightingRule.ConditionTypes.All,
                             Status = DBADashStatus.DBADashStatusEnum.Warning
@@ -191,18 +191,18 @@ namespace DBADashGUI
                 {
                     Rules = new List<CellHighlightingRule>
                     {
-                        new CellHighlightingRule
+                        new()
                         {
                             ConditionType = CellHighlightingRule.ConditionTypes.IsNull,
                             Status = DBADashStatus.DBADashStatusEnum.NA,
                         },
-                        new CellHighlightingRule
+                        new()
                         {
                             ConditionType = CellHighlightingRule.ConditionTypes.Equals,
                             Value1 = "AUTO",
                             Status = DBADashStatus.DBADashStatusEnum.OK,
                         },
-                        new CellHighlightingRule
+                        new()
                         {
                             ConditionType = CellHighlightingRule.ConditionTypes.All,
                             Status = DBADashStatus.DBADashStatusEnum.Warning

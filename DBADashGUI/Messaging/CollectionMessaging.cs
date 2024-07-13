@@ -8,14 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
-using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
-using DocumentFormat.OpenXml.VariantTypes;
-using System.Windows.Interop;
-using System.Reflection.Metadata;
-using System.Runtime.CompilerServices;
-using Amazon.Runtime.Internal.Transform;
 using System.Xml.Linq;
 using Serilog;
 
@@ -24,13 +18,13 @@ namespace DBADashGUI.Messaging
     internal static class CollectionMessaging
     {
         private const int RecentTriggerThresholdSeconds = 30;
-        private static int PendingRequests = 0;
+        private static int PendingRequests;
         private const int PendingRequestsThreshold = 10;
         private static readonly Dictionary<(string instanceName, string type), DateTime> LastTriggeredTimes = new();
         private static readonly object LockObject = new();
         private const int CollectionDialogLifetime = 600;
 
-        private static List<CollectionType> RecentlyTriggeredExcludedList = new()
+        private static readonly List<CollectionType> RecentlyTriggeredExcludedList = new()
         {
             CollectionType.RunningQueries, CollectionType.AvailabilityGroups, CollectionType.AvailabilityReplicas,
             CollectionType.DatabasesHADR

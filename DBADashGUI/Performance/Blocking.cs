@@ -5,6 +5,7 @@ using LiveCharts.Wpf;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
+using System.Globalization;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
@@ -17,8 +18,8 @@ namespace DBADashGUI.Performance
         }
 
         private int InstanceID;
-        private double maxBlockedTime = 0;
-        private int databaseID = 0;
+        private double maxBlockedTime;
+        private int databaseID;
 
         public bool CloseVisible
         {
@@ -84,7 +85,7 @@ namespace DBADashGUI.Performance
 
         public BlockingMetric Metric { get; set; } = new();
 
-        IMetric IMetricChart.Metric { get => Metric; }
+        IMetric IMetricChart.Metric => Metric;
 
         public void RefreshData()
         {
@@ -96,7 +97,7 @@ namespace DBADashGUI.Performance
             maxBlockedTime = 0;
 
             var points = new BlockingPoint[dt.Rows.Count];
-            int i = 0;
+            var i = 0;
             double Ymax = 100;
 
             foreach (DataRow r in dt.Rows)
@@ -130,17 +131,17 @@ namespace DBADashGUI.Performance
                     }
                 };
 
-            string format = DateRange.DurationMins < 1440 ? "HH:mm" : "yyyy-MM-dd HH:mm";
+            var format = DateRange.DurationMins < 1440 ? "HH:mm" : "yyyy-MM-dd HH:mm";
             chartBlocking.AxisX.Add(new Axis
             {
-                LabelFormatter = val => new System.DateTime((long)val).ToString(format),
+                LabelFormatter = val => new DateTime((long)val).ToString(format),
                 MinValue = DateRange.FromUTC.ToAppTimeZone().Ticks,
                 MaxValue = DateRange.ToUTC.ToAppTimeZone().Ticks
             });
             chartBlocking.AxisY.Add(new Axis
             {
                 Title = "Blocked Sessions",
-                LabelFormatter = val => val.ToString(),
+                LabelFormatter = val => val.ToString(CultureInfo.CurrentCulture),
                 MinValue = 0,
                 MaxValue = Ymax
             });
@@ -171,12 +172,12 @@ namespace DBADashGUI.Performance
 
         private void TsClose_Click(object sender, EventArgs e)
         {
-            Close.Invoke(this, new EventArgs());
+            Close.Invoke(this, EventArgs.Empty);
         }
 
         private void TsUp_Click(object sender, EventArgs e)
         {
-            MoveUp.Invoke(this, new EventArgs());
+            MoveUp.Invoke(this, EventArgs.Empty);
         }
     }
 }
@@ -193,9 +194,9 @@ internal class BlockingPoint
 
     public BlockingPoint(int snapshotID, DateTime snapshotDate, int blockedSessions, long blockedWaitTime)
     {
-        this.SnapshotID = snapshotID;
-        this.BlockedSessions = blockedSessions;
-        this.BlockedWaitTime = blockedWaitTime;
-        this.SnapshotDate = snapshotDate;
+        SnapshotID = snapshotID;
+        BlockedSessions = blockedSessions;
+        BlockedWaitTime = blockedWaitTime;
+        SnapshotDate = snapshotDate;
     }
 }

@@ -1,5 +1,4 @@
 ﻿using DBADashSharedGUI;
-using System.Drawing;
 
 namespace DBADashGUI.Theme
 {
@@ -15,8 +14,7 @@ namespace DBADashGUI.Theme
             BackgroundColor = Color.White;
             GridCellBackColor = Color.White;
             GridBackgroundColor = Color.White;
-
-            TimelineBodyBackColor = DashColors.White; ;
+            TimelineBodyBackColor = DashColors.White;
             TimelineChartBackColor = DashColors.White;
             TreeViewBackColor = DashColors.White;
             CodeEditorBackColor = DashColors.White;

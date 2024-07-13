@@ -1,22 +1,13 @@
 ﻿using DBADashGUI.Performance;
-using Humanizer;
 using Microsoft.Data.SqlClient;
-using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
-using System.Formats.Asn1;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
-using System.Windows.Automation;
 using System.Windows.Forms;
 using static DBADashGUI.AgentJobs.TimelineRow;
-using static System.Net.WebRequestMethods;
 
 namespace DBADashGUI.AgentJobs
 {
@@ -158,7 +149,7 @@ namespace DBADashGUI.AgentJobs
 
         private int DateGrouping
         {
-            get => (int)tsDateGroup.Tag;
+            get => (int)tsDateGroup.Tag!;
             set
             {
                 tsDateGroup.Tag = value;
@@ -320,7 +311,7 @@ namespace DBADashGUI.AgentJobs
             DateTime appTo = to.ToAppTimeZone();
             int rowCount = 0;
             TimelineRow previousTlr = new();
-            List<TimelineRow.RunStatus> statuses = new();
+            List<RunStatus> statuses = new();
             foreach (DataRow r in dt.Rows)
             {
                 TimelineRow tlr = new()
@@ -338,7 +329,7 @@ namespace DBADashGUI.AgentJobs
                 };
                 if (context.JobID == Guid.Empty)
                 {
-                    tlr.Name = tlr.JobName + (IncludeSteps ? " | " + tlr.StepID.ToString() : "");
+                    tlr.Name = tlr.JobName + (IncludeSteps ? " | " + tlr.StepID : "");
                 }
                 else
                 {
@@ -402,11 +393,11 @@ namespace DBADashGUI.AgentJobs
         /// </summary>
         private static string DateFormat => DateRange.DurationMins < 1500 ? "HH:mm" : "MMM dd HH:mm";
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            this.context = context;
+            this.context = _context;
             IsActive = true;
-            tsIncludeSteps.Visible = context.JobID == Guid.Empty;
+            tsIncludeSteps.Visible = _context.JobID == Guid.Empty;
             RefreshData();
         }
 
@@ -445,7 +436,7 @@ namespace DBADashGUI.AgentJobs
 
         private void WebView2_SetupCompleted()
         {
-            this.Invoke(RefreshData);
+            Invoke(RefreshData);
         }
     }
 }

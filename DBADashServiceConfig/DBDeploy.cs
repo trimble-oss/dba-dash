@@ -112,7 +112,7 @@ AND database_id > 4 ";
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.DialogResult = DialogResult.Abort;
+                DialogResult = DialogResult.Abort;
             }
             DbChanged();
         }
@@ -121,7 +121,7 @@ AND database_id > 4 ";
         {
             try
             {
-                this.Cursor = Cursors.WaitCursor;
+                Cursor = Cursors.WaitCursor;
                 GenerateScript();
                 lblNotice.Visible = true;
             }
@@ -132,7 +132,7 @@ AND database_id > 4 ";
             finally
             {
                 lblNotice.Visible = false;
-                this.Cursor = Cursors.Default;
+                Cursor = Cursors.Default;
             }
         }
 
@@ -222,8 +222,8 @@ AND database_id > 4 ";
                 if (!t.IsFaulted)
                 {
                     MessageBox.Show("Deploy succeeded", "Deploy", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    this.DialogResult = DialogResult.OK;
-                    this.Close();
+                    DialogResult = DialogResult.OK;
+                    Close();
                 }
                 else
                 {
@@ -249,7 +249,7 @@ AND database_id > 4 ";
             {
                 try
                 {
-                    this.Cursor = Cursors.WaitCursor;
+                    Cursor = Cursors.WaitCursor;
                     GetDatabases();
                 }
                 catch (Exception ex)
@@ -258,7 +258,7 @@ AND database_id > 4 ";
                 }
                 finally
                 {
-                    this.Cursor = Cursors.Default;
+                    Cursor = Cursors.Default;
                 }
             }
         }
@@ -307,19 +307,19 @@ AND database_id > 4 ";
                 }
                 else if (dbVersionStatus.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
                 {
-                    lblVersionInfo.Text = dbVersionStatus.DBVersion.ToString() + " (OK)";
+                    lblVersionInfo.Text = dbVersionStatus.DBVersion + " (OK)";
                     lblVersionInfo.ForeColor = DashColors.Success;
                     bttnGenerate.Enabled = true;
                 }
                 else if (dbVersionStatus.VersionStatus == DBValidations.DBVersionStatusEnum.UpgradeRequired)
                 {
-                    lblVersionInfo.Text = dbVersionStatus.DBVersion.ToString() + " Upgrade to " + dbVersionStatus.DACVersion.ToString();
+                    lblVersionInfo.Text = dbVersionStatus.DBVersion + " Upgrade to " + dbVersionStatus.DACVersion;
                     lblVersionInfo.ForeColor = DashColors.Fail;
                     bttnGenerate.Enabled = true;
                 }
                 else if (dbVersionStatus.VersionStatus == DBValidations.DBVersionStatusEnum.AppUpgradeRequired)
                 {
-                    lblVersionInfo.Text = dbVersionStatus.DBVersion.ToString() + "Newer than app:" + dbVersionStatus.DACVersion.ToString() + ". Upgrade app";
+                    lblVersionInfo.Text = dbVersionStatus.DBVersion + "Newer than app:" + dbVersionStatus.DACVersion + ". Upgrade app";
                     lblVersionInfo.ForeColor = DashColors.Fail;
                     bttnGenerate.Enabled = false;
                     bttnDeploy.Enabled = false;

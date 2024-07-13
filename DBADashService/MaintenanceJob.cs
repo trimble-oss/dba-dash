@@ -67,7 +67,7 @@ namespace DBADashService
 
         private static void LogError(Exception ex, string connectionString, string errorSource, string errorMessage, string errorContext = "Maintenance")
         {
-            Log.Error(ex, "{errorcontext} | {errorsource}", errorContext, errorSource);
+            Log.Error(ex, "{errorContext} | {errorSource}", errorContext, errorSource);
             try
             {
                 var dtErrors = new DataTable("Errors");
@@ -81,11 +81,11 @@ namespace DBADashService
                 dtErrors.Rows.Add(rError);
                 DataSet ds = new();
                 ds.Tables.Add(dtErrors);
-                DBADash.DBImporter.InsertErrors(connectionString, null, DateTime.UtcNow, ds, 60);
+                DBImporter.InsertErrors(connectionString, null, DateTime.UtcNow, ds, 60);
             }
             catch (Exception ex2)
             {
-                Log.Error(ex2, "Write errors to database from {errorcontext} | {errorsource}", errorContext, errorSource);
+                Log.Error(ex2, "Write errors to database from {errorContext} | {errorSource}", errorContext, errorSource);
             }
         }
     }

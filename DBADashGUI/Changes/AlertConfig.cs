@@ -80,13 +80,13 @@ namespace DBADashGUI.Changes
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
 
         private void BttnUpdate_Click(object sender, EventArgs e)
         {
             UpdateAlertThresholds(InstanceID, Id, AlertLevel, NotificationPeriodHrs);
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         private static void UpdateAlertThresholds(int InstanceID, int id, short? alertLevel, short? notificationPeriodHrs)

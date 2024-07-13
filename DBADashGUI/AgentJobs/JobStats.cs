@@ -19,7 +19,7 @@ namespace DBADashGUI.AgentJobs
 
         private int InstanceID { get; set; }
         private Guid JobID { get; set; }
-        private int StepID { get; set; } = 0;
+        private int StepID { get; set; }
 
         public bool CanNavigateBack => StepID != context.JobStepID || JobID != context.JobID;
 
@@ -37,8 +37,8 @@ namespace DBADashGUI.AgentJobs
             {
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("JobID", selectedJobID == Guid.Empty ? JobID : selectedJobID);
-                int stepid = selectedStepID >= 0 ? selectedStepID : StepID;
-                cmd.Parameters.AddWithValue("StepID", stepid);
+                var stepId = selectedStepID >= 0 ? selectedStepID : StepID;
+                cmd.Parameters.AddWithValue("StepID", stepId);
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                 var pDateGrouping = cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
@@ -84,14 +84,14 @@ namespace DBADashGUI.AgentJobs
                 {"TotalDurationSec", new ColumnMetaData{Name="Total Duration",IsVisible=false } }
         };
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            this.context = context;
-            InstanceID = context.InstanceID;
-            JobID = context.JobID;
-            StepID = context.JobStepID;
-            selectedStepID = context.JobStepID >= 0 ? context.JobStepID : 0;
-            selectedJobID = context.JobID;
+            this.context = _context;
+            InstanceID = _context.InstanceID;
+            JobID = _context.JobID;
+            StepID = _context.JobStepID;
+            selectedStepID = _context.JobStepID >= 0 ? _context.JobStepID : 0;
+            selectedJobID = _context.JobID;
             RefreshData();
         }
 
@@ -102,7 +102,7 @@ namespace DBADashGUI.AgentJobs
             dateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 200);
             tsDateGroup.Text = DateHelper.DateGroupString(dateGrouping);
 
-            dgv.Columns["colRetry"].Visible = JobID != Guid.Empty;
+            dgv.Columns["colRetry"]!.Visible = JobID != Guid.Empty;
 
             RefreshSummary();
             RefreshChart();
@@ -128,7 +128,7 @@ namespace DBADashGUI.AgentJobs
             tsDateGroup.Visible = true;
             tsMeasures.Visible = true;
             columns["RetryCount"].IsVisible = columns["RetryCount"].IsVisible && (StepID > 0 || selectedStepID > 0);
-            tsMeasures.DropDownItems["RetryCount"].Enabled = StepID > 0 || selectedStepID > 0;
+            tsMeasures.DropDownItems["RetryCount"]!.Enabled = StepID > 0 || selectedStepID > 0;
 
             splitContainer1.Panel1Collapsed = false;
             var dt = GetJobStats();
@@ -155,7 +155,7 @@ namespace DBADashGUI.AgentJobs
                 MinValue = 0
             });
             chart1.LegendLocation = LegendLocation.Bottom;
-            chart1.AddDataTable(dt, columns, "DateGroup", true);
+            chart1.AddDataTable(dt, columns, "DateGroup");
         }
 
         private void JobStats_Load(object sender, EventArgs e)
@@ -181,7 +181,7 @@ namespace DBADashGUI.AgentJobs
             {
                 var dd = new ToolStripMenuItem(c.Value.Name)
                 {
-                    Name = (string)c.Key,
+                    Name = c.Key,
                     CheckOnClick = true
                 };
                 dd.Checked = dd.Enabled && c.Value.IsVisible;
@@ -193,7 +193,7 @@ namespace DBADashGUI.AgentJobs
         private void MeasureDropDown_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
-            columns[ts.Name].IsVisible = ts.Checked;
+            columns[ts.Name!].IsVisible = ts.Checked;
             RefreshChart();
         }
 
@@ -213,22 +213,20 @@ namespace DBADashGUI.AgentJobs
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex < 0) return;
+            var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+            selectedJobID = (Guid)row["job_id"];
+            selectedStepID = (int)row["step_id"];
+            if (e.ColumnIndex == dgv.Columns["colView"]!.Index)
             {
-                var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                selectedJobID = (Guid)row["job_id"];
-                selectedStepID = (int)row["step_id"];
-                if (e.ColumnIndex == dgv.Columns["colView"].Index)
-                {
-                    tsJob.Text = (string)row["JobName"] + "\\" + (string)row["JobStep"];
-                    tsJob.Visible = true;
-                    RefreshChart();
-                }
-                else if (e.RowIndex >= 0 && e.ColumnIndex == dgv.Columns["colJob"].Index)
-                {
-                    JobID = selectedJobID;
-                    RefreshData();
-                }
+                tsJob.Text = (string)row["JobName"] + @"\" + (string)row["JobStep"];
+                tsJob.Visible = true;
+                RefreshChart();
+            }
+            else if (e.RowIndex >= 0 && e.ColumnIndex == dgv.Columns["colJob"]!.Index)
+            {
+                JobID = selectedJobID;
+                RefreshData();
             }
         }
 

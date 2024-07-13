@@ -5,15 +5,9 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using DocumentFormat.OpenXml.Office.PowerPoint.Y2021.M06.Main;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
-using System.Diagnostics;
-using Amazon.Runtime.Internal.Transform;
-using CommandLine;
 using DBADash;
 using DBADashGUI.Changes;
 using DBADashGUI.Theme;
-using static System.Net.WebRequestMethods;
 
 namespace DBADashGUI
 {
@@ -62,9 +56,9 @@ namespace DBADashGUI
             new DataGridViewTextBoxColumn()  { DataPropertyName = "LatestVersionPatchLevel", HeaderText = "Latest Version Patch Level",Width=90, ReadOnly = true, Name = "colLatestVersionPatchLevel", DefaultCellStyle = new DataGridViewCellStyle() { Font = new Font(DefaultFont, FontStyle.Italic)  }, ToolTipText = "Latest build available for this version of SQL" },
         };
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = context.RegularInstanceIDs.ToList();
+            InstanceIDs = _context.RegularInstanceIDs.ToList();
             RefreshData();
         }
 
@@ -195,7 +189,7 @@ namespace DBADashGUI
 
         private void DgvVersion_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var gRow = dgvVersion.Rows[idx];
                 var SPBehind = (int?)gRow.Cells["colSPBehind"].Value.DBNullToNull();
@@ -225,7 +219,7 @@ namespace DBADashGUI
                 gRow.Cells["colSupportedUntil"].SetStatusColor(supportedUntilStatus);
                 gRow.Cells["colCUBehind"].SetStatusColor(colCUBehindStatus);
                 gRow.Cells["colSPBehind"].SetStatusColor(colSPBehindStatus);
-            };
+            }
         }
 
         private void DgvVersion_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -319,7 +313,7 @@ namespace DBADashGUI
         private void SetThreshold_Click(object sender, EventArgs e)
         {
             var item = (ToolStripMenuItem)sender;
-            string setting = item.Tag.ToString();
+            var setting = item.Tag!.ToString();
             var value = Convert.ToString(RepositorySettings.GetIntSetting(setting, Common.ConnectionString));
             PromptUpdateThreshold(item.Tag.ToString(), value, item.Text);
         }

@@ -19,7 +19,9 @@ namespace DBADashGUI.CollectionDates
         private string _reference;
 
         public string Reference
-        { get { return _reference; } set { _reference = value; } }
+        { get => _reference;
+            set => _reference = value;
+        }
 
         public bool Inherit
         {
@@ -51,11 +53,11 @@ namespace DBADashGUI.CollectionDates
             using var rdr = cmd.ExecuteReader();
             while (rdr.Read())
             {
-                string reference = Convert.ToString(rdr["Reference"]);
+                var reference = Convert.ToString(rdr["Reference"]);
 
                 if (reference == _reference)
                 {
-                    chkReferences.Items.Add(reference, CheckState.Checked);
+                    chkReferences.Items.Add(reference!, CheckState.Checked);
                     if (rdr["WarningThreshold"] != DBNull.Value && rdr["CriticalThreshold"] != DBNull.Value)
                     {
                         WarningThreshold = (int)rdr["WarningThreshold"];
@@ -73,7 +75,7 @@ namespace DBADashGUI.CollectionDates
                 }
                 else
                 {
-                    chkReferences.Items.Add(reference, CheckState.Unchecked);
+                    chkReferences.Items.Add(reference!, CheckState.Unchecked);
                 }
             }
 
@@ -109,7 +111,7 @@ namespace DBADashGUI.CollectionDates
                 }
                 cmd.Parameters.AddWithValue("Inherit", Inherit);
                 cmd.ExecuteNonQuery();
-                this.DialogResult = DialogResult.OK;
+                DialogResult = DialogResult.OK;
             }
         }
 
@@ -118,11 +120,11 @@ namespace DBADashGUI.CollectionDates
             chkCheckAll.Enabled = InstanceID != -1;
             if (InstanceID == -1)
             {
-                this.Text += " (Root)";
+                Text += " (Root)";
             }
             else
             {
-                this.Text += " (Instance)";
+                Text += " (Instance)";
             }
             GetThreshold();
         }
@@ -144,12 +146,12 @@ namespace DBADashGUI.CollectionDates
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
 
         private void ChkCheckAll_CheckedChanged(object sender, EventArgs e)
         {
-            for (int i = 0; i < chkReferences.Items.Count; i++)
+            for (var i = 0; i < chkReferences.Items.Count; i++)
             {
                 chkReferences.SetItemChecked(i, chkCheckAll.Checked);
             }

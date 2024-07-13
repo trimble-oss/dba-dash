@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADashGUI.DBFiles;
 using DBADashGUI.Performance;
-using DocumentFormat.OpenXml.Wordprocessing;
 using Humanizer;
 using Microsoft.Data.SqlClient;
 
@@ -76,16 +70,16 @@ namespace DBADashGUI.AgentJobs
             DataTable dt = new();
             da.Fill(dt);
             DateHelper.ConvertUTCToAppTimeZone(ref dt);
-            dt.Columns["LastStepFinishDateUtc"].ColumnName = "LastStepFinishDate";
-            dt.Columns["LastStepStartDateUtc"].ColumnName = "LastStepStartDate";
-            dt.Columns["start_execution_date_utc"].ColumnName = "start_execution_date";
+            dt.Columns["LastStepFinishDateUtc"]!.ColumnName = "LastStepFinishDate";
+            dt.Columns["LastStepStartDateUtc"]!.ColumnName = "LastStepStartDate";
+            dt.Columns["start_execution_date_utc"]!.ColumnName = "start_execution_date";
 
             return dt;
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            this.context = context;
+            this.context = _context;
             RefreshData();
         }
 
@@ -138,19 +132,17 @@ namespace DBADashGUI.AgentJobs
 
         private void DgvRunningJobs_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.RowIndex >= 0 && e.ColumnIndex == dgvRunningJobs.Columns["colEstimatedCompletion"].Index)
+            if (e.RowIndex < 0 || e.ColumnIndex != dgvRunningJobs.Columns["colEstimatedCompletion"]!.Index) return;
+            if (e.Value == DBNull.Value || e.Value == null)
             {
-                if (e.Value == DBNull.Value || e.Value == null)
-                {
-                    return;
-                }
-                var estimatedCompletion = (DateTime)e.Value;
-                var ts = estimatedCompletion.Subtract(DateTime.Now);
-
-                e.Value = estimatedCompletion + " (" + (ts.Ticks > 0 ? "+" : "-") + ts.Humanize(2) + ")";
-                e.CellStyle.SetStatusColor(ts.Ticks > 0 ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning);
-                e.FormattingApplied = true;
+                return;
             }
+            var estimatedCompletion = (DateTime)e.Value;
+            var ts = estimatedCompletion.Subtract(DateTime.Now);
+
+            e.Value = estimatedCompletion + " (" + (ts.Ticks > 0 ? "+" : "-") + ts.Humanize(2) + ")";
+            e.CellStyle.SetStatusColor(ts.Ticks > 0 ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning);
+            e.FormattingApplied = true;
         }
 
         private void TsCols_Click(object sender, EventArgs e)
@@ -160,18 +152,18 @@ namespace DBADashGUI.AgentJobs
 
         private void SetMinimumDuration(object sender, EventArgs e)
         {
-            MinimumDuration = int.Parse(((ToolStripMenuItem)sender).Tag.ToString()!);
+            MinimumDuration = int.Parse(((ToolStripMenuItem)sender).Tag!.ToString()!);
             RefreshData();
         }
 
         private int _minimumDuration = 60;
 
-        private static JobStatusAndHistory JobHistoryForm = null;
-        private static RunningQueriesViewer RunningViewer = null;
+        private static JobStatusAndHistory JobHistoryForm;
+        private static RunningQueriesViewer RunningViewer;
 
         private void DgvRunningJobs_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0 && e.ColumnIndex == dgvRunningJobs.Columns["colJobName"].Index)
+            if (e.RowIndex >= 0 && e.ColumnIndex == dgvRunningJobs.Columns["colJobName"]!.Index)
             {
                 var row = (DataRowView)dgvRunningJobs.Rows[e.RowIndex].DataBoundItem;
                 var instanceId = (int)row["InstanceID"];
@@ -185,7 +177,7 @@ namespace DBADashGUI.AgentJobs
                 JobHistoryForm.FormClosed += delegate { JobHistoryForm = null; };
                 JobHistoryForm.Show();
             }
-            else if (e.RowIndex >= 0 && e.ColumnIndex == dgvRunningJobs.Columns["colRunningTime"].Index)
+            else if (e.RowIndex >= 0 && e.ColumnIndex == dgvRunningJobs.Columns["colRunningTime"]!.Index)
             {
                 var row = (DataRowView)dgvRunningJobs.Rows[e.RowIndex].DataBoundItem;
                 var instanceId = (int)row["InstanceID"];
@@ -202,14 +194,11 @@ namespace DBADashGUI.AgentJobs
 
         public int MinimumDuration
         {
-            get
-            {
-                return _minimumDuration;
-            }
+            get => _minimumDuration;
             set
             {
                 _minimumDuration = value;
-                minimumDurationToolStripMenuItem.DropDownItems.Cast<ToolStripMenuItem>().ToList().ForEach(x => x.Checked = int.Parse(x.Tag.ToString()!) == value);
+                minimumDurationToolStripMenuItem.DropDownItems.Cast<ToolStripMenuItem>().ToList().ForEach(x => x.Checked = int.Parse(x.Tag?.ToString()!) == value);
             }
         }
     }

@@ -11,10 +11,8 @@ using DBADashGUI.Theme;
 using static DBADashGUI.DBADashStatus;
 using DBADash;
 using DBADashGUI.Messaging;
-using DocumentFormat.OpenXml.Drawing.Charts;
 using DataTable = System.Data.DataTable;
 using System.Threading;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace DBADashGUI.Backups
 {
@@ -56,13 +54,13 @@ namespace DBADashGUI.Backups
         private const int BackupDataIsStaleThreshold = 600; // seconds
         private CancellationTokenSource cancellationToken;
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            if (CurrentContext == context &&  DateTime.Now.Subtract(LastRefresh).TotalSeconds < BackupDataIsStaleThreshold) return;
+            if (CurrentContext == _context &&  DateTime.Now.Subtract(LastRefresh).TotalSeconds < BackupDataIsStaleThreshold) return;
             LastRefresh = DateTime.Now;
-            InstanceIDs = context.RegularInstanceIDs.ToList();
-            IncludeNA = context.RegularInstanceIDs.Count == 1;
-            IncludeOK = context.RegularInstanceIDs.Count == 1;
+            InstanceIDs = _context.RegularInstanceIDs.ToList();
+            IncludeNA = _context.RegularInstanceIDs.Count == 1;
+            IncludeOK = _context.RegularInstanceIDs.Count == 1;
             IncludeWarning = true;
             IncludeCritical = true;
 
@@ -73,9 +71,9 @@ namespace DBADashGUI.Backups
             backupInstanceIDs = new ();
             tsBack.Enabled = false;
             lblStatus.Text = "";
-            tsTrigger.Visible = context.CanMessage;
+            tsTrigger.Visible = _context.CanMessage;
 
-            CurrentContext = context;
+            CurrentContext = _context;
          
             RunRefreshDataLocal();
         }
@@ -94,7 +92,7 @@ namespace DBADashGUI.Backups
 
         private async Task RefreshDataLocal(CancellationToken token)
         {
-            this.Invoke(() =>
+            Invoke(() =>
             {
                 splitContainer1.Visible = false;
                 refresh1.ShowRefresh();
@@ -109,7 +107,7 @@ namespace DBADashGUI.Backups
                 await Task.WhenAll(summaryTask, detailTask);
                 if (token.IsCancellationRequested) return;
 
-                this.Invoke(() =>
+                Invoke(() =>
                 {
                     RefreshSummary(summaryTask.Result);
                     if (DatabaseID > 0)
@@ -130,7 +128,7 @@ namespace DBADashGUI.Backups
             catch (Exception ex)
             {
                 if (token.IsCancellationRequested) return;
-                this.Invoke(() =>
+                Invoke(() =>
                 {
                     refresh1.SetFailed(ex.Message);
                 });
@@ -375,10 +373,10 @@ namespace DBADashGUI.Backups
             for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvBackups.Rows[idx].DataBoundItem;
-                var fullBackupStatus = (DBADashStatus.DBADashStatusEnum)row["FullBackupStatus"];
-                var diffBackupStatus = (DBADashStatus.DBADashStatusEnum)row["DiffBackupStatus"];
-                var logBackupStatus = (DBADashStatus.DBADashStatusEnum)row["LogBackupStatus"];
-                var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["SnapshotAgeStatus"];
+                var fullBackupStatus = (DBADashStatusEnum)row["FullBackupStatus"];
+                var diffBackupStatus = (DBADashStatusEnum)row["DiffBackupStatus"];
+                var logBackupStatus = (DBADashStatusEnum)row["LogBackupStatus"];
+                var snapshotStatus = (DBADashStatusEnum)row["SnapshotAgeStatus"];
                 dgvBackups.Rows[idx].Cells["LastFull"].SetStatusColor(fullBackupStatus);
                 dgvBackups.Rows[idx].Cells["LastDiff"].SetStatusColor(diffBackupStatus);
                 dgvBackups.Rows[idx].Cells["LastLog"].SetStatusColor(logBackupStatus);
@@ -479,23 +477,23 @@ namespace DBADashGUI.Backups
             for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvSummary.Rows[idx].DataBoundItem;
-                var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["SnapshotAgeStatus"];
+                var snapshotStatus = (DBADashStatusEnum)row["SnapshotAgeStatus"];
 
                 dgvSummary.Rows[idx].Cells["SnapshotAge"].SetStatusColor(snapshotStatus);
 
-                var okCols = new string[] { "FullOK", "DiffOK", "LogOK" };
+                var okCols = new[] { "FullOK", "DiffOK", "LogOK" };
                 foreach (var col in okCols)
                 {
                     var value = Convert.ToInt32(dgvSummary.Rows[idx].Cells[col].Value);
                     dgvSummary.Rows[idx].Cells[col].SetStatusColor(value > 0 ? DBADashStatusEnum.OK : DBADashStatusEnum.NA);
                 }
-                var warningCols = new string[] { "FullWarning", "DiffWarning", "LogWarning" };
+                var warningCols = new[] { "FullWarning", "DiffWarning", "LogWarning" };
                 foreach (var col in warningCols)
                 {
                     var value = Convert.ToInt32(dgvSummary.Rows[idx].Cells[col].Value);
                     dgvSummary.Rows[idx].Cells[col].SetStatusColor(value > 0 ? DBADashStatusEnum.Warning : DBADashStatusEnum.NA);
                 }
-                var criticalCols = new string[] { "FullCritical", "DiffCritical", "LogCritical" };
+                var criticalCols = new[] { "FullCritical", "DiffCritical", "LogCritical" };
                 foreach (var col in criticalCols)
                 {
                     var value = Convert.ToInt32(dgvSummary.Rows[idx].Cells[col].Value);

@@ -45,7 +45,7 @@ namespace DBADashGUI
         /// </summary>
         public static void AddDateGroups(ToolStripDropDownButton tsRoot, EventHandler click)
         {
-            foreach (var dg in DateHelper.DateGroups)
+            foreach (var dg in DateGroups)
             {
                 var ts = new ToolStripMenuItem(dg.Value)
                 {
@@ -116,7 +116,7 @@ namespace DBADashGUI
         {
             int lastMins = 0;
 
-            foreach (var mins in DateHelper.DateGroups.OrderBy(k => k.Key)
+            foreach (var mins in DateGroups.OrderBy(k => k.Key)
                 .Select(k => k.Key)
                 .ToList())
             {
@@ -132,7 +132,7 @@ namespace DBADashGUI
 
         public static string DateGroupString(int mins)
         {
-            return (DateHelper.DateGroups.Where(k => k.Key == mins).First()).Value;
+            return DateGroups.First(k => k.Key == mins).Value;
         }
 
         /// <summary>
@@ -159,6 +159,6 @@ namespace DBADashGUI
         /// <summary>
         /// Returns current DateTime in time zone of app
         /// </summary>
-        public static DateTime AppNow { get => TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, AppTimeZone); }
+        public static DateTime AppNow => TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, AppTimeZone);
     }
 }

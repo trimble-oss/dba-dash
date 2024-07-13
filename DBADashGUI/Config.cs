@@ -1,13 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADash;
-using DocumentFormat.OpenXml;
 using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI

@@ -60,17 +60,17 @@ namespace DBADashGUI
 
         public static void SetProgressBarColor(DBADashStatusEnum status, ref CustomProgressControl.DataGridViewProgressBarCell pCell)
         {
-            if (status == DBADashStatus.DBADashStatusEnum.OK)
+            if (status == DBADashStatusEnum.OK)
             {
                 pCell.ProgressBarColorFrom = DashColors.GreenPale;
                 pCell.ProgressBarColorTo = DashColors.Green;
             }
-            else if (status == DBADashStatus.DBADashStatusEnum.Warning)
+            else if (status == DBADashStatusEnum.Warning)
             {
                 pCell.ProgressBarColorFrom = DashColors.YellowPale;
                 pCell.ProgressBarColorTo = DashColors.YellowDark;
             }
-            else if (status == DBADashStatus.DBADashStatusEnum.Critical)
+            else if (status == DBADashStatusEnum.Critical)
             {
                 pCell.ProgressBarColorFrom = DashColors.RedPale;
                 pCell.ProgressBarColorTo = DashColors.RedDark;

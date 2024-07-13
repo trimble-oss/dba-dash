@@ -67,9 +67,9 @@ namespace DBADashGUI.CollectionDates
             return dt;
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            Context = context;
+            Context = _context;
             Days = 1;
             RefreshData();
         }
@@ -97,7 +97,7 @@ namespace DBADashGUI.CollectionDates
 
         private void TsErrorDays_Click(object sender, EventArgs e)
         {
-            Days = int.Parse((string)((ToolStripMenuItem)sender).Tag);
+            Days = int.Parse(((string)((ToolStripMenuItem)sender).Tag)!);
             RefreshDataLocal();
         }
 

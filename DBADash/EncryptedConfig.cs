@@ -1,19 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.SqlServer.Management.SqlParser.Metadata;
 using Newtonsoft.Json;
 
 namespace DBADash
 {
     public class EncryptedConfig
     {
-        private static readonly string tempKey = System.IO.Path.Combine(AppContext.BaseDirectory, "ServiceConfig.TempKey");
+        private static readonly string tempKey = Path.Combine(AppContext.BaseDirectory, "ServiceConfig.TempKey");
         private static readonly string random = "Ys8A#QJowc#h#5te4QjumXv4aWYN9F";
         private static readonly string cred = "DBADash_Config_" + EncryptText.GetShortHash(AppContext.BaseDirectory.ToLowerInvariant());
 
@@ -56,7 +51,7 @@ namespace DBADash
         {
             if (password == null)
             {
-                throw new ArgumentNullException("Password", "Password is not set");
+                throw new ArgumentNullException(nameof(password), @"Password is not set");
             }
             ProtectedConfig = config.EncryptString(password);
         }

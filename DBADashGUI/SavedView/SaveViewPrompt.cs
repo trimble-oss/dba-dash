@@ -16,27 +16,27 @@ namespace DBADashGUI
 
         private void TxtName_TextChanged(object sender, EventArgs e)
         {
-            chkDefault.Checked = txtName.Text == "Default";
+            chkDefault.Checked = txtName.Text == @"Default";
         }
 
         private void ChkDefault_CheckedChanged(object sender, EventArgs e)
         {
-            txtName.Text = "Default";
+            txtName.Text = @"Default";
         }
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
 
         private void BttnSave_Click(object sender, EventArgs e)
         {
             if (txtName.Text.Length == 0)
             {
-                MessageBox.Show("Invalid Name", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(@"Invalid Name", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         private void SaveViewPrompt_Load(object sender, EventArgs e)

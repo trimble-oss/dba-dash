@@ -2,7 +2,6 @@
 using Serilog;
 using System;
 using System.IO;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
 using System.Runtime.InteropServices;
 
 namespace DBADashService

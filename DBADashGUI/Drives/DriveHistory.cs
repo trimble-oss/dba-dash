@@ -124,14 +124,14 @@ namespace DBADashGUI.Drives
                     PointGeometrySize = PointSize,
                     Values = v
                 }
-                ); ;
+                );
             }
             chart1.AxisX.Clear();
             chart1.AxisY.Clear();
             chart1.AxisX.Add(new Axis
             {
                 Title = "Time",
-                LabelFormatter = val => new System.DateTime((long)val).ToString(DateFormat)
+                LabelFormatter = val => new DateTime((long)val).ToString(DateFormat)
             });
             chart1.AxisY.Add(new Axis
             {
@@ -162,7 +162,7 @@ namespace DBADashGUI.Drives
 
         private void Days_Click(object sender, EventArgs e)
         {
-            Days = int.Parse((string)((ToolStripMenuItem)sender).Tag);
+            Days = int.Parse(((string)((ToolStripMenuItem)sender).Tag)!);
             SetTimeChecked();
             RefreshData();
         }

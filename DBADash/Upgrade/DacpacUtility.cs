@@ -51,21 +51,21 @@ namespace DacpacUtility
 
             var dacServiceInstance = new DacServices(connectionString);
             dacServiceInstance.ProgressChanged +=
-              new EventHandler<DacProgressEventArgs>((s, e) =>
+              (s, e) =>
               {
                   MessageList.Add(e.Message);
                   Log.Information(e.Message);
-              });
+              };
             dacServiceInstance.Message +=
-              new EventHandler<DacMessageEventArgs>((s, e) =>
+              (s, e) =>
               {
                   MessageList.Add(e.Message.Message);
                   Log.Information(e.Message.Message);
-              });
+              };
 
             try
             {
-                using (DacPackage dacpac = DacPackage.Load(dacpacName))
+                using (var dacpac = DacPackage.Load(dacpacName))
                 {
                     if (_dacDeployOptions.SqlCommandVariableValues.ContainsKey("VersionNumber"))
                     {
@@ -93,9 +93,9 @@ namespace DacpacUtility
             set => _dacDeployOptions = value;
         }
 
-        public static System.Version GetVersion(string dacpacName)
+        public static Version GetVersion(string dacpacName)
         {
-            using (DacPackage dacpac = DacPackage.Load(dacpacName))
+            using (var dacpac = DacPackage.Load(dacpacName))
             {
                 return dacpac.Version;
             }
@@ -110,15 +110,15 @@ namespace DacpacUtility
 
             var dacServiceInstance = new DacServices(connectionString);
             dacServiceInstance.ProgressChanged +=
-              new EventHandler<DacProgressEventArgs>((s, e) =>
-                            MessageList.Add(e.Message));
+              (s, e) =>
+                  MessageList.Add(e.Message);
             dacServiceInstance.Message +=
-              new EventHandler<DacMessageEventArgs>((s, e) =>
-                            MessageList.Add(e.Message.Message));
+              (s, e) =>
+                  MessageList.Add(e.Message.Message);
 
             try
             {
-                using (DacPackage dacpac = DacPackage.Load(dacpacName))
+                using (var dacpac = DacPackage.Load(dacpacName))
                 {
                     if (_dacDeployOptions.SqlCommandVariableValues.ContainsKey("VersionNumber"))
                     {

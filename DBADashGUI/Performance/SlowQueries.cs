@@ -9,7 +9,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DBADashGUI.Theme;
-using DocumentFormat.OpenXml.Bibliography;
 
 namespace DBADashGUI
 {
@@ -45,10 +44,10 @@ namespace DBADashGUI
 
         public bool CanNavigateBack => tsRunningBack.Visible && tsRunning.Enabled;
 
-        private long CPUFilterFrom => long.TryParse(txtCPUFrom.Text, out long value) ? value : -1;
-        private long CPUFilterTo => long.TryParse(txtCPUTo.Text, out long value) ? value : long.MaxValue;
-        private long DurationFilterFrom => long.TryParse(txtDurationFrom.Text, out long value) ? value : -1;
-        private long DurationFilterTo => long.TryParse(txtDurationTo.Text, out long value) ? value : long.MaxValue;
+        private long CPUFilterFrom => long.TryParse(txtCPUFrom.Text, out var value) ? value : -1;
+        private long CPUFilterTo => long.TryParse(txtCPUTo.Text, out var value) ? value : long.MaxValue;
+        private long DurationFilterFrom => long.TryParse(txtDurationFrom.Text, out var value) ? value : -1;
+        private long DurationFilterTo => long.TryParse(txtDurationTo.Text, out var value) ? value : long.MaxValue;
 
         private DateTime FromLocal = DateTime.MinValue;
         private DateTime ToLocal = DateTime.MaxValue;
@@ -203,7 +202,7 @@ namespace DBADashGUI
                     cmd.Parameters.AddStringIfNotNullOrEmpty("ClientHostName", txtClient.Text);
                     cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceDisplayName", txtInstance.Text);
                     cmd.Parameters.AddStringIfNotNullOrEmpty("ClientAppName", txtApp.Text);
-                    string db = DBName.Length > 0 ? DBName : txtDatabase.Text;
+                    var db = DBName.Length > 0 ? DBName : txtDatabase.Text;
                     cmd.Parameters.AddStringIfNotNullOrEmpty("DatabaseName", db);
                     cmd.Parameters.AddStringIfNotNullOrEmpty("ObjectName", txtObject.Text);
                     cmd.Parameters.AddStringIfNotNullOrEmpty("UserName", txtUser.Text);
@@ -272,7 +271,7 @@ namespace DBADashGUI
 
                     if (sqlbatchcompletedToolStripMenuItem.Checked && !rpccompletedToolStripMenuItem.Checked)
                     {
-                        cmd.Parameters.AddWithValue("Eventtype", "sql_batch_completed");
+                        cmd.Parameters.AddWithValue("EventType", "sql_batch_completed");
                     }
                     else if (rpccompletedToolStripMenuItem.Checked && !sqlbatchcompletedToolStripMenuItem.Checked)
                     {
@@ -303,7 +302,7 @@ namespace DBADashGUI
                         }
                     }
 
-                    int top = Convert.ToInt32(tsTop.Tag);
+                    var top = Convert.ToInt32(tsTop.Tag);
                     cmd.Parameters.AddWithValue("Top", top);
                     cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
 
@@ -314,10 +313,10 @@ namespace DBADashGUI
             });
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = context.InstanceIDs.ToList();
-            DBName = context.DatabaseName;
+            InstanceIDs = _context.InstanceIDs.ToList();
+            DBName = _context.DatabaseName;
             ResetFilters();
             RefreshData();
         }
@@ -411,7 +410,7 @@ namespace DBADashGUI
             {
                 if (int.TryParse(groupingInput, out grouping))
                 {
-                    groupBy = "timestamp." + grouping.ToString() + "." + DateHelper.UtcOffset;
+                    groupBy = "timestamp." + grouping + "." + DateHelper.UtcOffset;
                     timeCustomToolStripMenuItem.Tag = groupBy;
                     SelectGroupBy();
                     RefreshData();
@@ -442,66 +441,64 @@ namespace DBADashGUI
             if (e.RowIndex >= 0)
             {
                 var row = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
-                selectedGroupValue = row["Grp"] == DBNull.Value ? "" : Convert.ToString(row["Grp"]);
+                selectedGroupValue = row["Grp"] == DBNull.Value ? "" : Convert.ToString(row["Grp"]) ?? string.Empty;
                 if (dgvSummary.Columns[e.ColumnIndex] == Grp)
                 {
-                    if (groupBy == "InstanceDisplayName")
+                    switch (groupBy)
                     {
-                        txtInstance.Text = selectedGroupValue;
-                    }
-                    else if (groupBy == "client_hostname")
-                    {
-                        txtClient.Text = selectedGroupValue;
-                    }
-                    else if (groupBy == "client_app_name")
-                    {
-                        txtApp.Text = selectedGroupValue;
-                    }
-                    else if (groupBy == "DatabaseName")
-                    {
-                        txtDatabase.Text = selectedGroupValue;
-                    }
-                    else if (groupBy == "object_name")
-                    {
-                        txtObject.Text = selectedGroupValue;
-                    }
-                    else if (groupBy == "username")
-                    {
-                        txtUser.Text = selectedGroupValue;
-                    }
-                    else if (groupBy == "Result")
-                    {
-                        txtResult.Text = selectedGroupValue;
-                    }
-                    else if (groupBy == "text")
-                    {
-                        txtText.Text = selectedGroupValue;
-                    }
-                    else if (groupBy == "session_id")
-                    {
-                        txtSessionID.Text = selectedGroupValue;
-                    }
-                    else if (groupBy == "EventType")
-                    {
-                        sqlbatchcompletedToolStripMenuItem.Checked = selectedGroupValue == "sql_batch_completed";
-                        rpccompletedToolStripMenuItem.Checked = selectedGroupValue == "rpc_completed";
-                    }
-                    else if (groupBy.StartsWith("timestamp"))
-                    {
-                        var mins = int.Parse(groupBy.Split(".")[1]);
+                        case "InstanceDisplayName":
+                            txtInstance.Text = selectedGroupValue;
+                            break;
+                        case "client_hostname":
+                            txtClient.Text = selectedGroupValue;
+                            break;
+                        case "client_app_name":
+                            txtApp.Text = selectedGroupValue;
+                            break;
+                        case "DatabaseName":
+                            txtDatabase.Text = selectedGroupValue;
+                            break;
+                        case "object_name":
+                            txtObject.Text = selectedGroupValue;
+                            break;
+                        case "username":
+                            txtUser.Text = selectedGroupValue;
+                            break;
+                        case "Result":
+                            txtResult.Text = selectedGroupValue;
+                            break;
+                        case "text":
+                            txtText.Text = selectedGroupValue;
+                            break;
+                        case "session_id":
+                            txtSessionID.Text = selectedGroupValue;
+                            break;
+                        case "EventType":
+                            sqlbatchcompletedToolStripMenuItem.Checked = selectedGroupValue == "sql_batch_completed";
+                            rpccompletedToolStripMenuItem.Checked = selectedGroupValue == "rpc_completed";
+                            break;
+                        default:
+                        {
+                            if (groupBy.StartsWith("timestamp"))
+                            {
+                                var mins = int.Parse(groupBy.Split(".")[1]);
 
-                        FromLocal = Convert.ToDateTime(row["Grp"]).AddMinutes(-DateHelper.UtcOffset);
-                        ToLocal = FromLocal.AddMinutes(mins);
-                        timeToolStripMenuItem.Text = $"Time {FromLocal.ToAppTimeZone()} to {ToLocal.ToAppTimeZone()}";
-                        timeToolStripMenuItem.Enabled = true;
-                    }
-                    else if (groupBy == "context_info")
-                    {
-                        txtContextInfo.Text = selectedGroupValue;
-                    }
-                    else
-                    {
-                        throw new Exception($"Invalid group by: {groupBy}");
+                                FromLocal = Convert.ToDateTime(row["Grp"]).AddMinutes(-DateHelper.UtcOffset);
+                                ToLocal = FromLocal.AddMinutes(mins);
+                                timeToolStripMenuItem.Text = $"Time {FromLocal.ToAppTimeZone()} to {ToLocal.ToAppTimeZone()}";
+                                timeToolStripMenuItem.Enabled = true;
+                            }
+                            else if (groupBy == "context_info")
+                            {
+                                txtContextInfo.Text = selectedGroupValue;
+                            }
+                            else
+                            {
+                                throw new Exception($"Invalid group by: {groupBy}");
+                            }
+
+                            break;
+                        }
                     }
 
                     if (txtInstance.Text.Length == 0 && _db.Length == 0)
@@ -550,7 +547,7 @@ namespace DBADashGUI
                 }
                 else if (dgvSummary.Columns[e.ColumnIndex] == _1hrPlus)
                 {
-                    LoadSlowQueriesDetail(3600, -1);
+                    LoadSlowQueriesDetail(3600);
                 }
                 else if (dgvSummary.Columns[e.ColumnIndex] == _30to60min)
                 {
@@ -622,19 +619,19 @@ namespace DBADashGUI
                     cmd.Parameters.AddWithValue("ResultFailed", true);
                 }
 
-                DateTime from = From;
-                DateTime to = To;
-                string displayName = txtInstance.Text;
-                string client = txtClient.Text;
-                string user = txtUser.Text;
-                string db = DBName.Length > 0 ? DBName : txtDatabase.Text;
-                string objectname = txtObject.Text;
-                string app = txtApp.Text;
-                string result = txtResult.Text;
-                string text = txtText.Text;
-                string sessionid = txtSessionID.Text;
-                string eventType = "";
-                string contextInfo = txtContextInfo.Text;
+                var from = From;
+                var to = To;
+                var displayName = txtInstance.Text;
+                var client = txtClient.Text;
+                var user = txtUser.Text;
+                var db = DBName.Length > 0 ? DBName : txtDatabase.Text;
+                var objectName = txtObject.Text;
+                var app = txtApp.Text;
+                var result = txtResult.Text;
+                var text = txtText.Text;
+                var sessionId = txtSessionID.Text;
+                var eventType = "";
+                var contextInfo = txtContextInfo.Text;
                 if (sqlbatchcompletedToolStripMenuItem.Checked && !rpccompletedToolStripMenuItem.Checked)
                 {
                     eventType = "sql_batch_completed";
@@ -644,68 +641,66 @@ namespace DBADashGUI
                     eventType = "rpc_completed";
                 }
 
-                if (groupBy == "InstanceDisplayName")
+                switch (groupBy)
                 {
-                    displayName = selectedGroupValue;
-                }
-                else if (groupBy == "client_hostname")
-                {
-                    client = selectedGroupValue;
-                }
-                else if (groupBy == "client_app_name")
-                {
-                    app = selectedGroupValue;
-                }
-                else if (groupBy == "DatabaseName")
-                {
-                    db = selectedGroupValue;
-                }
-                else if (groupBy == "object_name")
-                {
-                    objectname = selectedGroupValue;
-                }
-                else if (groupBy == "username")
-                {
-                    user = selectedGroupValue;
-                }
-                else if (groupBy == "Result")
-                {
-                    result = selectedGroupValue;
-                }
-                else if (groupBy == "text")
-                {
-                    text = selectedGroupValue;
-                }
-                else if (groupBy == "session_id")
-                {
-                    sessionid = selectedGroupValue;
-                }
-                else if (groupBy == "EventType")
-                {
-                    eventType = selectedGroupValue;
-                }
-                else if (groupBy.StartsWith("timestamp"))
-                {
-                    var mins = int.Parse(groupBy.Split(".")[1]);
+                    case "InstanceDisplayName":
+                        displayName = selectedGroupValue;
+                        break;
+                    case "client_hostname":
+                        client = selectedGroupValue;
+                        break;
+                    case "client_app_name":
+                        app = selectedGroupValue;
+                        break;
+                    case "DatabaseName":
+                        db = selectedGroupValue;
+                        break;
+                    case "object_name":
+                        objectName = selectedGroupValue;
+                        break;
+                    case "username":
+                        user = selectedGroupValue;
+                        break;
+                    case "Result":
+                        result = selectedGroupValue;
+                        break;
+                    case "text":
+                        text = selectedGroupValue;
+                        break;
+                    case "session_id":
+                        sessionId = selectedGroupValue;
+                        break;
+                    case "EventType":
+                        eventType = selectedGroupValue;
+                        break;
+                    default:
+                    {
+                        if (groupBy.StartsWith("timestamp"))
+                        {
+                            var mins = int.Parse(groupBy.Split(".")[1]);
 
-                    var dateGroupFrom = Convert.ToDateTime(selectedGroupValue).AddMinutes(-DateHelper.UtcOffset);
-                    var dateGroupTo = dateGroupFrom.AddMinutes(mins);
-                    from = dateGroupFrom > From ? dateGroupFrom : From;
-                    to = dateGroupTo < To ? dateGroupTo : To;
-                }
-                else if (groupBy == "context_info")
-                {
-                    contextInfo = selectedGroupValue;
-                }
-                else
-                {
-                    throw new Exception($"Invalid group by: {groupBy}");
+                            var dateGroupFrom = Convert.ToDateTime(selectedGroupValue).AddMinutes(-DateHelper.UtcOffset);
+                            var dateGroupTo = dateGroupFrom.AddMinutes(mins);
+                            from = dateGroupFrom > From ? dateGroupFrom : From;
+                            to = dateGroupTo < To ? dateGroupTo : To;
+                        }
+                        else if (groupBy == "context_info")
+                        {
+                            contextInfo = selectedGroupValue;
+                        }
+                        else
+                        {
+                            throw new Exception($"Invalid group by: {groupBy}");
+                        }
+
+                        break;
+                    }
                 }
 
-                long cpuFromMs = Math.Max(cpuFrom, CPUFilterFrom);
-                long cpuToMs = Math.Min(cpuTo, CPUFilterTo);
-                long durationFromMs = Math.Max(durationFrom, DurationFilterFrom);
-                long durationToMs = Math.Min(durationTo, DurationFilterTo);
+                var cpuFromMs = Math.Max(cpuFrom, CPUFilterFrom);
+                var cpuToMs = Math.Min(cpuTo, CPUFilterTo);
+                var durationFromMs = Math.Max(durationFrom, DurationFilterFrom);
+                var durationToMs = Math.Min(durationTo, DurationFilterTo);
 
                 cmd.Parameters.AddWithValue("FromDate", from);
                 cmd.Parameters.AddWithValue("ToDate", to);
@@ -717,11 +712,11 @@ namespace DBADashGUI
                 cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceDisplayName", displayName);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("ClientAppName", app);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("DatabaseName", db);
-                cmd.Parameters.AddStringIfNotNullOrEmpty("ObjectName", objectname);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ObjectName", objectName);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("UserName", user);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("Text", text);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("Result", result);
-                cmd.Parameters.AddStringIfNotNullOrEmpty("SessionID", sessionid);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("SessionID", sessionId);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeClientAppName", txtExcludeApp.Text);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeClientHostName", txtExcludeClient.Text);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeDatabaseName", txtExcludeDatabase.Text);
@@ -797,10 +792,10 @@ namespace DBADashGUI
 
         private void LoadSlowQueriesDetail(int metricFrom = -1, int metricTo = -1, bool failed = false)
         {
-            long durationFrom = !IsCPU && metricFrom > 0 ? Convert.ToInt64(metricFrom) * 1000 : -1;
-            long durationTo = !IsCPU && metricTo > 0 ? Convert.ToInt64(metricTo) * 1000 : long.MaxValue;
-            long cpuFrom = IsCPU && metricFrom > 0 ? Convert.ToInt64(metricFrom) * 1000 : -1;
-            long cpuTo = IsCPU && metricTo > 0 ? Convert.ToInt64(metricTo) * 1000 : long.MaxValue;
+            var durationFrom = !IsCPU && metricFrom > 0 ? Convert.ToInt64(metricFrom) * 1000 : -1;
+            var durationTo = !IsCPU && metricTo > 0 ? Convert.ToInt64(metricTo) * 1000 : long.MaxValue;
+            var cpuFrom = IsCPU && metricFrom > 0 ? Convert.ToInt64(metricFrom) * 1000 : -1;
+            var cpuTo = IsCPU && metricTo > 0 ? Convert.ToInt64(metricTo) * 1000 : long.MaxValue;
             var dt = GetSlowQueriesDetail(durationFrom, durationTo, cpuFrom, cpuTo, failed);
             dt.Columns.Add("text_trunc", typeof(string));
             foreach (DataRow r in dt.Rows)
@@ -852,18 +847,18 @@ namespace DBADashGUI
             if (e.RowIndex >= 0)
             {
                 var row = (DataRowView)dgvSlow.Rows[e.RowIndex].DataBoundItem;
-                int sessionID = Convert.ToInt32(row["session_id"]);
-                DateTime timestamp = Convert.ToDateTime(row["timestamp"]);
+                var sessionID = Convert.ToInt32(row["session_id"]);
+                var timestamp = Convert.ToDateTime(row["timestamp"]);
                 if (dgvSlow.Columns[e.ColumnIndex] == colText)
                 {
-                    string title = "SPID: " + sessionID + ", " + timestamp.ToString(CultureInfo.CurrentCulture);
+                    var title = "SPID: " + sessionID + ", " + timestamp.ToString(CultureInfo.CurrentCulture);
                     Common.ShowCodeViewer((string)row["Text"], title);
                 }
                 else if (dgvSlow.Columns[e.ColumnIndex] == colSessionID)
                 {
-                    DateTime toDate = timestamp.AppTimeZoneToUtc();
-                    DateTime fromDate = Convert.ToDateTime(row["start_time"]).AppTimeZoneToUtc();
-                    int instanceID = Convert.ToInt32(row["InstanceID"]);
+                    var toDate = timestamp.AppTimeZoneToUtc();
+                    var fromDate = Convert.ToDateTime(row["start_time"]).AppTimeZoneToUtc();
+                    var instanceID = Convert.ToInt32(row["InstanceID"]);
                     ToggleSummary(false);
                     runningQueries1.SessionID = sessionID;
                     runningQueries1.SnapshotDateFrom = fromDate;
@@ -982,7 +977,7 @@ namespace DBADashGUI
             {
                 RefreshData();
             }
-            else if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar) && !(e.KeyChar == ','))
+            else if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar) && e.KeyChar != ',')
             {
                 e.Handled = true;
             }
@@ -990,7 +985,7 @@ namespace DBADashGUI
 
         private void DgvSlow_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var r = dgvSlow.Rows[idx];
                 var status = Convert.ToString(r.Cells["Result"].Value) == "0 - OK"
@@ -1006,7 +1001,7 @@ namespace DBADashGUI
             loadSavedToolStripMenuItem.Enabled = false;
             try
             {
-                SlowQueryDetailSavedView saved = SlowQueryDetailSavedView.GetDefaultSavedView();
+                var saved = SlowQueryDetailSavedView.GetDefaultSavedView();
 
                 if (saved != null)
                 {
@@ -1060,7 +1055,7 @@ namespace DBADashGUI
         {
             try
             {
-                SlowQueryDetailSavedView saved = SlowQueryDetailSavedView.GetDefaultSavedView();
+                var saved = SlowQueryDetailSavedView.GetDefaultSavedView();
                 if (saved != null)
                 {
                     if (MessageBox.Show("Remove saved layout?", "Reset", MessageBoxButtons.YesNo,

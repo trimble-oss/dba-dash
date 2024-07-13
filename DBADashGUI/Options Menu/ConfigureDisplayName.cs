@@ -18,7 +18,7 @@ namespace DBADashGUI
         public string SearchString { get; set; }
 
         public int EditCount => _editCount;
-        private int _editCount = 0;
+        private int _editCount;
 
         private void ConfigureDisplayName_Load(object sender, EventArgs e)
         {

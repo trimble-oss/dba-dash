@@ -11,7 +11,7 @@ namespace DBADashGUI
     internal class PerformanceSummarySavedView : SavedView
     {
 
-        public override SavedView.ViewTypes Type => SavedView.ViewTypes.PerformanceSummary;
+        public override ViewTypes Type => ViewTypes.PerformanceSummary;
 
         public Dictionary<int, Counter> SelectedPerformanceCounters = new();
         public List<KeyValuePair<string, PersistedColumnLayout>> ColumnLayout;

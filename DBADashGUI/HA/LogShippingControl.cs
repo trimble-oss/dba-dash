@@ -37,17 +37,17 @@ namespace DBADashGUI.LogShipping
             get => statusFilterToolStrip1.OK; set => statusFilterToolStrip1.OK = value;
         }
 
-        public bool CanNavigateBack { get => tsBack.Enabled; }
+        public bool CanNavigateBack => tsBack.Enabled;
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            this.context = context;
-            IncludeNA = context.RegularInstanceIDs.Count == 1;
-            IncludeOK = context.RegularInstanceIDs.Count == 1;
+            this.context = _context;
+            IncludeNA = _context.RegularInstanceIDs.Count == 1;
+            IncludeOK = _context.RegularInstanceIDs.Count == 1;
             IncludeWarning = true;
             IncludeCritical = true;
-            InstanceIDs = context.RegularInstanceIDs.ToList();
-            tsTrigger.Visible = context.CanMessage;
+            InstanceIDs = _context.RegularInstanceIDs.ToList();
+            tsTrigger.Visible = _context.CanMessage;
             lblStatus.Text = "";
             RefreshData();
         }
@@ -106,9 +106,9 @@ namespace DBADashGUI.LogShipping
 
         public void RefreshData()
         {
-            if (this.InvokeRequired)
+            if (InvokeRequired)
             {
-                this.Invoke(RefreshData);
+                Invoke(RefreshData);
                 return;
             }
             RefreshSummary();

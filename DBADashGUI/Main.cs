@@ -9,19 +9,10 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Printing.IndexedProperties;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using CommandLine;
-using DBADash.Messaging;
-using DBADashGUI.CustomReports;
 using DBADashGUI.Theme;
-using DocumentFormat.OpenXml.Bibliography;
 using Humanizer;
-using ICSharpCode.AvalonEdit.Utils;
-using Microsoft.SqlServer.Management.SqlParser.SqlCodeDom;
 using Version = System.Version;
 
 namespace DBADashGUI
@@ -43,10 +34,10 @@ namespace DBADashGUI
         public Main(CommandLineOptions opts)
         {
             Application.AddMessageFilter(this);
-            this.FormClosed += (s, e) => Application.RemoveMessageFilter(this);
+            FormClosed += (s, e) => Application.RemoveMessageFilter(this);
             InitializeComponent();
             commandLine = opts;
-            this.Disposed += OnDispose;
+            Disposed += OnDispose;
         }
 
         private void OnDispose(object sender, EventArgs e)
@@ -58,36 +49,30 @@ namespace DBADashGUI
         private int currentPage = 1;
         private int currentPageSize = 100;
         private readonly DiffControl diffSchemaSnapshot = new();
-        private bool suppressLoadTab = false;
+        private bool suppressLoadTab;
 
-        private bool CurrentTabSupportsDayOfWeekFilter
-        {
-            get => (new List<TabPage>()
-                    { tabPerformanceSummary, tabPerformance, tabPC, tabObjectExecutionSummary, tabWaits })
-                .Contains(tabs.SelectedTab);
-        }
+        private bool CurrentTabSupportsDayOfWeekFilter =>
+            (new List<TabPage>()
+                { tabPerformanceSummary, tabPerformance, tabPC, tabObjectExecutionSummary, tabWaits })
+            .Contains(tabs.SelectedTab);
 
-        private bool CurrentTabSupportsTimeOfDayFilter
-        {
-            get => (new List<TabPage>()
-                    { tabPerformanceSummary, tabPerformance, tabPC, tabObjectExecutionSummary, tabWaits })
-                .Contains(tabs.SelectedTab);
-        }
+        private bool CurrentTabSupportsTimeOfDayFilter =>
+            (new List<TabPage>()
+                { tabPerformanceSummary, tabPerformance, tabPC, tabObjectExecutionSummary, tabWaits })
+            .Contains(tabs.SelectedTab);
 
-        private bool GlobalTimeIsVisible
-        {
-            get => (new List<TabPage>()
+        private bool GlobalTimeIsVisible =>
+            (new List<TabPage>()
             {
                 tabPerformanceSummary, tabPerformance, tabSlowQueries, tabAzureDB, tabAzureSummary, tabPC,
                 tabObjectExecutionSummary, tabWaits, tabRunningQueries, tabMemory, tabJobStats, tabJobTimeline, tabDrivePerformance, tabTopQueries
             }).Contains(tabs.SelectedTab) || (tabs.SelectedTab == tabCustomReport && ((SQLTreeItem)tv1.SelectedNode).Report.TimeFilterSupported);
-        }
 
         private bool IsAzureOnly;
-        private bool ShowCounts = false;
+        private bool ShowCounts;
         private string GroupByTag = string.Empty;
         private readonly List<TreeContext> VisitedNodes = new();
-        private bool suppressSaveContext = false;
+        private bool suppressSaveContext;
 
         /// <summary>
         ///  For PreFilterMessage.  Mouse down button.
@@ -108,7 +93,7 @@ namespace DBADashGUI
         {
             get
             {
-                string searchString = string.Empty;
+                var searchString = string.Empty;
                 if (txtSearch.Text.Trim().Length > 0)
                 {
                     searchString = "%" + txtSearch.Text.Trim() + "%";
@@ -166,7 +151,7 @@ namespace DBADashGUI
             await SetConnection(repositories.GetDefaultConnection());
             this.ApplyTheme();
             CheckTheme();
-            this.WindowState = FormWindowState.Maximized;
+            WindowState = FormWindowState.Maximized;
             if (splitMain.SplitterDistance > 400)
             {
                 splitMain.SplitterDistance = 400;
@@ -244,7 +229,6 @@ namespace DBADashGUI
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
             }
         }
 
@@ -267,7 +251,7 @@ namespace DBADashGUI
         /// <returns>True if connection succeeded</returns>
         private static bool CheckRepositoryDBConnection(string connectionString)
         {
-            bool connectionCheckPassed = false;
+            var connectionCheckPassed = false;
             while (!connectionCheckPassed)
             {
                 try
@@ -307,7 +291,7 @@ namespace DBADashGUI
                     "Upgrade GUI", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (promptUpgrade == DialogResult.Yes)
                 {
-                    string tag = dbVersion.ToString(3);
+                    var tag = dbVersion.ToString(3);
                     await Upgrade.UpgradeDBADashAsync(tag, true);
                     Application.Exit();
                 }
@@ -353,7 +337,7 @@ namespace DBADashGUI
             // tabs.SelectedTab?.ApplyTheme();
             SaveContext();
 
-            SQLTreeItem n = tv1.SelectedSQLTreeItem();
+            var n = tv1.SelectedSQLTreeItem();
             if (n == null)
             {
                 return;
@@ -371,7 +355,7 @@ namespace DBADashGUI
             }
             else
             {
-                foreach (ISetContext ctrl in tabs.SelectedTab.Controls.OfType<ISetContext>())
+                foreach (var ctrl in tabs.SelectedTab.Controls.OfType<ISetContext>())
                 {
                     ctrl.SetContext(n.Context);
                 }
@@ -413,21 +397,21 @@ namespace DBADashGUI
 
             root.AddReportsFolder(customReports.RootLevelReports);
 
-            SQLTreeItem parentNode = root;
+            var parentNode = root;
 
             var tags = string.Join(",", SelectedTags());
 
             CommonData.UpdateInstancesList(tagIDs: tags, searchString: SearchString, groupByTag: GroupByTag);
 
             SQLTreeItem AzureNode = null;
-            string currentTagGroup = string.Empty;
+            var currentTagGroup = string.Empty;
             foreach (DataRow row in CommonData.Instances.Rows)
             {
-                string instance = (string)row["Instance"];
-                string displayName = (string)row["InstanceDisplayName"];
-                int instanceID = (int)row["InstanceID"];
-                bool showInSummary = (bool)row["ShowInSummary"];
-                string tagGroup = Convert.ToString(row["TagGroup"]);
+                var instance = (string)row["Instance"];
+                var displayName = (string)row["InstanceDisplayName"];
+                var instanceID = (int)row["InstanceID"];
+                var showInSummary = (bool)row["ShowInSummary"];
+                var tagGroup = Convert.ToString(row["TagGroup"]);
 
                 if (currentTagGroup != tagGroup && !string.IsNullOrEmpty(tagGroup))
                 {
@@ -518,7 +502,7 @@ namespace DBADashGUI
 
             if (ShowCounts) // Show count of instances for the grouping
             {
-                foreach (SQLTreeItem n in root.Nodes.Cast<SQLTreeItem>()
+                foreach (var n in root.Nodes.Cast<SQLTreeItem>()
                              .Where(t => t.Type == SQLTreeItem.TreeType.InstanceFolder))
                 {
                     n.Text += "    {" + n.Nodes.Cast<SQLTreeItem>().Count(child => child.Type is SQLTreeItem.TreeType.Instance or SQLTreeItem.TreeType.AzureInstance) + "}";
@@ -612,9 +596,9 @@ namespace DBADashGUI
                 {
                     while (rdr.Read())
                     {
-                        string db = (string)rdr["name"];
-                        string status = (string)rdr["Status"];
-                        string nodeName = string.IsNullOrEmpty(status) ? db : db + " (" + status + ")";
+                        var db = (string)rdr["name"];
+                        var status = (string)rdr["Status"];
+                        var nodeName = string.IsNullOrEmpty(status) ? db : db + " (" + status + ")";
 
                         var n = new SQLTreeItem(nodeName, SQLTreeItem.TreeType.Database)
                         {
@@ -628,7 +612,7 @@ namespace DBADashGUI
                         }
 
                         n.AddDummyNode();
-                        if ((new string[] { "master", "model", "msdb", "tempdb" }).Contains((string)rdr[1]))
+                        if (systemDatabases.Contains((string)rdr[1]))
                         {
                             systemNode.Nodes.Add(n);
                         }
@@ -645,10 +629,10 @@ namespace DBADashGUI
 
         private static void ExpandObjects(SQLTreeItem n)
         {
-            DataTable dbobj = CommonData.GetDBObjects(n.DatabaseID, (string)n.Tag);
-            foreach (DataRow r in dbobj.Rows)
+            var dbObj = CommonData.GetDBObjects(n.DatabaseID, (string)n.Tag);
+            foreach (DataRow r in dbObj.Rows)
             {
-                string type = ((string)r[1]).Trim();
+                var type = ((string)r[1]).Trim();
                 var objN = new SQLTreeItem((string)r[3], (string)r[2], type)
                 {
                     ObjectID = (long)r[0]
@@ -662,22 +646,21 @@ namespace DBADashGUI
             List<TabPage> allowedTabs = new();
             var n = tv1.SelectedSQLTreeItem();
             var parent = n.SQLTreeItemParent;
-            bool hasAzureDBs = n.AzureInstanceIDs.Count > 0;
-
+            var hasAzureDBs = n.AzureInstanceIDs.Count > 0;
 
             if (n.Type is SQLTreeItem.TreeType.DBADashRoot or SQLTreeItem.TreeType.InstanceFolder)
             {
-                allowedTabs.AddRange(new TabPage[] { tabSummary, tabPerformanceSummary });
+                allowedTabs.AddRange(new[] { tabSummary, tabPerformanceSummary });
                 if (hasAzureDBs)
                 {
                     allowedTabs.Add(tabAzureSummary);
                 }
 
-                allowedTabs.AddRange(new TabPage[] { tabSlowQueries, tabRunningQueries });
+                allowedTabs.AddRange(new[] { tabSlowQueries, tabRunningQueries });
             }
             else if (n.Type == SQLTreeItem.TreeType.Database)
             {
-                allowedTabs.AddRange(new TabPage[]
+                allowedTabs.AddRange(new[]
                 {
                     tabPerformance, tabObjectExecutionSummary, tabSlowQueries, tabFiles, tabSnapshotsSummary,
                     tabDBSpace, tabDBConfiguration, tabDBOptions, tabTopQueries
@@ -685,7 +668,7 @@ namespace DBADashGUI
             }
             else if (n.Type == SQLTreeItem.TreeType.AzureDatabase)
             {
-                allowedTabs.AddRange(new TabPage[]
+                allowedTabs.AddRange(new[]
                 {
                     tabPerformance, tabAzureSummary, tabAzureDB, tabPC, tabSlowQueries, tabObjectExecutionSummary,
                     tabWaits, tabRunningQueries, tabFiles, tabTopQueries
@@ -693,7 +676,7 @@ namespace DBADashGUI
             }
             else if (n.Type == SQLTreeItem.TreeType.Instance)
             {
-                allowedTabs.AddRange(new TabPage[]
+                allowedTabs.AddRange(new[]
                 {
                     tabPerformanceSummary, tabPerformance, tabPC, tabObjectExecutionSummary, tabSlowQueries, tabWaits,
                     tabRunningQueries, tabMemory,tabTopQueries
@@ -701,14 +684,14 @@ namespace DBADashGUI
             }
             else if (n.Type == SQLTreeItem.TreeType.AzureInstance)
             {
-                allowedTabs.AddRange(new TabPage[]
+                allowedTabs.AddRange(new[]
                 {
                     tabPerformanceSummary, tabAzureSummary, tabSlowQueries, tabObjectExecutionSummary, tabRunningQueries
                 });
             }
             else if (n.Type == SQLTreeItem.TreeType.ElasticPool)
             {
-                allowedTabs.AddRange(new TabPage[]
+                allowedTabs.AddRange(new[]
                 {
                     tabAzureDB, tabPerformanceSummary, tabAzureSummary, tabSlowQueries, tabObjectExecutionSummary, tabRunningQueries, tabDBSpace
                 });
@@ -723,7 +706,7 @@ namespace DBADashGUI
                 if (parent.Type != SQLTreeItem.TreeType.AzureDatabase &&
                     parent.Type != SQLTreeItem.TreeType.AzureInstance && !IsAzureOnly)
                 {
-                    allowedTabs.AddRange(new TabPage[]
+                    allowedTabs.AddRange(new[]
                     {
                         tabInstanceConfig, tabTraceFlags, tabHardware, tabSQLPatching, tabAlerts, tabDrivers, tabTempDB,
                         tabRG
@@ -732,34 +715,34 @@ namespace DBADashGUI
 
                 if (parent.Type != SQLTreeItem.TreeType.Instance && hasAzureDBs)
                 {
-                    allowedTabs.AddRange(new TabPage[] { tabServiceObjectives, tabAzureDBesourceGovernance });
+                    allowedTabs.AddRange(new[] { tabServiceObjectives, tabAzureDBesourceGovernance });
                 }
 
-                allowedTabs.AddRange(new TabPage[] { tabDBConfiguration, tabDBOptions, tabQS, tabTags });
+                allowedTabs.AddRange(new[] { tabDBConfiguration, tabDBOptions, tabQS, tabTags });
             }
             else if (n.Type == SQLTreeItem.TreeType.AgentJobs)
             {
                 allowedTabs.AddRange(parent.Type is SQLTreeItem.TreeType.DBADashRoot or SQLTreeItem.TreeType.InstanceFolder
-                    ? new TabPage[] { tabJobs, tabRunningJobs }
-                    : new TabPage[] { tabJobs, tabJobStats, tabJobTimeline, tabRunningJobs });
+                    ? new[] { tabJobs, tabRunningJobs }
+                    : new[] { tabJobs, tabJobStats, tabJobTimeline, tabRunningJobs });
             }
             else if (n.Type == SQLTreeItem.TreeType.AgentJob)
             {
-                allowedTabs.AddRange(new TabPage[] { tabJobs, tabJobDDL, tabJobStats, tabJobTimeline });
+                allowedTabs.AddRange(new[] { tabJobs, tabJobDDL, tabJobStats, tabJobTimeline });
             }
             else if (n.Type == SQLTreeItem.TreeType.HADR)
             {
-                allowedTabs.AddRange(new TabPage[] { tabBackups, tabLogShipping, tabMirroring, tabAG });
+                allowedTabs.AddRange(new[] { tabBackups, tabLogShipping, tabMirroring, tabAG });
             }
             else if (n.Type == SQLTreeItem.TreeType.DBAChecks)
             {
                 allowedTabs.Add(tabSummary);
                 if (!IsAzureOnly && parent.Type != SQLTreeItem.TreeType.AzureInstance)
                 {
-                    allowedTabs.AddRange(new TabPage[] { tabLastGood, tabOSLoadedModules });
+                    allowedTabs.AddRange(new[] { tabLastGood, tabOSLoadedModules });
                 }
 
-                allowedTabs.AddRange(new TabPage[]
+                allowedTabs.AddRange(new[]
                 {
                     tabDBADashErrorLog, tabCollectionDates, tabCustomChecks, tabSnapshotsSummary,
                     tabIdentityColumns
@@ -771,7 +754,7 @@ namespace DBADashGUI
             }
             else if (n.Type == SQLTreeItem.TreeType.AgentJobStep)
             {
-                allowedTabs.AddRange(new TabPage[] { tabJobs, tabJobStats });
+                allowedTabs.AddRange(new[] { tabJobs, tabJobStats });
             }
             else if (n.Type == SQLTreeItem.TreeType.DatabasesFolder)
             {
@@ -781,7 +764,7 @@ namespace DBADashGUI
             {
                 if (!IsAzureOnly && parent.Type != SQLTreeItem.TreeType.AzureInstance)
                 {
-                    allowedTabs.AddRange(new TabPage[] { tabDrives, tabDBSpace, tabFiles, tabTempDB, tabTableSize });
+                    allowedTabs.AddRange(new[] { tabDrives, tabDBSpace, tabFiles, tabTempDB, tabTableSize });
                     if (n.InstanceID > 0)
                     {
                         allowedTabs.Add(tabDrivePerformance);
@@ -789,12 +772,12 @@ namespace DBADashGUI
                 }
                 else
                 {
-                    allowedTabs.AddRange(new TabPage[] { tabDBSpace, tabFiles, tabTableSize });
+                    allowedTabs.AddRange(new[] { tabDBSpace, tabFiles, tabTableSize });
                 }
             }
             else if (n.Type == SQLTreeItem.TreeType.Drive)
             {
-                allowedTabs.AddRange(new TabPage[] { tabDrives, tabFiles, tabDrivePerformance });
+                allowedTabs.AddRange(new[] { tabDrives, tabFiles, tabDrivePerformance });
             }
             else if (n.Type is SQLTreeItem.TreeType.CustomReport or SQLTreeItem.TreeType.SystemReport)
             {
@@ -813,7 +796,7 @@ namespace DBADashGUI
                     case SQLTreeItem.TreeType.StoredProcedure or SQLTreeItem.TreeType.CLRProcedure
                         or SQLTreeItem.TreeType.ScalarFunction or SQLTreeItem.TreeType.CLRScalarFunction
                         or SQLTreeItem.TreeType.Trigger or SQLTreeItem.TreeType.CLRTrigger:
-                        allowedTabs.AddRange(new TabPage[] { tabObjectExecutionSummary, tabPerformance });
+                        allowedTabs.AddRange(new[] { tabObjectExecutionSummary, tabPerformance });
                         break;
 
                     case SQLTreeItem.TreeType.Table:
@@ -851,20 +834,12 @@ namespace DBADashGUI
             suppressLoadTab = true; // Don't Load tab while adding/removing tabs
             var n = tv1.SelectedSQLTreeItem();
             tabAzureDB.Text = n.Type == SQLTreeItem.TreeType.ElasticPool ? "Pool" : "Azure DB";
-            List<TabPage> allowedTabs = GetAllowedTabs();
+            var allowedTabs = GetAllowedTabs();
 
-            this.Text = n.FriendlyFullPath;
+            Text = n.FriendlyFullPath;
 
             // Check if Tab pages match tabs currently loaded
-            bool validatedTabs = true;
-            if (allowedTabs.Count == tabs.TabPages.Count)
-            {
-                validatedTabs = !tabs.TabPages.Cast<TabPage>().Any(t => !allowedTabs.Contains(t));
-            }
-            else
-            {
-                validatedTabs = false;
-            }
+            var validatedTabs = allowedTabs.Count == tabs.TabPages.Count && tabs.TabPages.Cast<TabPage>().All(t => allowedTabs.Contains(t));
 
             // If tab pages don't match, clear tabs and reload
             if (!validatedTabs)
@@ -938,8 +913,8 @@ namespace DBADashGUI
 
         private void LoadDDL(long DDLID, long DDLIDOld)
         {
-            string newText = Common.DDL(DDLID);
-            string oldText = Common.DDL(DDLIDOld);
+            var newText = Common.DDL(DDLID);
+            var oldText = Common.DDL(DDLIDOld);
             diffSchemaSnapshot.OldText = oldText;
             diffSchemaSnapshot.NewText = newText;
         }
@@ -949,7 +924,7 @@ namespace DBADashGUI
             diffSchemaSnapshot.OldText = "";
             diffSchemaSnapshot.NewText = "";
             currentPageSize = int.Parse(tsPageSize.Text);
-            DataTable dt = CommonData.GetDDLHistoryForObject(ObjectID, PageNum, currentPageSize);
+            var dt = CommonData.GetDDLHistoryForObject(ObjectID, PageNum, currentPageSize);
 
             gvHistory.AutoGenerateColumns = false;
             gvHistory.DataSource = dt;
@@ -1004,13 +979,13 @@ namespace DBADashGUI
         {
             if (int.Parse(tsPageSize.Text) != currentPageSize)
             {
-                GetHistory(currentObjectID, 1);
+                GetHistory(currentObjectID);
             }
         }
 
         private void TsPageSize_Validating(object sender, CancelEventArgs e)
         {
-            _ = int.TryParse(tsPageSize.Text, out int i);
+            _ = int.TryParse(tsPageSize.Text, out var i);
             if (i <= 0)
             {
                 tsPageSize.Text = currentPageSize.ToString();
@@ -1021,13 +996,13 @@ namespace DBADashGUI
 
         #region Tagging
 
-        private bool isClearTags = false;
+        private bool isClearTags;
 
         private void BuildTagMenu(List<int> selected = null)
         {
             mnuTags.DropDownItems.Clear();
 
-            string currentTag = string.Empty;
+            var currentTag = string.Empty;
             ToolStripMenuItem mTagName = new();
             ToolStripMenuItem mSystemTags = new("System Tags");
             mSystemTags.Font = new Font(mSystemTags.Font, FontStyle.Italic);
@@ -1039,7 +1014,7 @@ namespace DBADashGUI
                 {
                     mTagName = new ToolStripMenuItem(tag.TagName);
 
-                    if (tag.TagName.StartsWith("{"))
+                    if (tag.TagName.StartsWith('{'))
                     {
                         mSystemTags.DropDownItems.Add(mTagName);
                     }
@@ -1085,7 +1060,7 @@ namespace DBADashGUI
         private void BuildGroupByTagMenu(ref List<DBADashTag> tags)
         {
             groupToolStripMenuItem.DropDownItems.Clear();
-            IEnumerable<string> tagNames = tags.Select(t => t.TagName).Distinct();
+            var tagNames = tags.Select(t => t.TagName).Distinct();
             ToolStripMenuItem mSystemTags = new("System Tags")
             { Font = new Font(groupToolStripMenuItem.Font, FontStyle.Italic) };
             ToolStripMenuItem mNone = new("[None]") { Tag = string.Empty };
@@ -1094,11 +1069,11 @@ namespace DBADashGUI
             mNone.Click += GroupByTag_Click;
             mShowCounts.Click += ShowCounts_Click;
             mSave.Click += SaveTreeLayout;
-            foreach (string tag in tagNames)
+            foreach (var tag in tagNames)
             {
                 ToolStripMenuItem mnu = new(tag) { Tag = tag };
                 mnu.Click += GroupByTag_Click;
-                if (tag.StartsWith("{"))
+                if (tag.StartsWith('{'))
                 {
                     mSystemTags.DropDownItems.Add(mnu);
                 }
@@ -1128,11 +1103,11 @@ namespace DBADashGUI
             GroupByTag = string.Empty;
             try
             {
-                var savedView = TreeSavedView.GetSavedViews(SavedView.ViewTypes.Tree, DBADashUser.UserID)
+                var savedView = SavedView.GetSavedViews(SavedView.ViewTypes.Tree, DBADashUser.UserID)
                     .Where(sv => sv.Key == SavedView.DefaultViewName);
                 if (savedView.Count() == 1)
                 {
-                    TreeSavedView treeView = TreeSavedView.Deserialize(savedView.First().Value);
+                    var treeView = TreeSavedView.Deserialize(savedView.First().Value);
                     GroupByTag = treeView.GroupByTag;
                     ShowCounts = treeView.ShowCounts;
                 }
@@ -1169,7 +1144,7 @@ namespace DBADashGUI
             ClearTags(mnuTags.DropDownItems);
             isClearTags = false;
             AddInstances();
-            this.Font = new Font(this.Font, FontStyle.Regular);
+            Font = new Font(Font, FontStyle.Regular);
         }
 
         private void ClearTags(ToolStripItemCollection items)
@@ -1193,22 +1168,18 @@ namespace DBADashGUI
             return SelectedTags(mnuTags.DropDownItems);
         }
 
-        private List<int> SelectedTags(ToolStripItemCollection items)
+        private static List<int> SelectedTags(ToolStripItemCollection items)
         {
             var selected = new List<int>();
-            foreach (ToolStripItem mnuTag in items)
+            foreach (var mnuTag in items.OfType<ToolStripMenuItem>())
             {
-                if (mnuTag.GetType() == typeof(ToolStripMenuItem))
+                if (mnuTag.Checked)
                 {
-                    if (((ToolStripMenuItem)mnuTag).Checked)
-                    {
-                        selected.Add((int)mnuTag.Tag);
-                    }
-
-                    if (((ToolStripMenuItem)mnuTag).DropDownItems.Count > 0)
-                    {
-                        selected.AddRange(SelectedTags(((ToolStripMenuItem)mnuTag).DropDownItems));
-                    }
+                    selected.Add((int)mnuTag.Tag!);
+                }
+                if (mnuTag.DropDownItems.Count > 0)
+                {
+                    selected.AddRange(SelectedTags(mnuTag.DropDownItems));
                 }
             }
 
@@ -1227,7 +1198,7 @@ namespace DBADashGUI
             SetCheckedItemsBold(mnuTags);
         }
 
-        public void SetCheckedItemsBold(ToolStripDropDownButton dropdownButton)
+        public static void SetCheckedItemsBold(ToolStripDropDownButton dropdownButton)
         {
             var hasCheckedChild = false;
 
@@ -1246,7 +1217,7 @@ namespace DBADashGUI
                 : new Font(dropdownButton.Font, dropdownButton.Font.Style & ~FontStyle.Bold);
         }
 
-        public bool ProcessMenuItem(ToolStripMenuItem menuItem)
+        public static bool ProcessMenuItem(ToolStripMenuItem menuItem)
         {
             var isCheckedOrHasCheckedChild = menuItem.Checked;
 
@@ -1273,7 +1244,7 @@ namespace DBADashGUI
 
         #endregion Tagging
 
-        private DataRetention DataRetentionForm = null;
+        private DataRetention DataRetentionForm;
 
         private void DataRetentionToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1384,9 +1355,9 @@ namespace DBADashGUI
 
         private void TsTime_Click(object sender, EventArgs e)
         {
-            string tag = (string)((ToolStripMenuItem)sender).Tag;
+            var tag = (string)((ToolStripMenuItem)sender).Tag;
             CheckTime(tag);
-            Performance.DateRange.SetMins(Convert.ToInt32(tag));
+            DateRange.SetMins(Convert.ToInt32(tag));
             DateRangeChanged();
         }
 
@@ -1426,7 +1397,7 @@ namespace DBADashGUI
         {
             UpdateTimeFilterVisibility();
 
-            foreach (IRefreshData ctrl in tabs.SelectedTab.Controls.OfType<IRefreshData>())
+            foreach (var ctrl in tabs.SelectedTab.Controls.OfType<IRefreshData>())
             {
                 ctrl.RefreshData();
             }
@@ -1445,7 +1416,7 @@ namespace DBADashGUI
             }
         }
 
-        private static ManageInstances ManageInstancesForm = null;
+        private static ManageInstances ManageInstancesForm;
 
         private void ManageInstancesToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1505,7 +1476,7 @@ namespace DBADashGUI
             AddInstances();
         }
 
-        private static DBDiff DBDiffForm = null;
+        private static DBDiff DBDiffForm;
 
         private void DatabaseSchemaDiffToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1522,7 +1493,7 @@ namespace DBADashGUI
             DBDiffForm.Show();
         }
 
-        private static JobDiff JobDiffForm = null;
+        private static JobDiff JobDiffForm;
 
         private void AgentJobDiffToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1545,7 +1516,7 @@ namespace DBADashGUI
             }
         }
 
-        private static ConfigureDisplayName ConfigureDisplayNameForm = null;
+        private static ConfigureDisplayName ConfigureDisplayNameForm;
 
         private void ConfigureDisplayNameToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1576,10 +1547,10 @@ namespace DBADashGUI
         private void DateToolStripMenuItem_Opening(object sender, EventArgs e)
         {
             dateToolStripMenuItem.DropDownItems.Clear();
-            for (int i = 0; i <= 14; i++)
+            for (var i = 0; i <= 14; i++)
             {
                 var date = DateHelper.AppNow.AddDays(-i).Date;
-                var daysAgo = i == 0 ? "Today" : i == 1 ? "Yesterday" : i.ToString() + " days ago";
+                var daysAgo = i == 0 ? "Today" : i == 1 ? "Yesterday" : i + " days ago";
                 var humanDateString = date.ToShortDateString() + " (" + date.DayOfWeek.ToString()[..3] + " - " +
                                       daysAgo + ")";
                 var dateItem = new ToolStripMenuItem(humanDateString)
@@ -1606,7 +1577,7 @@ namespace DBADashGUI
         // F5 to refresh
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            bool bHandled = false;
+            var bHandled = false;
             switch (keyData)
             {
                 case Keys.F5:
@@ -1787,7 +1758,7 @@ namespace DBADashGUI
         {
             if (m.Msg == WM_XBUTTONDOWN)
             {
-                int lowWord = (m.WParam.ToInt32() << 16) >> 16;
+                var lowWord = (m.WParam.ToInt32() << 16) >> 16;
                 switch (lowWord)
                 {
                     case MK_XBUTTON1:
@@ -1870,7 +1841,7 @@ namespace DBADashGUI
             tsConnect.DropDownItems.Clear();
             repositories ??= RepositoryConnectionList.GetRepositoryConnectionList();
 
-            foreach (RepositoryConnection connection in repositories)
+            foreach (var connection in repositories)
             {
                 var tsConnection = new ToolStripMenuItem() { Text = connection.Name, Tag = connection.Name, Image = Properties.Resources.Database_16x };
                 tsConnection.Click += TsConnection_Click;
@@ -1898,7 +1869,7 @@ namespace DBADashGUI
 
         private void TsSetDefault_Click(object sender, EventArgs e)
         {
-            string name = (string)((ToolStripMenuItem)sender).Tag;
+            var name = (string)((ToolStripMenuItem)sender).Tag;
             foreach (var connection in repositories)
             {
                 connection.IsDefault = connection.Name == name;
@@ -1909,9 +1880,9 @@ namespace DBADashGUI
 
         private void TsRename_Click(object sender, EventArgs e)
         {
-            string name = (string)((ToolStripMenuItem)sender).Tag;
+            var name = (string)((ToolStripMenuItem)sender).Tag;
             var connection = repositories.FindByName(name);
-            if (Common.ShowInputDialog(ref name, "Enter name") == DialogResult.OK)
+            if (CommonShared.ShowInputDialog(ref name, "Enter name") == DialogResult.OK)
             {
                 connection.Name = name;
                 repositories.Save();
@@ -1921,7 +1892,7 @@ namespace DBADashGUI
 
         private void TsRemove_Click(object sender, EventArgs e)
         {
-            string name = (string)((ToolStripItem)sender).Tag;
+            var name = (string)((ToolStripItem)sender).Tag;
             if (MessageBox.Show($"Remove connection {name}?", "Remove", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 repositories.Remove(name);
@@ -1932,7 +1903,7 @@ namespace DBADashGUI
 
         private async void TsConnection_Click(object sender, EventArgs e)
         {
-            string name = (string)((ToolStripItem)sender).Tag;
+            var name = (string)((ToolStripItem)sender).Tag;
             var connection = repositories.FindByName(name);
             await SetConnection(connection);
             tsConnect.HideDropDown();
@@ -1945,7 +1916,7 @@ namespace DBADashGUI
 
         private static string GetNewConnectionString()
         {
-            string connectionString = Common.ConnectionString;
+            var connectionString = Common.ConnectionString;
             if (string.IsNullOrEmpty(connectionString))
             {
                 connectionString = (new SqlConnectionStringBuilder()
@@ -1993,10 +1964,10 @@ namespace DBADashGUI
         private void SetAutoRefresh(object sender, EventArgs e)
         {
             var item = (ToolStripMenuItem)sender;
-            var interval = int.Parse((string)item.Tag);
+            var interval = int.Parse(((string)item.Tag)!);
             if (interval == 0)
             {
-                string strInterval = (autoRefreshTimer.Interval / 1000).ToString();
+                var strInterval = (autoRefreshTimer.Interval / 1000).ToString();
                 if (CommonShared.ShowInputDialog(ref strInterval, "Enter interval in seconds:") == DialogResult.OK)
                 {
                     if (!int.TryParse(strInterval, out interval) || interval < 1)
@@ -2022,10 +1993,10 @@ namespace DBADashGUI
                 autoRefreshTimer.Start();
             }
 
-            int checkCount = 0;
+            var checkCount = 0;
             foreach (var itm in setAutoRefreshToolStripMenuItem.DropDownItems.OfType<ToolStripMenuItem>())
             {
-                itm.Checked = int.Parse((string)itm.Tag) == interval;
+                itm.Checked = int.Parse(((string)itm.Tag)!) == interval;
                 if (itm.Checked)
                 {
                     checkCount += 1;
@@ -2045,13 +2016,15 @@ namespace DBADashGUI
 
         private bool IsAutoRefreshApplicable => tabs.SelectedTab != null && tabs.SelectedTab.Controls.OfType<IRefreshData>().Any();
 
+        private static readonly string[] systemDatabases = { "master", "model", "msdb", "tempdb" };
+
         private void AutoRefresh(object sender, EventArgs e)
         {
-            if (this.WindowState == FormWindowState.Minimized) // Skip auto refresh if app is minimized
+            if (WindowState == FormWindowState.Minimized) // Skip auto refresh if app is minimized
             {
                 return;
             }
-            foreach (IRefreshData ctrl in tabs.SelectedTab.Controls.OfType<IRefreshData>())
+            foreach (var ctrl in tabs.SelectedTab.Controls.OfType<IRefreshData>())
             {
                 ctrl.RefreshData();
             }
@@ -2093,7 +2066,7 @@ namespace DBADashGUI
 
         void IThemedControl.ApplyTheme(BaseTheme theme)
         {
-            this.Controls.ApplyTheme(theme);
+            Controls.ApplyTheme(theme);
 
             foreach (var tab in AllTabs)
             {

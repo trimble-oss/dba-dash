@@ -1,14 +1,8 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using Serilog;
-using ThirdParty.Json.LitJson;
 using Newtonsoft.Json.Linq;
 using Microsoft.Data.SqlClient;
 
@@ -25,7 +19,7 @@ namespace DBADash
             Encrypt = 1
         }
 
-        public static readonly string JsonConfigPath = System.IO.Path.Combine(AppContext.BaseDirectory, "ServiceConfig.json");
+        public static readonly string JsonConfigPath = Path.Combine(AppContext.BaseDirectory, "ServiceConfig.json");
         public EncryptionOptions EncryptionOption { get; set; }
 
         [JsonIgnore]
@@ -93,7 +87,7 @@ namespace DBADash
         /// <returns></returns>
         public static string GetUniqueFilename(string fullPath)
         {
-            var path = Path.GetDirectoryName(fullPath);
+            var path = Path.GetDirectoryName(fullPath) ?? throw new Exception($"GetDirectoryName returned null for {fullPath}");
             var filename = Path.GetFileNameWithoutExtension(fullPath);
             var extension = Path.GetExtension(fullPath);
             var newFullPath = fullPath;

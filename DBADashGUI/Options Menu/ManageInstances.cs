@@ -17,11 +17,11 @@ namespace DBADashGUI
         }
 
         public string Tags { get; set; } = null;
-        private bool activeFlagChanged = false;
-        private bool summaryVisibleChanged = false;
-        public bool InstanceActiveFlagChanged { get => activeFlagChanged; }
+        private bool activeFlagChanged;
+        private bool summaryVisibleChanged;
+        public bool InstanceActiveFlagChanged => activeFlagChanged;
 
-        public bool InstanceSummaryVisibleChanged { get => summaryVisibleChanged; }
+        public bool InstanceSummaryVisibleChanged => summaryVisibleChanged;
 
         private void ManageInstances_Load(object sender, EventArgs e)
         {

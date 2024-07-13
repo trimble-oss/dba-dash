@@ -2,6 +2,7 @@
 using System;
 using System.ComponentModel;
 using System.Data;
+using System.Globalization;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
@@ -37,7 +38,7 @@ namespace DBADashGUI.Performance
                 {
                     if (itm.Checked)
                     {
-                        return (IOSummaryGroupByOptions)Enum.Parse(typeof(IOSummaryGroupByOptions), itm.Text);
+                        return (IOSummaryGroupByOptions)Enum.Parse(typeof(IOSummaryGroupByOptions), itm.Text!);
                     }
                 }
                 return defaultGroupBy;
@@ -139,12 +140,12 @@ namespace DBADashGUI.Performance
             dgv.Columns["colGroup"].HeaderText = GroupBy.ToString();
             dgv.Sort(dgv.Columns[1], ListSortDirection.Descending);
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            lblDateRange.Text = "Date Range : " + FromDate.ToAppTimeZone().ToString() + " to " + ToDate.ToAppTimeZone().ToString();
+            lblDateRange.Text = "Date Range : " + FromDate.ToAppTimeZone().ToString(CultureInfo.CurrentCulture) + " to " + ToDate.ToAppTimeZone().ToString(CultureInfo.CurrentCulture);
         }
 
         private void TsGroupBy_Click(object sender, EventArgs e)
         {
-            GroupBy = (IOSummaryGroupByOptions)Enum.Parse(typeof(IOSummaryGroupByOptions), ((ToolStripMenuItem)sender).Text);
+            GroupBy = (IOSummaryGroupByOptions)Enum.Parse(typeof(IOSummaryGroupByOptions), ((ToolStripMenuItem)sender).Text ?? IOSummaryGroupByOptions.Drive.ToString());
             RefreshData();
         }
 

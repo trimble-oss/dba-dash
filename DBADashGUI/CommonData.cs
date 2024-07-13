@@ -36,7 +36,7 @@ namespace DBADashGUI
 
         public static int GetDatabaseID(string instanceGroupName, string dbName)
         {
-            if (instanceGroupName == null || instanceGroupName.Length == 0 || dbName == null || dbName.Length == 0)
+            if (string.IsNullOrEmpty(instanceGroupName) || dbName == null || dbName.Length == 0)
             {
                 return -1;
             }
@@ -171,17 +171,17 @@ namespace DBADashGUI
 
         public static Dictionary<string, string> GetObjectTypes()
         {
-            Dictionary<string, string> objtypes = new();
+            Dictionary<string, string> objTypes = new();
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("dbo.ObjectType_Get", cn) { CommandType = CommandType.StoredProcedure };
             cn.Open();
             using var rdr = cmd.ExecuteReader();
             while (rdr.Read())
             {
-                objtypes.Add(((string)rdr[0]).TrimEnd(), (string)rdr[1]);
+                objTypes.Add(((string)rdr[0]).TrimEnd(), (string)rdr[1]);
             }
 
-            return objtypes;
+            return objTypes;
         }
 
         public static DataTable GetDBObjects(int DatabaseID, string types)
@@ -238,10 +238,10 @@ namespace DBADashGUI
             using var da = new SqlDataAdapter(cmd);
             cn.Open();
             cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", instanceIDs));
-            cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeCritical", DbType = System.Data.DbType.Boolean, Value = includeCritical });
-            cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeWarning", DbType = System.Data.DbType.Boolean, Value = includeWarning });
-            cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeNA", DbType = System.Data.DbType.Boolean, Value = includeNA });
-            cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeOK", DbType = System.Data.DbType.Boolean, Value = includeOK });
+            cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeCritical", DbType = DbType.Boolean, Value = includeCritical });
+            cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeWarning", DbType = DbType.Boolean, Value = includeWarning });
+            cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeNA", DbType = DbType.Boolean, Value = includeNA });
+            cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeOK", DbType = DbType.Boolean, Value = includeOK });
             cmd.Parameters.AddWithNullableValue("DriveName", driveName);
             cmd.Parameters.AddWithValue("IncludeMetrics", includeMetrics);
             cmd.Parameters.AddWithValue("ShowHidden", showHidden);

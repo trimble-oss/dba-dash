@@ -1,18 +1,9 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO.Compression;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Build.Framework;
 using Serilog;
-using static Microsoft.SqlServer.Management.SqlParser.Metadata.MetadataInfoProvider;
-using Newtonsoft.Json.Linq;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Azure;
 using SerilogTimings;
 
 namespace DBADash.Messaging

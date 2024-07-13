@@ -30,12 +30,11 @@ namespace DBADashGUI.Changes
 
                 using (var rdr = cmd.ExecuteReader())
                 {
-                    string instance = "";
-                    string previousInstance = "";
+                    var previousInstance = "";
                     DataRow r = null;
                     while (rdr.Read())
                     {
-                        instance = (string)rdr["InstanceDisplayName"];
+                        var instance = (string)rdr["InstanceDisplayName"];
                         if (instance != previousInstance)
                         {
                             r = dt.NewRow();
@@ -45,7 +44,7 @@ namespace DBADashGUI.Changes
                         if (rdr["TraceFlag"] != DBNull.Value)
                         {
                             var flag = (short)rdr["TraceFlag"];
-                            var colName = "T" + flag.ToString();
+                            var colName = "T" + flag;
                             var validFrom = (DateTime)rdr["ValidFrom"];
                             if (!dt.Columns.Contains(colName))
                             {
@@ -99,9 +98,9 @@ namespace DBADashGUI.Changes
             }
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = context.RegularInstanceIDs.ToList();
+            InstanceIDs = _context.RegularInstanceIDs.ToList();
             RefreshFlags();
             RefreshHistory();
         }

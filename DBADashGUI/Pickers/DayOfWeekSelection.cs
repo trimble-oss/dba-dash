@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Windows.Forms;
 using DBADashGUI.Theme;
@@ -20,7 +19,7 @@ namespace DBADashGUI
             get
             {
                 var selected = new List<int>();
-                return chkDayOfWeek.CheckedIndices.Cast<int>().Select(i => i += 1).ToList();
+                return chkDayOfWeek.CheckedIndices.Cast<int>().Select(i => i + 1).ToList();
             }
             set
             {
@@ -74,7 +73,7 @@ namespace DBADashGUI
 
         private void BttnOK_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         private void BttnWeekday_Click(object sender, EventArgs e)

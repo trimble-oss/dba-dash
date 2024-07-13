@@ -3,20 +3,13 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.ServiceProcess;
 using System.Text;
 using System.Windows.Forms;
-using CronExpressionDescriptor;
 using DBADashGUI.Theme;
-using Microsoft.SqlServer.Management.SqlParser.SqlCodeDom;
-using Microsoft.SqlServer.Management.SqlScriptPublish;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
-using Newtonsoft.Json;
 using static DBADash.DBADashConnection;
 using SortOrder = System.Windows.Forms.SortOrder;
 using System.Threading.Tasks;
@@ -35,7 +28,7 @@ namespace DBADashServiceConfig
         private string originalJson = "";
         private CollectionConfig collectionConfig = new();
         private ServiceController svcCtrl;
-        private bool isInstalled = false;
+        private bool isInstalled;
         private Dictionary<string, CustomCollection> _customCollectionsNew;
 
         private string[] NewSourceConnections => txtSource.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
@@ -117,7 +110,7 @@ namespace DBADashServiceConfig
                     collectionConfig ??= new CollectionConfig();
                     if (!addUnvalidated)
                     {
-                        System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
+                        Cursor.Current = Cursors.WaitCursor;
                         try
                         {
                             src.SourceConnection.Validate();
@@ -134,7 +127,7 @@ namespace DBADashServiceConfig
                             validated = false;
                             validationError = ex.Message;
                         }
-                        System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
+                        Cursor.Current = Cursors.Default;
                     }
 
                     if (!addUnvalidated && !validated)
@@ -262,7 +255,7 @@ namespace DBADashServiceConfig
                     }
                     if (status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
                     {
-                        lblVersionInfo.Text = "Repository database upgrade not required. DacVersion/DB Version: " + status.DACVersion.ToString();
+                        lblVersionInfo.Text = "Repository database upgrade not required. DacVersion/DB Version: " + status.DACVersion;
                         lblVersionInfo.ForeColor = DashColors.Success;
                         bttnDeployDatabase.Enabled = true;
                     }
@@ -396,7 +389,7 @@ namespace DBADashServiceConfig
             DataGridViewColumn column = dgvConnections.Columns[e.ColumnIndex];
             if (dgvConnections.DataSource != null)
             {
-                System.ComponentModel.ListSortDirection direction;
+                ListSortDirection direction;
                 if (column.HeaderCell.SortGlyphDirection == SortOrder.Ascending || column.HeaderCell.SortGlyphDirection == SortOrder.None)
                 {
                     direction = ListSortDirection.Descending;
@@ -512,7 +505,7 @@ namespace DBADashServiceConfig
         private void SetConnectionCount()
         {
             int cnt = collectionConfig.SourceConnections.Count;
-            lnkSourceConnections.Text = "Source Connections: " + cnt.ToString();
+            lnkSourceConnections.Text = "Source Connections: " + cnt;
             if (cnt == 0)
             {
                 lnkSourceConnections.Text += ".  (Add source connections to monitor)";
@@ -524,7 +517,7 @@ namespace DBADashServiceConfig
             }
         }
 
-        private bool IsSetFromJson = false;
+        private bool IsSetFromJson;
 
         private void SetFromJson(string json)
         {
@@ -584,7 +577,7 @@ namespace DBADashServiceConfig
             lblServiceWarning.Visible = false;
             try
             {
-                var nameOfServiceFromPath = DBADash.ServiceTools.GetServiceNameFromPath();
+                var nameOfServiceFromPath = ServiceTools.GetServiceNameFromPath();
                 var pathOfService = ServiceTools.GetPathOfService(collectionConfig.ServiceName);
 
                 if (!pathOfService.Contains(ServiceTools.ServicePath, StringComparison.CurrentCultureIgnoreCase) && pathOfService != string.Empty)
@@ -770,7 +763,7 @@ namespace DBADashServiceConfig
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void TxtDestination_Validated(object sender, EventArgs e)
@@ -904,7 +897,7 @@ namespace DBADashServiceConfig
             if (frm.DialogResult == DialogResult.OK)
             {
                 var builder = new SqlConnectionStringBuilder(frm.ConnectionString);
-                if (builder.InitialCatalog == null || builder.InitialCatalog.Length == 0)
+                if (string.IsNullOrEmpty(builder.InitialCatalog))
                 {
                     builder.InitialCatalog = "DBADashDB";
                 }
@@ -1335,7 +1328,7 @@ namespace DBADashServiceConfig
             }
         }
 
-        private static ServiceLog ServiceLogForm = null;
+        private static ServiceLog ServiceLogForm;
 
         private void BttnViewServiceLog_Click(object sender, EventArgs e)
         {
@@ -1587,7 +1580,7 @@ namespace DBADashServiceConfig
 
         public void ApplyTheme(BaseTheme theme)
         {
-            foreach (Control c in this.Controls)
+            foreach (Control c in Controls)
             {
                 c.ApplyTheme(theme);
             }

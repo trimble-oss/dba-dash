@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Drawing;
-using System;
+﻿using System;
 using System.Windows.Forms;
 using static DBADashGUI.DiffControl;
 
@@ -30,9 +29,9 @@ namespace DBADashGUI
 
         private void AddDiffControl()
         {
-            if (!this.Controls.Contains(diff1))
+            if (!Controls.Contains(diff1))
             {
-                this.Controls.Add(diff1);
+                Controls.Add(diff1);
                 diff1.Dock = DockStyle.Fill;
             }
         }

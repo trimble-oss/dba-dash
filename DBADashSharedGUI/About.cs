@@ -14,9 +14,9 @@ namespace DBADashGUI
         public About()
         {
             InitializeComponent();
-            this.labelVersion.Text = AssemblyVersion;
-            this.labelCopyright.Text = AssemblyCopyright;
-            this.labelCompanyName.Text = AssemblyCompany;
+            labelVersion.Text = AssemblyVersion;
+            labelCopyright.Text = AssemblyCopyright;
+            labelCompanyName.Text = AssemblyCompany;
             this.ApplyTheme();
         }
 
@@ -103,7 +103,7 @@ namespace DBADashGUI
         #endregion
 
         public Version DBVersion = new();
-        public bool upgradeAvailable = false;
+        public bool upgradeAvailable;
         public string upgradeMessage = "The upgrade check hasn't completed yet.\nIf this server doesn't have internet access, an offline upgrade can be performed. See:\nhttps://dbadash.com/upgrades";
         public bool StartGUIOnUpgrade;
         MessageBoxIcon upgradeIcon = MessageBoxIcon.Warning;
@@ -201,7 +201,7 @@ namespace DBADashGUI
             {
                 await Upgrade.UpgradeDBADashAsync(startGUI: StartGUIOnUpgrade);
             }
-            catch (Octokit.NotFoundException)
+            catch (NotFoundException)
             {
                 MessageBox.Show("Upgrade script is not available.  Please check the upgrade instructions on the GitHub page", "Not Available", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 CommonShared.OpenURL(Upgrade.LatestVersionLink);

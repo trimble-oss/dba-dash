@@ -20,7 +20,7 @@ namespace DBADashGUI.Performance
         private readonly List<KeyValuePair<string, PersistedColumnLayout>> standardLayout;
 
         public Dictionary<int, Counter> SelectedPerformanceCounters = new();
-        private PerformanceSummarySavedView selectedview;
+        private PerformanceSummarySavedView selectedView;
 
         public PerformanceSummary()
         {
@@ -28,9 +28,9 @@ namespace DBADashGUI.Performance
             standardLayout = dgv.GetColumnLayout();
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            this.context = context;
+            this.context = _context;
             RefreshData();
         }
 
@@ -47,10 +47,10 @@ namespace DBADashGUI.Performance
             GenerateHistogram(ref dt);
             dgv.DataSource ??= new DataView(dt);
             dgv.AutoResizeColumnHeadersHeight();
-            dgv.Columns["colCPUHistogram"].Width = 200;
-            if (selectedview != null)
+            dgv.Columns["colCPUHistogram"]!.Width = 200;
+            if (selectedView != null)
             {
-                LoadPersistedColumnLayout(selectedview.ColumnLayout);
+                LoadPersistedColumnLayout(selectedView.ColumnLayout);
             }
         }
 
@@ -59,9 +59,9 @@ namespace DBADashGUI.Performance
             List<string> pcColNames = new();
             foreach (var ctr in SelectedPerformanceCounters.Values)
             {
-                foreach (string agg in ctr.GetAggColumns())
+                foreach (var agg in ctr.GetAggColumns())
                 {
-                    string name = agg + "_" + ctr.CounterID;
+                    var name = agg + "_" + ctr.CounterID;
                     pcColNames.Add(name);
                     if (!dgv.Columns.Contains(name))
                     {
@@ -78,14 +78,10 @@ namespace DBADashGUI.Performance
 
         private void AddPerformanceCounterColsToTable(ref DataTable dt)
         {
-            foreach (var ctr in SelectedPerformanceCounters.Values)
+            foreach (var name in from ctr in SelectedPerformanceCounters.Values from agg in ctr.GetAggColumns() select agg + "_" + ctr.CounterID)
             {
-                foreach (string agg in ctr.GetAggColumns())
-                {
-                    string name = agg + "_" + ctr.CounterID;
-                    dt.Columns.Add(name, typeof(double));
-                    dt.Columns.Add(name + "Status", typeof(int));
-                }
+                dt.Columns.Add(name, typeof(double));
+                dt.Columns.Add(name + "Status", typeof(int));
             }
         }
 
@@ -93,51 +89,49 @@ namespace DBADashGUI.Performance
         {
             AddPerformanceCounterColsToGrid();
             AddPerformanceCounterColsToTable(ref dt);
-            if (SelectedPerformanceCounters.Count > 0)
+            if (SelectedPerformanceCounters.Count <= 0) return;
+            var pcDT = GetPerformanceCounters();
+            DataRow mainRow = null;
+            var instanceIdMainRow = -1;
+            foreach (DataRow r in pcDT.Rows)
             {
-                var pcDT = GetPerformanceCounters();
-                DataRow mainRow = null;
-                int instanceIdMainRow = -1;
-                foreach (DataRow r in pcDT.Rows)
+                var instanceID = (int)r["InstanceID"];
+                var CounterID = (int)r["CounterID"];
+                var cntr = SelectedPerformanceCounters[CounterID];
+                if (instanceID != instanceIdMainRow)
                 {
-                    int instanceID = (int)r["InstanceID"];
-                    int CounterID = (int)r["CounterID"];
-                    var cntr = SelectedPerformanceCounters[CounterID];
-                    if (instanceID != instanceIdMainRow)
+                    mainRow = dt.Select("InstanceId=" + (int)r["InstanceID"]).FirstOrDefault();
+                    instanceIdMainRow = instanceID;
+                }
+                if (mainRow != null)
+                {
+                    if (cntr.Avg)
                     {
-                        mainRow = dt.Select("InstanceId=" + (int)r["InstanceID"]).FirstOrDefault();
-                        instanceIdMainRow = instanceID;
+                        mainRow[("Avg_" + (int)r["CounterID"])] = r["AvgValue"];
+                        mainRow[("Avg_" + (int)r["CounterID"] + "Status")] = r["AvgValueStatus"];
                     }
-                    if (mainRow != null)
+                    if (cntr.Max)
                     {
-                        if (cntr.Avg)
-                        {
-                            mainRow[("Avg_" + (int)r["CounterID"]).ToString()] = r["AvgValue"];
-                            mainRow[("Avg_" + (int)r["CounterID"] + "Status").ToString()] = r["AvgValueStatus"];
-                        }
-                        if (cntr.Max)
-                        {
-                            mainRow[("Max_" + (int)r["CounterID"]).ToString()] = r["MaxValue"];
-                            mainRow[("Max_" + (int)r["CounterID"] + "Status").ToString()] = r["MaxValueStatus"];
-                        }
-                        if (cntr.Total)
-                        {
-                            mainRow[("Total_" + (int)r["CounterID"]).ToString()] = r["TotalValue"];
-                        }
-                        if (cntr.Current)
-                        {
-                            mainRow[("Current_" + (int)r["CounterID"]).ToString()] = r["CurrentValue"];
-                            mainRow[("Current_" + (int)r["CounterID"] + "Status").ToString()] = r["CurrentValueStatus"];
-                        }
-                        if (cntr.Min)
-                        {
-                            mainRow[("Min_" + (int)r["CounterID"]).ToString()] = r["MinValue"];
-                            mainRow[("Min_" + (int)r["CounterID"] + "Status").ToString()] = r["MinValueStatus"];
-                        }
-                        if (cntr.SampleCount)
-                        {
-                            mainRow[("SampleCount_" + (int)r["CounterID"]).ToString()] = r["SampleCount"];
-                        }
+                        mainRow[("Max_" + (int)r["CounterID"])] = r["MaxValue"];
+                        mainRow[("Max_" + (int)r["CounterID"] + "Status")] = r["MaxValueStatus"];
+                    }
+                    if (cntr.Total)
+                    {
+                        mainRow[("Total_" + (int)r["CounterID"])] = r["TotalValue"];
+                    }
+                    if (cntr.Current)
+                    {
+                        mainRow[("Current_" + (int)r["CounterID"])] = r["CurrentValue"];
+                        mainRow[("Current_" + (int)r["CounterID"] + "Status")] = r["CurrentValueStatus"];
+                    }
+                    if (cntr.Min)
+                    {
+                        mainRow[("Min_" + (int)r["CounterID"])] = r["MinValue"];
+                        mainRow[("Min_" + (int)r["CounterID"] + "Status")] = r["MinValueStatus"];
+                    }
+                    if (cntr.SampleCount)
+                    {
+                        mainRow[("SampleCount_" + (int)r["CounterID"])] = r["SampleCount"];
                     }
                 }
             }
@@ -217,11 +211,11 @@ namespace DBADashGUI.Performance
                     if (row["CPU10"] != DBNull.Value)
                     {
                         StringBuilder sbToolTip = new();
-                        for (int i = 10; i <= 100; i += 10)
+                        for (var i = 10; i <= 100; i += 10)
                         {
-                            var v = Convert.ToDouble(row["CPU" + i.ToString()]);
+                            var v = Convert.ToDouble(row["CPU" + i]);
                             hist.Add(v);
-                            sbToolTip.AppendLine((i - 10).ToString() + " to " + i.ToString() + "% | " + v.ToString("N0"));
+                            sbToolTip.AppendLine((i - 10) + " to " + i + "% | " + v.ToString("N0"));
                         }
                         row["CPUHistogram"] = Histogram.GetHistogram(hist, 200, 100, true);
                         row["CPUHistogramToolTip"] = sbToolTip.ToString();
@@ -250,20 +244,20 @@ namespace DBADashGUI.Performance
             {
                 try
                 {
-                    string viewName = "Default";
+                    var viewName = "Default";
                     if (PerformanceSummarySavedView.GetSavedViews(DBADashUser.UserID).ContainsKey("Default")) // Check if we already have a view called Default and ensure we give it a unique name
                     {
                         viewName += Guid.NewGuid().ToString();
                     }
                     PerformanceSummarySavedView view = new() { Name = viewName };
-                    bool save = false;
-                    string jsonCounters = Properties.Settings.Default.PerformanceSummaryPerformanceCounters;
+                    var save = false;
+                    var jsonCounters = Properties.Settings.Default.PerformanceSummaryPerformanceCounters;
                     if (!string.IsNullOrEmpty(jsonCounters))
                     {
                         view.SelectedPerformanceCounters = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<int, Counter>>(jsonCounters);
                         save = true;
                     }
-                    string jsonLayout = Properties.Settings.Default.PerformanceSummaryCols;
+                    var jsonLayout = Properties.Settings.Default.PerformanceSummaryCols;
                     if (!string.IsNullOrEmpty(jsonLayout))
                     {
                         view.ColumnLayout = Newtonsoft.Json.JsonConvert.DeserializeObject<List<KeyValuePair<string, PersistedColumnLayout>>>(jsonLayout);
@@ -289,16 +283,16 @@ namespace DBADashGUI.Performance
 
         private static void AddHistCols(DataGridView dgv, string prefix)
         {
-            string histogram = "CPU";
+            var histogram = "CPU";
 
-            for (int i = 10; i <= 100; i += 10)
+            for (var i = 10; i <= 100; i += 10)
             {
                 var col = new DataGridViewTextBoxColumn()
                 {
                     Name = prefix + histogram + "Histogram_" + i,
-                    DataPropertyName = histogram + i.ToString(),
+                    DataPropertyName = histogram + i,
                     Visible = false,
-                    HeaderText = histogram + " Histogram " + (i - 10).ToString() + " to " + i.ToString() + "%"
+                    HeaderText = histogram + " Histogram " + (i - 10) + " to " + i + "%"
                 };
                 dgv.Columns.Add(col);
             }
@@ -311,13 +305,13 @@ namespace DBADashGUI.Performance
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            bool histogram = ((DataView)dgv.DataSource).Table.Columns.Contains("CPUHistogram");
+            var histogram = ((DataView)dgv.DataSource).Table.Columns.Contains("CPUHistogram");
             var pcCols = dgv.Columns.Cast<DataGridViewColumn>().Where(col => Convert.ToString(col.Tag) == "PC"
                                                                 && (col.DataPropertyName.StartsWith("Avg") || col.DataPropertyName.StartsWith("Max") || col.DataPropertyName.StartsWith("Min") || col.DataPropertyName.StartsWith("Current"))
                                                                 )
                                                                 .Select(col => col.DataPropertyName)
                                                                 .ToList();
-            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var r = dgv.Rows[idx];
                 var row = (DataRowView)r.DataBoundItem;
@@ -358,9 +352,9 @@ namespace DBADashGUI.Performance
             var cpuHistVisible = colCPUHistogram.Visible;
             if (cpuHistVisible)
             {
-                for (int i = 10; i <= 100; i += 10)
+                for (var i = 10; i <= 100; i += 10)
                 {
-                    dgv.Columns["colCPUHistogram_" + i.ToString()].Visible = true;
+                    dgv.Columns["colCPUHistogram_" + i].Visible = true;
                 }
             }
             colCPUHistogram.Visible = false;
@@ -368,9 +362,9 @@ namespace DBADashGUI.Performance
             colCPUHistogram.Visible = cpuHistVisible;
             if (cpuHistVisible)
             {
-                for (int i = 10; i <= 100; i += 10)
+                for (var i = 10; i <= 100; i += 10)
                 {
-                    dgv.Columns["colCPUHistogram_" + i.ToString()].Visible = false;
+                    dgv.Columns["colCPUHistogram_" + i].Visible = false;
                 }
             }
         }
@@ -381,7 +375,7 @@ namespace DBADashGUI.Performance
         {
             if (e.RowIndex >= 0 && e.ColumnIndex == 0)
             {
-                DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+                var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
                 Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (int)row["InstanceID"], Tab = "tabPerformance" });
             }
         }
@@ -435,7 +429,7 @@ namespace DBADashGUI.Performance
 
         private void DeSelectView()
         {
-            selectedview = null;
+            selectedView = null;
             tsDeleteView.Visible = false;
             savedViewMenuItem1.ClearSelectedItem();
         }
@@ -447,7 +441,7 @@ namespace DBADashGUI.Performance
                 frm.ShowDialog();
                 if (frm.DialogResult == DialogResult.OK)
                 {
-                    string name = frm.ViewName;
+                    var name = frm.ViewName;
 
                     if ((savedViewMenuItem1.ContainsUserView(name) && !frm.IsGlobal) || (savedViewMenuItem1.ContainsGlobalView(name) && frm.IsGlobal))
                     {
@@ -474,19 +468,19 @@ namespace DBADashGUI.Performance
 
         private void SavedViewSelected(object sender, SavedViewSelectedEventArgs e)
         {
-            selectedview = null;
+            selectedView = null;
             if (e.SerializedObject != string.Empty)
             {
                 try
                 {
-                    selectedview = PerformanceSummarySavedView.Deserialize(e.SerializedObject);
+                    selectedView = PerformanceSummarySavedView.Deserialize(e.SerializedObject);
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show("Error loading the saved view " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-            if (selectedview == null)
+            if (selectedView == null)
             {
                 SelectedPerformanceCounters.Clear();
                 AddPerformanceCounterColsToGrid();
@@ -495,8 +489,8 @@ namespace DBADashGUI.Performance
             }
             else
             {
-                SelectedPerformanceCounters = selectedview.SelectedPerformanceCounters;
-                LoadPersistedColumnLayout(selectedview.ColumnLayout);
+                SelectedPerformanceCounters = selectedView.SelectedPerformanceCounters;
+                LoadPersistedColumnLayout(selectedView.ColumnLayout);
                 tsDeleteView.Visible = !e.IsGlobal || DBADashUser.HasManageGlobalViews;
             }
             if (context != null)
@@ -521,7 +515,7 @@ namespace DBADashGUI.Performance
 
         void IThemedControl.ApplyTheme(BaseTheme theme)
         {
-            foreach (Control control in this.Controls)
+            foreach (Control control in Controls)
             {
                 control.ApplyTheme(theme);
             }

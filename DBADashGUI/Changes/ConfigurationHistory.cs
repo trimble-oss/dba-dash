@@ -16,15 +16,15 @@ namespace DBADashGUI
 
         private List<int> InstanceIDs;
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = context.RegularInstanceIDs.ToList();
+            InstanceIDs = _context.RegularInstanceIDs.ToList();
             RefreshData();
         }
 
         public void RefreshData()
         {
-            configuration1.InstanceIDs = this.InstanceIDs;
+            configuration1.InstanceIDs = InstanceIDs;
             configuration1.RefreshData();
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.SysConfigHistory_Get", cn) { CommandType = CommandType.StoredProcedure })

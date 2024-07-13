@@ -1,10 +1,6 @@
 ﻿using DBADash;
-using Microsoft.Data.SqlClient;
-using Microsoft.SqlServer.Management.Smo;
 using Newtonsoft.Json;
 using Quartz;
-using Serilog;
-using System;
 using System.Threading.Tasks;
 
 namespace DBADashService

@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using Microsoft.SqlServer.Dac.Model;
 using static DBADash.DBADashConnection;
 
 namespace DBADash
@@ -26,7 +25,7 @@ namespace DBADash
         private bool noWMI;
         private int slowQuerySessionMaxMemoryKB = 4096;
         private int slowQueryTargetMaxMemoryKB = -1;
-        private bool persistXESessions = false;
+        private bool persistXESessions;
         private bool useDualXESession = true;
         public bool WriteToSecondaryDestinations { get; set; } = true;
         public string ConnectionID { get; set; }
@@ -198,7 +197,7 @@ namespace DBADash
 
         public DBADashSource(string source)
         {
-            this.ConnectionString = source;
+            ConnectionString = source;
         }
 
         public DBADashSource()

@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Bson;
 using Newtonsoft.Json.Serialization;
 
 namespace DBADashGUI.CustomReports
@@ -32,7 +29,7 @@ namespace DBADashGUI.CustomReports
         [JsonIgnore]
         public Exception DeserializationException = null;
 
-        public static readonly string[] SystemParamNames = new string[] { "@INSTANCEIDS", "@INSTANCEID", "@DATABASEID", "@FROMDATE", "@TODATE", "@OBJECTID" };
+        public static readonly string[] SystemParamNames = new[] { "@INSTANCEIDS", "@INSTANCEID", "@DATABASEID", "@FROMDATE", "@TODATE", "@OBJECTID" };
 
         /// <summary>
         /// Parameters for the stored procedure that won't be supplied automatically based on context
@@ -55,7 +52,7 @@ namespace DBADashGUI.CustomReports
         public bool IsDatabaseLevel => Params != null && Params.ParamList.Any(p => p.ParamName.ToUpper() == "@DATABASEID");
 
         [JsonIgnore]
-        public bool IsInstanceLevel => Params != null && Params.ParamList.Any(p => (new string[] { "@INSTANCEIDS", "@INSTANCEID" }).Contains(p.ParamName.ToUpper()));
+        public bool IsInstanceLevel => Params != null && Params.ParamList.Any(p => (new[] { "@INSTANCEIDS", "@INSTANCEID" }).Contains(p.ParamName.ToUpper()));
 
         [JsonIgnore]
         public bool CanEditReport { get; set; }
@@ -109,7 +106,7 @@ namespace DBADashGUI.CustomReports
         public override Type BindToType(string assemblyName, string typeName)
         {
             var currentAssembly = typeof(SimpleBinder).Assembly;
-            var currentNamespace = this.GetType().Namespace;
+            var currentNamespace = GetType().Namespace;
             var type = currentAssembly.GetType($"{currentNamespace}.{typeName}") ?? base.BindToType(assemblyName, typeName);
             return type;
         }

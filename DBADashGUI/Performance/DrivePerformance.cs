@@ -38,10 +38,10 @@ namespace DBADashGUI.Performance
 
         private List<ISelectable> drives;
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            this.Context = context;
-            var dt = CommonData.GetMetricDrives(Context.InstanceID, context.DriveName);
+            Context = _context;
+            var dt = CommonData.GetMetricDrives(Context.InstanceID, _context.DriveName);
             drives = dt.AsEnumerable()
                 .Select(row =>
                     new SelectableString(((string)row["Name"]) + (string.IsNullOrEmpty(Convert.ToString(row["Label"])) ? string.Empty : " | " + Convert.ToString(row["Label"]))) as ISelectable)

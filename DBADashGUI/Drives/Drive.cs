@@ -85,9 +85,9 @@ namespace DBADashGUI
 
         public double PercentUsedSpace => 100d - PercentFreeSpace;
 
-        public long DriveCapacity { get; set; } = 0;
+        public long DriveCapacity { get; set; }
 
-        public long FreeSpace { get; set; } = 0;
+        public long FreeSpace { get; set; }
 
         public override string ToString() => DriveLabel + " (" + DriveLetter + ")";
     }

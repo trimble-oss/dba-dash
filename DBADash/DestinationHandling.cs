@@ -1,5 +1,4 @@
-﻿using DBADash;
-using Polly;
+﻿using Polly;
 using Serilog;
 using SerilogTimings;
 using System;
@@ -67,7 +66,6 @@ namespace DBADash
             {
                 ds.Tables["DBADash"].Rows[0]["S3Path"] = destination;
             }
-            string extension = System.IO.Path.GetExtension(fileName);
 
             DataSetSerialization.SetDateTimeKind(ds); // Required to prevent timezone conversion
 
@@ -92,10 +90,10 @@ namespace DBADash
 
         public static void WriteFolder(DataSet ds, string destination, string fileName, CollectionConfig cfg)
         {
-            if (System.IO.Directory.Exists(destination))
+            if (Directory.Exists(destination))
             {
                 string filePath = Path.Combine(destination, fileName);
-                string extension = System.IO.Path.GetExtension(fileName);
+                string extension = Path.GetExtension(fileName);
                 if (extension == ".xml")
                 {
                     using (FileStream fs = new(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))

@@ -114,7 +114,7 @@ namespace DBADashGUI.Performance
         private void TsMeasure_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
-            columns[(string)ts.Tag].IsVisible = ts.Checked;
+            columns[((string)ts.Tag)!].IsVisible = ts.Checked;
             chart1.UpdateColumnVisibility(columns);
         }
 

@@ -14,7 +14,7 @@ namespace DBADashGUI
     }
 
     /// <summary>
-    /// Custom ToolStipDrownDownButton that shows the saved views available for selection
+    /// Custom ToolStripDrownDownButton that shows the saved views available for selection
     /// </summary>
     [ToolStripItemDesignerAvailability(ToolStripItemDesignerAvailability.ToolStrip)]
     public class SavedViewMenuItem : ToolStripDropDownButton
@@ -22,9 +22,9 @@ namespace DBADashGUI
         private Dictionary<string, string> _savedViews;
         private Dictionary<string, string> _globalSavedViews;
 
-        private readonly static string globalTag = "Global";
-        private readonly static string userTag = "User";
-        private readonly static string noneText = "{None}";
+        private static readonly string globalTag = "Global";
+        private static readonly string userTag = "User";
+        private static readonly string noneText = "{None}";
         private Guid connectionGUID;
 
         public SavedView.ViewTypes Type { get; set; }
@@ -47,22 +47,22 @@ namespace DBADashGUI
         /// </summary>
         public bool SelectDefault()
         {
-            if (_savedViews.ContainsKey(SavedView.DefaultViewName)) // Check if user has a default view
+            if (_savedViews.TryGetValue(SavedView.DefaultViewName, out var view)) // Check if user has a default view
             {
                 SelectItem(SavedView.DefaultViewName, false);
-                SavedViewSelected(this, new SavedViewSelectedEventArgs() { Name = SavedView.DefaultViewName, IsGlobal = false, SerializedObject = _savedViews[SavedView.DefaultViewName] });
+                SavedViewSelected?.Invoke(this, new SavedViewSelectedEventArgs() { Name = SavedView.DefaultViewName, IsGlobal = false, SerializedObject = view });
                 return true;
             }
-            else if (_globalSavedViews.ContainsKey(SavedView.DefaultViewName)) // check for a global default view if user default view is not available
+            else if (_globalSavedViews.TryGetValue(SavedView.DefaultViewName, out var savedView)) // check for a global default view if user default view is not available
             {
                 SelectItem(SavedView.DefaultViewName, true);
-                SavedViewSelected(this, new SavedViewSelectedEventArgs() { Name = SavedView.DefaultViewName, IsGlobal = true, SerializedObject = _globalSavedViews[SavedView.DefaultViewName] });
+                SavedViewSelected?.Invoke(this, new SavedViewSelectedEventArgs() { Name = SavedView.DefaultViewName, IsGlobal = true, SerializedObject = savedView });
                 return true;
             }
             else
             {
                 SelectItem(noneText, true);
-                SavedViewSelected(this, new SavedViewSelectedEventArgs() { Name = noneText, IsGlobal = true, SerializedObject = string.Empty });
+                SavedViewSelected?.Invoke(this, new SavedViewSelectedEventArgs() { Name = noneText, IsGlobal = true, SerializedObject = string.Empty });
                 return false;
             }
         }
@@ -83,7 +83,7 @@ namespace DBADashGUI
         /// </summary>
         public bool LoadItems()
         {
-            if (this.HasDropDownItems && this.connectionGUID == Common.ConnectionGUID)
+            if (HasDropDownItems && connectionGUID == Common.ConnectionGUID)
             {
                 return false;
             }
@@ -125,7 +125,7 @@ namespace DBADashGUI
             };
             mnuNone.Click += SavedView_Click;
             DropDownItems.Add(mnuNone);
-            foreach (KeyValuePair<string, string> view in _globalSavedViews)
+            foreach (var view in _globalSavedViews)
             {
                 ToolStripMenuItem mnu = new()
                 {
@@ -137,7 +137,7 @@ namespace DBADashGUI
                 mnu.Click += SavedView_Click;
                 DropDownItems.Add(mnu);
             }
-            foreach (KeyValuePair<string, string> view in _savedViews)
+            foreach (var view in _savedViews)
             {
                 ToolStripMenuItem mnu = new()
                 {
@@ -150,8 +150,8 @@ namespace DBADashGUI
                 DropDownItems.Add(mnu);
             }
             SetText("View");
-            Font = new Font(this.Font, FontStyle.Regular);
-            _selectedSavedView = string.Empty;
+            Font = new Font(Font, FontStyle.Regular);
+            SelectedSavedView = string.Empty;
             connectionGUID = Common.ConnectionGUID; // Detect if we have changed connection to the repository DB for LoadItems
         }
 
@@ -167,46 +167,44 @@ namespace DBADashGUI
         {
             foreach (ToolStripMenuItem mnu in DropDownItems)
             {
-                bool mnuIsGlobal = Convert.ToString(mnu.Tag) == globalTag;
-                bool isSelected = mnu.Text.ToLower() == selectedItem.ToLower() && isGlobal == mnuIsGlobal;
+                var mnuIsGlobal = Convert.ToString(mnu.Tag) == globalTag;
+                var isSelected = mnu.Text?.ToLower() == selectedItem.ToLower() && isGlobal == mnuIsGlobal;
                 mnu.Checked = isSelected;
                 mnu.Font = isSelected ? new Font(mnu.Font, FontStyle.Bold) : new Font(mnu.Font, FontStyle.Regular);
             }
             if (selectedItem != noneText && selectedItem != string.Empty)
             {
                 SetText("View: " + selectedItem);
-                Font = new Font(this.Font, FontStyle.Bold);
+                Font = new Font(Font, FontStyle.Bold);
             }
             else
             {
-                SetText(this.Text = "View");
-                Font = new Font(this.Font, FontStyle.Regular);
+                SetText(Text = @"View");
+                Font = new Font(Font, FontStyle.Regular);
             }
-            _selectedSavedView = selectedItem;
-            _selectedSavedViewIsGlobal = isGlobal;
+            SelectedSavedView = selectedItem;
+            SelectedSavedViewIsGlobal = isGlobal;
         }
 
-        private string _selectedSavedView;
-        private bool _selectedSavedViewIsGlobal;
-        public string SelectedSavedView { get => _selectedSavedView; }
-        public bool SelectedSavedViewIsGlobal { get => _selectedSavedViewIsGlobal; }
+        public string SelectedSavedView { get; private set; }
+        public bool SelectedSavedViewIsGlobal { get; private set; }
 
 
         private void SavedView_Click(object sender, EventArgs e)
         {
             var mnu = (ToolStripMenuItem)sender;
-            bool isGlobal = Convert.ToString(mnu.Tag) == globalTag;
+            var isGlobal = Convert.ToString(mnu.Tag) == globalTag;
             string serializedObject;
             if (isGlobal)
             {
-                serializedObject = mnu.Text == noneText ? string.Empty : _globalSavedViews[mnu.Text];
+                serializedObject = mnu.Text == noneText ? string.Empty : _globalSavedViews[mnu.Text!];
             }
             else
             {
-                serializedObject = _savedViews[mnu.Text];
+                serializedObject = _savedViews[mnu.Text!];
             }
             SelectItem(mnu.Text, isGlobal);
-            SavedViewSelected(this, new SavedViewSelectedEventArgs() { Name = mnu.Text, IsGlobal = isGlobal, SerializedObject = serializedObject });
+            SavedViewSelected?.Invoke(this, new SavedViewSelectedEventArgs() { Name = mnu.Text, IsGlobal = isGlobal, SerializedObject = serializedObject });
         }
     }
 }

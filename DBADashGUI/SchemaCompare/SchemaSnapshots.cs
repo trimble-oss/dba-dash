@@ -31,7 +31,7 @@ namespace DBADashGUI.Changes
         private List<int> InstanceIDs;
         private DBADashContext CurrentContext;
 
-        public bool CanNavigateBack { get => tsBack.Enabled; }
+        public bool CanNavigateBack => tsBack.Enabled;
 
         private static DataSet DdlSnapshotDiff(DateTime snapshotDateUTC, int databaseID)
         {
@@ -52,59 +52,55 @@ namespace DBADashGUI.Changes
 
         private void GvSnapshots_SelectionChanged(object sender, EventArgs e)
         {
-            if (gvSnapshots.SelectedRows.Count == 1)
-            {
-                var row = (DataRowView)gvSnapshots.SelectedRows[0].DataBoundItem;
-                DateTime snapshotDateUTC = ((DateTime)row["SnapshotDate"]).AppTimeZoneToUtc();
-                int databaseID = (int)row["DatabaseID"];
+            if (gvSnapshots.SelectedRows.Count != 1) return;
+            var row = (DataRowView)gvSnapshots.SelectedRows[0].DataBoundItem;
+            var snapshotDateUTC = ((DateTime)row["SnapshotDate"]).AppTimeZoneToUtc();
+            var databaseID = (int)row["DatabaseID"];
 
-                DataSet ds = DdlSnapshotDiff(snapshotDateUTC, databaseID);
-                gvSnapshotsDetail.AutoGenerateColumns = false;
-                gvSnapshotsDetail.DataSource = ds.Tables[0];
-                gvSnapshotsDetail.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            }
+            var ds = DdlSnapshotDiff(snapshotDateUTC, databaseID);
+            gvSnapshotsDetail.AutoGenerateColumns = false;
+            gvSnapshotsDetail.DataSource = ds.Tables[0];
+            gvSnapshotsDetail.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
         private void GvSnapshotsDetail_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0 && (e.ColumnIndex == colView.Index || e.ColumnIndex == colDiff.Index))
+            if (e.RowIndex < 0 || (e.ColumnIndex != colView.Index && e.ColumnIndex != colDiff.Index)) return;
+            var row = (DataRowView)gvSnapshotsDetail.Rows[e.RowIndex].DataBoundItem;
+            var ddl = "";
+            if (row["NewDDLID"] != DBNull.Value)
             {
-                var row = (DataRowView)gvSnapshotsDetail.Rows[e.RowIndex].DataBoundItem;
-                string ddl = "";
-                if (row["NewDDLID"] != DBNull.Value)
-                {
-                    ddl = Common.DDL((long)row["NewDDLID"]);
-                }
-                string ddlOld = "";
-                if (row["OldDDLID"] != DBNull.Value)
-                {
-                    ddlOld = Common.DDL((long)row["OldDDLID"]);
-                }
-                ViewMode mode = e.ColumnIndex == colDiff.Index ? ViewMode.Diff : ViewMode.Code;
-                var frm = new Diff();
-                frm.SetText(ddlOld, ddl, mode);
-                frm.Show();
+                ddl = Common.DDL((long)row["NewDDLID"]);
             }
+            var ddlOld = "";
+            if (row["OldDDLID"] != DBNull.Value)
+            {
+                ddlOld = Common.DDL((long)row["OldDDLID"]);
+            }
+            var mode = e.ColumnIndex == colDiff.Index ? ViewMode.Diff : ViewMode.Code;
+            var frm = new Diff();
+            frm.SetText(ddlOld, ddl, mode);
+            frm.Show();
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceID = context.InstanceID;
-            InstanceName = context.InstanceName;
-            DatabaseID = context.DatabaseID;
-            InstanceIDs = context.InstanceIDs.ToList();
+            InstanceID = _context.InstanceID;
+            InstanceName = _context.InstanceName;
+            DatabaseID = _context.DatabaseID;
+            InstanceIDs = _context.InstanceIDs.ToList();
             lblStatus.Text = "";
-            tsTrigger.Visible = context.CanMessage;
-            CurrentContext = context;
+            tsTrigger.Visible = _context.CanMessage;
+            CurrentContext = _context;
             colTriggerSnapshot.Visible = DBADashUser.AllowMessaging;
             RefreshData();
         }
 
         public void RefreshData()
         {
-            if (this.InvokeRequired)
+            if (InvokeRequired)
             {
-                this.Invoke(RefreshData);
+                Invoke(RefreshData);
                 return;
             }
             if (InstanceID > 0 || InstanceName is { Length: > 0 })
@@ -198,13 +194,13 @@ namespace DBADashGUI.Changes
         {
             if (int.Parse(tsSummaryPageSize.Text) != currentSummaryPage)
             {
-                LoadSnapshots(1);
+                LoadSnapshots();
             }
         }
 
         private void TsSummaryPageSize_Validating(object sender, CancelEventArgs e)
         {
-            _ = int.TryParse(tsSummaryPageSize.Text, out int i);
+            _ = int.TryParse(tsSummaryPageSize.Text, out var i);
             if (i <= 0)
             {
                 tsSummaryPageSize.Text = currentSummaryPageSize.ToString();
@@ -213,11 +209,9 @@ namespace DBADashGUI.Changes
 
         private void DgvInstanceSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0 && e.ColumnIndex == colInstance.Index)
-            {
-                InstanceName = (string)dgvInstanceSummary.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
-                RefreshData();
-            }
+            if (e.RowIndex < 0 || e.ColumnIndex != colInstance.Index) return;
+            InstanceName = (string)dgvInstanceSummary.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
+            RefreshData();
         }
 
         private void SchemaSnapshots_Load(object sender, EventArgs e)
@@ -273,7 +267,7 @@ namespace DBADashGUI.Changes
             using var ofd = new FolderBrowserDialog() { Description = "Select a folder" };
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                string folder = System.IO.Path.Combine(ofd.SelectedPath, InstanceName + "_" + db + "_" + snapshotDate.ToString("yyyyMMdd_HHmmss"));
+                var folder = Path.Combine(ofd.SelectedPath, InstanceName + "_" + db + "_" + snapshotDate.ToString("yyyyMMdd_HHmmss"));
                 Directory.CreateDirectory(folder);
                 try
                 {
@@ -306,17 +300,17 @@ namespace DBADashGUI.Changes
                 {
                     while (rdr.Read())
                     {
-                        string schema = (string)rdr["SchemaName"];
-                        string name = (string)rdr["ObjectName"];
-                        string objType = (string)rdr["TypeDescription"];
-                        string subFolder = Path.Combine(Path.Combine(folder, Common.StripInvalidFileNameChars(schema)), objType);
-                        string filePath = Path.Combine(subFolder, Common.StripInvalidFileNameChars(name) + ".sql");
+                        var schema = (string)rdr["SchemaName"];
+                        var name = (string)rdr["ObjectName"];
+                        var objType = (string)rdr["TypeDescription"];
+                        var subFolder = Path.Combine(Path.Combine(folder, Common.StripInvalidFileNameChars(schema)), objType);
+                        var filePath = Path.Combine(subFolder, Common.StripInvalidFileNameChars(name) + ".sql");
                         if (!Directory.Exists(subFolder))
                         {
                             Directory.CreateDirectory(subFolder);
                         }
                         var bDDL = (byte[])rdr["DDL"];
-                        string sql = DBADash.SchemaSnapshotDB.Unzip(bDDL);
+                        var sql = SMOBaseClass.Unzip(bDDL);
                         File.WriteAllText(filePath, sql);
                     }
                 }

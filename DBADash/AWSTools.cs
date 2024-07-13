@@ -10,7 +10,6 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Amazon.SQS.Model;
 using System.Collections.Generic;
-using Microsoft.SqlServer.Management.SqlParser.Parser;
 
 namespace DBADash
 {
@@ -153,7 +152,7 @@ namespace DBADash
 
         public static async Task SendSQSMessageAsync(CollectionConfig cfg,string messageBody, string fromIdentifier, string toIdentifier, Guid handle, string toQueue,string messageType,string destinationConnectionHash)
         {
-            var region = AWSTools.GetRegionForQueue(toQueue);
+            var region = GetRegionForQueue(toQueue);
             var client = GetOrCreateClient(region,cfg);
 
             var sendMessageRequest = new SendMessageRequest

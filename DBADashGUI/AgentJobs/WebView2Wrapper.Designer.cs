@@ -32,9 +32,9 @@
             this.txtLink = new System.Windows.Forms.TextBox();
             this.pnlWebView2Required = new System.Windows.Forms.Panel();
             this.lblNotice = new System.Windows.Forms.Label();
-            this.WebViewCtrl = new Microsoft.Web.WebView2.WinForms.WebView2();
+            this.WebView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
             this.pnlWebView2Required.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.WebViewCtrl)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.WebView2)).BeginInit();
             this.SuspendLayout();
             // 
             // lnkDownload
@@ -85,27 +85,27 @@
             // 
             // WebViewCtrl
             // 
-            this.WebViewCtrl.AllowExternalDrop = true;
-            this.WebViewCtrl.CreationProperties = null;
-            this.WebViewCtrl.DefaultBackgroundColor = System.Drawing.Color.White;
-            this.WebViewCtrl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.WebViewCtrl.Location = new System.Drawing.Point(0, 0);
-            this.WebViewCtrl.Name = "WebViewCtrl";
-            this.WebViewCtrl.Size = new System.Drawing.Size(640, 469);
-            this.WebViewCtrl.TabIndex = 5;
-            this.WebViewCtrl.ZoomFactor = 1D;
+            this.WebView2.AllowExternalDrop = true;
+            this.WebView2.CreationProperties = null;
+            this.WebView2.DefaultBackgroundColor = System.Drawing.Color.White;
+            this.WebView2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.WebView2.Location = new System.Drawing.Point(0, 0);
+            this.WebView2.Name = "WebView2";
+            this.WebView2.Size = new System.Drawing.Size(640, 469);
+            this.WebView2.TabIndex = 5;
+            this.WebView2.ZoomFactor = 1D;
             // 
             // WebView2Wrapper
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.pnlWebView2Required);
-            this.Controls.Add(this.WebViewCtrl);
+            this.Controls.Add(this.WebView2);
             this.Name = "WebView2Wrapper";
             this.Size = new System.Drawing.Size(640, 469);
             this.pnlWebView2Required.ResumeLayout(false);
             this.pnlWebView2Required.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.WebViewCtrl)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.WebView2)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -115,7 +115,6 @@
         private System.Windows.Forms.LinkLabel lnkDownload;
         private System.Windows.Forms.TextBox txtLink;
         private System.Windows.Forms.Panel pnlWebView2Required;
-        private Microsoft.Web.WebView2.WinForms.WebView2 WebViewCtrl;
         private System.Windows.Forms.Label lblNotice;
     }
 }

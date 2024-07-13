@@ -1,11 +1,9 @@
-﻿using System.Drawing;
-using System.Windows.Forms;
-using DBADashSharedGUI;
+﻿using DBADashSharedGUI;
 
 namespace DBADashGUI.Theme
 {
     /// <summary>
-    /// Professional Color table for menu/toolstrip items in dark mode
+    /// Professional Color table for menu/tool strip items in dark mode
     /// </summary>
     public class DarkModeColors : ProfessionalColorTable
     {

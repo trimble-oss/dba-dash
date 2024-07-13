@@ -53,8 +53,8 @@ namespace DBADashGUI.Checks
             {
                 cn.Open();
                 cmd.Parameters.AddRange(new SqlParameter[] {
-                    new SqlParameter() { ParameterName = "MemoryDumpWarningThresholdHrs", SqlDbType = SqlDbType.Int,Value=MemoryDumpWarningThresholdHrs==null? DBNull.Value : MemoryDumpWarningThresholdHrs },
-                    new SqlParameter() { ParameterName = "MemoryDumpCriticalThresholdHrs", SqlDbType = SqlDbType.Int, Value = MemoryDumpCriticalThresholdHrs == null ? DBNull.Value : MemoryDumpCriticalThresholdHrs }
+                    new() { ParameterName = "MemoryDumpWarningThresholdHrs", SqlDbType = SqlDbType.Int,Value=MemoryDumpWarningThresholdHrs==null? DBNull.Value : MemoryDumpWarningThresholdHrs },
+                    new() { ParameterName = "MemoryDumpCriticalThresholdHrs", SqlDbType = SqlDbType.Int, Value = MemoryDumpCriticalThresholdHrs == null ? DBNull.Value : MemoryDumpCriticalThresholdHrs }
                 }
                 );
                 cmd.ExecuteNonQuery();

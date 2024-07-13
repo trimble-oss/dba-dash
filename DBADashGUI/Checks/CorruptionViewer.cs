@@ -12,9 +12,9 @@ namespace DBADashGUI
             this.ApplyTheme();
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            corruption1.SetContext(context);
+            corruption1.SetContext(_context);
             corruption1.RefreshData();
         }
 

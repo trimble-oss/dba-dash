@@ -1,10 +1,6 @@
 ﻿using DBADashGUI.Theme;
-using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.CustomReports
@@ -24,12 +20,12 @@ namespace DBADashGUI.CustomReports
             if (dgv == null) return;
             var isDark = DBADashUser.SelectedTheme.ThemeIdentifier == ThemeType.Dark;
 
-            if (this.Count == 0) return;
+            if (Count == 0) return;
             for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 foreach (var rules in this)
                 {
-                    object value = null;
+                    object value;
                     if (!dgv.Columns.Contains(rules.Key)) break; // Skip if column is not in the grid
 
                     if (rules.Value.EvaluateConditionAgainstDataSource)

@@ -41,10 +41,7 @@ namespace DBADashServiceConfig
                 }
                 return schedule;
             }
-            set
-            {
-                userSchedule = value;
-            }
+            set => userSchedule = value;
         }
 
         private void ScheduleConfig_Load(object sender, EventArgs e)
@@ -60,7 +57,7 @@ namespace DBADashServiceConfig
             {
                 foreach (var s in userSchedule)
                 {
-                    int idx = dgv.Rows.Add(new object[] { Enum.GetName(typeof(CollectionType), s.Key), s.Value.Schedule, GetScheduleDescription(s.Value.Schedule), s.Value.RunOnServiceStart, false });
+                    int idx = dgv.Rows.Add(Enum.GetName(typeof(CollectionType), s.Key), s.Value.Schedule, GetScheduleDescription(s.Value.Schedule), s.Value.RunOnServiceStart, false);
                     FormatRow(idx);
                 }
             }
@@ -68,7 +65,7 @@ namespace DBADashServiceConfig
             {
                 if (userSchedule == null || !userSchedule.ContainsKey(s.Key))
                 {
-                    int idx = dgv.Rows.Add(new object[] { Enum.GetName(typeof(CollectionType), s.Key), s.Value.Schedule, GetScheduleDescription(s.Value.Schedule), s.Value.RunOnServiceStart, true });
+                    int idx = dgv.Rows.Add(Enum.GetName(typeof(CollectionType), s.Key), s.Value.Schedule, GetScheduleDescription(s.Value.Schedule), s.Value.RunOnServiceStart, true);
                     FormatRow(idx);
                 }
             }
@@ -165,12 +162,12 @@ namespace DBADashServiceConfig
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
 
         private void BttnOK_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         private void LnkCron_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

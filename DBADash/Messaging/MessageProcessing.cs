@@ -1,24 +1,13 @@
-﻿using DBADash;
+﻿using Microsoft.Data.SqlClient;
+using Polly;
+using Polly.Retry;
+using Serilog;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Amazon.RuntimeDependencies;
-using Azure;
-using Microsoft.Data.SqlClient;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
-using Octokit;
-using Polly;
-using Serilog;
-using DBADash.Messaging;
-using Polly.Retry;
-using static Azure.Core.HttpHeader;
-using static System.Net.WebRequestMethods;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace DBADash.Messaging
 {
@@ -31,7 +20,7 @@ namespace DBADash.Messaging
         public const string ReplyMessageType = "//dbadash.com/DBADashService/Reply";
         private readonly DBADashAgent Agent;
         private const int DefaultMessageThreads = 2;
-        private int MessageThreads;
+        private readonly int MessageThreads;
 
         private readonly AsyncRetryPolicy AgentIDRetryPolicy = Policy.Handle<Exception>()
             .WaitAndRetryForeverAsync(_ => TimeSpan.FromSeconds(60),
@@ -144,6 +133,7 @@ namespace DBADash.Messaging
                 }
                 await Task.Delay(100);
             }
+            // ReSharper disable once FunctionNeverReturns
         }
 
         private static async Task HandleOtherMessageTypes(Guid handle, string type, byte[] message, string connectionString)
@@ -191,7 +181,7 @@ namespace DBADash.Messaging
                 var msg = MessageBase.Deserialize(message);
                 if (msg.IsExpired)
                 {
-                    Log.Error("Message with handle {handle} created at {Created} is expired.", type, handle, msg.Created);
+                    Log.Error("Message with handle {handle} created at {Created} is expired.", type, handle);
                     await SendReplyMessage(handle,
                         (new ResponseMessage()
                         { Type = ResponseMessage.ResponseTypes.Failure, Message = "Message is Expired." }).Serialize(),
@@ -204,10 +194,10 @@ namespace DBADash.Messaging
                                                (new ResponseMessage()
                                                { Type = ResponseMessage.ResponseTypes.Progress, Message = "Message relay to remote service" }).Serialize(),
                                                                       dest.ConnectionString);
-              
-                       //get hash of dest - pass it in the sqs message so it can be passed back and we know which destination
-                   await AWSTools.SendSQSMessageAsync(Config,Convert.ToBase64String(msg.Serialize()),DBADashAgent.GetCurrent().AgentIdentifier,msg.CollectAgent.AgentIdentifier,handle,msg.CollectAgent.ServiceSQSQueueUrl, SendMessageType,dest.Hash) ;
-                   endConversation = false;
+
+                    //get hash of dest - pass it in the sqs message so it can be passed back and we know which destination
+                    await AWSTools.SendSQSMessageAsync(Config, Convert.ToBase64String(msg.Serialize()), DBADashAgent.GetCurrent().AgentIdentifier, msg.CollectAgent.AgentIdentifier, handle, msg.CollectAgent.ServiceSQSQueueUrl, SendMessageType, dest.Hash);
+                    endConversation = false;
                 }
                 else
                 {
@@ -215,7 +205,7 @@ namespace DBADash.Messaging
                     var ds = await msg.Process(Config, handle);
                     await SendReplyMessage(handle,
                         (new ResponseMessage()
-                        { Type = ResponseMessage.ResponseTypes.Success, Message = "Completed", Data = ds}).Serialize(),
+                        { Type = ResponseMessage.ResponseTypes.Success, Message = "Completed", Data = ds }).Serialize(),
                         dest.ConnectionString);
                 }
             }

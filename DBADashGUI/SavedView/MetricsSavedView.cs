@@ -14,7 +14,7 @@ namespace DBADashGUI
 
         public bool ShowGrid { get; set; }
 
-        public override SavedView.ViewTypes Type => SavedView.ViewTypes.Metric;
+        public override ViewTypes Type => ViewTypes.Metric;
 
         public override string Serialize()
         {

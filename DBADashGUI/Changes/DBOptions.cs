@@ -3,7 +3,6 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using DBADashGUI.Theme;
@@ -74,10 +73,10 @@ namespace DBADashGUI.Changes
             }
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = context.InstanceIDs.ToList();
-            DatabaseID = context.DatabaseID;
+            InstanceIDs = _context.InstanceIDs.ToList();
+            DatabaseID = _context.DatabaseID;
             RowFilter = string.Empty;
             InstanceGroupName = string.Empty;
             SummaryMode = true;
@@ -159,7 +158,7 @@ namespace DBADashGUI.Changes
 
         private void RefreshDBInfo()
         {
-            DataTable dt = GetDBInfo();
+            var dt = GetDBInfo();
             tsClearFilter.Enabled = RowFilter != string.Empty;
             if (dt.Rows.Count == 1 && DatabaseID > 0)
             {
@@ -264,7 +263,7 @@ namespace DBADashGUI.Changes
 
         private void ShowSummary()
         {
-            bool historyRefresh = !string.IsNullOrEmpty(InstanceGroupName);
+            var historyRefresh = !string.IsNullOrEmpty(InstanceGroupName);
             dgv.DataSource = null;
             SummaryMode = true;
             RefreshDBSummary();
@@ -276,7 +275,7 @@ namespace DBADashGUI.Changes
 
         private void TsDetail_Click(object sender, EventArgs e)
         {
-            bool historyRefresh = string.IsNullOrEmpty(InstanceGroupName);
+            var historyRefresh = string.IsNullOrEmpty(InstanceGroupName);
             RowFilter = string.Empty;
             SummaryMode = false;
             RefreshDBInfo();
@@ -298,7 +297,7 @@ namespace DBADashGUI.Changes
         {
             if (!dgv.Columns.Contains("database_id")) return;
 
-            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var r = dgv.Rows[idx];
                 var maxCompatLevel = Convert.ToInt32(r.Cells["MaxSupportedCompatibilityLevel"].Value);
@@ -403,9 +402,9 @@ namespace DBADashGUI.Changes
 
         private void Summary_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            var warningCols = new string[] { "Auto Create Stats Disabled", "Auto Update Stats Disabled", "Old Compat Level", "Recovering", "Offline", "Trustworthy", "Not Using Indirect Checkpoints", "None-Default Target Recovery Time" };
-            var criticalCols = new string[] { "Page Verify Not Optimal", "Auto Close", "Auto Shrink", "Suspect", "Emergency", "Recovery Pending" };
-            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            var warningCols = new[] { "Auto Create Stats Disabled", "Auto Update Stats Disabled", "Old Compat Level", "Recovering", "Offline", "Trustworthy", "Not Using Indirect Checkpoints", "None-Default Target Recovery Time" };
+            var criticalCols = new[] { "Page Verify Not Optimal", "Auto Close", "Auto Shrink", "Suspect", "Emergency", "Recovery Pending" };
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var r = dgv.Rows[idx];
 

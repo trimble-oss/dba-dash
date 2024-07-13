@@ -62,7 +62,7 @@ namespace DBADashGUI.Performance
         public CPUMetric Metric
         { get => _metric; set { _metric = value; SelectAggregate(); } }
 
-        IMetric IMetricChart.Metric { get => Metric; }
+        IMetric IMetricChart.Metric => Metric;
 
         private void SelectAggregate()
         {
@@ -147,7 +147,7 @@ namespace DBADashGUI.Performance
                 string format = durationMins < 1440 ? "HH:mm" : "yyyy-MM-dd HH:mm";
                 chartCPU.AxisX.Add(new Axis
                 {
-                    LabelFormatter = val => new System.DateTime((long)val).ToString(format)
+                    LabelFormatter = val => new DateTime((long)val).ToString(format)
                 });
                 chartCPU.AxisY.Add(new Axis
                 {
@@ -208,12 +208,12 @@ namespace DBADashGUI.Performance
 
         private void TsClose_Click(object sender, EventArgs e)
         {
-            Close.Invoke(this, new EventArgs());
+            Close.Invoke(this, EventArgs.Empty);
         }
 
         private void TsUp_Click(object sender, EventArgs e)
         {
-            MoveUp.Invoke(this, new EventArgs());
+            MoveUp.Invoke(this, EventArgs.Empty);
         }
     }
 }

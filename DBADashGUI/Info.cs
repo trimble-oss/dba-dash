@@ -13,9 +13,9 @@ namespace DBADashGUI
 
         private int InstanceID;
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceID = context.InstanceID;
+            InstanceID = _context.InstanceID;
             RefreshData();
         }
 

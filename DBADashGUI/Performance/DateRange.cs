@@ -67,11 +67,11 @@ namespace DBADashGUI.Performance
                 {
                     throw new Exception("Invalid time of day filter. Expected 24 items or less");
                 }
-                if (value.Where(hr => hr is > 23 or < 0).Any())
+                if (value.Any(hr => hr is > 23 or < 0))
                 {
                     throw new Exception("Invalid time of day filter. Expected values 0..23");
                 }
-                if (value.GroupBy(hr => hr).Where(grp => grp.Count() > 1).Any())
+                if (value.GroupBy(hr => hr).Any(grp => grp.Count() > 1))
                 {
                     throw new Exception("Invalid time of day filter. Duplicate values detected");
                 }
@@ -92,11 +92,11 @@ namespace DBADashGUI.Performance
                 {
                     throw new Exception("Invalid day of week filter.  Expected 7 items or less");
                 }
-                if (value.Where(dow => dow is > 7 or < 1).Any())
+                if (value.Any(dow => dow is > 7 or < 1))
                 {
                     throw new Exception("Invalid days of week filter. Expected values 1..7");
                 }
-                if (value.GroupBy(dow => dow).Where(grp => grp.Count() > 1).Any())
+                if (value.GroupBy(dow => dow).Any(grp => grp.Count() > 1))
                 {
                     throw new Exception("Invalid day of week filter. Duplicate values detected");
                 }

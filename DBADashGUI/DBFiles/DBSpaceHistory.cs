@@ -43,19 +43,22 @@ namespace DBADashGUI.DBFiles
         private string _fileName;
 
         public string FileName
-        { get { return _fileName; } set { _fileName = value; SetFileChecked(); } }
+        {
+            get => _fileName;
+            set { _fileName = value; SetFileChecked(); }
+        }
 
         public string NumberFormat { get; set; } = "N1";
 
-        private int? _dataspaceid = null;
+        private int? _dataSpaceId;
         private DataTable HistoryDT;
 
         public int? DataSpaceID
         {
-            get => _dataspaceid;
+            get => _dataSpaceId;
             set
             {
-                _dataspaceid = value;
+                _dataSpaceId = value;
                 SetFGChecked();
             }
         }
@@ -98,7 +101,7 @@ namespace DBADashGUI.DBFiles
             get => _unit;
             set
             {
-                int checkedCount = 0;
+                var checkedCount = 0;
                 foreach (ToolStripMenuItem itm in tsUnits.DropDownItems)
                 {
                     itm.Checked = value == Convert.ToString(itm.Tag);
@@ -149,10 +152,10 @@ namespace DBADashGUI.DBFiles
                 columns[s].Points = new DateTimePoint[cnt];
             }
 
-            int i = 0;
+            var i = 0;
             foreach (DataRow r in HistoryDT.Rows)
             {
-                foreach (string s in columns.Keys)
+                foreach (var s in columns.Keys)
                 {
                     var v = r[s] == DBNull.Value ? 0 : (double)(decimal)r[s];
                     var ssDate = (DateTime)r["SnapshotDate"];
@@ -163,7 +166,7 @@ namespace DBADashGUI.DBFiles
 
             var sc = new SeriesCollection();
             chart1.Series = sc;
-            foreach (string s in columns.Keys)
+            foreach (var s in columns.Keys)
             {
                 var v = new ChartValues<DateTimePoint>();
                 v.AddRange(columns[s].Points);
@@ -176,14 +179,14 @@ namespace DBADashGUI.DBFiles
                     PointGeometrySize = PointSize,
                     Values = v
                 }
-                ); ;
+                );
             }
             chart1.AxisX.Clear();
             chart1.AxisY.Clear();
             chart1.AxisX.Add(new Axis
             {
                 Title = "Time",
-                LabelFormatter = val => new System.DateTime((long)val).ToString(DateFormat)
+                LabelFormatter = val => new DateTime((long)val).ToString(DateFormat)
             });
             chart1.AxisY.Add(new Axis
             {
@@ -239,7 +242,7 @@ namespace DBADashGUI.DBFiles
 
         private void Days_Click(object sender, EventArgs e)
         {
-            Days = int.Parse((string)((ToolStripMenuItem)sender).Tag);
+            Days = int.Parse(((string)((ToolStripMenuItem)sender).Tag)!);
             SetTimeChecked();
             RefreshData();
         }
@@ -281,7 +284,7 @@ namespace DBADashGUI.DBFiles
 
         private void SmoothLinesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (LineSeries s in chart1.Series.Cast<LineSeries>())
+            foreach (var s in chart1.Series.Cast<LineSeries>())
             {
                 s.LineSmoothness = SmoothLines ? 1 : 0;
             }
@@ -289,7 +292,7 @@ namespace DBADashGUI.DBFiles
 
         private void PointsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (LineSeries s in chart1.Series.Cast<LineSeries>())
+            foreach (var s in chart1.Series.Cast<LineSeries>())
             {
                 s.PointGeometrySize = PointSize;
             }
@@ -304,16 +307,13 @@ namespace DBADashGUI.DBFiles
         {
             dgv.Columns.Clear();
             dgv.AutoGenerateColumns = false;
-            dgv.Columns.AddRange(new DataGridViewColumn[]
-            {
-                new DataGridViewTextBoxColumn(){ HeaderText="Snapshot Date", DataPropertyName="SnapshotDate"},
-                new DataGridViewTextBoxColumn(){ HeaderText="Size (MB)", DataPropertyName="SizeMB", DefaultCellStyle= Common.DataGridViewCellStyle(NumberFormat), Visible=Unit=="MB" },
-                new DataGridViewTextBoxColumn(){ HeaderText="Used (MB)", DataPropertyName="UsedMB", DefaultCellStyle= Common.DataGridViewCellStyle(NumberFormat), Visible=Unit=="MB" },
-                new DataGridViewTextBoxColumn(){ HeaderText="Size (GB)", DataPropertyName="SizeGB", DefaultCellStyle= Common.DataGridViewCellStyle(NumberFormat), Visible=Unit=="GB" },
-                new DataGridViewTextBoxColumn(){ HeaderText="Used (GB)", DataPropertyName="UsedGB", DefaultCellStyle= Common.DataGridViewCellStyle(NumberFormat), Visible=Unit=="GB" },
-                new DataGridViewTextBoxColumn(){ HeaderText="Size (TB)", DataPropertyName="SizeTB", DefaultCellStyle= Common.DataGridViewCellStyle(NumberFormat), Visible=Unit=="TB" },
-                new DataGridViewTextBoxColumn(){ HeaderText="Used (TB)", DataPropertyName="UsedTB", DefaultCellStyle= Common.DataGridViewCellStyle(NumberFormat), Visible=Unit=="TB" }
-            });
+            dgv.Columns.AddRange(new DataGridViewTextBoxColumn() { HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate" },
+                new DataGridViewTextBoxColumn() { HeaderText = "Size (MB)", DataPropertyName = "SizeMB", DefaultCellStyle = Common.DataGridViewCellStyle(NumberFormat), Visible = Unit == "MB" },
+                new DataGridViewTextBoxColumn() { HeaderText = "Used (MB)", DataPropertyName = "UsedMB", DefaultCellStyle = Common.DataGridViewCellStyle(NumberFormat), Visible = Unit == "MB" },
+                new DataGridViewTextBoxColumn() { HeaderText = "Size (GB)", DataPropertyName = "SizeGB", DefaultCellStyle = Common.DataGridViewCellStyle(NumberFormat), Visible = Unit == "GB" },
+                new DataGridViewTextBoxColumn() { HeaderText = "Used (GB)", DataPropertyName = "UsedGB", DefaultCellStyle = Common.DataGridViewCellStyle(NumberFormat), Visible = Unit == "GB" },
+                new DataGridViewTextBoxColumn() { HeaderText = "Size (TB)", DataPropertyName = "SizeTB", DefaultCellStyle = Common.DataGridViewCellStyle(NumberFormat), Visible = Unit == "TB" },
+                new DataGridViewTextBoxColumn() { HeaderText = "Used (TB)", DataPropertyName = "UsedTB", DefaultCellStyle = Common.DataGridViewCellStyle(NumberFormat), Visible = Unit == "TB" });
         }
 
         private void PopulateFileGroupFilter()
@@ -321,18 +321,16 @@ namespace DBADashGUI.DBFiles
             var dt = CommonData.GetFileGroups(DatabaseID);
             foreach (DataRow r in dt.Rows)
             {
-                string fg = r["FileGroup"] == DBNull.Value ? "{NULL}" : (string)r["FileGroup"];
-                int? dataspaceid = r["data_space_id"] == DBNull.Value ? null : (int?)r["data_space_id"];
-                if (dataspaceid != null)
+                var fg = r["FileGroup"] == DBNull.Value ? "{NULL}" : (string)r["FileGroup"];
+                var dataSpaceId = r["data_space_id"] == DBNull.Value ? null : (int?)r["data_space_id"];
+                if (dataSpaceId == null) continue;
+                var mnu = new ToolStripMenuItem(fg)
                 {
-                    var mnu = new ToolStripMenuItem(fg)
-                    {
-                        Tag = dataspaceid,
-                        Checked = dataspaceid == DataSpaceID
-                    };
-                    mnu.Click += Mnu_Click;
-                    tsFileGroup.DropDownItems.Add(mnu);
-                }
+                    Tag = dataSpaceId,
+                    Checked = dataSpaceId == DataSpaceID
+                };
+                mnu.Click += Mnu_Click;
+                tsFileGroup.DropDownItems.Add(mnu);
             }
             tsFileGroup.Visible = tsFileGroup.DropDownItems.Count > 0;
         }
@@ -342,16 +340,14 @@ namespace DBADashGUI.DBFiles
             var dt = CommonData.GetFiles(DatabaseID);
             foreach (DataRow r in dt.Rows)
             {
-                string fileName = r["file_name"] == DBNull.Value ? "" : (string)r["file_name"];
-                if (fileName.Length > 0)
+                var fileName = r["file_name"] == DBNull.Value ? "" : (string)r["file_name"];
+                if (fileName.Length <= 0) continue;
+                var mnu = new ToolStripMenuItem(fileName)
                 {
-                    var mnu = new ToolStripMenuItem(fileName)
-                    {
-                        Checked = fileName == FileName
-                    };
-                    mnu.Click += MnuFile_Click;
-                    tsFile.DropDownItems.Add(mnu);
-                }
+                    Checked = fileName == FileName
+                };
+                mnu.Click += MnuFile_Click;
+                tsFile.DropDownItems.Add(mnu);
             }
             tsFile.Visible = tsFile.DropDownItems.Count > 0;
         }
@@ -371,7 +367,8 @@ namespace DBADashGUI.DBFiles
             foreach (ToolStripMenuItem mnu in tsFile.DropDownItems)
             {
                 mnu.Checked = mnu.Text == FileName;
-                if (mnu.Checked) { tsFile.Text = mnu.Text; };
+                if (mnu.Checked) { tsFile.Text = mnu.Text; }
+
                 mnu.Font = mnu.Checked ? new Font(mnu.Font, FontStyle.Bold) : new Font(mnu.Font, FontStyle.Regular);
             }
         }
@@ -398,7 +395,8 @@ namespace DBADashGUI.DBFiles
             foreach (ToolStripMenuItem mnu in tsFileGroup.DropDownItems)
             {
                 mnu.Checked = (int?)mnu.Tag == DataSpaceID;
-                if (mnu.Checked) { tsFileGroup.Text = mnu.Text; };
+                if (mnu.Checked) { tsFileGroup.Text = mnu.Text; }
+
                 mnu.Font = mnu.Checked ? new Font(mnu.Font, FontStyle.Bold) : new Font(mnu.Font, FontStyle.Regular);
             }
         }
@@ -419,17 +417,17 @@ namespace DBADashGUI.DBFiles
         {
             if (!splitContainer1.Panel2Collapsed)
             {
-                int distance = this.Width - (ColumnTotalWidth() + 30);
+                var distance = Width - (ColumnTotalWidth() + 30);
                 if (distance > 10)
                 {
-                    splitContainer1.SplitterDistance = this.Width - (ColumnTotalWidth() + 30);
+                    splitContainer1.SplitterDistance = Width - (ColumnTotalWidth() + 30);
                 }
             }
         }
 
         private int ColumnTotalWidth()
         {
-            return dgv.Columns.Cast<DataGridViewColumn>().Where(x => x.Visible == true).Select(x => x.Width).Sum();
+            return dgv.Columns.Cast<DataGridViewColumn>().Where(x => x.Visible).Select(x => x.Width).Sum();
         }
 
         private void DBSpaceHistory_Resize(object sender, EventArgs e)

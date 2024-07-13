@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Amazon.S3.Model.Internal.MarshallTransformations;
 using Microsoft.Data.SqlClient;
-using Octokit;
 
 namespace DBADash
 {
@@ -34,14 +28,7 @@ namespace DBADash
             using var cn = new SqlConnection(connectionString);
             using var cmd = new SqlCommand("Settings_Upd", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("SettingName", SettingName);
-            if (SettingValue == null)
-            {
-                cmd.Parameters.AddWithValue("SettingValue", DBNull.Value);
-            }
-            else
-            {
-                cmd.Parameters.AddWithValue("SettingValue", SettingValue);
-            }
+            cmd.Parameters.AddWithValue("SettingValue", SettingValue ?? DBNull.Value);
             cn.Open();
             cmd.ExecuteNonQuery();
         }

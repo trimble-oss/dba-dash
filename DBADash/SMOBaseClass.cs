@@ -12,7 +12,7 @@ namespace DBADash
     {
         protected readonly SchemaSnapshotDBOptions options;
         protected readonly ScriptingOptions ScriptingOptions;
-        protected string ConnectionString { get => SourceConnection.ConnectionString; }
+        protected string ConnectionString => SourceConnection.ConnectionString;
         protected readonly DBADashConnection SourceConnection;
 
         public SMOBaseClass(DBADashConnection source, SchemaSnapshotDBOptions options)
@@ -20,14 +20,14 @@ namespace DBADash
             SourceConnection = source;
             options ??= new SchemaSnapshotDBOptions();
             this.options = options;
-            this.ScriptingOptions = options.ScriptOptions();
+            ScriptingOptions = options.ScriptOptions();
         }
 
         public SMOBaseClass(DBADashConnection source)
         {
             SourceConnection = source;
-            this.options = new SchemaSnapshotDBOptions();
-            this.ScriptingOptions = options.ScriptOptions();
+            options = new SchemaSnapshotDBOptions();
+            ScriptingOptions = options.ScriptOptions();
         }
 
 

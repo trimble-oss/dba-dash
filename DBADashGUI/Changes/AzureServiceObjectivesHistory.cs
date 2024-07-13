@@ -16,9 +16,9 @@ namespace DBADashGUI.Changes
 
         private List<int> InstanceIDs;
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = context.AzureInstanceIDs.ToList();
+            InstanceIDs = _context.AzureInstanceIDs.ToList();
             RefreshDB();
             RefreshPool();
         }

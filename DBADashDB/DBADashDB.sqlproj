@@ -737,6 +737,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DBADashDB.publish.xml" />
+    <None Include="..\.editorconfig">
+      <Link>.editorconfig</Link>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <SqlCmdVariable Include="VersionNumber">

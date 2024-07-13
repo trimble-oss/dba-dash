@@ -18,17 +18,17 @@ namespace DBADashGUI.Performance
 
         private int InstanceID;
 
-        private bool isClerksRefreshed = false;
-        private bool isConfigRefreshed = false;
-        private bool isCountersRefreshed = false;
+        private bool isClerksRefreshed;
+        private bool isConfigRefreshed;
+        private bool isCountersRefreshed;
         private List<int> MemoryCounters;
-        private int dateGrouping = 0;
+        private int dateGrouping;
         private static readonly int MaxChartPoints = 1000;
         private string selectedClerk;
         private string selectedCounter;
         private string selectedCounterAlias;
         private readonly ToolTip dgvToolTip = new() { AutomaticDelay = 100, AutoPopDelay = 60000, ReshowDelay = 100 };
-        private int previousDurationMins = 0;
+        private int previousDurationMins;
 
         private enum ChartViews
         {
@@ -65,9 +65,9 @@ namespace DBADashGUI.Performance
             }
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceID = context.InstanceID;
+            InstanceID = _context.InstanceID;
             RefreshData();
         }
 
@@ -162,13 +162,11 @@ namespace DBADashGUI.Performance
                 $"{chartPoint.SeriesView.Title} ({chartPoint.Participation:P})";
             SeriesCollection sc = new();
             double other = 0;
-            double otherPct = 0;
-            bool dataLabels;
             foreach (DataRow r in dt.Rows)
             {
                 var pages = Convert.ToDouble(r["pages_kb"]);
                 var pct = Convert.ToDouble(r["Pct"]);
-                dataLabels = pct > 0.05;
+                var dataLabels = pct > 0.05;
                 if (pct > 0.02)
                 {
                     var s = new PieSeries() { Title = (string)r["MemoryClerkType"], Values = new ChartValues<double> { pages }, LabelPoint = labelPoint, DataLabels = dataLabels, ToolTip = true };
@@ -177,12 +175,10 @@ namespace DBADashGUI.Performance
                 else
                 {
                     other += pages;
-                    otherPct += pct;
                 }
             }
             if (other > 0)
             {
-                dataLabels = otherPct > 0.05;
                 var s = new PieSeries() { Title = "{Other}", Values = new ChartValues<double> { other }, LabelPoint = labelPoint, DataLabels = true, ToolTip = true };
                 sc.Add(s);
             }

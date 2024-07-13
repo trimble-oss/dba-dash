@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DBADashGUI
+﻿namespace DBADashGUI
 {
     public class DatabaseItem
     {
@@ -14,7 +12,7 @@ namespace DBADashGUI
 
         public override bool Equals(object obj)
         {
-            if (Object.ReferenceEquals(this, obj))
+            if (ReferenceEquals(this, obj))
             {
                 return true;
             }
@@ -22,11 +20,11 @@ namespace DBADashGUI
             {
                 return false;
             }
-            if (this.GetType() != obj.GetType())
+            if (GetType() != obj.GetType())
             {
                 return false;
             }
-            return ((DatabaseItem)obj).DatabaseID == this.DatabaseID && ((DatabaseItem)obj).DatabaseName == this.DatabaseName;
+            return ((DatabaseItem)obj).DatabaseID == DatabaseID && ((DatabaseItem)obj).DatabaseName == DatabaseName;
         }
 
         public override int GetHashCode()

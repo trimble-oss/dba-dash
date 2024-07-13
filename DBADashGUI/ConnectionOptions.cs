@@ -1,7 +1,4 @@
-﻿using DBADash;
-using System;
-using System.Diagnostics;
-using System.IO;
+﻿using System;
 using System.Windows.Forms;
 namespace DBADashGUI
 {
@@ -16,7 +13,7 @@ namespace DBADashGUI
 
         private void BttnOK_Click(object sender, EventArgs e)
         {
-            this.DialogResult= DialogResult.OK;
+            DialogResult= DialogResult.OK;
         }
 
         private void ConnectionOptions_Load(object sender, EventArgs e)

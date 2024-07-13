@@ -51,7 +51,7 @@ namespace CustomProgressControl
         /// </summary>
         public DataGridViewProgressBarCell()
         {
-            this.ValueType = typeof(int);
+            ValueType = typeof(int);
         }
 
         public Color ProgressBarColorFrom { get; set; } = DashColors.ProgressBarFrom;
@@ -68,10 +68,6 @@ namespace CustomProgressControl
           DataGridViewAdvancedBorderStyle advancedBorderStyle,
           DataGridViewPaintParts paintParts)
         {
-            int leftMargin = STANDARD_HORIZONTAL_MARGIN;
-            int rightMargin = STANDARD_HORIZONTAL_MARGIN;
-            int topMargin = STANDARD_VERTICAL_MARGIN;
-            int bottomMargin = STANDARD_VERTICAL_MARGIN;
             PointF fontPlacement = new(0, 0);
 
             int progressVal;
@@ -84,17 +80,14 @@ namespace CustomProgressControl
             base.Paint(g, clipBounds, cellBounds, rowIndex, cellState, value, formattedValue, errorText, cellStyle, advancedBorderStyle, (paintParts & ~DataGridViewPaintParts.ContentForeground));
 
             // Get margins from the style
-            if (null != cellStyle)
-            {
-                leftMargin = cellStyle.Padding.Left + 1;
-                rightMargin = cellStyle.Padding.Right + 1;
-                topMargin = cellStyle.Padding.Top + 1;
-                bottomMargin = cellStyle.Padding.Bottom + 1;
-            }
+            var leftMargin = cellStyle.Padding.Left + 1;
+            var rightMargin = cellStyle.Padding.Right + 1;
+            var topMargin = cellStyle.Padding.Top + 1;
+            var bottomMargin = cellStyle.Padding.Bottom + 1;
 
             // Calculate the sizes
-            int imgHeight = cellBounds.Bottom - cellBounds.Top - (topMargin + bottomMargin);
-            int imgWidth = cellBounds.Right - cellBounds.Left - (leftMargin + rightMargin);
+            var imgHeight = cellBounds.Bottom - cellBounds.Top - (topMargin + bottomMargin);
+            var imgWidth = cellBounds.Right - cellBounds.Left - (leftMargin + rightMargin);
             if (imgWidth <= 0)
             {
                 imgWidth = 1;
@@ -105,7 +98,7 @@ namespace CustomProgressControl
             }
 
             // Calculate the progress
-            int progressWidth = imgWidth * progressVal / 100;
+            var progressWidth = imgWidth * progressVal / 100;
             if (progressWidth <= 0)
             {
                 progressWidth = progressVal > 0 ? 1 : 0;
@@ -115,71 +108,63 @@ namespace CustomProgressControl
             if (null != formattedValue)
             {
                 SizeF availArea = new(imgWidth, imgHeight);
-                SizeF fontSize = g.MeasureString(formattedValue.ToString(), cellStyle.Font, availArea);
+                var fontSize = g.MeasureString(formattedValue.ToString(), cellStyle.Font, availArea);
 
                 #region [Font Placement Calc]
 
-                if (null == cellStyle)
+                // Set the Y vertical position
+                switch (cellStyle.Alignment)
                 {
-                    fontPlacement.Y = cellBounds.Y + topMargin + (((float)imgHeight - fontSize.Height) / 2);
-                    fontPlacement.X = cellBounds.X + leftMargin + (((float)imgWidth - fontSize.Width) / 2);
+                    case DataGridViewContentAlignment.BottomCenter:
+                    case DataGridViewContentAlignment.BottomLeft:
+                    case DataGridViewContentAlignment.BottomRight:
+                        {
+                            fontPlacement.Y = cellBounds.Y + topMargin + imgHeight - fontSize.Height;
+                            break;
+                        }
+                    case DataGridViewContentAlignment.TopCenter:
+                    case DataGridViewContentAlignment.TopLeft:
+                    case DataGridViewContentAlignment.TopRight:
+                        {
+                            fontPlacement.Y = cellBounds.Y + topMargin - fontSize.Height;
+                            break;
+                        }
+                    case DataGridViewContentAlignment.MiddleCenter:
+                    case DataGridViewContentAlignment.MiddleLeft:
+                    case DataGridViewContentAlignment.MiddleRight:
+                    case DataGridViewContentAlignment.NotSet:
+                    default:
+                        {
+                            fontPlacement.Y = cellBounds.Y + topMargin + ((imgHeight - fontSize.Height) / 2);
+                            break;
+                        }
                 }
-                else
+                // Set the X horizontal position
+                switch (cellStyle.Alignment)
                 {
-                    // Set the Y vertical position
-                    switch (cellStyle.Alignment)
-                    {
-                        case DataGridViewContentAlignment.BottomCenter:
-                        case DataGridViewContentAlignment.BottomLeft:
-                        case DataGridViewContentAlignment.BottomRight:
-                            {
-                                fontPlacement.Y = cellBounds.Y + topMargin + imgHeight - fontSize.Height;
-                                break;
-                            }
-                        case DataGridViewContentAlignment.TopCenter:
-                        case DataGridViewContentAlignment.TopLeft:
-                        case DataGridViewContentAlignment.TopRight:
-                            {
-                                fontPlacement.Y = cellBounds.Y + topMargin - fontSize.Height;
-                                break;
-                            }
-                        case DataGridViewContentAlignment.MiddleCenter:
-                        case DataGridViewContentAlignment.MiddleLeft:
-                        case DataGridViewContentAlignment.MiddleRight:
-                        case DataGridViewContentAlignment.NotSet:
-                        default:
-                            {
-                                fontPlacement.Y = cellBounds.Y + topMargin + (((float)imgHeight - fontSize.Height) / 2);
-                                break;
-                            }
-                    }
-                    // Set the X horizontal position
-                    switch (cellStyle.Alignment)
-                    {
-                        case DataGridViewContentAlignment.BottomLeft:
-                        case DataGridViewContentAlignment.MiddleLeft:
-                        case DataGridViewContentAlignment.TopLeft:
-                            {
-                                fontPlacement.X = cellBounds.X + leftMargin;
-                                break;
-                            }
-                        case DataGridViewContentAlignment.BottomRight:
-                        case DataGridViewContentAlignment.MiddleRight:
-                        case DataGridViewContentAlignment.TopRight:
-                            {
-                                fontPlacement.X = cellBounds.X + leftMargin + imgWidth - fontSize.Width;
-                                break;
-                            }
-                        case DataGridViewContentAlignment.BottomCenter:
-                        case DataGridViewContentAlignment.MiddleCenter:
-                        case DataGridViewContentAlignment.TopCenter:
-                        case DataGridViewContentAlignment.NotSet:
-                        default:
-                            {
-                                fontPlacement.X = cellBounds.X + leftMargin + (((float)imgWidth - fontSize.Width) / 2);
-                                break;
-                            }
-                    }
+                    case DataGridViewContentAlignment.BottomLeft:
+                    case DataGridViewContentAlignment.MiddleLeft:
+                    case DataGridViewContentAlignment.TopLeft:
+                        {
+                            fontPlacement.X = cellBounds.X + leftMargin;
+                            break;
+                        }
+                    case DataGridViewContentAlignment.BottomRight:
+                    case DataGridViewContentAlignment.MiddleRight:
+                    case DataGridViewContentAlignment.TopRight:
+                        {
+                            fontPlacement.X = cellBounds.X + leftMargin + imgWidth - fontSize.Width;
+                            break;
+                        }
+                    case DataGridViewContentAlignment.BottomCenter:
+                    case DataGridViewContentAlignment.MiddleCenter:
+                    case DataGridViewContentAlignment.TopCenter:
+                    case DataGridViewContentAlignment.NotSet:
+                    default:
+                        {
+                            fontPlacement.X = cellBounds.X + leftMargin + ((imgWidth - fontSize.Width) / 2);
+                            break;
+                        }
                 }
 
                 #endregion [Font Placement Calc]
@@ -204,12 +189,10 @@ namespace CustomProgressControl
             }
 
             // Draw the text
-            if (null != formattedValue && null != cellStyle)
+            if (null == formattedValue) return;
+            using (SolidBrush fontBrush = new(cellStyle.ForeColor))
             {
-                using (SolidBrush fontBrush = new(cellStyle.ForeColor))
-                {
-                    g.DrawString(formattedValue.ToString(), cellStyle.Font, fontBrush, fontPlacement);
-                }
+                g.DrawString(formattedValue.ToString(), cellStyle.Font, fontBrush, fontPlacement);
             }
         }
     }

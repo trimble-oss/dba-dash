@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
+using System.Globalization;
 using System.Windows.Forms;
 using DBADashGUI.Theme;
 
@@ -30,7 +31,7 @@ namespace DBADashGUI.Checks
                     if (rdr.Read())
                     {
                         chkInherit.Checked = Convert.ToBoolean(rdr["IsInherited"]);
-                        this.Text += " " + Convert.ToString(rdr["Instance"]);
+                        Text += " " + Convert.ToString(rdr["Instance"]);
                         if (rdr["WarningThreshold"] == DBNull.Value || rdr["CriticalThreshold"] == DBNull.Value)
                         {
                             chkEnabled.Checked = false;
@@ -43,14 +44,14 @@ namespace DBADashGUI.Checks
                         }
                         if (rdr["sqlserver_start_time"] != DBNull.Value)
                         {
-                            DateTime startTimeUtc = Convert.ToDateTime(rdr["sqlserver_start_time_utc"]);
-                            DateTime startTimeServer = Convert.ToDateTime(rdr["sqlserver_start_time"]);
-                            DateTime ackDate = Convert.ToDateTime(rdr["UptimeAckDate"] == DBNull.Value ? DateTime.MinValue : rdr["UptimeAckDate"]);
+                            var startTimeUtc = Convert.ToDateTime(rdr["sqlserver_start_time_utc"]);
+                            var startTimeServer = Convert.ToDateTime(rdr["sqlserver_start_time"]);
+                            var ackDate = Convert.ToDateTime(rdr["UptimeAckDate"] == DBNull.Value ? DateTime.MinValue : rdr["UptimeAckDate"]);
 
                             lblStartTime.Text = "Start Time: " + startTimeUtc.ToAppTimeZone();
                             if (startTimeUtc.ToAppTimeZone() != startTimeServer)
                             {
-                                lblStartTime.Text += " (" + startTimeServer.ToString() + " on server)";
+                                lblStartTime.Text += " (" + startTimeServer.ToString(CultureInfo.CurrentCulture) + " on server)";
                             }
                             lblUptime.Text = "Uptime: " + DateTime.UtcNow.Subtract(startTimeUtc).Humanize(3);
                             if (ackDate > startTimeUtc)
@@ -103,8 +104,8 @@ namespace DBADashGUI.Checks
                 cmd.ExecuteNonQuery();
             }
             MessageBox.Show("Threshold updated", "Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void ChkConfigureRoot_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -114,8 +115,8 @@ namespace DBADashGUI.Checks
                 frm.ShowDialog();
                 if (frm.DialogResult == DialogResult.OK)
                 {
-                    this.DialogResult = DialogResult.OK;
-                    this.Close();
+                    DialogResult = DialogResult.OK;
+                    Close();
                 }
             }
         }
@@ -124,8 +125,8 @@ namespace DBADashGUI.Checks
         {
             CommonData.AcknowledgeInstanceUptime(InstanceID);
             MessageBox.Show("Alert cleared", "Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            DialogResult = DialogResult.OK;
+            Close();
         }
     }
 }

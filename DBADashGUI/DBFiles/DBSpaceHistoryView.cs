@@ -22,14 +22,14 @@ namespace DBADashGUI.DBFiles
 
         private void DBSpaceHistoryView_Load(object sender, EventArgs e)
         {
-            this.Text = InstanceGroupName;
+            Text = InstanceGroupName;
             if (!string.IsNullOrEmpty(DBName))
             {
-                this.Text += " | " + DBName;
+                Text += " | " + DBName;
             }
             if (!string.IsNullOrEmpty(FileName))
             {
-                this.Text += " | " + FileName;
+                Text += " | " + FileName;
             }
             dbSpaceHistory1.RefreshData();
         }

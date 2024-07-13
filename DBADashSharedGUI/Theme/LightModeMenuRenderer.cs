@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Runtime.Versioning;
+﻿using System.Runtime.Versioning;
 using DBADashSharedGUI;
 
 namespace DBADashGUI.Theme

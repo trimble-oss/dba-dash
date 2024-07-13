@@ -70,9 +70,7 @@ namespace DBADashGUI.Performance
                 i++;
             }
 
-            SeriesCollection sc;
-
-            sc = new SeriesCollection();
+            var sc = new SeriesCollection();
             foreach (string s in columns.Keys)
             {
                 var v = new ChartValues<DateTimePoint>();
@@ -97,7 +95,7 @@ namespace DBADashGUI.Performance
                 AxisX.Add(new Axis
                 {
                     Title = "Time",
-                    LabelFormatter = val => new System.DateTime((long)val).ToString("yyyy-MM-dd HH:mm")
+                    LabelFormatter = val => new DateTime((long)val).ToString("yyyy-MM-dd HH:mm")
                 });
             }
             if (Series[0].Values.Count == 1)

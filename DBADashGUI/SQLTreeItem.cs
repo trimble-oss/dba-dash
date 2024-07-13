@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
-using DocumentFormat.OpenXml.Presentation;
 
 namespace DBADashGUI
 {
@@ -76,7 +75,7 @@ namespace DBADashGUI
         {
             get
             {
-                if (_engineEdition == DatabaseEngineEdition.Unknown && Type != TreeType.DBADashRoot && this.Parent != null)
+                if (_engineEdition == DatabaseEngineEdition.Unknown && Type != TreeType.DBADashRoot && Parent != null)
                 {
                     _engineEdition = SQLTreeItemParent.EngineEdition;
                 }
@@ -142,7 +141,7 @@ namespace DBADashGUI
             _ => Guid.Empty
         };
 
-        public int JobStepID => Type == SQLTreeItem.TreeType.AgentJobStep ? (int)Tag : -1;
+        public int JobStepID => Type == TreeType.AgentJobStep ? (int)Tag : -1;
 
         /// <summary>
         /// Populates lists of instance IDs: InstanceIDs, RegularInstanceIDs and AzureInstanceIDs
@@ -158,7 +157,7 @@ namespace DBADashGUI
                 _InstanceIDs = new HashSet<int>();
                 if (Type is TreeType.DBADashRoot or TreeType.AzureInstance or TreeType.InstanceFolder)
                 {
-                    foreach (SQLTreeItem itm in this.Nodes) // Look down the tree for Instance/AzureDB nodes
+                    foreach (SQLTreeItem itm in Nodes) // Look down the tree for Instance/AzureDB nodes
                     {
                         if (itm.InstanceID > 0) // We have an instance to add
                         {
@@ -183,13 +182,13 @@ namespace DBADashGUI
                 }
                 else if (Type == TreeType.AzureDatabase) // Return a list with a single ID of the AzureDB
                 {
-                    _AzureInstanceIDs.Add(this.instanceID);
-                    _InstanceIDs.Add(this.instanceID);
+                    _AzureInstanceIDs.Add(instanceID);
+                    _InstanceIDs.Add(instanceID);
                 }
                 else if (Type == TreeType.Instance) // Return a list with a single ID of the Instance
                 {
-                    _RegularInstanceIDs.Add(this.instanceID);
-                    _InstanceIDs.Add(this.instanceID);
+                    _RegularInstanceIDs.Add(instanceID);
+                    _InstanceIDs.Add(instanceID);
                 }
                 else if (Type == TreeType.ElasticPool)
                 {
@@ -274,7 +273,7 @@ namespace DBADashGUI
             }
         }
 
-        public string FullName() => _schemaName == null || _schemaName.Length == 0 ? _objectName : _schemaName + "." + _objectName;
+        public string FullName() => string.IsNullOrEmpty(_schemaName) ? _objectName : _schemaName + "." + _objectName;
 
         public SQLTreeItem(string objectName, string schemaName, TreeType type) : base()
         {
@@ -338,13 +337,13 @@ namespace DBADashGUI
         public bool IsVisibleInSummary
         { get => isVisibleInSummary; set { isVisibleInSummary = value; SetIcon(); } }
 
-        private bool hasInstanceName = false;
-        private string instanceName = null;
-        private int instanceID = 0;
+        private bool hasInstanceName;
+        private string instanceName;
+        private int instanceID;
 
         public int InstanceID
         {
-            get => instanceID > 0 ? instanceID : this.Parent == null ? 0 : SQLTreeItemParent.InstanceID;
+            get => instanceID > 0 ? instanceID : Parent == null ? 0 : SQLTreeItemParent.InstanceID;
             set => instanceID = value;
         }
 
@@ -388,10 +387,10 @@ namespace DBADashGUI
         private string databaseName;
 
         public string ObjectName
-        { get => _objectName; set { _objectName = value; this.Name = FullName(); } }
+        { get => _objectName; set { _objectName = value; Name = FullName(); } }
 
         public string SchemaName
-        { get => _schemaName; set { _schemaName = value; this.Name = FullName(); } }
+        { get => _schemaName; set { _schemaName = value; Name = FullName(); } }
 
         public long ObjectID { get; set; }
 
@@ -413,38 +412,34 @@ namespace DBADashGUI
                     return _databaseID;
                 }
             }
-            set
-            {
-                _databaseID = value;
-            }
+            set => _databaseID = value;
         }
 
         public string DatabaseName
         {
             get
             {
-                if (Type is TreeType.DBADashRoot or TreeType.Instance or TreeType.AzureInstance)
+                switch (Type)
                 {
-                    return string.Empty;
-                }
-                else if (Type is TreeType.Database or TreeType.AzureDatabase)
-                {
-                    return databaseName;
-                }
-                else if (databaseName != string.Empty && databaseName != null)
-                {
-                    return databaseName;
-                }
-                else
-                {
-                    databaseName = SQLTreeItemParent.DatabaseName;
-                    return databaseName;
+                    case TreeType.DBADashRoot or TreeType.Instance or TreeType.AzureInstance:
+                        return string.Empty;
+                    case TreeType.Database or TreeType.AzureDatabase:
+                        return databaseName;
+                    default:
+                    {
+                        if (!string.IsNullOrEmpty(databaseName))
+                        {
+                            return databaseName;
+                        }
+                        else
+                        {
+                            databaseName = SQLTreeItemParent.DatabaseName;
+                            return databaseName;
+                        }
+                    }
                 }
             }
-            set
-            {
-                databaseName = value;
-            }
+            set => databaseName = value;
         }
 
         private void SetIcon()
@@ -522,7 +517,7 @@ namespace DBADashGUI
                     break;
 
                 case TreeType.AgentJobStep:
-                    string subsystem = (string)_attributes["subsystem"];
+                    var subsystem = (string)_attributes["subsystem"];
                     ImageIndex = subsystem switch
                     {
                         "CmdExec" => 12,
@@ -585,16 +580,16 @@ namespace DBADashGUI
         public void AddDummyNode()
         {
             SQLTreeItem dummyNode = new("", "", TreeType.DummyNode);
-            this.Nodes.Add(dummyNode);
+            Nodes.Add(dummyNode);
             AddRefreshContextMenu(this);
         }
 
         public static SQLTreeItem GetReportsFolder(IEnumerable<CustomReport> reports)
         {
-            var reportsNode = new SQLTreeItem("Reports", SQLTreeItem.TreeType.ReportsFolder);
+            var reportsNode = new SQLTreeItem("Reports", TreeType.ReportsFolder);
             foreach (var report in reports)
             {
-                var reportNode = new SQLTreeItem(report.ReportName, report is SystemReport ? SQLTreeItem.TreeType.SystemReport : SQLTreeItem.TreeType.CustomReport) { Report = report };
+                var reportNode = new SQLTreeItem(report.ReportName, report is SystemReport ? TreeType.SystemReport : TreeType.CustomReport) { Report = report };
                 reportsNode.Nodes.Add(reportNode);
             }
 
@@ -606,7 +601,7 @@ namespace DBADashGUI
             var reportsNode = GetReportsFolder(reports);
             if (reportsNode.Nodes.Count > 0)
             {
-                this.Nodes.Add(reportsNode);
+                Nodes.Add(reportsNode);
             }
         }
 
@@ -656,12 +651,12 @@ namespace DBADashGUI
             AddContextMenu(nTypes);
             AddContextMenu(nSeq);
 
-            this.Nodes.Add(nTables);
-            this.Nodes.Add(nViews);
-            this.Nodes.Add(nProgrammability);
+            Nodes.Add(nTables);
+            Nodes.Add(nViews);
+            Nodes.Add(nProgrammability);
 
-            this.Nodes.Add(nTypes);
-            this.Nodes.Add(nSeq);
+            Nodes.Add(nTypes);
+            Nodes.Add(nSeq);
         }
 
         private void AddRefreshContextMenu(SQLTreeItem n)
@@ -702,8 +697,8 @@ namespace DBADashGUI
         private void MnuFilter_Click(object sender, EventArgs e)
         {
             var itm = (SQLTreeItem)((ToolStripMenuItem)sender).Tag;
-            string filter = itm.FilterText;
-            if (Common.ShowInputDialog(ref filter, "Filter") == DialogResult.OK)
+            var filter = itm.FilterText;
+            if (CommonShared.ShowInputDialog(ref filter, "Filter") == DialogResult.OK)
             {
                 itm.Filter(filter);
             }
@@ -713,34 +708,31 @@ namespace DBADashGUI
 
         public void Filter(string filter)
         {
-            this.Expand();
+            Expand();
             if (unfilteredNodes.Count == 0)
             {
-                foreach (SQLTreeItem itm in this.Nodes)
+                foreach (SQLTreeItem itm in Nodes)
                 {
                     unfilteredNodes.Add(itm)
 ;
                 }
             }
-            this.Nodes.Clear();
-            foreach (SQLTreeItem n in unfilteredNodes)
+            Nodes.Clear();
+            foreach (var n in unfilteredNodes.Where(n => string.IsNullOrEmpty(filter) || n.Text.Contains(filter, StringComparison.CurrentCultureIgnoreCase)))
             {
-                if (filter == null || filter == "" || n.Text.ToLower().Contains(filter.ToLower()))
-                {
-                    this.Nodes.Add(n);
-                }
+                Nodes.Add(n);
             }
-            if (unfilteredNodes.Count == this.Nodes.Count)
+            if (unfilteredNodes.Count == Nodes.Count)
             {
-                this.ImageIndex = 3;
-                this.SelectedImageIndex = 3;
+                ImageIndex = 3;
+                SelectedImageIndex = 3;
             }
             else
             {
-                this.ImageIndex = 6;
-                this.SelectedImageIndex = 6;
+                ImageIndex = 6;
+                SelectedImageIndex = 6;
             }
-            this.FilterText = filter;
+            FilterText = filter;
         }
 
         private bool IsThisInstance(int InstanceID)
@@ -750,29 +742,29 @@ namespace DBADashGUI
 
         private bool IsThisInstance(string Instance)
         {
-            return IsInstanceOrAzureDB && this.instanceName == Instance;
+            return IsInstanceOrAzureDB && instanceName == Instance;
         }
 
         /// <summary>
         /// Find instance in the tree by ID
         /// </summary>
-        public SQLTreeItem FindInstance(int InstanceID)
+        public SQLTreeItem FindInstance(int _instanceID)
         {
-            SQLTreeItem n = this;
+            var n = this;
             while (n.IsChildOfInstanceOrAzureDB) // If we are inside an instance node, navigate up until we get the instance ID.
             {
                 n = n.SQLTreeItemParent;
             }
-            if ((new TreeType[] { TreeType.DBAChecks, TreeType.HADR, TreeType.Configuration }).Contains(n.Type)) // Navigate up a level for these types
+            if ((new[] { TreeType.DBAChecks, TreeType.HADR, TreeType.Configuration }).Contains(n.Type)) // Navigate up a level for these types
             {
                 n = n.SQLTreeItemParent;
             }
-            if (n.IsThisInstance(InstanceID)) // Check if we have the instance
+            if (n.IsThisInstance(_instanceID)) // Check if we have the instance
             {
                 return n;
             }
             // Look down the tree to find the instance
-            return FindChildInstance(InstanceID, n);
+            return FindChildInstance(_instanceID, n);
         }
 
         /// <summary>
@@ -780,12 +772,12 @@ namespace DBADashGUI
         /// </summary>
         public SQLTreeItem FindInstance(string instance)
         {
-            SQLTreeItem n = this;
+            var n = this;
             while (n.IsChildOfInstanceOrAzureInstance) // If we are inside an instance node, navigate up until we get the instance ID.
             {
                 n = n.SQLTreeItemParent;
             }
-            if ((new TreeType[] { TreeType.DBAChecks, TreeType.HADR, TreeType.Configuration }).Contains(n.Type)) // Navigate up a level for these types
+            if ((new[] { TreeType.DBAChecks, TreeType.HADR, TreeType.Configuration }).Contains(n.Type)) // Navigate up a level for these types
             {
                 n = n.SQLTreeItemParent;
             }
@@ -808,9 +800,9 @@ namespace DBADashGUI
                 {
                     return child;
                 }
-                if (child.Type is SQLTreeItem.TreeType.InstanceFolder or SQLTreeItem.TreeType.AzureInstance)
+                if (child.Type is TreeType.InstanceFolder or TreeType.AzureInstance)
                 {
-                    SQLTreeItem find = FindChildInstance(instanceID, child);
+                    var find = FindChildInstance(instanceID, child);
                     if (find != null)
                     {
                         return find;
@@ -835,9 +827,9 @@ namespace DBADashGUI
                 {
                     return child;
                 }
-                if (child.Type is SQLTreeItem.TreeType.InstanceFolder or SQLTreeItem.TreeType.AzureInstance)
+                if (child.Type is TreeType.InstanceFolder or TreeType.AzureInstance)
                 {
-                    SQLTreeItem find = FindChildInstance(instance, child);
+                    var find = FindChildInstance(instance, child);
                     if (find != null)
                     {
                         return find;
@@ -849,7 +841,7 @@ namespace DBADashGUI
 
         public SQLTreeItem FindChildOfType(TreeType type)
         {
-            return this.Nodes.Cast<SQLTreeItem>().FirstOrDefault(n => n.Type == type);
+            return Nodes.Cast<SQLTreeItem>().FirstOrDefault(n => n.Type == type);
         }
     }
 }

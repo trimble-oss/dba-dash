@@ -58,7 +58,7 @@ namespace DBADashGUI
             {
                 oldText = value;
                 diffViewer1.OldText = value;
-                copyLeftToolStripMenuItem.Enabled = value is { Length: > 0 }; ;
+                copyLeftToolStripMenuItem.Enabled = value is { Length: > 0 };
             }
         }
 
@@ -108,7 +108,7 @@ namespace DBADashGUI
 
         public void ApplyTheme(BaseTheme theme)
         {
-            this.Controls.ApplyTheme(theme);
+            Controls.ApplyTheme(theme);
             diffViewer1 = new DiffPlex.Wpf.Controls.DiffViewer();
             elDiffViewer.Child = diffViewer1;
             diffViewer1.Foreground = new SolidColorBrush(theme.ForegroundColor.ToMediaColor());

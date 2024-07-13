@@ -23,7 +23,7 @@ namespace DBADashGUI
             catch (SqlException ex) when (ex.Number == 262)
             {
                 MessageBox.Show("Insufficient permissions", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                this.Close();
+                Close();
             }
         }
 
@@ -111,14 +111,14 @@ namespace DBADashGUI
         {
             try
             {
-                this.Cursor = Cursors.WaitCursor;
+                Cursor = Cursors.WaitCursor;
                 Purge();
                 RefreshData();
-                this.Cursor = Cursors.Default;
+                Cursor = Cursors.Default;
             }
             catch (Exception ex)
             {
-                this.Cursor = Cursors.Default;
+                Cursor = Cursors.Default;
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

@@ -1,17 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Amazon.Runtime.Internal.Transform;
 using DBADashGUI.CustomReports;
-using DBADashGUI.Theme;
-using Newtonsoft.Json;
-using Octokit;
 
 namespace DBADashGUI.DBFiles
 {
@@ -22,10 +11,10 @@ namespace DBADashGUI.DBFiles
             InitializeComponent();
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            context.Report = context.Type == SQLTreeItem.TreeType.Table ? SystemReports.TableSizeHistory : SystemReports.TableSizeReport;
-            customReportView1.SetContext(context);
+            _context.Report = _context.Type == SQLTreeItem.TreeType.Table ? SystemReports.TableSizeHistory : SystemReports.TableSizeReport;
+            customReportView1.SetContext(_context);
         }
 
         private void TableSize_Load(object sender, EventArgs e)

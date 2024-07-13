@@ -10,7 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using Humanizer;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace DBADashGUI.Performance
 {
@@ -23,7 +22,7 @@ namespace DBADashGUI.Performance
 
         public class DateModel
         {
-            public System.DateTime DateTime { get; set; }
+            public DateTime DateTime { get; set; }
             public double Value { get; set; }
         }
 
@@ -72,7 +71,7 @@ namespace DBADashGUI.Performance
             tsFilter.Text = Metric.WaitType == "" ? (criticalWaitsOnlyToolStripMenuItem.Checked ? "*Critical Waits*" : "") : Metric.WaitType;
         }
 
-        IMetric IMetricChart.Metric { get => Metric; }
+        IMetric IMetricChart.Metric => Metric;
 
         public void RefreshData(int instanceID)
         {
@@ -150,12 +149,12 @@ namespace DBADashGUI.Performance
                 + " (" + x.WaitTimeMsPerSecond.ToString("N1") + "ms/sec" + ")"
                 ));
             double threshold = 100; // To avoid highlighting with very small amounts of wait
-            if (topWaits.Where(r => r.IsCritical && r.WaitTimeMsPerSecond > threshold).Any()) // One of the top wait types is critical (RESOURCE_SEMAPHORE etc).  Red
+            if (topWaits.Any(r => r.IsCritical && r.WaitTimeMsPerSecond > threshold)) // One of the top wait types is critical (RESOURCE_SEMAPHORE etc).  Red
             {
                 tsTopWaits.ForeColor = DashColors.Fail;
                 tsTopWaits.Font = new System.Drawing.Font(tsTopWaits.Font, System.Drawing.FontStyle.Bold);
             }
-            else if (topWaits.Where(r => r.WaitType.StartsWith("LCK_") && r.WaitTimeMsPerSecond > threshold).Any()) // One of the top wait types is blocking.  Amber
+            else if (topWaits.Any(r => r.WaitType.StartsWith("LCK_") && r.WaitTimeMsPerSecond > threshold)) // One of the top wait types is blocking.  Amber
             {
                 tsTopWaits.ForeColor = DashColors.Warning;
                 tsTopWaits.Font = new System.Drawing.Font(tsTopWaits.Font, System.Drawing.FontStyle.Bold);
@@ -186,7 +185,7 @@ namespace DBADashGUI.Performance
                 return;
             }
             var dPoints = new Dictionary<string, ChartValues<DateTimePoint>>();
-            string current = string.Empty;
+            var current = string.Empty;
             ChartValues<DateTimePoint> values = new();
             foreach (DataRow r in dt.Rows)
             {
@@ -202,8 +201,8 @@ namespace DBADashGUI.Performance
                     values = new ChartValues<DateTimePoint>();
                     current = waitType;
                 }
-                string metric = (string)tsMetric.Tag;
-                values.Add(new DateTimePoint(((DateTime)r["Time"]).ToAppTimeZone(), Convert.ToDouble(r[metric])));
+                var metric = (string)tsMetric.Tag;
+                values.Add(new DateTimePoint(((DateTime)r["Time"]).ToAppTimeZone(), Convert.ToDouble(r[metric!])));
             }
             if (values.Count > 0)
             {
@@ -211,7 +210,7 @@ namespace DBADashGUI.Performance
                 values = new ChartValues<DateTimePoint>();
             }
 
-            CartesianMapper<DateTimePoint> dayConfig = Mappers.Xy<DateTimePoint>()
+            var dayConfig = Mappers.Xy<DateTimePoint>()
 .X(dateModel => dateModel.DateTime.Ticks / TimeSpan.FromMinutes(dateGrouping == 0 ? 1 : dateGrouping).Ticks)
 .Y(dateModel => dateModel.Value);
 
@@ -226,7 +225,7 @@ namespace DBADashGUI.Performance
             }
             waitChart.Series = s1;
 
-            string format = "t";
+            var format = "t";
             if (dateGrouping >= 1440)
             {
                 format = "yyyy-MM-dd";
@@ -283,22 +282,22 @@ namespace DBADashGUI.Performance
 
         private void TsFilterWaitType_Click(object sender, EventArgs e)
         {
-            string wt = Metric.WaitType;
-            if (Common.ShowInputDialog(ref wt, "Wait Type (LIKE):") == DialogResult.OK)
+            var wt = Metric.WaitType;
+            if (CommonShared.ShowInputDialog(ref wt, "Wait Type (LIKE):") == DialogResult.OK)
             {
-                WaitType = wt.EndsWith("%") || wt.Length == 0 ? wt : wt + "%";
+                WaitType = wt.EndsWith('%') || wt.Length == 0 ? wt : wt + "%";
                 RefreshData();
             }
         }
 
         private void StringFilterToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string wt = Metric.WaitType;
-            if (Common.ShowInputDialog(ref wt, "Wait Type (LIKE):") == DialogResult.OK)
+            var wt = Metric.WaitType;
+            if (CommonShared.ShowInputDialog(ref wt, "Wait Type (LIKE):") == DialogResult.OK)
             {
                 criticalWaitsOnlyToolStripMenuItem.Checked = false;
                 Metric.CriticalWaitsOnly = false;
-                WaitType = wt.EndsWith("%") || wt.Length == 0 ? wt : wt + "%";
+                WaitType = wt.EndsWith('%') || wt.Length == 0 ? wt : wt + "%";
                 RefreshData();
             }
         }
@@ -312,12 +311,12 @@ namespace DBADashGUI.Performance
 
         private void TsClose_Click(object sender, EventArgs e)
         {
-            Close.Invoke(this, new EventArgs());
+            Close?.Invoke(this, EventArgs.Empty);
         }
 
         private void TsUp_Click(object sender, EventArgs e)
         {
-            MoveUp.Invoke(this, new EventArgs());
+            MoveUp?.Invoke(this, EventArgs.Empty);
         }
 
         private void SelectMetric(object sender, EventArgs e)
@@ -329,7 +328,7 @@ namespace DBADashGUI.Performance
             RefreshChart();
         }
 
-        private static WaitSummaryDialog WaitSummaryForm = null;
+        private static WaitSummaryDialog WaitSummaryForm;
 
         private void TsTopWaits_Click(object sender, EventArgs e)
         {

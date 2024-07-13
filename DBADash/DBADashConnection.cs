@@ -21,12 +21,11 @@ namespace DBADash
         }
 
         private readonly string myString = "g&hAs2&mVOLwE6DqO!I5";
-        private bool wasEncryptionPerformed = false;
-        private bool isEncrypted = false;
+        private bool wasEncryptionPerformed;
+        private bool isEncrypted;
         private string encryptedConnectionString = "";
         private string connectionString = "";
         private ConnectionType connectionType;
-        private string _hash;
 
         public bool WasEncrypted => wasEncryptionPerformed;
 
@@ -54,7 +53,7 @@ namespace DBADash
             encryptedConnectionString = GetConnectionStringWithEncryptedPassword(value);
             connectionString = GetDecryptedConnectionString(value);
             connectionType = GetConnectionType(value);
-            _hash = EncryptText.GetHash(connectionString);
+            EncryptText.GetHash(connectionString);
         }
 
         [JsonIgnore]
@@ -104,7 +103,7 @@ namespace DBADash
         {
             if (connectionType == ConnectionType.Directory)
             {
-                if (System.IO.Directory.Exists(connectionString) == false)
+                if (Directory.Exists(connectionString) == false)
                 {
                     throw new Exception("Directory does not exist");
                 }
@@ -134,11 +133,13 @@ namespace DBADash
         {
             if (!supportedProductVersions.Contains(ConnectionInfo.MajorVersion))
             {
-                throw new Exception(string.Format("SQL Server Version {0} isn't supported by DBA Dash.  For testing purposes, it's possible to skip this validation check.", ConnectionInfo.MajorVersion));
+                throw new Exception(
+                    $"SQL Server Version {ConnectionInfo.MajorVersion} isn't supported by DBA Dash.  For testing purposes, it's possible to skip this validation check.");
             }
             if (!supportedEngineEditions.Contains(ConnectionInfo.EngineEditionValue))
             {
-                throw new Exception(string.Format("SQL Server Engine Edition {0} isn't supported by DBA Dash.  For testing purposes, it's possible to skip this validation check.", ConnectionInfo.EngineEditionValue));
+                throw new Exception(
+                    $"SQL Server Engine Edition {ConnectionInfo.EngineEditionValue} isn't supported by DBA Dash.  For testing purposes, it's possible to skip this validation check.");
             }
         }
 
@@ -198,16 +199,16 @@ namespace DBADash
             }
         }
 
-        private string GetConnectionStringWithEncryptedPassword(string connectionString)
+        private string GetConnectionStringWithEncryptedPassword(string _connectionString)
         {
-            if (GetConnectionType(connectionString) == ConnectionType.SQL)
+            if (GetConnectionType(_connectionString) == ConnectionType.SQL)
             {
-                SqlConnectionStringBuilder builder = new(connectionString);
+                SqlConnectionStringBuilder builder = new(_connectionString);
 
                 if (builder.Password.StartsWith("¬=!"))
                 {
                     isEncrypted = true;
-                    return connectionString;
+                    return _connectionString;
                 }
                 else if (builder.Password.Length > 0)
                 {
@@ -218,20 +219,20 @@ namespace DBADash
                 }
                 else
                 {
-                    return connectionString; ;
+                    return _connectionString;
                 }
             }
             else
             {
-                return connectionString;
+                return _connectionString;
             }
         }
 
-        private string GetDecryptedConnectionString(string connectionString)
+        private string GetDecryptedConnectionString(string _connectionString)
         {
-            if (GetConnectionType(connectionString) == ConnectionType.SQL)
+            if (GetConnectionType(_connectionString) == ConnectionType.SQL)
             {
-                SqlConnectionStringBuilder builder = new(connectionString);
+                SqlConnectionStringBuilder builder = new(_connectionString);
                 if (builder.ApplicationName == ".Net SqlClient Data Provider")
                 {
                     builder.ApplicationName = "DBADash";
@@ -244,7 +245,7 @@ namespace DBADash
             }
             else
             {
-                return connectionString;
+                return _connectionString;
             }
         }
 
@@ -260,7 +261,7 @@ namespace DBADash
                     SqlConnectionStringBuilder builder = new(connectionString);
                     string connection = builder.DataSource + (builder.InitialCatalog == "" ? "" : "_" + builder.InitialCatalog);
                     string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
-                    Regex r = new(string.Format("[{0}]", Regex.Escape(regexSearch)));
+                    Regex r = new($"[{Regex.Escape(regexSearch)}]");
                     return r.Replace(connection, "");
                 }
                 else

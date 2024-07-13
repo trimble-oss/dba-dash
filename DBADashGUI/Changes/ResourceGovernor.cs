@@ -20,9 +20,9 @@ namespace DBADashGUI.Changes
             InitializeComponent();
         }
 
-        public void SetContext(DBADashContext context)
+        public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = context.RegularInstanceIDs.ToList();
+            InstanceIDs = _context.RegularInstanceIDs.ToList();
             RefreshData();
         }
 

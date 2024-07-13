@@ -34,10 +34,10 @@ namespace DBADashGUI
 
         private int? _importAgentID;
         private int? _collectAgentID;
-        private Version? _productVersion;
-        private string? _connectionID;
+        private Version _productVersion;
+        private string _connectionID;
 
-        public Version? ProductVersion
+        public Version ProductVersion
         {
             get
             {

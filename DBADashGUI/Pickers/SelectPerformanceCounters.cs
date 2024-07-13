@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Windows.Forms;
 using DBADashGUI.Theme;
 
@@ -21,16 +22,23 @@ namespace DBADashGUI.Performance
         {
             get
             {
-                var selected = new Dictionary<int, Counter>();
-                foreach (DataRow row in Counters.Rows)
-                {
-                    var ctr = new Counter() { CounterID = (int)row["CounterID"], Avg = (bool)row["Avg"], Max = (bool)row["Max"], Min = (bool)row["Min"], SampleCount = (bool)row["SampleCount"], Current = (bool)row["Current"], Total = (bool)row["Total"], CounterName = (string)row["counter_name"], ObjectName = (string)row["object_name"], InstanceName = (string)row["instance_name"] };
-                    if (ctr.GetAggColumns().Count > 0)
+                return (from DataRow row in Counters.Rows
+                    select new Counter()
                     {
-                        selected.Add(ctr.CounterID, ctr);
+                        CounterID = (int)row["CounterID"],
+                        Avg = (bool)row["Avg"],
+                        Max = (bool)row["Max"],
+                        Min = (bool)row["Min"],
+                        SampleCount = (bool)row["SampleCount"],
+                        Current = (bool)row["Current"],
+                        Total = (bool)row["Total"],
+                        CounterName = (string)row["counter_name"],
+                        ObjectName = (string)row["object_name"],
+                        InstanceName = (string)row["instance_name"]
                     }
-                }
-                return selected;
+                    into ctr
+                    where ctr.GetAggColumns().Count > 0
+                    select ctr).ToDictionary(ctr => ctr.CounterID);
             }
             set => selectedCounters = value;
         }
@@ -56,17 +64,14 @@ namespace DBADashGUI.Performance
                 {
                     foreach (DataRow row in Counters.Rows)
                     {
-                        int counterID = (int)row["CounterID"];
-                        if (selectedCounters.ContainsKey(counterID))
-                        {
-                            var counter = selectedCounters[counterID];
-                            row["Total"] = counter.Total;
-                            row["Avg"] = counter.Avg;
-                            row["Max"] = counter.Max;
-                            row["Min"] = counter.Min;
-                            row["Current"] = counter.Current;
-                            row["SampleCount"] = counter.SampleCount;
-                        }
+                        var counterID = (int)row["CounterID"];
+                        if (!selectedCounters.TryGetValue(counterID, out var counter)) continue;
+                        row["Total"] = counter.Total;
+                        row["Avg"] = counter.Avg;
+                        row["Max"] = counter.Max;
+                        row["Min"] = counter.Min;
+                        row["Current"] = counter.Current;
+                        row["SampleCount"] = counter.SampleCount;
                     }
                 }
             }
@@ -84,8 +89,8 @@ namespace DBADashGUI.Performance
 
         private void BttnOK_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void TxtSearch_TextChanged(object sender, EventArgs e)
@@ -109,7 +114,7 @@ namespace DBADashGUI.Performance
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         public void ApplyTheme(BaseTheme theme)

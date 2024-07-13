@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Data;
 using System.IO;
 
@@ -20,36 +19,7 @@ namespace DBADash
                 }
             }
         }
-
-        private static readonly string binaryPrefix = "###BINARY###";
-
-        [ObsoleteAttribute("To be removed. Json serialization replaced with XML serialization", false)]
-        public static DataSet DeserializeDS(string json)
-        {
-            var ds = JsonConvert.DeserializeObject<DataSet>(json);
-            foreach (DataTable dt in ds.Tables)
-            {
-                for (Int32 i = 0; i < dt.Columns.Count - 1; i++)
-                {
-                    var col = dt.Columns[i];
-                    if (col.ColumnName.StartsWith(binaryPrefix))
-                    {
-                        var newCol = dt.Columns.Add(col.ColumnName.Remove(0, binaryPrefix.Length), typeof(byte[]));
-                        foreach (DataRow r in dt.Rows)
-                        {
-                            if (r[col] != DBNull.Value)
-                            {
-                                r[newCol] = Convert.FromBase64String((string)r[col]);
-                            }
-                        }
-                        newCol.SetOrdinal(col.Ordinal);
-                        dt.Columns.Remove(col);
-                    }
-                }
-            }
-            return ds;
-        }
-
+        
         public static DataSet DeserializeFromXmlFile(string filePath)
         {
             using FileStream fs = new(filePath, FileMode.OpenOrCreate, FileAccess.Read);
@@ -66,7 +36,7 @@ namespace DBADash
             }
             else
             {
-                throw new Exception($"Invalid file extention {filePath} expected: .xml");
+                throw new Exception($"Invalid file extension {filePath} expected: .xml");
             }
         }
     }

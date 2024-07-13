@@ -1,7 +1,4 @@
-﻿using Microsoft.SqlServer.Management.SqlParser.Metadata;
-using Octokit;
-using System;
-using System.CodeDom;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -184,15 +181,15 @@ namespace DBADash
                 RedirectStandardError = true
             };
             p.StartInfo = psi;
-            p.OutputDataReceived += (sender, args) =>
+            p.OutputDataReceived += (sender, _args) =>
             {
-                var data = args.Data;
+                var data = _args.Data;
                 Console.WriteLine(data);
                 outputBuilder.AppendLine(data);
             };
             p.Start();
             p.BeginOutputReadLine();
-            p?.WaitForExit();
+            p.WaitForExit();
             result.ExitCode = p.ExitCode;
             result.Output = outputBuilder.ToString();
             return result;
@@ -234,15 +231,15 @@ namespace DBADash
                 RedirectStandardError = true
             };
             p.StartInfo = psi;
-            p.OutputDataReceived += (sender, args) =>
+            p.OutputDataReceived += (sender, _args) =>
             {
-                var data = args.Data;
+                var data = _args.Data;
                 Console.WriteLine(data);
                 outputBuilder.AppendLine(data);
             };
             p.Start();
             p.BeginOutputReadLine();
-            p?.WaitForExit();
+            p.WaitForExit();
             result.ExitCode = p.ExitCode;
             result.Output = outputBuilder.ToString();
             return result;
@@ -273,15 +270,15 @@ namespace DBADash
                 RedirectStandardError = true
             };
             p.StartInfo = psi;
-            p.OutputDataReceived += (sender, args) =>
+            p.OutputDataReceived += (sender, _args) =>
             {
-                var data = args.Data;
+                var data = _args.Data;
                 Console.WriteLine(data);
                 outputBuilder.AppendLine(data);
             };
             p.Start();
             p.BeginOutputReadLine();
-            p?.WaitForExit();
+            p.WaitForExit();
             result.ExitCode = p.ExitCode;
             result.Output = outputBuilder.ToString();
             return result;
@@ -316,15 +313,15 @@ namespace DBADash
             };
 
             p.StartInfo = psi;
-            p.OutputDataReceived += (sender, args) =>
+            p.OutputDataReceived += (sender, _args) =>
             {
-                var data = args.Data;
+                var data = _args.Data;
                 Console.WriteLine(data);
                 outputBuilder.AppendLine(data);
             };
             p.Start();
             p.BeginOutputReadLine();
-            p?.WaitForExit();
+            p.WaitForExit();
             result.ExitCode = p.ExitCode;
             result.Output = outputBuilder.ToString();
             if (p.ExitCode == 0)

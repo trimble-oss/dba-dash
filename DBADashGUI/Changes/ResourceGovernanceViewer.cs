@@ -16,7 +16,7 @@ namespace DBADashGUI.Changes
 
         private void ResourceGovernanceViewer_Load(object sender, EventArgs e)
         {
-            this.Text = "Resource Governance " + DatabaseName;
+            Text = "Resource Governance " + DatabaseName;
             azureDBResourceGovernance1.InstanceIDs = new List<int>() { InstanceID };
             azureDBResourceGovernance1.RefreshData();
         }

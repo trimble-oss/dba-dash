@@ -109,7 +109,7 @@ namespace DBADashGUI.Backups
         private void BttnUpdate_Click(object sender, EventArgs e)
         {
             BackupThreshold.Save();
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
 
         }
 

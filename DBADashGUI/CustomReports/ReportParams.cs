@@ -34,14 +34,14 @@ namespace DBADashGUI.CustomReports
 
             foreach (var param in Params.Where(p => !CustomReport.SystemParamNames.Contains(p.Param.ParameterName, StringComparer.CurrentCultureIgnoreCase)))
             {
-                var row = dgv.Rows.Add(new object[] { param.Param.ParameterName, (param.Param.Value == DBNull.Value) && !param.UseDefaultValue, param.UseDefaultValue, param.Param.Value });
+                var row = dgv.Rows.Add(param.Param.ParameterName, (param.Param.Value == DBNull.Value) && !param.UseDefaultValue, param.UseDefaultValue, param.Param.Value);
                 SetRowReadOnly(row);
             }
 
             dgv.CellBeginEdit += Dgv_CellBeginEdit;
             dgv.CellEndEdit += Dgv_CellEndEdit;
-            dgv.Controls.Add(dtp); //
-            dtp.TextChanged += new EventHandler(Dtp_OnTextChange);
+            dgv.Controls.Add(dtp); 
+            dtp.TextChanged += Dtp_OnTextChange;
             dgv.ColumnWidthChanged += Dgv_ColumnWidthChanged;
             dgv.RowsAdded += Dgv_RowsAdded;
             dgv.CellContentClick += Dgv_CellContentClick;
@@ -146,12 +146,12 @@ namespace DBADashGUI.CustomReports
                 p.Param.Value = (bool)row.Cells[1].Value ? DBNull.Value : row.Cells[3].Value;
                 p.UseDefaultValue = (bool)row.Cells[2].Value;
             }
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security.Cryptography;
@@ -20,21 +19,21 @@ namespace DBADash
         //Encrypt
         public static string EncryptString(this string plainText, string passPhrase)
         {
-            byte[] initVectorBytes = Encoding.UTF8.GetBytes(initVector);
-            byte[] plainTextBytes = Encoding.UTF8.GetBytes(plainText);
+            var initVectorBytes = Encoding.UTF8.GetBytes(initVector);
+            var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
             using (PasswordDeriveBytes password = new(passPhrase, null))
             {
-                byte[] keyBytes = password.GetBytes(keysize / 8);
+                var keyBytes = password.GetBytes(keysize / 8);
                 using (var symmetricKey = Aes.Create())
                 {
                     symmetricKey.Mode = CipherMode.CBC;
-                    using (ICryptoTransform encryptor = symmetricKey.CreateEncryptor(keyBytes, initVectorBytes))
+                    using (var encryptor = symmetricKey.CreateEncryptor(keyBytes, initVectorBytes))
                     using (var memoryStream = new MemoryStream())
                     using (var cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write))
                     {
                         cryptoStream.Write(plainTextBytes, 0, plainTextBytes.Length);
                         cryptoStream.FlushFinalBlock();
-                        byte[] cipherTextBytes = memoryStream.ToArray();
+                        var cipherTextBytes = memoryStream.ToArray();
                         return Convert.ToBase64String(cipherTextBytes);
                     }
                 }
@@ -44,15 +43,15 @@ namespace DBADash
         //Decrypt
         public static string DecryptString(this string cipherText, string passPhrase)
         {
-            byte[] initVectorBytes = Encoding.UTF8.GetBytes(initVector);
-            byte[] cipherTextBytes = Convert.FromBase64String(cipherText);
+            var initVectorBytes = Encoding.UTF8.GetBytes(initVector);
+            var cipherTextBytes = Convert.FromBase64String(cipherText);
             using (PasswordDeriveBytes password = new(passPhrase, null))
             {
-                byte[] keyBytes = password.GetBytes(keysize / 8);
+                var keyBytes = password.GetBytes(keysize / 8);
                 using (var symmetricKey = Aes.Create())
                 {
                     symmetricKey.Mode = CipherMode.CBC;
-                    using (ICryptoTransform decryptor = symmetricKey.CreateDecryptor(keyBytes, initVectorBytes))
+                    using (var decryptor = symmetricKey.CreateDecryptor(keyBytes, initVectorBytes))
                     using (MemoryStream memoryStream = new(cipherTextBytes))
                     using (CryptoStream cryptoStream = new(memoryStream, decryptor, CryptoStreamMode.Read))
                     using (StreamReader srDecrypt = new(cryptoStream))
@@ -69,8 +68,8 @@ namespace DBADash
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 if (string.IsNullOrEmpty(value)) return value;
-                byte[] data = Encoding.Unicode.GetBytes(value);
-                byte[] encryptedData = ProtectedData.Protect(data, null, scope);
+                var data = Encoding.Unicode.GetBytes(value);
+                var encryptedData = ProtectedData.Protect(data, null, scope);
                 return Convert.ToBase64String(encryptedData);
             }
             else
@@ -85,8 +84,8 @@ namespace DBADash
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 if (string.IsNullOrEmpty(value)) return value;
-                byte[] encryptedData = Convert.FromBase64String(value);
-                byte[] data = ProtectedData.Unprotect(encryptedData, null, scope);
+                var encryptedData = Convert.FromBase64String(value);
+                var data = ProtectedData.Unprotect(encryptedData, null, scope);
                 return Encoding.Unicode.GetString(data);
             }
             else
@@ -125,7 +124,7 @@ namespace DBADash
         {
             if (length is < 0 or > 64) // SHA256 produces a 64-character hex string
             {
-                throw new ArgumentOutOfRangeException(nameof(length), "Length must be between 0 and 64.");
+                throw new ArgumentOutOfRangeException(nameof(length), @"Length must be between 0 and 64.");
             }
             var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(input));
 
