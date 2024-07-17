@@ -34,6 +34,8 @@ namespace DBADash
 
         public bool EnableMessaging { get; set; }
 
+        public bool AllowPlanForcing { get; set; }
+
         public string ServiceSQSQueueUrl { get; set; }
 
         public CollectionSchedules GetSchedules()

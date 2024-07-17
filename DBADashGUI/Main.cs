@@ -1,5 +1,7 @@
 ﻿using DBADash;
 using DBADashGUI.Performance;
+using DBADashGUI.Theme;
+using Humanizer;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using System;
@@ -11,8 +13,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
-using Humanizer;
 using Version = System.Version;
 
 namespace DBADashGUI
@@ -663,7 +663,7 @@ namespace DBADashGUI
                 allowedTabs.AddRange(new[]
                 {
                     tabPerformance, tabObjectExecutionSummary, tabSlowQueries, tabFiles, tabSnapshotsSummary,
-                    tabDBSpace, tabDBConfiguration, tabDBOptions, tabTopQueries
+                    tabDBSpace, tabDBConfiguration, tabDBOptions,  tabQS,tabTopQueries, tabQueryStoreForcedPlans
                 });
             }
             else if (n.Type == SQLTreeItem.TreeType.AzureDatabase)
@@ -671,7 +671,7 @@ namespace DBADashGUI
                 allowedTabs.AddRange(new[]
                 {
                     tabPerformance, tabAzureSummary, tabAzureDB, tabPC, tabSlowQueries, tabObjectExecutionSummary,
-                    tabWaits, tabRunningQueries, tabFiles, tabTopQueries
+                    tabWaits, tabRunningQueries, tabFiles, tabTopQueries, tabQueryStoreForcedPlans
                 });
             }
             else if (n.Type == SQLTreeItem.TreeType.Instance)
@@ -679,7 +679,7 @@ namespace DBADashGUI
                 allowedTabs.AddRange(new[]
                 {
                     tabPerformanceSummary, tabPerformance, tabPC, tabObjectExecutionSummary, tabSlowQueries, tabWaits,
-                    tabRunningQueries, tabMemory,tabTopQueries
+                    tabRunningQueries, tabMemory,tabTopQueries, tabQueryStoreForcedPlans
                 });
             }
             else if (n.Type == SQLTreeItem.TreeType.AzureInstance)
@@ -811,13 +811,10 @@ namespace DBADashGUI
             {
                 allowedTabs.Remove(tabSlowQueries);
             }
-            if (allowedTabs.Contains(tabTopQueries) && n.Context.ProductVersion?.Major < 13 && n.Context.AzureInstanceIDs.Count == 0)
+            if (!n.Context.CanMessage || (n.Context.ProductVersion?.Major < 13 && n.Context.AzureInstanceIDs.Count == 0))
             {
                 allowedTabs.Remove(tabTopQueries);
-            }
-            if (allowedTabs.Contains(tabTopQueries) && !n.Context.CanMessage)
-            {
-                allowedTabs.Remove(tabTopQueries);
+                allowedTabs.Remove(tabQueryStoreForcedPlans);
             }
 
             if (allowedTabs.Count == 0) // Display default tab if no tabs are applicable

@@ -17,6 +17,8 @@ namespace DBADashGUI
 
         public static bool AllowMessaging;
 
+        public static bool AllowPlanForcing;
+
         public static TimeZoneInfo UserTimeZone = TimeZoneInfo.Local;
 
         public static void Update()
@@ -50,19 +52,21 @@ namespace DBADashGUI
                 var pUserID = new SqlParameter("UserID", SqlDbType.Int) { Direction = ParameterDirection.Output };
                 var pManageGlobalViews = new SqlParameter("ManageGlobalViews", SqlDbType.Bit) { Direction = ParameterDirection.Output };
                 var pAllowMessaging = new SqlParameter("AllowMessaging", SqlDbType.Bit) { Direction = ParameterDirection.Output };
+                var pAllowPlanForcing = new SqlParameter("AllowPlanForcing", SqlDbType.Bit) { Direction = ParameterDirection.Output };
                 var pTZ = new SqlParameter("TimeZone", SqlDbType.VarChar, 50) { Direction = ParameterDirection.Output };
                 var pTheme = new SqlParameter("Theme", SqlDbType.VarChar, 50) { Direction = ParameterDirection.Output };
-                cmd.Parameters.AddRange(new[] { pUserID, pManageGlobalViews, pTZ, pTheme, pAllowMessaging });
+                cmd.Parameters.AddRange(new[] { pUserID, pManageGlobalViews, pTZ, pTheme, pAllowMessaging,pAllowPlanForcing });
                 cmd.ExecuteNonQuery();
-                int id = Convert.ToInt32(pUserID.Value);
+                var id = Convert.ToInt32(pUserID.Value);
                 if (id > 0)
                 {
                     _UserID = (int)pUserID.Value;
                     HasManageGlobalViews = (bool)pManageGlobalViews.Value;
                     AllowMessaging = (bool)pAllowMessaging.Value;
+                    AllowPlanForcing = (bool)pAllowPlanForcing.Value;
                     if (pTZ.Value != DBNull.Value)
                     {
-                        string tzID = (string)pTZ.Value;
+                        var tzID = (string)pTZ.Value;
                         try
                         {
                             UserTimeZone = TimeZoneInfo.FindSystemTimeZoneById(tzID);

@@ -53,6 +53,7 @@ BEGIN
 	BEGIN
 		CREATE QUEUE DBADashServiceInitiatorQueue
 	END
+	GRANT RECEIVE ON dbo.DBADashServiceInitiatorQueue  TO Messaging
 	IF NOT EXISTS(SELECT 1 FROM sys.services WHERE name = ''//dbadash.com/DBADashService/ComsInit'')
 	BEGIN
 		CREATE SERVICE [//dbadash.com/DBADashService/ComsInit]

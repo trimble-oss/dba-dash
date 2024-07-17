@@ -22,6 +22,7 @@
     <None Remove="SQL\SQLIdentityColumns.sql" />
     <None Remove="SQL\SQLJobs.sql" />
     <None Remove="SQL\SQLJobSteps.sql" />
+    <None Remove="SQL\SQLQueryStoreForcedPlans.sql" />
     <None Remove="SQL\SQLQueryStoreTopQueries.sql" />
     <None Remove="SQL\SQLRunningJobs.sql" />
     <None Remove="SQL\SQLTableSize.sql" />
@@ -70,6 +71,7 @@
 	<EmbeddedResource Include="SQL\SQLOSInfo.sql" />
 	<EmbeddedResource Include="SQL\SQLOSLoadedModules.sql" />
 	<EmbeddedResource Include="SQL\SQLPerformanceCounters.sql" />
+	<EmbeddedResource Include="SQL\SQLQueryStoreForcedPlans.sql" />
 	<EmbeddedResource Include="SQL\SQLQueryStoreTopQueries.sql" />
 	<EmbeddedResource Include="SQL\SQLRemoveEventSessions.sql" />
 	<EmbeddedResource Include="SQL\SQLRemoveEventSessionsAzure.sql" />

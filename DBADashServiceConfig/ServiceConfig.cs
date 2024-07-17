@@ -539,6 +539,7 @@ namespace DBADashServiceConfig
                 chkSummaryRefresh.Checked = !string.IsNullOrEmpty(collectionConfig.SummaryRefreshCron);
                 chkEnableMessaging.Checked = collectionConfig.EnableMessaging;
                 txtSQS.Text = collectionConfig.ServiceSQSQueueUrl;
+                chkAllowPlanForcing.Checked = collectionConfig.AllowPlanForcing;
                 UpdateSummaryCron();
                 UpdateScanInterval();
                 SetDgv();
@@ -1545,7 +1546,7 @@ namespace DBADashServiceConfig
             }
         }
 
-      private void PopulateConnectionID()
+        private void PopulateConnectionID()
         {
             var errors = new StringBuilder(); // Using StringBuilder instead of StringBuilder() for consistency
 
@@ -1600,12 +1601,18 @@ namespace DBADashServiceConfig
         {
             if (!string.IsNullOrEmpty(txtSQS.Text) && !txtSQS.Text.StartsWith("https://sqs.", StringComparison.OrdinalIgnoreCase))
             {
-                errorProvider1.SetError(txtSQS,"Invalid SQS Url");
+                errorProvider1.SetError(txtSQS, "Invalid SQS Url");
             }
             else
             {
                 errorProvider1.SetError(txtSQS, "");
             }
+        }
+
+        private void ChkAllowPlanForcing_CheckedChanged(object sender, EventArgs e)
+        {
+            collectionConfig.AllowPlanForcing= chkAllowPlanForcing.Checked;
+            SetJson();
         }
     }
 }

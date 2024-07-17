@@ -77,5 +77,6 @@ namespace DBADash
         public static string JobSteps => GetSqlString("JobSteps");
         public static string RunningJobs => GetSqlString("RunningJobs");
         public static string QueryStoreTopQueries => GetSqlString("QueryStoreTopQueries");
+        public static string QueryStoreForcedPlans => GetSqlString("QueryStoreForcedPlans");
     }
 }

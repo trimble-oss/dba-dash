@@ -216,6 +216,8 @@ namespace DBADashGUI
             tableSize1 = new DBFiles.TableSize();
             tabTopQueries = new System.Windows.Forms.TabPage();
             queryStoreTop = new Performance.QueryStoreTopQueries();
+            tabQueryStoreForcedPlans = new System.Windows.Forms.TabPage();
+            queryStoreForcedPlans1 = new Performance.QueryStoreForcedPlans();
             refresh1 = new Refresh();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -306,6 +308,7 @@ namespace DBADashGUI
             tabCustomReport.SuspendLayout();
             tabTableSize.SuspendLayout();
             tabTopQueries.SuspendLayout();
+            tabQueryStoreForcedPlans.SuspendLayout();
             SuspendLayout();
             // 
             // TreeViewImageList
@@ -922,6 +925,7 @@ namespace DBADashGUI
             tabs.Controls.Add(tabCustomReport);
             tabs.Controls.Add(tabTableSize);
             tabs.Controls.Add(tabTopQueries);
+            tabs.Controls.Add(tabQueryStoreForcedPlans);
             tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             tabs.Location = new System.Drawing.Point(0, 0);
             tabs.Name = "tabs";
@@ -2207,10 +2211,10 @@ namespace DBADashGUI
             // tabTopQueries
             // 
             tabTopQueries.Controls.Add(queryStoreTop);
-            tabTopQueries.Location = new System.Drawing.Point(4, 25);
+            tabTopQueries.Location = new System.Drawing.Point(4, 29);
             tabTopQueries.Name = "tabTopQueries";
             tabTopQueries.Padding = new System.Windows.Forms.Padding(3);
-            tabTopQueries.Size = new System.Drawing.Size(1631, 1246);
+            tabTopQueries.Size = new System.Drawing.Size(192, 67);
             tabTopQueries.TabIndex = 50;
             tabTopQueries.Text = "Top Queries (Query Store)";
             tabTopQueries.UseVisualStyleBackColor = true;
@@ -2220,8 +2224,27 @@ namespace DBADashGUI
             queryStoreTop.Dock = System.Windows.Forms.DockStyle.Fill;
             queryStoreTop.Location = new System.Drawing.Point(3, 3);
             queryStoreTop.Name = "queryStoreTop";
-            queryStoreTop.Size = new System.Drawing.Size(1625, 1240);
+            queryStoreTop.Size = new System.Drawing.Size(186, 61);
             queryStoreTop.TabIndex = 0;
+            // 
+            // tabQueryStoreForcedPlans
+            // 
+            tabQueryStoreForcedPlans.Controls.Add(queryStoreForcedPlans1);
+            tabQueryStoreForcedPlans.Location = new System.Drawing.Point(4, 25);
+            tabQueryStoreForcedPlans.Name = "tabQueryStoreForcedPlans";
+            tabQueryStoreForcedPlans.Padding = new System.Windows.Forms.Padding(3);
+            tabQueryStoreForcedPlans.Size = new System.Drawing.Size(1631, 1246);
+            tabQueryStoreForcedPlans.TabIndex = 51;
+            tabQueryStoreForcedPlans.Text = "Forced Plans (Query Store)";
+            tabQueryStoreForcedPlans.UseVisualStyleBackColor = true;
+            // 
+            // queryStoreForcedPlans1
+            // 
+            queryStoreForcedPlans1.Dock = System.Windows.Forms.DockStyle.Fill;
+            queryStoreForcedPlans1.Location = new System.Drawing.Point(3, 3);
+            queryStoreForcedPlans1.Name = "queryStoreForcedPlans1";
+            queryStoreForcedPlans1.Size = new System.Drawing.Size(1625, 1240);
+            queryStoreForcedPlans1.TabIndex = 0;
             // 
             // refresh1
             // 
@@ -2551,6 +2574,7 @@ namespace DBADashGUI
             tabCustomReport.ResumeLayout(false);
             tabTableSize.ResumeLayout(false);
             tabTopQueries.ResumeLayout(false);
+            tabQueryStoreForcedPlans.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -2762,5 +2786,7 @@ namespace DBADashGUI
         private DBFiles.TableSize tableSize1;
         private System.Windows.Forms.TabPage tabTopQueries;
         private Performance.QueryStoreTopQueries queryStoreTop;
+        private System.Windows.Forms.TabPage tabQueryStoreForcedPlans;
+        private Performance.QueryStoreForcedPlans queryStoreForcedPlans1;
     }
 }
