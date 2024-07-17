@@ -50,5 +50,13 @@ namespace DBADash.Messaging
                 : (MessageBase)JsonConvert.DeserializeObject(json, type);
         }
 
+        protected void ThrowIfExpired()
+        {
+            if (IsExpired)
+            {
+                throw new Exception("Message expired");
+            }
+        }
+
     }
 }

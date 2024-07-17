@@ -53,71 +53,10 @@ namespace DBADash.Messaging
 
         public bool NearestInterval { get; set; } = true;
 
-        private async Task<int> GetIdleSchedulerCount(string connectionString)
-        {
-            await using var cn = new SqlConnection(connectionString);
-            await using var cmd = new SqlCommand(@"SELECT COUNT(*) FROM sys.dm_os_schedulers WHERE status = 'VISIBLE ONLINE' AND is_idle=1", cn);
-            await cn.OpenAsync();
-            var result = await cmd.ExecuteScalarAsync();
-            return Convert.ToInt32(result);
-        }
-
-        // Calculate MAX DOP based on CPU availability
-        private async Task<int> GetThreadCountBasedOnSchedulerAvailability(string connectionString)
-        {
-            var idleSchedulerCount = 1;
-            try
-            {
-                idleSchedulerCount = await GetIdleSchedulerCount(connectionString);
-                Log.Debug("Idle scheduler count {idleSchedulerCount}", idleSchedulerCount);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error getting idle scheduler count");
-            }
-
-            return idleSchedulerCount switch
-            {
-                < 8 => 1,
-                < 16 => 2,
-                < 32 => 4,
-                _ => 8
-            };
-        }
-
-        public static async Task<List<string>> GetDatabasesAsync(string connectionString)
-        {
-            var databases = new List<string>();
-            var query = @"
-        SELECT D.name
-        FROM sys.databases D
-        WHERE D.is_query_store_on=1
-        AND D.database_id>4
-        AND D.state=0
-        AND HAS_DBACCESS(D.name)=1
-        AND D.is_in_standby = 0
-        AND DATABASEPROPERTYEX(D.name, 'Updateability') = 'READ_WRITE';
-    ";
-            await using var cn = new SqlConnection(connectionString);
-            await using var cmd = new SqlCommand(query, cn);
-
-            await cn.OpenAsync();
-            await using var reader = await cmd.ExecuteReaderAsync();
-
-            while (await reader.ReadAsync())
-            {
-                databases.Add(reader.GetString(0));
-            }
-
-            return databases;
-        }
 
         public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle)
         {
-            if (IsExpired)
-            {
-                throw new Exception("Message expired");
-            }
+            ThrowIfExpired();
             using var op = Operation.Begin("Query store top queries for {database} on {instance} triggered from message {handle}",
                 DatabaseName,
                 ConnectionID,
@@ -128,85 +67,20 @@ namespace DBADash.Messaging
                 List<string> databases;
                 if (string.IsNullOrEmpty(DatabaseName))
                 {
-                    databases = await GetDatabasesAsync(src.SourceConnection.ConnectionString);
+                    databases = await PerDatabaseCollectionHelper.GetDatabasesWithQueryStoreAsync(src.SourceConnection.ConnectionString);
                 }
                 else
                 {
                     databases = new List<string> { DatabaseName };
                 }
                 Log.Debug("Collecting Query Store for databases: {databases} for message {handle}", databases, handle);
-                var threadCount = 1;
-                switch (databases.Count)
+                
+                if (databases.Count == 0)
                 {
-                    case 0:
-                        throw new Exception("No databases found with Query Store enabled");
-                    case 1:
-                        break;
-
-                    default:
-                        threadCount = await GetThreadCountBasedOnSchedulerAvailability(src.SourceConnection.ConnectionString);
-                        Log.Information("Processing message {handle} with thread count {maxDegreeOfParallelism}", handle, threadCount);
-                        break;
+                    throw new Exception("No databases found with Query Store enabled");
                 }
-                var resultTable = new DataTable();
-
-                var options = new ParallelOptions { MaxDegreeOfParallelism = threadCount };
-
-                // Use a concurrent bag to collect DataTables from parallel tasks.
-                var dataTables = new ConcurrentBag<DataTable>();
-                var exceptions = new ConcurrentBag<Exception>();
-
-                var semaphore = new SemaphoreSlim(threadCount);
-
-                var tasks = new List<Task>();
-
-                foreach (var database in databases)
-                {
-                    // Wait to enter the semaphore. If the maximum number of requests are already running,
-                    // this will block until one of them completes and releases the semaphore.
-                    await semaphore.WaitAsync();
-
-                    tasks.Add(Task.Run(async () =>
-                    {
-                        try
-                        {
-                            var dt = await GetTopQueriesForDatabase(src.SourceConnection.ConnectionString, database);
-                            Log.Debug("Query store top queries for {database} returned {rows} rows", database, dt.Rows.Count);
-                            dataTables.Add(dt); // Ensure dataTables is thread-safe, e.g., ConcurrentBag.
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Error(ex, "Error getting query store top queries for {database} from {handle}", database, handle);
-                            exceptions.Add(ex); // Ensure exceptions is thread-safe, e.g., ConcurrentBag.
-                        }
-                        finally
-                        {
-                            // Release the semaphore so another task can enter.
-                            semaphore.Release();
-                        }
-                    }));
-                }
-
-                await Task.WhenAll(tasks);
-
-                if (!exceptions.IsEmpty)
-                {
-                    throw new AggregateException(exceptions);
-                }
-
-                // Merge all DataTables into a single DataTable.
-                foreach (var dt in dataTables)
-                {
-                    if (resultTable.Columns.Count == 0)
-                    {
-                        resultTable = dt.Clone(); // Clone the structure of the first DataTable.
-                    }
-
-                    foreach (DataRow row in dt.Rows)
-                    {
-                        resultTable.ImportRow(row);
-                    }
-                }
+                PerDatabaseCollectionHelper.DatabaseOperationDelegate operation = GetTopQueriesForDatabase;
+                var resultTable = await PerDatabaseCollectionHelper.RunPerDatabaseCollectionWithUnionResults(operation,src.SourceConnection.ConnectionString, databases);
 
                 if (resultTable.Rows.Count > Top)
                 {

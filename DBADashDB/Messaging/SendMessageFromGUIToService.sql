@@ -5,6 +5,7 @@
 	@InitDlgHandle UNIQUEIDENTIFIER,
 	@Lifetime INT
 )
+WITH EXECUTE AS OWNER
 AS
 /* 
 	Used by the GUI to communicate with the service 

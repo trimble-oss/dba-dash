@@ -145,7 +145,7 @@
             tsNearestInterval.CheckOnClick = true;
             tsNearestInterval.CheckState = System.Windows.Forms.CheckState.Checked;
             tsNearestInterval.Name = "tsNearestInterval";
-            tsNearestInterval.Size = new System.Drawing.Size(224, 26);
+            tsNearestInterval.Size = new System.Drawing.Size(221, 26);
             tsNearestInterval.Text = "Use nearest interval";
             tsNearestInterval.ToolTipText = "Use the nearest query store interval.  Uncheck to filter on first/last execution time";
             // 
@@ -155,7 +155,7 @@
             includeWaitsToolStripMenuItem.CheckOnClick = true;
             includeWaitsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             includeWaitsToolStripMenuItem.Name = "includeWaitsToolStripMenuItem";
-            includeWaitsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            includeWaitsToolStripMenuItem.Size = new System.Drawing.Size(221, 26);
             includeWaitsToolStripMenuItem.Text = "Include Waits";
             includeWaitsToolStripMenuItem.Click += IncludeWaitsToolStripMenuItem_Click;
             // 
@@ -258,7 +258,7 @@
             queryToolStripMenuItem.Checked = true;
             queryToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             queryToolStripMenuItem.Name = "queryToolStripMenuItem";
-            queryToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            queryToolStripMenuItem.Size = new System.Drawing.Size(168, 26);
             queryToolStripMenuItem.Tag = "query_id";
             queryToolStripMenuItem.Text = "Query";
             queryToolStripMenuItem.Click += Select_GroupBy;
@@ -266,7 +266,7 @@
             // planToolStripMenuItem
             // 
             planToolStripMenuItem.Name = "planToolStripMenuItem";
-            planToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            planToolStripMenuItem.Size = new System.Drawing.Size(168, 26);
             planToolStripMenuItem.Tag = "plan_id";
             planToolStripMenuItem.Text = "Plan";
             planToolStripMenuItem.Click += Select_GroupBy;
@@ -274,7 +274,7 @@
             // planHashToolStripMenuItem
             // 
             planHashToolStripMenuItem.Name = "planHashToolStripMenuItem";
-            planHashToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            planHashToolStripMenuItem.Size = new System.Drawing.Size(168, 26);
             planHashToolStripMenuItem.Tag = "query_plan_hash";
             planHashToolStripMenuItem.Text = "Plan Hash";
             planHashToolStripMenuItem.Click += Select_GroupBy;
@@ -282,7 +282,7 @@
             // queryHashToolStripMenuItem
             // 
             queryHashToolStripMenuItem.Name = "queryHashToolStripMenuItem";
-            queryHashToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            queryHashToolStripMenuItem.Size = new System.Drawing.Size(168, 26);
             queryHashToolStripMenuItem.Tag = "query_hash";
             queryHashToolStripMenuItem.Text = "Query Hash";
             queryHashToolStripMenuItem.Click += Select_GroupBy;
@@ -290,7 +290,7 @@
             // objectToolStripMenuItem
             // 
             objectToolStripMenuItem.Name = "objectToolStripMenuItem";
-            objectToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            objectToolStripMenuItem.Size = new System.Drawing.Size(168, 26);
             objectToolStripMenuItem.Tag = "object_id";
             objectToolStripMenuItem.Text = "Object";
             objectToolStripMenuItem.Click += Select_GroupBy;
@@ -465,6 +465,7 @@
             dgvDrillDown.TabIndex = 0;
             dgvDrillDown.CellContentClick += Dgv_CellContentClick;
             dgvDrillDown.CellFormatting += Dgv_CellFormatting;
+            dgvDrillDown.RowsAdded += DgvDrillDown_RowsAdded;
             // 
             // QueryStoreTopQueries
             // 

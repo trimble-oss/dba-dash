@@ -8,6 +8,10 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Azure;
+using DBADashGUI.Messaging;
+using Microsoft.Data.Tools.Schema.Sql.SchemaModel.Parameterization;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace DBADashGUI.Performance
 {
@@ -85,114 +89,104 @@ namespace DBADashGUI.Performance
             }
 
             dgv.DataSource = null;
-            var message = new QueryStoreTopQueriesMessage
+
+            try
             {
-                CollectAgent = CurrentContext.CollectAgent,
-                ImportAgent = CurrentContext.ImportAgent,
-                Top = top,
-                SortColumn = sortColumn,
-                ObjectName = objectName,
-                QueryID = queryId,
-                PlanID = planId,
-                NearestInterval = tsNearestInterval.Checked,
-                QueryHash = queryHash,
-                QueryPlanHash = planHash,
-                GroupBy = groupBy,
-                ConnectionID = CurrentContext.ConnectionID,
-                DatabaseName = CurrentContext.DatabaseName,
-                ParallelPlans = parallelPlansOnlyToolStripMenuItem.Checked,
-                MinimumPlanCount = GetMinimumPlanCount(),
-                From = new DateTimeOffset(DateRange.FromUTC, TimeSpan.Zero),
-                To = new DateTimeOffset(DateRange.ToUTC, TimeSpan.Zero),
-                IncludeWaits = IncludeWaits,
-                Lifetime = Config.DefaultCommandTimeout
-            };
-            lblStatus.InvokeSetStatus(messageSentMessage, string.Empty, DashColors.Information);
-            await SendMessageAndProcessReply(message, dgv, UserColumnLayout);
+                var message = new QueryStoreTopQueriesMessage
+                {
+                    CollectAgent = CurrentContext.CollectAgent,
+                    ImportAgent = CurrentContext.ImportAgent,
+                    Top = top,
+                    SortColumn = sortColumn,
+                    ObjectName = objectName,
+                    QueryID = queryId,
+                    PlanID = planId,
+                    NearestInterval = tsNearestInterval.Checked,
+                    QueryHash = queryHash,
+                    QueryPlanHash = planHash,
+                    GroupBy = groupBy,
+                    ConnectionID = CurrentContext.ConnectionID,
+                    DatabaseName = CurrentContext.DatabaseName,
+                    ParallelPlans = parallelPlansOnlyToolStripMenuItem.Checked,
+                    MinimumPlanCount = GetMinimumPlanCount(),
+                    From = new DateTimeOffset(DateRange.FromUTC, TimeSpan.Zero),
+                    To = new DateTimeOffset(DateRange.ToUTC, TimeSpan.Zero),
+                    IncludeWaits = IncludeWaits,
+                    Lifetime = Config.DefaultCommandTimeout
+                };
+                lblStatus.InvokeSetStatus(messageSentMessage, string.Empty, DashColors.Information);
+                await MessagingHelper.SendMessageAndProcessReply(message, CurrentContext, lblStatus,
+                    ProcessCompletedTopQueriesMessage, Guid.NewGuid());
+            }
+            catch (Exception ex)
+            {
+                lblStatus.InvokeSetStatus(ex.Message.Truncate(200), ex.ToString(), DashColors.Fail);
+            }
         }
 
-        private async Task SendMessageAndProcessReply(MessageBase message, DataGridView _dgv, List<KeyValuePair<string, PersistedColumnLayout>> layout = null)
+        private Task ProcessCompletedPlanCollectionMessage(ResponseMessage reply, Guid messageGroup)
         {
-            var messageGroup = Guid.NewGuid();
-            if (CurrentContext.ImportAgentID == null)
+            var ds = reply.Data;
+            if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Columns.Count == 0)
             {
-                lblStatus.InvokeSetStatus("No Import Agent", string.Empty, DashColors.Fail);
-                return;
+                MessageBox.Show(@"No data returned");
+                return Task.CompletedTask;
             }
-            await MessageProcessing.SendMessageToService(message.Serialize(), (int)CurrentContext.ImportAgentID, messageGroup, Common.ConnectionString, message.Lifetime);
-            var completed = false;
-            while (!completed)
+
+            var dt = ds.Tables[0];
+            LoadQueryPlan(dt);
+            return Task.CompletedTask;
+        }
+
+        private Task ProcessCompletedDrillDownTask(ResponseMessage reply, Guid messageGroup)
+        {
+            return ProcessCompletedTopQueriesOrDrillDownMessage(reply, dgvDrillDown, null);
+        }
+
+        private Task ProcessCompletedTopQueriesMessage(ResponseMessage reply, Guid messageGroup)
+        {
+            return ProcessCompletedTopQueriesOrDrillDownMessage(reply, dgv, UserColumnLayout);
+        }
+        private Task ProcessCompletedTopQueriesOrDrillDownMessage(ResponseMessage reply, DataGridView _dgv, List<KeyValuePair<string, PersistedColumnLayout>> layout)
+        {
+            lblStatus.InvokeSetStatus(reply.Message, string.Empty, DashColors.Success);
+            Invoke(() =>
             {
-                ResponseMessage reply;
-                try
+                var ds = reply.Data;
+                if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Columns.Count == 0)
                 {
-                    reply = await Messaging.CollectionMessaging.ReceiveReply(messageGroup, message.Lifetime * 1000);
-                }
-                catch (Exception ex)
-                {
-                    lblStatus.InvokeSetStatus(ex.Message, string.Empty, DashColors.Fail);
-                    completed = true;
+                    MessageBox.Show(@"No data returned");
                     return;
                 }
 
-                switch (reply.Type)
+                var dt = ds.Tables[0];
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
+
+                _dgv.Columns.Clear();
+                _dgv.AddColumns(dt, topQueriesResult);
+                try
                 {
-                    case ResponseMessage.ResponseTypes.Progress:
-                        completed = false;
-                        lblStatus.InvokeSetStatus(reply.Message, string.Empty, DashColors.Information);
-                        break;
-
-                    case ResponseMessage.ResponseTypes.Failure:
-                        completed = true;
-                        lblStatus.InvokeSetStatus(reply.Message, reply.Exception?.ToString(), DashColors.Fail);
-                        break;
-
-                    case ResponseMessage.ResponseTypes.Success:
-                        {
-                            completed = false; // It's done but wait for end dialog
-                            lblStatus.InvokeSetStatus(reply.Message, string.Empty, DashColors.Success);
-                            Invoke(() =>
-                            {
-                                var ds = reply.Data;
-                                if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Columns.Count == 0)
-                                {
-                                    MessageBox.Show(@"No data returned");
-                                    return;
-                                }
-
-                                var dt = ds.Tables[0];
-                                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                                if (message is PlanCollectionMessage)
-                                {
-                                    LoadQueryPlan(dt);
-                                    return;
-                                }
-
-                                _dgv.Columns.Clear();
-                                _dgv.AddColumns(dt, topQueriesResult);
-                                _dgv.DataSource = new DataView(dt, null, $"{sortColumn} DESC",
-                                    DataViewRowState.CurrentRows);
-                                try
-                                {
-                                    _dgv.LoadColumnLayout(layout ?? topQueriesResult.ColumnLayout);
-                                }
-                                catch (Exception ex)
-                                {
-                                    lblStatus.InvokeSetStatus("Error loading column layout", ex.Message, DashColors.Fail);
-                                }
-                                _dgv.ApplyTheme();
-                                if (_dgv == dgvDrillDown)
-                                {
-                                    splitContainer1.Panel2Collapsed = false;
-                                }
-                            });
-                            break;
-                        }
-                    case ResponseMessage.ResponseTypes.EndConversation:
-                        completed = true;
-                        break;
+                    _dgv.LoadColumnLayout(layout ?? topQueriesResult.ColumnLayout);
                 }
-            }
+                catch (Exception ex)
+                {
+                    lblStatus.InvokeSetStatus("Error loading column layout", ex.Message, DashColors.Fail);
+                }
+                if (_dgv.Columns.Contains("plan_id") && _dgv == dgvDrillDown)
+                {
+                    _dgv.Columns.Add(new DataGridViewButtonColumn()
+                        { Name = "ForceUnforce", Text = "Force Plan", HeaderText = "", Visible = true});
+                }
+
+                _dgv.ApplyTheme();
+                _dgv.DataSource = new DataView(dt, null, $"{sortColumn} DESC",
+                    DataViewRowState.CurrentRows);
+                if (_dgv == dgvDrillDown)
+                {
+                    splitContainer1.Panel2Collapsed = false;
+                }
+            });
+            return Task.CompletedTask;
         }
 
         private void LoadQueryPlan(DataTable dt)
@@ -432,6 +426,11 @@ namespace DBADashGUI.Performance
         {
             var queryId = (long)_dgv.Rows[e.RowIndex].Cells["query_id"].Value;
             var db = _dgv.Rows[e.RowIndex].Cells["DB"].Value.ToString();
+            QueryDrillDown(queryId, db);
+        }
+
+        private void QueryDrillDown(long queryId, string db)
+        {
             var message = new QueryStoreTopQueriesMessage
             {
                 CollectAgent = CurrentContext.CollectAgent,
@@ -448,8 +447,9 @@ namespace DBADashGUI.Performance
                 IncludeWaits = IncludeWaits,
                 Lifetime = Config.DefaultCommandTimeout
             };
-            Task.Run(() => SendMessageAndProcessReply(message, dgvDrillDown));
+            Task.Run(() => MessagingHelper.SendMessageAndProcessReply(message, CurrentContext, lblStatus, ProcessCompletedDrillDownTask,Guid.NewGuid()));
         }
+
 
         private void PlanDrillDown(DataGridView _dgv, DataGridViewCellEventArgs e)
         {
@@ -463,7 +463,7 @@ namespace DBADashGUI.Performance
                 DatabaseName = db,
                 PlanID = planId,
             };
-            Task.Run(() => SendMessageAndProcessReply(message, null));
+            Task.Run(() => MessagingHelper.SendMessageAndProcessReply(message, CurrentContext, lblStatus, ProcessCompletedPlanCollectionMessage, Guid.NewGuid()));
         }
 
         private void QueryHashDrillDown(DataGridView _dgv, DataGridViewCellEventArgs e)
@@ -506,7 +506,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private async void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             var _dgv = (DataGridView)sender;
             if (e.RowIndex < 0) return;
@@ -535,10 +535,30 @@ namespace DBADashGUI.Performance
                 case "object_name":
                     ObjectDrillDown(_dgv, e);
                     break;
-
+                case "" when _dgv.Columns[e.ColumnIndex].Name == "ForceUnforce":
+                    await MessagingHelper.ForcePlanDrillDown(_dgv, e, CurrentContext, lblStatus, ProcessPlanForcingMessage);
+                    break;
                 default:
                     DefaultDrillDown(_dgv, e);
                     break;
+            }
+        }
+
+        private async Task ProcessPlanForcingMessage(ResponseMessage reply, Guid messageGroup)
+        {
+            if (reply.Type == ResponseMessage.ResponseTypes.Success)
+            {
+                lblStatus.InvokeSetStatus("Plan Forcing Operation Completed", string.Empty, DashColors.Success);
+                await MessagingHelper.UpdatePlanForcingLog(messageGroup, "SUCCEEDED");
+                if (dgvDrillDown.Rows.Count > 0) // Refresh
+                {
+                    QueryDrillDown((long)dgvDrillDown.Rows[0].Cells["query_id"].Value, dgvDrillDown.Rows[0].Cells["DB"].Value.ToString());
+                }
+            }
+            else
+            {
+                lblStatus.InvokeSetStatus("Plan Forcing Operation Failed", reply.Message, DashColors.Fail);
+                await MessagingHelper.UpdatePlanForcingLog(messageGroup, "FAIL:" + reply.Message);
             }
         }
 
@@ -704,6 +724,15 @@ namespace DBADashGUI.Performance
         private void IncludeWaitsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             UserColumnLayout = null;
+        }
+
+        private void DgvDrillDown_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+            if (!dgvDrillDown.Columns.Contains("ForceUnForce")) return;
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            {
+                dgvDrillDown.Rows[idx].Cells["ForceUnForce"].Value = (string)dgvDrillDown.Rows[idx].Cells["plan_forcing_type_desc"].Value == "NONE" ? "Force" : "Unforce";
+            }
         }
     }
 }

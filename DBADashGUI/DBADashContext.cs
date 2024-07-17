@@ -103,7 +103,17 @@ namespace DBADashGUI
             get
             {
                 if (_canMessage != null) return (bool)_canMessage;
-                _canMessage= DBADashUser.AllowMessaging && ImportAgent is { MessagingEnabled: true } && CollectAgent is {MessagingEnabled:true};
+                try
+                {
+                    _canMessage = DBADashUser.AllowMessaging && ImportAgent is { MessagingEnabled: true } &&
+                                  CollectAgent is { MessagingEnabled: true };
+                }
+                catch (Exception ex)
+                {
+                    Log.Debug(ex, "Error checking messaging");
+                    return false;
+                }
+
                 return (bool)_canMessage;
             }
         }

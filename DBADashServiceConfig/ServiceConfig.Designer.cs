@@ -67,6 +67,7 @@ namespace DBADashServiceConfig
             txtJson = new System.Windows.Forms.TextBox();
             tabOther = new System.Windows.Forms.TabPage();
             groupBox6 = new System.Windows.Forms.GroupBox();
+            chkAllowPlanForcing = new System.Windows.Forms.CheckBox();
             label8 = new System.Windows.Forms.Label();
             label6 = new System.Windows.Forms.Label();
             txtSQS = new System.Windows.Forms.TextBox();
@@ -574,6 +575,7 @@ namespace DBADashServiceConfig
             // 
             // groupBox6
             // 
+            groupBox6.Controls.Add(chkAllowPlanForcing);
             groupBox6.Controls.Add(label8);
             groupBox6.Controls.Add(label6);
             groupBox6.Controls.Add(txtSQS);
@@ -586,10 +588,21 @@ namespace DBADashServiceConfig
             groupBox6.TabStop = false;
             groupBox6.Text = "Messaging";
             // 
+            // chkAllowPlanForcing
+            // 
+            chkAllowPlanForcing.AutoSize = true;
+            chkAllowPlanForcing.Location = new System.Drawing.Point(18, 69);
+            chkAllowPlanForcing.Name = "chkAllowPlanForcing";
+            chkAllowPlanForcing.Size = new System.Drawing.Size(154, 24);
+            chkAllowPlanForcing.TabIndex = 5;
+            chkAllowPlanForcing.Text = "Allow Plan Forcing";
+            chkAllowPlanForcing.UseVisualStyleBackColor = true;
+            chkAllowPlanForcing.CheckedChanged += ChkAllowPlanForcing_CheckedChanged;
+            // 
             // label8
             // 
             label8.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
-            label8.Location = new System.Drawing.Point(623, 80);
+            label8.Location = new System.Drawing.Point(623, 93);
             label8.Name = "label8";
             label8.Size = new System.Drawing.Size(466, 45);
             label8.TabIndex = 4;
@@ -598,7 +611,7 @@ namespace DBADashServiceConfig
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new System.Drawing.Point(18, 80);
+            label6.Location = new System.Drawing.Point(18, 105);
             label6.Name = "label6";
             label6.Size = new System.Drawing.Size(62, 20);
             label6.TabIndex = 3;
@@ -606,7 +619,7 @@ namespace DBADashServiceConfig
             // 
             // txtSQS
             // 
-            txtSQS.Location = new System.Drawing.Point(247, 77);
+            txtSQS.Location = new System.Drawing.Point(247, 102);
             txtSQS.Name = "txtSQS";
             txtSQS.Size = new System.Drawing.Size(370, 27);
             txtSQS.TabIndex = 2;
@@ -616,9 +629,9 @@ namespace DBADashServiceConfig
             // label4
             // 
             label4.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
-            label4.Location = new System.Drawing.Point(623, 23);
+            label4.Location = new System.Drawing.Point(623, 39);
             label4.Name = "label4";
-            label4.Size = new System.Drawing.Size(466, 86);
+            label4.Size = new System.Drawing.Size(466, 54);
             label4.TabIndex = 1;
             label4.Text = "Allow the GUI to send messages to this service via the service broker.  e.g. To trigger collections to run on demand.";
             // 
@@ -1633,6 +1646,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox txtSQS;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.CheckBox chkAllowPlanForcing;
     }
 }
 
