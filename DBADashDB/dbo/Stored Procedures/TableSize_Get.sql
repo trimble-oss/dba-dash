@@ -50,7 +50,7 @@ FROM T Latest
 JOIN dbo.Instances I ON I.InstanceID = Latest.InstanceID
 JOIN dbo.Databases D ON D.DatabaseID = Latest.DatabaseID
 JOIN dbo.DBObjects O ON Latest.ObjectID = O.ObjectID AND O.DatabaseID = Latest.DatabaseID
-LEFT JOIN T Oldest ON Latest.InstanceID = Oldest.InstanceID AND Latest.DatabaseID = Oldest.DatabaseID AND Latest.ObjectID = Oldest.ObjectID AND Oldest.Oldest = 1
+LEFT HASH JOIN T Oldest ON Latest.InstanceID = Oldest.InstanceID AND Latest.DatabaseID = Oldest.DatabaseID AND Latest.ObjectID = Oldest.ObjectID AND Oldest.Oldest = 1
 LEFT JOIN dbo.CollectionDatesStatus SSD ON SSD.InstanceID = Latest.InstanceID AND SSD.Reference='TableSize'
 WHERE Latest.Latest = 1
 AND D.IsActive=1
