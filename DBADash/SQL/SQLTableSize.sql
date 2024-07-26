@@ -18,6 +18,27 @@ CREATE TABLE #tablesize (
 		[used_pages] bigint, 
 		[data_pages] bigint 
 )
+
+SET @TableSizeDatabases = REPLACE(REPLACE(@TableSizeDatabases,'_','[_]'),'*','%'); -- Convert basic glob to SQL LIKE expression
+
+CREATE TABLE #DBFilters (
+	IsInclude bit NOT NULL,
+	FilterText nvarchar(100) NOT NULL,
+);
+
+INSERT INTO #DBFilters (IsInclude, FilterText)
+SELECT fa.IsInclude, ft.FilterText
+FROM STRING_SPLIT(@TableSizeDatabases,',') ss
+	CROSS APPLY (SELECT FilterText = LTRIM(RTRIM(ss.[value]))) tr -- Cleanup leading/trailing whitespace
+	CROSS APPLY (SELECT IsInclude  = IIF(LEFT(tr.FilterText,1)='-',0,1)) fa -- Determine if is include/exclude pattern
+	CROSS APPLY (SELECT FilterText = IIF(fa.IsInclude = 0, STUFF(tr.FilterText,1,1,''), tr.FilterText)) ft -- Remove leading `-` for exclude patterns
+WHERE ft.FilterText <> ''; -- Blank include is treated as `*`. Blank exclude is ignored/removed
+
+IF NOT EXISTS (SELECT * FROM #DBFilters WHERE IsInclude = 1)
+BEGIN;
+	INSERT INTO #DBFilters (IsInclude, FilterText) VALUES (1,'%');
+END;
+
 CREATE TABLE #Databases(
 	name NVARCHAR(128),
 
@@ -31,14 +52,15 @@ AND HAS_DBACCESS(D.name)=1
 AND D.database_id <> 2
 AND EXISTS(
 		SELECT 1 
-		FROM STRING_SPLIT(@TableSizeDatabases,',') SS
-		WHERE (RTRIM(LTRIM(SS.value)) = D.name COLLATE DATABASE_DEFAULT OR SS.value ='*')
+		FROM #DBFilters dbf
+		WHERE D.name COLLATE DATABASE_DEFAULT LIKE dbf.FilterText
+		AND dbf.IsInclude = 1
 )
 AND NOT EXISTS(
 			SELECT 1 
-			FROM STRING_SPLIT(@TableSizeDatabases,',') SS
-			WHERE STUFF(RTRIM(LTRIM(SS.value)),1,1,'') = D.name COLLATE DATABASE_DEFAULT
-			AND RTRIM(LTRIM(SS.value)) LIKE '-%'
+			FROM #DBFilters dbf
+			WHERE D.name COLLATE DATABASE_DEFAULT LIKE dbf.FilterText
+			AND dbf.IsInclude = 0
 	)
 
 IF @@ROWCOUNT > @MaxDatabases
