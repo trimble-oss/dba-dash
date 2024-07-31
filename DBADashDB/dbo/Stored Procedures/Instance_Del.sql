@@ -431,6 +431,9 @@ BEGIN
 
 	DELETE Staging.PerformanceCounters
 	WHERE InstanceID = @InstanceID	
+
+	DELETE dbo.RunningJobs
+	WHERE InstanceID = @InstanceID
 	
 	DELETE dbo.Instances
 	WHERE InstanceID = @InstanceID
