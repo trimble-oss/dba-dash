@@ -48,7 +48,8 @@ namespace DBADash.Messaging
             plan_id,
             query_hash,
             query_plan_hash,
-            object_id
+            object_id,
+            date_bucket
         }
 
         public bool NearestInterval { get; set; } = true;
@@ -57,6 +58,10 @@ namespace DBADash.Messaging
         public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle)
         {
             ThrowIfExpired();
+            if (GroupBy == QueryStoreGroupByEnum.date_bucket && (string.IsNullOrEmpty(DatabaseName) || QueryID == null))
+            {
+                throw new Exception("Database and QueryID must be specified when grouping by date bucket");
+            }
             using var op = Operation.Begin("Query store top queries for {database} on {instance} triggered from message {handle}",
                 DatabaseName,
                 ConnectionID,

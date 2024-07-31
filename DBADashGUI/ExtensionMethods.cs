@@ -12,6 +12,11 @@ using System.Windows.Forms;
 using System.Xml;
 using DBADashGUI.Theme;
 using static DBADashGUI.DBADashStatus;
+using LiveChartsCore.SkiaSharpView.SKCharts;
+using SkiaSharp;
+using System.IO;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView.WinForms;
 
 namespace DBADashGUI
 {
@@ -632,6 +637,47 @@ namespace DBADashGUI
                 column.ValueType = dataColumn.DataType;
                 dgv.Columns.Add(column);
             }
+        }
+
+        public static DateTime RoundDownToPreviousHour(this DateTime dateTime)
+        {
+            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, 0, 0, dateTime.Kind);
+        }
+
+        public static void SaveChartAs(this CartesianChart chart, string fileName="chart.png")
+        {
+            var sfd = new SaveFileDialog
+            {
+                Filter = @"PNG Files|*.png|SVG Files|*.svg",
+                Title = @"Save Chart Image",
+                FileName = fileName
+            };
+            if (sfd.ShowDialog() != DialogResult.OK) return;
+            File.Delete(sfd.FileName);
+            var skChart = new SKCartesianChart(chart) { Width = chart.Width, Height = chart.Height, };
+            if (string.Equals(System.IO.Path.GetExtension(sfd.FileName), ".svg", StringComparison.InvariantCultureIgnoreCase))
+            {
+                using var stream = new MemoryStream();
+                var svgCanvas = SKSvgCanvas.Create(SKRect.Create(skChart.Width, skChart.Height), stream);
+                skChart.DrawOnCanvas(svgCanvas);
+                svgCanvas.Dispose(); // <- dispose it before using the stream, otherwise the svg could not be completed.
+
+                stream.Position = 0;
+                using var fs = new FileStream(sfd.FileName, FileMode.OpenOrCreate);
+                stream.CopyTo(fs);
+            }
+            else
+            {
+                skChart.SaveImage(sfd.FileName);
+            }
+        }
+
+        public static void CopyImage(this CartesianChart chart)
+        {
+            var skChart = new SKCartesianChart(chart) { Width = chart.Width, Height = chart.Height, };
+            using var stream = new MemoryStream();
+            skChart.GetImage().Encode(SKEncodedImageFormat.Png,80).SaveTo(stream);
+            Clipboard.SetImage(new Bitmap(stream));
         }
     }
 }

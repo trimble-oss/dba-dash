@@ -37,7 +37,7 @@ namespace DBADash.Messaging
                 await using var cn = new SqlConnection(builder.ConnectionString);
                 await cn.OpenAsync();
                 await using var cmd =
-                    new SqlCommand("SELECT query_plan FROM sys.query_store_plan WHERE plan_id = @plan_id", cn);
+                    new SqlCommand("SELECT plan_id,query_plan FROM sys.query_store_plan WHERE plan_id = @plan_id", cn);
                 cmd.Parameters.AddWithValue("@plan_id", PlanID);
                 using var da = new SqlDataAdapter(cmd);
                 var ds = new DataSet();

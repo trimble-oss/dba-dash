@@ -25,9 +25,14 @@ BEGIN
 	RAISERROR('Invalid database',11,1)
 	RETURN
 END
-IF @GroupBy NOT IN('query_id','plan_id','query_plan_hash','query_hash','object_id')
+IF @GroupBy NOT IN('query_id','plan_id','query_plan_hash','query_hash','object_id','date_bucket')
 BEGIN
 	RAISERROR('Invalid group by',11,1)
+	RETURN
+END
+IF @GroupBy = 'date_bucket' AND @QueryID IS NULL
+BEGIN
+	RAISERROR('Query ID must be used with date_bucket group by',11,1)
 	RETURN
 END
 IF OBJECT_ID('sys.query_store_wait_stats') IS NULL
@@ -35,6 +40,14 @@ BEGIN
 	SET @IncludeWaits=0
 	PRINT 'Wait stats are not available on this version'
 END
+DECLARE @BucketStart NVARCHAR(MAX)
+DECLARE @BucketEnd NVARCHAR(MAX)
+SELECT @BucketStart = CASE WHEN DATEDIFF(mi,@FromDate,@ToDate)<65 THEN 'DATEADD(mi, DATEDIFF(mi, 0, rs.last_execution_time),0 )'
+			WHEN DATEDIFF(hh,@FromDate,@ToDate)<49 THEN 'DATEADD(hh, DATEDIFF(hh, 0, rs.last_execution_time),0 )'
+			WHEN DATEDIFF(d,@FromDate,@ToDate)<31 THEN 'DATEADD(d, DATEDIFF(d, 0, rs.last_execution_time),0 )'
+			WHEN DATEDIFF(w,@FromDate,@ToDate)<31 THEN 'DATEADD(w, DATEDIFF(w, 0, rs.last_execution_time),0 )'
+			ELSE 'DATEADD(m, DATEDIFF(m, 0, rs.last_execution_time),0 )' END
+SELECT @BucketEnd = REPLACE(@BucketStart,'DATEDIFF(','1+DATEDIFF(')
 
 DECLARE @SortSQL NVARCHAR(MAX)
 SELECT @SortSQL = CASE WHEN @SortCol IN('total_cpu_time_ms',
@@ -44,7 +57,8 @@ SELECT @SortSQL = CASE WHEN @SortCol IN('total_cpu_time_ms',
 											'count_executions',
 											'max_memory_grant_kb',
 											'total_physical_io_reads_kb',
-											'avg_physical_io_reads_kb') THEN QUOTENAME(@SortCol) ELSE NULL END
+											'avg_physical_io_reads_kb',
+											'bucket_start') THEN QUOTENAME(@SortCol) ELSE NULL END
 IF @SortSQL IS NULL
 BEGIN
 	RAISERROR('Invalid sort',11,1)
@@ -66,6 +80,16 @@ FROM sys.query_store_runtime_stats_interval
 WHERE end_time>=@ToDate
 ORDER BY end_time ASC
 
+IF @interval_from IS NULL
+BEGIN
+	SET @interval_from = 0
+END
+IF @interval_to IS NULL
+BEGIN
+	SET @interval_to = 9223372036854775807
+END
+
+
 SELECT TOP (@Top)
 		DB_NAME() AS DB,
 		',CASE WHEN @GroupBy = 'plan_id' THEN 'RS.plan_id,P.query_plan_hash,' ELSE '' END,'
@@ -79,6 +103,7 @@ SELECT TOP (@Top)
 		WHEN @GroupBy = 'query_plan_hash' THEN 'P.query_plan_hash,'
 		WHEN @GroupBy = 'object_id' THEN 'Q.object_id,
 		ISNULL(OBJECT_NAME(Q.object_id),'''') object_name,'
+		WHEN @GroupBy = 'date_bucket' THEN 'RS.plan_id,P.plan_forcing_type_desc,'
 		ELSE NULL END, 
 		CASE WHEN @IncludeWaits = 1 THEN 'STUFF(
 				(SELECT TOP(3) '', '' + CONCAT(W.wait_category_desc, '' = '',SUM(W.total_query_wait_time_ms),''ms'')
@@ -117,8 +142,11 @@ SELECT TOP (@Top)
 		MAX(RS.max_dop) AS max_dop,
 		', CASE WHEN @GroupBy IN('query_id','plan_id') THEN 'Q.query_parameterization_type_desc,' ELSE 'COUNT(DISTINCT Q.query_id) AS num_queries,' END, '
 		', CASE WHEN @GroupBy = 'plan_id' THEN 'P.plan_forcing_type_desc,P.force_failure_count,P.last_force_failure_reason_desc,P.is_parallel_plan,' ELSE 'COUNT(DISTINCT P.plan_id) num_plans,' END, '
-		MIN(MIN(RS.first_execution_time)) OVER() interval_start,
-		MAX(MAX(RS.last_execution_time)) OVER() interval_end
+		' + CASE WHEN @GroupBy = 'date_bucket' THEN
+		CONCAT(@BucketStart,' AS bucket_start,',@BucketEnd,' AS bucket_end')
+		ELSE 'MIN(MIN(RS.first_execution_time)) OVER() interval_start,
+		MAX(MAX(RS.last_execution_time)) OVER() interval_end' 
+		END + '
 FROM sys.query_store_runtime_stats AS RS
 JOIN sys.query_store_plan AS P ON P.plan_id = RS.plan_id
 JOIN sys.query_store_query AS Q  ON Q.query_id = P.query_id
@@ -139,10 +167,11 @@ GROUP BY ',CASE WHEN @GroupBy = 'query_id' THEN 'P.query_id, QT.query_sql_text, 
 			WHEN @GroupBy = 'query_hash' THEN 'Q.query_hash'
 			WHEN @GroupBy = 'object_id' THEN 'Q.object_id'
 			WHEN @GroupBy = 'plan_id' THEN 'P.query_id, QT.query_sql_text, Q.object_id,Q.query_hash,Q.query_parameterization_type_desc,RS.plan_id,P.query_plan_hash,P.plan_forcing_type_desc,P.force_failure_count,P.last_force_failure_reason_desc,P.is_parallel_plan' 
+			WHEN @GroupBy = 'date_bucket' THEN CONCAT(@BucketStart,',',@BucketEnd,',RS.plan_id,P.plan_forcing_type_desc')
 			ELSE NULL END, '
 ', CASE WHEN @MinimumPlanCount >1 THEN 'HAVING COUNT(DISTINCT RS.plan_id)>=@MinimumPlanCount' ELSE '' END,'
 ORDER BY ',@SortSQL,' DESC
 OPTION(HASH JOIN, LOOP JOIN)')
-
+PRINT @SQL
 EXEC sp_executesql @SQL,N'@Top INT,@FromDate DATETIMEOFFSET(7),@ToDate DATETIMEOFFSET(7), @ObjectName NVARCHAR(128),@ObjectID INT,@QueryID BIGINT,@PlanID BIGINT,@QueryHash BINARY(8),@QueryPlanHash BINARY(8),@MinimumPlanCount INT',
 					@Top,@FromDate,@ToDate,@ObjectName,@ObjectID,@QueryID,@PlanID,@QueryHash,@QueryPlanHash,@MinimumPlanCount
