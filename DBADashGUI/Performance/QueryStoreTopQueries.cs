@@ -147,6 +147,7 @@ namespace DBADashGUI.Performance
         {
             return ProcessCompletedTopQueriesOrDrillDownMessage(reply, dgv, UserColumnLayout);
         }
+
         private Task ProcessCompletedTopQueriesOrDrillDownMessage(ResponseMessage reply, DataGridView _dgv, List<KeyValuePair<string, PersistedColumnLayout>> layout)
         {
             lblStatus.InvokeSetStatus(reply.Message, string.Empty, DashColors.Success);
@@ -175,7 +176,7 @@ namespace DBADashGUI.Performance
                 if (_dgv.Columns.Contains("plan_id") && _dgv == dgvDrillDown)
                 {
                     _dgv.Columns.Add(new DataGridViewButtonColumn()
-                        { Name = "ForceUnforce", Text = "Force Plan", HeaderText = "", Visible = true});
+                    { Name = "ForceUnforce", Text = "Force Plan", HeaderText = "", Visible = true });
                 }
 
                 _dgv.ApplyTheme();
@@ -197,8 +198,13 @@ namespace DBADashGUI.Performance
                 return;
             }
             var plan = dt.Rows[0]["query_plan"].ToString();
+            string fileName = null;
+            if (dt.Columns.Contains("plan_id"))
+            {
+                fileName = $"Plan_{dt.Rows[0]["plan_id"]}_{DateTime.Now:yyyyMMddHHmmss}.sqlplan";
+            }
             lblStatus.InvokeSetStatus("Loading Query Plan...", string.Empty, DashColors.Success);
-            Common.ShowQueryPlan(plan);
+            Common.ShowQueryPlan(plan, fileName);
             lblStatus.InvokeSetStatus("Query plan loaded in associated app", string.Empty, DashColors.Success);
         }
 
@@ -429,32 +435,61 @@ namespace DBADashGUI.Performance
             QueryDrillDown(queryId, db);
         }
 
+        private long DrillDownQueryId;
+        private string DrillDownDB;
+        private bool IsChartLoaded;
+        private bool IsDrillDownLoaded;
+
         private void QueryDrillDown(long queryId, string db)
         {
-            var message = new QueryStoreTopQueriesMessage
-            {
-                CollectAgent = CurrentContext.CollectAgent,
-                ImportAgent = CurrentContext.ImportAgent,
-                Top = top,
-                SortColumn = sortColumn,
-                QueryID = queryId,
-                NearestInterval = tsNearestInterval.Checked,
-                GroupBy = QueryStoreTopQueriesMessage.QueryStoreGroupByEnum.plan_id,
-                ConnectionID = CurrentContext.ConnectionID,
-                DatabaseName = db,
-                From = new DateTimeOffset(DateRange.FromUTC, TimeSpan.Zero),
-                To = new DateTimeOffset(DateRange.ToUTC, TimeSpan.Zero),
-                IncludeWaits = IncludeWaits,
-                Lifetime = Config.DefaultCommandTimeout
-            };
-            Task.Run(() => MessagingHelper.SendMessageAndProcessReply(message, CurrentContext, lblStatus, ProcessCompletedDrillDownTask,Guid.NewGuid()));
+            IsChartLoaded = false;
+            IsDrillDownLoaded = false;
+            DrillDownQueryId = queryId;
+            DrillDownDB = db;
+            QueryDrillDown();
         }
 
+        private void QueryDrillDown()
+        {
+            if (tabDrillDown.SelectedTab == tabChart && !IsChartLoaded)
+            {
+                Task.Run(() => queryStorePlanChart1.ShowChart(CurrentContext, DrillDownDB, DrillDownQueryId, tsNearestInterval.Checked, new DateTimeOffset(DateRange.FromUTC, TimeSpan.Zero), new DateTimeOffset(DateRange.ToUTC, TimeSpan.Zero)));
+                splitContainer1.Panel2Collapsed = false;
+                IsChartLoaded = true;
+            }
+            else if (tabDrillDown.SelectedTab == tabSummary && !IsDrillDownLoaded)
+            {
+                IsDrillDownLoaded = true;
+                var message = new QueryStoreTopQueriesMessage
+                {
+                    CollectAgent = CurrentContext.CollectAgent,
+                    ImportAgent = CurrentContext.ImportAgent,
+                    Top = top,
+                    SortColumn = sortColumn,
+                    QueryID = DrillDownQueryId,
+                    NearestInterval = tsNearestInterval.Checked,
+                    GroupBy = QueryStoreTopQueriesMessage.QueryStoreGroupByEnum.plan_id,
+                    ConnectionID = CurrentContext.ConnectionID,
+                    DatabaseName = DrillDownDB,
+                    From = new DateTimeOffset(DateRange.FromUTC, TimeSpan.Zero),
+                    To = new DateTimeOffset(DateRange.ToUTC, TimeSpan.Zero),
+                    IncludeWaits = IncludeWaits,
+                    Lifetime = Config.DefaultCommandTimeout
+                };
+                Task.Run(() => MessagingHelper.SendMessageAndProcessReply(message, CurrentContext, lblStatus,
+                    ProcessCompletedDrillDownTask, Guid.NewGuid()));
+            }
+        }
 
         private void PlanDrillDown(DataGridView _dgv, DataGridViewCellEventArgs e)
         {
             var planId = (long)_dgv.Rows[e.RowIndex].Cells["plan_id"].Value;
             var db = _dgv.Rows[e.RowIndex].Cells["DB"].Value.ToString();
+            PlanDrillDown(planId, db);
+        }
+
+        private void PlanDrillDown(long planId, string db)
+        {
             var message = new PlanCollectionMessage()
             {
                 CollectAgent = CurrentContext.CollectAgent,
@@ -535,9 +570,11 @@ namespace DBADashGUI.Performance
                 case "object_name":
                     ObjectDrillDown(_dgv, e);
                     break;
+
                 case "" when _dgv.Columns[e.ColumnIndex].Name == "ForceUnforce":
                     await MessagingHelper.ForcePlanDrillDown(_dgv, e, CurrentContext, lblStatus, ProcessPlanForcingMessage);
                     break;
+
                 default:
                     DefaultDrillDown(_dgv, e);
                     break;
@@ -732,6 +769,19 @@ namespace DBADashGUI.Performance
             for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 dgvDrillDown.Rows[idx].Cells["ForceUnForce"].Value = (string)dgvDrillDown.Rows[idx].Cells["plan_forcing_type_desc"].Value == "NONE" ? "Force" : "Unforce";
+            }
+        }
+
+        private async void DrillDownTabIndexChanged(object sender, EventArgs e)
+        {
+            QueryDrillDown();
+        }
+
+        private void RefreshOn_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                RefreshData();
             }
         }
     }

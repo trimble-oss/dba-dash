@@ -416,13 +416,18 @@ namespace DBADashGUI
             }
         }
 
-        public static void ShowQueryPlan(string plan)
+        public static void ShowQueryPlan(string plan,string fileName=null)
         {
             if (!IsValidExecutionPlan(plan))
             {
                 throw new Exception("Invalid execution plan");
             }
             var path = Path.GetTempFileName() + ".sqlplan";
+            if(!string.IsNullOrEmpty(fileName))
+            {
+                path = Path.GetDirectoryName(path) + "\\" + fileName + ".sqlplan";
+            }
+
             File.WriteAllText(path, plan);
             var psi = new ProcessStartInfo(path) { UseShellExecute = true };
             Process.Start(psi);

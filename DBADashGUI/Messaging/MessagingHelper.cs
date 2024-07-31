@@ -7,19 +7,28 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Data.SqlClient;
+using System.Drawing;
 
 namespace DBADashGUI.Messaging
 {
     public class MessagingHelper
     {
         public delegate Task MessageCompletedDelegate(ResponseMessage reply,Guid messageGroup);
+        public delegate void SetStatusDelegate(string message, string details, Color color);
+
 
         public static async Task SendMessageAndProcessReply(MessageBase message, DBADashContext context,
-            ToolStripStatusLabel lblStatus, MessageCompletedDelegate processCompleted,Guid messageGroup)
+            ToolStripStatusLabel lblStatus, MessageCompletedDelegate processCompleted, Guid messageGroup)
+        {
+            await SendMessageAndProcessReply(message, context, lblStatus.InvokeSetStatus, processCompleted, messageGroup);
+        }
+
+        public static async Task SendMessageAndProcessReply(MessageBase message, DBADashContext context,
+            SetStatusDelegate setStatus, MessageCompletedDelegate processCompleted,Guid messageGroup)
         {
             if (context.ImportAgentID == null)
             {
-                lblStatus.InvokeSetStatus("No Import Agent", string.Empty, DashColors.Fail);
+                setStatus("No Import Agent", string.Empty, DashColors.Fail);
                 return;
             }
 
@@ -31,7 +40,7 @@ namespace DBADashGUI.Messaging
             }
             catch (Exception ex)
             {
-                lblStatus.InvokeSetStatus(ex.Message, ex.ToString(), DashColors.Fail);
+                setStatus(ex.Message, ex.ToString(), DashColors.Fail);
                 return;
             }
 
@@ -45,7 +54,7 @@ namespace DBADashGUI.Messaging
                 }
                 catch (Exception ex)
                 {
-                    lblStatus.InvokeSetStatus(ex.Message, string.Empty, DashColors.Fail);
+                    setStatus(ex.Message, string.Empty, DashColors.Fail);
                     completed = true;
                     return;
                 }
@@ -54,12 +63,12 @@ namespace DBADashGUI.Messaging
                 {
                     case ResponseMessage.ResponseTypes.Progress:
                         completed = false;
-                        lblStatus.InvokeSetStatus(reply.Message, string.Empty, DashColors.Information);
+                        setStatus(reply.Message, string.Empty, DashColors.Information);
                         break;
 
                     case ResponseMessage.ResponseTypes.Failure:
                         completed = true;
-                        lblStatus.InvokeSetStatus(reply.Message, reply.Exception?.ToString(), DashColors.Fail);
+                        setStatus(reply.Message, reply.Exception?.ToString(), DashColors.Fail);
                         await processCompleted(reply, messageGroup);
                         break;
 

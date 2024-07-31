@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI.Performance
+﻿using DBADashGUI.Theme;
+
+namespace DBADashGUI.Performance
 {
     partial class QueryStoreTopQueries
     {
@@ -71,7 +73,11 @@
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
+            tabDrillDown = new ThemedTabControl();
+            tabSummary = new System.Windows.Forms.TabPage();
             dgvDrillDown = new System.Windows.Forms.DataGridView();
+            tabChart = new System.Windows.Forms.TabPage();
+            queryStorePlanChart1 = new QueryStorePlanChart();
             ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
             toolStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
@@ -79,7 +85,10 @@
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
+            tabDrillDown.SuspendLayout();
+            tabSummary.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvDrillDown).BeginInit();
+            tabChart.SuspendLayout();
             SuspendLayout();
             // 
             // dgv
@@ -94,7 +103,7 @@
             dgv.ReadOnly = true;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
-            dgv.Size = new System.Drawing.Size(1408, 613);
+            dgv.Size = new System.Drawing.Size(1408, 267);
             dgv.TabIndex = 0;
             dgv.CellContentClick += Dgv_CellContentClick;
             dgv.CellFormatting += Dgv_CellFormatting;
@@ -405,6 +414,7 @@
             // 
             txtObjectName.Name = "txtObjectName";
             txtObjectName.Size = new System.Drawing.Size(100, 27);
+            txtObjectName.KeyDown += RefreshOn_KeyDown;
             // 
             // toolStripLabel2
             // 
@@ -416,6 +426,7 @@
             // 
             txtPlan.Name = "txtPlan";
             txtPlan.Size = new System.Drawing.Size(100, 27);
+            txtPlan.KeyDown += RefreshOn_KeyDown;
             // 
             // statusStrip1
             // 
@@ -445,11 +456,34 @@
             // 
             // splitContainer1.Panel2
             // 
-            splitContainer1.Panel2.Controls.Add(dgvDrillDown);
-            splitContainer1.Panel2Collapsed = true;
+            splitContainer1.Panel2.Controls.Add(tabDrillDown);
             splitContainer1.Size = new System.Drawing.Size(1408, 613);
             splitContainer1.SplitterDistance = 267;
             splitContainer1.TabIndex = 3;
+            // 
+            // tabDrillDown
+            // 
+            tabDrillDown.Alignment = System.Windows.Forms.TabAlignment.Bottom;
+            tabDrillDown.Controls.Add(tabSummary);
+            tabDrillDown.Controls.Add(tabChart);
+            tabDrillDown.Dock = System.Windows.Forms.DockStyle.Fill;
+            tabDrillDown.Location = new System.Drawing.Point(0, 0);
+            tabDrillDown.Name = "tabDrillDown";
+            tabDrillDown.SelectedIndex = 0;
+            tabDrillDown.Size = new System.Drawing.Size(1408, 342);
+            tabDrillDown.TabIndex = 1;
+            tabDrillDown.SelectedIndexChanged += DrillDownTabIndexChanged;
+            // 
+            // tabSummary
+            // 
+            tabSummary.Controls.Add(dgvDrillDown);
+            tabSummary.Location = new System.Drawing.Point(4, 4);
+            tabSummary.Name = "tabSummary";
+            tabSummary.Padding = new System.Windows.Forms.Padding(3);
+            tabSummary.Size = new System.Drawing.Size(1400, 309);
+            tabSummary.TabIndex = 0;
+            tabSummary.Text = "Summary";
+            tabSummary.UseVisualStyleBackColor = true;
             // 
             // dgvDrillDown
             // 
@@ -457,15 +491,34 @@
             dgvDrillDown.AllowUserToDeleteRows = false;
             dgvDrillDown.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvDrillDown.Dock = System.Windows.Forms.DockStyle.Fill;
-            dgvDrillDown.Location = new System.Drawing.Point(0, 0);
+            dgvDrillDown.Location = new System.Drawing.Point(3, 3);
             dgvDrillDown.Name = "dgvDrillDown";
             dgvDrillDown.RowHeadersVisible = false;
             dgvDrillDown.RowHeadersWidth = 51;
-            dgvDrillDown.Size = new System.Drawing.Size(150, 46);
+            dgvDrillDown.Size = new System.Drawing.Size(1394, 303);
             dgvDrillDown.TabIndex = 0;
             dgvDrillDown.CellContentClick += Dgv_CellContentClick;
             dgvDrillDown.CellFormatting += Dgv_CellFormatting;
             dgvDrillDown.RowsAdded += DgvDrillDown_RowsAdded;
+            // 
+            // tabChart
+            // 
+            tabChart.Controls.Add(queryStorePlanChart1);
+            tabChart.Location = new System.Drawing.Point(4, 4);
+            tabChart.Name = "tabChart";
+            tabChart.Padding = new System.Windows.Forms.Padding(3);
+            tabChart.Size = new System.Drawing.Size(1400, 309);
+            tabChart.TabIndex = 1;
+            tabChart.Text = "Chart";
+            tabChart.UseVisualStyleBackColor = true;
+            // 
+            // queryStorePlanChart1
+            // 
+            queryStorePlanChart1.Dock = System.Windows.Forms.DockStyle.Fill;
+            queryStorePlanChart1.Location = new System.Drawing.Point(3, 3);
+            queryStorePlanChart1.Name = "queryStorePlanChart1";
+            queryStorePlanChart1.Size = new System.Drawing.Size(1394, 303);
+            queryStorePlanChart1.TabIndex = 0;
             // 
             // QueryStoreTopQueries
             // 
@@ -485,7 +538,10 @@
             splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
+            tabDrillDown.ResumeLayout(false);
+            tabSummary.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvDrillDown).EndInit();
+            tabChart.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -535,5 +591,9 @@
         private System.Windows.Forms.ToolStripMenuItem minimumPlanCountToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem objectToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsColumns;
+        private DBADashGUI.Theme.ThemedTabControl tabDrillDown;
+        private System.Windows.Forms.TabPage tabSummary;
+        private System.Windows.Forms.TabPage tabChart;
+        private QueryStorePlanChart queryStorePlanChart1;
     }
 }
