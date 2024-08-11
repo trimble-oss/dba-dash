@@ -1,10 +1,13 @@
 ﻿using DBADash;
 using Microsoft.Data.SqlClient;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.ServiceProcess;
 using System.Text;
@@ -13,6 +16,8 @@ using DBADashGUI.Theme;
 using static DBADash.DBADashConnection;
 using SortOrder = System.Windows.Forms.SortOrder;
 using System.Threading.Tasks;
+using Humanizer;
+using Microsoft.SqlServer.Management.SqlParser.SqlCodeDom;
 
 namespace DBADashServiceConfig
 {
@@ -31,7 +36,8 @@ namespace DBADashServiceConfig
         private bool isInstalled;
         private Dictionary<string, CustomCollection> _customCollectionsNew;
 
-        private string[] NewSourceConnections => txtSource.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+        private string[] NewSourceConnections =>
+            txtSource.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
         private Dictionary<string, CustomCollection> CustomCollectionsNew
         {
@@ -40,7 +46,9 @@ namespace DBADashServiceConfig
             {
                 _customCollectionsNew = value;
                 bttnCustomCollectionsNew.Text = $"Custom Collections ({_customCollectionsNew?.Count ?? 0})";
-                bttnCustomCollectionsNew.Font = _customCollectionsNew?.Count > 0 ? new Font(bttnCustomCollectionsNew.Font, FontStyle.Bold) : new Font(bttnCustomCollectionsNew.Font, FontStyle.Regular);
+                bttnCustomCollectionsNew.Font = _customCollectionsNew?.Count > 0
+                    ? new Font(bttnCustomCollectionsNew.Font, FontStyle.Bold)
+                    : new Font(bttnCustomCollectionsNew.Font, FontStyle.Regular);
             }
         }
 
@@ -48,7 +56,9 @@ namespace DBADashServiceConfig
         {
             if (string.IsNullOrEmpty(txtSource.Text))
             {
-                MessageBox.Show("Please click the connect button or enter a list of connection strings for the SQL instances you want to monitor", "Enter Source", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(
+                    "Please click the connect button or enter a list of connection strings for the SQL instances you want to monitor",
+                    "Enter Source", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -57,6 +67,7 @@ namespace DBADashServiceConfig
             {
                 collectionConfig.SchemaSnapshotOptions = new SchemaSnapshotDBOptions();
             }
+
             bool hasUpdateApproval = false;
             bool warnXENotSupported = false;
             bool addUnvalidated = false;
@@ -69,7 +80,9 @@ namespace DBADashServiceConfig
                 {
                     continue;
                 }
-                if (!sourceString.Contains(';') && !sourceString.Contains(':') && !sourceString.StartsWith("\\\\") && !sourceString.StartsWith("//"))
+
+                if (!sourceString.Contains(';') && !sourceString.Contains(':') && !sourceString.StartsWith("\\\\") &&
+                    !sourceString.StartsWith("//"))
                 {
                     // Providing the name of the SQL instances - build the connection string automatically
                     var builder = new SqlConnectionStringBuilder
@@ -82,13 +95,22 @@ namespace DBADashServiceConfig
                     };
                     sourceString = builder.ConnectionString;
                 }
+
                 var src = new DBADashSource(sourceString)
                 {
                     NoWMI = chkNoWMI.Checked,
                     UseDualEventSession = chkDualSession.Checked,
                     PersistXESessions = chkPersistXESession.Checked,
                     SlowQueryThresholdMs = chkSlowQueryThreshold.Checked ? (Int32)numSlowQueryThreshold.Value : -1,
-                    RunningQueryPlanThreshold = chkCollectPlans.Checked ? new PlanCollectionThreshold() { CountThreshold = int.Parse(txtCountThreshold.Text), CPUThreshold = int.Parse(txtCPUThreshold.Text), DurationThreshold = int.Parse(txtDurationThreshold.Text), MemoryGrantThreshold = int.Parse(txtGrantThreshold.Text) } : null,
+                    RunningQueryPlanThreshold = chkCollectPlans.Checked
+                        ? new PlanCollectionThreshold()
+                        {
+                            CountThreshold = int.Parse(txtCountThreshold.Text),
+                            CPUThreshold = int.Parse(txtCPUThreshold.Text),
+                            DurationThreshold = int.Parse(txtDurationThreshold.Text),
+                            MemoryGrantThreshold = int.Parse(txtGrantThreshold.Text)
+                        }
+                        : null,
                     SchemaSnapshotDBs = schemaSnapshotDBs,
                     CollectSessionWaits = chkCollectSessionWaits.Checked,
                     ScriptAgentJobs = chkScriptJobs.Checked,
@@ -101,9 +123,12 @@ namespace DBADashServiceConfig
                 string validationError = "";
                 if (validated)
                 {
-                    if (!(src.SourceConnection.Type == ConnectionType.SQL || collectionConfig.DestinationConnection.Type == ConnectionType.SQL))
+                    if (!(src.SourceConnection.Type == ConnectionType.SQL ||
+                          collectionConfig.DestinationConnection.Type == ConnectionType.SQL))
                     {
-                        MessageBox.Show("Error: Invalid source and destination connection combination.  One of these should be a SQL connection string", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(
+                            "Error: Invalid source and destination connection combination.  One of these should be a SQL connection string",
+                            "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
 
@@ -117,9 +142,12 @@ namespace DBADashServiceConfig
                             validated = true;
                             src.ConnectionID = src.GetGeneratedConnectionID();
 
-                            if (src.SourceConnection.Type == ConnectionType.SQL && string.IsNullOrEmpty(src.SourceConnection.ConnectionInfo.ServerName))
+                            if (src.SourceConnection.Type == ConnectionType.SQL &&
+                                string.IsNullOrEmpty(src.SourceConnection.ConnectionInfo.ServerName))
                             {
-                                MessageBox.Show("Warning @@SERVERNAME returned NULL.  Consider fixing this using sp_addserver", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                MessageBox.Show(
+                                    "Warning @@SERVERNAME returned NULL.  Consider fixing this using sp_addserver",
+                                    "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             }
                         }
                         catch (Exception ex)
@@ -127,6 +155,7 @@ namespace DBADashServiceConfig
                             validated = false;
                             validationError = ex.Message;
                         }
+
                         Cursor.Current = Cursors.Default;
                     }
 
@@ -136,7 +165,10 @@ namespace DBADashServiceConfig
                         {
                             continue;
                         }
-                        else if (MessageBox.Show("Error connecting to data source.  Do you wish to add anyway?" + Environment.NewLine + Environment.NewLine + validationError, "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.No)
+                        else if (MessageBox.Show(
+                                     "Error connecting to data source.  Do you wish to add anyway?" +
+                                     Environment.NewLine + Environment.NewLine + validationError, "Error",
+                                     MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.No)
                         {
                             doNotAddUnvalidated = true;
                             continue;
@@ -161,7 +193,8 @@ namespace DBADashServiceConfig
                         {
                             continue;
                         }
-                        else if (hasUpdateApproval || MessageBox.Show("Update existing connection(s)?", "Update", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        else if (hasUpdateApproval || MessageBox.Show("Update existing connection(s)?", "Update",
+                                     MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                         {
                             collectionConfig.SourceConnections.Remove(existingConnection);
                             src.ConnectionID = existingConnection.ConnectionID;
@@ -184,7 +217,9 @@ namespace DBADashServiceConfig
             RefreshEncryption();
             if (warnXENotSupported)
             {
-                MessageBox.Show("Warning: Slow query capture requires an extended event session which is not supported for one or more connections.\nRequirements:\nSQL 2012 or later.\nStandard or Enteprise Edition on Amazon RDS", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(
+                    "Warning: Slow query capture requires an extended event session which is not supported for one or more connections.\nRequirements:\nSQL 2012 or later.\nStandard or Enteprise Edition on Amazon RDS",
+                    "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -218,7 +253,8 @@ namespace DBADashServiceConfig
             lblVersionInfo.Font = new Font(lblVersionInfo.Font, FontStyle.Regular);
             if (txtDestination.Text == "")
             {
-                lblVersionInfo.Text = "Please start by setting the destination connection for your DBA Dash repository database.";
+                lblVersionInfo.Text =
+                    "Please start by setting the destination connection for your DBA Dash repository database.";
                 lblVersionInfo.ForeColor = Color.Brown;
                 lblVersionInfo.Font = new Font(lblVersionInfo.Font, FontStyle.Bold);
                 return false;
@@ -229,6 +265,7 @@ namespace DBADashServiceConfig
                 errorProvider1.SetError(txtDestination, "Invalid connection string, directory or S3 path");
                 return false;
             }
+
             try
             {
                 CollectionConfig.ValidateDestination(dest);
@@ -238,6 +275,7 @@ namespace DBADashServiceConfig
                 errorProvider1.SetError(txtDestination, ex.Message);
                 return false;
             }
+
             if (dest.Type == ConnectionType.SQL)
             {
                 try
@@ -246,16 +284,20 @@ namespace DBADashServiceConfig
                     {
                         lblServerNameWarning.Visible = true;
                     }
+
                     var status = DBValidations.VersionStatus(dest.ConnectionString);
                     if (status.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB)
                     {
-                        lblVersionInfo.Text = "Start service to create repository database or click Deploy to create manually.";
+                        lblVersionInfo.Text =
+                            "Start service to create repository database or click Deploy to create manually.";
                         lblVersionInfo.ForeColor = DashColors.Fail;
                         return true;
                     }
+
                     if (status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
                     {
-                        lblVersionInfo.Text = "Repository database upgrade not required. DacVersion/DB Version: " + status.DACVersion;
+                        lblVersionInfo.Text = "Repository database upgrade not required. DacVersion/DB Version: " +
+                                              status.DACVersion;
                         lblVersionInfo.ForeColor = DashColors.Success;
                         bttnDeployDatabase.Enabled = true;
                     }
@@ -307,7 +349,8 @@ namespace DBADashServiceConfig
             collectionConfig.Save();
             originalJson = txtJson.Text;
             UpdateSaveButton();
-            MessageBox.Show("Config saved.  Restart service to apply changes.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Config saved.  Restart service to apply changes.", "Save", MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
         }
 
         private async void ServiceConfig_Load(object sender, EventArgs e)
@@ -320,33 +363,133 @@ namespace DBADashServiceConfig
             cboIOLevel.DataSource = Enum.GetValues(typeof(DBADashSource.IOCollectionLevels));
 
             dgvConnections.AutoGenerateColumns = false;
-            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ConnectionString", DataPropertyName = "ConnectionString", HeaderText = "Connection String", Width = 300 });
-            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ConnectionID", DataPropertyName = "ConnectionID", HeaderText = "Connection ID", ToolTipText = "The ConnectionID is used to uniquely identify the SQL Instance in the repository database.  The ConnectionID is automatically assigned to @@SERVERNAME but you can override this with a custom value.  If you change the ConnectionID for an existing server it will appear as a new instance in the repository database." });
-            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "NoWMI", HeaderText = "No WMI" });
-            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SlowQueryThresholdMs", HeaderText = "Slow Query Threshold (ms)" });
-            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "UseDualEventSession", HeaderText = "Use Dual Event Session" });
-            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "PersistXESessions", HeaderText = "Persist XE Sessions" });
-            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SchemaSnapshotDBs", HeaderText = "Schema Snapshot DBs" });
-            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SlowQuerySessionMaxMemoryKB", HeaderText = "Slow Query Session Max Memory (KB)", ToolTipText = "Max amount of memory to allocate for event buffering." });
-            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SlowQueryTargetMaxMemoryKB", HeaderText = "Slow Query Target Max Memory (KB)", ToolTipText = "Max memory target parameter for ring_buffer" });
-            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "CollectSessionWaits", HeaderText = "Collect Session Waits", ToolTipText = "Collect Session Waits for Running Queries" });
-            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "PlanCollectionEnabled", HeaderText = "Running Query Plan Collection" });
-            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "PlanCollectionCPUThreshold", HeaderText = "Plan Collection CPU Threshold" });
-            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "PlanCollectionDurationThreshold", HeaderText = "Plan Collection Duration Threshold" });
-            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "PlanCollectionCountThreshold", HeaderText = "Plan Collection Count Threshold" });
-            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "PlanCollectionMemoryGrantThreshold", HeaderText = "Plan Collection Memory Grant Threshold" });
-            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "ScriptAgentJobs", HeaderText = "Script Agent Jobs" });
-            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "HasCustomSchedule", HeaderText = "Custom Schedule" });
-            dgvConnections.Columns.Add(new DataGridViewComboBoxColumn() { DataPropertyName = "IOCollectionLevel", HeaderText = "IO Collection Level", DataSource = Enum.GetValues(typeof(DBADashSource.IOCollectionLevels)) });
-            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "WriteToSecondaryDestinations", HeaderText = "Write to Secondary Destinations" });
-            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "TableSizeCollectionThresholdMB", HeaderText = "Table Size Threshold MB", ToolTipText = "Only collect tables that are larger then the specified threshold" });
-            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "TableSizeDatabases", HeaderText = "Table Size Databases", ToolTipText = "Comma separated list of databases to collect table size. \ndb1,db2\t\t=Databases db1 & db2\n*,-db1\t\t=All databases except db1" });
-            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "TableSizeMaxTableThreshold", HeaderText = "Table Size Max Tables", ToolTipText = "Skip table size collection if database has a large number of tables" });
-            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "TableSizeMaxDatabaseThreshold", HeaderText = "Table Size Max Databases", ToolTipText = "Skip table size collection if instance has a large number of databases" });
-            dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Schedule", HeaderText = "Schedule", Text = "Schedule", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
-            dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "CustomCollections", HeaderText = "Custom Collections", Text = "View/Edit", LinkColor = DashColors.LinkColor });
-            dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Edit", HeaderText = "Copy Connection", Text = "Copy", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
-            dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Delete", HeaderText = "Delete", Text = "Delete", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                Name = "ConnectionString",
+                DataPropertyName = "ConnectionString",
+                HeaderText = "Connection String",
+                Width = 300
+            });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                Name = "ConnectionID",
+                DataPropertyName = "ConnectionID",
+                HeaderText = "Connection ID",
+                ToolTipText =
+                    "The ConnectionID is used to uniquely identify the SQL Instance in the repository database.  The ConnectionID is automatically assigned to @@SERVERNAME but you can override this with a custom value.  If you change the ConnectionID for an existing server it will appear as a new instance in the repository database."
+            });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
+            { DataPropertyName = "NoWMI", HeaderText = "No WMI" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            { DataPropertyName = "SlowQueryThresholdMs", HeaderText = "Slow Query Threshold (ms)" });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
+            { DataPropertyName = "UseDualEventSession", HeaderText = "Use Dual Event Session" });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
+            { DataPropertyName = "PersistXESessions", HeaderText = "Persist XE Sessions" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            { DataPropertyName = "SchemaSnapshotDBs", HeaderText = "Schema Snapshot DBs" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                DataPropertyName = "SlowQuerySessionMaxMemoryKB",
+                HeaderText = "Slow Query Session Max Memory (KB)",
+                ToolTipText = "Max amount of memory to allocate for event buffering."
+            });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                DataPropertyName = "SlowQueryTargetMaxMemoryKB",
+                HeaderText = "Slow Query Target Max Memory (KB)",
+                ToolTipText = "Max memory target parameter for ring_buffer"
+            });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
+            {
+                DataPropertyName = "CollectSessionWaits",
+                HeaderText = "Collect Session Waits",
+                ToolTipText = "Collect Session Waits for Running Queries"
+            });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
+            { DataPropertyName = "PlanCollectionEnabled", HeaderText = "Running Query Plan Collection" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            { DataPropertyName = "PlanCollectionCPUThreshold", HeaderText = "Plan Collection CPU Threshold" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                DataPropertyName = "PlanCollectionDurationThreshold",
+                HeaderText = "Plan Collection Duration Threshold"
+            });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            { DataPropertyName = "PlanCollectionCountThreshold", HeaderText = "Plan Collection Count Threshold" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                DataPropertyName = "PlanCollectionMemoryGrantThreshold",
+                HeaderText = "Plan Collection Memory Grant Threshold"
+            });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
+            { DataPropertyName = "ScriptAgentJobs", HeaderText = "Script Agent Jobs" });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
+            { DataPropertyName = "HasCustomSchedule", HeaderText = "Custom Schedule" });
+            dgvConnections.Columns.Add(new DataGridViewComboBoxColumn()
+            {
+                DataPropertyName = "IOCollectionLevel",
+                HeaderText = "IO Collection Level",
+                DataSource = Enum.GetValues(typeof(DBADashSource.IOCollectionLevels))
+            });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
+            { DataPropertyName = "WriteToSecondaryDestinations", HeaderText = "Write to Secondary Destinations" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                DataPropertyName = "TableSizeCollectionThresholdMB",
+                HeaderText = "Table Size Threshold MB",
+                ToolTipText = "Only collect tables that are larger then the specified threshold"
+            });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                DataPropertyName = "TableSizeDatabases",
+                HeaderText = "Table Size Databases",
+                ToolTipText =
+                    "Comma separated list of databases to collect table size. \ndb1,db2\t\t=Databases db1 & db2\n*,-db1\t\t=All databases except db1"
+            });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                DataPropertyName = "TableSizeMaxTableThreshold",
+                HeaderText = "Table Size Max Tables",
+                ToolTipText = "Skip table size collection if database has a large number of tables"
+            });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                DataPropertyName = "TableSizeMaxDatabaseThreshold",
+                HeaderText = "Table Size Max Databases",
+                ToolTipText = "Skip table size collection if instance has a large number of databases"
+            });
+            dgvConnections.Columns.Add(new DataGridViewLinkColumn()
+            {
+                Name = "Schedule",
+                HeaderText = "Schedule",
+                Text = "Schedule",
+                UseColumnTextForLinkValue = true,
+                LinkColor = DashColors.LinkColor
+            });
+            dgvConnections.Columns.Add(new DataGridViewLinkColumn()
+            {
+                Name = "CustomCollections",
+                HeaderText = "Custom Collections",
+                Text = "View/Edit",
+                LinkColor = DashColors.LinkColor
+            });
+            dgvConnections.Columns.Add(new DataGridViewLinkColumn()
+            {
+                Name = "Edit",
+                HeaderText = "Copy Connection",
+                Text = "Copy",
+                UseColumnTextForLinkValue = true,
+                LinkColor = DashColors.LinkColor
+            });
+            dgvConnections.Columns.Add(new DataGridViewLinkColumn()
+            {
+                Name = "Delete",
+                HeaderText = "Delete",
+                Text = "Delete",
+                UseColumnTextForLinkValue = true,
+                LinkColor = DashColors.LinkColor
+            });
 
             txtJson.MaxLength = 0;
 
@@ -356,9 +499,13 @@ namespace DBADashServiceConfig
                 {
                     SetOriginalJson();
 
-                    if (!originalJson.Like("%Trust%Server%Certificate%") && collectionConfig.SourceConnections.Count > 0)
+                    if (!originalJson.Like("%Trust%Server%Certificate%") &&
+                        collectionConfig.SourceConnections.Count > 0)
                     {
-                        if (MessageBox.Show("Encryption is applied by default to your SQL Server connections with Microsoft.Data.SqlClient 4.0.  Connections might fail if the server certificate is not trusted.  Apply Trust Server Certificate?", "Trust Server Certificate", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        if (MessageBox.Show(
+                                "Encryption is applied by default to your SQL Server connections with Microsoft.Data.SqlClient 4.0.  Connections might fail if the server certificate is not trusted.  Apply Trust Server Certificate?",
+                                "Trust Server Certificate", MessageBoxButtons.YesNo, MessageBoxIcon.Question) ==
+                            DialogResult.Yes)
                         {
                             ApplyTrustServerCertificate();
                             SaveChanges();
@@ -367,7 +514,8 @@ namespace DBADashServiceConfig
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error reading ServiceConfig.json: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Error reading ServiceConfig.json: " + ex.Message, "Error", MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
                     tab1.SelectedTab = tabJson; // Set tab to Json to allow user to correct error in Json
                 }
             }
@@ -377,6 +525,7 @@ namespace DBADashServiceConfig
                 numIdentityCollectionThreshold.Enabled = false;
                 chkDefaultIdentityCollection.Checked = true;
             }
+
             SetConnectionCount();
             RefreshServiceStatus();
             ValidateDestination();
@@ -390,7 +539,8 @@ namespace DBADashServiceConfig
             if (dgvConnections.DataSource != null)
             {
                 ListSortDirection direction;
-                if (column.HeaderCell.SortGlyphDirection == SortOrder.Ascending || column.HeaderCell.SortGlyphDirection == SortOrder.None)
+                if (column.HeaderCell.SortGlyphDirection == SortOrder.Ascending ||
+                    column.HeaderCell.SortGlyphDirection == SortOrder.None)
                 {
                     direction = ListSortDirection.Descending;
                 }
@@ -411,13 +561,40 @@ namespace DBADashServiceConfig
                         ? collectionConfig.SourceConnections.OrderBy(c => c.ConnectionID).ToList()
                         : collectionConfig.SourceConnections.OrderByDescending(c => c.ConnectionID).ToList();
                 }
+                else if (column.Name == "SnapshotAge")
+                {
+                    collectionConfig.SourceConnections = direction == ListSortDirection.Ascending
+                        ? collectionConfig.SourceConnections.OrderBy(c =>
+                           !string.IsNullOrEmpty(c.ConnectionID) && SnapshotDates.ContainsKey(c.ConnectionID)
+                                ? SnapshotDates[c.ConnectionID]
+                                : DateTime.MinValue).ToList()
+                        : collectionConfig.SourceConnections.OrderByDescending(c =>
+                            !string.IsNullOrEmpty(c.ConnectionID) && SnapshotDates.ContainsKey(c.ConnectionID)
+                                ? SnapshotDates[c.ConnectionID]
+                                : DateTime.MinValue).ToList();
+                }
+                else if (column.Name == "ConnectionStatus")
+
+                {
+                    collectionConfig.SourceConnections = direction == ListSortDirection.Ascending
+                        ? collectionConfig.SourceConnections.OrderBy(c =>
+                            ConnectionStatuses.ContainsKey(c.ConnectionString)
+                                ? ConnectionStatuses[c.ConnectionString].statusValue
+                                : 2).ToList()
+                        : collectionConfig.SourceConnections.OrderByDescending(c =>
+                            ConnectionStatuses.ContainsKey(c.ConnectionString)
+                                ? ConnectionStatuses[c.ConnectionString].statusValue
+                                : 2).ToList();
+                }
                 else
                 {
                     return;
                 }
 
                 SetDgv();
-                column.HeaderCell.SortGlyphDirection = direction == ListSortDirection.Descending ? SortOrder.Descending : SortOrder.Ascending;
+                column.HeaderCell.SortGlyphDirection = direction == ListSortDirection.Descending
+                    ? SortOrder.Descending
+                    : SortOrder.Ascending;
             }
         }
 
@@ -461,7 +638,8 @@ namespace DBADashServiceConfig
                 }
                 catch
                 {
-                    if (MessageBox.Show("Invalid Password", "Error", MessageBoxButtons.RetryCancel) == DialogResult.Retry)
+                    if (MessageBox.Show("Invalid Password", "Error", MessageBoxButtons.RetryCancel) ==
+                        DialogResult.Retry)
                     {
                         return ShowPassword();
                     }
@@ -471,6 +649,7 @@ namespace DBADashServiceConfig
                     }
                 }
             }
+
             return false;
         }
 
@@ -478,17 +657,22 @@ namespace DBADashServiceConfig
         {
             if (collectionConfig.DestinationConnection.Type == ConnectionType.SQL)
             {
-                collectionConfig.DestinationConnection.EncryptedConnectionString = AddTrustServerCertificate(collectionConfig.DestinationConnection.EncryptedConnectionString);
+                collectionConfig.DestinationConnection.EncryptedConnectionString =
+                    AddTrustServerCertificate(collectionConfig.DestinationConnection.EncryptedConnectionString);
                 txtDestination.Text = collectionConfig.DestinationConnection.EncryptedConnectionString;
             }
-            foreach (var dest in collectionConfig.SecondaryDestinationConnections.Where(dest => dest.Type == ConnectionType.SQL))
+
+            foreach (var dest in collectionConfig.SecondaryDestinationConnections.Where(dest =>
+                         dest.Type == ConnectionType.SQL))
             {
                 dest.EncryptedConnectionString = AddTrustServerCertificate(dest.EncryptedConnectionString);
             }
 
-            foreach (var src in collectionConfig.SourceConnections.Where(src => src.SourceConnection.Type == ConnectionType.SQL))
+            foreach (var src in collectionConfig.SourceConnections.Where(src =>
+                         src.SourceConnection.Type == ConnectionType.SQL))
             {
-                src.SourceConnection.EncryptedConnectionString = AddTrustServerCertificate(src.SourceConnection.EncryptedConnectionString);
+                src.SourceConnection.EncryptedConnectionString =
+                    AddTrustServerCertificate(src.SourceConnection.EncryptedConnectionString);
             }
         }
 
@@ -555,8 +739,13 @@ namespace DBADashServiceConfig
         private void UpdateCustomCollectionCount()
         {
             bttnCustomCollections.Text = $"Custom Collections ({collectionConfig.CustomCollections.Count})";
-            bttnCustomCollections.Font = collectionConfig.CustomCollections.Count > 0 ? new Font(bttnCustomCollections.Font, FontStyle.Bold) : new Font(bttnCustomCollections.Font, FontStyle.Regular);
-            toolTip1.SetToolTip(bttnCustomCollections, collectionConfig.CustomCollections.Count > 0 ? string.Join(", ", collectionConfig.CustomCollections.Keys.OrderBy(k => k)) : "No Custom Collections Defined");
+            bttnCustomCollections.Font = collectionConfig.CustomCollections.Count > 0
+                ? new Font(bttnCustomCollections.Font, FontStyle.Bold)
+                : new Font(bttnCustomCollections.Font, FontStyle.Regular);
+            toolTip1.SetToolTip(bttnCustomCollections,
+                collectionConfig.CustomCollections.Count > 0
+                    ? string.Join(", ", collectionConfig.CustomCollections.Keys.OrderBy(k => k))
+                    : "No Custom Collections Defined");
         }
 
         private void SetJson()
@@ -573,7 +762,7 @@ namespace DBADashServiceConfig
         private void RefreshServiceStatus()
         {
             svcCtrl = ServiceController.GetServices()
-    .FirstOrDefault(s => s.ServiceName == collectionConfig.ServiceName);
+                .FirstOrDefault(s => s.ServiceName == collectionConfig.ServiceName);
 
             lblServiceWarning.Visible = false;
             try
@@ -581,14 +770,17 @@ namespace DBADashServiceConfig
                 var nameOfServiceFromPath = ServiceTools.GetServiceNameFromPath();
                 var pathOfService = ServiceTools.GetPathOfService(collectionConfig.ServiceName);
 
-                if (!pathOfService.Contains(ServiceTools.ServicePath, StringComparison.CurrentCultureIgnoreCase) && pathOfService != string.Empty)
+                if (!pathOfService.Contains(ServiceTools.ServicePath, StringComparison.CurrentCultureIgnoreCase) &&
+                    pathOfService != string.Empty)
                 {
-                    lblServiceWarning.Text = $"Warning service with name {collectionConfig.ServiceName} is installed at a different location: {pathOfService}";
+                    lblServiceWarning.Text =
+                        $"Warning service with name {collectionConfig.ServiceName} is installed at a different location: {pathOfService}";
                     lblServiceWarning.Visible = true;
                 }
                 else if (nameOfServiceFromPath != collectionConfig.ServiceName && nameOfServiceFromPath != string.Empty)
                 {
-                    lblServiceWarning.Text = $"Warning: Service name from path {nameOfServiceFromPath} does not match the service name {collectionConfig.ServiceName} in ServiceConfig.json.";
+                    lblServiceWarning.Text =
+                        $"Warning: Service name from path {nameOfServiceFromPath} does not match the service name {collectionConfig.ServiceName} in ServiceConfig.json.";
                     lblServiceWarning.Visible = true;
                 }
             }
@@ -613,12 +805,14 @@ namespace DBADashServiceConfig
             else
             {
                 isInstalled = true;
-                lblServiceStatus.Text = "Service Status: " + Enum.GetName(typeof(ServiceControllerStatus), svcCtrl.Status);
+                lblServiceStatus.Text =
+                    "Service Status: " + Enum.GetName(typeof(ServiceControllerStatus), svcCtrl.Status);
                 if (svcCtrl.Status == ServiceControllerStatus.Running)
                 {
                     lblServiceStatus.ForeColor = Color.Green;
                 }
-                else if (svcCtrl.Status is ServiceControllerStatus.Stopped or ServiceControllerStatus.StopPending or ServiceControllerStatus.Paused)
+                else if (svcCtrl.Status is ServiceControllerStatus.Stopped or ServiceControllerStatus.StopPending
+                         or ServiceControllerStatus.Paused)
                 {
                     lblServiceStatus.ForeColor = Color.Red;
                 }
@@ -626,6 +820,7 @@ namespace DBADashServiceConfig
                 {
                     lblServiceStatus.ForeColor = Color.Orange;
                 }
+
                 lnkStart.Enabled = (svcCtrl.Status == ServiceControllerStatus.Stopped);
                 lnkStop.Enabled = (svcCtrl.Status == ServiceControllerStatus.Running);
                 lnkInstall.Font = new Font(lnkInstall.Font, FontStyle.Regular);
@@ -642,6 +837,7 @@ namespace DBADashServiceConfig
                 collectionConfig = new CollectionConfig();
                 return;
             }
+
             try
             {
                 SetFromJson(txtJson.Text);
@@ -662,7 +858,8 @@ namespace DBADashServiceConfig
         {
             if (originalJson != txtJson.Text)
             {
-                if (MessageBox.Show("Save Changes?", "Save", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                if (MessageBox.Show("Save Changes?", "Save", MessageBoxButtons.YesNo, MessageBoxIcon.Question) ==
+                    DialogResult.Yes)
                 {
                     SaveChanges();
                 }
@@ -705,6 +902,7 @@ namespace DBADashServiceConfig
                 sbError.AppendLine();
                 sbError.Append(ex.InnerException.Message);
             }
+
             MessageBox.Show(sbError.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
@@ -728,6 +926,7 @@ namespace DBADashServiceConfig
                     PromptError(ex);
                 }
             }
+
             RefreshServiceStatus();
         }
 
@@ -757,6 +956,7 @@ namespace DBADashServiceConfig
                 {
                     PromptError(ex);
                 }
+
                 System.Threading.Thread.Sleep(500);
                 RefreshServiceStatus();
             }
@@ -796,6 +996,7 @@ namespace DBADashServiceConfig
                 numSlowQueryThreshold.Value = -1;
                 lblSlow.Text = "Extended events trace to capture slow rpc and batch completed events is NOT enabled";
             }
+
             chkDualSession.Enabled = chkSlowQueryThreshold.Checked;
             chkPersistXESession.Enabled = chkSlowQueryThreshold.Checked;
         }
@@ -832,6 +1033,7 @@ namespace DBADashServiceConfig
             {
                 src.RunningQueryPlanThreshold = null;
             }
+
             CustomCollectionsNew = src.CustomCollections;
             SetAvailableOptionsForSource();
         }
@@ -860,7 +1062,8 @@ namespace DBADashServiceConfig
             frm.ShowDialog();
             if (frm.DatabaseName != cn.InitialCatalog())
             {
-                if (MessageBox.Show("Update connection string?", "Update", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                if (MessageBox.Show("Update connection string?", "Update", MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     var builder = new SqlConnectionStringBuilder(txtDestination.Text)
                     {
@@ -870,6 +1073,7 @@ namespace DBADashServiceConfig
                     DestinationChanged();
                 }
             }
+
             ValidateDestination();
         }
 
@@ -894,6 +1098,7 @@ namespace DBADashServiceConfig
 
                 frm.ConnectionString = builder.ConnectionString;
             }
+
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
@@ -902,12 +1107,14 @@ namespace DBADashServiceConfig
                 {
                     builder.InitialCatalog = "DBADashDB";
                 }
+
                 cn = new DBADashConnection(builder.ConnectionString);
 
                 txtDestination.Text = cn.EncryptedConnectionString;
                 DestinationChanged();
                 return true;
             }
+
             return false;
         }
 
@@ -924,6 +1131,7 @@ namespace DBADashServiceConfig
             {
                 frm.ConnectionString = cn.ConnectionString;
             }
+
             frm.ValidateInitialCatalog = true;
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
@@ -931,6 +1139,7 @@ namespace DBADashServiceConfig
                 cn = new DBADashConnection(frm.ConnectionString);
                 txtSource.Text = cn.EncryptedConnectionString;
             }
+
             SetAvailableOptionsForSource();
         }
 
@@ -939,11 +1148,13 @@ namespace DBADashServiceConfig
             var newConnections = collectionConfig.GetNewAzureDBConnections();
             if (newConnections.Count == 0)
             {
-                MessageBox.Show("No new Azure DB connections found", "Scan", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("No new Azure DB connections found", "Scan", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
             }
             else
             {
-                if (MessageBox.Show($"Found {newConnections.Count} new connections.  Add connections to config file?", "Scan", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                if (MessageBox.Show($"Found {newConnections.Count} new connections.  Add connections to config file?",
+                        "Scan", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     collectionConfig.AddConnections(newConnections);
                     SetJson();
@@ -971,10 +1182,12 @@ namespace DBADashServiceConfig
             {
                 numAzureScanInterval.Value = 3600;
             }
+
             if (!chkScanEvery.Checked)
             {
                 numAzureScanInterval.Value = 0;
             }
+
             collectionConfig.ScanForAzureDBsInterval = Convert.ToInt32(numAzureScanInterval.Value);
             UpdateScanInterval();
             SetJson();
@@ -1019,6 +1232,7 @@ namespace DBADashServiceConfig
                     txtSource.Text = fbd.SelectedPath;
                 }
             }
+
             SetAvailableOptionsForSource();
         }
 
@@ -1031,7 +1245,12 @@ namespace DBADashServiceConfig
                 AWSProfile = collectionConfig.AWSProfile
             };
 
-            using var frm = new S3Browser() { AccessKey = cfg.AccessKey, SecretKey = cfg.GetSecretKey(), Folder = "DBADash_" + Environment.MachineName };
+            using var frm = new S3Browser()
+            {
+                AccessKey = cfg.AccessKey,
+                SecretKey = cfg.GetSecretKey(),
+                Folder = "DBADash_" + Environment.MachineName
+            };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
@@ -1048,7 +1267,8 @@ namespace DBADashServiceConfig
                 SecretKey = collectionConfig.SecretKey,
                 AWSProfile = collectionConfig.AWSProfile
             };
-            using (var frm = new S3Browser() { AccessKey = cfg.AccessKey, SecretKey = cfg.GetSecretKey(), Folder = "DBADash_{HostName}" })
+            using (var frm = new S3Browser()
+            { AccessKey = cfg.AccessKey, SecretKey = cfg.GetSecretKey(), Folder = "DBADash_{HostName}" })
             {
                 frm.ShowDialog();
                 if (frm.DialogResult == DialogResult.OK)
@@ -1056,6 +1276,7 @@ namespace DBADashServiceConfig
                     txtSource.Text = frm.AWSURL;
                 }
             }
+
             SetAvailableOptionsForSource();
         }
 
@@ -1066,7 +1287,8 @@ namespace DBADashServiceConfig
 
         private void LnkPermissions_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            var psi = new ProcessStartInfo("https://github.com/DavidWiseman/DBADash/blob/develop/Docs/Security.md") { UseShellExecute = true };
+            var psi = new ProcessStartInfo("https://github.com/DavidWiseman/DBADash/blob/develop/Docs/Security.md")
+            { UseShellExecute = true };
             Process.Start(psi);
         }
 
@@ -1140,7 +1362,8 @@ namespace DBADashServiceConfig
                 var src = (DBADashSource)dgvConnections.Rows[e.RowIndex].DataBoundItem;
                 LoadConnectionForEdit(src);
             }
-            else if (e.RowIndex >= 0 && dgvConnections.Columns[e.ColumnIndex].CellType == typeof(DataGridViewCheckBoxCell))
+            else if (e.RowIndex >= 0 &&
+                     dgvConnections.Columns[e.ColumnIndex].CellType == typeof(DataGridViewCheckBoxCell))
             {
                 dgvConnections.EndEdit();
             }
@@ -1163,7 +1386,8 @@ namespace DBADashServiceConfig
                 }
                 else
                 {
-                    MessageBox.Show("Custom schedule configuration is only available for SQL connections", "Schedule", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Custom schedule configuration is only available for SQL connections", "Schedule",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             else if (e.RowIndex >= 0 && e.ColumnIndex == dgvConnections.Columns["CustomCollections"].Index)
@@ -1185,9 +1409,11 @@ namespace DBADashServiceConfig
                 }
                 else
                 {
-                    MessageBox.Show("Custom collections are only available for SQL connections", "Custom Collections", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Custom collections are only available for SQL connections", "Custom Collections",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
+
             UpdateFromGrid();
         }
 
@@ -1207,7 +1433,11 @@ namespace DBADashServiceConfig
             currencyManager1.SuspendBinding();
             foreach (DataGridViewRow row in dgvConnections.Rows)
             {
-                if (string.IsNullOrEmpty(txtSearch.Text) || (row.Cells["ConnectionString"].Value as string ?? "").Contains(txtSearch.Text, StringComparison.CurrentCultureIgnoreCase) || (row.Cells["ConnectionID"].Value as string ?? "").Contains(txtSearch.Text, StringComparison.CurrentCultureIgnoreCase))
+                if (string.IsNullOrEmpty(txtSearch.Text) ||
+                    (row.Cells["ConnectionString"].Value as string ?? "").Contains(txtSearch.Text,
+                        StringComparison.CurrentCultureIgnoreCase) ||
+                    (row.Cells["ConnectionID"].Value as string ?? "").Contains(txtSearch.Text,
+                        StringComparison.CurrentCultureIgnoreCase))
                 {
                     row.Visible = true;
                 }
@@ -1216,6 +1446,7 @@ namespace DBADashServiceConfig
                     row.Visible = false;
                 }
             }
+
             currencyManager1.ResumeBinding();
         }
 
@@ -1249,16 +1480,60 @@ namespace DBADashServiceConfig
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (int i = e.RowIndex; i < e.RowIndex + e.RowCount; i++)
+            var hasStatus = dgvConnections.Columns.Contains("ConnectionStatus") && ConnectionStatuses != null;
+            var hasSnapshotStatus = dgvConnections.Columns.Contains("SnapshotAge") && SnapshotDates != null;
+            for (var i = e.RowIndex; i < e.RowIndex + e.RowCount; i++)
             {
                 var src = (DBADashSource)dgvConnections.Rows[i].DataBoundItem;
                 SetCellsReadOnly(i, src.SourceConnection.Type);
                 if (src.SourceConnection.Type == ConnectionType.SQL)
                 {
-                    dgvConnections.Rows[i].Cells["CustomCollections"].Value = src.CustomCollections == null || src.CustomCollections.Keys.Count == 0
-                        ? "Add Collection"
-                        : string.Join(", ", src.CustomCollections.Keys.OrderBy(key => key));
+                    dgvConnections.Rows[i].Cells["CustomCollections"].Value =
+                        src.CustomCollections == null || src.CustomCollections.Keys.Count == 0
+                            ? "Add Collection"
+                            : string.Join(", ", src.CustomCollections.Keys.OrderBy(key => key));
                 }
+                var row = dgvConnections.Rows[i];
+                if (hasStatus)
+                {
+                    var status = ConnectionStatuses.ContainsKey(src.ConnectionString) ? ConnectionStatuses[src.ConnectionString] : new("Unknown", DashColors.NotApplicable, 2);
+
+                    row.Cells["ConnectionStatus"].Value = status.status;
+                    row.Cells["ConnectionStatus"].Style.BackColor = status.statusColor;
+                    row.Cells["ConnectionStatus"].Style.ForeColor = status.statusColor.ContrastColor();
+                    row.Cells["ConnectionStatus"].Style.SelectionBackColor = status.statusColor.AdjustBasedOnLuminance();
+                    row.Cells["ConnectionStatus"].Style.SelectionForeColor = status.statusColor.AdjustBasedOnLuminance().ContrastColor();
+                }
+                if (!hasSnapshotStatus || src.SourceConnection.Type != ConnectionType.SQL) continue;
+
+                string value;
+                Color primaryBackColor;
+                var toolTipText = string.Empty;
+                if (src.ConnectionID == null)
+                {
+                    value = "Skipped";
+                    primaryBackColor = DashColors.NotApplicable;
+                }
+                else if (SnapshotDates.TryGetValue(src.ConnectionID, out var snapshotDate))
+                {
+                    var age = SnapshotDatesLastChecked - snapshotDate;
+                    value = age.Humanize(3);
+                    toolTipText =
+                        snapshotDate.ToLocalTime().ToString(CultureInfo.CurrentCulture);
+                    primaryBackColor = age.TotalDays > 7 ? DashColors.Fail :
+                         age.TotalHours > 24 ? DashColors.Warning : DashColors.Success;
+                }
+                else
+                {
+                    value = "Not found";
+                    primaryBackColor = DashColors.Warning;
+                }
+                row.Cells["SnapshotAge"].Value = value;
+                row.Cells["SnapshotAge"].ToolTipText = toolTipText;
+                row.Cells["SnapshotAge"].Style.BackColor = primaryBackColor;
+                row.Cells["SnapshotAge"].Style.ForeColor = primaryBackColor.ContrastColor();
+                row.Cells["SnapshotAge"].Style.SelectionBackColor = primaryBackColor.AdjustBasedOnLuminance();
+                row.Cells["SnapshotAge"].Style.SelectionForeColor = primaryBackColor.AdjustBasedOnLuminance().ContrastColor();
             }
         }
 
@@ -1266,7 +1541,9 @@ namespace DBADashServiceConfig
         {
             foreach (DataGridViewColumn col in dgvConnections.Columns)
             {
-                var isReadOnly = connectionType != ConnectionType.SQL && !(col.DataPropertyName == "WriteToSecondaryDestinations" || col.Name is "Delete" or "Edit");
+                var isReadOnly = connectionType != ConnectionType.SQL &&
+                                 !(col.DataPropertyName == "WriteToSecondaryDestinations" ||
+                                   col.Name is "Delete" or "Edit");
 
                 dgvConnections.Rows[row].Cells[col.Index].ReadOnly = isReadOnly;
                 dgvConnections.Rows[row].Cells[col.Index].Style.BackColor = isReadOnly ? Color.Silver : Color.White;
@@ -1280,7 +1557,9 @@ namespace DBADashServiceConfig
 
         private void UpdateSaveButton()
         {
-            bttnSave.Font = txtJson.Text != originalJson ? new Font(bttnSave.Font, FontStyle.Bold) : new Font(bttnSave.Font, FontStyle.Regular);
+            bttnSave.Font = txtJson.Text != originalJson
+                ? new Font(bttnSave.Font, FontStyle.Bold)
+                : new Font(bttnSave.Font, FontStyle.Regular);
         }
 
         private void LnkStart_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -1309,16 +1588,20 @@ namespace DBADashServiceConfig
             {
                 if (txtJson.Text != originalJson)
                 {
-                    if (MessageBox.Show("Save changes to config", "Save", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    if (MessageBox.Show("Save changes to config", "Save", MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Question) == DialogResult.Yes)
                     {
                         SaveChanges();
                     }
                 }
+
                 if (!BasicConfig.ConfigExists)
                 {
-                    MessageBox.Show("Please configure the service and save changes before installing as a service.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    MessageBox.Show("Please configure the service and save changes before installing as a service.",
+                        "Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     return;
                 }
+
                 var frm = new InstallService
                 {
                     ServiceName = collectionConfig.ServiceName
@@ -1338,6 +1621,7 @@ namespace DBADashServiceConfig
                 ServiceLogForm = new();
                 ServiceLogForm.FormClosed += delegate { ServiceLogForm = null; };
             }
+
             ServiceLogForm.Show();
             ServiceLogForm.Focus();
         }
@@ -1357,13 +1641,17 @@ namespace DBADashServiceConfig
         private void ChkDefaultIdentityCollection_CheckedChanged(object sender, EventArgs e)
         {
             numIdentityCollectionThreshold.Enabled = !chkDefaultIdentityCollection.Checked;
-            collectionConfig.IdentityCollectionThreshold = chkDefaultIdentityCollection.Checked ? null : (int)numIdentityCollectionThreshold.Value;
+            collectionConfig.IdentityCollectionThreshold = chkDefaultIdentityCollection.Checked
+                ? null
+                : (int)numIdentityCollectionThreshold.Value;
             SetJson();
         }
 
         private void NumIdentityCollectionThreshold_ValueChanged(object sender, EventArgs e)
         {
-            collectionConfig.IdentityCollectionThreshold = chkDefaultIdentityCollection.Checked ? null : (int)numIdentityCollectionThreshold.Value;
+            collectionConfig.IdentityCollectionThreshold = chkDefaultIdentityCollection.Checked
+                ? null
+                : (int)numIdentityCollectionThreshold.Value;
             SetJson();
         }
 
@@ -1382,13 +1670,20 @@ namespace DBADashServiceConfig
                 collectionConfig.SecretKey = frm.AWSSecretKet;
                 collectionConfig.AccessKey = frm.AWSAccessKey;
             }
+
             SetJson();
             RefreshEncryption();
         }
 
         private void BttnEncryption_Click(object sender, EventArgs e)
         {
-            var frm = new EncryptionConfig() { EncryptionOption = collectionConfig.EncryptionOption, EncryptionPassword = collectionConfig.EncryptionOption == BasicConfig.EncryptionOptions.Encrypt ? EncryptedConfig.GetPassword() : null };
+            var frm = new EncryptionConfig()
+            {
+                EncryptionOption = collectionConfig.EncryptionOption,
+                EncryptionPassword = collectionConfig.EncryptionOption == BasicConfig.EncryptionOptions.Encrypt
+                    ? EncryptedConfig.GetPassword()
+                    : null
+            };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
@@ -1401,6 +1696,7 @@ namespace DBADashServiceConfig
                 {
                     EncryptedConfig.ClearPassword();
                 }
+
                 SaveChanges();
                 RefreshEncryption();
             }
@@ -1413,7 +1709,9 @@ namespace DBADashServiceConfig
                 : "Not Encrypted";
             lblEncryptionStatus.ForeColor = collectionConfig.EncryptionOption == BasicConfig.EncryptionOptions.Encrypt
                 ? DashColors.Success
-                : collectionConfig.ContainsSensitive() ? DashColors.Fail : DashColors.Warning;
+                : collectionConfig.ContainsSensitive()
+                    ? DashColors.Fail
+                    : DashColors.Warning;
             tabJson.Text = collectionConfig.EncryptionOption == BasicConfig.EncryptionOptions.Encrypt
                 ? "Json (Decrypted)"
                 : "Json";
@@ -1427,7 +1725,8 @@ namespace DBADashServiceConfig
 
         private void LnkDeleteConfigBackups_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (MessageBox.Show("Delete ALL config file backups?", "Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question) ==
+            if (MessageBox.Show("Delete ALL config file backups?", "Delete", MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question) ==
                 DialogResult.Yes)
             {
                 BasicConfig.ClearOldConfigBackups(0);
@@ -1468,12 +1767,15 @@ namespace DBADashServiceConfig
 
         private void BttnCustomCollections_Click(object sender, EventArgs e)
         {
-            var connectionString = collectionConfig.SourceConnections.Where(c => c.SourceConnection.Type == ConnectionType.SQL).Select(c => c.SourceConnection.ConnectionString).FirstOrDefault("");
+            var connectionString = collectionConfig.SourceConnections
+                .Where(c => c.SourceConnection.Type == ConnectionType.SQL)
+                .Select(c => c.SourceConnection.ConnectionString).FirstOrDefault("");
             var dlg = new DBConnection() { ConnectionString = connectionString };
             dlg.ShowDialog();
             if (dlg.DialogResult != DialogResult.OK) return;
 
-            var frm = new ManageCustomCollections() { CustomCollections = collectionConfig.CustomCollections, ConnectionString = dlg.ConnectionString };
+            var frm = new ManageCustomCollections()
+            { CustomCollections = collectionConfig.CustomCollections, ConnectionString = dlg.ConnectionString };
             if (frm.ShowDialog() != DialogResult.OK) return;
             collectionConfig.CustomCollections = frm.CustomCollections;
             SetJson();
@@ -1505,7 +1807,8 @@ namespace DBADashServiceConfig
                 return;
             }
 
-            var frm = new ManageCustomCollections() { CustomCollections = CustomCollectionsNew, ConnectionString = connectionString };
+            var frm = new ManageCustomCollections()
+            { CustomCollections = CustomCollectionsNew, ConnectionString = connectionString };
             if (frm.ShowDialog() != DialogResult.OK) return;
             CustomCollectionsNew = frm.CustomCollections;
         }
@@ -1535,7 +1838,8 @@ namespace DBADashServiceConfig
             collectionConfig.EnableMessaging = chkEnableMessaging.Checked;
             SetJson();
 
-            if (chkEnableMessaging.Checked && collectionConfig.SourceConnections.Exists(src => string.IsNullOrEmpty(src.ConnectionID) && src.SourceConnection.Type == ConnectionType.SQL))
+            if (chkEnableMessaging.Checked && collectionConfig.SourceConnections.Exists(src =>
+                    string.IsNullOrEmpty(src.ConnectionID) && src.SourceConnection.Type == ConnectionType.SQL))
             {
                 if (MessageBox.Show(
                         "Messaging requires an explicit ConnectionID to be defined in the config file. One or more connections do not have a ConnectionID defined.\nWould you like to automatically populate this now?\n\nNote:This might take a while depending on the number of connections and their availability.",
@@ -1563,7 +1867,8 @@ namespace DBADashServiceConfig
                 {
                     lock (errors) // Ensure thread safety when appending to the errors StringBuilder
                     {
-                        errors.AppendLine($"Error getting ConnectionID for {src.SourceConnection.ConnectionForPrint}: {ex.Message}");
+                        errors.AppendLine(
+                            $"Error getting ConnectionID for {src.SourceConnection.ConnectionForPrint}: {ex.Message}");
                     }
                 }
             });
@@ -1575,7 +1880,8 @@ namespace DBADashServiceConfig
             }
             else
             {
-                MessageBox.Show("ConnectionID populated successfully", "Messaging", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("ConnectionID populated successfully", "Messaging", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
             }
         }
 
@@ -1599,7 +1905,8 @@ namespace DBADashServiceConfig
 
         private void TxtSQS_Validating(object sender, CancelEventArgs e)
         {
-            if (!string.IsNullOrEmpty(txtSQS.Text) && !txtSQS.Text.StartsWith("https://sqs.", StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrEmpty(txtSQS.Text) &&
+                !txtSQS.Text.StartsWith("https://sqs.", StringComparison.OrdinalIgnoreCase))
             {
                 errorProvider1.SetError(txtSQS, "Invalid SQS Url");
             }
@@ -1611,8 +1918,143 @@ namespace DBADashServiceConfig
 
         private void ChkAllowPlanForcing_CheckedChanged(object sender, EventArgs e)
         {
-            collectionConfig.AllowPlanForcing= chkAllowPlanForcing.Checked;
+            collectionConfig.AllowPlanForcing = chkAllowPlanForcing.Checked;
             SetJson();
+        }
+
+        private Dictionary<string, DateTime> SnapshotDates = null;
+        private ConcurrentDictionary<string, (string status, Color statusColor, int statusValue)> ConnectionStatuses;
+
+        private async void bttnCheckConnections_Click(object sender, EventArgs e)
+        {
+            if (collectionConfig.SourceConnections.Where(src => src.SourceConnection.Type == ConnectionType.SQL)
+                .Any(src => string.IsNullOrEmpty(src.ConnectionID)))
+            {
+                if (MessageBox.Show(
+                        "One or more connections do not have a ConnectionID defined. Would you like to automatically populate this now?",
+                        "Connection ID", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+                {
+                    PopulateConnectionID();
+                }
+            }
+
+            bttnCheckConnections.Text = "Checking...";
+            bttnCheckConnections.Enabled = false;
+
+            List<Task> tasks = new List<Task>();
+            if (collectionConfig.DestinationConnection.Type == ConnectionType.SQL)
+            {
+                tasks.Add(TryGetLastSnapshotDates());
+            }
+            var connectionStatusTask = GetConnectionStatus();
+            tasks.Add(connectionStatusTask);
+            await Task.WhenAll(tasks);
+
+            ConnectionStatuses = connectionStatusTask.Result;
+
+            if (!dgvConnections.Columns.Contains("ConnectionStatus"))
+            {
+                dgvConnections.Columns.Insert(0,
+                    new DataGridViewTextBoxColumn() { Name = "ConnectionStatus", HeaderText = "Connection Status" });
+            }
+            if (SnapshotDates != null && !dgvConnections.Columns.Contains("SnapshotAge"))
+            {
+                dgvConnections.Columns.Insert(1,
+                    new DataGridViewTextBoxColumn() { Name = "SnapshotAge", HeaderText = "Last Snapshot Age" });
+            }
+
+            dgvConnections.DataSource = null;
+            dgvConnections.DataSource = collectionConfig.SourceConnections;
+
+            bttnCheckConnections.Text = "Check Connections";
+            bttnCheckConnections.Enabled = true;
+        }
+
+        private DateTime SnapshotDatesLastChecked = DateTime.MinValue;
+
+        private async Task TryGetLastSnapshotDates()
+        {
+            try
+            {
+                SnapshotDates = await GetLastSnapshotDates();
+                SnapshotDatesLastChecked = DateTime.UtcNow;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error getting snapshot dates: " + ex.Message, "Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        private async Task<ConcurrentDictionary<string, (string status, Color statusColor, int statusValue)>> GetConnectionStatus()
+        {
+            var tasks = new List<Task>();
+            ConcurrentDictionary<string, (string status, Color statusColor, int statusValue)> connectionStatus =
+                new();
+
+            foreach (var row in dgvConnections.Rows.Cast<DataGridViewRow>())
+            {
+                async Task CheckConnectionAsync()
+                {
+                    var src = (DBADashSource)row.DataBoundItem;
+                    switch (src.SourceConnection.Type)
+                    {
+                        case ConnectionType.SQL:
+                            try
+                            {
+                                await using var cn = new SqlConnection(src.SourceConnection.ConnectionString);
+                                await cn.OpenAsync();
+                                connectionStatus.TryAdd(src.ConnectionString,
+                                    ("OK", DashColors.Success, 0));
+                            }
+                            catch (Exception ex)
+                            {
+                                connectionStatus.TryAdd(src.ConnectionString,
+                                    ($"Error: {ex.Message}", DashColors.Fail, 99));
+                            }
+
+                            break;
+
+                        case ConnectionType.Directory:
+                            try
+                            {
+                                src.SourceConnection.Validate();
+                                connectionStatus.TryAdd(src.ConnectionString,
+                                    ("OK", DashColors.Success, 0));
+                            }
+                            catch (Exception ex)
+                            {
+                                connectionStatus.TryAdd(src.ConnectionString,
+                                    ($"Error: {ex.Message}", DashColors.Fail, 99));
+                            }
+
+                            break;
+
+                        default:
+                            connectionStatus.TryAdd(src.ConnectionString,
+                                ("N/A", DashColors.NotApplicable, 1));
+                            break;
+                    }
+                }
+
+                tasks.Add(CheckConnectionAsync());
+            }
+            await Task.WhenAll(tasks);
+            return connectionStatus;
+        }
+
+        private async Task<Dictionary<string, DateTime>> GetLastSnapshotDates()
+        {
+            await using var cn = new SqlConnection(collectionConfig.DestinationConnection.ConnectionString);
+            await cn.OpenAsync();
+            await using var cmd = new SqlCommand("dbo.MaxCollectionDateByInstance_Get", cn) { CommandType = CommandType.StoredProcedure };
+            await using var rdr = await cmd.ExecuteReaderAsync();
+            var snapshotDates = new Dictionary<string, DateTime>();
+            while (await rdr.ReadAsync())
+            {
+                snapshotDates.Add(rdr.GetString(0), rdr.GetDateTime(1));
+            }
+            return snapshotDates;
         }
     }
 }
