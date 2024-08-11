@@ -62,6 +62,7 @@ namespace DBADashServiceConfig
             label2 = new System.Windows.Forms.Label();
             bttnAWS = new System.Windows.Forms.Button();
             chkLogInternalPerfCounters = new System.Windows.Forms.CheckBox();
+            bttnCheckConnections = new System.Windows.Forms.Button();
             panel1 = new System.Windows.Forms.Panel();
             tabJson = new System.Windows.Forms.TabPage();
             txtJson = new System.Windows.Forms.TextBox();
@@ -523,6 +524,18 @@ namespace DBADashServiceConfig
             toolTip1.SetToolTip(chkLogInternalPerfCounters, "Internal performance counters are available on the Metrics tab in the GUI.  They track things like how long each collection took to run.");
             chkLogInternalPerfCounters.UseVisualStyleBackColor = true;
             chkLogInternalPerfCounters.CheckedChanged += ChkLogInternalPerfCounters_CheckedChanged;
+            // 
+            // bttnCheckConnections
+            // 
+            bttnCheckConnections.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            bttnCheckConnections.Location = new System.Drawing.Point(16, 342);
+            bttnCheckConnections.Name = "bttnCheckConnections";
+            bttnCheckConnections.Size = new System.Drawing.Size(163, 29);
+            bttnCheckConnections.TabIndex = 26;
+            bttnCheckConnections.Text = "Check Connections";
+            toolTip1.SetToolTip(bttnCheckConnections, "Perform a basic connectivity test for each source connection and get age of the last collection from the repository database.  ");
+            bttnCheckConnections.UseVisualStyleBackColor = true;
+            bttnCheckConnections.Click += bttnCheckConnections_Click;
             // 
             // panel1
             // 
@@ -1257,6 +1270,7 @@ namespace DBADashServiceConfig
             // groupBox1
             // 
             groupBox1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBox1.Controls.Add(bttnCheckConnections);
             groupBox1.Controls.Add(dgvConnections);
             groupBox1.Controls.Add(label13);
             groupBox1.Controls.Add(txtSearch);
@@ -1281,7 +1295,7 @@ namespace DBADashServiceConfig
             dgvConnections.Name = "dgvConnections";
             dgvConnections.RowHeadersWidth = 51;
             dgvConnections.RowTemplate.Height = 24;
-            dgvConnections.Size = new System.Drawing.Size(1067, 315);
+            dgvConnections.Size = new System.Drawing.Size(1067, 308);
             dgvConnections.TabIndex = 23;
             dgvConnections.CellContentClick += DgvConnections_CellContentClick;
             dgvConnections.EditingControlShowing += DgvConnections_EditingControlShowing;
@@ -1307,7 +1321,7 @@ namespace DBADashServiceConfig
             txtSearch.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             txtSearch.Name = "txtSearch";
             txtSearch.Size = new System.Drawing.Size(191, 22);
-            txtSearch.TabIndex = 24;
+            txtSearch.TabIndex = 27;
             txtSearch.TextChanged += TxtSearch_TextChanged;
             // 
             // tabDest
@@ -1647,6 +1661,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.TextBox txtSQS;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.CheckBox chkAllowPlanForcing;
+        private System.Windows.Forms.Button bttnCheckConnections;
     }
 }
 
