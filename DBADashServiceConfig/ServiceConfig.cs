@@ -548,6 +548,10 @@ namespace DBADashServiceConfig
                 {
                     direction = ListSortDirection.Ascending;
                 }
+                foreach (DataGridViewColumn col in dgvConnections.Columns)
+                {
+                    col.HeaderCell.SortGlyphDirection = SortOrder.None;
+                }
 
                 if (column.DataPropertyName == "ConnectionString")
                 {
