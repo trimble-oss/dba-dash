@@ -1963,8 +1963,7 @@ namespace DBADashServiceConfig
                     new DataGridViewTextBoxColumn() { Name = "SnapshotAge", HeaderText = "Last Snapshot Age" });
             }
 
-            dgvConnections.DataSource = null;
-            dgvConnections.DataSource = collectionConfig.SourceConnections;
+            SetDgv();
 
             bttnCheckConnections.Text = "Check Connections";
             bttnCheckConnections.Enabled = true;
