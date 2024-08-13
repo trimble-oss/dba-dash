@@ -757,6 +757,7 @@ namespace DBADashServiceConfig
         private void SetDgv()
         {
             dgvConnections.DataSource = new BindingSource() { DataSource = collectionConfig.SourceConnections };
+            ApplySearch();
         }
 
         private void RefreshServiceStatus()
@@ -1356,6 +1357,7 @@ namespace DBADashServiceConfig
             if (e.RowIndex >= 0 && e.ColumnIndex == dgvConnections.Columns["Delete"].Index)
             {
                 dgvConnections.Rows.RemoveAt(e.RowIndex);
+                ApplySearch();
             }
             else if (e.RowIndex >= 0 && e.ColumnIndex == dgvConnections.Columns["Edit"].Index)
             {
