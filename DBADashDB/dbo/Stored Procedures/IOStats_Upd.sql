@@ -17,6 +17,7 @@ CREATE TABLE #DBIOStatsTemp(
 	Drive CHAR(1) COLLATE DATABASE_DEFAULT NOT NULL ,
 	FileID INT NOT NULL,
 	SnapshotDate DATETIME2(2) NOT NULL,
+	SnapshotDate60 DATETIME2(2) NOT NULL,
 	num_of_reads BIGINT NOT NULL,
 	num_of_writes BIGINT NOT NULL,
 	num_of_bytes_read BIGINT NOT NULL,
@@ -25,6 +26,15 @@ CREATE TABLE #DBIOStatsTemp(
 	io_stall_write_ms BIGINT NOT NULL,
 	sample_ms_diff BIGINT NOT NULL,
 	size_on_disk_bytes BIGINT NOT NULL,
+	MaxReadLatency AS ISNULL(io_stall_read_ms/NULLIF(num_of_reads*1.0,0),0),
+	MaxWriteLatency AS ISNULL(io_stall_write_ms/NULLIF(num_of_writes*1.0,0),0),
+	MaxLatency AS ISNULL((io_stall_read_ms+io_stall_write_ms)/NULLIF(num_of_writes+num_of_reads*1.0,0),0),
+	MaxReadIOPs AS num_of_reads/(sample_ms_diff/1000.0),
+	MaxWriteIOPs AS num_of_writes/(sample_ms_diff/1000.0),
+	MaxIOPs AS  (num_of_reads+num_of_writes)/(sample_ms_diff/1000.0),
+	MaxReadMBsec AS	 num_of_bytes_read/(sample_ms_diff/1000.0)/POWER(1024.0,2),
+	MaxWriteMBsec AS num_of_bytes_written/(sample_ms_diff/1000.0)/POWER(1024.0,2),
+	MaxMBsec AS	 (num_of_bytes_written+num_of_bytes_read)/(sample_ms_diff/1000.0)/POWER(1024.0,2), 	
 	PRIMARY KEY(InstanceID,DatabaseID,Drive,FileID,	SnapshotDate)
 )
 DECLARE @IOStorageBitMask TINYINT
@@ -64,6 +74,7 @@ FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,4,REPLICATE(CHAR(9),3))
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = N'SELECT @InstanceID,
 			A.SnapshotDate,
+			DG.DateGroup AS SnapshotDate60,
 			' + CASE WHEN @IOStorageBitMask & 14 > 0 THEN 'ISNULL(x.DatabaseID,-1)' ELSE '-1' END + ' AS DatabaseID,
 			' + CASE WHEN @IOStorageBitMask & 26 > 0 THEN 'COALESCE(x.Drive,''*'')' ELSE '''*''' END + ' AS Drive,
 			' + CASE WHEN @IOStorageBitMask & 2 > 0 THEN 'ISNULL(x.FileID,-1)' ELSE '-1' END + ' AS FileID,
@@ -79,6 +90,7 @@ FROM @IOStats a
 JOIN Staging.IOStats b ON b.database_id = a.database_id AND b.file_id = a.file_id AND a.drive = b.drive AND b.InstanceID=@InstanceID
 LEFT JOIN dbo.Databases D ON D.database_id = a.database_id AND d.InstanceID=@InstanceID AND D.IsActive=1
 LEFT JOIN dbo.DBFiles F ON F.file_id = a.file_id AND F.DatabaseID = D.DatabaseID AND F.IsActive=1 
+CROSS APPLY dbo.DateGroupingMins(A.SnapshotDate,60) DG
 CROSS APPLY(SELECT ISNULL(D.DatabaseID,-999) AS DatabaseID,
 					ISNULL(F.FileID,-999) AS FileID,
 					CASE WHEN a.drive LIKE ''[A-Z,-]'' THEN a.drive WHEN F.physical_name LIKE ''_:\%'' THEN LEFT(F.physical_name,1) ELSE ''?'' END AS Drive,
@@ -93,7 +105,7 @@ WHERE A.sample_ms > b.sample_ms
 GROUP BY GROUPING SETS(
 			' + @Grp + '
 			)
-		,a.SnapshotDate
+		,a.SnapshotDate,DG.DateGroup
 HAVING(
 		SUM(A.num_of_writes-B.num_of_writes)>0 
 		OR SUM(A.num_of_reads-B.num_of_reads)>0
@@ -103,6 +115,7 @@ INSERT INTO #DBIOStatsTemp
 (
 	InstanceID,
 	SnapshotDate,
+	SnapshotDate60,
 	DatabaseID,
 	Drive,
 	FileID,
@@ -126,99 +139,83 @@ DELETE #DBIOStatsTemp
 WHERE InstanceID = @InstanceID 
 AND (DatabaseID = -999 OR FileID=-999 OR Drive = '-')
 
+
+
 BEGIN TRAN
 
-INSERT INTO dbo.DBIOStats
-(
-	InstanceID,
-	SnapshotDate,
-	DatabaseID,
-	Drive,
-	FileID,
-	sample_ms_diff,
-	num_of_reads,
-	num_of_bytes_read,
-	io_stall_read_ms,
-	num_of_writes,
-	num_of_bytes_written,
-	io_stall_write_ms,
-	size_on_disk_bytes
-)
-SELECT 	InstanceID,
-	SnapshotDate,
-	DatabaseID,
-	Drive,
-	FileID,
-	sample_ms_diff,
-	num_of_reads,
-	num_of_bytes_read,
-	io_stall_read_ms,
-	num_of_writes,
-	num_of_bytes_written,
-	io_stall_write_ms,
-	size_on_disk_bytes
-FROM #DBIOStatsTemp t
-WHERE NOT EXISTS(SELECT 1 
-			FROM dbo.DBIOStats IOS 
-			WHERE t.InstanceID = IOS.InstanceID
-			AND t.DatabaseID = IOS.DatabaseID
-			AND t.Drive = IOS.Drive
-			AND t.FileID = IOS.FileID
-			AND t.SnapshotDate = IOS.SnapshotDate			
-			)
+IF NOT EXISTS(
+	/* Check data hasn't been imported already */
+	SELECT 1
+	FROM #DBIOStatsTemp t
+	WHERE EXISTS(SELECT 1 
+				FROM dbo.DBIOStats IOS 
+				WHERE t.InstanceID = IOS.InstanceID
+				AND t.DatabaseID = IOS.DatabaseID
+				AND t.Drive = IOS.Drive
+				AND t.FileID = IOS.FileID
+				AND t.SnapshotDate = IOS.SnapshotDate			
+				)
+	)
+BEGIN
 
-IF @@ROWCOUNT>0
-BEGIN;
-	MERGE dbo.DBIOStats_60MIN AS T 
-	USING (SELECT InstanceID,
-				  DatabaseID,
-				  Drive,
-				  FileID,
-				  DG.DateGroup AS SnapshotDate,
-				  num_of_reads,
-				  num_of_writes,
-				  num_of_bytes_read,
-				  num_of_bytes_written,
-				  io_stall_read_ms,
-				  io_stall_write_ms,
-				  sample_ms_diff,
-				  size_on_disk_bytes,
-				  ISNULL(io_stall_read_ms/NULLIF(num_of_reads*1.0,0),0) AS MaxReadLatency,
-				  ISNULL(io_stall_write_ms/NULLIF(num_of_writes*1.0,0),0) AS MaxWriteLatency,
-				  ISNULL((io_stall_read_ms+io_stall_write_ms)/NULLIF(num_of_writes+num_of_reads*1.0,0),0) AS MaxLatency,
-				  num_of_reads/(sample_ms_diff/1000.0)  AS MaxReadIOPs,
-				  num_of_writes/(sample_ms_diff/1000.0)  AS MaxWriteIOPs,
-				  (num_of_reads+num_of_writes)/(sample_ms_diff/1000.0) AS MaxIOPs,
-				  num_of_bytes_read/(sample_ms_diff/1000.0)/POWER(1024.0,2) AS MaxReadMBsec,
-				  num_of_bytes_written/(sample_ms_diff/1000.0)/POWER(1024.0,2) AS MaxWriteMBsec,
-				  (num_of_bytes_written+num_of_bytes_read)/(sample_ms_diff/1000.0)/POWER(1024.0,2) AS MaxMBsec	
-				  FROM #DBIOStatsTemp
-				  CROSS APPLY [dbo].[DateGroupingMins](SnapshotDate,60) DG
-				  ) AS S
-	ON S.InstanceID= T.InstanceID
-	AND S.DatabaseID = T.DatabaseID
-	AND S.Drive = T.Drive
-	AND S.FileID = T.FileID
-	AND S.SnapshotDate = T.SnapshotDate
-	WHEN MATCHED THEN UPDATE SET T.num_of_reads += s.num_of_reads,
-								T.num_of_writes += S.num_of_writes,
-								T.num_of_bytes_read += S.num_of_bytes_read,
-								T.num_of_bytes_written += S.num_of_bytes_written,
-								T.io_stall_read_ms += S.io_stall_read_ms,
-								T.io_stall_write_ms += S.io_stall_write_ms,
-								T.sample_ms_diff += S.sample_ms_diff,
-								T.MaxReadLatency = CASE WHEN S.MaxReadLatency > t.MaxReadLatency THEN S.MaxReadLatency ELSE T.MaxReadLatency END,
-								T.MaxWriteLatency = CASE WHEN S.MaxWriteLatency > t.MaxWriteLatency THEN S.MaxReadLatency ELSE T.MaxReadLatency END,
-								T.MaxLatency = CASE WHEN S.MaxLatency > t.MaxLatency THEN S.MaxLatency ELSE T.MaxLatency END,
-								T.MaxReadIOPs = CASE WHEN S.MaxReadIOPs > t.MaxReadIOPs THEN S.MaxReadIOPs ELSE T.MaxReadIOPs END,
-								T.MaxWriteIOPs = CASE WHEN S.MaxWriteIOPs > t.MaxWriteIOPs THEN S.MaxWriteIOPs ELSE T.MaxWriteIOPs END,
-								T.MaxIOPs = CASE WHEN S.MaxIOPs > t.MaxIOPs THEN S.MaxIOPs ELSE T.MaxIOPs END,
-								T.MaxReadMBsec = CASE WHEN S.MaxReadMBsec > t.MaxReadMBsec THEN S.MaxReadMBsec ELSE T.MaxReadMBsec END,
-								T.MaxWriteMBsec = CASE WHEN S.MaxWriteMBsec > t.MaxWriteMBsec THEN S.MaxWriteMBsec ELSE T.MaxWriteMBsec END,
-								T.MaxMBsec =CASE WHEN S.MaxMBsec > t.MaxMBsec THEN S.MaxMBsec ELSE T.MaxMBsec END
-
-	WHEN NOT MATCHED BY TARGET THEN INSERT
+	/* Insert granular IO metrics */
+	INSERT INTO dbo.DBIOStats
 	(
+		InstanceID,
+		SnapshotDate,
+		DatabaseID,
+		Drive,
+		FileID,
+		sample_ms_diff,
+		num_of_reads,
+		num_of_bytes_read,
+		io_stall_read_ms,
+		num_of_writes,
+		num_of_bytes_written,
+		io_stall_write_ms,
+		size_on_disk_bytes
+	)
+	SELECT 	InstanceID,
+		SnapshotDate,
+		DatabaseID,
+		Drive,
+		FileID,
+		sample_ms_diff,
+		num_of_reads,
+		num_of_bytes_read,
+		io_stall_read_ms,
+		num_of_writes,
+		num_of_bytes_written,
+		io_stall_write_ms,
+		size_on_disk_bytes
+	FROM #DBIOStatsTemp t
+
+	/* Update 60min aggregation */
+	UPDATE T 
+			SET T.num_of_reads += s.num_of_reads,
+				T.num_of_writes += S.num_of_writes,
+				T.num_of_bytes_read += S.num_of_bytes_read,
+				T.num_of_bytes_written += S.num_of_bytes_written,
+				T.io_stall_read_ms += S.io_stall_read_ms,
+				T.io_stall_write_ms += S.io_stall_write_ms,
+				T.sample_ms_diff += S.sample_ms_diff,
+				T.MaxReadLatency = CASE WHEN S.MaxReadLatency > t.MaxReadLatency THEN S.MaxReadLatency ELSE T.MaxReadLatency END,
+				T.MaxWriteLatency = CASE WHEN S.MaxWriteLatency > t.MaxWriteLatency THEN S.MaxReadLatency ELSE T.MaxReadLatency END,
+				T.MaxLatency = CASE WHEN S.MaxLatency > t.MaxLatency THEN S.MaxLatency ELSE T.MaxLatency END,
+				T.MaxReadIOPs = CASE WHEN S.MaxReadIOPs > t.MaxReadIOPs THEN S.MaxReadIOPs ELSE T.MaxReadIOPs END,
+				T.MaxWriteIOPs = CASE WHEN S.MaxWriteIOPs > t.MaxWriteIOPs THEN S.MaxWriteIOPs ELSE T.MaxWriteIOPs END,
+				T.MaxIOPs = CASE WHEN S.MaxIOPs > t.MaxIOPs THEN S.MaxIOPs ELSE T.MaxIOPs END,
+				T.MaxReadMBsec = CASE WHEN S.MaxReadMBsec > t.MaxReadMBsec THEN S.MaxReadMBsec ELSE T.MaxReadMBsec END,
+				T.MaxWriteMBsec = CASE WHEN S.MaxWriteMBsec > t.MaxWriteMBsec THEN S.MaxWriteMBsec ELSE T.MaxWriteMBsec END,
+				T.MaxMBsec =CASE WHEN S.MaxMBsec > t.MaxMBsec THEN S.MaxMBsec ELSE T.MaxMBsec END
+	FROM dbo.DBIOStats_60MIN T 
+	JOIN #DBIOStatsTemp S ON T.InstanceID = S.InstanceID
+			AND S.DatabaseID = T.DatabaseID
+			AND S.Drive = T.Drive
+			AND S.FileID = T.FileID
+			AND S.SnapshotDate60 = T.SnapshotDate
+
+	INSERT INTO dbo.DBIOStats_60MIN(
 		InstanceID,
 		DatabaseID,
 		Drive,
@@ -241,32 +238,43 @@ BEGIN;
 		MaxWriteMBsec,
 		MaxMBsec
 	)
-	VALUES(    InstanceID,
-		DatabaseID,
-		Drive,
-		FileID,
-		SnapshotDate,
-		num_of_reads,
-		num_of_writes,
-		num_of_bytes_read,
-		num_of_bytes_written,
-		io_stall_read_ms,
-		io_stall_write_ms,
-		sample_ms_diff,
-		MaxReadLatency,
-		MaxWriteLatency,
-		MaxLatency,
-		MaxReadIOPs,
-		MaxWriteIOPs,
-		MaxIOPs,
-		MaxReadMBsec,
-		MaxWriteMBsec,
-		MaxMBsec);
+	SELECT  InstanceID,
+			DatabaseID,
+			Drive,
+			FileID,
+			SnapshotDate60,
+			num_of_reads,
+			num_of_writes,
+			num_of_bytes_read,
+			num_of_bytes_written,
+			io_stall_read_ms,
+			io_stall_write_ms,
+			sample_ms_diff,
+			MaxReadLatency,
+			MaxWriteLatency,
+			MaxLatency,
+			MaxReadIOPs,
+			MaxWriteIOPs,
+			MaxIOPs,
+			MaxReadMBsec,
+			MaxWriteMBsec,
+		MaxMBsec
+	FROM #DBIOStatsTemp S
+	WHERE NOT EXISTS(
+				SELECT 1 
+				FROM dbo.DBIOStats_60MIN T
+				WHERE T.InstanceID = S.InstanceID
+				AND S.DatabaseID = T.DatabaseID
+				AND S.Drive = T.Drive
+				AND S.FileID = T.FileID
+				AND S.SnapshotDate60 = T.SnapshotDate
+				)
 
 END
-
+/* Replace data in staging table */
 DELETE Staging.IOStats
 WHERE InstanceID=@InstanceID
+
 INSERT INTO Staging.IOStats
 (
     InstanceID,
