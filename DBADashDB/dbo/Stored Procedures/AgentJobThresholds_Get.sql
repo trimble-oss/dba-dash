@@ -1,4 +1,7 @@
-﻿CREATE PROC AgentJobThresholds_Get(@InstanceID INT,@JobID UNIQUEIDENTIFIER)
+﻿CREATE PROC AgentJobThresholds_Get(
+    @InstanceID INT,
+    @JobID UNIQUEIDENTIFIER
+)
 AS
 SELECT InstanceId,
        job_id,
@@ -15,7 +18,8 @@ SELECT InstanceId,
        JobStepFails7DaysWarning,
        JobStepFails7DaysCritical,
        LastFailIsCritical,
-       LastFailIsWarning
+       LastFailIsWarning,
+       AgentIsRunningCheck
 FROM dbo.AgentJobThresholds
 WHERE InstanceID=@InstanceID
 AND job_id= @JobID

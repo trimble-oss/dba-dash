@@ -246,7 +246,7 @@ SELECT I.InstanceID,
 	a.AlertStatus,
 	AlertCD.SnapshotDate AS AlertSnapshotDate,
 	CASE WHEN I.EngineEdition = 4 THEN NULL ELSE I.IsAgentRunning END AS IsAgentRunning,
-	CASE WHEN I.EngineEdition = 4 THEN 3 WHEN I.IsAgentRunning = 1 THEN 4 ELSE 1 END AS IsAgentRunningStatus,
+	CASE WHEN AJT.AgentIsRunningCheck=0 THEN 3 WHEN I.EngineEdition = 4 THEN 3 WHEN I.IsAgentRunning = 1 THEN 4 ELSE 1 END AS IsAgentRunningStatus,
 	ISNULL(cus.Status,3) AS CustomCheckStatus,
 	ISNULL(dbm.MirroringStatus,3) AS MirroringStatus,
 	3 AS ElasticPoolStorageStatus,
@@ -263,6 +263,22 @@ SELECT I.InstanceID,
 	CAST(0 AS BIT) AS IsAzure
 INTO #Summary
 FROM dbo.Instances I 
+OUTER APPLY(
+			SELECT ISNULL(
+							(
+							SELECT AJT.AgentIsRunningCheck
+							FROM dbo.AgentJobThresholds AJT 
+							WHERE AJT.InstanceID = I.InstanceID
+							AND AJT.job_id = '00000000-0000-0000-0000-000000000000'
+							),
+							(
+							SELECT AJT.AgentIsRunningCheck
+							FROM dbo.AgentJobThresholds AJT 
+							WHERE AJT.InstanceID = -1
+							AND AJT.job_id = '00000000-0000-0000-0000-000000000000'
+							)
+						) AS AgentIsRunningCheck
+			) AJT	
 LEFT JOIN #LogShippingStatus LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN #BackupStatus B ON I.InstanceID = B.InstanceID
 LEFT JOIN #DriveStatus D ON I.InstanceID = D.InstanceID

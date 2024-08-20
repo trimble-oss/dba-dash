@@ -53,7 +53,7 @@ namespace DBADashGUI
                                                             { "JobStatus", false }, { "CollectionErrorStatus", false }, { "AGStatus", false }, {"LastGoodCheckDBStatus",false}, {"SnapshotAgeStatus",false },
                                                             {"MemoryDumpStatus",false }, {"UptimeStatus",false }, {"CorruptionStatus",false }, {"AlertStatus",false }, {"FileFreeSpaceStatus",false },
                                                             {"CustomCheckStatus",false }, {"MirroringStatus",false },{"ElasticPoolStorageStatus",false},{"PctMaxSizeStatus",false}, {"QueryStoreStatus",false },
-                                                            {"LogFreeSpaceStatus",false },{"DBMailStatus",false },{"IdentityStatus",false },{"IsAgentRunningStatus",false },{"DatabaseStateStatus",false} };
+                                                            {"LogFreeSpaceStatus",false },{"DBMailStatus",false },{"IdentityStatus",false },{"IsAgentRunningStatus",false },{"DatabaseStateStatus",false}};
         }
 
         private Task<DataTable> GetSummaryAsync(bool forceRefresh, DateTime? forceRefreshDate)
@@ -289,7 +289,7 @@ namespace DBADashGUI
                     }
                 }
 
-                if (row["IsAgentRunning"] != DBNull.Value && (bool)row["IsAgentRunning"] == false)
+                if ((DBADashStatusEnum)row["IsAgentRunningStatus"] != DBADashStatusEnum.NA)
                 {
                     isFocusedRow = true;
                     statusColumns["JobStatus"] = true;
@@ -350,7 +350,8 @@ namespace DBADashGUI
                     : DateTime.UtcNow.Subtract((DateTime)row["DetectedCorruptionDateUtc"]).Humanize();
                 if (row["IsAgentRunning"] != DBNull.Value && (bool)row["IsAgentRunning"] == false)
                 {
-                    dgvSummary.Rows[idx].Cells["JobStatus"].SetStatusColor(DBADashStatusEnum.Critical);
+                    var status = (DBADashStatusEnum)row["IsAgentRunningStatus"];
+                    dgvSummary.Rows[idx].Cells["JobStatus"].SetStatusColor(status);
                     dgvSummary.Rows[idx].Cells["JobStatus"].Value = "Not Running";
                 }
 

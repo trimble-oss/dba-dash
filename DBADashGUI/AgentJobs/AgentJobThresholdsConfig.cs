@@ -20,6 +20,7 @@ namespace DBADashGUI.AgentJobs
             chkTimeSinceLast.Checked = threshold.TimeSinceLastFailureCritical != null && threshold.TimeSinceLastFailureWarning != null;
             chkTimeSinceLastSucceeded.Checked = threshold.TimeSinceLastSucceededCritical != null && threshold.TimeSinceLastSucceededWarning != null;
             chkInherit.Checked = threshold.IsInherited;
+            chkInherit.Enabled = !threshold.IsRootLevel;
             numTimeSinceLastCritical.Value = threshold.TimeSinceLastFailureCritical ?? 0;
             numTimeSinceLastWarning.Value = threshold.TimeSinceLastFailureWarning ?? 0;
             numJobStep7DaysCritical.Value = threshold.JobStepFails7DaysCritical ?? 0;
@@ -34,6 +35,9 @@ namespace DBADashGUI.AgentJobs
             numTimeSinceLastSucceededWarning.Value = threshold.TimeSinceLastSucceededWarning ?? 0;
             chkLastFailIsCritical.Checked = threshold.LastFailIsCritical;
             chkLastFailIsWarning.Checked = threshold.LastFailIsWarning;
+            chkAgentIsRunningCheck.Checked =JobID!=Guid.Empty || threshold.AgentIsRunningCheck;
+            chkAgentIsRunningCheck.Visible= JobID == Guid.Empty;
+
         }
 
         public AgentJobThreshold Threshold
@@ -76,6 +80,7 @@ namespace DBADashGUI.AgentJobs
                     threshold.TimeSinceLastSucceededCritical = (int?)numTimeSinceLastSucceededCritical.Value;
                     threshold.TimeSinceLastSucceededWarning = (int)numTimeSinceLastSucceededWarning.Value;
                 }
+                threshold.AgentIsRunningCheck = JobID != Guid.Empty || chkAgentIsRunningCheck.Checked;
 
                 threshold.IsInherited = chkInherit.Checked;
                 threshold.LastFailIsCritical = chkLastFailIsCritical.Checked;
