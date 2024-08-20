@@ -15,7 +15,8 @@
        @JobStepFails7DaysCritical INT=NULL,
        @LastFailIsCritical INT=NULL,
        @LastFailIsWarning INT=NULL,
-	   @Inherit BIT
+	   @Inherit BIT,
+	   @AgentIsRunningCheck BIT=1
 )
 AS
 SET XACT_ABORT ON
@@ -46,7 +47,8 @@ BEGIN
 		JobStepFails7DaysWarning,
 		JobStepFails7DaysCritical,
 		LastFailIsCritical,
-		LastFailIsWarning
+		LastFailIsWarning,
+		AgentIsRunningCheck
 	)
 	VALUES( @InstanceId,
 		   @job_id,
@@ -63,7 +65,8 @@ BEGIN
 		   @JobStepFails7DaysWarning,
 		   @JobStepFails7DaysCritical,
 		   @LastFailIsCritical,
-		   @LastFailIsWarning)
+		   @LastFailIsWarning,
+		   @AgentIsRunningCheck)
 END
 
 COMMIT
