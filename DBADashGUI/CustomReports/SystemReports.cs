@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Amazon.Runtime.Internal.Transform;
+using System.Collections.Generic;
+using DocumentFormat.OpenXml.Office2010.Excel;
 
 namespace DBADashGUI.CustomReports
 {
@@ -8,7 +10,199 @@ namespace DBADashGUI.CustomReports
         {
             Add(TableSizeReport);
             Add(TableSizeHistory);
+            Add(ServerServices);
         }
+
+        public static SystemReport ServerServices => new()
+        {
+            ReportName = "Server Services",
+            SchemaName = "dbo",
+            ProcedureName = "ServerServices_Get",
+            QualifiedProcedureName = "dbo.ServerServices_Get",
+            CanEditReport = false,
+            Params = new Params
+            {
+                ParamList = new List<Param>
+                {
+                    new()
+                    {
+                        ParamName = "@InstanceIDs",
+                        ParamType = "IDS"
+                    },
+                    new()
+                    {
+                        ParamName = "@ServiceType",
+                        ParamType = "NVARCHAR"
+                    },
+                    new()
+                    {
+                        ParamName = "@ServiceAccount",
+                        ParamType = "NVARCHAR",
+                    },
+                },
+            },
+            Pickers = new List<Picker>
+            {
+                new()
+                {
+                    ParameterName = "@ServiceType",
+                    Name = "Service Type",
+                    DefaultValue = null,
+                    PickerItems = new()
+                    {
+                        {"SQL Full-text Filter Daemon Launcher", "SQL Full-text Filter Daemon Launcher"},
+                        {"SQL Server", "SQL Server"},
+                        {"SQL Server Agent", "SQL Server Agent"},
+                        {"", "ALL"}
+                    }
+                },
+            },
+            CustomReportResults = new Dictionary<int, CustomReportResult>
+                {
+                    {
+                        0, new CustomReportResult
+                        {
+                            ColumnAlias = new Dictionary<string, string>
+                            {
+                                { "InstanceID","Instance ID"},
+                                { "InstanceDisplayName", "Instance" },
+                                { "service_type", "Service Type" },
+                                { "servicename", "Service Name" },
+                                { "startup_type", "Startup Type (ID)" },
+                                { "startup_type_desc", "Startup Type" },
+                                { "status", "Status (ID)" },
+                                { "status_desc", "Status" },
+                                { "process_id", "Process ID" },
+                                { "last_startup_time", "Last Startup Time" },
+                                { "service_account", "Service Account"},
+                                { "is_managed_service_account","Managed Service Account?"},
+                                { "filename", "FileName"},
+                                { "is_clustered","Is Clustered"},
+                                { "cluster_nodename","Cluster Node Name"},
+                                { "instant_file_initialization_enabled","Instant File Initialization Enabled"},
+                                { "instant_file_initialization_enabled_status","Instant File Initialization Status"},
+                                { "SnapshotDate", "Snapshot Date" },
+                                { "SnapshotStatus","Snapshot Status"}
+                            },
+                            ResultName = "Server Services",
+                            ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>()
+                            {
+                                new ("InstanceID", new PersistedColumnLayout { Width = 100, Visible = false }),
+                                new("InstanceDisplayName", new PersistedColumnLayout { Width = 120, Visible = true }),
+                                new("service_type", new PersistedColumnLayout { Width = 230, Visible = true }),
+                                new("servicename", new PersistedColumnLayout { Width = 340, Visible = true }),
+                                new("startup_type", new PersistedColumnLayout { Width = 70, Visible = false }),
+                                new("startup_type_desc", new PersistedColumnLayout { Width = 110, Visible = true }),
+                                new("status", new PersistedColumnLayout { Width = 75, Visible = false }),
+                                new("status_desc", new PersistedColumnLayout { Width = 75, Visible = true }),
+                                new("process_id", new PersistedColumnLayout { Width = 70, Visible = true }),
+                                new("last_startup_time", new PersistedColumnLayout { Width = 110, Visible = true }),
+                                new("service_account", new PersistedColumnLayout { Width = 240, Visible = true }),
+                                new("is_managed_service_account", new PersistedColumnLayout { Width = 70, Visible = true }),
+                                new("filename", new PersistedColumnLayout { Width = 150, Visible = true }),
+                                new("is_clustered", new PersistedColumnLayout { Width = 70, Visible = true }),
+                                new("cluster_nodename", new PersistedColumnLayout { Width = 110, Visible = true }),
+                                new("instant_file_initialization_enabled", new PersistedColumnLayout { Width = 80, Visible = true }),
+                                new("instant_file_initialization_enabled_status", new PersistedColumnLayout { Width = 80, Visible = false }),
+                                new("SnapshotDate", new PersistedColumnLayout { Width = 110, Visible = true }),
+                                new("SnapshotStatus", new PersistedColumnLayout { Width = 70, Visible = false }),
+                            },
+                            CellHighlightingRules =
+                            {
+                                {
+                                    "SnapshotDate",
+                                    new CellHighlightingRuleSet("SnapshotStatus") { IsStatusColumn = true }
+                                },
+                                {
+                                    "SnapshotStatus",
+                                    new CellHighlightingRuleSet("SnapshotStatus") { IsStatusColumn = true }
+                                },
+                                {
+                                    "instant_file_initialization_enabled",
+                                    new CellHighlightingRuleSet("instant_file_initialization_enabled_status") { IsStatusColumn = true }
+                                },
+                                {
+                                    "instant_file_initialization_enabled_status",
+                                    new CellHighlightingRuleSet("instant_file_initialization_enabled_status") { IsStatusColumn = true }
+                                },
+                                {
+                                    "startup_type_desc",
+                                    new CellHighlightingRuleSet("startup_type_desc")
+                                    {
+                                        Rules = new List<CellHighlightingRule>
+                                        {
+                                            new()
+                                            {
+                                                ConditionType = CellHighlightingRule.ConditionTypes.Equals,
+                                                Value1 = "Automatic",
+                                                Status = DBADashStatus.DBADashStatusEnum.OK
+                                            },
+                                            new()
+                                            {
+                                                ConditionType = CellHighlightingRule.ConditionTypes.Equals,
+                                                Value1 = "Manual",
+                                                Status = DBADashStatus.DBADashStatusEnum.NA
+                                            },
+                                            new()
+                                            {
+                                                ConditionType = CellHighlightingRule.ConditionTypes.All,
+                                                Status = DBADashStatus.DBADashStatusEnum.WarningLow
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "status_desc",
+                                    new CellHighlightingRuleSet("status_desc")
+                                    {
+                                        Rules = new List<CellHighlightingRule>
+                                        {
+                                            new()
+                                            {
+                                                ConditionType = CellHighlightingRule.ConditionTypes.Equals,
+                                                Value1 = "Running",
+                                                Status = DBADashStatus.DBADashStatusEnum.OK
+                                            },
+                                            new()
+                                            {
+                                                ConditionType = CellHighlightingRule.ConditionTypes.All,
+                                                Status = DBADashStatus.DBADashStatusEnum.WarningLow
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            LinkColumns = new Dictionary<string, LinkColumnInfo>
+                            {
+                                {
+                                    "service_type",
+                                    new DrillDownLinkColumnInfo
+                                    {
+                                        ReportProcedureName = "ServerServices_Get",
+                                        ColumnToParameterMap = new Dictionary<string, string> { { "@ServiceType", "service_type" } }
+                                    }
+                                },
+                                {
+                                    "service_account",
+                                    new DrillDownLinkColumnInfo
+                                    {
+                                        ReportProcedureName = "ServerServices_Get",
+                                        ColumnToParameterMap = new Dictionary<string, string> { { "@ServiceAccount", "service_account" } }
+                                    }
+                                },
+                                {
+                                    "InstanceDisplayName",
+                                    new DrillDownLinkColumnInfo
+                                    {
+                                        ReportProcedureName = "ServerServices_Get",
+                                        ColumnToParameterMap = new Dictionary<string, string> { { "@InstanceIDs", "InstanceID" } }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+        };
 
         public static SystemReport TableSizeReport =>
             new()

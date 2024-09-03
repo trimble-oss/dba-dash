@@ -74,7 +74,8 @@ namespace DBADash
         IdentityColumns,
         Instance,
         RunningJobs,
-        TableSize
+        TableSize,
+        ServerServices
     }
 
     public enum HostPlatform
@@ -83,7 +84,7 @@ namespace DBADash
         Windows
     }
 
-    public class DBCollector: IErrorLogger
+    public class DBCollector : IErrorLogger
     {
         public DataSet Data;
         private string ConnectionString => Source.SourceConnection.ConnectionString;
@@ -560,6 +561,10 @@ namespace DBADash
             {
                 return false; // Table size collection not supported on SQL 2014 and below
             }
+            else if (collectionType == CollectionType.ServerServices && SQLVersion.Major < 11)
+            {
+                return false;
+            }
             else
             {
                 return true;
@@ -996,7 +1001,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                     try
                     {
                         //ss.SnapshotJobs(ref Data);
-                        ss.CollectJobs(ref Data, Source.ScriptAgentJobs,IsRDS);
+                        ss.CollectJobs(ref Data, Source.ScriptAgentJobs, IsRDS);
                         JobLastModified = currentJobModified;
                     }
                     catch (Microsoft.SqlServer.Management.Smo.UnsupportedFeatureException ex)
@@ -1031,7 +1036,6 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             }
         }
 
-
         private DataTable GetRunningJobsSchema()
         {
             var dtRunningJobs = new DataTable("RunningJobs");
@@ -1054,7 +1058,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
         private void CollectRunningJobsRDS() //Permissions Issue with msdb.dbo.syssessions prevents usual collection.  Get the data we can from sp_help_job
         {
             using var cn = new SqlConnection(ConnectionString);
-            using var cmd = new SqlCommand("msdb.dbo.sp_help_job", cn) { CommandType = CommandType.StoredProcedure};
+            using var cmd = new SqlCommand("msdb.dbo.sp_help_job", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@execution_status", 0);
             cn.Open();
             using var rdr = cmd.ExecuteReader();
@@ -1090,7 +1094,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             using var rdr = cmd.ExecuteReader();
             var dtRunningJobs = GetRunningJobsSchema();
             dtRunningJobs.Load(rdr);
-            
+
             var spHelpJobInfo = new Dictionary<Guid, (int ExecutionStepID, string ExecutionStep, int RetryAttempts, int ExecutionStatus)>();
 
             while (rdr.Read())

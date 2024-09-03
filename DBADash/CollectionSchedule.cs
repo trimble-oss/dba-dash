@@ -33,6 +33,7 @@ namespace DBADashService
                             {CollectionType.DatabaseMirroring, new CollectionSchedule(){ Schedule = hourly } },
                             {CollectionType.Jobs, new CollectionSchedule(){ Schedule = hourly } },
                             {CollectionType.AzureDBResourceGovernance, new CollectionSchedule(){ Schedule = hourly } },
+                            {CollectionType.ServerServices, new CollectionSchedule(){Schedule = hourly} },
 
                             {CollectionType.ObjectExecutionStats, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false } },
                             {CollectionType.CPU, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },

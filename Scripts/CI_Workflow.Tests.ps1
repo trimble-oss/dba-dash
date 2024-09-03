@@ -15,8 +15,8 @@ Describe 'CI Workflow checks' {
          $result.CountOfInstances | Should -Be 1
     }
     It 'Check for errors' {
-         $results= Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT * FROM dbo.CollectionErrorLog"
-         $results.Count  | Should -Be 0
+         $result= Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) AS CountOfErrors FROM dbo.CollectionErrorLog"
+         $result.CountOfErrors  | Should -Be 0
          
     }
     It 'Check CPU table count' {
@@ -92,6 +92,7 @@ Describe 'CI Workflow checks' {
 	      @{TableName="dbo.WaitType"}
 		  @{TableName="dbo.BuildReference"}
 		  @{TableName="dbo.IdentityColumns"}
+		  @{TableName="dbo.ServerServices"}
     )
     It 'Check table counts for <TableName>' -TestCases $TableCountGreaterThanZeroTestCases {
         param($tableName)

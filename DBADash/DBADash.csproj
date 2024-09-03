@@ -25,6 +25,7 @@
     <None Remove="SQL\SQLQueryStoreForcedPlans.sql" />
     <None Remove="SQL\SQLQueryStoreTopQueries.sql" />
     <None Remove="SQL\SQLRunningJobs.sql" />
+    <None Remove="SQL\SQLServerServices.sql" />
     <None Remove="SQL\SQLTableSize.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -82,6 +83,7 @@
 	<EmbeddedResource Include="SQL\SQLServerPrincipals.sql" />
 	<EmbeddedResource Include="SQL\SQLServerProperties.sql" />
 	<EmbeddedResource Include="SQL\SQLServerRoleMembers.sql" />
+	<EmbeddedResource Include="SQL\SQLServerServices.sql" />
 	<EmbeddedResource Include="SQL\SQLSlowQueries.sql" />
 	<EmbeddedResource Include="SQL\SQLSlowQueriesAzure.sql" />
 	<EmbeddedResource Include="SQL\SQLStopEventSessions.sql" />
