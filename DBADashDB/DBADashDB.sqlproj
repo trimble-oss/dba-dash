@@ -737,6 +737,10 @@
     <Build Include="Security\AllowPlanForcing.sql" />
     <Build Include="dbo\Stored Procedures\PlanForcingLog_Upd.sql" />
     <Build Include="dbo\Stored Procedures\MaxCollectionDateByInstance_Get.sql" />
+    <Build Include="dbo\Stored Procedures\ServerServices_Upd.sql" />
+    <Build Include="dbo\Tables\ServerServices.sql" />
+    <Build Include="dbo\User Defined Types\ServerServices.sql" />
+    <Build Include="dbo\Stored Procedures\ServerServices_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

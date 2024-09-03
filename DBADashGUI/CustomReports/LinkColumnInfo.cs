@@ -101,6 +101,10 @@ namespace DBADashGUI.CustomReports
                 {
                     value = ((DateTime)value).AppTimeZoneToUtc();
                 }
+                if (string.Equals(mapping.Key, "@INSTANCEIDS", StringComparison.OrdinalIgnoreCase) && value is int intValue)
+                {
+                    value = (new HashSet<int>() { intValue }).AsDataTable();
+                }
                 param.Param.Value = value;
             }
             customReportViewer = new CustomReportViewer() { Context = newContext, CustomParams = customParams };

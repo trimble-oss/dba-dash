@@ -434,6 +434,9 @@ BEGIN
 
 	DELETE dbo.RunningJobs
 	WHERE InstanceID = @InstanceID
+
+	DELETE dbo.ServerServices
+	WHERE InstanceID = @InstanceID
 	
 	DELETE dbo.Instances
 	WHERE InstanceID = @InstanceID
