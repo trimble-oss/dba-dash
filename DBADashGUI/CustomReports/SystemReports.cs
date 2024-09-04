@@ -57,6 +57,7 @@ namespace DBADashGUI.CustomReports
                     }
                 },
             },
+            TriggerCollectionTypes = { DBADash.CollectionType.ServerServices.ToString() },
             CustomReportResults = new Dictionary<int, CustomReportResult>
                 {
                     {
@@ -277,6 +278,7 @@ namespace DBADashGUI.CustomReports
                         }
                     }
                 },
+                TriggerCollectionTypes = { DBADash.CollectionType.TableSize.ToString() },
                 SchemaName = "dbo",
                 ProcedureName = "TableSize_Get",
                 QualifiedProcedureName = "dbo.TableSize_Get",

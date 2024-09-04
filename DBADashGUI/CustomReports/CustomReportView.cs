@@ -11,10 +11,11 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using DBADash;
+using DBADashGUI.Interface;
 
 namespace DBADashGUI.CustomReports
 {
-    public partial class CustomReportView : UserControl, ISetContext, IRefreshData
+    public partial class CustomReportView : UserControl, ISetContext, IRefreshData, ISetStatus
     {
         public event EventHandler ReportNameChanged;
 
@@ -426,6 +427,11 @@ namespace DBADashGUI.CustomReports
 
         public void RefreshData()
         {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(RefreshData));
+                return;
+            }
             try
             {
                 ShowParamPrompt(false); // Show grid
@@ -450,6 +456,18 @@ namespace DBADashGUI.CustomReports
                 MessageBox.Show("Error running report:" + ex.Message, "Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
+        }
+
+        public void SetStatus(string message, string tooltip, Color color)
+        {
+            this.Invoke(() =>
+            {
+                statusStrip1.Visible = true;
+                lblDescription.Text = message;
+                lblDescription.ForeColor = color;
+                lblDescription.ToolTipText = tooltip;
+                lblDescription.Visible = true;
+            });
         }
 
         private void ShowTable()
@@ -561,6 +579,11 @@ namespace DBADashGUI.CustomReports
 
         public void SetContext(DBADashContext _context, List<CustomSqlParameter> sqlParams)
         {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => SetContext(_context, sqlParams)));
+                return;
+            }
             doAutoSize = true;
             selectedTableIndex = 0;
             dgv.Columns.Clear();
@@ -581,6 +604,7 @@ namespace DBADashGUI.CustomReports
             }
             InitializeContextMenu();
             AddPickers();
+            tsTrigger.Visible = report.TriggerCollectionTypes.Count > 0 && context.CanMessage;
             RefreshData();
         }
 
@@ -853,6 +877,12 @@ namespace DBADashGUI.CustomReports
             tsClearFilter.Enabled = false;
             tsClearFilter.Font = new Font(tsClearFilter.Font, FontStyle.Regular);
             tsClearFilter.ToolTipText = string.Empty;
+        }
+
+        private async void tsTrigger_Click(object sender, EventArgs e)
+        {
+            if (context.CollectAgentID == null || context.ImportAgentID == null) return;
+            await Messaging.CollectionMessaging.TriggerCollection(context.ConnectionID, report.TriggerCollectionTypes, context.CollectAgentID.Value, context.ImportAgentID.Value, this, null);
         }
     }
 }

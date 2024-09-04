@@ -1177,6 +1177,7 @@ namespace DBADashGUI
             // 
             // tags1
             // 
+            tags1.AllTags = null;
             tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             tags1.Location = new System.Drawing.Point(3, 3);
             tags1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
