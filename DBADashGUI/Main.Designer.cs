@@ -218,6 +218,8 @@ namespace DBADashGUI
             queryStoreTop = new Performance.QueryStoreTopQueries();
             tabQueryStoreForcedPlans = new System.Windows.Forms.TabPage();
             queryStoreForcedPlans1 = new Performance.QueryStoreForcedPlans();
+            tabServerServices = new System.Windows.Forms.TabPage();
+            serverServices1 = new CustomReports.ServerServices();
             refresh1 = new Refresh();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -309,6 +311,7 @@ namespace DBADashGUI
             tabTableSize.SuspendLayout();
             tabTopQueries.SuspendLayout();
             tabQueryStoreForcedPlans.SuspendLayout();
+            tabServerServices.SuspendLayout();
             SuspendLayout();
             // 
             // TreeViewImageList
@@ -926,6 +929,7 @@ namespace DBADashGUI
             tabs.Controls.Add(tabTableSize);
             tabs.Controls.Add(tabTopQueries);
             tabs.Controls.Add(tabQueryStoreForcedPlans);
+            tabs.Controls.Add(tabServerServices);
             tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             tabs.Location = new System.Drawing.Point(0, 0);
             tabs.Name = "tabs";
@@ -2230,10 +2234,10 @@ namespace DBADashGUI
             // tabQueryStoreForcedPlans
             // 
             tabQueryStoreForcedPlans.Controls.Add(queryStoreForcedPlans1);
-            tabQueryStoreForcedPlans.Location = new System.Drawing.Point(4, 25);
+            tabQueryStoreForcedPlans.Location = new System.Drawing.Point(4, 29);
             tabQueryStoreForcedPlans.Name = "tabQueryStoreForcedPlans";
             tabQueryStoreForcedPlans.Padding = new System.Windows.Forms.Padding(3);
-            tabQueryStoreForcedPlans.Size = new System.Drawing.Size(1631, 1246);
+            tabQueryStoreForcedPlans.Size = new System.Drawing.Size(192, 67);
             tabQueryStoreForcedPlans.TabIndex = 51;
             tabQueryStoreForcedPlans.Text = "Forced Plans (Query Store)";
             tabQueryStoreForcedPlans.UseVisualStyleBackColor = true;
@@ -2243,8 +2247,27 @@ namespace DBADashGUI
             queryStoreForcedPlans1.Dock = System.Windows.Forms.DockStyle.Fill;
             queryStoreForcedPlans1.Location = new System.Drawing.Point(3, 3);
             queryStoreForcedPlans1.Name = "queryStoreForcedPlans1";
-            queryStoreForcedPlans1.Size = new System.Drawing.Size(1625, 1240);
+            queryStoreForcedPlans1.Size = new System.Drawing.Size(186, 61);
             queryStoreForcedPlans1.TabIndex = 0;
+            // 
+            // tabServerServices
+            // 
+            tabServerServices.Controls.Add(serverServices1);
+            tabServerServices.Location = new System.Drawing.Point(4, 25);
+            tabServerServices.Name = "tabServerServices";
+            tabServerServices.Padding = new System.Windows.Forms.Padding(3);
+            tabServerServices.Size = new System.Drawing.Size(1631, 1246);
+            tabServerServices.TabIndex = 52;
+            tabServerServices.Text = "Server Services";
+            tabServerServices.UseVisualStyleBackColor = true;
+            // 
+            // serverServices1
+            // 
+            serverServices1.Dock = System.Windows.Forms.DockStyle.Fill;
+            serverServices1.Location = new System.Drawing.Point(3, 3);
+            serverServices1.Name = "serverServices1";
+            serverServices1.Size = new System.Drawing.Size(1625, 1240);
+            serverServices1.TabIndex = 0;
             // 
             // refresh1
             // 
@@ -2575,6 +2598,7 @@ namespace DBADashGUI
             tabTableSize.ResumeLayout(false);
             tabTopQueries.ResumeLayout(false);
             tabQueryStoreForcedPlans.ResumeLayout(false);
+            tabServerServices.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -2788,5 +2812,7 @@ namespace DBADashGUI
         private Performance.QueryStoreTopQueries queryStoreTop;
         private System.Windows.Forms.TabPage tabQueryStoreForcedPlans;
         private Performance.QueryStoreForcedPlans queryStoreForcedPlans1;
+        private System.Windows.Forms.TabPage tabServerServices;
+        private CustomReports.ServerServices serverServices1;
     }
 }
