@@ -45,6 +45,7 @@
             lblSelectResults = new System.Windows.Forms.ToolStripLabel();
             tsParams = new System.Windows.Forms.ToolStripDropDownButton();
             tsClearFilter = new System.Windows.Forms.ToolStripButton();
+            tsTrigger = new System.Windows.Forms.ToolStripButton();
             lnkParams = new System.Windows.Forms.LinkLabel();
             pnlParams = new System.Windows.Forms.Panel();
             splitContainer2 = new System.Windows.Forms.SplitContainer();
@@ -78,7 +79,7 @@
             dgv.ReadOnly = true;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
-            dgv.Size = new System.Drawing.Size(414, 562);
+            dgv.Size = new System.Drawing.Size(414, 559);
             dgv.TabIndex = 0;
             dgv.CellContentClick += Dgv_CellContentClick;
             dgv.RowsAdded += Dgv_RowsAdded;
@@ -86,10 +87,10 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsCols, tsConfigure, cboResults, lblSelectResults, tsParams, tsClearFilter });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsCols, tsConfigure, cboResults, lblSelectResults, tsParams, tsClearFilter, tsTrigger });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new System.Drawing.Size(1242, 28);
+            toolStrip1.Size = new System.Drawing.Size(1242, 27);
             toolStrip1.TabIndex = 1;
             toolStrip1.Text = "toolStrip1";
             // 
@@ -99,7 +100,7 @@
             tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsRefresh.Name = "tsRefresh";
-            tsRefresh.Size = new System.Drawing.Size(29, 25);
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
             tsRefresh.Text = "Refresh Data";
             tsRefresh.Click += TsRefresh_Click;
             // 
@@ -109,7 +110,7 @@
             tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCopy.Name = "tsCopy";
-            tsCopy.Size = new System.Drawing.Size(29, 25);
+            tsCopy.Size = new System.Drawing.Size(29, 24);
             tsCopy.Text = "Copy";
             tsCopy.Click += TsCopy_Click;
             // 
@@ -119,7 +120,7 @@
             tsExcel.Image = Properties.Resources.excel16x16;
             tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExcel.Name = "tsExcel";
-            tsExcel.Size = new System.Drawing.Size(29, 25);
+            tsExcel.Size = new System.Drawing.Size(29, 24);
             tsExcel.Text = "Export to Excel";
             tsExcel.Click += TsExcel_Click;
             // 
@@ -129,7 +130,7 @@
             tsCols.Image = Properties.Resources.Column_16x;
             tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCols.Name = "tsCols";
-            tsCols.Size = new System.Drawing.Size(29, 25);
+            tsCols.Size = new System.Drawing.Size(29, 24);
             tsCols.Text = "Columns";
             tsCols.Click += TsCols_Click;
             // 
@@ -140,7 +141,7 @@
             tsConfigure.Image = Properties.Resources.SettingsOutline_16x;
             tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsConfigure.Name = "tsConfigure";
-            tsConfigure.Size = new System.Drawing.Size(34, 25);
+            tsConfigure.Size = new System.Drawing.Size(34, 24);
             tsConfigure.Text = "Configure";
             // 
             // setTitleToolStripMenuItem
@@ -209,7 +210,7 @@
             // 
             lblSelectResults.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             lblSelectResults.Name = "lblSelectResults";
-            lblSelectResults.Size = new System.Drawing.Size(102, 25);
+            lblSelectResults.Size = new System.Drawing.Size(102, 24);
             lblSelectResults.Text = "Select Results:";
             lblSelectResults.Visible = false;
             // 
@@ -219,7 +220,7 @@
             tsParams.Image = Properties.Resources.ReportParameter_16x;
             tsParams.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsParams.Name = "tsParams";
-            tsParams.Size = new System.Drawing.Size(34, 25);
+            tsParams.Size = new System.Drawing.Size(34, 24);
             tsParams.Text = "Parameters";
             // 
             // tsClearFilter
@@ -228,9 +229,20 @@
             tsClearFilter.Image = Properties.Resources.Eraser_16x;
             tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsClearFilter.Name = "tsClearFilter";
-            tsClearFilter.Size = new System.Drawing.Size(104, 25);
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
             tsClearFilter.Text = "Clear Filter";
             tsClearFilter.Click += TsClearFilter_Click;
+            // 
+            // tsTrigger
+            // 
+            tsTrigger.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsTrigger.Image = Properties.Resources.ProjectSystemModelRefresh_16x;
+            tsTrigger.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsTrigger.Name = "tsTrigger";
+            tsTrigger.Size = new System.Drawing.Size(151, 24);
+            tsTrigger.Text = "Trigger Collection";
+            tsTrigger.Visible = false;
+            tsTrigger.Click += tsTrigger_Click;
             // 
             // lnkParams
             // 
@@ -238,7 +250,7 @@
             lnkParams.Font = new System.Drawing.Font("Segoe UI", 16F);
             lnkParams.Location = new System.Drawing.Point(0, 0);
             lnkParams.Name = "lnkParams";
-            lnkParams.Size = new System.Drawing.Size(824, 267);
+            lnkParams.Size = new System.Drawing.Size(824, 265);
             lnkParams.TabIndex = 2;
             lnkParams.TabStop = true;
             lnkParams.Text = "Set Parameters";
@@ -251,7 +263,7 @@
             pnlParams.Dock = System.Windows.Forms.DockStyle.Fill;
             pnlParams.Location = new System.Drawing.Point(0, 0);
             pnlParams.Name = "pnlParams";
-            pnlParams.Size = new System.Drawing.Size(824, 562);
+            pnlParams.Size = new System.Drawing.Size(824, 559);
             pnlParams.TabIndex = 3;
             // 
             // splitContainer2
@@ -271,8 +283,8 @@
             // 
             splitContainer2.Panel2.Controls.Add(lblParamsRequired);
             splitContainer2.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            splitContainer2.Size = new System.Drawing.Size(824, 562);
-            splitContainer2.SplitterDistance = 267;
+            splitContainer2.Size = new System.Drawing.Size(824, 559);
+            splitContainer2.SplitterDistance = 265;
             splitContainer2.TabIndex = 4;
             // 
             // lblParamsRequired
@@ -281,7 +293,7 @@
             lblParamsRequired.Font = new System.Drawing.Font("Segoe UI", 10F);
             lblParamsRequired.Location = new System.Drawing.Point(0, 0);
             lblParamsRequired.Name = "lblParamsRequired";
-            lblParamsRequired.Size = new System.Drawing.Size(824, 291);
+            lblParamsRequired.Size = new System.Drawing.Size(824, 290);
             lblParamsRequired.TabIndex = 3;
             lblParamsRequired.Text = "Parameters are required to run the report";
             lblParamsRequired.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -289,7 +301,7 @@
             // splitContainer1
             // 
             splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            splitContainer1.Location = new System.Drawing.Point(0, 28);
+            splitContainer1.Location = new System.Drawing.Point(0, 27);
             splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
@@ -299,7 +311,7 @@
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(pnlParams);
-            splitContainer1.Size = new System.Drawing.Size(1242, 562);
+            splitContainer1.Size = new System.Drawing.Size(1242, 559);
             splitContainer1.SplitterDistance = 414;
             splitContainer1.TabIndex = 4;
             // 
@@ -307,10 +319,10 @@
             // 
             statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { lblDescription });
-            statusStrip1.Location = new System.Drawing.Point(0, 590);
+            statusStrip1.Location = new System.Drawing.Point(0, 586);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.ShowItemToolTips = true;
-            statusStrip1.Size = new System.Drawing.Size(1242, 22);
+            statusStrip1.Size = new System.Drawing.Size(1242, 26);
             statusStrip1.TabIndex = 5;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -318,7 +330,7 @@
             // 
             lblDescription.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             lblDescription.Name = "lblDescription";
-            lblDescription.Size = new System.Drawing.Size(1227, 20);
+            lblDescription.Size = new System.Drawing.Size(1188, 20);
             lblDescription.Spring = true;
             lblDescription.Text = "Description...";
             lblDescription.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -377,5 +389,6 @@
         private System.Windows.Forms.ToolStripMenuItem scriptReportToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsClearFilter;
         private System.Windows.Forms.ToolStripDropDownButton tsParams;
+        private System.Windows.Forms.ToolStripButton tsTrigger;
     }
 }
