@@ -709,7 +709,7 @@ namespace DBADashGUI
                     allowedTabs.AddRange(new[]
                     {
                         tabInstanceConfig, tabTraceFlags, tabHardware, tabSQLPatching, tabAlerts, tabDrivers, tabTempDB,
-                        tabRG
+                        tabRG, tabServerServices
                     });
                 }
 
