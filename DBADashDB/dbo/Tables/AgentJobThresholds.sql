@@ -1,5 +1,5 @@
 ﻿CREATE TABLE dbo.AgentJobThresholds(
-    InstanceId INT NOT NULL,
+    InstanceID INT NOT NULL,
     job_id UNIQUEIDENTIFIER NOT NULL,
     TimeSinceLastFailureWarning INT NULL,
     TimeSinceLastFailureCritical INT NULL,
@@ -16,7 +16,7 @@
     LastFailIsCritical BIT NOT NULL,
     LastFailIsWarning BIT NOT NULL,
     AgentIsRunningCheck BIT NOT NULL CONSTRAINT DF_AgentIsRunningCheck DEFAULT (1),
-    CONSTRAINT PK_AgentJobThresholds PRIMARY KEY CLUSTERED (InstanceId ASC, job_id ASC)
+    CONSTRAINT PK_AgentJobThresholds PRIMARY KEY CLUSTERED (InstanceID ASC, job_id ASC)
 );
 
 

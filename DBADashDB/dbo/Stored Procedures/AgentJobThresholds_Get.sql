@@ -3,7 +3,7 @@
     @JobID UNIQUEIDENTIFIER
 )
 AS
-SELECT InstanceId,
+SELECT InstanceID,
        job_id,
        TimeSinceLastFailureWarning,
        TimeSinceLastFailureCritical,

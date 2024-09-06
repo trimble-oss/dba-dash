@@ -31,7 +31,7 @@ BEGIN
 	END
 
 	DELETE dbo.AgentJobThresholds
-	WHERE InstanceId = @InstanceID
+	WHERE InstanceID = @InstanceID
 
 	DELETE dbo.Alerts
 	WHERE InstanceID=@InstanceID

@@ -24,7 +24,7 @@ SET NOCOUNT ON
 
 BEGIN TRAN
 DELETE dbo.AgentJobThresholds
-WHERE InstanceId = @InstanceId
+WHERE InstanceID = @InstanceId
 AND job_id = @job_id
 
 IF @Inherit=0
@@ -32,7 +32,7 @@ BEGIN
 
 	INSERT INTO dbo.AgentJobThresholds
 	(
-		InstanceId,
+		InstanceID,
 		job_id,
 		TimeSinceLastFailureWarning,
 		TimeSinceLastFailureCritical,
