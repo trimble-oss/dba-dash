@@ -772,7 +772,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private async void DrillDownTabIndexChanged(object sender, EventArgs e)
+        private void DrillDownTabIndexChanged(object sender, EventArgs e)
         {
             QueryDrillDown();
         }

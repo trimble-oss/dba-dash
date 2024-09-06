@@ -165,14 +165,12 @@ namespace DBADashGUI.Performance
                 case < 1:
                     // Less than 1 day: Show time only
                     return date.ToString(cultureInfo.DateTimeFormat.ShortTimePattern, cultureInfo);
-                    break;
 
                 case < 7:
                     {
                         // Less than 7 days: Show day and time
                         var dayName = date.ToString("ddd", cultureInfo); // Short day name
                         return $"{dayName} {date.ToString(cultureInfo.DateTimeFormat.ShortTimePattern, cultureInfo)}";
-                        break;
                     }
                 default:
                     {
@@ -184,7 +182,6 @@ namespace DBADashGUI.Performance
                             // Different years: Show the full date
                             cultureInfo.DateTimeFormat.ShortDatePattern;
                         return date.ToString(dateFormat, cultureInfo).Trim();
-                        break;
                     }
             }
         }
@@ -393,7 +390,7 @@ namespace DBADashGUI.Performance
     // Custom Tooltip to show plan metrics
     public class CustomTooltip : IChartTooltip<SkiaSharpDrawingContext>
     {
-        private StackPanel<RoundedRectangleGeometry, SkiaSharpDrawingContext>? _stackPanel;
+        private StackPanel<RoundedRectangleGeometry, SkiaSharpDrawingContext> _stackPanel;
         private static readonly int s_zIndex = 10100;
         private readonly SolidColorPaint _backgroundPaint = new(DashColors.TrimbleBlueDark.ToSKColor());
         private readonly SolidColorPaint _fontPaint = new(new SKColor(230, 230, 230)) { ZIndex = s_zIndex + 1 };

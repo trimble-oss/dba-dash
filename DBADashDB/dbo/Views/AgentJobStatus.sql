@@ -43,7 +43,7 @@ SELECT	J.Instance,
 		cfg.JobStepFails7DaysCritical,
 		cfg.LastFailIsCritical,
 		cfg.LastFailIsWarning,
-		CASE WHEN cfg.job_id='00000000-0000-0000-0000-000000000000' AND cfg.InstanceId=-1 THEN 'Root' 
+		CASE WHEN cfg.job_id='00000000-0000-0000-0000-000000000000' AND cfg.InstanceID =-1 THEN 'Root' 
 			WHEN cfg.job_id='00000000-0000-0000-0000-000000000000' THEN 'Instance' 
 			WHEN cfg.job_id IS NULL THEN 'N/A' 
 			ELSE 'Job' END AS ConfiguredLevel,
@@ -98,9 +98,9 @@ CROSS APPLY dbo.SecondsToHumanDuration(J.MaxDurationSec) AS MaxD
 CROSS APPLY dbo.SecondsToHumanDuration(J.AvgDurationSec) AS AvgD
 OUTER APPLY(SELECT TOP(1) * 
 			FROM dbo.AgentJobThresholds T 
-			WHERE (T.InstanceId = J.InstanceID OR T.InstanceId =-1) 
+			WHERE (T.InstanceID = J.InstanceID OR T.InstanceID =-1) 
 			AND (T.job_id = J.job_id OR T.job_id ='00000000-0000-0000-0000-000000000000')
-			ORDER BY T.InstanceId DESC,T.job_id DESC) cfg
+			ORDER BY T.InstanceID DESC,T.job_id DESC) cfg
 OUTER APPLY(SELECT	CASE WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
 						WHEN (J.TimeSinceLastFailedMin <= cfg.TimeSinceLastFailureCritical OR J.TimeSinceLastFailedMin <= cfg.TimeSinceLastFailureWarning) 
 							AND J.AckDate > ISNULL(J.LastFailed,'19000101') THEN 5 /* Acknowledged.  Warning or Critical threshold met but acknowledged date greater than last failed */
