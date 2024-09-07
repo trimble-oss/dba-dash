@@ -60,5 +60,6 @@
     DatabaseStateStatus INT NOT NULL,
 	RefreshDate DATETIME NOT NULL,
 	IsAzure BIT NOT NULL,
+    MinIdentityEstimatedDays INT NULL,
 	CONSTRAINT PK_Summary PRIMARY KEY(InstanceID)
 );

@@ -345,6 +345,13 @@ namespace DBADashGUI
                 dgvSummary.Rows[idx].Cells["LogShippingStatus"].Value = isAzure ? "" : "View";
                 dgvSummary.Rows[idx].Cells["AGStatus"].Value = (int)row["AGStatus"] == 3 ? "" : "View";
                 dgvSummary.Rows[idx].Cells["QueryStoreStatus"].Value = (int)row["QueryStoreStatus"] == 3 ? "" : "View";
+                var identPct = (row["MaxIdentityPctUsed"] == DBNull.Value
+                    ? string.Empty : ((decimal)row["MaxIdentityPctUsed"]).ToString("P1"));
+                var identDays = row["MinIdentityEstimatedDays"] == DBNull.Value
+                    ? string.Empty
+                    : ((int)row["MinIdentityEstimatedDays"]) + " days";
+                dgvSummary.Rows[idx].Cells["IdentityStatus"].Value = string.Join(" / ", new[] { identPct, identDays }.Where(s => !string.IsNullOrEmpty(s))); ;
+
                 dgvSummary.Rows[idx].Cells["CorruptionStatus"].Value = row["DetectedCorruptionDateUtc"] == DBNull.Value
                     ? ""
                     : DateTime.UtcNow.Subtract((DateTime)row["DetectedCorruptionDateUtc"]).Humanize();
@@ -627,26 +634,29 @@ namespace DBADashGUI
                 case 0 when test == CorruptionStatus.Name:
                     ShowCorruptionViewer(context);
                     break;
+
                 case 0 when string.IsNullOrEmpty(tab):
                     FilterByStatus(new List<DBADashStatusEnum>() { DBADashStatusEnum.Warning, DBADashStatusEnum.Critical }, test);
                     break;
+
                 case 0:
                     Instance_Selected?.Invoke(this, new InstanceSelectedEventArgs() { InstanceID = context.InstanceID, Instance = context.InstanceName, Tab = tab });
                     break;
+
                 case >= 1 and <= 5:
-                {
-                    var status = e.ColumnIndex switch
                     {
-                        1 => DBADashStatusEnum.OK,
-                        2 => DBADashStatusEnum.Warning,
-                        3 => DBADashStatusEnum.Critical,
-                        4 => DBADashStatusEnum.NA,
-                        5 => DBADashStatusEnum.Acknowledged,
-                        _ => throw new Exception("Invalid ColumnIndex"),
-                    };
-                    FilterByStatus(status, test);
-                    break;
-                }
+                        var status = e.ColumnIndex switch
+                        {
+                            1 => DBADashStatusEnum.OK,
+                            2 => DBADashStatusEnum.Warning,
+                            3 => DBADashStatusEnum.Critical,
+                            4 => DBADashStatusEnum.NA,
+                            5 => DBADashStatusEnum.Acknowledged,
+                            _ => throw new Exception("Invalid ColumnIndex"),
+                        };
+                        FilterByStatus(status, test);
+                        break;
+                    }
             }
         }
 
@@ -735,6 +745,5 @@ namespace DBADashGUI
             CommonData.AcknowledgeInstanceUptime(-1);
             RefreshData(true);
         }
-
     }
 }

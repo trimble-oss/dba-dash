@@ -673,7 +673,7 @@
     <Build Include="dbo\Tables\IdentityColumnsHistory.sql" />
     <Build Include="dbo\Views\IdentityColumnsInfo.sql" />
     <Build Include="dbo\Stored Procedures\IdentityColumns_Get.sql" />
-    <Build Include="dbo\Tables\IdentityColumThresholds.sql" />
+    <Build Include="dbo\Tables\IdentityColumnThresholds.sql" />
     <Build Include="dbo\Stored Procedures\OSLoadedModuleSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\OSLoadedModules_Get.sql" />
     <Build Include="dbo\Stored Procedures\OSLoadedModulesStatus_Get.sql" />

@@ -1914,9 +1914,11 @@ BEGIN
 		DatabaseID,
 		object_name,
 		PctUsedWarningThreshold,
-		PctUsedCriticalThreshold
+		PctUsedCriticalThreshold,
+		DaysWarningThreshold,
+		DaysCriticalThreshold
 	)
-	VALUES (-1, -1, N'', 0.5, 0.8);
+	VALUES (-1, -1, N'', 0.5, 0.8,365,90);
 END
 
 /* 

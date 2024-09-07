@@ -4,5 +4,7 @@
 	object_name NVARCHAR(128) NOT NULL,
 	PctUsedWarningThreshold DECIMAL(9,3) NULL,
 	PctUsedCriticalThreshold DECIMAL(9,3) NULL,
+	DaysWarningThreshold INT NULL,
+	DaysCriticalThreshold INT NULL,
 	CONSTRAINT PK_IdentityColumnThresholds PRIMARY KEY(InstanceID,DatabaseID,object_name)
 )

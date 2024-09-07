@@ -28,6 +28,8 @@ SELECT ICI.InstanceID,
        ICI.max_rows,
        ICI.pct_used,
        ICI.IdentityStatus,
+       ICI.IdentityPctStatus,
+       ICI.IdentityDaysStatus,
        ICI.pct_free,
        ICI.pct_ident_used,
        ICI.pct_rows_used,
@@ -42,6 +44,8 @@ SELECT ICI.InstanceID,
        ICI.estimated_date,
        ICI.PctUsedWarningThreshold,
 	   ICI.PctUsedCriticalThreshold,
+       ICI.DaysWarningThreshold,
+       ICI.DaysCriticalThreshold,
        ICI.ThresholdConfigurationLevel
 FROM dbo.IdentityColumnsInfo ICI
 WHERE EXISTS(

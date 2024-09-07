@@ -91,13 +91,15 @@ namespace DBADashGUI.Checks
                 new DataGridViewTextBoxColumn() { HeaderText = "Avg Ident/day", DataPropertyName = "avg_ident_per_day", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Avg identity values used per day over the last ~month (Calc Days)" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Avg Rows/day", DataPropertyName = "avg_rows_per_day", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Avg rows added to the table per day of the last ~month (Calc Days)" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Avg Calc Days", DataPropertyName = "avg_calc_days", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, Visible = false, ToolTipText = "Number of days Avg Ident/day and Avg Rows/day have been calculated over" },
-                new DataGridViewTextBoxColumn() { HeaderText = "Estimated Days", DataPropertyName = "estimated_days", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Estimated days remaining until table runs out of identity values" },
-                new DataGridViewTextBoxColumn() { HeaderText = "Estimated Date", DataPropertyName = "estimated_date", DefaultCellStyle = new DataGridViewCellStyle() { Format = "d", NullValue = ">100 years" }, ToolTipText = "Estimated date table will run out of identity values" },
+                new DataGridViewTextBoxColumn() { Name = "colEstimatedDays", HeaderText = "Estimated Days", DataPropertyName = "estimated_days", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Estimated days remaining until table runs out of identity values" },
+                new DataGridViewTextBoxColumn() { Name = "colEstimatedDate", HeaderText = "Estimated Date", DataPropertyName = "estimated_date", DefaultCellStyle = new DataGridViewCellStyle() { Format = "d", NullValue = ">100 years" }, ToolTipText = "Estimated date table will run out of identity values" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Ident Estimated Days", DataPropertyName = "ident_estimated_days", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, Visible = false, ToolTipText = "Estimated days remaining until table runs out of identity values.  Based on Ident Remaining and Avg Ident/day" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Row Estimated Days", DataPropertyName = "row_estimated_days", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, Visible = false, ToolTipText = "Estimated days remaining until table runs out of identity values.  Based on Rows Remaining and Avg Rows/day" },
                 new DataGridViewTextBoxColumn() { Name = "colSnapshotDate", HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", ToolTipText = "Date identity data was collected from the SQL instance" },
-                new DataGridViewTextBoxColumn() { Name = "colPctUsedWarningThreshold", HeaderText = "Warning Threshold", DataPropertyName = "PctUsedWarningThreshold", DefaultCellStyle = Common.DataGridViewPercentCellStyle, Visible = false },
-                new DataGridViewTextBoxColumn() { Name = "colPctUsedCriticalThreshold", HeaderText = "Critical Threshold", DataPropertyName = "PctUsedCriticalThreshold", DefaultCellStyle = Common.DataGridViewPercentCellStyle, Visible = false },
+                new DataGridViewTextBoxColumn() { Name = "colPctUsedWarningThreshold", HeaderText = "Warning Threshold (%)", DataPropertyName = "PctUsedWarningThreshold", DefaultCellStyle = Common.DataGridViewPercentCellStyle, Visible = false },
+                new DataGridViewTextBoxColumn() { Name = "colPctUsedCriticalThreshold", HeaderText = "Critical Threshold (%)", DataPropertyName = "PctUsedCriticalThreshold", DefaultCellStyle = Common.DataGridViewPercentCellStyle, Visible = false },
+                new DataGridViewTextBoxColumn() { Name = "colWarningThresholdDays", HeaderText = "Warning Threshold (Days)", DataPropertyName = "DaysWarningThreshold", Visible = false },
+                new DataGridViewTextBoxColumn() { Name = "colCriticalThresholdDays", HeaderText = "Critical Threshold (Days)", DataPropertyName = "DaysCriticalThreshold", Visible = false },
                 new DataGridViewTextBoxColumn() { Name = "colThresholdConfigurationLevel", HeaderText = "Config Level", DataPropertyName = "ThresholdConfigurationLevel", Visible = false },
                 new DataGridViewLinkColumn() { Name = "colEdit", HeaderText = "Edit", Text = "Edit", LinkColor = DashColors.LinkColor, ToolTipText = "Edit thresholds", UseColumnTextForLinkValue = true }
             );
@@ -150,10 +152,13 @@ namespace DBADashGUI.Checks
             {
                 var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
                 var SnapshotStatus = (DBADashStatus.DBADashStatusEnum)row["SnapshotStatus"];
-                var IdentityStatus = (DBADashStatus.DBADashStatusEnum)row["IdentityStatus"];
+                var IdentityPctStatus = (DBADashStatus.DBADashStatusEnum)row["IdentityPctStatus"];
+                var IdentityDaysStatus = (DBADashStatus.DBADashStatusEnum)row["IdentityDaysStatus"];
                 dgv.Rows[idx].Cells["colSnapshotDate"].SetStatusColor(SnapshotStatus);
-                dgv.Rows[idx].Cells["colPctUsed"].SetStatusColor(IdentityStatus);
-                dgv.Rows[idx].Cells["colPctFree"].SetStatusColor(IdentityStatus);
+                dgv.Rows[idx].Cells["colPctUsed"].SetStatusColor(IdentityPctStatus);
+                dgv.Rows[idx].Cells["colPctFree"].SetStatusColor(IdentityPctStatus);
+                dgv.Rows[idx].Cells["colEstimatedDays"].SetStatusColor(IdentityDaysStatus);
+                dgv.Rows[idx].Cells["colEstimatedDate"].SetStatusColor(IdentityDaysStatus);
             }
         }
 
