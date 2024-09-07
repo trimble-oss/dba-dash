@@ -10,6 +10,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Windows.Navigation;
 using DBADash;
 using DBADashGUI.Interface;
 
@@ -604,9 +605,11 @@ namespace DBADashGUI.CustomReports
             }
             InitializeContextMenu();
             AddPickers();
-            tsTrigger.Visible = report.TriggerCollectionTypes.Count > 0 && context.CanMessage;
+            SetTriggerCollectionVisibility();
             RefreshData();
         }
+
+        public void SetTriggerCollectionVisibility() => tsTrigger.Visible = report.TriggerCollectionTypes.Count > 0 && context.CanMessage;
 
         private void AddPickers()
         {
@@ -883,6 +886,16 @@ namespace DBADashGUI.CustomReports
         {
             if (context.CollectAgentID == null || context.ImportAgentID == null) return;
             await Messaging.CollectionMessaging.TriggerCollection(context.ConnectionID, report.TriggerCollectionTypes, context.CollectAgentID.Value, context.ImportAgentID.Value, this, null);
+        }
+
+        private void associateCollectionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var collectionTypes = string.Join(',', report.TriggerCollectionTypes);
+            if (CommonShared.ShowInputDialog(ref collectionTypes, "Enter collection types to associate with this report", default, "Enter name of collection to be associated with this report.\nThis will allow the collection to be triggered directly from this report.\nMultiple collections can be specified comma-separated.\ne.g.\nUserData.MyCustomCollection") != DialogResult.OK) return;
+
+            report.TriggerCollectionTypes = collectionTypes.Split(',').Select(c => c.Trim()).ToList();
+            report.Update();
+            SetTriggerCollectionVisibility();
         }
     }
 }
