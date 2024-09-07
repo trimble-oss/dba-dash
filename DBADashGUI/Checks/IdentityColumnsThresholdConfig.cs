@@ -36,20 +36,23 @@ namespace DBADashGUI.Checks
             lblObject.Text = rdr.GetString("SelectedObject");
             Warning = GetThresholdValue(rdr, "PctUsedWarningThreshold");
             Critical = GetThresholdValue(rdr, "PctUsedCriticalThreshold");
+            WarningDays = rdr["DaysWarningThreshold"].DBNullToNull() as int?;
+            CriticalDays = rdr["DaysCriticalThreshold"].DBNullToNull() as int?;
 
             chkInherit.Enabled = !(InstanceID == -1 && DatabaseID == -1 && ObjectName == "");
-            bttnUp.Enabled= !(InstanceID == -1 && DatabaseID == -1 && ObjectName == "");
+            bttnUp.Enabled = !(InstanceID == -1 && DatabaseID == -1 && ObjectName == "");
         }
 
         private decimal? Warning
         {
-            get=> chkWarning.Checked ? numWarning.Value / 100m : null;
+            get => chkWarning.Checked ? numWarning.Value / 100m : null;
             set
             {
                 chkWarning.Checked = value is >= 0m and <= 1m;
                 numWarning.Value = value is >= 0m and <= 1m ? (decimal)value * 100m : 0;
             }
         }
+
         private decimal? Critical
         {
             get => chkCritical.Checked ? numCritical.Value / 100m : null;
@@ -60,6 +63,25 @@ namespace DBADashGUI.Checks
             }
         }
 
+        private int? WarningDays
+        {
+            get => chkWarningDays.Checked ? (int)numWarningDays.Value : null;
+            set
+            {
+                chkWarningDays.Checked = value.HasValue;
+                numWarningDays.Value = value ?? 0;
+            }
+        }
+
+        private int? CriticalDays
+        {
+            get => chkCriticalDays.Checked ? (int)numCriticalDays.Value : null;
+            set
+            {
+                chkCriticalDays.Checked = value.HasValue;
+                numCriticalDays.Value = value ?? 0;
+            }
+        }
 
         private void UpdateThresholds()
         {
@@ -68,13 +90,14 @@ namespace DBADashGUI.Checks
             cmd.Parameters.AddWithValue("InstanceID", InstanceID);
             cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
             cmd.Parameters.AddWithValue("object_name", ObjectName);
-            cmd.Parameters.AddWithValue("PctUsedWarningThreshold", Warning==null ? DBNull.Value : (decimal)Warning);
-            cmd.Parameters.AddWithValue("PctUsedCriticalThreshold", Critical==null ? DBNull.Value : (decimal)Critical);
+            cmd.Parameters.AddWithValue("PctUsedWarningThreshold", Warning == null ? DBNull.Value : (decimal)Warning);
+            cmd.Parameters.AddWithValue("PctUsedCriticalThreshold", Critical == null ? DBNull.Value : (decimal)Critical);
+            cmd.Parameters.AddWithValue("DaysWarningThreshold", WarningDays.HasValue ? WarningDays : DBNull.Value);
+            cmd.Parameters.AddWithValue("DaysCriticalThreshold", CriticalDays.HasValue ? CriticalDays : DBNull.Value);
             cmd.Parameters.AddWithValue("Inherit", chkInherit.Checked);
-            cn.Open();  
+            cn.Open();
             cmd.ExecuteNonQuery();
         }
-
 
         private void ChkWarning_CheckedChanged(object sender, EventArgs e)
         {
@@ -86,6 +109,18 @@ namespace DBADashGUI.Checks
         {
             numCritical.Enabled = chkCritical.Checked;
             numCritical.Value = chkCritical.Checked ? 80 : 0;
+        }
+
+        private void ChkWarningDays_CheckedChanged(object sender, EventArgs e)
+        {
+            numWarningDays.Enabled = chkWarningDays.Checked;
+            numWarningDays.Value = chkWarningDays.Checked ? 365 : 0;
+        }
+
+        private void ChkCriticalDays_CheckedChanged(object sender, EventArgs e)
+        {
+            numCriticalDays.Enabled = chkCriticalDays.Checked;
+            numCriticalDays.Value = chkCriticalDays.Checked ? 90 : 0;
         }
 
         private static decimal GetThresholdValue(SqlDataReader rdr, string columnName)
@@ -116,25 +151,25 @@ namespace DBADashGUI.Checks
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
-            DialogResult= DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
 
         private void ChkInherit_CheckedChanged(object sender, EventArgs e)
         {
-            pnlConfig.Enabled=!chkInherit.Checked;
+            pnlConfig.Enabled = !chkInherit.Checked;
         }
 
         private void BttnUp_Click(object sender, EventArgs e)
         {
-            if(ObjectName!="")
+            if (ObjectName != "")
             {
                 ObjectName = "";
             }
-            else if (DatabaseID!=-1)
+            else if (DatabaseID != -1)
             {
                 DatabaseID = -1;
             }
-            else if (InstanceID !=-1)
+            else if (InstanceID != -1)
             {
                 InstanceID = -1;
             }

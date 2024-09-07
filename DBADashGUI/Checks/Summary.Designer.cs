@@ -815,7 +815,6 @@
             // 
             // IdentityStatus
             // 
-            IdentityStatus.DataPropertyName = "MaxIdentityPctUsed";
             dataGridViewCellStyle6.Format = "P1";
             IdentityStatus.DefaultCellStyle = dataGridViewCellStyle6;
             IdentityStatus.HeaderText = "Identity Columns";

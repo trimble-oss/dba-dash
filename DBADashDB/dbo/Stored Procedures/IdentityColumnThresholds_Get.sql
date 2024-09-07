@@ -12,6 +12,8 @@ SELECT TOP(1)
 		ISNULL(I.InstanceGroupName,'{Root}') + ISNULL(' \ ' + D.name,'') + ISNULL(' \ ' + NULLIF(P.object_name,''),'') AS SelectedObject,
 		T.PctUsedWarningThreshold,
 		T.PctUsedCriticalThreshold,
+		T.DaysWarningThreshold,
+		T.DaysCriticalThreshold,
 		CASE WHEN P.InstanceID = T.InstanceID 
 					AND P.DatabaseID = T.DatabaseID 
 					AND P.object_name = T.object_name

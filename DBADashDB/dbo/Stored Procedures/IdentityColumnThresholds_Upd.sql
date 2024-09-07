@@ -4,6 +4,8 @@
 	@object_name NVARCHAR(128),
 	@PctUsedWarningThreshold  DECIMAL(9,3),
 	@PctUsedCriticalThreshold DECIMAL(9,3),
+	@DaysWarningThreshold INT,
+	@DaysCriticalThreshold INT,
 	@Inherit BIT = 0
 )
 AS
@@ -17,8 +19,8 @@ AND T.object_name = @object_name
 
 IF @Inherit=0
 BEGIN
-	INSERT INTO dbo.IdentityColumnThresholds(InstanceID,DatabaseID,object_name,PctUsedWarningThreshold,PctUsedCriticalThreshold)
-	VALUES(@InstanceID,@DatabaseID,@object_name,@PctUsedWarningThreshold,@PctUsedCriticalThreshold)
+	INSERT INTO dbo.IdentityColumnThresholds(InstanceID,DatabaseID,object_name,PctUsedWarningThreshold,PctUsedCriticalThreshold,DaysWarningThreshold,DaysCriticalThreshold)
+	VALUES(@InstanceID,@DatabaseID,@object_name,@PctUsedWarningThreshold,@PctUsedCriticalThreshold,@DaysWarningThreshold,@DaysCriticalThreshold)
 END
 
 COMMIT

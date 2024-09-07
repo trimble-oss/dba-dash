@@ -20,7 +20,19 @@ SELECT	IC.InstanceID,
 		IC.max_rows,
 		calc2.pct_used,
 		calc2.pct_free,
-		CASE WHEN calc2.pct_used>THRES.PctUsedCriticalThreshold THEN 1 WHEN calc2.pct_used > THRES.PctUsedWarningThreshold THEN 2 WHEN THRES.PctUsedWarningThreshold IS NOT NULL OR THRES.PctUsedCriticalThreshold IS NOT NULL THEN 4 ELSE 3 END AS IdentityStatus,
+		CASE	WHEN calc2.pct_used>THRES.PctUsedCriticalThreshold OR calc3.estimated_days <= THRES.DaysCriticalThreshold THEN 1 
+				WHEN calc2.pct_used > THRES.PctUsedWarningThreshold OR calc3.estimated_days <= THRES.DaysWarningThreshold THEN 2 
+				WHEN THRES.PctUsedWarningThreshold IS NOT NULL OR THRES.PctUsedCriticalThreshold IS NOT NULL
+					OR THRES.DaysCriticalThreshold IS NOT NULL OR THRES.DaysWarningThreshold IS NOT NULL THEN 4 
+				ELSE 3 END AS IdentityStatus,
+		CASE	WHEN calc2.pct_used>THRES.PctUsedCriticalThreshold THEN 1 
+				WHEN calc2.pct_used > THRES.PctUsedWarningThreshold THEN 2 
+				WHEN THRES.PctUsedWarningThreshold IS NOT NULL OR THRES.PctUsedCriticalThreshold IS NOT NULL THEN 4 
+				ELSE 3 END AS IdentityPctStatus,
+		CASE	WHEN calc3.estimated_days <= THRES.DaysCriticalThreshold THEN 1 
+				WHEN calc3.estimated_days <= THRES.DaysWarningThreshold THEN 2 
+				WHEN THRES.DaysCriticalThreshold IS NOT NULL OR THRES.DaysWarningThreshold IS NOT NULL THEN 4 
+				ELSE 3 END AS IdentityDaysStatus,
 		calc.pct_ident_used,
         calc.pct_rows_used,
 		calc.remaining_ident_count,
@@ -34,6 +46,8 @@ SELECT	IC.InstanceID,
 		CAST(DATEADD(d,CASE WHEN calc3.estimated_days > 36500 THEN NULL ELSE calc3.estimated_days END,IC.SnapshotDate) AS DATE) AS estimated_date,
 		THRES.PctUsedWarningThreshold,
 		THRES.PctUsedCriticalThreshold,
+		THRES.DaysWarningThreshold,
+		THRES.DaysCriticalThreshold,
 		I.ShowInSummary,
 		THRES.ThresholdConfigurationLevel
 FROM dbo.IdentityColumns IC
@@ -52,7 +66,7 @@ OUTER APPLY(SELECT TOP(1) (IC.last_value-ICH.last_value) / (DATEDIFF(s,ICH.Snaps
 			WHERE ICH.InstanceID = IC.InstanceID 
 			AND ICH.DatabaseID = IC.DatabaseID
 			AND ICH.object_id = IC.object_id
-			AND ICH.SnapshotDate < IC.SnapshotDate
+			AND ICH.SnapshotDate < DATEADD(d,-1,IC.SnapshotDate) /* At least 1 day of history */
 			AND ICH.SnapshotDate > CAST(DATEADD(d,-31,GETUTCDATE()) AS DATETIME2(2))
 			ORDER BY ICH.SnapshotDate
 			) AS PerDay
@@ -72,6 +86,8 @@ OUTER APPLY(SELECT TOP(1)	T.WarningThreshold,
 			ORDER BY T.InstanceID DESC) cdt
 OUTER APPLY(SELECT TOP(1)	ICT.PctUsedWarningThreshold,
 							ICT.PctUsedCriticalThreshold,
+							ICT.DaysWarningThreshold,
+							ICT.DaysCriticalThreshold,
 							CASE WHEN ICT.object_name <>'' THEN 'Table' WHEN ICT.DatabaseID <> -1 THEN 'Database' WHEN ICT.InstanceID <> -1 THEN 'Instance' ELSE 'Root' END AS ThresholdConfigurationLevel
 		FROM dbo.IdentityColumnThresholds ICT
 		WHERE (ICT.InstanceID = IC.InstanceID OR ICT.InstanceID=-1)

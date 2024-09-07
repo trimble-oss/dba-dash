@@ -160,7 +160,8 @@ GROUP BY D.InstanceID
 /* Get max % used for each instance */
 SELECT	InstanceID,
 		MIN(NULLIF(IdentityStatus,3)) AS IdentityStatus,
-		MAX(pct_used) AS MaxIdentityPctUsed
+		MAX(pct_used) AS MaxIdentityPctUsed,
+		MIN(estimated_days) AS MinIdentityEstimatedDays
 INTO #IdentityStatus
 FROM dbo.IdentityColumnsInfo I
 GROUP BY InstanceID
@@ -168,7 +169,8 @@ UNION ALL
 /* Show status 4 (OK) if we have collected data for a instance but we don't have rows in IdentityColumns table.  (No identity columns have hit the collection threshold) */
 SELECT InstanceID,
 		4 AS IdentityStatus,
-		NULL AS MaxIdentityPctUsed
+		NULL AS MaxIdentityPctUsed,
+		NULL AS MinIdentityEstimatedDays
 FROM dbo.CollectionDatesStatus CD
 WHERE Reference='IdentityColumns'
 AND Status=4
@@ -260,7 +262,8 @@ SELECT I.InstanceID,
 	~I.ShowInSummary IsHidden,
 	ISNULL(DBState.DatabaseStateStatus,4) AS DatabaseStateStatus,
 	GETUTCDATE() AS RefreshDate,
-	CAST(0 AS BIT) AS IsAzure
+	CAST(0 AS BIT) AS IsAzure,
+	Ident.MinIdentityEstimatedDays
 INTO #Summary
 FROM dbo.Instances I 
 OUTER APPLY(
@@ -366,7 +369,8 @@ SELECT I.InstanceID,
 	~I.ShowInSummary AS IsHidden,
 	ISNULL(DBState.DatabaseStateStatus,4) AS DatabaseStateStatus,
 	GETUTCDATE() AS RefreshDate,
-	CAST(1 AS BIT) AS IsAzure
+	CAST(1 AS BIT) AS IsAzure,
+	Ident.MinIdentityEstimatedDays
 FROM dbo.Instances I
 LEFT JOIN #CollectionErrorStatus errSummary  ON I.InstanceID = errSummary.InstanceID
 LEFT JOIN #FileGroupStatus F ON I.InstanceID = F.InstanceID
@@ -443,7 +447,8 @@ INSERT INTO dbo.Summary(
 	IsHidden,
 	DatabaseStateStatus,
 	RefreshDate,
-	IsAzure
+	IsAzure,
+	MinIdentityEstimatedDays
 )
 SELECT InstanceID,
 	Instance,
@@ -505,7 +510,8 @@ SELECT InstanceID,
 	IsHidden,
 	DatabaseStateStatus,
 	RefreshDate,
-	IsAzure
+	IsAzure,
+	MinIdentityEstimatedDays
 FROM #Summary
 
 COMMIT
