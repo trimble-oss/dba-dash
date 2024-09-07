@@ -70,8 +70,8 @@ OUTER APPLY(SELECT TOP(1) (IC.last_value-ICH.last_value) / (DATEDIFF(s,ICH.Snaps
 			AND ICH.SnapshotDate > CAST(DATEADD(d,-31,GETUTCDATE()) AS DATETIME2(2))
 			ORDER BY ICH.SnapshotDate
 			) AS PerDay
-OUTER APPLY(SELECT	calc.remaining_ident_count / CASE WHEN PerDay.avg_ident_per_day <=0 THEN NULL ELSE PerDay.avg_ident_per_day END AS ident_estimated_days,
-					calc.remaining_row_count / CASE WHEN PerDay.avg_rows_per_day <=0 THEN NULL ELSE PerDay.avg_rows_per_day END AS row_estimated_days,
+OUTER APPLY(SELECT	calc.remaining_ident_count / CASE WHEN calc.remaining_ident_count =0 THEN 1  WHEN PerDay.avg_ident_per_day <=0 THEN NULL ELSE PerDay.avg_ident_per_day END AS ident_estimated_days,
+					calc.remaining_row_count / CASE WHEN calc.remaining_row_count = 0 THEN 1 WHEN PerDay.avg_rows_per_day <=0 THEN NULL ELSE PerDay.avg_rows_per_day END AS row_estimated_days,
 					(SELECT MAX(PCT.pct_used) FROM (VALUES (calc.pct_ident_used),(calc.pct_rows_used)) PCT(pct_used)) AS pct_used,
 					(SELECT 1.-MAX(PCT.pct_used) FROM (VALUES (calc.pct_ident_used),(calc.pct_rows_used)) PCT(pct_used)) AS pct_free
 			) AS calc2
