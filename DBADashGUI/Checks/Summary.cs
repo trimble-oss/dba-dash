@@ -349,7 +349,7 @@ namespace DBADashGUI
                     ? string.Empty : ((decimal)row["MaxIdentityPctUsed"]).ToString("P1"));
                 var identDays = row["MinIdentityEstimatedDays"] == DBNull.Value
                     ? string.Empty
-                    : ((int)row["MinIdentityEstimatedDays"]) + " days";
+                    : ((long)row["MinIdentityEstimatedDays"]) + " days";
                 dgvSummary.Rows[idx].Cells["IdentityStatus"].Value = string.Join(" / ", new[] { identPct, identDays }.Where(s => !string.IsNullOrEmpty(s))); ;
 
                 dgvSummary.Rows[idx].Cells["CorruptionStatus"].Value = row["DetectedCorruptionDateUtc"] == DBNull.Value
