@@ -288,8 +288,8 @@ namespace DBADashGUI
                         isFocusedRow = true;
                     }
                 }
-
-                if ((DBADashStatusEnum)row["IsAgentRunningStatus"] != DBADashStatusEnum.NA)
+                var agentRunningStatus = (DBADashStatusEnum)row["IsAgentRunningStatus"];
+                if (!(agentRunningStatus == DBADashStatusEnum.NA || (agentRunningStatus == DBADashStatusEnum.OK && FocusedView)))
                 {
                     isFocusedRow = true;
                     statusColumns["JobStatus"] = true;
