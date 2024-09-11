@@ -6,6 +6,7 @@ BEGIN
 	SET @SQL = N'
 			SELECT object_id,
 				   database_id,
+				   ' + CASE WHEN @IsAzure=1 THEN 'DB_NAME()' ELSE 'DB_NAME(database_id)' END + 'AS database_name,
 				   ISNULL(OBJECT_NAME(object_id, database_id),''{object_id:'' + CAST(object_id AS SYSNAME) + ''}'') object_name,
 				   total_worker_time,
 				   total_elapsed_time,
@@ -26,6 +27,7 @@ BEGIN
 	SET @SQL = @SQL + 'UNION ALL
 		SELECT object_id,
 		   database_id,
+		   ' + CASE WHEN @IsAzure=1 THEN 'DB_NAME()' ELSE 'DB_NAME(database_id)' END + 'AS database_name,
 		   ISNULL(OBJECT_NAME(object_id, database_id),''{object_id:'' + CAST(object_id AS SYSNAME) + ''}'') object_name,
 		   total_worker_time,
 		   total_elapsed_time,
@@ -46,6 +48,7 @@ BEGIN
 	SET @SQL = @SQL + 'UNION ALL
 		SELECT object_id,
 		   database_id,
+		   ' + CASE WHEN @IsAzure=1 THEN 'DB_NAME()' ELSE 'DB_NAME(database_id)' END + 'AS database_name,
 		   ISNULL(OBJECT_NAME(object_id, database_id),''{object_id:'' + CAST(object_id AS SYSNAME) + ''}'') object_name,
 		   total_worker_time,
 		   total_elapsed_time,

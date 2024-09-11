@@ -1,5 +1,5 @@
 ﻿CREATE PROC dbo.ObjectExecutionStats_Upd(
-    @ObjectExecutionStats dbo.ProcStats READONLY,
+    @ObjectExecutionStats dbo.ObjectExecutionStats READONLY,
     @InstanceID INT,
     @SnapshotDate DATETIME2(3)
 )
@@ -50,7 +50,7 @@ SELECT d.DatabaseID,
 	t.schema_name,
 	CAST(1 AS BIT)
 FROM @ObjectExecutionStats t
-JOIN dbo.Databases d ON t.database_id = d.database_id AND D.InstanceID=@InstanceID
+JOIN dbo.Databases d ON t.database_name = d.name AND D.InstanceID=@InstanceID
 WHERE D.IsActive=1
 AND NOT EXISTS(SELECT 1 
 			FROM dbo.DBObjects O 
@@ -69,7 +69,7 @@ UPDATE O
 	SET O.IsActive=1,
 	O.object_id = t.object_id
 FROM @ObjectExecutionStats t
-JOIN dbo.Databases d ON t.database_id = d.database_id AND D.InstanceID=@InstanceID
+JOIN dbo.Databases d ON t.database_name = d.name AND D.InstanceID=@InstanceID
 JOIN dbo.DBObjects O ON O.DatabaseID = d.DatabaseID 
 					AND O.ObjectName = t.object_name 
 					AND O.ObjectType = t.type
@@ -97,7 +97,7 @@ WITH t AS (
 		   END) AS IsCompile
 	FROM @ObjectExecutionStats a
 		LEFT JOIN Staging.ObjectExecutionStats b ON  a.object_id = b.object_id
-                                                    AND a.database_id = b.database_id
+                                                    AND a.database_name = b.database_name
                                                     AND a.cached_time = b.cached_time
                                                     AND b.InstanceID = @InstanceID
                                                     AND a.current_time_utc > b.current_time_utc		
@@ -108,7 +108,7 @@ WITH t AS (
                                                     AND a.total_logical_writes>= b.total_logical_writes
                                                     AND a.total_physical_reads>= b.total_physical_reads
                                                     AND a.execution_count>= b.execution_count
-	JOIN dbo.Databases d ON a.database_id = d.database_id AND D.InstanceID=@InstanceID
+	JOIN dbo.Databases d ON a.database_name = d.name AND D.InstanceID=@InstanceID
 	JOIN dbo.DBObjects O ON a.object_name = O.ObjectName AND a.schema_name = O.SchemaName AND O.DatabaseID = d.DatabaseID AND O.ObjectType = a.type
 	WHERE D.IsActive=1
 	AND (a.cached_time> DATEADD(s,-70,a.current_time_utc) OR b.object_id IS NOT NULL) -- recently cached or we can calculate diff from staging table
@@ -241,50 +241,57 @@ WHERE NOT EXISTS(SELECT 1
 DELETE Staging.ObjectExecutionStats WHERE InstanceID=@InstanceID;
 
 WITH T AS (
-	-- handle infrequent dupes on object_id,cached_time,database_id
-	SELECT @InstanceID as InstanceID
-				,[object_id]
-			   ,[database_id]
-			   ,[object_name]
-			   ,[total_worker_time]
-			   ,[total_elapsed_time]
-			   ,[total_logical_reads]
-			   ,[total_logical_writes]
-			   ,[total_physical_reads]
-			   ,[cached_time]
-			   ,[execution_count]
-			   ,[current_time_utc],
-			   ROW_NUMBER() OVER(PARTITION BY object_id,cached_time,database_id ORDER BY total_elapsed_time DESC) rnum
-	FROM @ObjectExecutionStats
+   -- handle infrequent dupes on object_id,cached_time,database_name
+   SELECT @InstanceID AS InstanceID,
+          object_id,
+          database_id,
+          database_name,
+          object_name,
+          total_worker_time,
+          total_elapsed_time,
+          total_logical_reads,
+          total_logical_writes,
+          total_physical_reads,
+          cached_time,
+          execution_count,
+          current_time_utc,
+          ROW_NUMBER() OVER (PARTITION BY object_id,
+                                          cached_time,
+                                          database_name
+                             ORDER BY total_elapsed_time DESC
+                            ) rnum
+   FROM @ObjectExecutionStats
 )
 INSERT INTO Staging.ObjectExecutionStats(
-			InstanceID
-			,[object_id]
-           ,[database_id]
-           ,[object_name]
-           ,[total_worker_time]
-           ,[total_elapsed_time]
-           ,[total_logical_reads]
-           ,[total_logical_writes]
-           ,[total_physical_reads]
-           ,[cached_time]
-           ,[execution_count]
-           ,[current_time_utc])
-SELECT  InstanceID
-			,[object_id]
-           ,[database_id]
-           ,[object_name]
-           ,[total_worker_time]
-           ,[total_elapsed_time]
-           ,[total_logical_reads]
-           ,[total_logical_writes]
-           ,[total_physical_reads]
-           ,[cached_time]
-           ,[execution_count]
-           ,[current_time_utc]
+    InstanceID,
+    object_id,
+    database_id,
+    database_name,
+    object_name,
+    total_worker_time,
+    total_elapsed_time,
+    total_logical_reads,
+    total_logical_writes,
+    total_physical_reads,
+    cached_time,
+    execution_count,
+    current_time_utc
+)
+SELECT T.InstanceID,
+       object_id,
+       database_id,
+       database_name,
+       object_name,
+       total_worker_time,
+       total_elapsed_time,
+       total_logical_reads,
+       total_logical_writes,
+       total_physical_reads,
+       cached_time,
+       execution_count,
+       current_time_utc
 FROM T
-WHERE rnum=1;
-
+WHERE T.rnum = 1;
 
 EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
 										@Reference = @Ref,
