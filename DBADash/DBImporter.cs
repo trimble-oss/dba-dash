@@ -280,6 +280,10 @@ namespace DBADash
                     }
                 }
             }
+            if (data.Tables.Contains("ObjectExecutionStats") && !data.Tables["ObjectExecutionStats"]!.Columns.Contains("database_name"))
+            {
+                data.Tables["ObjectExecutionStats"].TableName = "ObjectExecutionStatsLegacy"; // Call ObjectExecutionStatsLegacy_Upd which will add the database_name column and call ObjectExecutionStats_Upd
+            }
         }
 
         private readonly HashSet<string> tablesToProcess = new()
@@ -294,7 +298,7 @@ namespace DBADash
             "Jobs", "JobHistory", "AvailabilityReplicas", "AvailabilityGroups", "JobSteps",
             "DatabaseQueryStoreOptions", "ResourceGovernorConfiguration", "AzureDBResourceGovernance",
             "RunningQueries", "QueryText", "QueryPlans", "InternalPerformanceCounters", "MemoryUsage",
-            "SessionWaits", "IdentityColumns", "RunningJobs", "TableSize", "ServerServices"
+            "SessionWaits", "IdentityColumns", "RunningJobs", "TableSize", "ServerServices","ObjectExecutionStatsLegacy"
         };
 
         public void Update()
