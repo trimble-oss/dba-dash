@@ -29,215 +29,309 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DBConnection));
-            this.txtServerName = new System.Windows.Forms.TextBox();
-            this.lblServer = new System.Windows.Forms.Label();
-            this.chkIntegratedSecurity = new System.Windows.Forms.CheckBox();
-            this.pnlAuth = new System.Windows.Forms.Panel();
-            this.txtPassword = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.txtUserName = new System.Windows.Forms.TextBox();
-            this.bttnConnect = new System.Windows.Forms.Button();
-            this.bttnCancel = new System.Windows.Forms.Button();
-            this.cboDatabase = new System.Windows.Forms.ComboBox();
-            this.lblDatabase = new System.Windows.Forms.Label();
-            this.chkEncrypt = new System.Windows.Forms.CheckBox();
-            this.chkTrustServerCert = new System.Windows.Forms.CheckBox();
-            this.pnlAuth.SuspendLayout();
-            this.SuspendLayout();
+            txtServerName = new TextBox();
+            lblServer = new Label();
+            txtPassword = new TextBox();
+            lblPassword = new Label();
+            lblUserName = new Label();
+            txtUserName = new TextBox();
+            bttnConnect = new Button();
+            bttnCancel = new Button();
+            cboDatabase = new ComboBox();
+            lblDatabase = new Label();
+            chkTrustServerCert = new CheckBox();
+            label3 = new Label();
+            cboAuthType = new ComboBox();
+            cboEncryption = new ComboBox();
+            label1 = new Label();
+            label2 = new Label();
+            label4 = new Label();
+            label5 = new Label();
+            label6 = new Label();
+            label7 = new Label();
+            label8 = new Label();
+            txtHostNameInCertificate = new TextBox();
+            label9 = new Label();
+            SuspendLayout();
             // 
             // txtServerName
             // 
-            this.txtServerName.Location = new System.Drawing.Point(113, 9);
-            this.txtServerName.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.txtServerName.Name = "txtServerName";
-            this.txtServerName.Size = new System.Drawing.Size(358, 27);
-            this.txtServerName.TabIndex = 0;
-            this.txtServerName.Text = "localhost";
+            txtServerName.Location = new Point(274, 34);
+            txtServerName.Margin = new Padding(3, 4, 3, 4);
+            txtServerName.Name = "txtServerName";
+            txtServerName.Size = new Size(279, 27);
+            txtServerName.TabIndex = 0;
+            txtServerName.Text = "localhost";
             // 
             // lblServer
             // 
-            this.lblServer.AutoSize = true;
-            this.lblServer.Location = new System.Drawing.Point(12, 9);
-            this.lblServer.Name = "lblServer";
-            this.lblServer.Size = new System.Drawing.Size(97, 20);
-            this.lblServer.TabIndex = 1;
-            this.lblServer.Text = "Server Name:";
-            // 
-            // chkIntegratedSecurity
-            // 
-            this.chkIntegratedSecurity.AutoSize = true;
-            this.chkIntegratedSecurity.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.chkIntegratedSecurity.Checked = true;
-            this.chkIntegratedSecurity.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkIntegratedSecurity.Location = new System.Drawing.Point(315, 44);
-            this.chkIntegratedSecurity.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.chkIntegratedSecurity.Name = "chkIntegratedSecurity";
-            this.chkIntegratedSecurity.Size = new System.Drawing.Size(156, 24);
-            this.chkIntegratedSecurity.TabIndex = 2;
-            this.chkIntegratedSecurity.Text = "Integrated Security";
-            this.chkIntegratedSecurity.UseVisualStyleBackColor = true;
-            this.chkIntegratedSecurity.CheckedChanged += new System.EventHandler(this.ChkIntegratedSecurity_CheckedChanged);
-            // 
-            // pnlAuth
-            // 
-            this.pnlAuth.Controls.Add(this.txtPassword);
-            this.pnlAuth.Controls.Add(this.label2);
-            this.pnlAuth.Controls.Add(this.label1);
-            this.pnlAuth.Controls.Add(this.txtUserName);
-            this.pnlAuth.Enabled = false;
-            this.pnlAuth.Location = new System.Drawing.Point(113, 107);
-            this.pnlAuth.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.pnlAuth.Name = "pnlAuth";
-            this.pnlAuth.Size = new System.Drawing.Size(364, 110);
-            this.pnlAuth.TabIndex = 3;
+            lblServer.AutoSize = true;
+            lblServer.Location = new Point(83, 37);
+            lblServer.Name = "lblServer";
+            lblServer.Size = new Size(97, 20);
+            lblServer.TabIndex = 1;
+            lblServer.Text = "Server Name:";
             // 
             // txtPassword
             // 
-            this.txtPassword.Location = new System.Drawing.Point(122, 49);
-            this.txtPassword.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.txtPassword.Name = "txtPassword";
-            this.txtPassword.PasswordChar = '*';
-            this.txtPassword.Size = new System.Drawing.Size(236, 27);
-            this.txtPassword.TabIndex = 4;
+            txtPassword.Location = new Point(274, 138);
+            txtPassword.Margin = new Padding(3, 4, 3, 4);
+            txtPassword.Name = "txtPassword";
+            txtPassword.PasswordChar = '*';
+            txtPassword.Size = new Size(279, 27);
+            txtPassword.TabIndex = 3;
             // 
-            // label2
+            // lblPassword
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 52);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(73, 20);
-            this.label2.TabIndex = 3;
-            this.label2.Text = "Password:";
+            lblPassword.AutoSize = true;
+            lblPassword.Location = new Point(113, 141);
+            lblPassword.Name = "lblPassword";
+            lblPassword.Size = new Size(73, 20);
+            lblPassword.TabIndex = 3;
+            lblPassword.Text = "Password:";
             // 
-            // label1
+            // lblUserName
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(3, 14);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(79, 20);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "User name";
+            lblUserName.AutoSize = true;
+            lblUserName.Location = new Point(113, 106);
+            lblUserName.Name = "lblUserName";
+            lblUserName.Size = new Size(82, 20);
+            lblUserName.TabIndex = 2;
+            lblUserName.Text = "User name:";
             // 
             // txtUserName
             // 
-            this.txtUserName.Location = new System.Drawing.Point(122, 14);
-            this.txtUserName.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.txtUserName.Name = "txtUserName";
-            this.txtUserName.Size = new System.Drawing.Size(236, 27);
-            this.txtUserName.TabIndex = 0;
+            txtUserName.Location = new Point(274, 103);
+            txtUserName.Margin = new Padding(3, 4, 3, 4);
+            txtUserName.Name = "txtUserName";
+            txtUserName.Size = new Size(279, 27);
+            txtUserName.TabIndex = 2;
             // 
             // bttnConnect
             // 
-            this.bttnConnect.Location = new System.Drawing.Point(296, 356);
-            this.bttnConnect.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.bttnConnect.Name = "bttnConnect";
-            this.bttnConnect.Size = new System.Drawing.Size(75, 29);
-            this.bttnConnect.TabIndex = 4;
-            this.bttnConnect.Text = "Connect";
-            this.bttnConnect.UseVisualStyleBackColor = true;
-            this.bttnConnect.Click += new System.EventHandler(this.BttnConnect_Click);
+            bttnConnect.Location = new Point(355, 434);
+            bttnConnect.Margin = new Padding(3, 4, 3, 4);
+            bttnConnect.Name = "bttnConnect";
+            bttnConnect.Size = new Size(94, 29);
+            bttnConnect.TabIndex = 8;
+            bttnConnect.Text = "Connect";
+            bttnConnect.UseVisualStyleBackColor = true;
+            bttnConnect.Click += BttnConnect_Click;
             // 
             // bttnCancel
             // 
-            this.bttnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.bttnCancel.Location = new System.Drawing.Point(405, 356);
-            this.bttnCancel.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.bttnCancel.Name = "bttnCancel";
-            this.bttnCancel.Size = new System.Drawing.Size(75, 29);
-            this.bttnCancel.TabIndex = 5;
-            this.bttnCancel.Text = "Cancel";
-            this.bttnCancel.UseVisualStyleBackColor = true;
-            this.bttnCancel.Click += new System.EventHandler(this.BttnCancel_Click);
+            bttnCancel.DialogResult = DialogResult.Cancel;
+            bttnCancel.Location = new Point(455, 434);
+            bttnCancel.Margin = new Padding(3, 4, 3, 4);
+            bttnCancel.Name = "bttnCancel";
+            bttnCancel.Size = new Size(94, 29);
+            bttnCancel.TabIndex = 9;
+            bttnCancel.Text = "Cancel";
+            bttnCancel.UseVisualStyleBackColor = true;
+            bttnCancel.Click += BttnCancel_Click;
             // 
             // cboDatabase
             // 
-            this.cboDatabase.FormattingEnabled = true;
-            this.cboDatabase.Location = new System.Drawing.Point(113, 245);
-            this.cboDatabase.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.cboDatabase.Name = "cboDatabase";
-            this.cboDatabase.Size = new System.Drawing.Size(358, 28);
-            this.cboDatabase.TabIndex = 6;
-            this.cboDatabase.DropDown += new System.EventHandler(this.CboDatabase_Dropdown);
+            cboDatabase.FormattingEnabled = true;
+            cboDatabase.Location = new Point(270, 375);
+            cboDatabase.Margin = new Padding(3, 4, 3, 4);
+            cboDatabase.Name = "cboDatabase";
+            cboDatabase.Size = new Size(279, 28);
+            cboDatabase.TabIndex = 7;
+            cboDatabase.DropDown += CboDatabase_Dropdown;
             // 
             // lblDatabase
             // 
-            this.lblDatabase.AutoSize = true;
-            this.lblDatabase.Location = new System.Drawing.Point(12, 249);
-            this.lblDatabase.Name = "lblDatabase";
-            this.lblDatabase.Size = new System.Drawing.Size(75, 20);
-            this.lblDatabase.TabIndex = 7;
-            this.lblDatabase.Text = "Database:";
-            // 
-            // chkEncrypt
-            // 
-            this.chkEncrypt.AutoSize = true;
-            this.chkEncrypt.Checked = true;
-            this.chkEncrypt.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkEncrypt.Location = new System.Drawing.Point(113, 280);
-            this.chkEncrypt.Name = "chkEncrypt";
-            this.chkEncrypt.Size = new System.Drawing.Size(159, 24);
-            this.chkEncrypt.TabIndex = 8;
-            this.chkEncrypt.Text = "Encrypt Connection";
-            this.chkEncrypt.UseVisualStyleBackColor = true;
+            lblDatabase.AutoSize = true;
+            lblDatabase.Location = new Point(79, 383);
+            lblDatabase.Name = "lblDatabase";
+            lblDatabase.Size = new Size(75, 20);
+            lblDatabase.TabIndex = 7;
+            lblDatabase.Text = "Database:";
             // 
             // chkTrustServerCert
             // 
-            this.chkTrustServerCert.AutoSize = true;
-            this.chkTrustServerCert.Checked = true;
-            this.chkTrustServerCert.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkTrustServerCert.Location = new System.Drawing.Point(292, 280);
-            this.chkTrustServerCert.Name = "chkTrustServerCert";
-            this.chkTrustServerCert.Size = new System.Drawing.Size(179, 24);
-            this.chkTrustServerCert.TabIndex = 9;
-            this.chkTrustServerCert.Text = "Trust Server Certificate";
-            this.chkTrustServerCert.UseVisualStyleBackColor = true;
+            chkTrustServerCert.AutoSize = true;
+            chkTrustServerCert.Location = new Point(274, 256);
+            chkTrustServerCert.Name = "chkTrustServerCert";
+            chkTrustServerCert.Size = new Size(179, 24);
+            chkTrustServerCert.TabIndex = 5;
+            chkTrustServerCert.Text = "Trust Server Certificate";
+            chkTrustServerCert.UseVisualStyleBackColor = true;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(83, 71);
+            label3.Name = "label3";
+            label3.Size = new Size(109, 20);
+            label3.TabIndex = 10;
+            label3.Text = "Authentication:";
+            // 
+            // cboAuthType
+            // 
+            cboAuthType.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboAuthType.FormattingEnabled = true;
+            cboAuthType.Items.AddRange(new object[] { "Windows Authentication", "SQL Server Authentication", "Microsoft Entra MFA" });
+            cboAuthType.Location = new Point(274, 68);
+            cboAuthType.Name = "cboAuthType";
+            cboAuthType.Size = new Size(279, 28);
+            cboAuthType.TabIndex = 1;
+            cboAuthType.SelectedIndexChanged += cboAuthType_SelectedIndexChanged;
+            // 
+            // cboEncryption
+            // 
+            cboEncryption.FormattingEnabled = true;
+            cboEncryption.Location = new Point(274, 221);
+            cboEncryption.Margin = new Padding(3, 4, 3, 4);
+            cboEncryption.Name = "cboEncryption";
+            cboEncryption.Size = new Size(279, 28);
+            cboEncryption.TabIndex = 4;
+            cboEncryption.SelectedIndexChanged += cboEncryption_SelectedIndexChanged;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(83, 224);
+            label1.Name = "label1";
+            label1.Size = new Size(82, 20);
+            label1.TabIndex = 13;
+            label1.Text = "Encryption:";
+            // 
+            // label2
+            // 
+            label2.BorderStyle = BorderStyle.Fixed3D;
+            label2.Location = new Point(168, 193);
+            label2.Name = "label2";
+            label2.Size = new Size(402, 2);
+            label2.TabIndex = 2;
+            // 
+            // label4
+            // 
+            label4.BorderStyle = BorderStyle.Fixed3D;
+            label4.Location = new Point(70, 352);
+            label4.Name = "label4";
+            label4.Size = new Size(500, 2);
+            label4.TabIndex = 16;
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(18, 184);
+            label5.Name = "label5";
+            label5.Size = new Size(140, 20);
+            label5.TabIndex = 17;
+            label5.Text = "Connection Security";
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Location = new Point(18, 9);
+            label6.Name = "label6";
+            label6.Size = new Size(50, 20);
+            label6.TabIndex = 18;
+            label6.Text = "Server";
+            // 
+            // label7
+            // 
+            label7.BorderStyle = BorderStyle.Fixed3D;
+            label7.Location = new Point(74, 18);
+            label7.Name = "label7";
+            label7.Size = new Size(496, 2);
+            label7.TabIndex = 19;
+            // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Location = new Point(18, 343);
+            label8.Name = "label8";
+            label8.Size = new Size(46, 20);
+            label8.TabIndex = 20;
+            label8.Text = "Other";
+            // 
+            // txtHostNameInCertificate
+            // 
+            txtHostNameInCertificate.Location = new Point(274, 286);
+            txtHostNameInCertificate.Name = "txtHostNameInCertificate";
+            txtHostNameInCertificate.Size = new Size(279, 27);
+            txtHostNameInCertificate.TabIndex = 6;
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Location = new Point(83, 289);
+            label9.Name = "label9";
+            label9.Size = new Size(170, 20);
+            label9.TabIndex = 22;
+            label9.Text = "Host name in certificate:";
             // 
             // DBConnection
             // 
-            this.AcceptButton = this.bttnConnect;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.bttnCancel;
-            this.ClientSize = new System.Drawing.Size(512, 400);
-            this.Controls.Add(this.chkTrustServerCert);
-            this.Controls.Add(this.chkEncrypt);
-            this.Controls.Add(this.lblDatabase);
-            this.Controls.Add(this.cboDatabase);
-            this.Controls.Add(this.bttnCancel);
-            this.Controls.Add(this.bttnConnect);
-            this.Controls.Add(this.pnlAuth);
-            this.Controls.Add(this.chkIntegratedSecurity);
-            this.Controls.Add(this.lblServer);
-            this.Controls.Add(this.txtServerName);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "DBConnection";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Connect";
-            this.Load += new System.EventHandler(this.DBConnection_Load);
-            this.pnlAuth.ResumeLayout(false);
-            this.pnlAuth.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AcceptButton = bttnConnect;
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            CancelButton = bttnCancel;
+            ClientSize = new Size(591, 486);
+            Controls.Add(label9);
+            Controls.Add(txtHostNameInCertificate);
+            Controls.Add(label8);
+            Controls.Add(label7);
+            Controls.Add(label6);
+            Controls.Add(label5);
+            Controls.Add(label4);
+            Controls.Add(label1);
+            Controls.Add(label2);
+            Controls.Add(chkTrustServerCert);
+            Controls.Add(cboEncryption);
+            Controls.Add(txtPassword);
+            Controls.Add(cboAuthType);
+            Controls.Add(txtUserName);
+            Controls.Add(lblPassword);
+            Controls.Add(label3);
+            Controls.Add(lblUserName);
+            Controls.Add(lblDatabase);
+            Controls.Add(cboDatabase);
+            Controls.Add(bttnCancel);
+            Controls.Add(bttnConnect);
+            Controls.Add(lblServer);
+            Controls.Add(txtServerName);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            Margin = new Padding(3, 4, 3, 4);
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "DBConnection";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "Connect";
+            Load += DBConnection_Load;
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
 
         private System.Windows.Forms.TextBox txtServerName;
         private System.Windows.Forms.Label lblServer;
-        private System.Windows.Forms.CheckBox chkIntegratedSecurity;
-        private System.Windows.Forms.Panel pnlAuth;
         private System.Windows.Forms.TextBox txtPassword;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblPassword;
+        private System.Windows.Forms.Label lblUserName;
         private System.Windows.Forms.TextBox txtUserName;
         private System.Windows.Forms.Button bttnConnect;
         private System.Windows.Forms.Button bttnCancel;
         private System.Windows.Forms.ComboBox cboDatabase;
         private System.Windows.Forms.Label lblDatabase;
-        private System.Windows.Forms.CheckBox chkEncrypt;
         private System.Windows.Forms.CheckBox chkTrustServerCert;
+        private Label label3;
+        private ComboBox cboAuthType;
+        private ComboBox cboEncryption;
+        private Label label1;
+        private Label label2;
+        private Label label4;
+        private Label label5;
+        private Label label6;
+        private Label label7;
+        private Label label8;
+        private TextBox txtHostNameInCertificate;
+        private Label label9;
     }
 }
