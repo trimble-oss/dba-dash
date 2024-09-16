@@ -141,6 +141,10 @@ namespace DBADashServiceConfig
                             src.SourceConnection.Validate();
                             validated = true;
                             src.ConnectionID = src.GetGeneratedConnectionID();
+                            if(src.SourceConnection.ApplicationIntent() == ApplicationIntent.ReadOnly)
+                            {
+                                src.ConnectionID += "|ReadOnly";
+                            }
 
                             if (src.SourceConnection.Type == ConnectionType.SQL &&
                                 string.IsNullOrEmpty(src.SourceConnection.ConnectionInfo.ServerName))

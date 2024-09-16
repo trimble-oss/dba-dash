@@ -158,6 +158,19 @@ namespace DBADash
             }
         }
 
+        public ApplicationIntent? ApplicationIntent()
+        {
+            if (connectionType == ConnectionType.SQL)
+            {
+                SqlConnectionStringBuilder builder = new(connectionString);
+                return builder.ApplicationIntent;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public string DataSource()
         {
             if (connectionType == ConnectionType.SQL)
