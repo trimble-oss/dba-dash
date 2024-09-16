@@ -57,7 +57,8 @@ BEGIN
 END
 ELSE IF NOT EXISTS(SELECT * 
 			FROM sys.objects
-			WHERE type NOT IN('S','IT','SQ')          
+			WHERE type NOT IN('S','IT','SQ')
+            AND is_ms_shipped=0
             )
         AND DB_ID()>4
 BEGIN
