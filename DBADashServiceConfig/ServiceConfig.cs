@@ -1097,7 +1097,6 @@ namespace DBADashServiceConfig
                     DataSource = Environment.MachineName,
                     InitialCatalog = "DBADashDB",
                     IntegratedSecurity = true,
-                    TrustServerCertificate = true,
                     Encrypt = true,
                 };
 
