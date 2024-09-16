@@ -52,6 +52,7 @@
             label8 = new Label();
             txtHostNameInCertificate = new TextBox();
             label9 = new Label();
+            lnkOptions = new LinkLabel();
             SuspendLayout();
             // 
             // txtServerName
@@ -109,7 +110,8 @@
             // 
             // bttnConnect
             // 
-            bttnConnect.Location = new Point(355, 434);
+            bttnConnect.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            bttnConnect.Location = new Point(355, 463);
             bttnConnect.Margin = new Padding(3, 4, 3, 4);
             bttnConnect.Name = "bttnConnect";
             bttnConnect.Size = new Size(94, 29);
@@ -120,8 +122,9 @@
             // 
             // bttnCancel
             // 
+            bttnCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             bttnCancel.DialogResult = DialogResult.Cancel;
-            bttnCancel.Location = new Point(455, 434);
+            bttnCancel.Location = new Point(455, 463);
             bttnCancel.Margin = new Padding(3, 4, 3, 4);
             bttnCancel.Name = "bttnCancel";
             bttnCancel.Size = new Size(94, 29);
@@ -265,13 +268,25 @@
             label9.TabIndex = 22;
             label9.Text = "Host name in certificate:";
             // 
+            // lnkOptions
+            // 
+            lnkOptions.AutoSize = true;
+            lnkOptions.Location = new Point(267, 414);
+            lnkOptions.Name = "lnkOptions";
+            lnkOptions.Size = new Size(112, 20);
+            lnkOptions.TabIndex = 23;
+            lnkOptions.TabStop = true;
+            lnkOptions.Text = "{Other Options}";
+            lnkOptions.LinkClicked += lnkOptions_LinkClicked;
+            // 
             // DBConnection
             // 
             AcceptButton = bttnConnect;
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = bttnCancel;
-            ClientSize = new Size(591, 486);
+            ClientSize = new Size(591, 508);
+            Controls.Add(lnkOptions);
             Controls.Add(label9);
             Controls.Add(txtHostNameInCertificate);
             Controls.Add(label8);
@@ -333,5 +348,6 @@
         private Label label8;
         private TextBox txtHostNameInCertificate;
         private Label label9;
+        private LinkLabel lnkOptions;
     }
 }

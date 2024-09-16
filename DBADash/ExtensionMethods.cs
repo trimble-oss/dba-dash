@@ -29,10 +29,17 @@ namespace DBADash
             return JsonConvert.DeserializeObject<T>(serialized);
         }
 
-        public static string Truncate(this string value, int maxLength)
+        public static string Truncate(this string value, int maxLength,bool ellipsis=false)
         {
             if (string.IsNullOrEmpty(value)) return value;
-            return value.Length <= maxLength ? value : value[..maxLength];
+            if(ellipsis)
+            {
+                return value.Length <= maxLength ? value : value[..(maxLength-3)] + "...";
+            }
+            else
+            {
+                return value.Length <= maxLength ? value : value[..maxLength];
+            }
         }
 
         /// <summary>
