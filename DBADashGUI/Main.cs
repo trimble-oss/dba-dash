@@ -1920,8 +1920,7 @@ namespace DBADashGUI
                 {
                     InitialCatalog = "DBADashDB",
                     IntegratedSecurity = true,
-                    Encrypt = true,
-                    TrustServerCertificate = true
+                    Encrypt = true
                 }).ConnectionString;
             }
             return connectionString;

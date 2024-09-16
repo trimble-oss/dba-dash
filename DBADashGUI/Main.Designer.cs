@@ -1177,7 +1177,6 @@ namespace DBADashGUI
             // 
             // tags1
             // 
-            tags1.AllTags = null;
             tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             tags1.Location = new System.Drawing.Point(3, 3);
             tags1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -2254,10 +2253,10 @@ namespace DBADashGUI
             // tabServerServices
             // 
             tabServerServices.Controls.Add(serverServices1);
-            tabServerServices.Location = new System.Drawing.Point(4, 25);
+            tabServerServices.Location = new System.Drawing.Point(4, 29);
             tabServerServices.Name = "tabServerServices";
             tabServerServices.Padding = new System.Windows.Forms.Padding(3);
-            tabServerServices.Size = new System.Drawing.Size(1631, 1246);
+            tabServerServices.Size = new System.Drawing.Size(192, 67);
             tabServerServices.TabIndex = 52;
             tabServerServices.Text = "Server Services";
             tabServerServices.UseVisualStyleBackColor = true;
@@ -2267,7 +2266,7 @@ namespace DBADashGUI
             serverServices1.Dock = System.Windows.Forms.DockStyle.Fill;
             serverServices1.Location = new System.Drawing.Point(3, 3);
             serverServices1.Name = "serverServices1";
-            serverServices1.Size = new System.Drawing.Size(1625, 1240);
+            serverServices1.Size = new System.Drawing.Size(186, 61);
             serverServices1.TabIndex = 0;
             // 
             // refresh1
