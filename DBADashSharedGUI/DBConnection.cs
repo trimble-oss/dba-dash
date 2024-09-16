@@ -2,6 +2,8 @@
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System.Runtime.Versioning;
+using Azure.Core;
+using DBADashSharedGUI;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace DBADash
@@ -113,6 +115,28 @@ namespace DBADash
                 chkTrustServerCert.Checked = builder.TrustServerCertificate;
                 cboEncryption.SelectedValue = builder.Encrypt;
                 txtHostNameInCertificate.Text = builder.HostNameInCertificate;
+                lnkOptions.Text = string.IsNullOrEmpty(OtherConnectionOptions) ? "{Other Options}" : OtherConnectionOptions.Truncate(40,true);
+            }
+        }
+
+        private string OtherConnectionOptions
+        {
+            get
+            {
+                var builder = new SqlConnectionStringBuilder(connectionString);
+                builder.Remove("User ID");
+                builder.Remove("UID");
+                builder.Remove("PWD");
+                builder.Remove("Password");
+                builder.Remove("Integrated Security");
+                builder.Remove("Initial Catalog");
+                builder.Remove("Data Source");
+                builder.Remove("Encrypt");
+                builder.Remove("Authentication");
+                builder.Remove("TrustServerCertificate");
+                builder.Remove("HostNameInCertificate");
+                builder.Remove("Application Name");
+                return builder.ConnectionString;
             }
         }
 
@@ -216,6 +240,54 @@ namespace DBADash
         {
             chkTrustServerCert.Enabled = !Equals(cboEncryption.SelectedValue, SqlConnectionEncryptOption.Strict);
             chkTrustServerCert.Checked = !Equals(cboEncryption.SelectedValue, SqlConnectionEncryptOption.Strict) && chkTrustServerCert.Checked;
+        }
+
+        private void lnkOptions_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var input = OtherConnectionOptions;
+            if (CommonShared.ShowInputDialog(ref input,
+                    "Enter additional connection string options: \n",default, "Enter any additional connection string options as required. e.g.\nApplicationIntent=ReadOnly;Connect Timeout=10") !=
+                DialogResult.OK) return;
+
+            try
+            {
+                var newConnectionString = StripOtherConnectionOptions();
+                ConnectionString = CombineConnectionStrings(newConnectionString, input);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+        }
+
+        private string StripOtherConnectionOptions()
+        {
+            var builder = new SqlConnectionStringBuilder(ConnectionString);
+            foreach (var pair in OtherConnectionOptions.Split(';'))
+            {
+                builder.Remove(pair.Split('=')[0]);
+            }
+            return builder.ConnectionString;
+        }
+
+        private static string CombineConnectionStrings(string originalConnectionString, string additionalOptions)
+        {
+            var builder = new SqlConnectionStringBuilder(originalConnectionString);
+
+            var additionalOptionsPairs = additionalOptions.Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var pair in additionalOptionsPairs)
+            {
+                var keyValue = pair.Split('=', StringSplitOptions.RemoveEmptyEntries);
+                if (keyValue.Length == 2)
+                {
+                    // Update or add the key-value pair to the original connection string
+                    builder[keyValue[0]] = keyValue[1];
+                }
+            }
+
+            return builder.ConnectionString;
         }
     }
 }
