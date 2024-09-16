@@ -104,16 +104,16 @@
             dgv.AllowUserToAddRows = false;
             dgv.AllowUserToDeleteRows = false;
             dgv.BackgroundColor = System.Drawing.Color.White;
-            dgv.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, ChangedDate, OldVersion, NewVersion, OldProductLevel, NewProductLevel, OldProductUpdateLevel, NewProductUpdateLevel, OldEdition, NewEdition });
             dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             dgv.Location = new System.Drawing.Point(0, 27);
+            dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgv.Name = "dgv";
             dgv.ReadOnly = true;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
-            dgv.Size = new System.Drawing.Size(1054, 298);
+            dgv.Size = new System.Drawing.Size(1205, 407);
             dgv.TabIndex = 0;
             // 
             // Instance
@@ -210,6 +210,7 @@
             // 
             splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             splitContainer1.Location = new System.Drawing.Point(0, 0);
+            splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             splitContainer1.Name = "splitContainer1";
             splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -222,8 +223,9 @@
             // 
             splitContainer1.Panel2.Controls.Add(dgv);
             splitContainer1.Panel2.Controls.Add(toolStrip1);
-            splitContainer1.Size = new System.Drawing.Size(1054, 652);
-            splitContainer1.SplitterDistance = 323;
+            splitContainer1.Size = new System.Drawing.Size(1205, 869);
+            splitContainer1.SplitterDistance = 430;
+            splitContainer1.SplitterWidth = 5;
             splitContainer1.TabIndex = 1;
             // 
             // dgvVersion
@@ -232,17 +234,17 @@
             dgvVersion.AllowUserToDeleteRows = false;
             dgvVersion.AllowUserToOrderColumns = true;
             dgvVersion.BackgroundColor = System.Drawing.Color.White;
-            dgvVersion.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             dgvVersion.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvVersion.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colInstance, colSQLVersion, colPatchDate, colProductVersion, colEdition, colEngineEdition, colEditionID, colProductLevel, colProductUpdateLevel, colProductUpdateReference, colProductMajorVersion, colBuildType, colProductBuild, colResourceVersion, colResourceLastUpdateDateTime, colLicenseType, colNumLicences, colWindowsCaption, colWindowsRelease, colWindowsSKU });
             dgvVersion.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvVersion.Location = new System.Drawing.Point(0, 27);
+            dgvVersion.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvVersion.Name = "dgvVersion";
             dgvVersion.ReadOnly = true;
             dgvVersion.RowHeadersVisible = false;
             dgvVersion.RowHeadersWidth = 51;
             dgvVersion.RowTemplate.Height = 24;
-            dgvVersion.Size = new System.Drawing.Size(1054, 296);
+            dgvVersion.Size = new System.Drawing.Size(1205, 403);
             dgvVersion.TabIndex = 0;
             dgvVersion.CellContentClick += DgvVersion_CellContentClick;
             dgvVersion.ColumnHeaderMouseClick += DgvVersion_ColumnHeaderMouseClick;
@@ -434,16 +436,16 @@
             toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel2, tsRefreshVersion, tsCopyVersion, tsExcel, tsCols, tsConfig, tsViewBuildReference, tsUpdateBuildReference });
             toolStrip2.Location = new System.Drawing.Point(0, 0);
             toolStrip2.Name = "toolStrip2";
-            toolStrip2.Size = new System.Drawing.Size(1054, 27);
+            toolStrip2.Size = new System.Drawing.Size(1205, 27);
             toolStrip2.TabIndex = 1;
             toolStrip2.Text = "toolStrip2";
             // 
             // toolStripLabel2
             // 
             toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             toolStripLabel2.Name = "toolStripLabel2";
-            toolStripLabel2.Size = new System.Drawing.Size(74, 24);
+            toolStripLabel2.Size = new System.Drawing.Size(94, 24);
             toolStripLabel2.Text = "Version Info";
             // 
             // tsRefreshVersion
@@ -452,7 +454,7 @@
             tsRefreshVersion.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefreshVersion.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsRefreshVersion.Name = "tsRefreshVersion";
-            tsRefreshVersion.Size = new System.Drawing.Size(24, 24);
+            tsRefreshVersion.Size = new System.Drawing.Size(29, 24);
             tsRefreshVersion.Text = "Refresh";
             tsRefreshVersion.Click += TsRefreshVersion_Click;
             // 
@@ -462,7 +464,7 @@
             tsCopyVersion.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopyVersion.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCopyVersion.Name = "tsCopyVersion";
-            tsCopyVersion.Size = new System.Drawing.Size(24, 24);
+            tsCopyVersion.Size = new System.Drawing.Size(29, 24);
             tsCopyVersion.Text = "Copy";
             tsCopyVersion.Click += TsCopyVersion_Click;
             // 
@@ -472,7 +474,7 @@
             tsExcel.Image = Properties.Resources.excel16x16;
             tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExcel.Name = "tsExcel";
-            tsExcel.Size = new System.Drawing.Size(24, 24);
+            tsExcel.Size = new System.Drawing.Size(29, 24);
             tsExcel.Text = "Export Excel";
             tsExcel.Click += TsExcel_Click;
             // 
@@ -482,7 +484,7 @@
             tsCols.Image = Properties.Resources.Column_16x;
             tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCols.Name = "tsCols";
-            tsCols.Size = new System.Drawing.Size(24, 24);
+            tsCols.Size = new System.Drawing.Size(29, 24);
             tsCols.Text = "Columns";
             tsCols.Click += TsCols_Click;
             // 
@@ -493,20 +495,20 @@
             tsConfig.Image = Properties.Resources.SettingsOutline_16x;
             tsConfig.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsConfig.Name = "tsConfig";
-            tsConfig.Size = new System.Drawing.Size(33, 24);
+            tsConfig.Size = new System.Drawing.Size(34, 24);
             tsConfig.Text = "Config";
             // 
             // thresholdsToolStripMenuItem
             // 
             thresholdsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { sPBehindWarningToolStripMenuItem, sPBehindCriticalToolStripMenuItem, cUBehindWarningToolStripMenuItem, cUBehindCriticalToolStripMenuItem, daysUntilSupportEndsWarningToolStripMenuItem, daysUntilSupportEndsCriticalToolStripMenuItem, daysUntilMainstreamSupportEndsWarningToolStripMenuItem, daysUntilMainstreamSupportEndsCriticalToolStripMenuItem, buildReferenceAgeWarningThresholdToolStripMenuItem, buildReferenceAgeCriticalThresholdToolStripMenuItem, buildReferenceUpdateExclusionPeriodToolStripMenuItem, toolStripSeparator1, resetToDefaultToolStripMenuItem });
             thresholdsToolStripMenuItem.Name = "thresholdsToolStripMenuItem";
-            thresholdsToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
+            thresholdsToolStripMenuItem.Size = new System.Drawing.Size(163, 26);
             thresholdsToolStripMenuItem.Text = "Thresholds";
             // 
             // sPBehindWarningToolStripMenuItem
             // 
             sPBehindWarningToolStripMenuItem.Name = "sPBehindWarningToolStripMenuItem";
-            sPBehindWarningToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            sPBehindWarningToolStripMenuItem.Size = new System.Drawing.Size(392, 26);
             sPBehindWarningToolStripMenuItem.Tag = "GUISPBehindWarningThreshold";
             sPBehindWarningToolStripMenuItem.Text = "SP Behind Warning";
             sPBehindWarningToolStripMenuItem.Click += SetThreshold_Click;
@@ -514,7 +516,7 @@
             // sPBehindCriticalToolStripMenuItem
             // 
             sPBehindCriticalToolStripMenuItem.Name = "sPBehindCriticalToolStripMenuItem";
-            sPBehindCriticalToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            sPBehindCriticalToolStripMenuItem.Size = new System.Drawing.Size(392, 26);
             sPBehindCriticalToolStripMenuItem.Tag = "GUISPBehindCriticalThreshold";
             sPBehindCriticalToolStripMenuItem.Text = "SP Behind Critical";
             sPBehindCriticalToolStripMenuItem.Click += SetThreshold_Click;
@@ -522,7 +524,7 @@
             // cUBehindWarningToolStripMenuItem
             // 
             cUBehindWarningToolStripMenuItem.Name = "cUBehindWarningToolStripMenuItem";
-            cUBehindWarningToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            cUBehindWarningToolStripMenuItem.Size = new System.Drawing.Size(392, 26);
             cUBehindWarningToolStripMenuItem.Tag = "GUICUBehindWarningThreshold";
             cUBehindWarningToolStripMenuItem.Text = "CU Behind Warning";
             cUBehindWarningToolStripMenuItem.Click += SetThreshold_Click;
@@ -530,7 +532,7 @@
             // cUBehindCriticalToolStripMenuItem
             // 
             cUBehindCriticalToolStripMenuItem.Name = "cUBehindCriticalToolStripMenuItem";
-            cUBehindCriticalToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            cUBehindCriticalToolStripMenuItem.Size = new System.Drawing.Size(392, 26);
             cUBehindCriticalToolStripMenuItem.Tag = "GUICUBehindCriticalThreshold";
             cUBehindCriticalToolStripMenuItem.Text = "CU Behind Critical";
             cUBehindCriticalToolStripMenuItem.Click += SetThreshold_Click;
@@ -538,7 +540,7 @@
             // daysUntilSupportEndsWarningToolStripMenuItem
             // 
             daysUntilSupportEndsWarningToolStripMenuItem.Name = "daysUntilSupportEndsWarningToolStripMenuItem";
-            daysUntilSupportEndsWarningToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            daysUntilSupportEndsWarningToolStripMenuItem.Size = new System.Drawing.Size(392, 26);
             daysUntilSupportEndsWarningToolStripMenuItem.Tag = "GUIDaysUntilSupportEndsWarningThreshold";
             daysUntilSupportEndsWarningToolStripMenuItem.Text = "Days Until Support Ends Warning";
             daysUntilSupportEndsWarningToolStripMenuItem.Click += SetThreshold_Click;
@@ -546,7 +548,7 @@
             // daysUntilSupportEndsCriticalToolStripMenuItem
             // 
             daysUntilSupportEndsCriticalToolStripMenuItem.Name = "daysUntilSupportEndsCriticalToolStripMenuItem";
-            daysUntilSupportEndsCriticalToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            daysUntilSupportEndsCriticalToolStripMenuItem.Size = new System.Drawing.Size(392, 26);
             daysUntilSupportEndsCriticalToolStripMenuItem.Tag = "GUIDaysUntilSupportEndsCriticalThreshold";
             daysUntilSupportEndsCriticalToolStripMenuItem.Text = "Days Until Support Ends Critical";
             daysUntilSupportEndsCriticalToolStripMenuItem.Click += SetThreshold_Click;
@@ -554,7 +556,7 @@
             // daysUntilMainstreamSupportEndsWarningToolStripMenuItem
             // 
             daysUntilMainstreamSupportEndsWarningToolStripMenuItem.Name = "daysUntilMainstreamSupportEndsWarningToolStripMenuItem";
-            daysUntilMainstreamSupportEndsWarningToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            daysUntilMainstreamSupportEndsWarningToolStripMenuItem.Size = new System.Drawing.Size(392, 26);
             daysUntilMainstreamSupportEndsWarningToolStripMenuItem.Tag = "GUIDaysUntilMainstreamSupportEndsWarningThreshold";
             daysUntilMainstreamSupportEndsWarningToolStripMenuItem.Text = "Days Until Mainstream Support Ends Warning";
             daysUntilMainstreamSupportEndsWarningToolStripMenuItem.Click += SetThreshold_Click;
@@ -562,7 +564,7 @@
             // daysUntilMainstreamSupportEndsCriticalToolStripMenuItem
             // 
             daysUntilMainstreamSupportEndsCriticalToolStripMenuItem.Name = "daysUntilMainstreamSupportEndsCriticalToolStripMenuItem";
-            daysUntilMainstreamSupportEndsCriticalToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            daysUntilMainstreamSupportEndsCriticalToolStripMenuItem.Size = new System.Drawing.Size(392, 26);
             daysUntilMainstreamSupportEndsCriticalToolStripMenuItem.Tag = "GUIDaysUntilMainstreamSupportEndsCriticalThreshold";
             daysUntilMainstreamSupportEndsCriticalToolStripMenuItem.Text = "Days Until Mainstream Support Ends Critical";
             daysUntilMainstreamSupportEndsCriticalToolStripMenuItem.Click += SetThreshold_Click;
@@ -570,7 +572,7 @@
             // buildReferenceAgeWarningThresholdToolStripMenuItem
             // 
             buildReferenceAgeWarningThresholdToolStripMenuItem.Name = "buildReferenceAgeWarningThresholdToolStripMenuItem";
-            buildReferenceAgeWarningThresholdToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            buildReferenceAgeWarningThresholdToolStripMenuItem.Size = new System.Drawing.Size(392, 26);
             buildReferenceAgeWarningThresholdToolStripMenuItem.Tag = "GUIBuildReferenceAgeWarningThreshold";
             buildReferenceAgeWarningThresholdToolStripMenuItem.Text = "Build Reference Age Warning Threshold";
             buildReferenceAgeWarningThresholdToolStripMenuItem.Click += SetThreshold_Click;
@@ -578,7 +580,7 @@
             // buildReferenceAgeCriticalThresholdToolStripMenuItem
             // 
             buildReferenceAgeCriticalThresholdToolStripMenuItem.Name = "buildReferenceAgeCriticalThresholdToolStripMenuItem";
-            buildReferenceAgeCriticalThresholdToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            buildReferenceAgeCriticalThresholdToolStripMenuItem.Size = new System.Drawing.Size(392, 26);
             buildReferenceAgeCriticalThresholdToolStripMenuItem.Tag = "GUIBuildReferenceAgeCriticalThreshold";
             buildReferenceAgeCriticalThresholdToolStripMenuItem.Text = "Build Reference Age Critical Threshold";
             buildReferenceAgeCriticalThresholdToolStripMenuItem.Click += SetThreshold_Click;
@@ -586,7 +588,7 @@
             // buildReferenceUpdateExclusionPeriodToolStripMenuItem
             // 
             buildReferenceUpdateExclusionPeriodToolStripMenuItem.Name = "buildReferenceUpdateExclusionPeriodToolStripMenuItem";
-            buildReferenceUpdateExclusionPeriodToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            buildReferenceUpdateExclusionPeriodToolStripMenuItem.Size = new System.Drawing.Size(392, 26);
             buildReferenceUpdateExclusionPeriodToolStripMenuItem.Tag = "GUIBuildReferenceUpdateExclusionPeriod";
             buildReferenceUpdateExclusionPeriodToolStripMenuItem.Text = "Build Reference Update Exclusion Period";
             buildReferenceUpdateExclusionPeriodToolStripMenuItem.ToolTipText = "Don't show a build reference is out of date warning if we have checked for updates in X days";
@@ -595,12 +597,12 @@
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(311, 6);
+            toolStripSeparator1.Size = new System.Drawing.Size(389, 6);
             // 
             // resetToDefaultToolStripMenuItem
             // 
             resetToDefaultToolStripMenuItem.Name = "resetToDefaultToolStripMenuItem";
-            resetToDefaultToolStripMenuItem.Size = new System.Drawing.Size(314, 22);
+            resetToDefaultToolStripMenuItem.Size = new System.Drawing.Size(392, 26);
             resetToDefaultToolStripMenuItem.Text = "Reset to Default";
             resetToDefaultToolStripMenuItem.Click += ResetToDefaultToolStripMenuItem_Click;
             // 
@@ -609,7 +611,7 @@
             tsViewBuildReference.Image = Properties.Resources.Table_16x;
             tsViewBuildReference.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsViewBuildReference.Name = "tsViewBuildReference";
-            tsViewBuildReference.Size = new System.Drawing.Size(113, 24);
+            tsViewBuildReference.Size = new System.Drawing.Size(137, 24);
             tsViewBuildReference.Text = "Build Reference";
             tsViewBuildReference.Click += TsViewBuildReference_Click;
             // 
@@ -618,7 +620,7 @@
             tsUpdateBuildReference.Image = Properties.Resources.CloudDownload_16x;
             tsUpdateBuildReference.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsUpdateBuildReference.Name = "tsUpdateBuildReference";
-            tsUpdateBuildReference.Size = new System.Drawing.Size(154, 24);
+            tsUpdateBuildReference.Size = new System.Drawing.Size(190, 24);
             tsUpdateBuildReference.Text = "Update Build Reference";
             tsUpdateBuildReference.Click += TsUpdateBuildReference_Click;
             // 
@@ -628,16 +630,16 @@
             toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel1, tsRefreshHistory, tsCopyHistory, tsExcelHistory });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new System.Drawing.Size(1054, 27);
+            toolStrip1.Size = new System.Drawing.Size(1205, 27);
             toolStrip1.TabIndex = 1;
             toolStrip1.Text = "toolStrip1";
             // 
             // toolStripLabel1
             // 
             toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             toolStripLabel1.Name = "toolStripLabel1";
-            toolStripLabel1.Size = new System.Drawing.Size(47, 24);
+            toolStripLabel1.Size = new System.Drawing.Size(61, 24);
             toolStripLabel1.Text = "History";
             // 
             // tsRefreshHistory
@@ -646,7 +648,7 @@
             tsRefreshHistory.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefreshHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsRefreshHistory.Name = "tsRefreshHistory";
-            tsRefreshHistory.Size = new System.Drawing.Size(24, 24);
+            tsRefreshHistory.Size = new System.Drawing.Size(29, 24);
             tsRefreshHistory.Text = "Refresh";
             tsRefreshHistory.Click += TsRefreshHistory_Click;
             // 
@@ -656,7 +658,7 @@
             tsCopyHistory.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopyHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCopyHistory.Name = "tsCopyHistory";
-            tsCopyHistory.Size = new System.Drawing.Size(24, 24);
+            tsCopyHistory.Size = new System.Drawing.Size(29, 24);
             tsCopyHistory.Text = "Copy";
             tsCopyHistory.Click += TsCopyHistory_Click;
             // 
@@ -666,17 +668,18 @@
             tsExcelHistory.Image = Properties.Resources.excel16x16;
             tsExcelHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExcelHistory.Name = "tsExcelHistory";
-            tsExcelHistory.Size = new System.Drawing.Size(24, 24);
+            tsExcelHistory.Size = new System.Drawing.Size(29, 24);
             tsExcelHistory.Text = "Export Excel";
             tsExcelHistory.Click += TsExcelHistory_Click;
             // 
             // SQLPatching
             // 
-            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             Controls.Add(splitContainer1);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             Name = "SQLPatching";
-            Size = new System.Drawing.Size(1054, 652);
+            Size = new System.Drawing.Size(1205, 869);
             Load += SQLPatching_Load;
             ((System.ComponentModel.ISupportInitialize)dgv).EndInit();
             splitContainer1.Panel1.ResumeLayout(false);

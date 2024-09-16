@@ -65,6 +65,18 @@
             acknowledgeErrorsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             statusFilterToolStrip1 = new StatusFilterToolStrip();
             dgvJobHistory = new System.Windows.Forms.DataGridView();
+            colRunDateTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colRunEndDateTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colStepID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colStepName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colMessageID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colSeverity = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colRunStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colRunDurationSec = new System.Windows.Forms.DataGridViewLinkColumn();
+            colRunDuration = new System.Windows.Forms.DataGridViewLinkColumn();
+            colRetries = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colMessage = new System.Windows.Forms.DataGridViewLinkColumn();
+            colViewSteps = new System.Windows.Forms.DataGridViewLinkColumn();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             jobStep1 = new JobStep();
             toolStrip2 = new System.Windows.Forms.ToolStrip();
@@ -104,18 +116,6 @@
             dataGridViewTextBoxColumn26 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn27 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn28 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colRunDateTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colRunEndDateTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colStepID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colStepName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colMessageID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colSeverity = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colRunStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colRunDurationSec = new System.Windows.Forms.DataGridViewLinkColumn();
-            colRunDuration = new System.Windows.Forms.DataGridViewLinkColumn();
-            colRetries = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colMessage = new System.Windows.Forms.DataGridViewLinkColumn();
-            colViewSteps = new System.Windows.Forms.DataGridViewLinkColumn();
             ((System.ComponentModel.ISupportInitialize)dgvJobs).BeginInit();
             tsJobs.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvJobHistory).BeginInit();
@@ -131,7 +131,6 @@
             dgvJobs.AllowUserToAddRows = false;
             dgvJobs.AllowUserToDeleteRows = false;
             dgvJobs.BackgroundColor = System.Drawing.Color.White;
-            dgvJobs.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             dgvJobs.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvJobs.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colHistory, Acknowledge, Instance, name, colEnabled, Description, LastFail, IsLastFail, TimeSinceLastFail, StepLastFailed, LastSucceeded, TimeSinceLastSucceeded, colAckDate, FailCount24Hrs, SucceedCount24Hrs, FailCount7Days, SucceedCount7Days, JobStepFails24Hrs, JobStepFails7Days, MaxDurationSec, colMaxDuration, AvgDurationSec, colAvgDuration, ConfiguredLevel, Configure });
             dgvJobs.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -456,7 +455,7 @@
             statusFilterToolStrip1.Critical = true;
             statusFilterToolStrip1.CriticalVisible = true;
             statusFilterToolStrip1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
-            statusFilterToolStrip1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            statusFilterToolStrip1.Font = new System.Drawing.Font("Segoe UI", 9F);
             statusFilterToolStrip1.Image = (System.Drawing.Image)resources.GetObject("statusFilterToolStrip1.Image");
             statusFilterToolStrip1.ImageTransparentColor = System.Drawing.Color.Magenta;
             statusFilterToolStrip1.NA = true;
@@ -489,6 +488,121 @@
             dgvJobHistory.TabIndex = 4;
             dgvJobHistory.CellContentClick += DgvJobHistory_CellContentClick;
             dgvJobHistory.RowsAdded += DgvJobHistory_RowsAdded;
+            // 
+            // colRunDateTime
+            // 
+            colRunDateTime.DataPropertyName = "RunDateTime";
+            colRunDateTime.HeaderText = "Start";
+            colRunDateTime.MinimumWidth = 6;
+            colRunDateTime.Name = "colRunDateTime";
+            colRunDateTime.ReadOnly = true;
+            colRunDateTime.Width = 125;
+            // 
+            // colRunEndDateTime
+            // 
+            colRunEndDateTime.DataPropertyName = "RunEndDateTime";
+            colRunEndDateTime.HeaderText = "Finish";
+            colRunEndDateTime.MinimumWidth = 6;
+            colRunEndDateTime.Name = "colRunEndDateTime";
+            colRunEndDateTime.ReadOnly = true;
+            colRunEndDateTime.Width = 125;
+            // 
+            // colStepID
+            // 
+            colStepID.DataPropertyName = "step_id";
+            colStepID.HeaderText = "Step ID";
+            colStepID.MinimumWidth = 6;
+            colStepID.Name = "colStepID";
+            colStepID.ReadOnly = true;
+            colStepID.Width = 125;
+            // 
+            // colStepName
+            // 
+            colStepName.DataPropertyName = "step_name";
+            colStepName.HeaderText = "Step Name";
+            colStepName.MinimumWidth = 6;
+            colStepName.Name = "colStepName";
+            colStepName.ReadOnly = true;
+            colStepName.Width = 125;
+            // 
+            // colMessageID
+            // 
+            colMessageID.DataPropertyName = "sql_message_id";
+            colMessageID.HeaderText = "Message ID";
+            colMessageID.MinimumWidth = 6;
+            colMessageID.Name = "colMessageID";
+            colMessageID.ReadOnly = true;
+            colMessageID.Width = 125;
+            // 
+            // colSeverity
+            // 
+            colSeverity.DataPropertyName = "sql_severity";
+            colSeverity.HeaderText = "Severity";
+            colSeverity.MinimumWidth = 6;
+            colSeverity.Name = "colSeverity";
+            colSeverity.ReadOnly = true;
+            colSeverity.Width = 125;
+            // 
+            // colRunStatus
+            // 
+            colRunStatus.DataPropertyName = "run_status_description";
+            colRunStatus.HeaderText = "Status";
+            colRunStatus.MinimumWidth = 6;
+            colRunStatus.Name = "colRunStatus";
+            colRunStatus.ReadOnly = true;
+            colRunStatus.Width = 125;
+            // 
+            // colRunDurationSec
+            // 
+            colRunDurationSec.DataPropertyName = "RunDurationSec";
+            colRunDurationSec.HeaderText = "Duration (sec)";
+            colRunDurationSec.MinimumWidth = 6;
+            colRunDurationSec.Name = "colRunDurationSec";
+            colRunDurationSec.ReadOnly = true;
+            colRunDurationSec.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colRunDurationSec.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            colRunDurationSec.Width = 125;
+            // 
+            // colRunDuration
+            // 
+            colRunDuration.DataPropertyName = "RunDuration";
+            colRunDuration.HeaderText = "Run Duration";
+            colRunDuration.MinimumWidth = 6;
+            colRunDuration.Name = "colRunDuration";
+            colRunDuration.ReadOnly = true;
+            colRunDuration.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colRunDuration.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            colRunDuration.Width = 125;
+            // 
+            // colRetries
+            // 
+            colRetries.DataPropertyName = "retries_attempted";
+            colRetries.HeaderText = "Retries";
+            colRetries.MinimumWidth = 6;
+            colRetries.Name = "colRetries";
+            colRetries.ReadOnly = true;
+            colRetries.Width = 125;
+            // 
+            // colMessage
+            // 
+            colMessage.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            colMessage.DataPropertyName = "message";
+            colMessage.HeaderText = "Message";
+            colMessage.MinimumWidth = 100;
+            colMessage.Name = "colMessage";
+            colMessage.ReadOnly = true;
+            colMessage.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colMessage.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            // 
+            // colViewSteps
+            // 
+            colViewSteps.HeaderText = "Steps";
+            colViewSteps.MinimumWidth = 25;
+            colViewSteps.Name = "colViewSteps";
+            colViewSteps.ReadOnly = true;
+            colViewSteps.Text = "View Steps";
+            colViewSteps.UseColumnTextForLinkValue = true;
+            colViewSteps.Width = 125;
             // 
             // splitContainer1
             // 
@@ -601,7 +715,7 @@
             // tsJobName
             // 
             tsJobName.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            tsJobName.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            tsJobName.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             tsJobName.ForeColor = System.Drawing.Color.Black;
             tsJobName.Name = "tsJobName";
             tsJobName.Size = new System.Drawing.Size(80, 24);
@@ -845,121 +959,6 @@
             dataGridViewTextBoxColumn28.MinimumWidth = 6;
             dataGridViewTextBoxColumn28.Name = "dataGridViewTextBoxColumn28";
             dataGridViewTextBoxColumn28.Width = 125;
-            // 
-            // colRunDateTime
-            // 
-            colRunDateTime.DataPropertyName = "RunDateTime";
-            colRunDateTime.HeaderText = "Start";
-            colRunDateTime.MinimumWidth = 6;
-            colRunDateTime.Name = "colRunDateTime";
-            colRunDateTime.ReadOnly = true;
-            colRunDateTime.Width = 125;
-            // 
-            // colRunEndDateTime
-            // 
-            colRunEndDateTime.DataPropertyName = "RunEndDateTime";
-            colRunEndDateTime.HeaderText = "Finish";
-            colRunEndDateTime.MinimumWidth = 6;
-            colRunEndDateTime.Name = "colRunEndDateTime";
-            colRunEndDateTime.ReadOnly = true;
-            colRunEndDateTime.Width = 125;
-            // 
-            // colStepID
-            // 
-            colStepID.DataPropertyName = "step_id";
-            colStepID.HeaderText = "Step ID";
-            colStepID.MinimumWidth = 6;
-            colStepID.Name = "colStepID";
-            colStepID.ReadOnly = true;
-            colStepID.Width = 125;
-            // 
-            // colStepName
-            // 
-            colStepName.DataPropertyName = "step_name";
-            colStepName.HeaderText = "Step Name";
-            colStepName.MinimumWidth = 6;
-            colStepName.Name = "colStepName";
-            colStepName.ReadOnly = true;
-            colStepName.Width = 125;
-            // 
-            // colMessageID
-            // 
-            colMessageID.DataPropertyName = "sql_message_id";
-            colMessageID.HeaderText = "Message ID";
-            colMessageID.MinimumWidth = 6;
-            colMessageID.Name = "colMessageID";
-            colMessageID.ReadOnly = true;
-            colMessageID.Width = 125;
-            // 
-            // colSeverity
-            // 
-            colSeverity.DataPropertyName = "sql_severity";
-            colSeverity.HeaderText = "Severity";
-            colSeverity.MinimumWidth = 6;
-            colSeverity.Name = "colSeverity";
-            colSeverity.ReadOnly = true;
-            colSeverity.Width = 125;
-            // 
-            // colRunStatus
-            // 
-            colRunStatus.DataPropertyName = "run_status_description";
-            colRunStatus.HeaderText = "Status";
-            colRunStatus.MinimumWidth = 6;
-            colRunStatus.Name = "colRunStatus";
-            colRunStatus.ReadOnly = true;
-            colRunStatus.Width = 125;
-            // 
-            // colRunDurationSec
-            // 
-            colRunDurationSec.DataPropertyName = "RunDurationSec";
-            colRunDurationSec.HeaderText = "Duration (sec)";
-            colRunDurationSec.MinimumWidth = 6;
-            colRunDurationSec.Name = "colRunDurationSec";
-            colRunDurationSec.ReadOnly = true;
-            colRunDurationSec.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colRunDurationSec.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            colRunDurationSec.Width = 125;
-            // 
-            // colRunDuration
-            // 
-            colRunDuration.DataPropertyName = "RunDuration";
-            colRunDuration.HeaderText = "Run Duration";
-            colRunDuration.MinimumWidth = 6;
-            colRunDuration.Name = "colRunDuration";
-            colRunDuration.ReadOnly = true;
-            colRunDuration.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colRunDuration.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            colRunDuration.Width = 125;
-            // 
-            // colRetries
-            // 
-            colRetries.DataPropertyName = "retries_attempted";
-            colRetries.HeaderText = "Retries";
-            colRetries.MinimumWidth = 6;
-            colRetries.Name = "colRetries";
-            colRetries.ReadOnly = true;
-            colRetries.Width = 125;
-            // 
-            // colMessage
-            // 
-            colMessage.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            colMessage.DataPropertyName = "message";
-            colMessage.HeaderText = "Message";
-            colMessage.MinimumWidth = 100;
-            colMessage.Name = "colMessage";
-            colMessage.ReadOnly = true;
-            colMessage.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colMessage.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            // 
-            // colViewSteps
-            // 
-            colViewSteps.HeaderText = "Steps";
-            colViewSteps.MinimumWidth = 25;
-            colViewSteps.Name = "colViewSteps";
-            colViewSteps.ReadOnly = true;
-            colViewSteps.Text = "View Steps";
-            colViewSteps.UseColumnTextForLinkValue = true;
-            colViewSteps.Width = 125;
             // 
             // AgentJobsControl
             // 

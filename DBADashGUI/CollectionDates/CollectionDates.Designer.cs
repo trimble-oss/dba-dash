@@ -129,7 +129,6 @@
             dgvCollectionDates.AllowUserToAddRows = false;
             dgvCollectionDates.AllowUserToDeleteRows = false;
             dgvCollectionDates.BackgroundColor = System.Drawing.Color.White;
-            dgvCollectionDates.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             dgvCollectionDates.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvCollectionDates.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, Reference, WarningThreshold, CriticalThreshold, SnapshotAge, SnapshotDate, ConfiguredLevel, Configure, ConfigureRoot, colRun });
             dgvCollectionDates.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -252,7 +251,7 @@
             // lblStatus
             // 
             lblStatus.Name = "lblStatus";
-            lblStatus.Size = new System.Drawing.Size(1303, 20);
+            lblStatus.Size = new System.Drawing.Size(1342, 20);
             lblStatus.Spring = true;
             lblStatus.Text = "Ready";
             lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;

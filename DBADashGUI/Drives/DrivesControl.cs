@@ -107,7 +107,6 @@ namespace DBADashGUI.Drives
                 ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
                 DataSource = dvDrives,
                 Dock = DockStyle.Fill,
-                ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText,
                 BackgroundColor = Color.White
             };
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", DataPropertyName = "InstanceDisplayName", HeaderText = "Instance" });
