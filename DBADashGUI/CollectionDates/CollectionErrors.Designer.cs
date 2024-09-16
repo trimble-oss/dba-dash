@@ -31,407 +31,378 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CollectionErrors));
-            this.dgvDBADashErrors = new System.Windows.Forms.DataGridView();
-            this.Instance = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.ErrorDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ErrorSource = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.ErrorContext = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.ErrorMessage = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.toolStrip3 = new System.Windows.Forms.ToolStrip();
-            this.tsRefreshErrors = new System.Windows.Forms.ToolStripButton();
-            this.tsCopyErrors = new System.Windows.Forms.ToolStripButton();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.tsErrorDays = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsErrors1Day = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsErrors2Days = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsErrors3Days = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsErrors7Days = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsErrors14Days = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsErrors30Days = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsAckErrors = new System.Windows.Forms.ToolStripButton();
-            this.tsFilter = new System.Windows.Forms.ToolStripDropDownButton();
-            this.sourceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.txtSource = new System.Windows.Forms.ToolStripTextBox();
-            this.contextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.txtContext = new System.Windows.Forms.ToolStripTextBox();
-            this.messageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.txtMessage = new System.Windows.Forms.ToolStripTextBox();
-            this.instanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.txtInstance = new System.Windows.Forms.ToolStripTextBox();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsClearFilters = new System.Windows.Forms.ToolStripMenuItem();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvDBADashErrors)).BeginInit();
-            this.toolStrip3.SuspendLayout();
-            this.SuspendLayout();
+            dgvDBADashErrors = new System.Windows.Forms.DataGridView();
+            Instance = new System.Windows.Forms.DataGridViewLinkColumn();
+            ErrorDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ErrorSource = new System.Windows.Forms.DataGridViewLinkColumn();
+            ErrorContext = new System.Windows.Forms.DataGridViewLinkColumn();
+            ErrorMessage = new System.Windows.Forms.DataGridViewLinkColumn();
+            toolStrip3 = new System.Windows.Forms.ToolStrip();
+            tsRefreshErrors = new System.Windows.Forms.ToolStripButton();
+            tsCopyErrors = new System.Windows.Forms.ToolStripButton();
+            tsExcel = new System.Windows.Forms.ToolStripButton();
+            tsErrorDays = new System.Windows.Forms.ToolStripDropDownButton();
+            tsErrors1Day = new System.Windows.Forms.ToolStripMenuItem();
+            tsErrors2Days = new System.Windows.Forms.ToolStripMenuItem();
+            tsErrors3Days = new System.Windows.Forms.ToolStripMenuItem();
+            tsErrors7Days = new System.Windows.Forms.ToolStripMenuItem();
+            tsErrors14Days = new System.Windows.Forms.ToolStripMenuItem();
+            tsErrors30Days = new System.Windows.Forms.ToolStripMenuItem();
+            tsAckErrors = new System.Windows.Forms.ToolStripButton();
+            tsFilter = new System.Windows.Forms.ToolStripDropDownButton();
+            contextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            txtContext = new System.Windows.Forms.ToolStripTextBox();
+            instanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            txtInstance = new System.Windows.Forms.ToolStripTextBox();
+            messageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            txtMessage = new System.Windows.Forms.ToolStripTextBox();
+            sourceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            txtSource = new System.Windows.Forms.ToolStripTextBox();
+            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            tsClearFilters = new System.Windows.Forms.ToolStripMenuItem();
+            dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ((System.ComponentModel.ISupportInitialize)dgvDBADashErrors).BeginInit();
+            toolStrip3.SuspendLayout();
+            SuspendLayout();
             // 
             // dgvDBADashErrors
             // 
-            this.dgvDBADashErrors.AllowUserToAddRows = false;
-            this.dgvDBADashErrors.AllowUserToDeleteRows = false;
-            this.dgvDBADashErrors.BackgroundColor = System.Drawing.Color.White;
-            this.dgvDBADashErrors.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+            dgvDBADashErrors.AllowUserToAddRows = false;
+            dgvDBADashErrors.AllowUserToDeleteRows = false;
+            dgvDBADashErrors.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgvDBADashErrors.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            this.dgvDBADashErrors.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvDBADashErrors.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Instance,
-            this.ErrorDate,
-            this.ErrorSource,
-            this.ErrorContext,
-            this.ErrorMessage});
+            dgvDBADashErrors.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dgvDBADashErrors.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvDBADashErrors.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, ErrorDate, ErrorSource, ErrorContext, ErrorMessage });
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgvDBADashErrors.DefaultCellStyle = dataGridViewCellStyle2;
-            this.dgvDBADashErrors.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvDBADashErrors.Location = new System.Drawing.Point(0, 27);
-            this.dgvDBADashErrors.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dgvDBADashErrors.Name = "dgvDBADashErrors";
-            this.dgvDBADashErrors.ReadOnly = true;
-            this.dgvDBADashErrors.RowHeadersVisible = false;
-            this.dgvDBADashErrors.RowHeadersWidth = 51;
-            this.dgvDBADashErrors.RowTemplate.Height = 24;
-            this.dgvDBADashErrors.Size = new System.Drawing.Size(829, 521);
-            this.dgvDBADashErrors.TabIndex = 2;
-            this.dgvDBADashErrors.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvDBADashErrors_CellContentClick);
+            dgvDBADashErrors.DefaultCellStyle = dataGridViewCellStyle2;
+            dgvDBADashErrors.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvDBADashErrors.Location = new System.Drawing.Point(0, 27);
+            dgvDBADashErrors.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dgvDBADashErrors.Name = "dgvDBADashErrors";
+            dgvDBADashErrors.ReadOnly = true;
+            dgvDBADashErrors.RowHeadersVisible = false;
+            dgvDBADashErrors.RowHeadersWidth = 51;
+            dgvDBADashErrors.RowTemplate.Height = 24;
+            dgvDBADashErrors.Size = new System.Drawing.Size(829, 521);
+            dgvDBADashErrors.TabIndex = 2;
+            dgvDBADashErrors.CellContentClick += DgvDBADashErrors_CellContentClick;
             // 
             // Instance
             // 
-            this.Instance.DataPropertyName = "InstanceDisplayName";
-            this.Instance.HeaderText = "Instance";
-            this.Instance.MinimumWidth = 6;
-            this.Instance.Name = "Instance";
-            this.Instance.ReadOnly = true;
-            this.Instance.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.Instance.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.Instance.Width = 90;
+            Instance.DataPropertyName = "InstanceDisplayName";
+            Instance.HeaderText = "Instance";
+            Instance.MinimumWidth = 6;
+            Instance.Name = "Instance";
+            Instance.ReadOnly = true;
+            Instance.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            Instance.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            Instance.Width = 90;
             // 
             // ErrorDate
             // 
-            this.ErrorDate.DataPropertyName = "ErrorDate";
-            this.ErrorDate.HeaderText = "Date";
-            this.ErrorDate.MinimumWidth = 6;
-            this.ErrorDate.Name = "ErrorDate";
-            this.ErrorDate.ReadOnly = true;
-            this.ErrorDate.Width = 67;
+            ErrorDate.DataPropertyName = "ErrorDate";
+            ErrorDate.HeaderText = "Date";
+            ErrorDate.MinimumWidth = 6;
+            ErrorDate.Name = "ErrorDate";
+            ErrorDate.ReadOnly = true;
+            ErrorDate.Width = 67;
             // 
             // ErrorSource
             // 
-            this.ErrorSource.DataPropertyName = "ErrorSource";
-            this.ErrorSource.HeaderText = "Source";
-            this.ErrorSource.MinimumWidth = 6;
-            this.ErrorSource.Name = "ErrorSource";
-            this.ErrorSource.ReadOnly = true;
-            this.ErrorSource.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.ErrorSource.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.ErrorSource.Width = 82;
+            ErrorSource.DataPropertyName = "ErrorSource";
+            ErrorSource.HeaderText = "Source";
+            ErrorSource.MinimumWidth = 6;
+            ErrorSource.Name = "ErrorSource";
+            ErrorSource.ReadOnly = true;
+            ErrorSource.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            ErrorSource.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            ErrorSource.Width = 82;
             // 
             // ErrorContext
             // 
-            this.ErrorContext.DataPropertyName = "ErrorContext";
-            this.ErrorContext.HeaderText = "Error Context";
-            this.ErrorContext.MinimumWidth = 6;
-            this.ErrorContext.Name = "ErrorContext";
-            this.ErrorContext.ReadOnly = true;
-            this.ErrorContext.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.ErrorContext.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.ErrorContext.Width = 120;
+            ErrorContext.DataPropertyName = "ErrorContext";
+            ErrorContext.HeaderText = "Error Context";
+            ErrorContext.MinimumWidth = 6;
+            ErrorContext.Name = "ErrorContext";
+            ErrorContext.ReadOnly = true;
+            ErrorContext.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            ErrorContext.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            ErrorContext.Width = 120;
             // 
             // ErrorMessage
             // 
-            this.ErrorMessage.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.ErrorMessage.DataPropertyName = "ErrorMessage";
-            this.ErrorMessage.HeaderText = "Message";
-            this.ErrorMessage.MinimumWidth = 50;
-            this.ErrorMessage.Name = "ErrorMessage";
-            this.ErrorMessage.ReadOnly = true;
-            this.ErrorMessage.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.ErrorMessage.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            ErrorMessage.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            ErrorMessage.DataPropertyName = "ErrorMessage";
+            ErrorMessage.HeaderText = "Message";
+            ErrorMessage.MinimumWidth = 50;
+            ErrorMessage.Name = "ErrorMessage";
+            ErrorMessage.ReadOnly = true;
+            ErrorMessage.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            ErrorMessage.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             // 
             // toolStrip3
             // 
-            this.toolStrip3.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip3.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsRefreshErrors,
-            this.tsCopyErrors,
-            this.tsExcel,
-            this.tsErrorDays,
-            this.tsAckErrors,
-            this.tsFilter});
-            this.toolStrip3.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip3.Name = "toolStrip3";
-            this.toolStrip3.Size = new System.Drawing.Size(829, 27);
-            this.toolStrip3.TabIndex = 3;
-            this.toolStrip3.Text = "toolStrip3";
+            toolStrip3.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip3.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefreshErrors, tsCopyErrors, tsExcel, tsErrorDays, tsAckErrors, tsFilter });
+            toolStrip3.Location = new System.Drawing.Point(0, 0);
+            toolStrip3.Name = "toolStrip3";
+            toolStrip3.Size = new System.Drawing.Size(829, 27);
+            toolStrip3.TabIndex = 3;
+            toolStrip3.Text = "toolStrip3";
             // 
             // tsRefreshErrors
             // 
-            this.tsRefreshErrors.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefreshErrors.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefreshErrors.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefreshErrors.Name = "tsRefreshErrors";
-            this.tsRefreshErrors.Size = new System.Drawing.Size(29, 24);
-            this.tsRefreshErrors.Text = "Refresh";
-            this.tsRefreshErrors.Click += new System.EventHandler(this.TsRefreshErrors_Click);
+            tsRefreshErrors.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefreshErrors.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefreshErrors.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefreshErrors.Name = "tsRefreshErrors";
+            tsRefreshErrors.Size = new System.Drawing.Size(29, 24);
+            tsRefreshErrors.Text = "Refresh";
+            tsRefreshErrors.Click += TsRefreshErrors_Click;
             // 
             // tsCopyErrors
             // 
-            this.tsCopyErrors.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopyErrors.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopyErrors.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopyErrors.Name = "tsCopyErrors";
-            this.tsCopyErrors.Size = new System.Drawing.Size(29, 24);
-            this.tsCopyErrors.Text = "Copy";
-            this.tsCopyErrors.Click += new System.EventHandler(this.TsCopyErrors_Click);
+            tsCopyErrors.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopyErrors.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsCopyErrors.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopyErrors.Name = "tsCopyErrors";
+            tsCopyErrors.Size = new System.Drawing.Size(29, 24);
+            tsCopyErrors.Text = "Copy";
+            tsCopyErrors.Click += TsCopyErrors_Click;
             // 
             // tsExcel
             // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
+            tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsExcel.Image = Properties.Resources.excel16x16;
+            tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcel.Name = "tsExcel";
+            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Text = "Export Excel";
+            tsExcel.Click += TsExcel_Click;
             // 
             // tsErrorDays
             // 
-            this.tsErrorDays.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsErrorDays.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsErrors1Day,
-            this.tsErrors2Days,
-            this.tsErrors3Days,
-            this.tsErrors7Days,
-            this.tsErrors14Days,
-            this.tsErrors30Days});
-            this.tsErrorDays.Image = global::DBADashGUI.Properties.Resources.Time_16x;
-            this.tsErrorDays.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsErrorDays.Name = "tsErrorDays";
-            this.tsErrorDays.Size = new System.Drawing.Size(34, 24);
-            this.tsErrorDays.Text = "toolStripDropDownButton1";
+            tsErrorDays.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsErrorDays.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsErrors1Day, tsErrors2Days, tsErrors3Days, tsErrors7Days, tsErrors14Days, tsErrors30Days });
+            tsErrorDays.Image = Properties.Resources.Time_16x;
+            tsErrorDays.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsErrorDays.Name = "tsErrorDays";
+            tsErrorDays.Size = new System.Drawing.Size(34, 24);
+            tsErrorDays.Text = "toolStripDropDownButton1";
             // 
             // tsErrors1Day
             // 
-            this.tsErrors1Day.Name = "tsErrors1Day";
-            this.tsErrors1Day.Size = new System.Drawing.Size(144, 26);
-            this.tsErrors1Day.Tag = "1";
-            this.tsErrors1Day.Text = "1 Day";
-            this.tsErrors1Day.Click += new System.EventHandler(this.TsErrorDays_Click);
+            tsErrors1Day.Name = "tsErrors1Day";
+            tsErrors1Day.Size = new System.Drawing.Size(144, 26);
+            tsErrors1Day.Tag = "1";
+            tsErrors1Day.Text = "1 Day";
+            tsErrors1Day.Click += TsErrorDays_Click;
             // 
             // tsErrors2Days
             // 
-            this.tsErrors2Days.Name = "tsErrors2Days";
-            this.tsErrors2Days.Size = new System.Drawing.Size(144, 26);
-            this.tsErrors2Days.Tag = "2";
-            this.tsErrors2Days.Text = "2 Days";
-            this.tsErrors2Days.Click += new System.EventHandler(this.TsErrorDays_Click);
+            tsErrors2Days.Name = "tsErrors2Days";
+            tsErrors2Days.Size = new System.Drawing.Size(144, 26);
+            tsErrors2Days.Tag = "2";
+            tsErrors2Days.Text = "2 Days";
+            tsErrors2Days.Click += TsErrorDays_Click;
             // 
             // tsErrors3Days
             // 
-            this.tsErrors3Days.Name = "tsErrors3Days";
-            this.tsErrors3Days.Size = new System.Drawing.Size(144, 26);
-            this.tsErrors3Days.Tag = "3";
-            this.tsErrors3Days.Text = "3 Days";
-            this.tsErrors3Days.Click += new System.EventHandler(this.TsErrorDays_Click);
+            tsErrors3Days.Name = "tsErrors3Days";
+            tsErrors3Days.Size = new System.Drawing.Size(144, 26);
+            tsErrors3Days.Tag = "3";
+            tsErrors3Days.Text = "3 Days";
+            tsErrors3Days.Click += TsErrorDays_Click;
             // 
             // tsErrors7Days
             // 
-            this.tsErrors7Days.Name = "tsErrors7Days";
-            this.tsErrors7Days.Size = new System.Drawing.Size(144, 26);
-            this.tsErrors7Days.Tag = "7";
-            this.tsErrors7Days.Text = "7 Days";
-            this.tsErrors7Days.Click += new System.EventHandler(this.TsErrorDays_Click);
+            tsErrors7Days.Name = "tsErrors7Days";
+            tsErrors7Days.Size = new System.Drawing.Size(144, 26);
+            tsErrors7Days.Tag = "7";
+            tsErrors7Days.Text = "7 Days";
+            tsErrors7Days.Click += TsErrorDays_Click;
             // 
             // tsErrors14Days
             // 
-            this.tsErrors14Days.Name = "tsErrors14Days";
-            this.tsErrors14Days.Size = new System.Drawing.Size(144, 26);
-            this.tsErrors14Days.Tag = "14";
-            this.tsErrors14Days.Text = "14 Days";
-            this.tsErrors14Days.Click += new System.EventHandler(this.TsErrorDays_Click);
+            tsErrors14Days.Name = "tsErrors14Days";
+            tsErrors14Days.Size = new System.Drawing.Size(144, 26);
+            tsErrors14Days.Tag = "14";
+            tsErrors14Days.Text = "14 Days";
+            tsErrors14Days.Click += TsErrorDays_Click;
             // 
             // tsErrors30Days
             // 
-            this.tsErrors30Days.Name = "tsErrors30Days";
-            this.tsErrors30Days.Size = new System.Drawing.Size(144, 26);
-            this.tsErrors30Days.Tag = "30";
-            this.tsErrors30Days.Text = "30 Days";
-            this.tsErrors30Days.Click += new System.EventHandler(this.TsErrorDays_Click);
+            tsErrors30Days.Name = "tsErrors30Days";
+            tsErrors30Days.Size = new System.Drawing.Size(144, 26);
+            tsErrors30Days.Tag = "30";
+            tsErrors30Days.Text = "30 Days";
+            tsErrors30Days.Click += TsErrorDays_Click;
             // 
             // tsAckErrors
             // 
-            this.tsAckErrors.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsAckErrors.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsAckErrors.Image = ((System.Drawing.Image)(resources.GetObject("tsAckErrors.Image")));
-            this.tsAckErrors.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsAckErrors.Name = "tsAckErrors";
-            this.tsAckErrors.Size = new System.Drawing.Size(145, 24);
-            this.tsAckErrors.Text = "Acknowledge Errors";
-            this.tsAckErrors.Click += new System.EventHandler(this.TsAckErrors_Click);
+            tsAckErrors.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsAckErrors.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            tsAckErrors.Image = (System.Drawing.Image)resources.GetObject("tsAckErrors.Image");
+            tsAckErrors.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsAckErrors.Name = "tsAckErrors";
+            tsAckErrors.Size = new System.Drawing.Size(145, 24);
+            tsAckErrors.Text = "Acknowledge Errors";
+            tsAckErrors.Click += TsAckErrors_Click;
             // 
             // tsFilter
             // 
-            this.tsFilter.BackColor = System.Drawing.SystemColors.Control;
-            this.tsFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.contextToolStripMenuItem,
-            this.instanceToolStripMenuItem,
-            this.messageToolStripMenuItem,
-            this.sourceToolStripMenuItem,
-            this.toolStripSeparator1,
-            this.tsClearFilters});
-            this.tsFilter.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
-            this.tsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsFilter.Name = "tsFilter";
-            this.tsFilter.Size = new System.Drawing.Size(76, 24);
-            this.tsFilter.Text = "Filter";
-            // 
-            // sourceToolStripMenuItem
-            // 
-            this.sourceToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.txtSource});
-            this.sourceToolStripMenuItem.Name = "sourceToolStripMenuItem";
-            this.sourceToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.sourceToolStripMenuItem.Text = "Source";
-            // 
-            // txtSource
-            // 
-            this.txtSource.Name = "txtSource";
-            this.txtSource.Size = new System.Drawing.Size(150, 27);
-            this.txtSource.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
-            this.txtSource.TextChanged += new System.EventHandler(this.TxtSource_TextChanged);
+            tsFilter.BackColor = System.Drawing.SystemColors.Control;
+            tsFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { contextToolStripMenuItem, instanceToolStripMenuItem, messageToolStripMenuItem, sourceToolStripMenuItem, toolStripSeparator1, tsClearFilters });
+            tsFilter.Image = Properties.Resources.FilterDropdown_16x;
+            tsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsFilter.Name = "tsFilter";
+            tsFilter.Size = new System.Drawing.Size(76, 24);
+            tsFilter.Text = "Filter";
             // 
             // contextToolStripMenuItem
             // 
-            this.contextToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.txtContext});
-            this.contextToolStripMenuItem.Name = "contextToolStripMenuItem";
-            this.contextToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.contextToolStripMenuItem.Text = "Context";
+            contextToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { txtContext });
+            contextToolStripMenuItem.Name = "contextToolStripMenuItem";
+            contextToolStripMenuItem.Size = new System.Drawing.Size(169, 26);
+            contextToolStripMenuItem.Text = "Context";
             // 
             // txtContext
             // 
-            this.txtContext.Name = "txtContext";
-            this.txtContext.Size = new System.Drawing.Size(150, 27);
-            this.txtContext.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
-            this.txtContext.TextChanged += new System.EventHandler(this.TxtContext_TextChanged);
-            // 
-            // messageToolStripMenuItem
-            // 
-            this.messageToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.txtMessage});
-            this.messageToolStripMenuItem.Name = "messageToolStripMenuItem";
-            this.messageToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.messageToolStripMenuItem.Text = "Message";
-            // 
-            // txtMessage
-            // 
-            this.txtMessage.Name = "txtMessage";
-            this.txtMessage.Size = new System.Drawing.Size(150, 27);
-            this.txtMessage.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
-            this.txtMessage.TextChanged += new System.EventHandler(this.TxtMessage_TextChanged);
+            txtContext.Name = "txtContext";
+            txtContext.Size = new System.Drawing.Size(150, 27);
+            txtContext.KeyPress += Filter_KeyPress;
+            txtContext.TextChanged += TxtContext_TextChanged;
             // 
             // instanceToolStripMenuItem
             // 
-            this.instanceToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.txtInstance});
-            this.instanceToolStripMenuItem.Name = "instanceToolStripMenuItem";
-            this.instanceToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.instanceToolStripMenuItem.Text = "Instance";
+            instanceToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { txtInstance });
+            instanceToolStripMenuItem.Name = "instanceToolStripMenuItem";
+            instanceToolStripMenuItem.Size = new System.Drawing.Size(169, 26);
+            instanceToolStripMenuItem.Text = "Instance";
             // 
             // txtInstance
             // 
-            this.txtInstance.Name = "txtInstance";
-            this.txtInstance.Size = new System.Drawing.Size(150, 27);
-            this.txtInstance.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
-            this.txtInstance.TextChanged += new System.EventHandler(this.TxtInstance_TextChanged);
+            txtInstance.Name = "txtInstance";
+            txtInstance.Size = new System.Drawing.Size(150, 27);
+            txtInstance.KeyPress += Filter_KeyPress;
+            txtInstance.TextChanged += TxtInstance_TextChanged;
+            // 
+            // messageToolStripMenuItem
+            // 
+            messageToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { txtMessage });
+            messageToolStripMenuItem.Name = "messageToolStripMenuItem";
+            messageToolStripMenuItem.Size = new System.Drawing.Size(169, 26);
+            messageToolStripMenuItem.Text = "Message";
+            // 
+            // txtMessage
+            // 
+            txtMessage.Name = "txtMessage";
+            txtMessage.Size = new System.Drawing.Size(150, 27);
+            txtMessage.KeyPress += Filter_KeyPress;
+            txtMessage.TextChanged += TxtMessage_TextChanged;
+            // 
+            // sourceToolStripMenuItem
+            // 
+            sourceToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { txtSource });
+            sourceToolStripMenuItem.Name = "sourceToolStripMenuItem";
+            sourceToolStripMenuItem.Size = new System.Drawing.Size(169, 26);
+            sourceToolStripMenuItem.Text = "Source";
+            // 
+            // txtSource
+            // 
+            txtSource.Name = "txtSource";
+            txtSource.Size = new System.Drawing.Size(150, 27);
+            txtSource.KeyPress += Filter_KeyPress;
+            txtSource.TextChanged += TxtSource_TextChanged;
             // 
             // toolStripSeparator1
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(221, 6);
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new System.Drawing.Size(166, 6);
             // 
             // tsClearFilters
             // 
-            this.tsClearFilters.Name = "tsClearFilters";
-            this.tsClearFilters.Size = new System.Drawing.Size(224, 26);
-            this.tsClearFilters.Text = "Clear Filters";
-            this.tsClearFilters.Click += new System.EventHandler(this.TsClearFilters_Click);
+            tsClearFilters.Name = "tsClearFilters";
+            tsClearFilters.Size = new System.Drawing.Size(169, 26);
+            tsClearFilters.Text = "Clear Filters";
+            tsClearFilters.Click += TsClearFilters_Click;
             // 
             // dataGridViewTextBoxColumn1
             // 
-            this.dataGridViewTextBoxColumn1.DataPropertyName = "Instance";
-            this.dataGridViewTextBoxColumn1.HeaderText = "Instance";
-            this.dataGridViewTextBoxColumn1.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            this.dataGridViewTextBoxColumn1.Width = 90;
+            dataGridViewTextBoxColumn1.DataPropertyName = "Instance";
+            dataGridViewTextBoxColumn1.HeaderText = "Instance";
+            dataGridViewTextBoxColumn1.MinimumWidth = 6;
+            dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            dataGridViewTextBoxColumn1.ReadOnly = true;
+            dataGridViewTextBoxColumn1.Width = 90;
             // 
             // dataGridViewTextBoxColumn2
             // 
-            this.dataGridViewTextBoxColumn2.DataPropertyName = "ErrorDate";
-            this.dataGridViewTextBoxColumn2.HeaderText = "Date";
-            this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            this.dataGridViewTextBoxColumn2.Width = 67;
+            dataGridViewTextBoxColumn2.DataPropertyName = "ErrorDate";
+            dataGridViewTextBoxColumn2.HeaderText = "Date";
+            dataGridViewTextBoxColumn2.MinimumWidth = 6;
+            dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            dataGridViewTextBoxColumn2.ReadOnly = true;
+            dataGridViewTextBoxColumn2.Width = 67;
             // 
             // dataGridViewTextBoxColumn3
             // 
-            this.dataGridViewTextBoxColumn3.DataPropertyName = "ErrorSource";
-            this.dataGridViewTextBoxColumn3.HeaderText = "Source";
-            this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            this.dataGridViewTextBoxColumn3.Width = 82;
+            dataGridViewTextBoxColumn3.DataPropertyName = "ErrorSource";
+            dataGridViewTextBoxColumn3.HeaderText = "Source";
+            dataGridViewTextBoxColumn3.MinimumWidth = 6;
+            dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            dataGridViewTextBoxColumn3.ReadOnly = true;
+            dataGridViewTextBoxColumn3.Width = 82;
             // 
             // dataGridViewTextBoxColumn4
             // 
-            this.dataGridViewTextBoxColumn4.DataPropertyName = "ErrorContext";
-            this.dataGridViewTextBoxColumn4.HeaderText = "Error Context";
-            this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
-            this.dataGridViewTextBoxColumn4.ReadOnly = true;
-            this.dataGridViewTextBoxColumn4.Width = 120;
+            dataGridViewTextBoxColumn4.DataPropertyName = "ErrorContext";
+            dataGridViewTextBoxColumn4.HeaderText = "Error Context";
+            dataGridViewTextBoxColumn4.MinimumWidth = 6;
+            dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            dataGridViewTextBoxColumn4.ReadOnly = true;
+            dataGridViewTextBoxColumn4.Width = 120;
             // 
             // dataGridViewTextBoxColumn5
             // 
-            this.dataGridViewTextBoxColumn5.DataPropertyName = "ErrorMessage";
-            this.dataGridViewTextBoxColumn5.HeaderText = "Message";
-            this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
-            this.dataGridViewTextBoxColumn5.ReadOnly = true;
-            this.dataGridViewTextBoxColumn5.Width = 94;
+            dataGridViewTextBoxColumn5.DataPropertyName = "ErrorMessage";
+            dataGridViewTextBoxColumn5.HeaderText = "Message";
+            dataGridViewTextBoxColumn5.MinimumWidth = 6;
+            dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
+            dataGridViewTextBoxColumn5.ReadOnly = true;
+            dataGridViewTextBoxColumn5.Width = 94;
             // 
             // CollectionErrors
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.dgvDBADashErrors);
-            this.Controls.Add(this.toolStrip3);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "CollectionErrors";
-            this.Size = new System.Drawing.Size(829, 548);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvDBADashErrors)).EndInit();
-            this.toolStrip3.ResumeLayout(false);
-            this.toolStrip3.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            Controls.Add(dgvDBADashErrors);
+            Controls.Add(toolStrip3);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "CollectionErrors";
+            Size = new System.Drawing.Size(829, 548);
+            ((System.ComponentModel.ISupportInitialize)dgvDBADashErrors).EndInit();
+            toolStrip3.ResumeLayout(false);
+            toolStrip3.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

@@ -91,7 +91,6 @@
             dgvLogShipping.AllowUserToAddRows = false;
             dgvLogShipping.AllowUserToDeleteRows = false;
             dgvLogShipping.BackgroundColor = System.Drawing.Color.White;
-            dgvLogShipping.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
