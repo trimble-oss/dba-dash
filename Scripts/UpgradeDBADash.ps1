@@ -57,7 +57,7 @@ function CheckDotNetVersion([System.Version]$AppVersion){
 
     $RuntimeVersions = dotnet --list-runtimes  | Where-Object { $_ -like "Microsoft.WindowsDesktop.App*" } 
 
-    $VersionCheck = @($RuntimeVersions | Where-Object { [System.Version]::Parse(($_).Split(" ")[1]) -ge $MinVersion }).Count -ge 1
+    $VersionCheck = @($RuntimeVersions | Where-Object { $_.Split(" ")[1] -as [System.Version] -ge $MinVersion }).Count -ge 1
 
     if (!$VersionCheck){
         if($MinVersion.Major -eq 8){
