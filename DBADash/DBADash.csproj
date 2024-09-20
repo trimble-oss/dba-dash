@@ -100,9 +100,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.7.400.20" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.402.11" />
-    <PackageReference Include="AWSSDK.SQS" Version="3.7.400.20" />
+    <PackageReference Include="AWSSDK.Core" Version="3.7.400.21" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.403" />
+    <PackageReference Include="AWSSDK.SQS" Version="3.7.400.21" />
     <PackageReference Include="Azure.Core" Version="1.43.0" />
     <PackageReference Include="Azure.Identity" Version="1.12.0" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
@@ -118,7 +118,7 @@
     <PackageReference Include="Microsoft.Management.Infrastructure" Version="3.0.0" />
     <PackageReference Include="Microsoft.SqlServer.Assessment" Version="1.1.17" />
     <PackageReference Include="Microsoft.SqlServer.Assessment.Authoring" Version="1.1.0" />
-    <PackageReference Include="Microsoft.SqlServer.DacFx" Version="162.3.566" />
+    <PackageReference Include="Microsoft.SqlServer.DacFx" Version="162.4.92" />
     <PackageReference Include="Microsoft.SqlServer.Management.SqlParser" Version="172.0.1" />
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="171.30.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
