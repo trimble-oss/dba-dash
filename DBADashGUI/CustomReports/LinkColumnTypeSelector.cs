@@ -166,7 +166,7 @@ namespace DBADashGUI.CustomReports
             }
 
             if (report?.UserParams == null) return;
-            foreach (var p in report.Params.ParamList.Where(p => !string.Equals(p.ParamName, "@InstanceIDs", StringComparison.InvariantCultureIgnoreCase)))
+            foreach (var p in report.Params.ParamList)
             {
                 bool isSystem = CustomReport.SystemParamNames.Contains(p.ParamName, StringComparer.OrdinalIgnoreCase);
                 var row = new DataGridViewRow();
