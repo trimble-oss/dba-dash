@@ -54,7 +54,7 @@ namespace DBADashGUI.CustomReports
 
             cboTargetColumn.Items.Clear();
             cboTargetColumn.Items.AddRange(ColumnList.ToArray<object>());
-            cboReport.Text = Context.Report.ReportName;
+            cboReport.Text = Context.Report.ProcedureName;
             cboTargetColumn.Text = LinkColumn;
             txtLinkColumn.Text = LinkColumn;
             switch (LinkColumnInfo)
@@ -157,7 +157,7 @@ namespace DBADashGUI.CustomReports
             dgvMapping.Columns[0].ReadOnly = true;
 
             dgvMapping.Rows.Clear();
-            var report = customReports.FirstOrDefault(r => r.ReportName == cboReport.Text);
+            var report = customReports.FirstOrDefault(r => r.ProcedureName == cboReport.Text);
 
             var mapping = new Dictionary<string, string>();
             if (LinkColumnInfo is DrillDownLinkColumnInfo drillDown)
