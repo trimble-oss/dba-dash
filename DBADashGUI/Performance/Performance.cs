@@ -10,6 +10,7 @@ namespace DBADashGUI.Performance
         public Performance()
         {
             InitializeComponent();
+            objectExecution1.Metric.Measure = "duration_ms_per_sec";
         }
 
         private DBADashContext context;

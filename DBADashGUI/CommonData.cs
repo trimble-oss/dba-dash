@@ -81,7 +81,7 @@ namespace DBADashGUI
             return dt;
         }
 
-        public static DataTable ObjectExecutionStats(int instanceID, int databaseID, long objectID, int dateGrouping, string measure, DateTime FromDate, DateTime ToDate, string instance = "")
+        public static DataTable ObjectExecutionStats(int instanceID, int databaseID, long objectID, int dateGrouping, string measure, DateTime FromDate, DateTime ToDate, string instance = "", int top = 10, bool includeOther = false)
         {
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("dbo.ObjectExecutionStats_Get", cn) { CommandType = CommandType.StoredProcedure };
@@ -97,6 +97,8 @@ namespace DBADashGUI
             cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
             cmd.Parameters.AddWithValue("Measure", measure);
             cmd.Parameters.AddIfGreaterThanZero("DatabaseID", databaseID);
+            cmd.Parameters.AddIfGreaterThanZero("Top", top);
+            cmd.Parameters.AddWithValue("IncludeOther", includeOther);
             if (DateRange.HasTimeOfDayFilter)
             {
                 cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
@@ -270,9 +272,9 @@ namespace DBADashGUI
 
         public static DBADashAgent GetDBADashAgent(int agentID)
         {
-            var cacheKey = "DBADashAgent_" + agentID;    
-            if (cache.Get(cacheKey) is DBADashAgent agent) return agent; 
-            agent =  DBADashAgent.GetDBADashAgent(Common.ConnectionString,agentID);
+            var cacheKey = "DBADashAgent_" + agentID;
+            if (cache.Get(cacheKey) is DBADashAgent agent) return agent;
+            agent = DBADashAgent.GetDBADashAgent(Common.ConnectionString, agentID);
             cache.Add(cacheKey, agent, DateTimeOffset.Now.AddMinutes(10));
             return agent;
         }

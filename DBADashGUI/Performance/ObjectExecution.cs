@@ -6,6 +6,7 @@ using LiveCharts.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
@@ -22,6 +23,9 @@ namespace DBADashGUI.Performance
             public DateTime DateTime { get; set; }
             public double Value { get; set; }
         }
+
+        private int TopRows => tsTop.Tag == null ? 10 : Convert.ToInt32(tsTop.Tag);
+        private bool IncludeOther => includeOtherToolStripMenuItem.Checked;
 
         //public string measure = "TotalDuration";
         public DateTimePoint x;
@@ -87,7 +91,7 @@ namespace DBADashGUI.Performance
             lblExecution.Text = databaseid > 0 ? "Execution Stats: Database" : "Execution Stats: Instance";
             toolStrip1.Tag = databaseid > 0 ? "ALT" : null; // set tag to ALT to use the alternate menu renderer
             toolStrip1.ApplyTheme(DBADashUser.SelectedTheme);
-            var dt = CommonData.ObjectExecutionStats(instanceID, databaseid, objectID, dateGrouping, Metric.Measure, DateRange.FromUTC, DateRange.ToUTC);
+            var dt = CommonData.ObjectExecutionStats(instanceID, databaseid, objectID, dateGrouping, Metric.Measure, DateRange.FromUTC, DateRange.ToUTC, default, TopRows, IncludeOther);
 
             if (dt.Rows.Count == 0)
             {
@@ -171,15 +175,17 @@ namespace DBADashGUI.Performance
         private readonly Measures measures = new()
             {
                 {"TotalDuration", "Total Duration","#,##0.000 sec"},
+                {"duration_ms_per_sec","Duration (ms/sec)","#,##0.000 ms/sec"},
                 {"AvgDuration", "Avg Duration","#,##0.000 sec"},
                 {"TotalCPU", "Total CPU","#,##0.000 sec"},
+                {"cpu_ms_per_sec", "CPU (ms/sec)","#,##0.000 ms/sec"},
                 {"AvgCPU","Avg CPU", "#,##0.000  sec"},
                 {"ExecutionCount", "Execution Count","N0"},
                 {"ExecutionsPerMin", "Executions Per Min","#,##0.000"},
                 {"MaxExecutionsPerMin", "Max Executions Per Min","#,##0.000"},
-                { "TotalLogicalReads","Total Logical Reads","N0" },
+                {"TotalLogicalReads","Total Logical Reads","N0" },
                 {"AvgLogicalReads","Avg Logical Reads","N0" },
-                {"TotalPhysicalReads","TotalPhysicalReads" ,"N0"},
+                {"TotalPhysicalReads","Total Physical Reads" ,"N0"},
                 {"AvgPhysicalReads","Avg Physical Reads" ,"N0"},
                 {"TotalWrites","Total Writes" ,"N0"},
                 {"AvgWrites","Avg Writes","N0" }
@@ -236,6 +242,23 @@ namespace DBADashGUI.Performance
         private void TsUp_Click(object sender, EventArgs e)
         {
             MoveUp?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void Top_Select(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            tsTop.Tag = ts.Tag;
+            tsTop.Text = "Top " + ts.Tag;
+            foreach (var itm in tsTop.DropDownItems.OfType<ToolStripMenuItem>().Where(item => item != includeOtherToolStripMenuItem))
+            {
+                itm.Checked = itm == ts;
+            }
+            RefreshData();
+        }
+
+        private void includeOtherToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RefreshData();
         }
     }
 }
