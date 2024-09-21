@@ -2,7 +2,7 @@
     InstanceID INT NOT NULL,
     object_id INT NOT NULL,
     database_id INT NOT NULL,
-    database_name NVARCHAR(128) NOT NULL CONSTRAINT DF_Staging_ObjectExecutionStats_database_name DEFAULT(CAST(NEWID() AS NVARCHAR(128))),
+    database_name NVARCHAR(128) NOT NULL CONSTRAINT DF_Staging_ObjectExecutionStats_database_name DEFAULT (CONVERT([nvarchar](128),newid())),
     object_name NVARCHAR(128) NULL,
     total_worker_time BIGINT NOT NULL,
     total_elapsed_time BIGINT NOT NULL,
