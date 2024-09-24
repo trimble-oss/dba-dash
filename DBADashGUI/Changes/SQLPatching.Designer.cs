@@ -41,26 +41,6 @@
             NewEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             dgvVersion = new System.Windows.Forms.DataGridView();
-            colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colSQLVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colPatchDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colProductVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colEngineEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colEditionID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colProductLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colProductUpdateLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colProductUpdateReference = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colProductMajorVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colBuildType = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colProductBuild = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colResourceVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colResourceLastUpdateDateTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colLicenseType = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colNumLicences = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colWindowsCaption = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colWindowsRelease = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colWindowsSKU = new System.Windows.Forms.DataGridViewTextBoxColumn();
             toolStrip2 = new System.Windows.Forms.ToolStrip();
             toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             tsRefreshVersion = new System.Windows.Forms.ToolStripButton();
@@ -89,6 +69,27 @@
             tsRefreshHistory = new System.Windows.Forms.ToolStripButton();
             tsCopyHistory = new System.Windows.Forms.ToolStripButton();
             tsExcelHistory = new System.Windows.Forms.ToolStripButton();
+            colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colSQLVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colPatchDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colProductVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colEngineEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colEditionID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colProductLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colProductUpdateLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colProductUpdateReference = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colProductMajorVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colBuildType = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colProductBuild = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colResourceVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colResourceLastUpdateDateTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colLicenseType = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colNumLicences = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colWindowsCaption = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colWindowsRelease = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colWindowsSKU = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            IsWindowsUpdate = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
@@ -113,7 +114,7 @@
             dgv.ReadOnly = true;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
-            dgv.Size = new System.Drawing.Size(1205, 407);
+            dgv.Size = new System.Drawing.Size(1205, 408);
             dgv.TabIndex = 0;
             // 
             // Instance
@@ -224,7 +225,7 @@
             splitContainer1.Panel2.Controls.Add(dgv);
             splitContainer1.Panel2.Controls.Add(toolStrip1);
             splitContainer1.Size = new System.Drawing.Size(1205, 869);
-            splitContainer1.SplitterDistance = 430;
+            splitContainer1.SplitterDistance = 429;
             splitContainer1.SplitterWidth = 5;
             splitContainer1.TabIndex = 1;
             // 
@@ -235,7 +236,7 @@
             dgvVersion.AllowUserToOrderColumns = true;
             dgvVersion.BackgroundColor = System.Drawing.Color.White;
             dgvVersion.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvVersion.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colInstance, colSQLVersion, colPatchDate, colProductVersion, colEdition, colEngineEdition, colEditionID, colProductLevel, colProductUpdateLevel, colProductUpdateReference, colProductMajorVersion, colBuildType, colProductBuild, colResourceVersion, colResourceLastUpdateDateTime, colLicenseType, colNumLicences, colWindowsCaption, colWindowsRelease, colWindowsSKU });
+            dgvVersion.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colInstance, colSQLVersion, colPatchDate, colProductVersion, colEdition, colEngineEdition, colEditionID, colProductLevel, colProductUpdateLevel, colProductUpdateReference, colProductMajorVersion, colBuildType, colProductBuild, colResourceVersion, colResourceLastUpdateDateTime, colLicenseType, colNumLicences, colWindowsCaption, colWindowsRelease, colWindowsSKU, IsWindowsUpdate });
             dgvVersion.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvVersion.Location = new System.Drawing.Point(0, 27);
             dgvVersion.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -244,191 +245,11 @@
             dgvVersion.RowHeadersVisible = false;
             dgvVersion.RowHeadersWidth = 51;
             dgvVersion.RowTemplate.Height = 24;
-            dgvVersion.Size = new System.Drawing.Size(1205, 403);
+            dgvVersion.Size = new System.Drawing.Size(1205, 402);
             dgvVersion.TabIndex = 0;
             dgvVersion.CellContentClick += DgvVersion_CellContentClick;
             dgvVersion.ColumnHeaderMouseClick += DgvVersion_ColumnHeaderMouseClick;
             dgvVersion.RowsAdded += DgvVersion_RowsAdded;
-            // 
-            // colInstance
-            // 
-            colInstance.DataPropertyName = "InstanceDisplayName";
-            colInstance.HeaderText = "Instance";
-            colInstance.MinimumWidth = 6;
-            colInstance.Name = "colInstance";
-            colInstance.ReadOnly = true;
-            colInstance.Width = 90;
-            // 
-            // colSQLVersion
-            // 
-            colSQLVersion.DataPropertyName = "SQLVersion";
-            colSQLVersion.HeaderText = "Version";
-            colSQLVersion.MinimumWidth = 6;
-            colSQLVersion.Name = "colSQLVersion";
-            colSQLVersion.ReadOnly = true;
-            colSQLVersion.Width = 85;
-            // 
-            // colPatchDate
-            // 
-            colPatchDate.DataPropertyName = "PatchDate";
-            colPatchDate.HeaderText = "SQL Patch Date";
-            colPatchDate.MinimumWidth = 6;
-            colPatchDate.Name = "colPatchDate";
-            colPatchDate.ReadOnly = true;
-            colPatchDate.Width = 127;
-            // 
-            // colProductVersion
-            // 
-            colProductVersion.DataPropertyName = "ProductVersion";
-            colProductVersion.HeaderText = "Product Version";
-            colProductVersion.MinimumWidth = 6;
-            colProductVersion.Name = "colProductVersion";
-            colProductVersion.ReadOnly = true;
-            colProductVersion.Width = 127;
-            // 
-            // colEdition
-            // 
-            colEdition.DataPropertyName = "Edition";
-            colEdition.HeaderText = "Edition";
-            colEdition.MinimumWidth = 6;
-            colEdition.Name = "colEdition";
-            colEdition.ReadOnly = true;
-            colEdition.Width = 80;
-            // 
-            // colEngineEdition
-            // 
-            colEngineEdition.DataPropertyName = "EngineEdition";
-            colEngineEdition.HeaderText = "Engine Edition";
-            colEngineEdition.MinimumWidth = 6;
-            colEngineEdition.Name = "colEngineEdition";
-            colEngineEdition.ReadOnly = true;
-            colEngineEdition.Width = 118;
-            // 
-            // colEditionID
-            // 
-            colEditionID.DataPropertyName = "EditionID";
-            colEditionID.HeaderText = "Edition ID";
-            colEditionID.MinimumWidth = 6;
-            colEditionID.Name = "colEditionID";
-            colEditionID.ReadOnly = true;
-            colEditionID.Width = 90;
-            // 
-            // colProductLevel
-            // 
-            colProductLevel.DataPropertyName = "ProductLevel";
-            colProductLevel.HeaderText = "Product Level";
-            colProductLevel.MinimumWidth = 6;
-            colProductLevel.Name = "colProductLevel";
-            colProductLevel.ReadOnly = true;
-            colProductLevel.Width = 114;
-            // 
-            // colProductUpdateLevel
-            // 
-            colProductUpdateLevel.DataPropertyName = "ProductUpdateLevel";
-            colProductUpdateLevel.HeaderText = "Product Update Level";
-            colProductUpdateLevel.MinimumWidth = 6;
-            colProductUpdateLevel.Name = "colProductUpdateLevel";
-            colProductUpdateLevel.ReadOnly = true;
-            colProductUpdateLevel.Width = 128;
-            // 
-            // colProductUpdateReference
-            // 
-            colProductUpdateReference.DataPropertyName = "ProductUpdateReference";
-            colProductUpdateReference.HeaderText = "Product Update Reference";
-            colProductUpdateReference.MinimumWidth = 6;
-            colProductUpdateReference.Name = "colProductUpdateReference";
-            colProductUpdateReference.ReadOnly = true;
-            colProductUpdateReference.Width = 188;
-            // 
-            // colProductMajorVersion
-            // 
-            colProductMajorVersion.DataPropertyName = "ProductMajorVersion";
-            colProductMajorVersion.HeaderText = "Major Version";
-            colProductMajorVersion.MinimumWidth = 6;
-            colProductMajorVersion.Name = "colProductMajorVersion";
-            colProductMajorVersion.ReadOnly = true;
-            colProductMajorVersion.Width = 114;
-            // 
-            // colBuildType
-            // 
-            colBuildType.DataPropertyName = "ProductBuildType";
-            colBuildType.HeaderText = "Build Type";
-            colBuildType.MinimumWidth = 6;
-            colBuildType.Name = "colBuildType";
-            colBuildType.ReadOnly = true;
-            colBuildType.Width = 96;
-            // 
-            // colProductBuild
-            // 
-            colProductBuild.DataPropertyName = "ProductBuild";
-            colProductBuild.HeaderText = "Product Build";
-            colProductBuild.MinimumWidth = 6;
-            colProductBuild.Name = "colProductBuild";
-            colProductBuild.ReadOnly = true;
-            colProductBuild.Width = 111;
-            // 
-            // colResourceVersion
-            // 
-            colResourceVersion.DataPropertyName = "ResourceVersion";
-            colResourceVersion.HeaderText = "Resource Version";
-            colResourceVersion.MinimumWidth = 6;
-            colResourceVersion.Name = "colResourceVersion";
-            colResourceVersion.ReadOnly = true;
-            colResourceVersion.Width = 137;
-            // 
-            // colResourceLastUpdateDateTime
-            // 
-            colResourceLastUpdateDateTime.DataPropertyName = "ResourceLastUpdateDateTime";
-            colResourceLastUpdateDateTime.HeaderText = "Resource Last Update";
-            colResourceLastUpdateDateTime.MinimumWidth = 6;
-            colResourceLastUpdateDateTime.Name = "colResourceLastUpdateDateTime";
-            colResourceLastUpdateDateTime.ReadOnly = true;
-            colResourceLastUpdateDateTime.Width = 122;
-            // 
-            // colLicenseType
-            // 
-            colLicenseType.DataPropertyName = "LicenseType";
-            colLicenseType.HeaderText = "License Type";
-            colLicenseType.MinimumWidth = 6;
-            colLicenseType.Name = "colLicenseType";
-            colLicenseType.ReadOnly = true;
-            colLicenseType.Width = 112;
-            // 
-            // colNumLicences
-            // 
-            colNumLicences.DataPropertyName = "NumLicenses";
-            colNumLicences.HeaderText = "Num Licenses";
-            colNumLicences.MinimumWidth = 6;
-            colNumLicences.Name = "colNumLicences";
-            colNumLicences.ReadOnly = true;
-            colNumLicences.Width = 116;
-            // 
-            // colWindowsCaption
-            // 
-            colWindowsCaption.DataPropertyName = "WindowsCaption";
-            colWindowsCaption.HeaderText = "Windows Caption";
-            colWindowsCaption.MinimumWidth = 6;
-            colWindowsCaption.Name = "colWindowsCaption";
-            colWindowsCaption.ReadOnly = true;
-            colWindowsCaption.Width = 133;
-            // 
-            // colWindowsRelease
-            // 
-            colWindowsRelease.DataPropertyName = "WindowsRelease";
-            colWindowsRelease.HeaderText = "Windows Release";
-            colWindowsRelease.MinimumWidth = 6;
-            colWindowsRelease.Name = "colWindowsRelease";
-            colWindowsRelease.ReadOnly = true;
-            colWindowsRelease.Width = 136;
-            // 
-            // colWindowsSKU
-            // 
-            colWindowsSKU.DataPropertyName = "WindowsSKU";
-            colWindowsSKU.HeaderText = "Windows SKU";
-            colWindowsSKU.MinimumWidth = 6;
-            colWindowsSKU.Name = "colWindowsSKU";
-            colWindowsSKU.ReadOnly = true;
-            colWindowsSKU.Width = 115;
             // 
             // toolStrip2
             // 
@@ -672,6 +493,196 @@
             tsExcelHistory.Text = "Export Excel";
             tsExcelHistory.Click += TsExcelHistory_Click;
             // 
+            // colInstance
+            // 
+            colInstance.DataPropertyName = "InstanceDisplayName";
+            colInstance.HeaderText = "Instance";
+            colInstance.MinimumWidth = 6;
+            colInstance.Name = "colInstance";
+            colInstance.ReadOnly = true;
+            colInstance.Width = 90;
+            // 
+            // colSQLVersion
+            // 
+            colSQLVersion.DataPropertyName = "SQLVersion";
+            colSQLVersion.HeaderText = "Version";
+            colSQLVersion.MinimumWidth = 6;
+            colSQLVersion.Name = "colSQLVersion";
+            colSQLVersion.ReadOnly = true;
+            colSQLVersion.Width = 85;
+            // 
+            // colPatchDate
+            // 
+            colPatchDate.DataPropertyName = "PatchDate";
+            colPatchDate.HeaderText = "SQL Patch Date";
+            colPatchDate.MinimumWidth = 6;
+            colPatchDate.Name = "colPatchDate";
+            colPatchDate.ReadOnly = true;
+            colPatchDate.Width = 127;
+            // 
+            // colProductVersion
+            // 
+            colProductVersion.DataPropertyName = "ProductVersion";
+            colProductVersion.HeaderText = "Product Version";
+            colProductVersion.MinimumWidth = 6;
+            colProductVersion.Name = "colProductVersion";
+            colProductVersion.ReadOnly = true;
+            colProductVersion.Width = 127;
+            // 
+            // colEdition
+            // 
+            colEdition.DataPropertyName = "Edition";
+            colEdition.HeaderText = "Edition";
+            colEdition.MinimumWidth = 6;
+            colEdition.Name = "colEdition";
+            colEdition.ReadOnly = true;
+            colEdition.Width = 80;
+            // 
+            // colEngineEdition
+            // 
+            colEngineEdition.DataPropertyName = "EngineEdition";
+            colEngineEdition.HeaderText = "Engine Edition";
+            colEngineEdition.MinimumWidth = 6;
+            colEngineEdition.Name = "colEngineEdition";
+            colEngineEdition.ReadOnly = true;
+            colEngineEdition.Width = 118;
+            // 
+            // colEditionID
+            // 
+            colEditionID.DataPropertyName = "EditionID";
+            colEditionID.HeaderText = "Edition ID";
+            colEditionID.MinimumWidth = 6;
+            colEditionID.Name = "colEditionID";
+            colEditionID.ReadOnly = true;
+            colEditionID.Width = 90;
+            // 
+            // colProductLevel
+            // 
+            colProductLevel.DataPropertyName = "ProductLevel";
+            colProductLevel.HeaderText = "Product Level";
+            colProductLevel.MinimumWidth = 6;
+            colProductLevel.Name = "colProductLevel";
+            colProductLevel.ReadOnly = true;
+            colProductLevel.Width = 114;
+            // 
+            // colProductUpdateLevel
+            // 
+            colProductUpdateLevel.DataPropertyName = "ProductUpdateLevel";
+            colProductUpdateLevel.HeaderText = "Product Update Level";
+            colProductUpdateLevel.MinimumWidth = 6;
+            colProductUpdateLevel.Name = "colProductUpdateLevel";
+            colProductUpdateLevel.ReadOnly = true;
+            colProductUpdateLevel.Width = 128;
+            // 
+            // colProductUpdateReference
+            // 
+            colProductUpdateReference.DataPropertyName = "ProductUpdateReference";
+            colProductUpdateReference.HeaderText = "Product Update Reference";
+            colProductUpdateReference.MinimumWidth = 6;
+            colProductUpdateReference.Name = "colProductUpdateReference";
+            colProductUpdateReference.ReadOnly = true;
+            colProductUpdateReference.Width = 188;
+            // 
+            // colProductMajorVersion
+            // 
+            colProductMajorVersion.DataPropertyName = "ProductMajorVersion";
+            colProductMajorVersion.HeaderText = "Major Version";
+            colProductMajorVersion.MinimumWidth = 6;
+            colProductMajorVersion.Name = "colProductMajorVersion";
+            colProductMajorVersion.ReadOnly = true;
+            colProductMajorVersion.Width = 114;
+            // 
+            // colBuildType
+            // 
+            colBuildType.DataPropertyName = "ProductBuildType";
+            colBuildType.HeaderText = "Build Type";
+            colBuildType.MinimumWidth = 6;
+            colBuildType.Name = "colBuildType";
+            colBuildType.ReadOnly = true;
+            colBuildType.Width = 96;
+            // 
+            // colProductBuild
+            // 
+            colProductBuild.DataPropertyName = "ProductBuild";
+            colProductBuild.HeaderText = "Product Build";
+            colProductBuild.MinimumWidth = 6;
+            colProductBuild.Name = "colProductBuild";
+            colProductBuild.ReadOnly = true;
+            colProductBuild.Width = 111;
+            // 
+            // colResourceVersion
+            // 
+            colResourceVersion.DataPropertyName = "ResourceVersion";
+            colResourceVersion.HeaderText = "Resource Version";
+            colResourceVersion.MinimumWidth = 6;
+            colResourceVersion.Name = "colResourceVersion";
+            colResourceVersion.ReadOnly = true;
+            colResourceVersion.Width = 137;
+            // 
+            // colResourceLastUpdateDateTime
+            // 
+            colResourceLastUpdateDateTime.DataPropertyName = "ResourceLastUpdateDateTime";
+            colResourceLastUpdateDateTime.HeaderText = "Resource Last Update";
+            colResourceLastUpdateDateTime.MinimumWidth = 6;
+            colResourceLastUpdateDateTime.Name = "colResourceLastUpdateDateTime";
+            colResourceLastUpdateDateTime.ReadOnly = true;
+            colResourceLastUpdateDateTime.Width = 122;
+            // 
+            // colLicenseType
+            // 
+            colLicenseType.DataPropertyName = "LicenseType";
+            colLicenseType.HeaderText = "License Type";
+            colLicenseType.MinimumWidth = 6;
+            colLicenseType.Name = "colLicenseType";
+            colLicenseType.ReadOnly = true;
+            colLicenseType.Width = 112;
+            // 
+            // colNumLicences
+            // 
+            colNumLicences.DataPropertyName = "NumLicenses";
+            colNumLicences.HeaderText = "Num Licenses";
+            colNumLicences.MinimumWidth = 6;
+            colNumLicences.Name = "colNumLicences";
+            colNumLicences.ReadOnly = true;
+            colNumLicences.Width = 116;
+            // 
+            // colWindowsCaption
+            // 
+            colWindowsCaption.DataPropertyName = "WindowsCaption";
+            colWindowsCaption.HeaderText = "Windows Caption";
+            colWindowsCaption.MinimumWidth = 6;
+            colWindowsCaption.Name = "colWindowsCaption";
+            colWindowsCaption.ReadOnly = true;
+            colWindowsCaption.Width = 133;
+            // 
+            // colWindowsRelease
+            // 
+            colWindowsRelease.DataPropertyName = "WindowsRelease";
+            colWindowsRelease.HeaderText = "Windows Release";
+            colWindowsRelease.MinimumWidth = 6;
+            colWindowsRelease.Name = "colWindowsRelease";
+            colWindowsRelease.ReadOnly = true;
+            colWindowsRelease.Width = 136;
+            // 
+            // colWindowsSKU
+            // 
+            colWindowsSKU.DataPropertyName = "WindowsSKU";
+            colWindowsSKU.HeaderText = "Windows SKU";
+            colWindowsSKU.MinimumWidth = 6;
+            colWindowsSKU.Name = "colWindowsSKU";
+            colWindowsSKU.ReadOnly = true;
+            colWindowsSKU.Width = 115;
+            // 
+            // IsWindowsUpdate
+            // 
+            IsWindowsUpdate.DataPropertyName = "IsWindowsUpdate";
+            IsWindowsUpdate.HeaderText = "Is Windows Update?";
+            IsWindowsUpdate.MinimumWidth = 6;
+            IsWindowsUpdate.Name = "IsWindowsUpdate";
+            IsWindowsUpdate.ReadOnly = true;
+            IsWindowsUpdate.ThreeState = true;
+            IsWindowsUpdate.Width = 125;
+            // 
             // SQLPatching
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -723,6 +734,22 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn OldEdition;
         private System.Windows.Forms.DataGridViewTextBoxColumn NewEdition;
         private System.Windows.Forms.ToolStripButton tsUpdateBuildReference;
+        private System.Windows.Forms.ToolStripButton tsViewBuildReference;
+        private System.Windows.Forms.ToolStripDropDownButton tsConfig;
+        private System.Windows.Forms.ToolStripMenuItem thresholdsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem sPBehindWarningToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem sPBehindCriticalToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cUBehindWarningToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cUBehindCriticalToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem daysUntilSupportEndsWarningToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem daysUntilSupportEndsCriticalToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem daysUntilMainstreamSupportEndsWarningToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem daysUntilMainstreamSupportEndsCriticalToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem resetToDefaultToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem buildReferenceAgeWarningThresholdToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem buildReferenceAgeCriticalThresholdToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem buildReferenceUpdateExclusionPeriodToolStripMenuItem;
         private System.Windows.Forms.DataGridViewTextBoxColumn colInstance;
         private System.Windows.Forms.DataGridViewTextBoxColumn colSQLVersion;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPatchDate;
@@ -743,21 +770,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colWindowsCaption;
         private System.Windows.Forms.DataGridViewTextBoxColumn colWindowsRelease;
         private System.Windows.Forms.DataGridViewTextBoxColumn colWindowsSKU;
-        private System.Windows.Forms.ToolStripButton tsViewBuildReference;
-        private System.Windows.Forms.ToolStripDropDownButton tsConfig;
-        private System.Windows.Forms.ToolStripMenuItem thresholdsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem sPBehindWarningToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem sPBehindCriticalToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem cUBehindWarningToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem cUBehindCriticalToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem daysUntilSupportEndsWarningToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem daysUntilSupportEndsCriticalToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem daysUntilMainstreamSupportEndsWarningToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem daysUntilMainstreamSupportEndsCriticalToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem resetToDefaultToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripMenuItem buildReferenceAgeWarningThresholdToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem buildReferenceAgeCriticalThresholdToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem buildReferenceUpdateExclusionPeriodToolStripMenuItem;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn IsWindowsUpdate;
     }
 }

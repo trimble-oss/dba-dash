@@ -60,7 +60,8 @@ SELECT	I.ConnectionID,
 		BR.MainstreamEndDate,
 		BR.LifecycleUrl,
 		DATEDIFF(d,GETUTCDATE(),SupportedUntil) AS DaysUntilSupportExpires,
-        DATEDIFF(d,GETUTCDATE(),MainstreamEndDate) AS DaysUntilMainstreamSupportExpires
+        DATEDIFF(d,GETUTCDATE(),MainstreamEndDate) AS DaysUntilMainstreamSupportExpires,
+		I.IsWindowsUpdate
 FROM dbo.InstanceInfo I
 OUTER APPLY(SELECT TOP(1) H.ChangedDate 
 			FROM dbo.SQLPatchingHistory H 

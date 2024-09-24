@@ -4,11 +4,21 @@ DECLARE @SystemManufacturer NVARCHAR(512)
 DECLARE @SystemProductName NVARCHAR(512)
 DECLARE @IsAgentRunning BIT
 DECLARE @InstantFileInitializationEnabled BIT
+DECLARE @IsWindowsUpdate BIT
+DECLARE @DefaultService NVARCHAR(512)
+DECLARE @RegisteredWithAU INT
+DECLARE @AllowMUUpdateService INT
 IF OBJECT_ID('sys.xp_instance_regread') IS NOT NULL AND IS_SRVROLEMEMBER('sysadmin')=1
 BEGIN  
 	EXEC sys.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'HARDWARE\DESCRIPTION\System\CentralProcessor\0', N'ProcessorNameString',@ProcessorNameString OUT;
 	EXEC sys.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'SYSTEM\HardwareConfig\Current', N'SystemManufacturer',@SystemManufacturer OUT;
 	EXEC sys.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'SYSTEM\HardwareConfig\Current', N'SystemProductName', @SystemProductName OUT;
+	EXEC sys.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Services', N'DefaultService', @DefaultService OUT; /* Set via GUI */
+	EXEC sys.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Services\7971F918-A847-4430-9279-4A52D1EFE18D', N'RegisteredWithAU', @RegisteredWithAU OUT; /* Set via GUI */
+	EXEC sys.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU', N'AllowMUUpdateService', @AllowMUUpdateService OUT; /* Set via Group Policy */
+
+	SELECT @IsWindowsUpdate = CASE WHEN @AllowMUUpdateService=1 THEN CAST(1 AS BIT) WHEN @DefaultService = '7971f918-a847-4430-9279-4a52d1efe18d' AND @RegisteredWithAU=1 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+	
 END
 ELSE
 BEGIN
@@ -122,4 +132,5 @@ SELECT @ActivePowerPlan ActivePowerPlanGUID,
        @ResourceGovernorEnabled AS ResourceGovernorEnabled,
        @LastMemoryDump LastMemoryDump,
        @DumpCount AS MemoryDumpCount,
-	   @DBMailStatus AS DBMailStatus;
+	   @DBMailStatus AS DBMailStatus,
+	   @IsWindowsUpdate AS IsWindowsUpdate;

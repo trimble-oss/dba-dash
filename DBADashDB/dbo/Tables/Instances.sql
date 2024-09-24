@@ -87,6 +87,7 @@
     contained_availability_group_name NVARCHAR(128) NULL,
     ProductMinorVersion INT NULL,
     ProductRevision INT NULL,
+    IsWindowsUpdate BIT NULL,
     InstanceDisplayName AS ISNULL(Alias,ConnectionID),
     InstanceGroupName AS CASE WHEN EngineEdition=5 THEN Instance ELSE ISNULL(Alias,ConnectionID) END,
     LastMemoryDumpUTC AS CONVERT(DATETIME2,LastMemoryDump,1),

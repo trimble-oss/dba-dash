@@ -114,7 +114,8 @@ SELECT I.InstanceID,
 			WHEN I.ProductMajorVersion>12 AND I.numa_node_count>1 AND I.cpu_count/I.numa_node_count > 16 AND I.cpu_count/I.numa_node_count * 0.5 > 16 THEN 16 /* Server with multiple NUMA nodes	Greater than 16 logical processors per NUMA node	Keep MAXDOP at half the number of logical processors per NUMA node with a MAX value of 16 */
 			WHEN I.ProductMajorVersion>12 AND I.numa_node_count>1 AND I.cpu_count/I.numa_node_count > 16 AND I.cpu_count/I.numa_node_count * 0.5 <= 16 THEN CAST(I.cpu_count/I.numa_node_count*0.5 AS INT) /* Server with multiple NUMA nodes	Greater than 16 logical processors per NUMA node	Keep MAXDOP at half the number of logical processors per NUMA node with a MAX value of 16 */
 		ELSE NULL END AS MaxRecommendedMaxDOP,
-	1 AS MinRecommendedMaxDOP
+	1 AS MinRecommendedMaxDOP,
+    I.IsWindowsUpdate
 FROM dbo.Instances I
 LEFT JOIN dbo.DBADashAgent A ON I.CollectAgentID = A.DBADashAgentID
 CROSS APPLY dbo.SQLVersionName(I.EditionID,I.ProductVersion) v
