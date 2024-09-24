@@ -54,6 +54,7 @@ namespace DBADashGUI
             new DataGridViewTextBoxColumn()  { DataPropertyName = "CUBehind", HeaderText = "CU Behind", ReadOnly = true, Name = "colCUBehind",Width=60, DefaultCellStyle = new DataGridViewCellStyle() { Font = new Font(DefaultFont, FontStyle.Italic)  }, ToolTipText = "Cumulative updates behind latest build within this service pack"},
             new DataGridViewTextBoxColumn()  { DataPropertyName = "LatestVersion", HeaderText = "Latest Version", ReadOnly = true,Width=100, Name = "colLatestVersion", DefaultCellStyle = new DataGridViewCellStyle() { Font = new Font(DefaultFont, FontStyle.Italic)  }, ToolTipText = "Latest build available for this version of SQL"},
             new DataGridViewTextBoxColumn()  { DataPropertyName = "LatestVersionPatchLevel", HeaderText = "Latest Version Patch Level",Width=90, ReadOnly = true, Name = "colLatestVersionPatchLevel", DefaultCellStyle = new DataGridViewCellStyle() { Font = new Font(DefaultFont, FontStyle.Italic)  }, ToolTipText = "Latest build available for this version of SQL" },
+            new DataGridViewCheckBoxColumn() { DataPropertyName = "IsWindowsUpdate", HeaderText = "Is Windows Update", ReadOnly = true,Width = 80, Name = "colIsWindowsUpdate",   DefaultCellStyle = new DataGridViewCellStyle() { Font = new Font(DefaultFont, FontStyle.Italic)  }, ToolTipText = "SQL Server is patched through Windows update. Checks 'Receive updates for other Microsoft products' setting of Windows update", IndeterminateValue = DBNull.Value, ThreeState = true, SortMode = DataGridViewColumnSortMode.Automatic},
         };
 
         public void SetContext(DBADashContext _context)
@@ -219,6 +220,14 @@ namespace DBADashGUI
                 gRow.Cells["colSupportedUntil"].SetStatusColor(supportedUntilStatus);
                 gRow.Cells["colCUBehind"].SetStatusColor(colCUBehindStatus);
                 gRow.Cells["colSPBehind"].SetStatusColor(colSPBehindStatus);
+                if (gRow.Cells["colIsWindowsUpdate"].Value == DBNull.Value)
+                {
+                    gRow.Cells["colIsWindowsUpdate"].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
+                }
+                else
+                {
+                    gRow.Cells["colIsWindowsUpdate"].Style = gRow.DefaultCellStyle;
+                }
             }
         }
 

@@ -1306,6 +1306,11 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                 Data.Tables["ServerExtraProperties"].Rows[0]["ActivePowerPlanGUID"] = activePowerPlanGUID;
                 Data.Tables["ServerExtraProperties"].Rows[0]["ActivePowerPlan"] = activePowerPlan;
             }
+            if (Data.Tables["ServerExtraProperties"].Rows[0]["IsWindowsUpdate"] == DBNull.Value && !noWMI)
+            {
+                CollectIsWindowsUpdateWMI();
+                Data.Tables["ServerExtraProperties"].Rows[0]["IsWindowsUpdate"] = IsWindowsUpdate == null ? DBNull.Value : IsWindowsUpdate;
+            }
         }
 
         public DataTable GetDT(string tableName, string SQL, int commandTimeout, SqlParameter[] param = null)
@@ -1379,8 +1384,29 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
         private string model;
         private string WindowsCaption;
         private string ProcessorName;
+        private bool? IsWindowsUpdate;
 
         #region "WMI"
+
+        private void CollectIsWindowsUpdateWMI()
+        {
+            try
+            {
+                var allowMUUpdateService = GetIsWindowsUpdateAllowMUUpdateService(); //Group Policy
+                if (allowMUUpdateService)
+                {
+                    IsWindowsUpdate = true;
+                    return;
+                }
+                var regWithAU = GetIsWindowsUpdateRegisteredWithAU(); // UI
+                var defaultService = GetWindowsUpdateDefaultService(); //UI
+                IsWindowsUpdate = string.Equals(defaultService, "7971f918-a847-4430-9279-4a52d1efe18d", StringComparison.OrdinalIgnoreCase) && regWithAU;
+            }
+            catch (Exception ex)
+            {
+                LogError(ex, "ServerExtraProperties", "Collect:CollectIsWindowsUpdateWMI");
+            }
+        }
 
         private void CollectOperatingSystemWMI()
         {
@@ -1618,6 +1644,51 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             {
                 LogError(ex, "ServerExtraProperties", "Collect:Processor WMI");
             }
+        }
+
+        private string GetWindowsUpdateDefaultService()
+        {
+            using CimMethodParametersCollection CimParams = new()
+            {
+                CimMethodParameter.Create("hDefKey", LOCAL_MACHINE, CimFlags.In),
+                CimMethodParameter.Create("sSubKeyName", @"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Services", CimFlags.In),
+                CimMethodParameter.Create("sValueName", "DefaultService", CimFlags.In)
+            };
+
+            using var session = CimSession.Create(computerName, WMISessionOptions);
+            using var results = session.InvokeMethod(new CimInstance("StdRegProv", @"root\default"), "GetStringValue", CimParams);
+
+            return Convert.ToString(results.OutParameters["sValue"].Value);
+        }
+
+        private bool GetIsWindowsUpdateRegisteredWithAU()
+        {
+            using CimMethodParametersCollection CimParams = new()
+            {
+                CimMethodParameter.Create("hDefKey", LOCAL_MACHINE, CimFlags.In),
+                CimMethodParameter.Create("sSubKeyName", @"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Services\7971F918-A847-4430-9279-4A52D1EFE18D", CimFlags.In),
+                CimMethodParameter.Create("sValueName", "RegisteredWithAU", CimFlags.In)
+            };
+
+            using var session = CimSession.Create(computerName, WMISessionOptions);
+            using var results = session.InvokeMethod(new CimInstance("StdRegProv", @"root\default"), "GetDWORDValue", CimParams);
+
+            return Convert.ToUInt32(results.OutParameters["uValue"].Value) == 1;
+        }
+
+        private bool GetIsWindowsUpdateAllowMUUpdateService()
+        {
+            using CimMethodParametersCollection CimParams = new()
+            {
+                CimMethodParameter.Create("hDefKey", LOCAL_MACHINE, CimFlags.In),
+                CimMethodParameter.Create("sSubKeyName", @"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU", CimFlags.In),
+                CimMethodParameter.Create("sValueName", "AllowMUUpdateService", CimFlags.In)
+            };
+
+            using var session = CimSession.Create(computerName, WMISessionOptions);
+            using var results = session.InvokeMethod(new CimInstance("StdRegProv", @"root\default"), "GetDWORDValue", CimParams);
+
+            return Convert.ToUInt32(results.OutParameters["uValue"].Value) == 1;
         }
 
         private string GetProcessorName()

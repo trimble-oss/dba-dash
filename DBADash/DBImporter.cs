@@ -449,6 +449,10 @@ namespace DBADash
                     {
                         cmd.Parameters.AddWithValue("DBMailStatus", r["DBMailStatus"]);
                     }
+                    if (r.Table.Columns.Contains("IsWindowsUpdate"))
+                    {
+                        cmd.Parameters.AddWithValue("IsWindowsUpdate", r["IsWindowsUpdate"]);
+                    }
                     cmd.ExecuteNonQuery();
                 }
             }
