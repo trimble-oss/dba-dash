@@ -95,7 +95,7 @@ namespace DBADash
                 { CollectionType.DatabaseMirroring, 120 },
                 { CollectionType.Jobs, 120 },
                 { CollectionType.AzureDBResourceGovernance, 120 },
-                { CollectionType.SchemaSnapshot, 300 },
+                { CollectionType.SchemaSnapshot, 1200 },
                 { CollectionType.ServerPrincipals, 300 },
                 { CollectionType.ServerRoleMembers, 300 },
                 { CollectionType.ServerPermissions, 300 },

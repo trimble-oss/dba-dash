@@ -189,7 +189,8 @@ namespace DBADash
                 dtSchema.Columns.Add("DDL", typeof(byte[]));
                 dtSchema.Columns.Add("ObjectDateCreated", typeof(DateTime));
                 dtSchema.Columns.Add("ObjectDateModified", typeof(DateTime));
-                var instance = new Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
+                var instance = new Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn) );
+                instance.ConnectionContext.StatementTimeout = CollectionType.SchemaSnapshot.GetCommandTimeout();
                 instance.SetDefaultInitFields(typeof(Table), true);
 
                 var db = instance.Databases[DBName];
