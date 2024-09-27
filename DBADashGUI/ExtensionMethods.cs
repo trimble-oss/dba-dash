@@ -546,7 +546,6 @@ namespace DBADashGUI
             }
             var hex = hexString[2..];
             return hex.Length % 2 == 0 && hex.All(c => "0123456789ABCDEFabcdef".Contains(c));
-
         }
 
         public static byte[] HexStringToByteArray(this string hex)
@@ -570,7 +569,7 @@ namespace DBADashGUI
                 label.Text = message.Length > 200 ? message[..200] + "..." : message;
                 label.ToolTipText = tooltip;
                 label.IsLink = !string.IsNullOrEmpty(tooltip);
-                label.ForeColor =DBADashUser.SelectedTheme.ThemeIdentifier == ThemeType.Dark ? DBADashUser.SelectedTheme.ForegroundColor :  color;
+                label.ForeColor = DBADashUser.SelectedTheme.ThemeIdentifier == ThemeType.Dark ? DBADashUser.SelectedTheme.ForegroundColor : color;
                 label.LinkColor = DBADashUser.SelectedTheme.ThemeIdentifier == ThemeType.Dark ? DBADashUser.SelectedTheme.ForegroundColor : color;
                 label.Click -= StatusLabel_Click;
                 label.Click += StatusLabel_Click;
@@ -644,7 +643,7 @@ namespace DBADashGUI
             return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, 0, 0, dateTime.Kind);
         }
 
-        public static void SaveChartAs(this CartesianChart chart, string fileName="chart.png")
+        public static void SaveChartAs(this CartesianChart chart, string fileName = "chart.png")
         {
             var sfd = new SaveFileDialog
             {
@@ -676,8 +675,47 @@ namespace DBADashGUI
         {
             var skChart = new SKCartesianChart(chart) { Width = chart.Width, Height = chart.Height, };
             using var stream = new MemoryStream();
-            skChart.GetImage().Encode(SKEncodedImageFormat.Png,80).SaveTo(stream);
+            skChart.GetImage().Encode(SKEncodedImageFormat.Png, 80).SaveTo(stream);
             Clipboard.SetImage(new Bitmap(stream));
+        }
+
+        public static Type ToClrType(this SqlDbType sqlDbType)
+        {
+            return sqlDbType switch
+            {
+                SqlDbType.BigInt => typeof(long),
+                SqlDbType.Binary => typeof(byte[]),
+                SqlDbType.Bit => typeof(bool),
+                SqlDbType.Char => typeof(string),
+                SqlDbType.Date => typeof(DateTime),
+                SqlDbType.DateTime => typeof(DateTime),
+                SqlDbType.DateTime2 => typeof(DateTime),
+                SqlDbType.DateTimeOffset => typeof(DateTimeOffset),
+                SqlDbType.Decimal => typeof(decimal),
+                SqlDbType.Float => typeof(double),
+                SqlDbType.Image => typeof(byte[]),
+                SqlDbType.Int => typeof(int),
+                SqlDbType.Money => typeof(decimal),
+                SqlDbType.NChar => typeof(string),
+                SqlDbType.NText => typeof(string),
+                SqlDbType.NVarChar => typeof(string),
+                SqlDbType.Real => typeof(float),
+                SqlDbType.SmallDateTime => typeof(DateTime),
+                SqlDbType.SmallInt => typeof(short),
+                SqlDbType.SmallMoney => typeof(decimal),
+                SqlDbType.Structured => typeof(DataTable),
+                SqlDbType.Text => typeof(string),
+                SqlDbType.Time => typeof(TimeSpan),
+                SqlDbType.Timestamp => typeof(byte[]),
+                SqlDbType.TinyInt => typeof(byte),
+                SqlDbType.Udt => typeof(object), // User-defined type; you might need a more specific mapping here.
+                SqlDbType.UniqueIdentifier => typeof(Guid),
+                SqlDbType.VarBinary => typeof(byte[]),
+                SqlDbType.VarChar => typeof(string),
+                SqlDbType.Variant => typeof(object),
+                SqlDbType.Xml => typeof(string), // For XML data, string is a common choice, but you might want to use XmlDocument or XDocument in some cases.
+                _ => throw new ArgumentOutOfRangeException(nameof(sqlDbType), $"Unsupported SqlDbType: {sqlDbType}")
+            };
         }
     }
 }
