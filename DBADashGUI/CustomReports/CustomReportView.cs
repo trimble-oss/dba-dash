@@ -246,10 +246,7 @@ namespace DBADashGUI.CustomReports
             if (CommonShared.ShowInputDialog(ref formatString, "Enter format string (e.g. N1, P1, yyyy-MM-dd)") !=
                 DialogResult.OK) return;
             dgv.Columns[clickedColumnIndex].DefaultCellStyle.Format = formatString;
-            if (report.CustomReportResults[selectedTableIndex].CellFormatString.ContainsKey(key))
-            {
-                report.CustomReportResults[selectedTableIndex].CellFormatString.Remove(key);
-            }
+            report.CustomReportResults[selectedTableIndex].CellFormatString.Remove(key);
 
             if (!string.IsNullOrEmpty(formatString))
             {
@@ -375,7 +372,7 @@ namespace DBADashGUI.CustomReports
             var convertCols = dt.Columns.Cast<DataColumn>()
                 .Where(column => column.DataType == typeof(DateTime) && !report.CustomReportResults[selectedTableIndex].DoNotConvertToLocalTimeZone.Contains(column.ColumnName))
                 .Select(column => column.ColumnName).ToList();
-            if (convertCols.Any())
+            if (convertCols.Count > 0)
             {
                 DateHelper.ConvertUTCToAppTimeZone(ref dt, convertCols);
             }
@@ -603,6 +600,7 @@ namespace DBADashGUI.CustomReports
                     report.DeserializationException.Message, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 report.DeserializationException = null;// Display the message once
             }
+            editPickersToolStripMenuItem.Enabled = report.UserParams.Any();
             InitializeContextMenu();
             AddPickers();
             SetTriggerCollectionVisibility();
@@ -623,7 +621,7 @@ namespace DBADashGUI.CustomReports
             }
 
             var pickers = report.Pickers;
-            if (customParams.Any(p => p.Param.ParameterName.Equals("@Top", StringComparison.InvariantCultureIgnoreCase) && p.Param.SqlDbType == SqlDbType.Int) && !pickers.Any(p => p.ParameterName.Equals("@Top", StringComparison.InvariantCultureIgnoreCase)))
+            if (customParams.Any(p => p.Param.ParameterName.TrimStart('@').Equals("Top", StringComparison.InvariantCultureIgnoreCase) && p.Param.SqlDbType == SqlDbType.Int) && !pickers.Any(p => p.ParameterName.TrimStart('@').Equals("Top", StringComparison.InvariantCultureIgnoreCase)))
             {
                 pickers.Add(Picker.CreateTopPicker());
             }
@@ -631,10 +629,10 @@ namespace DBADashGUI.CustomReports
             foreach (var picker in report.Pickers.OrderBy(p => p.Name))
             {
                 var param = customParams.FirstOrDefault(p =>
-                        p.Param.ParameterName.Equals(picker.ParameterName,
+                        p.Param.ParameterName.TrimStart('@').Equals(picker.ParameterName.TrimStart('@'),
                             StringComparison.InvariantCultureIgnoreCase));
                 if (param == null) continue;
-                if (param.UseDefaultValue && !string.IsNullOrEmpty(picker.DefaultValue))
+                if (param.UseDefaultValue && !string.IsNullOrEmpty(picker.DefaultValue?.ToString()))
                 {
                     param.Param.Value = picker.DefaultValue;
                     param.UseDefaultValue = false;
@@ -642,9 +640,12 @@ namespace DBADashGUI.CustomReports
                 var pickerMenu = new ToolStripMenuItem(picker.Name);
                 foreach (var itm in picker.PickerItems)
                 {
-                    var item = new ToolStripMenuItem(itm.Value) { Tag = itm.Key };
-                    item.Checked = param.UseDefaultValue && string.IsNullOrEmpty(itm.Key) || !param.UseDefaultValue && param.Param.Value.Equals(itm.Key);
-                    item.Click += (sender, e) => PickerItem_Click(sender, e, itm, picker.ParameterName);
+                    var item = new ToolStripMenuItem(itm.Value)
+                    {
+                        Tag = itm.Key,
+                        Checked = param.UseDefaultValue && string.IsNullOrEmpty(itm.Key.ToString()) || !param.UseDefaultValue && param.Param.Value.Equals(itm.Key)
+                    };
+                    item.Click += (sender, e) => PickerItem_Click(sender, itm, picker.ParameterName);
                     pickerMenu.DropDownItems.Add(item);
                 }
 
@@ -658,11 +659,11 @@ namespace DBADashGUI.CustomReports
             tsParams.DropDownItems.Add(tsParameters);
         }
 
-        private void PickerItem_Click(object sender, EventArgs eventArgs, KeyValuePair<string, string> itm, string paramName)
+        private void PickerItem_Click(object sender, KeyValuePair<object, string> itm, string paramName)
         {
             var menu = (ToolStripMenuItem)sender;
-            var param = customParams.First(p => p.Param.ParameterName.Equals(paramName, StringComparison.InvariantCultureIgnoreCase));
-            if (string.IsNullOrEmpty(itm.Key))
+            var param = customParams.First(p => p.Param.ParameterName.TrimStart('@').Equals(paramName.TrimStart('@'), StringComparison.InvariantCultureIgnoreCase));
+            if (itm.Key == null || string.IsNullOrEmpty(itm.Key.ToString()))
             {
                 param.UseDefaultValue = true;
             }
@@ -882,13 +883,13 @@ namespace DBADashGUI.CustomReports
             tsClearFilter.ToolTipText = string.Empty;
         }
 
-        private async void tsTrigger_Click(object sender, EventArgs e)
+        private async void TsTrigger_Click(object sender, EventArgs e)
         {
             if (context.CollectAgentID == null || context.ImportAgentID == null) return;
             await Messaging.CollectionMessaging.TriggerCollection(context.ConnectionID, report.TriggerCollectionTypes, context.CollectAgentID.Value, context.ImportAgentID.Value, this, null);
         }
 
-        private void associateCollectionToolStripMenuItem_Click(object sender, EventArgs e)
+        private void AssociateCollectionToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var collectionTypes = string.Join(',', report.TriggerCollectionTypes);
             if (CommonShared.ShowInputDialog(ref collectionTypes, "Enter collection types to associate with this report", default, "Enter name of collection to be associated with this report.\nThis will allow the collection to be triggered directly from this report.\nMultiple collections can be specified comma-separated.\ne.g.\nUserData.MyCustomCollection") != DialogResult.OK) return;
@@ -896,6 +897,14 @@ namespace DBADashGUI.CustomReports
             report.TriggerCollectionTypes = collectionTypes.Split(',').Select(c => c.Trim()).ToList();
             report.Update();
             SetTriggerCollectionVisibility();
+        }
+
+        private void EditPickersToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using var pickers = new Pickers() { Report = report };
+            pickers.ShowDialog();
+            if (pickers.DialogResult != DialogResult.OK) return;
+            AddPickers();
         }
     }
 }

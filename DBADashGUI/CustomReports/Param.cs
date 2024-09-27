@@ -2,6 +2,7 @@
 using System.Data;
 using System.Xml.Serialization;
 using Microsoft.Data.SqlClient;
+using Newtonsoft.Json;
 
 namespace DBADashGUI.CustomReports
 {
@@ -16,28 +17,41 @@ namespace DBADashGUI.CustomReports
         [XmlAttribute(AttributeName = "ParamType")]
         public string ParamType { get; set; }
 
+        [JsonIgnore]
+        [XmlIgnore]
+        public SqlDbType ParamDbType
+        {
+            get
+            {
+                return ParamType switch
+                {
+                    "DATETIME" => SqlDbType.DateTime,
+                    "INT" => SqlDbType.Int,
+                    "BIGINT" => SqlDbType.BigInt,
+                    "SMALLINT" => SqlDbType.SmallInt,
+                    "TINYINT" => SqlDbType.TinyInt,
+                    "DECIMAL" => SqlDbType.Decimal,
+                    "FLOAT" => SqlDbType.Float,
+                    "MONEY" => SqlDbType.Money,
+                    "BIT" => SqlDbType.Bit,
+                    "DATETIME2" => SqlDbType.DateTime2,
+                    "DATETIMEOFFSET" => SqlDbType.DateTimeOffset,
+                    "IDS" => SqlDbType.Structured,
+                    _ => SqlDbType.NVarChar
+                };
+            }
+        }
+
+        [JsonIgnore]
+        [XmlIgnore]
+        public Type ParamClrType => ParamDbType.ToClrType();
+
         /// <summary>
         /// Create a CustomSqlParameter object with the correct data type and a value based on the type to use as a starting point for user customization.
         /// </summary>
         /// <returns></returns>
         public CustomSqlParameter CreateParameter()
         {
-            var type = ParamType switch
-            {
-                "DATETIME" => SqlDbType.DateTime,
-                "INT" => SqlDbType.Int,
-                "BIGINT" => SqlDbType.BigInt,
-                "SMALLINT" => SqlDbType.SmallInt,
-                "TINYINT" => SqlDbType.TinyInt,
-                "DECIMAL" => SqlDbType.Decimal,
-                "FLOAT" => SqlDbType.Float,
-                "MONEY" => SqlDbType.Money,
-                "BIT" => SqlDbType.Bit,
-                "DATETIME2" => SqlDbType.DateTime2,
-                "DATETIMEOFFSET" => SqlDbType.DateTimeOffset,
-                "IDS" => SqlDbType.Structured,
-                _ => SqlDbType.NVarChar
-            };
             object value = ParamType switch
             {
                 "DATETIME" => DateTime.Now.Date,
@@ -55,7 +69,7 @@ namespace DBADashGUI.CustomReports
             };
             return new CustomSqlParameter()
             {
-                Param = new SqlParameter() { ParameterName = ParamName, SqlDbType = type, Value = value},
+                Param = new SqlParameter() { ParameterName = ParamName, SqlDbType = ParamDbType, Value = value },
                 UseDefaultValue = true
             };
         }

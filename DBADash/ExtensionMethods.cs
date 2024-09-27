@@ -25,16 +25,21 @@ namespace DBADash
 
         public static T DeepCopy<T>(this T self)
         {
-            var serialized = JsonConvert.SerializeObject(self);
-            return JsonConvert.DeserializeObject<T>(serialized);
+            var settings = new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto // Preserve type information
+            };
+
+            var serialized = JsonConvert.SerializeObject(self, settings);
+            return JsonConvert.DeserializeObject<T>(serialized, settings);
         }
 
-        public static string Truncate(this string value, int maxLength,bool ellipsis=false)
+        public static string Truncate(this string value, int maxLength, bool ellipsis = false)
         {
             if (string.IsNullOrEmpty(value)) return value;
-            if(ellipsis)
+            if (ellipsis)
             {
-                return value.Length <= maxLength ? value : value[..(maxLength-3)] + "...";
+                return value.Length <= maxLength ? value : value[..(maxLength - 3)] + "...";
             }
             else
             {
@@ -92,7 +97,7 @@ namespace DBADash
             gZipStream.CopyTo(outputStream);
         }
 
-        public static string AppendToUrl(this string url,string appendString)
+        public static string AppendToUrl(this string url, string appendString)
         {
             return (url.EndsWith('/') ? url : url + '/') + appendString;
         }

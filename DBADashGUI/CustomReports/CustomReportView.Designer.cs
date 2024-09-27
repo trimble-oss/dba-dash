@@ -42,6 +42,7 @@
             saveLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             resetLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             scriptReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            editPickersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             cboResults = new System.Windows.Forms.ToolStripComboBox();
             lblSelectResults = new System.Windows.Forms.ToolStripLabel();
             tsParams = new System.Windows.Forms.ToolStripDropDownButton();
@@ -138,7 +139,7 @@
             // tsConfigure
             // 
             tsConfigure.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { setTitleToolStripMenuItem, setDescriptionToolStripMenuItem, renameResultSetToolStripMenuItem, associateCollectionToolStripMenuItem, saveLayoutToolStripMenuItem, resetLayoutToolStripMenuItem, scriptReportToolStripMenuItem });
+            tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { setTitleToolStripMenuItem, setDescriptionToolStripMenuItem, renameResultSetToolStripMenuItem, associateCollectionToolStripMenuItem, saveLayoutToolStripMenuItem, resetLayoutToolStripMenuItem, editPickersToolStripMenuItem, scriptReportToolStripMenuItem });
             tsConfigure.Image = Properties.Resources.SettingsOutline_16x;
             tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsConfigure.Name = "tsConfigure";
@@ -178,7 +179,7 @@
             associateCollectionToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
             associateCollectionToolStripMenuItem.Text = "Associate Collection";
             associateCollectionToolStripMenuItem.ToolTipText = "Associate Collection - Allow collection to be triggered from report";
-            associateCollectionToolStripMenuItem.Click += associateCollectionToolStripMenuItem_Click;
+            associateCollectionToolStripMenuItem.Click += AssociateCollectionToolStripMenuItem_Click;
             // 
             // saveLayoutToolStripMenuItem
             // 
@@ -206,6 +207,14 @@
             scriptReportToolStripMenuItem.Text = "Script Report";
             scriptReportToolStripMenuItem.ToolTipText = "Generate a script for this custom report to share with other users of DBA Dash";
             scriptReportToolStripMenuItem.Click += ScriptReportToolStripMenuItem_Click;
+            // 
+            // editPickersToolStripMenuItem
+            // 
+            editPickersToolStripMenuItem.Image = Properties.Resources.ReportParameter_16x;
+            editPickersToolStripMenuItem.Name = "editPickersToolStripMenuItem";
+            editPickersToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            editPickersToolStripMenuItem.Text = "Edit Pickers";
+            editPickersToolStripMenuItem.Click += EditPickersToolStripMenuItem_Click;
             // 
             // cboResults
             // 
@@ -252,7 +261,7 @@
             tsTrigger.Size = new System.Drawing.Size(151, 25);
             tsTrigger.Text = "Trigger Collection";
             tsTrigger.Visible = false;
-            tsTrigger.Click += tsTrigger_Click;
+            tsTrigger.Click += TsTrigger_Click;
             // 
             // lnkParams
             // 
@@ -260,7 +269,7 @@
             lnkParams.Font = new System.Drawing.Font("Segoe UI", 16F);
             lnkParams.Location = new System.Drawing.Point(0, 0);
             lnkParams.Name = "lnkParams";
-            lnkParams.Size = new System.Drawing.Size(824, 266);
+            lnkParams.Size = new System.Drawing.Size(824, 265);
             lnkParams.TabIndex = 2;
             lnkParams.TabStop = true;
             lnkParams.Text = "Set Parameters";
@@ -294,7 +303,7 @@
             splitContainer2.Panel2.Controls.Add(lblParamsRequired);
             splitContainer2.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
             splitContainer2.Size = new System.Drawing.Size(824, 562);
-            splitContainer2.SplitterDistance = 266;
+            splitContainer2.SplitterDistance = 265;
             splitContainer2.TabIndex = 4;
             // 
             // lblParamsRequired
@@ -303,7 +312,7 @@
             lblParamsRequired.Font = new System.Drawing.Font("Segoe UI", 10F);
             lblParamsRequired.Location = new System.Drawing.Point(0, 0);
             lblParamsRequired.Name = "lblParamsRequired";
-            lblParamsRequired.Size = new System.Drawing.Size(824, 292);
+            lblParamsRequired.Size = new System.Drawing.Size(824, 293);
             lblParamsRequired.TabIndex = 3;
             lblParamsRequired.Text = "Parameters are required to run the report";
             lblParamsRequired.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -401,5 +410,6 @@
         private System.Windows.Forms.ToolStripDropDownButton tsParams;
         private System.Windows.Forms.ToolStripButton tsTrigger;
         private System.Windows.Forms.ToolStripMenuItem associateCollectionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem editPickersToolStripMenuItem;
     }
 }
