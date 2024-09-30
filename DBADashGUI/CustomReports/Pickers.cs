@@ -86,9 +86,17 @@ namespace DBADashGUI.CustomReports
             dtPickerItems.Columns.Add("Value", SelectedPicker.DataType);
             dtPickerItems.Columns.Add("Display", typeof(string));
 
-            foreach (var kvp in SelectedPicker.PickerItems)
+            try
             {
-                dtPickerItems.Rows.Add(kvp.Key, kvp.Value);
+                foreach (var kvp in SelectedPicker.PickerItems)
+                {
+                    var key = kvp.Key == null || kvp.Key.ToString() == "" ? null : kvp.Key;
+                    dtPickerItems.Rows.Add(key, kvp.Value);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error loading picker items: " + ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             dgv.DataSource = dtPickerItems;
@@ -119,9 +127,9 @@ namespace DBADashGUI.CustomReports
             SelectedPicker.PickerItems = PickerItems;
         }
 
-        private void TxtName_TextChanged(object sender, EventArgs e)
+        private void TxtName_Validated(object sender, EventArgs e)
         {
-            SelectedPicker.ParameterName = txtName.Text;
+            SelectedPicker.Name = txtName.Text;
         }
 
         private void TxtDefault_Validating(object sender, CancelEventArgs e)
@@ -159,11 +167,22 @@ namespace DBADashGUI.CustomReports
         private void RowValidating(object sender, DataGridViewCellCancelEventArgs e)
         {
             if (dgv.DataSource == null || IsBinding) return;
-            var row = ((DataRowView)dgv.Rows[e.RowIndex].DataBoundItem)?.Row;
-            if (row == null) return;
-            if (!dtPickerItems.Rows.Cast<DataRow>().Any(r => string.Equals(Convert.ToString(r[0]), Convert.ToString(row[0]), StringComparison.Ordinal) && r != row)) return;
-            e.Cancel = true;
-            MessageBox.Show(@"Duplicate value", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (dgv.Rows.Count <= e.RowIndex || e.RowIndex == -1) return;
+            if (dgv.Rows[e.RowIndex].IsNewRow) return; // Check if it's the new row placeholder
+
+            var keyCell = dgv.Rows[e.RowIndex].Cells[0];
+            if (keyCell.Value == null) return; // Check if the cell is initialized
+
+            var keyValue = Convert.ToString(keyCell.Value);
+
+            var isDuplicate = dgv.Rows.Cast<DataGridViewRow>()
+                .Any(r => !r.IsNewRow && r.Index != e.RowIndex && string.Equals(Convert.ToString(r.Cells[0].Value), keyValue, StringComparison.Ordinal));
+
+            if (isDuplicate)
+            {
+                e.Cancel = true;
+                MessageBox.Show(@"Duplicate value", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void Type_Change(object sender, EventArgs e)
