@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Text;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -586,10 +587,11 @@ namespace DBADashGUI
 
         public static void InvokeSetStatus(this ToolStripLabel label, string message, string tooltip, Color color)
         {
+            const int maxLength = 200;
             label.Owner?.Invoke(() =>
             {
                 label.Visible = true;
-                label.Text = message.Length > 50 ? message[..200] + "..." : message;
+                label.Text = message.Length > maxLength ? message[..maxLength] + "..." : message;
                 label.ToolTipText = tooltip;
                 label.IsLink = !string.IsNullOrEmpty(tooltip);
                 label.ForeColor = color;
