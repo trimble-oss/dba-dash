@@ -41,8 +41,8 @@
             associateCollectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             saveLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             resetLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            scriptReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             editPickersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            scriptReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             cboResults = new System.Windows.Forms.ToolStripComboBox();
             lblSelectResults = new System.Windows.Forms.ToolStripLabel();
             tsParams = new System.Windows.Forms.ToolStripDropDownButton();
@@ -199,6 +199,14 @@
             resetLayoutToolStripMenuItem.ToolTipText = "Resets column visibility, order and size";
             resetLayoutToolStripMenuItem.Click += ResetLayoutToolStripMenuItem_Click;
             // 
+            // editPickersToolStripMenuItem
+            // 
+            editPickersToolStripMenuItem.Image = Properties.Resources.ReportParameter_16x;
+            editPickersToolStripMenuItem.Name = "editPickersToolStripMenuItem";
+            editPickersToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            editPickersToolStripMenuItem.Text = "Edit Pickers";
+            editPickersToolStripMenuItem.Click += EditPickersToolStripMenuItem_Click;
+            // 
             // scriptReportToolStripMenuItem
             // 
             scriptReportToolStripMenuItem.Image = Properties.Resources.SQLScript_16x;
@@ -207,14 +215,6 @@
             scriptReportToolStripMenuItem.Text = "Script Report";
             scriptReportToolStripMenuItem.ToolTipText = "Generate a script for this custom report to share with other users of DBA Dash";
             scriptReportToolStripMenuItem.Click += ScriptReportToolStripMenuItem_Click;
-            // 
-            // editPickersToolStripMenuItem
-            // 
-            editPickersToolStripMenuItem.Image = Properties.Resources.ReportParameter_16x;
-            editPickersToolStripMenuItem.Name = "editPickersToolStripMenuItem";
-            editPickersToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
-            editPickersToolStripMenuItem.Text = "Edit Pickers";
-            editPickersToolStripMenuItem.Click += EditPickersToolStripMenuItem_Click;
             // 
             // cboResults
             // 

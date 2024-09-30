@@ -286,5 +286,21 @@ namespace DBADashGUI
                 cache.Remove(element.Key);
             }
         }
+
+        public static (int? ObjectId, string SchemaName, string ObjectName) GetDBObject(string objectIdentifier)
+        {
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("SELECT OBJECT_ID(@ObjectIdentifier), OBJECT_SCHEMA_NAME(OBJECT_ID(@ObjectIdentifier)), OBJECT_NAME(OBJECT_ID(@ObjectIdentifier))", cn) { CommandType = CommandType.Text };
+            cmd.Parameters.AddWithValue("@ObjectIdentifier", objectIdentifier);
+            cn.Open();
+            using var rdr = cmd.ExecuteReader();
+            if (!rdr.Read()) return (null, null, null);
+
+            int? objectId = rdr.IsDBNull(0) ? null : rdr.GetInt32(0);
+            var schemaName = rdr.IsDBNull(1) ? null : rdr.GetString(1);
+            var objectName = rdr.IsDBNull(2) ? null : rdr.GetString(2);
+
+            return (objectId, schemaName, objectName);
+        }
     }
 }

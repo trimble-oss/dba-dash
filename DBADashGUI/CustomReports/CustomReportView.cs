@@ -835,6 +835,33 @@ namespace DBADashGUI.CustomReports
                     sb.AppendLine("GO");
                 }
 
+                try
+                {
+                    foreach (var picker in report.Pickers.OfType<DBPicker>())
+                    {
+                        sb.AppendLine($"/* Script picker {picker.Name.Replace("*", "")} */");
+
+                        var (ObjectId, SchemaName, ObjectName) = CommonData.GetDBObject(picker.StoredProcedureName);
+                        if (ObjectName == null || SchemaName == null)
+                        {
+                            sb.AppendLine($"/* Unable to find object {picker.StoredProcedureName.Replace("*", "")} */");
+                            continue;
+                        }
+
+                        proc = db.StoredProcedures[ObjectName, SchemaName];
+                        parts = proc.Script(options);
+                        foreach (var part in parts)
+                        {
+                            sb.AppendLine(part);
+                            sb.AppendLine("GO");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    sb.AppendLine($"/* Error scripting pickers {ex.Message.Replace("*", "")} */");
+                }
+
                 var meta = report.Serialize();
                 sb.AppendLine();
                 sb.AppendLine("/* Report customizations in GUI */");
