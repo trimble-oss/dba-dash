@@ -55,33 +55,31 @@ namespace DBADashGUI.Changes
             dgvDrivers.Columns.Clear();
             searchText = txtSearch.Text;
 
-            dgvDrivers.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DriverProviderName", HeaderText = "Provider", Frozen = Common.FreezeKeyColumn });
-            dgvDrivers.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DeviceName", HeaderText = "Device", Frozen = Common.FreezeKeyColumn });
+            dgvDrivers.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DriverProviderName", HeaderText = "Provider", Frozen = Common.FreezeKeyColumn, FillWeight = 1 });
+            dgvDrivers.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DeviceName", HeaderText = "Device", Frozen = Common.FreezeKeyColumn, FillWeight = 1 });
 
-            DataTable dt = GetDrivers();
+            var dt = GetDrivers();
 
-            string pivotCol = "InstanceDisplayName";
+            const string pivotCol = "InstanceDisplayName";
             if (tsProvider.DropDownItems.Count == 0)
             {
                 AddFilters(dt);
             }
-            foreach (DataRow r in dt.DefaultView.ToTable(true, pivotCol).Select("", pivotCol))
+            foreach (var r in dt.DefaultView.ToTable(true, pivotCol).Select("", pivotCol))
             {
-                if (r[pivotCol] != DBNull.Value)
-                {
-                    DataGridViewTextBoxColumn col = new() { HeaderText = (string)r[pivotCol], Name = (string)r[pivotCol] };
-                    dgvDrivers.Columns.Add(col);
-                }
+                if (r[pivotCol] == DBNull.Value) continue;
+                DataGridViewTextBoxColumn col = new() { HeaderText = (string)r[pivotCol], Name = (string)r[pivotCol], FillWeight = 1 };
+                dgvDrivers.Columns.Add(col);
             }
-            string lastDevice = string.Empty;
-            string lastProvider = string.Empty;
-            string previousVersion = string.Empty;
+            var lastDevice = string.Empty;
+            var lastProvider = string.Empty;
+            var previousVersion = string.Empty;
             List<DataGridViewRow> rows = new();
             DataGridViewRow row = null;
-            foreach (DataRow r in dt.Select("", "DriverProviderName,DeviceName"))
+            foreach (var r in dt.Select("", "DriverProviderName,DeviceName"))
             {
-                string device = r["DeviceName"] == DBNull.Value ? "" : (string)r["DeviceName"];
-                string provider = r["DriverProviderName"] == DBNull.Value ? "" : (string)r["DriverProviderName"];
+                var device = r["DeviceName"] == DBNull.Value ? "" : (string)r["DeviceName"];
+                var provider = r["DriverProviderName"] == DBNull.Value ? "" : (string)r["DriverProviderName"];
                 if (provider == string.Empty && device == string.Empty)
                 {
                     continue;
@@ -96,10 +94,10 @@ namespace DBADashGUI.Changes
                     previousVersion = "";
                 }
 
-                string instance = (string)r[pivotCol];
-                string version = r["DriverVersion"] == DBNull.Value ? "" : (string)r["DriverVersion"];
-                DateTime validFrom = (DateTime)r["ValidFrom"];
-                var idx = dgvDrivers.Columns[instance].Index;
+                var instance = (string)r[pivotCol];
+                var version = r["DriverVersion"] == DBNull.Value ? "" : (string)r["DriverVersion"];
+                var validFrom = (DateTime)r["ValidFrom"];
+                var idx = dgvDrivers.Columns[instance]!.Index;
 
                 row.Cells[idx].Value = version;
                 row.Cells[idx].ToolTipText = "Valid From: " + validFrom.ToAppTimeZone().ToString("yyyy-MM-dd");
