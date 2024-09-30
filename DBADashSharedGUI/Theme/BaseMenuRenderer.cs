@@ -35,6 +35,10 @@ namespace DBADashGUI.Theme
             {
                 // Don't change the color of the status label
             }
+            else if (e.Item is ToolStripLabel tsl && tsl.ForeColor != Color.Empty && tsl.ForeColor != SelectionColor && tsl.ForeColor != MenuForeColor)
+            {
+                // Don't change the color of the label if it's not the default color
+            }
             else if (e.Item.Selected || e.Item.Pressed)
             {
                 e.TextColor = SelectionForeColor;
