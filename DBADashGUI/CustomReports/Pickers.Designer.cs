@@ -135,7 +135,7 @@
             txtName.Name = "txtName";
             txtName.Size = new System.Drawing.Size(295, 27);
             txtName.TabIndex = 5;
-            txtName.TextChanged += TxtName_TextChanged;
+            txtName.Validated += TxtName_Validated;
             // 
             // lblName
             // 
