@@ -300,8 +300,8 @@ namespace DBADashGUI.Changes
             for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var r = dgv.Rows[idx];
-                var maxCompatLevel = Convert.ToInt32(r.Cells["MaxSupportedCompatibilityLevel"].Value);
-                r.Cells["compatibility_level"].SetStatusColor(r.Cells["compatibility_level"].Value as int? < maxCompatLevel
+                var maxCompatLevel = Convert.ToInt16(r.Cells["MaxSupportedCompatibilityLevel"].Value);
+                r.Cells["compatibility_level"].SetStatusColor(Convert.ToInt16(r.Cells["compatibility_level"].Value) < maxCompatLevel
                     ? DBADashStatus.DBADashStatusEnum.Warning
                     : DBADashStatus.DBADashStatusEnum.OK);
 
