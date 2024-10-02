@@ -2,7 +2,9 @@
 using Serilog;
 using System;
 using System.Collections.Generic;
+using Microsoft.Data.SqlClient;
 using static DBADash.DBValidations;
+using Octokit;
 
 namespace DacpacUtility
 {
@@ -38,7 +40,8 @@ namespace DacpacUtility
         public void ProcessDacPac(string connectionString,
                                     string databaseName,
                                     string dacpacName,
-                                    DBVersionStatusEnum status)
+                                    DBVersionStatusEnum status,
+                                    int retryCount=0)
         {
             MessageList.Add("*** Start of processing for " +
                              databaseName);
@@ -71,11 +74,21 @@ namespace DacpacUtility
                     {
                         _dacDeployOptions.SqlCommandVariableValues.Remove("VersionNumber");
                     }
+
                     _dacDeployOptions.SqlCommandVariableValues.Add("VersionNumber", dacpac.Version.ToString());
                     dacServiceInstance.Deploy(dacpac, databaseName,
-                                            upgradeExisting: true,
-                                            options: _dacDeployOptions);
+                        upgradeExisting: true,
+                        options: _dacDeployOptions);
                 }
+            }
+            catch (DacServicesException ex) when (ex.Message.Contains("IX_Instances_InstanceDisplayName") && retryCount ==0)
+            {
+                var msg = "Encountered a known issue processing dacpac.Applying fix & re - running dacpac. ";
+                MessageList.Add(msg);
+                Log.Warning(ex,msg);
+                DropIndexFix_1040(connectionString, databaseName);
+                retryCount++;
+                ProcessDacPac(connectionString, databaseName, dacpacName, status,retryCount);
             }
             catch (Exception ex)
             {
@@ -83,6 +96,20 @@ namespace DacpacUtility
                 MessageList.Add(ex.Message);
                 throw;
             }
+        }
+
+        // Fix upgrade issue that occurs with versions 3.3 and older. #1040
+        private static void DropIndexFix_1040(string connectionString, string databaseName)
+        {
+            var builder = new SqlConnectionStringBuilder(connectionString)
+            {
+                InitialCatalog = databaseName
+            };
+            const string sql = "DROP INDEX IX_Instances_InstanceDisplayName ON dbo.Instances;";
+            using var cn = new SqlConnection(builder.ConnectionString);
+            using var cmd = new SqlCommand(sql, cn) ;
+            cn.Open();
+            cmd.ExecuteNonQuery();
         }
 
         private DacDeployOptions _dacDeployOptions;
