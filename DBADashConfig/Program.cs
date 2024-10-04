@@ -130,9 +130,23 @@ try
                               SlowQuerySessionMaxMemoryKB = o.SlowQuerySessionMaxMemoryKB,
                               SlowQueryTargetMaxMemoryKB = o.SlowQueryTargetMaxMemoryKB
                           };
+                          if (!o.SkipValidation)
+                          {
+                              Log.Information("Validating connection...");
+                              source.SourceConnection.Validate();
+                              Log.Information("Validated");
+                          }
                           if (o.ConnectionID != string.Empty)
                           {
                               source.ConnectionID = o.ConnectionID;
+                          }
+                          else if (!o.SkipValidation)
+                          {
+                              source.ConnectionID = source.GetGeneratedConnectionID();
+                          }
+                          else
+                          {
+                              Log.Warning("Validation skipped & ConnectionID not specified. ConnectionID will be generated on collection.");
                           }
                           if (!string.IsNullOrEmpty(o.SchemaSnapshotDBs) && o.SchemaSnapshotDBs != "<null>") // <null> was added for PowerShell script as passing a blank string results in an error with commandline parser
                           {
@@ -145,12 +159,7 @@ try
                               source.PlanCollectionDurationThreshold = o.PlanCollectionDurationThreshold;
                               source.PlanCollectionMemoryGrantThreshold = o.PlanCollectionMemoryGrantThreshold;
                           }
-                          if (!o.SkipValidation)
-                          {
-                              Log.Information("Validating connection...");
-                              source.SourceConnection.Validate();
-                              Log.Information("Validated");
-                          }
+
                           config.SourceConnections.Add(source);
                           break;
                       }
