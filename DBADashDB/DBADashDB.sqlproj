@@ -743,6 +743,7 @@
     <Build Include="dbo\Stored Procedures\ServerServices_Get.sql" />
     <Build Include="dbo\Stored Procedures\ObjectExecutionStatsLegacy_Upd.sql" />
     <Build Include="dbo\User Defined Types\ObjectExecutionStats.sql" />
+    <Build Include="dbo\Stored Procedures\Instances_HardDelete.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

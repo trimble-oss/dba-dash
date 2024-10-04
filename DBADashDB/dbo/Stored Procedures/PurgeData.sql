@@ -149,6 +149,18 @@ END
 /* Service Broker Cleanup */
 EXEC Messaging.Cleanup
 
+/* Remove instances that have been soft deleted after threshold days if enaabled */
+DECLARE @HardDeleteThresholdDays INT
+SELECT @HardDeleteThresholdDays = TRY_CAST(SettingValue AS INT)
+FROM dbo.Settings
+WHERE SettingName = 'HardDeleteThresholdDays'
+
+IF @HardDeleteThresholdDays >= 1
+BEGIN
+	PRINT CONCAT('Running Instances_HardDelete with threshold ',@HardDeleteThresholdDays,' days')
+	EXEC dbo.Instances_HardDelete @HardDeleteThresholdDays=@HardDeleteThresholdDays
+END
+
 IF @Errors <> ''
 BEGIN;
 	THROW 51000,@Errors,1;
