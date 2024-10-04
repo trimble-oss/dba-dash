@@ -44,6 +44,32 @@ static void CommandLineUpgrade()
     }
 }
 
+static DBADashSource? GetSourceConnection(Options o, CollectionConfig config)
+{
+    DBADashSource source;
+    if (!string.IsNullOrEmpty(o.ConnectionString))
+    {
+        return config.GetSourceFromConnectionString(o.ConnectionString);
+    }
+    else if (!string.IsNullOrEmpty(o.ConnectionID))
+    {
+        try
+        {
+            return config.GetSourceConnection(o.ConnectionID);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "ConnectionID not found: {ConnectionID}", o.ConnectionID);
+        }
+    }
+    else
+    {
+        Log.Error("ConnectionString or ConnectionID required");
+    }
+
+    return null;
+}
+
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}")
     .CreateLogger();
@@ -163,20 +189,20 @@ try
                           config.SourceConnections.Add(source);
                           break;
                       }
-                  // Remove connection from config
-                  case CommandLineActionOption.Remove when string.IsNullOrEmpty(o.ConnectionString):
-                      throw new ArgumentException("ConnectionString required");
-                  case CommandLineActionOption.Remove when config.SourceExists(o.ConnectionString):
+                  case CommandLineActionOption.Remove:
                       {
-                          var remove = config.GetSourceFromConnectionString(o.ConnectionString);
-                          Log.Information("Remove existing connection: {Connection}", remove.SourceConnection.ConnectionForPrint);
-                          config.SourceConnections.Remove(remove);
+                          DBADashSource? sourceToRemove = GetSourceConnection(o, config);
+                          if (sourceToRemove == null)
+                          {
+                              Log.Error("Source connection not found.");
+                              return;
+                          }
+
+                          Log.Information("Remove existing connection: {Connection}", sourceToRemove.SourceConnection.ConnectionForPrint);
+                          config.SourceConnections.Remove(sourceToRemove);
                           break;
                       }
-                  case CommandLineActionOption.Remove:
-                      Log.Warning("Connection not found");
-                      Environment.Exit(0);
-                      break;
+
                   // Set/Update the destination connection
                   case CommandLineActionOption.SetDestination when string.IsNullOrEmpty(o.ConnectionString):
                   case CommandLineActionOption.AddDestination when string.IsNullOrEmpty(o.ConnectionString):
