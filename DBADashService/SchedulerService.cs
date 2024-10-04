@@ -203,7 +203,7 @@ namespace DBADashService
                 var maintenanceCron = config.GetMaintenanceCron();
                 var job = JobBuilder.Create<MaintenanceJob>()
                         .WithIdentity("MaintenanceJob" + i)
-                        .UsingJobData("PurgeDataCommandTimeout", config.PurgeDataCommandTimeout ?? 600)
+                        .UsingJobData("PurgeDataCommandTimeout", config.PurgeDataCommandTimeout ?? 1200)
                         .UsingJobData("AddPartitionsCommandTimeout", config.AddPartitionsCommandTimeout ?? 300)
                         .UsingJobData("ConnectionString", d.ConnectionString)
                         .Build();
