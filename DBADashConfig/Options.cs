@@ -7,7 +7,25 @@ namespace DBADashConfig
         [Option('c', "connection", Required = false, HelpText = "The connection string for the SQL Instance you want to monitor.  e.g. \"Data Source = MYSERVER;Integrated Security=True;Encrypt=True;Trust Server Certificate=True\"")]
         public string ConnectionString { get; set; } = "";
 
-        [Option('a', "action", Required = true, HelpText = "Actions:\nAdd - Add a source connection to monitor. (Use -c to specify a connection string)\nRemove - Remove a source connection\nSetDestination - Connection to the repository database\nList - List source connections\nCount - Count source connections\nGetServiceName - Return the name of the service\nCheckForUpdates - Check if a new version of DBA Dash is available\nUpdate - Update to the latest version of DBA Dash\nSetServiceName - Change the name of the DBA Dash service\nEncrypt - Encrypt the config file with a password (--EncryptionPassword)\nDecrypt - Decrypt the config file. --DecryptionPassword can be used if required.\nSetConfigFileBackupRetention - Specify how long to keep config file backups. --RetentionDays")]
+        [Option('a', "action", Required = true, HelpText = @"Actions:
+
+Add - Add a source connection to monitor. (Use -c to specify a connection string)
+Remove - Remove a source connection
+RemoveAndDelete - Remove a source connection and mark as deleted in the repository database
+Delete - mark connection as deleted in the repository database.  Use RemoveAndDelete to also remove the connection from the config.
+Restore - Mark instance active in the repository database.
+SetDestination - Connection to the repository database
+List - List source connections
+List2 - List source connections with ConnectionID
+Count - Count source connections
+GetServiceName - Return the name of the service
+CheckForUpdates - Check if a new version of DBA Dash is available
+Update - Update to the latest version of DBA Dash
+SetServiceName - Change the name of the DBA Dash service
+Encrypt - Encrypt the config file with a password (--EncryptionPassword)
+Decrypt - Decrypt the config file. --DecryptionPassword can be used if required.
+SetConfigFileBackupRetention - Specify how long to keep config file backups. --RetentionDays
+PopulateConnectionID - Add ConnectionID to source connections without a ConnectionID")]
         public CommandLineActionOption Option { get; set; }
 
         [Option('r', "Replace", Required = false, HelpText = "Option to replace the existing connection if it already exists", Default = false)]
@@ -85,6 +103,7 @@ namespace DBADashConfig
             SetDestination,
             GetDestination,
             List,
+            List2,
             Count,
             GetServiceName,
             CheckForUpdates,
@@ -95,6 +114,10 @@ namespace DBADashConfig
             SetConfigFileBackupRetention,
             AddDestination,
             RemoveDestination,
+            RemoveAndDelete,
+            Delete,
+            Restore,
+            PopulateConnectionID
         }
     }
 }

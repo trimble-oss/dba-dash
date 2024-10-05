@@ -1,11 +1,30 @@
 ﻿CREATE PROC dbo.Instance_Del(
-	@InstanceID INT,
+	@InstanceID INT=NULL,
+	@ConnectionID NVARCHAR(128)=NULL,
 	@IsActive BIT=0,
 	@HardDelete BIT=0
 )
 AS
 SET NOCOUNT ON
 SET XACT_ABORT ON
+IF @InstanceID IS NULL AND @ConnectionID IS NULL
+BEGIN
+	RAISERROR('InstanceID or ConnectionID must be provided',11,1)
+	RETURN
+END
+ELSE IF @InstanceID IS NULL
+BEGIN
+	SELECT @InstanceID = InstanceID
+	FROM dbo.Instances
+	WHERE ConnectionID = @ConnectionID
+
+	IF @InstanceID IS NULL
+	BEGIN
+		RAISERROR('Instance not found',11,1)
+		RETURN
+	END
+END
+
 IF @HardDelete = 0
 BEGIN
 	UPDATE dbo.Instances

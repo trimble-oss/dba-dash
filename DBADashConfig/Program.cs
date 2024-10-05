@@ -5,71 +5,6 @@ using Serilog;
 using System.Runtime.InteropServices;
 using static DBADashConfig.Options;
 
-static void CommandLineUpgrade()
-{
-    try
-    {
-        var latest = Upgrade.GetLatestVersionAsync().GetAwaiter().GetResult();
-        if (Upgrade.IsUpgradeIncomplete)
-        {
-            Log.Warning(Upgrade.IncompleteUpgradeMessage);
-            Log.Information("Upgrade will be attempted");
-        }
-        if (Upgrade.IsUpgradeAvailable(latest) || Upgrade.IsUpgradeIncomplete)
-        {
-            if (Upgrade.IsAdministrator)
-            {
-                Log.Information($"Upgrade is available to {latest.TagName}.  Initiating upgrade.");
-                Upgrade.UpgradeDBADashAsync(noExit: false).Wait();
-            }
-            else
-            {
-                Log.Information($"Upgrade is available to {latest.TagName}.  Please re-run as Administrator.");
-            }
-        }
-        else
-        {
-            Log.Information($"Latest version is {latest.TagName}.  Upgrade is not available at this time. ");
-        }
-    }
-    catch (AggregateException ex) when (ex.InnerException != null &&
-                                        ex.InnerException.GetType() == typeof(Octokit.NotFoundException))
-    {
-        Log.Error("Upgrade script is not available.  Please check the upgrade instructions on the GitHub page");
-    }
-    catch (Exception ex)
-    {
-        Log.Error(ex, "Error running upgrade");
-        throw;
-    }
-}
-
-static DBADashSource? GetSourceConnection(Options o, CollectionConfig config)
-{
-    DBADashSource source;
-    if (!string.IsNullOrEmpty(o.ConnectionString))
-    {
-        return config.GetSourceFromConnectionString(o.ConnectionString);
-    }
-    else if (!string.IsNullOrEmpty(o.ConnectionID))
-    {
-        try
-        {
-            return config.GetSourceConnection(o.ConnectionID);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "ConnectionID not found: {ConnectionID}", o.ConnectionID);
-        }
-    }
-    else
-    {
-        Log.Error("ConnectionString or ConnectionID required");
-    }
-
-    return null;
-}
-
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}")
     .CreateLogger();
@@ -112,233 +47,81 @@ try
                       break;
                   // List source and destination connections
                   case CommandLineActionOption.List:
-                      {
-                          foreach (var cn in config.SourceConnections)
-                          {
-                              Console.WriteLine(cn.SourceConnection.EncryptedConnectionString);
-                          }
-                          Environment.Exit(0);
-                          break;
-                      }
+                      Helper.ListConnections(config);
+                      break;
+
+                  case CommandLineActionOption.List2:
+                      Helper.ListConnections2(config);
+                      break;
                   // Count connections
                   case CommandLineActionOption.Count:
                       Console.WriteLine(config.SourceConnections.Count);
                       Environment.Exit(0);
                       break;
                   // Add a new source connection
-                  case CommandLineActionOption.Add when string.IsNullOrEmpty(o.ConnectionString):
-                      throw new ArgumentException("ConnectionString required");
                   case CommandLineActionOption.Add:
-                      {
-                          Log.Information("Add new connection: {Connection}", o.ConnectionString);
-                          // check if connection exists before adding a new connection
-                          if (config.SourceExists(o.ConnectionString))
-                          {
-                              if (o.Replace)
-                              {
-                                  Log.Information("Replace existing connection");
-                                  config.SourceConnections.Remove(config.GetSourceFromConnectionString(o.ConnectionString));
-                              }
-                              else
-                              {
-                                  Log.Information("Source connection already exists");
-                                  Environment.Exit(0);
-                              }
-                          }
-                          var source = new DBADashSource()
-                          {
-                              IOCollectionLevel = (DBADashSource.IOCollectionLevels)o.IOCollectionLevel,
-                              ConnectionString = o.ConnectionString,
-                              NoWMI = o.NoWMI,
-                              CollectSessionWaits = !o.NoCollectSessionWaits,
-                              PlanCollectionEnabled = o.PlanCollectionEnabled,
-                              SlowQueryThresholdMs = o.SlowQueryThresholdMs,
-                              SlowQuerySessionMaxMemoryKB = o.SlowQuerySessionMaxMemoryKB,
-                              SlowQueryTargetMaxMemoryKB = o.SlowQueryTargetMaxMemoryKB
-                          };
-                          if (!o.SkipValidation)
-                          {
-                              Log.Information("Validating connection...");
-                              source.SourceConnection.Validate();
-                              Log.Information("Validated");
-                          }
-                          if (o.ConnectionID != string.Empty)
-                          {
-                              source.ConnectionID = o.ConnectionID;
-                          }
-                          else if (!o.SkipValidation)
-                          {
-                              source.ConnectionID = source.GetGeneratedConnectionID();
-                          }
-                          else
-                          {
-                              Log.Warning("Validation skipped & ConnectionID not specified. ConnectionID will be generated on collection.");
-                          }
-                          if (!string.IsNullOrEmpty(o.SchemaSnapshotDBs) && o.SchemaSnapshotDBs != "<null>") // <null> was added for PowerShell script as passing a blank string results in an error with commandline parser
-                          {
-                              source.SchemaSnapshotDBs = o.SchemaSnapshotDBs;
-                          }
-                          if (o.PlanCollectionEnabled)
-                          {
-                              source.PlanCollectionCountThreshold = o.PlanCollectionCountThreshold;
-                              source.PlanCollectionCPUThreshold = o.PlanCollectionCPUThreshold;
-                              source.PlanCollectionDurationThreshold = o.PlanCollectionDurationThreshold;
-                              source.PlanCollectionMemoryGrantThreshold = o.PlanCollectionMemoryGrantThreshold;
-                          }
+                      Helper.AddSourceConnection(config, o);
+                      break;
 
-                          config.SourceConnections.Add(source);
-                          break;
-                      }
                   case CommandLineActionOption.Remove:
-                      {
-                          DBADashSource? sourceToRemove = GetSourceConnection(o, config);
-                          if (sourceToRemove == null)
-                          {
-                              Log.Error("Source connection not found.");
-                              return;
-                          }
+                      Helper.RemoveSourceConnection(o, config, false);
+                      break;
 
-                          Log.Information("Remove existing connection: {Connection}", sourceToRemove.SourceConnection.ConnectionForPrint);
-                          config.SourceConnections.Remove(sourceToRemove);
-                          break;
-                      }
+                  case CommandLineActionOption.RemoveAndDelete:
+                      Helper.RemoveSourceConnection(o, config, true);
+                      break;
 
-                  // Set/Update the destination connection
-                  case CommandLineActionOption.SetDestination when string.IsNullOrEmpty(o.ConnectionString):
-                  case CommandLineActionOption.AddDestination when string.IsNullOrEmpty(o.ConnectionString):
-                  case CommandLineActionOption.RemoveDestination when string.IsNullOrEmpty(o.ConnectionString):
-                      throw new ArgumentException("ConnectionString required");
                   case CommandLineActionOption.SetDestination:
-                  case CommandLineActionOption.AddDestination when string.IsNullOrEmpty(config.Destination):
-                      {
-                          Log.Information("Setting destination connection");
-                          config.Destination = o.ConnectionString;
-                          if (!o.SkipValidation)
-                          {
-                              Log.Information("Validating connection...");
-                              config.ValidateDestination();
-                              Log.Information("Validated");
-                          }
-
-                          break;
-                      }
                   case CommandLineActionOption.AddDestination:
-                      {
-                          if (config.AllDestinations.Any(d => d.ConnectionString == o.ConnectionString))
-                          {
-                              Log.Information("Destination connection already exists");
-                          }
-                          var con = new DBADashConnection(o.ConnectionString);
-                          if (!o.SkipValidation)
-                          {
-                              Log.Information("Validating connection...");
+                      Helper.AddDestination(config, o);
+                      break;
 
-                              CollectionConfig.ValidateDestination(con);
-                              Log.Information("Validated");
-                          }
-                          Log.Information("Adding secondary destination");
-                          config.SecondaryDestinationConnections.Add(con);
-                          break;
-                      }
                   case CommandLineActionOption.RemoveDestination:
-                      {
-                          var toRemove = new DBADashConnection(o.ConnectionString);
-                          if (config.Destination == o.ConnectionString || config.DestinationConnection.ConnectionForPrint == toRemove.ConnectionForPrint)
-                          {
-                              config.Destination = string.Empty;
-                              Log.Warning("Warning: Primary Destination removed.");
-                          }
-                          else
-                          {
-                              var found = config.SecondaryDestinationConnections.FirstOrDefault(d =>
-                                  d.ConnectionString == o.ConnectionString ||
-                                  d.ConnectionForPrint == toRemove.ConnectionForPrint);
-                              if (found == null)
-                              {
-                                  Log.Error("Destination connection not found");
-                                  return;
-                              }
+                      Helper.RemoveDestination(config, o);
+                      break;
 
-                              config.SecondaryDestinationConnections.Remove(found);
-                          }
-
-                          break;
-                      }
                   case CommandLineActionOption.CheckForUpdates:
-                      {
-                          var latest = Upgrade.GetLatestVersionAsync().GetAwaiter().GetResult();
-                          Log.Information("Upgrade Available: : {0}", Upgrade.IsUpgradeAvailable(latest));
-                          Log.Information("Current Version: {0}", Upgrade.CurrentVersion().ToString());
-                          Log.Information("Latest Version: {0}", latest.TagName);
-                          Log.Information("Release Date: {0}", latest.PublishedAt.ToString());
-                          Log.Information("URL: {0}", latest.Url);
-                          Console.WriteLine(latest.Body);
-                          return;
-                      }
+                      Helper.CheckForUpdates();
+                      break;
+
                   case CommandLineActionOption.Update:
-                      CommandLineUpgrade();
-                      return;
+                      Helper.CommandLineUpgrade();
+                      break;
 
-                  case CommandLineActionOption.SetServiceName when string.IsNullOrEmpty(o.ServiceName):
-                      Log.Error("ServiceName is required with SetServiceName action");
-                      return;
+                  case CommandLineActionOption.SetServiceName:
+                      Helper.SetServiceName(config, o);
+                      break;
 
-                  case CommandLineActionOption.SetServiceName when o.ServiceName == config.ServiceName:
-                      Log.Information("ServiceName is already set to {ServiceName}", config.ServiceName);
-                      return;
-
-                  case CommandLineActionOption.SetServiceName when RuntimeInformation.IsOSPlatform(OSPlatform.Windows):
-                      {
-                          if (ServiceTools.IsServiceInstalledByName(o.ServiceName)) // Check if a service exists with the specified name
-                          {
-                              Log.Error("ServiceName is already in use");
-                              return;
-                          }
-                          if (ServiceTools.IsServiceInstalledByPath()) // Check if the service is already installed by location on disk
-                          {
-                              Log.Error("Service is already installed.  Please uninstall before setting a new service name");
-                              return;
-                          }
-                          else
-                          {
-                              Log.Information("Setting service name to {ServiceName}", o.ServiceName);
-                              config.ServiceName = o.ServiceName;
-                          }
-
-                          break;
-                      }
                   case CommandLineActionOption.Encrypt:
-                      if (string.IsNullOrEmpty(o.EncryptionPassword))
-                      {
-                          Log.Error("EncryptionPassword parameter not supplied");
-                          return;
-                      }
-                      EncryptedConfig.SetPassword(o.EncryptionPassword, true);
-                      config.EncryptionOption = BasicConfig.EncryptionOptions.Encrypt;
+                      Helper.EncryptConfig(config, o);
                       break;
 
                   case CommandLineActionOption.Decrypt:
                       config.EncryptionOption = BasicConfig.EncryptionOptions.Basic;
+                      Helper.SaveConfig(config, o);
                       break;
-
-                  case CommandLineActionOption.SetServiceName:
-                      Log.Error("SetServiceName is only supported on Windows");
-                      return;
 
                   case CommandLineActionOption.SetConfigFileBackupRetention:
                       config.ConfigBackupRetentionDays = o.RetentionDays;
+                      Helper.SaveConfig(config, o);
+                      break;
+
+                  case CommandLineActionOption.Delete:
+                      Helper.MarkInstanceDeleted(config, o.ConnectionID);
+                      break;
+
+                  case CommandLineActionOption.Restore:
+                      Helper.MarkInstanceDeleted(config, o.ConnectionID, true);
+                      break;
+
+                  case CommandLineActionOption.PopulateConnectionID:
+                      Helper.PopulateConnectionID(config, o);
                       break;
               }
-              Log.Information("Saving config");
-
-              var backup = config.ConfigBackupRetentionDays > 0 && (!o.NoBackupConfig);
-              config.Save(backup);
-
-              Log.Information("Complete.  Restart the service to apply the config change");
           });
 }
 catch (Exception ex)
 {
-    Log.Error(ex, "Error running DBADashConfig");
+    Log.Error(ex, ex.Message);
     Environment.Exit(1);
 }
