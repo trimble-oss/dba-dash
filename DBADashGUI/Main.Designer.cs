@@ -48,6 +48,7 @@ namespace DBADashGUI
             showHiddenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             manageInstancesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             saveTimeZonePreferenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            repoSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             setAutoRefreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             secondsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             minuteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -393,7 +394,7 @@ namespace DBADashGUI
             // 
             // optionsToolStripMenuItem
             // 
-            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { configureDisplayNameToolStripMenuItem, dataRetentionToolStripMenuItem, freezeKeyColumnsToolStripMenuItem, showHiddenToolStripMenuItem, manageInstancesToolStripMenuItem, saveTimeZonePreferenceToolStripMenuItem, setAutoRefreshToolStripMenuItem, themeToolStripMenuItem });
+            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { configureDisplayNameToolStripMenuItem, dataRetentionToolStripMenuItem, freezeKeyColumnsToolStripMenuItem, showHiddenToolStripMenuItem, manageInstancesToolStripMenuItem, saveTimeZonePreferenceToolStripMenuItem, repoSettingsToolStripMenuItem, setAutoRefreshToolStripMenuItem, themeToolStripMenuItem });
             optionsToolStripMenuItem.Enabled = false;
             optionsToolStripMenuItem.Image = Properties.Resources.SettingsOutline_16x;
             optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
@@ -447,6 +448,14 @@ namespace DBADashGUI
             saveTimeZonePreferenceToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
             saveTimeZonePreferenceToolStripMenuItem.Text = "Save time zone preference";
             saveTimeZonePreferenceToolStripMenuItem.Click += SaveTimeZonePreferenceToolStripMenuItem_Click;
+            // 
+            // repoSettingsToolStripMenuItem
+            // 
+            repoSettingsToolStripMenuItem.Image = Properties.Resources.DatabaseSettings_16x;
+            repoSettingsToolStripMenuItem.Name = "repoSettingsToolStripMenuItem";
+            repoSettingsToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
+            repoSettingsToolStripMenuItem.Text = "Repository Settings";
+            repoSettingsToolStripMenuItem.Click += RepositorySettings_Click;
             // 
             // setAutoRefreshToolStripMenuItem
             // 
@@ -1177,6 +1186,7 @@ namespace DBADashGUI
             // 
             // tags1
             // 
+            tags1.AllTags = null;
             tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             tags1.Location = new System.Drawing.Point(3, 3);
             tags1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -2814,5 +2824,6 @@ namespace DBADashGUI
         private Performance.QueryStoreForcedPlans queryStoreForcedPlans1;
         private System.Windows.Forms.TabPage tabServerServices;
         private CustomReports.ServerServices serverServices1;
+        private System.Windows.Forms.ToolStripMenuItem repoSettingsToolStripMenuItem;
     }
 }

@@ -1,5 +1,5 @@
 ﻿CREATE PROC dbo.Settings_Upd(
-	@SettingName VARCHAR(50),
+	@SettingName VARCHAR(100),
 	@SettingValue SQL_VARIANT
 )
 AS

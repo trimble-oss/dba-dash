@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DBADashGUI.Options_Menu;
 using Version = System.Version;
 
 namespace DBADashGUI
@@ -224,6 +225,7 @@ namespace DBADashGUI
                 AddInstances();
                 AddTimeZoneMenus();
                 SetConnectionState(true);
+                repoSettingsToolStripMenuItem.Enabled = DBADashUser.IsAdmin;
                 ThemeExtensions.CellToolTipMaxLength = Config.CellToolTipMaxLength;
             }
             catch (Exception ex)
@@ -2058,6 +2060,12 @@ namespace DBADashGUI
             {
                 ctrl.RefreshData();
             }
+        }
+
+        private void RepositorySettings_Click(object sender, EventArgs e)
+        {
+            using var options = new RepoSettings();
+            options.ShowDialog();
         }
 
         void IThemedControl.ApplyTheme(BaseTheme theme)
