@@ -788,5 +788,14 @@ namespace DBADashGUI.Properties {
             }
         }
 
+        internal static System.Drawing.Bitmap DatabaseSettings_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("DatabaseSettings_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
     }
 }

@@ -26,6 +26,19 @@ namespace DBADashGUI
         public static double IdleWarningThresholdForSleepingSessionWithOpenTran;
         public static double IdleCriticalThresholdForSleepingSessionWithOpenTran;
         public static int CellToolTipMaxLength;
+        public static int CPUCriticalThreshold;
+        public static int CPUWarningThreshold;
+        public static int CPULowThreshold;
+        public static int ReadLatencyCriticalThreshold;
+        public static int ReadLatencyWarningThreshold;
+        public static int ReadLatencyGoodThreshold;
+        public static int WriteLatencyCriticalThreshold;
+        public static int WriteLatencyWarningThreshold;
+        public static int WriteLatencyGoodThreshold;
+        public static int MinIOPsThreshold;
+        public static int CriticalWaitCriticalThreshold;
+        public static int CriticalWaitWarningThreshold;
+        public static int? HardDeleteThresholdDays;
 
         static Config()
         {
@@ -78,6 +91,29 @@ namespace DBADashGUI
             IdleWarningThresholdForSleepingSessionWithOpenTran = settings.GetValueAsDouble("IdleWarningThresholdForSleepingSessionWithOpenTran", 1);
             IdleCriticalThresholdForSleepingSessionWithOpenTran = settings.GetValueAsDouble("IdleCriticalThresholdForSleepingSessionWithOpenTran", 600);
             CellToolTipMaxLength = settings.GetValueAsInt("GUICellToolTipMaxLength", 1000);
+            CPUCriticalThreshold = settings.GetValueAsInt("CPUCriticalThreshold", -1);
+            CPUWarningThreshold = settings.GetValueAsInt("CPUWarningThreshold", -1);
+            CPULowThreshold = settings.GetValueAsInt("CPULowThreshold", -1);
+            ReadLatencyCriticalThreshold = settings.GetValueAsInt("ReadLatencyCriticalThreshold", -1);
+            ReadLatencyWarningThreshold = settings.GetValueAsInt("ReadLatencyWarningThreshold", -1);
+            ReadLatencyGoodThreshold = settings.GetValueAsInt("ReadLatencyGoodThreshold", -1);
+            WriteLatencyCriticalThreshold = settings.GetValueAsInt("WriteLatencyCriticalThreshold", -1);
+            WriteLatencyWarningThreshold = settings.GetValueAsInt("WriteLatencyWarningThreshold", -1);
+            WriteLatencyGoodThreshold = settings.GetValueAsInt("WriteLatencyGoodThreshold", -1);
+            MinIOPsThreshold = settings.GetValueAsInt("MinIOPsThreshold", -1);
+            CriticalWaitCriticalThreshold = settings.GetValueAsInt("CriticalWaitCriticalThreshold", -1);
+            CriticalWaitWarningThreshold = settings.GetValueAsInt("CriticalWaitWarningThreshold", -1);
+            HardDeleteThresholdDays = settings.GetValueAsNullableInt("HardDeleteThresholdDays");
+        }
+
+        public static void ResetDefaults()
+        {
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("Settings_Add", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("Reset", true);
+            cn.Open();
+            cmd.ExecuteNonQuery();
+            RefreshConfig();
         }
 
         public static int GetValueAsInt(object value, int defaultValue)

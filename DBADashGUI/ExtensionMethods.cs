@@ -351,6 +351,22 @@ namespace DBADashGUI
             return defaultValue;
         }
 
+        public static int? GetValueAsNullableInt(this Dictionary<string, object> dict, string key)
+        {
+            // Check if the key exists
+            if (dict.TryGetValue(key, out object value))
+            {
+                // Try to cast the value to an integer
+                if (value is int intValue)
+                {
+                    return intValue;
+                }
+            }
+
+            // If the key does not exist or the value is not an integer, return null value
+            return null;
+        }
+
         public static double GetValueAsDouble(this Dictionary<string, object> dict, string key, double defaultValue)
         {
             // Check if the key exists

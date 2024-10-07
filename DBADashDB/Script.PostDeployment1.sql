@@ -1643,47 +1643,7 @@ BEGIN
 	SELECT -1,'00000000-0000-0000-0000-000000000000',60,10080,1,0
 END
 
-INSERT INTO dbo.Settings(SettingName,SettingValue)
-SELECT SettingName,CAST('19000101' AS DATETIME) 
-FROM (VALUES('PurgeCollectionErrorLog_StartDate'),
-			('PurgeCollectionErrorLog_CompletedDate'),
-			('PurgeQueryText_StartDate'),
-			('PurgeQueryText_CompletedDate'),
-			('PurgeQueryPlans_StartDate'),
-			('PurgeQueryPlans_CompletedDate'),
-			('PurgePartitions_StartDate'),
-			('PurgePartitions_CompletedDate'),
-			('MemoryDumpAckDate'),
-			('PurgeBlockingSnapshotSummary_CompletedDate'),
-			('PurgeBlockingSnapshotSummary_StartDate')
-	  ) T(SettingName)
-WHERE NOT EXISTS(SELECT 1 
-				FROM dbo.Settings S
-				WHERE S.SettingName=T.SettingName);
-
-INSERT INTO dbo.Settings(SettingName,SettingValue)
-SELECT SettingName,SettingValue 
-FROM (VALUES('MemoryDumpCriticalThresholdHrs',48),
-		('MemoryDumpWarningThresholdHrs',168),
-		('CPUCriticalThreshold',90),
-		('CPUWarningThreshold',75),
-		('CPULowThreshold',50),
-		('ReadLatencyCriticalThreshold',50),
-		('ReadLatencyWarningThreshold',10),
-		('ReadLatencyGoodThreshold',10),
-		('WriteLatencyCriticalThreshold',50),
-		('WriteLatencyWarningThreshold',10),
-		('WriteLatencyGoodThreshold',10),
-		('MinIOPsThreshold',100),
-		('CriticalWaitCriticalThreshold',1000),
-		('CriticalWaitWarningThreshold',10),
-		('SummaryCacheDurationSec',300)
-		) T(SettingName,SettingValue)
-WHERE NOT EXISTS(
-	SELECT 1 
-	FROM dbo.Settings S 
-	WHERE S.SettingName = T.SettingName
-	)
+EXEC dbo.Settings_Add
 
 /* From: https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-memory-clerks-transact-sql?view=sql-server-ver15 */
 MERGE INTO dbo.MemoryClerkType AS T
