@@ -387,8 +387,8 @@ BEGIN;
 			0 AS MaxExecutionsPerMin,
 			0 AS Measure,
 			0 AS TotalMeasure,
-			0 AS ProcRankPeriod,
-			0 AS ProcRankTotal
+			1 AS ProcRankPeriod,
+			1 AS ProcRankTotal
 	FROM dbo.DBObjects O
 	JOIN dbo.Databases D ON D.DatabaseID = O.DatabaseID
 	CROSS JOIN @DateGroups DG
