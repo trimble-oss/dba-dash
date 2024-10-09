@@ -144,6 +144,9 @@ namespace DBADash
             }
         }
 
+        [JsonIgnore]
+        public List<DBADashConnection> SQLDestinations=>AllDestinations.Where(d => d.Type == ConnectionType.SQL).ToList();
+
         public bool WasEncrypted()
         {
             if (wasEncryptionPerformed)

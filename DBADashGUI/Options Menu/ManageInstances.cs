@@ -3,6 +3,7 @@ using System;
 using System.Data;
 using System.Text;
 using System.Windows.Forms;
+using DBADash;
 using DBADashGUI.Theme;
 
 namespace DBADashGUI
@@ -49,17 +50,7 @@ namespace DBADashGUI
             }
         }
 
-        private static void MarkInstanceDeleted(int InstanceID, bool IsActive)
-        {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.Instance_Del", cn) { CommandType = CommandType.StoredProcedure })
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("IsActive", IsActive);
-                cmd.ExecuteNonQuery();
-            }
-        }
+
 
         private static void UpdateShowInSummary(int InstanceID, bool ShowInSummary)
         {
@@ -83,7 +74,7 @@ namespace DBADashGUI
                 isActive = !isActive;
                 try
                 {
-                    MarkInstanceDeleted(InstanceID, isActive);
+                    SharedData.MarkInstanceDeleted(InstanceID,Common.ConnectionString, isActive);
                     dgv.Rows[e.RowIndex].Cells[colDeleteRestore.Index].Value = isActive ? "Mark Deleted" : "Restore";
                 }
                 catch (Exception ex)
