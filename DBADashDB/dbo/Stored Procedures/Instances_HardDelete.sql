@@ -6,7 +6,7 @@ AS
 	Removes SQL instances that have been soft deleted (IsActive=0) after a specified number of days (@HardDeleteThresholdDays)
 	The number of days is based on the time since the last collection.
 */
-IF (@HardDeleteThresholdDays<1)
+IF (@HardDeleteThresholdDays<1 OR @HardDeleteThresholdDays IS NULL)
 BEGIN
 	RAISERROR('@HardDeleteThresholdDays must be >=1',11,1)
 	RETURN

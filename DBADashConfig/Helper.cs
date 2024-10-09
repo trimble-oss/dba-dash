@@ -108,7 +108,14 @@ namespace DBADashConfig
                 Log.Information("Marking instance {status} in {Destination}", status, dest.ConnectionForPrint);
                 try
                 {
-                    SharedData.MarkInstanceDeleted(connectionId, dest.ConnectionString, isActive);
+                    if (isActive)
+                    {
+                        SharedData.RestoreInstance(connectionId, dest.ConnectionString);
+                    }
+                    else
+                    {
+                        SharedData.MarkInstanceDeleted(connectionId, dest.ConnectionString);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -213,7 +220,7 @@ namespace DBADashConfig
                 Console.WriteLine(cn.ConnectionID + "\t" + cn.SourceConnection.EncryptedConnectionString);
             }
         }
-        
+
         public static void AddDestination(CollectionConfig config, Options o)
         {
             if (string.IsNullOrEmpty(o.ConnectionString))

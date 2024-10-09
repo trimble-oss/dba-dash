@@ -1470,7 +1470,7 @@ namespace DBADashServiceConfig
         {
             if (!collectionConfig.SQLDestinations.Any() || src.ConnectionID == null)
             {
-                if(cboDeleteAction.SelectedIndex >0)
+                if (cboDeleteAction.SelectedIndex > 0)
                 {
                     return DialogResult.OK;
                 }
@@ -1497,7 +1497,7 @@ Cancel = cancel the operation.", @"Mark deleted?", MessageBoxButtons.YesNoCancel
             {
                 try
                 {
-                    SharedData.MarkInstanceDeleted(src.ConnectionID, dest.ConnectionString, false);
+                    SharedData.MarkInstanceDeleted(src.ConnectionID, dest.ConnectionString);
                 }
                 catch (Exception ex)
                 {

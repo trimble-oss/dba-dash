@@ -30,6 +30,9 @@ namespace DBADashGUI.CustomReports
         private int selectedTableIndex;
         private bool doAutoSize = true;
         private bool suppressCboResultsIndexChanged;
+        public DataGridView Grid => dgv;
+        public ToolStripStatusLabel StatusLabel=> lblDescription;
+        public StatusStrip StatusStrip => statusStrip1;
 
         public CustomReportView()
         {
