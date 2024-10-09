@@ -13,6 +13,7 @@ using DBADashGUI.Theme;
 using static DBADashGUI.DiffControl;
 using DBADash;
 using DBADashGUI.Messaging;
+using System.Diagnostics;
 
 namespace DBADashGUI.Changes
 {
@@ -77,10 +78,36 @@ namespace DBADashGUI.Changes
             {
                 ddlOld = Common.DDL((long)row["OldDDLID"]);
             }
-            var mode = e.ColumnIndex == colDiff.Index ? ViewMode.Diff : ViewMode.Code;
-            var frm = new Diff();
-            frm.SetText(ddlOld, ddl, mode);
-            frm.Show();
+
+            var diffToolBinaryPath = Properties.Settings.Default.DiffToolBinaryPath;
+            var diffToolArguments = Properties.Settings.Default.DiffToolArguments;
+
+            // If a custom diff tool is configured use that
+            if (!string.IsNullOrWhiteSpace(diffToolBinaryPath) && !string.IsNullOrWhiteSpace(diffToolArguments))
+            {
+                // TODO?: Check if binary path is valid? Try/catch on process start?
+
+                string oldDDLTempPath = Path.GetTempFileName();
+                string newDDLTempPath = Path.GetTempFileName();
+
+                File.WriteAllText(oldDDLTempPath, ddlOld);
+                File.WriteAllText(newDDLTempPath, ddl);
+
+                using (var process = new Process())
+                {
+                    process.StartInfo.FileName = diffToolBinaryPath;
+                    process.StartInfo.Arguments = diffToolArguments.Replace("$OLD$", $"\"{oldDDLTempPath}\"", true, null).Replace("$NEW$", $"\"{newDDLTempPath}\"", true, null);
+                    process.Start();
+                }
+            }
+            // otherwise use the built in diff tool
+            else
+            {
+                var mode = e.ColumnIndex == colDiff.Index ? ViewMode.Diff : ViewMode.Code;
+                var frm = new Diff();
+                frm.SetText(ddlOld, ddl, mode);
+                frm.Show();
+            }
         }
 
         public void SetContext(DBADashContext _context)
