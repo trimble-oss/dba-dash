@@ -221,6 +221,8 @@ namespace DBADashGUI
             queryStoreForcedPlans1 = new Performance.QueryStoreForcedPlans();
             tabServerServices = new System.Windows.Forms.TabPage();
             serverServices1 = new CustomReports.ServerServices();
+            tabDeletedInstances = new System.Windows.Forms.TabPage();
+            deletedInstances1 = new DeletedInstances();
             refresh1 = new Refresh();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -313,6 +315,7 @@ namespace DBADashGUI
             tabTopQueries.SuspendLayout();
             tabQueryStoreForcedPlans.SuspendLayout();
             tabServerServices.SuspendLayout();
+            tabDeletedInstances.SuspendLayout();
             SuspendLayout();
             // 
             // TreeViewImageList
@@ -939,6 +942,7 @@ namespace DBADashGUI
             tabs.Controls.Add(tabTopQueries);
             tabs.Controls.Add(tabQueryStoreForcedPlans);
             tabs.Controls.Add(tabServerServices);
+            tabs.Controls.Add(tabDeletedInstances);
             tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             tabs.Location = new System.Drawing.Point(0, 0);
             tabs.Name = "tabs";
@@ -1186,7 +1190,6 @@ namespace DBADashGUI
             // 
             // tags1
             // 
-            tags1.AllTags = null;
             tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             tags1.Location = new System.Drawing.Point(3, 3);
             tags1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -2279,6 +2282,25 @@ namespace DBADashGUI
             serverServices1.Size = new System.Drawing.Size(186, 61);
             serverServices1.TabIndex = 0;
             // 
+            // tabDeletedInstances
+            // 
+            tabDeletedInstances.Controls.Add(deletedInstances1);
+            tabDeletedInstances.Location = new System.Drawing.Point(4, 25);
+            tabDeletedInstances.Name = "tabDeletedInstances";
+            tabDeletedInstances.Padding = new System.Windows.Forms.Padding(3);
+            tabDeletedInstances.Size = new System.Drawing.Size(1631, 1246);
+            tabDeletedInstances.TabIndex = 53;
+            tabDeletedInstances.Text = "Recycle Bin";
+            tabDeletedInstances.UseVisualStyleBackColor = true;
+            // 
+            // deletedInstances1
+            // 
+            deletedInstances1.Dock = System.Windows.Forms.DockStyle.Fill;
+            deletedInstances1.Location = new System.Drawing.Point(3, 3);
+            deletedInstances1.Name = "deletedInstances1";
+            deletedInstances1.Size = new System.Drawing.Size(1625, 1240);
+            deletedInstances1.TabIndex = 0;
+            // 
             // refresh1
             // 
             refresh1.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
@@ -2609,6 +2631,7 @@ namespace DBADashGUI
             tabTopQueries.ResumeLayout(false);
             tabQueryStoreForcedPlans.ResumeLayout(false);
             tabServerServices.ResumeLayout(false);
+            tabDeletedInstances.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -2825,5 +2848,7 @@ namespace DBADashGUI
         private System.Windows.Forms.TabPage tabServerServices;
         private CustomReports.ServerServices serverServices1;
         private System.Windows.Forms.ToolStripMenuItem repoSettingsToolStripMenuItem;
+        private System.Windows.Forms.TabPage tabDeletedInstances;
+        private DeletedInstances deletedInstances1;
     }
 }

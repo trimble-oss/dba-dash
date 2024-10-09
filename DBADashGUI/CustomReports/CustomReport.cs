@@ -38,14 +38,14 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         [JsonIgnore]
         public IEnumerable<Param> UserParams => Params == null ? new List<Param>() : Params.ParamList.Where(p =>
-                                                                                                                                                            !SystemParamNames.Contains(p.ParamName.ToUpper()));
+                                                                                                                                                                    !SystemParamNames.Contains(p.ParamName.ToUpper()));
 
         /// <summary>
         /// Parameters for the stored procedure that are supplied automatically based on context
         /// </summary>
         [JsonIgnore]
         public IEnumerable<Param> SystemParams => Params == null ? new List<Param>() : Params.ParamList.Where(p =>
-                                                            SystemParamNames.Contains(p.ParamName.ToUpper()));
+                                                                    SystemParamNames.Contains(p.ParamName.ToUpper()));
 
         [JsonIgnore]
         public bool IsRootLevel => Params != null && Params.ParamList.Any(p => p.ParamName.ToUpper() == "@INSTANCEIDS");
@@ -66,8 +66,8 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         [JsonIgnore]
         public bool TimeFilterSupported => Params.ParamList.Any(p =>
-                                                                                                                                                            p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
-                                                                                                                                                            p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase));
+                                                                                                                                                                    p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
+                                                                                                                                                                    p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase));
 
         /// <summary>
         /// Save customizations
@@ -92,7 +92,7 @@ namespace DBADashGUI.CustomReports
         /// Convert list of parameters for the report to list of CustomSqlParameters
         /// </summary>
         /// <returns></returns>
-        public List<CustomSqlParameter> GetCustomSqlParameters() => Params.ParamList.Select(p => p.CreateParameter()).ToList();
+        public List<CustomSqlParameter> GetCustomSqlParameters() => Params?.ParamList.Select(p => p.CreateParameter()).ToList() ?? new();
 
         public List<Picker> Pickers { get; set; }
     }

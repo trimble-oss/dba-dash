@@ -71,7 +71,8 @@ namespace DBADashGUI
             ReportsFolder,
             CustomReport,
             ElasticPool,
-            SystemReport
+            SystemReport,
+            RecycleBin
         }
 
         private DatabaseEngineEdition _engineEdition = DatabaseEngineEdition.Unknown;
@@ -490,6 +491,7 @@ namespace DBADashGUI
                     ImageIndex = 5;
                     break;
 
+                case TreeType.RecycleBin:
                 case TreeType.Folder:
                 case TreeType.DatabasesFolder:
                     ImageIndex = 3;
@@ -777,7 +779,7 @@ namespace DBADashGUI
                 DialogResult.Yes) return;
             try
             {
-                SharedData.MarkInstanceDeleted(InstanceID, Common.ConnectionString, false);
+                SharedData.MarkInstanceDeleted(InstanceID, Common.ConnectionString);
                 Parent.Nodes.Remove(this);
             }
             catch (Exception ex)

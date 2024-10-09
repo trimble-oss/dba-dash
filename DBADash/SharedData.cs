@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using Octokit;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -12,26 +13,43 @@ namespace DBADash
 {
     public class SharedData
     {
-        public static void MarkInstanceDeleted(string connectionID, string connectionString, bool isActive = false)
+        private const int SoftDeleteCommandTimeout = 30;
+        private const int HardDeleteCommandTimeout = 3600;
+
+        private static void InstanceDelete(string connectionID, string connectionString, bool isActive = false, bool hardDelete = false)
         {
             using var cn = new SqlConnection(connectionString);
-            using var cmd = new SqlCommand("dbo.Instance_Del", cn) { CommandType = CommandType.StoredProcedure };
+            using var cmd = new SqlCommand("dbo.Instance_Del", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = hardDelete ? HardDeleteCommandTimeout : SoftDeleteCommandTimeout };
             cn.Open();
             cmd.Parameters.AddWithValue("ConnectionID", connectionID);
             cmd.Parameters.AddWithValue("IsActive", isActive);
+            cmd.Parameters.AddWithValue("HardDelete", hardDelete);
             cmd.ExecuteNonQuery();
         }
 
-        public static void MarkInstanceDeleted(int InstanceID, string connectionString, bool IsActive)
+        private static void InstanceDelete(int InstanceID, string connectionString, bool IsActive = false, bool hardDelete = false)
         {
             using var cn = new SqlConnection(connectionString);
-            using var cmd = new SqlCommand("dbo.Instance_Del", cn) { CommandType = CommandType.StoredProcedure };
+            using var cmd = new SqlCommand("dbo.Instance_Del", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = hardDelete ? HardDeleteCommandTimeout : SoftDeleteCommandTimeout };
 
             cn.Open();
             cmd.Parameters.AddWithValue("InstanceID", InstanceID);
             cmd.Parameters.AddWithValue("IsActive", IsActive);
+            cmd.Parameters.AddWithValue("HardDelete", hardDelete);
             cmd.ExecuteNonQuery();
         }
+
+        public static void MarkInstanceDeleted(string connectionID, string connectionString) => InstanceDelete(connectionID, connectionString, false, false);
+
+        public static void MarkInstanceDeleted(int instanceID, string connectionString) => InstanceDelete(instanceID, connectionString, false, false);
+
+        public static void RestoreInstance(int instanceID, string connectionString) => InstanceDelete(instanceID, connectionString, true, false);
+
+        public static void RestoreInstance(string connectionID, string connectionString) => InstanceDelete(connectionID, connectionString, true, false);
+
+        public static void HardDeleteInstance(int instanceID, string connectionString) => InstanceDelete(instanceID, connectionString, false, true);
+
+        public static void HardDeleteInstance(string connectionID, string connectionString) => InstanceDelete(connectionID, connectionString, false, true);
 
         public static void UpdateShowInSummary(int InstanceID, bool ShowInSummary, string connectionString)
         {
@@ -45,7 +63,7 @@ namespace DBADash
             cmd.ExecuteNonQuery();
         }
 
-        public static void UpdateAlias(int instanceID, ref string alias,string connectionString)
+        public static void UpdateAlias(int instanceID, ref string alias, string connectionString)
         {
             using var cn = new SqlConnection(connectionString);
             using var cmd = new SqlCommand("dbo.InstanceAlias_Upd", cn) { CommandType = CommandType.StoredProcedure };
@@ -56,8 +74,6 @@ namespace DBADash
             cmd.Parameters.Add(pInstanceDisplayName);
             cmd.ExecuteNonQuery();
             alias = (string)pInstanceDisplayName.Value; // Returns the display name (set to ConnectionID if alias is NULL)
-            
         }
-
     }
 }

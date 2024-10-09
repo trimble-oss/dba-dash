@@ -59,7 +59,14 @@ namespace DBADashGUI
                 isActive = !isActive;
                 try
                 {
-                    SharedData.MarkInstanceDeleted(InstanceID, Common.ConnectionString, isActive);
+                    if (isActive)
+                    {
+                        SharedData.RestoreInstance(InstanceID, Common.ConnectionString);
+                    }
+                    else
+                    {
+                        SharedData.MarkInstanceDeleted(InstanceID, Common.ConnectionString);
+                    }
                     dgv.Rows[e.RowIndex].Cells[colDeleteRestore.Index].Value = isActive ? "Mark Deleted" : "Restore";
                 }
                 catch (Exception ex)

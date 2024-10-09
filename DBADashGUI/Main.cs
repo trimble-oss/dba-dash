@@ -13,7 +13,9 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Amazon.Auth.AccessControlPolicy;
 using DBADashGUI.Options_Menu;
+using DBADashGUI.Properties;
 using Version = System.Version;
 
 namespace DBADashGUI
@@ -371,7 +373,7 @@ namespace DBADashGUI
         private ContextMenuStrip RootRefreshContextMenu()
         {
             var ctxMnu = new ContextMenuStrip();
-            var mnuRootRefresh = new ToolStripMenuItem("Refresh");
+            var mnuRootRefresh = new ToolStripMenuItem("Refresh") { Image = Resources._112_RefreshArrow_Green_16x16_72 };
             ctxMnu.Items.Add(mnuRootRefresh);
             mnuRootRefresh.Click += MnuRootRefresh_Click;
             return ctxMnu;
@@ -517,6 +519,11 @@ namespace DBADashGUI
             if (IsAzureOnly)
             {
                 root.Nodes.Remove(hadr);
+            }
+            if (DBADashUser.IsAdmin)
+            {
+                var recycleBin = new SQLTreeItem("Recycle Bin", SQLTreeItem.TreeType.RecycleBin);
+                root.Nodes.Add(recycleBin);
             }
 
             tv1.Nodes.Add(root);
@@ -791,6 +798,10 @@ namespace DBADashGUI
             else if (n.Type == SQLTreeItem.TreeType.Folder && n.Text == "Tables")
             {
                 allowedTabs.Add(tabTableSize);
+            }
+            else if (n.Type == SQLTreeItem.TreeType.RecycleBin)
+            {
+                allowedTabs.Add(tabDeletedInstances);
             }
 
             if (n.ObjectID > 0)
