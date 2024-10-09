@@ -487,6 +487,7 @@ namespace DBADashGUI
                             }
                         );
                     azureDBNode.AddDatabaseFolders();
+                    azureDBNode.AddInstanceActionsContextMenu();
                     AzureNode.Nodes.Add(azureDBNode);
                 }
                 else
@@ -498,6 +499,7 @@ namespace DBADashGUI
                         IsVisibleInSummary = showInSummary
                     };
                     n.AddDummyNode();
+                    n.AddInstanceActionsContextMenu();
                     parentNode.Nodes.Add(n);
                 }
             }

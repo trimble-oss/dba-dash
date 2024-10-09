@@ -3,6 +3,7 @@ using System;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
+using DBADash;
 using DBADashGUI.Theme;
 
 namespace DBADashGUI
@@ -53,7 +54,7 @@ namespace DBADashGUI
                 var alias = Convert.ToString(dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value);
                 try
                 {
-                    UpdateAlias(instanceID, ref alias);
+                    SharedData.UpdateAlias(instanceID, ref alias,Common.ConnectionString);
                     row["InstanceDisplayName"] = alias;
                     row.EndEdit();
                     _editCount++; // Keep track of edits made so we can decide to refresh the tree
@@ -71,20 +72,6 @@ namespace DBADashGUI
             }
         }
 
-        private static void UpdateAlias(int instanceID, ref string alias)
-        {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.InstanceAlias_Upd", cn) { CommandType = CommandType.StoredProcedure })
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                cmd.Parameters.AddWithValue("Alias", alias);
-                var pInstanceDisplayName = new SqlParameter("InstanceDisplayName", SqlDbType.NVarChar, 128) { Direction = ParameterDirection.Output };
-                cmd.Parameters.Add(pInstanceDisplayName);
-                cmd.ExecuteNonQuery();
-                alias = (string)pInstanceDisplayName.Value; // Returns the display name (set to ConnectionID if alias is NULL)
-            }
-        }
 
         private void Dgv_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
