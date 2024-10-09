@@ -141,7 +141,7 @@ namespace DBADashServiceConfig
                             src.SourceConnection.Validate();
                             validated = true;
                             src.ConnectionID = src.GetGeneratedConnectionID();
-                            if(src.SourceConnection.ApplicationIntent() == ApplicationIntent.ReadOnly)
+                            if (src.SourceConnection.ApplicationIntent() == ApplicationIntent.ReadOnly)
                             {
                                 src.ConnectionID += "|ReadOnly";
                             }
@@ -359,6 +359,7 @@ namespace DBADashServiceConfig
 
         private async void ServiceConfig_Load(object sender, EventArgs e)
         {
+            cboDeleteAction.SelectedIndex = 0;
             dgvConnections.ColumnHeaderMouseClick += dgvConnections_ColumnHeaderMouseClick;
 
             await CommonShared.CheckForIncompleteUpgrade();
@@ -1363,7 +1364,22 @@ namespace DBADashServiceConfig
         {
             if (e.RowIndex >= 0 && e.ColumnIndex == dgvConnections.Columns["Delete"].Index)
             {
-                dgvConnections.Rows.RemoveAt(e.RowIndex);
+                var src = (DBADashSource)dgvConnections.Rows[e.RowIndex].DataBoundItem;
+                switch (PromptMarkDeleted(src))
+                {
+                    case DialogResult.OK:
+                    case DialogResult.No:// Remove only
+                        dgvConnections.Rows.RemoveAt(e.RowIndex);
+                        break;
+
+                    case DialogResult.Yes: // Remove and delete
+                        DeleteInstance(src);
+                        dgvConnections.Rows.RemoveAt(e.RowIndex);
+                        break;
+
+                    case DialogResult.Cancel:
+                        return;
+                }
                 ApplySearch();
             }
             else if (e.RowIndex >= 0 && e.ColumnIndex == dgvConnections.Columns["Edit"].Index)
@@ -1429,6 +1445,69 @@ namespace DBADashServiceConfig
         private void Dgv_UserDeletedRow(object sender, DataGridViewRowEventArgs e)
         {
             UpdateFromGrid();
+        }
+
+        private void Dgv_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
+        {
+            var src = (DBADashSource)e.Row.DataBoundItem;
+            switch (PromptMarkDeleted(src))
+            {
+                case DialogResult.OK:
+                case DialogResult.No:// Remove only
+                    break;
+
+                case DialogResult.Yes: // Remove and delete
+                    DeleteInstance(src);
+                    break;
+
+                case DialogResult.Cancel:
+                    e.Cancel = true;
+                    break;
+            }
+        }
+
+        private DialogResult PromptMarkDeleted(DBADashSource src)
+        {
+            if (!collectionConfig.SQLDestinations.Any() || src.ConnectionID == null)
+            {
+                if(cboDeleteAction.SelectedIndex >0)
+                {
+                    return DialogResult.OK;
+                }
+                return MessageBox.Show(
+                    @$"Remove connection '{src.ConnectionID ?? src.SourceConnection.DataSource()}' from configuration?",
+                    @"Remove?", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+            }
+
+            return cboDeleteAction.SelectedIndex switch
+            {
+                1 => DialogResult.No,
+                2 => DialogResult.Yes,
+                _ => MessageBox.Show(@$"Mark connection '{src.ConnectionID}' deleted in repository database?
+Yes = remove connection and mark as deleted
+No =  to remove only.
+Cancel = cancel the operation.", @"Mark deleted?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question)
+            };
+        }
+
+        private void DeleteInstance(DBADashSource src)
+        {
+            var exceptions = new List<Exception>();
+            foreach (var dest in collectionConfig.SQLDestinations)
+            {
+                try
+                {
+                    SharedData.MarkInstanceDeleted(src.ConnectionID, dest.ConnectionString, false);
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Add(ex);
+                }
+            }
+            if (exceptions.Count > 0)
+            {
+                MessageBox.Show(@"Error marking connection deleted in repository database: " + string.Join(Environment.NewLine, exceptions.Select(ex => ex.Message)), @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void TxtSearch_TextChanged(object sender, EventArgs e)

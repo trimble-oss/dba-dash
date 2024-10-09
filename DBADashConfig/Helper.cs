@@ -4,6 +4,7 @@ using Serilog;
 using System.Data;
 using System.Diagnostics.Tracing;
 using System.Runtime.InteropServices;
+using Amazon.Runtime.CredentialManagement;
 
 namespace DBADashConfig
 {
@@ -107,7 +108,7 @@ namespace DBADashConfig
                 Log.Information("Marking instance {status} in {Destination}", status, dest.ConnectionForPrint);
                 try
                 {
-                    MarkInstanceDeleted(connectionId, dest.ConnectionString, isActive);
+                    SharedData.MarkInstanceDeleted(connectionId, dest.ConnectionString, isActive);
                 }
                 catch (Exception ex)
                 {
@@ -115,16 +116,6 @@ namespace DBADashConfig
                     Environment.Exit(1);
                 }
             }
-        }
-
-        public static void MarkInstanceDeleted(string connectionID, string connectionString, bool isActive = false)
-        {
-            using var cn = new SqlConnection(connectionString);
-            using var cmd = new SqlCommand("dbo.Instance_Del", cn) { CommandType = CommandType.StoredProcedure };
-            cn.Open();
-            cmd.Parameters.AddWithValue("ConnectionID", connectionID);
-            cmd.Parameters.AddWithValue("IsActive", isActive);
-            cmd.ExecuteNonQuery();
         }
 
         public static void CheckForUpdates()
@@ -222,7 +213,7 @@ namespace DBADashConfig
                 Console.WriteLine(cn.ConnectionID + "\t" + cn.SourceConnection.EncryptedConnectionString);
             }
         }
-
+        
         public static void AddDestination(CollectionConfig config, Options o)
         {
             if (string.IsNullOrEmpty(o.ConnectionString))

@@ -128,6 +128,8 @@ namespace DBADashServiceConfig
             chkNoWMI = new System.Windows.Forms.CheckBox();
             bttnAdd = new System.Windows.Forms.Button();
             groupBox1 = new System.Windows.Forms.GroupBox();
+            label12 = new System.Windows.Forms.Label();
+            cboDeleteAction = new System.Windows.Forms.ComboBox();
             dgvConnections = new System.Windows.Forms.DataGridView();
             label13 = new System.Windows.Forms.Label();
             txtSearch = new System.Windows.Forms.TextBox();
@@ -1270,6 +1272,8 @@ namespace DBADashServiceConfig
             // groupBox1
             // 
             groupBox1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBox1.Controls.Add(label12);
+            groupBox1.Controls.Add(cboDeleteAction);
             groupBox1.Controls.Add(bttnCheckConnections);
             groupBox1.Controls.Add(dgvConnections);
             groupBox1.Controls.Add(label13);
@@ -1283,6 +1287,27 @@ namespace DBADashServiceConfig
             groupBox1.TabIndex = 26;
             groupBox1.TabStop = false;
             groupBox1.Text = "Existing Connections";
+            // 
+            // label12
+            // 
+            label12.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            label12.AutoSize = true;
+            label12.Location = new System.Drawing.Point(199, 348);
+            label12.Name = "label12";
+            label12.Size = new System.Drawing.Size(115, 16);
+            label12.TabIndex = 29;
+            label12.Text = "Grid delete action:";
+            // 
+            // cboDeleteAction
+            // 
+            cboDeleteAction.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            cboDeleteAction.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            cboDeleteAction.FormattingEnabled = true;
+            cboDeleteAction.Items.AddRange(new object[] { "Prompt", "Remove Only", "Remove And Mark Deleted" });
+            cboDeleteAction.Location = new System.Drawing.Point(331, 344);
+            cboDeleteAction.Name = "cboDeleteAction";
+            cboDeleteAction.Size = new System.Drawing.Size(172, 24);
+            cboDeleteAction.TabIndex = 28;
             // 
             // dgvConnections
             // 
@@ -1302,13 +1327,14 @@ namespace DBADashServiceConfig
             dgvConnections.RowsAdded += Dgv_RowsAdded;
             dgvConnections.RowValidated += Dgv_RowValidated;
             dgvConnections.UserDeletedRow += Dgv_UserDeletedRow;
+            dgvConnections.UserDeletingRow += Dgv_UserDeletingRow;
             // 
             // label13
             // 
             label13.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             label13.AutoSize = true;
             label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            label13.Location = new System.Drawing.Point(830, 353);
+            label13.Location = new System.Drawing.Point(830, 348);
             label13.Name = "label13";
             label13.Size = new System.Drawing.Size(53, 16);
             label13.TabIndex = 25;
@@ -1317,7 +1343,7 @@ namespace DBADashServiceConfig
             // txtSearch
             // 
             txtSearch.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            txtSearch.Location = new System.Drawing.Point(893, 349);
+            txtSearch.Location = new System.Drawing.Point(893, 345);
             txtSearch.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             txtSearch.Name = "txtSearch";
             txtSearch.Size = new System.Drawing.Size(191, 22);
@@ -1662,6 +1688,8 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.CheckBox chkAllowPlanForcing;
         private System.Windows.Forms.Button bttnCheckConnections;
+        private System.Windows.Forms.ComboBox cboDeleteAction;
+        private System.Windows.Forms.Label label12;
     }
 }
 
