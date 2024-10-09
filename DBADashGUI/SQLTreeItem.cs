@@ -3,8 +3,13 @@ using Microsoft.SqlServer.Management.Common;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
+using System.Resources;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using DBADash;
+using DBADashGUI.Properties;
 
 namespace DBADashGUI
 {
@@ -423,20 +428,22 @@ namespace DBADashGUI
                 {
                     case TreeType.DBADashRoot or TreeType.Instance or TreeType.AzureInstance:
                         return string.Empty;
+
                     case TreeType.Database or TreeType.AzureDatabase:
                         return databaseName;
+
                     default:
-                    {
-                        if (!string.IsNullOrEmpty(databaseName))
                         {
-                            return databaseName;
+                            if (!string.IsNullOrEmpty(databaseName))
+                            {
+                                return databaseName;
+                            }
+                            else
+                            {
+                                databaseName = SQLTreeItemParent.DatabaseName;
+                                return databaseName;
+                            }
                         }
-                        else
-                        {
-                            databaseName = SQLTreeItemParent.DatabaseName;
-                            return databaseName;
-                        }
-                    }
                 }
             }
             set => databaseName = value;
@@ -581,7 +588,7 @@ namespace DBADashGUI
         {
             SQLTreeItem dummyNode = new("", "", TreeType.DummyNode);
             Nodes.Add(dummyNode);
-            AddRefreshContextMenu(this);
+            AddRefreshContextMenu();
         }
 
         public static SQLTreeItem GetReportsFolder(IEnumerable<CustomReport> reports)
@@ -635,21 +642,21 @@ namespace DBADashGUI
             nProgrammability.Nodes.Add(nDBTriggers);
             nProgrammability.Nodes.Add(nTriggers);
             nProgrammability.Nodes.Add(nAssemblies);
-            AddContextMenu(nStoredProcs);
-            AddContextMenu(nAggFunctions);
-            AddContextMenu(nTableFunctions);
-            AddContextMenu(nScalarFunctions);
-            AddContextMenu(nDBTriggers);
-            AddContextMenu(nTriggers);
-            AddContextMenu(nAssemblies);
-            AddContextMenu(nTableTypes);
-            AddContextMenu(nDataTypes);
-            AddContextMenu(nUserDefinedTypes);
-            AddContextMenu(nXML);
-            AddContextMenu(nViews);
-            AddContextMenu(nTables);
-            AddContextMenu(nTypes);
-            AddContextMenu(nSeq);
+            nStoredProcs.AddFilterContextMenu();
+            nAggFunctions.AddFilterContextMenu();
+            nTableFunctions.AddFilterContextMenu();
+            nScalarFunctions.AddFilterContextMenu();
+            nDBTriggers.AddFilterContextMenu();
+            nTriggers.AddFilterContextMenu();
+            nAssemblies.AddFilterContextMenu();
+            nTableTypes.AddFilterContextMenu();
+            nDataTypes.AddFilterContextMenu();
+            nUserDefinedTypes.AddFilterContextMenu();
+            nXML.AddFilterContextMenu();
+            nViews.AddFilterContextMenu();
+            nTables.AddFilterContextMenu();
+            nTypes.AddFilterContextMenu();
+            nSeq.AddFilterContextMenu();
 
             Nodes.Add(nTables);
             Nodes.Add(nViews);
@@ -659,48 +666,134 @@ namespace DBADashGUI
             Nodes.Add(nSeq);
         }
 
-        private void AddRefreshContextMenu(SQLTreeItem n)
+        private void AddRefreshContextMenu()
         {
-            var ctxMnu = new ContextMenuStrip();
-
-            var mnuRefresh = new ToolStripMenuItem("Refresh");
-            ctxMnu.Items.Add(mnuRefresh);
+            ContextMenuStrip ??= new ContextMenuStrip();
+            if (ContextMenuStrip.Items.Cast<ToolStripMenuItem>().Any(mnu => mnu.Text == @"Refresh")) return;
+            var mnuRefresh = new ToolStripMenuItem("Refresh") { Image = Resources._112_RefreshArrow_Green_16x16_72 };
+            ContextMenuStrip.Items.Add(mnuRefresh);
             mnuRefresh.Click += MnuRefresh_Click;
-            mnuRefresh.Tag = n;
-            n.ContextMenuStrip = ctxMnu;
         }
 
         private void MnuRefresh_Click(object sender, EventArgs e)
         {
-            var itm = (SQLTreeItem)((ToolStripMenuItem)sender).Tag;
-            var isExpanded = itm.IsExpanded;
-            itm.Nodes.Clear();
-            itm.AddDummyNode();
-            itm.Collapse();
+            RefreshNode();
+        }
+
+        private void RefreshNode()
+        {
+            var isExpanded = IsExpanded;
+            Nodes.Clear();
+            AddDummyNode();
+            Collapse();
             if (isExpanded)
             {
-                itm.Expand();
+                Expand();
             }
         }
 
-        private void AddContextMenu(SQLTreeItem n)
+        private void AddFilterContextMenu()
         {
-            var ctxMnu = new ContextMenuStrip();
-            var mnuFilter = ctxMnu.Items.Add("Filter");
+            ContextMenuStrip ??= new ContextMenuStrip();
+            var mnuFilter = new ToolStripMenuItem("Filter") { Image = Resources.Filter_16x };
             mnuFilter.Click += MnuFilter_Click;
-            mnuFilter.Tag = n;
-            n.ContextMenuStrip = ctxMnu;
+            ContextMenuStrip.Items.Add(mnuFilter);
+        }
+
+        public void AddInstanceActionsContextMenu()
+        {
+            ContextMenuStrip ??= new ContextMenuStrip();
+            if (!DBADashUser.IsAdmin) return;
+
+            var mnuInstanceActions = new ToolStripMenuItem("Instance Actions") { Image = Resources.DatabaseSettings_16x };
+
+            var mnuHidden = new ToolStripMenuItem("Hidden");
+            mnuHidden.Checked = !IsVisibleInSummary;
+            mnuHidden.CheckOnClick = true;
+            mnuHidden.Click += HideInstance_Click;
+
+            var mnuRename = new ToolStripMenuItem("Rename") { Image = Resources.Rename_16x };
+            mnuRename.Click += MnuRename_Click;
+
+            var mnuDelete = new ToolStripMenuItem("Delete") { Image = Resources.DeleteDatabase_16x };
+            mnuDelete.Click += MnuDelete_Click;
+
+            switch (Type)
+            {
+                case TreeType.Instance:
+                    mnuInstanceActions.DropDownItems.AddRange(new ToolStripItem[] { mnuHidden, mnuRename, mnuDelete });
+                    break;
+
+                case TreeType.AzureDatabase:
+                    mnuInstanceActions.DropDownItems.AddRange(new ToolStripItem[] { mnuDelete });
+                    break;
+            }
+            ContextMenuStrip.Items.Add(mnuInstanceActions);
+        }
+
+        private void HideInstance_Click(object sender, EventArgs e)
+        {
+            var mnu = (ToolStripMenuItem)sender;
+
+            if (mnu.Checked && MessageBox.Show($@"Hide instance {InstanceName}?", @"Hide Instance", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
+            {
+                mnu.Checked = false;
+                return;
+            }
+            try
+            {
+                SharedData.UpdateShowInSummary(InstanceID, !mnu.Checked, Common.ConnectionString);
+                IsVisibleInSummary = !mnu.Checked;
+                SetIcon();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void MnuRename_Click(object sender, EventArgs e)
+        {
+            var name = InstanceName;
+            var msg = $"Rename ConnectionID: {Context.ConnectionID}";
+            if (CommonShared.ShowInputDialog(ref name, msg) != DialogResult.OK) return;
+            try
+            {
+                SharedData.UpdateAlias(instanceID, ref name, Common.ConnectionString);
+                Context.InstanceName = name;
+                instanceName = name;
+                Text = name;
+                RefreshNode();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void MnuDelete_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show($@"Are you sure you want to mark {Context.InstanceName} ({Context.ConnectionID}) deleted?", @"Mark Deleted?", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) !=
+                DialogResult.Yes) return;
+            try
+            {
+                SharedData.MarkInstanceDeleted(InstanceID, Common.ConnectionString, false);
+                Parent.Nodes.Remove(this);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         public string FilterText = "";
 
         private void MnuFilter_Click(object sender, EventArgs e)
         {
-            var itm = (SQLTreeItem)((ToolStripMenuItem)sender).Tag;
-            var filter = itm.FilterText;
+            var filter = FilterText;
             if (CommonShared.ShowInputDialog(ref filter, "Filter") == DialogResult.OK)
             {
-                itm.Filter(filter);
+                Filter(filter);
             }
         }
 

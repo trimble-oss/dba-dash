@@ -1,10 +1,9 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADash;
+using DBADashGUI.Theme;
 using System;
 using System.Data;
 using System.Text;
 using System.Windows.Forms;
-using DBADash;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI
 {
@@ -50,20 +49,6 @@ namespace DBADashGUI
             }
         }
 
-
-
-        private static void UpdateShowInSummary(int InstanceID, bool ShowInSummary)
-        {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.Instance_ShowInSummary_Upd", cn) { CommandType = CommandType.StoredProcedure })
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("ShowInSummary", ShowInSummary);
-                cmd.ExecuteNonQuery();
-            }
-        }
-
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0 && e.ColumnIndex == colDeleteRestore.Index)
@@ -74,7 +59,7 @@ namespace DBADashGUI
                 isActive = !isActive;
                 try
                 {
-                    SharedData.MarkInstanceDeleted(InstanceID,Common.ConnectionString, isActive);
+                    SharedData.MarkInstanceDeleted(InstanceID, Common.ConnectionString, isActive);
                     dgv.Rows[e.RowIndex].Cells[colDeleteRestore.Index].Value = isActive ? "Mark Deleted" : "Restore";
                 }
                 catch (Exception ex)
@@ -149,7 +134,7 @@ namespace DBADashGUI
                     var InstanceID = (int)row["InstanceID"];
                     var showInSummary = !(bool)row["IsHidden"];
 
-                    UpdateShowInSummary(InstanceID, showInSummary);
+                    SharedData.UpdateShowInSummary(InstanceID, showInSummary, Common.ConnectionString);
                 }
                 catch (Exception ex)
                 {
