@@ -3,6 +3,7 @@ using DBADashGUI.CustomReports;
 using DBADashGUI.Theme;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using UserControl = System.Windows.Forms.UserControl;
@@ -12,6 +13,7 @@ namespace DBADashGUI
     public partial class DeletedInstances : UserControl, ISetContext, IRefreshData
     {
         public event EventHandler<int> InstanceRestored;
+        private bool IsDeleteInProgesss;
 
         public DeletedInstances()
         {
@@ -39,7 +41,7 @@ namespace DBADashGUI
                 customReportView1.Grid.Columns.Add(new DataGridViewLinkColumn()
                 {
                     Name = "colRestore",
-                    HeaderText = "Restore",
+                    HeaderText = @"Restore",
                     Text = "Restore",
                     UseColumnTextForLinkValue = true,
                     Width = 80
@@ -47,7 +49,7 @@ namespace DBADashGUI
                 customReportView1.Grid.Columns.Add(new DataGridViewLinkColumn()
                 {
                     Name = "colDelete",
-                    HeaderText = "Delete",
+                    HeaderText = @"Delete",
                     Text = "Delete Now",
                     UseColumnTextForLinkValue = true,
                     Width = 90
@@ -56,6 +58,8 @@ namespace DBADashGUI
                 customReportView1.Grid.CellContentClick += Grid_CellContentClick;
                 customReportView1.Grid.ApplyTheme();
             }
+            customReportView1.StatusStrip.Visible = true;
+            SetStatus(CurrentStatus.Message,CurrentStatus.ToolTip,CurrentStatus.Color);
         }
 
         private void Grid_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -71,52 +75,69 @@ namespace DBADashGUI
                         SharedData.RestoreInstance(instanceID, Common.ConnectionString);
                         RefreshData();
                         OnInstanceRestored(instanceID);
-                        customReportView1.StatusStrip.Visible = true;
-                        customReportView1.StatusLabel.InvokeSetStatus($"Instance {instanceName} restored.  Refresh the tree to see the instance.", string.Empty, DashColors.Success);
+                        SetStatus($"Instance {instanceName} restored.  Refresh the tree to see the instance.", string.Empty, DashColors.Success);
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
 
                     break;
 
                 case "colDelete":
                     {
+                        if(IsDeleteInProgesss)
+                        {
+                            MessageBox.Show(@"Please wait for the current delete operation to complete before starting another.", $@"Delete {instanceName}", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
                         var lastCollectionMins = (int)customReportView1.Grid.Rows[e.RowIndex].Cells["LastCollectionMins"].Value;
                         if (lastCollectionMins <= 1440)
                         {
-                            MessageBox.Show("Please wait at least 1 day before deleting this instance.", "Delete",
+                            MessageBox.Show(@"Please wait at least 1 day before deleting this instance.", $@"Delete {instanceName}",
                                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
                         }
 
                         if (MessageBox.Show(
-                                "Warning:This process can't be undone and might take a while to complete.\nIf you don't need to delete the instance immediately, the data retention settings will eventually remove most of the data associated with the deleted instance by truncating old partitions.\n\nAre you sure you want to delete this instance?",
-                                "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) != DialogResult.Yes) return;
-                        customReportView1.StatusStrip.Visible = true;
+                                @"Warning:This process can't be undone and might take a while to complete.
+If you don't need to delete the instance immediately, the data retention settings will eventually remove most of the data associated with the deleted instance by truncating old partitions.
+
+Are you sure you want to delete this instance?",
+                                $@"Delete {instanceName}", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) != DialogResult.Yes) return;
+                
                         Task.Run(() => HardDeleteInstance(instanceID, instanceName));
                         break;
                     }
             }
         }
 
+        private (string Message, string ToolTip, Color Color) CurrentStatus;
+
+        private void SetStatus(string message, string tooltip, Color color)
+        {
+            CurrentStatus = new(message, tooltip, color);
+            customReportView1.StatusLabel.InvokeSetStatus(message ?? string.Empty,tooltip ?? string.Empty,color);
+        }
+
         private void HardDeleteInstance(int instanceID, string instanceName)
         {
+            IsDeleteInProgesss = true;
             try
             {
-                customReportView1.StatusLabel.InvokeSetStatus($"Deleting instance {instanceName}...", string.Empty,
+                SetStatus($"Deleting instance {instanceName}...", string.Empty,
                     DashColors.Information);
                 SharedData.HardDeleteInstance(instanceID, Common.ConnectionString);
-                customReportView1.StatusLabel.InvokeSetStatus($"Instance {instanceName} deleted", string.Empty,
+                SetStatus($"Instance {instanceName} deleted", string.Empty,
                     DashColors.Success);
             }
             catch (Exception ex)
             {
-                customReportView1.StatusLabel.InvokeSetStatus(ex.Message, ex.ToString(), DashColors.Fail);
+                SetStatus(ex.Message, ex.ToString(), DashColors.Fail);
             }
 
             RefreshData();
+            IsDeleteInProgesss = false;
         }
 
         protected virtual void OnInstanceRestored(int instanceID)
