@@ -1,8 +1,8 @@
 ﻿CREATE PROC dbo.InstanceTags_Del(
 	@Instance SYSNAME,
 	@InstanceID INT,
-	@TagName VARCHAR(50),
-	@TagValue VARCHAR(50)
+	@TagName NVARCHAR(50),
+	@TagValue NVARCHAR(128)
 )
 AS
 DECLARE @TagID INT 
