@@ -598,6 +598,7 @@ namespace DBADashGUI
             var reportsNode = new SQLTreeItem("Reports", TreeType.ReportsFolder);
             foreach (var report in reports)
             {
+                if (!report.HasAccess()) continue;
                 var reportNode = new SQLTreeItem(report.ReportName, report is SystemReport ? TreeType.SystemReport : TreeType.CustomReport) { Report = report };
                 reportsNode.Nodes.Add(reportNode);
             }

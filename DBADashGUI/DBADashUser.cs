@@ -1,8 +1,11 @@
 ﻿using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Windows;
+using DocumentFormat.OpenXml.Office2010.ExcelAc;
+using DocumentFormat.OpenXml.Packaging;
 
 namespace DBADashGUI
 {
@@ -21,6 +24,8 @@ namespace DBADashGUI
         public static bool IsAdmin;
 
         public static TimeZoneInfo UserTimeZone = TimeZoneInfo.Local;
+
+        public static HashSet<string> Roles;
 
         public static void Update()
         {
@@ -55,7 +60,13 @@ namespace DBADashGUI
             var pTheme = new SqlParameter("Theme", SqlDbType.VarChar, 50) { Direction = ParameterDirection.Output };
             var pIsAdmin = new SqlParameter("IsAdmin", SqlDbType.Bit) { Direction = ParameterDirection.Output };
             cmd.Parameters.AddRange(new[] { pUserID, pManageGlobalViews, pTZ, pTheme, pAllowMessaging, pAllowPlanForcing, pIsAdmin });
-            cmd.ExecuteNonQuery();
+            using var rdr = cmd.ExecuteReader();
+            Roles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            while (rdr.Read())
+            {
+                Roles.Add(rdr["name"].ToString());
+            }
+            rdr.Close();
             var id = Convert.ToInt32(pUserID.Value);
             if (id > 0)
             {
