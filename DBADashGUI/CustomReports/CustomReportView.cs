@@ -31,7 +31,7 @@ namespace DBADashGUI.CustomReports
         private bool doAutoSize = true;
         private bool suppressCboResultsIndexChanged;
         public DataGridView Grid => dgv;
-        public ToolStripStatusLabel StatusLabel=> lblDescription;
+        public ToolStripStatusLabel StatusLabel => lblDescription;
         public StatusStrip StatusStrip => statusStrip1;
 
         public CustomReportView()
@@ -428,6 +428,12 @@ namespace DBADashGUI.CustomReports
 
         public void RefreshData()
         {
+            if (!report.HasAccess())
+            {
+                MessageBox.Show("You do not have access to this report", "Access Denied", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
             if (this.InvokeRequired)
             {
                 this.Invoke(new Action(RefreshData));
@@ -646,7 +652,7 @@ namespace DBADashGUI.CustomReports
                     var item = new ToolStripMenuItem(itm.Value)
                     {
                         Tag = itm.Key,
-                        Checked = param.UseDefaultValue && string.IsNullOrEmpty(itm.Key.ToString()) || !param.UseDefaultValue && param.Param.Value.Equals(itm.Key)
+                        Checked = (param.UseDefaultValue && string.IsNullOrEmpty(itm.Key.ToString())) || (!param.UseDefaultValue && param.Param.Value != null && param.Param.Value.Equals(itm.Key))
                     };
                     item.Click += (sender, e) => PickerItem_Click(sender, itm, picker.ParameterName);
                     pickerMenu.DropDownItems.Add(item);

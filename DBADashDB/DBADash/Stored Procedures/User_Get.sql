@@ -27,3 +27,8 @@ BEGIN
 
 	SELECT @UserID = SCOPE_IDENTITY()
 END
+
+SELECT name
+FROM sys.database_principals
+WHERE type = 'R'
+AND IS_ROLEMEMBER(name)=1
