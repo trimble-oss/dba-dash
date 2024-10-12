@@ -1,8 +1,8 @@
 ﻿CREATE PROC InstanceTags_Add(
 	@Instance SYSNAME,
 	@InstanceID INT,
-	@TagName VARCHAR(50),
-	@TagValue VARCHAR(128),
+	@TagName NVARCHAR(50),
+	@TagValue NVARCHAR(128),
 	@TagID INT OUT
 )
 AS
