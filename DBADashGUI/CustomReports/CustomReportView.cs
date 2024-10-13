@@ -846,7 +846,7 @@ namespace DBADashGUI.CustomReports
 
                 try
                 {
-                    foreach (var picker in report.Pickers.OfType<DBPicker>())
+                    foreach (var picker in report.Pickers?.OfType<DBPicker>() ?? Enumerable.Empty<DBPicker>())
                     {
                         sb.AppendLine($"/* Script picker {picker.Name.Replace("*", "")} */");
 
