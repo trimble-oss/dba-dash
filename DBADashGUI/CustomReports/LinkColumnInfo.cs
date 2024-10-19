@@ -74,6 +74,22 @@ namespace DBADashGUI.CustomReports
         }
     }
 
+    public class DeadlockGraphLinkColumnInfo : LinkColumnInfo
+    {
+        public string TargetColumn { get; set; }
+
+        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex)
+        {
+            var dlGraph = row.Cells[TargetColumn].Value.DBNullToNull() as string;
+            if (!Common.IsValidDeadlockGraph(dlGraph))
+            {
+                MessageBox.Show($"Invalid deadlock graph\n{dlGraph}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            Common.ShowDeadlockGraph(dlGraph);
+        }
+    }
+
     public class DrillDownLinkColumnInfo : LinkColumnInfo
     {
         public string ReportProcedureName { get; set; }

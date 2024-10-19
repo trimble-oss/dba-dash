@@ -7,6 +7,7 @@
 	@AgentIdentifier CHAR(22)=NULL,
 	@S3Path NVARCHAR(256)=NULL,
 	@MessagingEnabled BIT=0,
+	@AllowedScripts VARCHAR(MAX)=NULL,
 	@DBADashAgentID INT OUT
 )
 AS
@@ -15,9 +16,9 @@ DECLARE @UpdateAgent BIT = 0
 SELECT @DBADashAgentID = DBADashAgentID,
 	@UpdateAgent = CASE WHEN 
 						EXISTS(
-								SELECT @AgentPath, @AgentVersion, @ServiceSQSQueueUrl, @AgentIdentifier,@S3Path,@MessagingEnabled
+								SELECT @AgentPath, @AgentVersion, @ServiceSQSQueueUrl, @AgentIdentifier,@S3Path,@MessagingEnabled,@AllowedScripts
 								EXCEPT
-								SELECT AgentPath, AgentVersion, ServiceSQSQueueUrl, AgentIdentifier, S3Path, MessagingEnabled
+								SELECT AgentPath, AgentVersion, ServiceSQSQueueUrl, AgentIdentifier, S3Path, MessagingEnabled, AllowedScripts
 								)
 					THEN 1 ELSE 0 END
 FROM dbo.DBADashAgent
@@ -27,8 +28,8 @@ AND AgentServiceName = @AgentServiceName
 IF @DBADashAgentID IS NULL
 BEGIN
 
-	INSERT INTO dbo.DBADashAgent(AgentHostName,AgentServiceName,AgentVersion,AgentPath,ServiceSQSQueueUrl,AgentIdentifier,S3Path,MessagingEnabled)
-	SELECT @AgentHostName,@AgentServiceName,@AgentVersion,@AgentPath,@ServiceSQSQueueUrl,ISNULL(@AgentIdentifier,LEFT(CONCAT('Temp.',REPLACE(NEWID(),'-','')),22)), @S3Path, @MessagingEnabled
+	INSERT INTO dbo.DBADashAgent(AgentHostName,AgentServiceName,AgentVersion,AgentPath,ServiceSQSQueueUrl,AgentIdentifier,S3Path,MessagingEnabled,AllowedScripts)
+	SELECT @AgentHostName,@AgentServiceName,@AgentVersion,@AgentPath,@ServiceSQSQueueUrl,ISNULL(@AgentIdentifier,LEFT(CONCAT('Temp.',REPLACE(NEWID(),'-','')),22)), @S3Path, @MessagingEnabled,@AllowedScripts
 	WHERE NOT EXISTS(SELECT 1 
 				FROM dbo.DBADashAgent WITH(UPDLOCK,HOLDLOCK) 
 				WHERE AgentHostName = @AgentHostName 
@@ -51,6 +52,7 @@ BEGIN
 			ServiceSQSQueueUrl = @ServiceSQSQueueUrl,
 			AgentIdentifier = ISNULL(@AgentIdentifier,LEFT(CONCAT('Temp.',REPLACE(NEWID(),'-','')),22)),
 			S3Path = @S3Path,
-			MessagingEnabled = @MessagingEnabled
+			MessagingEnabled = @MessagingEnabled,
+			AllowedScripts = @AllowedScripts
 	WHERE DBADashAgentID = @DBADashAgentID;
 END

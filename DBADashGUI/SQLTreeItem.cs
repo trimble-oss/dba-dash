@@ -72,7 +72,9 @@ namespace DBADashGUI
             CustomReport,
             ElasticPool,
             SystemReport,
-            RecycleBin
+            RecycleBin,
+            CommunityToolsFolder,
+            CommunityTool
         }
 
         private DatabaseEngineEdition _engineEdition = DatabaseEngineEdition.Unknown;
@@ -566,6 +568,14 @@ namespace DBADashGUI
                     ImageIndex = 26;
                     break;
 
+                case TreeType.CommunityToolsFolder:
+                    ImageIndex = 29;
+                    break;
+
+                case TreeType.CommunityTool:
+                    ImageIndex = 30;
+                    break;
+
                 default:
                     ImageIndex = 5;
                     break;
@@ -938,6 +948,26 @@ namespace DBADashGUI
         public SQLTreeItem FindChildOfType(TreeType type)
         {
             return Nodes.Cast<SQLTreeItem>().FirstOrDefault(n => n.Type == type);
+        }
+
+        public void AddCommunityTools()
+        {
+            if (!Context.CanMessage) return;
+            if (!DBADashUser.CommunityScripts) return;
+            var communityTools = new SQLTreeItem("Community Tools", SQLTreeItem.TreeType.CommunityToolsFolder);
+            var agent = Context.CollectAgent;
+            foreach (var n in CommunityTools.CommunityTools.CommunityToolsList.Select(tool => new SQLTreeItem(tool.ProcedureName, SQLTreeItem.TreeType.CommunityTool)
+            {
+                Report = tool
+            }))
+            {
+                if (agent.IsAllowAllScripts || agent.AllowedScripts.Contains(n.Report.ProcedureName))
+                {
+                    communityTools.Nodes.Add(n);
+                }
+            }
+            if (communityTools.Nodes.Count > 0)
+                Nodes.Add(communityTools);
         }
     }
 }

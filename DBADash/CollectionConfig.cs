@@ -37,6 +37,8 @@ namespace DBADash
 
         public bool AllowPlanForcing { get; set; }
 
+        public string AllowedScripts { get; set; }
+
         public string ServiceSQSQueueUrl { get; set; }
 
         public CollectionSchedules GetSchedules()
@@ -145,7 +147,7 @@ namespace DBADash
         }
 
         [JsonIgnore]
-        public List<DBADashConnection> SQLDestinations=>AllDestinations.Where(d => d.Type == ConnectionType.SQL).ToList();
+        public List<DBADashConnection> SQLDestinations => AllDestinations.Where(d => d.Type == ConnectionType.SQL).ToList();
 
         public bool WasEncrypted()
         {
@@ -347,7 +349,7 @@ namespace DBADash
             return base.ContainsSensitive();
         }
 
-        public  DBADashConnection GetDestination(string hash)
+        public DBADashConnection GetDestination(string hash)
         {
             return DestinationConnection.Hash == hash ? DestinationConnection : SecondaryDestinationConnections.FirstOrDefault(c => c.Hash == hash);
         }

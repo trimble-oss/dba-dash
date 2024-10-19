@@ -345,7 +345,8 @@ namespace DBADash
                 new DataColumn("AgentPath", typeof(string)),
                 new DataColumn("ServiceSQSQueueUrl",typeof(string)),
                 new DataColumn("S3Path",typeof(string)),
-                new DataColumn("MessagingEnabled", typeof(bool))
+                new DataColumn("MessagingEnabled", typeof(bool)),
+                new DataColumn("AllowedScripts", typeof(string))
             });
             dt.Rows[0]["AgentVersion"] = dashAgent.AgentVersion;
             dt.Rows[0]["AgentHostName"] = dashAgent.AgentHostName;
@@ -353,6 +354,9 @@ namespace DBADash
             dt.Rows[0]["AgentPath"] = dashAgent.AgentPath;
             dt.Rows[0]["ServiceSQSQueueUrl"] = dashAgent.ServiceSQSQueueUrl;
             dt.Rows[0]["MessagingEnabled"] = dashAgent.MessagingEnabled;
+            dt.Rows[0]["AllowedScripts"] = dashAgent.AllowedScripts == null || dashAgent.AllowedScripts.Count == 0
+                ? DBNull.Value
+                : string.Join(',', dashAgent.AllowedScripts);
         }
 
         public void GetInstance()

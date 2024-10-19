@@ -16,6 +16,7 @@ using DBADashGUI.Theme;
 using static DBADash.DBADashConnection;
 using SortOrder = System.Windows.Forms.SortOrder;
 using System.Threading.Tasks;
+using DBADash.Messaging;
 using Humanizer;
 using Microsoft.SqlServer.Management.SqlParser.SqlCodeDom;
 
@@ -733,6 +734,7 @@ namespace DBADashServiceConfig
                 chkEnableMessaging.Checked = collectionConfig.EnableMessaging;
                 txtSQS.Text = collectionConfig.ServiceSQSQueueUrl;
                 chkAllowPlanForcing.Checked = collectionConfig.AllowPlanForcing;
+                txtAllowScripts.Text = collectionConfig.AllowedScripts;
                 UpdateSummaryCron();
                 UpdateScanInterval();
                 SetDgv();
@@ -2142,6 +2144,28 @@ Cancel = cancel the operation.", @"Mark deleted?", MessageBoxButtons.YesNoCancel
                 snapshotDates.Add(rdr.GetString(0), rdr.GetDateTime(1));
             }
             return snapshotDates;
+        }
+
+        private void lnkAllowAll_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            txtAllowScripts.Text = "*";
+        }
+
+        private void lnkAllowNone_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            txtAllowScripts.Text = string.Empty;
+        }
+
+        private void lnkAllowExplicit_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            txtAllowScripts.Text = Enum.GetValues(typeof(ProcedureExecutionMessage.CommandNames)).Cast<DBADash.Messaging.ProcedureExecutionMessage.CommandNames>()
+                .Select(c => c.ToString())
+                .Aggregate((a, b) => a + "," + b);
+        }
+
+        private void TxtAllowScripts_TextChanged(object sender, EventArgs e)
+        {
+            collectionConfig.AllowedScripts = txtAllowScripts.Text;
         }
     }
 }

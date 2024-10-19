@@ -68,6 +68,11 @@ namespace DBADashServiceConfig
             txtJson = new System.Windows.Forms.TextBox();
             tabOther = new System.Windows.Forms.TabPage();
             groupBox6 = new System.Windows.Forms.GroupBox();
+            lnkAllowExplicit = new System.Windows.Forms.LinkLabel();
+            lnkAllowNone = new System.Windows.Forms.LinkLabel();
+            lnkAllowAll = new System.Windows.Forms.LinkLabel();
+            label18 = new System.Windows.Forms.Label();
+            txtAllowScripts = new System.Windows.Forms.TextBox();
             chkAllowPlanForcing = new System.Windows.Forms.CheckBox();
             label8 = new System.Windows.Forms.Label();
             label6 = new System.Windows.Forms.Label();
@@ -590,6 +595,11 @@ namespace DBADashServiceConfig
             // 
             // groupBox6
             // 
+            groupBox6.Controls.Add(lnkAllowExplicit);
+            groupBox6.Controls.Add(lnkAllowNone);
+            groupBox6.Controls.Add(lnkAllowAll);
+            groupBox6.Controls.Add(label18);
+            groupBox6.Controls.Add(txtAllowScripts);
             groupBox6.Controls.Add(chkAllowPlanForcing);
             groupBox6.Controls.Add(label8);
             groupBox6.Controls.Add(label6);
@@ -598,10 +608,60 @@ namespace DBADashServiceConfig
             groupBox6.Controls.Add(chkEnableMessaging);
             groupBox6.Location = new System.Drawing.Point(9, 436);
             groupBox6.Name = "groupBox6";
-            groupBox6.Size = new System.Drawing.Size(1112, 162);
+            groupBox6.Size = new System.Drawing.Size(1112, 228);
             groupBox6.TabIndex = 39;
             groupBox6.TabStop = false;
             groupBox6.Text = "Messaging";
+            // 
+            // lnkAllowExplicit
+            // 
+            lnkAllowExplicit.AutoSize = true;
+            lnkAllowExplicit.Location = new System.Drawing.Point(721, 142);
+            lnkAllowExplicit.Name = "lnkAllowExplicit";
+            lnkAllowExplicit.Size = new System.Drawing.Size(95, 20);
+            lnkAllowExplicit.TabIndex = 11;
+            lnkAllowExplicit.TabStop = true;
+            lnkAllowExplicit.Text = "ALL (Explicit)";
+            lnkAllowExplicit.LinkClicked += lnkAllowExplicit_LinkClicked;
+            // 
+            // lnkAllowNone
+            // 
+            lnkAllowNone.AutoSize = true;
+            lnkAllowNone.Location = new System.Drawing.Point(665, 142);
+            lnkAllowNone.Name = "lnkAllowNone";
+            lnkAllowNone.Size = new System.Drawing.Size(50, 20);
+            lnkAllowNone.TabIndex = 10;
+            lnkAllowNone.TabStop = true;
+            lnkAllowNone.Text = "NONE";
+            lnkAllowNone.LinkClicked += lnkAllowNone_LinkClicked;
+            // 
+            // lnkAllowAll
+            // 
+            lnkAllowAll.AutoSize = true;
+            lnkAllowAll.Location = new System.Drawing.Point(626, 142);
+            lnkAllowAll.Name = "lnkAllowAll";
+            lnkAllowAll.Size = new System.Drawing.Size(33, 20);
+            lnkAllowAll.TabIndex = 9;
+            lnkAllowAll.TabStop = true;
+            lnkAllowAll.Text = "ALL";
+            lnkAllowAll.LinkClicked += lnkAllowAll_LinkClicked;
+            // 
+            // label18
+            // 
+            label18.AutoSize = true;
+            label18.Location = new System.Drawing.Point(18, 138);
+            label18.Name = "label18";
+            label18.Size = new System.Drawing.Size(192, 20);
+            label18.TabIndex = 8;
+            label18.Text = "Allowed Community Scripts";
+            // 
+            // txtAllowScripts
+            // 
+            txtAllowScripts.Location = new System.Drawing.Point(247, 135);
+            txtAllowScripts.Name = "txtAllowScripts";
+            txtAllowScripts.Size = new System.Drawing.Size(370, 27);
+            txtAllowScripts.TabIndex = 7;
+            txtAllowScripts.TextChanged += TxtAllowScripts_TextChanged;
             // 
             // chkAllowPlanForcing
             // 
@@ -1690,6 +1750,11 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Button bttnCheckConnections;
         private System.Windows.Forms.ComboBox cboDeleteAction;
         private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.LinkLabel lnkAllowNone;
+        private System.Windows.Forms.LinkLabel lnkAllowAll;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.TextBox txtAllowScripts;
+        private System.Windows.Forms.LinkLabel lnkAllowExplicit;
     }
 }
 
