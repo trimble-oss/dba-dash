@@ -748,6 +748,7 @@
     <Build Include="dbo\Stored Procedures\DeletedInstances_Get.sql" />
     <Build Include="dbo\Stored Procedures\ServerRoleMembers_Get.sql" />
     <Build Include="Security\SecurityReports.sql" />
+    <Build Include="Security\CommunityScripts.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

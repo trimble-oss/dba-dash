@@ -352,6 +352,8 @@ namespace DBADashGUI
             TreeViewImageList.Images.SetKeyName(26, "DatabaseGroup.png");
             TreeViewImageList.Images.SetKeyName(27, "User_Report_16x.png");
             TreeViewImageList.Images.SetKeyName(28, "Report_16x.png");
+            TreeViewImageList.Images.SetKeyName(29, "VSO_TeamProjectRepositoryFolder_hoverblue_16x.png");
+            TreeViewImageList.Images.SetKeyName(30, "VSO_TeamProject_16x.png");
             // 
             // menuStrip1
             // 
@@ -1538,10 +1540,10 @@ namespace DBADashGUI
             // tabSlowQueries
             // 
             tabSlowQueries.Controls.Add(slowQueries1);
-            tabSlowQueries.Location = new System.Drawing.Point(4, 29);
+            tabSlowQueries.Location = new System.Drawing.Point(4, 25);
             tabSlowQueries.Name = "tabSlowQueries";
             tabSlowQueries.Padding = new System.Windows.Forms.Padding(3);
-            tabSlowQueries.Size = new System.Drawing.Size(192, 67);
+            tabSlowQueries.Size = new System.Drawing.Size(1631, 1246);
             tabSlowQueries.TabIndex = 18;
             tabSlowQueries.Text = "Slow Queries";
             tabSlowQueries.UseVisualStyleBackColor = true;
@@ -1553,16 +1555,16 @@ namespace DBADashGUI
             slowQueries1.Location = new System.Drawing.Point(3, 3);
             slowQueries1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             slowQueries1.Name = "slowQueries1";
-            slowQueries1.Size = new System.Drawing.Size(186, 61);
+            slowQueries1.Size = new System.Drawing.Size(1625, 1240);
             slowQueries1.TabIndex = 0;
             // 
             // tabTraceFlags
             // 
             tabTraceFlags.Controls.Add(traceFlagHistory1);
-            tabTraceFlags.Location = new System.Drawing.Point(4, 29);
+            tabTraceFlags.Location = new System.Drawing.Point(4, 25);
             tabTraceFlags.Name = "tabTraceFlags";
             tabTraceFlags.Padding = new System.Windows.Forms.Padding(3);
-            tabTraceFlags.Size = new System.Drawing.Size(192, 67);
+            tabTraceFlags.Size = new System.Drawing.Size(1631, 1246);
             tabTraceFlags.TabIndex = 19;
             tabTraceFlags.Text = "Trace Flags";
             tabTraceFlags.UseVisualStyleBackColor = true;
@@ -1573,7 +1575,7 @@ namespace DBADashGUI
             traceFlagHistory1.Location = new System.Drawing.Point(3, 3);
             traceFlagHistory1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             traceFlagHistory1.Name = "traceFlagHistory1";
-            traceFlagHistory1.Size = new System.Drawing.Size(186, 61);
+            traceFlagHistory1.Size = new System.Drawing.Size(1625, 1240);
             traceFlagHistory1.TabIndex = 0;
             // 
             // tabAlerts
@@ -1600,10 +1602,10 @@ namespace DBADashGUI
             // tabDrivers
             // 
             tabDrivers.Controls.Add(drivers1);
-            tabDrivers.Location = new System.Drawing.Point(4, 29);
+            tabDrivers.Location = new System.Drawing.Point(4, 25);
             tabDrivers.Name = "tabDrivers";
             tabDrivers.Padding = new System.Windows.Forms.Padding(3);
-            tabDrivers.Size = new System.Drawing.Size(192, 67);
+            tabDrivers.Size = new System.Drawing.Size(1631, 1246);
             tabDrivers.TabIndex = 21;
             tabDrivers.Text = "Drivers";
             tabDrivers.UseVisualStyleBackColor = true;
@@ -1614,16 +1616,16 @@ namespace DBADashGUI
             drivers1.Location = new System.Drawing.Point(3, 3);
             drivers1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             drivers1.Name = "drivers1";
-            drivers1.Size = new System.Drawing.Size(186, 61);
+            drivers1.Size = new System.Drawing.Size(1625, 1240);
             drivers1.TabIndex = 0;
             // 
             // tabDBSpace
             // 
             tabDBSpace.Controls.Add(spaceTracking1);
-            tabDBSpace.Location = new System.Drawing.Point(4, 29);
+            tabDBSpace.Location = new System.Drawing.Point(4, 25);
             tabDBSpace.Name = "tabDBSpace";
             tabDBSpace.Padding = new System.Windows.Forms.Padding(3);
-            tabDBSpace.Size = new System.Drawing.Size(192, 67);
+            tabDBSpace.Size = new System.Drawing.Size(1631, 1246);
             tabDBSpace.TabIndex = 22;
             tabDBSpace.Text = "DB Space";
             tabDBSpace.UseVisualStyleBackColor = true;
@@ -1634,16 +1636,16 @@ namespace DBADashGUI
             spaceTracking1.Location = new System.Drawing.Point(3, 3);
             spaceTracking1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             spaceTracking1.Name = "spaceTracking1";
-            spaceTracking1.Size = new System.Drawing.Size(186, 61);
+            spaceTracking1.Size = new System.Drawing.Size(1625, 1240);
             spaceTracking1.TabIndex = 0;
             // 
             // tabAzureSummary
             // 
             tabAzureSummary.Controls.Add(azureSummary1);
-            tabAzureSummary.Location = new System.Drawing.Point(4, 29);
+            tabAzureSummary.Location = new System.Drawing.Point(4, 25);
             tabAzureSummary.Name = "tabAzureSummary";
             tabAzureSummary.Padding = new System.Windows.Forms.Padding(3);
-            tabAzureSummary.Size = new System.Drawing.Size(192, 67);
+            tabAzureSummary.Size = new System.Drawing.Size(1631, 1246);
             tabAzureSummary.TabIndex = 23;
             tabAzureSummary.Text = "Azure Summary";
             tabAzureSummary.UseVisualStyleBackColor = true;
@@ -1654,16 +1656,16 @@ namespace DBADashGUI
             azureSummary1.Location = new System.Drawing.Point(3, 3);
             azureSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             azureSummary1.Name = "azureSummary1";
-            azureSummary1.Size = new System.Drawing.Size(186, 61);
+            azureSummary1.Size = new System.Drawing.Size(1625, 1240);
             azureSummary1.TabIndex = 0;
             // 
             // tabAzureDB
             // 
             tabAzureDB.Controls.Add(azureDBResourceStats1);
-            tabAzureDB.Location = new System.Drawing.Point(4, 29);
+            tabAzureDB.Location = new System.Drawing.Point(4, 25);
             tabAzureDB.Name = "tabAzureDB";
             tabAzureDB.Padding = new System.Windows.Forms.Padding(3);
-            tabAzureDB.Size = new System.Drawing.Size(192, 67);
+            tabAzureDB.Size = new System.Drawing.Size(1631, 1246);
             tabAzureDB.TabIndex = 24;
             tabAzureDB.Text = "Azure DB";
             tabAzureDB.UseVisualStyleBackColor = true;
@@ -1675,16 +1677,16 @@ namespace DBADashGUI
             azureDBResourceStats1.Location = new System.Drawing.Point(3, 3);
             azureDBResourceStats1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             azureDBResourceStats1.Name = "azureDBResourceStats1";
-            azureDBResourceStats1.Size = new System.Drawing.Size(186, 61);
+            azureDBResourceStats1.Size = new System.Drawing.Size(1625, 1240);
             azureDBResourceStats1.TabIndex = 0;
             // 
             // tabServiceObjectives
             // 
             tabServiceObjectives.Controls.Add(azureServiceObjectivesHistory1);
-            tabServiceObjectives.Location = new System.Drawing.Point(4, 29);
+            tabServiceObjectives.Location = new System.Drawing.Point(4, 25);
             tabServiceObjectives.Name = "tabServiceObjectives";
             tabServiceObjectives.Padding = new System.Windows.Forms.Padding(3);
-            tabServiceObjectives.Size = new System.Drawing.Size(192, 67);
+            tabServiceObjectives.Size = new System.Drawing.Size(1631, 1246);
             tabServiceObjectives.TabIndex = 25;
             tabServiceObjectives.Text = "Azure Service Objectives";
             tabServiceObjectives.UseVisualStyleBackColor = true;
@@ -1695,7 +1697,7 @@ namespace DBADashGUI
             azureServiceObjectivesHistory1.Location = new System.Drawing.Point(3, 3);
             azureServiceObjectivesHistory1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             azureServiceObjectivesHistory1.Name = "azureServiceObjectivesHistory1";
-            azureServiceObjectivesHistory1.Size = new System.Drawing.Size(186, 61);
+            azureServiceObjectivesHistory1.Size = new System.Drawing.Size(1625, 1240);
             azureServiceObjectivesHistory1.TabIndex = 0;
             // 
             // tabDBConfiguration
@@ -1721,10 +1723,10 @@ namespace DBADashGUI
             // tabDBOptions
             // 
             tabDBOptions.Controls.Add(dbOptions1);
-            tabDBOptions.Location = new System.Drawing.Point(4, 29);
+            tabDBOptions.Location = new System.Drawing.Point(4, 25);
             tabDBOptions.Name = "tabDBOptions";
             tabDBOptions.Padding = new System.Windows.Forms.Padding(3);
-            tabDBOptions.Size = new System.Drawing.Size(192, 67);
+            tabDBOptions.Size = new System.Drawing.Size(1631, 1246);
             tabDBOptions.TabIndex = 27;
             tabDBOptions.Text = "DB Options";
             tabDBOptions.UseVisualStyleBackColor = true;
@@ -1735,17 +1737,17 @@ namespace DBADashGUI
             dbOptions1.Location = new System.Drawing.Point(3, 3);
             dbOptions1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dbOptions1.Name = "dbOptions1";
-            dbOptions1.Size = new System.Drawing.Size(186, 61);
+            dbOptions1.Size = new System.Drawing.Size(1625, 1240);
             dbOptions1.SummaryMode = false;
             dbOptions1.TabIndex = 0;
             // 
             // tabTempDB
             // 
             tabTempDB.Controls.Add(tempDBConfig1);
-            tabTempDB.Location = new System.Drawing.Point(4, 29);
+            tabTempDB.Location = new System.Drawing.Point(4, 25);
             tabTempDB.Name = "tabTempDB";
             tabTempDB.Padding = new System.Windows.Forms.Padding(3);
-            tabTempDB.Size = new System.Drawing.Size(192, 67);
+            tabTempDB.Size = new System.Drawing.Size(1631, 1246);
             tabTempDB.TabIndex = 28;
             tabTempDB.Text = "TempDB";
             tabTempDB.UseVisualStyleBackColor = true;
@@ -1756,7 +1758,7 @@ namespace DBADashGUI
             tempDBConfig1.Location = new System.Drawing.Point(3, 3);
             tempDBConfig1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             tempDBConfig1.Name = "tempDBConfig1";
-            tempDBConfig1.Size = new System.Drawing.Size(186, 61);
+            tempDBConfig1.Size = new System.Drawing.Size(1625, 1240);
             tempDBConfig1.TabIndex = 0;
             // 
             // tabCustomChecks
@@ -1808,10 +1810,10 @@ namespace DBADashGUI
             // tabObjectExecutionSummary
             // 
             tabObjectExecutionSummary.Controls.Add(objectExecutionSummary1);
-            tabObjectExecutionSummary.Location = new System.Drawing.Point(4, 29);
+            tabObjectExecutionSummary.Location = new System.Drawing.Point(4, 25);
             tabObjectExecutionSummary.Name = "tabObjectExecutionSummary";
             tabObjectExecutionSummary.Padding = new System.Windows.Forms.Padding(3);
-            tabObjectExecutionSummary.Size = new System.Drawing.Size(192, 67);
+            tabObjectExecutionSummary.Size = new System.Drawing.Size(1631, 1246);
             tabObjectExecutionSummary.TabIndex = 31;
             tabObjectExecutionSummary.Text = "Object Execution";
             tabObjectExecutionSummary.UseVisualStyleBackColor = true;
@@ -1822,7 +1824,7 @@ namespace DBADashGUI
             objectExecutionSummary1.Location = new System.Drawing.Point(3, 3);
             objectExecutionSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             objectExecutionSummary1.Name = "objectExecutionSummary1";
-            objectExecutionSummary1.Size = new System.Drawing.Size(186, 61);
+            objectExecutionSummary1.Size = new System.Drawing.Size(1625, 1240);
             objectExecutionSummary1.TabIndex = 0;
             objectExecutionSummary1.Types = "";
             // 
@@ -1871,10 +1873,10 @@ namespace DBADashGUI
             // tabJobDDL
             // 
             tabJobDDL.Controls.Add(jobDDLHistory1);
-            tabJobDDL.Location = new System.Drawing.Point(4, 29);
+            tabJobDDL.Location = new System.Drawing.Point(4, 25);
             tabJobDDL.Name = "tabJobDDL";
             tabJobDDL.Padding = new System.Windows.Forms.Padding(3);
-            tabJobDDL.Size = new System.Drawing.Size(192, 67);
+            tabJobDDL.Size = new System.Drawing.Size(1631, 1246);
             tabJobDDL.TabIndex = 34;
             tabJobDDL.Text = "Job DDL";
             tabJobDDL.UseVisualStyleBackColor = true;
@@ -1885,16 +1887,16 @@ namespace DBADashGUI
             jobDDLHistory1.Location = new System.Drawing.Point(3, 3);
             jobDDLHistory1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             jobDDLHistory1.Name = "jobDDLHistory1";
-            jobDDLHistory1.Size = new System.Drawing.Size(186, 61);
+            jobDDLHistory1.Size = new System.Drawing.Size(1625, 1240);
             jobDDLHistory1.TabIndex = 0;
             // 
             // tabAG
             // 
             tabAG.Controls.Add(ag1);
-            tabAG.Location = new System.Drawing.Point(4, 29);
+            tabAG.Location = new System.Drawing.Point(4, 25);
             tabAG.Name = "tabAG";
             tabAG.Padding = new System.Windows.Forms.Padding(3);
-            tabAG.Size = new System.Drawing.Size(192, 67);
+            tabAG.Size = new System.Drawing.Size(1631, 1246);
             tabAG.TabIndex = 35;
             tabAG.Text = "Availability Groups";
             tabAG.UseVisualStyleBackColor = true;
@@ -1905,7 +1907,7 @@ namespace DBADashGUI
             ag1.Location = new System.Drawing.Point(3, 3);
             ag1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             ag1.Name = "ag1";
-            ag1.Size = new System.Drawing.Size(186, 61);
+            ag1.Size = new System.Drawing.Size(1625, 1240);
             ag1.TabIndex = 0;
             // 
             // tabQS
@@ -1931,10 +1933,10 @@ namespace DBADashGUI
             // tabRG
             // 
             tabRG.Controls.Add(resourceGovernor1);
-            tabRG.Location = new System.Drawing.Point(4, 29);
+            tabRG.Location = new System.Drawing.Point(4, 25);
             tabRG.Name = "tabRG";
             tabRG.Padding = new System.Windows.Forms.Padding(3);
-            tabRG.Size = new System.Drawing.Size(192, 67);
+            tabRG.Size = new System.Drawing.Size(1631, 1246);
             tabRG.TabIndex = 37;
             tabRG.Text = "Resource Governor";
             tabRG.UseVisualStyleBackColor = true;
@@ -1945,16 +1947,16 @@ namespace DBADashGUI
             resourceGovernor1.Location = new System.Drawing.Point(3, 3);
             resourceGovernor1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             resourceGovernor1.Name = "resourceGovernor1";
-            resourceGovernor1.Size = new System.Drawing.Size(186, 61);
+            resourceGovernor1.Size = new System.Drawing.Size(1625, 1240);
             resourceGovernor1.TabIndex = 0;
             // 
             // tabAzureDBesourceGovernance
             // 
             tabAzureDBesourceGovernance.Controls.Add(azureDBResourceGovernance1);
-            tabAzureDBesourceGovernance.Location = new System.Drawing.Point(4, 29);
+            tabAzureDBesourceGovernance.Location = new System.Drawing.Point(4, 25);
             tabAzureDBesourceGovernance.Name = "tabAzureDBesourceGovernance";
             tabAzureDBesourceGovernance.Padding = new System.Windows.Forms.Padding(3);
-            tabAzureDBesourceGovernance.Size = new System.Drawing.Size(192, 67);
+            tabAzureDBesourceGovernance.Size = new System.Drawing.Size(1631, 1246);
             tabAzureDBesourceGovernance.TabIndex = 38;
             tabAzureDBesourceGovernance.Text = "Azure Resource Governance";
             tabAzureDBesourceGovernance.UseVisualStyleBackColor = true;
@@ -1965,16 +1967,16 @@ namespace DBADashGUI
             azureDBResourceGovernance1.Location = new System.Drawing.Point(3, 3);
             azureDBResourceGovernance1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             azureDBResourceGovernance1.Name = "azureDBResourceGovernance1";
-            azureDBResourceGovernance1.Size = new System.Drawing.Size(186, 61);
+            azureDBResourceGovernance1.Size = new System.Drawing.Size(1625, 1240);
             azureDBResourceGovernance1.TabIndex = 0;
             // 
             // tabRunningQueries
             // 
             tabRunningQueries.Controls.Add(runningQueries1);
-            tabRunningQueries.Location = new System.Drawing.Point(4, 29);
+            tabRunningQueries.Location = new System.Drawing.Point(4, 25);
             tabRunningQueries.Name = "tabRunningQueries";
             tabRunningQueries.Padding = new System.Windows.Forms.Padding(3);
-            tabRunningQueries.Size = new System.Drawing.Size(192, 67);
+            tabRunningQueries.Size = new System.Drawing.Size(1631, 1246);
             tabRunningQueries.TabIndex = 39;
             tabRunningQueries.Text = "Running Queries";
             tabRunningQueries.UseVisualStyleBackColor = true;
@@ -1985,16 +1987,16 @@ namespace DBADashGUI
             runningQueries1.Location = new System.Drawing.Point(3, 3);
             runningQueries1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             runningQueries1.Name = "runningQueries1";
-            runningQueries1.Size = new System.Drawing.Size(186, 61);
+            runningQueries1.Size = new System.Drawing.Size(1625, 1240);
             runningQueries1.TabIndex = 0;
             // 
             // tabMemory
             // 
             tabMemory.Controls.Add(memoryUsage1);
-            tabMemory.Location = new System.Drawing.Point(4, 29);
+            tabMemory.Location = new System.Drawing.Point(4, 25);
             tabMemory.Name = "tabMemory";
             tabMemory.Padding = new System.Windows.Forms.Padding(3);
-            tabMemory.Size = new System.Drawing.Size(192, 67);
+            tabMemory.Size = new System.Drawing.Size(1631, 1246);
             tabMemory.TabIndex = 40;
             tabMemory.Text = "Memory";
             tabMemory.UseVisualStyleBackColor = true;
@@ -2005,7 +2007,7 @@ namespace DBADashGUI
             memoryUsage1.Location = new System.Drawing.Point(3, 3);
             memoryUsage1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             memoryUsage1.Name = "memoryUsage1";
-            memoryUsage1.Size = new System.Drawing.Size(186, 61);
+            memoryUsage1.Size = new System.Drawing.Size(1625, 1240);
             memoryUsage1.TabIndex = 0;
             // 
             // tabJobStats
@@ -2033,10 +2035,10 @@ namespace DBADashGUI
             tabDBADash.Controls.Add(lblVersion);
             tabDBADash.Controls.Add(lblSQLMonitoring);
             tabDBADash.Controls.Add(lblDBADash);
-            tabDBADash.Location = new System.Drawing.Point(4, 29);
+            tabDBADash.Location = new System.Drawing.Point(4, 25);
             tabDBADash.Name = "tabDBADash";
             tabDBADash.Padding = new System.Windows.Forms.Padding(3);
-            tabDBADash.Size = new System.Drawing.Size(192, 67);
+            tabDBADash.Size = new System.Drawing.Size(1631, 1246);
             tabDBADash.TabIndex = 42;
             tabDBADash.UseVisualStyleBackColor = true;
             // 
@@ -2046,9 +2048,9 @@ namespace DBADashGUI
             lblVersion.Dock = System.Windows.Forms.DockStyle.Bottom;
             lblVersion.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Italic);
             lblVersion.ForeColor = System.Drawing.Color.White;
-            lblVersion.Location = new System.Drawing.Point(3, 32);
+            lblVersion.Location = new System.Drawing.Point(3, 1211);
             lblVersion.Name = "lblVersion";
-            lblVersion.Size = new System.Drawing.Size(186, 32);
+            lblVersion.Size = new System.Drawing.Size(1625, 32);
             lblVersion.TabIndex = 29;
             lblVersion.Text = "{Version}";
             // 
@@ -2060,7 +2062,7 @@ namespace DBADashGUI
             lblSQLMonitoring.ForeColor = System.Drawing.Color.White;
             lblSQLMonitoring.Location = new System.Drawing.Point(3, 3);
             lblSQLMonitoring.Name = "lblSQLMonitoring";
-            lblSQLMonitoring.Size = new System.Drawing.Size(186, 28);
+            lblSQLMonitoring.Size = new System.Drawing.Size(1625, 28);
             lblSQLMonitoring.TabIndex = 28;
             lblSQLMonitoring.Text = "SQL Server Monitoring";
             lblSQLMonitoring.TextAlign = System.Drawing.ContentAlignment.TopRight;
@@ -2073,7 +2075,7 @@ namespace DBADashGUI
             lblDBADash.ForeColor = System.Drawing.Color.White;
             lblDBADash.Location = new System.Drawing.Point(3, 3);
             lblDBADash.Name = "lblDBADash";
-            lblDBADash.Size = new System.Drawing.Size(186, 61);
+            lblDBADash.Size = new System.Drawing.Size(1625, 1240);
             lblDBADash.TabIndex = 0;
             lblDBADash.Text = "DBA Dash";
             lblDBADash.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -2105,10 +2107,10 @@ namespace DBADashGUI
             // tabOSLoadedModules
             // 
             tabOSLoadedModules.Controls.Add(osLoadedModules1);
-            tabOSLoadedModules.Location = new System.Drawing.Point(4, 29);
+            tabOSLoadedModules.Location = new System.Drawing.Point(4, 25);
             tabOSLoadedModules.Name = "tabOSLoadedModules";
             tabOSLoadedModules.Padding = new System.Windows.Forms.Padding(3);
-            tabOSLoadedModules.Size = new System.Drawing.Size(192, 67);
+            tabOSLoadedModules.Size = new System.Drawing.Size(1631, 1246);
             tabOSLoadedModules.TabIndex = 44;
             tabOSLoadedModules.Text = "OS Loaded Modules";
             tabOSLoadedModules.UseVisualStyleBackColor = true;
@@ -2119,16 +2121,16 @@ namespace DBADashGUI
             osLoadedModules1.Location = new System.Drawing.Point(3, 3);
             osLoadedModules1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             osLoadedModules1.Name = "osLoadedModules1";
-            osLoadedModules1.Size = new System.Drawing.Size(186, 61);
+            osLoadedModules1.Size = new System.Drawing.Size(1625, 1240);
             osLoadedModules1.TabIndex = 0;
             // 
             // tabJobTimeline
             // 
             tabJobTimeline.Controls.Add(jobTimeline1);
-            tabJobTimeline.Location = new System.Drawing.Point(4, 29);
+            tabJobTimeline.Location = new System.Drawing.Point(4, 25);
             tabJobTimeline.Name = "tabJobTimeline";
             tabJobTimeline.Padding = new System.Windows.Forms.Padding(3);
-            tabJobTimeline.Size = new System.Drawing.Size(192, 67);
+            tabJobTimeline.Size = new System.Drawing.Size(1631, 1246);
             tabJobTimeline.TabIndex = 45;
             tabJobTimeline.Text = "Timeline";
             tabJobTimeline.UseVisualStyleBackColor = true;
@@ -2140,16 +2142,16 @@ namespace DBADashGUI
             jobTimeline1.Location = new System.Drawing.Point(3, 3);
             jobTimeline1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             jobTimeline1.Name = "jobTimeline1";
-            jobTimeline1.Size = new System.Drawing.Size(186, 61);
+            jobTimeline1.Size = new System.Drawing.Size(1625, 1240);
             jobTimeline1.TabIndex = 0;
             // 
             // tabDrivePerformance
             // 
             tabDrivePerformance.Controls.Add(drivePerformance1);
-            tabDrivePerformance.Location = new System.Drawing.Point(4, 29);
+            tabDrivePerformance.Location = new System.Drawing.Point(4, 25);
             tabDrivePerformance.Name = "tabDrivePerformance";
             tabDrivePerformance.Padding = new System.Windows.Forms.Padding(3);
-            tabDrivePerformance.Size = new System.Drawing.Size(192, 67);
+            tabDrivePerformance.Size = new System.Drawing.Size(1631, 1246);
             tabDrivePerformance.TabIndex = 46;
             tabDrivePerformance.Text = "Drive Performance";
             tabDrivePerformance.UseVisualStyleBackColor = true;
@@ -2160,16 +2162,16 @@ namespace DBADashGUI
             drivePerformance1.Location = new System.Drawing.Point(3, 3);
             drivePerformance1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             drivePerformance1.Name = "drivePerformance1";
-            drivePerformance1.Size = new System.Drawing.Size(186, 61);
+            drivePerformance1.Size = new System.Drawing.Size(1625, 1240);
             drivePerformance1.TabIndex = 0;
             // 
             // tabRunningJobs
             // 
             tabRunningJobs.Controls.Add(runningJobs1);
-            tabRunningJobs.Location = new System.Drawing.Point(4, 29);
+            tabRunningJobs.Location = new System.Drawing.Point(4, 25);
             tabRunningJobs.Name = "tabRunningJobs";
             tabRunningJobs.Padding = new System.Windows.Forms.Padding(3);
-            tabRunningJobs.Size = new System.Drawing.Size(192, 67);
+            tabRunningJobs.Size = new System.Drawing.Size(1631, 1246);
             tabRunningJobs.TabIndex = 47;
             tabRunningJobs.Text = "Running Jobs";
             tabRunningJobs.UseVisualStyleBackColor = true;
@@ -2181,16 +2183,16 @@ namespace DBADashGUI
             runningJobs1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             runningJobs1.MinimumDuration = 60;
             runningJobs1.Name = "runningJobs1";
-            runningJobs1.Size = new System.Drawing.Size(186, 61);
+            runningJobs1.Size = new System.Drawing.Size(1625, 1240);
             runningJobs1.TabIndex = 0;
             // 
             // tabCustomReport
             // 
             tabCustomReport.Controls.Add(customReportView1);
-            tabCustomReport.Location = new System.Drawing.Point(4, 29);
+            tabCustomReport.Location = new System.Drawing.Point(4, 25);
             tabCustomReport.Name = "tabCustomReport";
             tabCustomReport.Padding = new System.Windows.Forms.Padding(3);
-            tabCustomReport.Size = new System.Drawing.Size(192, 67);
+            tabCustomReport.Size = new System.Drawing.Size(1631, 1246);
             tabCustomReport.TabIndex = 48;
             tabCustomReport.Text = "Report";
             tabCustomReport.UseVisualStyleBackColor = true;
@@ -2203,7 +2205,7 @@ namespace DBADashGUI
             customReportView1.Location = new System.Drawing.Point(3, 3);
             customReportView1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             customReportView1.Name = "customReportView1";
-            customReportView1.Size = new System.Drawing.Size(186, 61);
+            customReportView1.Size = new System.Drawing.Size(1625, 1240);
             customReportView1.TabIndex = 0;
             // 
             // tabTableSize
@@ -2228,10 +2230,10 @@ namespace DBADashGUI
             // tabTopQueries
             // 
             tabTopQueries.Controls.Add(queryStoreTop);
-            tabTopQueries.Location = new System.Drawing.Point(4, 29);
+            tabTopQueries.Location = new System.Drawing.Point(4, 25);
             tabTopQueries.Name = "tabTopQueries";
             tabTopQueries.Padding = new System.Windows.Forms.Padding(3);
-            tabTopQueries.Size = new System.Drawing.Size(192, 67);
+            tabTopQueries.Size = new System.Drawing.Size(1631, 1246);
             tabTopQueries.TabIndex = 50;
             tabTopQueries.Text = "Top Queries (Query Store)";
             tabTopQueries.UseVisualStyleBackColor = true;
@@ -2241,16 +2243,16 @@ namespace DBADashGUI
             queryStoreTop.Dock = System.Windows.Forms.DockStyle.Fill;
             queryStoreTop.Location = new System.Drawing.Point(3, 3);
             queryStoreTop.Name = "queryStoreTop";
-            queryStoreTop.Size = new System.Drawing.Size(186, 61);
+            queryStoreTop.Size = new System.Drawing.Size(1625, 1240);
             queryStoreTop.TabIndex = 0;
             // 
             // tabQueryStoreForcedPlans
             // 
             tabQueryStoreForcedPlans.Controls.Add(queryStoreForcedPlans1);
-            tabQueryStoreForcedPlans.Location = new System.Drawing.Point(4, 29);
+            tabQueryStoreForcedPlans.Location = new System.Drawing.Point(4, 25);
             tabQueryStoreForcedPlans.Name = "tabQueryStoreForcedPlans";
             tabQueryStoreForcedPlans.Padding = new System.Windows.Forms.Padding(3);
-            tabQueryStoreForcedPlans.Size = new System.Drawing.Size(192, 67);
+            tabQueryStoreForcedPlans.Size = new System.Drawing.Size(1631, 1246);
             tabQueryStoreForcedPlans.TabIndex = 51;
             tabQueryStoreForcedPlans.Text = "Forced Plans (Query Store)";
             tabQueryStoreForcedPlans.UseVisualStyleBackColor = true;
@@ -2260,7 +2262,7 @@ namespace DBADashGUI
             queryStoreForcedPlans1.Dock = System.Windows.Forms.DockStyle.Fill;
             queryStoreForcedPlans1.Location = new System.Drawing.Point(3, 3);
             queryStoreForcedPlans1.Name = "queryStoreForcedPlans1";
-            queryStoreForcedPlans1.Size = new System.Drawing.Size(186, 61);
+            queryStoreForcedPlans1.Size = new System.Drawing.Size(1625, 1240);
             queryStoreForcedPlans1.TabIndex = 0;
             // 
             // tabServerServices

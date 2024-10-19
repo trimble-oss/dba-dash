@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.IO.Compression;
 using System.IO;
+using Microsoft.Data.SqlClient;
 
 namespace DBADash
 {
@@ -101,5 +102,7 @@ namespace DBADash
         {
             return (url.EndsWith('/') ? url : url + '/') + appendString;
         }
+
+        public static SqlParameter[] GetParameters(this List<CustomSqlParameter> parameters) => parameters.Where(p => !p.UseDefaultValue).Select(p => p.Param).ToArray();
     }
 }

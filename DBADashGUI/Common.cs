@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using DBADashGUI.SchemaCompare;
 using System.Xml.Linq;
 using System.Xml;
+using DBADash;
 
 namespace DBADashGUI
 {
@@ -247,8 +248,8 @@ namespace DBADashGUI
                         else
                         {
                             sheet.Cell(rowIndex, colIndex).SetValue(replaceInvalidChars
-                                ? Convert.ToString(cell.FormattedValue).StripInvalidXmlChars()
-                                : Convert.ToString(cell.FormattedValue));
+                                ? Convert.ToString(cell.FormattedValue).StripInvalidXmlChars().Truncate(32767, true)
+                                : Convert.ToString(cell.FormattedValue).Truncate(32767, true));
                         }
                     }
                     catch (Exception ex)
@@ -416,21 +417,57 @@ namespace DBADashGUI
             }
         }
 
-        public static void ShowQueryPlan(string plan,string fileName=null)
+        public static void ShowQueryPlan(string plan, string fileName = null)
         {
             if (!IsValidExecutionPlan(plan))
             {
                 throw new Exception("Invalid execution plan");
             }
-            var path = Path.GetTempFileName() + ".sqlplan";
-            if(!string.IsNullOrEmpty(fileName))
-            {
-                path = Path.GetDirectoryName(path) + "\\" + fileName + ".sqlplan";
-            }
+            ShowFileContent(plan, fileName, ".sqlplan");
+        }
 
-            File.WriteAllText(path, plan);
-            var psi = new ProcessStartInfo(path) { UseShellExecute = true };
-            Process.Start(psi);
+        public static void ShowDeadlockGraph(string dlGraph, string fileName = null)
+        {
+            if (!IsValidDeadlockGraph(dlGraph))
+            {
+                throw new Exception("Invalid execution plan");
+            }
+            ShowFileContent(dlGraph, fileName, ".xdl");
+        }
+
+        private static void ShowFileContent(string content, string fileName, string extension)
+        {
+            try
+            {
+                var path = GetFilePath(fileName, extension);
+                File.WriteAllText(path, content);
+                var psi = new ProcessStartInfo(path) { UseShellExecute = true };
+                using var process = Process.Start(psi);
+            }
+            catch (Exception ex)
+            {
+                // Log or handle exceptions as needed.
+                throw new InvalidOperationException($"Failed to show content: {ex.Message}", ex);
+            }
+        }
+
+        private static string GetFilePath(string fileName, string extension)
+        {
+            // Ensure the extension is correctly formatted.
+            extension = extension.StartsWith(".") ? extension : $".{extension}";
+
+            var tempFileName = string.IsNullOrEmpty(fileName) ? Path.GetTempFileName() : null;
+
+            // Determine the directory based on whether a temp file was needed.
+            var directory = Path.GetDirectoryName(tempFileName ?? string.Empty) ?? Path.GetTempPath();
+
+            // If fileName is not provided, use the tempFileName with the correct extension.
+            // Otherwise, check if fileName ends with the extension, and append the extension if necessary.
+            fileName = string.IsNullOrEmpty(fileName)
+                ? $"{Path.GetFileNameWithoutExtension(tempFileName)}{extension}"
+                : fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase) ? fileName : $"{fileName}{extension}";
+
+            return Path.Combine(directory, fileName);
         }
 
         /// <summary>
@@ -447,6 +484,23 @@ namespace DBADashGUI
 
                 // Basic validation check :The root node is ShowPlanXML
                 return doc.Root is { Name.LocalName: "ShowPlanXML" };
+            }
+            catch (XmlException)
+            {
+                // The XML is not well-formed
+                return false;
+            }
+        }
+
+        public static bool IsValidDeadlockGraph(string xmlString)
+        {
+            if (string.IsNullOrEmpty(xmlString)) return false;
+            try
+            {
+                var doc = XDocument.Parse(xmlString);
+
+                // Basic validation check :The root node is ShowPlanXML
+                return doc.Root is { Name.LocalName: "deadlock" };
             }
             catch (XmlException)
             {

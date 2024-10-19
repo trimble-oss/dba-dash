@@ -569,7 +569,8 @@ namespace DBADash
                     AgentServiceName = rInstance.Table.Columns.Contains("AgentServiceName") ? (string)rInstance["AgentServiceName"] : "{DBADashService}",
                     ServiceSQSQueueUrl = rInstance.Table.Columns.Contains("ServiceSQSQueueUrl") && rInstance["ServiceSQSQueueUrl"] != DBNull.Value ? (string)rInstance["ServiceSQSQueueUrl"] : null,
                     S3Path = rInstance.Table.Columns.Contains("S3Path") && rInstance["S3Path"] != DBNull.Value ? (string)rInstance["S3Path"] : null,
-                    MessagingEnabled = rInstance.Table.Columns.Contains("MessagingEnabled") && rInstance["MessagingEnabled"] != DBNull.Value && (bool)rInstance["MessagingEnabled"]
+                    MessagingEnabled = rInstance.Table.Columns.Contains("MessagingEnabled") && rInstance["MessagingEnabled"] != DBNull.Value && (bool)rInstance["MessagingEnabled"],
+                    AllowedScripts = rInstance.Table.Columns.Contains("AllowedScripts") && rInstance["AllowedScripts"] != DBNull.Value ? new HashSet<string>(((string)rInstance["AllowedScripts"]).Split(',').Select(part => part.Trim())) : new HashSet<string>(),
                 };
                 var collectAgentID = collectAgent.Equals(importAgent) ? importAgentID : collectAgent.GetDBADashAgentID(connectionString);
 

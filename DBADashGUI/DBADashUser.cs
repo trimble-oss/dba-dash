@@ -23,6 +23,8 @@ namespace DBADashGUI
 
         public static bool IsAdmin;
 
+        public static bool CommunityScripts;
+
         public static TimeZoneInfo UserTimeZone = TimeZoneInfo.Local;
 
         public static HashSet<string> Roles;
@@ -66,6 +68,7 @@ namespace DBADashGUI
             {
                 Roles.Add(rdr["name"].ToString());
             }
+
             rdr.Close();
             var id = Convert.ToInt32(pUserID.Value);
             if (id > 0)
@@ -75,6 +78,7 @@ namespace DBADashGUI
                 AllowMessaging = (bool)pAllowMessaging.Value;
                 AllowPlanForcing = (bool)pAllowPlanForcing.Value;
                 IsAdmin = (bool)pIsAdmin.Value;
+                CommunityScripts = (Roles.Contains("CommunityScripts") && AllowMessaging) || IsAdmin;
                 if (pTZ.Value != DBNull.Value)
                 {
                     var tzID = (string)pTZ.Value;

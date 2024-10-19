@@ -2,6 +2,7 @@
 using LiveCharts.WinForms;
 using System.Runtime.Versioning;
 using System.Windows.Media;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
 using Button = System.Windows.Forms.Button;
 using ComboBox = System.Windows.Forms.ComboBox;
 using Control = System.Windows.Forms.Control;
@@ -120,6 +121,10 @@ namespace DBADashGUI.Theme
             else
             {
                 menu.Renderer = theme is DarkTheme ? new DarkModeMenuRenderer() : new LightModeMenuRenderer();
+            }
+            foreach (var lbl in menu.Items.OfType<ToolStripStatusLabel>().Where(lbl => lbl.IsLink))
+            {
+                lbl.LinkColor = theme.LinkColor;
             }
         }
 

@@ -569,6 +569,7 @@ namespace DBADashGUI
             nodesToAdd.Add(jobs);
             instanceNode.Nodes.AddRange(nodesToAdd.ToArray());
             instanceNode.AddReportsFolder(customReports.InstanceLevelReports);
+            instanceNode.AddCommunityTools();
         }
 
         private static void ExpandStorage(SQLTreeItem storage)
@@ -802,6 +803,11 @@ namespace DBADashGUI
             else if (n.Type == SQLTreeItem.TreeType.RecycleBin)
             {
                 allowedTabs.Add(tabDeletedInstances);
+            }
+            else if (n.Type == SQLTreeItem.TreeType.CommunityTool)
+            {
+                tabCustomReport.Text = n.Text;
+                allowedTabs.Add(tabCustomReport);
             }
 
             if (n.ObjectID > 0)

@@ -9,10 +9,14 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Navigation;
 using DBADash;
 using DBADashGUI.Interface;
+using DBADash.Messaging;
+using DBADashGUI.CommunityTools;
+using DBADashGUI.Messaging;
 
 namespace DBADashGUI.CustomReports
 {
@@ -26,13 +30,18 @@ namespace DBADashGUI.CustomReports
         private readonly ToolStripMenuItem filterLike = new("LIKE", Properties.Resources.FilteredTextBox_16x);
         private int clickedColumnIndex = -1;
         private int clickedRowIndex = -1;
-        private DataSet reportDS;
+        protected DataSet reportDS;
         private int selectedTableIndex;
         private bool doAutoSize = true;
         private bool suppressCboResultsIndexChanged;
         public DataGridView Grid => dgv;
         public ToolStripStatusLabel StatusLabel => lblDescription;
         public StatusStrip StatusStrip => statusStrip1;
+        private DBADashContext context;
+        private CustomReport report;
+        private List<CustomSqlParameter> customParams = new();
+
+        private bool AutoLoad => report is not DirectExecutionReport;
 
         public CustomReportView()
         {
@@ -125,6 +134,12 @@ namespace DBADashGUI.CustomReports
             var exclude = (bool)((ToolStripMenuItem)sender).Tag;
             var value = dgv.Rows[clickedRowIndex].Cells[clickedColumnIndex].Value;
             var colName = dgv.Columns[clickedColumnIndex].DataPropertyName;
+            if (value.GetType() == typeof(byte[]))
+            {
+                MessageBox.Show("Filter by value is not supported for binary data", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             colName = EscapeColumnName(colName);
             var filterValue = FormatFilterValue(value, exclude);
 
@@ -399,7 +414,7 @@ namespace DBADashGUI.CustomReports
         /// <summary>
         /// Results combobox allows user to select which result set to display if the report returns multiple result sets
         /// </summary>
-        private void LoadResultsCombo()
+        protected void LoadResultsCombo()
         {
             suppressCboResultsIndexChanged = true;
             for (var i = 0; i < reportDS.Tables.Count; i++)
@@ -434,11 +449,43 @@ namespace DBADashGUI.CustomReports
                     MessageBoxIcon.Warning);
                 return;
             }
+            if (report is DirectExecutionReport)
+            {
+                RefreshDataMessage();
+            }
+            else
+            {
+                RefreshDataRepository();
+            }
+        }
+
+        private void StartTimer()
+        {
+            ResetTimer();
+            timer1.Start();
+        }
+
+        private void StopTimer()
+        {
+            timer1.Stop();
+            UpdateTimer();
+        }
+
+        private void ResetTimer()
+        {
+            timer1.Stop();
+            TimerStart = DateTime.Now;
+            lblTimer.Text = "00:00:00";
+        }
+
+        public void RefreshDataRepository()
+        {
             if (this.InvokeRequired)
             {
                 this.Invoke(new Action(RefreshData));
                 return;
             }
+            StartTimer();
             try
             {
                 ShowParamPrompt(false); // Show grid
@@ -463,6 +510,90 @@ namespace DBADashGUI.CustomReports
                 MessageBox.Show("Error running report:" + ex.Message, "Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
+            StopTimer();
+        }
+
+        private bool IsMessageInProgress;
+        private Guid CurrentMessageGroup;
+
+        public void RefreshDataMessage()
+        {
+            if (IsMessageInProgress)
+            {
+                SetStatus("A message is already in progress.  Please wait for the current message to complete before running another.", "Warning", DashColors.Warning);
+                return;
+            }
+            var msg = new ProcedureExecutionMessage
+            {
+                CommandName = Enum.Parse<ProcedureExecutionMessage.CommandNames>(report.ProcedureName),
+                Parameters = customParams,
+                ConnectionID = context.ConnectionID,
+                CollectAgent = context.CollectAgent,
+                ImportAgent = context.ImportAgent,
+                Lifetime = Config.DefaultCommandTimeout
+            };
+            doAutoSize = true;
+            SetStatus("Message sent", "Running", DashColors.Information);
+            IsMessageInProgress = true;
+            CurrentMessageGroup = Guid.NewGuid();
+            StartTimer();
+            Task.Run(() => MessagingHelper.SendMessageAndProcessReply(msg, context, SetStatus, ProcessCompletedMessage,
+                CurrentMessageGroup));
+        }
+
+        private Task ProcessCompletedMessage(ResponseMessage reply, Guid messageGroup)
+        {
+            if (CurrentMessageGroup != messageGroup) // Context has changed
+            {
+                if (reply.Type == ResponseMessage.ResponseTypes.Progress) return Task.CompletedTask;
+                IsMessageInProgress = false;
+                SetStatus("Ready", "", DashColors.Information);
+            }
+            else if (reply.Type == ResponseMessage.ResponseTypes.Success && reply.Data is { Tables.Count: > 0 })
+            {
+                StopTimer();
+                IsMessageInProgress = false;
+                try
+                {
+                    reportDS = reply.Data;
+                    this.Invoke(LoadResultsCombo);
+
+                    if (reportDS.Tables.Count > 0)
+                    {
+                        this.Invoke(() =>
+                        {
+                            ShowTable(true);
+                        });
+                        SetStatus("Completed", "Success", DashColors.Success);
+                    }
+                    else
+                    {
+                        SetStatus("Report didn't return a result set", "Warning", System.Drawing.Color.Orange);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error running report:" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else if (reply.Type == ResponseMessage.ResponseTypes.Failure)
+            {
+                StopTimer();
+                SetStatus(reply.Message, reply.Exception?.ToString(), DashColors.Fail);
+                IsMessageInProgress = false;
+            }
+            else if (reply.Type == ResponseMessage.ResponseTypes.Success)
+            {
+                StopTimer();
+                SetStatus(reply.Message, null, DashColors.Success);
+                IsMessageInProgress = false;
+            }
+            else if (reply.Type == ResponseMessage.ResponseTypes.Progress)
+            {
+                SetStatus(reply.Message, null, DashColors.Information);
+            }
+
+            return Task.CompletedTask;
         }
 
         public void SetStatus(string message, string tooltip, Color color)
@@ -477,8 +608,12 @@ namespace DBADashGUI.CustomReports
             });
         }
 
-        private void ShowTable()
+        protected void ShowTable(bool reset = false)
         {
+            if (reset)
+            {
+                dgv.Columns.Clear();
+            }
             if (reportDS.Tables.Count == 0) return;
             if (selectedTableIndex >= reportDS.Tables.Count)
             {
@@ -524,7 +659,7 @@ namespace DBADashGUI.CustomReports
         /// Run the query to get the data for the user custom report
         /// </summary>
         /// <returns></returns>
-        private DataSet GetReportData()
+        protected virtual DataSet GetReportData()
         {
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand(report.QualifiedProcedureName, cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
@@ -575,10 +710,6 @@ namespace DBADashGUI.CustomReports
             return ds;
         }
 
-        private DBADashContext context;
-        private CustomReport report;
-        private List<CustomSqlParameter> customParams = new();
-
         public void SetContext(DBADashContext _context)
         {
             SetContext(_context, null);
@@ -591,6 +722,11 @@ namespace DBADashGUI.CustomReports
                 this.Invoke(new Action(() => SetContext(_context, sqlParams)));
                 return;
             }
+
+            cboResults.Visible = false;
+            lblSelectResults.Visible = false;
+            ResetTimer();
+            CurrentMessageGroup = Guid.Empty;
             doAutoSize = true;
             selectedTableIndex = 0;
             dgv.Columns.Clear();
@@ -599,8 +735,8 @@ namespace DBADashGUI.CustomReports
             customParams = sqlParams ?? report.GetCustomSqlParameters();
             tsParams.Enabled = customParams.Count > 0;
             tsConfigure.Visible = report.CanEditReport;
-            lblDescription.Text = report.Description;
-            statusStrip1.Visible = !string.IsNullOrEmpty(report.Description);
+            SetStatus(report.Description, report.Description, DBADashUser.SelectedTheme.ForegroundColor);
+            statusStrip1.Visible = !string.IsNullOrEmpty(report.Description) || !string.IsNullOrEmpty(report.URL);
             lblDescription.Visible = !string.IsNullOrEmpty(report.Description);
             if (report.DeserializationException != null)
             {
@@ -610,10 +746,17 @@ namespace DBADashGUI.CustomReports
                 report.DeserializationException = null;// Display the message once
             }
             editPickersToolStripMenuItem.Enabled = report.UserParams.Any();
+            tsRefresh.Checked = report is not DirectExecutionReport;
+            tsExecute.Visible = report is DirectExecutionReport;
+            lblURL.Text = report.URL;
+            lblURL.Visible = !string.IsNullOrEmpty(report.URL);
             InitializeContextMenu();
             AddPickers();
             SetTriggerCollectionVisibility();
-            RefreshData();
+            if (AutoLoad)
+            {
+                RefreshData();
+            }
         }
 
         public void SetTriggerCollectionVisibility() => tsTrigger.Visible = report.TriggerCollectionTypes.Count > 0 && context.CanMessage;
@@ -689,8 +832,10 @@ namespace DBADashGUI.CustomReports
                     item.Checked = item == menu;
                 }
             }
-
-            RefreshData();
+            if (AutoLoad)
+            {
+                RefreshData();
+            }
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -744,12 +889,11 @@ namespace DBADashGUI.CustomReports
         {
             var frm = new ReportParams() { Params = customParams };
             frm.ShowDialog();
-            if (frm.DialogResult == DialogResult.OK)
-            {
-                customParams = frm.Params;
-                AddPickers();// Update checks on picker items
-            }
-            RefreshData();
+            if (frm.DialogResult != DialogResult.OK) return;
+            customParams = frm.Params;
+            AddPickers();// Update checks on picker items
+            if (AutoLoad)
+                RefreshData();
         }
 
         private void TsCols_Click(object sender, EventArgs e)
@@ -781,6 +925,7 @@ namespace DBADashGUI.CustomReports
             if (suppressCboResultsIndexChanged) return;
             selectedTableIndex = cboResults.SelectedIndex;
             dgv.Columns.Clear();
+            doAutoSize = true;
             ShowTable();
         }
 
@@ -941,6 +1086,34 @@ namespace DBADashGUI.CustomReports
             pickers.ShowDialog();
             if (pickers.DialogResult != DialogResult.OK) return;
             AddPickers();
+        }
+
+        private void URL_Click(object sender, EventArgs e)
+        {
+            CommonShared.OpenURL(report.URL);
+        }
+
+        private void Dgv_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (dgv.Columns[e.ColumnIndex].ValueType == typeof(byte[]) && e.Value != null && e.Value != DBNull.Value)
+            {
+                byte[] bytes = (byte[])e.Value;
+                // Convert the byte array to a hexadecimal string
+                e.Value = "0x" + BitConverter.ToString(bytes).Replace("-", string.Empty);
+                e.FormattingApplied = true; // Indicate that formatting was applied
+            }
+        }
+
+        private DateTime TimerStart;
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            UpdateTimer();
+        }
+
+        private void UpdateTimer()
+        {
+            lblTimer.Text = (DateTime.Now - TimerStart).ToString(@"hh\:mm\:ss");
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
+using DBADash;
 
 namespace DBADashGUI.CustomReports
 {
@@ -40,7 +41,7 @@ namespace DBADashGUI.CustomReports
 
             dgv.CellBeginEdit += Dgv_CellBeginEdit;
             dgv.CellEndEdit += Dgv_CellEndEdit;
-            dgv.Controls.Add(dtp); 
+            dgv.Controls.Add(dtp);
             dtp.TextChanged += Dtp_OnTextChange;
             dgv.ColumnWidthChanged += Dgv_ColumnWidthChanged;
             dgv.RowsAdded += Dgv_RowsAdded;
