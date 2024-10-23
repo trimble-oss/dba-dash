@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Serilog;
@@ -33,7 +35,7 @@ namespace DBADash.Messaging
             sp_HumanEvents
         }
 
-        public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle)
+        public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
             ThrowIfExpired();
             if (cfg.AllowedScripts == null || (!cfg.AllowedScripts.Split(",").Contains(CommandName.ToString()) && cfg.AllowedScripts != "*"))
@@ -43,9 +45,10 @@ namespace DBADash.Messaging
             }
             try
             {
-                using var op = Operation.Begin("Running {CommandName} on {instance} triggered from message {handle}",
+                using var op = Operation.Begin("Running {CommandName} on {instance} triggered from message {id} with handle {handle}",
                     CommandName,
                     ConnectionID,
+                    Id,
                     handle);
                 var src = cfg.GetSourceConnection(ConnectionID);
 
@@ -55,14 +58,24 @@ namespace DBADash.Messaging
                     cmd.Parameters.AddRange(Parameters.GetParameters());
                 var da = new SqlDataAdapter(cmd);
                 var ds = new DataSet();
-                da.Fill(ds);
-
+                await using var registration = cancellationToken.Register(() =>
+                {
+                    cmd.Cancel();
+                });
+                try
+                {
+                    da.Fill(ds);
+                }
+                finally
+                {
+                    registration.Unregister();
+                }
                 op.Complete();
                 return ds;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error running {CommandName} on {instance} from message {handle}", CommandName, ConnectionID, handle);
+                Log.Error(ex, "Error running {CommandName} on {instance} from message {id} with handle {handle}", CommandName, ConnectionID, Id, handle);
                 throw;
             }
         }

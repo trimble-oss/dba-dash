@@ -13,17 +13,17 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Numerics;
 using System.Security.AccessControl;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace DBADash.Messaging
 {
     public class QueryStoreForcedPlansMessage : MessageBase
     {
-
         public string ConnectionID { get; set; }
 
         public string DatabaseName { get; set; }
 
-        public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle)
+        public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
             ThrowIfExpired();
             using var op = Operation.Begin("Query store forced plans {database} on {instance} triggered from message {handle}",
@@ -42,7 +42,7 @@ namespace DBADash.Messaging
                 {
                     databases = new List<string> { DatabaseName };
                 }
-              
+
                 if (databases.Count == 0)
                 {
                     throw new Exception("No databases found with Query Store enabled");
@@ -62,7 +62,6 @@ namespace DBADash.Messaging
                 Log.Error(ex, "Error processing query store message");
                 throw;
             }
-
         }
 
         private async Task<DataTable> GetForcedPlans(string connectionString, string db)
@@ -76,7 +75,5 @@ namespace DBADash.Messaging
             da.Fill(dt);
             return dt;
         }
-
-
     }
 }

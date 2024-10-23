@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -11,7 +12,7 @@ using Serilog;
 
 namespace DBADash.Messaging
 {
-    public class QueryStorePlanForcingMessage:MessageBase
+    public class QueryStorePlanForcingMessage : MessageBase
     {
         public string ConnectionID { get; set; }
 
@@ -29,7 +30,7 @@ namespace DBADash.Messaging
 
         public PlanForcingOperations PlanForcingOperation { get; set; }
 
-        public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle)
+        public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
             ThrowIfExpired();
             if (!cfg.AllowPlanForcing)
@@ -56,9 +57,11 @@ namespace DBADash.Messaging
                     case PlanForcingOperations.Force:
                         await ForcePlan(builder.ConnectionString, QueryID, PlanID);
                         break;
+
                     case PlanForcingOperations.Unforce:
                         await UnforcePlan(builder.ConnectionString, QueryID, PlanID);
                         break;
+
                     default:
                         throw new Exception($"Plan forcing operation {PlanForcingOperation} is not supported");
                 }
@@ -67,7 +70,7 @@ namespace DBADash.Messaging
             }
             catch (Exception ex)
             {
-                Log.Error(ex,"Error with {type} plan operation",PlanForcingOperation.ToString());
+                Log.Error(ex, "Error with {type} plan operation", PlanForcingOperation.ToString());
                 throw;
             }
         }
@@ -75,7 +78,7 @@ namespace DBADash.Messaging
         public static async Task ForcePlan(string connectionString, long queryID, long planID)
         {
             await using var cn = new SqlConnection(connectionString);
-            await using var cmd = new SqlCommand(@"sys.sp_query_store_force_plan", cn) {CommandType = CommandType.StoredProcedure};
+            await using var cmd = new SqlCommand(@"sys.sp_query_store_force_plan", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@query_id", queryID);
             cmd.Parameters.AddWithValue("@plan_id", planID);
             await cn.OpenAsync();
@@ -85,7 +88,7 @@ namespace DBADash.Messaging
         public static async Task UnforcePlan(string connectionString, long queryID, long planID)
         {
             await using var cn = new SqlConnection(connectionString);
-            await using var cmd = new SqlCommand(@"sys.sp_query_store_unforce_plan", cn) {CommandType = CommandType.StoredProcedure};
+            await using var cmd = new SqlCommand(@"sys.sp_query_store_unforce_plan", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@query_id", queryID);
             cmd.Parameters.AddWithValue("@plan_id", planID);
             await cn.OpenAsync();

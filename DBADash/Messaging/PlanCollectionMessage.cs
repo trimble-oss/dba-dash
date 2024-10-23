@@ -3,6 +3,7 @@ using Serilog;
 using SerilogTimings;
 using System;
 using System.Data;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DBADash.Messaging
@@ -14,7 +15,7 @@ namespace DBADash.Messaging
 
         public long PlanID { get; set; }
 
-        public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle)
+        public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
             if (IsExpired)
             {
@@ -22,7 +23,7 @@ namespace DBADash.Messaging
             }
 
             using var op = Operation.Begin(
-                "Get Plan ID {id} from {database} on {instance} triggered from message {handle}",
+                "Get Plan Id {id} from {database} on {instance} triggered from message {handle}",
                 PlanID,
                 DatabaseName,
                 ConnectionID,
@@ -35,13 +36,15 @@ namespace DBADash.Messaging
                     InitialCatalog = DatabaseName
                 };
                 await using var cn = new SqlConnection(builder.ConnectionString);
-                await cn.OpenAsync();
+                await cn.OpenAsync(cancellationToken);
                 await using var cmd =
                     new SqlCommand("SELECT plan_id,query_plan FROM sys.query_store_plan WHERE plan_id = @plan_id", cn);
                 cmd.Parameters.AddWithValue("@plan_id", PlanID);
-                using var da = new SqlDataAdapter(cmd);
                 var ds = new DataSet();
-                da.Fill(ds);
+                await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+                var dataTable = new DataTable();
+                dataTable.Load(reader);
+                ds.Tables.Add(dataTable);
                 return ds;
             }
             catch (Exception ex)

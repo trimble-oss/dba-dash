@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
 using SerilogTimings;
@@ -39,14 +40,14 @@ namespace DBADash.Messaging
         {
         }
 
-        public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle)
+        public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
             if (IsExpired)
             {
                 throw new Exception("Message expired");
             }
-            using var op = Operation.Begin("Collection triggered from message {handle} to collect {types} from {instance}",
-                handle,
+            using var op = Operation.Begin("Collection triggered from message {Id} to collect {types} from {instance}",
+                Id,
                 CollectionTypes,
                 ConnectionID);
             var src = cfg.GetSourceConnection(ConnectionID);
@@ -59,24 +60,23 @@ namespace DBADash.Messaging
 
             if (standardCollections.Contains(CollectionType.SchemaSnapshot))
             {
-
-                if (string.IsNullOrEmpty(DatabaseName)) // 
+                if (string.IsNullOrEmpty(DatabaseName)) //
                 {
                     // Snapshot all configured databases
                     // Written to destinations as usual.  Could be additional delay to process.
                     // It's done DB at a time to limit the size of the data being processed.
-                    Log.Information("Message {handle} requested schema snapshots for {instance}", handle,ConnectionID);
+                    Log.Information("Message {Id} requested schema snapshots for {instance}", Id, ConnectionID);
                     await SchemaSnapshotDB.GenerateSchemaSnapshots(cfg, src);
                 }
                 else
                 {
-                    Log.Information("Message {handle} requested snapshot for database {DatabaseName} on {instance}", handle,DatabaseName,ConnectionID);
+                    Log.Information("Message {Id} requested snapshot for database {DatabaseName} on {instance}", Id, DatabaseName, ConnectionID);
                     var schema = new SchemaSnapshotDB(src.SourceConnection, cfg.SchemaSnapshotOptions);
                     var dt = schema.SnapshotDB(DatabaseName, collector);
                     collector.Data.Tables.Add(dt);
                 }
             }
-            
+
             if (CollectAgent.S3Path != null)
             {
                 op.Complete();
@@ -89,7 +89,6 @@ namespace DBADash.Messaging
                 op.Complete();
                 return null;
             }
-
         }
 
         private (List<CollectionType>, Dictionary<string, CustomCollection>) ParseCollectionTypes(DBADashSource src, CollectionConfig cfg)
@@ -140,7 +139,5 @@ namespace DBADash.Messaging
 
             return (standardCollections, customCollections);
         }
-
-
     }
 }

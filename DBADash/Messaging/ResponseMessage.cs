@@ -15,7 +15,8 @@ namespace DBADash.Messaging
             Progress,
             Failure,
             Success,
-            EndConversation
+            EndConversation,
+            Cancellation
         }
 
         public ResponseTypes Type { get; set; }
@@ -63,7 +64,7 @@ namespace DBADash.Messaging
                 Log.Information("Downloading message data from {path}", MessageDataPath);
                 var uri = new Amazon.S3.Util.AmazonS3Uri(MessageDataPath);
                 using var s3Cli = await AWSTools.GetAWSClientAsync(Config.AWSProfile, Config.AccessKey, Config.GetSecretKey(), uri);
-               
+
                 using var s3Obj = await s3Cli.GetObjectAsync(uri.Bucket, uri.Key);
 
                 await using var responseStream = s3Obj.ResponseStream;

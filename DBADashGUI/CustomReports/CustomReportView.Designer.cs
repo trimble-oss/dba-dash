@@ -33,6 +33,7 @@
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsExecute = new System.Windows.Forms.ToolStripButton();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
+            tsCancel = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
             tsExcel = new System.Windows.Forms.ToolStripButton();
             tsCols = new System.Windows.Forms.ToolStripButton();
@@ -96,7 +97,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsExecute, tsRefresh, tsCopy, tsExcel, tsCols, tsConfigure, cboResults, lblSelectResults, tsParams, tsClearFilter, tsTrigger });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsExecute, tsRefresh, tsCancel, tsCopy, tsExcel, tsCols, tsConfigure, cboResults, lblSelectResults, tsParams, tsClearFilter, tsTrigger });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1242, 28);
@@ -122,6 +123,16 @@
             tsRefresh.Size = new System.Drawing.Size(29, 25);
             tsRefresh.Text = "Refresh Data";
             tsRefresh.Click += TsRefresh_Click;
+            // 
+            // tsCancel
+            // 
+            tsCancel.Enabled = false;
+            tsCancel.Image = Properties.Resources.Close_red_16x;
+            tsCancel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCancel.Name = "tsCancel";
+            tsCancel.Size = new System.Drawing.Size(77, 25);
+            tsCancel.Text = "Cancel";
+            tsCancel.Click += TsCancel_Click;
             // 
             // tsCopy
             // 
@@ -286,7 +297,7 @@
             lnkParams.Font = new System.Drawing.Font("Segoe UI", 16F);
             lnkParams.Location = new System.Drawing.Point(0, 0);
             lnkParams.Name = "lnkParams";
-            lnkParams.Size = new System.Drawing.Size(824, 260);
+            lnkParams.Size = new System.Drawing.Size(824, 259);
             lnkParams.TabIndex = 2;
             lnkParams.TabStop = true;
             lnkParams.Text = "Set Parameters";
@@ -320,7 +331,7 @@
             splitContainer2.Panel2.Controls.Add(lblParamsRequired);
             splitContainer2.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
             splitContainer2.Size = new System.Drawing.Size(824, 558);
-            splitContainer2.SplitterDistance = 260;
+            splitContainer2.SplitterDistance = 259;
             splitContainer2.TabIndex = 4;
             // 
             // lblParamsRequired
@@ -329,7 +340,7 @@
             lblParamsRequired.Font = new System.Drawing.Font("Segoe UI", 10F);
             lblParamsRequired.Location = new System.Drawing.Point(0, 0);
             lblParamsRequired.Name = "lblParamsRequired";
-            lblParamsRequired.Size = new System.Drawing.Size(824, 294);
+            lblParamsRequired.Size = new System.Drawing.Size(824, 295);
             lblParamsRequired.TabIndex = 3;
             lblParamsRequired.Text = "Parameters are required to run the report";
             lblParamsRequired.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -396,7 +407,7 @@
             // timer1
             // 
             timer1.Interval = 1000;
-            timer1.Tick += timer1_Tick;
+            timer1.Tick += Timer1_Tick;
             // 
             // CustomReportView
             // 
@@ -459,5 +470,6 @@
         private System.Windows.Forms.ToolStripStatusLabel lblTimer;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.ToolStripStatusLabel tsSep;
+        private System.Windows.Forms.ToolStripButton tsCancel;
     }
 }
