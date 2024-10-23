@@ -13,9 +13,9 @@ namespace DBADashGUI.Messaging
 {
     public class MessagingHelper
     {
-        public delegate Task MessageCompletedDelegate(ResponseMessage reply,Guid messageGroup);
-        public delegate void SetStatusDelegate(string message, string details, Color color);
+        public delegate Task MessageCompletedDelegate(ResponseMessage reply, Guid messageGroup);
 
+        public delegate void SetStatusDelegate(string message, string details, Color color);
 
         public static async Task SendMessageAndProcessReply(MessageBase message, DBADashContext context,
             ToolStripStatusLabel lblStatus, MessageCompletedDelegate processCompleted, Guid messageGroup)
@@ -24,8 +24,9 @@ namespace DBADashGUI.Messaging
         }
 
         public static async Task SendMessageAndProcessReply(MessageBase message, DBADashContext context,
-            SetStatusDelegate setStatus, MessageCompletedDelegate processCompleted,Guid messageGroup)
+            SetStatusDelegate setStatus, MessageCompletedDelegate processCompleted, Guid messageGroup)
         {
+            message.Id = messageGroup;
             if (context.ImportAgentID == null)
             {
                 setStatus("No Import Agent", string.Empty, DashColors.Fail);
@@ -74,7 +75,7 @@ namespace DBADashGUI.Messaging
 
                     case ResponseMessage.ResponseTypes.Success:
                         completed = false; // It's done but wait for end dialog
-                        await processCompleted(reply,messageGroup);
+                        await processCompleted(reply, messageGroup);
                         break;
 
                     case ResponseMessage.ResponseTypes.EndConversation:
@@ -91,7 +92,7 @@ namespace DBADashGUI.Messaging
                 throw new Exception("User does not have permission to force/unforce plans");
             }
             var messageGroup = Guid.NewGuid();
-            await LogPlanForcingOperation(context.InstanceID, db, operation.ToString(), queryId, planId, objectName, text, queryHash, planHash, notes,messageGroup);
+            await LogPlanForcingOperation(context.InstanceID, db, operation.ToString(), queryId, planId, objectName, text, queryHash, planHash, notes, messageGroup);
             var message = new QueryStorePlanForcingMessage()
             {
                 ConnectionID = context.ConnectionID,
@@ -102,10 +103,10 @@ namespace DBADashGUI.Messaging
                 CollectAgent = context.CollectAgent,
                 ImportAgent = context.ImportAgent,
             };
-            await MessagingHelper.SendMessageAndProcessReply(message, context, lbl, dCompletedDelegate,messageGroup);
+            await MessagingHelper.SendMessageAndProcessReply(message, context, lbl, dCompletedDelegate, messageGroup);
         }
 
-        private static async Task LogPlanForcingOperation(int InstanceID, string db, string type, long queryId, long planId, string objectName, string text, byte[] query_hash, byte[] plan_hash, string notes,Guid messageGroup)
+        private static async Task LogPlanForcingOperation(int InstanceID, string db, string type, long queryId, long planId, string objectName, string text, byte[] query_hash, byte[] plan_hash, string notes, Guid messageGroup)
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
             var cmd = new SqlCommand("dbo.PlanForcingLog_Add", cn) { CommandType = CommandType.StoredProcedure };
@@ -180,7 +181,5 @@ namespace DBADashGUI.Messaging
             await MessagingHelper.ForceQueryPlan(context, db, forceOp, queryID, planID, objectName, text, queryHash, planHash,
                 notes, lbl, dCompletedDelegate);
         }
-
-
     }
 }

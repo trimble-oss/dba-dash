@@ -4,13 +4,43 @@ using System;
 using System.Data;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace DBADash.Messaging
 {
     // Define a base class for message types
     public abstract class MessageBase : IMessage
     {
-        public abstract Task<DataSet> Process(CollectionConfig cfg, Guid handle);
+        [JsonIgnore] public int SemaphoreTimeout { get; set; } = 2000;
+
+        public abstract Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Generates a CancellationTokenSource and associates it with the message ID.  Passes the token to the Process method and removes when the method completes.  The user can send a cancellation request which will look up the token source by Id and cancel it.
+        /// </summary>
+        /// <param name="cfg"></param>
+        /// <param name="handle"></param>
+        /// <returns></returns>
+        public async Task<DataSet> ProcessWithCancellation(CollectionConfig cfg, Guid handle)
+        {
+            // Create a CancellationTokenSource and track it
+            using var cts = new CancellationTokenSource();
+            CancellationTokenManager.Add(Id, cts);
+
+            try
+            {
+                // Call the abstract ProcessCore method where derived classes implement their logic
+                return await Process(cfg, handle, cts.Token);
+            }
+            finally
+            {
+                // Ensure the CancellationTokenSource is removed from the manager
+                CancellationTokenManager.Remove(Id);
+            }
+        }
+
+        // Unique identifier for the message (Service Broker Message Group).  Used to track the message to allow cancellation.
+        public Guid Id { get; set; }
 
         public string SerializeString() => JsonConvert.SerializeObject(this, Formatting.Indented);
 
@@ -57,6 +87,5 @@ namespace DBADash.Messaging
                 throw new Exception("Message expired");
             }
         }
-
     }
 }

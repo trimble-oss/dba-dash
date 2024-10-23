@@ -20,21 +20,19 @@ namespace DBADash.Messaging
         private const int messageVisibilityTimeout = 10000; //ms
         private const int delayAfterReceivingMessageForDifferentAgent = 1000; // ms
         private const int delayBetweenMessages = 100; // ms
-        private const int errorDelay= 1000; // ms
+        private const int errorDelay = 1000; // ms
         private readonly AsyncRetryPolicy _retryPolicy;
         private readonly ConcurrentDictionary<string, SemaphoreSlim> _semaphores = new();
         private const int MaxDegreeOfParallelism = 2;
-        private const int SemaphoreTimeout = 2000; // ms
-
 
         public SQSMessageProcessing(CollectionConfig config)
         {
             Config = config;
             _sqsClient = AWSTools.GetSQSClient(config.AWSProfile, config.AccessKey, config.GetSecretKey(), config.ServiceSQSQueueUrl);
             _retryPolicy = Policy
-                .Handle<Exception>() 
+                .Handle<Exception>()
                 .WaitAndRetryAsync(2, retryAttempt =>
-                        TimeSpan.FromSeconds(1) ,
+                        TimeSpan.FromSeconds(1),
                     onRetry: (exception, timeSpan, retryCount, context) =>
                     {
                         Log.Error(exception, "An error occurred on retry {RetryCount} for operation {OperationKey}. Waiting {TimeSpan} before next retry. Exception: {ExceptionMessage}", retryCount, context.OperationKey, timeSpan, exception.Message);
@@ -96,18 +94,16 @@ namespace DBADash.Messaging
                                 await AWSTools.DeleteMessageAsync(_sqsClient, Config.ServiceSQSQueueUrl,
                                     message.ReceiptHandle);
 
-                            
-                                    if (messageType == "REPLY") // Reply message sent from remote service
-                                    {
-                                        await ProcessReply(message, handle, destinationConnectionHash);
-                                    }
-                                    else // A message for this service to action
-                                    {
-                                        // Process on a separate thread
-                                        _= ProcessMessageAsync(message, DBADashAgentIdentifier, handle,
-                                            destinationConnectionHash, replySQS, replyAgent);
-                                    }
-
+                                if (messageType == "REPLY") // Reply message sent from remote service
+                                {
+                                    await ProcessReply(message, handle, destinationConnectionHash);
+                                }
+                                else // A message for this service to action
+                                {
+                                    // Process on a separate thread
+                                    _ = ProcessMessageAsync(message, DBADashAgentIdentifier, handle,
+                                        destinationConnectionHash, replySQS, replyAgent);
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -124,11 +120,11 @@ namespace DBADash.Messaging
                     await Task.Delay(errorDelay); // Extra delay if error occurs to avoid burning CPU cycles
                 }
 
-                await Task.Delay(delayBetweenMessages); // Wait a small amount of time before checking for more messages to avoid burning CPU cycles (shouldn't be required)  
+                await Task.Delay(delayBetweenMessages); // Wait a small amount of time before checking for more messages to avoid burning CPU cycles (shouldn't be required)
             }
         }
 
-        private static bool ValidateMessageAttributes(Message message,string expectedAgent, out string reason, out string messageType, out Guid handle, out string destinationConnectionHash,out bool notForThisAgent, out bool deleteMessage, out string replySQS, out string replyAgent)
+        private static bool ValidateMessageAttributes(Message message, string expectedAgent, out string reason, out string messageType, out Guid handle, out string destinationConnectionHash, out bool notForThisAgent, out bool deleteMessage, out string replySQS, out string replyAgent)
         {
             reason = string.Empty;
             messageType = string.Empty;
@@ -175,7 +171,7 @@ namespace DBADash.Messaging
                 deleteMessage = false;
                 return false;
             }
-            
+
             if (!message.MessageAttributes.TryGetValue("MessageType", out var messageTypeAttribute))
             {
                 reason = "Message does not contain a MessageType attribute.";
@@ -211,7 +207,6 @@ namespace DBADash.Messaging
             return true;
         }
 
-
         /// <summary>
         /// Process message from the SQS queue.  e.g. trigger a collection
         /// </summary>
@@ -222,7 +217,7 @@ namespace DBADash.Messaging
         /// <param name="replySQS">SQS queue to send reply messages to</param>
         /// <param name="replyAgent">Identifier for agent to reply messages to</param>
         /// <returns></returns>
-        private async Task ProcessMessageAsync(Message message, string DBADashAgentIdentifier, Guid handle, string destinationConnectionHash,string replySQS,string replyAgent)
+        private async Task ProcessMessageAsync(Message message, string DBADashAgentIdentifier, Guid handle, string destinationConnectionHash, string replySQS, string replyAgent)
         {
             var msg = await ValidateMessage(message, DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent);
             if (msg == null) return;
@@ -230,12 +225,19 @@ namespace DBADash.Messaging
             // Implementations of MessageBase will process the message and return a DataSet or null
             var semaphore =
                 _semaphores.GetOrAdd(destinationConnectionHash,
-                    _ => new SemaphoreSlim(MaxDegreeOfParallelism)); 
+                    _ => new SemaphoreSlim(MaxDegreeOfParallelism));
             try
             {
-                if (!await semaphore.WaitAsync(SemaphoreTimeout)) // Semaphore used to limit concurrent processing per connection
+                if (msg is CancellationMessage cancellationMessage) // Process cancellation message immediately without waiting for semaphore
                 {
-                    Log.Warning("Semaphore timeout for {handle}.  Service is busy.", handle);
+                    await cancellationMessage.Process(Config, handle, CancellationToken.None);
+                    await SendReplyMessage(DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent,
+                        ResponseMessage.ResponseTypes.Failure, "Message Cancelled").ConfigureAwait(false);
+                    return;
+                }
+                if (!await semaphore.WaitAsync(msg.SemaphoreTimeout)) // Semaphore used to limit concurrent processing per connection
+                {
+                    Log.Warning("Semaphore timeout for message {id} of type {type} with handle {handle}.  Service is busy.", msg.Id, msg.GetType().ToString(), handle);
                     // Semaphore timed out, service is busy
                     await SendReplyMessage(DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent,
                         ResponseMessage.ResponseTypes.Failure, "Service is busy.  Try again later.").ConfigureAwait(false);
@@ -243,23 +245,24 @@ namespace DBADash.Messaging
                     return;
                 }
 
-                await DoProcessMessageAsync(msg, DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS,
-                    replyAgent);
-
+                try
+                {
+                    await DoProcessMessageAsync(msg, DBADashAgentIdentifier, handle, destinationConnectionHash,
+                        replySQS,
+                        replyAgent);
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error processing message with handle {handle}", handle);
                 await SendReplyMessage(DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent,
                     ResponseMessage.ResponseTypes.Failure, ex.Message).ConfigureAwait(false);
-
-            }
-            finally
-            {
-                semaphore.Release();
             }
         }
-
 
         /// <summary>
         /// Run the processing task for the message.  Send a reply message to the source agent when complete
@@ -278,7 +281,7 @@ namespace DBADash.Messaging
             await SendReplyMessage(DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent,
                 ResponseMessage.ResponseTypes.Progress, "Message Received");
 
-            var ds = await msg.Process(Config, handle);
+            var ds = await msg.ProcessWithCancellation(Config, handle);
             string messageDataPath = null;
             if (ds != null)
             {
@@ -296,13 +299,12 @@ namespace DBADash.Messaging
 
         private async Task SendReplyMessage(string DBADashAgentIdentifier, Guid handle,
             string destinationConnectionHash, string replySQS, string replyAgent,
-            ResponseMessage.ResponseTypes responseType, string message, string messageDataPath=null)
+            ResponseMessage.ResponseTypes responseType, string message, string messageDataPath = null)
         {
             var payload = CreateResponsePayload(responseType, message, messageDataPath);
             await AWSTools.SendSQSMessageAsync(Config, Convert.ToBase64String(payload),
                 DBADashAgentIdentifier, replyAgent, handle, replySQS, "REPLY", destinationConnectionHash);
         }
-
 
         /// <summary>
         /// Deserialize the message payload and check if it is expired
@@ -323,11 +325,10 @@ namespace DBADash.Messaging
                 Log.Debug($"Received message: {message.MessageId}");
                 var payloadBin = Convert.FromBase64String(message.Body);
                 msg = MessageBase.Deserialize(payloadBin);
-
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Log.Error(ex,"Message with handle {handle} couldn't be deserialized", handle);
+                Log.Error(ex, "Message with handle {handle} couldn't be deserialized", handle);
                 await SendReplyMessage(DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent,
                     ResponseMessage.ResponseTypes.Failure, "Message couldn't be read");
                 return null;
@@ -345,11 +346,8 @@ namespace DBADash.Messaging
             {
                 return msg;
             }
-
-
         }
 
-        
         private static byte[] CreateResponsePayload(ResponseMessage.ResponseTypes responseType, string message, string messageDataPath = null)
         {
             var responseMessage = new ResponseMessage
@@ -360,7 +358,6 @@ namespace DBADash.Messaging
             };
             return responseMessage.Serialize();
         }
-
 
         /// <summary>
         /// Process the reply message from the remote service.  Send data back to the SQL repository DB & notification back to GUI via service broker
@@ -405,7 +402,6 @@ namespace DBADash.Messaging
                     Log.Warning(
                         "The conversation handle {handle} was not found.  The conversation might have ended & this message is processing out of order.",
                         handle);
-
                 }
             });
 

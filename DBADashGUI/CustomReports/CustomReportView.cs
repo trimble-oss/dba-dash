@@ -9,6 +9,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Navigation;
@@ -40,6 +41,8 @@ namespace DBADashGUI.CustomReports
         private DBADashContext context;
         private CustomReport report;
         private List<CustomSqlParameter> customParams = new();
+        private CancellationTokenSource cancellationTokenSource;
+        private Guid CurrentMessageGroup;
 
         private bool AutoLoad => report is not DirectExecutionReport;
 
@@ -455,7 +458,13 @@ namespace DBADashGUI.CustomReports
             }
             else
             {
-                RefreshDataRepository();
+                StartTimer();
+                cancellationTokenSource = new CancellationTokenSource();
+                IsMessageInProgress = true;
+                Task.Run(() =>
+                {
+                    _ = RefreshDataRepository(cancellationTokenSource.Token);
+                });
             }
         }
 
@@ -478,43 +487,54 @@ namespace DBADashGUI.CustomReports
             lblTimer.Text = "00:00:00";
         }
 
-        public void RefreshDataRepository()
+        public async Task RefreshDataRepository(CancellationToken token)
         {
-            if (this.InvokeRequired)
-            {
-                this.Invoke(new Action(RefreshData));
-                return;
-            }
-            StartTimer();
             try
             {
-                ShowParamPrompt(false); // Show grid
-                reportDS = GetReportData();
-                LoadResultsCombo();
-                if (reportDS.Tables.Count > 0)
+                SetStatus("Running report", string.Empty, DashColors.Information);
+                reportDS = await GetReportDataAsync(token);
+                this.Invoke(() =>
                 {
-                    ShowTable();
-                }
-                else
-                {
-                    MessageBox.Show("Report didn't return a result set", "Warning", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-                }
+                    ShowParamPrompt(false); // Show grid
+                    LoadResultsCombo();
+                    if (reportDS.Tables.Count > 0)
+                    {
+                        ShowTable();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Report didn't return a result set", "Warning", MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
+                    }
+                });
+                SetStatus("Completed", "Success", DashColors.Success);
             }
             catch (SqlException ex) when (ex.Number == 201) // Parameter required
             {
-                ShowParamPrompt(true); // Show parameter prompt instead of grid as we have required parameters that were not supplied
+                ShowParamPrompt(
+                    true); // Show parameter prompt instead of grid as we have required parameters that were not supplied
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error running report:" + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                SetStatus("Error running report:" + ex.Message, ex.ToString(), DashColors.Fail);
             }
-            StopTimer();
+            finally
+            {
+                IsMessageInProgress = false;
+                StopTimer();
+            }
         }
 
-        private bool IsMessageInProgress;
-        private Guid CurrentMessageGroup;
+        private bool IsMessageInProgress
+        {
+            get => tsCancel.Enabled;
+            set
+            {
+                tsCancel.Enabled = value;
+                tsRefresh.Enabled = !tsCancel.Enabled;
+                tsExecute.Enabled = !tsCancel.Enabled;
+            }
+        }
 
         public void RefreshDataMessage()
         {
@@ -533,6 +553,7 @@ namespace DBADashGUI.CustomReports
                 Lifetime = Config.DefaultCommandTimeout
             };
             doAutoSize = true;
+
             SetStatus("Message sent", "Running", DashColors.Information);
             IsMessageInProgress = true;
             CurrentMessageGroup = Guid.NewGuid();
@@ -543,11 +564,9 @@ namespace DBADashGUI.CustomReports
 
         private Task ProcessCompletedMessage(ResponseMessage reply, Guid messageGroup)
         {
-            if (CurrentMessageGroup != messageGroup) // Context has changed
+            if (CurrentMessageGroup != messageGroup) // Context has changed.  Ignore
             {
-                if (reply.Type == ResponseMessage.ResponseTypes.Progress) return Task.CompletedTask;
-                IsMessageInProgress = false;
-                SetStatus("Ready", "", DashColors.Information);
+                return Task.CompletedTask;
             }
             else if (reply.Type == ResponseMessage.ResponseTypes.Success && reply.Data is { Tables.Count: > 0 })
             {
@@ -600,7 +619,6 @@ namespace DBADashGUI.CustomReports
         {
             this.Invoke(() =>
             {
-                statusStrip1.Visible = true;
                 lblDescription.Text = message;
                 lblDescription.ForeColor = color;
                 lblDescription.ToolTipText = tooltip;
@@ -659,10 +677,10 @@ namespace DBADashGUI.CustomReports
         /// Run the query to get the data for the user custom report
         /// </summary>
         /// <returns></returns>
-        protected virtual DataSet GetReportData()
+        protected async Task<DataSet> GetReportDataAsync(CancellationToken cancellationToken)
         {
-            using var cn = new SqlConnection(Common.ConnectionString);
-            using var cmd = new SqlCommand(report.QualifiedProcedureName, cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand(report.QualifiedProcedureName, cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
             using var da = new SqlDataAdapter(cmd);
 
             // Add system parameters unless they are overridden by user supplied parameters for drill down reports
@@ -704,28 +722,43 @@ namespace DBADashGUI.CustomReports
             {
                 cmd.Parameters.Add(p.Param.Clone());
             }
-
+            await using var registration = cancellationToken.Register(() =>
+            {
+                cmd.Cancel();
+            });
             var ds = new DataSet();
-            da.Fill(ds);
+            try
+            {
+                da.Fill(ds);
+            }
+            finally
+            {
+                registration.Unregister();
+            }
             return ds;
         }
 
         public void SetContext(DBADashContext _context)
         {
-            SetContext(_context, null);
+            _ = SetContext(_context, null);
         }
 
-        public void SetContext(DBADashContext _context, List<CustomSqlParameter> sqlParams)
+        public async Task SetContext(DBADashContext _context, List<CustomSqlParameter> sqlParams)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new Action(() => SetContext(_context, sqlParams)));
+                this.Invoke(new Action(() => _ = SetContext(_context, sqlParams)));
                 return;
             }
 
             cboResults.Visible = false;
             lblSelectResults.Visible = false;
             ResetTimer();
+            if (IsMessageInProgress)
+            {
+                await CancelProcessing();
+            }
+            IsMessageInProgress = false;
             CurrentMessageGroup = Guid.Empty;
             doAutoSize = true;
             selectedTableIndex = 0;
@@ -736,7 +769,6 @@ namespace DBADashGUI.CustomReports
             tsParams.Enabled = customParams.Count > 0;
             tsConfigure.Visible = report.CanEditReport;
             SetStatus(report.Description, report.Description, DBADashUser.SelectedTheme.ForegroundColor);
-            statusStrip1.Visible = !string.IsNullOrEmpty(report.Description) || !string.IsNullOrEmpty(report.URL);
             lblDescription.Visible = !string.IsNullOrEmpty(report.Description);
             if (report.DeserializationException != null)
             {
@@ -746,7 +778,7 @@ namespace DBADashGUI.CustomReports
                 report.DeserializationException = null;// Display the message once
             }
             editPickersToolStripMenuItem.Enabled = report.UserParams.Any();
-            tsRefresh.Checked = report is not DirectExecutionReport;
+            tsRefresh.Visible = report is not DirectExecutionReport;
             tsExecute.Visible = report is DirectExecutionReport;
             lblURL.Text = report.URL;
             lblURL.Visible = !string.IsNullOrEmpty(report.URL);
@@ -949,7 +981,6 @@ namespace DBADashGUI.CustomReports
             report.Description = description;
             report.Update();
             lblDescription.Text = report.Description;
-            statusStrip1.Visible = !string.IsNullOrEmpty(report.Description);
             lblDescription.Visible = !string.IsNullOrEmpty(report.Description);
         }
 
@@ -1106,7 +1137,7 @@ namespace DBADashGUI.CustomReports
 
         private DateTime TimerStart;
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private void Timer1_Tick(object sender, EventArgs e)
         {
             UpdateTimer();
         }
@@ -1114,6 +1145,40 @@ namespace DBADashGUI.CustomReports
         private void UpdateTimer()
         {
             lblTimer.Text = (DateTime.Now - TimerStart).ToString(@"hh\:mm\:ss");
+        }
+
+        private async void TsCancel_Click(object sender, EventArgs e)
+        {
+            await CancelProcessing();
+        }
+
+        private async Task CancelProcessing()
+        {
+            if (report is DirectExecutionReport)
+            {
+                if (CurrentMessageGroup != Guid.Empty)
+                {
+                    var msg = new CancellationMessage()
+                    {
+                        CollectAgent = context.CollectAgent,
+                        ImportAgent = context.ImportAgent,
+                        Lifetime = Config.DefaultCommandTimeout,
+                        CancelMessageId = CurrentMessageGroup
+                    };
+                    SetStatus("Cancellation requested", "", DashColors.Warning);
+                    await MessagingHelper.SendMessageAndProcessReply(msg, context, SetStatus, ProcessCompletedMessage,
+                        CurrentMessageGroup);
+                }
+                else
+                {
+                    SetStatus("Nothing to cancel", "", DashColors.Information);
+                    IsMessageInProgress = false;
+                }
+            }
+            else
+            {
+                cancellationTokenSource.Cancel();
+            }
         }
     }
 }

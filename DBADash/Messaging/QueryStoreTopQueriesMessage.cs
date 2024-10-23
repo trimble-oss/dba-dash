@@ -54,8 +54,7 @@ namespace DBADash.Messaging
 
         public bool NearestInterval { get; set; } = true;
 
-
-        public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle)
+        public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
             ThrowIfExpired();
             if (GroupBy == QueryStoreGroupByEnum.date_bucket && (string.IsNullOrEmpty(DatabaseName) || QueryID == null))
@@ -79,13 +78,13 @@ namespace DBADash.Messaging
                     databases = new List<string> { DatabaseName };
                 }
                 Log.Debug("Collecting Query Store for databases: {databases} for message {handle}", databases, handle);
-                
+
                 if (databases.Count == 0)
                 {
                     throw new Exception("No databases found with Query Store enabled");
                 }
                 PerDatabaseCollectionHelper.DatabaseOperationDelegate operation = GetTopQueriesForDatabase;
-                var resultTable = await PerDatabaseCollectionHelper.RunPerDatabaseCollectionWithUnionResults(operation,src.SourceConnection.ConnectionString, databases);
+                var resultTable = await PerDatabaseCollectionHelper.RunPerDatabaseCollectionWithUnionResults(operation, src.SourceConnection.ConnectionString, databases);
 
                 if (resultTable.Rows.Count > Top)
                 {

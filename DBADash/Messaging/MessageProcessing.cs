@@ -3,6 +3,7 @@ using Polly;
 using Polly.Retry;
 using Serilog;
 using System;
+using System.Collections.Concurrent;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -21,13 +22,14 @@ namespace DBADash.Messaging
         private readonly DBADashAgent Agent;
         private const int DefaultMessageThreads = 2;
         private readonly int MessageThreads;
+        private readonly SemaphoreSlim MessageSemaphore;
 
         private readonly AsyncRetryPolicy AgentIDRetryPolicy = Policy.Handle<Exception>()
             .WaitAndRetryForeverAsync(_ => TimeSpan.FromSeconds(60),
                 (exception, retryCount, calculatedWaitDuration) =>
                 {
                     Log.Error(exception,
-                        $"Error getting Agent ID.  Retrying in {calculatedWaitDuration.TotalSeconds} seconds. (Retry count: {retryCount})");
+                        $"Error getting Agent Id.  Retrying in {calculatedWaitDuration.TotalSeconds} seconds. (Retry count: {retryCount})");
                 });
 
         public MessageProcessing(CollectionConfig config)
@@ -65,7 +67,7 @@ namespace DBADash.Messaging
 
             if (agentID == 0)
             {
-                Log.Error("Unable to get Agent ID for {Destination}", d.ConnectionForPrint);
+                Log.Error("Unable to get Agent Id for {Destination}", d.ConnectionForPrint);
                 return;
             }
             try
@@ -90,15 +92,12 @@ namespace DBADash.Messaging
             }
         }
 
-        private readonly SemaphoreSlim MessageSemaphore;
-
         public async Task Process(DBADashConnection dest, int agentID)
         {
             while (true)
             {
                 try
                 {
-                    await WaitForCapacity();
                     await using var cn = new SqlConnection(dest.ConnectionString);
                     await cn.OpenAsync();
                     await using var cmd = new SqlCommand("Messaging.ReceiveMessageToService", cn)
@@ -119,7 +118,7 @@ namespace DBADash.Messaging
                                 .Serialize(),
                                 dest.ConnectionString);
 
-                            _ = ProcessMessage(dest, handle, type, message);
+                            _ = Task.Run(() => ProcessMessage(dest, handle, type, message));
                         }
                         else
                         {
@@ -160,28 +159,16 @@ namespace DBADash.Messaging
             }
         }
 
-        private async Task WaitForCapacity()
-        {
-            if (MessageSemaphore.CurrentCount > 0) return;
-            Log.Warning("Message processing is currently at capacity.  Waiting for a slot to open.");
-            while (MessageSemaphore.CurrentCount == 0)
-            {
-                await Task.Delay(200);
-            }
-        }
-
         public async Task ProcessMessage(DBADashConnection dest, Guid handle, string type, byte[] message)
         {
             bool endConversation = true;
+
             try
             {
-                await MessageSemaphore.WaitAsync(); // Limit the number of messages processed at once
-
-                Log.Information("Processing message of type {MessageType} with handle {handle}", type, handle);
                 var msg = MessageBase.Deserialize(message);
                 if (msg.IsExpired)
                 {
-                    Log.Error("Message with handle {handle} created at {Created} is expired.", type, handle);
+                    Log.Error("Message {Id} with handle {handle} created at {Created} is expired.", msg.Id, type, handle);
                     await SendReplyMessage(handle,
                         (new ResponseMessage()
                         { Type = ResponseMessage.ResponseTypes.Failure, Message = "Message is Expired." }).Serialize(),
@@ -189,6 +176,7 @@ namespace DBADash.Messaging
                 }
                 else if (msg.CollectAgent.AgentIdentifier != DBADashAgent.GetCurrent().AgentIdentifier)
                 {
+                    Log.Error("Message {Id} with handle {handle} created at {Created} is expired.", msg.Id, type, handle);
                     // The message needs to be relayed to the remote agent via SQS queue
                     await SendReplyMessage(handle,
                                                (new ResponseMessage()
@@ -202,11 +190,47 @@ namespace DBADash.Messaging
                 else
                 {
                     // Message is for this agent.  Process the message
-                    var ds = await msg.Process(Config, handle);
-                    await SendReplyMessage(handle,
-                        (new ResponseMessage()
-                        { Type = ResponseMessage.ResponseTypes.Success, Message = "Completed", Data = ds }).Serialize(),
-                        dest.ConnectionString);
+
+                    if (msg is CancellationMessage)
+                    {
+                        // Cancellation message received - process immediately
+                        await msg.Process(Config, handle, CancellationToken.None);
+                        await SendReplyMessage(handle,
+                            (new ResponseMessage()
+                            { Type = ResponseMessage.ResponseTypes.Failure, Message = "Cancelled", Data = null }).Serialize(),
+                            dest.ConnectionString);
+                        return;
+                    }
+                    // Semaphore to limit the number of messages processed at once
+                    var acquired = await MessageSemaphore.WaitAsync(msg.SemaphoreTimeout);
+                    if (!acquired)
+                    {
+                        // Semaphore timed out - send a message back to the service to try again later
+                        Log.Warning("Semaphore timed out processing message {id} of type {MessageType} with handle {handle}", msg.Id, type, handle);
+                        await SendReplyMessage(handle,
+                            (new ResponseMessage()
+                            { Type = ResponseMessage.ResponseTypes.Failure, Message = "Service is busy processing other requests.  Please try again later.", Data = null }).Serialize(),
+                            dest.ConnectionString);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            Log.Information("Processing message {id} of type {MessageType} with handle {handle}", msg.Id, type,
+                                handle);
+
+                            var ds = await msg.ProcessWithCancellation(Config, msg.Id);
+                            await SendReplyMessage(handle,
+                                (new ResponseMessage()
+                                { Type = ResponseMessage.ResponseTypes.Success, Message = "Completed", Data = ds })
+                                .Serialize(),
+                                dest.ConnectionString);
+                        }
+                        finally
+                        {
+                            MessageSemaphore.Release();
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -216,7 +240,6 @@ namespace DBADash.Messaging
             }
             finally
             {
-                MessageSemaphore.Release();
                 if (endConversation)
                 {
                     await EndConversation(handle, dest.ConnectionString);
