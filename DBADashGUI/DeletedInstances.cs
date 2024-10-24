@@ -13,29 +13,17 @@ namespace DBADashGUI
     public partial class DeletedInstances : UserControl, ISetContext, IRefreshData
     {
         public event EventHandler<int> InstanceRestored;
+
         private bool IsDeleteInProgesss;
 
         public DeletedInstances()
         {
             InitializeComponent();
+            customReportView1.Grid.ColumnAdded += Grid_ColumnAdded;
         }
 
-        public void RefreshData()
+        private void Grid_ColumnAdded(object sender, DataGridViewColumnEventArgs e)
         {
-            if (InvokeRequired)
-            {
-                Invoke(new Action(RefreshData));
-                return;
-            }
-
-            customReportView1.RefreshData();
-        }
-
-        public void SetContext(DBADashContext _context)
-        {
-            if (_context == null) return;
-            _context.Report = DeletedInstancesReport;
-            customReportView1.SetContext(_context);
             if (!customReportView1.Grid.Columns.Contains("colRestore"))
             {
                 customReportView1.Grid.Columns.Add(new DataGridViewLinkColumn()
@@ -58,8 +46,26 @@ namespace DBADashGUI
                 customReportView1.Grid.CellContentClick += Grid_CellContentClick;
                 customReportView1.Grid.ApplyTheme();
             }
-            customReportView1.StatusStrip.Visible = true;
-            SetStatus(CurrentStatus.Message,CurrentStatus.ToolTip,CurrentStatus.Color);
+        }
+
+        public void RefreshData()
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(RefreshData));
+                return;
+            }
+
+            customReportView1.RefreshData();
+        }
+
+        public void SetContext(DBADashContext _context)
+        {
+            if (_context == null) return;
+            _context.Report = DeletedInstancesReport;
+            customReportView1.SetContext(_context);
+
+            SetStatus(CurrentStatus.Message, CurrentStatus.ToolTip, CurrentStatus.Color);
         }
 
         private void Grid_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -86,7 +92,7 @@ namespace DBADashGUI
 
                 case "colDelete":
                     {
-                        if(IsDeleteInProgesss)
+                        if (IsDeleteInProgesss)
                         {
                             MessageBox.Show(@"Please wait for the current delete operation to complete before starting another.", $@"Delete {instanceName}", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
@@ -105,7 +111,7 @@ If you don't need to delete the instance immediately, the data retention setting
 
 Are you sure you want to delete this instance?",
                                 $@"Delete {instanceName}", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) != DialogResult.Yes) return;
-                
+
                         Task.Run(() => HardDeleteInstance(instanceID, instanceName));
                         break;
                     }
@@ -117,7 +123,7 @@ Are you sure you want to delete this instance?",
         private void SetStatus(string message, string tooltip, Color color)
         {
             CurrentStatus = new(message, tooltip, color);
-            customReportView1.StatusLabel.InvokeSetStatus(message ?? string.Empty,tooltip ?? string.Empty,color);
+            customReportView1.StatusLabel.InvokeSetStatus(message ?? string.Empty, tooltip ?? string.Empty, color);
         }
 
         private void HardDeleteInstance(int instanceID, string instanceName)
