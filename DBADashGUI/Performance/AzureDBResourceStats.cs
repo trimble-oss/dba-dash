@@ -94,8 +94,8 @@ namespace DBADashGUI.Performance
 
         public void SetContext(DBADashContext _context)
         {
-            InstanceID =_context.MasterInstanceID;
-            ElasticPoolName=_context.ElasticPoolName;
+            InstanceID = string.IsNullOrEmpty(_context.ElasticPoolName) ? _context.InstanceID : _context.MasterInstanceID;
+            ElasticPoolName = _context.ElasticPoolName;
             RefreshData();
         }
 
@@ -107,7 +107,7 @@ namespace DBADashGUI.Performance
 
         private void RefreshDataLocal()
         {
-            dt = ElasticPoolName == string.Empty ? GetAzureDBResourceStats() : GetAzurePoolResourceStats();
+            dt = string.IsNullOrEmpty(ElasticPoolName) ? GetAzureDBResourceStats() : GetAzurePoolResourceStats();
 
             UpdateChart();
         }
