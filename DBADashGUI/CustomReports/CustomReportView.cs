@@ -1154,6 +1154,9 @@ namespace DBADashGUI.CustomReports
 
         private async Task CancelProcessing()
         {
+            if (!string.IsNullOrEmpty(report.CancellationMessageWarning)
+                && MessageBox.Show(report.CancellationMessageWarning + "\nDo you want to continue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+
             if (report is DirectExecutionReport)
             {
                 if (CurrentMessageGroup != Guid.Empty)
@@ -1177,7 +1180,7 @@ namespace DBADashGUI.CustomReports
             }
             else
             {
-                cancellationTokenSource.Cancel();
+                await cancellationTokenSource.CancelAsync();
             }
         }
     }

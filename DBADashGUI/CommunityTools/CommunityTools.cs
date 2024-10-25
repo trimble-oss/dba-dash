@@ -1524,6 +1524,7 @@ namespace DBADashGUI.CommunityTools
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_HumanEvents.ToString(),
             URL = ErikDarlingUrl,
             Description = "Extended events capture",
+            CancellationMessageWarning = "Cancellation of this report will leave an extended event session running that will require cleanup.",
             Params = new Params()
             {
                 ParamList = new List<Param>
@@ -1637,11 +1638,14 @@ namespace DBADashGUI.CommunityTools
                     ParameterName = "@skip_plans",
                     Name = "Skip Plans",
                     DefaultValue = false,
-                    PickerItems = new()
-                    {
-                        { true, "Yes" },
-                        { false, "No" }
-                    }
+                    PickerItems = BooleanPickerItems
+                },
+                new()
+                {
+                    ParameterName = "@cleanup",
+                    Name = "Cleanup",
+                    DefaultValue = true,
+                    PickerItems = BooleanPickerItems
                 },
                 new()
                 {
