@@ -18,6 +18,7 @@ using DBADashGUI.Interface;
 using DBADash.Messaging;
 using DBADashGUI.CommunityTools;
 using DBADashGUI.Messaging;
+using DataTable = System.Data.DataTable;
 
 namespace DBADashGUI.CustomReports
 {
@@ -25,169 +26,35 @@ namespace DBADashGUI.CustomReports
     {
         public event EventHandler ReportNameChanged;
 
-        private ContextMenuStrip columnContextMenu;
-        private ContextMenuStrip cellContextMenu;
-        private readonly ToolStripMenuItem convertLocalMenuItem = new("Convert to local timezone") { Checked = true, CheckOnClick = true };
-        private readonly ToolStripMenuItem filterLike = new("LIKE", Properties.Resources.FilteredTextBox_16x);
-        private int clickedColumnIndex = -1;
-        private int clickedRowIndex = -1;
         protected DataSet reportDS;
-        private int selectedTableIndex;
-        private bool doAutoSize = true;
         private bool suppressCboResultsIndexChanged;
-        public DataGridView Grid => dgv;
+        public static DataGridView Grid => new(); // dgv;
         public ToolStripStatusLabel StatusLabel => lblDescription;
-        public StatusStrip StatusStrip => statusStrip1;
         private DBADashContext context;
         private CustomReport report;
         private List<CustomSqlParameter> customParams = new();
         private CancellationTokenSource cancellationTokenSource;
         private Guid CurrentMessageGroup;
+        public EventHandler PostGridRefresh;
 
         private bool AutoLoad => report is not DirectExecutionReport;
 
         public CustomReportView()
         {
+            Grids = new();
             InitializeComponent();
             ShowParamPrompt(false);
-            dgv.AutoGenerateColumns = false;
             this.ApplyTheme();
         }
 
-        private void InitializeContextMenu()
+        private void SetCellHighlightingRules(DBADashDataGridView dgv)
         {
-            columnContextMenu = new ContextMenuStrip();
-            if (report.CanEditReport)
-            {
-                var renameColumnMenuItem = new ToolStripMenuItem("Rename Column", Properties.Resources.Rename_16x);
-                var setFormatStringMenuItem =
-                    new ToolStripMenuItem("Set Format String", Properties.Resources.Percentage_16x);
-                var addLink = new ToolStripMenuItem("Add Link", Properties.Resources.WebURL_16x);
-                var rules = new ToolStripMenuItem("Highlighting Rules", Properties.Resources.HighlightHS);
-                renameColumnMenuItem.Click += RenameColumnMenuItem_Click;
-                convertLocalMenuItem.Click += ConvertLocalMenuItem_Click;
-                setFormatStringMenuItem.Click += SetFormatStringMenuItem_Click;
-                addLink.Click += AddLink_Click;
-                rules.Click += SetCellHighlightingRules;
-                columnContextMenu.Items.Add(renameColumnMenuItem);
-                columnContextMenu.Items.Add(convertLocalMenuItem);
-                columnContextMenu.Items.Add(setFormatStringMenuItem);
-                columnContextMenu.Items.Add(addLink);
-                columnContextMenu.Items.Add(rules);
-                dgv.MouseUp += Dgv_MouseUp;
-            }
-
-            var highlight = new ToolStripMenuItem("Highlight", Properties.Resources.HighlightHS);
-            var filterByValue = new ToolStripMenuItem("Filter By Value", Properties.Resources.Filter_16x) { Tag = false };
-            var excludeValue = new ToolStripMenuItem("Exclude Value", Properties.Resources.StopFilter_16x) { Tag = true };
-            cellContextMenu = new ContextMenuStrip();
-            cellContextMenu.Items.Add(filterByValue);
-            cellContextMenu.Items.Add(excludeValue);
-            cellContextMenu.Items.Add(filterLike);
-            if (report.CanEditReport)
-            {
-                cellContextMenu.Items.Add(highlight);
-            }
-            highlight.Click += SetCellHighlightingRules;
-            excludeValue.Click += FilterByValue_Click;
-            filterByValue.Click += FilterByValue_Click;
-            filterLike.Click += FilterLike_Click;
-            dgv.MouseUp += Dgv_MouseUp;
-        }
-
-        private void FilterLike_Click(object sender, EventArgs e)
-        {
-            var value = dgv.Rows[clickedRowIndex].Cells[clickedColumnIndex].Value.DBNullToNull()?.ToString();
-            var colName = dgv.Columns[clickedColumnIndex].DataPropertyName;
-
-            if (CommonShared.ShowInputDialog(ref value, "Enter value to filter by:", default, "Use % or * as wildcards") == DialogResult.Cancel) return;
-            if (string.IsNullOrEmpty(value)) return;
-            if (dgv.DataSource is not DataView dv) return;
-            var filter = dv.RowFilter;
-            if (!string.IsNullOrEmpty(filter))
-            {
-                filter += Environment.NewLine + " AND ";
-            }
-            value = EscapeValue(value);
-            filter += $"{colName} LIKE {value}";
-            SetFilter(filter);
-        }
-
-        private void SetFilter(string filter)
-        {
-            if (dgv.DataSource is not DataView dv) return;
-            var previousFilter = dv.RowFilter;
+            if (dgv == null) return;
             try
             {
-                dv.RowFilter = filter;
-                tsClearFilter.Enabled = true;
-                tsClearFilter.Font = new Font(tsClearFilter.Font, FontStyle.Bold);
-                tsClearFilter.ToolTipText = dv.RowFilter;
-            }
-            catch (Exception ex)
-            {
-                dv.RowFilter = previousFilter;
-                MessageBox.Show("Error setting row filter: " + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
-        }
-
-        private void FilterByValue_Click(object sender, EventArgs e)
-        {
-            var exclude = (bool)((ToolStripMenuItem)sender).Tag;
-            var value = dgv.Rows[clickedRowIndex].Cells[clickedColumnIndex].Value;
-            var colName = dgv.Columns[clickedColumnIndex].DataPropertyName;
-            if (value.GetType() == typeof(byte[]))
-            {
-                MessageBox.Show("Filter by value is not supported for binary data", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            colName = EscapeColumnName(colName);
-            var filterValue = FormatFilterValue(value, exclude);
-
-            if (dgv.DataSource is not DataView dv) return;
-            var filter = dv.RowFilter;
-            if (!string.IsNullOrEmpty(filter))
-            {
-                filter += Environment.NewLine + " AND ";
-            }
-
-            filter += $"{colName} {filterValue}";
-            SetFilter(filter);
-        }
-
-        private static string EscapeColumnName(string columnName)
-        {
-            return "[" + columnName.Replace("]", "]]") + "]";
-        }
-
-        private static string EscapeValue(string value) => "'" + value?.Replace("'", "''") + "'";
-
-        private static string FormatFilterValue(object value, bool exclude)
-        {
-            var compare = (exclude ? "<>" : "=");
-            if (value.DBNullToNull() is null)
-            {
-                return exclude ? "IS NOT NULL" : "IS NULL";
-            }
-            else if (value.GetType().IsNumericType())
-            {
-                return compare + value;
-            }
-            else
-            {
-                return $"{compare} " + EscapeValue(value.ToString());
-            }
-        }
-
-        private void SetCellHighlightingRules(object sender, EventArgs e)
-        {
-            try
-            {
-                var customReportResult = report.CustomReportResults[selectedTableIndex];
-                var columnName = dgv.Columns[clickedColumnIndex].DataPropertyName;
-                customReportResult.CellHighlightingRules.TryGetValue(dgv.Columns[clickedColumnIndex].DataPropertyName,
+                var customReportResult = report.CustomReportResults[dgv.ResultSetID];
+                var columnName = dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName;
+                customReportResult.CellHighlightingRules.TryGetValue(dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName,
                     out var ruleSet);
 
                 var frm = new CellHighlightingRulesConfig()
@@ -195,17 +62,17 @@ namespace DBADashGUI.CustomReports
                     ColumnList = dgv.Columns,
                     CellHighlightingRules = new KeyValuePair<string, CellHighlightingRuleSet>(columnName,
                         ruleSet.DeepCopy() ?? new CellHighlightingRuleSet() { TargetColumn = columnName }),
-                    CellValue = clickedRowIndex >= 0 ? dgv.Rows[clickedRowIndex].Cells[clickedColumnIndex].Value : null,
-                    CellValueIsNull = clickedRowIndex >= 0 &&
-                                      dgv.Rows[clickedRowIndex].Cells[clickedColumnIndex].Value.DBNullToNull() == null
+                    CellValue = dgv.ClickedRowIndex >= 0 ? dgv.Rows[dgv.ClickedRowIndex].Cells[dgv.ClickedColumnIndex].Value : null,
+                    CellValueIsNull = dgv.ClickedRowIndex >= 0 &&
+                                      dgv.Rows[dgv.ClickedRowIndex].Cells[dgv.ClickedColumnIndex].Value.DBNullToNull() == null
                 };
 
                 frm.ShowDialog();
                 if (frm.DialogResult != DialogResult.OK) return;
-                report.CustomReportResults[selectedTableIndex].CellHighlightingRules.Remove(columnName);
+                report.CustomReportResults[dgv.ResultSetID].CellHighlightingRules.Remove(columnName);
                 if (frm.CellHighlightingRules.Value is { HasRules: true })
                 {
-                    report.CustomReportResults[selectedTableIndex].CellHighlightingRules
+                    report.CustomReportResults[dgv.ResultSetID].CellHighlightingRules
                         .Add(columnName, frm.CellHighlightingRules.Value);
                 }
 
@@ -219,12 +86,14 @@ namespace DBADashGUI.CustomReports
             }
         }
 
-        private void AddLink_Click(object sender, EventArgs e)
+        private void AddLink_Click(DBADashDataGridView dgv)
         {
+            var tableIndex = dgv.ResultSetID;
+            if (dgv == null) return;
             try
             {
-                var customReportResult = report.CustomReportResults[selectedTableIndex];
-                var col = dgv.Columns[clickedColumnIndex].DataPropertyName;
+                var customReportResult = report.CustomReportResults[tableIndex];
+                var col = dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName;
                 var linkColumnInfo = customReportResult.LinkColumns?.TryGetValue(col, out var column) is true
                     ? column
                     : null;
@@ -248,7 +117,6 @@ namespace DBADashGUI.CustomReports
                 }
 
                 dgv.Columns.Clear();
-                doAutoSize = true;
                 report.Update();
                 ShowTable();
             }
@@ -259,36 +127,38 @@ namespace DBADashGUI.CustomReports
             }
         }
 
-        private void SetFormatStringMenuItem_Click(object sender, EventArgs e)
+        private void SetFormatStringMenuItem_Click(DBADashDataGridView dgv)
         {
-            if (clickedColumnIndex < 0) return;
-            var formatString = dgv.Columns[clickedColumnIndex].DefaultCellStyle.Format;
-            var key = dgv.Columns[clickedColumnIndex].Name;
+            var formatString = dgv.Columns[dgv.ClickedColumnIndex].DefaultCellStyle.Format;
+            var key = dgv.Columns[dgv.ClickedColumnIndex].Name;
             if (CommonShared.ShowInputDialog(ref formatString, "Enter format string (e.g. N1, P1, yyyy-MM-dd)") !=
                 DialogResult.OK) return;
-            dgv.Columns[clickedColumnIndex].DefaultCellStyle.Format = formatString;
-            report.CustomReportResults[selectedTableIndex].CellFormatString.Remove(key);
+            dgv.Columns[dgv.ClickedColumnIndex].DefaultCellStyle.Format = formatString;
+            report.CustomReportResults[dgv.ResultSetID].CellFormatString.Remove(key);
 
             if (!string.IsNullOrEmpty(formatString))
             {
-                report.CustomReportResults[selectedTableIndex].CellFormatString.Add(key, formatString);
+                report.CustomReportResults[dgv.ResultSetID].CellFormatString.Add(key, formatString);
             }
 
             report.Update();
         }
 
-        private void ConvertLocalMenuItem_Click(object sender, EventArgs e)
+        private void ConvertLocalMenuItem_Click(object sender, DBADashDataGridView dgv)
         {
-            if (clickedColumnIndex < 0) return;
-            var name = dgv.Columns[clickedColumnIndex].DataPropertyName;
+            var convertLocalMenuItem = (ToolStripMenuItem)sender;
+            if (dgv.ClickedColumnIndex < 0) return;
+            var name = dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName;
             switch (convertLocalMenuItem.Checked)
             {
-                case true when report.CustomReportResults[selectedTableIndex].DoNotConvertToLocalTimeZone.Contains(name):
-                    report.CustomReportResults[selectedTableIndex].DoNotConvertToLocalTimeZone.Remove(name);
+                case true when report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Contains(name):
+                    if (MessageBox.Show("Convert column from UTC to local time?", "Convert?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No) return;
+                    report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Remove(name);
                     break;
 
-                case false when !report.CustomReportResults[selectedTableIndex].DoNotConvertToLocalTimeZone.Contains(name):
-                    report.CustomReportResults[selectedTableIndex].DoNotConvertToLocalTimeZone.Add(name);
+                case false when !report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Contains(name):
+                    if (MessageBox.Show("Remove UTC to local time zone conversion for this column?", "Convert?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No) return;
+                    report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Add(name);
                     break;
             }
 
@@ -305,62 +175,23 @@ namespace DBADashGUI.CustomReports
             RefreshData();
         }
 
-        /// <summary>
-        /// Used to display context menu when user right-clicks column headers.  Selected column index is stored in clickedColumnIndex
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Dgv_MouseUp(object sender, MouseEventArgs e)
+        private void RenameColumnMenuItem_Click(DBADashDataGridView dgv)
         {
-            if (e.Button != MouseButtons.Right) return;
-
-            // Perform a hit test to determine where the click occurred
-            var hitTestInfo = dgv.HitTest(e.X, e.Y);
-            clickedColumnIndex = hitTestInfo.ColumnIndex;
-            clickedRowIndex = hitTestInfo.RowIndex;
-            switch (hitTestInfo.Type)
-            {
-                case DataGridViewHitTestType.Cell:
-                    filterLike.Visible = dgv.Columns[clickedColumnIndex].ValueType == typeof(string);
-                    cellContextMenu.Show(dgv, e.Location);
-                    return;
-
-                case DataGridViewHitTestType.ColumnHeader:
-                    {
-                        if (dgv.Columns[clickedColumnIndex].ValueType ==
-                            typeof(DateTime)) // Show option for timezone conversion if column is DateTime
-                        {
-                            convertLocalMenuItem.Checked =
-                                !report.CustomReportResults[selectedTableIndex].DoNotConvertToLocalTimeZone
-                                    .Contains(dgv.Columns[clickedColumnIndex].DataPropertyName);
-                            convertLocalMenuItem.Visible = true;
-                        }
-                        else
-                        {
-                            convertLocalMenuItem.Visible = false;
-                        }
-
-                        // Show the context menu at the mouse position
-                        columnContextMenu.Show(dgv, e.Location);
-                        break;
-                    }
-            }
-        }
-
-        private void RenameColumnMenuItem_Click(object sender, EventArgs e)
-        {
-            if (clickedColumnIndex < 0) return;
+            if (dgv.ClickedColumnIndex < 0) return;
             // Show a dialog for renaming
-            var newName = dgv.Columns[clickedColumnIndex].HeaderText;
+            var newName = dgv.Columns[dgv.ClickedColumnIndex].HeaderText;
             if (CommonShared.ShowInputDialog(ref newName, "Enter new column name:") != DialogResult.OK) return;
             if (string.IsNullOrEmpty(newName))
             {
-                newName = dgv.Columns[clickedColumnIndex].DataPropertyName;
+                newName = dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName;
             }
-            dgv.Columns[clickedColumnIndex].HeaderText = newName;
+            dgv.Columns[dgv.ClickedColumnIndex].HeaderText = newName;
             try
             {
-                report.CustomReportResults[selectedTableIndex].ColumnAlias = GetColumnMapping();
+                var alias = dgv.Columns.Cast<DataGridViewColumn>()
+                        .Where(column => column.DataPropertyName != column.HeaderText)
+                         .ToDictionary(column => column.DataPropertyName, column => column.HeaderText);
+                report.CustomReportResults[dgv.ResultSetID].ColumnAlias = alias;
                 report.Update();
             }
             catch (Exception ex)
@@ -369,10 +200,6 @@ namespace DBADashGUI.CustomReports
                     MessageBoxIcon.Error);
             }
         }
-
-        private Dictionary<string, string> GetColumnMapping() => dgv.Columns.Cast<DataGridViewColumn>()
-                .Where(column => column.DataPropertyName != column.HeaderText)
-                .ToDictionary(column => column.DataPropertyName, column => column.HeaderText);
 
         /// <summary>
         /// Param prompt is shown instead of grid if we have a 201 error indicating that parameter values are required.
@@ -387,31 +214,23 @@ namespace DBADashGUI.CustomReports
         /// <summary>
         /// Convert DateTime columns to local timezone unless user has specified that conversion should be excluded for the column
         /// </summary>
-        /// <param name="dt"></param>
-        private void ConvertDateTimeColsToLocalTimeZone(DataTable dt)
+        /// <param name="ds"></param>
+        private void ConvertDateTimeColsToLocalTimeZone(DataSet ds)
         {
-            var convertCols = dt.Columns.Cast<DataColumn>()
-                .Where(column => column.DataType == typeof(DateTime) && !report.CustomReportResults[selectedTableIndex].DoNotConvertToLocalTimeZone.Contains(column.ColumnName))
-                .Select(column => column.ColumnName).ToList();
-            if (convertCols.Count > 0)
+            for (var i = 0; i < ds.Tables.Count; i++)
             {
-                DateHelper.ConvertUTCToAppTimeZone(ref dt, convertCols);
-            }
-        }
+                if (!report.CustomReportResults.TryGetValue(i, out var result)) continue;
+                var dt = ds.Tables[i];
+                var convertCols = dt.Columns.Cast<DataColumn>()
+                    .Where(column => column.DataType == typeof(DateTime) && !result.DoNotConvertToLocalTimeZone.Contains(column.ColumnName))
+                    .Select(column => column.ColumnName).ToList();
+                if (convertCols.Count > 0)
+                {
+                    DateHelper.ConvertUTCToAppTimeZone(ref dt, convertCols);
+                }
 
-        private void SetDataSource(DataTable dt)
-        {
-            if (dgv.Columns.Count == 0)
-            {
-                var customReportResults = report.CustomReportResults[selectedTableIndex];
-                dgv.AddColumns(dt, customReportResults);
-                dgv.ApplyTheme();
+                i += 1;
             }
-            dgv.DataSource = null;
-            dgv.DataSource = new DataView(dt);
-            tsClearFilter.Enabled = false;
-            tsClearFilter.Font = new Font(tsClearFilter.Font, FontStyle.Regular);
-            tsClearFilter.ToolTipText = string.Empty;
         }
 
         /// <summary>
@@ -424,11 +243,11 @@ namespace DBADashGUI.CustomReports
             {
                 if (report.CustomReportResults.TryGetValue(i, out var result))
                 {
-                    result.ResultName ??= "Result" + i; // ensure we have a name
+                    result.ResultName ??= "Result" + (i + 1); // ensure we have a name
                 }
                 else
                 {
-                    report.CustomReportResults.Add(i, new CustomReportResult() { ResultName = "Result" + i });
+                    report.CustomReportResults.Add(i, new CustomReportResult() { ResultName = "Result" + (i + 1) });
                 }
             }
 
@@ -437,12 +256,16 @@ namespace DBADashGUI.CustomReports
             {
                 cboResults.Items.Add(report.CustomReportResults[i].ResultName);
             }
-            renameResultSetToolStripMenuItem.Visible = cboResults.Items.Count > 1;
-            cboResults.Visible = cboResults.Items.Count > 1;
-            lblSelectResults.Visible = cboResults.Items.Count > 1;
-            cboResults.SelectedIndex = selectedTableIndex < cboResults.Items.Count ? selectedTableIndex : 0;
+
+            cboResults.Items.Add("ALL");
+
+            cboResults.Visible = cboResults.Items.Count > 2;
+            lblSelectResults.Visible = cboResults.Items.Count > 2;
+            cboResults.SelectedIndex = cboResults.Items.Count - 1;
             suppressCboResultsIndexChanged = false;
         }
+
+        private bool ShowAllResults => cboResults.SelectedIndex == cboResults.Items.Count - 1;
 
         public void RefreshData()
         {
@@ -552,7 +375,6 @@ namespace DBADashGUI.CustomReports
                 ImportAgent = context.ImportAgent,
                 Lifetime = Config.DefaultCommandTimeout
             };
-            doAutoSize = true;
 
             SetStatus("Message sent", "Running", DashColors.Information);
             IsMessageInProgress = true;
@@ -579,10 +401,7 @@ namespace DBADashGUI.CustomReports
 
                     if (reportDS.Tables.Count > 0)
                     {
-                        this.Invoke(() =>
-                        {
-                            ShowTable(true);
-                        });
+                        this.Invoke(ShowTable);
                         SetStatus("Completed", "Success", DashColors.Success);
                     }
                     else
@@ -626,37 +445,374 @@ namespace DBADashGUI.CustomReports
             });
         }
 
-        protected void ShowTable(bool reset = false)
+        public List<DBADashDataGridView> Grids { get; private set; }
+        private string previousSchema;
+
+        private void ClearResults()
         {
-            if (reset)
-            {
-                dgv.Columns.Clear();
-            }
-            if (reportDS.Tables.Count == 0) return;
-            if (selectedTableIndex >= reportDS.Tables.Count)
-            {
-                suppressCboResultsIndexChanged = true;
-                selectedTableIndex = 0;
-                cboResults.SelectedIndex = 0;
-                dgv.Columns.Clear();
-                suppressCboResultsIndexChanged = false;
-            }
-            var dt = reportDS.Tables[selectedTableIndex];
-            ConvertDateTimeColsToLocalTimeZone(dt);
-
-            SetDataSource(dt);
-
-            SetColumnLayout();
+            splitContainer1.Panel1.Controls.Clear();
+            Grids.Clear();
+            previousSchema = string.Empty;
+            UpdateClearFilter();
         }
 
-        private void SetColumnLayout()
+        private void LoadResultsIntoExistingGrids()
         {
-            const int maxWidth = 400;
-            if (report.CustomReportResults[selectedTableIndex].ColumnLayout.Count > 0)
+            foreach (var grid in Grids)
             {
-                dgv.LoadColumnLayout(report.CustomReportResults[selectedTableIndex].ColumnLayout);
+                grid.AutoGenerateColumns = false;
+                var table = reportDS.Tables[grid.ResultSetID];
+                grid.DataSource = new DataView(table, grid.RowFilter, grid.SortString, DataViewRowState.CurrentRows);
             }
-            else if (doAutoSize)
+        }
+
+        protected void ShowTable()
+        {
+            if (reportDS.Tables.Count == 0) return;
+            var currentSchema = reportDS.GetXmlSchema();
+            if (currentSchema == previousSchema)
+            {
+                LoadResultsIntoExistingGrids();
+                return;
+            }
+
+            const int minDataGridViewHeight = 100; // Minimum height for a DataGridView
+            var maxDataGridViewHeight = Math.Max(300, this.Height / Math.Min(3, reportDS.Tables.Count)); // Allow table to take up to 1/3 (or half if there are 2 tables) of the form height with minimum size of 300.
+            var parentPanel = splitContainer1.Panel1;
+            ClearResults();
+            List<Panel> panels = new();
+            var i = ShowAllResults ? 0 : cboResults.SelectedIndex;
+            var tables = ShowAllResults ? reportDS.Tables.Cast<DataTable>().ToArray() : new[] { reportDS.Tables[cboResults.SelectedIndex] };
+            foreach (var table in tables)
+            {
+                var pnl = new Panel()
+                {
+                    Dock = tables.Length == 1 ? DockStyle.Fill : DockStyle.Top, // Dock to the top of the panel
+                    Tag = i,
+                    Padding = new Padding(0, 0, 0, 5),
+                };
+                var dgv = new DBADashDataGridView()
+                {
+                    DataSource = new DataView(table),
+                    ReadOnly = true,
+                    Dock = DockStyle.Fill,
+                    Padding = new Padding(0, 0, 0, 30),
+                    AllowUserToAddRows = false,
+                    AllowUserToDeleteRows = false,
+                    AllowUserToOrderColumns = true,
+                    ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
+                    RowHeadersVisible = false,
+                    ResultSetID = i,
+                    ResultSetName = report.CustomReportResults[i].ResultName,
+                };
+                dgv.RowsAdded += Dgv_RowsAdded;
+                dgv.CellContentClick += Dgv_CellContentClick;
+                if (tables.Length > 1)
+                {
+                    pnl.MouseDown += DataGridPanel_MouseDown;
+                    pnl.MouseMove += DataGridPanel_MouseMove;
+                    pnl.MouseUp += DataGridPanel_MouseUp;
+                    pnl.MouseLeave += DataGridPanel_MouseLeave;
+                }
+                var customReportResults = report.CustomReportResults[i];
+                dgv.AddColumns(table, customReportResults);
+                dgv.DataBindingComplete += Dgv_DataBindingComplete;
+
+                if (report.CanEditReport) // Add context menu items for editing
+                {
+                    AddContextMenuItemsForEditing(dgv);
+                }
+                dgv.ApplyTheme();
+                // Adjust height based on row count, with a maximum limit.  Allow for column height being adjusted from default.
+                var rowsHeight = ((dgv.RowTemplate.Height) * table.Rows.Count) + dgv.Padding.Top + dgv.Padding.Bottom + (dgv.ColumnHeadersHeight * 3) + pnl.Padding.Top + pnl.Padding.Bottom;
+                pnl.Height = Math.Max(Math.Min(rowsHeight, maxDataGridViewHeight), minDataGridViewHeight);
+
+                Grids.Add(dgv);
+                panels.Add(pnl);
+
+                if (tables.Length > 1)
+                {
+                    var ts = new ToolStrip() { Dock = DockStyle.Top };
+                    ts.Items.Add(new ToolStripButton("+", null, Maximize_Click)
+                    {
+                        Alignment = ToolStripItemAlignment.Right,
+                        DisplayStyle = ToolStripItemDisplayStyle.Text,
+                        Tag = i
+                    });
+                    ts.Items.Add(new ToolStripLabel(report.CustomReportResults[i].ResultName)
+                    {
+                        Alignment = ToolStripItemAlignment.Right,
+                        Font = new Font(this.Font, FontStyle.Bold)
+                    });
+                    ts.Items.Add(new ToolStripButton("Columns", Properties.Resources.Column_16x, Columns_Click)
+                    {
+                        Alignment = ToolStripItemAlignment.Left,
+                        DisplayStyle = ToolStripItemDisplayStyle.Image,
+                        Tag = i
+                    });
+                    ts.Items.Add(new ToolStripButton("Copy", Properties.Resources.ASX_Copy_blue_16x, Copy_Click)
+                    {
+                        Alignment = ToolStripItemAlignment.Left,
+                        DisplayStyle = ToolStripItemDisplayStyle.Image,
+                        Tag = i
+                    });
+                    var clearFilterMenuItem =
+                        new ToolStripButton("Clear Filter", Properties.Resources.Eraser_16x, ClearFilter_Click)
+                        {
+                            Alignment = ToolStripItemAlignment.Left,
+                            DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
+                            Enabled = false,
+                            Tag = i
+                        };
+                    ts.Items.Add(clearFilterMenuItem);
+                    if (report.CanEditReport)
+                        ts.Items.Add(
+                            new ToolStripButton("Rename", Properties.Resources.Rename_16x, RenameResultSet_Click)
+                            {
+                                Alignment = ToolStripItemAlignment.Right,
+                                DisplayStyle = ToolStripItemDisplayStyle.Image,
+                                Tag = i
+                            });
+                    ts.ApplyTheme();
+                    pnl.Controls.AddRange(new Control[] { dgv, ts });
+                    dgv.GridFilterChanged += (sender, e) =>
+                    {
+                        clearFilterMenuItem.Enabled = !string.IsNullOrEmpty(dgv.RowFilter);
+                        clearFilterMenuItem.Font = new Font(clearFilterMenuItem.Font, clearFilterMenuItem.Enabled ? FontStyle.Bold : FontStyle.Regular);
+                        UpdateClearFilter();
+                    };
+                }
+                else
+                {
+                    pnl.Controls.Add(dgv);
+                    dgv.GridFilterChanged += (sender, e) =>
+                    {
+                        UpdateClearFilter();
+                    };
+                }
+
+                i += 1;
+            }
+            parentPanel.Controls.AddRange(panels.OrderByDescending(p => (int)p.Tag!).Cast<Control>().ToArray());
+            OnPostGridRefresh();
+            previousSchema = currentSchema;
+        }
+
+        private void UpdateClearFilter()
+        {
+            tsClearFilter.Enabled = Grids.Any(g => (g.DataSource as DataView)?.RowFilter != string.Empty);
+            tsClearFilter.Font = new Font(tsClearFilter.Font, tsClearFilter.Enabled ? FontStyle.Bold : FontStyle.Regular);
+        }
+
+        private void ClearFilter_Click(object sender, EventArgs e)
+        {
+            var dgv = GetAssociatedGrid(sender);
+            dgv.SetFilter(string.Empty);
+        }
+
+        private void AddContextMenuItemsForEditing(DBADashDataGridView dgv)
+        {
+            AddCellContextMenuItemsForEditing(dgv);
+            AddColumnContextMenuItemsForEditing(dgv);
+        }
+
+        private void AddCellContextMenuItemsForEditing(DBADashDataGridView dgv)
+        {
+            var editReport = new ToolStripMenuItem("Edit Report", Properties.Resources.VBReport_16x);
+            var highlight = new ToolStripMenuItem("Highlight Cell Value", Properties.Resources.HighlightHS);
+            highlight.Click += (sender, e) => SetCellHighlightingRules(dgv);
+            editReport.DropDownItems.Add(highlight);
+            dgv.CellContextMenu.Items.Add(editReport);
+        }
+
+        private void AddColumnContextMenuItemsForEditing(DBADashDataGridView dgv)
+        {
+            var editReport = new ToolStripMenuItem("Edit Report", Properties.Resources.VBReport_16x) { Name = "EditReport" };
+
+            var renameColumnMenuItem = new ToolStripMenuItem("Rename Column", Properties.Resources.Rename_16x);
+            var setFormatStringMenuItem =
+                new ToolStripMenuItem("Set Format String", Properties.Resources.Percentage_16x);
+            var addLink = new ToolStripMenuItem("Add Link", Properties.Resources.WebURL_16x);
+            var rules = new ToolStripMenuItem("Highlighting Rules", Properties.Resources.HighlightHS);
+            var convertLocalMenuItem = new ToolStripMenuItem("Convert to local timezone") { Checked = true, CheckOnClick = true, Name = "ConvertLocal" };
+            renameColumnMenuItem.Click += (sender, e) => RenameColumnMenuItem_Click(dgv);
+            convertLocalMenuItem.Click += (sender, e) => ConvertLocalMenuItem_Click(sender, dgv);
+            setFormatStringMenuItem.Click += (sender, e) => SetFormatStringMenuItem_Click(dgv);
+            addLink.Click += (sender, e) => AddLink_Click(dgv);
+            rules.Click += (sender, e) => SetCellHighlightingRules(dgv);
+
+            editReport.DropDownItems.AddRange(new ToolStripItem[]
+            {
+                renameColumnMenuItem,
+                convertLocalMenuItem,
+                setFormatStringMenuItem,
+                addLink,
+                rules
+            });
+
+            dgv.ColumnContextMenu.Items.Add(editReport);
+            dgv.ColumnContextMenuOpening += (sender, args) =>
+            {
+                convertLocalMenuItem.Checked = dgv.Columns[args.ColumnIndex].ValueType == typeof(DateTime) &&
+                                       !report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Contains(dgv.Columns[args.ColumnIndex].DataPropertyName);
+                convertLocalMenuItem.Visible = dgv.Columns[args.ColumnIndex].ValueType == typeof(DateTime);
+            };
+        }
+
+        private void Maximize_Click(object sender, EventArgs e)
+        {
+            foreach (var panel in splitContainer1.Panel1.Controls.OfType<Panel>())
+            {
+                if (panel.Controls[1] is ToolStrip ts && ts.Items[0] is ToolStripButton tsb && tsb == sender)
+                {
+                    panel.Dock = DockStyle.Fill;
+                    ts.Items[0].Text = "-";
+                    ts.Items[0].Click -= Maximize_Click;
+                    ts.Items[0].Click += Minimize_Click;
+                }
+                else
+                {
+                    panel.Visible = false;
+                }
+            }
+        }
+
+        private void Minimize_Click(object sender, EventArgs e)
+        {
+            foreach (var panel in splitContainer1.Panel1.Controls.OfType<Panel>())
+            {
+                if (panel.Controls[1] is ToolStrip ts && ts.Items[0] is ToolStripButton tsb && tsb == sender)
+                {
+                    panel.Dock = DockStyle.Top;
+                    ts.Items[0].Text = "+";
+                    ts.Items[0].Click -= Minimize_Click;
+                    ts.Items[0].Click += Maximize_Click;
+                }
+                else
+                {
+                    panel.Visible = true;
+                }
+            }
+        }
+
+        protected virtual void OnPostGridRefresh()
+        {
+            UpdateClearFilter();
+            PostGridRefresh?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void RenameResultSet_Click(object sender, EventArgs e)
+        {
+            var dgv = GetAssociatedGrid(sender);
+            if (dgv == null) return;
+            var name = dgv.ResultSetName;
+            if (CommonShared.ShowInputDialog(ref name, "Enter name") == DialogResult.OK)
+            {
+                report.CustomReportResults[dgv.ResultSetID].ResultName = name;
+                suppressCboResultsIndexChanged = true;
+                cboResults.Items[dgv.ResultSetID] = name;
+                dgv.ResultSetName = name;
+                suppressCboResultsIndexChanged = false;
+                report.Update();
+                ShowTable();
+            }
+        }
+
+        private DBADashDataGridView GetAssociatedGrid(object sender)
+        {
+            switch (Grids.Count)
+            {
+                case 0:
+                    return null;
+
+                case 1:
+                    return Grids[0];
+            }
+            if (sender is ToolStripButton tsb && tsb.Tag != null)
+            {
+                var resultSetID = (int)tsb.Tag;
+                return Grids.FirstOrDefault(d => d.ResultSetID == resultSetID);
+            }
+            return Grids[0];
+        }
+
+        private void Copy_Click(object sender, EventArgs e)
+        {
+            var dgv = GetAssociatedGrid(sender);
+            Common.CopyDataGridViewToClipboard(dgv);
+        }
+
+        private void Columns_Click(object sender, EventArgs e)
+        {
+            var dgv = GetAssociatedGrid(sender);
+            dgv?.PromptColumnSelection();
+        }
+
+        #region DataGridPanelResizing
+
+        private bool isResizing = false;
+        private int initialResizeY;
+        private Control resizingControl;
+
+        private void DataGridPanel_MouseLeave(object sender, EventArgs e)
+        {
+            if (!isResizing) // Only reset the cursor if we're not currently resizing
+            {
+                ((Control)sender).Cursor = Cursors.Default;
+            }
+        }
+
+        private void DataGridPanel_MouseDown(object sender, MouseEventArgs e)
+        {
+            // Start resizing if the mouse is near the edge of the panel
+            if (e.Y < ((Control)sender).Height - 10) return;
+            isResizing = true;
+            initialResizeY = e.Y;
+            resizingControl = (Control)sender;
+            resizingControl.Cursor = Cursors.SizeNS; // Change cursor to resizing cursor
+        }
+
+        private void DataGridPanel_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isResizing && resizingControl != null)
+            {
+                // Calculate the new height
+                var newHeight = resizingControl.Height + (e.Y - initialResizeY);
+                if (newHeight <= 100) return; // Minimum height constraint
+                resizingControl.Height = newHeight;
+                initialResizeY = e.Y;
+            }
+            else if (e.Y >= ((Control)sender).Height - 10)
+            {
+                // Change cursor to indicate resizable area
+                ((Control)sender).Cursor = Cursors.SizeNS;
+            }
+            else
+            {
+                // Change cursor back to default
+                ((Control)sender).Cursor = Cursors.Default;
+            }
+        }
+
+        private void DataGridPanel_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (!isResizing) return;
+            isResizing = false;
+            resizingControl.Cursor = Cursors.Default; // Reset cursor
+            resizingControl = null;
+        }
+
+        #endregion DataGridPanelResizing
+
+        private void SetColumnLayout(DBADashDataGridView dgv)
+        {
+            if (!report.CustomReportResults.TryGetValue(dgv.ResultSetID, out var value)) return;
+            const int maxWidth = 400;
+            if (value.ColumnLayout.Count > 0)
+            {
+                dgv.LoadColumnLayout(value.ColumnLayout);
+            }
+            else
             {
                 dgv.AutoResizeColumns();
                 // Ensure column size is not excessive
@@ -666,11 +822,13 @@ namespace DBADashGUI.CustomReports
                     column.Width = maxWidth;
                 }
             }
+        }
 
-            if (dgv.Rows.Count > 0)
-            {
-                doAutoSize = false;
-            }
+        private void Dgv_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
+        {
+            if (sender is not DBADashDataGridView dgv) return;
+            SetColumnLayout(dgv);
+            dgv.DataBindingComplete -= Dgv_DataBindingComplete;
         }
 
         /// <summary>
@@ -730,6 +888,7 @@ namespace DBADashGUI.CustomReports
             try
             {
                 da.Fill(ds);
+                ConvertDateTimeColsToLocalTimeZone(ds);
             }
             finally
             {
@@ -758,11 +917,9 @@ namespace DBADashGUI.CustomReports
             {
                 await CancelProcessing();
             }
+            ClearResults();
             IsMessageInProgress = false;
             CurrentMessageGroup = Guid.Empty;
-            doAutoSize = true;
-            selectedTableIndex = 0;
-            dgv.Columns.Clear();
             this.context = _context;
             report = _context.Report;
             customParams = sqlParams ?? report.GetCustomSqlParameters();
@@ -782,7 +939,6 @@ namespace DBADashGUI.CustomReports
             tsExecute.Visible = report is DirectExecutionReport;
             lblURL.Text = report.URL;
             lblURL.Visible = !string.IsNullOrEmpty(report.URL);
-            InitializeContextMenu();
             AddPickers();
             SetTriggerCollectionVisibility();
             if (AutoLoad)
@@ -877,12 +1033,12 @@ namespace DBADashGUI.CustomReports
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgv);
+            // Common.CopyDataGridViewToClipboard(dgv);
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(dgv);
+            Common.PromptSaveDataGridView(Grids.Cast<DataGridView>().ToArray());
         }
 
         private void SetTitleToolStripMenuItem_Click(object sender, EventArgs e)
@@ -930,14 +1086,17 @@ namespace DBADashGUI.CustomReports
 
         private void TsCols_Click(object sender, EventArgs e)
         {
-            dgv.PromptColumnSelection();
+            // dgv.PromptColumnSelection();
         }
 
         private void SaveLayoutToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("Save Layout (column visibility, order and size)?", "Save", MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question) != DialogResult.Yes) return;
-            report.CustomReportResults[selectedTableIndex].ColumnLayout = dgv.GetColumnLayout();
+            foreach (var dgv in Grids)
+            {
+                report.CustomReportResults[dgv.ResultSetID].ColumnLayout = dgv.GetColumnLayout();
+            }
             report.Update();
         }
 
@@ -945,33 +1104,19 @@ namespace DBADashGUI.CustomReports
         {
             if (MessageBox.Show("Reset Layout (column visibility, order and size)?", "Reset", MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question) != DialogResult.Yes) return;
-            report.CustomReportResults[selectedTableIndex].ColumnLayout = new();
+            foreach (var dgv in Grids)
+            {
+                report.CustomReportResults[dgv.ResultSetID].ColumnLayout = new();
+            }
             report.Update();
-            dgv.Columns.Clear();
-            doAutoSize = true;
             RefreshData();
         }
 
         private void CboResults_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (suppressCboResultsIndexChanged) return;
-            selectedTableIndex = cboResults.SelectedIndex;
-            dgv.Columns.Clear();
-            doAutoSize = true;
+            previousSchema = string.Empty; // Force re-generation of grids
             ShowTable();
-        }
-
-        private void RenameResultSetToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var name = cboResults.SelectedItem.ToString();
-            if (CommonShared.ShowInputDialog(ref name, "Enter name") == DialogResult.OK)
-            {
-                report.CustomReportResults[cboResults.SelectedIndex].ResultName = name;
-                suppressCboResultsIndexChanged = true;
-                cboResults.Items[selectedTableIndex] = name;
-                suppressCboResultsIndexChanged = false;
-                report.Update();
-            }
         }
 
         private void SetDescriptionToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1066,13 +1211,14 @@ namespace DBADashGUI.CustomReports
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
+            var dgv = (DBADashDataGridView)sender;
             if (e.RowIndex < 0) return;
             var colName = dgv.Columns[e.ColumnIndex].DataPropertyName;
             LinkColumnInfo linkColumnInfo = null;
-            report.CustomReportResults[selectedTableIndex].LinkColumns?.TryGetValue(colName, out linkColumnInfo);
+            report.CustomReportResults[dgv.ResultSetID].LinkColumns?.TryGetValue(colName, out linkColumnInfo);
             try
             {
-                linkColumnInfo?.Navigate(context, dgv.Rows[e.RowIndex], selectedTableIndex);
+                linkColumnInfo?.Navigate(context, dgv.Rows[e.RowIndex], dgv.ResultSetID);
             }
             catch (Exception ex)
             {
@@ -1083,13 +1229,17 @@ namespace DBADashGUI.CustomReports
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            report.CustomReportResults[selectedTableIndex].CellHighlightingRules.FormatRowsAdded(sender as DataGridView, e);
+            if (sender is not DBADashDataGridView dgv) return;
+            if (!report.CustomReportResults.TryGetValue(dgv.ResultSetID, out CustomReportResult value)) return;
+            value.CellHighlightingRules.FormatRowsAdded(dgv, e);
         }
 
         private void TsClearFilter_Click(object sender, EventArgs e)
         {
-            if (dgv.DataSource is not DataView dv) return;
-            dv.RowFilter = string.Empty;
+            foreach (var dgv in Grids)
+            {
+                dgv.SetFilter(string.Empty);
+            }
             tsClearFilter.Enabled = false;
             tsClearFilter.Font = new Font(tsClearFilter.Font, FontStyle.Regular);
             tsClearFilter.ToolTipText = string.Empty;
@@ -1124,17 +1274,6 @@ namespace DBADashGUI.CustomReports
             CommonShared.OpenURL(report.URL);
         }
 
-        private void Dgv_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
-        {
-            if (dgv.Columns[e.ColumnIndex].ValueType == typeof(byte[]) && e.Value != null && e.Value != DBNull.Value)
-            {
-                byte[] bytes = (byte[])e.Value;
-                // Convert the byte array to a hexadecimal string
-                e.Value = "0x" + BitConverter.ToString(bytes).Replace("-", string.Empty);
-                e.FormattingApplied = true; // Indicate that formatting was applied
-            }
-        }
-
         private DateTime TimerStart;
 
         private void Timer1_Tick(object sender, EventArgs e)
@@ -1144,6 +1283,11 @@ namespace DBADashGUI.CustomReports
 
         private void UpdateTimer()
         {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(UpdateTimer);
+                return;
+            }
             lblTimer.Text = (DateTime.Now - TimerStart).ToString(@"hh\:mm\:ss");
         }
 

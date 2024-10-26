@@ -12,6 +12,7 @@ using DBADashGUI.SchemaCompare;
 using System.Xml.Linq;
 using System.Xml;
 using DBADash;
+using DBADashGUI.CustomReports;
 
 namespace DBADashGUI
 {
@@ -134,10 +135,15 @@ namespace DBADashGUI
 
         public static void PromptSaveDataGridView(ref DataGridView dgv)
         {
-            PromptSaveDataGridView(dgv);
+            PromptSaveDataGridView(new DataGridView[] { dgv });
         }
 
         public static void PromptSaveDataGridView(DataGridView dgv)
+        {
+            PromptSaveDataGridView(new DataGridView[] { dgv });
+        }
+
+        public static void PromptSaveDataGridView(DataGridView[] dgv)
         {
             var defaultFileName = "DBADash_" + DateHelper.AppNow.ToString("yyyyMMdd_HHmmss") + ".xlsx";
             using var ofd = new SaveFileDialog() { FileName = defaultFileName, AddExtension = true, DefaultExt = ".xlsx" };
@@ -156,12 +162,12 @@ namespace DBADashGUI
 
             try
             {
-                SaveDataGridViewToXLSX(ref dgv, ofd.FileName); // Assume there will be no invalid XML characters
+                SaveDataGridViewsToXLSX(dgv, ofd.FileName); // Assume there will be no invalid XML characters
             }
             catch (XmlException ex)
             {
                 Debug.WriteLine("XmlException exporting to Excel, retrying with invalid XML characters removed", ex.ToString());
-                SaveDataGridViewToXLSX(ref dgv, ofd.FileName, true); // Try again with invalid XML characters removed
+                SaveDataGridViewsToXLSX(dgv, ofd.FileName, true); // Try again with invalid XML characters removed
                 Debug.WriteLine("Invalid XML characters removed");
             }
 
@@ -169,108 +175,123 @@ namespace DBADashGUI
             Process.Start(psi);
         }
 
-        public static void SaveDataGridViewToXLSX(ref DataGridView dgv, string path, bool replaceInvalidChars = false)
+        public static void SaveDataGridViewsToXLSX(DataGridView[] Grids, string path, bool replaceInvalidChars = false)
         {
-            var colIndex = 1;
-            var rowIndex = 1;
-
             using var workbook = new XLWorkbook();
-            var sheet = workbook.Worksheets.Add("Sheet1");
-
-            foreach (DataGridViewColumn col in dgv.Columns)
+            var sheetIndex = 1;
+            foreach (var dgv in Grids)
             {
-                if (!col.Visible) continue;
-                sheet.Cell(1, colIndex).SetValue(col.HeaderText);
-                colIndex++;
-            }
-            foreach (DataGridViewRow row in dgv.Rows)
-            {
-                colIndex = 0;
-                rowIndex += 1;
-                foreach (DataGridViewCell cell in row.Cells)
+                var colIndex = 1;
+                var rowIndex = 1;
+                var sheetName = $"Sheet{sheetIndex}";
+                if (dgv is DBADashDataGridView dbadashDgv)
                 {
-                    if (!cell.Visible) continue;
-                    colIndex += 1;
+                    sheetName = string.IsNullOrEmpty(dbadashDgv.ResultSetName) ? sheetName : dbadashDgv.ResultSetName;
+                }
 
-                    var cellType = cell.ValueType;
+                var sheet = workbook.Worksheets.Add(sheetName);
 
-                    var format = string.IsNullOrEmpty(cell.Style.Format)
-                        ? cell.InheritedStyle.Format
-                        : cell.Style.Format;
-                    format = format switch
+                foreach (DataGridViewColumn col in dgv.Columns)
+                {
+                    if (!col.Visible) continue;
+                    sheet.Cell(1, colIndex).SetValue(col.HeaderText);
+                    colIndex++;
+                }
+                foreach (DataGridViewRow row in dgv.Rows)
+                {
+                    colIndex = 0;
+                    rowIndex += 1;
+                    foreach (DataGridViewCell cell in row.Cells)
                     {
-                        "P1" => "0.0%",
-                        "P:" or "P2" => "0.00%",
-                        _ => "",
-                    };
-                    if (cellType == typeof(DateTime))
-                    {
-                        format = "yyyy-MM-dd HH:mm";
-                    }
+                        if (!cell.Visible) continue;
+                        colIndex += 1;
 
-                    if (!cell.Style.ForeColor.IsEmpty || !cell.Style.BackColor.IsEmpty ||
-                        !string.IsNullOrEmpty(format))
-                    {
-                        var xlCell = sheet.Cell(rowIndex, colIndex);
-                        var backColor = cell.Style.BackColor.IsEmpty ? Color.Transparent : cell.Style.BackColor;
-                        xlCell.Style.Fill.SetBackgroundColor(XLColor.FromColor(backColor));
-                        xlCell.Style.Font.SetFontColor(XLColor.FromColor(cell.Style.ForeColor));
-                        xlCell.Style.NumberFormat.Format = format;
-                    }
+                        var cellType = cell.ValueType;
 
-                    try
-                    {
-                        if (cell.Value == DBNull.Value)
+                        var format = string.IsNullOrEmpty(cell.Style.Format)
+                            ? cell.InheritedStyle.Format
+                            : cell.Style.Format;
+                        format = format switch
                         {
-                            sheet.Cell(rowIndex, colIndex).SetValue(Convert.ToString(cell.FormattedValue));
+                            "P1" => "0.0%",
+                            "P:" or "P2" => "0.00%",
+                            _ => "",
+                        };
+                        if (cellType == typeof(DateTime))
+                        {
+                            format = "yyyy-MM-dd HH:mm";
                         }
-                        else if (cellType == typeof(bool))
+
+                        if (!cell.Style.ForeColor.IsEmpty || !cell.Style.BackColor.IsEmpty ||
+                            !string.IsNullOrEmpty(format))
                         {
-                            sheet.Cell(rowIndex, colIndex).SetValue((bool)cell.Value);
+                            var xlCell = sheet.Cell(rowIndex, colIndex);
+                            var backColor = cell.Style.BackColor.IsEmpty ? Color.Transparent : cell.Style.BackColor;
+                            xlCell.Style.Fill.SetBackgroundColor(XLColor.FromColor(backColor));
+                            xlCell.Style.Font.SetFontColor(XLColor.FromColor(cell.Style.ForeColor));
+                            xlCell.Style.NumberFormat.Format = format;
                         }
-                        else if (cellType.IsNumericType())
+
+                        try
                         {
-                            if (!decimal.TryParse(cell.FormattedValue as string, out var decimalValue))
+                            if (cell.Value == DBNull.Value)
                             {
-                                decimalValue = Convert.ToDecimal(cell.Value);
+                                sheet.Cell(rowIndex, colIndex).SetValue(Convert.ToString(cell.FormattedValue));
                             }
+                            else if (cellType == typeof(bool))
+                            {
+                                sheet.Cell(rowIndex, colIndex).SetValue((bool)cell.Value);
+                            }
+                            else if (cellType.IsNumericType())
+                            {
+                                if (!decimal.TryParse(cell.FormattedValue as string, out var decimalValue))
+                                {
+                                    decimalValue = Convert.ToDecimal(cell.Value);
+                                }
 
-                            sheet.Cell(rowIndex, colIndex).SetValue(decimalValue);
+                                sheet.Cell(rowIndex, colIndex).SetValue(decimalValue);
+                            }
+                            else if (cellType == typeof(DateTime))
+                            {
+                                sheet.Cell(rowIndex, colIndex).SetValue(Convert.ToDateTime(cell.Value));
+                            }
+                            else if (cellType == typeof(byte[]))
+                            {
+                                sheet.Cell(rowIndex, colIndex).SetValue(Convert.ToString(cell.Value));
+                            }
+                            else
+                            {
+                                sheet.Cell(rowIndex, colIndex).SetValue(replaceInvalidChars
+                                    ? Convert.ToString(cell.FormattedValue).StripInvalidXmlChars().Truncate(32767, true)
+                                    : Convert.ToString(cell.FormattedValue).Truncate(32767, true));
+                            }
                         }
-                        else if (cellType == typeof(DateTime))
+                        catch (Exception ex)
                         {
-                            sheet.Cell(rowIndex, colIndex).SetValue(Convert.ToDateTime(cell.Value));
+                            Debug.WriteLine(ex.ToString());
                         }
-                        else if (cellType == typeof(byte[]))
-                        {
-                            sheet.Cell(rowIndex, colIndex).SetValue(Convert.ToString(cell.Value));
-                        }
-                        else
-                        {
-                            sheet.Cell(rowIndex, colIndex).SetValue(replaceInvalidChars
-                                ? Convert.ToString(cell.FormattedValue).StripInvalidXmlChars().Truncate(32767, true)
-                                : Convert.ToString(cell.FormattedValue).Truncate(32767, true));
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine(ex.ToString());
                     }
                 }
-            }
-            var table = sheet.Range(sheet.Cell(1, 1).Address, sheet.Cell(rowIndex, colIndex).Address).CreateTable();
-            table.Theme = XLTableTheme.None;
-            var header = sheet.Range(1, 1, 1, colIndex);
-            header.Style.Fill.SetBackgroundColor(XLColor.FromColor(DashColors.TrimbleBlue));
-            header.Style.Font.SetFontColor(XLColor.White);
-            header.Style.Font.SetBold();
-            var maxColumnWidth = 150;
-            sheet.Columns().AdjustToContents();
-            for (var i = 1; i <= colIndex; i++)
-            {
-                sheet.Column(i).Width = Math.Min(sheet.Column(i).Width, maxColumnWidth);
+                var table = sheet.Range(sheet.Cell(1, 1).Address, sheet.Cell(rowIndex, colIndex).Address).CreateTable();
+                table.Theme = XLTableTheme.None;
+                var header = sheet.Range(1, 1, 1, colIndex);
+                header.Style.Fill.SetBackgroundColor(XLColor.FromColor(DashColors.TrimbleBlue));
+                header.Style.Font.SetFontColor(XLColor.White);
+                header.Style.Font.SetBold();
+                var maxColumnWidth = 150;
+                sheet.Columns().AdjustToContents();
+                for (var i = 1; i <= colIndex; i++)
+                {
+                    sheet.Column(i).Width = Math.Min(sheet.Column(i).Width, maxColumnWidth);
+                }
+                sheetIndex += 1;
             }
             workbook.SaveAs(path);
+        }
+
+        public static void SaveDataGridViewToXLSX(ref DataGridView dgv, string path, bool replaceInvalidChars = false)
+        {
+            SaveDataGridViewsToXLSX(new DataGridView[] { dgv }, path, replaceInvalidChars);
         }
 
         public static string ByteArrayToString(byte[] ba)
