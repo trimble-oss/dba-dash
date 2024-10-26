@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            dgv = new System.Windows.Forms.DataGridView();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsExecute = new System.Windows.Forms.ToolStripButton();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
@@ -62,7 +61,6 @@
             lblDescription = new System.Windows.Forms.ToolStripStatusLabel();
             lblURL = new System.Windows.Forms.ToolStripStatusLabel();
             timer1 = new System.Windows.Forms.Timer(components);
-            ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
             toolStrip1.SuspendLayout();
             pnlParams.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer2).BeginInit();
@@ -70,29 +68,10 @@
             splitContainer2.Panel2.SuspendLayout();
             splitContainer2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
-            splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
             statusStrip1.SuspendLayout();
             SuspendLayout();
-            // 
-            // dgv
-            // 
-            dgv.AllowUserToAddRows = false;
-            dgv.AllowUserToDeleteRows = false;
-            dgv.AllowUserToOrderColumns = true;
-            dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            dgv.Location = new System.Drawing.Point(0, 0);
-            dgv.Name = "dgv";
-            dgv.ReadOnly = true;
-            dgv.RowHeadersVisible = false;
-            dgv.RowHeadersWidth = 51;
-            dgv.Size = new System.Drawing.Size(414, 558);
-            dgv.TabIndex = 0;
-            dgv.CellContentClick += Dgv_CellContentClick;
-            dgv.CellFormatting += Dgv_CellFormatting;
-            dgv.RowsAdded += Dgv_RowsAdded;
             // 
             // toolStrip1
             // 
@@ -142,7 +121,7 @@
             tsCopy.Name = "tsCopy";
             tsCopy.Size = new System.Drawing.Size(29, 25);
             tsCopy.Text = "Copy";
-            tsCopy.Click += TsCopy_Click;
+            tsCopy.Click += Copy_Click;
             // 
             // tsExcel
             // 
@@ -162,7 +141,7 @@
             tsCols.Name = "tsCols";
             tsCols.Size = new System.Drawing.Size(29, 25);
             tsCols.Text = "Columns";
-            tsCols.Click += TsCols_Click;
+            tsCols.Click += Columns_Click;
             // 
             // tsConfigure
             // 
@@ -198,7 +177,7 @@
             renameResultSetToolStripMenuItem.Name = "renameResultSetToolStripMenuItem";
             renameResultSetToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
             renameResultSetToolStripMenuItem.Text = "Rename Result Set";
-            renameResultSetToolStripMenuItem.Click += RenameResultSetToolStripMenuItem_Click;
+            renameResultSetToolStripMenuItem.Click += RenameResultSet_Click;
             // 
             // associateCollectionToolStripMenuItem
             // 
@@ -297,7 +276,7 @@
             lnkParams.Font = new System.Drawing.Font("Segoe UI", 16F);
             lnkParams.Location = new System.Drawing.Point(0, 0);
             lnkParams.Name = "lnkParams";
-            lnkParams.Size = new System.Drawing.Size(824, 259);
+            lnkParams.Size = new System.Drawing.Size(824, 258);
             lnkParams.TabIndex = 2;
             lnkParams.TabStop = true;
             lnkParams.Text = "Set Parameters";
@@ -331,7 +310,7 @@
             splitContainer2.Panel2.Controls.Add(lblParamsRequired);
             splitContainer2.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
             splitContainer2.Size = new System.Drawing.Size(824, 558);
-            splitContainer2.SplitterDistance = 259;
+            splitContainer2.SplitterDistance = 258;
             splitContainer2.TabIndex = 4;
             // 
             // lblParamsRequired
@@ -340,7 +319,7 @@
             lblParamsRequired.Font = new System.Drawing.Font("Segoe UI", 10F);
             lblParamsRequired.Location = new System.Drawing.Point(0, 0);
             lblParamsRequired.Name = "lblParamsRequired";
-            lblParamsRequired.Size = new System.Drawing.Size(824, 295);
+            lblParamsRequired.Size = new System.Drawing.Size(824, 296);
             lblParamsRequired.TabIndex = 3;
             lblParamsRequired.Text = "Parameters are required to run the report";
             lblParamsRequired.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -353,7 +332,7 @@
             // 
             // splitContainer1.Panel1
             // 
-            splitContainer1.Panel1.Controls.Add(dgv);
+            splitContainer1.Panel1.AutoScroll = true;
             // 
             // splitContainer1.Panel2
             // 
@@ -413,12 +392,13 @@
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            AutoScroll = true;
             Controls.Add(splitContainer1);
             Controls.Add(toolStrip1);
             Controls.Add(statusStrip1);
+            DoubleBuffered = true;
             Name = "CustomReportView";
             Size = new System.Drawing.Size(1242, 612);
-            ((System.ComponentModel.ISupportInitialize)dgv).EndInit();
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
             pnlParams.ResumeLayout(false);
@@ -426,7 +406,6 @@
             splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer2).EndInit();
             splitContainer2.ResumeLayout(false);
-            splitContainer1.Panel1.ResumeLayout(false);
             splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
@@ -437,8 +416,6 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.DataGridView dgv;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripButton tsCopy;

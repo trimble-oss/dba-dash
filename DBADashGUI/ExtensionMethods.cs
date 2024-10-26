@@ -140,7 +140,7 @@ namespace DBADashGUI
                     var savedCol = savedCols.First(savedCol => savedCol.Key == col.Name);
                     col.Visible = savedCol.Value.Visible;
                     col.Width = savedCol.Value.Width;
-                    if (savedCol.Value.DisplayIndex >= 0)
+                    if (savedCol.Value.DisplayIndex >= 0 && savedCol.Value.DisplayIndex < dgv.Columns.Count)
                     {
                         col.DisplayIndex = savedCol.Value.DisplayIndex;
                     }

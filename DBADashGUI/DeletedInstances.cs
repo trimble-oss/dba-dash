@@ -14,19 +14,21 @@ namespace DBADashGUI
     {
         public event EventHandler<int> InstanceRestored;
 
-        private bool IsDeleteInProgesss;
+        private bool IsDeleteInProgress;
 
         public DeletedInstances()
         {
             InitializeComponent();
-            customReportView1.Grid.ColumnAdded += Grid_ColumnAdded;
+            customReportView1.PostGridRefresh += OnPostGridRefresh;
         }
 
-        private void Grid_ColumnAdded(object sender, DataGridViewColumnEventArgs e)
+        protected void OnPostGridRefresh(object sender, EventArgs e)
         {
-            if (!customReportView1.Grid.Columns.Contains("colRestore"))
+            if (customReportView1.Grids.Count == 0) return;
+            var grid = customReportView1.Grids[0];
+            if (!grid.Columns.Contains("colRestore"))
             {
-                customReportView1.Grid.Columns.Add(new DataGridViewLinkColumn()
+                grid.Columns.Add(new DataGridViewLinkColumn()
                 {
                     Name = "colRestore",
                     HeaderText = @"Restore",
@@ -34,7 +36,7 @@ namespace DBADashGUI
                     UseColumnTextForLinkValue = true,
                     Width = 80
                 });
-                customReportView1.Grid.Columns.Add(new DataGridViewLinkColumn()
+                grid.Columns.Add(new DataGridViewLinkColumn()
                 {
                     Name = "colDelete",
                     HeaderText = @"Delete",
@@ -42,9 +44,9 @@ namespace DBADashGUI
                     UseColumnTextForLinkValue = true,
                     Width = 90
                 });
-                customReportView1.Grid.CellContentClick -= Grid_CellContentClick;
-                customReportView1.Grid.CellContentClick += Grid_CellContentClick;
-                customReportView1.Grid.ApplyTheme();
+                grid.CellContentClick -= Grid_CellContentClick;
+                grid.CellContentClick += Grid_CellContentClick;
+                grid.ApplyTheme();
             }
         }
 
@@ -71,9 +73,10 @@ namespace DBADashGUI
         private void Grid_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
-            var instanceID = (int)customReportView1.Grid.Rows[e.RowIndex].Cells["InstanceID"].Value;
-            var instanceName = (string)customReportView1.Grid.Rows[e.RowIndex].Cells["InstanceDisplayName"].Value;
-            switch (customReportView1.Grid.Columns[e.ColumnIndex].Name)
+            var grid = (DBADashDataGridView)sender;
+            var instanceID = (int)grid.Rows[e.RowIndex].Cells["InstanceID"].Value;
+            var instanceName = (string)grid.Rows[e.RowIndex].Cells["InstanceDisplayName"].Value;
+            switch (grid.Columns[e.ColumnIndex].Name)
             {
                 case "colRestore":
                     try
@@ -92,12 +95,12 @@ namespace DBADashGUI
 
                 case "colDelete":
                     {
-                        if (IsDeleteInProgesss)
+                        if (IsDeleteInProgress)
                         {
                             MessageBox.Show(@"Please wait for the current delete operation to complete before starting another.", $@"Delete {instanceName}", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
                         }
-                        var lastCollectionMins = (int)customReportView1.Grid.Rows[e.RowIndex].Cells["LastCollectionMins"].Value;
+                        var lastCollectionMins = (int)grid.Rows[e.RowIndex].Cells["LastCollectionMins"].Value;
                         if (lastCollectionMins <= 1440)
                         {
                             MessageBox.Show(@"Please wait at least 1 day before deleting this instance.", $@"Delete {instanceName}",
@@ -128,7 +131,7 @@ Are you sure you want to delete this instance?",
 
         private void HardDeleteInstance(int instanceID, string instanceName)
         {
-            IsDeleteInProgesss = true;
+            IsDeleteInProgress = true;
             try
             {
                 SetStatus($"Deleting instance {instanceName}...", string.Empty,
@@ -143,7 +146,7 @@ Are you sure you want to delete this instance?",
             }
 
             RefreshData();
-            IsDeleteInProgesss = false;
+            IsDeleteInProgress = false;
         }
 
         protected virtual void OnInstanceRestored(int instanceID)
