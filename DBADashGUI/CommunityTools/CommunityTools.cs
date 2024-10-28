@@ -80,6 +80,30 @@ namespace DBADashGUI.CommunityTools
                                     TextHandling = CodeEditor.CodeEditorModes.SQL
                                 }
                             },
+                            {
+                                "additional_info",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "additional_info",
+                                    TextHandling = CodeEditor.CodeEditorModes.XML
+                                }
+                            },
+                            {
+                                "locks",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "locks",
+                                    TextHandling = CodeEditor.CodeEditorModes.XML
+                                }
+                            },
+                            {
+                                "memory_info",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "memory_info",
+                                    TextHandling = CodeEditor.CodeEditorModes.XML
+                                }
+                            },
                         }
                     }
                 }
