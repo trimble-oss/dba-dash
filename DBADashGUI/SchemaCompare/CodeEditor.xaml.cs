@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Xml.Linq;
 using DBADashGUI.Theme;
 
 namespace DBADashGUI.SchemaCompare
@@ -70,6 +71,19 @@ namespace DBADashGUI.SchemaCompare
             {
                 resourceName = "DBADashGUI.SyntaxHighlighting.PowerShell.xshd";
             }
+            else if (mode == CodeEditorModes.XML)
+            {
+                try
+                {
+                    txtCode.Text = string.IsNullOrEmpty(_text) ? _text : XDocument.Parse(_text).ToString();
+                }
+                catch
+                {
+                    // ignored
+                }
+                txtCode.SyntaxHighlighting = ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance.GetDefinitionByExtension(".xml");
+                return;
+            }
             else if (mode == CodeEditorModes.None)
             {
                 resourceName = null;
@@ -100,19 +114,27 @@ namespace DBADashGUI.SchemaCompare
         {
             SQL,
             PowerShell,
-            None
+            None,
+            XML
         }
+
+        private string _text;
 
         public string Text
         {
-            get => txtCode.Text;
+            get => _text;
             set
             {
+                _text = value;
+                txtCode.Text = value;
                 var theme = DBADashUser.SelectedTheme;
                 SetHighlighting();
+                if (theme is DarkTheme && Mode != CodeEditorModes.SQL)
+                {
+                    theme = new BaseTheme();
+                }
                 txtCode.Background = new SolidColorBrush(theme.CodeEditorBackColor.ToMediaColor());
                 txtCode.Foreground = new SolidColorBrush(theme.CodeEditorForeColor.ToMediaColor());
-                txtCode.Text = value;
             }
         }
 
