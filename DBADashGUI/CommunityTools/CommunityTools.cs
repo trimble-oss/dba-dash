@@ -1798,6 +1798,51 @@ namespace DBADashGUI.CommunityTools
             },
         };
 
+        // Result sets can change order, so define the link columns once with links across all results.
+        private static CustomReportResult GetPressureDetectorResult(string name) => new()
+        {
+            ResultName = name,
+            LinkColumns = new Dictionary<string, LinkColumnInfo>
+            {
+                {
+                    "tempdb_info",
+                    new TextLinkColumnInfo() { TargetColumn = "tempdb_info", TextHandling = CodeEditor.CodeEditorModes.XML }
+                },
+                {
+                    "low_memory",
+                    new TextLinkColumnInfo() { TargetColumn = "low_memory", TextHandling = CodeEditor.CodeEditorModes.XML }
+                },
+                {
+                    "cache_memory",
+                    new TextLinkColumnInfo() { TargetColumn = "cache_memory", TextHandling = CodeEditor.CodeEditorModes.XML }
+                },
+                {
+                    "max_memory_grant_cap",
+                    new TextLinkColumnInfo() { TargetColumn = "max_memory_grant_cap", TextHandling = CodeEditor.CodeEditorModes.XML }
+                },
+                {
+                    "cpu_details_output",
+                    new TextLinkColumnInfo() { TargetColumn = "cpu_details_output", TextHandling = CodeEditor.CodeEditorModes.XML }
+                },
+                {
+                    "cpu_utilization_over_threshold",
+                    new TextLinkColumnInfo() { TargetColumn = "cpu_utilization_over_threshold", TextHandling = CodeEditor.CodeEditorModes.XML }
+                },
+                {
+                    "query_text",
+                    new TextLinkColumnInfo() { TargetColumn = "query_text", TextHandling = CodeEditor.CodeEditorModes.SQL }
+                },
+                {
+                    "query_plan",
+                    new QueryPlanLinkColumnInfo() { TargetColumn = "query_plan" }
+                },
+                {
+                    "live_query_plan",
+                    new QueryPlanLinkColumnInfo() { TargetColumn = "live_query_plan" }
+                },
+            }
+        };
+
         public static DirectExecutionReport sp_PressureDetector = new DirectExecutionReport()
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_PressureDetector.ToString(),
@@ -1921,7 +1966,23 @@ namespace DBADashGUI.CommunityTools
                         { 100, "100" },
                     }
                 },
-            }
+            },
+            CustomReportResults = new Dictionary<int, CustomReportResult>
+            {
+                { 0, GetPressureDetectorResult("1") },
+                { 1, GetPressureDetectorResult("2") },
+                { 2, GetPressureDetectorResult("3") },
+                { 3, GetPressureDetectorResult("4") },
+                { 4, GetPressureDetectorResult("5") },
+                { 5, GetPressureDetectorResult("6") },
+                { 6, GetPressureDetectorResult("7") },
+                { 7, GetPressureDetectorResult("8") },
+                { 8, GetPressureDetectorResult("9") },
+                { 9, GetPressureDetectorResult("10") },
+                { 10, GetPressureDetectorResult("11") },
+                { 11, GetPressureDetectorResult("12") },
+                { 12, GetPressureDetectorResult("13") }
+            },
         };
 
         public static List<DirectExecutionReport> CommunityToolsList = new()

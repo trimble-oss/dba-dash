@@ -1,7 +1,10 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Xml;
 using System.Xml.Linq;
 using DBADashGUI.Theme;
 
@@ -75,7 +78,7 @@ namespace DBADashGUI.SchemaCompare
             {
                 try
                 {
-                    txtCode.Text = string.IsNullOrEmpty(_text) ? _text : XDocument.Parse(_text).ToString();
+                    txtCode.Text = FormatXml(_text);
                 }
                 catch
                 {
@@ -98,6 +101,26 @@ namespace DBADashGUI.SchemaCompare
                 SetHighlighting(GetResource(resourceName));
             }
             currentHighlighting = resourceName;
+        }
+
+        public static string FormatXml(string xml)
+        {
+            if (string.IsNullOrWhiteSpace(xml))
+                return xml;
+
+            // Wrapping in a temporary root element to form valid XML in cases where we have multiple root nodes
+            var tempRoot = XElement.Parse($"<root>{xml}</root>");
+
+            var formattedXmlBuilder = new StringBuilder();
+
+            // Getting rid of the temporary root element and formatting the XML
+            foreach (var node in tempRoot.Elements())
+            {
+                var formattedNode = node.ToString(SaveOptions.None);
+                formattedXmlBuilder.AppendLine(formattedNode);
+            }
+
+            return formattedXmlBuilder.ToString();
         }
 
         public CodeEditorModes Mode
