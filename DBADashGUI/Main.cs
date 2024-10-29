@@ -488,9 +488,9 @@ namespace DBADashGUI
                             new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks)
                             }
                         );
+                    AzureNode.Nodes.Add(azureDBNode);
                     azureDBNode.AddDatabaseFolders();
                     azureDBNode.AddInstanceActionsContextMenu();
-                    AzureNode.Nodes.Add(azureDBNode);
                 }
                 else
                 {
