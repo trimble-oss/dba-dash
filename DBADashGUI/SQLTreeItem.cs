@@ -956,7 +956,7 @@ namespace DBADashGUI
             if (!DBADashUser.CommunityScripts) return;
             var communityTools = new SQLTreeItem("Community Tools", SQLTreeItem.TreeType.CommunityToolsFolder);
             var agent = Context.CollectAgent;
-            foreach (var n in CommunityTools.CommunityTools.CommunityToolsList.Select(tool => new SQLTreeItem(tool.ProcedureName, SQLTreeItem.TreeType.CommunityTool)
+            foreach (var n in CommunityTools.CommunityTools.CommunityToolsList.OrderBy(tool=>tool.ReportName).Select(tool => new SQLTreeItem(tool.ProcedureName, SQLTreeItem.TreeType.CommunityTool)
             {
                 Report = tool
             }))

@@ -21,6 +21,7 @@ namespace DBADashGUI.CommunityTools
         public static DirectExecutionReport sp_WhoIsActive = new DirectExecutionReport()
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_WhoIsActive.ToString(),
+            ReportName = ProcedureExecutionMessage.CommandNames.sp_WhoIsActive.ToString(),
             URL = "https://whoisactive.com/",
             Description = "Shows what queries are currently running",
             Params = new Params
@@ -360,7 +361,8 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_Blitz = new DirectExecutionReport()
         {
-            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_Blitz.ToString(),
+            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_Blitz.ToString(), 
+            ReportName = ProcedureExecutionMessage.CommandNames.sp_Blitz.ToString(),
             URL = FirstResponderKitUrl,
             Description = "SQL Server Health Check Stored Procedure",
             Params = new Params
@@ -423,6 +425,7 @@ namespace DBADashGUI.CommunityTools
         public static DirectExecutionReport sp_BlitzWho = new DirectExecutionReport()
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_BlitzWho.ToString(),
+            ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzWho.ToString(),
             URL = FirstResponderKitUrl,
             Description = "Shows what queries are currently running",
             Params = new Params
@@ -594,6 +597,7 @@ namespace DBADashGUI.CommunityTools
         public static DirectExecutionReport sp_BlitzIndex = new DirectExecutionReport()
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_BlitzIndex.ToString(),
+            ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzIndex.ToString(),
             URL = FirstResponderKitUrl,
             Description = "SQL Server Index Analysis Stored Procedure",
             Params = new Params
@@ -822,6 +826,7 @@ namespace DBADashGUI.CommunityTools
         public static DirectExecutionReport sp_LogHunter = new DirectExecutionReport
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_LogHunter.ToString(),
+            ReportName = ProcedureExecutionMessage.CommandNames.sp_LogHunter.ToString(),
             URL = ErikDarlingUrl,
             Description = "Search ErrorLog",
             Params = new Params
@@ -842,6 +847,7 @@ namespace DBADashGUI.CommunityTools
         public static DirectExecutionReport sp_BlitzCache = new DirectExecutionReport
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_BlitzCache.ToString(),
+            ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzCache.ToString(),
             URL = FirstResponderKitUrl,
             Description = "List the most resource-intensive queries from the plan cache",
             Params = new Params
@@ -1079,6 +1085,7 @@ namespace DBADashGUI.CommunityTools
         public static DirectExecutionReport sp_BlitzLock = new DirectExecutionReport()
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_BlitzLock.ToString(),
+            ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzLock.ToString(),
             URL = FirstResponderKitUrl,
             Description = "SQL Server Deadlock Analysis Stored Procedure",
             Params = new Params()
@@ -1198,6 +1205,7 @@ namespace DBADashGUI.CommunityTools
         public static DirectExecutionReport sp_BlitzFirst = new DirectExecutionReport()
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_BlitzFirst.ToString(),
+            ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzFirst.ToString(),
             URL = FirstResponderKitUrl,
             Description = "This script gives you a prioritized list of why your SQL Server is slow right now",
             Params = new Params()
@@ -1489,7 +1497,7 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_BlitzBackups = new DirectExecutionReport()
         {
-            ReportName = "sp_BlitzBackups",
+            ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzBackups.ToString(),
             URL = FirstResponderKitUrl,
             Description = "Backup Analysis",
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_BlitzBackups.ToString(),
@@ -1544,7 +1552,7 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_HumanEvents = new DirectExecutionReport()
         {
-            ReportName = "sp_HumanEvents",
+            ReportName = ProcedureExecutionMessage.CommandNames.sp_HumanEvents.ToString(),
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_HumanEvents.ToString(),
             URL = ErikDarlingUrl,
             Description = "Extended events capture",
@@ -1846,7 +1854,7 @@ namespace DBADashGUI.CommunityTools
         public static DirectExecutionReport sp_PressureDetector = new DirectExecutionReport()
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_PressureDetector.ToString(),
-            ReportName = "sp_PressureDetector",
+            ReportName = ProcedureExecutionMessage.CommandNames.sp_PressureDetector.ToString(),
             URL = ErikDarlingUrl,
             Description = "Pressure Detector - CPU, Memory etc",
             Params = new Params()
