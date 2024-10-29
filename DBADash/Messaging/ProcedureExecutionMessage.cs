@@ -33,7 +33,8 @@ namespace DBADash.Messaging
             sp_BlitzLock,
             sp_BlitzBackups,
             sp_HumanEvents,
-            sp_HealthParser
+            sp_HealthParser,
+            sp_QuickieStore
         }
 
         public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
