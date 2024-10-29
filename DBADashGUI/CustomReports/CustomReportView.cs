@@ -923,6 +923,7 @@ namespace DBADashGUI.CustomReports
             this.context = _context;
             report = _context.Report;
             customParams = sqlParams ?? report.GetCustomSqlParameters();
+            SetContextParametersForDirectExecutionReport();
             tsParams.Enabled = customParams.Count > 0;
             tsConfigure.Visible = report.CanEditReport;
             SetStatus(report.Description, report.Description, DBADashUser.SelectedTheme.ForegroundColor);
@@ -944,6 +945,28 @@ namespace DBADashGUI.CustomReports
             if (AutoLoad)
             {
                 RefreshData();
+            }
+        }
+
+        private void SetContextParametersForDirectExecutionReport() // Set DatabaseName
+        {
+            if (report is not DirectExecutionReport dxReport) return;
+            if (string.IsNullOrEmpty(context.DatabaseName)) return;
+            foreach (var p in customParams.Where(p =>
+                         p.Param.ParameterName.Equals(dxReport.DatabaseNameParameter,
+                             StringComparison.InvariantCultureIgnoreCase)))
+            {
+                p.Param.Value = context.DatabaseName;
+                p.UseDefaultValue = false;
+            }
+            // Some reports have a parameter to get all databases that we need to turn off
+            foreach (var p in customParams.Where(p =>
+                         string.Equals(p.Param.ParameterName, "@GetAllDatabases") ||
+                         string.Equals(p.Param.ParameterName, "@get_all_databases",
+                             StringComparison.OrdinalIgnoreCase)))
+            {
+                p.Param.Value = false;
+                p.UseDefaultValue = false;
             }
         }
 

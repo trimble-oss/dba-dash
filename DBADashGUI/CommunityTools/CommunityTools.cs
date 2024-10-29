@@ -2,12 +2,15 @@
 using DBADashGUI.CustomReports;
 using DBADashGUI.SchemaCompare;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using DBADash;
 using Microsoft.SqlServer.Management.Smo;
+using System;
 
 namespace DBADashGUI.CommunityTools
 {
-    internal class CommunityTools
+    internal static class CommunityTools
     {
         private const string FirstResponderKitUrl = "https://github.com/BrentOzarULTD/SQL-Server-First-Responder-Kit";
         private const string ErikDarlingUrl = "https://github.com/erikdarlingdata/DarlingData";
@@ -600,6 +603,7 @@ namespace DBADashGUI.CommunityTools
             ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzIndex.ToString(),
             URL = FirstResponderKitUrl,
             Description = "SQL Server Index Analysis Stored Procedure",
+            DatabaseNameParameter = "@DatabaseName",
             Params = new Params
             {
                 ParamList = new List<Param>
@@ -850,6 +854,7 @@ namespace DBADashGUI.CommunityTools
             ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzCache.ToString(),
             URL = FirstResponderKitUrl,
             Description = "List the most resource-intensive queries from the plan cache",
+            DatabaseNameParameter = "@DatabaseName",
             Params = new Params
             {
                 ParamList = new List<Param>
@@ -1088,6 +1093,7 @@ namespace DBADashGUI.CommunityTools
             ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzLock.ToString(),
             URL = FirstResponderKitUrl,
             Description = "SQL Server Deadlock Analysis Stored Procedure",
+            DatabaseNameParameter = "@DatabaseName",
             Params = new Params()
             {
                 ParamList = new List<Param>
@@ -1557,6 +1563,7 @@ namespace DBADashGUI.CommunityTools
             URL = ErikDarlingUrl,
             Description = "Extended events capture",
             CancellationMessageWarning = "Cancellation of this report will leave an extended event session running that will require cleanup.",
+            DatabaseNameParameter = "@database_name",
             Params = new Params()
             {
                 ParamList = new List<Param>
@@ -2028,6 +2035,7 @@ namespace DBADashGUI.CommunityTools
             ReportName = ProcedureExecutionMessage.CommandNames.sp_HealthParser.ToString(),
             URL = ErikDarlingUrl,
             Description = "Returns data from system health extended event.",
+            DatabaseNameParameter = "@database_name",
             Params = new Params()
             {
                 ParamList = new()
@@ -2122,6 +2130,7 @@ namespace DBADashGUI.CommunityTools
             ReportName = ProcedureExecutionMessage.CommandNames.sp_QuickieStore.ToString(),
             URL = ErikDarlingUrl,
             Description = "Query store analysis",
+            DatabaseNameParameter = "@database_name",
             Params = new Params()
             {
                 ParamList = new()
@@ -2304,5 +2313,8 @@ namespace DBADashGUI.CommunityTools
             sp_HealthParser,
             sp_QuickieStore
         };
+
+        public static List<DirectExecutionReport> DatabaseLevelCommunityTools =>
+            CommunityToolsList.Where(x => x.DatabaseNameParameter != null).ToList();
     }
 }

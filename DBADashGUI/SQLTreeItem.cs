@@ -644,6 +644,7 @@ namespace DBADashGUI
             var nSeq = NewFolder("Sequences", "SO", true);
             var nTriggers = NewFolder("Triggers", "TA,TR", true);
             AddReportsFolder(CustomReports.CustomReports.GetCustomReports().DatabaseLevelReports);
+            AddCommunityTools();
             nTypes.Nodes.Add(nTableTypes);
             nTypes.Nodes.Add(nDataTypes);
             nTypes.Nodes.Add(nUserDefinedTypes);
@@ -956,7 +957,12 @@ namespace DBADashGUI
             if (!DBADashUser.CommunityScripts) return;
             var communityTools = new SQLTreeItem("Community Tools", SQLTreeItem.TreeType.CommunityToolsFolder);
             var agent = Context.CollectAgent;
-            foreach (var n in CommunityTools.CommunityTools.CommunityToolsList.OrderBy(tool=>tool.ReportName).Select(tool => new SQLTreeItem(tool.ProcedureName, SQLTreeItem.TreeType.CommunityTool)
+
+            var toolsList = DatabaseID > 0
+                ? CommunityTools.CommunityTools.DatabaseLevelCommunityTools
+                : CommunityTools.CommunityTools.CommunityToolsList;
+
+            foreach (var n in toolsList.OrderBy(tool => tool.ReportName).Select(tool => new SQLTreeItem(tool.ProcedureName, SQLTreeItem.TreeType.CommunityTool)
             {
                 Report = tool
             }))
