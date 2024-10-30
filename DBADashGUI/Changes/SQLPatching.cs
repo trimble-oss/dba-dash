@@ -16,6 +16,8 @@ namespace DBADashGUI
         public SQLPatching()
         {
             InitializeComponent();
+            dgvVersion.RegisterClearFilter(tsClearFilter);
+            dgvHistory.RegisterClearFilter(tsClearFilterHistory);
         }
 
         private List<int> InstanceIDs;
@@ -66,77 +68,71 @@ namespace DBADashGUI
         public void RefreshData()
         {
             dgvVersion.Columns[0].Frozen = Common.FreezeKeyColumn;
-            dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
+            dgvHistory.Columns[0].Frozen = Common.FreezeKeyColumn;
             RefreshHistory();
             RefreshVersion();
         }
 
         private void RefreshVersion()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new("dbo.InstanceVersionInfo_Get", cn) { CommandType = CommandType.StoredProcedure })
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                SqlDataAdapter da = new(cmd);
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt, new List<string>() { "PatchDate" });
-                dgvVersion.AutoGenerateColumns = false;
-                dgvVersion.DataSource = new DataView(dt);
-                // dgvVersion.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                if (dt.Rows.Count > 0)
-                {
-                    var versionDate = Convert.ToDateTime(dt.Rows[0]["BuildReferenceVersion"].DBNullToNull());
-                    var updatedDate = Convert.ToDateTime(dt.Rows[0]["BuildReferenceUpdated"].DBNullToNull());
-                    tsUpdateBuildReference.Text = "Update Build Reference (" + versionDate.ToShortDateString() + ")";
-                    tsUpdateBuildReference.ToolTipText = "Build Reference provided by dbatools (https://dbatools.io/). Click to update.\nBuild Reference Version: " + versionDate.ToShortDateString() + "\nLast Update Check: " + updatedDate.ToShortDateString();
-                    var buildReferenceAge = DateTime.UtcNow.Subtract(versionDate).TotalDays;
-                    var buildReferenceDaysSinceUpdate = DateTime.UtcNow.Subtract(updatedDate).TotalDays;
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using SqlCommand cmd = new("dbo.InstanceVersionInfo_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cn.Open();
+            cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            SqlDataAdapter da = new(cmd);
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt, new List<string>() { "PatchDate" });
+            dgvVersion.AutoGenerateColumns = false;
+            dgvVersion.DataSource = new DataView(dt);
 
-                    if (buildReferenceAge > Config.BuildReferenceAgeCriticalThreshold)
-                    {
-                        tsUpdateBuildReference.ForeColor = buildReferenceDaysSinceUpdate <= Config.BuildReferenceUpdateExclusionPeriod ? DashColors.TrimbleBlue : DashColors.Fail;
-                    }
-                    else if (buildReferenceAge > Config.BuildReferenceAgeWarningThreshold)
-                    {
-                        tsUpdateBuildReference.ForeColor = buildReferenceDaysSinceUpdate <= Config.BuildReferenceUpdateExclusionPeriod ? DashColors.TrimbleBlue : DashColors.Warning;
-                    }
-                    else
-                    {
-                        tsUpdateBuildReference.ForeColor = DashColors.Success;
-                    }
-                }
+            if (dt.Rows.Count <= 0) return;
+            var versionDate = Convert.ToDateTime(dt.Rows[0]["BuildReferenceVersion"].DBNullToNull());
+            var updatedDate = Convert.ToDateTime(dt.Rows[0]["BuildReferenceUpdated"].DBNullToNull());
+            tsUpdateBuildReference.Text = "Update Build Reference (" + versionDate.ToShortDateString() + ")";
+            tsUpdateBuildReference.ToolTipText = "Build Reference provided by dbatools (https://dbatools.io/). Click to update.\nBuild Reference Version: " + versionDate.ToShortDateString() + "\nLast Update Check: " + updatedDate.ToShortDateString();
+            var buildReferenceAge = DateTime.UtcNow.Subtract(versionDate).TotalDays;
+            var buildReferenceDaysSinceUpdate = DateTime.UtcNow.Subtract(updatedDate).TotalDays;
+
+            if (buildReferenceAge > Config.BuildReferenceAgeCriticalThreshold)
+            {
+                tsUpdateBuildReference.ForeColor = buildReferenceDaysSinceUpdate <= Config.BuildReferenceUpdateExclusionPeriod ? DashColors.TrimbleBlue : DashColors.Fail;
+            }
+            else if (buildReferenceAge > Config.BuildReferenceAgeWarningThreshold)
+            {
+                tsUpdateBuildReference.ForeColor = buildReferenceDaysSinceUpdate <= Config.BuildReferenceUpdateExclusionPeriod ? DashColors.TrimbleBlue : DashColors.Warning;
+            }
+            else
+            {
+                tsUpdateBuildReference.ForeColor = DashColors.Success;
             }
         }
 
         private void RefreshHistory()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.SQLPatching_Get", cn) { CommandType = CommandType.StoredProcedure })
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                SqlDataAdapter da = new(cmd);
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                dgv.AutoGenerateColumns = false;
-                dgv.DataSource = dt;
-                dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.SQLPatching_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cn.Open();
+            cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            SqlDataAdapter da = new(cmd);
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            dgvHistory.AutoGenerateColumns = false;
+            dgvHistory.DataSource = new DataView(dt);
+            dgvHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
         private void TsCopyVersion_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgvVersion);
+            dgvVersion.CopyGrid();
         }
 
         private void TsCopyHistory_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgv);
+            dgvHistory.CopyGrid();
         }
 
         private void TsRefreshVersion_Click(object sender, EventArgs e)
@@ -151,12 +147,12 @@ namespace DBADashGUI
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvVersion);
+            dgvVersion.ExportToExcel();
         }
 
         private void TsExcelHistory_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+            dgvHistory.ExportToExcel();
         }
 
         private void TsCols_Click(object sender, EventArgs e)
@@ -278,25 +274,23 @@ namespace DBADashGUI
         {
             try
             {
-                if (CommonShared.ShowInputDialog(ref currentValue, title) == DialogResult.OK)
+                if (CommonShared.ShowInputDialog(ref currentValue, title) != DialogResult.OK) return;
+                if (string.IsNullOrEmpty(currentValue))
                 {
-                    if (string.IsNullOrEmpty(currentValue))
-                    {
-                        RepositorySettings.UpdateSetting(setting, null, Common.ConnectionString);
-                    }
-                    else if (int.TryParse(currentValue, out var intValue))
-                    {
-                        RepositorySettings.UpdateSetting(setting, intValue, Common.ConnectionString);
-                    }
-                    else
-                    {
-                        MessageBox.Show("Invalid value", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        return;
-                    }
-                    Config.RefreshConfig();
-                    RefreshData();
-                    SetThresholdsMenuText();
+                    RepositorySettings.UpdateSetting(setting, null, Common.ConnectionString);
                 }
+                else if (int.TryParse(currentValue, out var intValue))
+                {
+                    RepositorySettings.UpdateSetting(setting, intValue, Common.ConnectionString);
+                }
+                else
+                {
+                    MessageBox.Show("Invalid value", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                Config.RefreshConfig();
+                RefreshData();
+                SetThresholdsMenuText();
             }
             catch (Exception ex)
             {
