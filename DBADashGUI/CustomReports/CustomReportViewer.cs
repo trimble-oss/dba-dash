@@ -16,10 +16,10 @@ namespace DBADashGUI.CustomReports
 
         public List<CustomSqlParameter> CustomParams { get; set; }
 
-        private void CustomReportViewer_Load(object sender, EventArgs e)
+        private async void CustomReportViewer_Load(object sender, EventArgs e)
         {
             Text = Context.Report.ReportName;
-            customReportView1.SetContext(Context, CustomParams);
+            await customReportView1.SetContext(Context, CustomParams);
         }
     }
 }

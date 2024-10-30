@@ -1,4 +1,9 @@
-﻿using DBADashGUI.Performance;
+﻿using DBADash;
+using DBADash.Messaging;
+using DBADashGUI.CommunityTools;
+using DBADashGUI.Interface;
+using DBADashGUI.Messaging;
+using DBADashGUI.Performance;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
@@ -12,12 +17,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Navigation;
-using DBADash;
-using DBADashGUI.Interface;
-using DBADash.Messaging;
-using DBADashGUI.CommunityTools;
-using DBADashGUI.Messaging;
 using DataTable = System.Data.DataTable;
 
 namespace DBADashGUI.CustomReports
@@ -89,7 +88,6 @@ namespace DBADashGUI.CustomReports
         private void AddLink_Click(DBADashDataGridView dgv)
         {
             var tableIndex = dgv.ResultSetID;
-            if (dgv == null) return;
             try
             {
                 var customReportResult = report.CustomReportResults[tableIndex];
@@ -406,7 +404,7 @@ namespace DBADashGUI.CustomReports
                     }
                     else
                     {
-                        SetStatus("Report didn't return a result set", "Warning", System.Drawing.Color.Orange);
+                        SetStatus("Report didn't return a result set", "Warning", Color.Orange);
                     }
                 }
                 catch (Exception ex)
@@ -445,7 +443,7 @@ namespace DBADashGUI.CustomReports
             });
         }
 
-        public List<DBADashDataGridView> Grids { get; private set; }
+        public List<DBADashDataGridView> Grids { get; }
         private string previousSchema;
 
         private void ClearResults()
@@ -706,16 +704,14 @@ namespace DBADashGUI.CustomReports
             var dgv = GetAssociatedGrid(sender);
             if (dgv == null) return;
             var name = dgv.ResultSetName;
-            if (CommonShared.ShowInputDialog(ref name, "Enter name") == DialogResult.OK)
-            {
-                report.CustomReportResults[dgv.ResultSetID].ResultName = name;
-                suppressCboResultsIndexChanged = true;
-                cboResults.Items[dgv.ResultSetID] = name;
-                dgv.ResultSetName = name;
-                suppressCboResultsIndexChanged = false;
-                report.Update();
-                ShowTable();
-            }
+            if (CommonShared.ShowInputDialog(ref name, "Enter name") != DialogResult.OK) return;
+            report.CustomReportResults[dgv.ResultSetID].ResultName = name;
+            suppressCboResultsIndexChanged = true;
+            cboResults.Items[dgv.ResultSetID] = name;
+            dgv.ResultSetName = name;
+            suppressCboResultsIndexChanged = false;
+            report.Update();
+            ShowTable();
         }
 
         private DBADashDataGridView GetAssociatedGrid(object sender)
@@ -728,12 +724,10 @@ namespace DBADashGUI.CustomReports
                 case 1:
                     return Grids[0];
             }
-            if (sender is ToolStripButton tsb && tsb.Tag != null)
-            {
-                var resultSetID = (int)tsb.Tag;
-                return Grids.FirstOrDefault(d => d.ResultSetID == resultSetID);
-            }
-            return Grids[0];
+
+            if (sender is not ToolStripButton tsb || tsb.Tag == null) return Grids[0];
+            var resultSetID = (int)tsb.Tag;
+            return Grids.FirstOrDefault(d => d.ResultSetID == resultSetID);
         }
 
         private void Copy_Click(object sender, EventArgs e)
@@ -882,6 +876,7 @@ namespace DBADashGUI.CustomReports
             }
             await using var registration = cancellationToken.Register(() =>
             {
+                // ReSharper disable once AccessToDisposedClosure
                 cmd.Cancel();
             });
             var ds = new DataSet();
@@ -1054,11 +1049,6 @@ namespace DBADashGUI.CustomReports
             RefreshData();
         }
 
-        private void TsCopy_Click(object sender, EventArgs e)
-        {
-            // Common.CopyDataGridViewToClipboard(dgv);
-        }
-
         private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(Grids.Cast<DataGridView>().ToArray());
@@ -1105,11 +1095,6 @@ namespace DBADashGUI.CustomReports
             AddPickers();// Update checks on picker items
             if (AutoLoad)
                 RefreshData();
-        }
-
-        private void TsCols_Click(object sender, EventArgs e)
-        {
-            // dgv.PromptColumnSelection();
         }
 
         private void SaveLayoutToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1271,7 +1256,7 @@ namespace DBADashGUI.CustomReports
         private async void TsTrigger_Click(object sender, EventArgs e)
         {
             if (context.CollectAgentID == null || context.ImportAgentID == null) return;
-            await Messaging.CollectionMessaging.TriggerCollection(context.ConnectionID, report.TriggerCollectionTypes, context.CollectAgentID.Value, context.ImportAgentID.Value, this, null);
+            await CollectionMessaging.TriggerCollection(context.ConnectionID, report.TriggerCollectionTypes, context.CollectAgentID.Value, context.ImportAgentID.Value, this);
         }
 
         private void AssociateCollectionToolStripMenuItem_Click(object sender, EventArgs e)
