@@ -14,17 +14,7 @@ namespace DBADashGUI.Changes
         private List<int> InstanceIDs;
         private int DatabaseID;
         private string InstanceGroupName;
-        private string _RowFilter;
-
-        private string RowFilter
-        {
-            get => _RowFilter;
-            set
-            {
-                _RowFilter = value;
-                tsClearFilter.Text = "Clear Filter" + (string.IsNullOrEmpty(value) ? "" : " : " + RowFilter);
-            }
-        }
+        private string PersistFilter;
 
         private const int MAX_VLF_WARNING_THRESHOLD = 1000;
         private const int MAX_VLF_CRITICAL_THRESHOLD = 10000;
@@ -32,6 +22,8 @@ namespace DBADashGUI.Changes
         public DBOptions()
         {
             InitializeComponent();
+            dgvHistory.RegisterClearFilter(tsClearFilterHistory);
+            dgv.RegisterClearFilter(tsClearFilter);
         }
 
         private static readonly DataGridViewColumn[] SummaryCols =
@@ -67,7 +59,6 @@ namespace DBADashGUI.Changes
                 tsSummary.Visible = !value;
                 if (value)
                 {
-                    RowFilter = string.Empty;
                     InstanceGroupName = string.Empty;
                 }
             }
@@ -77,7 +68,7 @@ namespace DBADashGUI.Changes
         {
             InstanceIDs = _context.InstanceIDs.ToList();
             DatabaseID = _context.DatabaseID;
-            RowFilter = string.Empty;
+            PersistFilter = null;
             InstanceGroupName = string.Empty;
             SummaryMode = true;
             RefreshData();
@@ -120,60 +111,55 @@ namespace DBADashGUI.Changes
 
         private void RefreshDBSummary()
         {
-            tsClearFilter.Visible = false;
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.DBSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                DataTable dt = new();
-                da.Fill(dt);
-                dgv.DataSource = null;
-                dgv.AutoGenerateColumns = false;
-                dgv.Columns.Clear();
-                dgv.Columns.AddRange(SummaryCols);
-                dgv.ApplyTheme();
-                dgv.DataSource = dt;
-                dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.DBSummary_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            DataTable dt = new();
+            da.Fill(dt);
+            dgv.DataSource = null;
+            dgv.AutoGenerateColumns = false;
+            dgv.Columns.Clear();
+            dgv.Columns.AddRange(SummaryCols);
+            dgv.ApplyTheme();
+            dgv.DataSource = new DataView(dt);
+            PersistFilter = null;
+            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+
             dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
         }
 
         public DataTable GetDBInfo()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.DatabasesAllInfo_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceGroupName", InstanceGroupName);
-                DataTable dt = new();
-                da.Fill(dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.DatabasesAllInfo_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceGroupName", InstanceGroupName);
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
         }
 
         private void RefreshDBInfo()
         {
             var dt = GetDBInfo();
-            tsClearFilter.Enabled = RowFilter != string.Empty;
             if (dt.Rows.Count == 1 && DatabaseID > 0)
             {
                 tsSummary.Visible = false;
-                tsClearFilter.Visible = false;
                 tsDetail.Visible = false;
                 Pivot(ref dt);
             }
             else
             {
                 tsSummary.Visible = true;
-                tsClearFilter.Visible = true;
                 dgv.Columns.Clear();
                 dgv.AutoGenerateColumns = true;
-                var dv = new DataView(dt, RowFilter, string.Empty, DataViewRowState.CurrentRows);
+                var dv = new DataView(dt, PersistFilter, string.Empty, DataViewRowState.CurrentRows);
                 dgv.DataSource = dv;
                 dgv.Columns["InstanceID"].Visible = false;
                 dgv.Columns["DatabaseID"].Visible = false;
@@ -188,45 +174,43 @@ namespace DBADashGUI.Changes
                 dgv.Columns[1].Frozen = Common.FreezeKeyColumn; //hidden
                 dgv.Columns[2].Frozen = Common.FreezeKeyColumn; //hidden
                 dgv.Columns[3].Frozen = Common.FreezeKeyColumn;
-                dgv.ApplyTheme();
+                PersistFilter = null;
             }
         }
 
         private void RefreshHistory()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.DBOptionsHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.DBOptionsHistory_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
+            cmd.Parameters.AddWithValue("ExcludeStateChanges", excludeStateChangesToolStripMenuItem.Checked);
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceGroupName", InstanceGroupName);
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            foreach (DataRow r in dt.Rows)
             {
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
-                cmd.Parameters.AddWithValue("ExcludeStateChanges", excludeStateChangesToolStripMenuItem.Checked);
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceGroupName", InstanceGroupName);
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                foreach (DataRow r in dt.Rows)
+                if (r["OldValue"].GetType() == typeof(byte[]))
                 {
-                    if (r["OldValue"].GetType() == typeof(byte[]))
-                    {
-                        r["OldValue"] = Common.ByteArrayToString((byte[])r["OldValue"]);
-                    }
-                    if (r["NewValue"].GetType() == typeof(byte[]))
-                    {
-                        r["NewValue"] = Common.ByteArrayToString((byte[])r["NewValue"]);
-                    }
+                    r["OldValue"] = Common.ByteArrayToString((byte[])r["OldValue"]);
                 }
-                dgvHistory.AutoGenerateColumns = false;
-                dgvHistory.DataSource = dt;
-                dgvHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                dgvHistory.ApplyTheme();
+                if (r["NewValue"].GetType() == typeof(byte[]))
+                {
+                    r["NewValue"] = Common.ByteArrayToString((byte[])r["NewValue"]);
+                }
             }
+            dgvHistory.AutoGenerateColumns = false;
+            dgvHistory.DataSource = new DataView(dt);
+            dgvHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgvHistory.ApplyTheme();
         }
 
         private void TsCopyHistory_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgvHistory);
+            dgvHistory.CopyGrid();
         }
 
         private void TsRefreshHistory_Click(object sender, EventArgs e)
@@ -248,7 +232,7 @@ namespace DBADashGUI.Changes
 
         private void TsCopyInfo_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgv);
+            dgv.CopyGrid();
         }
 
         private void ExcludeStateChangesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -276,7 +260,6 @@ namespace DBADashGUI.Changes
         private void TsDetail_Click(object sender, EventArgs e)
         {
             var historyRefresh = string.IsNullOrEmpty(InstanceGroupName);
-            RowFilter = string.Empty;
             SummaryMode = false;
             RefreshDBInfo();
             if (historyRefresh)
@@ -454,12 +437,12 @@ namespace DBADashGUI.Changes
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+            dgv.ExportToExcel();
         }
 
         private void TsExcelHistory_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvHistory);
+            dgvHistory.ExportToExcel();
         }
 
         private void TsCols_Click(object sender, EventArgs e)
@@ -475,91 +458,91 @@ namespace DBADashGUI.Changes
             SummaryMode = false;
             if (e.ColumnIndex == dgv.Columns["Instance"]?.Index)
             {
-                RowFilter = string.Empty;
+                PersistFilter = string.Empty;
             }
             else if (e.ColumnIndex == dgv.Columns["Page Verify Not Optimal"]?.Index)
             {
-                RowFilter = "page_verify_option <> 2";
+                PersistFilter = "page_verify_option <> 2";
             }
             else if (e.ColumnIndex == dgv.Columns["Auto Close"]?.Index)
             {
-                RowFilter = "is_auto_close_on = 1";
+                PersistFilter = "is_auto_close_on = 1";
             }
             else if (e.ColumnIndex == dgv.Columns["Auto Shrink"]?.Index)
             {
-                RowFilter = "is_auto_shrink_on = 1";
+                PersistFilter = "is_auto_shrink_on = 1";
             }
             else if (e.ColumnIndex == dgv.Columns["Auto Create Stats Disabled"]?.Index)
             {
-                RowFilter = "is_auto_create_stats_on = 0";
+                PersistFilter = "is_auto_create_stats_on = 0";
             }
             else if (e.ColumnIndex == dgv.Columns["Auto Update Stats Disabled"]?.Index)
             {
-                RowFilter = "is_auto_update_stats_on = 0";
+                PersistFilter = "is_auto_update_stats_on = 0";
             }
             else if (e.ColumnIndex == dgv.Columns["Trustworthy"]?.Index)
             {
-                RowFilter = "is_trustworthy_on = 1 AND DatabaseName<> 'msdb'";
+                PersistFilter = "is_trustworthy_on = 1 AND DatabaseName<> 'msdb'";
             }
             else if (e.ColumnIndex == dgv.Columns["Online"]?.Index)
             {
-                RowFilter = "state = 0";
+                PersistFilter = "state = 0";
             }
             else if (e.ColumnIndex == dgv.Columns["Restoring"]?.Index)
             {
-                RowFilter = "state = 1";
+                PersistFilter = "state = 1";
             }
             else if (e.ColumnIndex == dgv.Columns["Recovering"]?.Index)
             {
-                RowFilter = "state = 2";
+                PersistFilter = "state = 2";
             }
             else if (e.ColumnIndex == dgv.Columns["Recovery Pending"]?.Index)
             {
-                RowFilter = "state = 3";
+                PersistFilter = "state = 3";
             }
             else if (e.ColumnIndex == dgv.Columns["Suspect"]?.Index)
             {
-                RowFilter = "state = 4";
+                PersistFilter = "state = 4";
             }
             else if (e.ColumnIndex == dgv.Columns["Emergency"]?.Index)
             {
-                RowFilter = "state = 5";
+                PersistFilter = "state = 5";
             }
             else if (e.ColumnIndex == dgv.Columns["Offline"]?.Index)
             {
-                RowFilter = "state IN(6, 10)";
+                PersistFilter = "state IN(6, 10)";
             }
             else if (e.ColumnIndex == dgv.Columns["Not Using Indirect Checkpoints"]?.Index)
             {
-                RowFilter = "target_recovery_time_in_seconds=0 and database_id>4";
+                PersistFilter = "target_recovery_time_in_seconds=0 and database_id>4";
             }
             else if (e.ColumnIndex == dgv.Columns["None-Default Target Recovery Time"]?.Index)
             {
-                RowFilter = "target_recovery_time_in_seconds NOT IN(0,60)";
+                PersistFilter = "target_recovery_time_in_seconds NOT IN(0,60)";
             }
             else if (e.ColumnIndex == dgv.Columns["Old Compat Level"]?.Index)
             {
-                RowFilter = "compatibility_level < " + Convert.ToInt32(row["Max Supported Compatibility Level"]);
+                PersistFilter = "compatibility_level < " + Convert.ToInt32(row["Max Supported Compatibility Level"]);
             }
             else if (e.ColumnIndex == dgv.Columns["Max VLF Count"]?.Index)
             {
-                RowFilter = "VLFCount >= " + Math.Min(MAX_VLF_WARNING_THRESHOLD + 1, Convert.ToInt32(row["Max VLF Count"]));
+                PersistFilter = "VLFCount >= " + Math.Min(MAX_VLF_WARNING_THRESHOLD + 1, Convert.ToInt32(row["Max VLF Count"]));
             }
             else if (e.ColumnIndex == dgv.Columns["User Database Count"]?.Index)
             {
-                RowFilter = "database_id > 4";
+                PersistFilter = "database_id > 4";
             }
             else if (e.ColumnIndex == dgv.Columns["Standby"]?.Index)
             {
-                RowFilter = "is_in_standby = 1";
+                PersistFilter = "is_in_standby = 1";
             }
             else if (e.ColumnIndex == dgv.Columns["RCSI Count"]?.Index)
             {
-                RowFilter = "is_read_committed_snapshot_on=1";
+                PersistFilter = "is_read_committed_snapshot_on=1";
             }
             else
             {
-                RowFilter = "";
+                PersistFilter = "";
             }
             RefreshData();
         }
@@ -574,11 +557,9 @@ namespace DBADashGUI.Changes
             return true;
         }
 
-        private void TsClearFilter_Click(object sender, EventArgs e)
+        private void HistoryCols_Click(object sender, EventArgs e)
         {
-            RowFilter = string.Empty;
-            ((DataView)dgv.DataSource).RowFilter = RowFilter;
-            tsClearFilter.Enabled = false;
+            dgvHistory.PromptColumnSelection();
         }
     }
 }
