@@ -73,7 +73,7 @@ namespace DBADashGUI.CustomReports
                 var filterSupported = DataSource is DataView;
                 clearFilter.Enabled = !string.IsNullOrEmpty((DataSource as DataView)?.RowFilter);
                 clearFilter.Visible = filterSupported;
-                editFilter.Visible= filterSupported;
+                editFilter.Visible = filterSupported;
             };
         }
 
@@ -112,10 +112,10 @@ namespace DBADashGUI.CustomReports
                 if (dgv == null) return;
                 var columnType = dgv.Columns[ClickedColumnIndex].ValueType;
                 var filterSupported = DataSource is DataView;
-                var columnFilterSupported = filterSupported && 
-                                      columnType != typeof(byte[]) &&
-                                      !string.IsNullOrEmpty(dgv.Columns[ClickedColumnIndex].DataPropertyName);
-
+                var columnFilterSupported = filterSupported &&
+                                            columnType != typeof(byte[]) &&
+                                            columnType != typeof(object) &&
+                                            !string.IsNullOrEmpty(dgv.Columns[ClickedColumnIndex].DataPropertyName);
 
                 filterLike.Visible = columnFilterSupported && columnType == typeof(string);
                 cellClearFilterMenuItem.Enabled = !string.IsNullOrEmpty((DataSource as DataView)?.RowFilter);
@@ -144,6 +144,7 @@ namespace DBADashGUI.CustomReports
         {
             item.Enabled = !string.IsNullOrEmpty(RowFilter);
             item.Font = new System.Drawing.Font(item.Font, item.Enabled ? FontStyle.Bold : FontStyle.Regular);
+            item.ToolTipText = item.Enabled ? RowFilter : "No Filter Applied";
         }
 
         private void PromptFilter()
