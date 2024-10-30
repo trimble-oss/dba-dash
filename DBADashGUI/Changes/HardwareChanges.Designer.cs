@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI
 {
     partial class HardwareChanges
     {
@@ -28,19 +30,23 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
-            dgv = new System.Windows.Forms.DataGridView();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle21 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle26 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle25 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle27 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle28 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle29 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle30 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle32 = new System.Windows.Forms.DataGridViewCellStyle();
+            dgvHistory = new DBADashDataGridView();
             Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ChangeDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             SystemManufacturerOld = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -60,7 +66,7 @@
             physical_memory_gb_old = new System.Windows.Forms.DataGridViewTextBoxColumn();
             physical_memory_gb_new = new System.Windows.Forms.DataGridViewTextBoxColumn();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
-            dgvHardware = new System.Windows.Forms.DataGridView();
+            dgvHardware = new DBADashDataGridView();
             colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colManufacturer = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colModel = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -92,11 +98,13 @@
             tsCopy = new System.Windows.Forms.ToolStripButton();
             tsExcel = new System.Windows.Forms.ToolStripButton();
             tsCols = new System.Windows.Forms.ToolStripButton();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
             toolStrip2 = new System.Windows.Forms.ToolStrip();
             toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             tsRefreshHistory = new System.Windows.Forms.ToolStripButton();
             tsCopyHistory = new System.Windows.Forms.ToolStripButton();
             tsExcelHistory = new System.Windows.Forms.ToolStripButton();
+            tsClearFilterHistory = new System.Windows.Forms.ToolStripButton();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -137,7 +145,8 @@
             dataGridViewTextBoxColumn38 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn39 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn40 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
+            tsHistoryCols = new System.Windows.Forms.ToolStripButton();
+            ((System.ComponentModel.ISupportInitialize)dgvHistory).BeginInit();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -147,23 +156,42 @@
             toolStrip2.SuspendLayout();
             SuspendLayout();
             // 
-            // dgv
+            // dgvHistory
             // 
-            dgv.AllowUserToAddRows = false;
-            dgv.AllowUserToDeleteRows = false;
-            dgv.BackgroundColor = System.Drawing.Color.White;
-            dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, ChangeDate, SystemManufacturerOld, SystemManufacturerNew, SystemProductNameOld, SystemProductNameNew, Processor_old, Processor_new, cpu_count_old, cpu_count_new, cores_per_socket_old, cores_per_socket_new, socket_count_old, socket_count_new, hyperthread_ratio_old, hyperthread_ratio_new, physical_memory_gb_old, physical_memory_gb_new });
-            dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            dgv.Location = new System.Drawing.Point(0, 27);
-            dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            dgv.Name = "dgv";
-            dgv.ReadOnly = true;
-            dgv.RowHeadersVisible = false;
-            dgv.RowHeadersWidth = 51;
-            dgv.RowTemplate.Height = 24;
-            dgv.Size = new System.Drawing.Size(850, 364);
-            dgv.TabIndex = 0;
+            dgvHistory.AllowUserToAddRows = false;
+            dgvHistory.AllowUserToDeleteRows = false;
+            dgvHistory.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle17.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle17.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle17.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle17.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle17.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle17.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle17.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvHistory.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle17;
+            dgvHistory.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvHistory.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, ChangeDate, SystemManufacturerOld, SystemManufacturerNew, SystemProductNameOld, SystemProductNameNew, Processor_old, Processor_new, cpu_count_old, cpu_count_new, cores_per_socket_old, cores_per_socket_new, socket_count_old, socket_count_new, hyperthread_ratio_old, hyperthread_ratio_new, physical_memory_gb_old, physical_memory_gb_new });
+            dataGridViewCellStyle20.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle20.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle20.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle20.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle20.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle20.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle20.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvHistory.DefaultCellStyle = dataGridViewCellStyle20;
+            dgvHistory.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvHistory.EnableHeadersVisualStyles = false;
+            dgvHistory.Location = new System.Drawing.Point(0, 27);
+            dgvHistory.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dgvHistory.Name = "dgvHistory";
+            dgvHistory.ReadOnly = true;
+            dgvHistory.ResultSetID = 0;
+            dgvHistory.ResultSetName = null;
+            dgvHistory.RowHeadersVisible = false;
+            dgvHistory.RowHeadersWidth = 51;
+            dgvHistory.RowTemplate.Height = 24;
+            dgvHistory.Size = new System.Drawing.Size(850, 364);
+            dgvHistory.TabIndex = 0;
             // 
             // Instance
             // 
@@ -312,8 +340,8 @@
             // physical_memory_gb_old
             // 
             physical_memory_gb_old.DataPropertyName = "physical_memory_gb_old";
-            dataGridViewCellStyle1.Format = "N1";
-            physical_memory_gb_old.DefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle18.Format = "N1";
+            physical_memory_gb_old.DefaultCellStyle = dataGridViewCellStyle18;
             physical_memory_gb_old.HeaderText = "Physical Memory (Old)";
             physical_memory_gb_old.MinimumWidth = 6;
             physical_memory_gb_old.Name = "physical_memory_gb_old";
@@ -323,8 +351,8 @@
             // physical_memory_gb_new
             // 
             physical_memory_gb_new.DataPropertyName = "physical_memory_gb_new";
-            dataGridViewCellStyle2.Format = "N1";
-            physical_memory_gb_new.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle19.Format = "N1";
+            physical_memory_gb_new.DefaultCellStyle = dataGridViewCellStyle19;
             physical_memory_gb_new.HeaderText = "Physical Memory (New)";
             physical_memory_gb_new.MinimumWidth = 6;
             physical_memory_gb_new.Name = "physical_memory_gb_new";
@@ -346,7 +374,7 @@
             // 
             // splitContainer1.Panel2
             // 
-            splitContainer1.Panel2.Controls.Add(dgv);
+            splitContainer1.Panel2.Controls.Add(dgvHistory);
             splitContainer1.Panel2.Controls.Add(toolStrip2);
             splitContainer1.Size = new System.Drawing.Size(850, 786);
             splitContainer1.SplitterDistance = 390;
@@ -358,13 +386,32 @@
             dgvHardware.AllowUserToAddRows = false;
             dgvHardware.AllowUserToDeleteRows = false;
             dgvHardware.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle21.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle21.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle21.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle21.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle21.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle21.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle21.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvHardware.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle21;
             dgvHardware.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvHardware.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colInstance, colManufacturer, colModel, colProcessor, SQLVersion, colCoresPerSocket, colSockets, colCPUs, colCPUCores, colPhysicalCPUs, colHTRatio, colNUMA, colSoftNUMA, colAffinity, colPhysicalMemory, colBufferPool, colPctMemoryBufferPool, colMemNotAllocated, colMemoryModel, colPriority, colMaxWorkerCount, colSchedulerCount, colOfflineSchedulers, colPowerPlan, colInstantFileInitialization });
+            dataGridViewCellStyle26.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle26.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle26.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle26.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle26.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle26.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle26.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvHardware.DefaultCellStyle = dataGridViewCellStyle26;
             dgvHardware.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvHardware.EnableHeadersVisualStyles = false;
             dgvHardware.Location = new System.Drawing.Point(0, 27);
             dgvHardware.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvHardware.Name = "dgvHardware";
             dgvHardware.ReadOnly = true;
+            dgvHardware.ResultSetID = 0;
+            dgvHardware.ResultSetName = null;
             dgvHardware.RowHeadersVisible = false;
             dgvHardware.RowHeadersWidth = 51;
             dgvHardware.RowTemplate.Height = 24;
@@ -502,8 +549,8 @@
             // colPhysicalMemory
             // 
             colPhysicalMemory.DataPropertyName = "PhysicalMemoryGB";
-            dataGridViewCellStyle3.Format = "N1";
-            colPhysicalMemory.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle22.Format = "N1";
+            colPhysicalMemory.DefaultCellStyle = dataGridViewCellStyle22;
             colPhysicalMemory.HeaderText = "Physical Memory (GB)";
             colPhysicalMemory.MinimumWidth = 6;
             colPhysicalMemory.Name = "colPhysicalMemory";
@@ -513,8 +560,8 @@
             // colBufferPool
             // 
             colBufferPool.DataPropertyName = "BufferPoolMB";
-            dataGridViewCellStyle4.Format = "N0";
-            colBufferPool.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle23.Format = "N0";
+            colBufferPool.DefaultCellStyle = dataGridViewCellStyle23;
             colBufferPool.HeaderText = "Buffer Pool (MB)";
             colBufferPool.MinimumWidth = 6;
             colBufferPool.Name = "colBufferPool";
@@ -524,8 +571,8 @@
             // colPctMemoryBufferPool
             // 
             colPctMemoryBufferPool.DataPropertyName = "PctMemoryAllocatedToBufferPool";
-            dataGridViewCellStyle5.Format = "P1";
-            colPctMemoryBufferPool.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle24.Format = "P1";
+            colPctMemoryBufferPool.DefaultCellStyle = dataGridViewCellStyle24;
             colPctMemoryBufferPool.HeaderText = "% Memory allocated to buffer pool";
             colPctMemoryBufferPool.MinimumWidth = 6;
             colPctMemoryBufferPool.Name = "colPctMemoryBufferPool";
@@ -535,8 +582,8 @@
             // colMemNotAllocated
             // 
             colMemNotAllocated.DataPropertyName = "MemoryNotAllocatedToBufferPoolGB";
-            dataGridViewCellStyle6.Format = "N1";
-            colMemNotAllocated.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle25.Format = "N1";
+            colMemNotAllocated.DefaultCellStyle = dataGridViewCellStyle25;
             colMemNotAllocated.HeaderText = "Memory not allocated to buffer pool (GB)";
             colMemNotAllocated.MinimumWidth = 6;
             colMemNotAllocated.Name = "colMemNotAllocated";
@@ -609,7 +656,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel1, tsRefreshHardware, tsCopy, tsExcel, tsCols });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel1, tsRefreshHardware, tsCopy, tsExcel, tsCols, tsClearFilter });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(850, 27);
@@ -664,10 +711,18 @@
             tsCols.Text = "Columns";
             tsCols.Click += TsCols_Click;
             // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Image = Properties.Resources.Eraser_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            tsClearFilter.Text = "Clear Filter";
+            // 
             // toolStrip2
             // 
             toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel2, tsRefreshHistory, tsCopyHistory, tsExcelHistory });
+            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel2, tsRefreshHistory, tsCopyHistory, tsExcelHistory, tsHistoryCols, tsClearFilterHistory });
             toolStrip2.Location = new System.Drawing.Point(0, 0);
             toolStrip2.Name = "toolStrip2";
             toolStrip2.Size = new System.Drawing.Size(850, 27);
@@ -711,6 +766,14 @@
             tsExcelHistory.Size = new System.Drawing.Size(29, 24);
             tsExcelHistory.Text = "Export Excel";
             tsExcelHistory.Click += TsExcelHistory_Click;
+            // 
+            // tsClearFilterHistory
+            // 
+            tsClearFilterHistory.Image = Properties.Resources.Eraser_16x;
+            tsClearFilterHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilterHistory.Name = "tsClearFilterHistory";
+            tsClearFilterHistory.Size = new System.Drawing.Size(104, 24);
+            tsClearFilterHistory.Text = "Clear Filter";
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -833,8 +896,8 @@
             // dataGridViewTextBoxColumn14
             // 
             dataGridViewTextBoxColumn14.DataPropertyName = "PhysicalMemoryGB";
-            dataGridViewCellStyle7.Format = "N1";
-            dataGridViewTextBoxColumn14.DefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle27.Format = "N1";
+            dataGridViewTextBoxColumn14.DefaultCellStyle = dataGridViewCellStyle27;
             dataGridViewTextBoxColumn14.HeaderText = "Physical Memory (GB)";
             dataGridViewTextBoxColumn14.MinimumWidth = 6;
             dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
@@ -844,8 +907,8 @@
             // dataGridViewTextBoxColumn15
             // 
             dataGridViewTextBoxColumn15.DataPropertyName = "BufferPoolMB";
-            dataGridViewCellStyle8.Format = "N0";
-            dataGridViewTextBoxColumn15.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle28.Format = "N0";
+            dataGridViewTextBoxColumn15.DefaultCellStyle = dataGridViewCellStyle28;
             dataGridViewTextBoxColumn15.HeaderText = "Buffer Pool (MB)";
             dataGridViewTextBoxColumn15.MinimumWidth = 6;
             dataGridViewTextBoxColumn15.Name = "dataGridViewTextBoxColumn15";
@@ -855,8 +918,8 @@
             // dataGridViewTextBoxColumn16
             // 
             dataGridViewTextBoxColumn16.DataPropertyName = "PctMemoryAllocatedToBufferPool";
-            dataGridViewCellStyle9.Format = "P1";
-            dataGridViewTextBoxColumn16.DefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewCellStyle29.Format = "P1";
+            dataGridViewTextBoxColumn16.DefaultCellStyle = dataGridViewCellStyle29;
             dataGridViewTextBoxColumn16.HeaderText = "% Memory allocated to buffer pool";
             dataGridViewTextBoxColumn16.MinimumWidth = 6;
             dataGridViewTextBoxColumn16.Name = "dataGridViewTextBoxColumn16";
@@ -866,8 +929,8 @@
             // dataGridViewTextBoxColumn17
             // 
             dataGridViewTextBoxColumn17.DataPropertyName = "MemoryNotAllocatedToBufferPoolGB";
-            dataGridViewCellStyle10.Format = "N1";
-            dataGridViewTextBoxColumn17.DefaultCellStyle = dataGridViewCellStyle10;
+            dataGridViewCellStyle30.Format = "N1";
+            dataGridViewTextBoxColumn17.DefaultCellStyle = dataGridViewCellStyle30;
             dataGridViewTextBoxColumn17.HeaderText = "Memory not allocated to buffer pool (GB)";
             dataGridViewTextBoxColumn17.MinimumWidth = 6;
             dataGridViewTextBoxColumn17.Name = "dataGridViewTextBoxColumn17";
@@ -1066,8 +1129,8 @@
             // dataGridViewTextBoxColumn39
             // 
             dataGridViewTextBoxColumn39.DataPropertyName = "physical_memory_gb_old";
-            dataGridViewCellStyle11.Format = "N1";
-            dataGridViewTextBoxColumn39.DefaultCellStyle = dataGridViewCellStyle11;
+            dataGridViewCellStyle31.Format = "N1";
+            dataGridViewTextBoxColumn39.DefaultCellStyle = dataGridViewCellStyle31;
             dataGridViewTextBoxColumn39.HeaderText = "Physical Memory (Old)";
             dataGridViewTextBoxColumn39.MinimumWidth = 6;
             dataGridViewTextBoxColumn39.Name = "dataGridViewTextBoxColumn39";
@@ -1077,13 +1140,23 @@
             // dataGridViewTextBoxColumn40
             // 
             dataGridViewTextBoxColumn40.DataPropertyName = "physical_memory_gb_new";
-            dataGridViewCellStyle12.Format = "N1";
-            dataGridViewTextBoxColumn40.DefaultCellStyle = dataGridViewCellStyle12;
+            dataGridViewCellStyle32.Format = "N1";
+            dataGridViewTextBoxColumn40.DefaultCellStyle = dataGridViewCellStyle32;
             dataGridViewTextBoxColumn40.HeaderText = "Physical Memory (New)";
             dataGridViewTextBoxColumn40.MinimumWidth = 6;
             dataGridViewTextBoxColumn40.Name = "dataGridViewTextBoxColumn40";
             dataGridViewTextBoxColumn40.ReadOnly = true;
             dataGridViewTextBoxColumn40.Width = 135;
+            // 
+            // tsHistoryCols
+            // 
+            tsHistoryCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsHistoryCols.Image = Properties.Resources.Column_16x;
+            tsHistoryCols.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsHistoryCols.Name = "tsHistoryCols";
+            tsHistoryCols.Size = new System.Drawing.Size(29, 24);
+            tsHistoryCols.Text = "Columns";
+            tsHistoryCols.Click += TsHistoryCols_Click;
             // 
             // HardwareChanges
             // 
@@ -1093,7 +1166,7 @@
             Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             Name = "HardwareChanges";
             Size = new System.Drawing.Size(850, 786);
-            ((System.ComponentModel.ISupportInitialize)dgv).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvHistory).EndInit();
             splitContainer1.Panel1.ResumeLayout(false);
             splitContainer1.Panel1.PerformLayout();
             splitContainer1.Panel2.ResumeLayout(false);
@@ -1110,9 +1183,9 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgv;
+        private DBADashDataGridView dgvHistory;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.DataGridView dgvHardware;
+        private DBADashDataGridView dgvHardware;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripButton tsCopy;
@@ -1207,5 +1280,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colOfflineSchedulers;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPowerPlan;
         private System.Windows.Forms.DataGridViewTextBoxColumn colInstantFileInitialization;
+        private System.Windows.Forms.ToolStripButton tsClearFilter;
+        private System.Windows.Forms.ToolStripButton tsClearFilterHistory;
+        private System.Windows.Forms.ToolStripButton tsHistoryCols;
     }
 }

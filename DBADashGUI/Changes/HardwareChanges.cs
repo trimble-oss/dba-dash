@@ -13,6 +13,8 @@ namespace DBADashGUI
         public HardwareChanges()
         {
             InitializeComponent();
+            dgvHardware.RegisterClearFilter(tsClearFilter);
+            dgvHistory.RegisterClearFilter(tsClearFilterHistory);
         }
 
         private List<int> InstanceIDs;
@@ -25,7 +27,7 @@ namespace DBADashGUI
 
         public void RefreshData()
         {
-            dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
+            dgvHistory.Columns[0].Frozen = Common.FreezeKeyColumn;
             dgvHardware.Columns[0].Frozen = Common.FreezeKeyColumn;
             RefreshHistory();
             RefreshHardware();
@@ -33,37 +35,33 @@ namespace DBADashGUI
 
         private void RefreshHistory()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.HostUpgradeHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                dgv.AutoGenerateColumns = false;
-                dgv.DataSource = dt;
-                dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.HostUpgradeHistory_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            dgvHistory.AutoGenerateColumns = false;
+            dgvHistory.DataSource = new DataView(dt);
+            dgvHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
         private void RefreshHardware()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.Hardware_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                DataTable dt = new();
-                da.Fill(dt);
-                dgvHardware.AutoGenerateColumns = false;
-                dgvHardware.DataSource = dt;
-                dgvHardware.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.Hardware_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            DataTable dt = new();
+            da.Fill(dt);
+            dgvHardware.AutoGenerateColumns = false;
+            dgvHardware.DataSource = new DataView(dt);
+            dgvHardware.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
         private void TsCopy_Click(object sender, EventArgs e)
@@ -83,7 +81,7 @@ namespace DBADashGUI
 
         private void TsCopyHistory_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgv);
+            Common.CopyDataGridViewToClipboard(dgvHistory);
         }
 
         private readonly CellHighlightingRuleSetCollection HighlightingRules = new()
@@ -219,17 +217,22 @@ namespace DBADashGUI
 
         private void TsExcelHistory_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+            dgvHistory.ExportToExcel();
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvHardware);
+            dgvHardware.ExportToExcel();
         }
 
         private void TsCols_Click(object sender, EventArgs e)
         {
             dgvHardware.PromptColumnSelection();
+        }
+
+        private void TsHistoryCols_Click(object sender, EventArgs e)
+        {
+            dgvHistory.PromptColumnSelection();
         }
     }
 }
