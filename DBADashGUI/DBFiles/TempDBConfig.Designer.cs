@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI.DBFiles
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI.DBFiles
 {
     partial class TempDBConfig
     {
@@ -28,536 +30,520 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            this.dgvTempDB = new System.Windows.Forms.DataGridView();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn10 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn13 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn14 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn15 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn16 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn19 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colNumberOfDataFiles = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colInsufficientFiles = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colMinimumRecommendedFiles = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colNumberOfLogFiles = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colEvenSize = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colEvenGrowth = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colTotalSize = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colLogMB = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colFileSizeMB = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colMaxGrowthMB = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colMaxLogGrowth = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colMaxGrowthPct = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colMaxLogGrowthPct = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colTempDBVolumes = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colCPUCores = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colT1117 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colT1118 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colIsTraceFlagRequired = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colTempDBMemoryOpt = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvTempDB)).BeginInit();
-            this.toolStrip1.SuspendLayout();
-            this.SuspendLayout();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            dgvTempDB = new DBADashDataGridView();
+            colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colNumberOfDataFiles = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colInsufficientFiles = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colMinimumRecommendedFiles = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colNumberOfLogFiles = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colEvenSize = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colEvenGrowth = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colTotalSize = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colLogMB = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colFileSizeMB = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colMaxGrowthMB = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colMaxLogGrowth = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colMaxGrowthPct = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colMaxLogGrowthPct = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colTempDBVolumes = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colCPUCores = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colT1117 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colT1118 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colIsTraceFlagRequired = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colTempDBMemoryOpt = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            tsRefresh = new System.Windows.Forms.ToolStripButton();
+            tsCopy = new System.Windows.Forms.ToolStripButton();
+            tsExcel = new System.Windows.Forms.ToolStripButton();
+            dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn10 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn13 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn14 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn15 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn16 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn19 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
+            ((System.ComponentModel.ISupportInitialize)dgvTempDB).BeginInit();
+            toolStrip1.SuspendLayout();
+            SuspendLayout();
             // 
             // dgvTempDB
             // 
-            this.dgvTempDB.AllowUserToAddRows = false;
-            this.dgvTempDB.AllowUserToDeleteRows = false;
-            this.dgvTempDB.BackgroundColor = System.Drawing.Color.White;
-            this.dgvTempDB.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvTempDB.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.colInstance,
-            this.colNumberOfDataFiles,
-            this.colInsufficientFiles,
-            this.colMinimumRecommendedFiles,
-            this.colNumberOfLogFiles,
-            this.colEvenSize,
-            this.colEvenGrowth,
-            this.colTotalSize,
-            this.colLogMB,
-            this.colFileSizeMB,
-            this.colMaxGrowthMB,
-            this.colMaxLogGrowth,
-            this.colMaxGrowthPct,
-            this.colMaxLogGrowthPct,
-            this.colTempDBVolumes,
-            this.colCPUCores,
-            this.colT1117,
-            this.colT1118,
-            this.colIsTraceFlagRequired,
-            this.colTempDBMemoryOpt});
-            this.dgvTempDB.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvTempDB.Location = new System.Drawing.Point(0, 27);
-            this.dgvTempDB.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dgvTempDB.Name = "dgvTempDB";
-            this.dgvTempDB.ReadOnly = true;
-            this.dgvTempDB.RowHeadersVisible = false;
-            this.dgvTempDB.RowHeadersWidth = 51;
-            this.dgvTempDB.RowTemplate.Height = 24;
-            this.dgvTempDB.Size = new System.Drawing.Size(959, 549);
-            this.dgvTempDB.TabIndex = 0;
-            this.dgvTempDB.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.DgvTempDB_RowsAdded);
-            // 
-            // toolStrip1
-            // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsRefresh,
-            this.tsCopy,
-            this.tsExcel});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(959, 27);
-            this.toolStrip1.TabIndex = 1;
-            this.toolStrip1.Text = "toolStrip1";
-            // 
-            // tsRefresh
-            // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
-            // 
-            // tsCopy
-            // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
-            // 
-            // tsExcel
-            // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
-            // 
-            // dataGridViewTextBoxColumn1
-            // 
-            this.dataGridViewTextBoxColumn1.DataPropertyName = "Instance";
-            this.dataGridViewTextBoxColumn1.HeaderText = "Instance";
-            this.dataGridViewTextBoxColumn1.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            this.dataGridViewTextBoxColumn1.Width = 90;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            this.dataGridViewTextBoxColumn2.DataPropertyName = "NumberOfDataFiles";
-            this.dataGridViewTextBoxColumn2.HeaderText = "#Data Files";
-            this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            this.dataGridViewTextBoxColumn2.Width = 108;
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            this.dataGridViewTextBoxColumn3.DataPropertyName = "MinimumRecommendedFiles";
-            this.dataGridViewTextBoxColumn3.HeaderText = "Recommended Files (Minimum)";
-            this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            this.dataGridViewTextBoxColumn3.Width = 154;
-            // 
-            // dataGridViewTextBoxColumn4
-            // 
-            this.dataGridViewTextBoxColumn4.DataPropertyName = "NumberOfLogFiles";
-            this.dataGridViewTextBoxColumn4.HeaderText = "#Log Files";
-            this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
-            this.dataGridViewTextBoxColumn4.ReadOnly = true;
-            this.dataGridViewTextBoxColumn4.Width = 94;
-            // 
-            // dataGridViewTextBoxColumn5
-            // 
-            this.dataGridViewTextBoxColumn5.DataPropertyName = "IsEvenlySized";
-            this.dataGridViewTextBoxColumn5.HeaderText = "Even Sized?";
-            this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
-            this.dataGridViewTextBoxColumn5.ReadOnly = true;
-            this.dataGridViewTextBoxColumn5.Width = 107;
-            // 
-            // dataGridViewTextBoxColumn6
-            // 
-            this.dataGridViewTextBoxColumn6.DataPropertyName = "IsEvenGrowth";
-            this.dataGridViewTextBoxColumn6.HeaderText = "Even Growth";
-            this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
-            this.dataGridViewTextBoxColumn6.ReadOnly = true;
-            this.dataGridViewTextBoxColumn6.Width = 109;
-            // 
-            // dataGridViewTextBoxColumn7
-            // 
-            this.dataGridViewTextBoxColumn7.DataPropertyName = "TotalSizeMB";
-            this.dataGridViewTextBoxColumn7.HeaderText = "Total Size (MB)";
-            this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
-            this.dataGridViewTextBoxColumn7.ReadOnly = true;
-            this.dataGridViewTextBoxColumn7.Width = 123;
-            // 
-            // dataGridViewTextBoxColumn8
-            // 
-            this.dataGridViewTextBoxColumn8.DataPropertyName = "LogMB";
-            this.dataGridViewTextBoxColumn8.HeaderText = "Log MB";
-            this.dataGridViewTextBoxColumn8.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
-            this.dataGridViewTextBoxColumn8.ReadOnly = true;
-            this.dataGridViewTextBoxColumn8.Width = 61;
-            // 
-            // dataGridViewTextBoxColumn9
-            // 
-            this.dataGridViewTextBoxColumn9.DataPropertyName = "FileSizeMB";
-            this.dataGridViewTextBoxColumn9.HeaderText = "File Size (MB)";
-            this.dataGridViewTextBoxColumn9.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn9.Name = "dataGridViewTextBoxColumn9";
-            this.dataGridViewTextBoxColumn9.ReadOnly = true;
-            this.dataGridViewTextBoxColumn9.Width = 114;
-            // 
-            // dataGridViewTextBoxColumn10
-            // 
-            this.dataGridViewTextBoxColumn10.DataPropertyName = "MaxGrowthMB";
-            this.dataGridViewTextBoxColumn10.HeaderText = "Max Growth (MB)";
-            this.dataGridViewTextBoxColumn10.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn10.Name = "dataGridViewTextBoxColumn10";
-            this.dataGridViewTextBoxColumn10.ReadOnly = true;
-            this.dataGridViewTextBoxColumn10.Width = 133;
-            // 
-            // dataGridViewTextBoxColumn11
-            // 
-            this.dataGridViewTextBoxColumn11.DataPropertyName = "MaxLogGrowthMB";
-            this.dataGridViewTextBoxColumn11.HeaderText = "Max Log Growth (MB)";
-            this.dataGridViewTextBoxColumn11.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn11.Name = "dataGridViewTextBoxColumn11";
-            this.dataGridViewTextBoxColumn11.ReadOnly = true;
-            this.dataGridViewTextBoxColumn11.Width = 131;
-            // 
-            // dataGridViewTextBoxColumn12
-            // 
-            this.dataGridViewTextBoxColumn12.DataPropertyName = "MaxGrowthPct";
-            this.dataGridViewTextBoxColumn12.HeaderText = "Max Growth %";
-            this.dataGridViewTextBoxColumn12.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
-            this.dataGridViewTextBoxColumn12.ReadOnly = true;
-            this.dataGridViewTextBoxColumn12.Width = 106;
-            // 
-            // dataGridViewTextBoxColumn13
-            // 
-            this.dataGridViewTextBoxColumn13.DataPropertyName = "MaxLogGrowthPct";
-            this.dataGridViewTextBoxColumn13.HeaderText = "Max Log Growth %";
-            this.dataGridViewTextBoxColumn13.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn13.Name = "dataGridViewTextBoxColumn13";
-            this.dataGridViewTextBoxColumn13.ReadOnly = true;
-            this.dataGridViewTextBoxColumn13.Width = 127;
-            // 
-            // dataGridViewTextBoxColumn14
-            // 
-            this.dataGridViewTextBoxColumn14.DataPropertyName = "TempDBVolumes";
-            this.dataGridViewTextBoxColumn14.HeaderText = "TempDB Volume(s)";
-            this.dataGridViewTextBoxColumn14.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
-            this.dataGridViewTextBoxColumn14.ReadOnly = true;
-            this.dataGridViewTextBoxColumn14.Width = 146;
-            // 
-            // dataGridViewTextBoxColumn15
-            // 
-            this.dataGridViewTextBoxColumn15.DataPropertyName = "cpu_core_count";
-            this.dataGridViewTextBoxColumn15.HeaderText = "CPU Core Count";
-            this.dataGridViewTextBoxColumn15.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn15.Name = "dataGridViewTextBoxColumn15";
-            this.dataGridViewTextBoxColumn15.ReadOnly = true;
-            this.dataGridViewTextBoxColumn15.Width = 128;
-            // 
-            // dataGridViewTextBoxColumn16
-            // 
-            this.dataGridViewTextBoxColumn16.DataPropertyName = "T1117";
-            this.dataGridViewTextBoxColumn16.HeaderText = "T1117";
-            this.dataGridViewTextBoxColumn16.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn16.Name = "dataGridViewTextBoxColumn16";
-            this.dataGridViewTextBoxColumn16.ReadOnly = true;
-            this.dataGridViewTextBoxColumn16.Width = 78;
-            // 
-            // dataGridViewTextBoxColumn17
-            // 
-            this.dataGridViewTextBoxColumn17.DataPropertyName = "T1118";
-            this.dataGridViewTextBoxColumn17.HeaderText = "T1118";
-            this.dataGridViewTextBoxColumn17.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn17.Name = "dataGridViewTextBoxColumn17";
-            this.dataGridViewTextBoxColumn17.ReadOnly = true;
-            this.dataGridViewTextBoxColumn17.Width = 78;
-            // 
-            // dataGridViewTextBoxColumn18
-            // 
-            this.dataGridViewTextBoxColumn18.DataPropertyName = "IsTraceFlagRequired";
-            this.dataGridViewTextBoxColumn18.HeaderText = "Trace Flag Required?";
-            this.dataGridViewTextBoxColumn18.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn18.Name = "dataGridViewTextBoxColumn18";
-            this.dataGridViewTextBoxColumn18.ReadOnly = true;
-            this.dataGridViewTextBoxColumn18.Width = 160;
-            // 
-            // dataGridViewTextBoxColumn19
-            // 
-            this.dataGridViewTextBoxColumn19.DataPropertyName = "IsTempDBMetadataMemoryOptimized";
-            dataGridViewCellStyle7.NullValue = "N/A";
-            this.dataGridViewTextBoxColumn19.DefaultCellStyle = dataGridViewCellStyle7;
-            this.dataGridViewTextBoxColumn19.HeaderText = "Memory Optimized TempDB?";
-            this.dataGridViewTextBoxColumn19.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn19.Name = "dataGridViewTextBoxColumn19";
-            this.dataGridViewTextBoxColumn19.ReadOnly = true;
-            this.dataGridViewTextBoxColumn19.Width = 201;
+            dgvTempDB.AllowUserToAddRows = false;
+            dgvTempDB.AllowUserToDeleteRows = false;
+            dgvTempDB.BackgroundColor = System.Drawing.Color.White;
+            dgvTempDB.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvTempDB.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colInstance, colNumberOfDataFiles, colInsufficientFiles, colMinimumRecommendedFiles, colNumberOfLogFiles, colEvenSize, colEvenGrowth, colTotalSize, colLogMB, colFileSizeMB, colMaxGrowthMB, colMaxLogGrowth, colMaxGrowthPct, colMaxLogGrowthPct, colTempDBVolumes, colCPUCores, colT1117, colT1118, colIsTraceFlagRequired, colTempDBMemoryOpt });
+            dgvTempDB.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvTempDB.Location = new System.Drawing.Point(0, 27);
+            dgvTempDB.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dgvTempDB.Name = "dgvTempDB";
+            dgvTempDB.ReadOnly = true;
+            dgvTempDB.RowHeadersVisible = false;
+            dgvTempDB.RowHeadersWidth = 51;
+            dgvTempDB.RowTemplate.Height = 24;
+            dgvTempDB.Size = new System.Drawing.Size(959, 549);
+            dgvTempDB.TabIndex = 0;
+            dgvTempDB.RowsAdded += DgvTempDB_RowsAdded;
             // 
             // colInstance
             // 
-            this.colInstance.DataPropertyName = "InstanceDisplayName";
-            this.colInstance.HeaderText = "Instance";
-            this.colInstance.MinimumWidth = 6;
-            this.colInstance.Name = "colInstance";
-            this.colInstance.ReadOnly = true;
-            this.colInstance.Width = 90;
+            colInstance.DataPropertyName = "InstanceDisplayName";
+            colInstance.HeaderText = "Instance";
+            colInstance.MinimumWidth = 6;
+            colInstance.Name = "colInstance";
+            colInstance.ReadOnly = true;
+            colInstance.Width = 90;
             // 
             // colNumberOfDataFiles
             // 
-            this.colNumberOfDataFiles.DataPropertyName = "NumberOfDataFiles";
-            this.colNumberOfDataFiles.HeaderText = "#Data Files";
-            this.colNumberOfDataFiles.MinimumWidth = 6;
-            this.colNumberOfDataFiles.Name = "colNumberOfDataFiles";
-            this.colNumberOfDataFiles.ReadOnly = true;
-            this.colNumberOfDataFiles.Width = 125;
+            colNumberOfDataFiles.DataPropertyName = "NumberOfDataFiles";
+            colNumberOfDataFiles.HeaderText = "#Data Files";
+            colNumberOfDataFiles.MinimumWidth = 6;
+            colNumberOfDataFiles.Name = "colNumberOfDataFiles";
+            colNumberOfDataFiles.ReadOnly = true;
+            colNumberOfDataFiles.Width = 125;
             // 
             // colInsufficientFiles
             // 
-            this.colInsufficientFiles.DataPropertyName = "InsufficientFiles";
-            this.colInsufficientFiles.HeaderText = "Insufficient Files";
-            this.colInsufficientFiles.MinimumWidth = 6;
-            this.colInsufficientFiles.Name = "colInsufficientFiles";
-            this.colInsufficientFiles.ReadOnly = true;
-            this.colInsufficientFiles.Width = 126;
+            colInsufficientFiles.DataPropertyName = "InsufficientFiles";
+            colInsufficientFiles.HeaderText = "Insufficient Files";
+            colInsufficientFiles.MinimumWidth = 6;
+            colInsufficientFiles.Name = "colInsufficientFiles";
+            colInsufficientFiles.ReadOnly = true;
+            colInsufficientFiles.Width = 126;
             // 
             // colMinimumRecommendedFiles
             // 
-            this.colMinimumRecommendedFiles.DataPropertyName = "MinimumRecommendedFiles";
-            this.colMinimumRecommendedFiles.HeaderText = "Recommended Files (Minimum)";
-            this.colMinimumRecommendedFiles.MinimumWidth = 6;
-            this.colMinimumRecommendedFiles.Name = "colMinimumRecommendedFiles";
-            this.colMinimumRecommendedFiles.ReadOnly = true;
-            this.colMinimumRecommendedFiles.Width = 154;
+            colMinimumRecommendedFiles.DataPropertyName = "MinimumRecommendedFiles";
+            colMinimumRecommendedFiles.HeaderText = "Recommended Files (Minimum)";
+            colMinimumRecommendedFiles.MinimumWidth = 6;
+            colMinimumRecommendedFiles.Name = "colMinimumRecommendedFiles";
+            colMinimumRecommendedFiles.ReadOnly = true;
+            colMinimumRecommendedFiles.Width = 154;
             // 
             // colNumberOfLogFiles
             // 
-            this.colNumberOfLogFiles.DataPropertyName = "NumberOfLogFiles";
-            this.colNumberOfLogFiles.HeaderText = "#Log Files";
-            this.colNumberOfLogFiles.MinimumWidth = 6;
-            this.colNumberOfLogFiles.Name = "colNumberOfLogFiles";
-            this.colNumberOfLogFiles.ReadOnly = true;
-            this.colNumberOfLogFiles.Width = 94;
+            colNumberOfLogFiles.DataPropertyName = "NumberOfLogFiles";
+            colNumberOfLogFiles.HeaderText = "#Log Files";
+            colNumberOfLogFiles.MinimumWidth = 6;
+            colNumberOfLogFiles.Name = "colNumberOfLogFiles";
+            colNumberOfLogFiles.ReadOnly = true;
+            colNumberOfLogFiles.Width = 94;
             // 
             // colEvenSize
             // 
-            this.colEvenSize.DataPropertyName = "IsEvenlySized";
-            this.colEvenSize.HeaderText = "Even Sized?";
-            this.colEvenSize.MinimumWidth = 6;
-            this.colEvenSize.Name = "colEvenSize";
-            this.colEvenSize.ReadOnly = true;
-            this.colEvenSize.ToolTipText = "Should be evenly sized";
-            this.colEvenSize.Width = 107;
+            colEvenSize.DataPropertyName = "IsEvenlySized";
+            colEvenSize.HeaderText = "Even Sized?";
+            colEvenSize.MinimumWidth = 6;
+            colEvenSize.Name = "colEvenSize";
+            colEvenSize.ReadOnly = true;
+            colEvenSize.ToolTipText = "Should be evenly sized";
+            colEvenSize.Width = 107;
             // 
             // colEvenGrowth
             // 
-            this.colEvenGrowth.DataPropertyName = "IsEvenGrowth";
-            this.colEvenGrowth.HeaderText = "Even Growth";
-            this.colEvenGrowth.MinimumWidth = 6;
-            this.colEvenGrowth.Name = "colEvenGrowth";
-            this.colEvenGrowth.ReadOnly = true;
-            this.colEvenGrowth.ToolTipText = "Should be even growth";
-            this.colEvenGrowth.Width = 109;
+            colEvenGrowth.DataPropertyName = "IsEvenGrowth";
+            colEvenGrowth.HeaderText = "Even Growth";
+            colEvenGrowth.MinimumWidth = 6;
+            colEvenGrowth.Name = "colEvenGrowth";
+            colEvenGrowth.ReadOnly = true;
+            colEvenGrowth.ToolTipText = "Should be even growth";
+            colEvenGrowth.Width = 109;
             // 
             // colTotalSize
             // 
-            this.colTotalSize.DataPropertyName = "TotalSizeMB";
+            colTotalSize.DataPropertyName = "TotalSizeMB";
             dataGridViewCellStyle1.Format = "N0";
-            this.colTotalSize.DefaultCellStyle = dataGridViewCellStyle1;
-            this.colTotalSize.HeaderText = "Total Size (MB)";
-            this.colTotalSize.MinimumWidth = 6;
-            this.colTotalSize.Name = "colTotalSize";
-            this.colTotalSize.ReadOnly = true;
-            this.colTotalSize.Width = 123;
+            colTotalSize.DefaultCellStyle = dataGridViewCellStyle1;
+            colTotalSize.HeaderText = "Total Size (MB)";
+            colTotalSize.MinimumWidth = 6;
+            colTotalSize.Name = "colTotalSize";
+            colTotalSize.ReadOnly = true;
+            colTotalSize.Width = 123;
             // 
             // colLogMB
             // 
-            this.colLogMB.DataPropertyName = "LogMB";
+            colLogMB.DataPropertyName = "LogMB";
             dataGridViewCellStyle2.Format = "N0";
-            this.colLogMB.DefaultCellStyle = dataGridViewCellStyle2;
-            this.colLogMB.HeaderText = "Log MB";
-            this.colLogMB.MinimumWidth = 6;
-            this.colLogMB.Name = "colLogMB";
-            this.colLogMB.ReadOnly = true;
-            this.colLogMB.Width = 61;
+            colLogMB.DefaultCellStyle = dataGridViewCellStyle2;
+            colLogMB.HeaderText = "Log MB";
+            colLogMB.MinimumWidth = 6;
+            colLogMB.Name = "colLogMB";
+            colLogMB.ReadOnly = true;
+            colLogMB.Width = 61;
             // 
             // colFileSizeMB
             // 
-            this.colFileSizeMB.DataPropertyName = "FileSizeMB";
+            colFileSizeMB.DataPropertyName = "FileSizeMB";
             dataGridViewCellStyle3.Format = "N0";
-            this.colFileSizeMB.DefaultCellStyle = dataGridViewCellStyle3;
-            this.colFileSizeMB.HeaderText = "File Size (MB)";
-            this.colFileSizeMB.MinimumWidth = 6;
-            this.colFileSizeMB.Name = "colFileSizeMB";
-            this.colFileSizeMB.ReadOnly = true;
-            this.colFileSizeMB.Width = 114;
+            colFileSizeMB.DefaultCellStyle = dataGridViewCellStyle3;
+            colFileSizeMB.HeaderText = "File Size (MB)";
+            colFileSizeMB.MinimumWidth = 6;
+            colFileSizeMB.Name = "colFileSizeMB";
+            colFileSizeMB.ReadOnly = true;
+            colFileSizeMB.Width = 114;
             // 
             // colMaxGrowthMB
             // 
-            this.colMaxGrowthMB.DataPropertyName = "MaxGrowthMB";
+            colMaxGrowthMB.DataPropertyName = "MaxGrowthMB";
             dataGridViewCellStyle4.Format = "N0";
-            this.colMaxGrowthMB.DefaultCellStyle = dataGridViewCellStyle4;
-            this.colMaxGrowthMB.HeaderText = "Max Growth (MB)";
-            this.colMaxGrowthMB.MinimumWidth = 6;
-            this.colMaxGrowthMB.Name = "colMaxGrowthMB";
-            this.colMaxGrowthMB.ReadOnly = true;
-            this.colMaxGrowthMB.Width = 133;
+            colMaxGrowthMB.DefaultCellStyle = dataGridViewCellStyle4;
+            colMaxGrowthMB.HeaderText = "Max Growth (MB)";
+            colMaxGrowthMB.MinimumWidth = 6;
+            colMaxGrowthMB.Name = "colMaxGrowthMB";
+            colMaxGrowthMB.ReadOnly = true;
+            colMaxGrowthMB.Width = 133;
             // 
             // colMaxLogGrowth
             // 
-            this.colMaxLogGrowth.DataPropertyName = "MaxLogGrowthMB";
+            colMaxLogGrowth.DataPropertyName = "MaxLogGrowthMB";
             dataGridViewCellStyle5.Format = "N0";
-            this.colMaxLogGrowth.DefaultCellStyle = dataGridViewCellStyle5;
-            this.colMaxLogGrowth.HeaderText = "Max Log Growth (MB)";
-            this.colMaxLogGrowth.MinimumWidth = 6;
-            this.colMaxLogGrowth.Name = "colMaxLogGrowth";
-            this.colMaxLogGrowth.ReadOnly = true;
-            this.colMaxLogGrowth.Width = 131;
+            colMaxLogGrowth.DefaultCellStyle = dataGridViewCellStyle5;
+            colMaxLogGrowth.HeaderText = "Max Log Growth (MB)";
+            colMaxLogGrowth.MinimumWidth = 6;
+            colMaxLogGrowth.Name = "colMaxLogGrowth";
+            colMaxLogGrowth.ReadOnly = true;
+            colMaxLogGrowth.Width = 131;
             // 
             // colMaxGrowthPct
             // 
-            this.colMaxGrowthPct.DataPropertyName = "MaxGrowthPct";
-            this.colMaxGrowthPct.HeaderText = "Max Growth %";
-            this.colMaxGrowthPct.MinimumWidth = 6;
-            this.colMaxGrowthPct.Name = "colMaxGrowthPct";
-            this.colMaxGrowthPct.ReadOnly = true;
-            this.colMaxGrowthPct.Width = 106;
+            colMaxGrowthPct.DataPropertyName = "MaxGrowthPct";
+            colMaxGrowthPct.HeaderText = "Max Growth %";
+            colMaxGrowthPct.MinimumWidth = 6;
+            colMaxGrowthPct.Name = "colMaxGrowthPct";
+            colMaxGrowthPct.ReadOnly = true;
+            colMaxGrowthPct.Width = 106;
             // 
             // colMaxLogGrowthPct
             // 
-            this.colMaxLogGrowthPct.DataPropertyName = "MaxLogGrowthPct";
-            this.colMaxLogGrowthPct.HeaderText = "Max Log Growth %";
-            this.colMaxLogGrowthPct.MinimumWidth = 6;
-            this.colMaxLogGrowthPct.Name = "colMaxLogGrowthPct";
-            this.colMaxLogGrowthPct.ReadOnly = true;
-            this.colMaxLogGrowthPct.Width = 127;
+            colMaxLogGrowthPct.DataPropertyName = "MaxLogGrowthPct";
+            colMaxLogGrowthPct.HeaderText = "Max Log Growth %";
+            colMaxLogGrowthPct.MinimumWidth = 6;
+            colMaxLogGrowthPct.Name = "colMaxLogGrowthPct";
+            colMaxLogGrowthPct.ReadOnly = true;
+            colMaxLogGrowthPct.Width = 127;
             // 
             // colTempDBVolumes
             // 
-            this.colTempDBVolumes.DataPropertyName = "TempDBVolumes";
-            this.colTempDBVolumes.HeaderText = "TempDB Volume(s)";
-            this.colTempDBVolumes.MinimumWidth = 6;
-            this.colTempDBVolumes.Name = "colTempDBVolumes";
-            this.colTempDBVolumes.ReadOnly = true;
-            this.colTempDBVolumes.Width = 146;
+            colTempDBVolumes.DataPropertyName = "TempDBVolumes";
+            colTempDBVolumes.HeaderText = "TempDB Volume(s)";
+            colTempDBVolumes.MinimumWidth = 6;
+            colTempDBVolumes.Name = "colTempDBVolumes";
+            colTempDBVolumes.ReadOnly = true;
+            colTempDBVolumes.Width = 146;
             // 
             // colCPUCores
             // 
-            this.colCPUCores.DataPropertyName = "cpu_core_count";
-            this.colCPUCores.HeaderText = "CPU Core Count";
-            this.colCPUCores.MinimumWidth = 6;
-            this.colCPUCores.Name = "colCPUCores";
-            this.colCPUCores.ReadOnly = true;
-            this.colCPUCores.ToolTipText = "Up to 8 cores tempdb should match core count.  Then start at 8 files and add more" +
-    " if needed.";
-            this.colCPUCores.Width = 128;
+            colCPUCores.DataPropertyName = "cpu_core_count";
+            colCPUCores.HeaderText = "CPU Core Count";
+            colCPUCores.MinimumWidth = 6;
+            colCPUCores.Name = "colCPUCores";
+            colCPUCores.ReadOnly = true;
+            colCPUCores.ToolTipText = "Up to 8 cores tempdb should match core count.  Then start at 8 files and add more if needed.";
+            colCPUCores.Width = 128;
             // 
             // colT1117
             // 
-            this.colT1117.DataPropertyName = "T1117";
-            this.colT1117.HeaderText = "T1117";
-            this.colT1117.MinimumWidth = 6;
-            this.colT1117.Name = "colT1117";
-            this.colT1117.ReadOnly = true;
-            this.colT1117.ToolTipText = "Recommended trace flag prior to SQL 2016";
-            this.colT1117.Width = 78;
+            colT1117.DataPropertyName = "T1117";
+            colT1117.HeaderText = "T1117";
+            colT1117.MinimumWidth = 6;
+            colT1117.Name = "colT1117";
+            colT1117.ReadOnly = true;
+            colT1117.ToolTipText = "Recommended trace flag prior to SQL 2016";
+            colT1117.Width = 78;
             // 
             // colT1118
             // 
-            this.colT1118.DataPropertyName = "T1118";
-            this.colT1118.HeaderText = "T1118";
-            this.colT1118.MinimumWidth = 6;
-            this.colT1118.Name = "colT1118";
-            this.colT1118.ReadOnly = true;
-            this.colT1118.ToolTipText = "Recommended trace flag prior to SQL 2016";
-            this.colT1118.Width = 78;
+            colT1118.DataPropertyName = "T1118";
+            colT1118.HeaderText = "T1118";
+            colT1118.MinimumWidth = 6;
+            colT1118.Name = "colT1118";
+            colT1118.ReadOnly = true;
+            colT1118.ToolTipText = "Recommended trace flag prior to SQL 2016";
+            colT1118.Width = 78;
             // 
             // colIsTraceFlagRequired
             // 
-            this.colIsTraceFlagRequired.DataPropertyName = "IsTraceFlagRequired";
-            this.colIsTraceFlagRequired.HeaderText = "Trace Flag Required?";
-            this.colIsTraceFlagRequired.MinimumWidth = 6;
-            this.colIsTraceFlagRequired.Name = "colIsTraceFlagRequired";
-            this.colIsTraceFlagRequired.ReadOnly = true;
-            this.colIsTraceFlagRequired.ToolTipText = "SQL 2016 and later don\'t require T1118 & T1117";
-            this.colIsTraceFlagRequired.Width = 160;
+            colIsTraceFlagRequired.DataPropertyName = "IsTraceFlagRequired";
+            colIsTraceFlagRequired.HeaderText = "Trace Flag Required?";
+            colIsTraceFlagRequired.MinimumWidth = 6;
+            colIsTraceFlagRequired.Name = "colIsTraceFlagRequired";
+            colIsTraceFlagRequired.ReadOnly = true;
+            colIsTraceFlagRequired.ToolTipText = "SQL 2016 and later don't require T1118 & T1117";
+            colIsTraceFlagRequired.Width = 160;
             // 
             // colTempDBMemoryOpt
             // 
-            this.colTempDBMemoryOpt.DataPropertyName = "IsTempDBMetadataMemoryOptimized";
+            colTempDBMemoryOpt.DataPropertyName = "IsTempDBMetadataMemoryOptimized";
             dataGridViewCellStyle6.NullValue = "N/A";
-            this.colTempDBMemoryOpt.DefaultCellStyle = dataGridViewCellStyle6;
-            this.colTempDBMemoryOpt.HeaderText = "Memory Optimized TempDB?";
-            this.colTempDBMemoryOpt.MinimumWidth = 6;
-            this.colTempDBMemoryOpt.Name = "colTempDBMemoryOpt";
-            this.colTempDBMemoryOpt.ReadOnly = true;
-            this.colTempDBMemoryOpt.ToolTipText = "Valid from SQL 2019";
-            this.colTempDBMemoryOpt.Width = 201;
+            colTempDBMemoryOpt.DefaultCellStyle = dataGridViewCellStyle6;
+            colTempDBMemoryOpt.HeaderText = "Memory Optimized TempDB?";
+            colTempDBMemoryOpt.MinimumWidth = 6;
+            colTempDBMemoryOpt.Name = "colTempDBMemoryOpt";
+            colTempDBMemoryOpt.ReadOnly = true;
+            colTempDBMemoryOpt.ToolTipText = "Valid from SQL 2019";
+            colTempDBMemoryOpt.Width = 201;
+            // 
+            // toolStrip1
+            // 
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsClearFilter });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new System.Drawing.Size(959, 27);
+            toolStrip1.TabIndex = 1;
+            toolStrip1.Text = "toolStrip1";
+            // 
+            // tsRefresh
+            // 
+            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Name = "tsRefresh";
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Text = "Refresh";
+            tsRefresh.Click += TsRefresh_Click;
+            // 
+            // tsCopy
+            // 
+            tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopy.Name = "tsCopy";
+            tsCopy.Size = new System.Drawing.Size(29, 24);
+            tsCopy.Text = "Copy";
+            tsCopy.Click += TsCopy_Click;
+            // 
+            // tsExcel
+            // 
+            tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsExcel.Image = Properties.Resources.excel16x16;
+            tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcel.Name = "tsExcel";
+            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Text = "Export Excel";
+            tsExcel.Click += TsExcel_Click;
+            // 
+            // dataGridViewTextBoxColumn1
+            // 
+            dataGridViewTextBoxColumn1.DataPropertyName = "Instance";
+            dataGridViewTextBoxColumn1.HeaderText = "Instance";
+            dataGridViewTextBoxColumn1.MinimumWidth = 6;
+            dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            dataGridViewTextBoxColumn1.ReadOnly = true;
+            dataGridViewTextBoxColumn1.Width = 90;
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            dataGridViewTextBoxColumn2.DataPropertyName = "NumberOfDataFiles";
+            dataGridViewTextBoxColumn2.HeaderText = "#Data Files";
+            dataGridViewTextBoxColumn2.MinimumWidth = 6;
+            dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            dataGridViewTextBoxColumn2.ReadOnly = true;
+            dataGridViewTextBoxColumn2.Width = 108;
+            // 
+            // dataGridViewTextBoxColumn3
+            // 
+            dataGridViewTextBoxColumn3.DataPropertyName = "MinimumRecommendedFiles";
+            dataGridViewTextBoxColumn3.HeaderText = "Recommended Files (Minimum)";
+            dataGridViewTextBoxColumn3.MinimumWidth = 6;
+            dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            dataGridViewTextBoxColumn3.ReadOnly = true;
+            dataGridViewTextBoxColumn3.Width = 154;
+            // 
+            // dataGridViewTextBoxColumn4
+            // 
+            dataGridViewTextBoxColumn4.DataPropertyName = "NumberOfLogFiles";
+            dataGridViewTextBoxColumn4.HeaderText = "#Log Files";
+            dataGridViewTextBoxColumn4.MinimumWidth = 6;
+            dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            dataGridViewTextBoxColumn4.ReadOnly = true;
+            dataGridViewTextBoxColumn4.Width = 94;
+            // 
+            // dataGridViewTextBoxColumn5
+            // 
+            dataGridViewTextBoxColumn5.DataPropertyName = "IsEvenlySized";
+            dataGridViewTextBoxColumn5.HeaderText = "Even Sized?";
+            dataGridViewTextBoxColumn5.MinimumWidth = 6;
+            dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
+            dataGridViewTextBoxColumn5.ReadOnly = true;
+            dataGridViewTextBoxColumn5.Width = 107;
+            // 
+            // dataGridViewTextBoxColumn6
+            // 
+            dataGridViewTextBoxColumn6.DataPropertyName = "IsEvenGrowth";
+            dataGridViewTextBoxColumn6.HeaderText = "Even Growth";
+            dataGridViewTextBoxColumn6.MinimumWidth = 6;
+            dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
+            dataGridViewTextBoxColumn6.ReadOnly = true;
+            dataGridViewTextBoxColumn6.Width = 109;
+            // 
+            // dataGridViewTextBoxColumn7
+            // 
+            dataGridViewTextBoxColumn7.DataPropertyName = "TotalSizeMB";
+            dataGridViewTextBoxColumn7.HeaderText = "Total Size (MB)";
+            dataGridViewTextBoxColumn7.MinimumWidth = 6;
+            dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
+            dataGridViewTextBoxColumn7.ReadOnly = true;
+            dataGridViewTextBoxColumn7.Width = 123;
+            // 
+            // dataGridViewTextBoxColumn8
+            // 
+            dataGridViewTextBoxColumn8.DataPropertyName = "LogMB";
+            dataGridViewTextBoxColumn8.HeaderText = "Log MB";
+            dataGridViewTextBoxColumn8.MinimumWidth = 6;
+            dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
+            dataGridViewTextBoxColumn8.ReadOnly = true;
+            dataGridViewTextBoxColumn8.Width = 61;
+            // 
+            // dataGridViewTextBoxColumn9
+            // 
+            dataGridViewTextBoxColumn9.DataPropertyName = "FileSizeMB";
+            dataGridViewTextBoxColumn9.HeaderText = "File Size (MB)";
+            dataGridViewTextBoxColumn9.MinimumWidth = 6;
+            dataGridViewTextBoxColumn9.Name = "dataGridViewTextBoxColumn9";
+            dataGridViewTextBoxColumn9.ReadOnly = true;
+            dataGridViewTextBoxColumn9.Width = 114;
+            // 
+            // dataGridViewTextBoxColumn10
+            // 
+            dataGridViewTextBoxColumn10.DataPropertyName = "MaxGrowthMB";
+            dataGridViewTextBoxColumn10.HeaderText = "Max Growth (MB)";
+            dataGridViewTextBoxColumn10.MinimumWidth = 6;
+            dataGridViewTextBoxColumn10.Name = "dataGridViewTextBoxColumn10";
+            dataGridViewTextBoxColumn10.ReadOnly = true;
+            dataGridViewTextBoxColumn10.Width = 133;
+            // 
+            // dataGridViewTextBoxColumn11
+            // 
+            dataGridViewTextBoxColumn11.DataPropertyName = "MaxLogGrowthMB";
+            dataGridViewTextBoxColumn11.HeaderText = "Max Log Growth (MB)";
+            dataGridViewTextBoxColumn11.MinimumWidth = 6;
+            dataGridViewTextBoxColumn11.Name = "dataGridViewTextBoxColumn11";
+            dataGridViewTextBoxColumn11.ReadOnly = true;
+            dataGridViewTextBoxColumn11.Width = 131;
+            // 
+            // dataGridViewTextBoxColumn12
+            // 
+            dataGridViewTextBoxColumn12.DataPropertyName = "MaxGrowthPct";
+            dataGridViewTextBoxColumn12.HeaderText = "Max Growth %";
+            dataGridViewTextBoxColumn12.MinimumWidth = 6;
+            dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
+            dataGridViewTextBoxColumn12.ReadOnly = true;
+            dataGridViewTextBoxColumn12.Width = 106;
+            // 
+            // dataGridViewTextBoxColumn13
+            // 
+            dataGridViewTextBoxColumn13.DataPropertyName = "MaxLogGrowthPct";
+            dataGridViewTextBoxColumn13.HeaderText = "Max Log Growth %";
+            dataGridViewTextBoxColumn13.MinimumWidth = 6;
+            dataGridViewTextBoxColumn13.Name = "dataGridViewTextBoxColumn13";
+            dataGridViewTextBoxColumn13.ReadOnly = true;
+            dataGridViewTextBoxColumn13.Width = 127;
+            // 
+            // dataGridViewTextBoxColumn14
+            // 
+            dataGridViewTextBoxColumn14.DataPropertyName = "TempDBVolumes";
+            dataGridViewTextBoxColumn14.HeaderText = "TempDB Volume(s)";
+            dataGridViewTextBoxColumn14.MinimumWidth = 6;
+            dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
+            dataGridViewTextBoxColumn14.ReadOnly = true;
+            dataGridViewTextBoxColumn14.Width = 146;
+            // 
+            // dataGridViewTextBoxColumn15
+            // 
+            dataGridViewTextBoxColumn15.DataPropertyName = "cpu_core_count";
+            dataGridViewTextBoxColumn15.HeaderText = "CPU Core Count";
+            dataGridViewTextBoxColumn15.MinimumWidth = 6;
+            dataGridViewTextBoxColumn15.Name = "dataGridViewTextBoxColumn15";
+            dataGridViewTextBoxColumn15.ReadOnly = true;
+            dataGridViewTextBoxColumn15.Width = 128;
+            // 
+            // dataGridViewTextBoxColumn16
+            // 
+            dataGridViewTextBoxColumn16.DataPropertyName = "T1117";
+            dataGridViewTextBoxColumn16.HeaderText = "T1117";
+            dataGridViewTextBoxColumn16.MinimumWidth = 6;
+            dataGridViewTextBoxColumn16.Name = "dataGridViewTextBoxColumn16";
+            dataGridViewTextBoxColumn16.ReadOnly = true;
+            dataGridViewTextBoxColumn16.Width = 78;
+            // 
+            // dataGridViewTextBoxColumn17
+            // 
+            dataGridViewTextBoxColumn17.DataPropertyName = "T1118";
+            dataGridViewTextBoxColumn17.HeaderText = "T1118";
+            dataGridViewTextBoxColumn17.MinimumWidth = 6;
+            dataGridViewTextBoxColumn17.Name = "dataGridViewTextBoxColumn17";
+            dataGridViewTextBoxColumn17.ReadOnly = true;
+            dataGridViewTextBoxColumn17.Width = 78;
+            // 
+            // dataGridViewTextBoxColumn18
+            // 
+            dataGridViewTextBoxColumn18.DataPropertyName = "IsTraceFlagRequired";
+            dataGridViewTextBoxColumn18.HeaderText = "Trace Flag Required?";
+            dataGridViewTextBoxColumn18.MinimumWidth = 6;
+            dataGridViewTextBoxColumn18.Name = "dataGridViewTextBoxColumn18";
+            dataGridViewTextBoxColumn18.ReadOnly = true;
+            dataGridViewTextBoxColumn18.Width = 160;
+            // 
+            // dataGridViewTextBoxColumn19
+            // 
+            dataGridViewTextBoxColumn19.DataPropertyName = "IsTempDBMetadataMemoryOptimized";
+            dataGridViewCellStyle7.NullValue = "N/A";
+            dataGridViewTextBoxColumn19.DefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewTextBoxColumn19.HeaderText = "Memory Optimized TempDB?";
+            dataGridViewTextBoxColumn19.MinimumWidth = 6;
+            dataGridViewTextBoxColumn19.Name = "dataGridViewTextBoxColumn19";
+            dataGridViewTextBoxColumn19.ReadOnly = true;
+            dataGridViewTextBoxColumn19.Width = 201;
+            // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Image = Properties.Resources.Eraser_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            tsClearFilter.Text = "Clear Filter";
             // 
             // TempDBConfig
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.dgvTempDB);
-            this.Controls.Add(this.toolStrip1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "TempDBConfig";
-            this.Size = new System.Drawing.Size(959, 576);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvTempDB)).EndInit();
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            Controls.Add(dgvTempDB);
+            Controls.Add(toolStrip1);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "TempDBConfig";
+            Size = new System.Drawing.Size(959, 576);
+            ((System.ComponentModel.ISupportInitialize)dgvTempDB).EndInit();
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgvTempDB;
+        private DBADashDataGridView dgvTempDB;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripButton tsCopy;
@@ -601,5 +587,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colT1118;
         private System.Windows.Forms.DataGridViewTextBoxColumn colIsTraceFlagRequired;
         private System.Windows.Forms.DataGridViewTextBoxColumn colTempDBMemoryOpt;
+        private System.Windows.Forms.ToolStripButton tsClearFilter;
     }
 }
