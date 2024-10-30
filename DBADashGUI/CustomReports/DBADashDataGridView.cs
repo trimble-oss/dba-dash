@@ -43,10 +43,16 @@ namespace DBADashGUI.CustomReports
         {
             this.CellFormatting += DBADashDataGridView_CellFormatting;
             this.MouseUp += Dgv_MouseUp;
+            this.DataSourceChanged += Dgv_DataSourceChanged;
             EnableDoubleBuffering();
             AddCellContextMenuItems();
             AddColumnContextMenuItems();
             this.ApplyTheme();
+        }
+
+        private void Dgv_DataSourceChanged(object sender, EventArgs e)
+        {
+            FormatFilteredColumns();
         }
 
         private void AddColumnContextMenuItems()
@@ -229,10 +235,7 @@ namespace DBADashGUI.CustomReports
             try
             {
                 dv.RowFilter = filter;
-                foreach (DataGridViewColumn col in Columns)
-                {
-                    col.HeaderCell.Style.Font = new Font(col.HeaderCell.Style.Font ?? Font, IsColumnFiltered(col.Index) ? FontStyle.Bold | FontStyle.Italic : FontStyle.Regular);
-                }
+                FormatFilteredColumns();
                 GridFilterChanged?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
@@ -240,6 +243,14 @@ namespace DBADashGUI.CustomReports
                 dv.RowFilter = previousFilter;
                 MessageBox.Show("Error setting row filter: " + ex.Message, "Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
+            }
+        }
+
+        private void FormatFilteredColumns()
+        {
+            foreach (DataGridViewColumn col in Columns)
+            {
+                col.HeaderCell.Style.Font = new Font(col.HeaderCell.Style.Font ?? Font, IsColumnFiltered(col.Index) ? FontStyle.Bold | FontStyle.Italic : FontStyle.Regular);
             }
         }
 

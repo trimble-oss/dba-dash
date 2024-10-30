@@ -1,4 +1,6 @@
 ﻿
+using DBADashGUI.CustomReports;
+
 namespace DBADashGUI.Performance
 {
     partial class RunningQueries
@@ -33,7 +35,9 @@ namespace DBADashGUI.Performance
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RunningQueries));
-            dgv = new System.Windows.Forms.DataGridView();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            dgv = new DBADashDataGridView();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
@@ -70,12 +74,13 @@ namespace DBADashGUI.Performance
             toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             clearBlockingFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsGroupByFilter = new System.Windows.Forms.ToolStripLabel();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblRowLimit = new System.Windows.Forms.ToolStripStatusLabel();
             tsEditLimit = new System.Windows.Forms.ToolStripStatusLabel();
             tsStatus = new System.Windows.Forms.ToolStripStatusLabel();
-            dgvSessionWaits = new System.Windows.Forms.DataGridView();
+            dgvSessionWaits = new DBADashDataGridView();
             toolStrip2 = new System.Windows.Forms.ToolStrip();
             lblWaitsForSession = new System.Windows.Forms.ToolStripLabel();
             tsSessionWaitCopy = new System.Windows.Forms.ToolStripButton();
@@ -119,10 +124,13 @@ namespace DBADashGUI.Performance
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             dgv.DefaultCellStyle = dataGridViewCellStyle2;
             dgv.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgv.EnableHeadersVisualStyles = false;
             dgv.Location = new System.Drawing.Point(0, 0);
             dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgv.Name = "dgv";
             dgv.ReadOnly = true;
+            dgv.ResultSetID = 0;
+            dgv.ResultSetName = null;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
@@ -142,7 +150,7 @@ namespace DBADashGUI.Performance
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsCols, tsBack, tsGetLatest, tsTriggerCollection, tsNext, lblSnapshotDate, tsGroupBy, tsPrevious, tsBlockingFilter, tsGroupByFilter });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsCols, tsBack, tsGetLatest, tsTriggerCollection, tsNext, lblSnapshotDate, tsGroupBy, tsPrevious, tsBlockingFilter, tsGroupByFilter, tsClearFilter });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1090, 27);
@@ -453,6 +461,16 @@ namespace DBADashGUI.Performance
             tsGroupByFilter.Text = "{Group By Filter}";
             tsGroupByFilter.Visible = false;
             // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Image = Properties.Resources.Eraser_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            tsClearFilter.Text = "Clear Filter";
+            tsClearFilter.Click += tsClearFilter_Click;
+            // 
             // splitContainer1
             // 
             splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -504,7 +522,7 @@ namespace DBADashGUI.Performance
             // tsStatus
             // 
             tsStatus.Name = "tsStatus";
-            tsStatus.Size = new System.Drawing.Size(374, 20);
+            tsStatus.Size = new System.Drawing.Size(1003, 20);
             tsStatus.Spring = true;
             tsStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
@@ -513,12 +531,31 @@ namespace DBADashGUI.Performance
             dgvSessionWaits.AllowUserToAddRows = false;
             dgvSessionWaits.AllowUserToDeleteRows = false;
             dgvSessionWaits.BackgroundColor = System.Drawing.Color.AliceBlue;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvSessionWaits.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle4;
             dgvSessionWaits.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvSessionWaits.DefaultCellStyle = dataGridViewCellStyle5;
             dgvSessionWaits.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvSessionWaits.EnableHeadersVisualStyles = false;
             dgvSessionWaits.Location = new System.Drawing.Point(0, 27);
             dgvSessionWaits.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvSessionWaits.Name = "dgvSessionWaits";
             dgvSessionWaits.ReadOnly = true;
+            dgvSessionWaits.ResultSetID = 0;
+            dgvSessionWaits.ResultSetName = null;
             dgvSessionWaits.RowHeadersVisible = false;
             dgvSessionWaits.RowHeadersWidth = 51;
             dgvSessionWaits.RowTemplate.Height = 24;
@@ -625,7 +662,7 @@ namespace DBADashGUI.Performance
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgv;
+        private DBADashDataGridView dgv;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.ToolStripButton tsExcel;
@@ -652,7 +689,7 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripButton tsPrevious;
         private System.Windows.Forms.ToolStripButton tsNext;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.DataGridView dgvSessionWaits;
+        private DBADashDataGridView dgvSessionWaits;
         private System.Windows.Forms.ToolStrip toolStrip2;
         private System.Windows.Forms.ToolStripLabel lblWaitsForSession;
         private System.Windows.Forms.ToolStripButton tsSessionWaitCopy;
@@ -676,5 +713,6 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem contextInfoToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsTriggerCollection;
+        private System.Windows.Forms.ToolStripButton tsClearFilter;
     }
 }
