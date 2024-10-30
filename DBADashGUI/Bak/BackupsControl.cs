@@ -56,7 +56,7 @@ namespace DBADashGUI.Backups
 
         public void SetContext(DBADashContext _context)
         {
-            if (CurrentContext == _context &&  DateTime.Now.Subtract(LastRefresh).TotalSeconds < BackupDataIsStaleThreshold) return;
+            if (CurrentContext == _context && DateTime.Now.Subtract(LastRefresh).TotalSeconds < BackupDataIsStaleThreshold) return;
             LastRefresh = DateTime.Now;
             InstanceIDs = _context.RegularInstanceIDs.ToList();
             IncludeNA = _context.RegularInstanceIDs.Count == 1;
@@ -68,26 +68,26 @@ namespace DBADashGUI.Backups
             dgvBackups.DataSource = null;
             dgvBackups.Columns.Clear();
 
-            backupInstanceIDs = new ();
+            backupInstanceIDs = new();
             tsBack.Enabled = false;
             lblStatus.Text = "";
             tsTrigger.Visible = _context.CanMessage;
 
             CurrentContext = _context;
-         
+
             RunRefreshDataLocal();
         }
 
         public void RefreshData()
         {
-           RunRefreshDataLocal();
+            RunRefreshDataLocal();
         }
 
         private void RunRefreshDataLocal()
         {
             cancellationToken?.Cancel();
             cancellationToken = new CancellationTokenSource();
-            Task.Run(()=>RefreshDataLocal(cancellationToken.Token));
+            Task.Run(() => RefreshDataLocal(cancellationToken.Token));
         }
 
         private async Task RefreshDataLocal(CancellationToken token)
@@ -101,7 +101,6 @@ namespace DBADashGUI.Backups
             var summaryTask = GetBackupSummaryAsync(token);
             var detailTask = DatabaseID > 0 ? GetLastBackupAsync(token) : GetBackupsAsync(token);
 
-       
             try
             {
                 await Task.WhenAll(summaryTask, detailTask);
@@ -133,7 +132,6 @@ namespace DBADashGUI.Backups
                     refresh1.SetFailed(ex.Message);
                 });
             }
-
         }
 
         private async Task<DataTable> GetLastBackupAsync(CancellationToken token)
@@ -365,8 +363,10 @@ namespace DBADashGUI.Backups
         public BackupsControl()
         {
             InitializeComponent();
+            dgvBackups.RegisterClearFilter(tsClearFilterBackups);
+            dgvSummary.RegisterClearFilter(tsClearFilterSummary);
         }
-
+        
         private void DgvBackups_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             if (!dgvBackups.Columns.Contains("LastFull")) return;
@@ -455,7 +455,7 @@ namespace DBADashGUI.Backups
 
         private void TsRefresh_Click(object sender, EventArgs e)
         {
-           RunRefreshDataLocal();
+            RunRefreshDataLocal();
         }
 
         private void TsCopy_Click(object sender, EventArgs e)
@@ -468,7 +468,7 @@ namespace DBADashGUI.Backups
         private void TsExcel_Click(object sender, EventArgs e)
         {
             dgvSummary.Columns["Configure"]!.Visible = false;
-            Common.PromptSaveDataGridView(ref dgvSummary);
+            dgvSummary.ExportToExcel();
             dgvSummary.Columns["Configure"]!.Visible = true;
         }
 
@@ -538,7 +538,7 @@ namespace DBADashGUI.Backups
         public bool NavigateBack()
         {
             if (!CanNavigateBack) return false;
-            
+
             if (DatabaseID > 0)
             {
                 DatabaseID = 0;
@@ -561,14 +561,14 @@ namespace DBADashGUI.Backups
         private void TsExcelDetail_Click(object sender, EventArgs e)
         {
             dgvBackups.Columns["Configure"]!.Visible = false;
-            Common.PromptSaveDataGridView(ref dgvBackups);
+            dgvBackups.ExportToExcel();
             dgvBackups.Columns["Configure"]!.Visible = true;
         }
 
         private void TsCopyDetail_Click(object sender, EventArgs e)
         {
             dgvBackups.Columns["Configure"]!.Visible = false;
-            Common.CopyDataGridViewToClipboard(dgvBackups);
+            dgvBackups.CopyGrid();
             dgvBackups.Columns["Configure"].Visible = true;
         }
 
