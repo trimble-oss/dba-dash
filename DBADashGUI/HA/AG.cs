@@ -18,6 +18,7 @@ namespace DBADashGUI.HA
         public AG()
         {
             InitializeComponent();
+            dgv.RegisterClearFilter(tsClearFilter);
         }
 
         private List<int> InstanceIDs=> CurrentContext?.RegularInstanceIDs.ToList();
@@ -25,6 +26,8 @@ namespace DBADashGUI.HA
 
         public bool CanNavigateBack => tsBack.Enabled;
         private DBADashContext CurrentContext;
+        private string PersistFilter;
+        private string PersistSort;
 
         public void SetContext(DBADashContext _context)
         {
@@ -85,46 +88,53 @@ namespace DBADashGUI.HA
                 }
 
                 DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                dgv.DataSource = dt;
-                dgv.ApplyTheme();
+                try
+                {
+                    dgv.DataSource = new DataView(dt,PersistFilter,PersistSort, DataViewRowState.CurrentRows);
+                }
+                catch (Exception ex)
+                {
+                    dgv.DataSource = new DataView(dt);
+                }
+                PersistFilter= null;
+                PersistSort = null;
+
                 dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             });
         }
 
         public static DataTable GetAvailabilityGroup(int InstanceID)
         {
-            using (SqlConnection cn = new(Common.ConnectionString))
-            using (SqlCommand cmd = new("AvailabilityGroup_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (SqlDataAdapter da = new(cmd))
-            {
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                var dt = new DataTable();
-                da.Fill(dt);
-                return dt;
-            }
+            using SqlConnection cn = new(Common.ConnectionString);
+            using SqlCommand cmd = new("AvailabilityGroup_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using SqlDataAdapter da = new(cmd);
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            var dt = new DataTable();
+            da.Fill(dt);
+            return dt;
         }
 
         public static DataTable GetAvailabilityGroupSummary(List<int> InstanceIDs)
         {
-            using (SqlConnection cn = new(Common.ConnectionString))
-            using (SqlCommand cmd = new("AvailabilityGroupSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (SqlDataAdapter da = new(cmd))
-            {
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                var dt = new DataTable();
-                da.Fill(dt);
-                return dt;
-            }
+            using SqlConnection cn = new(Common.ConnectionString);
+            using SqlCommand cmd = new("AvailabilityGroupSummary_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using SqlDataAdapter da = new(cmd);
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            var dt = new DataTable();
+            da.Fill(dt);
+            return dt;
         }
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgv);
+            dgv.CopyGrid();
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
         {
+            PersistFilter = dgv.RowFilter;
+            PersistSort = dgv.SortString;
             RefreshData();
         }
 
@@ -200,11 +210,13 @@ namespace DBADashGUI.HA
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+            dgv.ExportToExcel();
         }
 
         private async void tsTrigger_Click(object sender, EventArgs e)
         {
+            PersistFilter = dgv.RowFilter;
+            PersistSort = dgv.SortString;
             await CollectionMessaging.TriggerCollection(instanceId>0 ? instanceId : CurrentContext.InstanceID,new List<CollectionType>() { CollectionType.AvailabilityGroups, CollectionType.AvailabilityReplicas, CollectionType.DatabasesHADR}, this);
         }
     }
