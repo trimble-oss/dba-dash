@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI.Backups
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI.Backups
 {
     partial class BackupsControl
     {
@@ -31,9 +33,9 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BackupsControl));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BackupsControl));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -41,7 +43,9 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
-            dgvBackups = new System.Windows.Forms.DataGridView();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
+            dgvBackups = new DBADashDataGridView();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
@@ -52,13 +56,15 @@
             tsCols = new System.Windows.Forms.ToolStripButton();
             tsBack = new System.Windows.Forms.ToolStripButton();
             tsTrigger = new System.Windows.Forms.ToolStripButton();
+            tsClearFilterSummary = new System.Windows.Forms.ToolStripButton();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
-            dgvSummary = new System.Windows.Forms.DataGridView();
+            dgvSummary = new DBADashDataGridView();
             toolStrip2 = new System.Windows.Forms.ToolStrip();
             tsCopyDetail = new System.Windows.Forms.ToolStripButton();
             tsExcelDetail = new System.Windows.Forms.ToolStripButton();
             statusFilterToolStrip1 = new StatusFilterToolStrip();
             tsDetailCols = new System.Windows.Forms.ToolStripButton();
+            tsClearFilterBackups = new System.Windows.Forms.ToolStripButton();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -124,10 +130,13 @@
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             dgvBackups.DefaultCellStyle = dataGridViewCellStyle2;
             dgvBackups.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvBackups.EnableHeadersVisualStyles = false;
             dgvBackups.Location = new System.Drawing.Point(0, 27);
             dgvBackups.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvBackups.Name = "dgvBackups";
             dgvBackups.ReadOnly = true;
+            dgvBackups.ResultSetID = 0;
+            dgvBackups.ResultSetName = null;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
@@ -146,7 +155,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsConfigure, tsCols, tsBack, tsTrigger });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsConfigure, tsCols, tsBack, tsTrigger, tsClearFilterSummary });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1947, 27);
@@ -238,6 +247,14 @@
             tsTrigger.Visible = false;
             tsTrigger.Click += TsTrigger_Click;
             // 
+            // tsClearFilterSummary
+            // 
+            tsClearFilterSummary.Image = Properties.Resources.Eraser_16x;
+            tsClearFilterSummary.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilterSummary.Name = "tsClearFilterSummary";
+            tsClearFilterSummary.Size = new System.Drawing.Size(104, 24);
+            tsClearFilterSummary.Text = "Clear Filter";
+            // 
             // splitContainer1
             // 
             splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -264,12 +281,31 @@
             dgvSummary.AllowUserToAddRows = false;
             dgvSummary.AllowUserToDeleteRows = false;
             dgvSummary.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvSummary.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle4;
             dgvSummary.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvSummary.DefaultCellStyle = dataGridViewCellStyle5;
             dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvSummary.EnableHeadersVisualStyles = false;
             dgvSummary.Location = new System.Drawing.Point(0, 0);
             dgvSummary.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvSummary.Name = "dgvSummary";
             dgvSummary.ReadOnly = true;
+            dgvSummary.ResultSetID = 0;
+            dgvSummary.ResultSetName = null;
             dgvSummary.RowHeadersVisible = false;
             dgvSummary.RowHeadersWidth = 51;
             dgvSummary.RowTemplate.Height = 24;
@@ -281,7 +317,7 @@
             // toolStrip2
             // 
             toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsCopyDetail, tsExcelDetail, statusFilterToolStrip1, tsDetailCols });
+            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsCopyDetail, tsExcelDetail, statusFilterToolStrip1, tsDetailCols, tsClearFilterBackups });
             toolStrip2.Location = new System.Drawing.Point(0, 0);
             toolStrip2.Name = "toolStrip2";
             toolStrip2.Size = new System.Drawing.Size(1947, 27);
@@ -339,6 +375,14 @@
             tsDetailCols.Text = "Columns";
             tsDetailCols.Click += TsDetailCols_Click;
             // 
+            // tsClearFilterBackups
+            // 
+            tsClearFilterBackups.Image = Properties.Resources.Eraser_16x;
+            tsClearFilterBackups.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilterBackups.Name = "tsClearFilterBackups";
+            tsClearFilterBackups.Size = new System.Drawing.Size(104, 24);
+            tsClearFilterBackups.Text = "Clear Filter";
+            // 
             // dataGridViewTextBoxColumn1
             // 
             dataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
@@ -362,8 +406,8 @@
             // dataGridViewTextBoxColumn3
             // 
             dataGridViewTextBoxColumn3.DataPropertyName = "create_date_utc";
-            dataGridViewCellStyle4.Format = "yyyy-MM-dd HH:mm";
-            dataGridViewTextBoxColumn3.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle6.Format = "yyyy-MM-dd HH:mm";
+            dataGridViewTextBoxColumn3.DefaultCellStyle = dataGridViewCellStyle6;
             dataGridViewTextBoxColumn3.HeaderText = "Created";
             dataGridViewTextBoxColumn3.MinimumWidth = 6;
             dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
@@ -530,8 +574,8 @@
             // dataGridViewTextBoxColumn20
             // 
             dataGridViewTextBoxColumn20.DataPropertyName = "Full Backup MB/sec";
-            dataGridViewCellStyle5.Format = "N3";
-            dataGridViewTextBoxColumn20.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle7.Format = "N3";
+            dataGridViewTextBoxColumn20.DefaultCellStyle = dataGridViewCellStyle7;
             dataGridViewTextBoxColumn20.HeaderText = "Full Backup MB/sec";
             dataGridViewTextBoxColumn20.MinimumWidth = 6;
             dataGridViewTextBoxColumn20.Name = "dataGridViewTextBoxColumn20";
@@ -541,8 +585,8 @@
             // dataGridViewTextBoxColumn21
             // 
             dataGridViewTextBoxColumn21.DataPropertyName = "Full Backup Write MB/sec";
-            dataGridViewCellStyle6.Format = "N3";
-            dataGridViewTextBoxColumn21.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle8.Format = "N3";
+            dataGridViewTextBoxColumn21.DefaultCellStyle = dataGridViewCellStyle8;
             dataGridViewTextBoxColumn21.HeaderText = "Full Backup Write MB/sec";
             dataGridViewTextBoxColumn21.MinimumWidth = 6;
             dataGridViewTextBoxColumn21.Name = "dataGridViewTextBoxColumn21";
@@ -552,8 +596,8 @@
             // dataGridViewTextBoxColumn22
             // 
             dataGridViewTextBoxColumn22.DataPropertyName = "Full Backup Size GB";
-            dataGridViewCellStyle7.Format = "N3";
-            dataGridViewTextBoxColumn22.DefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle9.Format = "N3";
+            dataGridViewTextBoxColumn22.DefaultCellStyle = dataGridViewCellStyle9;
             dataGridViewTextBoxColumn22.HeaderText = "FullBackupSizeGB";
             dataGridViewTextBoxColumn22.MinimumWidth = 6;
             dataGridViewTextBoxColumn22.Name = "dataGridViewTextBoxColumn22";
@@ -563,8 +607,8 @@
             // dataGridViewTextBoxColumn23
             // 
             dataGridViewTextBoxColumn23.DataPropertyName = "Full Backup Size (Compressed) GB";
-            dataGridViewCellStyle8.Format = "N3";
-            dataGridViewTextBoxColumn23.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle10.Format = "N3";
+            dataGridViewTextBoxColumn23.DefaultCellStyle = dataGridViewCellStyle10;
             dataGridViewTextBoxColumn23.HeaderText = "Full Backup Size (Compressed) GB";
             dataGridViewTextBoxColumn23.MinimumWidth = 6;
             dataGridViewTextBoxColumn23.Name = "dataGridViewTextBoxColumn23";
@@ -574,8 +618,8 @@
             // dataGridViewTextBoxColumn24
             // 
             dataGridViewTextBoxColumn24.DataPropertyName = "Full Compression Saving %";
-            dataGridViewCellStyle9.Format = "P2";
-            dataGridViewTextBoxColumn24.DefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewCellStyle11.Format = "P2";
+            dataGridViewTextBoxColumn24.DefaultCellStyle = dataGridViewCellStyle11;
             dataGridViewTextBoxColumn24.HeaderText = "Full Compression Saving %";
             dataGridViewTextBoxColumn24.MinimumWidth = 6;
             dataGridViewTextBoxColumn24.Name = "dataGridViewTextBoxColumn24";
@@ -585,8 +629,8 @@
             // dataGridViewTextBoxColumn25
             // 
             dataGridViewTextBoxColumn25.DataPropertyName = "Full Compression Saving %";
-            dataGridViewCellStyle10.Format = "P2";
-            dataGridViewTextBoxColumn25.DefaultCellStyle = dataGridViewCellStyle10;
+            dataGridViewCellStyle12.Format = "P2";
+            dataGridViewTextBoxColumn25.DefaultCellStyle = dataGridViewCellStyle12;
             dataGridViewTextBoxColumn25.HeaderText = "Full Compression Saving %";
             dataGridViewTextBoxColumn25.MinimumWidth = 6;
             dataGridViewTextBoxColumn25.Name = "dataGridViewTextBoxColumn25";
@@ -605,8 +649,8 @@
             // dataGridViewTextBoxColumn27
             // 
             dataGridViewTextBoxColumn27.DataPropertyName = "Diff Backup MB/sec";
-            dataGridViewCellStyle11.Format = "N1";
-            dataGridViewTextBoxColumn27.DefaultCellStyle = dataGridViewCellStyle11;
+            dataGridViewCellStyle13.Format = "N1";
+            dataGridViewTextBoxColumn27.DefaultCellStyle = dataGridViewCellStyle13;
             dataGridViewTextBoxColumn27.HeaderText = "Diff Backup MB/sec";
             dataGridViewTextBoxColumn27.MinimumWidth = 6;
             dataGridViewTextBoxColumn27.Name = "dataGridViewTextBoxColumn27";
@@ -616,8 +660,8 @@
             // dataGridViewTextBoxColumn28
             // 
             dataGridViewTextBoxColumn28.DataPropertyName = "Diff Backup Write MB/sec";
-            dataGridViewCellStyle12.Format = "N1";
-            dataGridViewTextBoxColumn28.DefaultCellStyle = dataGridViewCellStyle12;
+            dataGridViewCellStyle14.Format = "N1";
+            dataGridViewTextBoxColumn28.DefaultCellStyle = dataGridViewCellStyle14;
             dataGridViewTextBoxColumn28.HeaderText = "Diff Backup Write MB/sec";
             dataGridViewTextBoxColumn28.MinimumWidth = 6;
             dataGridViewTextBoxColumn28.Name = "dataGridViewTextBoxColumn28";
@@ -680,7 +724,7 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgvBackups;
+        private DBADashDataGridView dgvBackups;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripDropDownButton tsConfigure;
         private System.Windows.Forms.ToolStripMenuItem configureInstanceThresholdsToolStripMenuItem;
@@ -717,7 +761,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn27;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn28;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.DataGridView dgvSummary;
+        private DBADashDataGridView dgvSummary;
         private System.Windows.Forms.ToolStripButton tsBack;
         private System.Windows.Forms.ToolStrip toolStrip2;
         private System.Windows.Forms.ToolStripButton tsCopyDetail;
@@ -729,5 +773,7 @@
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel lblStatus;
         private Refresh refresh1;
+        private System.Windows.Forms.ToolStripButton tsClearFilterSummary;
+        private System.Windows.Forms.ToolStripButton tsClearFilterBackups;
     }
 }

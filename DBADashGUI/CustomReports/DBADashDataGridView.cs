@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using DBADashGUI.Theme;
+using System;
 using System.Data;
 using System.Drawing;
-using System.Drawing.Text;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI.CustomReports
 {
@@ -119,6 +114,25 @@ namespace DBADashGUI.CustomReports
                 filterByValue.Visible = filterSupported;
                 excludeValue.Visible = filterSupported;
             };
+        }
+
+        public void RegisterClearFilter(ToolStripItem item)
+        {
+            this.GridFilterChanged += (_, _) =>
+            {
+                UpdateClearFilter(item);
+            };
+            this.DataSourceChanged += (_, _) =>
+            {
+                UpdateClearFilter(item);
+            };
+            item.Click += (_, _) => ClearFilter();
+        }
+
+        private void UpdateClearFilter(ToolStripItem item)
+        {
+            item.Enabled = !string.IsNullOrEmpty(RowFilter);
+            item.Font = new System.Drawing.Font(item.Font, item.Enabled ? FontStyle.Bold : FontStyle.Regular);
         }
 
         private void PromptFilter()
@@ -245,6 +259,8 @@ namespace DBADashGUI.CustomReports
                     MessageBoxIcon.Error);
             }
         }
+
+        public void ClearFilter() => SetFilter(string.Empty);
 
         private void FormatFilteredColumns()
         {
