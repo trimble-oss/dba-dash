@@ -169,7 +169,7 @@ SELECT ISNULL(base.InstanceID,compare.InstanceID) as InstanceID,
 		compare_avg_duration_sec,
 		compare_execution_count,
 		compare_execs_per_min,
-		compare_max_execs_per_min
+		compare_max_execs_per_min,
 		compare_total_cpu_sec,
 		compare_cpu_ms_per_sec,
 		compare_avg_cpu_sec,
