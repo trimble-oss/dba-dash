@@ -18,8 +18,11 @@ namespace DBADashGUI.CollectionDates
         public CollectionDates()
         {
             InitializeComponent();
-            dgvCollectionDates.ApplyTheme();
+            dgvCollectionDates.RegisterClearFilter(tsClearFilter);
         }
+
+        private string PersistFilter;
+        private string PersistSort;
 
         private List<int> InstanceIDs { get; set; }
 
@@ -47,19 +50,17 @@ namespace DBADashGUI.CollectionDates
 
         private DataTable GetCollectionDates()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.CollectionDates_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.CollectionDates_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            return dt;
         }
 
         public void SetContext(DBADashContext _context)
@@ -83,11 +84,13 @@ namespace DBADashGUI.CollectionDates
             UseWaitCursor = true;
             DataTable dt = GetCollectionDates();
             dgvCollectionDates.AutoGenerateColumns = false;
-            dgvCollectionDates.DataSource = new DataView(dt);
+            dgvCollectionDates.DataSource = new DataView(dt, PersistFilter, PersistSort, DataViewRowState.CurrentRows);
             dgvCollectionDates.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             UseWaitCursor = false;
             dgvCollectionDates.Columns["colRun"]!.Visible = DBADashUser.AllowMessaging && dt.Rows.Cast<DataRow>().Any(r => r["MessagingEnabled"] != DBNull.Value && (bool)r["MessagingEnabled"]);
             tsTrigger.Visible = DBADashUser.AllowMessaging && dt.Rows.Cast<DataRow>().Any(r => r["MessagingEnabled"] != DBNull.Value && (bool)r["MessagingEnabled"] && r["Status"] is 1 or 2);
+            PersistFilter = null;
+            PersistSort = null;
         }
 
         private void Status_Selected(object sender, EventArgs e)
@@ -124,38 +127,38 @@ namespace DBADashGUI.CollectionDates
 
         private async void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex < 0) return;
+            var row = (DataRowView)dgvCollectionDates.Rows[e.RowIndex].DataBoundItem;
+            if (dgvCollectionDates.Columns[e.ColumnIndex].HeaderText == "Configure Instance")
             {
-                var row = (DataRowView)dgvCollectionDates.Rows[e.RowIndex].DataBoundItem;
-                if (dgvCollectionDates.Columns[e.ColumnIndex].HeaderText == "Configure Instance")
+                var InstanceID = (int)row["InstanceID"];
+                ConfigureThresholds(InstanceID, row);
+            }
+            else if (dgvCollectionDates.Columns[e.ColumnIndex].HeaderText == "Configure Root")
+            {
+                ConfigureThresholds(-1, row);
+            }
+            else if (dgvCollectionDates.Columns[e.ColumnIndex].HeaderText == "Run")
+            {
+                PersistFilter = dgvCollectionDates.RowFilter;
+                PersistSort = dgvCollectionDates.SortString;
+                var instance = (string)row["ConnectionID"];
+                var importAgentID = (int)row["ImportAgentID"];
+                var collectAgentID = (int)row["CollectAgentID"];
+                var supportsMessaging = (bool)row["MessagingEnabled"];
+                if (!supportsMessaging)
                 {
-                    var InstanceID = (int)row["InstanceID"];
-                    ConfigureThresholds(InstanceID, row);
+                    SetStatus("The associated DBA Dash service is not enabled for messaging", null, DashColors.Fail);
+                    return;
                 }
-                else if (dgvCollectionDates.Columns[e.ColumnIndex].HeaderText == "Configure Root")
-                {
-                    ConfigureThresholds(-1, row);
-                }
-                else if (dgvCollectionDates.Columns[e.ColumnIndex].HeaderText == "Run")
-                {
-                    var instance = (string)row["ConnectionID"];
-                    var importAgentID = (int)row["ImportAgentID"];
-                    var collectAgentID = (int)row["CollectAgentID"];
-                    var supportsMessaging = (bool)row["MessagingEnabled"];
-                    if (!supportsMessaging)
-                    {
-                        SetStatus("The associated DBA Dash service is not enabled for messaging", null, DashColors.Fail);
-                        return;
-                    }
 
-                    var collection = (string)row["Reference"];
-                    if (NoTriggerCollectionTypes.Contains(collection, StringComparer.OrdinalIgnoreCase))
-                    {
-                        SetStatus("This collection type cannot be triggered manually", null, DashColors.Warning);
-                        return;
-                    }
-                    await CollectionMessaging.TriggerCollection(instance, collection, collectAgentID, importAgentID, this);
+                var collection = (string)row["Reference"];
+                if (NoTriggerCollectionTypes.Contains(collection, StringComparer.OrdinalIgnoreCase))
+                {
+                    SetStatus("This collection type cannot be triggered manually", null, DashColors.Warning);
+                    return;
                 }
+                await CollectionMessaging.TriggerCollection(instance, collection, collectAgentID, importAgentID, this);
             }
         }
 
@@ -169,19 +172,19 @@ namespace DBADashGUI.CollectionDates
             for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvCollectionDates.Rows[idx].DataBoundItem;
-                if (row != null)
-                {
-                    var Status = (DBADashStatus.DBADashStatusEnum)row["Status"];
+                if (row == null) continue;
+                var Status = (DBADashStatus.DBADashStatusEnum)row["Status"];
 
-                    dgvCollectionDates.Rows[idx].Cells["SnapshotAge"].SetStatusColor(Status);
+                dgvCollectionDates.Rows[idx].Cells["SnapshotAge"].SetStatusColor(Status);
 
-                    dgvCollectionDates.Rows[idx].Cells["Configure"].Style.Font = (string)row["ConfiguredLevel"] == "Instance" ? new Font(dgvCollectionDates.Font, FontStyle.Bold) : new Font(dgvCollectionDates.Font, FontStyle.Regular);
-                }
+                dgvCollectionDates.Rows[idx].Cells["Configure"].Style.Font = (string)row["ConfiguredLevel"] == "Instance" ? new Font(dgvCollectionDates.Font, FontStyle.Bold) : new Font(dgvCollectionDates.Font, FontStyle.Regular);
             }
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
         {
+            PersistFilter = dgvCollectionDates.RowFilter;
+            PersistSort = dgvCollectionDates.SortString;
             RefreshData();
         }
 
@@ -189,14 +192,14 @@ namespace DBADashGUI.CollectionDates
         {
             Configure.Visible = false;
             ConfigureRoot.Visible = false;
-            Common.CopyDataGridViewToClipboard(dgvCollectionDates);
+            dgvCollectionDates.CopyGrid();
             Configure.Visible = true;
             ConfigureRoot.Visible = true;
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvCollectionDates);
+            dgvCollectionDates.ExportToExcel();
         }
 
         private async void TsTrigger_Click(object sender, EventArgs e)
