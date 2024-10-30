@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI.LogShipping
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI.LogShipping
 {
     partial class LogShippingControl
     {
@@ -31,8 +33,10 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LogShippingControl));
-            dgvLogShipping = new System.Windows.Forms.DataGridView();
+            dgvLogShipping = new DBADashDataGridView();
             Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
             Status = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -55,7 +59,7 @@
             configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsBack = new System.Windows.Forms.ToolStripButton();
             tsTrigger = new System.Windows.Forms.ToolStripButton();
-            dgvSummary = new System.Windows.Forms.DataGridView();
+            dgvSummary = new DBADashDataGridView();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             toolStrip2 = new System.Windows.Forms.ToolStrip();
             tsCopyDetail = new System.Windows.Forms.ToolStripButton();
@@ -75,6 +79,8 @@
             dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            tsClearFilterSummary = new System.Windows.Forms.ToolStripButton();
+            tsClearFilterDetail = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)dgvLogShipping).BeginInit();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvSummary).BeginInit();
@@ -110,10 +116,13 @@
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             dgvLogShipping.DefaultCellStyle = dataGridViewCellStyle2;
             dgvLogShipping.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvLogShipping.EnableHeadersVisualStyles = false;
             dgvLogShipping.Location = new System.Drawing.Point(0, 27);
             dgvLogShipping.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvLogShipping.Name = "dgvLogShipping";
             dgvLogShipping.ReadOnly = true;
+            dgvLogShipping.ResultSetID = 0;
+            dgvLogShipping.ResultSetName = null;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
@@ -253,7 +262,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsConfigure, tsBack, tsTrigger });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsConfigure, tsBack, tsTrigger, tsClearFilterSummary });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(698, 27);
@@ -340,12 +349,31 @@
             dgvSummary.AllowUserToAddRows = false;
             dgvSummary.AllowUserToDeleteRows = false;
             dgvSummary.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvSummary.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle4;
             dgvSummary.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvSummary.DefaultCellStyle = dataGridViewCellStyle5;
             dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvSummary.EnableHeadersVisualStyles = false;
             dgvSummary.Location = new System.Drawing.Point(0, 0);
             dgvSummary.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvSummary.Name = "dgvSummary";
             dgvSummary.ReadOnly = true;
+            dgvSummary.ResultSetID = 0;
+            dgvSummary.ResultSetName = null;
             dgvSummary.RowHeadersVisible = false;
             dgvSummary.RowHeadersWidth = 51;
             dgvSummary.RowTemplate.Height = 24;
@@ -378,7 +406,7 @@
             // toolStrip2
             // 
             toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsCopyDetail, tsExportExcelDetail, statusFilterToolStrip1 });
+            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsCopyDetail, tsExportExcelDetail, statusFilterToolStrip1, tsClearFilterDetail });
             toolStrip2.Location = new System.Drawing.Point(0, 0);
             toolStrip2.Name = "toolStrip2";
             toolStrip2.Size = new System.Drawing.Size(698, 27);
@@ -537,6 +565,22 @@
             lblStatus.Name = "lblStatus";
             lblStatus.Size = new System.Drawing.Size(0, 16);
             // 
+            // tsClearFilterSummary
+            // 
+            tsClearFilterSummary.Image = Properties.Resources.Eraser_16x;
+            tsClearFilterSummary.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilterSummary.Name = "tsClearFilterSummary";
+            tsClearFilterSummary.Size = new System.Drawing.Size(104, 24);
+            tsClearFilterSummary.Text = "Clear Filter";
+            // 
+            // tsClearFilterDetail
+            // 
+            tsClearFilterDetail.Image = Properties.Resources.Eraser_16x;
+            tsClearFilterDetail.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilterDetail.Name = "tsClearFilterDetail";
+            tsClearFilterDetail.Size = new System.Drawing.Size(104, 24);
+            tsClearFilterDetail.Text = "Clear Filter";
+            // 
             // LogShippingControl
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -566,7 +610,7 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgvLogShipping;
+        private DBADashDataGridView dgvLogShipping;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripDropDownButton tsConfigure;
         private System.Windows.Forms.ToolStripMenuItem configureInstanceThresholdsToolStripMenuItem;
@@ -574,7 +618,7 @@
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.ToolStripButton tsExcel;
-        private System.Windows.Forms.DataGridView dgvSummary;
+        private DBADashDataGridView dgvSummary;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
@@ -609,5 +653,7 @@
         private System.Windows.Forms.ToolStripButton tsTrigger;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel lblStatus;
+        private System.Windows.Forms.ToolStripButton tsClearFilterSummary;
+        private System.Windows.Forms.ToolStripButton tsClearFilterDetail;
     }
 }
