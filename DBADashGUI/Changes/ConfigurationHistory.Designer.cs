@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI
 {
     partial class ConfigurationHistory
     {
@@ -28,305 +30,316 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.dgv = new System.Windows.Forms.DataGridView();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.configuration1 = new DBADashGUI.Changes.Configuration();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsHistoryExcel = new System.Windows.Forms.ToolStripButton();
-            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Description = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.value = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.value_in_use = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.new_value = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.new_value_in_use = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ValidFrom = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ValidTo = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.is_dynamic = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.is_advanced = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.default_value = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Minimum = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Maximum = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
-            this.toolStrip1.SuspendLayout();
-            this.SuspendLayout();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            dgv = new DBADashDataGridView();
+            Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            Description = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            value = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            value_in_use = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            new_value = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            new_value_in_use = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ValidFrom = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ValidTo = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            is_dynamic = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            is_advanced = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            default_value = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            Minimum = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            Maximum = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            splitContainer1 = new System.Windows.Forms.SplitContainer();
+            configuration1 = new Changes.Configuration();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            tsRefresh = new System.Windows.Forms.ToolStripButton();
+            tsCopy = new System.Windows.Forms.ToolStripButton();
+            tsHistoryExcel = new System.Windows.Forms.ToolStripButton();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
+            ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
+            splitContainer1.Panel1.SuspendLayout();
+            splitContainer1.Panel2.SuspendLayout();
+            splitContainer1.SuspendLayout();
+            toolStrip1.SuspendLayout();
+            SuspendLayout();
             // 
             // dgv
             // 
-            this.dgv.AllowUserToAddRows = false;
-            this.dgv.AllowUserToDeleteRows = false;
-            this.dgv.BackgroundColor = System.Drawing.Color.White;
-            this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Instance,
-            this.colName,
-            this.Description,
-            this.value,
-            this.value_in_use,
-            this.new_value,
-            this.new_value_in_use,
-            this.ValidFrom,
-            this.ValidTo,
-            this.is_dynamic,
-            this.is_advanced,
-            this.default_value,
-            this.Minimum,
-            this.Maximum});
-            this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 27);
-            this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dgv.Name = "dgv";
-            this.dgv.ReadOnly = true;
-            this.dgv.RowHeadersVisible = false;
-            this.dgv.RowHeadersWidth = 51;
-            this.dgv.Size = new System.Drawing.Size(1678, 488);
-            this.dgv.TabIndex = 0;
-            // 
-            // splitContainer1
-            // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.splitContainer1.Name = "splitContainer1";
-            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitContainer1.Panel1
-            // 
-            this.splitContainer1.Panel1.Controls.Add(this.configuration1);
-            // 
-            // splitContainer1.Panel2
-            // 
-            this.splitContainer1.Panel2.Controls.Add(this.dgv);
-            this.splitContainer1.Panel2.Controls.Add(this.toolStrip1);
-            this.splitContainer1.Size = new System.Drawing.Size(1678, 1040);
-            this.splitContainer1.SplitterDistance = 520;
-            this.splitContainer1.SplitterWidth = 5;
-            this.splitContainer1.TabIndex = 2;
-            // 
-            // configuration1
-            // 
-            this.configuration1.BackColor = System.Drawing.Color.White;
-            this.configuration1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.configuration1.Location = new System.Drawing.Point(0, 0);
-            this.configuration1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
-            this.configuration1.Name = "configuration1";
-            this.configuration1.Size = new System.Drawing.Size(1678, 520);
-            this.configuration1.TabIndex = 1;
-            // 
-            // toolStrip1
-            // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripLabel1,
-            this.tsRefresh,
-            this.tsCopy,
-            this.tsHistoryExcel});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1678, 27);
-            this.toolStrip1.TabIndex = 1;
-            this.toolStrip1.Text = "toolStrip1";
-            // 
-            // toolStripLabel1
-            // 
-            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(192, 24);
-            this.toolStripLabel1.Text = "Configuration Change Log";
-            // 
-            // tsRefresh
-            // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
-            // 
-            // tsCopy
-            // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
-            // 
-            // tsHistoryExcel
-            // 
-            this.tsHistoryExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsHistoryExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsHistoryExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsHistoryExcel.Name = "tsHistoryExcel";
-            this.tsHistoryExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsHistoryExcel.Text = "Excel";
-            this.tsHistoryExcel.Click += new System.EventHandler(this.TsHistoryExcel_Click);
+            dgv.AllowUserToAddRows = false;
+            dgv.AllowUserToDeleteRows = false;
+            dgv.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, colName, Description, value, value_in_use, new_value, new_value_in_use, ValidFrom, ValidTo, is_dynamic, is_advanced, default_value, Minimum, Maximum });
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgv.DefaultCellStyle = dataGridViewCellStyle2;
+            dgv.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgv.EnableHeadersVisualStyles = false;
+            dgv.Location = new System.Drawing.Point(0, 27);
+            dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dgv.Name = "dgv";
+            dgv.ReadOnly = true;
+            dgv.ResultSetID = 0;
+            dgv.ResultSetName = null;
+            dgv.RowHeadersVisible = false;
+            dgv.RowHeadersWidth = 51;
+            dgv.Size = new System.Drawing.Size(1678, 488);
+            dgv.TabIndex = 0;
             // 
             // Instance
             // 
-            this.Instance.DataPropertyName = "InstanceDisplayName";
-            this.Instance.HeaderText = "Instance";
-            this.Instance.MinimumWidth = 6;
-            this.Instance.Name = "Instance";
-            this.Instance.ReadOnly = true;
-            this.Instance.Width = 90;
+            Instance.DataPropertyName = "InstanceDisplayName";
+            Instance.HeaderText = "Instance";
+            Instance.MinimumWidth = 6;
+            Instance.Name = "Instance";
+            Instance.ReadOnly = true;
+            Instance.Width = 90;
             // 
             // colName
             // 
-            this.colName.DataPropertyName = "name";
-            this.colName.HeaderText = "Name";
-            this.colName.MinimumWidth = 6;
-            this.colName.Name = "colName";
-            this.colName.ReadOnly = true;
-            this.colName.Width = 74;
+            colName.DataPropertyName = "name";
+            colName.HeaderText = "Name";
+            colName.MinimumWidth = 6;
+            colName.Name = "colName";
+            colName.ReadOnly = true;
+            colName.Width = 74;
             // 
             // Description
             // 
-            this.Description.DataPropertyName = "description";
-            this.Description.HeaderText = "Description";
-            this.Description.MinimumWidth = 6;
-            this.Description.Name = "Description";
-            this.Description.ReadOnly = true;
-            this.Description.Width = 108;
+            Description.DataPropertyName = "description";
+            Description.HeaderText = "Description";
+            Description.MinimumWidth = 6;
+            Description.Name = "Description";
+            Description.ReadOnly = true;
+            Description.Width = 108;
             // 
             // value
             // 
-            this.value.DataPropertyName = "value";
-            this.value.HeaderText = "Value";
-            this.value.MinimumWidth = 6;
-            this.value.Name = "value";
-            this.value.ReadOnly = true;
-            this.value.Width = 73;
+            value.DataPropertyName = "value";
+            value.HeaderText = "Value";
+            value.MinimumWidth = 6;
+            value.Name = "value";
+            value.ReadOnly = true;
+            value.Width = 73;
             // 
             // value_in_use
             // 
-            this.value_in_use.DataPropertyName = "value_in_use";
-            this.value_in_use.HeaderText = "Value in Use";
-            this.value_in_use.MinimumWidth = 6;
-            this.value_in_use.Name = "value_in_use";
-            this.value_in_use.ReadOnly = true;
-            this.value_in_use.Width = 117;
+            value_in_use.DataPropertyName = "value_in_use";
+            value_in_use.HeaderText = "Value in Use";
+            value_in_use.MinimumWidth = 6;
+            value_in_use.Name = "value_in_use";
+            value_in_use.ReadOnly = true;
+            value_in_use.Width = 117;
             // 
             // new_value
             // 
-            this.new_value.DataPropertyName = "new_value";
-            this.new_value.HeaderText = "New Value";
-            this.new_value.MinimumWidth = 6;
-            this.new_value.Name = "new_value";
-            this.new_value.ReadOnly = true;
-            this.new_value.Width = 104;
+            new_value.DataPropertyName = "new_value";
+            new_value.HeaderText = "New Value";
+            new_value.MinimumWidth = 6;
+            new_value.Name = "new_value";
+            new_value.ReadOnly = true;
+            new_value.Width = 104;
             // 
             // new_value_in_use
             // 
-            this.new_value_in_use.DataPropertyName = "new_value_in_use";
-            this.new_value_in_use.HeaderText = "New Value In Use";
-            this.new_value_in_use.MinimumWidth = 6;
-            this.new_value_in_use.Name = "new_value_in_use";
-            this.new_value_in_use.ReadOnly = true;
-            this.new_value_in_use.Width = 113;
+            new_value_in_use.DataPropertyName = "new_value_in_use";
+            new_value_in_use.HeaderText = "New Value In Use";
+            new_value_in_use.MinimumWidth = 6;
+            new_value_in_use.Name = "new_value_in_use";
+            new_value_in_use.ReadOnly = true;
+            new_value_in_use.Width = 113;
             // 
             // ValidFrom
             // 
-            this.ValidFrom.DataPropertyName = "ValidFrom";
-            this.ValidFrom.HeaderText = "Valid From";
-            this.ValidFrom.MinimumWidth = 6;
-            this.ValidFrom.Name = "ValidFrom";
-            this.ValidFrom.ReadOnly = true;
-            this.ValidFrom.Width = 96;
+            ValidFrom.DataPropertyName = "ValidFrom";
+            ValidFrom.HeaderText = "Valid From";
+            ValidFrom.MinimumWidth = 6;
+            ValidFrom.Name = "ValidFrom";
+            ValidFrom.ReadOnly = true;
+            ValidFrom.Width = 96;
             // 
             // ValidTo
             // 
-            this.ValidTo.DataPropertyName = "ValidTo";
-            this.ValidTo.HeaderText = "Valid To";
-            this.ValidTo.MinimumWidth = 6;
-            this.ValidTo.Name = "ValidTo";
-            this.ValidTo.ReadOnly = true;
-            this.ValidTo.Width = 82;
+            ValidTo.DataPropertyName = "ValidTo";
+            ValidTo.HeaderText = "Valid To";
+            ValidTo.MinimumWidth = 6;
+            ValidTo.Name = "ValidTo";
+            ValidTo.ReadOnly = true;
+            ValidTo.Width = 82;
             // 
             // is_dynamic
             // 
-            this.is_dynamic.DataPropertyName = "is_dynamic";
-            this.is_dynamic.HeaderText = "Is Dynamic";
-            this.is_dynamic.MinimumWidth = 6;
-            this.is_dynamic.Name = "is_dynamic";
-            this.is_dynamic.ReadOnly = true;
-            this.is_dynamic.Width = 74;
+            is_dynamic.DataPropertyName = "is_dynamic";
+            is_dynamic.HeaderText = "Is Dynamic";
+            is_dynamic.MinimumWidth = 6;
+            is_dynamic.Name = "is_dynamic";
+            is_dynamic.ReadOnly = true;
+            is_dynamic.Width = 74;
             // 
             // is_advanced
             // 
-            this.is_advanced.DataPropertyName = "is_advanced";
-            this.is_advanced.HeaderText = "Is Advanced";
-            this.is_advanced.MinimumWidth = 6;
-            this.is_advanced.Name = "is_advanced";
-            this.is_advanced.ReadOnly = true;
-            this.is_advanced.Width = 82;
+            is_advanced.DataPropertyName = "is_advanced";
+            is_advanced.HeaderText = "Is Advanced";
+            is_advanced.MinimumWidth = 6;
+            is_advanced.Name = "is_advanced";
+            is_advanced.ReadOnly = true;
+            is_advanced.Width = 82;
             // 
             // default_value
             // 
-            this.default_value.DataPropertyName = "default_value";
-            this.default_value.HeaderText = "Default";
-            this.default_value.MinimumWidth = 6;
-            this.default_value.Name = "default_value";
-            this.default_value.ReadOnly = true;
-            this.default_value.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.default_value.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.default_value.Width = 59;
+            default_value.DataPropertyName = "default_value";
+            default_value.HeaderText = "Default";
+            default_value.MinimumWidth = 6;
+            default_value.Name = "default_value";
+            default_value.ReadOnly = true;
+            default_value.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            default_value.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            default_value.Width = 59;
             // 
             // Minimum
             // 
-            this.Minimum.DataPropertyName = "Minimum";
-            this.Minimum.HeaderText = "Minimum";
-            this.Minimum.MinimumWidth = 6;
-            this.Minimum.Name = "Minimum";
-            this.Minimum.ReadOnly = true;
-            this.Minimum.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.Minimum.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.Minimum.Width = 69;
+            Minimum.DataPropertyName = "Minimum";
+            Minimum.HeaderText = "Minimum";
+            Minimum.MinimumWidth = 6;
+            Minimum.Name = "Minimum";
+            Minimum.ReadOnly = true;
+            Minimum.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            Minimum.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            Minimum.Width = 69;
             // 
             // Maximum
             // 
-            this.Maximum.DataPropertyName = "Maximum";
-            this.Maximum.HeaderText = "Maximum";
-            this.Maximum.MinimumWidth = 6;
-            this.Maximum.Name = "Maximum";
-            this.Maximum.ReadOnly = true;
-            this.Maximum.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.Maximum.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.Maximum.Width = 72;
+            Maximum.DataPropertyName = "Maximum";
+            Maximum.HeaderText = "Maximum";
+            Maximum.MinimumWidth = 6;
+            Maximum.Name = "Maximum";
+            Maximum.ReadOnly = true;
+            Maximum.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            Maximum.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            Maximum.Width = 72;
+            // 
+            // splitContainer1
+            // 
+            splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitContainer1.Location = new System.Drawing.Point(0, 0);
+            splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            splitContainer1.Name = "splitContainer1";
+            splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            splitContainer1.Panel1.Controls.Add(configuration1);
+            // 
+            // splitContainer1.Panel2
+            // 
+            splitContainer1.Panel2.Controls.Add(dgv);
+            splitContainer1.Panel2.Controls.Add(toolStrip1);
+            splitContainer1.Size = new System.Drawing.Size(1678, 1040);
+            splitContainer1.SplitterDistance = 520;
+            splitContainer1.SplitterWidth = 5;
+            splitContainer1.TabIndex = 2;
+            // 
+            // configuration1
+            // 
+            configuration1.BackColor = System.Drawing.Color.White;
+            configuration1.Dock = System.Windows.Forms.DockStyle.Fill;
+            configuration1.Location = new System.Drawing.Point(0, 0);
+            configuration1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            configuration1.Name = "configuration1";
+            configuration1.Size = new System.Drawing.Size(1678, 520);
+            configuration1.TabIndex = 1;
+            // 
+            // toolStrip1
+            // 
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel1, tsRefresh, tsCopy, tsHistoryExcel, tsClearFilter });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new System.Drawing.Size(1678, 27);
+            toolStrip1.TabIndex = 1;
+            toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripLabel1
+            // 
+            toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            toolStripLabel1.Name = "toolStripLabel1";
+            toolStripLabel1.Size = new System.Drawing.Size(192, 24);
+            toolStripLabel1.Text = "Configuration Change Log";
+            // 
+            // tsRefresh
+            // 
+            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Name = "tsRefresh";
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Text = "Refresh";
+            tsRefresh.Click += TsRefresh_Click;
+            // 
+            // tsCopy
+            // 
+            tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopy.Name = "tsCopy";
+            tsCopy.Size = new System.Drawing.Size(29, 24);
+            tsCopy.Text = "Copy";
+            tsCopy.Click += TsCopy_Click;
+            // 
+            // tsHistoryExcel
+            // 
+            tsHistoryExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsHistoryExcel.Image = Properties.Resources.excel16x16;
+            tsHistoryExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsHistoryExcel.Name = "tsHistoryExcel";
+            tsHistoryExcel.Size = new System.Drawing.Size(29, 24);
+            tsHistoryExcel.Text = "Excel";
+            tsHistoryExcel.Click += TsHistoryExcel_Click;
+            // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Image = Properties.Resources.Eraser_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            tsClearFilter.Text = "Clear Filter";
             // 
             // ConfigurationHistory
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.splitContainer1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "ConfigurationHistory";
-            this.Size = new System.Drawing.Size(1678, 1040);
-            ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            this.splitContainer1.Panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
-            this.splitContainer1.ResumeLayout(false);
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            Controls.Add(splitContainer1);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "ConfigurationHistory";
+            Size = new System.Drawing.Size(1678, 1040);
+            ((System.ComponentModel.ISupportInitialize)dgv).EndInit();
+            splitContainer1.Panel1.ResumeLayout(false);
+            splitContainer1.Panel2.ResumeLayout(false);
+            splitContainer1.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
+            splitContainer1.ResumeLayout(false);
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            ResumeLayout(false);
         }
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgv;
+        private DBADashDataGridView dgv;
         private Changes.Configuration configuration1;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.ToolStrip toolStrip1;
@@ -348,5 +361,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn default_value;
         private System.Windows.Forms.DataGridViewTextBoxColumn Minimum;
         private System.Windows.Forms.DataGridViewTextBoxColumn Maximum;
+        private System.Windows.Forms.ToolStripButton tsClearFilter;
     }
 }

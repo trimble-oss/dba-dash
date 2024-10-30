@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI.Changes
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI.Changes
 {
     partial class Configuration
     {
@@ -28,18 +30,20 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Configuration));
-            dgvConfig = new System.Windows.Forms.DataGridView();
+            dgvConfig = new DBADashDataGridView();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
             tsExcel = new System.Windows.Forms.ToolStripButton();
             tsCols = new System.Windows.Forms.ToolStripButton();
             toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
+            adviceConfiguredToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            adviceConfiguredALLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             configuredOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             configuredALLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            adviceConfiguredALLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            adviceConfiguredToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             ((System.ComponentModel.ISupportInitialize)dgvConfig).BeginInit();
             toolStrip1.SuspendLayout();
@@ -50,12 +54,31 @@
             dgvConfig.AllowUserToAddRows = false;
             dgvConfig.AllowUserToDeleteRows = false;
             dgvConfig.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvConfig.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgvConfig.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvConfig.DefaultCellStyle = dataGridViewCellStyle2;
             dgvConfig.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvConfig.EnableHeadersVisualStyles = false;
             dgvConfig.Location = new System.Drawing.Point(0, 27);
             dgvConfig.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvConfig.Name = "dgvConfig";
             dgvConfig.ReadOnly = true;
+            dgvConfig.ResultSetID = 0;
+            dgvConfig.ResultSetName = null;
             dgvConfig.RowHeadersVisible = false;
             dgvConfig.RowHeadersWidth = 51;
             dgvConfig.Size = new System.Drawing.Size(568, 415);
@@ -121,6 +144,24 @@
             toolStripDropDownButton1.Size = new System.Drawing.Size(34, 24);
             toolStripDropDownButton1.Text = "Filter";
             // 
+            // adviceConfiguredToolStripMenuItem
+            // 
+            adviceConfiguredToolStripMenuItem.Name = "adviceConfiguredToolStripMenuItem";
+            adviceConfiguredToolStripMenuItem.Size = new System.Drawing.Size(255, 26);
+            adviceConfiguredToolStripMenuItem.Text = "Advice/Configured";
+            adviceConfiguredToolStripMenuItem.ToolTipText = resources.GetString("adviceConfiguredToolStripMenuItem.ToolTipText");
+            adviceConfiguredToolStripMenuItem.Click += ConfiguredOnlyToolStripMenuItem_Click;
+            // 
+            // adviceConfiguredALLToolStripMenuItem
+            // 
+            adviceConfiguredALLToolStripMenuItem.Checked = true;
+            adviceConfiguredALLToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            adviceConfiguredALLToolStripMenuItem.Name = "adviceConfiguredALLToolStripMenuItem";
+            adviceConfiguredALLToolStripMenuItem.Size = new System.Drawing.Size(255, 26);
+            adviceConfiguredALLToolStripMenuItem.Text = "Advice/Configured - ALL";
+            adviceConfiguredALLToolStripMenuItem.ToolTipText = "Show all configuration options with advice based highlighting\r\nBold = Default value has changed\r\nColor = Advice status.  See tooltip for info.\r\n";
+            adviceConfiguredALLToolStripMenuItem.Click += ConfiguredOnlyToolStripMenuItem_Click;
+            // 
             // configuredOnlyToolStripMenuItem
             // 
             configuredOnlyToolStripMenuItem.Name = "configuredOnlyToolStripMenuItem";
@@ -137,28 +178,10 @@
             configuredALLToolStripMenuItem.ToolTipText = "Show all configuration options and highlight based on using default values only";
             configuredALLToolStripMenuItem.Click += ConfiguredOnlyToolStripMenuItem_Click;
             // 
-            // adviceConfiguredALLToolStripMenuItem
-            // 
-            adviceConfiguredALLToolStripMenuItem.Checked = true;
-            adviceConfiguredALLToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            adviceConfiguredALLToolStripMenuItem.Name = "adviceConfiguredALLToolStripMenuItem";
-            adviceConfiguredALLToolStripMenuItem.Size = new System.Drawing.Size(255, 26);
-            adviceConfiguredALLToolStripMenuItem.Text = "Advice/Configured - ALL";
-            adviceConfiguredALLToolStripMenuItem.ToolTipText = "Show all configuration options with advice based highlighting\r\nBold = Default value has changed\r\nColor = Advice status.  See tooltip for info.\r\n";
-            adviceConfiguredALLToolStripMenuItem.Click += ConfiguredOnlyToolStripMenuItem_Click;
-            // 
-            // adviceConfiguredToolStripMenuItem
-            // 
-            adviceConfiguredToolStripMenuItem.Name = "adviceConfiguredToolStripMenuItem";
-            adviceConfiguredToolStripMenuItem.Size = new System.Drawing.Size(255, 26);
-            adviceConfiguredToolStripMenuItem.Text = "Advice/Configured";
-            adviceConfiguredToolStripMenuItem.ToolTipText = resources.GetString("adviceConfiguredToolStripMenuItem.ToolTipText");
-            adviceConfiguredToolStripMenuItem.Click += ConfiguredOnlyToolStripMenuItem_Click;
-            // 
             // toolStripLabel1
             // 
             toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             toolStripLabel1.Name = "toolStripLabel1";
             toolStripLabel1.Size = new System.Drawing.Size(106, 24);
             toolStripLabel1.Text = "Configuration";
@@ -182,7 +205,7 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgvConfig;
+        private DBADashDataGridView dgvConfig;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
         private System.Windows.Forms.ToolStripMenuItem configuredOnlyToolStripMenuItem;

@@ -18,19 +18,17 @@ namespace DBADashGUI.Changes
 
         private DataTable GetConfiguration()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.Configuration_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("@ConfiguredOnly", configuredOnlyToolStripMenuItem.Checked);
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                cmd.Parameters.AddWithValue("AdviceOnly", adviceConfiguredToolStripMenuItem.Checked);
-                DataTable dt = new();
-                da.Fill(dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.Configuration_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("@ConfiguredOnly", configuredOnlyToolStripMenuItem.Checked);
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            cmd.Parameters.AddWithValue("AdviceOnly", adviceConfiguredToolStripMenuItem.Checked);
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
         }
 
         public void RefreshData()
@@ -106,12 +104,12 @@ namespace DBADashGUI.Changes
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgvConfig);
+            dgvConfig.CopyGrid();
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvConfig);
+            dgvConfig.ExportToExcel();
         }
 
         private void TsCols_Click(object sender, EventArgs e)
