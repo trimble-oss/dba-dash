@@ -1,10 +1,10 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADashGUI.Theme;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI.Tagging
 {
@@ -13,6 +13,7 @@ namespace DBADashGUI.Tagging
         public Tags()
         {
             InitializeComponent();
+            dgvReport.RegisterClearFilter(tsClearFilterReport);
         }
 
         public event EventHandler TagsChanged;
@@ -127,7 +128,7 @@ namespace DBADashGUI.Tagging
             dgvReport.Columns.Clear();
             dgvReport.Columns.Add(new DataGridViewTextBoxColumn { Name = "colInstanceID", Visible = false, DataPropertyName = "InstanceID", Frozen = Common.FreezeKeyColumn });
             dgvReport.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn });
-            dgvReport.DataSource = dt;
+            dgvReport.DataSource = new DataView(dt);
             dgvReport.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             dgvReport.ApplyTheme();
         }
@@ -149,12 +150,12 @@ namespace DBADashGUI.Tagging
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgvReport);
+            dgvReport.CopyGrid();
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvReport);
+            dgvReport.ExportToExcel();
         }
 
         private void TsBack_Click(object sender, EventArgs e)
