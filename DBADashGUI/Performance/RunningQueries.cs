@@ -1,4 +1,7 @@
-﻿using DBADashGUI.Theme;
+﻿using DBADash;
+using DBADashGUI.Interface;
+using DBADashGUI.Messaging;
+using DBADashGUI.Theme;
 using Humanizer;
 using Humanizer.Localisation;
 using Microsoft.Data.SqlClient;
@@ -10,9 +13,6 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
-using DBADash;
-using DBADashGUI.Interface;
-using DBADashGUI.Messaging;
 
 namespace DBADashGUI.Performance
 {
@@ -21,7 +21,20 @@ namespace DBADashGUI.Performance
         public RunningQueries()
         {
             InitializeComponent();
+            dgv.GridFilterChanged += (sender, e) =>
+            {
+                UpdateClearFilter();
+            };
         }
+
+        private void UpdateClearFilter()
+        {
+            tsClearFilter.Enabled = !string.IsNullOrEmpty(dgv.RowFilter) || !string.IsNullOrEmpty(dgvSessionWaits.RowFilter);
+            tsClearFilter.Font = new Font(tsClearFilter.Font, tsClearFilter.Enabled ? FontStyle.Bold : FontStyle.Regular);
+        }
+
+        private string PersistedSort;
+        private string PersistedFilter;
 
         public int InstanceID;
         private List<int> InstanceIDs;
@@ -400,7 +413,17 @@ namespace DBADashGUI.Performance
             snapshotDT = RunningQueriesSnapshot(ref snapshotDate, skip);
             GetCounts();
             lblSnapshotDate.Text = "Snapshot Date: " + snapshotDate.ToAppTimeZone().ToString(CultureInfo.CurrentCulture);
-            LoadSnapshot(new DataView(snapshotDT));
+            try
+            {
+                LoadSnapshot(new DataView(snapshotDT, PersistedFilter, PersistedSort, DataViewRowState.CurrentRows));
+            }
+            catch (Exception ex) // Previous filter might not be valid
+            {
+                LoadSnapshot(new DataView(snapshotDT));
+            }
+
+            PersistedFilter = string.Empty;
+            PersistedSort = string.Empty;
             lblSnapshotDate.Visible = true;
             tsGetLatest.Visible = true;
             tsPrevious.Visible = true;
@@ -408,7 +431,6 @@ namespace DBADashGUI.Performance
 
             currentSnapshotDate = snapshotDate;
             tsBack.Enabled = SnapshotDateFrom == DateTime.MinValue;
-            dgv.ApplyTheme(DBADashUser.SelectedTheme);
         }
 
         /// <summary>Load a running queries snapshot</summary>
@@ -436,7 +458,7 @@ namespace DBADashGUI.Performance
             dgv.Columns["colQueryPlanHash"].Width = 70;
             tsGroupBy.Enabled = dgv.Rows.Count > 1;
             tsBlockingFilter.Visible = SessionID == 0 && JobId == Guid.Empty;
-            dgv.ApplyTheme();
+            UpdateClearFilter();
         }
 
         /// <summary>Get counts from the running queries snapshot table. e.g. Blocking counts</summary>
@@ -454,7 +476,7 @@ namespace DBADashGUI.Performance
             tsStatus.Text =
                 $"Blocked Sessions: {blockedCount}, Blocked Wait Time: {TimeSpan.FromMilliseconds(blockedWait):dd\\ hh\\:mm\\:ss}, Running Jobs {runningJobCount}";
             tsStatus.Font = blockedCount > 0 ? new Font(tsStatus.Font, FontStyle.Bold) : new Font(tsStatus.Font, FontStyle.Regular);
-            tsStatus.ForeColor =DBADashUser.SelectedTheme.ThemeIdentifier== ThemeType.Dark ? DBADashUser.SelectedTheme.ForegroundColor : blockedCount > 0 ? DashColors.Fail : DashColors.Success;
+            tsStatus.ForeColor = DBADashUser.SelectedTheme.ThemeIdentifier == ThemeType.Dark ? DBADashUser.SelectedTheme.ForegroundColor : blockedCount > 0 ? DashColors.Fail : DashColors.Success;
         }
 
         private static void ShowPlan(DataRowView row)
@@ -654,7 +676,7 @@ namespace DBADashGUI.Performance
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+            dgv.ExportToExcel();
         }
 
         private void TsBack_Click(object sender, EventArgs e)
@@ -713,6 +735,8 @@ namespace DBADashGUI.Performance
 
         private void TsGetLatest_Click(object sender, EventArgs e)
         {
+            PersistedFilter = dgv.RowFilter;
+            PersistedSort = dgv.SortString;
             LoadSnapshot(DateTime.MaxValue);
         }
 
@@ -849,11 +873,15 @@ namespace DBADashGUI.Performance
 
         private void TsPrevious_Click(object sender, EventArgs e)
         {
+            PersistedFilter = dgv.RowFilter;
+            PersistedSort = dgv.SortString;
             LoadSnapshot(currentSnapshotDate, -1);
         }
 
         private void TsNext_Click(object sender, EventArgs e)
         {
+            PersistedFilter = dgv.RowFilter;
+            PersistedSort = dgv.SortString;
             LoadSnapshot(currentSnapshotDate, 1);
         }
 
@@ -896,7 +924,7 @@ namespace DBADashGUI.Performance
 
         private void TsSessionWaitExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvSessionWaits);
+            dgvSessionWaits.ExportToExcel();
         }
 
         private void AllSessionsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1053,6 +1081,8 @@ namespace DBADashGUI.Performance
 
         private async void TsTriggerCollection_Click(object sender, EventArgs e)
         {
+            PersistedFilter = dgv.RowFilter;
+            PersistedSort = dgv.SortString;
             ShowLatestOnNextExecution = true;
             await CollectionMessaging.TriggerCollection(InstanceID, CollectionType.RunningQueries, this);
         }
@@ -1068,6 +1098,12 @@ namespace DBADashGUI.Performance
                 tsStatus.ForeColor = color;
                 tsStatus.LinkColor = color;
             });
+        }
+
+        private void tsClearFilter_Click(object sender, EventArgs e)
+        {
+            dgv.SetFilter(string.Empty);
+            dgvSessionWaits.SetFilter(string.Empty);
         }
     }
 }
