@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI.CollectionDates
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI.CollectionDates
 {
     partial class CollectionErrors
     {
@@ -31,7 +33,7 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CollectionErrors));
-            dgvDBADashErrors = new System.Windows.Forms.DataGridView();
+            dgvDBADashErrors = new DBADashDataGridView();
             Instance = new System.Windows.Forms.DataGridViewLinkColumn();
             ErrorDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ErrorSource = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -407,7 +409,7 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgvDBADashErrors;
+        private DBADashDataGridView dgvDBADashErrors;
         private System.Windows.Forms.ToolStrip toolStrip3;
         private System.Windows.Forms.ToolStripButton tsRefreshErrors;
         private System.Windows.Forms.ToolStripButton tsCopyErrors;

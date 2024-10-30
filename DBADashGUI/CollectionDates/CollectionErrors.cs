@@ -85,7 +85,7 @@ namespace DBADashGUI.CollectionDates
             tsFilter.Font = IsFiltered ? new Font(tsFilter.Font, FontStyle.Bold) : new Font(tsFilter.Font, FontStyle.Regular);
             DataTable dt = GetErrorLog(InstanceID, InstanceGroupName, txtInstance.Text.Trim(), txtSource.Text.Trim(), txtContext.Text.Trim(), txtMessage.Text.Trim(), Days, Context.InstanceIDs);
             dgvDBADashErrors.AutoGenerateColumns = false;
-            dgvDBADashErrors.DataSource = dt;
+            dgvDBADashErrors.DataSource = new DataView(dt);
             dgvDBADashErrors.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
@@ -103,7 +103,7 @@ namespace DBADashGUI.CollectionDates
 
         private void TsCopyErrors_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgvDBADashErrors);
+            dgvDBADashErrors.CopyGrid();
         }
 
         private void TsRefreshErrors_Click(object sender, EventArgs e)
@@ -127,7 +127,7 @@ namespace DBADashGUI.CollectionDates
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvDBADashErrors);
+            dgvDBADashErrors.ExportToExcel();
         }
 
         private void DgvDBADashErrors_CellContentClick(object sender, DataGridViewCellEventArgs e)
