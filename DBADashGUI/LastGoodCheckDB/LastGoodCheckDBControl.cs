@@ -39,6 +39,7 @@ namespace DBADashGUI.LastGoodCheckDB
         public LastGoodCheckDBControl()
         {
             InitializeComponent();
+            dgvLastGoodCheckDB.RegisterClearFilter(tsClearFilter);
         }
 
         private DBADashContext CurrentContext;
@@ -115,13 +116,11 @@ namespace DBADashGUI.LastGoodCheckDB
 
         private void DgvLastGoodCheckDB_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex < 0) return;
+            if (dgvLastGoodCheckDB.Columns[e.ColumnIndex].HeaderText == "Configure")
             {
-                if (dgvLastGoodCheckDB.Columns[e.ColumnIndex].HeaderText == "Configure")
-                {
-                    var row = (DataRowView)dgvLastGoodCheckDB.Rows[e.RowIndex].DataBoundItem;
-                    ConfigureThresholds((int)row["InstanceID"], (int)row["DatabaseID"]);
-                }
+                var row = (DataRowView)dgvLastGoodCheckDB.Rows[e.RowIndex].DataBoundItem;
+                ConfigureThresholds((int)row["InstanceID"], (int)row["DatabaseID"]);
             }
         }
 
@@ -159,14 +158,14 @@ namespace DBADashGUI.LastGoodCheckDB
         private void TsCopy_Click(object sender, EventArgs e)
         {
             Configure.Visible = false;
-            Common.CopyDataGridViewToClipboard(dgvLastGoodCheckDB);
+            dgvLastGoodCheckDB.CopyGrid();
             Configure.Visible = true;
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
             Configure.Visible = false;
-            Common.PromptSaveDataGridView(ref dgvLastGoodCheckDB);
+            dgvLastGoodCheckDB.ExportToExcel();
             Configure.Visible = true;
         }
 
@@ -177,7 +176,7 @@ namespace DBADashGUI.LastGoodCheckDB
 
         private async void TsTrigger_Click(object sender, EventArgs e)
         {
-            await CollectionMessaging.TriggerCollection(CurrentContext.InstanceID, new List<CollectionType>() { CollectionType.LastGoodCheckDB}, this);
+            await CollectionMessaging.TriggerCollection(CurrentContext.InstanceID, new List<CollectionType>() { CollectionType.LastGoodCheckDB }, this);
         }
     }
 }
