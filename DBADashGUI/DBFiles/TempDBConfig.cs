@@ -13,6 +13,7 @@ namespace DBADashGUI.DBFiles
         public TempDBConfig()
         {
             InitializeComponent();
+            dgvTempDB.RegisterClearFilter(tsClearFilter);
         }
 
         private List<int> InstanceIDs;
@@ -26,25 +27,23 @@ namespace DBADashGUI.DBFiles
         public void RefreshData()
         {
             dgvTempDB.Columns[0].Frozen = Common.FreezeKeyColumn;
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.TempDBConfig_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.TempDBConfig_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
 
-                DataTable dt = new();
-                da.Fill(dt);
-                dgvTempDB.AutoGenerateColumns = false;
-                dgvTempDB.DataSource = dt;
-                dgvTempDB.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            }
+            DataTable dt = new();
+            da.Fill(dt);
+            dgvTempDB.AutoGenerateColumns = false;
+            dgvTempDB.DataSource = new DataView(dt);
+            dgvTempDB.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgvTempDB);
+            dgvTempDB.CopyGrid();
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -80,7 +79,7 @@ namespace DBADashGUI.DBFiles
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvTempDB);
+            dgvTempDB.ExportToExcel();
         }
     }
 }
