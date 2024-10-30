@@ -324,12 +324,18 @@ namespace DBADashGUI
                 }
                 dgv.Columns.Clear();
                 dgv.AutoGenerateColumns = true;
-                dgv.DataSource = dtPivot;
+                dgv.DataSource = new DataView(dtPivot);
             }
             else
             {
                 throw new Exception("Expected 1 row for pivot operation");
             }
+        }
+
+        public static void PivotDGV(ref DBADashDataGridView dgv)
+        {
+            var dgv1 = dgv as DataGridView;
+            PivotDGV(ref dgv1);
         }
 
         public static readonly DataGridViewCellStyle DataGridViewNumericCellStyle = DataGridViewCellStyle("#,##0.###");

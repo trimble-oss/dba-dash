@@ -1,10 +1,10 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADashGUI.Theme;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI.Changes
 {
@@ -13,6 +13,7 @@ namespace DBADashGUI.Changes
         public QueryStore()
         {
             InitializeComponent();
+            dgv.RegisterClearFilter(tsClearFilter);
         }
 
         private string Instance = string.Empty;
@@ -50,7 +51,7 @@ namespace DBADashGUI.Changes
             }
             DateHelper.ConvertUTCToAppTimeZone(ref dt);
             dgv.AutoGenerateColumns = false;
-            dgv.DataSource = dt;
+            dgv.DataSource = new DataView(dt);
             if (dt.Rows.Count == 1 && DatabaseID > 0)
             {
                 Common.PivotDGV(ref dgv);
@@ -100,44 +101,44 @@ namespace DBADashGUI.Changes
 
         private DataTable GetDatabaseQueryStoreOptions()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.DatabaseQueryStoreOptions_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("InstanceGroupName", Instance);
-                cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
-                var dt = new DataTable();
-                da.Fill(dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.DatabaseQueryStoreOptions_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("InstanceGroupName", Instance);
+            cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
+            var dt = new DataTable();
+            da.Fill(dt);
+            return dt;
         }
 
         private DataTable GetDatabaseQueryStoreOptionsSummary()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.DatabaseQueryStoreOptionsSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                var dt = new DataTable();
-                da.Fill(dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.DatabaseQueryStoreOptionsSummary_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            var dt = new DataTable();
+            da.Fill(dt);
+            return dt;
         }
 
         private void Dgv_CellContent_Click(object sender, DataGridViewCellEventArgs e)
         {
-            if (dgv.Columns[e.ColumnIndex].Name == "colInstance" && e.RowIndex >= 0)
+            switch (dgv.Columns[e.ColumnIndex].Name)
             {
-                Instance = (string)dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
-                RefreshData();
-            }
-            else if (dgv.Columns[e.ColumnIndex].Name == "colDB" && e.RowIndex >= 0)
-            {
-                var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                DatabaseID = (int)row["DatabaseID"];
-                RefreshData();
+                case "colInstance" when e.RowIndex >= 0:
+                    Instance = (string)dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
+                    RefreshData();
+                    break;
+
+                case "colDB" when e.RowIndex >= 0:
+                    {
+                        var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+                        DatabaseID = (int)row["DatabaseID"];
+                        RefreshData();
+                        break;
+                    }
             }
         }
 
@@ -181,9 +182,9 @@ namespace DBADashGUI.Changes
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            bool summaryMode = dgv.Columns.Contains("col_READ_ONLY");
-            bool dbsMode = dgv.Columns.Contains("colDB)");
-            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            var summaryMode = dgv.Columns.Contains("col_READ_ONLY");
+            var dbsMode = dgv.Columns.Contains("colDB)");
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
                 if (summaryMode)
@@ -209,7 +210,7 @@ namespace DBADashGUI.Changes
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+            dgv.ExportToExcel();
         }
     }
 }
