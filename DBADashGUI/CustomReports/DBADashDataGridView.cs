@@ -54,6 +54,7 @@ namespace DBADashGUI.CustomReports
         {
             ColumnContextMenu = new();
             var clearFilter = GetClearFilterMenuItem();
+            var editFilter = GetEditFilterMenuItem();
             ColumnContextMenu.Items.AddRange(
                 new ToolStripItem[]
                 {
@@ -62,14 +63,17 @@ namespace DBADashGUI.CustomReports
                     new ToolStripSeparator(),
                     GetColumnsMenuItem(),
                     new ToolStripSeparator(),
-                    GetEditFilterMenuItem(),
+                    editFilter,
                     clearFilter,
                     new ToolStripSeparator(),
                 }
             );
             ColumnContextMenuOpening += (sender, e) =>
             {
+                var filterSupported = DataSource is DataView;
                 clearFilter.Enabled = !string.IsNullOrEmpty((DataSource as DataView)?.RowFilter);
+                clearFilter.Visible = filterSupported;
+                editFilter.Visible= filterSupported;
             };
         }
 
@@ -80,7 +84,8 @@ namespace DBADashGUI.CustomReports
             var filterByValue = new ToolStripMenuItem("Filter By Value", Properties.Resources.Filter_16x, FilterByValue_Click) { Tag = false };
             var excludeValue = new ToolStripMenuItem("Exclude Value", Properties.Resources.StopFilter_16x, FilterByValue_Click) { Tag = true };
             var copyCell = new ToolStripMenuItem("Copy Cell", Properties.Resources.ASX_Copy_grey_16x, CopyCell);
-
+            var editFilter = GetEditFilterMenuItem();
+            var filterSeparator = new ToolStripSeparator();
             filterLike.Click += FilterLike_Click;
 
             CellContextMenu.Items.AddRange(
@@ -95,9 +100,9 @@ namespace DBADashGUI.CustomReports
                     filterByValue,
                     excludeValue,
                     filterLike,
-                    GetEditFilterMenuItem(),
+                    editFilter,
                     cellClearFilterMenuItem,
-                    new ToolStripSeparator(),
+                    filterSeparator,
                 }
             );
 
@@ -106,13 +111,19 @@ namespace DBADashGUI.CustomReports
                 var dgv = (DataGridView)sender;
                 if (dgv == null) return;
                 var columnType = dgv.Columns[ClickedColumnIndex].ValueType;
-                var filterSupported = columnType != typeof(byte[]) &&
+                var filterSupported = DataSource is DataView;
+                var columnFilterSupported = filterSupported && 
+                                      columnType != typeof(byte[]) &&
                                       !string.IsNullOrEmpty(dgv.Columns[ClickedColumnIndex].DataPropertyName);
 
-                filterLike.Visible = filterSupported && columnType == typeof(string);
+
+                filterLike.Visible = columnFilterSupported && columnType == typeof(string);
                 cellClearFilterMenuItem.Enabled = !string.IsNullOrEmpty((DataSource as DataView)?.RowFilter);
-                filterByValue.Visible = filterSupported;
-                excludeValue.Visible = filterSupported;
+                filterByValue.Visible = columnFilterSupported;
+                excludeValue.Visible = columnFilterSupported;
+                editFilter.Visible = filterSupported;
+                cellClearFilterMenuItem.Visible = filterSupported;
+                filterSeparator.Visible = filterSupported;
             };
         }
 

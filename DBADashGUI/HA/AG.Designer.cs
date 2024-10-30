@@ -1,4 +1,6 @@
 ﻿
+using DBADashGUI.CustomReports;
+
 namespace DBADashGUI.HA
 {
     partial class AG
@@ -29,7 +31,7 @@ namespace DBADashGUI.HA
         /// </summary>
         private void InitializeComponent()
         {
-            dgv = new System.Windows.Forms.DataGridView();
+            dgv = new DBADashDataGridView();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
@@ -38,6 +40,7 @@ namespace DBADashGUI.HA
             tsTrigger = new System.Windows.Forms.ToolStripButton();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
             toolStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
@@ -65,7 +68,7 @@ namespace DBADashGUI.HA
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsBack, tsTrigger });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsBack, tsTrigger, tsClearFilter });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(752, 27);
@@ -139,6 +142,14 @@ namespace DBADashGUI.HA
             lblStatus.Name = "lblStatus";
             lblStatus.Size = new System.Drawing.Size(0, 16);
             // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Image = Properties.Resources.Eraser_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            tsClearFilter.Text = "Clear Filter";
+            // 
             // AG
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -160,7 +171,7 @@ namespace DBADashGUI.HA
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgv;
+        private DBADashDataGridView dgv;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripButton tsCopy;
@@ -169,5 +180,6 @@ namespace DBADashGUI.HA
         private System.Windows.Forms.ToolStripButton tsTrigger;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel lblStatus;
+        private System.Windows.Forms.ToolStripButton tsClearFilter;
     }
 }
