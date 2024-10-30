@@ -1,14 +1,14 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADash;
+using DBADashGUI.Interface;
+using DBADashGUI.Messaging;
+using DBADashGUI.Theme;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.Interface;
-using DBADashGUI.Theme;
-using DBADash;
-using DBADashGUI.Messaging;
 
 namespace DBADashGUI.LogShipping
 {
@@ -113,7 +113,7 @@ namespace DBADashGUI.LogShipping
             }
             RefreshSummary();
             var dt = GetLogShippingDataTable();
-           
+
             tsBack.Enabled = (context.RegularInstanceIDs.Count > 1 && InstanceIDs.Count == 1);
             dgvLogShipping.AutoGenerateColumns = false;
             dgvLogShipping.Columns[0].Frozen = Common.FreezeKeyColumn;
@@ -131,7 +131,8 @@ namespace DBADashGUI.LogShipping
         public LogShippingControl()
         {
             InitializeComponent();
-            dgvLogShipping.ApplyTheme();
+            dgvSummary.RegisterClearFilter(tsClearFilterSummary);
+            dgvLogShipping.RegisterClearFilter(tsClearFilterDetail);
         }
 
         private void TsFilter_Click(object sender, EventArgs e)
@@ -194,7 +195,7 @@ namespace DBADashGUI.LogShipping
         private void TsCopy_Click(object sender, EventArgs e)
         {
             dgvSummary.Columns["Configure"].Visible = false;
-            Common.CopyDataGridViewToClipboard(dgvSummary);
+            dgvSummary.CopyGrid();
             dgvSummary.Columns["Configure"].Visible = true;
         }
 
@@ -206,7 +207,7 @@ namespace DBADashGUI.LogShipping
         private void TsExcel_Click(object sender, EventArgs e)
         {
             dgvSummary.Columns["Configure"].Visible = false;
-            Common.PromptSaveDataGridView(ref dgvSummary);
+            dgvSummary.ExportToExcel();
             dgvSummary.Columns["Configure"].Visible = true;
         }
 
@@ -276,24 +277,24 @@ namespace DBADashGUI.LogShipping
         private void TsCopyDetail_Click(object sender, EventArgs e)
         {
             Configure.Visible = false;
-            Common.CopyDataGridViewToClipboard(dgvLogShipping);
+            dgvLogShipping.CopyGrid();
             Configure.Visible = true;
         }
 
         private void TsExportExcelDetail_Click(object sender, EventArgs e)
         {
             Configure.Visible = false;
-            Common.PromptSaveDataGridView(ref dgvLogShipping);
+            dgvLogShipping.ExportToExcel();
             Configure.Visible = true;
         }
 
         private async void tsTrigger_Click(object sender, EventArgs e)
         {
-            if (InstanceIDs.Count !=1)
+            if (InstanceIDs.Count != 1)
             {
                 lblStatus.Text = "Please select a single instance to trigger a collection";
             }
-            var instanceId= InstanceIDs[0];
+            var instanceId = InstanceIDs[0];
             await CollectionMessaging.TriggerCollection(instanceId, new List<CollectionType>() { CollectionType.LogRestores, CollectionType.Databases }, this);
         }
     }
