@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI.CollectionDates
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI.CollectionDates
 {
     partial class CollectionDates
     {
@@ -35,7 +37,7 @@
             tsExcel = new System.Windows.Forms.ToolStripButton();
             statusFilterToolStrip1 = new StatusFilterToolStrip();
             tsTrigger = new System.Windows.Forms.ToolStripButton();
-            dgvCollectionDates = new System.Windows.Forms.DataGridView();
+            dgvCollectionDates = new DBADashDataGridView();
             Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             Reference = new System.Windows.Forms.DataGridViewTextBoxColumn();
             WarningThreshold = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -48,6 +50,7 @@
             colRun = new System.Windows.Forms.DataGridViewLinkColumn();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvCollectionDates).BeginInit();
             statusStrip1.SuspendLayout();
@@ -56,7 +59,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, statusFilterToolStrip1, tsTrigger });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, statusFilterToolStrip1, tsTrigger, tsClearFilter });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1357, 27);
@@ -256,6 +259,15 @@
             lblStatus.Text = "Ready";
             lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Image = Properties.Resources.Filter_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            tsClearFilter.Text = "Clear Filter";
+            // 
             // CollectionDates
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -278,7 +290,7 @@
         #endregion
 
         private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.DataGridView dgvCollectionDates;
+        private DBADashDataGridView dgvCollectionDates;
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.ToolStripButton tsExcel;
@@ -296,5 +308,6 @@
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel lblStatus;
         private System.Windows.Forms.ToolStripButton tsTrigger;
+        private System.Windows.Forms.ToolStripButton tsClearFilter;
     }
 }
