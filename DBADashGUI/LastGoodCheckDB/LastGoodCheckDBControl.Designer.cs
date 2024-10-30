@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI.LastGoodCheckDB
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI.LastGoodCheckDB
 {
     partial class LastGoodCheckDBControl
     {
@@ -32,7 +34,7 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LastGoodCheckDBControl));
-            dgvLastGoodCheckDB = new System.Windows.Forms.DataGridView();
+            dgvLastGoodCheckDB = new DBADashDataGridView();
             Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
             LastGoodCheckDbTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -51,6 +53,7 @@
             tsTrigger = new System.Windows.Forms.ToolStripButton();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)dgvLastGoodCheckDB).BeginInit();
             toolStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
@@ -80,10 +83,13 @@
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             dgvLastGoodCheckDB.DefaultCellStyle = dataGridViewCellStyle2;
             dgvLastGoodCheckDB.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvLastGoodCheckDB.EnableHeadersVisualStyles = false;
             dgvLastGoodCheckDB.Location = new System.Drawing.Point(0, 27);
             dgvLastGoodCheckDB.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvLastGoodCheckDB.Name = "dgvLastGoodCheckDB";
             dgvLastGoodCheckDB.ReadOnly = true;
+            dgvLastGoodCheckDB.ResultSetID = 0;
+            dgvLastGoodCheckDB.ResultSetName = null;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
@@ -166,7 +172,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, statusFilterToolStrip1, tsConfigure, tsTrigger });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, statusFilterToolStrip1, tsClearFilter, tsConfigure, tsTrigger });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1250, 27);
@@ -274,6 +280,15 @@
             lblStatus.Name = "lblStatus";
             lblStatus.Size = new System.Drawing.Size(0, 16);
             // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Image = Properties.Resources.Filter_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            tsClearFilter.Text = "Clear Filter";
+            // 
             // LastGoodCheckDBControl
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -296,7 +311,7 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgvLastGoodCheckDB;
+        private DBADashDataGridView dgvLastGoodCheckDB;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripDropDownButton tsConfigure;
         private System.Windows.Forms.ToolStripMenuItem configureInstanceThresholdsToolStripMenuItem;
@@ -315,5 +330,6 @@
         private System.Windows.Forms.ToolStripButton tsTrigger;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel lblStatus;
+        private System.Windows.Forms.ToolStripButton tsClearFilter;
     }
 }
