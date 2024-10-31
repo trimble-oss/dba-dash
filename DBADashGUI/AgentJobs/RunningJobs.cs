@@ -1,11 +1,11 @@
-﻿using System;
+﻿using DBADashGUI.Performance;
+using Humanizer;
+using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.Performance;
-using Humanizer;
-using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI.AgentJobs
 {
@@ -13,9 +13,13 @@ namespace DBADashGUI.AgentJobs
     {
         private DBADashContext context;
 
+        private string PersistedFilter;
+        private string PersistedSort;
+
         public RunningJobs()
         {
             InitializeComponent();
+            dgvRunningJobs.RegisterClearFilter(tsClearFilter);
             AddColsToDGV();
         }
 
@@ -57,7 +61,9 @@ namespace DBADashGUI.AgentJobs
         public void RefreshData()
         {
             var dt = GetRunningJobs();
-            dgvRunningJobs.DataSource = dt;
+            dgvRunningJobs.DataSource = new DataView(dt,PersistedFilter,PersistedSort, DataViewRowState.CurrentRows);
+            PersistedFilter = null;
+            PersistedSort = null;
         }
 
         private DataTable GetRunningJobs()
@@ -85,17 +91,19 @@ namespace DBADashGUI.AgentJobs
 
         private void TsRefresh_Click(object sender, EventArgs e)
         {
+            PersistedFilter = dgvRunningJobs.RowFilter;
+            PersistedSort = dgvRunningJobs.SortString;
             RefreshData();
         }
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgvRunningJobs);
+            dgvRunningJobs.CopyGrid();
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvRunningJobs);
+            dgvRunningJobs.ExportToExcel();
         }
 
         private void DgvRunningJobs_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
