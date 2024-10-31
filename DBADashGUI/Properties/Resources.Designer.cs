@@ -804,6 +804,14 @@ namespace DBADashGUI.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        internal static System.Drawing.Bitmap EditFilter_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("EditFilter_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
 
     }
 }
