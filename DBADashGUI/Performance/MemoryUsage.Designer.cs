@@ -1,4 +1,5 @@
 ﻿
+using DBADashGUI.CustomReports;
 using DBADashGUI.Theme;
 
 namespace DBADashGUI.Performance
@@ -31,7 +32,7 @@ namespace DBADashGUI.Performance
         /// </summary>
         private void InitializeComponent()
         {
-            this.dgv = new System.Windows.Forms.DataGridView();
+            this.dgv = new DBADashDataGridView();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.chartClerk = new DBADashGUI.Performance.CartesianChartWithDataTable();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -49,7 +50,7 @@ namespace DBADashGUI.Performance
             this.tab1 = new ThemedTabControl();
             this.tabClerks = new System.Windows.Forms.TabPage();
             this.tabConfig = new System.Windows.Forms.TabPage();
-            this.dgvConfig = new System.Windows.Forms.DataGridView();
+            this.dgvConfig = new DBADashDataGridView();
             this.tabCounters = new System.Windows.Forms.TabPage();
             this.performanceCounterSummaryGrid1 = new DBADashGUI.Performance.PerformanceCounterSummaryGrid();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
@@ -362,7 +363,7 @@ namespace DBADashGUI.Performance
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgv;
+        private DBADashDataGridView dgv;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private LiveCharts.WinForms.PieChart pieChart1;
         private CartesianChartWithDataTable chartClerk;
@@ -373,7 +374,7 @@ namespace DBADashGUI.Performance
         private ThemedTabControl tab1;
         private System.Windows.Forms.TabPage tabClerks;
         private System.Windows.Forms.TabPage tabConfig;
-        private System.Windows.Forms.DataGridView dgvConfig;
+        private DBADashDataGridView dgvConfig;
         private System.Windows.Forms.TabPage tabCounters;
         private PerformanceCounters performanceCounters1;
         private PerformanceCounterSummaryGrid performanceCounterSummaryGrid1;
