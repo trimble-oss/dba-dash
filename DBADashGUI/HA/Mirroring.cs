@@ -13,6 +13,7 @@ namespace DBADashGUI.HA
         public Mirroring()
         {
             InitializeComponent();
+            dgv.RegisterClearFilter(tsClearFilter);
         }
 
         private List<int> InstanceIDs;
@@ -50,7 +51,7 @@ namespace DBADashGUI.HA
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Witness Disconnected Count", DataPropertyName = "WitnessDisconnectedCount" });
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Snapshot Age (min)", DataPropertyName = "SnapshotAge", Name = "SnapshotAge" });
                 dgv.AutoGenerateColumns = false;
-                dgv.DataSource = dt;
+                dgv.DataSource = new DataView(dt);
                 dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
             else
@@ -59,7 +60,7 @@ namespace DBADashGUI.HA
                 dgv.DataSource = null;
                 dgv.Columns.Clear();
                 dgv.AutoGenerateColumns = true;
-                dgv.DataSource = dt;
+                dgv.DataSource = new DataView(dt);
                 dgv.Columns.Remove("CollectionDateStatus");
                 dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
@@ -67,30 +68,26 @@ namespace DBADashGUI.HA
 
         private DataTable GetMirroringSummary()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.DatabaseMirroringSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (SqlDataAdapter da = new(cmd))
-            {
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                var dt = new DataTable();
-                da.Fill(dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.DatabaseMirroringSummary_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using SqlDataAdapter da = new(cmd);
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            var dt = new DataTable();
+            da.Fill(dt);
+            return dt;
         }
 
         private DataTable GetMirroringDetail()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.DatabaseMirroring_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                var dt = new DataTable();
-                da.Fill(dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.DatabaseMirroring_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            var dt = new DataTable();
+            da.Fill(dt);
+            return dt;
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -100,7 +97,7 @@ namespace DBADashGUI.HA
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgv);
+            dgv.CopyGrid();
         }
 
         private void TsDetailSummary_Click(object sender, EventArgs e)
@@ -148,7 +145,7 @@ namespace DBADashGUI.HA
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+            dgv.ExportToExcel();
         }
     }
 }
