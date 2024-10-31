@@ -4,6 +4,7 @@ using System.Data;
 using System.Drawing;
 using System.Reflection;
 using System.Windows.Forms;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace DBADashGUI.CustomReports
 {
@@ -21,6 +22,8 @@ namespace DBADashGUI.CustomReports
 
         private readonly ToolStripMenuItem filterLike = new("LIKE", Properties.Resources.FilteredTextBox_16x);
 
+        private readonly ToolStripMenuItem filterNotLike = new("NOT LIKE", Properties.Resources.FilteredTextBox_16x);
+
         private ToolStripMenuItem GetCopyGridMenuItem() => new("Copy Grid", Properties.Resources.ASX_Copy_blue_16x, (_, _) => CopyGrid());
 
         private ToolStripMenuItem GetExportToExcelMenuItem() => new("Export Excel", Properties.Resources.excel16x16, (_, _) => ExportToExcel());
@@ -29,7 +32,7 @@ namespace DBADashGUI.CustomReports
 
         private ToolStripMenuItem GetColumnsMenuItem() => new("Columns", Properties.Resources.Column_16x, (_, _) => this.PromptColumnSelection());
 
-        private ToolStripMenuItem GetEditFilterMenuItem() => new("Edit Filter", Properties.Resources.FilteredTextBox_16x, (_, _) => PromptFilter());
+        private ToolStripMenuItem GetEditFilterMenuItem() => new("Edit Filter", Properties.Resources.EditFilter_16x, (_, _) => PromptFilter());
 
         public int ClickedColumnIndex { get; private set; } = -1;
         public int ClickedRowIndex { get; private set; } = -1;
@@ -86,7 +89,8 @@ namespace DBADashGUI.CustomReports
             var copyCell = new ToolStripMenuItem("Copy Cell", Properties.Resources.ASX_Copy_grey_16x, CopyCell);
             var editFilter = GetEditFilterMenuItem();
             var filterSeparator = new ToolStripSeparator();
-            filterLike.Click += FilterLike_Click;
+            filterLike.Click += (_, _) => FilterLike();
+            filterNotLike.Click += (_, _) => FilterNotLike();
 
             CellContextMenu.Items.AddRange(
                 new ToolStripItem[]
@@ -100,6 +104,7 @@ namespace DBADashGUI.CustomReports
                     filterByValue,
                     excludeValue,
                     filterLike,
+                    filterNotLike,
                     editFilter,
                     cellClearFilterMenuItem,
                     filterSeparator,
@@ -118,6 +123,7 @@ namespace DBADashGUI.CustomReports
                                             !string.IsNullOrEmpty(dgv.Columns[ClickedColumnIndex].DataPropertyName);
 
                 filterLike.Visible = columnFilterSupported && columnType == typeof(string);
+                filterNotLike.Visible = columnFilterSupported && columnType == typeof(string);
                 cellClearFilterMenuItem.Enabled = !string.IsNullOrEmpty((DataSource as DataView)?.RowFilter);
                 filterByValue.Visible = columnFilterSupported;
                 excludeValue.Visible = columnFilterSupported;
@@ -199,25 +205,6 @@ namespace DBADashGUI.CustomReports
             pi?.SetValue(this, true, null);
         }
 
-        private void FilterLike_Click(object sender, EventArgs e)
-        {
-            var dgv = (DataGridView)CellContextMenu.SourceControl;
-            var value = dgv.Rows[ClickedRowIndex].Cells[ClickedColumnIndex].Value.DBNullToNull()?.ToString();
-            var colName = dgv.Columns[ClickedColumnIndex].DataPropertyName;
-
-            if (CommonShared.ShowInputDialog(ref value, "Enter value to filter by:", default, "Use % or * as wildcards") == DialogResult.Cancel) return;
-            if (string.IsNullOrEmpty(value)) return;
-            if (dgv.DataSource is not DataView dv) return;
-            var filter = dv.RowFilter;
-            if (!string.IsNullOrEmpty(filter))
-            {
-                filter += Environment.NewLine + " AND ";
-            }
-            value = EscapeValue(value);
-            filter += $"[{colName}] LIKE {value}";
-            SetFilter(filter);
-        }
-
         /// <summary>
         /// Used to display context menu when user right-clicks column headers.  Selected column index is stored in clickedColumnIndex
         /// </summary>
@@ -282,6 +269,24 @@ namespace DBADashGUI.CustomReports
             }
         }
 
+        private void FilterLike(bool IsNotLike = false)
+        {
+            var dgv = (DataGridView)CellContextMenu.SourceControl;
+            var value = dgv.Rows[ClickedRowIndex].Cells[ClickedColumnIndex].Value.DBNullToNull()?.ToString();
+            var colName = dgv.Columns[ClickedColumnIndex].DataPropertyName;
+            colName = EscapeColumnName(colName);
+            if (CommonShared.ShowInputDialog(ref value, "Enter value to filter by:", default, "Use % or * as wildcards") == DialogResult.Cancel) return;
+            if (string.IsNullOrEmpty(value)) return;
+            if (dgv.DataSource is not DataView dv) return;
+            var filter = string.IsNullOrEmpty(RowFilter) ? RowFilter : RowFilter + Environment.NewLine + " AND ";
+
+            value = EscapeValue(value);
+            filter += IsNotLike ? $"({colName} NOT LIKE {value} OR {colName} IS NULL)" : $"{colName} LIKE {value}"; ;
+            SetFilter(filter);
+        }
+
+        private void FilterNotLike() => FilterLike(true);
+
         private void FilterByValue_Click(object sender, EventArgs e)
         {
             if (DataSource is not DataView dv) return;
@@ -296,7 +301,7 @@ namespace DBADashGUI.CustomReports
             }
             var filter = string.IsNullOrEmpty(RowFilter) ? RowFilter : RowFilter + Environment.NewLine + " AND ";
             colName = EscapeColumnName(colName);
-            
+
             filter += FormatFilterValue(value, exclude, colName);
             SetFilter(filter);
         }
@@ -308,7 +313,7 @@ namespace DBADashGUI.CustomReports
 
         private static string EscapeValue(string value) => "'" + value?.Replace("'", "''") + "'";
 
-        private static string FormatFilterValue(object value, bool exclude,string colName)
+        private static string FormatFilterValue(object value, bool exclude, string colName)
         {
             if (value.DBNullToNull() is null)
             {
@@ -316,11 +321,11 @@ namespace DBADashGUI.CustomReports
             }
             else if (value.GetType().IsNumericType())
             {
-                return exclude? $"({colName} <> {value} OR {colName} IS NULL)" : $"{colName} = {value}";
+                return exclude ? $"({colName} <> {value} OR {colName} IS NULL)" : $"{colName} = {value}";
             }
             else if (value is DateTime)
             {
-                return exclude ? $"({colName} <> #{value:yyyy-MM-dd HH:mm:ss.fff}# OR {colName} IS NULL)" :  $"{colName} = #{value:yyyy-MM-dd HH:mm:ss.fff}#";
+                return exclude ? $"({colName} <> #{value:yyyy-MM-dd HH:mm:ss.fff}# OR {colName} IS NULL)" : $"{colName} = #{value:yyyy-MM-dd HH:mm:ss.fff}#";
             }
             else
             {
