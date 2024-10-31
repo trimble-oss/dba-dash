@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI.Changes
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI.Changes
 {
     partial class Alerts
     {
@@ -28,7 +30,11 @@
         /// </summary>
         private void InitializeComponent()
         {
-            dgvAlertsConfig = new System.Windows.Forms.DataGridView();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            dgvAlertsConfig = new DBADashDataGridView();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
@@ -37,12 +43,13 @@
             tsExcel = new System.Windows.Forms.ToolStripButton();
             toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             pivotByAlertNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            dgvAlerts = new System.Windows.Forms.DataGridView();
+            dgvAlerts = new DBADashDataGridView();
             toolStrip2 = new System.Windows.Forms.ToolStrip();
             toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             tsRefreshAlerts = new System.Windows.Forms.ToolStripButton();
             tsCopyAlerts = new System.Windows.Forms.ToolStripButton();
             tsExcelAlerts = new System.Windows.Forms.ToolStripButton();
+            tsClearFilterAlerts = new System.Windows.Forms.ToolStripButton();
             tsOptions = new System.Windows.Forms.ToolStripDropDownButton();
             acknowledgeALLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             clearALLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -61,12 +68,31 @@
             dgvAlertsConfig.AllowUserToAddRows = false;
             dgvAlertsConfig.AllowUserToDeleteRows = false;
             dgvAlertsConfig.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvAlertsConfig.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
             dgvAlertsConfig.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle6.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvAlertsConfig.DefaultCellStyle = dataGridViewCellStyle6;
             dgvAlertsConfig.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvAlertsConfig.EnableHeadersVisualStyles = false;
             dgvAlertsConfig.Location = new System.Drawing.Point(0, 27);
             dgvAlertsConfig.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvAlertsConfig.Name = "dgvAlertsConfig";
             dgvAlertsConfig.ReadOnly = true;
+            dgvAlertsConfig.ResultSetID = 0;
+            dgvAlertsConfig.ResultSetName = null;
             dgvAlertsConfig.RowHeadersVisible = false;
             dgvAlertsConfig.RowHeadersWidth = 51;
             dgvAlertsConfig.RowTemplate.Height = 24;
@@ -108,7 +134,7 @@
             // toolStripLabel1
             // 
             toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             toolStripLabel1.Name = "toolStripLabel1";
             toolStripLabel1.Size = new System.Drawing.Size(152, 24);
             toolStripLabel1.Text = "Alerts Configuration";
@@ -166,12 +192,31 @@
             dgvAlerts.AllowUserToAddRows = false;
             dgvAlerts.AllowUserToDeleteRows = false;
             dgvAlerts.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle7.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle7.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle7.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvAlerts.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle7;
             dgvAlerts.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle8.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle8.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle8.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle8.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvAlerts.DefaultCellStyle = dataGridViewCellStyle8;
             dgvAlerts.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvAlerts.EnableHeadersVisualStyles = false;
             dgvAlerts.Location = new System.Drawing.Point(0, 27);
             dgvAlerts.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvAlerts.Name = "dgvAlerts";
             dgvAlerts.ReadOnly = true;
+            dgvAlerts.ResultSetID = 0;
+            dgvAlerts.ResultSetName = null;
             dgvAlerts.RowHeadersVisible = false;
             dgvAlerts.RowHeadersWidth = 51;
             dgvAlerts.RowTemplate.Height = 24;
@@ -183,7 +228,7 @@
             // toolStrip2
             // 
             toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel2, tsRefreshAlerts, tsCopyAlerts, tsExcelAlerts, tsOptions });
+            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel2, tsRefreshAlerts, tsCopyAlerts, tsExcelAlerts, tsClearFilterAlerts, tsOptions });
             toolStrip2.Location = new System.Drawing.Point(0, 0);
             toolStrip2.Name = "toolStrip2";
             toolStrip2.Size = new System.Drawing.Size(667, 27);
@@ -193,7 +238,7 @@
             // toolStripLabel2
             // 
             toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             toolStripLabel2.Name = "toolStripLabel2";
             toolStripLabel2.Size = new System.Drawing.Size(51, 24);
             toolStripLabel2.Text = "Alerts";
@@ -228,6 +273,15 @@
             tsExcelAlerts.Text = "Export Excel";
             tsExcelAlerts.Click += TsExcelAlerts_Click;
             // 
+            // tsClearFilterAlerts
+            // 
+            tsClearFilterAlerts.Enabled = false;
+            tsClearFilterAlerts.Image = Properties.Resources.Filter_16x;
+            tsClearFilterAlerts.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilterAlerts.Name = "tsClearFilterAlerts";
+            tsClearFilterAlerts.Size = new System.Drawing.Size(104, 24);
+            tsClearFilterAlerts.Text = "Clear Filter";
+            // 
             // tsOptions
             // 
             tsOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { acknowledgeALLToolStripMenuItem, clearALLToolStripMenuItem });
@@ -240,14 +294,14 @@
             // acknowledgeALLToolStripMenuItem
             // 
             acknowledgeALLToolStripMenuItem.Name = "acknowledgeALLToolStripMenuItem";
-            acknowledgeALLToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            acknowledgeALLToolStripMenuItem.Size = new System.Drawing.Size(210, 26);
             acknowledgeALLToolStripMenuItem.Text = "Acknowledge ALL";
             acknowledgeALLToolStripMenuItem.Click += AcknowledgeALLToolStripMenuItem_Click;
             // 
             // clearALLToolStripMenuItem
             // 
             clearALLToolStripMenuItem.Name = "clearALLToolStripMenuItem";
-            clearALLToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            clearALLToolStripMenuItem.Size = new System.Drawing.Size(210, 26);
             clearALLToolStripMenuItem.Text = "Clear ALL";
             clearALLToolStripMenuItem.Click += ClearALLToolStripMenuItem_Click;
             // 
@@ -276,13 +330,13 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgvAlertsConfig;
+        private DBADashDataGridView dgvAlertsConfig;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStrip toolStrip2;
         private System.Windows.Forms.ToolStripLabel toolStripLabel2;
-        private System.Windows.Forms.DataGridView dgvAlerts;
+        private DBADashDataGridView dgvAlerts;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
         private System.Windows.Forms.ToolStripMenuItem pivotByAlertNameToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsCopy;
@@ -294,5 +348,6 @@
         private System.Windows.Forms.ToolStripDropDownButton tsOptions;
         private System.Windows.Forms.ToolStripMenuItem acknowledgeALLToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem clearALLToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton tsClearFilterAlerts;
     }
 }
