@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using OpenTK.Graphics.OpenGL;
 using static DBADashGUI.DBADashStatus;
 using static DBADashGUI.Main;
 
@@ -28,6 +29,26 @@ namespace DBADashGUI
             InitializeComponent();
             dgvTests.AutoGenerateColumns = false;
             dgvTests.Columns.AddRange(TestCols.ToArray());
+            dgvTests.GridFilterChanged += (s, e) => UpdateClearFilter();
+            dgvSummary.GridFilterChanged += (s, e) => UpdateClearFilter();
+        }
+
+        private bool IsDefaultFilter => (string.IsNullOrEmpty(dgvTests.RowFilter) || dgvTests.RowFilter == TestRowFilter) && (string.IsNullOrEmpty(dgvSummary.RowFilter) || dgvSummary.RowFilter == SummaryRowFilter);
+
+        private void UpdateClearFilter()
+        {
+            if (string.IsNullOrEmpty(dgvSummary.RowFilter) && !string.IsNullOrEmpty(SummaryRowFilter))
+            {
+                dgvSummary.SetFilter(SummaryRowFilter);
+            }
+
+            if (string.IsNullOrEmpty(dgvTests.RowFilter) && !string.IsNullOrEmpty(TestRowFilter))
+            {
+                dgvTests.SetFilter(TestRowFilter);
+            }
+            tsClearFilter.Enabled = !IsDefaultFilter;
+            tsClearFilter.Font = tsClearFilter.Enabled ? new Font(tsClearFilter.Font, FontStyle.Bold) : new Font(tsClearFilter.Font, FontStyle.Regular);
+            tsClearFilter.ToolTipText = tsClearFilter.Enabled ? "Clear Filter" : "No Filter to Clear";
         }
 
         private DataView dv;
@@ -60,25 +81,23 @@ namespace DBADashGUI
         {
             return Task<DataTable>.Factory.StartNew(() =>
             {
-                using (var cn = new SqlConnection(Common.ConnectionString))
-                using (var cmd = new SqlCommand("dbo.Summary_Get", cn) { CommandType = CommandType.StoredProcedure })
-                using (var da = new SqlDataAdapter(cmd))
-                {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("ForceRefresh", forceRefresh);
-                    cmd.Parameters.AddWithNullableValue("ForceRefreshDate", forceRefreshDate);
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", context.InstanceIDs));
-                    cmd.Parameters.AddWithValue("ShowHidden", ShowHidden);
-                    cmd.CommandTimeout = Config.SummaryCommandTimeout;
-                    var pWasRefreshed = new SqlParameter("WasRefreshed", SqlDbType.Bit)
-                    { Direction = ParameterDirection.Output };
-                    cmd.Parameters.Add(pWasRefreshed);
+                using var cn = new SqlConnection(Common.ConnectionString);
+                using var cmd = new SqlCommand("dbo.Summary_Get", cn) { CommandType = CommandType.StoredProcedure };
+                using var da = new SqlDataAdapter(cmd);
+                cn.Open();
+                cmd.Parameters.AddWithValue("ForceRefresh", forceRefresh);
+                cmd.Parameters.AddWithNullableValue("ForceRefreshDate", forceRefreshDate);
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", context.InstanceIDs));
+                cmd.Parameters.AddWithValue("ShowHidden", ShowHidden);
+                cmd.CommandTimeout = Config.SummaryCommandTimeout;
+                var pWasRefreshed = new SqlParameter("WasRefreshed", SqlDbType.Bit)
+                { Direction = ParameterDirection.Output };
+                cmd.Parameters.Add(pWasRefreshed);
 
-                    DataTable dt = new();
-                    da.Fill(dt);
-                    WasRefreshed = (bool)pWasRefreshed.Value;
-                    return dt;
-                }
+                DataTable dt = new();
+                da.Fill(dt);
+                WasRefreshed = (bool)pWasRefreshed.Value;
+                return dt;
             });
         }
 
@@ -320,7 +339,7 @@ namespace DBADashGUI
         }
 
         private string SummaryRowFilter => FocusedView ? "IsFocusedRow=1" : "";
-        private string TestRowFilter => FocusedView ? "IsFocusedRow=1" : "OK>0 OR Warning>0 OR Critical>0";
+        private string TestRowFilter => FocusedView ? "IsFocusedRow=1" : "(OK>0 OR Warning>0 OR Critical>0)";
 
         private void DgvSummary_RowAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
@@ -685,11 +704,9 @@ namespace DBADashGUI
 
         private void TsClearFilter_Click(object sender, EventArgs e)
         {
-            var dv = (DataView)dgvSummary.DataSource;
-            dv.RowFilter = SummaryRowFilter;
-            tsClearFilter.Enabled = false;
-            focusedViewToolStripMenuItem.Checked = false;
-            SetStatusColumnVisibility();
+            dgvSummary.SetFilter(SummaryRowFilter);
+            dgvTests.SetFilter(TestRowFilter);
+            UpdateClearFilter();
         }
 
         private void ShowTestSummaryToolStripMenuItem_Click(object sender, EventArgs e)
@@ -699,22 +716,22 @@ namespace DBADashGUI
 
         private void ExportSummaryToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvSummary);
+            dgvSummary.ExportToExcel();
         }
 
         private void ExportTestSummaryToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvTests);
+            dgvTests.ExportToExcel();
         }
 
         private void CopySummaryToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgvSummary);
+            dgvSummary.CopyGrid();
         }
 
         private void CopyTestSummaryToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgvTests);
+            dgvTests.CopyGrid();
         }
 
         private void SaveToolStripMenuItem_Click(object sender, EventArgs e)
