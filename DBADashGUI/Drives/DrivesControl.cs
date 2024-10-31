@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using DBADash;
+using DBADashGUI.CustomReports;
 using DBADashGUI.Interface;
 using DBADashGUI.Messaging;
 using DBADashGUI.Theme;
@@ -96,7 +97,7 @@ namespace DBADashGUI.Drives
             gridView = true;
             pnlDrives.Controls.Clear();
             pnlSpacing.Visible = false;
-            dgv = new DataGridView
+            dgv = new DBADashDataGridView
             {
                 AllowUserToAddRows = false,
                 AllowUserToDeleteRows = false,
@@ -106,8 +107,7 @@ namespace DBADashGUI.Drives
                 AutoGenerateColumns = false,
                 ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
                 DataSource = dvDrives,
-                Dock = DockStyle.Fill,
-                BackgroundColor = Color.White
+                Dock = DockStyle.Fill
             };
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", DataPropertyName = "InstanceDisplayName", HeaderText = "Instance" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Name", DataPropertyName = "Name", HeaderText = "Name" });
@@ -138,7 +138,6 @@ namespace DBADashGUI.Drives
             dgv.RowsAdded += Dgv_RowsAdded;
             pnlDrives.Controls.Add(dgv);
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            dgv.ApplyTheme();
             tsGridView.Enabled = false;
             tsDrivesView.Enabled = dvDrives.Table.Rows.Count <= DrivesViewMaxRows;
         }
