@@ -1,4 +1,6 @@
 ﻿using DBADashGUI.Changes;
+using DBADashGUI.CustomReports;
+using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -7,7 +9,6 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI.Performance
 {
@@ -16,6 +17,8 @@ namespace DBADashGUI.Performance
         public AzureSummary()
         {
             InitializeComponent();
+            dgv.RegisterClearFilter(tsClearFilter);
+            dgvPool.RegisterClearFilter(tsClearFilterPool);
         }
 
         private List<int> InstanceIDs;
@@ -28,38 +31,34 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-            if (Common.ConnectionString != null)
-            {
-                RefreshDB();
-                RefreshPool();
-            }
+            if (Common.ConnectionString == null) return;
+            RefreshDB();
+            RefreshPool();
         }
 
         private DataTable GetAzureDBPerformanceSummary()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new("dbo.AzureDBPerformanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
-            {
-                cn.Open();
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using SqlCommand cmd = new("dbo.AzureDBPerformanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cn.Open();
 
-                if (InstanceIDs.Count > 0)
-                {
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                }
-                bool histogram = HasHistograms(ref dgv);
-                cmd.Parameters.AddWithValue("CPUHist", histogram);
-                cmd.Parameters.AddWithValue("DataHist", histogram);
-                cmd.Parameters.AddWithValue("LogHist", histogram);
-                cmd.Parameters.AddWithValue("DTUHist", histogram);
-                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                cmd.CommandTimeout = Config.DefaultCommandTimeout;
-                SqlDataAdapter da = new(cmd);
-                DataTable dt = new();
-                da.Fill(dt);
-                return dt;
+            if (InstanceIDs.Count > 0)
+            {
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
             }
+            var histogram = HasHistograms(ref dgv);
+            cmd.Parameters.AddWithValue("CPUHist", histogram);
+            cmd.Parameters.AddWithValue("DataHist", histogram);
+            cmd.Parameters.AddWithValue("LogHist", histogram);
+            cmd.Parameters.AddWithValue("DTUHist", histogram);
+            cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+            cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            cmd.CommandTimeout = Config.DefaultCommandTimeout;
+            SqlDataAdapter da = new(cmd);
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
         }
 
         private void RefreshDB()
@@ -84,49 +83,47 @@ namespace DBADashGUI.Performance
 
         private DataTable GetAzureDBPoolSummary()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new("dbo.AzureDBPoolSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
-            {
-                cn.Open();
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using SqlCommand cmd = new("dbo.AzureDBPoolSummary_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cn.Open();
 
-                if (InstanceIDs.Count > 0)
-                {
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                }
-                bool histogram = HasHistograms(ref dgvPool);
-                cmd.Parameters.AddWithValue("CPUHist", histogram);
-                cmd.Parameters.AddWithValue("DataHist", histogram);
-                cmd.Parameters.AddWithValue("LogHist", histogram);
-                cmd.Parameters.AddWithValue("DTUHist", histogram);
-                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                cmd.CommandTimeout = Config.DefaultCommandTimeout;
-                SqlDataAdapter da = new(cmd);
-                DataTable dt = new();
-                da.Fill(dt);
-                return dt;
+            if (InstanceIDs.Count > 0)
+            {
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
             }
+            var histogram = HasHistograms(ref dgvPool);
+            cmd.Parameters.AddWithValue("CPUHist", histogram);
+            cmd.Parameters.AddWithValue("DataHist", histogram);
+            cmd.Parameters.AddWithValue("LogHist", histogram);
+            cmd.Parameters.AddWithValue("DTUHist", histogram);
+            cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+            cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            cmd.CommandTimeout = Config.DefaultCommandTimeout;
+            SqlDataAdapter da = new(cmd);
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
         }
 
         private readonly string[] histograms = new[] { "DTU", "CPU", "Data", "Log" };
 
         private void GenerateHistogram(DataGridView gv)
         {
-            string colPrefix = gv.Name + "_";
-            foreach (string histogram in histograms)
+            var colPrefix = gv.Name + "_";
+            foreach (var histogram in histograms)
             {
-                string colName = colPrefix + histogram + "Histogram";
+                var colName = colPrefix + histogram + "Histogram";
                 if (gv.Rows.Count > 0 && gv.Rows[0].Cells[colName].Visible && gv.Rows[0].Cells[colName].Value == null)
                 {
                     foreach (DataGridViewRow r in gv.Rows)
                     {
-                        DataRowView row = (DataRowView)r.DataBoundItem;
+                        var row = (DataRowView)r.DataBoundItem;
                         StringBuilder sbToolTip = new();
                         var hist = new List<double>();
                         double total = 0;
 
-                        for (int i = 10; i <= 100; i += 10)
+                        for (var i = 10; i <= 100; i += 10)
                         {
                             var v = Convert.ToDouble(row[histogram + i]);
                             hist.Add(v);
@@ -139,7 +136,7 @@ namespace DBADashGUI.Performance
                         }
                         else
                         {
-                            for (int i = 10; i <= 100; i += 10)
+                            for (var i = 10; i <= 100; i += 10)
                             {
                                 var v = Convert.ToDouble(row[histogram + i]);
                                 sbToolTip.AppendLine((i - 10) + " to " + i + "% | " + v.ToString("N0") + " (" + (v / total).ToString("P2") + ")");
@@ -163,9 +160,9 @@ namespace DBADashGUI.Performance
 
         private void AddHistCols(DataGridView gv)
         {
-            foreach (string histogram in histograms)
+            foreach (var histogram in histograms)
             {
-                for (int i = 10; i <= 100; i += 10)
+                for (var i = 10; i <= 100; i += 10)
                 {
                     var col = new DataGridViewTextBoxColumn()
                     {
@@ -214,9 +211,9 @@ namespace DBADashGUI.Performance
             var col = dgv.Columns[e.ColumnIndex];
             if (e.RowIndex >= 0 && (col == colDB || col == colElasticPool))
             {
-                DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                string instance = (string)row["Instance"];
-                string db = (string)row["DB"];
+                var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+                var instance = (string)row["Instance"];
+                var db = (string)row["DB"];
 
                 var frm = new AzureDBResourceStatsView
                 {
@@ -226,7 +223,7 @@ namespace DBADashGUI.Performance
                 };
                 if (col == colElasticPool)
                 {
-                    string pool = (string)row["elastic_pool_name"];
+                    var pool = (string)row["elastic_pool_name"];
                     frm.ElasticPoolName = pool;
                     frm.Text = instance + " | " + pool;
                 }
@@ -239,7 +236,7 @@ namespace DBADashGUI.Performance
             }
             else if (e.RowIndex >= 0 && col == colServiceObjective)
             {
-                DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+                var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
                 var frm = new ResourceGovernanceViewer() { InstanceID = (int)row["InstanceID"], DatabaseName = (string)row["DB"] };
                 frm.ApplyTheme();
                 frm.Show();
@@ -250,9 +247,9 @@ namespace DBADashGUI.Performance
         {
             if (e.RowIndex >= 0 && dgvPool.Columns[e.ColumnIndex] == colPoolName)
             {
-                DataRowView row = (DataRowView)dgvPool.Rows[e.RowIndex].DataBoundItem;
-                string instance = (string)row["Instance"];
-                string pool = (string)row["elastic_pool_name"];
+                var row = (DataRowView)dgvPool.Rows[e.RowIndex].DataBoundItem;
+                var instance = (string)row["Instance"];
+                var pool = (string)row["elastic_pool_name"];
                 var frm = new AzureDBResourceStatsView
                 {
                     FromDate = DateRange.FromUTC,
@@ -302,11 +299,11 @@ namespace DBADashGUI.Performance
             }
             if (target == ExportTarget.Clipboard)
             {
-                Common.CopyDataGridViewToClipboard(dgv);
+                dgv.CopyGrid();
             }
             else if (target == ExportTarget.Excel)
             {
-                Common.PromptSaveDataGridView(ref dgv);
+                dgv.ExportToExcel();
             }
             foreach (var c in visibleCols)
             {
@@ -324,11 +321,11 @@ namespace DBADashGUI.Performance
             }
             if (target == ExportTarget.Clipboard)
             {
-                Common.CopyDataGridViewToClipboard(dgvPool);
+                dgvPool.CopyGrid();
             }
             else if (target == ExportTarget.Excel)
             {
-                Common.PromptSaveDataGridView(ref dgvPool);
+                dgvPool.ExportToExcel();
             }
             foreach (var c in visibleCols)
             {
@@ -353,38 +350,34 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private static bool HasHistograms(ref DataGridView gv)
+        private static bool HasHistograms(ref DBADashDataGridView gv)
         {
             return gv.Columns.Cast<DataGridViewColumn>().Any(col => col.Name.Contains("Histogram") && col.Visible);
         }
 
-        private void UpdateHistogramsIfNeeded(ref DataGridView gv)
+        private void UpdateHistogramsIfNeeded(ref DBADashDataGridView gv)
         {
-            DataView dv = (DataView)gv.DataSource;
+            var dv = (DataView)gv.DataSource;
 
-            if (HasHistograms(ref gv))
+            if (!HasHistograms(ref gv)) return;
+            foreach (var histogram in histograms)
             {
-                foreach (string histogram in histograms)
+                if (dv.Table.Columns.Contains(histogram + "10")) continue;
+                if (gv == dgvPool)
                 {
-                    if (!dv.Table.Columns.Contains(histogram + "10"))
-                    {
-                        if (gv == dgvPool)
-                        {
-                            RefreshPool();
-                        }
-                        else
-                        {
-                            RefreshDB();
-                        }
-
-                        return;
-                    }
+                    RefreshPool();
                 }
-                GenerateHistogram(gv);
+                else
+                {
+                    RefreshDB();
+                }
+
+                return;
             }
+            GenerateHistogram(gv);
         }
 
-        private void PromptColumnSelection(ref DataGridView gv)
+        private void PromptColumnSelection(ref DBADashDataGridView gv)
         {
             if (dgv.PromptColumnSelection() == DialogResult.OK)
             {
