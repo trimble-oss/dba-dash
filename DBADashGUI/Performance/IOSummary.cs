@@ -12,6 +12,7 @@ namespace DBADashGUI.Performance
         public IOSummary()
         {
             InitializeComponent();
+            dgv.RegisterClearFilter(tsClearFilter);
         }
 
         public enum IOSummaryGroupByOptions
@@ -55,32 +56,30 @@ namespace DBADashGUI.Performance
 
         public DataTable GetIOSummary(out string InstanceName, out string DatabaseName)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.IOSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout })
-            using (var da = new SqlDataAdapter(cmd))
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.IOSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
+            using var da = new SqlDataAdapter(cmd);
+            var dt = new DataTable();
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("FromDate", FromDate);
+            cmd.Parameters.AddWithValue("ToDate", ToDate);
+            cmd.Parameters.AddWithValue("GroupBy", GroupBy.ToString());
+            var pDatabaseName = cmd.Parameters.Add(new SqlParameter() { ParameterName = "DatabaseName", Direction = ParameterDirection.Output, SqlDbType = SqlDbType.NVarChar, Size = 128 });
+            var pInstance = cmd.Parameters.Add(new SqlParameter() { ParameterName = "Instance", Direction = ParameterDirection.Output, SqlDbType = SqlDbType.NVarChar, Size = 128 });
+            cmd.Parameters.AddWithNullableValue("DatabaseID", DatabaseID);
+            cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
+            if (DateRange.HasTimeOfDayFilter)
             {
-                var dt = new DataTable();
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("FromDate", FromDate);
-                cmd.Parameters.AddWithValue("ToDate", ToDate);
-                cmd.Parameters.AddWithValue("GroupBy", GroupBy.ToString());
-                var pDatabaseName = cmd.Parameters.Add(new SqlParameter() { ParameterName = "DatabaseName", Direction = ParameterDirection.Output, SqlDbType = SqlDbType.NVarChar, Size = 128 });
-                var pInstance = cmd.Parameters.Add(new SqlParameter() { ParameterName = "Instance", Direction = ParameterDirection.Output, SqlDbType = SqlDbType.NVarChar, Size = 128 });
-                cmd.Parameters.AddWithNullableValue("DatabaseID", DatabaseID);
-                cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
-                if (DateRange.HasTimeOfDayFilter)
-                {
-                    cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
-                }
-                if (DateRange.HasDayOfWeekFilter)
-                {
-                    cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
-                }
-                da.Fill(dt);
-                DatabaseName = Convert.ToString(pDatabaseName.Value);
-                InstanceName = Convert.ToString(pInstance.Value);
-                return dt;
+                cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
             }
+            if (DateRange.HasDayOfWeekFilter)
+            {
+                cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
+            }
+            da.Fill(dt);
+            DatabaseName = Convert.ToString(pDatabaseName.Value);
+            InstanceName = Convert.ToString(pInstance.Value);
+            return dt;
         }
 
         private void AddGroupByOptions()
@@ -134,9 +133,9 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-            DataTable dt = GetIOSummary(out string instanceName, out string databaseName);
+            var dt = GetIOSummary(out var instanceName, out var databaseName);
             lblHeader.Text = instanceName + (string.IsNullOrEmpty(databaseName) ? "" : " | " + databaseName);
-            dgv.DataSource = dt;
+            dgv.DataSource = new DataView(dt);
             dgv.Columns["colGroup"].HeaderText = GroupBy.ToString();
             dgv.Sort(dgv.Columns[1], ListSortDirection.Descending);
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
@@ -151,12 +150,12 @@ namespace DBADashGUI.Performance
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+            dgv.ExportToExcel();
         }
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgv);
+            dgv.CopyGrid();
         }
     }
 }
