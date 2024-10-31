@@ -19,11 +19,12 @@ namespace DBADashGUI.DBFiles
         public DBFilesControl()
         {
             InitializeComponent();
+            dgvFiles.RegisterClearFilter(tsClearFilter);
         }
 
-        private List<int> InstanceIDs=> CurrentContext?.InstanceIDs.ToList();
-        private int? DatabaseID=> (CurrentContext?.DatabaseID > 0 ? CurrentContext?.DatabaseID : null);
-        private string DriveName=> CurrentContext?.DriveName;
+        private List<int> InstanceIDs => CurrentContext?.InstanceIDs.ToList();
+        private int? DatabaseID => (CurrentContext?.DatabaseID > 0 ? CurrentContext?.DatabaseID : null);
+        private string DriveName => CurrentContext?.DriveName;
         private DBADashContext CurrentContext;
 
         public bool IncludeCritical
@@ -46,52 +47,35 @@ namespace DBADashGUI.DBFiles
             get => statusFilterToolStrip1.OK; set => statusFilterToolStrip1.OK = value;
         }
 
-        public List<short> FileTypes
-        {
-            get
-            {
-                var selected = new List<short>();
-                foreach (ToolStripMenuItem itm in tsType.DropDownItems)
-                {
-                    if (itm.Checked)
-                    {
-                        selected.Add(Convert.ToInt16(itm.Tag));
-                    }
-                }
-                return selected;
-            }
-        }
+        public List<short> FileTypes => (from ToolStripMenuItem itm in tsType.DropDownItems where itm.Checked select Convert.ToInt16(itm.Tag)).ToList();
 
         public bool IsFileGroupLevel => tsFilegroup.Checked && tsLevel.Visible;
 
         private DataTable GetDBFiles()
         {
             var selectedTypes = FileTypes;
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.DBFiles_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.DBFiles_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            if (DatabaseID != null) { cmd.Parameters.AddWithValue("DatabaseID", DatabaseID); }
+            cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
+            cmd.Parameters.AddWithValue("FilegroupLevel", IsFileGroupLevel);
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            cmd.Parameters.AddWithNullableValue("DriveName", DriveName);
+            if (selectedTypes.Count is > 0 and < 4)
             {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                if (DatabaseID != null) { cmd.Parameters.AddWithValue("DatabaseID", DatabaseID); }
-                cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
-                cmd.Parameters.AddWithValue("FilegroupLevel", IsFileGroupLevel);
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                cmd.Parameters.AddWithNullableValue("DriveName", DriveName);
-                if (selectedTypes.Count is > 0 and < 4)
-                {
-                    cmd.Parameters.AddWithValue("Types", string.Join(",", selectedTypes));
-                }
-
-                DataTable dt = new();
-                da.Fill(dt);
-                return dt;
+                cmd.Parameters.AddWithValue("Types", string.Join(",", selectedTypes));
             }
+
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
         }
 
         public void SetContext(DBADashContext _context)
         {
-
             IncludeCritical = true;
             IncludeWarning = true;
             IncludeNA = DatabaseID != null || _context.DriveName != null;
@@ -148,7 +132,7 @@ namespace DBADashGUI.DBFiles
                     .Where(row => !row.IsNewRow && row.Cells["FileLevel_FileSizeMB"].Value != null)
                     .Sum(row => Convert.ToDouble(row.Cells["FileLevel_FileSizeMB"].Value.ToString()));
             }
-            SetStatus($"File Count {totalFiles}. Total Size: {totalSize.Megabytes()}", "",ThemeExtensions.CurrentTheme.ForegroundColor);
+            SetStatus($"File Count {totalFiles}. Total Size: {totalSize.Megabytes()}", "", ThemeExtensions.CurrentTheme.ForegroundColor);
         }
 
         private void Status_Selected(object sender, EventArgs e)
@@ -175,27 +159,27 @@ namespace DBADashGUI.DBFiles
 
         private void DgvFiles_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex < 0) return;
+            var row = (DataRowView)dgvFiles.Rows[e.RowIndex].DataBoundItem;
+            switch (dgvFiles.Columns[e.ColumnIndex].HeaderText)
             {
-                var row = (DataRowView)dgvFiles.Rows[e.RowIndex].DataBoundItem;
-                if (dgvFiles.Columns[e.ColumnIndex].HeaderText == "Configure")
-                {
+                case "Configure":
                     ConfigureThresholds((int)row["InstanceID"], (int)row["DatabaseID"], (int)row["data_space_id"]);
-                }
-                else if (dgvFiles.Columns[e.ColumnIndex].HeaderText == "History")
-                {
+                    break;
+
+                case "History":
                     LoadDBSpaceHistory((int)row["DatabaseID"], row["data_space_id"] == DBNull.Value ? null : (int?)row["data_space_id"], (string)row["InstanceGroupName"], (string)row["name"], row["file_name"] == DBNull.Value ? null : (string)row["file_name"]);
-                }
+                    break;
             }
         }
 
-        public void ConfigureThresholds(int InstanceID, int DatabaseID, int DataSpaceID)
+        public void ConfigureThresholds(int instanceID, int databaseID, int dataSpaceID)
         {
             var frm = new FileThresholdConfig
             {
-                InstanceID = InstanceID,
-                DataSpaceID = DataSpaceID,
-                DatabaseID = DatabaseID
+                InstanceID = instanceID,
+                DataSpaceID = dataSpaceID,
+                DatabaseID = databaseID
             };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
@@ -206,14 +190,14 @@ namespace DBADashGUI.DBFiles
 
         private void DgvFiles_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvFiles.Rows[idx].DataBoundItem;
                 var Status = (DBADashStatusEnum)row["FreeSpaceStatus"];
                 var snapshotStatus = (DBADashStatusEnum)row["FileSnapshotAgeStatus"];
                 var maxSizeStatus = (DBADashStatusEnum)row["PctMaxSizeStatus"];
                 var fgAutogrowStatus = (DBADashStatusEnum)row["FilegroupAutogrowStatus"];
-                string checkType = row["FreeSpaceCheckType"] == DBNull.Value ? "-" : (string)row["FreeSpaceCheckType"];
+                var checkType = row["FreeSpaceCheckType"] == DBNull.Value ? "-" : (string)row["FreeSpaceCheckType"];
                 dgvFiles.Rows[idx].Cells["FileSnapshotAge"].SetStatusColor(snapshotStatus);
                 dgvFiles.Rows[idx].Cells["FilegroupPctMaxSize"].SetStatusColor(maxSizeStatus);
                 dgvFiles.Rows[idx].Cells["FilegroupAutogrow"].SetStatusColor(fgAutogrowStatus);
@@ -265,7 +249,7 @@ namespace DBADashGUI.DBFiles
         {
             Configure.Visible = false;
             History.Visible = false;
-            Common.CopyDataGridViewToClipboard(dgvFiles);
+            dgvFiles.CopyGrid();
             Configure.Visible = true;
             History.Visible = true;
         }
@@ -308,17 +292,12 @@ namespace DBADashGUI.DBFiles
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvFiles);
-        }
-
-        private void DBFilesControl_Load(object sender, EventArgs e)
-        {
-            dgvFiles.ApplyTheme();
+            dgvFiles.ExportToExcel();
         }
 
         private async void TsTrigger_Click(object sender, EventArgs e)
         {
-            await CollectionMessaging.TriggerCollection(CurrentContext.InstanceID,CollectionType.DBFiles, this);
+            await CollectionMessaging.TriggerCollection(CurrentContext.InstanceID, CollectionType.DBFiles, this);
         }
     }
 }

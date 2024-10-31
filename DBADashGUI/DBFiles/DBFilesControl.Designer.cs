@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI.DBFiles
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI.DBFiles
 {
     partial class DBFilesControl
     {
@@ -61,7 +63,7 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle30 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle32 = new System.Windows.Forms.DataGridViewCellStyle();
-            dgvFiles = new System.Windows.Forms.DataGridView();
+            dgvFiles = new DBADashDataGridView();
             Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
             FileLevel_FileName = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -112,6 +114,7 @@
             fILESTREAMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             fULLTEXTToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsTrigger = new System.Windows.Forms.ToolStripButton();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -173,10 +176,13 @@
             dataGridViewCellStyle15.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             dgvFiles.DefaultCellStyle = dataGridViewCellStyle15;
             dgvFiles.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvFiles.EnableHeadersVisualStyles = false;
             dgvFiles.Location = new System.Drawing.Point(0, 27);
             dgvFiles.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvFiles.Name = "dgvFiles";
             dgvFiles.ReadOnly = true;
+            dgvFiles.ResultSetID = 0;
+            dgvFiles.ResultSetName = null;
             dataGridViewCellStyle16.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle16.BackColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle16.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
@@ -525,7 +531,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, statusFilterToolStrip1, tsConfigure, tsLevel, tsType, tsTrigger });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, statusFilterToolStrip1, tsConfigure, tsLevel, tsType, tsTrigger, tsClearFilter });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1616, 27);
@@ -705,6 +711,15 @@
             tsTrigger.Text = "Trigger Collection";
             tsTrigger.Visible = false;
             tsTrigger.Click += TsTrigger_Click;
+            // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Image = Properties.Resources.Eraser_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            tsClearFilter.Text = "Clear Filter";
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -1041,7 +1056,6 @@
             Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             Name = "DBFilesControl";
             Size = new System.Drawing.Size(1616, 357);
-            Load += DBFilesControl_Load;
             ((System.ComponentModel.ISupportInitialize)dgvFiles).EndInit();
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
@@ -1053,7 +1067,7 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgvFiles;
+        private DBADashDataGridView dgvFiles;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripDropDownButton tsConfigure;
         private System.Windows.Forms.ToolStripMenuItem configureInstanceThresholdsToolStripMenuItem;
@@ -1136,5 +1150,6 @@
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel lblInfo;
         private System.Windows.Forms.ToolStripButton tsTrigger;
+        private System.Windows.Forms.ToolStripButton tsClearFilter;
     }
 }
