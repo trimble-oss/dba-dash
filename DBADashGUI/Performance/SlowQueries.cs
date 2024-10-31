@@ -185,131 +185,129 @@ namespace DBADashGUI
         {
             return Task<DataTable>.Factory.StartNew(() =>
             {
-                using (var cn = new SqlConnection(Common.ConnectionString))
-                using (var cmd = new SqlCommand("dbo.SlowQueriesSummary_Get", cn)
+                using var cn = new SqlConnection(Common.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SlowQueriesSummary_Get", cn)
                 {
                     CommandType = CommandType.StoredProcedure,
                     CommandTimeout = Config.DefaultCommandTimeout
-                })
-                using (var da = new SqlDataAdapter(cmd))
+                };
+                using var da = new SqlDataAdapter(cmd);
+                cn.Open();
+
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("FromDate", From);
+                cmd.Parameters.AddWithValue("ToDate", To);
+                cmd.Parameters.AddWithValue("GroupBy", groupBy.Replace("{UTCOffset}", DateHelper.UtcOffset.ToString()));
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ClientHostName", txtClient.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceDisplayName", txtInstance.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ClientAppName", txtApp.Text);
+                var db = DBName.Length > 0 ? DBName : txtDatabase.Text;
+                cmd.Parameters.AddStringIfNotNullOrEmpty("DatabaseName", db);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ObjectName", txtObject.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("UserName", txtUser.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("Text", txtText.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("Result", txtResult.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("SessionID", txtSessionID.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeClientAppName", txtExcludeApp.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeClientHostName", txtExcludeClient.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeDatabaseName", txtExcludeDatabase.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeInstanceDisplayName", txtExcludeInstance.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeObjectName", txtExcludeObject.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeSessionID", txtExcludeSessionID.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeText", txtExcludeText.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeUserName", txtExcludeUser.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeResult", txtExcludeResult.Text);
+                cmd.Parameters.AddWithValue("Metric", Metric);
+                if (txtDurationFrom.Text.Length > 0)
                 {
-                    cn.Open();
-
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                    cmd.Parameters.AddWithValue("FromDate", From);
-                    cmd.Parameters.AddWithValue("ToDate", To);
-                    cmd.Parameters.AddWithValue("GroupBy", groupBy.Replace("{UTCOffset}", DateHelper.UtcOffset.ToString()));
-                    cmd.Parameters.AddStringIfNotNullOrEmpty("ClientHostName", txtClient.Text);
-                    cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceDisplayName", txtInstance.Text);
-                    cmd.Parameters.AddStringIfNotNullOrEmpty("ClientAppName", txtApp.Text);
-                    var db = DBName.Length > 0 ? DBName : txtDatabase.Text;
-                    cmd.Parameters.AddStringIfNotNullOrEmpty("DatabaseName", db);
-                    cmd.Parameters.AddStringIfNotNullOrEmpty("ObjectName", txtObject.Text);
-                    cmd.Parameters.AddStringIfNotNullOrEmpty("UserName", txtUser.Text);
-                    cmd.Parameters.AddStringIfNotNullOrEmpty("Text", txtText.Text);
-                    cmd.Parameters.AddStringIfNotNullOrEmpty("Result", txtResult.Text);
-                    cmd.Parameters.AddStringIfNotNullOrEmpty("SessionID", txtSessionID.Text);
-                    cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeClientAppName", txtExcludeApp.Text);
-                    cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeClientHostName", txtExcludeClient.Text);
-                    cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeDatabaseName", txtExcludeDatabase.Text);
-                    cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeInstanceDisplayName", txtExcludeInstance.Text);
-                    cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeObjectName", txtExcludeObject.Text);
-                    cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeSessionID", txtExcludeSessionID.Text);
-                    cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeText", txtExcludeText.Text);
-                    cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeUserName", txtExcludeUser.Text);
-                    cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeResult", txtExcludeResult.Text);
-                    cmd.Parameters.AddWithValue("Metric", Metric);
-                    if (txtDurationFrom.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("DurationFromMs", Convert.ToInt64(txtDurationFrom.Text));
-                    }
-
-                    if (txtDurationTo.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("DurationToMs", Convert.ToInt64(txtDurationTo.Text));
-                    }
-
-                    if (txtCPUFrom.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("CPUFromMs", Convert.ToInt64(txtCPUFrom.Text));
-                    }
-
-                    if (txtCPUTo.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("CPUToMs", Convert.ToInt64(txtCPUTo.Text));
-                    }
-
-                    if (txtPhysicalReadsFrom.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("PhysicalReadsFrom", Convert.ToInt64(txtPhysicalReadsFrom.Text));
-                    }
-
-                    if (txtPhysicalReadsTo.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("PhysicalReadsTo", Convert.ToInt64(txtPhysicalReadsTo.Text));
-                    }
-
-                    if (txtLogicalReadsFrom.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("LogicalReadsFrom", Convert.ToInt64(txtLogicalReadsFrom.Text));
-                    }
-
-                    if (txtLogicalReadsTo.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("LogicalReadsTo", Convert.ToInt64(txtLogicalReadsTo.Text));
-                    }
-
-                    if (txtWritesFrom.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("WritesFrom", Convert.ToInt64(txtWritesFrom.Text));
-                    }
-
-                    if (txtWritesTo.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("WritesTo", Convert.ToInt64(txtWritesTo.Text));
-                    }
-
-                    if (sqlbatchcompletedToolStripMenuItem.Checked && !rpccompletedToolStripMenuItem.Checked)
-                    {
-                        cmd.Parameters.AddWithValue("EventType", "sql_batch_completed");
-                    }
-                    else if (rpccompletedToolStripMenuItem.Checked && !sqlbatchcompletedToolStripMenuItem.Checked)
-                    {
-                        cmd.Parameters.AddWithValue("EventType", "rpc_completed");
-                    }
-                    if (txtContextInfo.Text.Length > 0)
-                    {
-                        try
-                        {
-                            cmd.Parameters.AddWithValue("ContextInfo",
-                                Convert.FromHexString(txtContextInfo.Text.Trim().RemoveHexPrefix()));
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show("Invalid Context Info\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-                    if (txtExcludeContextInfo.Text.Length > 0)
-                    {
-                        try
-                        {
-                            cmd.Parameters.AddWithValue("ExcludeContextInfo",
-                                Convert.FromHexString(txtExcludeContextInfo.Text.Trim().RemoveHexPrefix()));
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show("Invalid Exclude Context Info\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-
-                    var top = Convert.ToInt32(tsTop.Tag);
-                    cmd.Parameters.AddWithValue("Top", top);
-                    cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-
-                    var dt = new DataTable();
-                    da.Fill(dt);
-                    return dt;
+                    cmd.Parameters.AddWithValue("DurationFromMs", Convert.ToInt64(txtDurationFrom.Text));
                 }
+
+                if (txtDurationTo.Text.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("DurationToMs", Convert.ToInt64(txtDurationTo.Text));
+                }
+
+                if (txtCPUFrom.Text.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("CPUFromMs", Convert.ToInt64(txtCPUFrom.Text));
+                }
+
+                if (txtCPUTo.Text.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("CPUToMs", Convert.ToInt64(txtCPUTo.Text));
+                }
+
+                if (txtPhysicalReadsFrom.Text.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("PhysicalReadsFrom", Convert.ToInt64(txtPhysicalReadsFrom.Text));
+                }
+
+                if (txtPhysicalReadsTo.Text.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("PhysicalReadsTo", Convert.ToInt64(txtPhysicalReadsTo.Text));
+                }
+
+                if (txtLogicalReadsFrom.Text.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("LogicalReadsFrom", Convert.ToInt64(txtLogicalReadsFrom.Text));
+                }
+
+                if (txtLogicalReadsTo.Text.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("LogicalReadsTo", Convert.ToInt64(txtLogicalReadsTo.Text));
+                }
+
+                if (txtWritesFrom.Text.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("WritesFrom", Convert.ToInt64(txtWritesFrom.Text));
+                }
+
+                if (txtWritesTo.Text.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("WritesTo", Convert.ToInt64(txtWritesTo.Text));
+                }
+
+                if (sqlbatchcompletedToolStripMenuItem.Checked && !rpccompletedToolStripMenuItem.Checked)
+                {
+                    cmd.Parameters.AddWithValue("EventType", "sql_batch_completed");
+                }
+                else if (rpccompletedToolStripMenuItem.Checked && !sqlbatchcompletedToolStripMenuItem.Checked)
+                {
+                    cmd.Parameters.AddWithValue("EventType", "rpc_completed");
+                }
+                if (txtContextInfo.Text.Length > 0)
+                {
+                    try
+                    {
+                        cmd.Parameters.AddWithValue("ContextInfo",
+                            Convert.FromHexString(txtContextInfo.Text.Trim().RemoveHexPrefix()));
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Invalid Context Info\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                if (txtExcludeContextInfo.Text.Length > 0)
+                {
+                    try
+                    {
+                        cmd.Parameters.AddWithValue("ExcludeContextInfo",
+                            Convert.FromHexString(txtExcludeContextInfo.Text.Trim().RemoveHexPrefix()));
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Invalid Exclude Context Info\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+
+                var top = Convert.ToInt32(tsTop.Tag);
+                cmd.Parameters.AddWithValue("Top", top);
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;
             });
         }
 
@@ -354,7 +352,7 @@ namespace DBADashGUI
                             dgvSummary.Columns[0].Width = dgvSummary.Width / 2;
                         }
 
-                        dgvSummary.DataSource = dt;
+                        dgvSummary.DataSource = new DataView(dt);
                         dgvSummary.ApplyTheme(DBADashUser.SelectedTheme);
                         dgvSummary.Visible = true;
                     });
@@ -438,46 +436,55 @@ namespace DBADashGUI
 
         private void DgvSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex < 0) return;
+            var row = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
+            selectedGroupValue = row["Grp"] == DBNull.Value ? "" : Convert.ToString(row["Grp"]) ?? string.Empty;
+            if (dgvSummary.Columns[e.ColumnIndex] == Grp)
             {
-                var row = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
-                selectedGroupValue = row["Grp"] == DBNull.Value ? "" : Convert.ToString(row["Grp"]) ?? string.Empty;
-                if (dgvSummary.Columns[e.ColumnIndex] == Grp)
+                switch (groupBy)
                 {
-                    switch (groupBy)
-                    {
-                        case "InstanceDisplayName":
-                            txtInstance.Text = selectedGroupValue;
-                            break;
-                        case "client_hostname":
-                            txtClient.Text = selectedGroupValue;
-                            break;
-                        case "client_app_name":
-                            txtApp.Text = selectedGroupValue;
-                            break;
-                        case "DatabaseName":
-                            txtDatabase.Text = selectedGroupValue;
-                            break;
-                        case "object_name":
-                            txtObject.Text = selectedGroupValue;
-                            break;
-                        case "username":
-                            txtUser.Text = selectedGroupValue;
-                            break;
-                        case "Result":
-                            txtResult.Text = selectedGroupValue;
-                            break;
-                        case "text":
-                            txtText.Text = selectedGroupValue;
-                            break;
-                        case "session_id":
-                            txtSessionID.Text = selectedGroupValue;
-                            break;
-                        case "EventType":
-                            sqlbatchcompletedToolStripMenuItem.Checked = selectedGroupValue == "sql_batch_completed";
-                            rpccompletedToolStripMenuItem.Checked = selectedGroupValue == "rpc_completed";
-                            break;
-                        default:
+                    case "InstanceDisplayName":
+                        txtInstance.Text = selectedGroupValue;
+                        break;
+
+                    case "client_hostname":
+                        txtClient.Text = selectedGroupValue;
+                        break;
+
+                    case "client_app_name":
+                        txtApp.Text = selectedGroupValue;
+                        break;
+
+                    case "DatabaseName":
+                        txtDatabase.Text = selectedGroupValue;
+                        break;
+
+                    case "object_name":
+                        txtObject.Text = selectedGroupValue;
+                        break;
+
+                    case "username":
+                        txtUser.Text = selectedGroupValue;
+                        break;
+
+                    case "Result":
+                        txtResult.Text = selectedGroupValue;
+                        break;
+
+                    case "text":
+                        txtText.Text = selectedGroupValue;
+                        break;
+
+                    case "session_id":
+                        txtSessionID.Text = selectedGroupValue;
+                        break;
+
+                    case "EventType":
+                        sqlbatchcompletedToolStripMenuItem.Checked = selectedGroupValue == "sql_batch_completed";
+                        rpccompletedToolStripMenuItem.Checked = selectedGroupValue == "rpc_completed";
+                        break;
+
+                    default:
                         {
                             if (groupBy.StartsWith("timestamp"))
                             {
@@ -499,92 +506,91 @@ namespace DBADashGUI
 
                             break;
                         }
-                    }
+                }
 
-                    if (txtInstance.Text.Length == 0 && _db.Length == 0)
-                    {
-                        groupBy = "InstanceDisplayName";
-                    }
-                    else if (txtDatabase.Text.Length == 0 && _db.Length == 0)
-                    {
-                        groupBy = "DatabaseName";
-                    }
-                    else if (txtApp.Text.Length == 0)
-                    {
-                        groupBy = "client_app_name";
-                    }
-                    else if (txtClient.Text.Length == 0)
-                    {
-                        groupBy = "client_hostname";
-                    }
-                    else if (txtObject.Text.Length == 0)
-                    {
-                        groupBy = "object_name";
-                    }
-                    else if (txtUser.Text.Length == 0)
-                    {
-                        groupBy = "username";
-                    }
-                    else if (sqlbatchcompletedToolStripMenuItem.Checked == rpccompletedToolStripMenuItem.Checked)
-                    {
-                        groupBy = "EventType";
-                    }
-                    else
-                    {
-                        groupBy = "Result";
-                    }
+                if (txtInstance.Text.Length == 0 && _db.Length == 0)
+                {
+                    groupBy = "InstanceDisplayName";
+                }
+                else if (txtDatabase.Text.Length == 0 && _db.Length == 0)
+                {
+                    groupBy = "DatabaseName";
+                }
+                else if (txtApp.Text.Length == 0)
+                {
+                    groupBy = "client_app_name";
+                }
+                else if (txtClient.Text.Length == 0)
+                {
+                    groupBy = "client_hostname";
+                }
+                else if (txtObject.Text.Length == 0)
+                {
+                    groupBy = "object_name";
+                }
+                else if (txtUser.Text.Length == 0)
+                {
+                    groupBy = "username";
+                }
+                else if (sqlbatchcompletedToolStripMenuItem.Checked == rpccompletedToolStripMenuItem.Checked)
+                {
+                    groupBy = "EventType";
+                }
+                else
+                {
+                    groupBy = "Result";
+                }
 
-                    SelectGroupBy();
-                    RefreshData();
-                }
-                else if (dgvSummary.Columns[e.ColumnIndex] == Total)
-                {
-                    LoadSlowQueriesDetail();
-                }
-                else if (dgvSummary.Columns[e.ColumnIndex] == Failed)
-                {
-                    LoadSlowQueriesDetail(default, default, true);
-                }
-                else if (dgvSummary.Columns[e.ColumnIndex] == _1hrPlus)
-                {
-                    LoadSlowQueriesDetail(3600);
-                }
-                else if (dgvSummary.Columns[e.ColumnIndex] == _30to60min)
-                {
-                    LoadSlowQueriesDetail(1800, 3600);
-                }
-                else if (dgvSummary.Columns[e.ColumnIndex] == _10to30min)
-                {
-                    LoadSlowQueriesDetail(600, 1800);
-                }
-                else if (dgvSummary.Columns[e.ColumnIndex] == _5to10min)
-                {
-                    LoadSlowQueriesDetail(300, 600);
-                }
-                else if (dgvSummary.Columns[e.ColumnIndex] == _1to5min)
-                {
-                    LoadSlowQueriesDetail(60, 300);
-                }
-                else if (dgvSummary.Columns[e.ColumnIndex] == _30to60)
-                {
-                    LoadSlowQueriesDetail(30, 60);
-                }
-                else if (dgvSummary.Columns[e.ColumnIndex] == _20to30)
-                {
-                    LoadSlowQueriesDetail(20, 30);
-                }
-                else if (dgvSummary.Columns[e.ColumnIndex] == _10to20)
-                {
-                    LoadSlowQueriesDetail(10, 20);
-                }
-                else if (dgvSummary.Columns[e.ColumnIndex] == _5to10)
-                {
-                    LoadSlowQueriesDetail(5, 10);
-                }
-                else if (dgvSummary.Columns[e.ColumnIndex] == _lt5)
-                {
-                    LoadSlowQueriesDetail(0, 5);
-                }
+                SelectGroupBy();
+                RefreshData();
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == Total)
+            {
+                LoadSlowQueriesDetail();
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == Failed)
+            {
+                LoadSlowQueriesDetail(default, default, true);
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == _1hrPlus)
+            {
+                LoadSlowQueriesDetail(3600);
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == _30to60min)
+            {
+                LoadSlowQueriesDetail(1800, 3600);
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == _10to30min)
+            {
+                LoadSlowQueriesDetail(600, 1800);
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == _5to10min)
+            {
+                LoadSlowQueriesDetail(300, 600);
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == _1to5min)
+            {
+                LoadSlowQueriesDetail(60, 300);
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == _30to60)
+            {
+                LoadSlowQueriesDetail(30, 60);
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == _20to30)
+            {
+                LoadSlowQueriesDetail(20, 30);
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == _10to20)
+            {
+                LoadSlowQueriesDetail(10, 20);
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == _5to10)
+            {
+                LoadSlowQueriesDetail(5, 10);
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == _lt5)
+            {
+                LoadSlowQueriesDetail(0, 5);
             }
         }
 
@@ -646,55 +652,65 @@ namespace DBADashGUI
                     case "InstanceDisplayName":
                         displayName = selectedGroupValue;
                         break;
+
                     case "client_hostname":
                         client = selectedGroupValue;
                         break;
+
                     case "client_app_name":
                         app = selectedGroupValue;
                         break;
+
                     case "DatabaseName":
                         db = selectedGroupValue;
                         break;
+
                     case "object_name":
                         objectName = selectedGroupValue;
                         break;
+
                     case "username":
                         user = selectedGroupValue;
                         break;
+
                     case "Result":
                         result = selectedGroupValue;
                         break;
+
                     case "text":
                         text = selectedGroupValue;
                         break;
+
                     case "session_id":
                         sessionId = selectedGroupValue;
                         break;
+
                     case "EventType":
                         eventType = selectedGroupValue;
                         break;
+
                     default:
-                    {
-                        if (groupBy.StartsWith("timestamp"))
                         {
-                            var mins = int.Parse(groupBy.Split(".")[1]);
+                            if (groupBy.StartsWith("timestamp"))
+                            {
+                                var mins = int.Parse(groupBy.Split(".")[1]);
 
-                            var dateGroupFrom = Convert.ToDateTime(selectedGroupValue).AddMinutes(-DateHelper.UtcOffset);
-                            var dateGroupTo = dateGroupFrom.AddMinutes(mins);
-                            from = dateGroupFrom > From ? dateGroupFrom : From;
-                            to = dateGroupTo < To ? dateGroupTo : To;
-                        }
-                        else if (groupBy == "context_info")
-                        {
-                            contextInfo = selectedGroupValue;
-                        }
-                        else
-                        {
-                            throw new Exception($"Invalid group by: {groupBy}");
-                        }
+                                var dateGroupFrom = Convert.ToDateTime(selectedGroupValue).AddMinutes(-DateHelper.UtcOffset);
+                                var dateGroupTo = dateGroupFrom.AddMinutes(mins);
+                                from = dateGroupFrom > From ? dateGroupFrom : From;
+                                to = dateGroupTo < To ? dateGroupTo : To;
+                            }
+                            else if (groupBy == "context_info")
+                            {
+                                contextInfo = selectedGroupValue;
+                            }
+                            else
+                            {
+                                throw new Exception($"Invalid group by: {groupBy}");
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                 }
 
                 var cpuFromMs = Math.Max(cpuFrom, CPUFilterFrom);
@@ -821,7 +837,7 @@ namespace DBADashGUI
             dgvSlow.AutoGenerateColumns = false;
             dgvSlow.Columns["colContextInfo"].Visible = dt.Rows.Cast<DataRow>().Any(row => row["context_info"] != DBNull.Value && (row["context_info"] as string is not "0x" or "" or null));
 
-            dgvSlow.DataSource = dt;
+            dgvSlow.DataSource = new DataView(dt);
             if (autoSizeColumnsToolStripMenuItem.Checked)
             {
                 AutoSizeDetailGridColumns();
@@ -844,28 +860,26 @@ namespace DBADashGUI
 
         private void DgvSlow_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex < 0) return;
+            var row = (DataRowView)dgvSlow.Rows[e.RowIndex].DataBoundItem;
+            var sessionID = Convert.ToInt32(row["session_id"]);
+            var timestamp = Convert.ToDateTime(row["timestamp"]);
+            if (dgvSlow.Columns[e.ColumnIndex] == colText)
             {
-                var row = (DataRowView)dgvSlow.Rows[e.RowIndex].DataBoundItem;
-                var sessionID = Convert.ToInt32(row["session_id"]);
-                var timestamp = Convert.ToDateTime(row["timestamp"]);
-                if (dgvSlow.Columns[e.ColumnIndex] == colText)
-                {
-                    var title = "SPID: " + sessionID + ", " + timestamp.ToString(CultureInfo.CurrentCulture);
-                    Common.ShowCodeViewer((string)row["Text"], title);
-                }
-                else if (dgvSlow.Columns[e.ColumnIndex] == colSessionID)
-                {
-                    var toDate = timestamp.AppTimeZoneToUtc();
-                    var fromDate = Convert.ToDateTime(row["start_time"]).AppTimeZoneToUtc();
-                    var instanceID = Convert.ToInt32(row["InstanceID"]);
-                    ToggleSummary(false);
-                    runningQueries1.SessionID = sessionID;
-                    runningQueries1.SnapshotDateFrom = fromDate;
-                    runningQueries1.SnapshotDateTo = toDate;
-                    runningQueries1.InstanceID = instanceID;
-                    runningQueries1.RefreshData();
-                }
+                var title = "SPID: " + sessionID + ", " + timestamp.ToString(CultureInfo.CurrentCulture);
+                Common.ShowCodeViewer((string)row["Text"], title);
+            }
+            else if (dgvSlow.Columns[e.ColumnIndex] == colSessionID)
+            {
+                var toDate = timestamp.AppTimeZoneToUtc();
+                var fromDate = Convert.ToDateTime(row["start_time"]).AppTimeZoneToUtc();
+                var instanceID = Convert.ToInt32(row["InstanceID"]);
+                ToggleSummary(false);
+                runningQueries1.SessionID = sessionID;
+                runningQueries1.SnapshotDateFrom = fromDate;
+                runningQueries1.SnapshotDateTo = toDate;
+                runningQueries1.InstanceID = instanceID;
+                runningQueries1.RefreshData();
             }
         }
 
@@ -905,12 +919,12 @@ namespace DBADashGUI
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvSummary);
+            dgvSummary.ExportToExcel();
         }
 
         private void TsExcelDetail_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvSlow);
+            dgvSlow.ExportToExcel();
         }
 
         private void ToggleSummary(bool isSummary)

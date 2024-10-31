@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI
 {
     partial class SlowQueries
     {
@@ -58,7 +60,7 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle56 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle57 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle58 = new System.Windows.Forms.DataGridViewCellStyle();
-            dgvSummary = new System.Windows.Forms.DataGridView();
+            dgvSummary = new DBADashDataGridView();
             Grp = new System.Windows.Forms.DataGridViewLinkColumn();
             _lt5 = new System.Windows.Forms.DataGridViewLinkColumn();
             _5to10 = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -188,7 +190,7 @@
             tsTopAll = new System.Windows.Forms.ToolStripMenuItem();
             tsCopySummary = new System.Windows.Forms.ToolStripButton();
             tsExcel = new System.Windows.Forms.ToolStripButton();
-            dgvSlow = new System.Windows.Forms.DataGridView();
+            dgvSlow = new DBADashDataGridView();
             Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             DatabaseName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             event_type = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -1883,7 +1885,7 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgvSummary;
+        private DBADashDataGridView dgvSummary;
         private System.Windows.Forms.ToolStrip tsSummary;
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripDropDownButton tsGroup;
@@ -1910,7 +1912,7 @@
         private System.Windows.Forms.ToolStripTextBox txtText;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem resetToolStripMenuItem;
-        private System.Windows.Forms.DataGridView dgvSlow;
+        private DBADashDataGridView dgvSlow;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.Label lblPageSize;
         private System.Windows.Forms.ToolStripMenuItem lblResult;
