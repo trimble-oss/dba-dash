@@ -30,6 +30,7 @@ namespace DBADashGUI.Drives
             };
             dgv.Columns.AddRange(cols);
             dgv.AutoGenerateColumns = false;
+            dgv.RegisterClearFilter(tsClearFilter);
         }
 
         private readonly string connectionString = Common.ConnectionString;
@@ -79,7 +80,7 @@ namespace DBADashGUI.Drives
         {
             ToggleGrid(false);
             driveSnapshotDT = DriveSnapshot();
-            dgv.DataSource = driveSnapshotDT;
+            dgv.DataSource = new DataView(driveSnapshotDT);
             var cnt = driveSnapshotDT.Rows.Count;
             if (cnt < 2)
             {
@@ -97,10 +98,10 @@ namespace DBADashGUI.Drives
                 columns[s].Points = new DateTimePoint[cnt];
             }
 
-            int i = 0;
+            var i = 0;
             foreach (DataRow r in driveSnapshotDT.Rows)
             {
-                foreach (string s in columns.Keys)
+                foreach (var s in columns.Keys)
                 {
                     var v = r[s] == DBNull.Value ? 0 : (double)(decimal)r[s];
                     var ssDate = (DateTime)r["SnapshotDate"];
@@ -111,7 +112,7 @@ namespace DBADashGUI.Drives
 
             var sc = new SeriesCollection();
             chart1.Series = sc;
-            foreach (string s in columns.Keys)
+            foreach (var s in columns.Keys)
             {
                 var v = new ChartValues<DateTimePoint>();
                 v.AddRange(columns[s].Points);
@@ -144,20 +145,18 @@ namespace DBADashGUI.Drives
 
         public DataTable DriveSnapshot()
         {
-            using (var cn = new SqlConnection(connectionString))
-            using (var cmd = new SqlCommand("dbo.DriveSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("FromDate", From);
-                cmd.Parameters.AddWithValue("ToDate", To);
-                cmd.Parameters.AddWithValue("DriveID", DriveID);
-                cmd.Parameters.AddWithValue("DateGroupingMins", DateGroupingMins);
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(connectionString);
+            using var cmd = new SqlCommand("dbo.DriveSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("FromDate", From);
+            cmd.Parameters.AddWithValue("ToDate", To);
+            cmd.Parameters.AddWithValue("DriveID", DriveID);
+            cmd.Parameters.AddWithValue("DateGroupingMins", DateGroupingMins);
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            return dt;
         }
 
         private void Days_Click(object sender, EventArgs e)
@@ -169,16 +168,12 @@ namespace DBADashGUI.Drives
 
         private void SetTimeChecked()
         {
-            foreach (ToolStripItem ts in tsTime.DropDownItems)
+            foreach (var itm in tsTime.DropDownItems.OfType<ToolStripMenuItem>())
             {
-                if (ts.GetType() == typeof(ToolStripMenuItem))
+                itm.Checked = (string)itm.Tag == Days.ToString();
+                if (itm.Checked)
                 {
-                    var itm = (ToolStripMenuItem)ts;
-                    itm.Checked = (string)itm.Tag == Days.ToString();
-                    if (itm.Checked)
-                    {
-                        tsTime.Text = itm.Text;
-                    }
+                    tsTime.Text = itm.Text;
                 }
             }
         }
@@ -208,7 +203,7 @@ namespace DBADashGUI.Drives
 
         private void SmoothLinesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (LineSeries s in chart1.Series.Cast<LineSeries>())
+            foreach (var s in chart1.Series.Cast<LineSeries>())
             {
                 s.LineSmoothness = SmoothLines ? 1 : 0;
             }
@@ -216,7 +211,7 @@ namespace DBADashGUI.Drives
 
         private void PointsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (LineSeries s in chart1.Series.Cast<LineSeries>())
+            foreach (var s in chart1.Series.Cast<LineSeries>())
             {
                 s.PointGeometrySize = PointSize;
             }
@@ -243,12 +238,12 @@ namespace DBADashGUI.Drives
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+            dgv.ExportToExcel();
         }
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgv);
+            dgv.CopyGrid();
         }
     }
 }
