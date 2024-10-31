@@ -1,10 +1,10 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADashGUI.Theme;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.Changes
@@ -14,6 +14,7 @@ namespace DBADashGUI.Changes
         public Alerts()
         {
             InitializeComponent();
+            dgvAlerts.RegisterClearFilter(tsClearFilterAlerts);
         }
 
         private List<int> InstanceIDs;
@@ -59,17 +60,15 @@ namespace DBADashGUI.Changes
 
         private DataTable GetAlertsConfig()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.AlertsConfig_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                DataTable dt = new();
-                da.Fill(dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.AlertsConfig_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
         }
 
         private void RefreshAlertConfig()
@@ -83,11 +82,9 @@ namespace DBADashGUI.Changes
 
             foreach (var r in dt.DefaultView.ToTable(true, pivotCol).Select("", pivotCol))
             {
-                if (r[pivotCol] != DBNull.Value)
-                {
-                    DataGridViewTextBoxColumn col = new() { HeaderText = (string)r[pivotCol], Name = (string)r[pivotCol] };
-                    dgvAlertsConfig.Columns.Add(col);
-                }
+                if (r[pivotCol] == DBNull.Value) continue;
+                DataGridViewTextBoxColumn col = new() { HeaderText = (string)r[pivotCol], Name = (string)r[pivotCol] };
+                dgvAlertsConfig.Columns.Add(col);
             }
             var lastInstance = "";
             List<DataGridViewRow> rows = new();
@@ -126,17 +123,15 @@ namespace DBADashGUI.Changes
 
         private DataTable GetAlerts()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.Alerts_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.Alerts_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            return dt;
         }
 
         private void RefreshAlerts()
@@ -148,7 +143,7 @@ namespace DBADashGUI.Changes
                 dgvAlerts.AutoGenerateColumns = false;
                 dgvAlerts.ApplyTheme();
             }
-            dgvAlerts.DataSource = dt;
+            dgvAlerts.DataSource = new DataView(dt);
             dgvAlerts.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
@@ -174,17 +169,17 @@ namespace DBADashGUI.Changes
 
         private void TsCopyAlerts_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgvAlerts);
+            dgvAlerts.CopyGrid();
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvAlertsConfig);
+            dgvAlertsConfig.ExportToExcel();
         }
 
         private void TsExcelAlerts_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvAlerts);
+            dgvAlerts.ExportToExcel();
         }
 
         private void DgvAlerts_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
@@ -207,40 +202,36 @@ namespace DBADashGUI.Changes
 
         private void DgvAlerts_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex < 0) return;
+            var row = (DataRowView)dgvAlerts.Rows[e.RowIndex].DataBoundItem;
+            var id = (int)row["id"];
+            var instanceID = (int)row["InstanceID"];
+            var status = (DBADashStatusEnum)row["AlertStatus"];
+            if (dgvAlerts.Columns[e.ColumnIndex].Name == "Acknowledge")
             {
-                var row = (DataRowView)dgvAlerts.Rows[e.RowIndex].DataBoundItem;
-                var id = (int)row["id"];
-                var instanceID = (int)row["InstanceID"];
-                var status = (DBADashStatusEnum)row["AlertStatus"];
-                if (dgvAlerts.Columns[e.ColumnIndex].Name == "Acknowledge")
+                AcknowledgeAlert(instanceID, id, status == DBADashStatusEnum.Acknowledged);
+                RefreshAlerts();
+            }
+            else if (dgvAlerts.Columns[e.ColumnIndex].Name == "Configure")
+            {
+                AlertConfig frm = new() { AlertRow = row.Row };
+                frm.ShowDialog();
+                if (frm.DialogResult == DialogResult.OK)
                 {
-                    AcknowledgeAlert(instanceID, id, status == DBADashStatusEnum.Acknowledged);
                     RefreshAlerts();
-                }
-                else if (dgvAlerts.Columns[e.ColumnIndex].Name == "Configure")
-                {
-                    AlertConfig frm = new() { AlertRow = row.Row };
-                    frm.ShowDialog();
-                    if (frm.DialogResult == DialogResult.OK)
-                    {
-                        RefreshAlerts();
-                    }
                 }
             }
         }
 
         private static void AcknowledgeAlert(int InstanceID, int id, bool clear = false)
         {
-            using (SqlConnection cn = new(Common.ConnectionString))
-            using (SqlCommand cmd = new("dbo.Alerts_Ack", cn) { CommandType = CommandType.StoredProcedure })
-            {
-                cn.Open();
-                cmd.Parameters.AddIfGreaterThanZero("id", id);
-                cmd.Parameters.AddIfGreaterThanZero("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("Clear", clear);
-                cmd.ExecuteNonQuery();
-            }
+            using SqlConnection cn = new(Common.ConnectionString);
+            using SqlCommand cmd = new("dbo.Alerts_Ack", cn) { CommandType = CommandType.StoredProcedure };
+            cn.Open();
+            cmd.Parameters.AddIfGreaterThanZero("id", id);
+            cmd.Parameters.AddIfGreaterThanZero("InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("Clear", clear);
+            cmd.ExecuteNonQuery();
         }
 
         private void AcknowledgeALLToolStripMenuItem_Click(object sender, EventArgs e)
