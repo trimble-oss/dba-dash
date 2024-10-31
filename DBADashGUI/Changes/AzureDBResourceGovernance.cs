@@ -13,6 +13,7 @@ namespace DBADashGUI.Changes
         public AzureDBResourceGovernance()
         {
             InitializeComponent();
+            dgv.RegisterClearFilter(tsClearFilter);
         }
 
         public List<int> InstanceIDs;
@@ -26,7 +27,7 @@ namespace DBADashGUI.Changes
         public void RefreshData()
         {
             var dt = GetAzureDBResourceGovernance(InstanceIDs);
-            dgv.DataSource = dt;
+            dgv.DataSource = new DataView(dt);
             dgv.Columns["InstanceID"]!.Visible = false;
             foreach (DataGridViewColumn col in dgv.Columns)
             {
@@ -41,16 +42,14 @@ namespace DBADashGUI.Changes
 
         public static DataTable GetAzureDBResourceGovernance(List<int> instanceIDs)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.AzureDBResourceGovernance_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                var dt = new DataTable();
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", instanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", instanceIDs.Count == 1 || Common.ShowHidden);
-                da.Fill(dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.AzureDBResourceGovernance_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            var dt = new DataTable();
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", instanceIDs));
+            cmd.Parameters.AddWithValue("ShowHidden", instanceIDs.Count == 1 || Common.ShowHidden);
+            da.Fill(dt);
+            return dt;
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -60,12 +59,12 @@ namespace DBADashGUI.Changes
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgv);
+            dgv.CopyGrid();
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+            dgv.ExportToExcel();
         }
 
         private void TsCols_Click(object sender, EventArgs e)
