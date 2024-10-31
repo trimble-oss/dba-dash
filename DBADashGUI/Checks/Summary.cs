@@ -688,6 +688,7 @@ namespace DBADashGUI
             var dv = (DataView)dgvSummary.DataSource;
             dv.RowFilter = SummaryRowFilter;
             tsClearFilter.Enabled = false;
+            focusedViewToolStripMenuItem.Checked = false;
             SetStatusColumnVisibility();
         }
 
