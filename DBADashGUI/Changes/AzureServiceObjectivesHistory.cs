@@ -12,6 +12,8 @@ namespace DBADashGUI.Changes
         public AzureServiceObjectivesHistory()
         {
             InitializeComponent();
+            dgv.RegisterClearFilter(tsClearFilterDB);
+            dgvPool.RegisterClearFilter(tsClearFilterPool);
         }
 
         private List<int> InstanceIDs;
@@ -25,38 +27,32 @@ namespace DBADashGUI.Changes
 
         private void RefreshDB()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            {
-                using (SqlCommand cmd = new("dbo.AzureServiceObjectivesHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
-                {
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                    cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                    SqlDataAdapter da = new(cmd);
-                    DataTable dt = new();
-                    da.Fill(dt);
-                    DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                    dgv.AutoGenerateColumns = false;
-                    dgv.DataSource = dt;
-                    dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                }
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using SqlCommand cmd = new("dbo.AzureServiceObjectivesHistory_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            SqlDataAdapter da = new(cmd);
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            dgv.AutoGenerateColumns = false;
+            dgv.DataSource = new DataView(dt);
+            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
         private void RefreshPool()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new("dbo.AzureDBElasticPoolHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
-            {
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                SqlDataAdapter da = new(cmd);
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                dgvPool.AutoGenerateColumns = false;
-                dgvPool.DataSource = dt;
-                dgvPool.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using SqlCommand cmd = new("dbo.AzureDBElasticPoolHistory_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            SqlDataAdapter da = new(cmd);
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            dgvPool.AutoGenerateColumns = false;
+            dgvPool.DataSource = new DataView(dt);
+            dgvPool.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -66,7 +62,7 @@ namespace DBADashGUI.Changes
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgv);
+            dgv.CopyGrid();
         }
 
         private void TsRefreshPool_Click(object sender, EventArgs e)
@@ -76,17 +72,17 @@ namespace DBADashGUI.Changes
 
         private void TsCopyPool_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgvPool);
+            dgvPool.CopyGrid();
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+             dgv.ExportToExcel();
         }
 
         private void TsPoolExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvPool);
+            dgvPool.ExportToExcel();
         }
     }
 }
