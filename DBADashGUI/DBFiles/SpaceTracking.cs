@@ -16,6 +16,7 @@ namespace DBADashGUI
         public SpaceTracking()
         {
             InitializeComponent();
+            dgv.RegisterClearFilter(tsClearFilter);
         }
 
         private List<int> InstanceIDs;
@@ -35,7 +36,7 @@ namespace DBADashGUI
 
         public void RefreshData()
         {
-            bool drillDownEnabled = DatabaseID > 0;
+            var drillDownEnabled = DatabaseID > 0;
             tsBack.Enabled = false;
             DisableHyperLinks(drillDownEnabled);
             RefreshDataLocal();
@@ -43,21 +44,19 @@ namespace DBADashGUI
 
         private DataTable GetDBSpace()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.DBSpace_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddIfGreaterThanZero("@DatabaseID", DatabaseID);
-                cmd.Parameters.AddStringIfNotNullOrEmpty("@InstanceGroupName", InstanceGroupName);
-                cmd.Parameters.AddStringIfNotNullOrEmpty("@DBName", DBName);
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                DataTable dt = new();
-                da.Fill(dt);
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.DBSpace_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddIfGreaterThanZero("@DatabaseID", DatabaseID);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("@InstanceGroupName", InstanceGroupName);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("@DBName", DBName);
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            DataTable dt = new();
+            da.Fill(dt);
 
-                return dt;
-            }
+            return dt;
         }
 
         private void RefreshDataLocal()
@@ -65,7 +64,7 @@ namespace DBADashGUI
             tsContext.Text = InstanceGroupName + (string.IsNullOrEmpty(DBName) ? "" : " \\ " + DBName);
             var dt = GetDBSpace();
             dgv.AutoGenerateColumns = false;
-            dgv.DataSource = dt;
+            dgv.DataSource = new DataView(dt);
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             pieChart1.Series.Clear();
 
@@ -99,55 +98,53 @@ namespace DBADashGUI
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex < 0) return;
+            var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+
+            var selectedGroupValue = row["Grp"] == DBNull.Value ? "" : (string)row["Grp"];
+            if (e.ColumnIndex == dgv.Columns["colName"].Index)
             {
-                var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-
-                var selectedGroupValue = row["Grp"] == DBNull.Value ? "" : (string)row["Grp"];
-                if (e.ColumnIndex == dgv.Columns["colName"].Index)
+                if (InstanceIDs.Count > 1 && string.IsNullOrEmpty(InstanceGroupName))
                 {
-                    if (InstanceIDs.Count > 1 && string.IsNullOrEmpty(InstanceGroupName))
-                    {
-                        InstanceGroupName = selectedGroupValue;
-                    }
-                    else if (DBName.Length == 0)
-                    {
-                        DBName = selectedGroupValue;
-                        DisableHyperLinks(true);
-                    }
-                    else
-                    {
-                        DisableHyperLinks(true);
-                        return;
-                    }
-                    tsBack.Enabled = true;
-                    RefreshDataLocal();
+                    InstanceGroupName = selectedGroupValue;
                 }
-                else if (e.ColumnIndex == dgv.Columns["colHistory"].Index)
+                else if (DBName.Length == 0)
                 {
-                    string instance = InstanceGroupName;
-                    string db = DBName;
-                    int dbid = DatabaseID;
-                    string fileName = string.Empty;
-
-                    if (InstanceIDs.Count > 1 && string.IsNullOrEmpty(InstanceGroupName))
-                    {
-                        instance = selectedGroupValue;
-                    }
-                    else if (DBName.Length == 0)
-                    {
-                        db = selectedGroupValue;
-                    }
-                    else
-                    {
-                        fileName = selectedGroupValue;
-                    }
-                    if (dbid < 1)
-                    {
-                        dbid = CommonData.GetDatabaseID(instance, db);
-                    }
-                    LoadDBSpaceHistoryView(dbid, db, instance, fileName);
+                    DBName = selectedGroupValue;
+                    DisableHyperLinks(true);
                 }
+                else
+                {
+                    DisableHyperLinks(true);
+                    return;
+                }
+                tsBack.Enabled = true;
+                RefreshDataLocal();
+            }
+            else if (e.ColumnIndex == dgv.Columns["colHistory"].Index)
+            {
+                var instance = InstanceGroupName;
+                var db = DBName;
+                var dbid = DatabaseID;
+                var fileName = string.Empty;
+
+                if (InstanceIDs.Count > 1 && string.IsNullOrEmpty(InstanceGroupName))
+                {
+                    instance = selectedGroupValue;
+                }
+                else if (DBName.Length == 0)
+                {
+                    db = selectedGroupValue;
+                }
+                else
+                {
+                    fileName = selectedGroupValue;
+                }
+                if (dbid < 1)
+                {
+                    dbid = CommonData.GetDatabaseID(instance, db);
+                }
+                LoadDBSpaceHistoryView(dbid, db, instance, fileName);
             }
         }
 
@@ -211,7 +208,7 @@ namespace DBADashGUI
 
         private void TsHistory_Click(object sender, EventArgs e)
         {
-            int dbid = DatabaseID < 1 ? CommonData.GetDatabaseID(InstanceGroupName, DBName) : DatabaseID;
+            var dbid = DatabaseID < 1 ? CommonData.GetDatabaseID(InstanceGroupName, DBName) : DatabaseID;
             LoadDBSpaceHistoryView(dbid, DBName, InstanceGroupName, string.Empty);
         }
 
@@ -234,7 +231,7 @@ namespace DBADashGUI
         private void TsExcel_Click(object sender, EventArgs e)
         {
             dgv.Columns["colHistory"].Visible = false;
-            Common.PromptSaveDataGridView(ref dgv);
+            dgv.ExportToExcel();
             dgv.Columns["colHistory"].Visible = true;
         }
 
@@ -261,7 +258,7 @@ namespace DBADashGUI
             {
                 itm.Checked = itm == selectedItem;
             }
-            foreach (string unit in new[] { "MB", "GB", "TB" })
+            foreach (var unit in new[] { "MB", "GB", "TB" })
             {
                 dgv.Columns["colAllocated" + unit].Visible = Convert.ToString(selectedItem.Tag) == unit;
                 dgv.Columns["colUsed" + unit].Visible = Convert.ToString(selectedItem.Tag) == unit;
@@ -290,7 +287,7 @@ namespace DBADashGUI
             {
                 itm.Checked = itm == selectedItem;
             }
-            foreach (string unit in new[] { "MB", "GB", "TB" })
+            foreach (var unit in new[] { "MB", "GB", "TB" })
             {
                 dgv.Columns["colAllocated" + unit].DefaultCellStyle = Common.DataGridViewCellStyle(Convert.ToString(selectedItem.Tag));
                 dgv.Columns["colUsed" + unit].DefaultCellStyle = Common.DataGridViewCellStyle(Convert.ToString(selectedItem.Tag));
@@ -314,11 +311,9 @@ namespace DBADashGUI
 
         private void Dgv_CellToolTipTextNeeded(object sender, DataGridViewCellToolTipTextNeededEventArgs e)
         {
-            if (e.RowIndex >= 0)
-            {
-                object value = dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
-                e.ToolTipText = value == null || value == DBNull.Value ? "Unknown" : value.ToString();
-            }
+            if (e.RowIndex < 0) return;
+            var value = dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
+            e.ToolTipText = value == null || value == DBNull.Value ? "Unknown" : value.ToString();
         }
     }
 }
