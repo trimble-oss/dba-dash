@@ -26,6 +26,7 @@ namespace DBADashGUI.Performance
         {
             InitializeComponent();
             standardLayout = dgv.GetColumnLayout();
+            dgv.RegisterClearFilter(tsClearFilter);
         }
 
         public void SetContext(DBADashContext _context)
@@ -139,63 +140,59 @@ namespace DBADashGUI.Performance
 
         private DataTable GetPerformanceCounters()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.PerformanceCounterSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout })
-            using (var da = new SqlDataAdapter(cmd))
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.PerformanceCounterSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", context.InstanceIDs));
+
+            var counters = string.Join(",", SelectedPerformanceCounters.Values.Select(pc => pc.CounterID));
+            cmd.Parameters.AddWithValue("Counters", counters);
+            cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+            cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+            cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
+            if (DateRange.HasTimeOfDayFilter)
             {
-                cn.Open();
-
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", context.InstanceIDs));
-
-                var counters = string.Join(",", SelectedPerformanceCounters.Values.Select(pc => pc.CounterID));
-                cmd.Parameters.AddWithValue("Counters", counters);
-                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
-                if (DateRange.HasTimeOfDayFilter)
-                {
-                    cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
-                }
-                if (DateRange.HasDayOfWeekFilter)
-                {
-                    cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
-                }
-                cmd.Parameters.AddWithValue("ShowHidden", context.InstanceIDs.Count == 1 || Common.ShowHidden);
-                DataTable dt = new();
-                da.Fill(dt);
-                return dt;
+                cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
             }
+            if (DateRange.HasDayOfWeekFilter)
+            {
+                cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
+            }
+            cmd.Parameters.AddWithValue("ShowHidden", context.InstanceIDs.Count == 1 || Common.ShowHidden);
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
         }
 
         private DataTable GetPerformanceSummary()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.PerformanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout })
-            using (var da = new SqlDataAdapter(cmd))
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.PerformanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", context.InstanceIDs));
+
+            cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+            cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+            cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
+            if (DateRange.HasTimeOfDayFilter)
             {
-                cn.Open();
-
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", context.InstanceIDs));
-
-                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
-                if (DateRange.HasTimeOfDayFilter)
-                {
-                    cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
-                }
-                if (DateRange.HasDayOfWeekFilter)
-                {
-                    cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
-                }
-                cmd.Parameters.AddWithValue("ShowHidden", context.InstanceIDs.Count == 1 || Common.ShowHidden);
-                DataTable dt = new();
-                var pkCols = new DataColumn[1];
-                pkCols[0] = dt.Columns.Add("InstanceID", typeof(int));
-                dt.PrimaryKey = pkCols;
-                da.Fill(dt);
-                return dt;
+                cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
             }
+            if (DateRange.HasDayOfWeekFilter)
+            {
+                cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
+            }
+            cmd.Parameters.AddWithValue("ShowHidden", context.InstanceIDs.Count == 1 || Common.ShowHidden);
+            DataTable dt = new();
+            var pkCols = new DataColumn[1];
+            pkCols[0] = dt.Columns.Add("InstanceID", typeof(int));
+            dt.PrimaryKey = pkCols;
+            da.Fill(dt);
+            return dt;
         }
 
         private void GenerateHistogram(ref DataTable dt)
@@ -382,7 +379,7 @@ namespace DBADashGUI.Performance
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+            dgv.ExportToExcel();
         }
 
         private void LoadPersistedColumnLayout(List<KeyValuePair<string, PersistedColumnLayout>> savedCols)
@@ -403,12 +400,10 @@ namespace DBADashGUI.Performance
 
         private void StandardColumnsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (dgv.PromptColumnSelection() == DialogResult.OK)
-            {
-                var dt = ((DataView)dgv.DataSource).Table;
-                GenerateHistogram(ref dt);
-                DeSelectView();
-            }
+            if (dgv.PromptColumnSelection() != DialogResult.OK) return;
+            var dt = ((DataView)dgv.DataSource).Table;
+            GenerateHistogram(ref dt);
+            DeSelectView();
         }
 
         private void PerformanceCounterColumnsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -501,15 +496,13 @@ namespace DBADashGUI.Performance
 
         private void TsDeleteView_Click(object sender, EventArgs e)
         {
-            if (!savedViewMenuItem1.SelectedSavedViewIsGlobal || DBADashUser.HasManageGlobalViews)
+            if (savedViewMenuItem1.SelectedSavedViewIsGlobal && !DBADashUser.HasManageGlobalViews) return;
+            if (MessageBox.Show("Delete " + savedViewMenuItem1.SelectedSavedView, "Delete View", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                if (MessageBox.Show("Delete " + savedViewMenuItem1.SelectedSavedView, "Delete View", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                {
-                    var view = new PerformanceSummarySavedView() { Name = savedViewMenuItem1.SelectedSavedView, UserID = savedViewMenuItem1.SelectedSavedViewIsGlobal ? DBADashUser.SystemUserID : DBADashUser.UserID };
-                    view.Delete();
-                    savedViewMenuItem1.RefreshItems();
-                    tsDeleteView.Visible = false;
-                }
+                var view = new PerformanceSummarySavedView() { Name = savedViewMenuItem1.SelectedSavedView, UserID = savedViewMenuItem1.SelectedSavedViewIsGlobal ? DBADashUser.SystemUserID : DBADashUser.UserID };
+                view.Delete();
+                savedViewMenuItem1.RefreshItems();
+                tsDeleteView.Visible = false;
             }
         }
 
