@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI.AgentJobs
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI.AgentJobs
 {
     partial class RunningJobs
     {
@@ -28,6 +30,8 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
@@ -45,7 +49,8 @@
             hrsToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             hrsToolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             dayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            dgvRunningJobs = new System.Windows.Forms.DataGridView();
+            dgvRunningJobs = new DBADashDataGridView();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvRunningJobs).BeginInit();
             SuspendLayout();
@@ -53,7 +58,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsCols, tsFilter });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsCols, tsFilter, tsClearFilter });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(951, 27);
@@ -203,19 +208,47 @@
             // 
             dgvRunningJobs.AllowUserToAddRows = false;
             dgvRunningJobs.AllowUserToDeleteRows = false;
+            dgvRunningJobs.BackgroundColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvRunningJobs.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgvRunningJobs.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvRunningJobs.DefaultCellStyle = dataGridViewCellStyle2;
             dgvRunningJobs.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvRunningJobs.EnableHeadersVisualStyles = false;
             dgvRunningJobs.Location = new System.Drawing.Point(0, 27);
             dgvRunningJobs.Name = "dgvRunningJobs";
             dgvRunningJobs.ReadOnly = true;
+            dgvRunningJobs.ResultSetID = 0;
+            dgvRunningJobs.ResultSetName = null;
             dgvRunningJobs.RowHeadersVisible = false;
             dgvRunningJobs.RowHeadersWidth = 51;
-            dgvRunningJobs.RowTemplate.Height = 29;
             dgvRunningJobs.Size = new System.Drawing.Size(951, 402);
             dgvRunningJobs.TabIndex = 3;
             dgvRunningJobs.CellContentClick += DgvRunningJobs_CellContentClick;
             dgvRunningJobs.CellFormatting += DgvRunningJobs_CellFormatting;
             dgvRunningJobs.RowsAdded += DgvRunningJobs_RowsAdded;
+            // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Image = Properties.Resources.Eraser_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            tsClearFilter.Text = "Clear Filter";
             // 
             // RunningJobs
             // 
@@ -238,7 +271,7 @@
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.ToolStripButton tsExcel;
-        private System.Windows.Forms.DataGridView dgvRunningJobs;
+        private DBADashDataGridView dgvRunningJobs;
         private System.Windows.Forms.ToolStripButton tsCols;
         private System.Windows.Forms.ToolStripDropDownButton tsFilter;
         private System.Windows.Forms.ToolStripMenuItem minimumDurationToolStripMenuItem;
@@ -252,5 +285,6 @@
         private System.Windows.Forms.ToolStripMenuItem hrsToolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem hrsToolStripMenuItem3;
         private System.Windows.Forms.ToolStripMenuItem dayToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton tsClearFilter;
     }
 }
