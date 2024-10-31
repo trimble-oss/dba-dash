@@ -16,6 +16,7 @@ namespace DBADashGUI.Changes
         public BuildReference()
         {
             InitializeComponent();
+            dgv.RegisterClearFilter(tsClearFilter);
         }
 
         private readonly List<DataGridViewColumn> ColumnsList = new()
