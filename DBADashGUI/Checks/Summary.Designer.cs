@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI
 {
     partial class Summary
     {
@@ -41,7 +43,7 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            dgvSummary = new System.Windows.Forms.DataGridView();
+            dgvSummary = new DBADashDataGridView();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopyGrid = new System.Windows.Forms.ToolStripDropDownButton();
@@ -83,7 +85,7 @@
             timer1 = new System.Windows.Forms.Timer(components);
             refresh1 = new Refresh();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
-            dgvTests = new System.Windows.Forms.DataGridView();
+            dgvTests = new DBADashDataGridView();
             Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colHidden = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             MemoryDumpStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -144,10 +146,13 @@
             dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             dgvSummary.DefaultCellStyle = dataGridViewCellStyle7;
             dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvSummary.EnableHeadersVisualStyles = false;
             dgvSummary.Location = new System.Drawing.Point(0, 0);
             dgvSummary.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvSummary.Name = "dgvSummary";
             dgvSummary.ReadOnly = true;
+            dgvSummary.ResultSetID = 0;
+            dgvSummary.ResultSetName = null;
             dgvSummary.RowHeadersVisible = false;
             dgvSummary.RowHeadersWidth = 51;
             dgvSummary.RowTemplate.Height = 24;
@@ -534,9 +539,12 @@
             dataGridViewCellStyle12.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             dgvTests.DefaultCellStyle = dataGridViewCellStyle12;
             dgvTests.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvTests.EnableHeadersVisualStyles = false;
             dgvTests.Location = new System.Drawing.Point(0, 0);
             dgvTests.Name = "dgvTests";
             dgvTests.ReadOnly = true;
+            dgvTests.ResultSetID = 0;
+            dgvTests.ResultSetName = null;
             dgvTests.RowHeadersVisible = false;
             dgvTests.RowHeadersWidth = 51;
             dgvTests.Size = new System.Drawing.Size(1800, 117);
@@ -577,7 +585,6 @@
             // 
             // CorruptionStatus
             // 
-            CorruptionStatus.DataPropertyName = "DetectedCorruptionDate";
             CorruptionStatus.HeaderText = "Corruption";
             CorruptionStatus.MinimumWidth = 6;
             CorruptionStatus.Name = "CorruptionStatus";
@@ -873,7 +880,7 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgvSummary;
+        private DBADashDataGridView dgvSummary;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
@@ -899,7 +906,7 @@
         private System.Windows.Forms.Timer timer1;
         private Refresh refresh1;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.DataGridView dgvTests;
+        private DBADashDataGridView dgvTests;
         private System.Windows.Forms.ToolStripButton tsClearFilter;
         private System.Windows.Forms.ToolStripMenuItem showTestSummaryToolStripMenuItem;
         private System.Windows.Forms.ToolStripDropDownButton tsExportToExcel;
