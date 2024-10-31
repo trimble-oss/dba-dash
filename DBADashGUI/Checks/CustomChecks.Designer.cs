@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI.Checks
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI.Checks
 {
     partial class CustomChecks
     {
@@ -29,7 +31,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CustomChecks));
-            dgvCustom = new System.Windows.Forms.DataGridView();
+            dgvCustom = new DBADashDataGridView();
             colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colTest = new System.Windows.Forms.DataGridViewLinkColumn();
             colContext = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -355,7 +357,7 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgvCustom;
+        private DBADashDataGridView dgvCustom;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;

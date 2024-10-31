@@ -242,24 +242,22 @@ namespace DBADashGUI.Checks
 
         private void RefreshCustomChecks()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.CustomCheck_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
-                cmd.Parameters.AddWithNullableValue("Context", _checkContext);
-                cmd.Parameters.AddWithNullableValue("Test", test);
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                dgvCustom.AutoGenerateColumns = false;
-                dgvCustom.DataSource = dt;
-                HistoryView(false);
-                dgvCustom.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.CustomCheck_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
+            cmd.Parameters.AddWithNullableValue("Context", _checkContext);
+            cmd.Parameters.AddWithNullableValue("Test", test);
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            dgvCustom.AutoGenerateColumns = false;
+            dgvCustom.DataSource = new DataView(dt);
+            HistoryView(false);
+            dgvCustom.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
         private void HistoryView(bool isHistory)
@@ -273,22 +271,20 @@ namespace DBADashGUI.Checks
 
         private void GetHistory(int InstanceID, string test, string context)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.CustomChecksHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithNullableValue("Context", context);
-                cmd.Parameters.AddWithNullableValue("Test", test);
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.CustomChecksHistory_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            cmd.Parameters.AddWithNullableValue("Context", context);
+            cmd.Parameters.AddWithNullableValue("Test", test);
 
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                dgvCustom.AutoGenerateColumns = false;
-                dgvCustom.DataSource = dt;
-                HistoryView(true);
-            }
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            dgvCustom.AutoGenerateColumns = false;
+            dgvCustom.DataSource = new DataView(dt);
+            HistoryView(true);
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -313,7 +309,7 @@ namespace DBADashGUI.Checks
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgvCustom);
+            dgvCustom.CopyGrid();
         }
 
         private void CustomChecks_Load(object sender, EventArgs e)
@@ -360,7 +356,7 @@ namespace DBADashGUI.Checks
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvCustom);
+            dgvCustom.ExportToExcel();
         }
 
         private async void TsTrigger_Click(object sender, EventArgs e)
