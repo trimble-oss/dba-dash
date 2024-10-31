@@ -144,7 +144,7 @@ namespace DBADashGUI.Performance
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colDescription", HeaderText = "Description", DataPropertyName = "MemoryClerkDescription" });
                 dgv.ApplyTheme();
             }
-            dgv.DataSource = dt;
+            dgv.DataSource = new DataView(dt);
 
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             if (ChartView == ChartViews.Pie)
@@ -189,57 +189,53 @@ namespace DBADashGUI.Performance
 
         public DataTable GetMemoryUsage()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.MemoryUsage_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                var dt = new DataTable();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.MemoryUsage_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+            cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+            var dt = new DataTable();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            return dt;
         }
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex < 0) return;
+            var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+            selectedClerk = (string)row["MemoryClerkType"];
+            if (e.ColumnIndex == dgv.Columns["colPages"].Index)
             {
-                DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                selectedClerk = (string)row["MemoryClerkType"];
-                if (e.ColumnIndex == dgv.Columns["colPages"].Index)
-                {
-                    selectedCounter = "pages_kb";
-                    selectedCounterAlias = selectedClerk + " - Pages KB";
-                }
-                else if (e.ColumnIndex == dgv.Columns["colVirtualMemoryCommitted"].Index)
-                {
-                    selectedCounter = "virtual_memory_committed_kb";
-                    selectedCounterAlias = selectedClerk + " - Virtual Memory Committed KB";
-                }
-                else if (e.ColumnIndex == dgv.Columns["colAWEAllocated"].Index)
-                {
-                    selectedCounter = "awe_allocated_kb";
-                    selectedCounterAlias = selectedClerk + " - AWE Allocated KB";
-                }
-                else if (e.ColumnIndex == dgv.Columns["colSharedMemoryReserved"].Index)
-                {
-                    selectedCounter = "shared_memory_reserved_kb";
-                    selectedCounterAlias = selectedClerk + " - Shared Memory Reserved KB";
-                }
-                else if (e.ColumnIndex == dgv.Columns["colSharedMemoryCommitted"].Index)
-                {
-                    selectedCounter = "shared_memory_committed_kb";
-                    selectedCounterAlias = selectedClerk + " - Shared Memory Committed KB";
-                }
-                else
-                {
-                    return;
-                }
-                ShowMemoryUsageForClerk();
+                selectedCounter = "pages_kb";
+                selectedCounterAlias = selectedClerk + " - Pages KB";
             }
+            else if (e.ColumnIndex == dgv.Columns["colVirtualMemoryCommitted"].Index)
+            {
+                selectedCounter = "virtual_memory_committed_kb";
+                selectedCounterAlias = selectedClerk + " - Virtual Memory Committed KB";
+            }
+            else if (e.ColumnIndex == dgv.Columns["colAWEAllocated"].Index)
+            {
+                selectedCounter = "awe_allocated_kb";
+                selectedCounterAlias = selectedClerk + " - AWE Allocated KB";
+            }
+            else if (e.ColumnIndex == dgv.Columns["colSharedMemoryReserved"].Index)
+            {
+                selectedCounter = "shared_memory_reserved_kb";
+                selectedCounterAlias = selectedClerk + " - Shared Memory Reserved KB";
+            }
+            else if (e.ColumnIndex == dgv.Columns["colSharedMemoryCommitted"].Index)
+            {
+                selectedCounter = "shared_memory_committed_kb";
+                selectedCounterAlias = selectedClerk + " - Shared Memory Committed KB";
+            }
+            else
+            {
+                return;
+            }
+            ShowMemoryUsageForClerk();
         }
 
         private void ShowMemoryUsageForClerk(string format = "N0")
@@ -269,32 +265,30 @@ namespace DBADashGUI.Performance
 
         private DataTable GetMemoryClerkUsage(string clerk, int? dateGrouping, string agg, string measure)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.MemoryClerkUsage_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                cmd.Parameters.AddWithValue("MemoryClerkType", clerk);
-                cmd.Parameters.AddWithValue("Mins", dateGrouping);
-                cmd.Parameters.AddWithValue("Agg", agg);
-                cmd.Parameters.AddWithValue("Measure", measure);
-                var dt = new DataTable();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.MemoryClerkUsage_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+            cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+            cmd.Parameters.AddWithValue("MemoryClerkType", clerk);
+            cmd.Parameters.AddWithValue("Mins", dateGrouping);
+            cmd.Parameters.AddWithValue("Agg", agg);
+            cmd.Parameters.AddWithValue("Measure", measure);
+            var dt = new DataTable();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            return dt;
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+            dgv.ExportToExcel();
         }
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgv);
+            dgv.CopyGrid();
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -305,7 +299,7 @@ namespace DBADashGUI.Performance
         private void RefreshConfig()
         {
             var dt = GetMemoryConfig();
-            dgvConfig.DataSource = dt;
+            dgvConfig.DataSource = new DataView(dt);
             dgvConfig.Columns[0].Width = 400;
             dgvConfig.Columns[1].Width = 150;
             isConfigRefreshed = true;
@@ -324,34 +318,31 @@ namespace DBADashGUI.Performance
 
         private DataTable GetMemoryConfig()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.MemoryConfig_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                var dt = new DataTable();
-                da.Fill(dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.MemoryConfig_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            var dt = new DataTable();
+            da.Fill(dt);
+            return dt;
         }
 
         private List<int> GetMemoryCounters()
         {
             var Counters = new List<int>();
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.MemoryCounters_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.MemoryCounters_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            using (var rdr = cmd.ExecuteReader())
             {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                using (var rdr = cmd.ExecuteReader())
+                while (rdr.Read())
                 {
-                    while (rdr.Read())
-                    {
-                        Counters.Add(rdr.GetInt32(0));
-                    }
+                    Counters.Add(rdr.GetInt32(0));
                 }
             }
+
             return Counters;
         }
 
@@ -364,7 +355,7 @@ namespace DBADashGUI.Performance
         {
             if (e.RowIndex >= 0)
             {
-                string toolTip = (string)((DataRowView)dgv.Rows[e.RowIndex].DataBoundItem)["MemoryClerkDescription"];
+                var toolTip = (string)((DataRowView)dgv.Rows[e.RowIndex].DataBoundItem)["MemoryClerkDescription"];
                 dgvToolTip.SetToolTip(dgv, toolTip);
             }
         }
