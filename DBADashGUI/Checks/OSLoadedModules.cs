@@ -13,6 +13,7 @@ namespace DBADashGUI.Checks
         public OSLoadedModules()
         {
             InitializeComponent();
+            dgv.RegisterClearFilter(tsClearFilter);
         }
 
         private List<int> InstanceIDs { get; set; }
@@ -40,14 +41,14 @@ namespace DBADashGUI.Checks
             {
                 var dt = GetOSLoadedModules();
                 LoadDetailCols();
-                dgv.DataSource = dt;
+                dgv.DataSource = new DataView(dt);
                 dgv.AutoResizeColumns();
             }
             else
             {
                 var dt = GetOSLoadedModuleSummary();
                 LoadSummaryCols();
-                dgv.DataSource = dt;
+                dgv.DataSource = new DataView(dt);
                 dgv.AutoResizeColumns();
             }
         }
@@ -73,7 +74,6 @@ namespace DBADashGUI.Checks
                 new DataGridViewTextBoxColumn() { HeaderText = "Description", DataPropertyName = "description" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Name", DataPropertyName = "name" }
                 );
-            dgv.ApplyTheme();
         }
 
         private void LoadSummaryCols()
@@ -85,41 +85,36 @@ namespace DBADashGUI.Checks
                 new DataGridViewTextBoxColumn() { Name = "colStatus", HeaderText = "Status", DataPropertyName = "StatusDescription" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Notes", DataPropertyName = "Notes" }
                 );
-            dgv.ApplyTheme();
         }
 
         private DataTable GetOSLoadedModuleSummary()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.OSLoadedModuleSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceIDs", InstanceIDs.AsDataTable());
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                DataTable dt = new();
-                da.Fill(dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.OSLoadedModuleSummary_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("InstanceIDs", InstanceIDs.AsDataTable());
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
         }
 
         private DataTable GetOSLoadedModules()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.OSLoadedModules_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceID", selectedInstanceID);
-                DataTable dt = new();
-                da.Fill(dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.OSLoadedModules_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("InstanceID", selectedInstanceID);
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
         }
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
                 var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row["Status"] == DBNull.Value ? 3 : row["Status"]);
@@ -163,12 +158,12 @@ namespace DBADashGUI.Checks
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgv);
+            dgv.CopyGrid();
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+            dgv.ExportToExcel();
         }
 
         private void TsEdit_Click(object sender, EventArgs e)
@@ -180,21 +175,6 @@ namespace DBADashGUI.Checks
                 {
                     RefreshDataLocal();
                 }
-            }
-        }
-
-        private void Dgv_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
-        {
-            if (dgv.Columns.Contains("colBaseAddress") && e.ColumnIndex == dgv.Columns["colBaseAddress"].Index)
-            {
-                if (e.Value != null && e.Value != DBNull.Value)
-                {
-                    byte[] array = (byte[])e.Value;
-                    e.Value = "0x" + Convert.ToHexString(array);
-                    e.FormattingApplied = true;
-                }
-                else
-                    e.FormattingApplied = false;
             }
         }
     }
