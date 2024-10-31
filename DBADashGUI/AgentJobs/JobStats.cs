@@ -1,4 +1,5 @@
 ﻿using DBADashGUI.Performance;
+using DBADashGUI.Theme;
 using LiveCharts;
 using LiveCharts.Wpf;
 using Microsoft.Data.SqlClient;
@@ -6,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI.AgentJobs
 {
@@ -15,6 +15,7 @@ namespace DBADashGUI.AgentJobs
         public JobStats()
         {
             InitializeComponent();
+            dgv.RegisterClearFilter(tsClearFilter);
         }
 
         private int InstanceID { get; set; }
@@ -31,47 +32,43 @@ namespace DBADashGUI.AgentJobs
 
         public DataTable GetJobStats()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.JobStats_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("JobID", selectedJobID == Guid.Empty ? JobID : selectedJobID);
-                var stepId = selectedStepID >= 0 ? selectedStepID : StepID;
-                cmd.Parameters.AddWithValue("StepID", stepId);
-                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                var pDateGrouping = cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
-                pDateGrouping.Direction = ParameterDirection.InputOutput;
-                DataTable dt = new();
-                da.Fill(dt);
-                tsDateGroup.Text = DateHelper.DateGroups[(int)pDateGrouping.Value];
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.JobStats_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("JobID", selectedJobID == Guid.Empty ? JobID : selectedJobID);
+            var stepId = selectedStepID >= 0 ? selectedStepID : StepID;
+            cmd.Parameters.AddWithValue("StepID", stepId);
+            cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+            cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+            var pDateGrouping = cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
+            pDateGrouping.Direction = ParameterDirection.InputOutput;
+            DataTable dt = new();
+            da.Fill(dt);
+            tsDateGroup.Text = DateHelper.DateGroups[(int)pDateGrouping.Value];
+            return dt;
         }
 
         public DataTable GetJobStatsSummary()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.JobStatsSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.JobStatsSummary_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("JobID", JobID);
+            if (JobID == Guid.Empty)
             {
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("JobID", JobID);
-                if (JobID == Guid.Empty)
-                {
-                    cmd.Parameters.AddWithValue("StepID", 0);
-                }
-                else if (StepID >= 0)
-                {
-                    cmd.Parameters.AddWithValue("StepID", StepID);
-                }
-                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                DataTable dt = new();
-                da.Fill(dt);
-                return dt;
+                cmd.Parameters.AddWithValue("StepID", 0);
             }
+            else if (StepID >= 0)
+            {
+                cmd.Parameters.AddWithValue("StepID", StepID);
+            }
+            cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+            cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
         }
 
         private readonly Dictionary<string, ColumnMetaData> columns = new() {
@@ -111,7 +108,7 @@ namespace DBADashGUI.AgentJobs
         private void RefreshSummary()
         {
             var dt = GetJobStatsSummary();
-            dgv.DataSource = dt;
+            dgv.DataSource = new DataView(dt);
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             dgv.ApplyTheme();
         }
@@ -237,12 +234,12 @@ namespace DBADashGUI.AgentJobs
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgv);
+            dgv.CopyGrid();
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+            dgv.ExportToExcel();
         }
 
         public bool NavigateBack()
