@@ -34,6 +34,8 @@ namespace DBADashGUI.Performance
                 forcedPlansResult.CellHighlightingRules.FormatRowsAdded((DataGridView)sender, args);
             dgv.RowsAdded += (sender, args) => forcedPlansResult.CellHighlightingRules.FormatRowsAdded((DataGridView)sender, args);
             dgvLog.RowsAdded += (sender, args) => logReport.CellHighlightingRules.FormatRowsAdded((DataGridView)sender, args);
+            dgv.RegisterClearFilter(tsClearFilter);
+            dgvLog.RegisterClearFilter(tsClearFilterLog);
         }
 
         private readonly CustomReportResult logReport = new()
@@ -255,7 +257,7 @@ namespace DBADashGUI.Performance
             }
 
             DateHelper.ConvertUTCToAppTimeZone(ref dt);
-            dgv.DataSource = dt;
+            dgv.DataSource = new DataView(dt);
             dgv.ApplyTheme();
             dgv.LoadColumnLayout(forcedPlansResult.ColumnLayout);
             dgv.Columns["Unforce"]!.Visible = true;
@@ -277,12 +279,12 @@ namespace DBADashGUI.Performance
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+            dgv.ExportToExcel();
         }
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgv);
+            dgv.CopyGrid();
         }
 
         private async void CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -352,7 +354,7 @@ namespace DBADashGUI.Performance
                 dgvLog.Columns.Add(new DataGridViewButtonColumn() { Name = "Undo", Text = "Undo", HeaderText = "" });
                 dgvLog.LoadColumnLayout(logReport.ColumnLayout);
             }
-            dgvLog.DataSource = dt;
+            dgvLog.DataSource = new DataView(dt);
             dgvLog.ApplyTheme();
         }
 
@@ -390,12 +392,12 @@ namespace DBADashGUI.Performance
 
         private void TsCopyHistory_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgvLog);
+            dgvLog.CopyGrid();
         }
 
         private void TsExportHistoryExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(dgvLog);
+            dgvLog.ExportToExcel();
         }
     }
 }

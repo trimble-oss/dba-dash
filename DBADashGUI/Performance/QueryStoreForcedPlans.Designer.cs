@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI.Performance
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI.Performance
 {
     partial class QueryStoreForcedPlans
     {
@@ -28,15 +30,20 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsCopy = new System.Windows.Forms.ToolStripButton();
             tsExcel = new System.Windows.Forms.ToolStripButton();
             tsTriggerCollection = new System.Windows.Forms.ToolStripButton();
-            dgv = new System.Windows.Forms.DataGridView();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
+            dgv = new DBADashDataGridView();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
-            dgvLog = new System.Windows.Forms.DataGridView();
+            dgvLog = new DBADashDataGridView();
             toolStrip2 = new System.Windows.Forms.ToolStrip();
             tsCopyHistory = new System.Windows.Forms.ToolStripButton();
             tsExportHistoryExcel = new System.Windows.Forms.ToolStripButton();
@@ -48,6 +55,7 @@
             toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             tsTopCustom = new System.Windows.Forms.ToolStripMenuItem();
             toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            tsClearFilterLog = new System.Windows.Forms.ToolStripButton();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
             statusStrip1.SuspendLayout();
@@ -62,7 +70,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsCopy, tsExcel, tsTriggerCollection });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsCopy, tsExcel, tsTriggerCollection, tsClearFilter });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1256, 27);
@@ -98,15 +106,44 @@
             tsTriggerCollection.Text = "Execute";
             tsTriggerCollection.Click += TsTriggerCollection_Click;
             // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Image = Properties.Resources.Eraser_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            tsClearFilter.Text = "Clear Filter";
+            // 
             // dgv
             // 
             dgv.AllowUserToAddRows = false;
             dgv.AllowUserToDeleteRows = false;
+            dgv.BackgroundColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
             dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle6.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgv.DefaultCellStyle = dataGridViewCellStyle6;
             dgv.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgv.EnableHeadersVisualStyles = false;
             dgv.Location = new System.Drawing.Point(0, 0);
             dgv.Name = "dgv";
             dgv.ReadOnly = true;
+            dgv.ResultSetID = 0;
+            dgv.ResultSetName = null;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
             dgv.Size = new System.Drawing.Size(1256, 301);
@@ -152,11 +189,31 @@
             // 
             dgvLog.AllowUserToAddRows = false;
             dgvLog.AllowUserToDeleteRows = false;
+            dgvLog.BackgroundColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle7.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle7.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle7.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvLog.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle7;
             dgvLog.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle8.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle8.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle8.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle8.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvLog.DefaultCellStyle = dataGridViewCellStyle8;
             dgvLog.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvLog.EnableHeadersVisualStyles = false;
             dgvLog.Location = new System.Drawing.Point(0, 27);
             dgvLog.Name = "dgvLog";
             dgvLog.ReadOnly = true;
+            dgvLog.ResultSetID = 0;
+            dgvLog.ResultSetName = null;
             dgvLog.RowHeadersVisible = false;
             dgvLog.RowHeadersWidth = 51;
             dgvLog.Size = new System.Drawing.Size(1256, 276);
@@ -168,7 +225,7 @@
             // toolStrip2
             // 
             toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsCopyHistory, tsExportHistoryExcel, tsTop, toolStripLabel1 });
+            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsCopyHistory, tsExportHistoryExcel, tsTop, toolStripLabel1, tsClearFilterLog });
             toolStrip2.Location = new System.Drawing.Point(0, 0);
             toolStrip2.Name = "toolStrip2";
             toolStrip2.Size = new System.Drawing.Size(1256, 27);
@@ -261,6 +318,15 @@
             toolStripLabel1.Text = "History of DBA Dash plan forcing operations";
             toolStripLabel1.ToolTipText = "Note: History is limited to plan forcing performed using DBA Dash";
             // 
+            // tsClearFilterLog
+            // 
+            tsClearFilterLog.Enabled = false;
+            tsClearFilterLog.Image = Properties.Resources.Eraser_16x;
+            tsClearFilterLog.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilterLog.Name = "tsClearFilterLog";
+            tsClearFilterLog.Size = new System.Drawing.Size(104, 24);
+            tsClearFilterLog.Text = "Clear Filter";
+            // 
             // QueryStoreForcedPlans
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -291,13 +357,13 @@
 
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsTriggerCollection;
-        private System.Windows.Forms.DataGridView dgv;
+        private DBADashDataGridView dgv;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel lblStatus;
         private System.Windows.Forms.ToolStripButton tsExcel;
         private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.DataGridView dgvLog;
+        private DBADashDataGridView dgvLog;
         private System.Windows.Forms.ToolStrip toolStrip2;
         private System.Windows.Forms.ToolStripButton tsCopyHistory;
         private System.Windows.Forms.ToolStripButton tsExportHistoryExcel;
@@ -309,5 +375,7 @@
         private System.Windows.Forms.ToolStripMenuItem tsTopCustom;
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripMenuItem tsTop10;
+        private System.Windows.Forms.ToolStripButton tsClearFilter;
+        private System.Windows.Forms.ToolStripButton tsClearFilterLog;
     }
 }
