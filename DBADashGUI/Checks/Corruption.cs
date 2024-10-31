@@ -12,6 +12,7 @@ namespace DBADashGUI
         public Corruption()
         {
             InitializeComponent();
+            dgv.RegisterClearFilter(tsClearFilter);
         }
 
         private DBADashContext context;
@@ -43,37 +44,33 @@ namespace DBADashGUI
                 dgv.Columns.AddRange(Cols);
             }
 
-            dgv.DataSource = dt;
+            dgv.DataSource = new DataView(dt);
 
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
         private DataTable GetCorruption()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.Corruption_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("InstanceIDs", context.InstanceIDs.AsDataTable());
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt, new List<string>() { "UpdateDateUtc", "LastGoodCheckDbTime", "AckDate" });
-                dt.Columns["UpdateDateUtc"]!.ColumnName = "UpdateDateLocal";
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.Corruption_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("InstanceIDs", context.InstanceIDs.AsDataTable());
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt, new List<string>() { "UpdateDateUtc", "LastGoodCheckDbTime", "AckDate" });
+            dt.Columns["UpdateDateUtc"]!.ColumnName = "UpdateDateLocal";
+            return dt;
         }
 
         private static void AcknowledgeCorruption(int DatabaseID, bool Clear = false)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.Corruption_Ack", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                cmd.Parameters.AddWithValue("Clear", Clear);
-                cmd.ExecuteNonQuery();
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.Corruption_Ack", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+            cmd.Parameters.AddWithValue("Clear", Clear);
+            cmd.ExecuteNonQuery();
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -122,14 +119,14 @@ namespace DBADashGUI
         private void TsCopy_Click(object sender, EventArgs e)
         {
             dgv.Columns["MoreInfo"]!.Visible = false;
-            Common.CopyDataGridViewToClipboard(dgv);
+            dgv.CopyGrid();
             dgv.Columns["MoreInfo"]!.Visible = true;
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
             dgv.Columns["MoreInfo"]!.Visible = false;
-            Common.PromptSaveDataGridView(dgv);
+            dgv.ExportToExcel();
             dgv.Columns["MoreInfo"]!.Visible = true;
         }
 
