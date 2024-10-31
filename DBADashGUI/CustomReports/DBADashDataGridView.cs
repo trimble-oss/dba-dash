@@ -284,6 +284,7 @@ namespace DBADashGUI.CustomReports
 
         private void FilterByValue_Click(object sender, EventArgs e)
         {
+            if (DataSource is not DataView dv) return;
             var exclude = (bool)((ToolStripMenuItem)sender).Tag;
             var value = Rows[ClickedRowIndex].Cells[ClickedColumnIndex].Value;
             var colName = Columns[ClickedColumnIndex].DataPropertyName;
@@ -293,18 +294,10 @@ namespace DBADashGUI.CustomReports
                 MessageBox.Show("Filter by value is not supported for binary data", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
+            var filter = string.IsNullOrEmpty(RowFilter) ? RowFilter : RowFilter + Environment.NewLine + " AND ";
             colName = EscapeColumnName(colName);
-            var filterValue = FormatFilterValue(value, exclude);
-
-            if (DataSource is not DataView dv) return;
-            var filter = dv.RowFilter;
-            if (!string.IsNullOrEmpty(filter))
-            {
-                filter += Environment.NewLine + " AND ";
-            }
-
-            filter += $"{colName} {filterValue}";
+            
+            filter += FormatFilterValue(value, exclude, colName);
             SetFilter(filter);
         }
 
@@ -315,24 +308,23 @@ namespace DBADashGUI.CustomReports
 
         private static string EscapeValue(string value) => "'" + value?.Replace("'", "''") + "'";
 
-        private static string FormatFilterValue(object value, bool exclude)
+        private static string FormatFilterValue(object value, bool exclude,string colName)
         {
-            var compare = (exclude ? "<>" : "=");
             if (value.DBNullToNull() is null)
             {
-                return exclude ? "IS NOT NULL" : "IS NULL";
+                return exclude ? $"{colName} IS NOT NULL" : $"{colName} IS NULL";
             }
             else if (value.GetType().IsNumericType())
             {
-                return compare + value;
+                return exclude? $"({colName} <> {value} OR {colName} IS NULL)" : $"{colName} = {value}";
             }
             else if (value is DateTime)
             {
-                return $"{compare} #{value:yyyy-MM-dd HH:mm:ss.fff}#";
+                return exclude ? $"({colName} <> #{value:yyyy-MM-dd HH:mm:ss.fff}# OR {colName} IS NULL)" :  $"{colName} = #{value:yyyy-MM-dd HH:mm:ss.fff}#";
             }
             else
             {
-                return $"{compare} " + EscapeValue(value.ToString());
+                return exclude ? $"({colName} <> {EscapeValue(value.ToString())} OR {colName} IS NULL)" : $"{colName} = {EscapeValue(value.ToString())}";
             }
         }
     }
