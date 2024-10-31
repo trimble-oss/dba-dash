@@ -35,19 +35,17 @@ namespace DBADashGUI.Changes
 
         private DataTable GetDrivers()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.Drivers_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddStringIfNotNullOrEmpty("Provider", provider);
-                cmd.Parameters.AddStringIfNotNullOrEmpty("DriverSearch", searchText);
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                DataTable dt = new();
-                da.Fill(dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.Drivers_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddStringIfNotNullOrEmpty("Provider", provider);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("DriverSearch", searchText);
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
         }
 
         private void RefreshDrivers()
@@ -168,12 +166,12 @@ namespace DBADashGUI.Changes
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgvDrivers);
+            dgvDrivers.CopyGrid();
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvDrivers);
+            dgvDrivers.ExportToExcel();
         }
     }
 }

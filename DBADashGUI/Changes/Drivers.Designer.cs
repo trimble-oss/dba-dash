@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI.Changes
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI.Changes
 {
     partial class Drivers
     {
@@ -28,7 +30,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.dgvDrivers = new System.Windows.Forms.DataGridView();
+            this.dgvDrivers = new DBADashDataGridView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
@@ -179,7 +181,7 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgvDrivers;
+        private DBADashDataGridView dgvDrivers;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripDropDownButton tsFilter;
