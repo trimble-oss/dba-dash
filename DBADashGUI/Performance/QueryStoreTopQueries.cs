@@ -660,12 +660,12 @@ namespace DBADashGUI.Performance
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+            dgv.ExportToExcel();
         }
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgv);
+            dgv.CopyGrid();
         }
 
         private void Select_GroupBy(object sender, EventArgs e)

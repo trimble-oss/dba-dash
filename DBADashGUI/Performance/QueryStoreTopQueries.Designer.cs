@@ -1,4 +1,5 @@
-﻿using DBADashGUI.Theme;
+﻿using DBADashGUI.CustomReports;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.Performance
 {
@@ -31,7 +32,7 @@ namespace DBADashGUI.Performance
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(QueryStoreTopQueries));
-            dgv = new System.Windows.Forms.DataGridView();
+            dgv = new DBADashDataGridView();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             TsCopy = new System.Windows.Forms.ToolStripButton();
             tsExcel = new System.Windows.Forms.ToolStripButton();
@@ -75,7 +76,7 @@ namespace DBADashGUI.Performance
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             tabDrillDown = new ThemedTabControl();
             tabSummary = new System.Windows.Forms.TabPage();
-            dgvDrillDown = new System.Windows.Forms.DataGridView();
+            dgvDrillDown = new DBADashDataGridView();
             tabChart = new System.Windows.Forms.TabPage();
             queryStorePlanChart1 = new QueryStorePlanChart();
             ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
@@ -548,7 +549,7 @@ namespace DBADashGUI.Performance
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgv;
+        private DBADashDataGridView dgv;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsExecute;
         private System.Windows.Forms.ToolStripDropDownButton tsTop;
@@ -583,7 +584,7 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripMenuItem planHashToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem queryHashToolStripMenuItem;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.DataGridView dgvDrillDown;
+        private DBADashDataGridView dgvDrillDown;
         private System.Windows.Forms.ToolStripButton tsReset;
         private System.Windows.Forms.ToolStripMenuItem includeWaitsToolStripMenuItem;
         private System.Windows.Forms.ToolStripDropDownButton tsFilter;
