@@ -98,25 +98,25 @@ namespace DBADashGUI.AgentJobs
 
         private DataTable GetJobs()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.AgentJobs_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
-                cmd.Parameters.AddWithValue("ShowHidden", context.RegularInstanceIDs.Count == 1 || Common.ShowHidden);
-                cmd.Parameters.AddGuidIfNotEmpty("JobID", context.JobID);
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.AgentJobs_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
+            cmd.Parameters.AddWithValue("ShowHidden", context.RegularInstanceIDs.Count == 1 || Common.ShowHidden);
+            cmd.Parameters.AddGuidIfNotEmpty("JobID", context.JobID);
 
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                return dt;
-            }
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            return dt;
         }
 
         public AgentJobsControl()
         {
             InitializeComponent();
+            dgvJobs.RegisterClearFilter(tsClearFilter);
+            dgvJobHistory.RegisterClearFilter(tsClearFilterHistory);
         }
 
         private void ConfigureRootThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -149,24 +149,22 @@ namespace DBADashGUI.AgentJobs
 
         private void DgvJobs_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex < 0) return;
+            var row = (DataRowView)dgvJobs.Rows[e.RowIndex].DataBoundItem;
+            if (dgvJobs.Columns[e.ColumnIndex].HeaderText == "Configure")
             {
-                var row = (DataRowView)dgvJobs.Rows[e.RowIndex].DataBoundItem;
-                if (dgvJobs.Columns[e.ColumnIndex].HeaderText == "Configure")
-                {
-                    ConfigureThresholds((int)row["InstanceID"], (Guid)row["job_id"]);
-                }
-                else if (dgvJobs.Columns[e.ColumnIndex] == colHistory)
-                {
-                    failedOnlyToolStripMenuItem.Checked = false;
-                    ShowHistory(row.Row);
-                }
-                else if (e.ColumnIndex == Acknowledge.Index)
-                {
-                    var clear = (DBADashStatus.DBADashStatusEnum)row["JobStatus"] == DBADashStatus.DBADashStatusEnum.Acknowledged;
-                    AcknowledgeJobErrors((int)row["InstanceID"], (Guid)row["job_id"], clear);
-                    RefreshData();
-                }
+                ConfigureThresholds((int)row["InstanceID"], (Guid)row["job_id"]);
+            }
+            else if (dgvJobs.Columns[e.ColumnIndex] == colHistory)
+            {
+                failedOnlyToolStripMenuItem.Checked = false;
+                ShowHistory(row.Row);
+            }
+            else if (e.ColumnIndex == Acknowledge.Index)
+            {
+                var clear = (DBADashStatus.DBADashStatusEnum)row["JobStatus"] == DBADashStatus.DBADashStatusEnum.Acknowledged;
+                AcknowledgeJobErrors((int)row["InstanceID"], (Guid)row["job_id"], clear);
+                RefreshData();
             }
         }
 
@@ -201,26 +199,25 @@ namespace DBADashGUI.AgentJobs
             colViewSteps.Visible = instance_id == null && stepID == 0;
             splitContainer1.Panel2Collapsed = false;
             dgvJobHistory.AutoGenerateColumns = false;
-            dgvJobHistory.DataSource = GetJobHistory(instanceId, jobID, stepID, instance_id, failedOnlyToolStripMenuItem.Checked);
+            var dtHistory = GetJobHistory(instanceId, jobID, stepID, instance_id, failedOnlyToolStripMenuItem.Checked);
+            dgvJobHistory.DataSource = new DataView(dtHistory);
             dgvJobHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
         private static DataTable GetJobHistory(int InstanceID, Guid JobID, int? StepID = 0, int? instance_id = null, bool failedOnly = false)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new("dbo.JobHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (SqlDataAdapter da = new(cmd))
-            {
-                var dt = new DataTable();
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("JobID", JobID);
-                cmd.Parameters.AddWithNullableValue("StepID", StepID);
-                cmd.Parameters.AddWithNullableValue("instance_id", instance_id);
-                cmd.Parameters.AddWithValue("FailedOnly", failedOnly);
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using SqlCommand cmd = new("dbo.JobHistory_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using SqlDataAdapter da = new(cmd);
+            var dt = new DataTable();
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("JobID", JobID);
+            cmd.Parameters.AddWithNullableValue("StepID", StepID);
+            cmd.Parameters.AddWithNullableValue("instance_id", instance_id);
+            cmd.Parameters.AddWithValue("FailedOnly", failedOnly);
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            return dt;
         }
 
         private void DgvJobs_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
@@ -257,16 +254,14 @@ namespace DBADashGUI.AgentJobs
 
         private static void AcknowledgeJobErrors(int InstanceID, Guid JobID, bool clear)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new("dbo.JobErrorAck", cn) { CommandType = CommandType.StoredProcedure })
-            using (SqlDataAdapter da = new(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddGuidIfNotEmpty("job_id", JobID);
-                cmd.Parameters.AddWithValue("Clear", clear);
-                cmd.ExecuteNonQuery();
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using SqlCommand cmd = new("dbo.JobErrorAck", cn) { CommandType = CommandType.StoredProcedure };
+            using SqlDataAdapter da = new(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            cmd.Parameters.AddGuidIfNotEmpty("job_id", JobID);
+            cmd.Parameters.AddWithValue("Clear", clear);
+            cmd.ExecuteNonQuery();
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -347,7 +342,7 @@ namespace DBADashGUI.AgentJobs
         {
             Configure.Visible = false;
             colHistory.Visible = false;
-            Common.PromptSaveDataGridView(ref dgvJobs);
+            dgvJobs.ExportToExcel();
             Configure.Visible = true;
             colHistory.Visible = true;
         }
@@ -355,7 +350,7 @@ namespace DBADashGUI.AgentJobs
         private void TsExcelHistory_Click(object sender, EventArgs e)
         {
             colViewSteps.Visible = false;
-            Common.PromptSaveDataGridView(ref dgvJobHistory);
+            dgvJobHistory.ExportToExcel();
             colViewSteps.Visible = true;
         }
 

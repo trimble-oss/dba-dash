@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI.AgentJobs
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI.AgentJobs
 {
     partial class AgentJobsControl
     {
@@ -28,8 +30,12 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AgentJobsControl));
-            dgvJobs = new System.Windows.Forms.DataGridView();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            dgvJobs = new DBADashDataGridView();
             colHistory = new System.Windows.Forms.DataGridViewLinkColumn();
             Acknowledge = new System.Windows.Forms.DataGridViewLinkColumn();
             Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -64,7 +70,7 @@
             configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             acknowledgeErrorsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             statusFilterToolStrip1 = new StatusFilterToolStrip();
-            dgvJobHistory = new System.Windows.Forms.DataGridView();
+            dgvJobHistory = new DBADashDataGridView();
             colRunDateTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colRunEndDateTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colStepID = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -116,6 +122,8 @@
             dataGridViewTextBoxColumn26 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn27 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn28 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
+            tsClearFilterHistory = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)dgvJobs).BeginInit();
             tsJobs.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvJobHistory).BeginInit();
@@ -131,13 +139,32 @@
             dgvJobs.AllowUserToAddRows = false;
             dgvJobs.AllowUserToDeleteRows = false;
             dgvJobs.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvJobs.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgvJobs.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvJobs.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colHistory, Acknowledge, Instance, name, colEnabled, Description, LastFail, IsLastFail, TimeSinceLastFail, StepLastFailed, LastSucceeded, TimeSinceLastSucceeded, colAckDate, FailCount24Hrs, SucceedCount24Hrs, FailCount7Days, SucceedCount7Days, JobStepFails24Hrs, JobStepFails7Days, MaxDurationSec, colMaxDuration, AvgDurationSec, colAvgDuration, ConfiguredLevel, Configure });
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvJobs.DefaultCellStyle = dataGridViewCellStyle2;
             dgvJobs.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvJobs.EnableHeadersVisualStyles = false;
             dgvJobs.Location = new System.Drawing.Point(0, 0);
             dgvJobs.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvJobs.Name = "dgvJobs";
             dgvJobs.ReadOnly = true;
+            dgvJobs.ResultSetID = 0;
+            dgvJobs.ResultSetName = null;
             dgvJobs.RowHeadersVisible = false;
             dgvJobs.RowHeadersWidth = 51;
             dgvJobs.RowTemplate.Height = 24;
@@ -380,7 +407,7 @@
             // tsJobs
             // 
             tsJobs.ImageScalingSize = new System.Drawing.Size(20, 20);
-            tsJobs.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsConfigure, statusFilterToolStrip1 });
+            tsJobs.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsConfigure, statusFilterToolStrip1, tsClearFilter });
             tsJobs.Location = new System.Drawing.Point(0, 0);
             tsJobs.Name = "tsJobs";
             tsJobs.Size = new System.Drawing.Size(2197, 27);
@@ -474,13 +501,32 @@
             dgvJobHistory.AllowUserToAddRows = false;
             dgvJobHistory.AllowUserToDeleteRows = false;
             dgvJobHistory.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle3.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvJobHistory.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
             dgvJobHistory.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvJobHistory.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colRunDateTime, colRunEndDateTime, colStepID, colStepName, colMessageID, colSeverity, colRunStatus, colRunDurationSec, colRunDuration, colRetries, colMessage, colViewSteps });
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvJobHistory.DefaultCellStyle = dataGridViewCellStyle4;
             dgvJobHistory.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvJobHistory.EnableHeadersVisualStyles = false;
             dgvJobHistory.Location = new System.Drawing.Point(0, 27);
             dgvJobHistory.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvJobHistory.Name = "dgvJobHistory";
             dgvJobHistory.ReadOnly = true;
+            dgvJobHistory.ResultSetID = 0;
+            dgvJobHistory.ResultSetName = null;
             dgvJobHistory.RowHeadersVisible = false;
             dgvJobHistory.RowHeadersWidth = 51;
             dgvJobHistory.RowTemplate.Height = 24;
@@ -639,7 +685,7 @@
             // toolStrip2
             // 
             toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefreshHistory, tsCopyHistory, tsExcelHistory, tsFilter, tsBack, tsJobName });
+            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefreshHistory, tsCopyHistory, tsExcelHistory, tsFilter, tsClearFilterHistory, tsBack, tsJobName });
             toolStrip2.Location = new System.Drawing.Point(0, 0);
             toolStrip2.Name = "toolStrip2";
             toolStrip2.Size = new System.Drawing.Size(2197, 27);
@@ -960,6 +1006,24 @@
             dataGridViewTextBoxColumn28.Name = "dataGridViewTextBoxColumn28";
             dataGridViewTextBoxColumn28.Width = 125;
             // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Image = Properties.Resources.Eraser_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            tsClearFilter.Text = "Clear Filter";
+            // 
+            // tsClearFilterHistory
+            // 
+            tsClearFilterHistory.Enabled = false;
+            tsClearFilterHistory.Image = Properties.Resources.Eraser_16x;
+            tsClearFilterHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilterHistory.Name = "tsClearFilterHistory";
+            tsClearFilterHistory.Size = new System.Drawing.Size(104, 24);
+            tsClearFilterHistory.Text = "Clear Filter";
+            // 
             // AgentJobsControl
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -988,7 +1052,7 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgvJobs;
+        private DBADashDataGridView dgvJobs;
         private System.Windows.Forms.ToolStrip tsJobs;
         private System.Windows.Forms.ToolStripDropDownButton tsConfigure;
         private System.Windows.Forms.ToolStripMenuItem configureInstanceThresholdsToolStripMenuItem;
@@ -1010,7 +1074,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn13;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn14;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn15;
-        private System.Windows.Forms.DataGridView dgvJobHistory;
+        private DBADashDataGridView dgvJobHistory;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.ToolStrip toolStrip2;
         private System.Windows.Forms.ToolStripButton tsCopyHistory;
@@ -1075,5 +1139,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colRetries;
         private System.Windows.Forms.DataGridViewLinkColumn colMessage;
         private System.Windows.Forms.DataGridViewLinkColumn colViewSteps;
+        private System.Windows.Forms.ToolStripButton tsClearFilter;
+        private System.Windows.Forms.ToolStripButton tsClearFilterHistory;
     }
 }
