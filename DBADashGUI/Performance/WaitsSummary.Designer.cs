@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI.Performance
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI.Performance
 {
     partial class WaitsSummary
     {
@@ -28,14 +30,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -43,558 +39,564 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-            this.dgv = new System.Windows.Forms.DataGridView();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.tsColumns = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.WaitChart1 = new DBADashGUI.Performance.CartesianChartWithDataTable();
-            this.toolStrip2 = new System.Windows.Forms.ToolStrip();
-            this.tsWaitType = new System.Windows.Forms.ToolStripLabel();
-            this.tsOptions = new System.Windows.Forms.ToolStripDropDownButton();
-            this.lineSmoothnesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsSmooth1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsSmoothPoint5 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsSmooth0 = new System.Windows.Forms.ToolStripMenuItem();
-            this.pointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.noneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.smallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mediumToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.largeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsMetrics = new System.Windows.Forms.ToolStripDropDownButton();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colWaitType = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.colTotalWait = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colSignalWait = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colSignalWaitPct = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colWaitTimeMsPerSec = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colWaitTimeMsPerSecPerCore = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colWaitingTasksCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colAvgWaitTimeMs = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colSampleDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colCriticalWait = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.colHelp = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.colDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
-            this.toolStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
-            this.toolStrip2.SuspendLayout();
-            this.SuspendLayout();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
+            dgv = new DBADashDataGridView();
+            colWaitType = new System.Windows.Forms.DataGridViewLinkColumn();
+            colTotalWait = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colSignalWait = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colSignalWaitPct = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colWaitTimeMsPerSec = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colWaitTimeMsPerSecPerCore = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colWaitingTasksCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colAvgWaitTimeMs = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colSampleDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colCriticalWait = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            colHelp = new System.Windows.Forms.DataGridViewLinkColumn();
+            colDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            tsCopy = new System.Windows.Forms.ToolStripButton();
+            tsExcel = new System.Windows.Forms.ToolStripButton();
+            tsColumns = new System.Windows.Forms.ToolStripDropDownButton();
+            tsRefresh = new System.Windows.Forms.ToolStripButton();
+            splitContainer1 = new System.Windows.Forms.SplitContainer();
+            WaitChart1 = new CartesianChartWithDataTable();
+            toolStrip2 = new System.Windows.Forms.ToolStrip();
+            tsWaitType = new System.Windows.Forms.ToolStripLabel();
+            tsOptions = new System.Windows.Forms.ToolStripDropDownButton();
+            lineSmoothnesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsSmooth1 = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
+            tsSmoothPoint5 = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            tsSmooth0 = new System.Windows.Forms.ToolStripMenuItem();
+            pointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            noneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            smallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            mediumToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            largeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
+            tsMetrics = new System.Windows.Forms.ToolStripDropDownButton();
+            dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
+            ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
+            toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
+            splitContainer1.Panel1.SuspendLayout();
+            splitContainer1.Panel2.SuspendLayout();
+            splitContainer1.SuspendLayout();
+            toolStrip2.SuspendLayout();
+            SuspendLayout();
             // 
             // dgv
             // 
-            this.dgv.AllowUserToAddRows = false;
-            this.dgv.AllowUserToDeleteRows = false;
-            this.dgv.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
-            this.dgv.BackgroundColor = System.Drawing.Color.White;
-            this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.colWaitType,
-            this.colTotalWait,
-            this.colSignalWait,
-            this.colSignalWaitPct,
-            this.colWaitTimeMsPerSec,
-            this.colWaitTimeMsPerSecPerCore,
-            this.colWaitingTasksCount,
-            this.colAvgWaitTimeMs,
-            this.colSampleDuration,
-            this.colCriticalWait,
-            this.colHelp,
-            this.colDescription});
-            this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 27);
-            this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dgv.Name = "dgv";
-            this.dgv.ReadOnly = true;
-            this.dgv.RowHeadersVisible = false;
-            this.dgv.RowHeadersWidth = 51;
-            this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(708, 318);
-            this.dgv.TabIndex = 0;
-            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellContentClick);
-            // 
-            // toolStrip1
-            // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsCopy,
-            this.tsExcel,
-            this.tsColumns,
-            this.tsRefresh});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(708, 27);
-            this.toolStrip1.TabIndex = 1;
-            this.toolStrip1.Text = "toolStrip1";
-            // 
-            // tsCopy
-            // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
-            // 
-            // tsExcel
-            // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
-            // 
-            // tsColumns
-            // 
-            this.tsColumns.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsColumns.Image = global::DBADashGUI.Properties.Resources.Column_16x;
-            this.tsColumns.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsColumns.Name = "tsColumns";
-            this.tsColumns.Size = new System.Drawing.Size(34, 24);
-            this.tsColumns.Text = "Columns";
-            // 
-            // tsRefresh
-            // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
-            // 
-            // splitContainer1
-            // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.splitContainer1.Name = "splitContainer1";
-            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitContainer1.Panel1
-            // 
-            this.splitContainer1.Panel1.Controls.Add(this.WaitChart1);
-            this.splitContainer1.Panel1.Controls.Add(this.toolStrip2);
-            // 
-            // splitContainer1.Panel2
-            // 
-            this.splitContainer1.Panel2.Controls.Add(this.dgv);
-            this.splitContainer1.Panel2.Controls.Add(this.toolStrip1);
-            this.splitContainer1.Size = new System.Drawing.Size(708, 656);
-            this.splitContainer1.SplitterDistance = 306;
-            this.splitContainer1.SplitterWidth = 5;
-            this.splitContainer1.TabIndex = 2;
-            // 
-            // WaitChart1
-            // 
-            this.WaitChart1.DefaultLineSmoothness = 0.5D;
-            this.WaitChart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.WaitChart1.Location = new System.Drawing.Point(0, 27);
-            this.WaitChart1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.WaitChart1.Name = "WaitChart1";
-            this.WaitChart1.Size = new System.Drawing.Size(708, 279);
-            this.WaitChart1.TabIndex = 0;
-            this.WaitChart1.Text = "cartesianChartWithDataTable1";
-            // 
-            // toolStrip2
-            // 
-            this.toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsWaitType,
-            this.tsOptions,
-            this.tsDateGroup,
-            this.tsMetrics});
-            this.toolStrip2.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(708, 27);
-            this.toolStrip2.TabIndex = 1;
-            this.toolStrip2.Text = "toolStrip2";
-            // 
-            // tsWaitType
-            // 
-            this.tsWaitType.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsWaitType.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.tsWaitType.Name = "tsWaitType";
-            this.tsWaitType.Size = new System.Drawing.Size(89, 24);
-            this.tsWaitType.Text = "WAIT_TYPE";
-            // 
-            // tsOptions
-            // 
-            this.tsOptions.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.lineSmoothnesToolStripMenuItem,
-            this.pointsToolStripMenuItem});
-            this.tsOptions.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
-            this.tsOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsOptions.Name = "tsOptions";
-            this.tsOptions.Size = new System.Drawing.Size(34, 24);
-            this.tsOptions.Text = "Options";
-            // 
-            // lineSmoothnesToolStripMenuItem
-            // 
-            this.lineSmoothnesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsSmooth1,
-            this.toolStripMenuItem3,
-            this.tsSmoothPoint5,
-            this.toolStripMenuItem2,
-            this.tsSmooth0});
-            this.lineSmoothnesToolStripMenuItem.Name = "lineSmoothnesToolStripMenuItem";
-            this.lineSmoothnesToolStripMenuItem.Size = new System.Drawing.Size(197, 26);
-            this.lineSmoothnesToolStripMenuItem.Text = "Line Smoothnes";
-            // 
-            // tsSmooth1
-            // 
-            this.tsSmooth1.Name = "tsSmooth1";
-            this.tsSmooth1.Size = new System.Drawing.Size(128, 26);
-            this.tsSmooth1.Tag = "1.0";
-            this.tsSmooth1.Text = "100%";
-            this.tsSmooth1.Click += new System.EventHandler(this.TsSmooth_Click);
-            // 
-            // toolStripMenuItem3
-            // 
-            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(128, 26);
-            this.toolStripMenuItem3.Tag = "0.75";
-            this.toolStripMenuItem3.Text = "75%";
-            this.toolStripMenuItem3.Click += new System.EventHandler(this.TsSmooth_Click);
-            // 
-            // tsSmoothPoint5
-            // 
-            this.tsSmoothPoint5.Name = "tsSmoothPoint5";
-            this.tsSmoothPoint5.Size = new System.Drawing.Size(128, 26);
-            this.tsSmoothPoint5.Tag = "0.5";
-            this.tsSmoothPoint5.Text = "50%";
-            this.tsSmoothPoint5.Click += new System.EventHandler(this.TsSmooth_Click);
-            // 
-            // toolStripMenuItem2
-            // 
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(128, 26);
-            this.toolStripMenuItem2.Tag = "0.25";
-            this.toolStripMenuItem2.Text = "25%";
-            this.toolStripMenuItem2.Click += new System.EventHandler(this.TsSmooth_Click);
-            // 
-            // tsSmooth0
-            // 
-            this.tsSmooth0.Name = "tsSmooth0";
-            this.tsSmooth0.Size = new System.Drawing.Size(128, 26);
-            this.tsSmooth0.Tag = "0";
-            this.tsSmooth0.Text = "0%";
-            this.tsSmooth0.Click += new System.EventHandler(this.TsSmooth_Click);
-            // 
-            // pointsToolStripMenuItem
-            // 
-            this.pointsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.noneToolStripMenuItem,
-            this.smallToolStripMenuItem,
-            this.mediumToolStripMenuItem,
-            this.largeToolStripMenuItem});
-            this.pointsToolStripMenuItem.Name = "pointsToolStripMenuItem";
-            this.pointsToolStripMenuItem.Size = new System.Drawing.Size(197, 26);
-            this.pointsToolStripMenuItem.Text = "Points";
-            // 
-            // noneToolStripMenuItem
-            // 
-            this.noneToolStripMenuItem.Name = "noneToolStripMenuItem";
-            this.noneToolStripMenuItem.Size = new System.Drawing.Size(147, 26);
-            this.noneToolStripMenuItem.Tag = "0";
-            this.noneToolStripMenuItem.Text = "None";
-            this.noneToolStripMenuItem.Click += new System.EventHandler(this.PointSize_Click);
-            // 
-            // smallToolStripMenuItem
-            // 
-            this.smallToolStripMenuItem.Name = "smallToolStripMenuItem";
-            this.smallToolStripMenuItem.Size = new System.Drawing.Size(147, 26);
-            this.smallToolStripMenuItem.Tag = "5";
-            this.smallToolStripMenuItem.Text = "Small";
-            this.smallToolStripMenuItem.Click += new System.EventHandler(this.PointSize_Click);
-            // 
-            // mediumToolStripMenuItem
-            // 
-            this.mediumToolStripMenuItem.Name = "mediumToolStripMenuItem";
-            this.mediumToolStripMenuItem.Size = new System.Drawing.Size(147, 26);
-            this.mediumToolStripMenuItem.Tag = "10";
-            this.mediumToolStripMenuItem.Text = "Medium";
-            this.mediumToolStripMenuItem.Click += new System.EventHandler(this.PointSize_Click);
-            // 
-            // largeToolStripMenuItem
-            // 
-            this.largeToolStripMenuItem.Name = "largeToolStripMenuItem";
-            this.largeToolStripMenuItem.Size = new System.Drawing.Size(147, 26);
-            this.largeToolStripMenuItem.Tag = "15";
-            this.largeToolStripMenuItem.Text = "Large";
-            this.largeToolStripMenuItem.Click += new System.EventHandler(this.PointSize_Click);
-            // 
-            // tsDateGroup
-            // 
-            this.tsDateGroup.Image = global::DBADashGUI.Properties.Resources.Time_16x;
-            this.tsDateGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsDateGroup.Name = "tsDateGroup";
-            this.tsDateGroup.Size = new System.Drawing.Size(76, 24);
-            this.tsDateGroup.Tag = "1";
-            this.tsDateGroup.Text = "1Min";
-            this.tsDateGroup.ToolTipText = "Date Group";
-            // 
-            // tsMetrics
-            // 
-            this.tsMetrics.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsMetrics.Image = global::DBADashGUI.Properties.Resources.AddComputedField_16x;
-            this.tsMetrics.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsMetrics.Name = "tsMetrics";
-            this.tsMetrics.Size = new System.Drawing.Size(34, 24);
-            this.tsMetrics.Text = "Metrics";
-            // 
-            // dataGridViewTextBoxColumn1
-            // 
-            this.dataGridViewTextBoxColumn1.DataPropertyName = "WaitType";
-            dataGridViewCellStyle9.Format = "N3";
-            dataGridViewCellStyle9.NullValue = null;
-            this.dataGridViewTextBoxColumn1.DefaultCellStyle = dataGridViewCellStyle9;
-            this.dataGridViewTextBoxColumn1.HeaderText = "Wait Type";
-            this.dataGridViewTextBoxColumn1.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            this.dataGridViewTextBoxColumn1.Width = 101;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            this.dataGridViewTextBoxColumn2.DataPropertyName = "TotalWaitSec";
-            dataGridViewCellStyle10.Format = "N3";
-            dataGridViewCellStyle10.NullValue = null;
-            this.dataGridViewTextBoxColumn2.DefaultCellStyle = dataGridViewCellStyle10;
-            this.dataGridViewTextBoxColumn2.HeaderText = "Total Wait (sec)";
-            this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            this.dataGridViewTextBoxColumn2.Width = 126;
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            this.dataGridViewTextBoxColumn3.DataPropertyName = "SignalWaitSec";
-            dataGridViewCellStyle11.Format = "N3";
-            this.dataGridViewTextBoxColumn3.DefaultCellStyle = dataGridViewCellStyle11;
-            this.dataGridViewTextBoxColumn3.HeaderText = "Signal Wait (sec)";
-            this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            this.dataGridViewTextBoxColumn3.Width = 103;
-            // 
-            // dataGridViewTextBoxColumn4
-            // 
-            this.dataGridViewTextBoxColumn4.DataPropertyName = "SignalWaitPct";
-            dataGridViewCellStyle12.Format = "P1";
-            this.dataGridViewTextBoxColumn4.DefaultCellStyle = dataGridViewCellStyle12;
-            this.dataGridViewTextBoxColumn4.HeaderText = "Signal Wait %";
-            this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
-            this.dataGridViewTextBoxColumn4.ReadOnly = true;
-            this.dataGridViewTextBoxColumn4.Width = 103;
-            // 
-            // dataGridViewTextBoxColumn5
-            // 
-            this.dataGridViewTextBoxColumn5.DataPropertyName = "WaitTimeMsPerSec";
-            dataGridViewCellStyle13.Format = "N2";
-            this.dataGridViewTextBoxColumn5.DefaultCellStyle = dataGridViewCellStyle13;
-            this.dataGridViewTextBoxColumn5.HeaderText = "Wait Time (ms/sec)";
-            this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
-            this.dataGridViewTextBoxColumn5.ReadOnly = true;
-            this.dataGridViewTextBoxColumn5.Width = 145;
-            // 
-            // dataGridViewTextBoxColumn6
-            // 
-            this.dataGridViewTextBoxColumn6.DataPropertyName = "WaitTimeMsPerCorePerSec";
-            dataGridViewCellStyle14.Format = "N2";
-            this.dataGridViewTextBoxColumn6.DefaultCellStyle = dataGridViewCellStyle14;
-            this.dataGridViewTextBoxColumn6.HeaderText = "Wait Time (ms/sec/core)";
-            this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
-            this.dataGridViewTextBoxColumn6.ReadOnly = true;
-            this.dataGridViewTextBoxColumn6.Width = 173;
-            // 
-            // dataGridViewTextBoxColumn7
-            // 
-            this.dataGridViewTextBoxColumn7.DataPropertyName = "SampleDurationSec";
-            dataGridViewCellStyle15.Format = "N0";
-            this.dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle15;
-            this.dataGridViewTextBoxColumn7.HeaderText = "Sample Duration (sec)";
-            this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
-            this.dataGridViewTextBoxColumn7.ReadOnly = true;
-            this.dataGridViewTextBoxColumn7.Width = 134;
+            dgv.AllowUserToAddRows = false;
+            dgv.AllowUserToDeleteRows = false;
+            dgv.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
+            dgv.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colWaitType, colTotalWait, colSignalWait, colSignalWaitPct, colWaitTimeMsPerSec, colWaitTimeMsPerSecPerCore, colWaitingTasksCount, colAvgWaitTimeMs, colSampleDuration, colCriticalWait, colHelp, colDescription });
+            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle10.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle10.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle10.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle10.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle10.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle10.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgv.DefaultCellStyle = dataGridViewCellStyle10;
+            dgv.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgv.EnableHeadersVisualStyles = false;
+            dgv.Location = new System.Drawing.Point(0, 27);
+            dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dgv.Name = "dgv";
+            dgv.ReadOnly = true;
+            dgv.ResultSetID = 0;
+            dgv.ResultSetName = null;
+            dgv.RowHeadersVisible = false;
+            dgv.RowHeadersWidth = 51;
+            dgv.RowTemplate.Height = 24;
+            dgv.Size = new System.Drawing.Size(708, 318);
+            dgv.TabIndex = 0;
+            dgv.CellContentClick += Dgv_CellContentClick;
             // 
             // colWaitType
             // 
-            this.colWaitType.DataPropertyName = "WaitType";
-            this.colWaitType.HeaderText = "Wait Type";
-            this.colWaitType.MinimumWidth = 100;
-            this.colWaitType.Name = "colWaitType";
-            this.colWaitType.ReadOnly = true;
-            this.colWaitType.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colWaitType.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            colWaitType.DataPropertyName = "WaitType";
+            colWaitType.HeaderText = "Wait Type";
+            colWaitType.MinimumWidth = 100;
+            colWaitType.Name = "colWaitType";
+            colWaitType.ReadOnly = true;
+            colWaitType.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colWaitType.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            colWaitType.Width = 125;
             // 
             // colTotalWait
             // 
-            this.colTotalWait.DataPropertyName = "TotalWaitSec";
-            dataGridViewCellStyle1.Format = "N3";
-            dataGridViewCellStyle1.NullValue = null;
-            this.colTotalWait.DefaultCellStyle = dataGridViewCellStyle1;
-            this.colTotalWait.HeaderText = "Total Wait (sec)";
-            this.colTotalWait.MinimumWidth = 50;
-            this.colTotalWait.Name = "colTotalWait";
-            this.colTotalWait.ReadOnly = true;
-            this.colTotalWait.Width = 50;
+            colTotalWait.DataPropertyName = "TotalWaitSec";
+            dataGridViewCellStyle2.Format = "N3";
+            dataGridViewCellStyle2.NullValue = null;
+            colTotalWait.DefaultCellStyle = dataGridViewCellStyle2;
+            colTotalWait.HeaderText = "Total Wait (sec)";
+            colTotalWait.MinimumWidth = 50;
+            colTotalWait.Name = "colTotalWait";
+            colTotalWait.ReadOnly = true;
+            colTotalWait.Width = 50;
             // 
             // colSignalWait
             // 
-            this.colSignalWait.DataPropertyName = "SignalWaitSec";
-            dataGridViewCellStyle2.Format = "N3";
-            this.colSignalWait.DefaultCellStyle = dataGridViewCellStyle2;
-            this.colSignalWait.HeaderText = "Signal Wait (sec)";
-            this.colSignalWait.MinimumWidth = 55;
-            this.colSignalWait.Name = "colSignalWait";
-            this.colSignalWait.ReadOnly = true;
-            this.colSignalWait.Width = 55;
+            colSignalWait.DataPropertyName = "SignalWaitSec";
+            dataGridViewCellStyle3.Format = "N3";
+            colSignalWait.DefaultCellStyle = dataGridViewCellStyle3;
+            colSignalWait.HeaderText = "Signal Wait (sec)";
+            colSignalWait.MinimumWidth = 55;
+            colSignalWait.Name = "colSignalWait";
+            colSignalWait.ReadOnly = true;
+            colSignalWait.Width = 55;
             // 
             // colSignalWaitPct
             // 
-            this.colSignalWaitPct.DataPropertyName = "SignalWaitPct";
-            dataGridViewCellStyle3.Format = "P1";
-            this.colSignalWaitPct.DefaultCellStyle = dataGridViewCellStyle3;
-            this.colSignalWaitPct.HeaderText = "Signal Wait %";
-            this.colSignalWaitPct.MinimumWidth = 55;
-            this.colSignalWaitPct.Name = "colSignalWaitPct";
-            this.colSignalWaitPct.ReadOnly = true;
-            this.colSignalWaitPct.Width = 55;
+            colSignalWaitPct.DataPropertyName = "SignalWaitPct";
+            dataGridViewCellStyle4.Format = "P1";
+            colSignalWaitPct.DefaultCellStyle = dataGridViewCellStyle4;
+            colSignalWaitPct.HeaderText = "Signal Wait %";
+            colSignalWaitPct.MinimumWidth = 55;
+            colSignalWaitPct.Name = "colSignalWaitPct";
+            colSignalWaitPct.ReadOnly = true;
+            colSignalWaitPct.Width = 55;
             // 
             // colWaitTimeMsPerSec
             // 
-            this.colWaitTimeMsPerSec.DataPropertyName = "WaitTimeMsPerSec";
-            dataGridViewCellStyle4.Format = "N2";
-            this.colWaitTimeMsPerSec.DefaultCellStyle = dataGridViewCellStyle4;
-            this.colWaitTimeMsPerSec.HeaderText = "Wait Time (ms / sec)";
-            this.colWaitTimeMsPerSec.MinimumWidth = 70;
-            this.colWaitTimeMsPerSec.Name = "colWaitTimeMsPerSec";
-            this.colWaitTimeMsPerSec.ReadOnly = true;
-            this.colWaitTimeMsPerSec.Width = 70;
+            colWaitTimeMsPerSec.DataPropertyName = "WaitTimeMsPerSec";
+            dataGridViewCellStyle5.Format = "N2";
+            colWaitTimeMsPerSec.DefaultCellStyle = dataGridViewCellStyle5;
+            colWaitTimeMsPerSec.HeaderText = "Wait Time (ms / sec)";
+            colWaitTimeMsPerSec.MinimumWidth = 70;
+            colWaitTimeMsPerSec.Name = "colWaitTimeMsPerSec";
+            colWaitTimeMsPerSec.ReadOnly = true;
+            colWaitTimeMsPerSec.Width = 70;
             // 
             // colWaitTimeMsPerSecPerCore
             // 
-            this.colWaitTimeMsPerSecPerCore.DataPropertyName = "WaitTimeMsPerCorePerSec";
-            dataGridViewCellStyle5.Format = "N2";
-            this.colWaitTimeMsPerSecPerCore.DefaultCellStyle = dataGridViewCellStyle5;
-            this.colWaitTimeMsPerSecPerCore.HeaderText = "Wait Time (ms / sec / core)";
-            this.colWaitTimeMsPerSecPerCore.MinimumWidth = 70;
-            this.colWaitTimeMsPerSecPerCore.Name = "colWaitTimeMsPerSecPerCore";
-            this.colWaitTimeMsPerSecPerCore.ReadOnly = true;
-            this.colWaitTimeMsPerSecPerCore.Width = 70;
+            colWaitTimeMsPerSecPerCore.DataPropertyName = "WaitTimeMsPerCorePerSec";
+            dataGridViewCellStyle6.Format = "N2";
+            colWaitTimeMsPerSecPerCore.DefaultCellStyle = dataGridViewCellStyle6;
+            colWaitTimeMsPerSecPerCore.HeaderText = "Wait Time (ms / sec / core)";
+            colWaitTimeMsPerSecPerCore.MinimumWidth = 70;
+            colWaitTimeMsPerSecPerCore.Name = "colWaitTimeMsPerSecPerCore";
+            colWaitTimeMsPerSecPerCore.ReadOnly = true;
+            colWaitTimeMsPerSecPerCore.Width = 70;
             // 
             // colWaitingTasksCount
             // 
-            this.colWaitingTasksCount.DataPropertyName = "WaitingTasksCount";
-            this.colWaitingTasksCount.HeaderText = "Waiting Tasks Count";
-            this.colWaitingTasksCount.MinimumWidth = 65;
-            this.colWaitingTasksCount.Name = "colWaitingTasksCount";
-            this.colWaitingTasksCount.ReadOnly = true;
-            this.colWaitingTasksCount.Width = 65;
+            colWaitingTasksCount.DataPropertyName = "WaitingTasksCount";
+            colWaitingTasksCount.HeaderText = "Waiting Tasks Count";
+            colWaitingTasksCount.MinimumWidth = 65;
+            colWaitingTasksCount.Name = "colWaitingTasksCount";
+            colWaitingTasksCount.ReadOnly = true;
+            colWaitingTasksCount.Width = 65;
             // 
             // colAvgWaitTimeMs
             // 
-            this.colAvgWaitTimeMs.DataPropertyName = "AvgWaitTimeMs";
-            dataGridViewCellStyle6.Format = "N3";
-            this.colAvgWaitTimeMs.DefaultCellStyle = dataGridViewCellStyle6;
-            this.colAvgWaitTimeMs.HeaderText = "Avg Wait Time (ms)";
-            this.colAvgWaitTimeMs.MinimumWidth = 50;
-            this.colAvgWaitTimeMs.Name = "colAvgWaitTimeMs";
-            this.colAvgWaitTimeMs.ReadOnly = true;
-            this.colAvgWaitTimeMs.Width = 50;
+            colAvgWaitTimeMs.DataPropertyName = "AvgWaitTimeMs";
+            dataGridViewCellStyle7.Format = "N3";
+            colAvgWaitTimeMs.DefaultCellStyle = dataGridViewCellStyle7;
+            colAvgWaitTimeMs.HeaderText = "Avg Wait Time (ms)";
+            colAvgWaitTimeMs.MinimumWidth = 50;
+            colAvgWaitTimeMs.Name = "colAvgWaitTimeMs";
+            colAvgWaitTimeMs.ReadOnly = true;
+            colAvgWaitTimeMs.Width = 50;
             // 
             // colSampleDuration
             // 
-            this.colSampleDuration.DataPropertyName = "SampleDurationSec";
-            dataGridViewCellStyle7.Format = "N0";
-            this.colSampleDuration.DefaultCellStyle = dataGridViewCellStyle7;
-            this.colSampleDuration.HeaderText = "Sample Duration (sec)";
-            this.colSampleDuration.MinimumWidth = 70;
-            this.colSampleDuration.Name = "colSampleDuration";
-            this.colSampleDuration.ReadOnly = true;
-            this.colSampleDuration.Width = 70;
+            colSampleDuration.DataPropertyName = "SampleDurationSec";
+            dataGridViewCellStyle8.Format = "N0";
+            colSampleDuration.DefaultCellStyle = dataGridViewCellStyle8;
+            colSampleDuration.HeaderText = "Sample Duration (sec)";
+            colSampleDuration.MinimumWidth = 70;
+            colSampleDuration.Name = "colSampleDuration";
+            colSampleDuration.ReadOnly = true;
+            colSampleDuration.Width = 70;
             // 
             // colCriticalWait
             // 
-            this.colCriticalWait.DataPropertyName = "CriticalWait";
-            this.colCriticalWait.FalseValue = "";
-            this.colCriticalWait.HeaderText = "Is Critical Wait?";
-            this.colCriticalWait.MinimumWidth = 60;
-            this.colCriticalWait.Name = "colCriticalWait";
-            this.colCriticalWait.ReadOnly = true;
-            this.colCriticalWait.Width = 60;
+            colCriticalWait.DataPropertyName = "CriticalWait";
+            colCriticalWait.FalseValue = "";
+            colCriticalWait.HeaderText = "Is Critical Wait?";
+            colCriticalWait.MinimumWidth = 60;
+            colCriticalWait.Name = "colCriticalWait";
+            colCriticalWait.ReadOnly = true;
+            colCriticalWait.Width = 60;
             // 
             // colHelp
             // 
-            this.colHelp.HeaderText = "Help";
-            this.colHelp.MinimumWidth = 50;
-            this.colHelp.Name = "colHelp";
-            this.colHelp.ReadOnly = true;
-            this.colHelp.Text = "Help";
-            this.colHelp.UseColumnTextForLinkValue = true;
-            this.colHelp.Width = 50;
+            colHelp.HeaderText = "Help";
+            colHelp.MinimumWidth = 50;
+            colHelp.Name = "colHelp";
+            colHelp.ReadOnly = true;
+            colHelp.Text = "Help";
+            colHelp.UseColumnTextForLinkValue = true;
+            colHelp.Width = 50;
             // 
             // colDescription
             // 
-            this.colDescription.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.colDescription.DataPropertyName = "Description";
-            dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.colDescription.DefaultCellStyle = dataGridViewCellStyle8;
-            this.colDescription.HeaderText = "Description";
-            this.colDescription.MinimumWidth = 50;
-            this.colDescription.Name = "colDescription";
-            this.colDescription.ReadOnly = true;
+            colDescription.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            colDescription.DataPropertyName = "Description";
+            dataGridViewCellStyle9.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            colDescription.DefaultCellStyle = dataGridViewCellStyle9;
+            colDescription.HeaderText = "Description";
+            colDescription.MinimumWidth = 50;
+            colDescription.Name = "colDescription";
+            colDescription.ReadOnly = true;
+            // 
+            // toolStrip1
+            // 
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsColumns, tsClearFilter });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new System.Drawing.Size(708, 27);
+            toolStrip1.TabIndex = 1;
+            toolStrip1.Text = "toolStrip1";
+            // 
+            // tsCopy
+            // 
+            tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopy.Name = "tsCopy";
+            tsCopy.Size = new System.Drawing.Size(29, 24);
+            tsCopy.Text = "Copy";
+            tsCopy.Click += TsCopy_Click;
+            // 
+            // tsExcel
+            // 
+            tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsExcel.Image = Properties.Resources.excel16x16;
+            tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcel.Name = "tsExcel";
+            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Text = "Export Excel";
+            tsExcel.Click += TsExcel_Click;
+            // 
+            // tsColumns
+            // 
+            tsColumns.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsColumns.Image = Properties.Resources.Column_16x;
+            tsColumns.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsColumns.Name = "tsColumns";
+            tsColumns.Size = new System.Drawing.Size(34, 24);
+            tsColumns.Text = "Columns";
+            // 
+            // tsRefresh
+            // 
+            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Name = "tsRefresh";
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Text = "Refresh";
+            tsRefresh.Click += TsRefresh_Click;
+            // 
+            // splitContainer1
+            // 
+            splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitContainer1.Location = new System.Drawing.Point(0, 0);
+            splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            splitContainer1.Name = "splitContainer1";
+            splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            splitContainer1.Panel1.Controls.Add(WaitChart1);
+            splitContainer1.Panel1.Controls.Add(toolStrip2);
+            // 
+            // splitContainer1.Panel2
+            // 
+            splitContainer1.Panel2.Controls.Add(dgv);
+            splitContainer1.Panel2.Controls.Add(toolStrip1);
+            splitContainer1.Size = new System.Drawing.Size(708, 656);
+            splitContainer1.SplitterDistance = 306;
+            splitContainer1.SplitterWidth = 5;
+            splitContainer1.TabIndex = 2;
+            // 
+            // WaitChart1
+            // 
+            WaitChart1.DefaultLineSmoothness = 0.5D;
+            WaitChart1.Dock = System.Windows.Forms.DockStyle.Fill;
+            WaitChart1.Location = new System.Drawing.Point(0, 27);
+            WaitChart1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            WaitChart1.Name = "WaitChart1";
+            WaitChart1.Size = new System.Drawing.Size(708, 279);
+            WaitChart1.TabIndex = 0;
+            WaitChart1.Text = "cartesianChartWithDataTable1";
+            // 
+            // toolStrip2
+            // 
+            toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsWaitType, tsOptions, tsDateGroup, tsMetrics });
+            toolStrip2.Location = new System.Drawing.Point(0, 0);
+            toolStrip2.Name = "toolStrip2";
+            toolStrip2.Size = new System.Drawing.Size(708, 27);
+            toolStrip2.TabIndex = 1;
+            toolStrip2.Text = "toolStrip2";
+            // 
+            // tsWaitType
+            // 
+            tsWaitType.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsWaitType.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            tsWaitType.Name = "tsWaitType";
+            tsWaitType.Size = new System.Drawing.Size(89, 24);
+            tsWaitType.Text = "WAIT_TYPE";
+            // 
+            // tsOptions
+            // 
+            tsOptions.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lineSmoothnesToolStripMenuItem, pointsToolStripMenuItem });
+            tsOptions.Image = Properties.Resources.SettingsOutline_16x;
+            tsOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsOptions.Name = "tsOptions";
+            tsOptions.Size = new System.Drawing.Size(34, 24);
+            tsOptions.Text = "Options";
+            // 
+            // lineSmoothnesToolStripMenuItem
+            // 
+            lineSmoothnesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsSmooth1, toolStripMenuItem3, tsSmoothPoint5, toolStripMenuItem2, tsSmooth0 });
+            lineSmoothnesToolStripMenuItem.Name = "lineSmoothnesToolStripMenuItem";
+            lineSmoothnesToolStripMenuItem.Size = new System.Drawing.Size(197, 26);
+            lineSmoothnesToolStripMenuItem.Text = "Line Smoothnes";
+            // 
+            // tsSmooth1
+            // 
+            tsSmooth1.Name = "tsSmooth1";
+            tsSmooth1.Size = new System.Drawing.Size(128, 26);
+            tsSmooth1.Tag = "1.0";
+            tsSmooth1.Text = "100%";
+            tsSmooth1.Click += TsSmooth_Click;
+            // 
+            // toolStripMenuItem3
+            // 
+            toolStripMenuItem3.Name = "toolStripMenuItem3";
+            toolStripMenuItem3.Size = new System.Drawing.Size(128, 26);
+            toolStripMenuItem3.Tag = "0.75";
+            toolStripMenuItem3.Text = "75%";
+            toolStripMenuItem3.Click += TsSmooth_Click;
+            // 
+            // tsSmoothPoint5
+            // 
+            tsSmoothPoint5.Name = "tsSmoothPoint5";
+            tsSmoothPoint5.Size = new System.Drawing.Size(128, 26);
+            tsSmoothPoint5.Tag = "0.5";
+            tsSmoothPoint5.Text = "50%";
+            tsSmoothPoint5.Click += TsSmooth_Click;
+            // 
+            // toolStripMenuItem2
+            // 
+            toolStripMenuItem2.Name = "toolStripMenuItem2";
+            toolStripMenuItem2.Size = new System.Drawing.Size(128, 26);
+            toolStripMenuItem2.Tag = "0.25";
+            toolStripMenuItem2.Text = "25%";
+            toolStripMenuItem2.Click += TsSmooth_Click;
+            // 
+            // tsSmooth0
+            // 
+            tsSmooth0.Name = "tsSmooth0";
+            tsSmooth0.Size = new System.Drawing.Size(128, 26);
+            tsSmooth0.Tag = "0";
+            tsSmooth0.Text = "0%";
+            tsSmooth0.Click += TsSmooth_Click;
+            // 
+            // pointsToolStripMenuItem
+            // 
+            pointsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { noneToolStripMenuItem, smallToolStripMenuItem, mediumToolStripMenuItem, largeToolStripMenuItem });
+            pointsToolStripMenuItem.Name = "pointsToolStripMenuItem";
+            pointsToolStripMenuItem.Size = new System.Drawing.Size(197, 26);
+            pointsToolStripMenuItem.Text = "Points";
+            // 
+            // noneToolStripMenuItem
+            // 
+            noneToolStripMenuItem.Name = "noneToolStripMenuItem";
+            noneToolStripMenuItem.Size = new System.Drawing.Size(147, 26);
+            noneToolStripMenuItem.Tag = "0";
+            noneToolStripMenuItem.Text = "None";
+            noneToolStripMenuItem.Click += PointSize_Click;
+            // 
+            // smallToolStripMenuItem
+            // 
+            smallToolStripMenuItem.Name = "smallToolStripMenuItem";
+            smallToolStripMenuItem.Size = new System.Drawing.Size(147, 26);
+            smallToolStripMenuItem.Tag = "5";
+            smallToolStripMenuItem.Text = "Small";
+            smallToolStripMenuItem.Click += PointSize_Click;
+            // 
+            // mediumToolStripMenuItem
+            // 
+            mediumToolStripMenuItem.Name = "mediumToolStripMenuItem";
+            mediumToolStripMenuItem.Size = new System.Drawing.Size(147, 26);
+            mediumToolStripMenuItem.Tag = "10";
+            mediumToolStripMenuItem.Text = "Medium";
+            mediumToolStripMenuItem.Click += PointSize_Click;
+            // 
+            // largeToolStripMenuItem
+            // 
+            largeToolStripMenuItem.Name = "largeToolStripMenuItem";
+            largeToolStripMenuItem.Size = new System.Drawing.Size(147, 26);
+            largeToolStripMenuItem.Tag = "15";
+            largeToolStripMenuItem.Text = "Large";
+            largeToolStripMenuItem.Click += PointSize_Click;
+            // 
+            // tsDateGroup
+            // 
+            tsDateGroup.Image = Properties.Resources.Time_16x;
+            tsDateGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsDateGroup.Name = "tsDateGroup";
+            tsDateGroup.Size = new System.Drawing.Size(76, 24);
+            tsDateGroup.Tag = "1";
+            tsDateGroup.Text = "1Min";
+            tsDateGroup.ToolTipText = "Date Group";
+            // 
+            // tsMetrics
+            // 
+            tsMetrics.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsMetrics.Image = Properties.Resources.AddComputedField_16x;
+            tsMetrics.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsMetrics.Name = "tsMetrics";
+            tsMetrics.Size = new System.Drawing.Size(34, 24);
+            tsMetrics.Text = "Metrics";
+            // 
+            // dataGridViewTextBoxColumn1
+            // 
+            dataGridViewTextBoxColumn1.DataPropertyName = "WaitType";
+            dataGridViewCellStyle11.Format = "N3";
+            dataGridViewCellStyle11.NullValue = null;
+            dataGridViewTextBoxColumn1.DefaultCellStyle = dataGridViewCellStyle11;
+            dataGridViewTextBoxColumn1.HeaderText = "Wait Type";
+            dataGridViewTextBoxColumn1.MinimumWidth = 6;
+            dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            dataGridViewTextBoxColumn1.ReadOnly = true;
+            dataGridViewTextBoxColumn1.Width = 101;
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            dataGridViewTextBoxColumn2.DataPropertyName = "TotalWaitSec";
+            dataGridViewCellStyle12.Format = "N3";
+            dataGridViewCellStyle12.NullValue = null;
+            dataGridViewTextBoxColumn2.DefaultCellStyle = dataGridViewCellStyle12;
+            dataGridViewTextBoxColumn2.HeaderText = "Total Wait (sec)";
+            dataGridViewTextBoxColumn2.MinimumWidth = 6;
+            dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            dataGridViewTextBoxColumn2.ReadOnly = true;
+            dataGridViewTextBoxColumn2.Width = 126;
+            // 
+            // dataGridViewTextBoxColumn3
+            // 
+            dataGridViewTextBoxColumn3.DataPropertyName = "SignalWaitSec";
+            dataGridViewCellStyle13.Format = "N3";
+            dataGridViewTextBoxColumn3.DefaultCellStyle = dataGridViewCellStyle13;
+            dataGridViewTextBoxColumn3.HeaderText = "Signal Wait (sec)";
+            dataGridViewTextBoxColumn3.MinimumWidth = 6;
+            dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            dataGridViewTextBoxColumn3.ReadOnly = true;
+            dataGridViewTextBoxColumn3.Width = 103;
+            // 
+            // dataGridViewTextBoxColumn4
+            // 
+            dataGridViewTextBoxColumn4.DataPropertyName = "SignalWaitPct";
+            dataGridViewCellStyle14.Format = "P1";
+            dataGridViewTextBoxColumn4.DefaultCellStyle = dataGridViewCellStyle14;
+            dataGridViewTextBoxColumn4.HeaderText = "Signal Wait %";
+            dataGridViewTextBoxColumn4.MinimumWidth = 6;
+            dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            dataGridViewTextBoxColumn4.ReadOnly = true;
+            dataGridViewTextBoxColumn4.Width = 103;
+            // 
+            // dataGridViewTextBoxColumn5
+            // 
+            dataGridViewTextBoxColumn5.DataPropertyName = "WaitTimeMsPerSec";
+            dataGridViewCellStyle15.Format = "N2";
+            dataGridViewTextBoxColumn5.DefaultCellStyle = dataGridViewCellStyle15;
+            dataGridViewTextBoxColumn5.HeaderText = "Wait Time (ms/sec)";
+            dataGridViewTextBoxColumn5.MinimumWidth = 6;
+            dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
+            dataGridViewTextBoxColumn5.ReadOnly = true;
+            dataGridViewTextBoxColumn5.Width = 145;
+            // 
+            // dataGridViewTextBoxColumn6
+            // 
+            dataGridViewTextBoxColumn6.DataPropertyName = "WaitTimeMsPerCorePerSec";
+            dataGridViewCellStyle16.Format = "N2";
+            dataGridViewTextBoxColumn6.DefaultCellStyle = dataGridViewCellStyle16;
+            dataGridViewTextBoxColumn6.HeaderText = "Wait Time (ms/sec/core)";
+            dataGridViewTextBoxColumn6.MinimumWidth = 6;
+            dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
+            dataGridViewTextBoxColumn6.ReadOnly = true;
+            dataGridViewTextBoxColumn6.Width = 173;
+            // 
+            // dataGridViewTextBoxColumn7
+            // 
+            dataGridViewTextBoxColumn7.DataPropertyName = "SampleDurationSec";
+            dataGridViewCellStyle17.Format = "N0";
+            dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle17;
+            dataGridViewTextBoxColumn7.HeaderText = "Sample Duration (sec)";
+            dataGridViewTextBoxColumn7.MinimumWidth = 6;
+            dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
+            dataGridViewTextBoxColumn7.ReadOnly = true;
+            dataGridViewTextBoxColumn7.Width = 134;
+            // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Image = Properties.Resources.Eraser_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            tsClearFilter.Text = "Clear Filter";
             // 
             // WaitsSummary
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.splitContainer1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "WaitsSummary";
-            this.Size = new System.Drawing.Size(708, 656);
-            this.Load += new System.EventHandler(this.WaitsSummary_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel1.PerformLayout();
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            this.splitContainer1.Panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
-            this.splitContainer1.ResumeLayout(false);
-            this.toolStrip2.ResumeLayout(false);
-            this.toolStrip2.PerformLayout();
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            Controls.Add(splitContainer1);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "WaitsSummary";
+            Size = new System.Drawing.Size(708, 656);
+            Load += WaitsSummary_Load;
+            ((System.ComponentModel.ISupportInitialize)dgv).EndInit();
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            splitContainer1.Panel1.ResumeLayout(false);
+            splitContainer1.Panel1.PerformLayout();
+            splitContainer1.Panel2.ResumeLayout(false);
+            splitContainer1.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
+            splitContainer1.ResumeLayout(false);
+            toolStrip2.ResumeLayout(false);
+            toolStrip2.PerformLayout();
+            ResumeLayout(false);
         }
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgv;
+        private DBADashDataGridView dgv;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
@@ -637,5 +639,6 @@
         private System.Windows.Forms.DataGridViewCheckBoxColumn colCriticalWait;
         private System.Windows.Forms.DataGridViewLinkColumn colHelp;
         private System.Windows.Forms.DataGridViewTextBoxColumn colDescription;
+        private System.Windows.Forms.ToolStripButton tsClearFilter;
     }
 }
