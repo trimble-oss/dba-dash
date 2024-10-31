@@ -1,11 +1,11 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADashGUI.Theme;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI.Checks
 {
@@ -14,6 +14,7 @@ namespace DBADashGUI.Checks
         public IdentityColumns()
         {
             InitializeComponent();
+            dgv.RegisterClearFilter(tsClearFilter);
         }
 
         private List<int> InstanceIDs { get; set; }
@@ -59,7 +60,7 @@ namespace DBADashGUI.Checks
                 AddColsToDGV();
             }
             var dt = GetIdentityColumns();
-            dgv.DataSource = dt;
+            dgv.DataSource = new DataView(dt);
             dgv.Sort(dgv.Columns["colPctUsed"]!, ListSortDirection.Descending);
             dgv.AutoResizeColumns();
         }
@@ -108,22 +109,20 @@ namespace DBADashGUI.Checks
 
         private DataTable GetIdentityColumns()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("IdentityColumns_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("IdentityColumns_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("InstanceIDs", InstanceIDs.AsDataTable());
+            if (DatabaseID > 0)
             {
-                cmd.Parameters.AddWithValue("InstanceIDs", InstanceIDs.AsDataTable());
-                if (DatabaseID > 0)
-                {
-                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                }
-                cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                return dt;
+                cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
             }
+            cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            return dt;
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -138,12 +137,12 @@ namespace DBADashGUI.Checks
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgv);
+            dgv.CopyGrid();
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+            dgv.ExportToExcel();
         }
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
