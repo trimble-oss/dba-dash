@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Reflection;
 using System.Windows.Forms;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
+using System.Linq;
 
 namespace DBADashGUI.CustomReports
 {
@@ -19,10 +20,6 @@ namespace DBADashGUI.CustomReports
         public int ResultSetID { get; set; }
 
         public string ResultSetName { get; set; }
-
-        private readonly ToolStripMenuItem filterLike = new("LIKE", Properties.Resources.FilteredTextBox_16x);
-
-        private readonly ToolStripMenuItem filterNotLike = new("NOT LIKE", Properties.Resources.FilteredTextBox_16x);
 
         private ToolStripMenuItem GetCopyGridMenuItem() => new("Copy Grid", Properties.Resources.ASX_Copy_blue_16x, (_, _) => CopyGrid());
 
@@ -84,13 +81,23 @@ namespace DBADashGUI.CustomReports
         {
             CellContextMenu = new();
             var cellClearFilterMenuItem = GetClearFilterMenuItem();
-            var filterByValue = new ToolStripMenuItem("Filter By Value", Properties.Resources.Filter_16x, FilterByValue_Click) { Tag = false };
-            var excludeValue = new ToolStripMenuItem("Exclude Value", Properties.Resources.StopFilter_16x, FilterByValue_Click) { Tag = true };
+            var filterByValue = new ToolStripMenuItem("Filter By Value", Properties.Resources.Filter_16x, FilterByValue_Click) { Tag = "=" };
+            var excludeValue = new ToolStripMenuItem("Exclude Value", Properties.Resources.StopFilter_16x, FilterByValue_Click) { Tag = "<>" };
             var copyCell = new ToolStripMenuItem("Copy Cell", Properties.Resources.ASX_Copy_grey_16x, CopyCell);
             var editFilter = GetEditFilterMenuItem();
             var filterSeparator = new ToolStripSeparator();
-            filterLike.Click += (_, _) => FilterLike();
-            filterNotLike.Click += (_, _) => FilterNotLike();
+
+            var allFilters = new ToolStripMenuItem("All Filters", Properties.Resources.FilterDropdown_16x);
+            var filterLike = new ToolStripMenuItem("Like", null, (_, _) => FilterLike());
+            var filterNotLike = new ToolStripMenuItem("Not Like", null, (_, _) => FilterNotLike());
+            var greaterThan = new ToolStripMenuItem(">", null, (_, _) => FilterByValueWithPrompt(">"));
+            var lessThan = new ToolStripMenuItem("<", null, (_, _) => FilterByValueWithPrompt("<"));
+            var greaterThanEqual = new ToolStripMenuItem(">=", null, (_, _) => FilterByValueWithPrompt(">="));
+            var lessThanEqual = new ToolStripMenuItem("<=", null, (_, _) => FilterByValueWithPrompt("<="));
+            var equal = new ToolStripMenuItem("=", null, (_, _) => FilterByValueWithPrompt("="));
+            var notEqual = new ToolStripMenuItem("<>", null, (_, _) => FilterByValueWithPrompt("<>"));
+
+            allFilters.DropDownItems.AddRange(new ToolStripItem[] { filterLike, filterNotLike, equal, notEqual, greaterThan, lessThan, greaterThanEqual, lessThanEqual });
 
             CellContextMenu.Items.AddRange(
                 new ToolStripItem[]
@@ -103,8 +110,7 @@ namespace DBADashGUI.CustomReports
                     new ToolStripSeparator(),
                     filterByValue,
                     excludeValue,
-                    filterLike,
-                    filterNotLike,
+                    allFilters,
                     editFilter,
                     cellClearFilterMenuItem,
                     filterSeparator,
@@ -223,7 +229,6 @@ namespace DBADashGUI.CustomReports
             {
                 case DataGridViewHitTestType.Cell:
                     if (CellContextMenu.Items.Count == 0) return;
-                    filterLike.Visible = dgv.Columns[ClickedColumnIndex].ValueType == typeof(string);
                     CellContextMenuOpening?.Invoke(dgv, new DataGridViewCellEventArgs(ClickedColumnIndex, ClickedRowIndex));
                     CellContextMenu.Show(dgv, e.Location);
                     return;
@@ -269,41 +274,41 @@ namespace DBADashGUI.CustomReports
             }
         }
 
+        private string SelectedColumnName => Columns[ClickedColumnIndex].DataPropertyName;
+        private object SelectedValue => Rows[ClickedRowIndex].Cells[ClickedColumnIndex].Value.DBNullToNull();
+
         private void FilterLike(bool IsNotLike = false)
         {
-            var dgv = (DataGridView)CellContextMenu.SourceControl;
-            var value = dgv.Rows[ClickedRowIndex].Cells[ClickedColumnIndex].Value.DBNullToNull()?.ToString();
-            var colName = dgv.Columns[ClickedColumnIndex].DataPropertyName;
-            colName = EscapeColumnName(colName);
+            var value = SelectedValue?.ToString();
             if (CommonShared.ShowInputDialog(ref value, "Enter value to filter by:", default, "Use % or * as wildcards") == DialogResult.Cancel) return;
             if (string.IsNullOrEmpty(value)) return;
-            if (dgv.DataSource is not DataView dv) return;
-            var filter = string.IsNullOrEmpty(RowFilter) ? RowFilter : RowFilter + Environment.NewLine + " AND ";
+            AppendFilter(value, SelectedColumnName, IsNotLike ? "NOT LIKE" : "LIKE");
+        }
 
-            value = EscapeValue(value);
-            filter += IsNotLike ? $"({colName} NOT LIKE {value} OR {colName} IS NULL)" : $"{colName} LIKE {value}"; ;
+        private void AppendFilter(object value, string colName, string operatorSymbol)
+        {
+            var filter = string.IsNullOrEmpty(RowFilter) ? RowFilter : RowFilter + Environment.NewLine + " AND ";
+            filter += FormatFilterExpression(value, colName, operatorSymbol);
             SetFilter(filter);
         }
 
         private void FilterNotLike() => FilterLike(true);
 
+        private void FilterByValueWithPrompt(string operatorSymbol)
+        {
+            var valueString = SelectedValue?.ToString();
+            if (CommonShared.ShowInputDialog(ref valueString, $"Enter value to filter by {operatorSymbol}:") == DialogResult.Cancel) return;
+            if (string.IsNullOrEmpty(valueString)) return;
+            var value = Convert.ChangeType(valueString, SelectedValue?.GetType() ?? typeof(string)); // convert back to original type
+            AppendFilter(value, SelectedColumnName, operatorSymbol);
+        }
+
         private void FilterByValue_Click(object sender, EventArgs e)
         {
             if (DataSource is not DataView dv) return;
-            var exclude = (bool)((ToolStripMenuItem)sender).Tag;
-            var value = Rows[ClickedRowIndex].Cells[ClickedColumnIndex].Value;
-            var colName = Columns[ClickedColumnIndex].DataPropertyName;
+            var operatorSymbol = ((ToolStripMenuItem)sender).Tag!.ToString();
 
-            if (value.GetType() == typeof(byte[]))
-            {
-                MessageBox.Show("Filter by value is not supported for binary data", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-            var filter = string.IsNullOrEmpty(RowFilter) ? RowFilter : RowFilter + Environment.NewLine + " AND ";
-            colName = EscapeColumnName(colName);
-
-            filter += FormatFilterValue(value, exclude, colName);
-            SetFilter(filter);
+            AppendFilter(SelectedValue, SelectedColumnName, operatorSymbol);
         }
 
         private static string EscapeColumnName(string columnName)
@@ -313,24 +318,40 @@ namespace DBADashGUI.CustomReports
 
         private static string EscapeValue(string value) => "'" + value?.Replace("'", "''") + "'";
 
-        private static string FormatFilterValue(object value, bool exclude, string colName)
+        private static string FormatFilterExpression(object value, string colName, string operatorSymbol)
         {
+            colName = EscapeColumnName(colName);
+            // Validation
+            var validOperators = new[] { "=", "<>", ">", "<", ">=", "<=", "LIKE", "NOT LIKE" };
+            if (!validOperators.Contains(operatorSymbol))
+            {
+                throw new ArgumentException("Invalid operator symbol.", nameof(operatorSymbol));
+            }
+
+            // Handle NULL value
             if (value.DBNullToNull() is null)
             {
-                return exclude ? $"{colName} IS NOT NULL" : $"{colName} IS NULL";
+                return operatorSymbol switch
+                {
+                    "=" => $"{colName} IS NULL",
+                    "<>" => $"{colName} IS NOT NULL",
+                    _ => throw new ArgumentException("Invalid operator for NULL value.", nameof(operatorSymbol))
+                };
             }
-            else if (value.GetType().IsNumericType())
+
+            // Format value for the expression based on its type
+            var formattedValue = value switch
             {
-                return exclude ? $"({colName} <> {value} OR {colName} IS NULL)" : $"{colName} = {value}";
-            }
-            else if (value is DateTime)
+                _ when value.GetType().IsNumericType() => value.ToString(),
+                DateTime dateTimeValue => $"#{dateTimeValue:yyyy-MM-dd HH:mm:ss.fff}#",
+                _ => EscapeValue(value.ToString())
+            };
+
+            return operatorSymbol switch
             {
-                return exclude ? $"({colName} <> #{value:yyyy-MM-dd HH:mm:ss.fff}# OR {colName} IS NULL)" : $"{colName} = #{value:yyyy-MM-dd HH:mm:ss.fff}#";
-            }
-            else
-            {
-                return exclude ? $"({colName} <> {EscapeValue(value.ToString())} OR {colName} IS NULL)" : $"{colName} = {EscapeValue(value.ToString())}";
-            }
+                "<>" or "NOT LIKE" => $"({colName} {operatorSymbol} {formattedValue} OR {colName} IS NULL)",
+                _ => $"{colName} {operatorSymbol} {formattedValue}"
+            };
         }
     }
 }
