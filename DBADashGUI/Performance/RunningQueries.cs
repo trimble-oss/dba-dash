@@ -21,16 +21,15 @@ namespace DBADashGUI.Performance
         public RunningQueries()
         {
             InitializeComponent();
+            dgv.RegisterClearFilter(tsClearFilter);
             dgv.GridFilterChanged += (sender, e) =>
             {
-                UpdateClearFilter();
+                if (!dgv.HasFilter)
+                {
+                    ResetBlockingFilterText();
+                    tsGroupByFilter.Visible = false;
+                }
             };
-        }
-
-        private void UpdateClearFilter()
-        {
-            tsClearFilter.Enabled = !string.IsNullOrEmpty(dgv.RowFilter) || !string.IsNullOrEmpty(dgvSessionWaits.RowFilter);
-            tsClearFilter.Font = new Font(tsClearFilter.Font, tsClearFilter.Enabled ? FontStyle.Bold : FontStyle.Regular);
         }
 
         private string PersistedSort;
@@ -458,7 +457,6 @@ namespace DBADashGUI.Performance
             dgv.Columns["colQueryPlanHash"].Width = 70;
             tsGroupBy.Enabled = dgv.Rows.Count > 1;
             tsBlockingFilter.Visible = SessionID == 0 && JobId == Guid.Empty;
-            UpdateClearFilter();
         }
 
         /// <summary>Get counts from the running queries snapshot table. e.g. Blocking counts</summary>
@@ -964,8 +962,8 @@ namespace DBADashGUI.Performance
 
         private void BlockedQueriesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var dv = (DataView)dgv.DataSource;
-            dv.RowFilter = "blocking_session_id > 0";
+            tsGroupByFilter.Visible = false;
+            dgv.SetFilter("blocking_session_id > 0");
             tsBlockingFilter.Text = "Blocking : All Blocked Queries";
             tsBack.Enabled = true;
             tsBlockingFilter.Font = new Font(tsBlockingFilter.Font, FontStyle.Bold);
@@ -973,8 +971,8 @@ namespace DBADashGUI.Performance
 
         private void BlockedOrBlockingToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var dv = (DataView)dgv.DataSource;
-            dv.RowFilter = "blocking_session_id > 0 OR BlockCount>0";
+            tsGroupByFilter.Visible = false;
+            dgv.SetFilter("(blocking_session_id > 0 OR BlockCount>0)");
             tsBlockingFilter.Text = "Blocking : All Blocked or Blocking Queries";
             tsBack.Enabled = true;
             tsBlockingFilter.Font = new Font(tsBlockingFilter.Font, FontStyle.Bold);
@@ -982,8 +980,8 @@ namespace DBADashGUI.Performance
 
         private void BlockingQueriesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var dv = (DataView)dgv.DataSource;
-            dv.RowFilter = "BlockCount>0";
+            tsGroupByFilter.Visible = false;
+            dgv.SetFilter("BlockCount>0");
             tsBlockingFilter.Text = "Blocking : All Blocking Queries";
             tsBack.Enabled = true;
             tsBlockingFilter.Font = new Font(tsBlockingFilter.Font, FontStyle.Bold);
@@ -999,21 +997,19 @@ namespace DBADashGUI.Performance
         private void ShowBlocking(short sessionID, bool recursive = false) //
         {
             tsGroupByFilter.Visible = false;
-            var dv = (DataView)dgv.DataSource;
             if (sessionID == 0) // Root blockers
             {
-                dv.RowFilter = $"blocking_session_id = {sessionID} AND BlockCount > 0 ";
+                dgv.SetFilter($"blocking_session_id = {sessionID} AND BlockCount > 0 ");
                 tsBlockingFilter.Text = "Blocking : Root Blockers";
             }
             else if (recursive)
             {
-                dv.RowFilter =
-                    $"(blocking_session_id = {sessionID} OR BlockingHierarchy LIKE '{sessionID} \\%' OR BlockingHierarchy LIKE '%\\ {sessionID}' OR BlockingHierarchy LIKE '%\\ {sessionID} \\%')";
+                dgv.SetFilter($"(blocking_session_id = {sessionID} OR BlockingHierarchy LIKE '{sessionID} \\%' OR BlockingHierarchy LIKE '%\\ {sessionID}' OR BlockingHierarchy LIKE '%\\ {sessionID} \\%')");
                 tsBlockingFilter.Text = $"Blocking : Blocked By {sessionID} (Recursive)";
             }
             else
             {
-                dv.RowFilter = $"blocking_session_id = {sessionID}";
+                dgv.SetFilter($"blocking_session_id = {sessionID}");
                 tsBlockingFilter.Text = $"Blocking : Blocked By {sessionID}";
             }
 
@@ -1027,9 +1023,13 @@ namespace DBADashGUI.Performance
             tsGroupByFilter.Visible = false;
             if (dgv.DataSource != null)
             {
-                var dv = (DataView)dgv.DataSource;
-                dv.RowFilter = "";
+                dgv.ClearFilter();
             }
+            ResetBlockingFilterText();
+        }
+
+        private void ResetBlockingFilterText()
+        {
             tsBlockingFilter.Text = $"Blocking ({blockedCount} Blocked)";
             tsBlockingFilter.Font = new Font(tsBlockingFilter.Font, FontStyle.Regular);
         }
