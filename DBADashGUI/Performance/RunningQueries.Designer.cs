@@ -469,7 +469,6 @@ namespace DBADashGUI.Performance
             tsClearFilter.Name = "tsClearFilter";
             tsClearFilter.Size = new System.Drawing.Size(104, 24);
             tsClearFilter.Text = "Clear Filter";
-            tsClearFilter.Click += tsClearFilter_Click;
             // 
             // splitContainer1
             // 
