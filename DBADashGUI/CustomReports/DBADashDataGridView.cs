@@ -345,9 +345,17 @@ namespace DBADashGUI.CustomReports
             if (CommonShared.ShowInputDialog(ref valueString, $"Enter value to filter by {operatorSymbol}:") ==
                 DialogResult.Cancel) return;
             if (string.IsNullOrEmpty(valueString)) return;
-            var value = Convert.ChangeType(valueString,
-                SelectedValue?.GetType() ?? typeof(string)); // convert back to original type
-            AppendFilter(value, SelectedColumnName, operatorSymbol);
+            try
+            {
+                var value = Convert.ChangeType(valueString,
+                    SelectedValue?.GetType() ?? typeof(string)); // convert back to original type
+                AppendFilter(value, SelectedColumnName, operatorSymbol);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error converting value: " + ex.Message, "Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
         }
 
         private void FilterByValue_Click(object sender, EventArgs e)
