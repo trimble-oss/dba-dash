@@ -210,8 +210,16 @@ namespace DBADashGUI.CustomReports
 
         private void CopyCell(object sender, EventArgs e)
         {
-            Clipboard.SetText(
-                Rows[ClickedRowIndex].Cells[ClickedColumnIndex].FormattedValue?.ToString() ?? string.Empty);
+            if (Rows[ClickedRowIndex].Cells[ClickedColumnIndex].ValueType == typeof(string)) // Formatted value could be truncated
+            {
+                Clipboard.SetText(
+                    Rows[ClickedRowIndex].Cells[ClickedColumnIndex].Value?.ToString() ?? string.Empty);
+            }
+            else
+            {
+                Clipboard.SetText(
+                    Rows[ClickedRowIndex].Cells[ClickedColumnIndex].FormattedValue?.ToString() ?? string.Empty);
+            }
         }
 
         public void ExportToExcel()
@@ -233,6 +241,8 @@ namespace DBADashGUI.CustomReports
             return filter.Contains(colName);
         }
 
+        private const int CellTruncateLength = 43679; // Cell will not display text beyond this length
+
         private void DBADashDataGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             if (this.Columns[e.ColumnIndex].ValueType == typeof(byte[]) && e.Value != null && e.Value != DBNull.Value)
@@ -241,6 +251,11 @@ namespace DBADashGUI.CustomReports
                 // Convert the byte array to a hexadecimal string
                 e.Value = "0x" + BitConverter.ToString(bytes).Replace("-", string.Empty);
                 e.FormattingApplied = true; // Indicate that formatting was applied
+            }
+            else if (this.Columns[e.ColumnIndex].ValueType == typeof(string) && e.Value != null && e.Value != DBNull.Value && ((string)e.Value).Length > CellTruncateLength)
+            {
+                e.Value = ((string)e.Value)[..(CellTruncateLength - 3)] + "...";
+                e.FormattingApplied = true;
             }
         }
 
