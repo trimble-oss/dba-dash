@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Serilog;
 using SerilogTimings;
-using System.Collections.Concurrent;
 using System.Threading;
 
 namespace DBADash.Messaging

@@ -1,13 +1,9 @@
 ﻿using SerilogTimings;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
 using Serilog;
 
 namespace DBADash.Messaging

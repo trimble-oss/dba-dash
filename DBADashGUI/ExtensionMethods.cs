@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Text;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -16,7 +15,6 @@ using static DBADashGUI.DBADashStatus;
 using LiveChartsCore.SkiaSharpView.SKCharts;
 using SkiaSharp;
 using System.IO;
-using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView.WinForms;
 
 namespace DBADashGUI

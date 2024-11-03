@@ -1,18 +1,11 @@
-﻿using Octokit;
-using Serilog;
+﻿using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using SerilogTimings;
 using static DBADash.Messaging.PerDatabaseCollectionHelper;
 using Microsoft.Data.SqlClient;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Numerics;
-using System.Security.AccessControl;
-using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace DBADash.Messaging

@@ -2,24 +2,14 @@
 using DBADashGUI.Theme;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Polly;
 using DBADashGUI.CustomReports;
 using DBADashGUI.Messaging;
-using DocumentFormat.OpenXml.Presentation;
 using Microsoft.Data.SqlClient;
-using Microsoft.SqlServer.Management.Dmf;
 using DBADashGUI.SchemaCompare;
-using DocumentFormat.OpenXml.ExtendedProperties;
-using System.Security.AccessControl;
-using DBADash;
-using Microsoft.Data.Tools.Schema.Sql.SchemaModel.Parameterization;
 
 namespace DBADashGUI.Performance
 {
@@ -312,8 +302,6 @@ namespace DBADashGUI.Performance
             }
         }
 
-
-
         private async Task ProcessPlanForcingMessage(ResponseMessage reply, Guid messageGroup)
         {
             if (reply.Type == ResponseMessage.ResponseTypes.Success)
@@ -328,7 +316,6 @@ namespace DBADashGUI.Performance
                 await MessagingHelper.UpdatePlanForcingLog(messageGroup, "FAIL:" + reply.Message);
                 await RefreshLog();
             }
-         
         }
 
         private int TopRows => int.Parse(tsTop.Tag?.ToString() ?? 100.ToString());

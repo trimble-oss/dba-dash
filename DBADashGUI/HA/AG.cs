@@ -6,7 +6,6 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using DBADashGUI.Interface;
-using DBADashGUI.Theme;
 using static DBADashGUI.DBADashStatus;
 using DBADash;
 using DBADashGUI.Messaging;
@@ -21,7 +20,7 @@ namespace DBADashGUI.HA
             dgv.RegisterClearFilter(tsClearFilter);
         }
 
-        private List<int> InstanceIDs=> CurrentContext?.RegularInstanceIDs.ToList();
+        private List<int> InstanceIDs => CurrentContext?.RegularInstanceIDs.ToList();
         private int instanceId = -1;
 
         public bool CanNavigateBack => tsBack.Enabled;
@@ -59,12 +58,16 @@ namespace DBADashGUI.HA
 
                 dgv.Columns.Add(new DataGridViewTextBoxColumn()
                 {
-                    DataPropertyName = "InstanceID", Visible = false, Name = "colInstanceID",
+                    DataPropertyName = "InstanceID",
+                    Visible = false,
+                    Name = "colInstanceID",
                     Frozen = Common.FreezeKeyColumn
                 });
                 dgv.Columns.Add(new DataGridViewTextBoxColumn()
                 {
-                    DataPropertyName = "Snapshot Status", Name = "colSnapshotStatus", Visible = false,
+                    DataPropertyName = "Snapshot Status",
+                    Name = "colSnapshotStatus",
+                    Visible = false,
                     Frozen = Common.FreezeKeyColumn
                 });
                 if (instanceId > 0)
@@ -72,7 +75,9 @@ namespace DBADashGUI.HA
                     dt = GetAvailabilityGroup(instanceId);
                     dgv.Columns.Add(new DataGridViewTextBoxColumn()
                     {
-                        DataPropertyName = "Database", Name = "colDatabase", HeaderText = "Database",
+                        DataPropertyName = "Database",
+                        Name = "colDatabase",
+                        HeaderText = "Database",
                         Frozen = Common.FreezeKeyColumn
                     });
                 }
@@ -81,8 +86,11 @@ namespace DBADashGUI.HA
                     dt = GetAvailabilityGroupSummary(InstanceIDs);
                     dgv.Columns.Add(new DataGridViewLinkColumn()
                     {
-                        HeaderText = "Instance", DataPropertyName = "Instance", Name = "colInstance",
-                        LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn,
+                        HeaderText = "Instance",
+                        DataPropertyName = "Instance",
+                        Name = "colInstance",
+                        LinkColor = DashColors.LinkColor,
+                        Frozen = Common.FreezeKeyColumn,
                         SortMode = DataGridViewColumnSortMode.Automatic
                     });
                 }
@@ -90,13 +98,13 @@ namespace DBADashGUI.HA
                 DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 try
                 {
-                    dgv.DataSource = new DataView(dt,PersistFilter,PersistSort, DataViewRowState.CurrentRows);
+                    dgv.DataSource = new DataView(dt, PersistFilter, PersistSort, DataViewRowState.CurrentRows);
                 }
-                catch (Exception ex)
+                catch
                 {
                     dgv.DataSource = new DataView(dt);
                 }
-                PersistFilter= null;
+                PersistFilter = null;
                 PersistSort = null;
 
                 dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
@@ -217,7 +225,7 @@ namespace DBADashGUI.HA
         {
             PersistFilter = dgv.RowFilter;
             PersistSort = dgv.SortString;
-            await CollectionMessaging.TriggerCollection(instanceId>0 ? instanceId : CurrentContext.InstanceID,new List<CollectionType>() { CollectionType.AvailabilityGroups, CollectionType.AvailabilityReplicas, CollectionType.DatabasesHADR}, this);
+            await CollectionMessaging.TriggerCollection(instanceId > 0 ? instanceId : CurrentContext.InstanceID, new List<CollectionType>() { CollectionType.AvailabilityGroups, CollectionType.AvailabilityReplicas, CollectionType.DatabasesHADR }, this);
         }
     }
 }

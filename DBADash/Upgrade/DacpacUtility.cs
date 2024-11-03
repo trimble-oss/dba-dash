@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
 using static DBADash.DBValidations;
-using Octokit;
 
 namespace DacpacUtility
 {
@@ -41,7 +40,7 @@ namespace DacpacUtility
                                     string databaseName,
                                     string dacpacName,
                                     DBVersionStatusEnum status,
-                                    int retryCount=0)
+                                    int retryCount = 0)
         {
             MessageList.Add("*** Start of processing for " +
                              databaseName);
@@ -81,14 +80,14 @@ namespace DacpacUtility
                         options: _dacDeployOptions);
                 }
             }
-            catch (DacServicesException ex) when (ex.Message.Contains("IX_Instances_InstanceDisplayName") && retryCount ==0)
+            catch (DacServicesException ex) when (ex.Message.Contains("IX_Instances_InstanceDisplayName") && retryCount == 0)
             {
                 var msg = "Encountered a known issue processing dacpac.Applying fix & re - running dacpac. ";
                 MessageList.Add(msg);
-                Log.Warning(ex,msg);
+                Log.Warning(ex, msg);
                 DropIndexFix_1040(connectionString, databaseName);
                 retryCount++;
-                ProcessDacPac(connectionString, databaseName, dacpacName, status,retryCount);
+                ProcessDacPac(connectionString, databaseName, dacpacName, status, retryCount);
             }
             catch (Exception ex)
             {
@@ -107,7 +106,7 @@ namespace DacpacUtility
             };
             const string sql = "DROP INDEX IX_Instances_InstanceDisplayName ON dbo.Instances;";
             using var cn = new SqlConnection(builder.ConnectionString);
-            using var cmd = new SqlCommand(sql, cn) ;
+            using var cmd = new SqlCommand(sql, cn);
             cn.Open();
             cmd.ExecuteNonQuery();
         }
