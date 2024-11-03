@@ -114,6 +114,7 @@ namespace DBADashGUI.CustomReports
                     customReportResult.LinkColumns.Add(col, frm.LinkColumnInfo);
                 }
 
+                previousSchema = null; // Force grids to be re-generated
                 dgv.Columns.Clear();
                 report.Update();
                 ShowTable();
