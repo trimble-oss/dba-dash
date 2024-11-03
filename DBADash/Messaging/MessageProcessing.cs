@@ -3,7 +3,6 @@ using Polly;
 using Polly.Retry;
 using Serilog;
 using System;
-using System.Collections.Concurrent;
 using System.Data;
 using System.Linq;
 using System.Text;

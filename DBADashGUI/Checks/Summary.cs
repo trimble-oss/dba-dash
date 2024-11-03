@@ -11,7 +11,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using OpenTK.Graphics.OpenGL;
 using static DBADashGUI.DBADashStatus;
 using static DBADashGUI.Main;
 
@@ -369,7 +368,7 @@ namespace DBADashGUI
                 var identDays = row["MinIdentityEstimatedDays"] == DBNull.Value
                     ? string.Empty
                     : ((long)row["MinIdentityEstimatedDays"]) + " days";
-                dgvSummary.Rows[idx].Cells["IdentityStatus"].Value = string.Join(" / ", new[] { identPct, identDays }.Where(s => !string.IsNullOrEmpty(s))); ;
+                dgvSummary.Rows[idx].Cells["IdentityStatus"].Value = string.Join(" / ", new[] { identPct, identDays }.Where(s => !string.IsNullOrEmpty(s)));
 
                 dgvSummary.Rows[idx].Cells["CorruptionStatus"].Value = row["DetectedCorruptionDateUtc"] == DBNull.Value
                     ? ""

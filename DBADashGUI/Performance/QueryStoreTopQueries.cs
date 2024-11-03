@@ -8,10 +8,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Azure;
 using DBADashGUI.Messaging;
-using Microsoft.Data.Tools.Schema.Sql.SchemaModel.Parameterization;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace DBADashGUI.Performance
 {

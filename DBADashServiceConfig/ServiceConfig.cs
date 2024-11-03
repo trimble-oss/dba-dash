@@ -18,7 +18,6 @@ using SortOrder = System.Windows.Forms.SortOrder;
 using System.Threading.Tasks;
 using DBADash.Messaging;
 using Humanizer;
-using Microsoft.SqlServer.Management.SqlParser.SqlCodeDom;
 
 namespace DBADashServiceConfig
 {

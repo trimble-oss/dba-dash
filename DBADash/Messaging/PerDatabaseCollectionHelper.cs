@@ -4,9 +4,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,9 +11,7 @@ namespace DBADash.Messaging
 {
     internal class PerDatabaseCollectionHelper
     {
-
         public delegate Task<DataTable> DatabaseOperationDelegate(string connectionString, string db);
-
 
         private static async Task<int> GetIdleSchedulerCount(string connectionString)
         {
@@ -54,8 +49,7 @@ namespace DBADash.Messaging
             DatabaseOperationDelegate databaseCollection, string connectionString, List<string> databases,
             int? threadCount = null)
         {
-            threadCount ??= databases.Count==1 ? 1 : await GetThreadCountBasedOnSchedulerAvailability(connectionString);
-
+            threadCount ??= databases.Count == 1 ? 1 : await GetThreadCountBasedOnSchedulerAvailability(connectionString);
 
             // Use a concurrent bag to collect DataTables from parallel tasks.
             var dataTables = new ConcurrentBag<DataTable>();
@@ -104,9 +98,9 @@ namespace DBADash.Messaging
                 throw new AggregateException(exceptions);
             }
             return dataTables;
-        }   
+        }
 
-        public static async Task<DataTable>RunPerDatabaseCollectionWithUnionResults(DatabaseOperationDelegate databaseCollection,string connectionString, List<string>databases,int? threadCount=null)
+        public static async Task<DataTable> RunPerDatabaseCollectionWithUnionResults(DatabaseOperationDelegate databaseCollection, string connectionString, List<string> databases, int? threadCount = null)
         {
             var dataTables = await RunPerDatabaseCollection(databaseCollection, connectionString, databases, threadCount);
 
@@ -159,6 +153,5 @@ namespace DBADash.Messaging
 
             return databases;
         }
-
     }
 }

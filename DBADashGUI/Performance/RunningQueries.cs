@@ -416,7 +416,7 @@ namespace DBADashGUI.Performance
             {
                 LoadSnapshot(new DataView(snapshotDT, PersistedFilter, PersistedSort, DataViewRowState.CurrentRows));
             }
-            catch (Exception ex) // Previous filter might not be valid
+            catch  // Previous filter might not be valid
             {
                 LoadSnapshot(new DataView(snapshotDT));
             }
@@ -755,11 +755,11 @@ namespace DBADashGUI.Performance
             {
                 e.Value = Convert.ToString(e.Value).Truncate(997) + "...";
             }
-            else if ((new[] { "colBlockCount", "colBlockedCountRecursive", "colBlockingSessionID" }).Contains(dgv.Columns[e.ColumnIndex].Name))
+            else if (new[] { "colBlockCount", "colBlockedCountRecursive", "colBlockingSessionID" }.Contains(dgv.Columns[e.ColumnIndex].Name))
             {
                 dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].SetStatusColor(Convert.ToInt32(e.Value) == 0 ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Critical);
             }
-            else if ((new[] { "colIdleTimeSec", "colIdleTime" }).Contains(dgv.Columns[e.ColumnIndex].Name))
+            else if (new[] { "colIdleTimeSec", "colIdleTime" }.Contains(dgv.Columns[e.ColumnIndex].Name))
             {
                 var idleSec = Convert.ToDouble(dgv.Rows[e.RowIndex].Cells["colIdleTimeSec"].Value.DBNullToNull());
                 var openTranCnt = Convert.ToInt32(dgv.Rows[e.RowIndex].Cells["colOpenTransactionCount"].Value.DBNullToNull());
@@ -1098,12 +1098,6 @@ namespace DBADashGUI.Performance
                 tsStatus.ForeColor = color;
                 tsStatus.LinkColor = color;
             });
-        }
-
-        private void tsClearFilter_Click(object sender, EventArgs e)
-        {
-            dgv.SetFilter(string.Empty);
-            dgvSessionWaits.SetFilter(string.Empty);
         }
     }
 }

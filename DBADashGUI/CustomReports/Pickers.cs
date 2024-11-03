@@ -2,16 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls.Primitives;
 using System.Windows.Forms;
 using DBADash;
 using DBADashGUI.Theme;
-using Microsoft.Extensions.Azure;
 
 namespace DBADashGUI.CustomReports
 {
@@ -148,7 +142,7 @@ namespace DBADashGUI.CustomReports
 
         private void TxtDefault_Validated(object sender, EventArgs e)
         {
-            SelectedPicker.DefaultValue =txtDefault.Text == string.Empty ? DBNull.Value : Convert.ChangeType(txtDefault.Text, SelectedPicker.DataType);
+            SelectedPicker.DefaultValue = txtDefault.Text == string.Empty ? DBNull.Value : Convert.ChangeType(txtDefault.Text, SelectedPicker.DataType);
         }
 
         private void Cancel_Click(object sender, EventArgs e)

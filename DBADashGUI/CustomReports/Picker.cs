@@ -61,8 +61,7 @@ namespace DBADashGUI.CustomReports
                 }
                 catch (Exception ex)
                 {
-                    _pickerItems = new Dictionary<object, string>();
-                    _pickerItems.Add("", "Error loading list:" + ex.Message);
+                    _pickerItems = new Dictionary<object, string> { { "", "Error loading list:" + ex.Message } };
                 }
 
                 return _pickerItems;

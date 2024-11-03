@@ -1,10 +1,6 @@
 ﻿using DBADash;
-using Microsoft.Data.SqlClient;
 using Serilog;
-using System.Data;
-using System.Diagnostics.Tracing;
 using System.Runtime.InteropServices;
-using Amazon.Runtime.CredentialManagement;
 
 namespace DBADashConfig
 {

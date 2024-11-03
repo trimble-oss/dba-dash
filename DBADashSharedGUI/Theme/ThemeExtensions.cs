@@ -2,7 +2,6 @@
 using LiveCharts.WinForms;
 using System.Runtime.Versioning;
 using System.Windows.Media;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
 using Button = System.Windows.Forms.Button;
 using ComboBox = System.Windows.Forms.ComboBox;
 using Control = System.Windows.Forms.Control;

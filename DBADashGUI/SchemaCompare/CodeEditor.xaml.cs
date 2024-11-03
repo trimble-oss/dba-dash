@@ -1,10 +1,8 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Xml;
 using System.Xml.Linq;
 using DBADashGUI.Theme;
 

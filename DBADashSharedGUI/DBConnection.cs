@@ -1,10 +1,7 @@
-﻿using System.Diagnostics.Eventing.Reader;
-using DBADashGUI.Theme;
+﻿using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System.Runtime.Versioning;
-using Azure.Core;
 using DBADashSharedGUI;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace DBADash
 {
@@ -34,7 +31,7 @@ namespace DBADash
             or SqlAuthenticationMethod.ActiveDirectoryServicePrincipal or SqlAuthenticationMethod.ActiveDirectoryManagedIdentity;
 
         private static Dictionary<SqlAuthenticationMethod, string> AuthenticationMethods =>
-            new Dictionary<SqlAuthenticationMethod, string>
+            new()
             {
                 { SqlAuthenticationMethod.ActiveDirectoryIntegrated, "Windows Authentication" },
                 { SqlAuthenticationMethod.SqlPassword, "SQL Server Authentication" },
@@ -45,7 +42,7 @@ namespace DBADash
                 { SqlAuthenticationMethod.ActiveDirectoryDefault, "Microsoft Entra Default" }
             };
 
-        private static Dictionary<SqlConnectionEncryptOption, string> EncryptionOptions => new Dictionary<SqlConnectionEncryptOption, string>
+        private static Dictionary<SqlConnectionEncryptOption, string> EncryptionOptions => new()
         {
             { SqlConnectionEncryptOption.Mandatory, "Mandatory" },
             { SqlConnectionEncryptOption.Optional, "Optional" },
@@ -115,7 +112,7 @@ namespace DBADash
                 chkTrustServerCert.Checked = builder.TrustServerCertificate;
                 cboEncryption.SelectedValue = builder.Encrypt;
                 txtHostNameInCertificate.Text = builder.HostNameInCertificate;
-                lnkOptions.Text = string.IsNullOrEmpty(OtherConnectionOptions) ? "{Other Options}" : OtherConnectionOptions.Truncate(40,true);
+                lnkOptions.Text = string.IsNullOrEmpty(OtherConnectionOptions) ? "{Other Options}" : OtherConnectionOptions.Truncate(40, true);
             }
         }
 
@@ -246,7 +243,7 @@ namespace DBADash
         {
             var input = OtherConnectionOptions;
             if (CommonShared.ShowInputDialog(ref input,
-                    "Enter additional connection string options: \n",default, "Enter any additional connection string options as required. e.g.\nApplicationIntent=ReadOnly;Connect Timeout=10") !=
+                    "Enter additional connection string options: \n", default, "Enter any additional connection string options as required. e.g.\nApplicationIntent=ReadOnly;Connect Timeout=10") !=
                 DialogResult.OK) return;
 
             try
@@ -258,7 +255,6 @@ namespace DBADash
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
         }
 
         private string StripOtherConnectionOptions()

@@ -3,10 +3,6 @@ using DBADashGUI.CustomReports;
 using DBADashGUI.SchemaCompare;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using DBADash;
-using Microsoft.SqlServer.Management.Smo;
-using System;
 
 namespace DBADashGUI.CommunityTools
 {
@@ -21,7 +17,7 @@ namespace DBADashGUI.CommunityTools
             { false, "No" },
         };
 
-        public static DirectExecutionReport sp_WhoIsActive = new DirectExecutionReport()
+        public static DirectExecutionReport sp_WhoIsActive = new()
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_WhoIsActive.ToString(),
             ReportName = ProcedureExecutionMessage.CommandNames.sp_WhoIsActive.ToString(),
@@ -31,27 +27,27 @@ namespace DBADashGUI.CommunityTools
             {
                 ParamList = new List<Param>
                 {
-                    new Param { ParamName = "@filter", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@filter_type", ParamType = "VARCHAR" },
-                    new Param { ParamName = "@not_filter", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@not_filter_type", ParamType = "VARCHAR" },
-                    new Param { ParamName = "@show_own_spid", ParamType = "BIT" },
-                    new Param { ParamName = "@show_system_spids", ParamType = "BIT" },
-                    new Param { ParamName = "@show_sleeping_spids", ParamType = "TINYINT" },
-                    new Param { ParamName = "@get_full_inner_text", ParamType = "BIT" },
-                    new Param { ParamName = "@get_plans", ParamType = "TINYINT" },
-                    new Param { ParamName = "@get_outer_command", ParamType = "BIT" },
-                    new Param { ParamName = "@get_transaction_info", ParamType = "BIT" },
-                    new Param { ParamName = "@get_task_info", ParamType = "TINYINT" },
-                    new Param { ParamName = "@get_locks", ParamType = "BIT" },
-                    new Param { ParamName = "@get_avg_time", ParamType = "BIT" },
-                    new Param { ParamName = "@get_additional_info", ParamType = "BIT" },
-                    new Param { ParamName = "@get_memory_info", ParamType = "BIT" },
-                    new Param { ParamName = "@find_block_leaders", ParamType = "BIT" },
-                    new Param { ParamName = "@delta_interval", ParamType = "INT" },
-                    new Param { ParamName = "@output_column_list", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@sort_order", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@format_output", ParamType = "TINYINT" },
+                    new() { ParamName = "@filter", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@filter_type", ParamType = "VARCHAR" },
+                    new() { ParamName = "@not_filter", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@not_filter_type", ParamType = "VARCHAR" },
+                    new() { ParamName = "@show_own_spid", ParamType = "BIT" },
+                    new() { ParamName = "@show_system_spids", ParamType = "BIT" },
+                    new() { ParamName = "@show_sleeping_spids", ParamType = "TINYINT" },
+                    new() { ParamName = "@get_full_inner_text", ParamType = "BIT" },
+                    new() { ParamName = "@get_plans", ParamType = "TINYINT" },
+                    new() { ParamName = "@get_outer_command", ParamType = "BIT" },
+                    new() { ParamName = "@get_transaction_info", ParamType = "BIT" },
+                    new() { ParamName = "@get_task_info", ParamType = "TINYINT" },
+                    new() { ParamName = "@get_locks", ParamType = "BIT" },
+                    new() { ParamName = "@get_avg_time", ParamType = "BIT" },
+                    new() { ParamName = "@get_additional_info", ParamType = "BIT" },
+                    new() { ParamName = "@get_memory_info", ParamType = "BIT" },
+                    new() { ParamName = "@find_block_leaders", ParamType = "BIT" },
+                    new() { ParamName = "@delta_interval", ParamType = "INT" },
+                    new() { ParamName = "@output_column_list", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@sort_order", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@format_output", ParamType = "TINYINT" },
                 }
             },
             CustomReportResults = new Dictionary<int, CustomReportResult>
@@ -362,7 +358,7 @@ namespace DBADashGUI.CommunityTools
             }
         };
 
-        public static DirectExecutionReport sp_Blitz = new DirectExecutionReport()
+        public static DirectExecutionReport sp_Blitz = new()
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_Blitz.ToString(),
             ReportName = ProcedureExecutionMessage.CommandNames.sp_Blitz.ToString(),
@@ -372,23 +368,23 @@ namespace DBADashGUI.CommunityTools
             {
                 ParamList = new List<Param>
                 {
-                    new Param { ParamName = "@CheckUserDatabaseObjects", ParamType = "TINYINT" },
-                    new Param { ParamName = "@CheckProcedureCache", ParamType = "TINYINT" },
-                    new Param { ParamName = "@OutputType", ParamType = "VARCHAR" },
-                    new Param { ParamName = "@OutputProcedureCache", ParamType = "TINYINT" },
-                    new Param { ParamName = "@CheckProcedureCacheFilter", ParamType = "VARCHAR" },
-                    new Param { ParamName = "@CheckServerInfo", ParamType = "TINYINT" },
-                    new Param { ParamName = "@SkipChecksServer", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@SkipChecksDatabase", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@SkipChecksSchema", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@SkipChecksTable", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@IgnorePrioritiesBelow", ParamType = "INT" },
-                    new Param { ParamName = "@IgnorePrioritiesAbove", ParamType = "INT" },
-                    new Param { ParamName = "@OutputXMLasNVARCHAR", ParamType = "TINYINT" },
-                    new Param { ParamName = "@SummaryMode", ParamType = "TINYINT" },
-                    new Param { ParamName = "@BringThePain", ParamType = "TINYINT" },
-                    new Param { ParamName = "@UsualDBOwner", ParamType = "SYSNAME" },
-                    new Param { ParamName = "@SkipBlockingChecks", ParamType = "TINYINT" },
+                    new() { ParamName = "@CheckUserDatabaseObjects", ParamType = "TINYINT" },
+                    new() { ParamName = "@CheckProcedureCache", ParamType = "TINYINT" },
+                    new() { ParamName = "@OutputType", ParamType = "VARCHAR" },
+                    new() { ParamName = "@OutputProcedureCache", ParamType = "TINYINT" },
+                    new() { ParamName = "@CheckProcedureCacheFilter", ParamType = "VARCHAR" },
+                    new() { ParamName = "@CheckServerInfo", ParamType = "TINYINT" },
+                    new() { ParamName = "@SkipChecksServer", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@SkipChecksDatabase", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@SkipChecksSchema", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@SkipChecksTable", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@IgnorePrioritiesBelow", ParamType = "INT" },
+                    new() { ParamName = "@IgnorePrioritiesAbove", ParamType = "INT" },
+                    new() { ParamName = "@OutputXMLasNVARCHAR", ParamType = "TINYINT" },
+                    new() { ParamName = "@SummaryMode", ParamType = "TINYINT" },
+                    new() { ParamName = "@BringThePain", ParamType = "TINYINT" },
+                    new() { ParamName = "@UsualDBOwner", ParamType = "SYSNAME" },
+                    new() { ParamName = "@SkipBlockingChecks", ParamType = "TINYINT" },
                 }
             },
             CustomReportResults = new Dictionary<int, CustomReportResult>
@@ -425,7 +421,7 @@ namespace DBADashGUI.CommunityTools
             },
         };
 
-        public static DirectExecutionReport sp_BlitzWho = new DirectExecutionReport()
+        public static DirectExecutionReport sp_BlitzWho = new()
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_BlitzWho.ToString(),
             ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzWho.ToString(),
@@ -435,20 +431,20 @@ namespace DBADashGUI.CommunityTools
             {
                 ParamList = new List<Param>
                 {
-                    new Param { ParamName = "@ShowSleepingSPIDs", ParamType = "TINYINT" },
-                    new Param { ParamName = "@ExpertMode", ParamType = "BIT" },
-                    new Param { ParamName = "@MinElapsedSeconds", ParamType = "INT" },
-                    new Param { ParamName = "@MinCPUTime", ParamType = "INT" },
-                    new Param { ParamName = "@MinLogicalReads", ParamType = "INT" },
-                    new Param { ParamName = "@MinPhysicalReads", ParamType = "INT" },
-                    new Param { ParamName = "@MinWrites", ParamType = "INT" },
-                    new Param { ParamName = "@MinTempdbMB", ParamType = "INT" },
-                    new Param { ParamName = "@MinRequestedMemoryKB", ParamType = "INT" },
-                    new Param { ParamName = "@MinBlockingSeconds", ParamType = "INT" },
-                    new Param { ParamName = "@ShowActualParameters", ParamType = "BIT" },
-                    new Param { ParamName = "@GetOuterCommand", ParamType = "BIT" },
-                    new Param { ParamName = "@GetLiveQueryPlan", ParamType = "BIT" },
-                    new Param { ParamName = "@SortOrder", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@ShowSleepingSPIDs", ParamType = "TINYINT" },
+                    new() { ParamName = "@ExpertMode", ParamType = "BIT" },
+                    new() { ParamName = "@MinElapsedSeconds", ParamType = "INT" },
+                    new() { ParamName = "@MinCPUTime", ParamType = "INT" },
+                    new() { ParamName = "@MinLogicalReads", ParamType = "INT" },
+                    new() { ParamName = "@MinPhysicalReads", ParamType = "INT" },
+                    new() { ParamName = "@MinWrites", ParamType = "INT" },
+                    new() { ParamName = "@MinTempdbMB", ParamType = "INT" },
+                    new() { ParamName = "@MinRequestedMemoryKB", ParamType = "INT" },
+                    new() { ParamName = "@MinBlockingSeconds", ParamType = "INT" },
+                    new() { ParamName = "@ShowActualParameters", ParamType = "BIT" },
+                    new() { ParamName = "@GetOuterCommand", ParamType = "BIT" },
+                    new() { ParamName = "@GetLiveQueryPlan", ParamType = "BIT" },
+                    new() { ParamName = "@SortOrder", ParamType = "NVARCHAR" },
                 }
             },
             Pickers = new List<Picker>
@@ -597,7 +593,7 @@ namespace DBADashGUI.CommunityTools
             },
         };
 
-        public static DirectExecutionReport sp_BlitzIndex = new DirectExecutionReport()
+        public static DirectExecutionReport sp_BlitzIndex = new()
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_BlitzIndex.ToString(),
             ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzIndex.ToString(),
@@ -608,23 +604,23 @@ namespace DBADashGUI.CommunityTools
             {
                 ParamList = new List<Param>
                 {
-                    new Param { ParamName = "@DatabaseName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@SchemaName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@TableName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@Mode", ParamType = "TINYINT" },
-                    new Param { ParamName = "@Filter", ParamType = "TINYINT" },
-                    new Param { ParamName = "@SkipPartitions", ParamType = "BIT" },
-                    new Param { ParamName = "@SkipStatistics", ParamType = "BIT" },
-                    new Param { ParamName = "@GetAllDatabases", ParamType = "BIT" },
-                    new Param { ParamName = "@ShowColumnstoreOnly", ParamType = "BIT" },
-                    new Param { ParamName = "@BringThePain", ParamType = "BIT" },
-                    new Param { ParamName = "@IgnoreDatabases", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@ThresholdMB", ParamType = "INT" },
-                    new Param { ParamName = "@IncludeInactiveIndexes", ParamType = "BIT" },
-                    new Param { ParamName = "@ShowAllMissingIndexRequests", ParamType = "BIT" },
-                    new Param { ParamName = "@ShowPartitionRanges", ParamType = "BIT" },
-                    new Param { ParamName = "@SortOrder", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@SortDirection", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@DatabaseName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@SchemaName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@TableName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@Mode", ParamType = "TINYINT" },
+                    new() { ParamName = "@Filter", ParamType = "TINYINT" },
+                    new() { ParamName = "@SkipPartitions", ParamType = "BIT" },
+                    new() { ParamName = "@SkipStatistics", ParamType = "BIT" },
+                    new() { ParamName = "@GetAllDatabases", ParamType = "BIT" },
+                    new() { ParamName = "@ShowColumnstoreOnly", ParamType = "BIT" },
+                    new() { ParamName = "@BringThePain", ParamType = "BIT" },
+                    new() { ParamName = "@IgnoreDatabases", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@ThresholdMB", ParamType = "INT" },
+                    new() { ParamName = "@IncludeInactiveIndexes", ParamType = "BIT" },
+                    new() { ParamName = "@ShowAllMissingIndexRequests", ParamType = "BIT" },
+                    new() { ParamName = "@ShowPartitionRanges", ParamType = "BIT" },
+                    new() { ParamName = "@SortOrder", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@SortDirection", ParamType = "NVARCHAR" },
                 }
             },
             Pickers = new List<Picker>
@@ -827,7 +823,7 @@ namespace DBADashGUI.CommunityTools
             },
         };
 
-        public static DirectExecutionReport sp_LogHunter = new DirectExecutionReport
+        public static DirectExecutionReport sp_LogHunter = new()
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_LogHunter.ToString(),
             ReportName = ProcedureExecutionMessage.CommandNames.sp_LogHunter.ToString(),
@@ -837,18 +833,18 @@ namespace DBADashGUI.CommunityTools
             {
                 ParamList = new List<Param>
                 {
-                    new Param { ParamName = "@days_back", ParamType = "INT" },
-                    new Param { ParamName = "@custom_message", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@custom_message_only", ParamType = "BIT" },
-                    new Param { ParamName = "@first_log_only", ParamType = "BIT" },
-                    new Param { ParamName = "@start_date", ParamType = "DATETIME" },
-                    new Param { ParamName = "@end_date", ParamType = "DATETIME" },
-                    new Param { ParamName = "@language_id", ParamType = "INT" },
+                    new() { ParamName = "@days_back", ParamType = "INT" },
+                    new() { ParamName = "@custom_message", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@custom_message_only", ParamType = "BIT" },
+                    new() { ParamName = "@first_log_only", ParamType = "BIT" },
+                    new() { ParamName = "@start_date", ParamType = "DATETIME" },
+                    new() { ParamName = "@end_date", ParamType = "DATETIME" },
+                    new() { ParamName = "@language_id", ParamType = "INT" },
                 }
             }
         };
 
-        public static DirectExecutionReport sp_BlitzCache = new DirectExecutionReport
+        public static DirectExecutionReport sp_BlitzCache = new()
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_BlitzCache.ToString(),
             ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzCache.ToString(),
@@ -859,30 +855,30 @@ namespace DBADashGUI.CommunityTools
             {
                 ParamList = new List<Param>
                 {
-                    new Param { ParamName = "@Top", ParamType = "INT" },
-                    new Param { ParamName = "@SortOrder", ParamType = "VARCHAR" },
-                    new Param { ParamName = "@UseTriggersAnyway", ParamType = "BIT" },
-                    new Param { ParamName = "@ExportToExcel", ParamType = "BIT" },
-                    new Param { ParamName = "@ExpertMode", ParamType = "TINYINT" },
-                    new Param { ParamName = "@ConfigurationDatabaseName", ParamType = "NVARCHAR(128)" },
-                    new Param { ParamName = "@ConfigurationSchemaName", ParamType = "NVARCHAR(258)" },
-                    new Param { ParamName = "@ConfigurationTableName", ParamType = "NVARCHAR(258)" },
-                    new Param { ParamName = "@DurationFilter", ParamType = "DECIMAL" },
-                    new Param { ParamName = "@HideSummary", ParamType = "BIT" },
-                    new Param { ParamName = "@IgnoreSystemDBs", ParamType = "BIT" },
-                    new Param { ParamName = "@OnlyQueryHashes", ParamType = "VARCHAR" },
-                    new Param { ParamName = "@IgnoreQueryHashes", ParamType = "VARCHAR" },
-                    new Param { ParamName = "@OnlySqlHandles", ParamType = "VARCHAR" },
-                    new Param { ParamName = "@IgnoreSqlHandles", ParamType = "VARCHAR" },
-                    new Param { ParamName = "@QueryFilter", ParamType = "VARCHAR" },
-                    new Param { ParamName = "@DatabaseName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@StoredProcName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@SlowlySearchPlansFor", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@Reanalyze", ParamType = "BIT" },
-                    new Param { ParamName = "@SkipAnalysis", ParamType = "BIT" },
-                    new Param { ParamName = "@BringThePain", ParamType = "BIT" },
-                    new Param { ParamName = "@MinimumExecutionCount", ParamType = "INT" },
-                    new Param { ParamName = "@MinutesBack", ParamType = "INT" },
+                    new() { ParamName = "@Top", ParamType = "INT" },
+                    new() { ParamName = "@SortOrder", ParamType = "VARCHAR" },
+                    new() { ParamName = "@UseTriggersAnyway", ParamType = "BIT" },
+                    new() { ParamName = "@ExportToExcel", ParamType = "BIT" },
+                    new() { ParamName = "@ExpertMode", ParamType = "TINYINT" },
+                    new() { ParamName = "@ConfigurationDatabaseName", ParamType = "NVARCHAR(128)" },
+                    new() { ParamName = "@ConfigurationSchemaName", ParamType = "NVARCHAR(258)" },
+                    new() { ParamName = "@ConfigurationTableName", ParamType = "NVARCHAR(258)" },
+                    new() { ParamName = "@DurationFilter", ParamType = "DECIMAL" },
+                    new() { ParamName = "@HideSummary", ParamType = "BIT" },
+                    new() { ParamName = "@IgnoreSystemDBs", ParamType = "BIT" },
+                    new() { ParamName = "@OnlyQueryHashes", ParamType = "VARCHAR" },
+                    new() { ParamName = "@IgnoreQueryHashes", ParamType = "VARCHAR" },
+                    new() { ParamName = "@OnlySqlHandles", ParamType = "VARCHAR" },
+                    new() { ParamName = "@IgnoreSqlHandles", ParamType = "VARCHAR" },
+                    new() { ParamName = "@QueryFilter", ParamType = "VARCHAR" },
+                    new() { ParamName = "@DatabaseName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@StoredProcName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@SlowlySearchPlansFor", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@Reanalyze", ParamType = "BIT" },
+                    new() { ParamName = "@SkipAnalysis", ParamType = "BIT" },
+                    new() { ParamName = "@BringThePain", ParamType = "BIT" },
+                    new() { ParamName = "@MinimumExecutionCount", ParamType = "INT" },
+                    new() { ParamName = "@MinutesBack", ParamType = "INT" },
                 }
             },
             Pickers = new List<Picker>
@@ -1087,7 +1083,7 @@ namespace DBADashGUI.CommunityTools
             },
         };
 
-        public static DirectExecutionReport sp_BlitzLock = new DirectExecutionReport()
+        public static DirectExecutionReport sp_BlitzLock = new()
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_BlitzLock.ToString(),
             ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzLock.ToString(),
@@ -1098,18 +1094,18 @@ namespace DBADashGUI.CommunityTools
             {
                 ParamList = new List<Param>
                 {
-                    new Param { ParamName = "@DatabaseName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@StartDate", ParamType = "DATETIME" },
-                    new Param { ParamName = "@EndDate", ParamType = "DATETIME" },
-                    new Param { ParamName = "@ObjectName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@StoredProcName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@AppName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@HostName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@LoginName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@EventSessionName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@TargetSessionType", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@VictimsOnly", ParamType = "BIT" },
-                    new Param { ParamName = "@DeadlockType", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@DatabaseName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@StartDate", ParamType = "DATETIME" },
+                    new() { ParamName = "@EndDate", ParamType = "DATETIME" },
+                    new() { ParamName = "@ObjectName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@StoredProcName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@AppName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@HostName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@LoginName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@EventSessionName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@TargetSessionType", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@VictimsOnly", ParamType = "BIT" },
+                    new() { ParamName = "@DeadlockType", ParamType = "NVARCHAR" },
                 }
             },
             Pickers = new List<Picker>
@@ -1208,7 +1204,7 @@ namespace DBADashGUI.CommunityTools
             },
         };
 
-        public static DirectExecutionReport sp_BlitzFirst = new DirectExecutionReport()
+        public static DirectExecutionReport sp_BlitzFirst = new()
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_BlitzFirst.ToString(),
             ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzFirst.ToString(),
@@ -1218,38 +1214,38 @@ namespace DBADashGUI.CommunityTools
             {
                 ParamList = new List<Param>
                 {
-                    new Param { ParamName = "@LogMessage", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@Help", ParamType = "TINYINT" },
-                    new Param { ParamName = "@AsOf", ParamType = "DATETIMEOFFSET" },
-                    new Param { ParamName = "@ExpertMode", ParamType = "TINYINT" },
-                    new Param { ParamName = "@Seconds", ParamType = "INT" },
-                    new Param { ParamName = "@OutputType", ParamType = "VARCHAR" },
-                    new Param { ParamName = "@OutputServerName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@OutputDatabaseName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@OutputSchemaName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@OutputTableName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@OutputTableNameFileStats", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@OutputTableNamePerfmonStats", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@OutputTableNameWaitStats", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@OutputTableNameBlitzCache", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@OutputTableNameBlitzWho", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@OutputResultSets", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@OutputTableRetentionDays", ParamType = "TINYINT" },
-                    new Param { ParamName = "@OutputXMLasNVARCHAR", ParamType = "TINYINT" },
-                    new Param { ParamName = "@FilterPlansByDatabase", ParamType = "VARCHAR" },
-                    new Param { ParamName = "@CheckProcedureCache", ParamType = "TINYINT" },
-                    new Param { ParamName = "@CheckServerInfo", ParamType = "TINYINT" },
-                    new Param { ParamName = "@FileLatencyThresholdMS", ParamType = "INT" },
-                    new Param { ParamName = "@SinceStartup", ParamType = "TINYINT" },
-                    new Param { ParamName = "@ShowSleepingSPIDs", ParamType = "TINYINT" },
-                    new Param { ParamName = "@BlitzCacheSkipAnalysis", ParamType = "BIT" },
-                    new Param { ParamName = "@MemoryGrantThresholdPct", ParamType = "DECIMAL" },
-                    new Param { ParamName = "@LogMessageCheckID", ParamType = "INT" },
-                    new Param { ParamName = "@LogMessagePriority", ParamType = "TINYINT" },
-                    new Param { ParamName = "@LogMessageFindingsGroup", ParamType = "VARCHAR" },
-                    new Param { ParamName = "@LogMessageFinding", ParamType = "VARCHAR" },
-                    new Param { ParamName = "@LogMessageURL", ParamType = "VARCHAR" },
-                    new Param { ParamName = "@LogMessageCheckDate", ParamType = "DATETIMEOFFSET" },
+                    new() { ParamName = "@LogMessage", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@Help", ParamType = "TINYINT" },
+                    new() { ParamName = "@AsOf", ParamType = "DATETIMEOFFSET" },
+                    new() { ParamName = "@ExpertMode", ParamType = "TINYINT" },
+                    new() { ParamName = "@Seconds", ParamType = "INT" },
+                    new() { ParamName = "@OutputType", ParamType = "VARCHAR" },
+                    new() { ParamName = "@OutputServerName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@OutputDatabaseName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@OutputSchemaName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@OutputTableName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@OutputTableNameFileStats", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@OutputTableNamePerfmonStats", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@OutputTableNameWaitStats", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@OutputTableNameBlitzCache", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@OutputTableNameBlitzWho", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@OutputResultSets", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@OutputTableRetentionDays", ParamType = "TINYINT" },
+                    new() { ParamName = "@OutputXMLasNVARCHAR", ParamType = "TINYINT" },
+                    new() { ParamName = "@FilterPlansByDatabase", ParamType = "VARCHAR" },
+                    new() { ParamName = "@CheckProcedureCache", ParamType = "TINYINT" },
+                    new() { ParamName = "@CheckServerInfo", ParamType = "TINYINT" },
+                    new() { ParamName = "@FileLatencyThresholdMS", ParamType = "INT" },
+                    new() { ParamName = "@SinceStartup", ParamType = "TINYINT" },
+                    new() { ParamName = "@ShowSleepingSPIDs", ParamType = "TINYINT" },
+                    new() { ParamName = "@BlitzCacheSkipAnalysis", ParamType = "BIT" },
+                    new() { ParamName = "@MemoryGrantThresholdPct", ParamType = "DECIMAL" },
+                    new() { ParamName = "@LogMessageCheckID", ParamType = "INT" },
+                    new() { ParamName = "@LogMessagePriority", ParamType = "TINYINT" },
+                    new() { ParamName = "@LogMessageFindingsGroup", ParamType = "VARCHAR" },
+                    new() { ParamName = "@LogMessageFinding", ParamType = "VARCHAR" },
+                    new() { ParamName = "@LogMessageURL", ParamType = "VARCHAR" },
+                    new() { ParamName = "@LogMessageCheckDate", ParamType = "DATETIMEOFFSET" },
                 }
             },
             Pickers = new List<Picker>
@@ -1501,7 +1497,7 @@ namespace DBADashGUI.CommunityTools
             },
         };
 
-        public static DirectExecutionReport sp_BlitzBackups = new DirectExecutionReport()
+        public static DirectExecutionReport sp_BlitzBackups = new()
         {
             ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzBackups.ToString(),
             URL = FirstResponderKitUrl,
@@ -1511,15 +1507,15 @@ namespace DBADashGUI.CommunityTools
             {
                 ParamList = new List<Param>
                 {
-                    new Param { ParamName = "@HoursBack", ParamType = "INT" },
-                    new Param { ParamName = "@MSDBName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@AGName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@RestoreSpeedFullMBps", ParamType = "INT" },
-                    new Param { ParamName = "@RestoreSpeedDiffMBps", ParamType = "INT" },
-                    new Param { ParamName = "@RestoreSpeedLogMBps", ParamType = "INT" },
-                    new Param { ParamName = "@WriteBackupsToListenerName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@WriteBackupsToDatabaseName", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@WriteBackupsLastHours", ParamType = "INT" },
+                    new() { ParamName = "@HoursBack", ParamType = "INT" },
+                    new() { ParamName = "@MSDBName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@AGName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@RestoreSpeedFullMBps", ParamType = "INT" },
+                    new() { ParamName = "@RestoreSpeedDiffMBps", ParamType = "INT" },
+                    new() { ParamName = "@RestoreSpeedLogMBps", ParamType = "INT" },
+                    new() { ParamName = "@WriteBackupsToListenerName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@WriteBackupsToDatabaseName", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@WriteBackupsLastHours", ParamType = "INT" },
                 }
             },
             CustomReportResults = new Dictionary<int, CustomReportResult>
@@ -1556,7 +1552,7 @@ namespace DBADashGUI.CommunityTools
             }
         };
 
-        public static DirectExecutionReport sp_HumanEvents = new DirectExecutionReport()
+        public static DirectExecutionReport sp_HumanEvents = new()
         {
             ReportName = ProcedureExecutionMessage.CommandNames.sp_HumanEvents.ToString(),
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_HumanEvents.ToString(),
@@ -1568,31 +1564,31 @@ namespace DBADashGUI.CommunityTools
             {
                 ParamList = new List<Param>
                 {
-                    new Param { ParamName = "@event_type", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@query_duration_ms", ParamType = "INTEGER" },
-                    new Param { ParamName = "@query_sort_order", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@skip_plans", ParamType = "BIT" },
-                    new Param { ParamName = "@blocking_duration_ms", ParamType = "INTEGER" },
-                    new Param { ParamName = "@wait_type", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@wait_duration_ms", ParamType = "INTEGER" },
-                    new Param { ParamName = "@client_app_name", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@client_hostname", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@database_name", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@session_id", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@sample_divisor", ParamType = "INTEGER" },
-                    new Param { ParamName = "@username", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@object_name", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@object_schema", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@requested_memory_mb", ParamType = "INTEGER" },
-                    new Param { ParamName = "@seconds_sample", ParamType = "TINYINT" },
-                    new Param { ParamName = "@gimme_danger", ParamType = "BIT" },
-                    new Param { ParamName = "@keep_alive", ParamType = "BIT" },
-                    new Param { ParamName = "@custom_name", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@output_database_name", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@output_schema_name", ParamType = "NVARCHAR" },
-                    new Param { ParamName = "@delete_retention_days", ParamType = "INTEGER" },
-                    new Param { ParamName = "@cleanup", ParamType = "BIT" },
-                    new Param { ParamName = "@max_memory_kb", ParamType = "BIGINT" }
+                    new() { ParamName = "@event_type", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@query_duration_ms", ParamType = "INTEGER" },
+                    new() { ParamName = "@query_sort_order", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@skip_plans", ParamType = "BIT" },
+                    new() { ParamName = "@blocking_duration_ms", ParamType = "INTEGER" },
+                    new() { ParamName = "@wait_type", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@wait_duration_ms", ParamType = "INTEGER" },
+                    new() { ParamName = "@client_app_name", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@client_hostname", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@database_name", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@session_id", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@sample_divisor", ParamType = "INTEGER" },
+                    new() { ParamName = "@username", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@object_name", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@object_schema", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@requested_memory_mb", ParamType = "INTEGER" },
+                    new() { ParamName = "@seconds_sample", ParamType = "TINYINT" },
+                    new() { ParamName = "@gimme_danger", ParamType = "BIT" },
+                    new() { ParamName = "@keep_alive", ParamType = "BIT" },
+                    new() { ParamName = "@custom_name", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@output_database_name", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@output_schema_name", ParamType = "NVARCHAR" },
+                    new() { ParamName = "@delete_retention_days", ParamType = "INTEGER" },
+                    new() { ParamName = "@cleanup", ParamType = "BIT" },
+                    new() { ParamName = "@max_memory_kb", ParamType = "BIGINT" }
                 }
             },
             Pickers = new List<Picker>
@@ -1858,7 +1854,7 @@ namespace DBADashGUI.CommunityTools
             }
         };
 
-        public static DirectExecutionReport sp_PressureDetector = new DirectExecutionReport()
+        public static DirectExecutionReport sp_PressureDetector = new()
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_PressureDetector.ToString(),
             ReportName = ProcedureExecutionMessage.CommandNames.sp_PressureDetector.ToString(),
@@ -2029,7 +2025,7 @@ namespace DBADashGUI.CommunityTools
             }
         };
 
-        public static DirectExecutionReport sp_HealthParser = new DirectExecutionReport()
+        public static DirectExecutionReport sp_HealthParser = new()
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_HealthParser.ToString(),
             ReportName = ProcedureExecutionMessage.CommandNames.sp_HealthParser.ToString(),
@@ -2124,7 +2120,7 @@ namespace DBADashGUI.CommunityTools
             },
         };
 
-        public static DirectExecutionReport sp_QuickieStore = new DirectExecutionReport()
+        public static DirectExecutionReport sp_QuickieStore = new()
         {
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_QuickieStore.ToString(),
             ReportName = ProcedureExecutionMessage.CommandNames.sp_QuickieStore.ToString(),
