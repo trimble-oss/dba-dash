@@ -813,5 +813,14 @@ namespace DBADashGUI.Properties {
             }
         }
 
+        internal static System.Drawing.Bitmap NewWindow_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("NewWindow_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
     }
 }

@@ -1336,5 +1336,12 @@ namespace DBADashGUI.CustomReports
                 await cancellationTokenSource.CancelAsync();
             }
         }
+
+        private void TsNewWindow_Click(object sender, EventArgs e)
+        {
+            var frm = new CustomReportViewer();
+            frm.Context = context;
+            frm.Show();
+        }
     }
 }
