@@ -43,6 +43,7 @@ namespace DBADashGUI.CustomReports
             this.CellFormatting += DBADashDataGridView_CellFormatting;
             this.MouseUp += Dgv_MouseUp;
             this.DataSourceChanged += Dgv_DataSourceChanged;
+            this.ColumnAdded += (_, args) => args.Column.ApplyTheme();
             EnableDoubleBuffering();
             AddCellContextMenuItems();
             AddColumnContextMenuItems();
