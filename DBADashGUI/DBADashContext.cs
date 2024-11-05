@@ -9,9 +9,17 @@ namespace DBADashGUI
 {
     public class DBADashContext : ICloneable
     {
-        public HashSet<int> InstanceIDs;
-        public HashSet<int> AzureInstanceIDs;
-        public HashSet<int> RegularInstanceIDs;
+        public HashSet<int> InstanceIDs => new HashSet<int>(RegularInstanceIDs.Union(AzureInstanceIDs));
+        public HashSet<int> AzureInstanceIDs => ShowHiddenInstances ? AzureInstanceIDsWithHidden : new HashSet<int>(AzureInstanceIDsWithHidden.Except(HiddenInstanceIDs));
+        public HashSet<int> RegularInstanceIDs => ShowHiddenInstances ? RegularInstanceIDsWithHidden : new HashSet<int>(RegularInstanceIDsWithHidden.Except(HiddenInstanceIDs));
+
+        public bool ShowHiddenInstances => Common.ShowHidden || InstanceID > 0;
+
+        public HashSet<int> RegularInstanceIDsWithHidden = new();
+        public HashSet<int> AzureInstanceIDsWithHidden = new();
+
+        public static HashSet<int> HiddenInstanceIDs = new();
+
         public string InstanceName { get; set; }
         public string DatabaseName { get; set; }
         public int InstanceID { get; set; }
@@ -41,7 +49,7 @@ namespace DBADashGUI
         {
             get
             {
-                if(_productVersion != null) return _productVersion;
+                if (_productVersion != null) return _productVersion;
                 GetAdditionalInfo();
                 return _productVersion;
             }
@@ -51,7 +59,7 @@ namespace DBADashGUI
         {
             get
             {
-                if(_importAgentID != null || InstanceID <=0) return _importAgentID;
+                if (_importAgentID != null || InstanceID <= 0) return _importAgentID;
                 GetAdditionalInfo();
                 return _importAgentID;
             }
@@ -61,7 +69,7 @@ namespace DBADashGUI
         {
             get
             {
-                if(_collectAgentID != null || InstanceID<=0) return _collectAgentID;
+                if (_collectAgentID != null || InstanceID <= 0) return _collectAgentID;
                 GetAdditionalInfo();
                 return _collectAgentID;
             }
@@ -71,7 +79,7 @@ namespace DBADashGUI
         {
             get
             {
-                if(_connectionID != null) return _connectionID;
+                if (_connectionID != null) return _connectionID;
                 GetAdditionalInfo();
                 return _connectionID;
             }
@@ -81,8 +89,8 @@ namespace DBADashGUI
 
         private void GetAdditionalInfo()
         {
-            if(InstanceID<=0) return;
-            var row =  CommonData.Instances.Select($"InstanceID={InstanceID}").FirstOrDefault();
+            if (InstanceID <= 0) return;
+            var row = CommonData.Instances.Select($"InstanceID={InstanceID}").FirstOrDefault();
             if (row == null) return;
             _collectAgentID = (int)row["CollectAgentID"];
             _importAgentID = (int)row["ImportAgentID"];

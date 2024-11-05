@@ -1,12 +1,12 @@
-﻿using DBADashGUI.CustomReports;
+﻿using DBADash;
+using DBADashGUI.CustomReports;
+using DBADashGUI.Properties;
 using Microsoft.SqlServer.Management.Common;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
-using DBADash;
-using DBADashGUI.Properties;
 
 namespace DBADashGUI
 {
@@ -95,9 +95,6 @@ namespace DBADashGUI
 
         public string FriendlyFullPath => Type == TreeType.Drive ? FullPath[..^Text.Length].Replace("\\", " \\ ") + DriveName : FullPath.Replace("\\", " \\ ");
 
-        private HashSet<int> _RegularInstanceIDs;
-        private HashSet<int> _AzureInstanceIDs;
-        private HashSet<int> _InstanceIDs;
         private DBADashContext InternalContext;
         public SQLTreeItem SQLTreeItemParent => Parent.AsSQLTreeItem();
         private bool IsChildOfInstanceOrAzureDB => (InstanceID > 0 && !IsInstanceOrAzureDB) || Type == TreeType.ElasticPool;
@@ -115,16 +112,13 @@ namespace DBADashGUI
         {
             get
             {
-                InternalContext ??= new DBADashContext()
+                if (InternalContext != null) return InternalContext;
+                InternalContext = new DBADashContext()
                 {
-                    InstanceIDs = InstanceIDs,
-                    AzureInstanceIDs = AzureInstanceIDs,
-                    RegularInstanceIDs = RegularInstanceIDs,
                     ObjectID = ObjectID,
                     ObjectName = ObjectName,
                     InstanceID = InstanceID,
                     DatabaseID = DatabaseID,
-                    InstanceName = InstanceName,
                     JobID = JobID,
                     JobStepID = JobStepID,
                     Type = Type,
@@ -133,8 +127,71 @@ namespace DBADashGUI
                     DriveName = DriveName,
                     Report = Report,
                     ElasticPoolName = ElasticPoolName,
-                    MasterInstanceID = MasterInstanceID
                 };
+                switch (Type)
+                {
+                    case TreeType.DBADashRoot or TreeType.AzureInstance or TreeType.InstanceFolder:
+                        {
+                            foreach (SQLTreeItem itm in Nodes) // Look down the tree for Instance/AzureDB nodes
+                            {
+                                if (itm.InstanceID > 0) // We have an instance to add
+                                {
+                                    if (itm.Type == TreeType.AzureDatabase)
+                                    {
+                                        InternalContext.AzureInstanceIDsWithHidden.Add(itm.instanceID);
+                                    }
+                                    else
+                                    {
+                                        InternalContext.RegularInstanceIDsWithHidden.Add(itm.instanceID);
+                                    }
+                                }
+                                else if (itm.Type is TreeType.AzureInstance or TreeType.InstanceFolder)
+                                {
+                                    // We need to get the InstanceIDs from next level down
+
+                                    InternalContext.AzureInstanceIDsWithHidden.UnionWith(itm.Context.AzureInstanceIDsWithHidden);
+                                    InternalContext.RegularInstanceIDsWithHidden.UnionWith(itm.Context.RegularInstanceIDsWithHidden);
+                                }
+                            }
+
+                            break;
+                        }
+                    // Return a list with a single ID of the AzureDB
+                    case TreeType.AzureDatabase:
+                        InternalContext.AzureInstanceIDsWithHidden.Add(instanceID);
+                        break;
+                    // Return a list with a single ID of the Instance
+                    case TreeType.Instance:
+                        InternalContext.RegularInstanceIDsWithHidden.Add(instanceID);
+                        break;
+
+                    case TreeType.ElasticPool:
+                        InternalContext.AzureInstanceIDsWithHidden = Parent?.Nodes.Cast<SQLTreeItem>().Where(n => n.Type == TreeType.AzureDatabase && string.Equals(n.ElasticPoolName, ElasticPoolName, StringComparison.InvariantCultureIgnoreCase)).Select(n => n.InstanceID).ToHashSet();
+                        break;
+
+                    default:
+                        InternalContext.AzureInstanceIDsWithHidden = Parent.AsSQLTreeItem().AzureInstanceIDsWithHidden;
+                        InternalContext.RegularInstanceIDsWithHidden = Parent.AsSQLTreeItem().RegularInstanceIDsWithHidden;
+                        break;
+                }
+
+                Context.InstanceName = Type switch
+                {
+                    TreeType.Instance or TreeType.AzureInstance => ObjectName,
+                    TreeType.DBADashRoot => string.Empty,
+                    _ => Parent?.AsSQLTreeItem().Context.InstanceName ?? string.Empty
+                };
+                if (Type is TreeType.ElasticPool or TreeType.AzureInstance)
+                {
+                    InternalContext.MasterInstanceID = CommonData.Instances.Rows.Cast<DataRow>()
+                        .Where(r => string.Equals((string)r["Instance"], InstanceName, StringComparison.InvariantCultureIgnoreCase) && string.Equals((string)r["AzureDBName"].DBNullToNull(), "master", StringComparison.InvariantCultureIgnoreCase))
+                        .Select(r => (int)r["InstanceID"])
+                        .FirstOrDefault(0);
+                }
+                else
+                {
+                    InternalContext.MasterInstanceID = 0;
+                }
                 return InternalContext;
             }
         }
@@ -149,134 +206,30 @@ namespace DBADashGUI
         public int JobStepID => Type == TreeType.AgentJobStep ? (int)Tag : -1;
 
         /// <summary>
-        /// Populates lists of instance IDs: InstanceIDs, RegularInstanceIDs and AzureInstanceIDs
-        /// No work is performed if list of IDs has already been populated.
+        /// Return a list of instance IDs associated with the current node in the tree.  Includes AzureDB.
         /// </summary>
-        private void GetInstanceIDs()
-        {
-            if (_InstanceIDs == null)
-            {
-                // Note dupes are possible but HashSet maintains a distinct list
-                _RegularInstanceIDs = new HashSet<int>();
-                _AzureInstanceIDs = new HashSet<int>();
-                _InstanceIDs = new HashSet<int>();
-                if (Type is TreeType.DBADashRoot or TreeType.AzureInstance or TreeType.InstanceFolder)
-                {
-                    foreach (SQLTreeItem itm in Nodes) // Look down the tree for Instance/AzureDB nodes
-                    {
-                        if (itm.InstanceID > 0) // We have an instance to add
-                        {
-                            if (itm.Type == TreeType.AzureDatabase)
-                            {
-                                _AzureInstanceIDs.Add(itm.instanceID);
-                            }
-                            else
-                            {
-                                _RegularInstanceIDs.Add(itm.instanceID);
-                            }
-                            _InstanceIDs.Add(itm.InstanceID);
-                        }
-                        if (itm.Type is TreeType.AzureInstance or TreeType.InstanceFolder)
-                        {
-                            // We need to get the InstanceIDs from next level down
-                            _InstanceIDs.UnionWith(itm.InstanceIDs);
-                            _AzureInstanceIDs.UnionWith(itm.AzureInstanceIDs);
-                            _RegularInstanceIDs.UnionWith(itm.RegularInstanceIDs);
-                        }
-                    }
-                }
-                else if (Type == TreeType.AzureDatabase) // Return a list with a single ID of the AzureDB
-                {
-                    _AzureInstanceIDs.Add(instanceID);
-                    _InstanceIDs.Add(instanceID);
-                }
-                else if (Type == TreeType.Instance) // Return a list with a single ID of the Instance
-                {
-                    _RegularInstanceIDs.Add(instanceID);
-                    _InstanceIDs.Add(instanceID);
-                }
-                else if (Type == TreeType.ElasticPool)
-                {
-                    _AzureInstanceIDs = Parent.Nodes.Cast<SQLTreeItem>().Where(n => n.Type == TreeType.AzureDatabase && string.Equals(n.ElasticPoolName, ElasticPoolName, StringComparison.InvariantCultureIgnoreCase)).Select(n => n.InstanceID).ToHashSet();
-                    _InstanceIDs.UnionWith(_AzureInstanceIDs);
-                }
-            }
-        }
+        public HashSet<int> InstanceIDs => Context.InstanceIDs;
 
         /// <summary>
         /// Return a list of instance IDs associated with the current node in the tree.  Includes AzureDB.
         /// </summary>
-        public HashSet<int> InstanceIDs
-        {
-            get
-            {
-                if (Type is TreeType.DBADashRoot or TreeType.AzureInstance or TreeType.InstanceFolder or TreeType.Instance or TreeType.AzureDatabase or TreeType.ElasticPool)
-                {
-                    GetInstanceIDs();
-                    return _InstanceIDs;
-                }
-                else
-                {
-                    return SQLTreeItemParent.InstanceIDs;
-                }
-            }
-        }
+        public HashSet<int> InstanceIDsWithHidden => Context.AzureInstanceIDsWithHidden;
 
         /// <summary>
         /// Return a list of instance IDs associated with the current node in the tree.  Excludes AzureDB.
         /// </summary>
-        public HashSet<int> RegularInstanceIDs
-        {
-            get
-            {
-                if (Type is TreeType.DBADashRoot or TreeType.AzureInstance or TreeType.InstanceFolder or TreeType.Instance or TreeType.AzureDatabase or TreeType.ElasticPool)
-                {
-                    GetInstanceIDs();
-                    return _RegularInstanceIDs;
-                }
-                else
-                {
-                    return SQLTreeItemParent.RegularInstanceIDs;
-                }
-            }
-        }
+        public HashSet<int> RegularInstanceIDs => Context.RegularInstanceIDs;
+
+        public HashSet<int> RegularInstanceIDsWithHidden => Context.RegularInstanceIDsWithHidden;
 
         /// <summary>
         /// Return a list of AzureDB instance IDs associated with the current node in the tree.
         /// </summary>
-        public HashSet<int> AzureInstanceIDs
-        {
-            get
-            {
-                if (Type is TreeType.DBADashRoot or TreeType.AzureInstance or TreeType.InstanceFolder or TreeType.Instance or TreeType.AzureDatabase or TreeType.ElasticPool)
-                {
-                    GetInstanceIDs();
-                    return _AzureInstanceIDs;
-                }
-                else
-                {
-                    return SQLTreeItemParent.AzureInstanceIDs;
-                }
-            }
-        }
+        public HashSet<int> AzureInstanceIDs => Context.AzureInstanceIDs;
 
-        public int MasterInstanceID
-        {
-            get
-            {
-                if (Type is TreeType.ElasticPool or TreeType.AzureInstance)
-                {
-                    return CommonData.Instances.Rows.Cast<DataRow>()
-                        .Where(r => string.Equals((string)r["Instance"], InstanceName, StringComparison.InvariantCultureIgnoreCase) && string.Equals((string)r["AzureDBName"].DBNullToNull(), "master", StringComparison.InvariantCultureIgnoreCase))
-                        .Select(r => (int)r["InstanceID"])
-                        .FirstOrDefault(0);
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-        }
+        public HashSet<int> AzureInstanceIDsWithHidden => Context.AzureInstanceIDsWithHidden;
+
+        public int MasterInstanceID => Context.MasterInstanceID;
 
         public string FullName() => string.IsNullOrEmpty(_schemaName) ? _objectName : _schemaName + "." + _objectName;
 
@@ -342,7 +295,6 @@ namespace DBADashGUI
         public bool IsVisibleInSummary
         { get => isVisibleInSummary; set { isVisibleInSummary = value; SetIcon(); } }
 
-        private bool hasInstanceName;
         private string instanceName;
         private int instanceID;
 
@@ -354,37 +306,7 @@ namespace DBADashGUI
 
         public TreeType Type;
 
-        public string InstanceName
-        {
-            get
-            {
-                if (hasInstanceName)
-                {
-                    return instanceName;
-                }
-                var n = this;
-                do
-                {
-                    if (n.Type is TreeType.Instance or TreeType.AzureInstance)
-                    {
-                        instanceName = n.ObjectName;
-                        hasInstanceName = true;
-                    }
-                    else if (n.Type == TreeType.DBADashRoot)
-                    {
-                        instanceName = string.Empty;
-                        hasInstanceName = true;
-                    }
-                    else
-                    {
-                        n = n.SQLTreeItemParent;
-                    }
-                }
-                while (n.Parent != null && !hasInstanceName);
-                hasInstanceName = true;
-                return instanceName;
-            }
-        }
+        public string InstanceName => Context.InstanceName;
 
         public string _objectName;
         public string _schemaName;
@@ -754,6 +676,17 @@ namespace DBADashGUI
             try
             {
                 SharedData.UpdateShowInSummary(InstanceID, !mnu.Checked, Common.ConnectionString);
+                switch (mnu.Checked)
+                {
+                    case true:
+                        DBADashContext.HiddenInstanceIDs.Add(InstanceID);
+                        break;
+
+                    default:
+                        DBADashContext.HiddenInstanceIDs.Remove(InstanceID);
+                        break;
+                }
+
                 IsVisibleInSummary = !mnu.Checked;
                 SetIcon();
             }
