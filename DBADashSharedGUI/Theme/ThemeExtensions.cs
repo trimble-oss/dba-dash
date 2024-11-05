@@ -80,7 +80,6 @@ namespace DBADashGUI.Theme
                 case TextBox txt:
                     txt.ApplyTheme(theme);
                     break;
-
                 default:
                     control.BackColor = theme.BackgroundColor;
                     control.ForeColor = theme.ForegroundColor;
@@ -192,7 +191,7 @@ namespace DBADashGUI.Theme
 
             foreach (var col in dgv.Columns.OfType<DataGridViewLinkColumn>())
             {
-                col.LinkColor = theme.LinkColor;
+                col.ApplyTheme(theme);
             }
             dgv.ShowCellToolTips = CellToolTipMaxLength > 0;
             dgv.CellFormatting -= TruncateTooltipTextHandler;
@@ -200,6 +199,19 @@ namespace DBADashGUI.Theme
             {
                 dgv.CellFormatting += TruncateTooltipTextHandler;
             }
+        }
+
+        public static void ApplyTheme(this DataGridViewColumn col, BaseTheme theme)
+        {
+            if(col is DataGridViewLinkColumn linkCol)
+            {
+                linkCol.LinkColor = theme.LinkColor;
+            }
+        }
+
+        public static void ApplyTheme(this DataGridViewColumn col)
+        {
+           col.ApplyTheme(CurrentTheme);
         }
 
         public static void ApplyTheme(this TreeView tv, BaseTheme theme)
