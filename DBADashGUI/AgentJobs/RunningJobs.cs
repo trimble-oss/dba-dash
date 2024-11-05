@@ -61,7 +61,7 @@ namespace DBADashGUI.AgentJobs
         public void RefreshData()
         {
             var dt = GetRunningJobs();
-            dgvRunningJobs.DataSource = new DataView(dt,PersistedFilter,PersistedSort, DataViewRowState.CurrentRows);
+            dgvRunningJobs.DataSource = new DataView(dt, PersistedFilter, PersistedSort, DataViewRowState.CurrentRows);
             PersistedFilter = null;
             PersistedSort = null;
         }
@@ -179,7 +179,7 @@ namespace DBADashGUI.AgentJobs
 
                 JobHistoryForm?.Close();
                 JobHistoryForm = new();
-                var jobContext = new DBADashContext() { InstanceID = instanceId, JobID = jobId, InstanceIDs = new HashSet<int>() { instanceId }, RegularInstanceIDs = new HashSet<int>() { instanceId }, JobStepID = -1 };
+                var jobContext = new DBADashContext() { InstanceID = instanceId, JobID = jobId, RegularInstanceIDsWithHidden = new HashSet<int>() { instanceId }, JobStepID = -1 };
                 JobHistoryForm.ShowSteps = true;
                 JobHistoryForm.SetContext(jobContext);
                 JobHistoryForm.FormClosed += delegate { JobHistoryForm = null; };

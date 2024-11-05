@@ -558,7 +558,7 @@ namespace DBADashGUI
 
         private void ShowCorruptionViewer(string instance, int instanceID)
         {
-            DBADashContext ctx = new() { InstanceIDs = new HashSet<int>() { instanceID }, InstanceID = instanceID, InstanceName = instance };
+            DBADashContext ctx = new() { RegularInstanceIDsWithHidden = new HashSet<int>() { instanceID }, InstanceID = instanceID, InstanceName = instance };
             ShowCorruptionViewer(ctx);
         }
 
