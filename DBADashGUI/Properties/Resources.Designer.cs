@@ -821,6 +821,21 @@ namespace DBADashGUI.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-
+        internal static System.Drawing.Bitmap SaveTable_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("SaveTable_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        internal static System.Drawing.Bitmap DataTable_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("DataTable_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
