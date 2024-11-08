@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DBADash;
+using DBADash.Messaging;
 using DBADashGUI.CustomReports;
 using Serilog;
 
@@ -26,6 +27,7 @@ namespace DBADashGUI
         public int DatabaseID { get; set; }
         public long ObjectID { get; set; }
         public string ObjectName { get; set; }
+        public string SchemaName{ get; set; }
 
         public Guid JobID { get; set; }
         public int JobStepID { get; set; }
@@ -125,6 +127,12 @@ namespace DBADashGUI
                 return (bool)_canMessage;
             }
         }
+
+        public bool IsScriptAllowed(ProcedureExecutionMessage.CommandNames proc) => IsScriptAllowed(proc.ToString());
+      
+
+        public bool IsScriptAllowed(string procName)=>CanMessage && DBADashUser.CommunityScripts && (CollectAgent.IsAllowAllScripts || CollectAgent.AllowedScripts.Contains(procName));
+       
 
         public DBADashAgent ImportAgent => ImportAgentID == null ? null : CommonData.GetDBADashAgent((int)ImportAgentID);
 
