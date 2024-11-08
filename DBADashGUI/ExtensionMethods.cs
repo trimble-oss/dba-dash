@@ -425,6 +425,13 @@ namespace DBADashGUI
         /// <returns></returns>
         public static string SqlSingleQuote(this string value) => value.Replace("'", "''");
 
+        /// <summary>
+        /// Replicates SQL Server QUOTENAME function - wrapping text in square brackets and doubling up on right square bracket.  Use SqlSingleQuote for single quotes.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static string SqlQuoteName(this string value) => $"[{value.Truncate(128).Replace("]", "]]")}]";
+
         public static int ToWin32(this Color color) => color.R | (color.G << 8) | (color.B << 16);
 
         public static string GetDescription(this Font font)
@@ -732,6 +739,26 @@ namespace DBADashGUI
                 SqlDbType.Xml => typeof(string), // For XML data, string is a common choice, but you might want to use XmlDocument or XDocument in some cases.
                 _ => throw new ArgumentOutOfRangeException(nameof(sqlDbType), $"Unsupported SqlDbType: {sqlDbType}")
             };
+        }
+
+        /// <summary>
+        /// Infers the data type of a DataGridViewColumn based on the first non-null value in the column, or uses ValueType of the column where available.
+        /// </summary>
+        /// <param name="column">The DataGridViewColumn to infer the type for.</param>
+        /// <returns>The inferred data type, or typeof(string) if the column is empty or the DataGridView is not set.</returns>
+        public static Type InferColumnType(this DataGridViewColumn column)
+        {
+            if (column.ValueType != null)
+            {
+                return column.ValueType;
+            }
+            var dgv = column.DataGridView;
+            if (dgv == null) return typeof(string);
+            var firstNonNullValue = dgv.Rows.Cast<DataGridViewRow>()
+                .Select(row => row.Cells[column.Name].Value)
+                .FirstOrDefault(value => value != null);
+
+            return firstNonNullValue?.GetType() ?? typeof(string);
         }
     }
 }

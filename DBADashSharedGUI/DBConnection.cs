@@ -19,6 +19,8 @@ namespace DBADash
 
         public bool ValidateInitialCatalog = false;
 
+        public bool InitialCatalogRequired = false;
+
         private SqlAuthenticationMethod SelectedAuthenticationMethod => cboAuthType.SelectedItem is KeyValuePair<SqlAuthenticationMethod, string> selectedPair ? selectedPair.Key : SqlAuthenticationMethod.ActiveDirectoryIntegrated;
         private SqlConnectionEncryptOption SelectedEncryptionOption => cboEncryption.SelectedItem is KeyValuePair<SqlConnectionEncryptOption, string> selectedPair ? selectedPair.Key : SqlConnectionEncryptOption.Mandatory;
 
@@ -160,6 +162,11 @@ namespace DBADash
 
         private void BttnConnect_Click(object sender, EventArgs e)
         {
+            if (InitialCatalogRequired && string.IsNullOrEmpty(cboDatabase.Text))
+            {
+                MessageBox.Show("Please select a database", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             try
             {
                 Cursor = Cursors.WaitCursor;
