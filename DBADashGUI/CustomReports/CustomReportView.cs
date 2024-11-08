@@ -30,13 +30,13 @@ namespace DBADashGUI.CustomReports
         public static DataGridView Grid => new(); // dgv;
         public ToolStripStatusLabel StatusLabel => lblDescription;
         private DBADashContext context;
-        private CustomReport report;
+        public CustomReport Report { get; set; }
         private List<CustomSqlParameter> customParams = new();
         private CancellationTokenSource cancellationTokenSource;
         private Guid CurrentMessageGroup;
         public EventHandler PostGridRefresh;
 
-        private bool AutoLoad => report is not DirectExecutionReport;
+        private bool AutoLoad => Report is not DirectExecutionReport;
 
         public CustomReportView()
         {
@@ -51,7 +51,7 @@ namespace DBADashGUI.CustomReports
             if (dgv == null) return;
             try
             {
-                var customReportResult = report.CustomReportResults[dgv.ResultSetID];
+                var customReportResult = Report.CustomReportResults[dgv.ResultSetID];
                 var columnName = dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName;
                 customReportResult.CellHighlightingRules.TryGetValue(dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName,
                     out var ruleSet);
@@ -68,14 +68,14 @@ namespace DBADashGUI.CustomReports
 
                 frm.ShowDialog();
                 if (frm.DialogResult != DialogResult.OK) return;
-                report.CustomReportResults[dgv.ResultSetID].CellHighlightingRules.Remove(columnName);
+                Report.CustomReportResults[dgv.ResultSetID].CellHighlightingRules.Remove(columnName);
                 if (frm.CellHighlightingRules.Value is { HasRules: true })
                 {
-                    report.CustomReportResults[dgv.ResultSetID].CellHighlightingRules
+                    Report.CustomReportResults[dgv.ResultSetID].CellHighlightingRules
                         .Add(columnName, frm.CellHighlightingRules.Value);
                 }
 
-                report.Update();
+                Report.Update();
                 ShowTable();
             }
             catch (Exception ex)
@@ -90,7 +90,7 @@ namespace DBADashGUI.CustomReports
             var tableIndex = dgv.ResultSetID;
             try
             {
-                var customReportResult = report.CustomReportResults[tableIndex];
+                var customReportResult = Report.CustomReportResults[tableIndex];
                 var col = dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName;
                 var linkColumnInfo = customReportResult.LinkColumns?.TryGetValue(col, out var column) is true
                     ? column
@@ -116,7 +116,7 @@ namespace DBADashGUI.CustomReports
 
                 previousSchema = null; // Force grids to be re-generated
                 dgv.Columns.Clear();
-                report.Update();
+                Report.Update();
                 ShowTable();
             }
             catch (Exception ex)
@@ -133,14 +133,14 @@ namespace DBADashGUI.CustomReports
             if (CommonShared.ShowInputDialog(ref formatString, "Enter format string (e.g. N1, P1, yyyy-MM-dd)") !=
                 DialogResult.OK) return;
             dgv.Columns[dgv.ClickedColumnIndex].DefaultCellStyle.Format = formatString;
-            report.CustomReportResults[dgv.ResultSetID].CellFormatString.Remove(key);
+            Report.CustomReportResults[dgv.ResultSetID].CellFormatString.Remove(key);
 
             if (!string.IsNullOrEmpty(formatString))
             {
-                report.CustomReportResults[dgv.ResultSetID].CellFormatString.Add(key, formatString);
+                Report.CustomReportResults[dgv.ResultSetID].CellFormatString.Add(key, formatString);
             }
 
-            report.Update();
+            Report.Update();
         }
 
         private void ConvertLocalMenuItem_Click(object sender, DBADashDataGridView dgv)
@@ -150,20 +150,20 @@ namespace DBADashGUI.CustomReports
             var name = dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName;
             switch (convertLocalMenuItem.Checked)
             {
-                case true when report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Contains(name):
+                case true when Report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Contains(name):
                     if (MessageBox.Show("Convert column from UTC to local time?", "Convert?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No) return;
-                    report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Remove(name);
+                    Report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Remove(name);
                     break;
 
-                case false when !report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Contains(name):
+                case false when !Report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Contains(name):
                     if (MessageBox.Show("Remove UTC to local time zone conversion for this column?", "Convert?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No) return;
-                    report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Add(name);
+                    Report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Add(name);
                     break;
             }
 
             try
             {
-                report.Update();
+                Report.Update();
             }
             catch (Exception ex)
             {
@@ -190,8 +190,8 @@ namespace DBADashGUI.CustomReports
                 var alias = dgv.Columns.Cast<DataGridViewColumn>()
                         .Where(column => column.DataPropertyName != column.HeaderText)
                          .ToDictionary(column => column.DataPropertyName, column => column.HeaderText);
-                report.CustomReportResults[dgv.ResultSetID].ColumnAlias = alias;
-                report.Update();
+                Report.CustomReportResults[dgv.ResultSetID].ColumnAlias = alias;
+                Report.Update();
             }
             catch (Exception ex)
             {
@@ -218,7 +218,7 @@ namespace DBADashGUI.CustomReports
         {
             for (var i = 0; i < ds.Tables.Count; i++)
             {
-                if (!report.CustomReportResults.TryGetValue(i, out var result)) continue;
+                if (!Report.CustomReportResults.TryGetValue(i, out var result)) continue;
                 var dt = ds.Tables[i];
                 var convertCols = dt.Columns.Cast<DataColumn>()
                     .Where(column => column.DataType == typeof(DateTime) && !result.DoNotConvertToLocalTimeZone.Contains(column.ColumnName))
@@ -240,20 +240,20 @@ namespace DBADashGUI.CustomReports
             suppressCboResultsIndexChanged = true;
             for (var i = 0; i < reportDS.Tables.Count; i++)
             {
-                if (report.CustomReportResults.TryGetValue(i, out var result))
+                if (Report.CustomReportResults.TryGetValue(i, out var result))
                 {
                     result.ResultName ??= "Result" + (i + 1); // ensure we have a name
                 }
                 else
                 {
-                    report.CustomReportResults.Add(i, new CustomReportResult() { ResultName = "Result" + (i + 1) });
+                    Report.CustomReportResults.Add(i, new CustomReportResult() { ResultName = "Result" + (i + 1) });
                 }
             }
 
             cboResults.Items.Clear();
             for (var i = 0; i < reportDS.Tables.Count; i++)
             {
-                cboResults.Items.Add(report.CustomReportResults[i].ResultName);
+                cboResults.Items.Add(Report.CustomReportResults[i].ResultName);
             }
 
             cboResults.Items.Add("ALL");
@@ -268,13 +268,13 @@ namespace DBADashGUI.CustomReports
 
         public void RefreshData()
         {
-            if (!report.HasAccess())
+            if (!Report.HasAccess())
             {
                 MessageBox.Show("You do not have access to this report", "Access Denied", MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
                 return;
             }
-            if (report is DirectExecutionReport)
+            if (Report is DirectExecutionReport)
             {
                 RefreshDataMessage();
             }
@@ -367,7 +367,7 @@ namespace DBADashGUI.CustomReports
             }
             var msg = new ProcedureExecutionMessage
             {
-                CommandName = Enum.Parse<ProcedureExecutionMessage.CommandNames>(report.ProcedureName),
+                CommandName = Enum.Parse<ProcedureExecutionMessage.CommandNames>(Report.ProcedureName),
                 Parameters = customParams,
                 ConnectionID = context.ConnectionID,
                 CollectAgent = context.CollectAgent,
@@ -502,7 +502,7 @@ namespace DBADashGUI.CustomReports
                     ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
                     RowHeadersVisible = false,
                     ResultSetID = i,
-                    ResultSetName = report.CustomReportResults[i].ResultName,
+                    ResultSetName = Report.CustomReportResults[i].ResultName,
                 };
                 dgv.RowsAdded += Dgv_RowsAdded;
                 dgv.CellContentClick += Dgv_CellContentClick;
@@ -513,11 +513,11 @@ namespace DBADashGUI.CustomReports
                     pnl.MouseUp += DataGridPanel_MouseUp;
                     pnl.MouseLeave += DataGridPanel_MouseLeave;
                 }
-                var customReportResults = report.CustomReportResults[i];
+                var customReportResults = Report.CustomReportResults[i];
                 dgv.AddColumns(table, customReportResults);
                 dgv.DataBindingComplete += Dgv_DataBindingComplete;
 
-                if (report.CanEditReport) // Add context menu items for editing
+                if (Report.CanEditReport) // Add context menu items for editing
                 {
                     AddContextMenuItemsForEditing(dgv);
                 }
@@ -538,7 +538,7 @@ namespace DBADashGUI.CustomReports
                         DisplayStyle = ToolStripItemDisplayStyle.Text,
                         Tag = i
                     });
-                    ts.Items.Add(new ToolStripLabel(report.CustomReportResults[i].ResultName)
+                    ts.Items.Add(new ToolStripLabel(Report.CustomReportResults[i].ResultName)
                     {
                         Alignment = ToolStripItemAlignment.Right,
                         Font = new Font(this.Font, FontStyle.Bold)
@@ -564,7 +564,7 @@ namespace DBADashGUI.CustomReports
                             Tag = i
                         };
                     ts.Items.Add(clearFilterMenuItem);
-                    if (report.CanEditReport)
+                    if (Report.CanEditReport)
                         ts.Items.Add(
                             new ToolStripButton("Rename", Properties.Resources.Rename_16x, RenameResultSet_Click)
                             {
@@ -653,7 +653,7 @@ namespace DBADashGUI.CustomReports
             dgv.ColumnContextMenuOpening += (sender, args) =>
             {
                 convertLocalMenuItem.Checked = dgv.Columns[args.ColumnIndex].ValueType == typeof(DateTime) &&
-                                       !report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Contains(dgv.Columns[args.ColumnIndex].DataPropertyName);
+                                       !Report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Contains(dgv.Columns[args.ColumnIndex].DataPropertyName);
                 convertLocalMenuItem.Visible = dgv.Columns[args.ColumnIndex].ValueType == typeof(DateTime);
             };
         }
@@ -706,12 +706,12 @@ namespace DBADashGUI.CustomReports
             if (dgv == null) return;
             var name = dgv.ResultSetName;
             if (CommonShared.ShowInputDialog(ref name, "Enter name") != DialogResult.OK) return;
-            report.CustomReportResults[dgv.ResultSetID].ResultName = name;
+            Report.CustomReportResults[dgv.ResultSetID].ResultName = name;
             suppressCboResultsIndexChanged = true;
             cboResults.Items[dgv.ResultSetID] = name;
             dgv.ResultSetName = name;
             suppressCboResultsIndexChanged = false;
-            report.Update();
+            Report.Update();
             ShowTable();
         }
 
@@ -801,7 +801,7 @@ namespace DBADashGUI.CustomReports
 
         private void SetColumnLayout(DBADashDataGridView dgv)
         {
-            if (!report.CustomReportResults.TryGetValue(dgv.ResultSetID, out var value)) return;
+            if (!Report.CustomReportResults.TryGetValue(dgv.ResultSetID, out var value)) return;
             const int maxWidth = 400;
             if (value.ColumnLayout.Count > 0)
             {
@@ -833,7 +833,7 @@ namespace DBADashGUI.CustomReports
         protected async Task<DataSet> GetReportDataAsync(CancellationToken cancellationToken)
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
-            await using var cmd = new SqlCommand(report.QualifiedProcedureName, cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
+            await using var cmd = new SqlCommand(Report.QualifiedProcedureName, cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
             using var da = new SqlDataAdapter(cmd);
 
             // Add system parameters unless they are overridden by user supplied parameters for drill down reports
@@ -868,6 +868,24 @@ namespace DBADashGUI.CustomReports
             if (pObjectID != null)
             {
                 pObjectID.Param.Value = context.ObjectID > 0 ? context.ObjectID : DBNull.Value;
+            }
+            var pObjectName = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@ObjectName", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
+            if (pObjectName != null && !string.IsNullOrEmpty(context.ObjectName))
+            {
+                pObjectName.Param.Value = context.ObjectName;
+                pObjectName.UseDefaultValue = false;
+            }
+            var pTableName = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@TableName", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
+            if (pTableName != null && !string.IsNullOrEmpty(context.ObjectName) && context.Type == SQLTreeItem.TreeType.Table)
+            {
+                pTableName.Param.Value = context.ObjectName;
+                pTableName.UseDefaultValue = false;
+            }
+            var pSchemaName = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@SchemaName", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
+            if (pSchemaName != null && !string.IsNullOrEmpty(context.SchemaName))
+            {
+                pSchemaName.Param.Value = context.SchemaName;
+                pSchemaName.UseDefaultValue = false;
             }
 
             // Add user supplied parameters
@@ -917,25 +935,26 @@ namespace DBADashGUI.CustomReports
             IsMessageInProgress = false;
             CurrentMessageGroup = Guid.Empty;
             this.context = _context;
-            report = _context.Report;
-            customParams = sqlParams ?? report.GetCustomSqlParameters();
+            Report = _context.Report ?? Report;
+            customParams = sqlParams ?? Report.GetCustomSqlParameters();
             SetContextParametersForDirectExecutionReport();
             tsParams.Enabled = customParams.Count > 0;
-            tsConfigure.Visible = report.CanEditReport;
-            SetStatus(report.Description, report.Description, DBADashUser.SelectedTheme.ForegroundColor);
-            lblDescription.Visible = !string.IsNullOrEmpty(report.Description);
-            if (report.DeserializationException != null)
+            tsConfigure.Visible = Report.CanEditReport;
+            SetStatus(Report.Description, Report.Description, DBADashUser.SelectedTheme.ForegroundColor);
+            lblDescription.Visible = !string.IsNullOrEmpty(Report.Description);
+            if (Report.DeserializationException != null)
             {
                 MessageBox.Show(
                     "An error occurred deserializing the report. Preferences have been reset.\n" +
-                    report.DeserializationException.Message, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                report.DeserializationException = null;// Display the message once
+                    Report.DeserializationException.Message, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Report.DeserializationException = null;// Display the message once
             }
-            editPickersToolStripMenuItem.Enabled = report.UserParams.Any();
-            tsRefresh.Visible = report is not DirectExecutionReport;
-            tsExecute.Visible = report is DirectExecutionReport;
-            lblURL.Text = report.URL;
-            lblURL.Visible = !string.IsNullOrEmpty(report.URL);
+            editPickersToolStripMenuItem.Enabled = Report.UserParams.Any();
+            tsRefresh.Visible = Report is not DirectExecutionReport;
+            tsExecute.Visible = Report is DirectExecutionReport;
+            tsExecute.Enabled = Report is DirectExecutionReport && _context.IsScriptAllowed(Report.ProcedureName);
+            lblURL.Text = Report.URL;
+            lblURL.Visible = !string.IsNullOrEmpty(Report.URL);
             AddPickers();
             SetTriggerCollectionVisibility();
             if (AutoLoad)
@@ -946,7 +965,7 @@ namespace DBADashGUI.CustomReports
 
         private void SetContextParametersForDirectExecutionReport() // Set DatabaseName
         {
-            if (report is not DirectExecutionReport dxReport) return;
+            if (Report is not DirectExecutionReport dxReport) return;
             if (string.IsNullOrEmpty(context.DatabaseName)) return;
             foreach (var p in customParams.Where(p =>
                          p.Param.ParameterName.Equals(dxReport.DatabaseNameParameter,
@@ -954,6 +973,24 @@ namespace DBADashGUI.CustomReports
             {
                 p.Param.Value = context.DatabaseName;
                 p.UseDefaultValue = false;
+            }
+            var pObjectName = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@ObjectName", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
+            if (pObjectName != null && !string.IsNullOrEmpty(context.ObjectName))
+            {
+                pObjectName.Param.Value = context.ObjectName;
+                pObjectName.UseDefaultValue = false;
+            }
+            var pTableName = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@TableName", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
+            if (pTableName != null && !string.IsNullOrEmpty(context.ObjectName) && context.Type == SQLTreeItem.TreeType.Table)
+            {
+                pTableName.Param.Value = context.ObjectName;
+                pTableName.UseDefaultValue = false;
+            }
+            var pSchemaName = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@SchemaName", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
+            if (pSchemaName != null && !string.IsNullOrEmpty(context.ObjectName))
+            {
+                pSchemaName.Param.Value = context.SchemaName;
+                pSchemaName.UseDefaultValue = false;
             }
             // Some reports have a parameter to get all databases that we need to turn off
             foreach (var p in customParams.Where(p =>
@@ -966,26 +1003,26 @@ namespace DBADashGUI.CustomReports
             }
         }
 
-        public void SetTriggerCollectionVisibility() => tsTrigger.Visible = report.TriggerCollectionTypes.Count > 0 && context.CanMessage;
+        public void SetTriggerCollectionVisibility() => tsTrigger.Visible = Report.TriggerCollectionTypes.Count > 0 && context.CanMessage;
 
         private void AddPickers()
         {
             tsParams.DropDownItems.Clear();
             tsParams.Click -= TsParameters_Click;
-            if (report.Pickers == null)
+            if (Report.Pickers == null)
             {
                 tsParams.Click += TsParameters_Click;
 
                 return;
             }
 
-            var pickers = report.Pickers;
+            var pickers = Report.Pickers;
             if (customParams.Any(p => p.Param.ParameterName.TrimStart('@').Equals("Top", StringComparison.InvariantCultureIgnoreCase) && p.Param.SqlDbType == SqlDbType.Int) && !pickers.Any(p => p.ParameterName.TrimStart('@').Equals("Top", StringComparison.InvariantCultureIgnoreCase)))
             {
                 pickers.Add(Picker.CreateTopPicker());
             }
 
-            foreach (var picker in report.Pickers.OrderBy(p => p.Name))
+            foreach (var picker in Report.Pickers.OrderBy(p => p.Name))
             {
                 var param = customParams.FirstOrDefault(p =>
                         p.Param.ParameterName.TrimStart('@').Equals(picker.ParameterName.TrimStart('@'),
@@ -1057,12 +1094,12 @@ namespace DBADashGUI.CustomReports
 
         private void SetTitleToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var title = report.ReportName;
+            var title = Report.ReportName;
             if (CommonShared.ShowInputDialog(ref title, "Update Title") != DialogResult.OK) return;
             try
             {
-                report.ReportName = title;
-                report.Update();
+                Report.ReportName = title;
+                Report.Update();
                 OnReportNameChanged(EventArgs.Empty);
             }
             catch (Exception ex)
@@ -1104,9 +1141,9 @@ namespace DBADashGUI.CustomReports
                     MessageBoxIcon.Question) != DialogResult.Yes) return;
             foreach (var dgv in Grids)
             {
-                report.CustomReportResults[dgv.ResultSetID].ColumnLayout = dgv.GetColumnLayout();
+                Report.CustomReportResults[dgv.ResultSetID].ColumnLayout = dgv.GetColumnLayout();
             }
-            report.Update();
+            Report.Update();
         }
 
         private void ResetLayoutToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1115,9 +1152,9 @@ namespace DBADashGUI.CustomReports
                     MessageBoxIcon.Question) != DialogResult.Yes) return;
             foreach (var dgv in Grids)
             {
-                report.CustomReportResults[dgv.ResultSetID].ColumnLayout = new();
+                Report.CustomReportResults[dgv.ResultSetID].ColumnLayout = new();
             }
-            report.Update();
+            Report.Update();
             RefreshData();
         }
 
@@ -1130,12 +1167,12 @@ namespace DBADashGUI.CustomReports
 
         private void SetDescriptionToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var description = report.Description;
+            var description = Report.Description;
             if (CommonShared.ShowInputDialog(ref description, "Enter description") != DialogResult.OK) return;
-            report.Description = description;
-            report.Update();
-            lblDescription.Text = report.Description;
-            lblDescription.Visible = !string.IsNullOrEmpty(report.Description);
+            Report.Description = description;
+            Report.Update();
+            lblDescription.Text = Report.Description;
+            lblDescription.Visible = !string.IsNullOrEmpty(Report.Description);
         }
 
         private void ScriptReportToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1158,7 +1195,7 @@ namespace DBADashGUI.CustomReports
             var server = new Server(serverCn);
             var db = server.Databases[cn.Database];
 
-            var proc = db.StoredProcedures[report.ProcedureName, report.SchemaName];
+            var proc = db.StoredProcedures[Report.ProcedureName, Report.SchemaName];
 
             if (proc != null)
             {
@@ -1167,7 +1204,7 @@ namespace DBADashGUI.CustomReports
                 var parts = proc.Script(options);
                 var sb = new StringBuilder();
                 sb.AppendFormat("/*\n\t{0}\n\t{1}\n\n\tCustom report for DBA Dash.\n\thttp://dbadash.com\n\tGenerated: {2:yyyy-MM-dd HH:mm:ss} \n*/\n\n",
-                    report.ReportName.Replace("*/", ""), report.Description?.Replace("*/", ""), DateTime.Now);
+                    Report.ReportName.Replace("*/", ""), Report.Description?.Replace("*/", ""), DateTime.Now);
                 foreach (var part in parts)
                 {
                     sb.AppendLine(part);
@@ -1176,7 +1213,7 @@ namespace DBADashGUI.CustomReports
 
                 try
                 {
-                    foreach (var picker in report.Pickers?.OfType<DBPicker>() ?? Enumerable.Empty<DBPicker>())
+                    foreach (var picker in Report.Pickers?.OfType<DBPicker>() ?? Enumerable.Empty<DBPicker>())
                     {
                         sb.AppendLine($"/* Script picker {picker.Name.Replace("*", "")} */");
 
@@ -1201,20 +1238,20 @@ namespace DBADashGUI.CustomReports
                     sb.AppendLine($"/* Error scripting pickers {ex.Message.Replace("*", "")} */");
                 }
 
-                var meta = report.Serialize();
+                var meta = Report.Serialize();
                 sb.AppendLine();
                 sb.AppendLine("/* Report customizations in GUI */");
-                sb.AppendFormat("DELETE dbo.CustomReport\nWHERE SchemaName = '{0}'\nAND ProcedureName = '{1}'\n\n", report.SchemaName.SqlSingleQuote(), report.ProcedureName.SqlSingleQuote());
+                sb.AppendFormat("DELETE dbo.CustomReport\nWHERE SchemaName = '{0}'\nAND ProcedureName = '{1}'\n\n", Report.SchemaName.SqlSingleQuote(), Report.ProcedureName.SqlSingleQuote());
                 sb.AppendLine("INSERT INTO dbo.CustomReport(SchemaName,ProcedureName,MetaData)");
-                sb.AppendFormat("VALUES('{0}','{1}','{2}')", report.SchemaName.SqlSingleQuote(),
-                    report.ProcedureName.SqlSingleQuote(), meta.SqlSingleQuote());
+                sb.AppendFormat("VALUES('{0}','{1}','{2}')", Report.SchemaName.SqlSingleQuote(),
+                    Report.ProcedureName.SqlSingleQuote(), meta.SqlSingleQuote());
 
                 var frm = new CodeViewer() { Code = sb.ToString() };
                 frm.ShowDialog();
             }
             else
             {
-                MessageBox.Show($"Unable to find procedure {report.QualifiedProcedureName}", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"Unable to find procedure {Report.QualifiedProcedureName}", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -1224,7 +1261,7 @@ namespace DBADashGUI.CustomReports
             if (e.RowIndex < 0) return;
             var colName = dgv.Columns[e.ColumnIndex].DataPropertyName;
             LinkColumnInfo linkColumnInfo = null;
-            report.CustomReportResults[dgv.ResultSetID].LinkColumns?.TryGetValue(colName, out linkColumnInfo);
+            Report.CustomReportResults[dgv.ResultSetID].LinkColumns?.TryGetValue(colName, out linkColumnInfo);
             try
             {
                 linkColumnInfo?.Navigate(context, dgv.Rows[e.RowIndex], dgv.ResultSetID);
@@ -1239,7 +1276,7 @@ namespace DBADashGUI.CustomReports
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             if (sender is not DBADashDataGridView dgv) return;
-            if (!report.CustomReportResults.TryGetValue(dgv.ResultSetID, out CustomReportResult value)) return;
+            if (!Report.CustomReportResults.TryGetValue(dgv.ResultSetID, out CustomReportResult value)) return;
             value.CellHighlightingRules.FormatRowsAdded(dgv, e);
         }
 
@@ -1257,22 +1294,22 @@ namespace DBADashGUI.CustomReports
         private async void TsTrigger_Click(object sender, EventArgs e)
         {
             if (context.CollectAgentID == null || context.ImportAgentID == null) return;
-            await CollectionMessaging.TriggerCollection(context.ConnectionID, report.TriggerCollectionTypes, context.CollectAgentID.Value, context.ImportAgentID.Value, this);
+            await CollectionMessaging.TriggerCollection(context.ConnectionID, Report.TriggerCollectionTypes, context.CollectAgentID.Value, context.ImportAgentID.Value, this);
         }
 
         private void AssociateCollectionToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var collectionTypes = string.Join(',', report.TriggerCollectionTypes);
+            var collectionTypes = string.Join(',', Report.TriggerCollectionTypes);
             if (CommonShared.ShowInputDialog(ref collectionTypes, "Enter collection types to associate with this report", default, "Enter name of collection to be associated with this report.\nThis will allow the collection to be triggered directly from this report.\nMultiple collections can be specified comma-separated.\ne.g.\nUserData.MyCustomCollection") != DialogResult.OK) return;
 
-            report.TriggerCollectionTypes = collectionTypes.Split(',').Select(c => c.Trim()).ToList();
-            report.Update();
+            Report.TriggerCollectionTypes = collectionTypes.Split(',').Select(c => c.Trim()).ToList();
+            Report.Update();
             SetTriggerCollectionVisibility();
         }
 
         private void EditPickersToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using var pickers = new Pickers() { Report = report };
+            using var pickers = new Pickers() { Report = Report };
             pickers.ShowDialog();
             if (pickers.DialogResult != DialogResult.OK) return;
             AddPickers();
@@ -1280,7 +1317,7 @@ namespace DBADashGUI.CustomReports
 
         private void URL_Click(object sender, EventArgs e)
         {
-            CommonShared.OpenURL(report.URL);
+            CommonShared.OpenURL(Report.URL);
         }
 
         private DateTime TimerStart;
@@ -1307,10 +1344,10 @@ namespace DBADashGUI.CustomReports
 
         private async Task CancelProcessing()
         {
-            if (!string.IsNullOrEmpty(report.CancellationMessageWarning)
-                && MessageBox.Show(report.CancellationMessageWarning + "\nDo you want to continue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+            if (!string.IsNullOrEmpty(Report.CancellationMessageWarning)
+                && MessageBox.Show(Report.CancellationMessageWarning + "\nDo you want to continue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
 
-            if (report is DirectExecutionReport)
+            if (Report is DirectExecutionReport)
             {
                 if (CurrentMessageGroup != Guid.Empty)
                 {
@@ -1340,7 +1377,9 @@ namespace DBADashGUI.CustomReports
         private void TsNewWindow_Click(object sender, EventArgs e)
         {
             var frm = new CustomReportViewer();
-            frm.Context = context;
+            var ctx = context.DeepCopy();
+            ctx.Report = Report;
+            frm.Context = ctx;
             frm.Show();
         }
     }

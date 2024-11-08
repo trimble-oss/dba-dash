@@ -117,6 +117,7 @@ namespace DBADashGUI
                 {
                     ObjectID = ObjectID,
                     ObjectName = ObjectName,
+                    SchemaName = SchemaName,
                     InstanceID = InstanceID,
                     DatabaseID = DatabaseID,
                     JobID = JobID,

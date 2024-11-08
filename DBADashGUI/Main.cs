@@ -1,5 +1,9 @@
 ﻿using DBADash;
+using DBADash.Messaging;
+using DBADashGUI.CustomReports;
+using DBADashGUI.Options_Menu;
 using DBADashGUI.Performance;
+using DBADashGUI.Properties;
 using DBADashGUI.Theme;
 using Humanizer;
 using Microsoft.Data.SqlClient;
@@ -13,8 +17,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADashGUI.Options_Menu;
-using DBADashGUI.Properties;
 using Version = System.Version;
 
 namespace DBADashGUI
@@ -40,6 +42,21 @@ namespace DBADashGUI
             InitializeComponent();
             commandLine = opts;
             Disposed += OnDispose;
+            AddTabs();
+        }
+
+        private void AddTabs()
+        {
+            tabBlitzIndex = GetCommunityToolsTabPage(ProcedureExecutionMessage.CommandNames.sp_BlitzIndex);
+            tabs.TabPages.Add(tabBlitzIndex);
+        }
+
+        public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommandNames proc)
+        {
+            var tab = new TabPage(proc.ToString());
+            var report = CommunityTools.CommunityTools.CommunityToolsList.First(report => report.ProcedureName == proc.ToString());
+            tab.Controls.Add(new CustomReportView() { Dock = DockStyle.Fill, Report = report });
+            return tab;
         }
 
         private void OnDispose(object sender, EventArgs e)
@@ -75,6 +92,7 @@ namespace DBADashGUI
         private string GroupByTag = string.Empty;
         private readonly List<TreeContext> VisitedNodes = new();
         private bool suppressSaveContext;
+        private TabPage tabBlitzIndex;
 
         /// <summary>
         ///  For PreFilterMessage.  Mouse down button.
@@ -821,6 +839,10 @@ namespace DBADashGUI
 
                     case SQLTreeItem.TreeType.Table:
                         allowedTabs.Add(tabTableSize);
+                        if (n.Context.IsScriptAllowed(ProcedureExecutionMessage.CommandNames.sp_BlitzIndex))
+                        {
+                            allowedTabs.Add(tabBlitzIndex);
+                        }
                         break;
                 }
 
