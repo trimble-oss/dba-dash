@@ -14,6 +14,14 @@ namespace DBADashGUI.Performance
         public ObjectExecutionSummary()
         {
             InitializeComponent();
+            dgv.RegisterClearFilter(tsClearFilter);
+            dgv.GridFilterChanged += (sender, args) =>
+            {
+                if (dgv.RowFilter == string.Empty)
+                {
+                    txtSearch.Text = string.Empty;
+                }
+            };
         }
 
         private string Instance => _context.InstanceName;
@@ -187,6 +195,7 @@ namespace DBADashGUI.Performance
                 {
                     splitContainer1.Panel1Collapsed = true;
                 }
+                var filter = dgv.RowFilter;
                 dgv.DataSource = null;
 
                 var dt = GetObjectExecutionStatsSummary();
@@ -198,7 +207,7 @@ namespace DBADashGUI.Performance
                 dgv.Columns.Clear();
                 dgv.AutoGenerateColumns = false;
                 tsCompare.Font = new Font(tsCompare.Font, HasCompare ? FontStyle.Bold : FontStyle.Regular);
-                SetDataSourceWithFilter();
+                dgv.DataSource = new DataView(dt, filter, "total_duration_sec DESC", DataViewRowState.CurrentRows);
                 dgv.Columns.AddRange(Columns.ToArray());
                 dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 dgv.ApplyTheme();
@@ -256,34 +265,11 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                 cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
-                cmd.Parameters.AddWithValue("InstanceIDs", _context.InstanceIDs.AsDataTable() );
+                cmd.Parameters.AddWithValue("InstanceIDs", _context.InstanceIDs.AsDataTable());
                 dt = new DataTable();
                 da.Fill(dt);
                 return dt;
             }
-        }
-
-        private void SetDataSourceWithFilter()
-        {
-            if (string.IsNullOrEmpty(txtSearch.Text.Trim()))
-            {
-                dgv.DataSource = new DataView(dt, null, "total_duration_sec DESC", DataViewRowState.CurrentRows);
-                lblSearch.Font = new Font(lblSearch.Font, FontStyle.Regular);
-            }
-            else
-            {
-                lblSearch.Font = new Font(lblSearch.Font, FontStyle.Bold);
-                try
-                {
-                    dgv.DataSource = new DataView(dt, string.Format("SchemaName LIKE '%{0}%' OR ObjectName LIKE '%{0}%'", txtSearch.Text.Replace("'", "''")), "total_duration_sec DESC", DataViewRowState.CurrentRows);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Filter Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    dgv.DataSource = new DataView(dt, null, "total_duration_sec DESC", DataViewRowState.CurrentRows);
-                }
-            }
-            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -293,7 +279,7 @@ namespace DBADashGUI.Performance
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgv);
+            dgv.CopyGrid();
         }
 
         private void TsSetOffset_Click(object sender, EventArgs e)
@@ -426,7 +412,7 @@ namespace DBADashGUI.Performance
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+            dgv.ExportToExcel();
         }
 
         private void TxtSearch_TextChanged(object sender, EventArgs e)
@@ -438,7 +424,24 @@ namespace DBADashGUI.Performance
 
         private void TmrSearch_Tick(object sender, EventArgs e)
         {
-            SetDataSourceWithFilter();
+            if (string.IsNullOrEmpty(txtSearch.Text.Trim()))
+            {
+                dgv.ClearFilter();
+                lblSearch.Font = new Font(lblSearch.Font, FontStyle.Regular);
+            }
+            else
+            {
+                lblSearch.Font = new Font(lblSearch.Font, FontStyle.Bold);
+                try
+                {
+                    dgv.SetFilter($"([SchemaName] LIKE '%{0}%' OR [ObjectName] LIKE '%{txtSearch.Text.SqlSingleQuote()}%'\n)");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Filter Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    dgv.DataSource = new DataView(dt, null, "total_duration_sec DESC", DataViewRowState.CurrentRows);
+                }
+            }
             tmrSearch.Enabled = false;
         }
 
