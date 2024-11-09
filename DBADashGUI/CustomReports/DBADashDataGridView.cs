@@ -9,6 +9,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
+using DBADashGUI.SchemaCompare;
+using System.Globalization;
 
 namespace DBADashGUI.CustomReports
 {
@@ -37,7 +39,11 @@ namespace DBADashGUI.CustomReports
                 new ToolStripMenuItem("From Data Table", Properties.Resources.DataTable_16x,
                     (_, _) => SaveTable(false)) {ToolTipText = "Save underlying DataTable to table in SQL Server database"},
                 new ToolStripMenuItem("From Grid", Properties.Resources.Table_16x,
-                (_, _) => SaveTable(true)){ ToolTipText = "Save grid to table in SQL Server database" }
+                (_, _) => SaveTable(true)){ ToolTipText = "Save grid to table in SQL Server database" },
+                new ToolStripMenuItem("Script Data Table", Properties.Resources.SQLScript_16x,
+                    (_, _) => ScriptTable(false)) {ToolTipText = "Script underlying DataTable AS INSERT"},
+                new ToolStripMenuItem("Script Grid", Properties.Resources.TableScript_16x,
+                    (_, _) => ScriptTable(true)){ ToolTipText = "Script grid as INSERT" }
             });
             return tsSave;
         }
@@ -482,9 +488,10 @@ namespace DBADashGUI.CustomReports
         /// <param name="dataTable">The DataTable containing the schema to generate the CREATE TABLE command.</param>
         /// <param name="tableName">The name of the table to be created.</param>
         /// <returns>A string containing the SQL CREATE TABLE command.</returns>
-        private static string GenerateCreateTableCommand(DataTable dataTable, string tableName)
+        private static string GenerateCreateTableCommand(DataTable dataTable, string tableName, bool quoteTableName = true)
         {
-            var commandText = new StringBuilder($"CREATE TABLE {tableName.SqlQuoteName()} (");
+            var quotedTableName = quoteTableName ? tableName.SqlQuoteName() : tableName;
+            var commandText = new StringBuilder($"CREATE TABLE {quotedTableName} (\n\t");
 
             for (var i = 0; i < dataTable.Columns.Count; i++)
             {
@@ -505,11 +512,11 @@ namespace DBADashGUI.CustomReports
 
                 if (i < dataTable.Columns.Count - 1)
                 {
-                    commandText.Append(", ");
+                    commandText.Append(",\n\t");
                 }
             }
 
-            commandText.Append(");");
+            commandText.Append("\n);");
 
             return commandText.ToString();
         }
@@ -522,8 +529,8 @@ namespace DBADashGUI.CustomReports
         private static string ConvertToSqlType(DataColumn column)
         {
             var columnSize = column.MaxLength; // Note: Not set using DataAdapter Fill method, so types will end up being MAX
-            const int numericPrecision = 18;
-            const int numericScale = 0;
+            const int numericPrecision = 28;
+            const int numericScale = 9;
 
             return column.DataType switch
             {
@@ -664,6 +671,113 @@ namespace DBADashGUI.CustomReports
             }
 
             return dt;
+        }
+
+        // / <summary>
+        // / Script DataGridView AS INSERT statements
+        // / </summary>
+        // / <param name="fromGrid">If true, saves the DataGridView to a table.  If false, saves the underlying DataTable to a table.</param>
+        private void ScriptTable(bool fromGrid)
+        {
+            const string tableName = "#DBADashGrid";
+            try
+            {
+                var dt = GetDataTableForExport(fromGrid);
+                var tableScript = GenerateCreateTableCommand(dt, tableName, false);
+                var insertStatements = GenerateInsertStatementsWithBatching(dt, tableName, false);
+                var header = @$"/*********************************************************
+----------------------------------------------------------
+|   ____   ____     _      ____               _          |
+|  |  _ \ | __ )   / \    |  _ \   __ _  ___ | |__       |
+|  | | | ||  _ \  / _ \   | | | | / _` |/ __|| '_ \      |
+|  | |_| || |_) |/ ___ \  | |_| || (_| |\__ \| | | |     |
+|  |____/ |____//_/   \_\ |____/  \__,_||___/|_| |_|     |
+|                                                        |
+|	    SQL Server Monitoring by David Wiseman			 |
+|       Copyright 2022 Trimble, Inc.					 |
+|		https://dbadash.com								 |
+|	    https://github.com/trimble-oss/dba-dash			 |
+|       Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}					 |
+----------------------------------------------------------
+*********************************************************/
+
+IF OBJECT_ID('tempdb..{tableName}') IS NOT NULL
+BEGIN
+    DROP TABLE {tableName}
+END
+GO
+";
+                var footer = $"\n\nSELECT {GetColumnList(dt)}\nFROM {tableName}\n\n--DROP TABLE {tableName}";
+                var insertScript = header + tableScript + "\n" + string.Join("\n", insertStatements) + footer;
+                var frm = new CodeViewer() { Code = insertScript, Language = CodeEditor.CodeEditorModes.SQL };
+                frm.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error generating script: " + ex.Message, "Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        public static List<string> GenerateInsertStatementsWithBatching(DataTable dataTable, string tableName, bool quoteTableName = true)
+        {
+            const int batchSize = 1000;
+            var insertStatements = new List<string>();
+            var totalRows = dataTable.Rows.Count;
+            var batchCount = (int)Math.Ceiling(totalRows / (double)batchSize);
+            var quotedTableName = quoteTableName ? tableName.SqlQuoteName() : tableName;
+            for (var batchIndex = 0; batchIndex < batchCount; batchIndex++)
+            {
+                var batchRows = dataTable.AsEnumerable().Skip(batchIndex * batchSize).Take(batchSize);
+                var valuesList = batchRows.Select(row => string.Join(", ", row.ItemArray.Select((value, index) => FormatSqlValue(value, dataTable.Columns[index])))).Select(rowValues => $"({rowValues})").ToList();
+
+                var columnNames = GetColumnList(dataTable);
+                var valuesClause = string.Join(",\n", valuesList);
+                var insertStatement = $"INSERT INTO {quotedTableName} (\n\t{columnNames})\nVALUES {valuesClause};";
+                insertStatements.Add(insertStatement);
+            }
+
+            return insertStatements;
+        }
+
+        private static string GetColumnList(DataTable dataTable) => string.Join(", \n\t", dataTable.Columns.Cast<DataColumn>().Select(c => c.ColumnName.SqlQuoteName()));
+
+        /// <summary>
+        /// Formats a value for use in a SQL statement.
+        /// </summary>
+        private static string FormatSqlValue(object value, DataColumn column)
+        {
+            if (value == DBNull.Value)
+            {
+                return "NULL";
+            }
+            else if (column.DataType == typeof(string))
+            {
+                return value.ToString().SqlSingleQuoteWithEncapsulation();
+            }
+            else if (column.DataType == typeof(DateTime))
+            {
+                return ((DateTime)value).ToString("yyyy-MM-dd HH:mm:ss.fff").SqlSingleQuoteWithEncapsulation();
+            }
+            else if (column.DataType == typeof(bool))
+            {
+                return (bool)value ? "1" : "0";
+            }
+            else if (column.DataType == typeof(byte[]))
+            {
+                // Convert byte array to hexadecimal string
+                var byteArray = (byte[])value;
+                var hexString = "0x" + BitConverter.ToString(byteArray).Replace("-", "");
+                return hexString;
+            }
+            else if (column.DataType == typeof(int) || column.DataType == typeof(long) || column.DataType == typeof(short) || column.DataType == typeof(byte) || column.DataType == typeof(decimal) || column.DataType == typeof(float) || column.DataType == typeof(double))
+            {
+                return Convert.ToString(value, CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                return value.ToString().SqlSingleQuoteWithEncapsulation();
+            }
         }
     }
 }

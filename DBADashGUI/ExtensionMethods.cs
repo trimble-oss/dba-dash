@@ -419,6 +419,13 @@ namespace DBADashGUI
         }
 
         /// <summary>
+        /// Replace single ' quote with two single quotes '' and encloses in single quotes.  Only to be used where input can't be parameterized
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static string SqlSingleQuoteWithEncapsulation(this string value) => $"'{value.SqlSingleQuote()}'";
+
+        /// <summary>
         /// Replace single ' quote with two single quotes ''.  Only to be used where input can't be parameterized
         /// </summary>
         /// <param name="value"></param>
@@ -426,7 +433,7 @@ namespace DBADashGUI
         public static string SqlSingleQuote(this string value) => value.Replace("'", "''");
 
         /// <summary>
-        /// Replicates SQL Server QUOTENAME function - wrapping text in square brackets and doubling up on right square bracket.  Use SqlSingleQuote for single quotes.
+        /// Replicates SQL Server QUOTENAME function - wrapping text in square brackets and doubling up on right square bracket.  Use SqlSingleQuote/SqlSingleQuoteWithEncapsulation for single quotes.
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>

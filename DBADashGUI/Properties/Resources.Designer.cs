@@ -837,5 +837,14 @@ namespace DBADashGUI.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+
+        internal static System.Drawing.Bitmap TableScript_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("TableScript_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
