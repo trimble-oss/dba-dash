@@ -1,11 +1,11 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADashGUI.Theme;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI.Performance
 {
@@ -24,27 +24,16 @@ namespace DBADashGUI.Performance
             };
         }
 
-        private string Instance => _context.InstanceName;
-        private int InstanceID => _context.InstanceID;
-        private int DatabaseID => _context.DatabaseID;
-        private long ObjectID => (_context.Type is SQLTreeItem.TreeType.Database or SQLTreeItem.TreeType.AzureDatabase) ? -1 : _context.ObjectID;
+        private string Instance => CurrentContext.InstanceName;
+        private int InstanceID => CurrentContext.InstanceID;
+        private int DatabaseID => CurrentContext.DatabaseID;
+        private long ObjectID => (CurrentContext.Type is SQLTreeItem.TreeType.Database or SQLTreeItem.TreeType.AzureDatabase) ? -1 : CurrentContext.ObjectID;
 
-        private DBADashContext _context;
+        private DBADashContext CurrentContext;
 
         public string Types
         {
-            get
-            {
-                string types = "";
-                foreach (ToolStripMenuItem mnu in tsType.DropDownItems)
-                {
-                    if (mnu.Checked)
-                    {
-                        types += (types.Length > 0 ? "," : "") + mnu.Tag;
-                    }
-                }
-                return types;
-            }
+            get => tsType.DropDownItems.Cast<ToolStripMenuItem>().Where(mnu => mnu.Checked).Aggregate("", (current, mnu) => current + ((current.Length > 0 ? "," : "") + mnu.Tag));
             set
             {
                 var types = value.Split(',');
@@ -55,11 +44,10 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private int CompareOffset => int.Parse(SelectedCompareOffsetItem.Tag.ToString() ?? "-1");
+        private int CompareOffset => int.Parse(SelectedCompareOffsetItem.Tag?.ToString() ?? "-1");
 
         private DateTime _compareTo = DateTime.MinValue;
         private DateTime _compareFrom = DateTime.MinValue;
-        private DataTable dt;
 
         private ToolStripMenuItem SelectedCompareOffsetItem => tsCompare.DropDownItems.OfType<ToolStripMenuItem>().FirstOrDefault(mnu => mnu.Checked, tsNoCompare);
 
@@ -122,15 +110,13 @@ namespace DBADashGUI.Performance
 
         private void TsColumn_Click(object sender, EventArgs e)
         {
-            if (sender.GetType() == typeof(ToolStripMenuItem))
+            if (sender.GetType() != typeof(ToolStripMenuItem)) return;
+            var mnu = (ToolStripMenuItem)sender;
+            foreach (var name in new[] { mnu.Text, "Compare " + mnu.Text })
             {
-                var mnu = (ToolStripMenuItem)sender;
-                foreach (string name in new[] { mnu.Text, "Compare " + mnu.Text })
+                if (dgv.Columns.Contains(name))
                 {
-                    if (dgv.Columns.Contains(name))
-                    {
-                        dgv.Columns[name].Visible = mnu.Checked;
-                    }
+                    dgv.Columns[name]!.Visible = mnu.Checked;
                 }
             }
         }
@@ -148,27 +134,25 @@ namespace DBADashGUI.Performance
                     col.Visible = true;
                     _cols.Add(col);
                     displayIdx += 1;
-                    if (CompareFrom > DateTime.MinValue)
+                    if (CompareFrom <= DateTime.MinValue) continue;
+                    var compareCol = new DataGridViewTextBoxColumn
                     {
-                        var compareCol = new DataGridViewTextBoxColumn
-                        {
-                            Name = "Compare " + col.Name,
-                            DataPropertyName = "compare_" + col.DataPropertyName,
-                            DisplayIndex = displayIdx,
-                            DefaultCellStyle = col.DefaultCellStyle.Clone()
-                        };
-                        compareCol.DefaultCellStyle.BackColor = Color.BlanchedAlmond;
-                        compareCol.DefaultCellStyle.ForeColor = DashColors.TrimbleBlue;
-                        _cols.Add(compareCol);
+                        Name = "Compare " + col.Name,
+                        DataPropertyName = "compare_" + col.DataPropertyName,
+                        DisplayIndex = displayIdx,
+                        DefaultCellStyle = col.DefaultCellStyle.Clone()
+                    };
+                    compareCol.DefaultCellStyle.BackColor = Color.BlanchedAlmond;
+                    compareCol.DefaultCellStyle.ForeColor = DashColors.TrimbleBlue;
+                    _cols.Add(compareCol);
+                    displayIdx += 1;
+                    if (col.DataPropertyName is "avg_duration_sec" or "avg_cpu_sec")
+                    {
+                        var diffCol = new DataGridViewTextBoxColumn() { Name = "Diff " + col.Name.Replace("sec", "%"), DataPropertyName = "diff_" + col.DataPropertyName.Replace("_sec", "_pct"), DisplayIndex = displayIdx };
+                        diffCol.DefaultCellStyle.Format = "P2";
+                        diffCol.DefaultCellStyle.BackColor = Color.AliceBlue;
+                        _cols.Add(diffCol);
                         displayIdx += 1;
-                        if (col.DataPropertyName is "avg_duration_sec" or "avg_cpu_sec")
-                        {
-                            var diffCol = new DataGridViewTextBoxColumn() { Name = "Diff " + col.Name.Replace("sec", "%"), DataPropertyName = "diff_" + col.DataPropertyName.Replace("_sec", "_pct"), DisplayIndex = displayIdx };
-                            diffCol.DefaultCellStyle.Format = "P2";
-                            diffCol.DefaultCellStyle.BackColor = Color.AliceBlue;
-                            _cols.Add(diffCol);
-                            displayIdx += 1;
-                        }
                     }
                 }
 
@@ -176,9 +160,9 @@ namespace DBADashGUI.Performance
             }
         }
 
-        public void SetContext(DBADashContext _context)
+        public void SetContext(DBADashContext context)
         {
-            this._context = _context;
+            CurrentContext = context;
             RefreshData();
         }
 
@@ -231,45 +215,43 @@ namespace DBADashGUI.Performance
 
         private DataTable GetObjectExecutionStatsSummary()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.ObjectExecutionStatsSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout })
-            using (var da = new SqlDataAdapter(cmd))
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.ObjectExecutionStatsSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+
+            if (cmd.Parameters.AddIfGreaterThanZero("InstanceID", InstanceID) == null && cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceGroupName", Instance) == null)
             {
-                cn.Open();
-
-                if (cmd.Parameters.AddIfGreaterThanZero("InstanceID", InstanceID) == null && cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceGroupName", Instance) == null)
-                {
-                    throw new Exception("Instance not provided to Object Execution Summary");
-                }
-
-                cmd.Parameters.AddIfGreaterThanZero("ObjectID", ObjectID);
-                cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
-
-                if (HasCompare)
-                {
-                    cmd.Parameters.AddWithValue("CompareFrom", CompareFrom);
-                    cmd.Parameters.AddWithValue("CompareTo", CompareTo);
-                }
-
-                cmd.Parameters.AddStringIfNotNullOrEmpty("Types", Types);
-
-                if (DateRange.HasDayOfWeekFilter)
-                {
-                    cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
-                }
-                if (DateRange.HasTimeOfDayFilter)
-                {
-                    cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
-                }
-
-                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
-                cmd.Parameters.AddWithValue("InstanceIDs", _context.InstanceIDs.AsDataTable());
-                dt = new DataTable();
-                da.Fill(dt);
-                return dt;
+                throw new Exception("Instance not provided to Object Execution Summary");
             }
+
+            cmd.Parameters.AddIfGreaterThanZero("ObjectID", ObjectID);
+            cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
+
+            if (HasCompare)
+            {
+                cmd.Parameters.AddWithValue("CompareFrom", CompareFrom);
+                cmd.Parameters.AddWithValue("CompareTo", CompareTo);
+            }
+
+            cmd.Parameters.AddStringIfNotNullOrEmpty("Types", Types);
+
+            if (DateRange.HasDayOfWeekFilter)
+            {
+                cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
+            }
+            if (DateRange.HasTimeOfDayFilter)
+            {
+                cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
+            }
+
+            cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+            cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+            cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
+            cmd.Parameters.AddWithValue("InstanceIDs", CurrentContext.InstanceIDs.AsDataTable());
+            var dt = new DataTable();
+            da.Fill(dt);
+            return dt;
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -312,13 +294,11 @@ namespace DBADashGUI.Performance
                 ToDate = CompareTo > DateTime.MinValue && CompareTo < DateTime.MaxValue ? CompareTo.ToAppTimeZone() : DateRange.ToUTC.ToAppTimeZone()
             };
             frm.ShowDialog();
-            if (frm.DialogResult == DialogResult.OK)
-            {
-                _compareFrom = frm.FromDate.AppTimeZoneToUtc();
-                _compareTo = frm.ToDate.AppTimeZoneToUtc();
-                CheckCompareOffset(tsCustomCompare);
-                RefreshData();
-            }
+            if (frm.DialogResult != DialogResult.OK) return;
+            _compareFrom = frm.FromDate.AppTimeZoneToUtc();
+            _compareTo = frm.ToDate.AppTimeZoneToUtc();
+            CheckCompareOffset(tsCustomCompare);
+            RefreshData();
         }
 
         private void TsType_Click(object sender, EventArgs e)
@@ -340,12 +320,12 @@ namespace DBADashGUI.Performance
         {
             if (dgv.Columns.Contains("Diff Avg Duration (%)"))
             {
-                for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+                for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
                 {
                     var r = dgv.Rows[idx];
                     var row = (DataRowView)r.DataBoundItem;
-                    double diffAvgDurationPct = row["diff_avg_duration_pct"] == DBNull.Value ? 0d : Convert.ToDouble(row["diff_avg_duration_pct"]);
-                    double diffAvgCPUPct = row["diff_avg_cpu_pct"] == DBNull.Value ? 0d : Convert.ToDouble(row["diff_avg_cpu_pct"]);
+                    var diffAvgDurationPct = row["diff_avg_duration_pct"] == DBNull.Value ? 0d : Convert.ToDouble(row["diff_avg_duration_pct"]);
+                    var diffAvgCPUPct = row["diff_avg_cpu_pct"] == DBNull.Value ? 0d : Convert.ToDouble(row["diff_avg_cpu_pct"]);
                     r.Cells["Diff Avg Duration (%)"].SetColor(DiffColorFromDouble(diffAvgDurationPct));
                     r.Cells["Diff Avg CPU (%)"].SetColor(DiffColorFromDouble(diffAvgCPUPct));
                 }
@@ -400,13 +380,11 @@ namespace DBADashGUI.Performance
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex < 0) return;
+            if (dgv.Columns[e.ColumnIndex].Name == "Name")
             {
-                if (dgv.Columns[e.ColumnIndex].Name == "Name")
-                {
-                    var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                    RefreshChart((long)row["ObjectID"], (string)row["ObjectName"]);
-                }
+                var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+                RefreshChart((long)row["ObjectID"], (string)row["ObjectName"]);
             }
         }
 
@@ -439,7 +417,7 @@ namespace DBADashGUI.Performance
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message, "Filter Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    dgv.DataSource = new DataView(dt, null, "total_duration_sec DESC", DataViewRowState.CurrentRows);
+                    dgv.ClearFilter();
                 }
             }
             tmrSearch.Enabled = false;
@@ -447,11 +425,9 @@ namespace DBADashGUI.Performance
 
         private void TsCols_Click(object sender, EventArgs e)
         {
-            if (dgv.PromptColumnSelection() == DialogResult.OK)
-            {
-                dgv.AutoResizeColumns();
-                dgv.AutoResizeRows();
-            }
+            if (dgv.PromptColumnSelection() != DialogResult.OK) return;
+            dgv.AutoResizeColumns();
+            dgv.AutoResizeRows();
         }
     }
 }
