@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI.Performance
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI.Performance
 {
     partial class ObjectExecutionSummary
     {
@@ -29,7 +31,9 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            dgv = new System.Windows.Forms.DataGridView();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            dgv = new DBADashDataGridView();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
@@ -59,6 +63,7 @@
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
             tmrSearch = new System.Windows.Forms.Timer(components);
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -77,12 +82,31 @@
             dgv.AllowUserToAddRows = false;
             dgv.AllowUserToDeleteRows = false;
             dgv.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgv.DefaultCellStyle = dataGridViewCellStyle2;
             dgv.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgv.EnableHeadersVisualStyles = false;
             dgv.Location = new System.Drawing.Point(0, 0);
             dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgv.Name = "dgv";
             dgv.ReadOnly = true;
+            dgv.ResultSetID = 0;
+            dgv.ResultSetName = null;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
             dgv.RowTemplate.Height = 24;
@@ -94,7 +118,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsCompare, tsCols, tsType, toolStripSeparator1, lblSearch, txtSearch });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsCompare, tsCols, tsType, toolStripSeparator1, lblSearch, txtSearch, tsClearFilter });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1262, 27);
@@ -144,7 +168,7 @@
             // 
             tsPreviousPeriod.Font = new System.Drawing.Font("Segoe UI", 9F);
             tsPreviousPeriod.Name = "tsPreviousPeriod";
-            tsPreviousPeriod.Size = new System.Drawing.Size(224, 26);
+            tsPreviousPeriod.Size = new System.Drawing.Size(193, 26);
             tsPreviousPeriod.Tag = "-1";
             tsPreviousPeriod.Text = "Previous Period";
             tsPreviousPeriod.Click += TsSetOffset_Click;
@@ -153,7 +177,7 @@
             // 
             ts24Hrs.Font = new System.Drawing.Font("Segoe UI", 9F);
             ts24Hrs.Name = "ts24Hrs";
-            ts24Hrs.Size = new System.Drawing.Size(224, 26);
+            ts24Hrs.Size = new System.Drawing.Size(193, 26);
             ts24Hrs.Tag = "1440";
             ts24Hrs.Text = "-24hrs offset";
             ts24Hrs.Click += TsSetOffset_Click;
@@ -162,7 +186,7 @@
             // 
             ts7Days.Font = new System.Drawing.Font("Segoe UI", 9F);
             ts7Days.Name = "ts7Days";
-            ts7Days.Size = new System.Drawing.Size(224, 26);
+            ts7Days.Size = new System.Drawing.Size(193, 26);
             ts7Days.Tag = "10080";
             ts7Days.Text = "-7 days offset";
             ts7Days.Click += TsSetOffset_Click;
@@ -170,13 +194,13 @@
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new System.Drawing.Size(221, 6);
+            toolStripSeparator2.Size = new System.Drawing.Size(190, 6);
             // 
             // tsCustomCompare
             // 
             tsCustomCompare.Font = new System.Drawing.Font("Segoe UI", 9F);
             tsCustomCompare.Name = "tsCustomCompare";
-            tsCustomCompare.Size = new System.Drawing.Size(224, 26);
+            tsCustomCompare.Size = new System.Drawing.Size(193, 26);
             tsCustomCompare.Tag = "-1";
             tsCustomCompare.Text = "Custom";
             tsCustomCompare.Click += TsCustomCompare_Click;
@@ -187,7 +211,7 @@
             tsNoCompare.CheckState = System.Windows.Forms.CheckState.Checked;
             tsNoCompare.Font = new System.Drawing.Font("Segoe UI", 9F);
             tsNoCompare.Name = "tsNoCompare";
-            tsNoCompare.Size = new System.Drawing.Size(224, 26);
+            tsNoCompare.Size = new System.Drawing.Size(193, 26);
             tsNoCompare.Tag = "-1";
             tsNoCompare.Text = "None";
             tsNoCompare.Click += TsSetOffset_Click;
@@ -365,6 +389,15 @@
             tmrSearch.Interval = 1000;
             tmrSearch.Tick += TmrSearch_Tick;
             // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Image = Properties.Resources.Eraser_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            tsClearFilter.Text = "Clear Filter";
+            // 
             // ObjectExecutionSummary
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -395,7 +428,7 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgv;
+        private DBADashDataGridView dgv;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripButton tsCopy;
@@ -425,5 +458,6 @@
         private System.Windows.Forms.ToolStripButton tsCols;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel lblStatus;
+        private System.Windows.Forms.ToolStripButton tsClearFilter;
     }
 }
