@@ -18,6 +18,7 @@ namespace DBADashGUI.CustomReports
     {
         public ContextMenuStrip CellContextMenu;
         public ContextMenuStrip ColumnContextMenu;
+        public ContextMenuStrip TableContextMenu;
         public EventHandler<DataGridViewCellEventArgs> CellContextMenuOpening;
         public EventHandler<DataGridViewCellEventArgs> ColumnContextMenuOpening;
         public EventHandler GridFilterChanged;
@@ -80,6 +81,8 @@ namespace DBADashGUI.CustomReports
         private void AddColumnContextMenuItems()
         {
             ColumnContextMenu = new();
+            var hideColumn = new ToolStripMenuItem("Hide Column", Properties.Resources.DeleteColumn_16x,
+                (_, _) => Columns[ClickedColumnIndex].Visible = false);
             var clearFilter = GetClearFilterMenuItem();
             var editFilter = GetEditFilterMenuItem();
             var saveTable = GetSaveTableMenuItem();
@@ -91,6 +94,7 @@ namespace DBADashGUI.CustomReports
                     saveTable,
                     new ToolStripSeparator(),
                     GetColumnsMenuItem(),
+                    hideColumn,
                     new ToolStripSeparator(),
                     editFilter,
                     clearFilter,
@@ -104,6 +108,7 @@ namespace DBADashGUI.CustomReports
                 clearFilter.Visible = filterSupported;
                 editFilter.Visible = filterSupported;
                 saveTable.DropDownItems[0].Enabled = DataSource is DataTable or DataView;
+                hideColumn.Visible = ClickedColumnIndex >= 0;
             };
         }
 
@@ -257,6 +262,11 @@ namespace DBADashGUI.CustomReports
 
         public void ExportToExcel()
         {
+            if (Columns.Cast<DataGridViewColumn>().Count(c => c.Visible) == 0)
+            {
+                MessageBox.Show("No data to export", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             Common.PromptSaveDataGridView(this);
         }
 
@@ -332,6 +342,11 @@ namespace DBADashGUI.CustomReports
                         ColumnContextMenu.Show(dgv, e.Location);
                         break;
                     }
+                case DataGridViewHitTestType.None:
+                    ColumnContextMenuOpening?.Invoke(dgv,
+                        new DataGridViewCellEventArgs(ClickedColumnIndex, ClickedRowIndex));
+                    ColumnContextMenu.Show(dgv, e.Location);
+                    break;
             }
         }
 
