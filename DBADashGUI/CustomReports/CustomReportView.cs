@@ -932,6 +932,7 @@ namespace DBADashGUI.CustomReports
 
         public async Task SetContext(DBADashContext _context, List<CustomSqlParameter> sqlParams)
         {
+            if (_context == this.context) return;
             if (this.InvokeRequired)
             {
                 this.Invoke(new Action(() => _ = SetContext(_context, sqlParams)));

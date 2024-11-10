@@ -17,6 +17,9 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DBADashGUI.CommunityTools;
+using DocumentFormat.OpenXml.Vml.Office;
+using Microsoft.SqlServer.Management.XEvent;
 using Version = System.Version;
 
 namespace DBADashGUI
@@ -34,6 +37,8 @@ namespace DBADashGUI
         private readonly List<int> commandLineTags = new();
         private TabPage[] AllTabs;
         private CustomReports.CustomReports customReports = new();
+        private readonly Dictionary<ProcedureExecutionMessage.CommandNames, TabPage> CommunityToolsTabPages = new Dictionary<ProcedureExecutionMessage.CommandNames, TabPage>();
+        private TabPage tabBlitzIndex => CommunityToolsTabPages[ProcedureExecutionMessage.CommandNames.sp_BlitzIndex];
 
         public Main(CommandLineOptions opts)
         {
@@ -47,8 +52,12 @@ namespace DBADashGUI
 
         private void AddTabs()
         {
-            tabBlitzIndex = GetCommunityToolsTabPage(ProcedureExecutionMessage.CommandNames.sp_BlitzIndex);
-            tabs.TabPages.Add(tabBlitzIndex);
+            foreach (var proc in Enum.GetValues<ProcedureExecutionMessage.CommandNames>())
+            {
+                var tab = GetCommunityToolsTabPage(proc);
+                CommunityToolsTabPages.Add(proc, tab);
+                tabs.TabPages.Add(tab);
+            }
         }
 
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommandNames proc)
@@ -92,7 +101,6 @@ namespace DBADashGUI
         private string GroupByTag = string.Empty;
         private readonly List<TreeContext> VisitedNodes = new();
         private bool suppressSaveContext;
-        private TabPage tabBlitzIndex;
 
         /// <summary>
         ///  For PreFilterMessage.  Mouse down button.
@@ -824,7 +832,10 @@ namespace DBADashGUI
             else if (n.Type == SQLTreeItem.TreeType.CommunityTool)
             {
                 tabCustomReport.Text = n.Text;
-                allowedTabs.Add(tabCustomReport);
+                if (Enum.TryParse(n.Text, out ProcedureExecutionMessage.CommandNames proc))
+                {
+                    allowedTabs.Add(CommunityToolsTabPages[proc]);
+                }
             }
 
             if (n.ObjectID > 0)
