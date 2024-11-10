@@ -80,7 +80,7 @@
             toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsExecute, tsRefresh, tsCancel, tsCopy, tsExcel, tsCols, tsConfigure, cboResults, lblSelectResults, tsParams, tsClearFilter, tsTrigger, tsNewWindow });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new System.Drawing.Size(1242, 27);
+            toolStrip1.Size = new System.Drawing.Size(1242, 28);
             toolStrip1.TabIndex = 1;
             toolStrip1.Text = "toolStrip1";
             // 
@@ -277,7 +277,7 @@
             tsNewWindow.Image = Properties.Resources.NewWindow_16x;
             tsNewWindow.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsNewWindow.Name = "tsNewWindow";
-            tsNewWindow.Size = new System.Drawing.Size(29, 24);
+            tsNewWindow.Size = new System.Drawing.Size(29, 25);
             tsNewWindow.Text = "Open in new window";
             tsNewWindow.Click += TsNewWindow_Click;
             // 
@@ -287,7 +287,7 @@
             lnkParams.Font = new System.Drawing.Font("Segoe UI", 16F);
             lnkParams.Location = new System.Drawing.Point(0, 0);
             lnkParams.Name = "lnkParams";
-            lnkParams.Size = new System.Drawing.Size(824, 258);
+            lnkParams.Size = new System.Drawing.Size(824, 257);
             lnkParams.TabIndex = 2;
             lnkParams.TabStop = true;
             lnkParams.Text = "Set Parameters";
@@ -300,7 +300,7 @@
             pnlParams.Dock = System.Windows.Forms.DockStyle.Fill;
             pnlParams.Location = new System.Drawing.Point(0, 0);
             pnlParams.Name = "pnlParams";
-            pnlParams.Size = new System.Drawing.Size(824, 559);
+            pnlParams.Size = new System.Drawing.Size(824, 558);
             pnlParams.TabIndex = 3;
             // 
             // splitContainer2
@@ -320,8 +320,8 @@
             // 
             splitContainer2.Panel2.Controls.Add(lblParamsRequired);
             splitContainer2.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            splitContainer2.Size = new System.Drawing.Size(824, 559);
-            splitContainer2.SplitterDistance = 258;
+            splitContainer2.Size = new System.Drawing.Size(824, 558);
+            splitContainer2.SplitterDistance = 257;
             splitContainer2.TabIndex = 4;
             // 
             // lblParamsRequired
@@ -338,7 +338,7 @@
             // splitContainer1
             // 
             splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            splitContainer1.Location = new System.Drawing.Point(0, 27);
+            splitContainer1.Location = new System.Drawing.Point(0, 28);
             splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
@@ -348,7 +348,7 @@
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(pnlParams);
-            splitContainer1.Size = new System.Drawing.Size(1242, 559);
+            splitContainer1.Size = new System.Drawing.Size(1242, 558);
             splitContainer1.SplitterDistance = 414;
             splitContainer1.TabIndex = 4;
             // 
