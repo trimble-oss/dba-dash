@@ -53,7 +53,8 @@ namespace DBADashGUI.CustomReports
             {
                 var customReportResult = Report.CustomReportResults[dgv.ResultSetID];
                 var columnName = dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName;
-                customReportResult.CellHighlightingRules.TryGetValue(dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName,
+                customReportResult.CellHighlightingRules.TryGetValue(
+                    dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName,
                     out var ruleSet);
 
                 var frm = new CellHighlightingRulesConfig()
@@ -61,9 +62,12 @@ namespace DBADashGUI.CustomReports
                     ColumnList = dgv.Columns,
                     CellHighlightingRules = new KeyValuePair<string, CellHighlightingRuleSet>(columnName,
                         ruleSet.DeepCopy() ?? new CellHighlightingRuleSet() { TargetColumn = columnName }),
-                    CellValue = dgv.ClickedRowIndex >= 0 ? dgv.Rows[dgv.ClickedRowIndex].Cells[dgv.ClickedColumnIndex].Value : null,
+                    CellValue = dgv.ClickedRowIndex >= 0
+                        ? dgv.Rows[dgv.ClickedRowIndex].Cells[dgv.ClickedColumnIndex].Value
+                        : null,
                     CellValueIsNull = dgv.ClickedRowIndex >= 0 &&
-                                      dgv.Rows[dgv.ClickedRowIndex].Cells[dgv.ClickedColumnIndex].Value.DBNullToNull() == null
+                                      dgv.Rows[dgv.ClickedRowIndex].Cells[dgv.ClickedColumnIndex].Value
+                                          .DBNullToNull() == null
                 };
 
                 frm.ShowDialog();
@@ -81,7 +85,7 @@ namespace DBADashGUI.CustomReports
             catch (Exception ex)
             {
                 MessageBox.Show("Error setting highlighting rules: " + ex.Message, "Error", MessageBoxButtons.OK,
-                                       MessageBoxIcon.Error);
+                    MessageBoxIcon.Error);
             }
         }
 
@@ -122,7 +126,7 @@ namespace DBADashGUI.CustomReports
             catch (Exception ex)
             {
                 MessageBox.Show("Error adding link: " + ex.Message, "Error", MessageBoxButtons.OK,
-                                       MessageBoxIcon.Error);
+                    MessageBoxIcon.Error);
             }
         }
 
@@ -151,12 +155,14 @@ namespace DBADashGUI.CustomReports
             switch (convertLocalMenuItem.Checked)
             {
                 case true when Report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Contains(name):
-                    if (MessageBox.Show("Convert column from UTC to local time?", "Convert?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No) return;
+                    if (MessageBox.Show("Convert column from UTC to local time?", "Convert?", MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Question) == DialogResult.No) return;
                     Report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Remove(name);
                     break;
 
                 case false when !Report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Contains(name):
-                    if (MessageBox.Show("Remove UTC to local time zone conversion for this column?", "Convert?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No) return;
+                    if (MessageBox.Show("Remove UTC to local time zone conversion for this column?", "Convert?",
+                            MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No) return;
                     Report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Add(name);
                     break;
             }
@@ -184,12 +190,13 @@ namespace DBADashGUI.CustomReports
             {
                 newName = dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName;
             }
+
             dgv.Columns[dgv.ClickedColumnIndex].HeaderText = newName;
             try
             {
                 var alias = dgv.Columns.Cast<DataGridViewColumn>()
-                        .Where(column => column.DataPropertyName != column.HeaderText)
-                         .ToDictionary(column => column.DataPropertyName, column => column.HeaderText);
+                    .Where(column => column.DataPropertyName != column.HeaderText)
+                    .ToDictionary(column => column.DataPropertyName, column => column.HeaderText);
                 Report.CustomReportResults[dgv.ResultSetID].ColumnAlias = alias;
                 Report.Update();
             }
@@ -221,7 +228,9 @@ namespace DBADashGUI.CustomReports
                 if (!Report.CustomReportResults.TryGetValue(i, out var result)) continue;
                 var dt = ds.Tables[i];
                 var convertCols = dt.Columns.Cast<DataColumn>()
-                    .Where(column => column.DataType == typeof(DateTime) && !result.DoNotConvertToLocalTimeZone.Contains(column.ColumnName))
+                    .Where(column =>
+                        column.DataType == typeof(DateTime) &&
+                        !result.DoNotConvertToLocalTimeZone.Contains(column.ColumnName))
                     .Select(column => column.ColumnName).ToList();
                 if (convertCols.Count > 0)
                 {
@@ -274,6 +283,7 @@ namespace DBADashGUI.CustomReports
                     MessageBoxIcon.Warning);
                 return;
             }
+
             if (Report is DirectExecutionReport)
             {
                 RefreshDataMessage();
@@ -283,10 +293,7 @@ namespace DBADashGUI.CustomReports
                 StartTimer();
                 cancellationTokenSource = new CancellationTokenSource();
                 IsMessageInProgress = true;
-                Task.Run(() =>
-                {
-                    _ = RefreshDataRepository(cancellationTokenSource.Token);
-                });
+                Task.Run(() => { _ = RefreshDataRepository(cancellationTokenSource.Token); });
             }
         }
 
@@ -345,6 +352,13 @@ namespace DBADashGUI.CustomReports
                 IsMessageInProgress = false;
                 StopTimer();
             }
+        }
+
+        public void ShowData(DataSet ds)
+        {
+            reportDS = ds;
+            ShowTable();
+            LoadResultsCombo();
         }
 
         private bool IsMessageInProgress
@@ -1377,9 +1391,12 @@ namespace DBADashGUI.CustomReports
         private void TsNewWindow_Click(object sender, EventArgs e)
         {
             var frm = new CustomReportViewer();
+
             var ctx = context.DeepCopy();
             ctx.Report = Report;
             frm.Context = ctx;
+            frm.DataSet = reportDS;
+            frm.CustomParams = customParams;
             frm.Show();
         }
     }
