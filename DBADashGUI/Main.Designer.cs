@@ -1550,7 +1550,6 @@ namespace DBADashGUI
             // 
             // slowQueries1
             // 
-            slowQueries1.DBName = "";
             slowQueries1.Dock = System.Windows.Forms.DockStyle.Fill;
             slowQueries1.Location = new System.Drawing.Point(3, 3);
             slowQueries1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
