@@ -39,6 +39,7 @@ namespace DBADashGUI
         public static int CriticalWaitCriticalThreshold;
         public static int CriticalWaitWarningThreshold;
         public static int? HardDeleteThresholdDays;
+        public static int SlowQueriesDrillDownMaxRows;
 
         static Config()
         {
@@ -104,6 +105,7 @@ namespace DBADashGUI
             CriticalWaitCriticalThreshold = settings.GetValueAsInt("CriticalWaitCriticalThreshold", -1);
             CriticalWaitWarningThreshold = settings.GetValueAsInt("CriticalWaitWarningThreshold", -1);
             HardDeleteThresholdDays = settings.GetValueAsNullableInt("HardDeleteThresholdDays");
+            SlowQueriesDrillDownMaxRows = settings.GetValueAsInt("GUISlowQueriesDrillDownMaxRows", 1000);
         }
 
         public static void ResetDefaults()

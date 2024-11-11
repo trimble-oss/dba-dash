@@ -35,7 +35,8 @@ namespace DBADashGUI.Options_Menu
             ("MinIOPsThreshold","Minimum IOPs threshold.  Below this threshold, the latency thresholds don't apply. Performance summary tab.",typeof(int), Config.MinIOPsThreshold),
             ("CriticalWaitCriticalThreshold","Critical wait ms/sec critical threshold.  Performance summary tab.",typeof(int), Config.CriticalWaitCriticalThreshold),
             ("CriticalWaitWarningThreshold","Critical wait ms/sec warning threshold. Performance summary tab.",typeof(int), Config.CriticalWaitWarningThreshold),
-            ("HardDeleteThresholdDays","Remove all the data associated with a (soft) deleted instance a specified number of days after the last collection.",typeof(int?),Config.HardDeleteThresholdDays )
+            ("HardDeleteThresholdDays","Remove all the data associated with a (soft) deleted instance a specified number of days after the last collection.",typeof(int?),Config.HardDeleteThresholdDays ),
+            ("GUISlowQueriesDrillDownMaxRows", "Max drill down rows for Slow Queries tab", typeof(int),Config.SlowQueriesDrillDownMaxRows),
         };
 
         private void Options_Load(object sender, EventArgs e)
