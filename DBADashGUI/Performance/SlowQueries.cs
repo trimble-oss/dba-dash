@@ -426,8 +426,6 @@ namespace DBADashGUI
             }
         }
 
-        public int pageSize = 1000;
-
         private void DgvSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
@@ -613,7 +611,7 @@ namespace DBADashGUI
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("Top", pageSize);
+                cmd.Parameters.AddWithValue("Top", Config.SlowQueriesDrillDownMaxRows);
                 if (failed)
                 {
                     cmd.Parameters.AddWithValue("ResultFailed", true);
@@ -818,9 +816,10 @@ namespace DBADashGUI
             }
 
             DateHelper.ConvertUTCToAppTimeZone(ref dt);
-            if (dt.Rows.Count == pageSize)
+            if (dt.Rows.Count == Config.SlowQueriesDrillDownMaxRows)
             {
-                lblPageSize.Text = $"Top {pageSize} rows";
+                lblPageSize.Text = $"Top {Config.SlowQueriesDrillDownMaxRows} rows";
+                lblPageSize.ForeColor = DashColors.Fail;
                 lblPageSize.Visible = true;
             }
             else
