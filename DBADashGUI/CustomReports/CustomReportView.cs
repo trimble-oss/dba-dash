@@ -497,6 +497,15 @@ namespace DBADashGUI.CustomReports
 
         private void ClearResults()
         {
+            foreach (var grid in Grids)
+            {
+                grid.DataSource = null;
+                grid.RowsAdded -= Dgv_RowsAdded;
+                grid.CellContentClick -= Dgv_CellContentClick;
+                grid.DataBindingComplete -= Dgv_DataBindingComplete;
+                grid.GridFilterChanged -= (sender, e) => { };
+                grid.Dispose();
+            }
             splitContainer1.Panel1.Controls.Clear();
             Grids.Clear();
             previousSchema = string.Empty;

@@ -61,16 +61,23 @@ namespace DBADashGUI.CustomReports
         public int ClickedColumnIndex { get; private set; } = -1;
         public int ClickedRowIndex { get; private set; } = -1;
 
+        private bool _disposed = false;
+
         public DBADashDataGridView()
         {
-            this.CellFormatting += DBADashDataGridView_CellFormatting;
-            this.MouseUp += Dgv_MouseUp;
-            this.DataSourceChanged += Dgv_DataSourceChanged;
-            this.ColumnAdded += (_, args) => args.Column.ApplyTheme();
+            CellFormatting += DBADashDataGridView_CellFormatting;
+            MouseUp += Dgv_MouseUp;
+            DataSourceChanged += Dgv_DataSourceChanged;
+            ColumnAdded += Dgv_ColumnsAdded;
             EnableDoubleBuffering();
             AddCellContextMenuItems();
             AddColumnContextMenuItems();
             this.ApplyTheme();
+        }
+
+        private static void Dgv_ColumnsAdded(object sender, DataGridViewColumnEventArgs e)
+        {
+            e.Column.ApplyTheme();
         }
 
         private void Dgv_DataSourceChanged(object sender, EventArgs e)
@@ -224,15 +231,15 @@ namespace DBADashGUI.CustomReports
 
         public void RegisterClearFilter(ToolStripItem item)
         {
-            this.GridFilterChanged += (_, _) => { UpdateClearFilter(item); };
-            this.DataSourceChanged += (_, _) => { UpdateClearFilter(item); };
+            GridFilterChanged += (_, _) => { UpdateClearFilter(item); };
+            DataSourceChanged += (_, _) => { UpdateClearFilter(item); };
             item.Click += (_, _) => ClearFilter();
         }
 
         private void UpdateClearFilter(ToolStripItem item)
         {
             item.Enabled = !string.IsNullOrEmpty(RowFilter);
-            item.Font = new System.Drawing.Font(item.Font, item.Enabled ? FontStyle.Bold : FontStyle.Regular);
+            item.Font = new Font(item.Font, item.Enabled ? FontStyle.Bold : FontStyle.Regular);
             item.ToolTipText = item.Enabled ? RowFilter : "No Filter Applied";
         }
 
@@ -288,14 +295,14 @@ namespace DBADashGUI.CustomReports
 
         private void DBADashDataGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (this.Columns[e.ColumnIndex].ValueType == typeof(byte[]) && e.Value != null && e.Value != DBNull.Value)
+            if (Columns[e.ColumnIndex].ValueType == typeof(byte[]) && e.Value != null && e.Value != DBNull.Value)
             {
                 var bytes = (byte[])e.Value;
                 // Convert the byte array to a hexadecimal string
                 e.Value = "0x" + BitConverter.ToString(bytes).Replace("-", string.Empty);
                 e.FormattingApplied = true; // Indicate that formatting was applied
             }
-            else if (this.Columns[e.ColumnIndex].ValueType == typeof(string) && e.Value != null &&
+            else if (Columns[e.ColumnIndex].ValueType == typeof(string) && e.Value != null &&
                      e.Value != DBNull.Value && ((string)e.Value).Length > CellTruncateLength)
             {
                 e.Value = ((string)e.Value)[..(CellTruncateLength - 3)] + "...";
@@ -306,7 +313,7 @@ namespace DBADashGUI.CustomReports
         private void EnableDoubleBuffering()
         {
             // Set DoubleBuffered to true using reflection
-            var dgvType = this.GetType().BaseType; // Get the type of the base DataGridView class
+            var dgvType = GetType().BaseType; // Get the type of the base DataGridView class
             var pi = dgvType?.GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
             pi?.SetValue(this, true, null);
         }
@@ -799,6 +806,45 @@ GO
             {
                 return value.ToString().SqlSingleQuoteWithEncapsulation();
             }
+        }
+
+        // Public implementation of Dispose pattern callable by consumers
+        public new void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this); // Prevent finalizer from running
+            base.Dispose();
+        }
+
+        // Protected implementation of Dispose pattern
+        protected override void Dispose(bool disposing)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                CellFormatting -= DBADashDataGridView_CellFormatting;
+                MouseUp -= Dgv_MouseUp;
+                DataSourceChanged -= Dgv_DataSourceChanged;
+                ColumnAdded -= Dgv_ColumnsAdded;
+                DataSource = null;
+                ColumnContextMenu.Dispose();
+                CellContextMenu.Dispose();
+            }
+
+            _disposed = true;
+
+            // Call the base class implementation
+            base.Dispose(disposing);
+        }
+
+        // Destructor
+        ~DBADashDataGridView()
+        {
+            Dispose(false);
         }
     }
 }
