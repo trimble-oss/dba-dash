@@ -13,6 +13,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
+using OpenTK.Graphics;
 
 namespace DBADashGUI.Performance
 {
@@ -32,11 +33,12 @@ namespace DBADashGUI.Performance
             };
         }
 
+        private DBADashContext CurrentContext;
         private string PersistedSort;
         private string PersistedFilter;
 
         public int InstanceID;
-        private List<int> InstanceIDs;
+        private HashSet<int> InstanceIDs => CurrentContext.InstanceIDs;
         private DateTime currentSnapshotDate;
         private DataTable snapshotDT;
         public DateTime SnapshotDateFrom;
@@ -135,18 +137,15 @@ namespace DBADashGUI.Performance
 
         public void SetContext(DBADashContext _context)
         {
+            if (CurrentContext == _context) return; // Context hasn't changed, don't refresh
             ShowLatestOnNextExecution = false;
-            if (InstanceIDs != null && _context.InstanceIDs.SetEquals(InstanceIDs) && InstanceID == _context.InstanceID) // Context hasn't changed
-            {
-                return;
-            }
+            CurrentContext = _context;
             currentSnapshotDate = DateTime.MinValue;
             dgv.DataSource = null;
-            InstanceIDs = _context.InstanceIDs.ToList();
             InstanceID = _context.InstanceID;
             if (InstanceIDs is { Count: 1 })
             {
-                InstanceID = InstanceIDs[0];
+                InstanceID = InstanceIDs.First();
             }
             RefreshData();
         }
