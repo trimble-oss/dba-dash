@@ -34,14 +34,14 @@
             tsLineNumbers = new System.Windows.Forms.ToolStripButton();
             tsWrapText = new System.Windows.Forms.ToolStripButton();
             elementHost1 = new System.Windows.Forms.Integration.ElementHost();
-            codeEditor1 = new DBADashGUI.SchemaCompare.CodeEditor();
+            tsSave = new System.Windows.Forms.ToolStripButton();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { bttnCopy, tsLineNumbers, tsWrapText });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsSave, bttnCopy, tsLineNumbers, tsWrapText });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(800, 27);
@@ -87,7 +87,16 @@
             elementHost1.Size = new System.Drawing.Size(800, 535);
             elementHost1.TabIndex = 2;
             elementHost1.Text = "elementHost1";
-            elementHost1.Child = codeEditor1;
+            // 
+            // tsSave
+            // 
+            tsSave.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsSave.Image = Properties.Resources.Save_16x;
+            tsSave.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsSave.Name = "tsSave";
+            tsSave.Size = new System.Drawing.Size(29, 24);
+            tsSave.Text = "Save As";
+            tsSave.Click += TsSave_Click;
             // 
             // CodeViewer
             // 
@@ -112,8 +121,8 @@
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton bttnCopy;
         private System.Windows.Forms.Integration.ElementHost elementHost1;
-        private SchemaCompare.CodeEditor codeEditor1;
         private System.Windows.Forms.ToolStripButton tsLineNumbers;
         private System.Windows.Forms.ToolStripButton tsWrapText;
+        private System.Windows.Forms.ToolStripButton tsSave;
     }
 }
