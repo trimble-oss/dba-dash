@@ -13,7 +13,6 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
-using OpenTK.Graphics;
 
 namespace DBADashGUI.Performance
 {
@@ -23,7 +22,7 @@ namespace DBADashGUI.Performance
         {
             InitializeComponent();
             dgv.RegisterClearFilter(tsClearFilter);
-            dgv.GridFilterChanged += (sender, e) =>
+            dgv.GridFilterChanged += (_, _) =>
             {
                 if (!dgv.HasFilter)
                 {
@@ -298,19 +297,17 @@ namespace DBADashGUI.Performance
         /// <summary>Get running query snapshots associated with a specified session id between two dates (for associating RPC/Batch completed events with running queries)</summary>
         private static DataTable RunningQueriesForSession(int sessionID, DateTime fromDate, DateTime toDate, int instanceID)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("RunningQueriesForSession_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("SessionID", sessionID);
-                cmd.Parameters.Add(new SqlParameter("SnapshotDateFrom", fromDate) { DbType = DbType.DateTime2 });
-                cmd.Parameters.Add(new SqlParameter("SnapshotDateTo", toDate) { DbType = DbType.DateTime2 });
-                cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                DataTable dt = new();
-                da.Fill(dt);
-                ApplyTableModifications(dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("RunningQueriesForSession_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("SessionID", sessionID);
+            cmd.Parameters.Add(new SqlParameter("SnapshotDateFrom", fromDate) { DbType = DbType.DateTime2 });
+            cmd.Parameters.Add(new SqlParameter("SnapshotDateTo", toDate) { DbType = DbType.DateTime2 });
+            cmd.Parameters.AddWithValue("InstanceID", instanceID);
+            DataTable dt = new();
+            da.Fill(dt);
+            ApplyTableModifications(dt);
+            return dt;
         }
 
         private static void ApplyTableModifications(DataTable dt)
@@ -326,79 +323,71 @@ namespace DBADashGUI.Performance
 
         private static DataTable RunningQueriesForJob(Guid JobId, DateTime fromDate, DateTime toDate, int instanceID)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("RunningQueriesForJob_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("JobID", JobId);
-                cmd.Parameters.Add(new SqlParameter("SnapshotDateFrom", fromDate) { DbType = DbType.DateTime2 });
-                cmd.Parameters.Add(new SqlParameter("SnapshotDateTo", toDate) { DbType = DbType.DateTime2 });
-                cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                DataTable dt = new();
-                da.Fill(dt);
-                ApplyTableModifications(dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("RunningQueriesForJob_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("JobID", JobId);
+            cmd.Parameters.Add(new SqlParameter("SnapshotDateFrom", fromDate) { DbType = DbType.DateTime2 });
+            cmd.Parameters.Add(new SqlParameter("SnapshotDateTo", toDate) { DbType = DbType.DateTime2 });
+            cmd.Parameters.AddWithValue("InstanceID", instanceID);
+            DataTable dt = new();
+            da.Fill(dt);
+            ApplyTableModifications(dt);
+            return dt;
         }
 
         /// <summary>Get last running query snapshot summary data for all servers</summary>
         private DataTable RunningQueriesServerSummary()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.RunningQueriesServerSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                var dt = new DataTable();
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.RunningQueriesServerSummary_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            var dt = new DataTable();
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
+            return dt;
         }
 
         /// <summary>Get a list of running query snapshots for the specified instance</summary>
         private DataTable RunningQueriesSummary()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.RunningQueriesSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                var dt = new DataTable();
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                cmd.Parameters.AddWithValue("MaxRows", Properties.Settings.Default.RunningQueriesSummaryMaxRows);
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.RunningQueriesSummary_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            var dt = new DataTable();
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+            cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+            cmd.Parameters.AddWithValue("MaxRows", Properties.Settings.Default.RunningQueriesSummaryMaxRows);
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
+            return dt;
         }
 
         /// <summary>Get running queries snapshot data for the specified snapshot date. skip parameter is used to return next snapshot (1) or previous snapshot (-1)</summary>
         private DataTable RunningQueriesSnapshot(ref DateTime snapshotDate, int skip = 0)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.RunningQueries_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.RunningQueries_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            var dt = new DataTable();
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            var pSnapshotDate = cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+            cmd.Parameters.AddWithValue("Skip", skip);
+            pSnapshotDate.SqlDbType = SqlDbType.DateTime2;
+            pSnapshotDate.Direction = ParameterDirection.InputOutput;
+            if (snapshotDate == DateTime.MaxValue)
             {
-                var dt = new DataTable();
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                var pSnapshotDate = cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
-                cmd.Parameters.AddWithValue("Skip", skip);
-                pSnapshotDate.SqlDbType = SqlDbType.DateTime2;
-                pSnapshotDate.Direction = ParameterDirection.InputOutput;
-                if (snapshotDate == DateTime.MaxValue)
-                {
-                    pSnapshotDate.Value = DBNull.Value;
-                }
-                da.Fill(dt);
-                snapshotDate = Convert.ToDateTime(pSnapshotDate.Value);
-                ApplyTableModifications(dt);
-                return dt;
+                pSnapshotDate.Value = DBNull.Value;
             }
+            da.Fill(dt);
+            snapshotDate = Convert.ToDateTime(pSnapshotDate.Value);
+            ApplyTableModifications(dt);
+            return dt;
         }
 
         /// <summary>Load a running queries snapshot for the specified date. skip parameter is used to return next snapshot (1) or previous snapshot (-1) </summary>
@@ -885,33 +874,29 @@ namespace DBADashGUI.Performance
         /// <summary>Get session level wait stats for a specified session or for all sessions</summary>
         private static DataTable GetSessionWaits(int InstanceID, short? SessionID, DateTime? SnapshotDateUTC, DateTime? LoginTimeUTC)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.SessionWaits_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("SessionID", SessionID);
-                cmd.Parameters.Add(new SqlParameter("SnapshotDateUTC", SnapshotDateUTC) { DbType = DbType.DateTime2 });
-                cmd.Parameters.AddWithValue("LoginTimeUTC", LoginTimeUTC);
-                var dt = new DataTable();
-                da.Fill(dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.SessionWaits_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("SessionID", SessionID);
+            cmd.Parameters.Add(new SqlParameter("SnapshotDateUTC", SnapshotDateUTC) { DbType = DbType.DateTime2 });
+            cmd.Parameters.AddWithValue("LoginTimeUTC", LoginTimeUTC);
+            var dt = new DataTable();
+            da.Fill(dt);
+            return dt;
         }
 
         /// <summary>Get session level wait stats for the specified snapshot over all sessions.</summary>
         private static DataTable GetSessionWaitSummary(int InstanceID, DateTime? SnapshotDateUTC)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.SessionWaitsSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.Add(new SqlParameter("SnapshotDateUTC", SnapshotDateUTC) { DbType = DbType.DateTime2 });
-                var dt = new DataTable();
-                da.Fill(dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.SessionWaitsSummary_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            cmd.Parameters.Add(new SqlParameter("SnapshotDateUTC", SnapshotDateUTC) { DbType = DbType.DateTime2 });
+            var dt = new DataTable();
+            da.Fill(dt);
+            return dt;
         }
 
         private void TsSessionWaitCopy_Click(object sender, EventArgs e)
