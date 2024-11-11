@@ -694,13 +694,27 @@ namespace DBADashGUI.CustomReports
         // / <param name="fromGrid">If true, saves the DataGridView to a table.  If false, saves the underlying DataTable to a table.</param>
         private void ScriptTable(bool fromGrid)
         {
-            const string tableName = "#DBADashGrid";
             try
             {
-                var dt = GetDataTableForExport(fromGrid);
-                var tableScript = GenerateCreateTableCommand(dt, tableName, false);
-                var insertStatements = GenerateInsertStatementsWithBatching(dt, tableName, false);
-                var header = @$"/*********************************************************
+                var insertScript = ScriptTable(fromGrid, true, "#DBADashGrid");
+                var frm = new CodeViewer() { Code = insertScript, Language = CodeEditor.CodeEditorModes.SQL };
+                frm.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error generating script: " + ex.Message, "Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        public string ScriptTable(bool fromGrid, bool includeHeader, string tableName) => ScriptDataTable(GetDataTableForExport(fromGrid), includeHeader, tableName);
+
+        public static string ScriptDataTable(DataTable dt, bool includeHeader, string tableName)
+        {
+            var tableScript = GenerateCreateTableCommand(dt, tableName, false);
+            var insertStatements = GenerateInsertStatementsWithBatching(dt, tableName, false);
+            var header = includeHeader
+                ? @$"/*********************************************************
 ----------------------------------------------------------
 |   ____   ____     _      ____               _          |
 |  |  _ \ | __ )   / \    |  _ \   __ _  ___ | |__       |
@@ -715,23 +729,15 @@ namespace DBADashGUI.CustomReports
 |       Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}					 |
 ----------------------------------------------------------
 *********************************************************/
-
-IF OBJECT_ID('tempdb..{tableName}') IS NOT NULL
+" : "";
+            header += @$"IF OBJECT_ID('tempdb..{tableName}') IS NOT NULL
 BEGIN
     DROP TABLE {tableName}
 END
 GO
 ";
-                var footer = $"\n\nSELECT {GetColumnList(dt)}\nFROM {tableName}\n\n--DROP TABLE {tableName}";
-                var insertScript = header + tableScript + "\n" + string.Join("\n", insertStatements) + footer;
-                var frm = new CodeViewer() { Code = insertScript, Language = CodeEditor.CodeEditorModes.SQL };
-                frm.ShowDialog();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error generating script: " + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
+            var footer = $"\n\nSELECT {GetColumnList(dt)}\nFROM {tableName}\n\n--DROP TABLE {tableName}";
+            return header + tableScript + "\n" + string.Join("\n", insertStatements) + footer;
         }
 
         public static List<string> GenerateInsertStatementsWithBatching(DataTable dataTable, string tableName, bool quoteTableName = true)

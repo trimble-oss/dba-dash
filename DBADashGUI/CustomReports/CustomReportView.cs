@@ -17,6 +17,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DBADashGUI.SchemaCompare;
 using DataTable = System.Data.DataTable;
 
 namespace DBADashGUI.CustomReports
@@ -44,6 +45,39 @@ namespace DBADashGUI.CustomReports
             InitializeComponent();
             ShowParamPrompt(false);
             this.ApplyTheme();
+            scriptDataTablesToolStripMenuItem.Click += (_, _) => ScriptDataTables(false);
+            scriptGridsToolStripMenuItem.Click += (_, _) => ScriptDataTables(true);
+        }
+
+        private void ScriptDataTables(bool fromGrid)
+        {
+            try
+            {
+                var i = 0;
+                StringBuilder sb = new();
+                foreach (var grid in Grids)
+                {
+                    if (i > 0)
+                    {
+                        sb.AppendLine();
+                        sb.AppendLine("/*********************************************************");
+                        sb.AppendLine($" Result Set {i + 1}");
+                        sb.AppendLine("*********************************************************/");
+                        sb.AppendLine();
+                    }
+                    var tableName = $"#DBADashGrid{i + 1}";
+                    sb.Append(grid.ScriptTable(fromGrid, i == 0, tableName));
+                    sb.AppendLine();
+                    i += 1;
+                }
+
+                var frm = new CodeViewer() { Code = sb.ToString(), Language = CodeEditor.CodeEditorModes.SQL };
+                frm.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error scripting tables: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void SetCellHighlightingRules(DBADashDataGridView dgv)
