@@ -1,4 +1,5 @@
 ﻿using DBADashGUI.Performance;
+using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,6 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI
 {
@@ -19,24 +19,14 @@ namespace DBADashGUI
             InitializeComponent();
         }
 
-        private List<int> InstanceIDs;
+        private DBADashContext CurrentContext;
+
+        private HashSet<int> InstanceIDs => CurrentContext.InstanceIDs;
         private string groupBy = "InstanceDisplayName";
-        private string _db = "";
         private bool savedLayoutLoaded;
 
-        public string DBName
-        {
-            get => _db;
-            set
-            {
-                _db = value;
-
-                lblDatabase.Visible = _db.Length == 0;
-                lblInstance.Visible = _db.Length == 0;
-                instanceToolStripMenuItem.Visible = _db.Length == 0;
-                databaseNameToolStripMenuItem.Visible = _db.Length == 0;
-            }
-        }
+        public string DBName => CurrentContext.DatabaseName;
+        private bool IsDBLevel => !string.IsNullOrEmpty(CurrentContext.DatabaseName);
 
         private string Metric => tsMetric.Text == "CPU" ? "cpu_time" : "Duration";
 
@@ -165,7 +155,7 @@ namespace DBADashGUI
             rpccompletedToolStripMenuItem.Checked = false;
             sqlbatchcompletedToolStripMenuItem.Checked = false;
             ResetTime();
-            if (_db.Length > 0)
+            if (IsDBLevel)
             {
                 groupBy = "object_name";
             }
@@ -313,8 +303,12 @@ namespace DBADashGUI
 
         public void SetContext(DBADashContext _context)
         {
-            InstanceIDs = _context.InstanceIDs.ToList();
-            DBName = _context.DatabaseName;
+            if (_context == CurrentContext) return;
+            CurrentContext = _context;
+            lblDatabase.Visible = !IsDBLevel;
+            lblInstance.Visible = !IsDBLevel;
+            instanceToolStripMenuItem.Visible = !IsDBLevel;
+            databaseNameToolStripMenuItem.Visible = !IsDBLevel;
             ResetFilters();
             RefreshData();
         }
@@ -508,11 +502,11 @@ namespace DBADashGUI
                         }
                 }
 
-                if (txtInstance.Text.Length == 0 && _db.Length == 0)
+                if (txtInstance.Text.Length == 0 && !IsDBLevel)
                 {
                     groupBy = "InstanceDisplayName";
                 }
-                else if (txtDatabase.Text.Length == 0 && _db.Length == 0)
+                else if (txtDatabase.Text.Length == 0 && !IsDBLevel)
                 {
                     groupBy = "DatabaseName";
                 }
