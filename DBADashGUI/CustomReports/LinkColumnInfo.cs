@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using Newtonsoft.Json;
 using static DBADashGUI.SchemaCompare.CodeEditor;
 
 namespace DBADashGUI.CustomReports
@@ -19,13 +19,29 @@ namespace DBADashGUI.CustomReports
         public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex)
         {
             var url = row.Cells[TargetColumn].Value.DBNullToNull().ToString() ?? string.Empty;
-            if (CommonShared.IsValidUrl(url))
+            try
             {
-                CommonShared.OpenURL(url);
+                if (url.StartsWith("smb:")) // Convert to UNC path
+                {
+                    url = url.Replace("smb:", "").Replace("/", @"\");
+                }
+                if (Uri.TryCreate(url, UriKind.Absolute, out var uri) && uri.IsFile)
+                {
+                    var filePath = uri.LocalPath; // Converts file:// paths
+                    CommonShared.OpenFolder(filePath);
+                }
+                else if (CommonShared.IsValidUrl(url))
+                {
+                    CommonShared.OpenURL(url);
+                }
+                else
+                {
+                    MessageBox.Show($"Invalid URL: {url}", "Invalid URL", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show($"Invalid URL: {url}", "Invalid URL", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
