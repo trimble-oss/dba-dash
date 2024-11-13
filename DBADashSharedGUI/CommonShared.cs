@@ -4,6 +4,8 @@ using Microsoft.SqlServer.Management.Common;
 using System.Diagnostics;
 using System.Runtime.Versioning;
 using DBADashGUI.Theme;
+using System.IO;
+using System.Security;
 
 namespace DBADashSharedGUI
 {
@@ -18,6 +20,35 @@ namespace DBADashSharedGUI
 
             var psi = new ProcessStartInfo(url) { UseShellExecute = true };
             Process.Start(psi);
+        }
+
+        public static void OpenFolder(string path)
+        {
+            if (!Directory.Exists(path))
+            {
+                throw new DirectoryNotFoundException($"The folder '{path}' does not exist.");
+            }
+
+            // Use Path.GetFullPath to get the absolute path, which also checks for invalid characters
+            string fullPath;
+            try
+            {
+                fullPath = Path.GetFullPath(path);
+            }
+            catch (Exception ex) when (ex is ArgumentException || ex is NotSupportedException || ex is PathTooLongException || ex is SecurityException)
+            {
+                throw new ArgumentException("The folder path is invalid.", nameof(path), ex);
+            }
+
+            // Start Windows Explorer at the given path
+            try
+            {
+                Process.Start("explorer.exe", fullPath);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Failed to open the folder '{fullPath}' in Windows Explorer.", ex);
+            }
         }
 
         public static bool IsValidUrl(string url)
