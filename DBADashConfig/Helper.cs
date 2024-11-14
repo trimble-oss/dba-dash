@@ -165,7 +165,9 @@ namespace DBADashConfig
                 PlanCollectionEnabled = o.PlanCollectionEnabled,
                 SlowQueryThresholdMs = o.SlowQueryThresholdMs,
                 SlowQuerySessionMaxMemoryKB = o.SlowQuerySessionMaxMemoryKB,
-                SlowQueryTargetMaxMemoryKB = o.SlowQueryTargetMaxMemoryKB
+                SlowQueryTargetMaxMemoryKB = o.SlowQueryTargetMaxMemoryKB,
+                UseDualEventSession = o.UseDualEventSession ?? true,
+                PersistXESessions = o.PersistXESessions ?? false,
             };
             if (!o.SkipValidation)
             {

@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using DBADash;
 
 namespace DBADashConfig.Test
@@ -53,6 +54,42 @@ namespace DBADashConfig.Test
 
             Assert.IsFalse(BasicConfig.IsConfigFileEncrypted(), "Config file should not be encrypted");
             File.Delete("ServiceConfig.TempKey");
+        }
+
+        [TestMethod]
+        [DataRow("SQL1", "Data Source=SQL1;Integrated Security=SSPI", false, false)]
+        [DataRow("SQL2", "Data Source=SQL2;Integrated Security=SSPI", true, false)]
+        [DataRow("SQL3", "Data Source=SQL3;Integrated Security=SSPI", false, true)]
+        public void AddConnectionTest(string connectionID, string connectionString, bool persistXE, bool useDualSession)
+        {
+            const bool skipValidation = true;
+            var psi = new ProcessStartInfo("DBADashConfig",
+                $"-a Add -c \"{connectionString}\" --PersistXESessions {persistXE} --UseDualEventSession {useDualSession} --SkipValidation {skipValidation} --ConnectionID {connectionID}");
+            Helper.RunProcess(psi);
+            var json = Helper.GetConfigJson();
+            var cfg = BasicConfig.Load<CollectionConfig>();
+
+            var conn = cfg.SourceConnections.FirstOrDefault(c => c.ConnectionID == connectionID);
+            Assert.IsNotNull(conn);
+            Assert.AreEqual(conn.UseDualEventSession, useDualSession);
+            Assert.AreEqual(conn.PersistXESessions, persistXE);
+        }
+
+        [TestMethod]
+        [DataRow("SQL4", "Data Source=SQL4;Integrated Security=SSPI")]
+        public void AddConnectionTestDefaults(string connectionID, string connectionString)
+        {
+            const bool skipValidation = true;
+            var psi = new ProcessStartInfo("DBADashConfig",
+                $"-a Add -c \"{connectionString}\" --SkipValidation {skipValidation} --ConnectionID {connectionID}");
+            Helper.RunProcess(psi);
+            var json = Helper.GetConfigJson();
+            var cfg = BasicConfig.Load<CollectionConfig>();
+
+            var conn = cfg.SourceConnections.FirstOrDefault(c => c.ConnectionID == connectionID);
+            Assert.IsNotNull(conn);
+            Assert.AreEqual(conn.UseDualEventSession, true);
+            Assert.AreEqual(conn.PersistXESessions, false);
         }
 
         [TestMethod]

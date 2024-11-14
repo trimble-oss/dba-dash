@@ -70,6 +70,12 @@ PopulateConnectionID - Add ConnectionID to source connections without a Connecti
         [Option("SlowQueryTargetMaxMemoryKB", Default = -1, Required = false, HelpText = "Max memory target parameter for ring_buffer")]
         public int SlowQueryTargetMaxMemoryKB { get; set; }
 
+        [Option("UseDualEventSession", Default = true, Required = false, HelpText = "Use two event sessions turned on/off alternatively.  Used to limit event loss while session is turned off/on to flush events.")]
+        public bool? UseDualEventSession { get; set; }
+
+        [Option("PersistXESessions", Default = false, Required = false, HelpText = "Allows customization of event sessions by persisting them instead of removing them when the service is shutdown.")]
+        public bool? PersistXESessions { get; set; }
+
         [Option("ConnectionID", Default = "", Required = false, HelpText = "The ConnectionID is used to uniquely identify the SQL Instance in the repository database.  The ConnectionID is automatically assigned to @@SERVERNAME but you can override this with a custom value.  If you change the ConnectionID for an existing server it will appear as a new instance in the repository database.")]
         public string ConnectionID { get; set; } = "";
 
