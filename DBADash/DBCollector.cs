@@ -190,11 +190,16 @@ namespace DBADash
 
         private void LogDBError(string errorSource, string errorMessage, string errorContext = "Collect")
         {
-            var rError = dtErrors.NewRow();
+            AddErrorRow(ref dtErrors,errorSource,errorMessage,errorContext);
+        }
+
+        public static void AddErrorRow(ref DataTable dt, string errorSource, string errorMessage, string errorContext)
+        {
+            var rError = dt.NewRow();
             rError["ErrorSource"] = errorSource;
             rError["ErrorMessage"] = errorMessage;
             rError["ErrorContext"] = errorContext;
-            dtErrors.Rows.Add(rError);
+            dt.Rows.Add(rError);
         }
 
         private void CreateInternalPerformanceCountersDataTable()
@@ -289,7 +294,19 @@ namespace DBADash
                 });
 
             Data = new DataSet("DBADash");
-            dtErrors = new("Errors")
+            dtErrors = GetErrorDataTableSchema();
+
+            Data.Tables.Add(dtErrors);
+
+            retryPolicy.Execute(
+                _ => GetInstance(),
+                new Context("Instance")
+              );
+        }
+
+        public static DataTable GetErrorDataTableSchema()
+        {
+            return new DataTable("Errors")
             {
                 Columns =
                 {
@@ -298,13 +315,6 @@ namespace DBADash
                     new DataColumn("ErrorContext")
                 }
             };
-
-            Data.Tables.Add(dtErrors);
-
-            retryPolicy.Execute(
-                _ => GetInstance(),
-                new Context("Instance")
-              );
         }
 
         public async Task RemoveEventSessionsAsync()

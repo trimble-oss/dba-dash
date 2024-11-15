@@ -456,6 +456,36 @@ BEGIN
 
 	DELETE dbo.ServerServices
 	WHERE InstanceID = @InstanceID
+
+	DELETE CTK 
+	FROM Alert.CustomThreadKey CTK
+	WHERE EXISTS(
+				SELECT 1 
+				FROM Alert.ActiveAlerts AA
+				WHERE AA.InstanceID = @InstanceID
+				AND AA.AlertID = CTK.AlertID
+				)
+
+	DELETE NL 
+	FROM Alert.NotificationLog NL
+	WHERE EXISTS(
+				SELECT 1 
+				FROM Alert.ActiveAlerts AA
+				WHERE AA.InstanceID = @InstanceID
+				AND AA.AlertID = NL.AlertID
+				)
+
+	DELETE Alert.ActiveAlerts
+	WHERE InstanceID = @InstanceID 
+
+	DELETE Alert.ClosedAlerts 
+	WHERE InstanceID = @InstanceID
+
+	DELETE Alert.BlackoutPeriod
+	WHERE ApplyToInstanceID = @InstanceID
+
+	DELETE Alert.Rules
+	WHERE ApplyToInstanceID = @InstanceID
 	
 	DELETE dbo.Instances
 	WHERE InstanceID = @InstanceID

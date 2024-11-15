@@ -10,6 +10,9 @@ GRANT SELECT ON SCHEMA::DBADash TO App;
 GRANT EXECUTE ON SCHEMA::DBADash TO App;
 GRANT EXECUTE ON SCHEMA::UserReport TO RunUserReports;
 GRANT EXECUTE ON SCHEMA::Messaging TO Messaging;
+GRANT EXECUTE ON SCHEMA::Alert TO App;
+GRANT SELECT ON SCHEMA::Alert TO App;
+GRANT SELECT ON SCHEMA::Alert TO AppReadOnly
 
 /* App ReadOnly role provides limited app access. Generate grant for stored procedures that end with _Get & inline functions*/
 DECLARE @GrantAppReadOnlySQL NVARCHAR(MAX);
@@ -18,7 +21,7 @@ WITH Grants AS (
 		FROM sys.objects
 		WHERE name LIKE '%_Get' 
 		AND type = 'P'
-		AND SCHEMA_NAME(schema_id) IN('dbo','DBADash')
+		AND SCHEMA_NAME(schema_id) IN('dbo','DBADash','Alert')
 		UNION ALL
 		SELECT CONCAT('GRANT SELECT ON ',QUOTENAME(SCHEMA_NAME(schema_id)),'.',QUOTENAME(name),' TO AppReadOnly')
 		FROM sys.objects
@@ -1879,7 +1882,24 @@ BEGIN
 		DaysCriticalThreshold
 	)
 	VALUES (-1, -1, N'', 0.5, 0.8,365,90);
-END
+END;
+
+MERGE INTO Alert.NotificationChannelType AS [Target]
+USING (VALUES
+	(1,N'Webhook'),
+	(2,N'Email'),
+	(3,N'Slack')
+) AS [Source]([NotificationChannelTypeID],[NotificationChannelType])
+ON ([Target].[NotificationChannelTypeID] = [Source].[NotificationChannelTypeID])
+WHEN MATCHED AND (
+	NULLIF([Source].[NotificationChannelType], [Target].[NotificationChannelType]) IS NOT NULL OR NULLIF([Target].[NotificationChannelType], [Source].[NotificationChannelType]) IS NOT NULL) THEN
+ UPDATE SET
+  [Target].[NotificationChannelType] = [Source].[NotificationChannelType]
+WHEN NOT MATCHED BY TARGET THEN
+ INSERT([NotificationChannelTypeID],[NotificationChannelType])
+ VALUES([Source].[NotificationChannelTypeID],[Source].[NotificationChannelType])
+WHEN NOT MATCHED BY SOURCE THEN 
+ DELETE;
 
 /* 
 	ResourceGovernorConfiguration collection no longer run non-enterprise edition engines.

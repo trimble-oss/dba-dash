@@ -876,5 +876,67 @@ namespace DBADashGUI.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+
+        internal static System.Drawing.Bitmap Alert_OK
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("Alert_OK", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap Alert_Warning
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("Alert_Warning", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        internal static System.Drawing.Bitmap Alert_Critical
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("Alert_Critical", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap Alert_Information
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("Alert_Information", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap AddUserGroup_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("AddUserGroup_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap NewRule_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("NewRule_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap NotificationAlertMute_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("NotificationAlertMute_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

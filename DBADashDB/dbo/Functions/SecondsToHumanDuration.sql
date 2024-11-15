@@ -1,5 +1,5 @@
 ﻿CREATE FUNCTION dbo.SecondsToHumanDuration (
-    @Seconds INT
+    @Seconds BIGINT
 )
 RETURNS TABLE
 AS

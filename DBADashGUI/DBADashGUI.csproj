@@ -36,6 +36,8 @@
     <None Remove="SQL\CorruptionInfo.sql" />
     <None Remove="SQL\DecipherWaitResource.sql" />
     <None Remove="SQL\FindPlan.sql" />
+    <None Remove="SyntaxHighlighting\Json.xshd" />
+    <None Remove="SyntaxHighlighting\MarkDown.xshd" />
     <None Remove="SyntaxHighlighting\SQL-Light.xshd" />
   </ItemGroup>
   <ItemGroup>
@@ -218,6 +220,8 @@
     <Compile Update="Tagging\Tags.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <EmbeddedResource Include="SyntaxHighlighting\Json.xshd" />
+    <EmbeddedResource Include="SyntaxHighlighting\MarkDown.xshd" />
     <EmbeddedResource Include="SyntaxHighlighting\PowerShell.xshd" />
     <EmbeddedResource Include="SyntaxHighlighting\SQL-Dark.xshd" />
     <EmbeddedResource Include="SQL\CorruptionInfo.sql" />
@@ -248,6 +252,8 @@
     <PackageReference Include="LiveCharts.WinForms" Version="0.9.7.1" />
     <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WinForms" Version="2.0.0-rc4.5" />
+    <PackageReference Include="Markdig" Version="0.39.1" />
+    <PackageReference Include="Markdig.SyntaxHighlighting" Version="1.1.7" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="172.52.0" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />

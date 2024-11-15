@@ -1,10 +1,12 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Xml.Linq;
 using DBADashGUI.Theme;
+using ICSharpCode.AvalonEdit.Document;
 
 namespace DBADashGUI.SchemaCompare
 {
@@ -13,11 +15,24 @@ namespace DBADashGUI.SchemaCompare
     /// </summary>
     public partial class CodeEditor : UserControl, IThemedControl
     {
+        public EventHandler TextChanged;
+
         public CodeEditor()
         {
             InitializeComponent();
-
+            txtCode.TextChanged += TxtCode_TextChanged;
             Mode = CodeEditorModes.SQL;
+        }
+
+        public bool IsReadOnly
+        {
+            get => txtCode.IsReadOnly;
+            set => txtCode.IsReadOnly = value;
+        }
+
+        private void TxtCode_TextChanged(object sender, EventArgs e)
+        {
+            TextChanged?.Invoke(this, e);
         }
 
         private CodeEditorModes mode = CodeEditorModes.SQL;
@@ -85,6 +100,15 @@ namespace DBADashGUI.SchemaCompare
                 txtCode.SyntaxHighlighting = ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance.GetDefinitionByExtension(".xml");
                 return;
             }
+            else if (mode == CodeEditorModes.Json)
+            {
+                resourceName = "DBADashGUI.SyntaxHighlighting.Json.xshd";
+            }
+            else if (mode == CodeEditorModes.Markdown)
+            {
+                txtCode.SyntaxHighlighting = ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance.GetDefinitionByExtension(".md");
+                return;
+            }
             else if (mode == CodeEditorModes.None)
             {
                 resourceName = null;
@@ -136,7 +160,9 @@ namespace DBADashGUI.SchemaCompare
             SQL,
             PowerShell,
             None,
-            XML
+            XML,
+            Json,
+            Markdown
         }
 
         private string _text;

@@ -67,6 +67,14 @@ namespace DBADashServiceConfig
             tabJson = new System.Windows.Forms.TabPage();
             txtJson = new System.Windows.Forms.TextBox();
             tabOther = new System.Windows.Forms.TabPage();
+            groupBox7 = new System.Windows.Forms.GroupBox();
+            chkAlertStartupDelay = new System.Windows.Forms.CheckBox();
+            label20 = new System.Windows.Forms.Label();
+            numAlertStartupDelay = new System.Windows.Forms.NumericUpDown();
+            chkAlertPollingFrequency = new System.Windows.Forms.CheckBox();
+            label19 = new System.Windows.Forms.Label();
+            numAlertPollingFrequency = new System.Windows.Forms.NumericUpDown();
+            chkProcessAlerts = new System.Windows.Forms.CheckBox();
             groupBox6 = new System.Windows.Forms.GroupBox();
             lnkAllowExplicit = new System.Windows.Forms.LinkLabel();
             lnkAllowNone = new System.Windows.Forms.LinkLabel();
@@ -157,6 +165,9 @@ namespace DBADashServiceConfig
             panel1.SuspendLayout();
             tabJson.SuspendLayout();
             tabOther.SuspendLayout();
+            groupBox7.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numAlertStartupDelay).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numAlertPollingFrequency).BeginInit();
             groupBox6.SuspendLayout();
             groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numBackupRetention).BeginInit();
@@ -558,11 +569,11 @@ namespace DBADashServiceConfig
             // tabJson
             // 
             tabJson.Controls.Add(txtJson);
-            tabJson.Location = new System.Drawing.Point(4, 29);
+            tabJson.Location = new System.Drawing.Point(4, 39);
             tabJson.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             tabJson.Name = "tabJson";
             tabJson.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            tabJson.Size = new System.Drawing.Size(1129, 732);
+            tabJson.Size = new System.Drawing.Size(1129, 722);
             tabJson.TabIndex = 6;
             tabJson.Text = "Json";
             tabJson.UseVisualStyleBackColor = true;
@@ -574,24 +585,114 @@ namespace DBADashServiceConfig
             txtJson.Multiline = true;
             txtJson.Name = "txtJson";
             txtJson.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            txtJson.Size = new System.Drawing.Size(1123, 724);
+            txtJson.Size = new System.Drawing.Size(1123, 714);
             txtJson.TabIndex = 13;
             txtJson.TextChanged += TxtJson_TextChanged;
             txtJson.Validating += TxtJson_Validating;
             // 
             // tabOther
             // 
+            tabOther.Controls.Add(groupBox7);
             tabOther.Controls.Add(groupBox6);
             tabOther.Controls.Add(groupBox3);
             tabOther.Controls.Add(groupBox4);
-            tabOther.Location = new System.Drawing.Point(4, 29);
+            tabOther.Location = new System.Drawing.Point(4, 39);
             tabOther.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             tabOther.Name = "tabOther";
             tabOther.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            tabOther.Size = new System.Drawing.Size(1129, 732);
+            tabOther.Size = new System.Drawing.Size(1129, 722);
             tabOther.TabIndex = 5;
             tabOther.Text = "Options";
             tabOther.UseVisualStyleBackColor = true;
+            // 
+            // groupBox7
+            // 
+            groupBox7.Controls.Add(chkAlertStartupDelay);
+            groupBox7.Controls.Add(label20);
+            groupBox7.Controls.Add(numAlertStartupDelay);
+            groupBox7.Controls.Add(chkAlertPollingFrequency);
+            groupBox7.Controls.Add(label19);
+            groupBox7.Controls.Add(numAlertPollingFrequency);
+            groupBox7.Controls.Add(chkProcessAlerts);
+            groupBox7.Location = new System.Drawing.Point(9, 604);
+            groupBox7.Name = "groupBox7";
+            groupBox7.Size = new System.Drawing.Size(1112, 91);
+            groupBox7.TabIndex = 40;
+            groupBox7.TabStop = false;
+            groupBox7.Text = "Alerts";
+            // 
+            // chkAlertStartupDelay
+            // 
+            chkAlertStartupDelay.AutoSize = true;
+            chkAlertStartupDelay.Location = new System.Drawing.Point(896, 44);
+            chkAlertStartupDelay.Name = "chkAlertStartupDelay";
+            chkAlertStartupDelay.Size = new System.Drawing.Size(18, 17);
+            chkAlertStartupDelay.TabIndex = 53;
+            chkAlertStartupDelay.UseVisualStyleBackColor = true;
+            chkAlertStartupDelay.CheckedChanged += ChangeAlertStartupDelay;
+            // 
+            // label20
+            // 
+            label20.AutoSize = true;
+            label20.Location = new System.Drawing.Point(569, 42);
+            label20.Name = "label20";
+            label20.Size = new System.Drawing.Size(201, 20);
+            label20.TabIndex = 52;
+            label20.Text = "Alert startup delay (seconds):";
+            // 
+            // numAlertStartupDelay
+            // 
+            numAlertStartupDelay.Enabled = false;
+            numAlertStartupDelay.Location = new System.Drawing.Point(787, 37);
+            numAlertStartupDelay.Maximum = new decimal(new int[] { 86400, 0, 0, 0 });
+            numAlertStartupDelay.Minimum = new decimal(new int[] { 1, 0, 0, int.MinValue });
+            numAlertStartupDelay.Name = "numAlertStartupDelay";
+            numAlertStartupDelay.Size = new System.Drawing.Size(103, 27);
+            numAlertStartupDelay.TabIndex = 51;
+            numAlertStartupDelay.Value = new decimal(new int[] { 60, 0, 0, 0 });
+            numAlertStartupDelay.ValueChanged += ChangeAlertStartupDelay;
+            // 
+            // chkAlertPollingFrequency
+            // 
+            chkAlertPollingFrequency.AutoSize = true;
+            chkAlertPollingFrequency.Location = new System.Drawing.Point(526, 43);
+            chkAlertPollingFrequency.Name = "chkAlertPollingFrequency";
+            chkAlertPollingFrequency.Size = new System.Drawing.Size(18, 17);
+            chkAlertPollingFrequency.TabIndex = 50;
+            chkAlertPollingFrequency.UseVisualStyleBackColor = true;
+            chkAlertPollingFrequency.CheckedChanged += ChangeAlertPollingFrequency;
+            // 
+            // label19
+            // 
+            label19.AutoSize = true;
+            label19.Location = new System.Drawing.Point(180, 38);
+            label19.Name = "label19";
+            label19.Size = new System.Drawing.Size(231, 20);
+            label19.TabIndex = 49;
+            label19.Text = "Alert polling frequency (seconds):";
+            // 
+            // numAlertPollingFrequency
+            // 
+            numAlertPollingFrequency.Enabled = false;
+            numAlertPollingFrequency.Location = new System.Drawing.Point(417, 36);
+            numAlertPollingFrequency.Maximum = new decimal(new int[] { 86400, 0, 0, 0 });
+            numAlertPollingFrequency.Minimum = new decimal(new int[] { 1, 0, 0, int.MinValue });
+            numAlertPollingFrequency.Name = "numAlertPollingFrequency";
+            numAlertPollingFrequency.Size = new System.Drawing.Size(103, 27);
+            numAlertPollingFrequency.TabIndex = 48;
+            numAlertPollingFrequency.Value = new decimal(new int[] { 60, 0, 0, 0 });
+            numAlertPollingFrequency.ValueChanged += ChangeAlertPollingFrequency;
+            // 
+            // chkProcessAlerts
+            // 
+            chkProcessAlerts.AutoSize = true;
+            chkProcessAlerts.Location = new System.Drawing.Point(14, 38);
+            chkProcessAlerts.Name = "chkProcessAlerts";
+            chkProcessAlerts.Size = new System.Drawing.Size(122, 24);
+            chkProcessAlerts.TabIndex = 47;
+            chkProcessAlerts.Text = "Process Alerts";
+            chkProcessAlerts.UseVisualStyleBackColor = true;
+            chkProcessAlerts.CheckedChanged += ChkProcessNotifications_CheckedChanged;
             // 
             // groupBox6
             // 
@@ -606,9 +707,9 @@ namespace DBADashServiceConfig
             groupBox6.Controls.Add(txtSQS);
             groupBox6.Controls.Add(label4);
             groupBox6.Controls.Add(chkEnableMessaging);
-            groupBox6.Location = new System.Drawing.Point(9, 436);
+            groupBox6.Location = new System.Drawing.Point(9, 417);
             groupBox6.Name = "groupBox6";
-            groupBox6.Size = new System.Drawing.Size(1112, 228);
+            groupBox6.Size = new System.Drawing.Size(1112, 181);
             groupBox6.TabIndex = 39;
             groupBox6.TabStop = false;
             groupBox6.Text = "Messaging";
@@ -741,7 +842,7 @@ namespace DBADashServiceConfig
             groupBox3.Controls.Add(chkLogInternalPerfCounters);
             groupBox3.Location = new System.Drawing.Point(8, 19);
             groupBox3.Name = "groupBox3";
-            groupBox3.Size = new System.Drawing.Size(1113, 260);
+            groupBox3.Size = new System.Drawing.Size(1113, 246);
             groupBox3.TabIndex = 38;
             groupBox3.TabStop = false;
             groupBox3.Text = "Miscellaneous";
@@ -869,11 +970,11 @@ namespace DBADashServiceConfig
             groupBox4.Controls.Add(label11);
             groupBox4.Controls.Add(chkScanEvery);
             groupBox4.Controls.Add(label10);
-            groupBox4.Location = new System.Drawing.Point(9, 285);
+            groupBox4.Location = new System.Drawing.Point(9, 272);
             groupBox4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             groupBox4.Name = "groupBox4";
             groupBox4.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            groupBox4.Size = new System.Drawing.Size(1113, 144);
+            groupBox4.Size = new System.Drawing.Size(1113, 138);
             groupBox4.TabIndex = 30;
             groupBox4.TabStop = false;
             groupBox4.Text = "Azure DB";
@@ -921,11 +1022,11 @@ namespace DBADashServiceConfig
             // 
             tabSource.Controls.Add(groupBox2);
             tabSource.Controls.Add(groupBox1);
-            tabSource.Location = new System.Drawing.Point(4, 29);
+            tabSource.Location = new System.Drawing.Point(4, 39);
             tabSource.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             tabSource.Name = "tabSource";
             tabSource.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            tabSource.Size = new System.Drawing.Size(1129, 732);
+            tabSource.Size = new System.Drawing.Size(1129, 722);
             tabSource.TabIndex = 0;
             tabSource.Text = "Source";
             tabSource.UseVisualStyleBackColor = true;
@@ -952,10 +1053,12 @@ namespace DBADashServiceConfig
             tabSrcOptions.Controls.Add(tabExtendedEvents);
             tabSrcOptions.Controls.Add(tabRunningQueries);
             tabSrcOptions.Controls.Add(tabAddConnectionOther);
+            tabSrcOptions.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
             tabSrcOptions.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             tabSrcOptions.Location = new System.Drawing.Point(16, 27);
             tabSrcOptions.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             tabSrcOptions.Name = "tabSrcOptions";
+            tabSrcOptions.Padding = new System.Drawing.Point(20, 8);
             tabSrcOptions.SelectedIndex = 0;
             tabSrcOptions.Size = new System.Drawing.Size(1067, 221);
             tabSrcOptions.TabIndex = 21;
@@ -968,11 +1071,11 @@ namespace DBADashServiceConfig
             tabGeneral.Controls.Add(bttnSrcFolder);
             tabGeneral.Controls.Add(bttnConnectSource);
             tabGeneral.Controls.Add(label1);
-            tabGeneral.Location = new System.Drawing.Point(4, 29);
+            tabGeneral.Location = new System.Drawing.Point(4, 35);
             tabGeneral.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             tabGeneral.Name = "tabGeneral";
             tabGeneral.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            tabGeneral.Size = new System.Drawing.Size(1059, 188);
+            tabGeneral.Size = new System.Drawing.Size(1059, 182);
             tabGeneral.TabIndex = 0;
             tabGeneral.Text = "General";
             tabGeneral.UseVisualStyleBackColor = true;
@@ -984,7 +1087,7 @@ namespace DBADashServiceConfig
             txtSource.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             txtSource.Multiline = true;
             txtSource.Name = "txtSource";
-            txtSource.Size = new System.Drawing.Size(945, 111);
+            txtSource.Size = new System.Drawing.Size(945, 105);
             txtSource.TabIndex = 13;
             // 
             // label1
@@ -1000,11 +1103,11 @@ namespace DBADashServiceConfig
             // 
             tabExtendedEvents.Controls.Add(pnlExtendedEvents);
             tabExtendedEvents.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            tabExtendedEvents.Location = new System.Drawing.Point(4, 29);
+            tabExtendedEvents.Location = new System.Drawing.Point(4, 35);
             tabExtendedEvents.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             tabExtendedEvents.Name = "tabExtendedEvents";
             tabExtendedEvents.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            tabExtendedEvents.Size = new System.Drawing.Size(1059, 188);
+            tabExtendedEvents.Size = new System.Drawing.Size(1059, 182);
             tabExtendedEvents.TabIndex = 1;
             tabExtendedEvents.Text = "Extended Events";
             tabExtendedEvents.UseVisualStyleBackColor = true;
@@ -1021,7 +1124,7 @@ namespace DBADashServiceConfig
             pnlExtendedEvents.Location = new System.Drawing.Point(3, 4);
             pnlExtendedEvents.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             pnlExtendedEvents.Name = "pnlExtendedEvents";
-            pnlExtendedEvents.Size = new System.Drawing.Size(1053, 180);
+            pnlExtendedEvents.Size = new System.Drawing.Size(1053, 174);
             pnlExtendedEvents.TabIndex = 18;
             // 
             // chkSlowQueryThreshold
@@ -1084,10 +1187,10 @@ namespace DBADashServiceConfig
             tabRunningQueries.Controls.Add(chkCollectPlans);
             tabRunningQueries.Controls.Add(grpRunningQueryThreshold);
             tabRunningQueries.Controls.Add(chkCollectSessionWaits);
-            tabRunningQueries.Location = new System.Drawing.Point(4, 29);
+            tabRunningQueries.Location = new System.Drawing.Point(4, 35);
             tabRunningQueries.Name = "tabRunningQueries";
             tabRunningQueries.Padding = new System.Windows.Forms.Padding(3);
-            tabRunningQueries.Size = new System.Drawing.Size(1059, 188);
+            tabRunningQueries.Size = new System.Drawing.Size(1059, 182);
             tabRunningQueries.TabIndex = 4;
             tabRunningQueries.Text = "Running Queries";
             tabRunningQueries.UseVisualStyleBackColor = true;
@@ -1207,11 +1310,11 @@ namespace DBADashServiceConfig
             tabAddConnectionOther.Controls.Add(lblSchemaSnapshotDBs);
             tabAddConnectionOther.Controls.Add(txtSnapshotDBs);
             tabAddConnectionOther.Controls.Add(chkNoWMI);
-            tabAddConnectionOther.Location = new System.Drawing.Point(4, 29);
+            tabAddConnectionOther.Location = new System.Drawing.Point(4, 35);
             tabAddConnectionOther.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             tabAddConnectionOther.Name = "tabAddConnectionOther";
             tabAddConnectionOther.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            tabAddConnectionOther.Size = new System.Drawing.Size(1059, 188);
+            tabAddConnectionOther.Size = new System.Drawing.Size(1059, 182);
             tabAddConnectionOther.TabIndex = 3;
             tabAddConnectionOther.Text = "Other";
             tabAddConnectionOther.UseVisualStyleBackColor = true;
@@ -1423,11 +1526,11 @@ namespace DBADashServiceConfig
             tabDest.Controls.Add(bttnDeployDatabase);
             tabDest.Controls.Add(label7);
             tabDest.Controls.Add(txtDestination);
-            tabDest.Location = new System.Drawing.Point(4, 29);
+            tabDest.Location = new System.Drawing.Point(4, 39);
             tabDest.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             tabDest.Name = "tabDest";
             tabDest.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            tabDest.Size = new System.Drawing.Size(1129, 732);
+            tabDest.Size = new System.Drawing.Size(1129, 722);
             tabDest.TabIndex = 2;
             tabDest.Text = "Destination:";
             tabDest.UseVisualStyleBackColor = true;
@@ -1569,9 +1672,11 @@ namespace DBADashServiceConfig
             tab1.Controls.Add(tabOther);
             tab1.Controls.Add(tabJson);
             tab1.Dock = System.Windows.Forms.DockStyle.Fill;
+            tab1.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
             tab1.Location = new System.Drawing.Point(0, 0);
             tab1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             tab1.Name = "tab1";
+            tab1.Padding = new System.Drawing.Point(20, 8);
             tab1.SelectedIndex = 0;
             tab1.Size = new System.Drawing.Size(1137, 765);
             tab1.TabIndex = 22;
@@ -1598,6 +1703,10 @@ namespace DBADashServiceConfig
             tabJson.ResumeLayout(false);
             tabJson.PerformLayout();
             tabOther.ResumeLayout(false);
+            groupBox7.ResumeLayout(false);
+            groupBox7.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numAlertStartupDelay).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numAlertPollingFrequency).EndInit();
             groupBox6.ResumeLayout(false);
             groupBox6.PerformLayout();
             groupBox3.ResumeLayout(false);
@@ -1754,6 +1863,14 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.TextBox txtAllowScripts;
         private System.Windows.Forms.LinkLabel lnkAllowExplicit;
+        private System.Windows.Forms.GroupBox groupBox7;
+        private System.Windows.Forms.CheckBox chkProcessAlerts;
+        private System.Windows.Forms.CheckBox chkAlertPollingFrequency;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.NumericUpDown numAlertPollingFrequency;
+        private System.Windows.Forms.CheckBox chkAlertStartupDelay;
+        private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.NumericUpDown numAlertStartupDelay;
     }
 }
 

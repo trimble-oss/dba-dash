@@ -734,6 +734,12 @@ namespace DBADashServiceConfig
                 txtSQS.Text = collectionConfig.ServiceSQSQueueUrl;
                 chkAllowPlanForcing.Checked = collectionConfig.AllowPlanForcing;
                 txtAllowScripts.Text = collectionConfig.AllowedScripts;
+                chkProcessAlerts.Checked = collectionConfig.ProcessAlerts;
+                chkAlertPollingFrequency.Checked = collectionConfig.AlertProcessingFrequencySeconds != null;
+                numAlertPollingFrequency.Value = collectionConfig.AlertProcessingFrequencySeconds ?? CollectionConfig.DefaultAlertProcessingFrequencySeconds;
+                chkAlertStartupDelay.Checked = collectionConfig.AlertProcessingStartupDelaySeconds != null;
+                numAlertStartupDelay.Value = collectionConfig.AlertProcessingStartupDelaySeconds ??
+                                             CollectionConfig.DefaultAlertProcessingStartupDelaySeconds;
                 UpdateSummaryCron();
                 UpdateScanInterval();
                 SetDgv();
@@ -2165,6 +2171,34 @@ Cancel = cancel the operation.", @"Mark deleted?", MessageBoxButtons.YesNoCancel
         private void TxtAllowScripts_TextChanged(object sender, EventArgs e)
         {
             collectionConfig.AllowedScripts = txtAllowScripts.Text;
+        }
+
+        private void ChkProcessNotifications_CheckedChanged(object sender, EventArgs e)
+        {
+            collectionConfig.ProcessAlerts = chkProcessAlerts.Checked;
+            numAlertPollingFrequency.Enabled = chkAlertPollingFrequency.Checked && chkProcessAlerts.Checked;
+            numAlertStartupDelay.Enabled = chkAlertStartupDelay.Checked && chkProcessAlerts.Checked;
+            chkAlertPollingFrequency.Enabled = chkProcessAlerts.Checked;
+            chkAlertStartupDelay.Enabled = chkProcessAlerts.Checked;
+            SetJson();
+        }
+
+        private void ChangeAlertPollingFrequency(object sender, EventArgs e)
+        {
+            collectionConfig.AlertProcessingFrequencySeconds =
+                chkAlertPollingFrequency.Checked && numAlertPollingFrequency.Value > 0 ? Convert.ToInt32(numAlertPollingFrequency.Value) : null;
+            numAlertPollingFrequency.Enabled = chkAlertPollingFrequency.Checked && chkProcessAlerts.Checked;
+            SetJson();
+        }
+
+        private void ChangeAlertStartupDelay(object sender, EventArgs e)
+        {
+            collectionConfig.AlertProcessingStartupDelaySeconds =
+                chkAlertStartupDelay.Checked && numAlertStartupDelay.Value > 0
+                    ? Convert.ToInt32(numAlertStartupDelay.Value)
+                    : null;
+            numAlertStartupDelay.Enabled = chkAlertStartupDelay.Checked && chkProcessAlerts.Checked;
+            SetJson();
         }
     }
 }
