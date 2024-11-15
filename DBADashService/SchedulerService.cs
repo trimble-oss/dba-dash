@@ -86,6 +86,7 @@ namespace DBADashService
                     case DBValidations.DBVersionStatusEnum.AppUpgradeRequired:
                         Log.Warning("This version of the app is older than the repository database and should be upgraded. DB {dbVersion}.  App {appVersion}", status.DACVersion, status.DBVersion);
                         break;
+
                     case DBValidations.DBVersionStatusEnum.CreateDB when config.AutoUpdateDatabase:
                         Log.Information("Validating destination");
                         CollectionConfig.ValidateDestination(d);
@@ -93,27 +94,28 @@ namespace DBADashService
                         DBValidations.UpgradeDBAsync(d.ConnectionString).Wait();
                         Log.Information("Repository database created");
                         break;
+
                     case DBValidations.DBVersionStatusEnum.CreateDB:
                         throw new Exception("Repository database needs to be created.  Use to service configuration tool to deploy the repository database.");
                     case DBValidations.DBVersionStatusEnum.UpgradeRequired when config.AutoUpdateDatabase:
-                    {
-                        Log.Information("Validating destination");
-                        CollectionConfig.ValidateDestination(d);
-                        Log.Information("Upgrade DB from {oldVersion} to {newVersion}", status.DBVersion.ToString(), status.DACVersion.ToString());
-                        DBValidations.UpgradeDBAsync(d.ConnectionString).Wait();
-                        status = DBValidations.VersionStatus(d.ConnectionString);
-                        if (status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
                         {
-                            Log.Information("Repository DB upgrade completed");
-                        }
-                        else
-                        {
-                            throw new Exception(
-                                $"Database version is {status.DBVersion} is not expected following upgrade to {status.DACVersion}");
-                        }
+                            Log.Information("Validating destination");
+                            CollectionConfig.ValidateDestination(d);
+                            Log.Information("Upgrade DB from {oldVersion} to {newVersion}", status.DBVersion.ToString(), status.DACVersion.ToString());
+                            DBValidations.UpgradeDBAsync(d.ConnectionString).Wait();
+                            status = DBValidations.VersionStatus(d.ConnectionString);
+                            if (status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
+                            {
+                                Log.Information("Repository DB upgrade completed");
+                            }
+                            else
+                            {
+                                throw new Exception(
+                                    $"Database version is {status.DBVersion} is not expected following upgrade to {status.DACVersion}");
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                     case DBValidations.DBVersionStatusEnum.UpgradeRequired:
                         throw new Exception("Database upgrade is required.  Enable auto updates or run the service configuration tool to update.");
                     case DBValidations.DBVersionStatusEnum.OK:
@@ -327,57 +329,57 @@ namespace DBADashService
             switch (src.SourceConnection.Type)
             {
                 case ConnectionType.SQL:
-                {
-                    var groupedSchedule = srcSchedule.GroupedBySchedule;
-                    foreach (var schedule in customCollections
-                                 .GroupBy(c => c.Value.Schedule)
-                                 .Where(c => !groupedSchedule.ContainsKey(c.Key))
-                                 .Select(c => c.Key))
                     {
-                        groupedSchedule.Add(schedule, Array.Empty<CollectionType>());
-                    }
-
-                    foreach (var s in groupedSchedule)
-                    {
-                        if (string.IsNullOrEmpty(s.Key)) continue; /* Collection is disabled */
-                        var custom = customCollections
-                            .Where(c => c.Value.Schedule == s.Key)
-                            .ToDictionary(c => c.Key, c => c.Value);
-                        var job = GetJob(s.Value, src, cfgString, custom);
-                        Log.Information("Add schedule for {source} to collect {collection},{custom} on schedule {schedule}", src.SourceConnection.ConnectionForPrint, s.Value, custom.Keys, s.Key);
-                        ScheduleJob(s.Key, job);
-                    }
-
-                    if (src.SchemaSnapshotDBs is { Length: > 0 })
-                    {
-                        var snapshotSchedule = srcSchedule[CollectionType.SchemaSnapshot];
-                        if (!string.IsNullOrEmpty(snapshotSchedule.Schedule))
+                        var groupedSchedule = srcSchedule.GroupedBySchedule;
+                        foreach (var schedule in customCollections
+                                     .GroupBy(c => c.Value.Schedule)
+                                     .Where(c => !groupedSchedule.ContainsKey(c.Key))
+                                     .Select(c => c.Key))
                         {
-                            Log.Information("Add schedule for {source} to collect Schema Snapshots on schedule {schedule}", src.SourceConnection.ConnectionForPrint, snapshotSchedule.Schedule);
-                            var job = JobBuilder.Create<SchemaSnapshotJob>()
-                                .UsingJobData("Source", src.SourceConnection.ConnectionString)
-                                .UsingJobData("CFG", cfgString)
-                                .UsingJobData("SchemaSnapshotDBs", src.SchemaSnapshotDBs)
-                                .Build();
+                            groupedSchedule.Add(schedule, Array.Empty<CollectionType>());
+                        }
 
-                            ScheduleJob(snapshotSchedule.Schedule, job);
+                        foreach (var s in groupedSchedule)
+                        {
+                            if (string.IsNullOrEmpty(s.Key)) continue; /* Collection is disabled */
+                            var custom = customCollections
+                                .Where(c => c.Value.Schedule == s.Key)
+                                .ToDictionary(c => c.Key, c => c.Value);
+                            var job = GetJob(s.Value, src, cfgString, custom);
+                            Log.Information("Add schedule for {source} to collect {collection},{custom} on schedule {schedule}", src.SourceConnection.ConnectionForPrint, s.Value, custom.Keys, s.Key);
+                            ScheduleJob(s.Key, job);
+                        }
 
-                            if (snapshotSchedule.RunOnServiceStart)
+                        if (src.SchemaSnapshotDBs is { Length: > 0 })
+                        {
+                            var snapshotSchedule = srcSchedule[CollectionType.SchemaSnapshot];
+                            if (!string.IsNullOrEmpty(snapshotSchedule.Schedule))
                             {
-                                await scheduler.TriggerJob(job.Key);
+                                Log.Information("Add schedule for {source} to collect Schema Snapshots on schedule {schedule}", src.SourceConnection.ConnectionForPrint, snapshotSchedule.Schedule);
+                                var job = JobBuilder.Create<SchemaSnapshotJob>()
+                                    .UsingJobData("Source", src.SourceConnection.ConnectionString)
+                                    .UsingJobData("CFG", cfgString)
+                                    .UsingJobData("SchemaSnapshotDBs", src.SchemaSnapshotDBs)
+                                    .Build();
+
+                                ScheduleJob(snapshotSchedule.Schedule, job);
+
+                                if (snapshotSchedule.RunOnServiceStart)
+                                {
+                                    await scheduler.TriggerJob(job.Key);
+                                }
                             }
                         }
-                    }
 
-                    break;
-                }
+                        break;
+                    }
                 case ConnectionType.Directory or ConnectionType.AWSS3:
-                {
-                    var job = GetJob(null, src, cfgString, null);
-                    Log.Information("Add schedule for {source} to import on schedule {schedule}", src.SourceConnection.ConnectionForPrint, CollectionSchedule.DefaultImportSchedule);
-                    ScheduleJob(CollectionSchedule.DefaultImportSchedule.Schedule, job);
-                    break;
-                }
+                    {
+                        var job = GetJob(null, src, cfgString, null);
+                        Log.Information("Add schedule for {source} to import on schedule {schedule}", src.SourceConnection.ConnectionForPrint, CollectionSchedule.DefaultImportSchedule);
+                        ScheduleJob(CollectionSchedule.DefaultImportSchedule.Schedule, job);
+                        break;
+                    }
             }
         }
 
@@ -412,6 +414,19 @@ namespace DBADashService
             {
                 sqsMessageProcessing = new SQSMessageProcessing(config);
                 _ = sqsMessageProcessing.ProcessSQSQueue(DBADashAgent.GetCurrent().AgentIdentifier);
+            }
+
+            Log.Information("Alert processing is {IsEnabled}", config.ProcessAlerts ? "enabled" : "disabled");
+            if (config.ProcessAlerts)
+            {
+                foreach (var alertProcessing in config.SQLDestinations.Select(dest => new AlertProcessing(dest)
+                         {
+                             NotificationProcessingStartupDelaySeconds = config.AlertProcessingStartupDelaySeconds ?? CollectionConfig.DefaultAlertProcessingStartupDelaySeconds,
+                            NotificationProcessingFrequencySeconds = config.AlertProcessingFrequencySeconds ?? CollectionConfig.DefaultAlertProcessingFrequencySeconds
+                         }))
+                {
+                    _ = Task.Run(() => alertProcessing.ProcessAlerts());
+                }
             }
         }
 

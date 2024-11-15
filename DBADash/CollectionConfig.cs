@@ -40,6 +40,16 @@ namespace DBADash
 
         public string ServiceSQSQueueUrl { get; set; }
 
+        public bool ProcessAlerts { get; set; } = true;
+
+        public int? AlertProcessingFrequencySeconds { get; set; }
+
+        public int? AlertProcessingStartupDelaySeconds { get; set; }
+
+        public const int DefaultAlertProcessingFrequencySeconds = 60;
+
+        public const int DefaultAlertProcessingStartupDelaySeconds = 60;
+
         public CollectionSchedules GetSchedules()
         {
             if (CollectionSchedules == null)

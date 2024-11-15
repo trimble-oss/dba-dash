@@ -33,8 +33,8 @@ namespace DBADashGUI
         {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             TreeViewImageList = new System.Windows.Forms.ImageList(components);
             menuStrip1 = new System.Windows.Forms.MenuStrip();
             tsConnect = new System.Windows.Forms.ToolStripMenuItem();
@@ -45,6 +45,7 @@ namespace DBADashGUI
             configureDisplayNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             externalDiffToolToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             dataRetentionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            desktopNotificationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             freezeKeyColumnsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             manageInstancesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             repoSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -61,6 +62,7 @@ namespace DBADashGUI
             defaultToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             darkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             whiteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsAlert = new System.Windows.Forms.ToolStripMenuItem();
             tsTime = new System.Windows.Forms.ToolStripDropDownButton();
             minsToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             minsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -99,7 +101,7 @@ namespace DBADashGUI
             groupToolStripMenuItem = new System.Windows.Forms.ToolStripDropDownButton();
             tabs = new ThemedTabControl();
             tabSnapshotsSummary = new System.Windows.Forms.TabPage();
-            schemaSnapshots1 = new Changes.SchemaSnapshots();
+            schemaSnapshots1 = new DBADashGUI.Changes.SchemaSnapshots();
             tabSchema = new System.Windows.Forms.TabPage();
             splitSchemaSnapshot = new System.Windows.Forms.SplitContainer();
             label7 = new System.Windows.Forms.Label();
@@ -120,29 +122,29 @@ namespace DBADashGUI
             colCompare = new System.Windows.Forms.DataGridViewLinkColumn();
             label1 = new System.Windows.Forms.Label();
             tabTags = new System.Windows.Forms.TabPage();
-            tags1 = new Tagging.Tags();
+            tags1 = new DBADashGUI.Tagging.Tags();
             tabDrives = new System.Windows.Forms.TabPage();
             drivesControl1 = new DrivesControl();
             tabBackups = new System.Windows.Forms.TabPage();
-            backupsControl1 = new Backups.BackupsControl();
+            backupsControl1 = new DBADashGUI.Backups.BackupsControl();
             tabLogShipping = new System.Windows.Forms.TabPage();
-            logShippingControl1 = new LogShipping.LogShippingControl();
+            logShippingControl1 = new DBADashGUI.LogShipping.LogShippingControl();
             tabJobs = new System.Windows.Forms.TabPage();
-            agentJobsControl1 = new AgentJobs.AgentJobsControl();
+            agentJobsControl1 = new DBADashGUI.AgentJobs.AgentJobsControl();
             tabSummary = new System.Windows.Forms.TabPage();
             summary1 = new Summary();
             tabFiles = new System.Windows.Forms.TabPage();
-            dbFilesControl1 = new DBFiles.DBFilesControl();
+            dbFilesControl1 = new DBADashGUI.DBFiles.DBFilesControl();
             tabLastGood = new System.Windows.Forms.TabPage();
-            lastGoodCheckDBControl1 = new LastGoodCheckDB.LastGoodCheckDBControl();
+            lastGoodCheckDBControl1 = new DBADashGUI.LastGoodCheckDB.LastGoodCheckDBControl();
             tabPerformance = new System.Windows.Forms.TabPage();
-            performance1 = new Performance.Performance();
+            performance1 = new DBADashGUI.Performance.Performance();
             tabDBADashErrorLog = new System.Windows.Forms.TabPage();
-            collectionErrors1 = new CollectionDates.CollectionErrors();
+            collectionErrors1 = new DBADashGUI.CollectionDates.CollectionErrors();
             tabCollectionDates = new System.Windows.Forms.TabPage();
-            collectionDates1 = new CollectionDates.CollectionDates();
+            collectionDates1 = new DBADashGUI.CollectionDates.CollectionDates();
             tabPerformanceSummary = new System.Windows.Forms.TabPage();
-            performanceSummary1 = new Performance.PerformanceSummary();
+            performanceSummary1 = new DBADashGUI.Performance.PerformanceSummary();
             tabInfo = new System.Windows.Forms.TabPage();
             info1 = new Info();
             tabHardware = new System.Windows.Forms.TabPage();
@@ -154,75 +156,75 @@ namespace DBADashGUI
             tabSlowQueries = new System.Windows.Forms.TabPage();
             slowQueries1 = new SlowQueries();
             tabTraceFlags = new System.Windows.Forms.TabPage();
-            traceFlagHistory1 = new Changes.TraceFlagHistory();
-            tabAlerts = new System.Windows.Forms.TabPage();
-            alerts1 = new Changes.Alerts();
+            traceFlagHistory1 = new DBADashGUI.Changes.TraceFlagHistory();
+            tabSQLAgentAlerts = new System.Windows.Forms.TabPage();
+            alerts1 = new DBADashGUI.Changes.Alerts();
             tabDrivers = new System.Windows.Forms.TabPage();
-            drivers1 = new Changes.Drivers();
+            drivers1 = new DBADashGUI.Changes.Drivers();
             tabDBSpace = new System.Windows.Forms.TabPage();
             spaceTracking1 = new SpaceTracking();
             tabAzureSummary = new System.Windows.Forms.TabPage();
-            azureSummary1 = new Performance.AzureSummary();
+            azureSummary1 = new DBADashGUI.Performance.AzureSummary();
             tabAzureDB = new System.Windows.Forms.TabPage();
-            azureDBResourceStats1 = new Performance.AzureDBResourceStats();
+            azureDBResourceStats1 = new DBADashGUI.Performance.AzureDBResourceStats();
             tabServiceObjectives = new System.Windows.Forms.TabPage();
-            azureServiceObjectivesHistory1 = new Changes.AzureServiceObjectivesHistory();
+            azureServiceObjectivesHistory1 = new DBADashGUI.Changes.AzureServiceObjectivesHistory();
             tabDBConfiguration = new System.Windows.Forms.TabPage();
-            dbConfiguration1 = new Changes.DBConfiguration();
+            dbConfiguration1 = new DBADashGUI.Changes.DBConfiguration();
             tabDBOptions = new System.Windows.Forms.TabPage();
-            dbOptions1 = new Changes.DBOptions();
+            dbOptions1 = new DBADashGUI.Changes.DBOptions();
             tabTempDB = new System.Windows.Forms.TabPage();
-            tempDBConfig1 = new DBFiles.TempDBConfig();
+            tempDBConfig1 = new DBADashGUI.DBFiles.TempDBConfig();
             tabCustomChecks = new System.Windows.Forms.TabPage();
-            customChecks1 = new Checks.CustomChecks();
+            customChecks1 = new DBADashGUI.Checks.CustomChecks();
             tabPC = new System.Windows.Forms.TabPage();
-            performanceCounterSummary1 = new Performance.PerformanceCounterSummary();
+            performanceCounterSummary1 = new DBADashGUI.Performance.PerformanceCounterSummary();
             tabObjectExecutionSummary = new System.Windows.Forms.TabPage();
-            objectExecutionSummary1 = new Performance.ObjectExecutionSummary();
+            objectExecutionSummary1 = new DBADashGUI.Performance.ObjectExecutionSummary();
             tabWaits = new System.Windows.Forms.TabPage();
-            waitsSummary1 = new Performance.WaitsSummary();
+            waitsSummary1 = new DBADashGUI.Performance.WaitsSummary();
             tabMirroring = new System.Windows.Forms.TabPage();
-            mirroring1 = new HA.Mirroring();
+            mirroring1 = new DBADashGUI.HA.Mirroring();
             tabJobDDL = new System.Windows.Forms.TabPage();
-            jobDDLHistory1 = new Changes.JobDDLHistory();
+            jobDDLHistory1 = new DBADashGUI.Changes.JobDDLHistory();
             tabAG = new System.Windows.Forms.TabPage();
-            ag1 = new HA.AG();
+            ag1 = new DBADashGUI.HA.AG();
             tabQS = new System.Windows.Forms.TabPage();
-            queryStore1 = new Changes.QueryStore();
+            queryStore1 = new DBADashGUI.Changes.QueryStore();
             tabRG = new System.Windows.Forms.TabPage();
-            resourceGovernor1 = new Changes.ResourceGovernor();
+            resourceGovernor1 = new DBADashGUI.Changes.ResourceGovernor();
             tabAzureDBesourceGovernance = new System.Windows.Forms.TabPage();
-            azureDBResourceGovernance1 = new Changes.AzureDBResourceGovernance();
+            azureDBResourceGovernance1 = new DBADashGUI.Changes.AzureDBResourceGovernance();
             tabRunningQueries = new System.Windows.Forms.TabPage();
-            runningQueries1 = new Performance.RunningQueries();
+            runningQueries1 = new DBADashGUI.Performance.RunningQueries();
             tabMemory = new System.Windows.Forms.TabPage();
-            memoryUsage1 = new Performance.MemoryUsage();
+            memoryUsage1 = new DBADashGUI.Performance.MemoryUsage();
             tabJobStats = new System.Windows.Forms.TabPage();
-            jobStats1 = new AgentJobs.JobStats();
+            jobStats1 = new DBADashGUI.AgentJobs.JobStats();
             tabDBADash = new System.Windows.Forms.TabPage();
             lblVersion = new System.Windows.Forms.Label();
             lblSQLMonitoring = new System.Windows.Forms.Label();
             lblDBADash = new System.Windows.Forms.Label();
             tabIdentityColumns = new System.Windows.Forms.TabPage();
-            identityColumns1 = new Checks.IdentityColumns();
+            identityColumns1 = new DBADashGUI.Checks.IdentityColumns();
             tabOSLoadedModules = new System.Windows.Forms.TabPage();
-            osLoadedModules1 = new Checks.OSLoadedModules();
+            osLoadedModules1 = new DBADashGUI.Checks.OSLoadedModules();
             tabJobTimeline = new System.Windows.Forms.TabPage();
-            jobTimeline1 = new AgentJobs.JobTimeline();
+            jobTimeline1 = new DBADashGUI.AgentJobs.JobTimeline();
             tabDrivePerformance = new System.Windows.Forms.TabPage();
-            drivePerformance1 = new Performance.DrivePerformance();
+            drivePerformance1 = new DBADashGUI.Performance.DrivePerformance();
             tabRunningJobs = new System.Windows.Forms.TabPage();
-            runningJobs1 = new AgentJobs.RunningJobs();
+            runningJobs1 = new DBADashGUI.AgentJobs.RunningJobs();
             tabCustomReport = new System.Windows.Forms.TabPage();
-            customReportView1 = new CustomReports.CustomReportView();
+            customReportView1 = new DBADashGUI.CustomReports.CustomReportView();
             tabTableSize = new System.Windows.Forms.TabPage();
-            tableSize1 = new DBFiles.TableSize();
+            tableSize1 = new DBADashGUI.DBFiles.TableSize();
             tabTopQueries = new System.Windows.Forms.TabPage();
-            queryStoreTop = new Performance.QueryStoreTopQueries();
+            queryStoreTop = new DBADashGUI.Performance.QueryStoreTopQueries();
             tabQueryStoreForcedPlans = new System.Windows.Forms.TabPage();
-            queryStoreForcedPlans1 = new Performance.QueryStoreForcedPlans();
+            queryStoreForcedPlans1 = new DBADashGUI.Performance.QueryStoreForcedPlans();
             tabServerServices = new System.Windows.Forms.TabPage();
-            serverServices1 = new CustomReports.ServerServices();
+            serverServices1 = new DBADashGUI.CustomReports.ServerServices();
             tabDeletedInstances = new System.Windows.Forms.TabPage();
             deletedInstances1 = new DeletedInstances();
             refresh1 = new Refresh();
@@ -250,6 +252,7 @@ namespace DBADashGUI
             dataGridViewTextBoxColumn22 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn23 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             autoRefreshTimer = new System.Windows.Forms.Timer(components);
+            toolTip1 = new System.Windows.Forms.ToolTip(components);
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitMain).BeginInit();
             splitMain.Panel1.SuspendLayout();
@@ -285,7 +288,7 @@ namespace DBADashGUI
             tabInstanceConfig.SuspendLayout();
             tabSlowQueries.SuspendLayout();
             tabTraceFlags.SuspendLayout();
-            tabAlerts.SuspendLayout();
+            tabSQLAgentAlerts.SuspendLayout();
             tabDrivers.SuspendLayout();
             tabDBSpace.SuspendLayout();
             tabAzureSummary.SuspendLayout();
@@ -362,7 +365,7 @@ namespace DBADashGUI
             // 
             menuStrip1.GripMargin = new System.Windows.Forms.Padding(2);
             menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsConnect, diffToolStripMenuItem, optionsToolStripMenuItem, tsTime, helpToolStripMenuItem, tsTimeFilter, tsDayOfWeek, cboTimeZone });
+            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsConnect, diffToolStripMenuItem, optionsToolStripMenuItem, tsAlert, tsTime, helpToolStripMenuItem, tsTimeFilter, tsDayOfWeek, cboTimeZone });
             menuStrip1.Location = new System.Drawing.Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Padding = new System.Windows.Forms.Padding(3, 1, 0, 1);
@@ -403,7 +406,7 @@ namespace DBADashGUI
             // 
             // optionsToolStripMenuItem
             // 
-            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { configureDisplayNameToolStripMenuItem, externalDiffToolToolStripMenuItem, dataRetentionToolStripMenuItem, freezeKeyColumnsToolStripMenuItem, manageInstancesToolStripMenuItem, repoSettingsToolStripMenuItem, saveTimeZonePreferenceToolStripMenuItem, setAutoRefreshToolStripMenuItem, showHiddenToolStripMenuItem, themeToolStripMenuItem });
+            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { configureDisplayNameToolStripMenuItem, externalDiffToolToolStripMenuItem, dataRetentionToolStripMenuItem, desktopNotificationsToolStripMenuItem, freezeKeyColumnsToolStripMenuItem, manageInstancesToolStripMenuItem, repoSettingsToolStripMenuItem, saveTimeZonePreferenceToolStripMenuItem, setAutoRefreshToolStripMenuItem, showHiddenToolStripMenuItem, themeToolStripMenuItem });
             optionsToolStripMenuItem.Enabled = false;
             optionsToolStripMenuItem.Image = Properties.Resources.SettingsOutline_16x;
             optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
@@ -431,6 +434,14 @@ namespace DBADashGUI
             dataRetentionToolStripMenuItem.Size = new System.Drawing.Size(276, 26);
             dataRetentionToolStripMenuItem.Text = "Data Retention";
             dataRetentionToolStripMenuItem.Click += DataRetentionToolStripMenuItem_Click;
+            // 
+            // desktopNotificationsToolStripMenuItem
+            // 
+            desktopNotificationsToolStripMenuItem.CheckOnClick = true;
+            desktopNotificationsToolStripMenuItem.Name = "desktopNotificationsToolStripMenuItem";
+            desktopNotificationsToolStripMenuItem.Size = new System.Drawing.Size(276, 26);
+            desktopNotificationsToolStripMenuItem.Text = "Desktop Notifications";
+            desktopNotificationsToolStripMenuItem.Click += DesktopNotificationsToolStripMenuItem_Click;
             // 
             // freezeKeyColumnsToolStripMenuItem
             // 
@@ -563,6 +574,16 @@ namespace DBADashGUI
             whiteToolStripMenuItem.Size = new System.Drawing.Size(141, 26);
             whiteToolStripMenuItem.Text = "White";
             whiteToolStripMenuItem.Click += LightToolStripMenuItem_Click;
+            // 
+            // tsAlert
+            // 
+            tsAlert.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsAlert.Image = Properties.Resources.Alert_OK;
+            tsAlert.Name = "tsAlert";
+            tsAlert.Size = new System.Drawing.Size(51, 28);
+            tsAlert.Text = "0";
+            tsAlert.Click += TsAlert_Click;
+            tsAlert.MouseHover += ShowAlertToolTip;
             // 
             // tsTime
             // 
@@ -836,7 +857,6 @@ namespace DBADashGUI
             // 
             searchLayout.AutoSize = true;
             searchLayout.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            searchLayout.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
             searchLayout.ColumnCount = 2;
             searchLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             searchLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
@@ -953,7 +973,7 @@ namespace DBADashGUI
             tabs.Controls.Add(tabInstanceConfig);
             tabs.Controls.Add(tabSlowQueries);
             tabs.Controls.Add(tabTraceFlags);
-            tabs.Controls.Add(tabAlerts);
+            tabs.Controls.Add(tabSQLAgentAlerts);
             tabs.Controls.Add(tabDrivers);
             tabs.Controls.Add(tabDBSpace);
             tabs.Controls.Add(tabAzureSummary);
@@ -1050,7 +1070,7 @@ namespace DBADashGUI
             splitSchemaSnapshot.Panel2.Controls.Add(gvHistory);
             splitSchemaSnapshot.Panel2.Controls.Add(label1);
             splitSchemaSnapshot.Size = new System.Drawing.Size(186, 47);
-            splitSchemaSnapshot.SplitterDistance = 670;
+            splitSchemaSnapshot.SplitterDistance = 25;
             splitSchemaSnapshot.SplitterWidth = 2;
             splitSchemaSnapshot.TabIndex = 1;
             // 
@@ -1070,10 +1090,10 @@ namespace DBADashGUI
             toolStrip1.Dock = System.Windows.Forms.DockStyle.Bottom;
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsPrevious, tsPageNum, tsNext, toolStripLabel1, tsPageSize });
-            toolStrip1.Location = new System.Drawing.Point(0, 749);
+            toolStrip1.Location = new System.Drawing.Point(0, -5);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Padding = new System.Windows.Forms.Padding(0);
-            toolStrip1.Size = new System.Drawing.Size(1572, 28);
+            toolStrip1.Size = new System.Drawing.Size(186, 32);
             toolStrip1.TabIndex = 1;
             toolStrip1.Text = "toolStrip1";
             // 
@@ -1082,14 +1102,14 @@ namespace DBADashGUI
             tsPrevious.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsPrevious.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsPrevious.Name = "tsPrevious";
-            tsPrevious.Size = new System.Drawing.Size(29, 25);
+            tsPrevious.Size = new System.Drawing.Size(29, 29);
             tsPrevious.Text = "Previous";
             tsPrevious.Click += TsPrevious_Click;
             // 
             // tsPageNum
             // 
             tsPageNum.Name = "tsPageNum";
-            tsPageNum.Size = new System.Drawing.Size(53, 25);
+            tsPageNum.Size = new System.Drawing.Size(53, 29);
             tsPageNum.Text = "Page 1";
             // 
             // tsNext
@@ -1097,14 +1117,14 @@ namespace DBADashGUI
             tsNext.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsNext.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsNext.Name = "tsNext";
-            tsNext.Size = new System.Drawing.Size(29, 25);
+            tsNext.Size = new System.Drawing.Size(29, 29);
             tsNext.Text = "Next";
             tsNext.Click += TsNext_Click;
             // 
             // toolStripLabel1
             // 
             toolStripLabel1.Name = "toolStripLabel1";
-            toolStripLabel1.Size = new System.Drawing.Size(75, 25);
+            toolStripLabel1.Size = new System.Drawing.Size(75, 20);
             toolStripLabel1.Text = "Page Size:";
             // 
             // tsPageSize
@@ -1122,23 +1142,23 @@ namespace DBADashGUI
             gvHistory.AllowUserToDeleteRows = false;
             gvHistory.AllowUserToOrderColumns = true;
             gvHistory.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            gvHistory.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            gvHistory.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
             gvHistory.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             gvHistory.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { ObjectName, SchemaName, ObjectType, SnapshotValidFrom, SnapshotValidTo, ObjectDateCreated, ObjectDateModified, colCompare });
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            gvHistory.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            gvHistory.DefaultCellStyle = dataGridViewCellStyle4;
             gvHistory.Dock = System.Windows.Forms.DockStyle.Fill;
             gvHistory.Location = new System.Drawing.Point(0, 30);
             gvHistory.Margin = new System.Windows.Forms.Padding(1, 4, 1, 4);
@@ -1147,7 +1167,7 @@ namespace DBADashGUI
             gvHistory.RowHeadersVisible = false;
             gvHistory.RowHeadersWidth = 51;
             gvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            gvHistory.Size = new System.Drawing.Size(1572, 747);
+            gvHistory.Size = new System.Drawing.Size(186, 0);
             gvHistory.TabIndex = 0;
             gvHistory.CellContentClick += GvHistory_CellContentClick;
             gvHistory.SelectionChanged += GvHistory_SelectionChanged;
@@ -1225,7 +1245,7 @@ namespace DBADashGUI
             label1.Location = new System.Drawing.Point(0, 0);
             label1.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             label1.Name = "label1";
-            label1.Size = new System.Drawing.Size(1572, 30);
+            label1.Size = new System.Drawing.Size(186, 30);
             label1.TabIndex = 2;
             label1.Text = "Snapshot History";
             label1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -1244,6 +1264,7 @@ namespace DBADashGUI
             // 
             // tags1
             // 
+            tags1.AllTags = null;
             tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             tags1.Location = new System.Drawing.Point(1, 2);
             tags1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
@@ -1646,17 +1667,17 @@ namespace DBADashGUI
             traceFlagHistory1.Size = new System.Drawing.Size(190, 53);
             traceFlagHistory1.TabIndex = 0;
             // 
-            // tabAlerts
+            // tabSQLAgentAlerts
             // 
-            tabAlerts.Controls.Add(alerts1);
-            tabAlerts.Location = new System.Drawing.Point(4, 39);
-            tabAlerts.Margin = new System.Windows.Forms.Padding(1, 2, 1, 2);
-            tabAlerts.Name = "tabAlerts";
-            tabAlerts.Padding = new System.Windows.Forms.Padding(1, 2, 1, 2);
-            tabAlerts.Size = new System.Drawing.Size(192, 57);
-            tabAlerts.TabIndex = 20;
-            tabAlerts.Text = "Alerts";
-            tabAlerts.UseVisualStyleBackColor = true;
+            tabSQLAgentAlerts.Controls.Add(alerts1);
+            tabSQLAgentAlerts.Location = new System.Drawing.Point(4, 39);
+            tabSQLAgentAlerts.Margin = new System.Windows.Forms.Padding(1, 2, 1, 2);
+            tabSQLAgentAlerts.Name = "tabSQLAgentAlerts";
+            tabSQLAgentAlerts.Padding = new System.Windows.Forms.Padding(1, 2, 1, 2);
+            tabSQLAgentAlerts.Size = new System.Drawing.Size(1578, 955);
+            tabSQLAgentAlerts.TabIndex = 20;
+            tabSQLAgentAlerts.Text = "SQL Agent Alerts";
+            tabSQLAgentAlerts.UseVisualStyleBackColor = true;
             // 
             // alerts1
             // 
@@ -1664,7 +1685,7 @@ namespace DBADashGUI
             alerts1.Location = new System.Drawing.Point(1, 2);
             alerts1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
             alerts1.Name = "alerts1";
-            alerts1.Size = new System.Drawing.Size(190, 53);
+            alerts1.Size = new System.Drawing.Size(1576, 951);
             alerts1.TabIndex = 0;
             alerts1.UseAlertName = false;
             // 
@@ -2715,7 +2736,7 @@ namespace DBADashGUI
             tabInstanceConfig.ResumeLayout(false);
             tabSlowQueries.ResumeLayout(false);
             tabTraceFlags.ResumeLayout(false);
-            tabAlerts.ResumeLayout(false);
+            tabSQLAgentAlerts.ResumeLayout(false);
             tabDrivers.ResumeLayout(false);
             tabDBSpace.ResumeLayout(false);
             tabAzureSummary.ResumeLayout(false);
@@ -2806,7 +2827,7 @@ namespace DBADashGUI
         private SlowQueries slowQueries1;
         private System.Windows.Forms.TabPage tabTraceFlags;
         private Changes.TraceFlagHistory traceFlagHistory1;
-        private System.Windows.Forms.TabPage tabAlerts;
+        private System.Windows.Forms.TabPage tabSQLAgentAlerts;
         private Changes.Alerts alerts1;
         private System.Windows.Forms.TabPage tabDrivers;
         private Changes.Drivers drivers1;
@@ -2970,5 +2991,8 @@ namespace DBADashGUI
         private DeletedInstances deletedInstances1;
         private System.Windows.Forms.ToolStripMenuItem externalDiffToolToolStripMenuItem;
         private System.Windows.Forms.TableLayoutPanel searchLayout;
+        private System.Windows.Forms.ToolStripMenuItem tsAlert;
+        private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.ToolStripMenuItem desktopNotificationsToolStripMenuItem;
     }
 }

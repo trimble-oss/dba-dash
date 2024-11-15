@@ -523,30 +523,38 @@ namespace DBADash
 
         public static void InsertErrors(string connectionString, int? instanceID, DateTime SnapshotDate, DataSet ds, int commandTimeout)
         {
-            if (ds.Tables.Contains("Errors") && ds.Tables["Errors"]!.Rows.Count > 0)
-            {
-                if (ds.Tables["Errors"].Columns.Count == 2)
-                {
-                    ds.Tables["Errors"].Columns.Add("ErrorContext");
-                }
-                using (var cn = new SqlConnection(connectionString))
-                using (var cmd = new SqlCommand("CollectionErrorLog_Add", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout })
-                {
-                    cn.Open();
+            if (!ds.Tables.Contains("Errors") || ds.Tables["Errors"]!.Rows.Count <= 0) return;
+            var dt = ds.Tables["Errors"];
+            InsertErrors(connectionString,instanceID,SnapshotDate,dt,commandTimeout);
+        }
 
-                    cmd.Parameters.AddWithValue("Errors", ds.Tables["Errors"]);
-                    if (instanceID == null)
-                    {
-                        cmd.Parameters.AddWithValue("InstanceID", DBNull.Value);
-                    }
-                    else
-                    {
-                        cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                    }
-                    cmd.Parameters.AddWithValue("ErrorDate", SnapshotDate);
-                    cmd.ExecuteNonQuery();
-                }
+        public static void InsertErrors(string connectionString, int? instanceID, DateTime SnapshotDate, DataTable dt,
+            int commandTimeout=30)
+        {
+            if (dt.Rows.Count == 0) return;
+            if (dt.Columns.Count == 2)
+            {
+                dt.Columns.Add("ErrorContext");
             }
+
+            using var cn = new SqlConnection(connectionString);
+            using var cmd = new SqlCommand("CollectionErrorLog_Add", cn)
+                { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout };
+            
+            cn.Open();
+
+            cmd.Parameters.AddWithValue("Errors", dt);
+            if (instanceID == null)
+            {
+                cmd.Parameters.AddWithValue("InstanceID", DBNull.Value);
+            }
+            else
+            {
+                cmd.Parameters.AddWithValue("InstanceID", instanceID);
+            }
+            cmd.Parameters.AddWithValue("ErrorDate", SnapshotDate);
+            cmd.ExecuteNonQuery();
+            
         }
 
         private int UpdateInstance(ref DataRow rInstance)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -33,6 +34,12 @@ namespace DBADashGUI.Performance
 
         private void bttnOK_Click(object sender, EventArgs e)
         {
+            var validationResults = new List<ValidationResult>();
+            if (SelectedObject is IValidatableObject && !Validator.TryValidateObject(SelectedObject, new ValidationContext(SelectedObject), validationResults, true))
+            {
+                MessageBox.Show(string.Join('\n', validationResults), "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
             DialogResult = DialogResult.OK;
         }
 

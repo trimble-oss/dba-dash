@@ -18,11 +18,14 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Azure.Core;
 using DBADashGUI.CommunityTools;
+using DBADashGUI.DBADashAlerts;
 using DBADashGUI.SchemaCompare;
 using DocumentFormat.OpenXml.Vml.Office;
 using Microsoft.SqlServer.Management.XEvent;
 using Version = System.Version;
+using System.Text;
 
 namespace DBADashGUI
 {
@@ -41,6 +44,8 @@ namespace DBADashGUI
         private CustomReports.CustomReports customReports = new();
         private readonly Dictionary<ProcedureExecutionMessage.CommandNames, TabPage> CommunityToolsTabPages = new Dictionary<ProcedureExecutionMessage.CommandNames, TabPage>();
         private TabPage tabBlitzIndex => CommunityToolsTabPages[ProcedureExecutionMessage.CommandNames.sp_BlitzIndex];
+        private TabPage tabDBADashAlerts;
+        private NotifyIcon notifyIcon;
 
         public Main(CommandLineOptions opts)
         {
@@ -62,6 +67,10 @@ namespace DBADashGUI
                 CommunityToolsTabPages.Add(proc, tab);
                 tabs.TabPages.Add(tab);
             }
+            tabDBADashAlerts = new TabPage("Alerts");
+            var alertsCsControl = new ActiveAlerts() { Dock = DockStyle.Fill };
+            alertsCsControl.Instance_Selected += Instance_Selected;
+            tabDBADashAlerts.Controls.Add(alertsCsControl);
         }
 
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommandNames proc)
@@ -190,6 +199,9 @@ namespace DBADashGUI
             }
 
             customReportView1.ReportNameChanged += CustomReport_ReportNameChanged;
+            InitializeNotifyIcon();
+            desktopNotificationsToolStripMenuItem.Checked = Properties.Settings.Default.DesktopNotificationsEnabled;
+            _ = Task.Run(GetNewAlertsLoop);
         }
 
         private void CustomReport_ReportNameChanged(object sender, EventArgs e)
@@ -691,7 +703,7 @@ namespace DBADashGUI
 
             if (n.Type is SQLTreeItem.TreeType.DBADashRoot or SQLTreeItem.TreeType.InstanceFolder)
             {
-                allowedTabs.AddRange(new[] { tabSummary, tabPerformanceSummary });
+                allowedTabs.AddRange(new[] { tabSummary, tabDBADashAlerts, tabPerformanceSummary });
                 if (hasAzureDBs)
                 {
                     allowedTabs.Add(tabAzureSummary);
@@ -711,7 +723,7 @@ namespace DBADashGUI
             {
                 allowedTabs.AddRange(new[]
                 {
-                    tabPerformance, tabAzureSummary, tabAzureDB, tabPC, tabSlowQueries, tabObjectExecutionSummary,
+                    tabPerformance, tabAzureSummary, tabAzureDB, tabPC,tabDBADashAlerts, tabSlowQueries, tabObjectExecutionSummary,
                     tabWaits, tabRunningQueries, tabFiles, tabTopQueries, tabQueryStoreForcedPlans
                 });
             }
@@ -719,7 +731,7 @@ namespace DBADashGUI
             {
                 allowedTabs.AddRange(new[]
                 {
-                    tabPerformanceSummary, tabPerformance, tabPC, tabObjectExecutionSummary, tabSlowQueries, tabWaits,
+                    tabPerformanceSummary, tabPerformance, tabPC,tabDBADashAlerts, tabObjectExecutionSummary, tabSlowQueries, tabWaits,
                     tabRunningQueries, tabMemory,tabTopQueries, tabQueryStoreForcedPlans
                 });
             }
@@ -727,7 +739,7 @@ namespace DBADashGUI
             {
                 allowedTabs.AddRange(new[]
                 {
-                    tabPerformanceSummary, tabAzureSummary, tabSlowQueries, tabObjectExecutionSummary, tabRunningQueries
+                    tabPerformanceSummary, tabAzureSummary,tabDBADashAlerts, tabSlowQueries, tabObjectExecutionSummary, tabRunningQueries
                 });
             }
             else if (n.Type == SQLTreeItem.TreeType.ElasticPool)
@@ -749,7 +761,7 @@ namespace DBADashGUI
                 {
                     allowedTabs.AddRange(new[]
                     {
-                        tabInstanceConfig, tabTraceFlags, tabHardware, tabSQLPatching, tabAlerts, tabDrivers, tabTempDB,
+                        tabInstanceConfig, tabTraceFlags, tabHardware, tabSQLPatching, tabSQLAgentAlerts, tabDrivers, tabTempDB,
                         tabRG, tabServerServices
                     });
                 }
@@ -1084,7 +1096,7 @@ namespace DBADashGUI
             ToolStripMenuItem mTagName = new();
             ToolStripMenuItem mSystemTags = new("System Tags");
             mSystemTags.Font = new Font(mnuTags.Font, FontStyle.Italic);
-            var tags = DBADashTag.GetTags();
+            var tags = DBADashTag.GetTags(Common.ConnectionString);
             tags1.AllTags = tags;
             foreach (var tag in tags)
             {
@@ -1389,7 +1401,7 @@ namespace DBADashGUI
                         nInstance.Expand();
                         tv1.SelectedNode = nInstance.FindChildOfType(SQLTreeItem.TreeType.AgentJobs);
                     }
-                    else if (e.Tab is "tabAzureSummary" or "tabPerformance")
+                    else if (e.Tab is "tabAzureSummary" or "tabPerformance" or "tabPC")
                     {
                         tv1.SelectedNode = nInstance;
                     }
@@ -2153,6 +2165,147 @@ namespace DBADashGUI
         {
             using var frm = new ExternalDiffConfig();
             frm.ShowDialog();
+        }
+
+        #region "Alerts"
+
+        private void TsAlert_Click(object sender, EventArgs e)
+        {
+            tv1.SelectedNode = tv1.Nodes[0];
+            tabs.SelectedTab = tabDBADashAlerts;
+            LoadSelectedTab();
+        }
+
+        public async Task<(int Total, int ForAttention, short Priority)> GetAlertCounts()
+        {
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await cn.OpenAsync();
+            await using var cmd = new SqlCommand("Alert.AlertCount_Get", cn) { CommandType = CommandType.StoredProcedure };
+            await using var rdr = await cmd.ExecuteReaderAsync();
+            await rdr.ReadAsync();
+            var total = rdr.GetInt32("Total");
+            var forAttention = rdr.GetInt32("ForAttention");
+            var priority = rdr.GetByte("Priority");
+            return (total, forAttention, priority);
+        }
+
+        /// <summary>
+        /// Update bell menu icon to indicate if we have any alerts & priority of those alerts
+        /// </summary>
+        /// <returns></returns>
+        private async Task UpdateAlertIcon()
+        {
+            try
+            {
+                var counts = await GetAlertCounts();
+                // Only update GUI if it's changed since the last run
+                if (tsAlert.Tag?.ToString() != counts.ToString())
+                {
+                    menuStrip1.Invoke(() =>
+                    {
+                        tsAlert.Text = counts.ForAttention.ToString() + " / " + counts.Total;
+                        tsAlert.ToolTipText = $"Alerts for your attention: {counts.ForAttention}\nTotal active alerts: {counts.Total}";
+                        tsAlert.Image = counts.Priority switch
+                        {
+                            <= 10 => Properties.Resources.Alert_Critical,
+                            <= 20 => Properties.Resources.Alert_Warning,
+                            <= 30 => Properties.Resources.Alert_Warning,
+                            <= 40 => Properties.Resources.Alert_Information,
+                            41 => Resources.Alert_OK,
+                            _ => Resources.Alert_Information
+                        };
+                    });
+                }
+                tsAlert.Tag = counts.ToString();
+            }
+            catch (Exception ex)
+            {
+                menuStrip1.Invoke(() =>
+                {
+                    tsAlert.ToolTipText = ex.Message;
+                    tsAlert.Text = @"Error";
+                    tsAlert.Image = Properties.Resources.StatusCriticalError_16x;
+                    tsAlert.Tag = "Error";
+                });
+            }
+        }
+
+        private void ShowAlertToolTip(object sender, EventArgs e)
+        {
+            toolTip1.Show(tsAlert.ToolTipText, tsAlert.GetCurrentParent()!);
+        }
+
+        private DateTime NewAlertsFromDate = DateTime.UtcNow;
+
+        private async Task GetNewAlertsLoop()
+        {
+            while (true)
+            {
+                await UpdateAlertIcon();
+                if (Settings.Default.DesktopNotificationsEnabled)
+                {
+                    await GetNewAlerts();
+                }
+
+                await Task.Delay(10000);
+            }
+        }
+
+        private void InitializeNotifyIcon()
+        {
+            notifyIcon = new NotifyIcon
+            {
+                Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath),
+                Visible = true,
+                Text = @"DBA Dash Alert Notification"
+            };
+        }
+
+        private async Task GetNewAlerts()
+        {
+            try
+            {
+                await using var cn = new SqlConnection(Common.ConnectionString);
+                await cn.OpenAsync();
+                await using var cmd = new SqlCommand("Alert.NewAlerts_Get", cn)
+                { CommandType = CommandType.StoredProcedure };
+                cmd.Parameters.Add(new SqlParameter("FromDate", SqlDbType.DateTime2) { Value = NewAlertsFromDate });
+                var da = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                da.Fill(dt);
+                if (dt.Rows.Count == 0) return;
+                var priority = dt.Rows.Cast<DataRow>().Min(r => Convert.ToInt16(r["Priority"]));
+                var alertDate = dt.Rows.Cast<DataRow>().Max(r => Convert.ToDateTime(r["AlertDate"]));
+                var icon = priority switch
+                {
+                    <= 10 => ToolTipIcon.Error,
+                    <= 20 => ToolTipIcon.Warning,
+                    <= 30 => ToolTipIcon.Warning,
+                    <= 40 => ToolTipIcon.Warning,
+                    41 => ToolTipIcon.Info,
+                    _ => ToolTipIcon.Info
+                };
+
+                StringBuilder sb = new();
+                dt.Rows.Cast<DataRow>().Take(5).ToList().ForEach(r =>
+                    sb.AppendLine($"{r["InstanceDisplayName"]} - {r["AlertType"]} - {r["LastMessage"]}"));
+                if (dt.Rows.Count > 5) sb.AppendLine("...");
+                notifyIcon.ShowBalloonTip(10000, $"{dt.Rows.Count} new alerts", sb.ToString(), icon);
+
+                NewAlertsFromDate = alertDate;
+            }
+            catch (Exception ex)
+            {
+                notifyIcon.ShowBalloonTip(10000, $"Error getting new alerts", ex.Message, ToolTipIcon.Error);
+            }
+        }
+
+        #endregion "Alerts"
+
+        private void DesktopNotificationsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Settings.Default.DesktopNotificationsEnabled = desktopNotificationsToolStripMenuItem.Checked;
+            Settings.Default.Save();
         }
 
         void IThemedControl.ApplyTheme(BaseTheme theme)

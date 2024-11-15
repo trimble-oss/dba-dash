@@ -19,6 +19,7 @@ using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.Office.PowerPoint.Y2021.M06.Main;
 using LiveChartsCore.SkiaSharpView.WinForms;
 using DataTable = System.Data.DataTable;
+using static DBADashGUI.DBADashAlerts.Rules.AlertRuleBase;
 
 namespace DBADashGUI
 {
@@ -47,14 +48,18 @@ namespace DBADashGUI
             return NumericTypes.Contains(Nullable.GetUnderlyingType(myType) ?? myType);
         }
 
-        public static DataTable AsDataTable(this IEnumerable<int> list)
+        public static DataTable AsDataTable<T>(this IEnumerable<T> list,string columnName="ID")
         {
             var dt = new DataTable();
-            dt.Columns.Add("ID", typeof(int));
-            foreach (int i in list)
+            dt.Columns.Add(columnName, typeof(T));
+            if (list == null)
+            {
+                return dt;
+            }
+            foreach (var item in list)
             {
                 var r = dt.NewRow();
-                r["ID"] = i;
+                r[columnName] = item;
                 dt.Rows.Add(r);
             }
 
@@ -795,5 +800,31 @@ namespace DBADashGUI
         }
 
         private const float DefaultMaxColumnWidthPercent = 0.15f;
+
+        public static string ToSymbol(this RuleComparisonTypes ruleComparisonType)
+        {
+            return ruleComparisonType switch
+            {
+                RuleComparisonTypes.Equal => "=",
+                RuleComparisonTypes.GreaterThan => ">",
+                RuleComparisonTypes.GreaterThanOrEqual => ">=",
+                RuleComparisonTypes.LessThan => "<",
+                RuleComparisonTypes.LessThanOrEqual => "<=",
+                _ => throw new ArgumentOutOfRangeException(nameof(ruleComparisonType), ruleComparisonType, null)
+            };
+        }
+
+        public static RuleComparisonTypes FromSymbol(this string symbol)
+        {
+            return symbol switch
+            {
+                "=" => RuleComparisonTypes.Equal,
+                ">" => RuleComparisonTypes.GreaterThan,
+                ">=" => RuleComparisonTypes.GreaterThanOrEqual,
+                "<" => RuleComparisonTypes.LessThan,
+                "<=" => RuleComparisonTypes.LessThanOrEqual,
+                _ => throw new ArgumentException($"Unknown symbol: {symbol}", nameof(symbol))
+            };
+        }
     }
 }

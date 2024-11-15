@@ -1,14 +1,40 @@
 ﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace DBADashGUI.Performance
 {
-    public class Counter
+    public class BaseCounter
     {
-        public int CounterID { get; set; }
         public string ObjectName { get; set; }
         public string CounterName { get; set; }
         public string InstanceName { get; set; }
+        public override string ToString()
+        {
+            return ObjectName + "\\" + CounterName + "\\" + InstanceName;
+        }
+    }
 
+    public class AlertCounter : BaseCounter
+    {
+        [JsonIgnore]
+        public int CounterID => -1;
+
+        private string _instanceName;
+
+        public bool ApplyToAllInstances { get; set; }
+
+        public new string InstanceName { get=>ApplyToAllInstances ? "*" : _instanceName; set=>_instanceName=value; }
+
+        public override string ToString()
+        {
+            return ObjectName + "\\" + CounterName + "\\" + InstanceName;
+        }
+
+    }
+
+    public class Counter :BaseCounter
+    {
+        public int CounterID { get; set; }
         public bool Max { get; set; }
         public bool Avg { get; set; }
         public bool Min { get; set; }
@@ -29,9 +55,5 @@ namespace DBADashGUI.Performance
             return agg;
         }
 
-        public override string ToString()
-        {
-            return ObjectName + "\\" + CounterName + "\\" + InstanceName;
-        }
     }
 }

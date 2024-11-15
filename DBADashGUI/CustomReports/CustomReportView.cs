@@ -36,6 +36,10 @@ namespace DBADashGUI.CustomReports
         private CancellationTokenSource cancellationTokenSource;
         private Guid CurrentMessageGroup;
         public EventHandler PostGridRefresh;
+        public ToolStrip ToolStrip => toolStrip1;
+        public DateTime RefreshDate { private set; get; }
+
+        public TimeSpan TimeSinceRefresh => DateTime.Now.Subtract(RefreshDate);
 
         private bool AutoLoad => Report is not DirectExecutionReport;
 
@@ -329,6 +333,7 @@ namespace DBADashGUI.CustomReports
                 IsMessageInProgress = true;
                 Task.Run(() => { _ = RefreshDataRepository(cancellationTokenSource.Token); });
             }
+            RefreshDate = DateTime.Now;
         }
 
         private void StartTimer()
@@ -354,6 +359,10 @@ namespace DBADashGUI.CustomReports
         {
             try
             {
+                while (!IsHandleCreated)
+                {
+                    await Task.Delay(100, token);
+                }
                 SetStatus("Running report", string.Empty, DashColors.Information);
                 reportDS = await GetReportDataAsync(token);
                 this.Invoke(() =>
@@ -529,6 +538,7 @@ namespace DBADashGUI.CustomReports
             if (currentSchema == previousSchema)
             {
                 LoadResultsIntoExistingGrids();
+                OnPostGridRefresh();
                 return;
             }
 

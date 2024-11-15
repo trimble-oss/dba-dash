@@ -105,6 +105,7 @@
     <PackageReference Include="AWSSDK.SQS" Version="3.7.400.59" />
     <PackageReference Include="Azure.Core" Version="1.44.1" />
     <PackageReference Include="Azure.Identity" Version="1.13.1" />
+    <PackageReference Include="MailKit" Version="4.9.0" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />

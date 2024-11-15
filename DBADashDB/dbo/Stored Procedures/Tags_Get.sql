@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.Tags_Get(
-	@TagFilters NVARCHAR(MAX)=NULL
+	@TagFilters NVARCHAR(MAX)=NULL,
+	@TagID INT=NULL
 )
 AS
 
@@ -9,7 +10,8 @@ SELECT	TagID,
 		TagName,
 		TagValue 
 FROM dbo.Tags T 
-WHERE EXISTS(SELECT 1 
+WHERE ' + CASE WHEN @TagID IS NOT NULL THEN 'T.TagID = @TagID'
+ELSE 'EXISTS(SELECT 1 
 			FROM dbo.InstanceTags IT 
 			JOIN dbo.Instances I ON IT.Instance = I.Instance
 			WHERE IT.TagID = T.TagID
@@ -20,7 +22,7 @@ WHERE EXISTS(SELECT 1
 			JOIN dbo.Instances I ON IT.InstanceID = I.InstanceID
 			WHERE IT.TagID = T.TagID
 			AND I.IsActive=1
-			)
+			)' END  + '
 ' + CASE WHEN @TagFilters IS NULL THEN '' ELSE 'AND EXISTS(SELECT TagName,TagValue 
 		INTERSECT
 		SELECT SUBSTRING(ss.Value,0,CHARINDEX('':'',ss.value)),
@@ -29,4 +31,4 @@ WHERE EXISTS(SELECT 1
 		)' END + '
 ORDER BY TagName,TagValue'
 
-EXEC sp_executesql @SQL,N'@TagFilters NVARCHAR(MAX)',@TagFilters
+EXEC sp_executesql @SQL,N'@TagFilters NVARCHAR(MAX),@TagID INT',@TagFilters,@TagID
