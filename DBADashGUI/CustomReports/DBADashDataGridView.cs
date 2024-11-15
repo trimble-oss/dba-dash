@@ -30,6 +30,9 @@ namespace DBADashGUI.CustomReports
         private ToolStripMenuItem GetCopyGridMenuItem() =>
             new("Copy Grid", Properties.Resources.ASX_Copy_blue_16x, (_, _) => CopyGrid());
 
+        private ToolStripMenuItem GetCopyColumnMenuItem() =>
+            new("Copy Column", Properties.Resources.ASX_Copy_yellow_16x, (_, _) => CopyColumn());
+
         private ToolStripMenuItem GetExportToExcelMenuItem() => new("Export Excel", Properties.Resources.excel16x16,
             (_, _) => ExportToExcel());
 
@@ -97,6 +100,7 @@ namespace DBADashGUI.CustomReports
                 new ToolStripItem[]
                 {
                     GetCopyGridMenuItem(),
+                    GetCopyColumnMenuItem(),
                     GetExportToExcelMenuItem(),
                     saveTable,
                     new ToolStripSeparator(),
@@ -154,6 +158,7 @@ namespace DBADashGUI.CustomReports
                 new ToolStripItem[]
                 {
                     GetCopyGridMenuItem(),
+                    GetCopyColumnMenuItem(),
                     copyCell,
                     GetExportToExcelMenuItem(),
                     saveTable,
@@ -249,6 +254,29 @@ namespace DBADashGUI.CustomReports
             if (CommonShared.ShowInputDialog(ref filter, "Edit Filter") == DialogResult.OK)
             {
                 SetFilter(filter);
+            }
+        }
+
+        private void CopyColumn()
+        {
+            var sb = new StringBuilder();
+
+            foreach (DataGridViewRow row in Rows)
+            {
+                if (row.IsNewRow || !row.Visible) continue;
+                sb.AppendLine(Rows[ClickedRowIndex].Cells[ClickedColumnIndex].ValueType ==
+                              typeof(string) // Formatted value could be truncated
+                    ? Convert.ToString(row.Cells[ClickedColumnIndex].Value)
+                    : Convert.ToString(row.Cells[ClickedColumnIndex].FormattedValue));
+            }
+
+            if (sb.Length > 0)
+            {
+                Clipboard.SetText(sb.ToString());
+            }
+            else
+            {
+                MessageBox.Show("No data to copy", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
