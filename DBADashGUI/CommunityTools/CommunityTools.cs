@@ -1558,7 +1558,8 @@ namespace DBADashGUI.CommunityTools
             ProcedureName = ProcedureExecutionMessage.CommandNames.sp_HumanEvents.ToString(),
             URL = ErikDarlingUrl,
             Description = "Extended events capture",
-            CancellationMessageWarning = "Cancellation of this report will leave an extended event session running that will require cleanup.",
+            CancellationMessageWarning =
+                "Cancellation of this report will leave an extended event session running that will require cleanup.",
             DatabaseNameParameter = "@database_name",
             Params = new Params()
             {
@@ -1602,9 +1603,9 @@ namespace DBADashGUI.CommunityTools
                     {
                         { "blocking", "Blocking" },
                         { "query", "Query" },
-                        { "waits","Waits"},
-                        { "recompiles","Recompiles"},
-                        { "compiles","Compiles"}
+                        { "waits", "Waits" },
+                        { "recompiles", "Recompiles" },
+                        { "compiles", "Compiles" }
                     }
                 },
                 new()
@@ -1614,7 +1615,7 @@ namespace DBADashGUI.CommunityTools
                     DefaultValue = 500,
                     PickerItems = new()
                     {
-                        {0, "0"},
+                        { 0, "0" },
                         { 10, "10ms" },
                         { 20, "20ms" },
                         { 50, "50ms" },
@@ -1637,7 +1638,7 @@ namespace DBADashGUI.CommunityTools
                     DefaultValue = 10,
                     PickerItems = new()
                     {
-                        { 5, "5 seconds"},
+                        { 5, "5 seconds" },
                         { 10, "10 seconds" },
                         { 20, "20 seconds" },
                         { 30, "30 seconds" },
@@ -1654,18 +1655,18 @@ namespace DBADashGUI.CommunityTools
                     DefaultValue = "cpu",
                     PickerItems = new()
                     {
-                        {"cpu", "CPU"},
-                        {"avg cpu", "Avg CPU"},
-                        {"reads", "Reads"},
-                        {"avg reads", "Avg Reads"},
-                        {"writes", "Writes"},
-                        {"avg writes", "Avg Writes"},
-                        {"duration", "Duration"},
-                        {"avg duration", "Avg Duration"},
-                        {"memory", "Memory"},
-                        {"avg memory", "Avg Memory"},
-                        {"spills", "Spills"},
-                        {"avg spills", "Avg Spills"},
+                        { "cpu", "CPU" },
+                        { "avg cpu", "Avg CPU" },
+                        { "reads", "Reads" },
+                        { "avg reads", "Avg Reads" },
+                        { "writes", "Writes" },
+                        { "avg writes", "Avg Writes" },
+                        { "duration", "Duration" },
+                        { "avg duration", "Avg Duration" },
+                        { "memory", "Memory" },
+                        { "avg memory", "Avg Memory" },
+                        { "spills", "Spills" },
+                        { "avg spills", "Avg Spills" },
                     }
                 },
                 new()
@@ -1689,7 +1690,7 @@ namespace DBADashGUI.CommunityTools
                     DefaultValue = 500,
                     PickerItems = new()
                     {
-                        {0, "0"},
+                        { 0, "0" },
                         { 10, "10ms" },
                         { 20, "20ms" },
                         { 50, "50ms" },
@@ -1712,7 +1713,7 @@ namespace DBADashGUI.CommunityTools
                     DefaultValue = 10,
                     PickerItems = new()
                     {
-                        {0, "0"},
+                        { 0, "0" },
                         { 10, "10ms" },
                         { 20, "20ms" },
                         { 50, "50ms" },
@@ -1817,31 +1818,40 @@ namespace DBADashGUI.CommunityTools
             {
                 {
                     "tempdb_info",
-                    new TextLinkColumnInfo() { TargetColumn = "tempdb_info", TextHandling = CodeEditor.CodeEditorModes.XML }
+                    new TextLinkColumnInfo()
+                        { TargetColumn = "tempdb_info", TextHandling = CodeEditor.CodeEditorModes.XML }
                 },
                 {
                     "low_memory",
-                    new TextLinkColumnInfo() { TargetColumn = "low_memory", TextHandling = CodeEditor.CodeEditorModes.XML }
+                    new TextLinkColumnInfo()
+                        { TargetColumn = "low_memory", TextHandling = CodeEditor.CodeEditorModes.XML }
                 },
                 {
                     "cache_memory",
-                    new TextLinkColumnInfo() { TargetColumn = "cache_memory", TextHandling = CodeEditor.CodeEditorModes.XML }
+                    new TextLinkColumnInfo()
+                        { TargetColumn = "cache_memory", TextHandling = CodeEditor.CodeEditorModes.XML }
                 },
                 {
                     "max_memory_grant_cap",
-                    new TextLinkColumnInfo() { TargetColumn = "max_memory_grant_cap", TextHandling = CodeEditor.CodeEditorModes.XML }
+                    new TextLinkColumnInfo()
+                        { TargetColumn = "max_memory_grant_cap", TextHandling = CodeEditor.CodeEditorModes.XML }
                 },
                 {
                     "cpu_details_output",
-                    new TextLinkColumnInfo() { TargetColumn = "cpu_details_output", TextHandling = CodeEditor.CodeEditorModes.XML }
+                    new TextLinkColumnInfo()
+                        { TargetColumn = "cpu_details_output", TextHandling = CodeEditor.CodeEditorModes.XML }
                 },
                 {
                     "cpu_utilization_over_threshold",
-                    new TextLinkColumnInfo() { TargetColumn = "cpu_utilization_over_threshold", TextHandling = CodeEditor.CodeEditorModes.XML }
+                    new TextLinkColumnInfo()
+                    {
+                        TargetColumn = "cpu_utilization_over_threshold", TextHandling = CodeEditor.CodeEditorModes.XML
+                    }
                 },
                 {
                     "query_text",
-                    new TextLinkColumnInfo() { TargetColumn = "query_text", TextHandling = CodeEditor.CodeEditorModes.SQL }
+                    new TextLinkColumnInfo()
+                        { TargetColumn = "query_text", TextHandling = CodeEditor.CodeEditorModes.SQL }
                 },
                 {
                     "query_plan",
@@ -1886,7 +1896,7 @@ namespace DBADashGUI.CommunityTools
                     {
                         { "all", "All" },
                         { "cpu", "CPU" },
-                        { "memory","Memory"}
+                        { "memory", "Memory" }
                     },
                 },
                 new()
@@ -1924,7 +1934,7 @@ namespace DBADashGUI.CommunityTools
                     DefaultValue = false,
                     PickerItems = new()
                     {
-                        { 5, "5 seconds"},
+                        { 5, "5 seconds" },
                         { 10, "10 seconds" },
                         { 20, "20 seconds" },
                         { 30, "30 seconds" },
@@ -1941,7 +1951,7 @@ namespace DBADashGUI.CommunityTools
                     DefaultValue = 100,
                     PickerItems = new()
                     {
-                        {0, "0"},
+                        { 0, "0" },
                         { 10, "10ms" },
                         { 20, "20ms" },
                         { 50, "50ms" },
@@ -1964,7 +1974,7 @@ namespace DBADashGUI.CommunityTools
                     DefaultValue = 50,
                     PickerItems = new()
                     {
-                        {0, "0"},
+                        { 0, "0" },
                         { 10, "10" },
                         { 20, "20" },
                         { 30, "30" },
@@ -2004,7 +2014,8 @@ namespace DBADashGUI.CommunityTools
             {
                 {
                     "query_text",
-                    new TextLinkColumnInfo() { TargetColumn = "query_text", TextHandling = CodeEditor.CodeEditorModes.SQL }
+                    new TextLinkColumnInfo()
+                        { TargetColumn = "query_text", TextHandling = CodeEditor.CodeEditorModes.SQL }
                 },
                 {
                     "query_plan",
@@ -2012,11 +2023,13 @@ namespace DBADashGUI.CommunityTools
                 },
                 {
                     "blocked_process_report",
-                    new TextLinkColumnInfo() { TargetColumn = "blocked_process_report", TextHandling = CodeEditor.CodeEditorModes.XML }
+                    new TextLinkColumnInfo()
+                        { TargetColumn = "blocked_process_report", TextHandling = CodeEditor.CodeEditorModes.XML }
                 },
                 {
                     "deadlock_resources",
-                    new TextLinkColumnInfo() { TargetColumn = "deadlock_resources", TextHandling = CodeEditor.CodeEditorModes.XML }
+                    new TextLinkColumnInfo()
+                        { TargetColumn = "deadlock_resources", TextHandling = CodeEditor.CodeEditorModes.XML }
                 },
                 {
                     "deadlock_graph",
@@ -2079,7 +2092,7 @@ namespace DBADashGUI.CommunityTools
                     DefaultValue = 10,
                     PickerItems = new()
                     {
-                        {0, "0"},
+                        { 0, "0" },
                         { 10, "10ms" },
                         { 20, "20ms" },
                         { 50, "50ms" },
@@ -2381,6 +2394,297 @@ namespace DBADashGUI.CommunityTools
             }
         };
 
+        public static DirectExecutionReport sp_SrvPermissions = new()
+        {
+            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_SrvPermissions.ToString(),
+            ReportName = ProcedureExecutionMessage.CommandNames.sp_SrvPermissions.ToString(),
+            URL = "https://github.com/sqlstudent144/SQL-Server-Scripts/blob/main/sp_SrvPermissions.sql",
+            Description = "Server principals,role membership and permissions",
+            DatabaseNameParameter = "@DBName",
+            Params = new Params()
+            {
+                ParamList = new()
+                {
+                    new Param { ParamName = "@Principal", ParamType = "NVARCHAR" },
+                    new Param { ParamName = "@Role", ParamType = "NVARCHAR" },
+                    new Param { ParamName = "@Type", ParamType = "NVARCHAR" },
+                    new Param { ParamName = "@DBName", ParamType = "NVARCHAR" },
+                    new Param { ParamName = "@UseLikeSearch", ParamType = "BIT" },
+                    new Param { ParamName = "@IncludeMSShipped", ParamType = "BIT" },
+                    new Param { ParamName = "@CopyTo", ParamType = "NVARCHAR" },
+                    new Param { ParamName = "@Output", ParamType = "NVARCHAR" },
+                }
+            },
+            Pickers = new List<Picker>
+            {
+                new()
+                {
+                    ParameterName = "@Type",
+                    Name = "Type",
+                    PickerItems = new()
+                    {
+                        { "S", "SQL Login" },
+                        { "U", "Windows Login" },
+                        { "G", "Windows Group" },
+                        { "R", "Server Role" },
+                        { "C", "Login mapped to a certificate" },
+                        { "K", "Login mapped to a asymmetric key" },
+                        { "", "ALL" },
+                    }
+                },
+                new()
+                {
+                    ParameterName = "IncludeMSShipped",
+                    Name = "Include MS Shipped",
+                    DefaultValue = true,
+                    PickerItems = BooleanPickerItems
+                },
+                new()
+                {
+                    ParameterName = "@Output",
+                    Name = "Output",
+                    DefaultValue = "Default",
+                    PickerItems = new()
+                    {
+                        { "Default", "Default" },
+                        { "CreateOnly", "Create Only" },
+                        { "DropOnly", "DropOnly" },
+                        { "ScriptOnly", "Scripts Only" },
+                        { "Report", "Report" },
+                    }
+                },
+            },
+            CustomReportResults = new Dictionary<int, CustomReportResult>
+            {
+                {
+                    0, new CustomReportResult
+                    {
+                        ResultName = "1",
+                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        {
+                            {
+                                "DropScript",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "DropScript",
+                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                }
+                            },
+                            {
+                                "CreateScript",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "CreateScript",
+                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    1, new CustomReportResult
+                    {
+                        ResultName = "2",
+                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        {
+                            {
+                                "DropScript",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "DropScript",
+                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                }
+                            },
+                            {
+                                "AddScript",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "AddScript",
+                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    2, new CustomReportResult
+                    {
+                        ResultName = "3",
+                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        {
+                            {
+                                "RevokeScript",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "DropScript",
+                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                }
+                            },
+                            {
+                                "GrantScript",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "AddScript",
+                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                }
+                            }
+                        }
+                    }
+                },
+            }
+        };
+
+        public static DirectExecutionReport sp_DBPermissions = new()
+        {
+            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_DBPermissions.ToString(),
+            ReportName = ProcedureExecutionMessage.CommandNames.sp_DBPermissions.ToString(),
+            URL = "https://github.com/sqlstudent144/SQL-Server-Scripts/blob/main/sp_DBPermissions.sql",
+            Description = "Database principals,role membership and permissions",
+            DatabaseNameParameter = "@DBName",
+            Params = new Params()
+            {
+                ParamList = new()
+                {
+                    new Param { ParamName = "@Principal", ParamType = "NVARCHAR" },
+                    new Param { ParamName = "@Role", ParamType = "NVARCHAR" },
+                    new Param { ParamName = "@Type", ParamType = "NVARCHAR" },
+                    new Param { ParamName = "@DBName", ParamType = "NVARCHAR" },
+                    new Param { ParamName = "@ObjectName", ParamType = "NVARCHAR" },
+                    new Param { ParamName = "@Permission", ParamType = "NVARCHAR" },
+                    new Param { ParamName = "@LoginName", ParamType = "NVARCHAR" },
+                    new Param { ParamName = "@UseLikeSearch", ParamType = "BIT" },
+                    new Param { ParamName = "@IncludeMSShipped", ParamType = "BIT" },
+                    new Param { ParamName = "@CopyTo", ParamType = "NVARCHAR" },
+                    new Param { ParamName = "@ShowOrphans", ParamType = "BIT" },
+                    new Param { ParamName = "@Output", ParamType = "NVARCHAR" },
+                }
+            },
+            Pickers = new List<Picker>
+            {
+                new()
+                {
+                    ParameterName = "@Type",
+                    Name = "Type",
+                    PickerItems = new()
+                    {
+                        { "S", "SQL Login" },
+                        { "U", "Windows Login" },
+                        { "G", "Windows Group" },
+                        { "R", "Server Role" },
+                        { "C", "Login mapped to a certificate" },
+                        { "K", "Login mapped to a asymmetric key" },
+                        { "", "ALL" },
+                    }
+                },
+                new()
+                {
+                    ParameterName = "IncludeMSShipped",
+                    Name = "Include MS Shipped",
+                    DefaultValue = true,
+                    PickerItems = BooleanPickerItems
+                },
+                new()
+                {
+                    ParameterName = "ShowOrphans",
+                    Name = "Show Orphans",
+                    DefaultValue = false,
+                    PickerItems = BooleanPickerItems
+                },
+                new()
+                {
+                    ParameterName = "@Output",
+                    Name = "Output",
+                    DefaultValue = "Default",
+                    PickerItems = new()
+                    {
+                        { "Default", "Default" },
+                        { "CreateOnly", "Create Only" },
+                        { "DropOnly", "DropOnly" },
+                        { "ScriptOnly", "Scripts Only" },
+                        { "Report", "Report" },
+                    }
+                },
+            },
+            CustomReportResults = new Dictionary<int, CustomReportResult>
+            {
+                {
+                    0, new CustomReportResult
+                    {
+                        ResultName = "1",
+                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        {
+                            {
+                                "DropScript",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "DropScript",
+                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                }
+                            },
+                            {
+                                "CreateScript",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "CreateScript",
+                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    1, new CustomReportResult
+                    {
+                        ResultName = "2",
+                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        {
+                            {
+                                "DropScript",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "DropScript",
+                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                }
+                            },
+                            {
+                                "AddScript",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "AddScript",
+                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    2, new CustomReportResult
+                    {
+                        ResultName = "3",
+                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        {
+                            {
+                                "RevokeScript",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "DropScript",
+                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                }
+                            },
+                            {
+                                "GrantScript",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "AddScript",
+                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                }
+                            }
+                        }
+                    }
+                },
+            }
+        };
+
         public static List<DirectExecutionReport> CommunityToolsList = new()
         {
             sp_LogHunter,
@@ -2396,7 +2700,9 @@ namespace DBADashGUI.CommunityTools
             sp_PressureDetector,
             sp_HealthParser,
             sp_QuickieStore,
-            sp_HumanEventsBlockViewer
+            sp_HumanEventsBlockViewer,
+            sp_SrvPermissions,
+            sp_DBPermissions
         };
 
         public static List<DirectExecutionReport> DatabaseLevelCommunityTools =>

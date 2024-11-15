@@ -55,6 +55,7 @@ namespace DBADashGUI
             foreach (var proc in Enum.GetValues<ProcedureExecutionMessage.CommandNames>())
             {
                 var tab = GetCommunityToolsTabPage(proc);
+                if (tab == null) continue;
                 CommunityToolsTabPages.Add(proc, tab);
                 tabs.TabPages.Add(tab);
             }
@@ -63,7 +64,8 @@ namespace DBADashGUI
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommandNames proc)
         {
             var tab = new TabPage(proc.ToString());
-            var report = CommunityTools.CommunityTools.CommunityToolsList.First(report => report.ProcedureName == proc.ToString());
+            var report = CommunityTools.CommunityTools.CommunityToolsList.FirstOrDefault(report => report.ProcedureName == proc.ToString());
+            if (report == null) return null;
             tab.Controls.Add(new CustomReportView() { Dock = DockStyle.Fill, Report = report });
             return tab;
         }
