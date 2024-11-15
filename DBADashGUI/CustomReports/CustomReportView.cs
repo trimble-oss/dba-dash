@@ -926,23 +926,36 @@ namespace DBADashGUI.CustomReports
             {
                 pObjectID.Param.Value = context.ObjectID > 0 ? context.ObjectID : DBNull.Value;
             }
-            var pObjectName = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@ObjectName", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
-            if (pObjectName != null && !string.IsNullOrEmpty(context.ObjectName))
+
+            if (context.ObjectID > 0)
             {
-                pObjectName.Param.Value = context.ObjectName;
-                pObjectName.UseDefaultValue = false;
-            }
-            var pTableName = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@TableName", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
-            if (pTableName != null && !string.IsNullOrEmpty(context.ObjectName) && context.Type == SQLTreeItem.TreeType.Table)
-            {
-                pTableName.Param.Value = context.ObjectName;
-                pTableName.UseDefaultValue = false;
-            }
-            var pSchemaName = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@SchemaName", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
-            if (pSchemaName != null && !string.IsNullOrEmpty(context.SchemaName))
-            {
-                pSchemaName.Param.Value = context.SchemaName;
-                pSchemaName.UseDefaultValue = false;
+                var pObjectName = customParams.FirstOrDefault(p =>
+                    p.Param.ParameterName.Equals("@ObjectName", StringComparison.InvariantCultureIgnoreCase) &&
+                    p.UseDefaultValue);
+                if (pObjectName != null && !string.IsNullOrEmpty(context.ObjectName))
+                {
+                    pObjectName.Param.Value = context.ObjectName;
+                    pObjectName.UseDefaultValue = false;
+                }
+
+                var pTableName = customParams.FirstOrDefault(p =>
+                    p.Param.ParameterName.Equals("@TableName", StringComparison.InvariantCultureIgnoreCase) &&
+                    p.UseDefaultValue);
+                if (pTableName != null && !string.IsNullOrEmpty(context.ObjectName) &&
+                    context.Type == SQLTreeItem.TreeType.Table)
+                {
+                    pTableName.Param.Value = context.ObjectName;
+                    pTableName.UseDefaultValue = false;
+                }
+
+                var pSchemaName = customParams.FirstOrDefault(p =>
+                    p.Param.ParameterName.Equals("@SchemaName", StringComparison.InvariantCultureIgnoreCase) &&
+                    p.UseDefaultValue);
+                if (pSchemaName != null && !string.IsNullOrEmpty(context.SchemaName))
+                {
+                    pSchemaName.Param.Value = context.SchemaName;
+                    pSchemaName.UseDefaultValue = false;
+                }
             }
 
             // Add user supplied parameters
@@ -1032,24 +1045,38 @@ namespace DBADashGUI.CustomReports
                 p.Param.Value = context.DatabaseName;
                 p.UseDefaultValue = false;
             }
-            var pObjectName = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@ObjectName", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
-            if (pObjectName != null && !string.IsNullOrEmpty(context.ObjectName))
+
+            if (context.ObjectID > 0)
             {
-                pObjectName.Param.Value = context.ObjectName;
-                pObjectName.UseDefaultValue = false;
+                var pObjectName = customParams.FirstOrDefault(p =>
+                    p.Param.ParameterName.Equals("@ObjectName", StringComparison.InvariantCultureIgnoreCase) &&
+                    p.UseDefaultValue);
+                if (pObjectName != null && !string.IsNullOrEmpty(context.ObjectName))
+                {
+                    pObjectName.Param.Value = context.ObjectName;
+                    pObjectName.UseDefaultValue = false;
+                }
+
+                var pTableName = customParams.FirstOrDefault(p =>
+                    p.Param.ParameterName.Equals("@TableName", StringComparison.InvariantCultureIgnoreCase) &&
+                    p.UseDefaultValue);
+                if (pTableName != null && !string.IsNullOrEmpty(context.ObjectName) &&
+                    context.Type == SQLTreeItem.TreeType.Table)
+                {
+                    pTableName.Param.Value = context.ObjectName;
+                    pTableName.UseDefaultValue = false;
+                }
+
+                var pSchemaName = customParams.FirstOrDefault(p =>
+                    p.Param.ParameterName.Equals("@SchemaName", StringComparison.InvariantCultureIgnoreCase) &&
+                    p.UseDefaultValue);
+                if (pSchemaName != null && !string.IsNullOrEmpty(context.ObjectName))
+                {
+                    pSchemaName.Param.Value = context.SchemaName;
+                    pSchemaName.UseDefaultValue = false;
+                }
             }
-            var pTableName = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@TableName", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
-            if (pTableName != null && !string.IsNullOrEmpty(context.ObjectName) && context.Type == SQLTreeItem.TreeType.Table)
-            {
-                pTableName.Param.Value = context.ObjectName;
-                pTableName.UseDefaultValue = false;
-            }
-            var pSchemaName = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@SchemaName", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
-            if (pSchemaName != null && !string.IsNullOrEmpty(context.ObjectName))
-            {
-                pSchemaName.Param.Value = context.SchemaName;
-                pSchemaName.UseDefaultValue = false;
-            }
+
             // Some reports have a parameter to get all databases that we need to turn off
             foreach (var p in customParams.Where(p =>
                          string.Equals(p.Param.ParameterName, "@GetAllDatabases") ||
