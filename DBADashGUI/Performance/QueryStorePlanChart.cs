@@ -194,10 +194,7 @@ namespace DBADashGUI.Performance
             ISeries currentSeries = null;
             long lastPlanId = -1;
             List<PlanMetrics> points = new();
-            var maxExecutions = (long)dt.Rows.Cast<DataRow>().OrderByDescending(r => (long)r["count_executions"]).First()["count_executions"];
-            var minExecutions = (long)dt.Rows.Cast<DataRow>().OrderBy(r => (long)r["count_executions"]).First()["count_executions"];
-            minExecutions = minExecutions == 0 ? 1 : minExecutions; // Just in case to prevent divide by zero
-            maxExecutions = maxExecutions == 0 ? 1 : maxExecutions; // Just in case to prevent divide by zero
+
             foreach (var row in dt.Rows.Cast<DataRow>().OrderBy(r => (long)r["plan_id"]))
             {
                 var planId = (long)row["plan_id"];
@@ -209,29 +206,17 @@ namespace DBADashGUI.Performance
                         currentSeries.Values = points;
                         series.Add(currentSeries);
                     }
-
                     points = new();
-                    // Add fake data points to ensure geometry size is consistent between series
-                    var fakeMax = dt.NewRow();
-                    var fakeMin = dt.NewRow();
-                    fakeMin["bucket_start"] = DateTime.MinValue;
-                    fakeMin["bucket_end"] = DateTime.MinValue;
-                    fakeMin["count_executions"] = minExecutions;
-                    fakeMax["bucket_start"] = DateTime.MinValue;
-                    fakeMax["bucket_end"] = DateTime.MinValue;
-                    fakeMax["count_executions"] = maxExecutions;
-                    points.Add(new PlanMetrics(fakeMin));
-                    points.Add(new PlanMetrics(fakeMax));
 
-                    var minGeometrySize = ((minExecutions / Convert.ToDouble(maxExecutions)) * 25) + 5; // based on how close the min executions are to the max executions, adjust the min geometry size.
                     currentSeries = new ScatterSeries<PlanMetrics, SVGPathGeometry>
                     {
                         Values = new ObservableCollection<PlanMetrics>(),
                         Mapping = (metric, value) => new(metric.BucketMidpoint.Ticks, metric.MetricValue(metricName), metric.ExecutionCount),
                         Name = $"Plan {planId}" + (planForcingType == "NONE" ? "" : " (Forced)"),
                         GeometrySvg = planForcingType == "NONE" ? SVGPoints.Circle : SVGPoints.Star,
-                        MinGeometrySize = minGeometrySize,
+                        MinGeometrySize = 5,
                         GeometrySize = 30,
+                        StackGroup = 1 // Ensures weight is shared between series
                     };
 
                     // ((ScatterSeries< PlanMetrics, SVGPathGeometry> )currentSeries).ChartPointPointerDown  += OnPointerDown;
