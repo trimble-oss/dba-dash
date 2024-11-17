@@ -1,6 +1,7 @@
 ﻿using DBADashSharedGUI;
 using LiveCharts.WinForms;
 using System.Runtime.Versioning;
+using System.Windows.Controls;
 using System.Windows.Media;
 using Button = System.Windows.Forms.Button;
 using ComboBox = System.Windows.Forms.ComboBox;
@@ -80,6 +81,11 @@ namespace DBADashGUI.Theme
                 case TextBox txt:
                     txt.ApplyTheme(theme);
                     break;
+
+                case PropertyGrid pGrid:
+                    pGrid.ApplyTheme(theme);
+                    break;
+
                 default:
                     control.BackColor = theme.BackgroundColor;
                     control.ForeColor = theme.ForegroundColor;
@@ -87,6 +93,12 @@ namespace DBADashGUI.Theme
             }
             // Recursively theme child controls
             control.Controls.ApplyTheme(theme);
+        }
+
+        public static void ApplyTheme(this PropertyGrid grid, BaseTheme theme)
+        {
+            grid.LineColor = theme.TabBackColor;
+            grid.CategoryForeColor = theme.ForegroundColor;
         }
 
         public static void ApplyTheme(this ComboBox combo, BaseTheme theme)
@@ -203,7 +215,7 @@ namespace DBADashGUI.Theme
 
         public static void ApplyTheme(this DataGridViewColumn col, BaseTheme theme)
         {
-            if(col is DataGridViewLinkColumn linkCol)
+            if (col is DataGridViewLinkColumn linkCol)
             {
                 linkCol.LinkColor = theme.LinkColor;
             }
@@ -211,7 +223,7 @@ namespace DBADashGUI.Theme
 
         public static void ApplyTheme(this DataGridViewColumn col)
         {
-           col.ApplyTheme(CurrentTheme);
+            col.ApplyTheme(CurrentTheme);
         }
 
         public static void ApplyTheme(this TreeView tv, BaseTheme theme)

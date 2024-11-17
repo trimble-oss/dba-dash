@@ -75,6 +75,7 @@ namespace DBADashGUI.Performance
             clearBlockingFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsGroupByFilter = new System.Windows.Forms.ToolStripLabel();
             tsClearFilter = new System.Windows.Forms.ToolStripButton();
+            tsViewALL = new System.Windows.Forms.ToolStripButton();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblRowLimit = new System.Windows.Forms.ToolStripStatusLabel();
@@ -150,7 +151,7 @@ namespace DBADashGUI.Performance
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsCols, tsBack, tsGetLatest, tsTriggerCollection, tsNext, lblSnapshotDate, tsGroupBy, tsPrevious, tsBlockingFilter, tsGroupByFilter, tsClearFilter });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsCols, tsBack, tsGetLatest, tsTriggerCollection, tsNext, lblSnapshotDate, tsGroupBy, tsPrevious, tsBlockingFilter, tsGroupByFilter, tsClearFilter, tsViewALL });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1090, 27);
@@ -470,6 +471,16 @@ namespace DBADashGUI.Performance
             tsClearFilter.Size = new System.Drawing.Size(104, 24);
             tsClearFilter.Text = "Clear Filter";
             // 
+            // tsViewALL
+            // 
+            tsViewALL.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            tsViewALL.Image = (System.Drawing.Image)resources.GetObject("tsViewALL.Image");
+            tsViewALL.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsViewALL.Name = "tsViewALL";
+            tsViewALL.Size = new System.Drawing.Size(73, 24);
+            tsViewALL.Text = "View ALL";
+            tsViewALL.Click += tsViewALL_Click;
+            // 
             // splitContainer1
             // 
             splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -506,8 +517,8 @@ namespace DBADashGUI.Performance
             // 
             lblRowLimit.ForeColor = System.Drawing.Color.Red;
             lblRowLimit.Name = "lblRowLimit";
-            lblRowLimit.Size = new System.Drawing.Size(590, 20);
-            lblRowLimit.Text = "Row Limit exceeded.  Select a narrower date range to view older snapshots or edit limit.";
+            lblRowLimit.Size = new System.Drawing.Size(150, 20);
+            lblRowLimit.Text = "Row Limit exceeded. ";
             lblRowLimit.Visible = false;
             // 
             // tsEditLimit
@@ -521,7 +532,7 @@ namespace DBADashGUI.Performance
             // tsStatus
             // 
             tsStatus.Name = "tsStatus";
-            tsStatus.Size = new System.Drawing.Size(1003, 20);
+            tsStatus.Size = new System.Drawing.Size(814, 20);
             tsStatus.Spring = true;
             tsStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
@@ -713,5 +724,6 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripMenuItem contextInfoToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsTriggerCollection;
         private System.Windows.Forms.ToolStripButton tsClearFilter;
+        private System.Windows.Forms.ToolStripButton tsViewALL;
     }
 }
