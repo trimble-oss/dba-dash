@@ -189,7 +189,6 @@ namespace DBADashGUI.Changes
             dgvFlags.ResultSetName = null;
             dgvFlags.RowHeadersVisible = false;
             dgvFlags.RowHeadersWidth = 51;
-            dgvFlags.RowTemplate.Height = 24;
             dgvFlags.Size = new System.Drawing.Size(676, 217);
             dgvFlags.TabIndex = 0;
             // 

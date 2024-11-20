@@ -142,7 +142,6 @@ namespace DBADashGUI.Performance
             dgv.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
-            dgv.RowTemplate.Height = 24;
             dgv.Size = new System.Drawing.Size(1090, 376);
             dgv.TabIndex = 0;
             dgv.CellContentClick += Dgv_CellContentClick;
@@ -532,7 +531,7 @@ namespace DBADashGUI.Performance
             // tsStatus
             // 
             tsStatus.Name = "tsStatus";
-            tsStatus.Size = new System.Drawing.Size(814, 20);
+            tsStatus.Size = new System.Drawing.Size(1003, 20);
             tsStatus.Spring = true;
             tsStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
@@ -568,7 +567,6 @@ namespace DBADashGUI.Performance
             dgvSessionWaits.ResultSetName = null;
             dgvSessionWaits.RowHeadersVisible = false;
             dgvSessionWaits.RowHeadersWidth = 51;
-            dgvSessionWaits.RowTemplate.Height = 24;
             dgvSessionWaits.Size = new System.Drawing.Size(1090, 134);
             dgvSessionWaits.TabIndex = 0;
             dgvSessionWaits.CellContentClick += DgvSessionWaits_CellContentClick;

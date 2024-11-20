@@ -95,7 +95,6 @@ namespace DBADashGUI.Changes
             dgvAlertsConfig.ResultSetName = null;
             dgvAlertsConfig.RowHeadersVisible = false;
             dgvAlertsConfig.RowHeadersWidth = 51;
-            dgvAlertsConfig.RowTemplate.Height = 24;
             dgvAlertsConfig.Size = new System.Drawing.Size(667, 339);
             dgvAlertsConfig.TabIndex = 0;
             // 
@@ -219,7 +218,6 @@ namespace DBADashGUI.Changes
             dgvAlerts.ResultSetName = null;
             dgvAlerts.RowHeadersVisible = false;
             dgvAlerts.RowHeadersWidth = 51;
-            dgvAlerts.RowTemplate.Height = 24;
             dgvAlerts.Size = new System.Drawing.Size(667, 336);
             dgvAlerts.TabIndex = 0;
             dgvAlerts.CellContentClick += DgvAlerts_CellContentClick;

@@ -101,7 +101,6 @@ namespace DBADashGUI.CollectionDates
             dgvDBADashErrors.ReadOnly = true;
             dgvDBADashErrors.RowHeadersVisible = false;
             dgvDBADashErrors.RowHeadersWidth = 51;
-            dgvDBADashErrors.RowTemplate.Height = 24;
             dgvDBADashErrors.Size = new System.Drawing.Size(829, 521);
             dgvDBADashErrors.TabIndex = 2;
             dgvDBADashErrors.CellContentClick += DgvDBADashErrors_CellContentClick;

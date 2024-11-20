@@ -80,7 +80,6 @@ namespace DBADashGUI.Performance
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
-            this.dgv.RowTemplate.Height = 24;
             this.dgv.ShowCellToolTips = false;
             this.dgv.Size = new System.Drawing.Size(870, 402);
             this.dgv.TabIndex = 0;
@@ -299,7 +298,6 @@ namespace DBADashGUI.Performance
             this.dgvConfig.ReadOnly = true;
             this.dgvConfig.RowHeadersVisible = false;
             this.dgvConfig.RowHeadersWidth = 51;
-            this.dgvConfig.RowTemplate.Height = 24;
             this.dgvConfig.Size = new System.Drawing.Size(870, 402);
             this.dgvConfig.TabIndex = 0;
             // 

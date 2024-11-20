@@ -56,7 +56,6 @@ namespace DBADashGUI.Performance
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
-            this.dgv.RowTemplate.Height = 24;
             this.dgv.Size = new System.Drawing.Size(395, 851);
             this.dgv.TabIndex = 1;
             // 

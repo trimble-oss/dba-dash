@@ -175,7 +175,6 @@
             gvDiff.Name = "gvDiff";
             gvDiff.ReadOnly = true;
             gvDiff.RowHeadersWidth = 51;
-            gvDiff.RowTemplate.Height = 24;
             gvDiff.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             gvDiff.Size = new System.Drawing.Size(937, 465);
             gvDiff.TabIndex = 9;

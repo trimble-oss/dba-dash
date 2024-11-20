@@ -102,7 +102,6 @@ namespace DBADashGUI
             dgvJobs.ReadOnly = true;
             dgvJobs.RowHeadersVisible = false;
             dgvJobs.RowHeadersWidth = 51;
-            dgvJobs.RowTemplate.Height = 24;
             dgvJobs.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             dgvJobs.Size = new System.Drawing.Size(1338, 329);
             dgvJobs.TabIndex = 0;

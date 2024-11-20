@@ -155,7 +155,6 @@ namespace DBADashGUI
             dgvSummary.ResultSetName = null;
             dgvSummary.RowHeadersVisible = false;
             dgvSummary.RowHeadersWidth = 51;
-            dgvSummary.RowTemplate.Height = 24;
             dgvSummary.Size = new System.Drawing.Size(1800, 119);
             dgvSummary.TabIndex = 0;
             dgvSummary.CellContentClick += DgvSummary_CellContentClick;
