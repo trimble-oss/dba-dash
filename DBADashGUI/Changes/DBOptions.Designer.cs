@@ -131,7 +131,6 @@ namespace DBADashGUI.Changes
             dgv.ResultSetName = null;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
-            dgv.RowTemplate.Height = 24;
             dgv.Size = new System.Drawing.Size(839, 321);
             dgv.TabIndex = 0;
             dgv.CellContentClick += Dgv_CellContentClick;
@@ -256,7 +255,6 @@ namespace DBADashGUI.Changes
             dgvHistory.ResultSetName = null;
             dgvHistory.RowHeadersVisible = false;
             dgvHistory.RowHeadersWidth = 51;
-            dgvHistory.RowTemplate.Height = 24;
             dgvHistory.Size = new System.Drawing.Size(839, 225);
             dgvHistory.TabIndex = 0;
             // 

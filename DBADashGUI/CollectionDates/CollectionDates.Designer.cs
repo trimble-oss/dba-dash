@@ -141,7 +141,6 @@ namespace DBADashGUI.CollectionDates
             dgvCollectionDates.ReadOnly = true;
             dgvCollectionDates.RowHeadersVisible = false;
             dgvCollectionDates.RowHeadersWidth = 51;
-            dgvCollectionDates.RowTemplate.Height = 24;
             dgvCollectionDates.Size = new System.Drawing.Size(1357, 457);
             dgvCollectionDates.TabIndex = 3;
             dgvCollectionDates.CellContentClick += Dgv_CellContentClick;

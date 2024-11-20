@@ -267,7 +267,6 @@ namespace DBADashGUI
             dgvSummary.ReadOnly = true;
             dgvSummary.RowHeadersVisible = false;
             dgvSummary.RowHeadersWidth = 51;
-            dgvSummary.RowTemplate.Height = 24;
             dgvSummary.Size = new System.Drawing.Size(1829, 485);
             dgvSummary.TabIndex = 0;
             dgvSummary.CellContentClick += DgvSummary_CellContentClick;
@@ -1333,7 +1332,6 @@ namespace DBADashGUI
             dgvSlow.ReadOnly = true;
             dgvSlow.RowHeadersVisible = false;
             dgvSlow.RowHeadersWidth = 51;
-            dgvSlow.RowTemplate.Height = 24;
             dgvSlow.Size = new System.Drawing.Size(1829, 807);
             dgvSlow.TabIndex = 4;
             dgvSlow.CellContentClick += DgvSlow_CellContentClick;

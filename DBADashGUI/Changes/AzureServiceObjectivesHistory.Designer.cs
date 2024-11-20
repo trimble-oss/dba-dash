@@ -120,7 +120,6 @@ namespace DBADashGUI.Changes
             dgv.ResultSetName = null;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
-            dgv.RowTemplate.Height = 24;
             dgv.Size = new System.Drawing.Size(1344, 444);
             dgv.TabIndex = 0;
             // 
@@ -407,7 +406,6 @@ namespace DBADashGUI.Changes
             dgvPool.ResultSetName = null;
             dgvPool.RowHeadersVisible = false;
             dgvPool.RowHeadersWidth = 51;
-            dgvPool.RowTemplate.Height = 24;
             dgvPool.Size = new System.Drawing.Size(1344, 439);
             dgvPool.TabIndex = 1;
             // 

@@ -290,7 +290,6 @@ namespace DBADashGUI
             dgvVersion.ResultSetName = null;
             dgvVersion.RowHeadersVisible = false;
             dgvVersion.RowHeadersWidth = 51;
-            dgvVersion.RowTemplate.Height = 24;
             dgvVersion.Size = new System.Drawing.Size(1205, 402);
             dgvVersion.TabIndex = 0;
             dgvVersion.CellContentClick += DgvVersion_CellContentClick;

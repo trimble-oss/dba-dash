@@ -65,7 +65,6 @@
             dgvCounters.Name = "dgvCounters";
             dgvCounters.RowHeadersVisible = false;
             dgvCounters.RowHeadersWidth = 51;
-            dgvCounters.RowTemplate.Height = 24;
             dgvCounters.Size = new System.Drawing.Size(1020, 756);
             dgvCounters.TabIndex = 0;
             // 

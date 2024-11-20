@@ -75,7 +75,6 @@ namespace DBADashGUI.HA
             dgv.ResultSetName = null;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
-            dgv.RowTemplate.Height = 24;
             dgv.Size = new System.Drawing.Size(549, 422);
             dgv.TabIndex = 0;
             dgv.RowsAdded += Dgv_RowsAdded;

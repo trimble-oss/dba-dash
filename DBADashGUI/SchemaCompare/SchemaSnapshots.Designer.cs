@@ -151,7 +151,6 @@
             gvSnapshots.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             gvSnapshots.RowHeadersVisible = false;
             gvSnapshots.RowHeadersWidth = 51;
-            gvSnapshots.RowTemplate.Height = 24;
             gvSnapshots.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             gvSnapshots.Size = new System.Drawing.Size(2019, 748);
             gvSnapshots.TabIndex = 0;
@@ -245,7 +244,6 @@
             gvSnapshotsDetail.ReadOnly = true;
             gvSnapshotsDetail.RowHeadersVisible = false;
             gvSnapshotsDetail.RowHeadersWidth = 51;
-            gvSnapshotsDetail.RowTemplate.Height = 24;
             gvSnapshotsDetail.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
             gvSnapshotsDetail.Size = new System.Drawing.Size(2019, 490);
             gvSnapshotsDetail.TabIndex = 0;
@@ -315,7 +313,6 @@
             dgvInstanceSummary.ReadOnly = true;
             dgvInstanceSummary.RowHeadersVisible = false;
             dgvInstanceSummary.RowHeadersWidth = 51;
-            dgvInstanceSummary.RowTemplate.Height = 24;
             dgvInstanceSummary.Size = new System.Drawing.Size(2019, 228);
             dgvInstanceSummary.TabIndex = 3;
             dgvInstanceSummary.CellContentClick += DgvInstanceSummary_CellContentClick;

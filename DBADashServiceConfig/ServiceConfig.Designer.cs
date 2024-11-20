@@ -1379,7 +1379,6 @@ namespace DBADashServiceConfig
             dgvConnections.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvConnections.Name = "dgvConnections";
             dgvConnections.RowHeadersWidth = 51;
-            dgvConnections.RowTemplate.Height = 24;
             dgvConnections.Size = new System.Drawing.Size(1067, 308);
             dgvConnections.TabIndex = 23;
             dgvConnections.CellContentClick += DgvConnections_CellContentClick;

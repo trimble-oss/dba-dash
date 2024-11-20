@@ -77,7 +77,6 @@ namespace DBADashGUI.Checks
             dgvCustom.ReadOnly = true;
             dgvCustom.RowHeadersVisible = false;
             dgvCustom.RowHeadersWidth = 51;
-            dgvCustom.RowTemplate.Height = 24;
             dgvCustom.Size = new System.Drawing.Size(801, 505);
             dgvCustom.TabIndex = 0;
             dgvCustom.CellContentClick += DgvCustom_CellContentClick;

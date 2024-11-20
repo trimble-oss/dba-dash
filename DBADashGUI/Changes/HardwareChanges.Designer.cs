@@ -189,7 +189,6 @@ namespace DBADashGUI
             dgvHistory.ResultSetName = null;
             dgvHistory.RowHeadersVisible = false;
             dgvHistory.RowHeadersWidth = 51;
-            dgvHistory.RowTemplate.Height = 24;
             dgvHistory.Size = new System.Drawing.Size(850, 364);
             dgvHistory.TabIndex = 0;
             // 
@@ -414,7 +413,6 @@ namespace DBADashGUI
             dgvHardware.ResultSetName = null;
             dgvHardware.RowHeadersVisible = false;
             dgvHardware.RowHeadersWidth = 51;
-            dgvHardware.RowTemplate.Height = 24;
             dgvHardware.Size = new System.Drawing.Size(850, 363);
             dgvHardware.TabIndex = 0;
             dgvHardware.RowsAdded += DgvHardware_RowsAdded;

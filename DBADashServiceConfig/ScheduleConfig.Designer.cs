@@ -58,7 +58,6 @@ namespace DBADashServiceConfig
             this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgv.Name = "dgv";
             this.dgv.RowHeadersWidth = 51;
-            this.dgv.RowTemplate.Height = 24;
             this.dgv.Size = new System.Drawing.Size(729, 687);
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellContentClick);

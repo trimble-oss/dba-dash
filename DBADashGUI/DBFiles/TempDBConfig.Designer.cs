@@ -100,7 +100,6 @@ namespace DBADashGUI.DBFiles
             dgvTempDB.ReadOnly = true;
             dgvTempDB.RowHeadersVisible = false;
             dgvTempDB.RowHeadersWidth = 51;
-            dgvTempDB.RowTemplate.Height = 24;
             dgvTempDB.Size = new System.Drawing.Size(959, 549);
             dgvTempDB.TabIndex = 0;
             dgvTempDB.RowsAdded += DgvTempDB_RowsAdded;

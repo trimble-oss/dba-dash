@@ -193,7 +193,6 @@ namespace DBADashGUI.DBFiles
             dgvFiles.RowHeadersDefaultCellStyle = dataGridViewCellStyle16;
             dgvFiles.RowHeadersVisible = false;
             dgvFiles.RowHeadersWidth = 51;
-            dgvFiles.RowTemplate.Height = 24;
             dgvFiles.Size = new System.Drawing.Size(1616, 308);
             dgvFiles.TabIndex = 0;
             dgvFiles.CellContentClick += DgvFiles_CellContentClick;

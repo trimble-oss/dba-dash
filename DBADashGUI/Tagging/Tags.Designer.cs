@@ -215,7 +215,6 @@ namespace DBADashGUI.Tagging
             dgv.ResultSetName = null;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
-            dgv.RowTemplate.Height = 24;
             dgv.Size = new System.Drawing.Size(917, 155);
             dgv.TabIndex = 9;
             // 
@@ -289,7 +288,6 @@ namespace DBADashGUI.Tagging
             dgvTags.ResultSetName = null;
             dgvTags.RowHeadersVisible = false;
             dgvTags.RowHeadersWidth = 51;
-            dgvTags.RowTemplate.Height = 24;
             dgvTags.Size = new System.Drawing.Size(917, 158);
             dgvTags.TabIndex = 12;
             dgvTags.CellMouseDoubleClick += DgvTags_CellMouseDoubleClick;
@@ -408,7 +406,6 @@ namespace DBADashGUI.Tagging
             dgvReport.ResultSetName = null;
             dgvReport.RowHeadersVisible = false;
             dgvReport.RowHeadersWidth = 51;
-            dgvReport.RowTemplate.Height = 24;
             dgvReport.Size = new System.Drawing.Size(917, 466);
             dgvReport.TabIndex = 0;
             dgvReport.CellContentClick += DgvReport_CellContentClick;

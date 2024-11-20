@@ -58,7 +58,6 @@ namespace DBADashGUI.Changes
             this.dgvDrivers.ReadOnly = true;
             this.dgvDrivers.RowHeadersVisible = false;
             this.dgvDrivers.RowHeadersWidth = 51;
-            this.dgvDrivers.RowTemplate.Height = 24;
             this.dgvDrivers.Size = new System.Drawing.Size(630, 419);
             this.dgvDrivers.TabIndex = 0;
             // 

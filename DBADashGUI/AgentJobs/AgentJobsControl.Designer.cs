@@ -167,7 +167,6 @@ namespace DBADashGUI.AgentJobs
             dgvJobs.ResultSetName = null;
             dgvJobs.RowHeadersVisible = false;
             dgvJobs.RowHeadersWidth = 51;
-            dgvJobs.RowTemplate.Height = 24;
             dgvJobs.Size = new System.Drawing.Size(2197, 216);
             dgvJobs.TabIndex = 0;
             dgvJobs.CellContentClick += DgvJobs_CellContentClick;
@@ -529,7 +528,6 @@ namespace DBADashGUI.AgentJobs
             dgvJobHistory.ResultSetName = null;
             dgvJobHistory.RowHeadersVisible = false;
             dgvJobHistory.RowHeadersWidth = 51;
-            dgvJobHistory.RowTemplate.Height = 24;
             dgvJobHistory.Size = new System.Drawing.Size(2197, 200);
             dgvJobHistory.TabIndex = 4;
             dgvJobHistory.CellContentClick += DgvJobHistory_CellContentClick;

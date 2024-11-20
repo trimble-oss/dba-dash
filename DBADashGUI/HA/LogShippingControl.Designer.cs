@@ -133,7 +133,6 @@ namespace DBADashGUI.LogShipping
             dgvLogShipping.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             dgvLogShipping.RowHeadersVisible = false;
             dgvLogShipping.RowHeadersWidth = 51;
-            dgvLogShipping.RowTemplate.Height = 24;
             dgvLogShipping.Size = new System.Drawing.Size(698, 276);
             dgvLogShipping.TabIndex = 0;
             dgvLogShipping.CellContentClick += DgvLogShipping_CellContentClick;
@@ -376,7 +375,6 @@ namespace DBADashGUI.LogShipping
             dgvSummary.ResultSetName = null;
             dgvSummary.RowHeadersVisible = false;
             dgvSummary.RowHeadersWidth = 51;
-            dgvSummary.RowTemplate.Height = 24;
             dgvSummary.Size = new System.Drawing.Size(698, 184);
             dgvSummary.TabIndex = 3;
             dgvSummary.CellContentClick += DgvSummary_CellContentClick;

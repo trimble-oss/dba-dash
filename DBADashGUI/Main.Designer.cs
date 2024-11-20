@@ -1095,7 +1095,6 @@ namespace DBADashGUI
             gvHistory.Name = "gvHistory";
             gvHistory.RowHeadersVisible = false;
             gvHistory.RowHeadersWidth = 51;
-            gvHistory.RowTemplate.Height = 24;
             gvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             gvHistory.Size = new System.Drawing.Size(186, 7);
             gvHistory.TabIndex = 0;
