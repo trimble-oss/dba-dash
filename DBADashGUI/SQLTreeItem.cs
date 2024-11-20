@@ -131,7 +131,13 @@ namespace DBADashGUI
                 };
                 switch (Type)
                 {
-                    case TreeType.DBADashRoot or TreeType.AzureInstance or TreeType.InstanceFolder:
+                    case TreeType.AzureInstance:
+                        InternalContext.AzureInstanceIDsWithHidden = CommonData.Instances.Rows.Cast<DataRow>().Where(r => (string)r["Instance"] == ObjectName && (int)r["EngineEdition"] == 5)
+                         .Select(r => (int)r["InstanceID"]).ToHashSet();
+
+                        break;
+
+                    case TreeType.DBADashRoot or TreeType.InstanceFolder:
                         {
                             foreach (SQLTreeItem itm in Nodes) // Look down the tree for Instance/AzureDB nodes
                             {
@@ -176,7 +182,7 @@ namespace DBADashGUI
                         break;
                 }
 
-                Context.InstanceName = Type switch
+                InternalContext.InstanceName = Type switch
                 {
                     TreeType.Instance or TreeType.AzureInstance => ObjectName,
                     TreeType.DBADashRoot => string.Empty,
