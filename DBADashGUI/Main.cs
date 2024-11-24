@@ -18,6 +18,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DBADashGUI.CommunityTools;
+using DBADashGUI.SchemaCompare;
 using DocumentFormat.OpenXml.Vml.Office;
 using Microsoft.SqlServer.Management.XEvent;
 using Version = System.Version;
@@ -2119,6 +2120,12 @@ namespace DBADashGUI
         {
             using var options = new RepoSettings();
             options.ShowDialog();
+        }
+
+        private void externalDiffToolToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using var frm = new ExternalDiffConfig();
+            frm.ShowDialog();
         }
 
         void IThemedControl.ApplyTheme(BaseTheme theme)

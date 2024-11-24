@@ -36,6 +36,17 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             splitSnapshotSummary = new System.Windows.Forms.SplitContainer();
             gvSnapshots = new System.Windows.Forms.DataGridView();
+            dataGridViewTextBoxColumn14 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colDB = new System.Windows.Forms.DataGridViewLinkColumn();
+            SnapshotDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ValidatedDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ValidForDays = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            DaysSinceValidation = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colCreated = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            Modified = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            Dropped = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colExport = new System.Windows.Forms.DataGridViewLinkColumn();
+            colTriggerSnapshot = new System.Windows.Forms.DataGridViewLinkColumn();
             toolStrip2 = new System.Windows.Forms.ToolStrip();
             tsSummaryBack = new System.Windows.Forms.ToolStripButton();
             tsSummaryPageNum = new System.Windows.Forms.ToolStripLabel();
@@ -44,11 +55,6 @@
             tsSummaryPageSize = new System.Windows.Forms.ToolStripComboBox();
             lblStatus = new System.Windows.Forms.ToolStripLabel();
             gvSnapshotsDetail = new System.Windows.Forms.DataGridView();
-            colObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colSchemaName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colAction = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colView = new System.Windows.Forms.DataGridViewLinkColumn();
-            colDiff = new System.Windows.Forms.DataGridViewLinkColumn();
             dgvInstanceSummary = new System.Windows.Forms.DataGridView();
             colInstance = new System.Windows.Forms.DataGridViewLinkColumn();
             colLastUpdated = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -70,17 +76,12 @@
             dataGridViewTextBoxColumn11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn13 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            dataGridViewTextBoxColumn14 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colDB = new System.Windows.Forms.DataGridViewLinkColumn();
-            SnapshotDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            ValidatedDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            ValidForDays = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            DaysSinceValidation = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colCreated = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            Modified = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            Dropped = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colExport = new System.Windows.Forms.DataGridViewLinkColumn();
-            colTriggerSnapshot = new System.Windows.Forms.DataGridViewLinkColumn();
+            colObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colSchemaName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colAction = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colView = new System.Windows.Forms.DataGridViewLinkColumn();
+            colDiff = new System.Windows.Forms.DataGridViewLinkColumn();
+            colExternalDiff = new System.Windows.Forms.DataGridViewLinkColumn();
             ((System.ComponentModel.ISupportInitialize)splitSnapshotSummary).BeginInit();
             splitSnapshotSummary.Panel1.SuspendLayout();
             splitSnapshotSummary.Panel2.SuspendLayout();
@@ -157,6 +158,110 @@
             gvSnapshots.CellContentClick += GvSnapshots_CellContentClick;
             gvSnapshots.SelectionChanged += GvSnapshots_SelectionChanged;
             // 
+            // dataGridViewTextBoxColumn14
+            // 
+            dataGridViewTextBoxColumn14.DataPropertyName = "InstanceGroupName";
+            dataGridViewTextBoxColumn14.HeaderText = "Instance";
+            dataGridViewTextBoxColumn14.MinimumWidth = 6;
+            dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
+            dataGridViewTextBoxColumn14.ReadOnly = true;
+            dataGridViewTextBoxColumn14.Width = 125;
+            // 
+            // colDB
+            // 
+            colDB.DataPropertyName = "DB";
+            colDB.HeaderText = "DB";
+            colDB.MinimumWidth = 6;
+            colDB.Name = "colDB";
+            colDB.ReadOnly = true;
+            colDB.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colDB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            colDB.Width = 56;
+            // 
+            // SnapshotDate
+            // 
+            SnapshotDate.DataPropertyName = "SnapshotDate";
+            SnapshotDate.HeaderText = "Snapshot Date";
+            SnapshotDate.MinimumWidth = 6;
+            SnapshotDate.Name = "SnapshotDate";
+            SnapshotDate.ReadOnly = true;
+            SnapshotDate.Width = 131;
+            // 
+            // ValidatedDate
+            // 
+            ValidatedDate.DataPropertyName = "ValidatedDate";
+            ValidatedDate.HeaderText = "Validated Date";
+            ValidatedDate.MinimumWidth = 6;
+            ValidatedDate.Name = "ValidatedDate";
+            ValidatedDate.ReadOnly = true;
+            ValidatedDate.Width = 130;
+            // 
+            // ValidForDays
+            // 
+            ValidForDays.DataPropertyName = "ValidForDays";
+            ValidForDays.HeaderText = "Valid For (Days)";
+            ValidForDays.MinimumWidth = 6;
+            ValidForDays.Name = "ValidForDays";
+            ValidForDays.ReadOnly = true;
+            ValidForDays.Width = 125;
+            // 
+            // DaysSinceValidation
+            // 
+            DaysSinceValidation.DataPropertyName = "DaysSinceValidation";
+            DaysSinceValidation.HeaderText = "Days Since Validation";
+            DaysSinceValidation.MinimumWidth = 6;
+            DaysSinceValidation.Name = "DaysSinceValidation";
+            DaysSinceValidation.ReadOnly = true;
+            DaysSinceValidation.Width = 125;
+            // 
+            // colCreated
+            // 
+            colCreated.DataPropertyName = "Created";
+            colCreated.HeaderText = "Created";
+            colCreated.MinimumWidth = 6;
+            colCreated.Name = "colCreated";
+            colCreated.ReadOnly = true;
+            colCreated.Width = 87;
+            // 
+            // Modified
+            // 
+            Modified.DataPropertyName = "Modified";
+            Modified.HeaderText = "Modified";
+            Modified.MinimumWidth = 6;
+            Modified.Name = "Modified";
+            Modified.ReadOnly = true;
+            Modified.Width = 90;
+            // 
+            // Dropped
+            // 
+            Dropped.DataPropertyName = "Dropped";
+            Dropped.HeaderText = "Dropped";
+            Dropped.MinimumWidth = 6;
+            Dropped.Name = "Dropped";
+            Dropped.ReadOnly = true;
+            Dropped.Width = 92;
+            // 
+            // colExport
+            // 
+            colExport.HeaderText = "Export";
+            colExport.MinimumWidth = 6;
+            colExport.Name = "colExport";
+            colExport.ReadOnly = true;
+            colExport.Text = "Export";
+            colExport.ToolTipText = "Export DB Schema to disk";
+            colExport.UseColumnTextForLinkValue = true;
+            colExport.Width = 125;
+            // 
+            // colTriggerSnapshot
+            // 
+            colTriggerSnapshot.HeaderText = "Trigger Snapshot";
+            colTriggerSnapshot.MinimumWidth = 6;
+            colTriggerSnapshot.Name = "colTriggerSnapshot";
+            colTriggerSnapshot.ReadOnly = true;
+            colTriggerSnapshot.Text = "Trigger Snapshot";
+            colTriggerSnapshot.UseColumnTextForLinkValue = true;
+            colTriggerSnapshot.Width = 125;
+            // 
             // toolStrip2
             // 
             toolStrip2.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -228,7 +333,7 @@
             dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             gvSnapshotsDetail.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle4;
             gvSnapshotsDetail.ColumnHeadersHeight = 29;
-            gvSnapshotsDetail.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colObjectName, colSchemaName, colAction, colView, colDiff });
+            gvSnapshotsDetail.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colObjectName, colSchemaName, colAction, colView, colDiff, colExternalDiff });
             dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Window;
             dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
@@ -248,56 +353,6 @@
             gvSnapshotsDetail.Size = new System.Drawing.Size(2019, 490);
             gvSnapshotsDetail.TabIndex = 0;
             gvSnapshotsDetail.CellContentClick += GvSnapshotsDetail_CellContentClick;
-            // 
-            // colObjectName
-            // 
-            colObjectName.DataPropertyName = "ObjectName";
-            colObjectName.HeaderText = "Object Name";
-            colObjectName.MinimumWidth = 6;
-            colObjectName.Name = "colObjectName";
-            colObjectName.ReadOnly = true;
-            colObjectName.Width = 119;
-            // 
-            // colSchemaName
-            // 
-            colSchemaName.DataPropertyName = "SchemaName";
-            colSchemaName.HeaderText = "Schema Name";
-            colSchemaName.MinimumWidth = 6;
-            colSchemaName.Name = "colSchemaName";
-            colSchemaName.ReadOnly = true;
-            colSchemaName.Width = 129;
-            // 
-            // colAction
-            // 
-            colAction.DataPropertyName = "Action";
-            colAction.HeaderText = "Action";
-            colAction.MinimumWidth = 6;
-            colAction.Name = "colAction";
-            colAction.ReadOnly = true;
-            colAction.Width = 76;
-            // 
-            // colView
-            // 
-            colView.DataPropertyName = "newDDLID";
-            colView.HeaderText = "View";
-            colView.MinimumWidth = 6;
-            colView.Name = "colView";
-            colView.ReadOnly = true;
-            colView.Text = "View";
-            colView.UseColumnTextForLinkValue = true;
-            colView.Width = 125;
-            // 
-            // colDiff
-            // 
-            colDiff.DataPropertyName = "OldDDLID";
-            colDiff.HeaderText = "Diff";
-            colDiff.MinimumWidth = 6;
-            colDiff.Name = "colDiff";
-            colDiff.ReadOnly = true;
-            colDiff.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colDiff.Text = "Diff";
-            colDiff.UseColumnTextForLinkValue = true;
-            colDiff.Width = 125;
             // 
             // dgvInstanceSummary
             // 
@@ -517,109 +572,65 @@
             dataGridViewTextBoxColumn13.ReadOnly = true;
             dataGridViewTextBoxColumn13.Width = 125;
             // 
-            // dataGridViewTextBoxColumn14
+            // colObjectName
             // 
-            dataGridViewTextBoxColumn14.DataPropertyName = "InstanceGroupName";
-            dataGridViewTextBoxColumn14.HeaderText = "Instance";
-            dataGridViewTextBoxColumn14.MinimumWidth = 6;
-            dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
-            dataGridViewTextBoxColumn14.ReadOnly = true;
-            dataGridViewTextBoxColumn14.Width = 125;
+            colObjectName.DataPropertyName = "ObjectName";
+            colObjectName.HeaderText = "Object Name";
+            colObjectName.MinimumWidth = 6;
+            colObjectName.Name = "colObjectName";
+            colObjectName.ReadOnly = true;
+            colObjectName.Width = 119;
             // 
-            // colDB
+            // colSchemaName
             // 
-            colDB.DataPropertyName = "DB";
-            colDB.HeaderText = "DB";
-            colDB.MinimumWidth = 6;
-            colDB.Name = "colDB";
-            colDB.ReadOnly = true;
-            colDB.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colDB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            colDB.Width = 56;
+            colSchemaName.DataPropertyName = "SchemaName";
+            colSchemaName.HeaderText = "Schema Name";
+            colSchemaName.MinimumWidth = 6;
+            colSchemaName.Name = "colSchemaName";
+            colSchemaName.ReadOnly = true;
+            colSchemaName.Width = 129;
             // 
-            // SnapshotDate
+            // colAction
             // 
-            SnapshotDate.DataPropertyName = "SnapshotDate";
-            SnapshotDate.HeaderText = "Snapshot Date";
-            SnapshotDate.MinimumWidth = 6;
-            SnapshotDate.Name = "SnapshotDate";
-            SnapshotDate.ReadOnly = true;
-            SnapshotDate.Width = 131;
+            colAction.DataPropertyName = "Action";
+            colAction.HeaderText = "Action";
+            colAction.MinimumWidth = 6;
+            colAction.Name = "colAction";
+            colAction.ReadOnly = true;
+            colAction.Width = 76;
             // 
-            // ValidatedDate
+            // colView
             // 
-            ValidatedDate.DataPropertyName = "ValidatedDate";
-            ValidatedDate.HeaderText = "Validated Date";
-            ValidatedDate.MinimumWidth = 6;
-            ValidatedDate.Name = "ValidatedDate";
-            ValidatedDate.ReadOnly = true;
-            ValidatedDate.Width = 130;
+            colView.DataPropertyName = "newDDLID";
+            colView.HeaderText = "View";
+            colView.MinimumWidth = 6;
+            colView.Name = "colView";
+            colView.ReadOnly = true;
+            colView.Text = "View";
+            colView.UseColumnTextForLinkValue = true;
+            colView.Width = 125;
             // 
-            // ValidForDays
+            // colDiff
             // 
-            ValidForDays.DataPropertyName = "ValidForDays";
-            ValidForDays.HeaderText = "Valid For (Days)";
-            ValidForDays.MinimumWidth = 6;
-            ValidForDays.Name = "ValidForDays";
-            ValidForDays.ReadOnly = true;
-            ValidForDays.Width = 125;
+            colDiff.DataPropertyName = "OldDDLID";
+            colDiff.HeaderText = "Diff";
+            colDiff.MinimumWidth = 6;
+            colDiff.Name = "colDiff";
+            colDiff.ReadOnly = true;
+            colDiff.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colDiff.Text = "Diff";
+            colDiff.UseColumnTextForLinkValue = true;
+            colDiff.Width = 125;
             // 
-            // DaysSinceValidation
+            // colExternalDiff
             // 
-            DaysSinceValidation.DataPropertyName = "DaysSinceValidation";
-            DaysSinceValidation.HeaderText = "Days Since Validation";
-            DaysSinceValidation.MinimumWidth = 6;
-            DaysSinceValidation.Name = "DaysSinceValidation";
-            DaysSinceValidation.ReadOnly = true;
-            DaysSinceValidation.Width = 125;
-            // 
-            // colCreated
-            // 
-            colCreated.DataPropertyName = "Created";
-            colCreated.HeaderText = "Created";
-            colCreated.MinimumWidth = 6;
-            colCreated.Name = "colCreated";
-            colCreated.ReadOnly = true;
-            colCreated.Width = 87;
-            // 
-            // Modified
-            // 
-            Modified.DataPropertyName = "Modified";
-            Modified.HeaderText = "Modified";
-            Modified.MinimumWidth = 6;
-            Modified.Name = "Modified";
-            Modified.ReadOnly = true;
-            Modified.Width = 90;
-            // 
-            // Dropped
-            // 
-            Dropped.DataPropertyName = "Dropped";
-            Dropped.HeaderText = "Dropped";
-            Dropped.MinimumWidth = 6;
-            Dropped.Name = "Dropped";
-            Dropped.ReadOnly = true;
-            Dropped.Width = 92;
-            // 
-            // colExport
-            // 
-            colExport.HeaderText = "Export";
-            colExport.MinimumWidth = 6;
-            colExport.Name = "colExport";
-            colExport.ReadOnly = true;
-            colExport.Text = "Export";
-            colExport.ToolTipText = "Export DB Schema to disk";
-            colExport.UseColumnTextForLinkValue = true;
-            colExport.Width = 125;
-            // 
-            // colTriggerSnapshot
-            // 
-            colTriggerSnapshot.HeaderText = "Trigger Snapshot";
-            colTriggerSnapshot.MinimumWidth = 6;
-            colTriggerSnapshot.Name = "colTriggerSnapshot";
-            colTriggerSnapshot.ReadOnly = true;
-            colTriggerSnapshot.Text = "Trigger Snapshot";
-            colTriggerSnapshot.UseColumnTextForLinkValue = true;
-            colTriggerSnapshot.Width = 125;
+            colExternalDiff.HeaderText = "External Diff";
+            colExternalDiff.MinimumWidth = 6;
+            colExternalDiff.Name = "colExternalDiff";
+            colExternalDiff.ReadOnly = true;
+            colExternalDiff.Text = "External Diff";
+            colExternalDiff.UseColumnTextForLinkValue = true;
+            colExternalDiff.Width = 125;
             // 
             // SchemaSnapshots
             // 
@@ -676,11 +687,6 @@
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripButton tsBack;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colObjectName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colSchemaName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colAction;
-        private System.Windows.Forms.DataGridViewLinkColumn colView;
-        private System.Windows.Forms.DataGridViewLinkColumn colDiff;
         private System.Windows.Forms.DataGridViewLinkColumn colInstance;
         private System.Windows.Forms.DataGridViewTextBoxColumn colLastUpdated;
         private System.Windows.Forms.DataGridViewTextBoxColumn colLastValidated;
@@ -697,5 +703,11 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Dropped;
         private System.Windows.Forms.DataGridViewLinkColumn colExport;
         private System.Windows.Forms.DataGridViewLinkColumn colTriggerSnapshot;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colObjectName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colSchemaName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colAction;
+        private System.Windows.Forms.DataGridViewLinkColumn colView;
+        private System.Windows.Forms.DataGridViewLinkColumn colDiff;
+        private System.Windows.Forms.DataGridViewLinkColumn colExternalDiff;
     }
 }

@@ -1,19 +1,19 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADash;
+using DBADashGUI.Interface;
+using DBADashGUI.Messaging;
+using DBADashGUI.Theme;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADashGUI.Interface;
-using DBADashGUI.Theme;
 using static DBADashGUI.DiffControl;
-using DBADash;
-using DBADashGUI.Messaging;
-using System.Diagnostics;
 
 namespace DBADashGUI.Changes
 {
@@ -31,6 +31,9 @@ namespace DBADashGUI.Changes
         private int DatabaseID;
         private List<int> InstanceIDs;
         private DBADashContext CurrentContext;
+
+        private bool IsExternalDiffConfigured => !string.IsNullOrWhiteSpace(Properties.Settings.Default.DiffToolBinaryPath) &&
+                                                 !string.IsNullOrWhiteSpace(Properties.Settings.Default.DiffToolArguments);
 
         public bool CanNavigateBack => tsBack.Enabled;
 
@@ -53,6 +56,7 @@ namespace DBADashGUI.Changes
 
         private void GvSnapshots_SelectionChanged(object sender, EventArgs e)
         {
+            colExternalDiff.Visible = IsExternalDiffConfigured;
             if (gvSnapshots.SelectedRows.Count != 1) return;
             var row = (DataRowView)gvSnapshots.SelectedRows[0].DataBoundItem;
             var snapshotDateUTC = ((DateTime)row["SnapshotDate"]).AppTimeZoneToUtc();
@@ -66,7 +70,7 @@ namespace DBADashGUI.Changes
 
         private void GvSnapshotsDetail_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex < 0 || (e.ColumnIndex != colView.Index && e.ColumnIndex != colDiff.Index)) return;
+            if (e.RowIndex < 0 || (e.ColumnIndex != colView.Index && e.ColumnIndex != colDiff.Index && e.ColumnIndex != colExternalDiff.Index)) return;
             var row = (DataRowView)gvSnapshotsDetail.Rows[e.RowIndex].DataBoundItem;
             var ddl = "";
             if (row["NewDDLID"] != DBNull.Value)
@@ -78,29 +82,30 @@ namespace DBADashGUI.Changes
             {
                 ddlOld = Common.DDL((long)row["OldDDLID"]);
             }
-
             var diffToolBinaryPath = Properties.Settings.Default.DiffToolBinaryPath;
             var diffToolArguments = Properties.Settings.Default.DiffToolArguments;
-
-            // If a custom diff tool is configured use that
-            if (!string.IsNullOrWhiteSpace(diffToolBinaryPath) && !string.IsNullOrWhiteSpace(diffToolArguments))
+            if (e.ColumnIndex == colExternalDiff.Index && !string.IsNullOrWhiteSpace(diffToolBinaryPath) && !string.IsNullOrWhiteSpace(diffToolArguments))
             {
-                // TODO?: Check if binary path is valid? Try/catch on process start?
-
-                string oldDDLTempPath = Path.GetTempFileName();
-                string newDDLTempPath = Path.GetTempFileName();
+                var oldDDLTempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".sql");
+                var newDDLTempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".sql");
 
                 File.WriteAllText(oldDDLTempPath, ddlOld);
                 File.WriteAllText(newDDLTempPath, ddl);
 
-                using (var process = new Process())
+                using var process = new Process();
+                process.StartInfo.FileName = diffToolBinaryPath;
+                process.StartInfo.Arguments = diffToolArguments.Replace("$OLD$", $"\"{oldDDLTempPath}\"", true, null).Replace("$NEW$", $"\"{newDDLTempPath}\"", true, null);
+                process.StartInfo.UseShellExecute = true;
+
+                try
                 {
-                    process.StartInfo.FileName = diffToolBinaryPath;
-                    process.StartInfo.Arguments = diffToolArguments.Replace("$OLD$", $"\"{oldDDLTempPath}\"", true, null).Replace("$NEW$", $"\"{newDDLTempPath}\"", true, null);
                     process.Start();
                 }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
-            // otherwise use the built in diff tool
             else
             {
                 var mode = e.ColumnIndex == colDiff.Index ? ViewMode.Diff : ViewMode.Code;
@@ -130,6 +135,7 @@ namespace DBADashGUI.Changes
                 Invoke(RefreshData);
                 return;
             }
+
             if (InstanceID > 0 || InstanceName is { Length: > 0 })
             {
                 LoadSnapshots();
@@ -266,7 +272,7 @@ namespace DBADashGUI.Changes
             {
                 var row = (DataRowView)gvSnapshots.Rows[e.RowIndex].DataBoundItem;
                 await TriggerSchemaSnapshot(row);
-            }   
+            }
         }
 
         private async Task TriggerSchemaSnapshot(DataRowView row)
@@ -283,7 +289,6 @@ namespace DBADashGUI.Changes
             {
                 SetStatus("Collections can't be triggered for this instance.", "Enable messaging in the service configuration tool to allow communication", DashColors.Warning);
             }
-          
         }
 
         private void Export(DataRowView row)
@@ -378,7 +383,7 @@ namespace DBADashGUI.Changes
 
         private async void tsTrigger_Click(object sender, EventArgs e)
         {
-            if (InstanceID <=0)
+            if (InstanceID <= 0)
             {
                 lblStatus.Text = "Please select a single instance to trigger a collection";
             }
