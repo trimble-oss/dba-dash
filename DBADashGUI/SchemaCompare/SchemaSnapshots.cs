@@ -5,7 +5,6 @@ using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
@@ -24,7 +23,6 @@ namespace DBADashGUI.Changes
             InitializeComponent();
         }
 
-        private readonly int currentSummaryPageSize = 100;
         private int currentSummaryPage = 1;
         private int InstanceID;
         private string InstanceName;
@@ -32,26 +30,24 @@ namespace DBADashGUI.Changes
         private List<int> InstanceIDs;
         private DBADashContext CurrentContext;
 
-        private bool IsExternalDiffConfigured => !string.IsNullOrWhiteSpace(Properties.Settings.Default.DiffToolBinaryPath) &&
-                                                 !string.IsNullOrWhiteSpace(Properties.Settings.Default.DiffToolArguments);
+        private static bool IsExternalDiffConfigured => !string.IsNullOrWhiteSpace(Properties.Settings.Default.DiffToolBinaryPath) &&
+                                                        !string.IsNullOrWhiteSpace(Properties.Settings.Default.DiffToolArguments);
 
         public bool CanNavigateBack => tsBack.Enabled;
 
         private static DataSet DdlSnapshotDiff(DateTime snapshotDateUTC, int databaseID)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.DDLSnapshotDiff_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("DatabaseID", databaseID);
-                var p = cmd.Parameters.AddWithValue("SnapshotDate", snapshotDateUTC);
-                p.DbType = DbType.DateTime2;
-                DataSet ds = new();
-                da.Fill(ds);
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.DDLSnapshotDiff_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("DatabaseID", databaseID);
+            var p = cmd.Parameters.AddWithValue("SnapshotDate", snapshotDateUTC);
+            p.DbType = DbType.DateTime2;
+            DataSet ds = new();
+            da.Fill(ds);
 
-                return ds;
-            }
+            return ds;
         }
 
         private void GvSnapshots_SelectionChanged(object sender, EventArgs e)
@@ -155,18 +151,16 @@ namespace DBADashGUI.Changes
 
         private DataTable DdlSnapshotInstanceSummary()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.DDLSnapshotInstanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                var dt = new DataTable();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.DDLSnapshotInstanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            var dt = new DataTable();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            return dt;
         }
 
         private void LoadInstanceSummary()
@@ -180,21 +174,19 @@ namespace DBADashGUI.Changes
 
         private DataTable GetDDLSnapshots(int pageNum)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.DDLSnapshots_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                cmd.Parameters.AddWithValue("InstanceGroupName", InstanceName);
-                cmd.Parameters.AddWithValue("PageSize", currentSummaryPage);
-                cmd.Parameters.AddWithValue("PageNumber", pageNum);
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.DDLSnapshots_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+            cmd.Parameters.AddWithValue("InstanceGroupName", InstanceName);
+            cmd.Parameters.AddWithValue("PageSize", currentSummaryPage);
+            cmd.Parameters.AddWithValue("PageNumber", pageNum);
 
-                var dt = new DataTable();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                return dt;
-            }
+            var dt = new DataTable();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            return dt;
         }
 
         private void LoadSnapshots(int pageNum = 1)
@@ -231,15 +223,6 @@ namespace DBADashGUI.Changes
             }
         }
 
-        private void TsSummaryPageSize_Validating(object sender, CancelEventArgs e)
-        {
-            _ = int.TryParse(tsSummaryPageSize.Text, out var i);
-            if (i <= 0)
-            {
-                tsSummaryPageSize.Text = currentSummaryPageSize.ToString();
-            }
-        }
-
         private void DgvInstanceSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0 || e.ColumnIndex != colInstance.Index) return;
@@ -257,18 +240,20 @@ namespace DBADashGUI.Changes
 
         private async void GvSnapshots_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0 && e.ColumnIndex == colDB.Index)
+            if (e.RowIndex < 0) return;
+
+            if (e.ColumnIndex == colDB.Index)
             {
                 var row = (DataRowView)gvSnapshots.Rows[e.RowIndex].DataBoundItem;
                 DatabaseID = (int)row["DatabaseID"];
                 RefreshData();
             }
-            else if (e.RowIndex >= 0 && e.ColumnIndex == colExport.Index)
+            else if (e.ColumnIndex == colExport.Index)
             {
                 var row = (DataRowView)gvSnapshots.Rows[e.RowIndex].DataBoundItem;
                 Export(row);
             }
-            else if (e.RowIndex >= 0 && e.ColumnIndex == colTriggerSnapshot.Index)
+            else if (e.ColumnIndex == colTriggerSnapshot.Index)
             {
                 var row = (DataRowView)gvSnapshots.Rows[e.RowIndex].DataBoundItem;
                 await TriggerSchemaSnapshot(row);
@@ -297,55 +282,49 @@ namespace DBADashGUI.Changes
             var db = (string)row["DB"];
             var snapshotDate = (DateTime)row["SnapshotDate"];
             using var ofd = new FolderBrowserDialog() { Description = "Select a folder" };
-            if (ofd.ShowDialog() == DialogResult.OK)
+            if (ofd.ShowDialog() != DialogResult.OK) return;
+            var folder = Path.Combine(ofd.SelectedPath, InstanceName + "_" + db + "_" + snapshotDate.ToString("yyyyMMdd_HHmmss"));
+            Directory.CreateDirectory(folder);
+            try
             {
-                var folder = Path.Combine(ofd.SelectedPath, InstanceName + "_" + db + "_" + snapshotDate.ToString("yyyyMMdd_HHmmss"));
-                Directory.CreateDirectory(folder);
-                try
+                ExportSchema(folder, dbid, snapshotDate);
+                MessageBox.Show("Export Completed", "Export", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Process.Start(new ProcessStartInfo()
                 {
-                    ExportSchema(folder, dbid, snapshotDate);
-                    MessageBox.Show("Export Completed", "Export", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
-                    {
-                        FileName = folder,
-                        UseShellExecute = true,
-                        Verb = "open"
-                    });
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Export", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                    FileName = folder,
+                    UseShellExecute = true,
+                    Verb = "open"
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Export", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private static void ExportSchema(string folder, int DBID, DateTime SnapshotDate)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.DBSchemaAtDate_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = 300 })
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.DBSchemaAtDate_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = 300 };
+            cn.Open();
+            cmd.Parameters.AddWithValue("DBID", DBID);
+            var pSnapshotDate = cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
+            pSnapshotDate.SqlDbType = SqlDbType.DateTime2;
+            using var rdr = cmd.ExecuteReader();
+            while (rdr.Read())
             {
-                cn.Open();
-                cmd.Parameters.AddWithValue("DBID", DBID);
-                var pSnapshotDate = cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
-                pSnapshotDate.SqlDbType = SqlDbType.DateTime2;
-                using (var rdr = cmd.ExecuteReader())
+                var schema = (string)rdr["SchemaName"];
+                var name = (string)rdr["ObjectName"];
+                var objType = (string)rdr["TypeDescription"];
+                var subFolder = Path.Combine(Path.Combine(folder, Common.StripInvalidFileNameChars(schema)), objType);
+                var filePath = Path.Combine(subFolder, Common.StripInvalidFileNameChars(name) + ".sql");
+                if (!Directory.Exists(subFolder))
                 {
-                    while (rdr.Read())
-                    {
-                        var schema = (string)rdr["SchemaName"];
-                        var name = (string)rdr["ObjectName"];
-                        var objType = (string)rdr["TypeDescription"];
-                        var subFolder = Path.Combine(Path.Combine(folder, Common.StripInvalidFileNameChars(schema)), objType);
-                        var filePath = Path.Combine(subFolder, Common.StripInvalidFileNameChars(name) + ".sql");
-                        if (!Directory.Exists(subFolder))
-                        {
-                            Directory.CreateDirectory(subFolder);
-                        }
-                        var bDDL = (byte[])rdr["DDL"];
-                        var sql = SMOBaseClass.Unzip(bDDL);
-                        File.WriteAllText(filePath, sql);
-                    }
+                    Directory.CreateDirectory(subFolder);
                 }
+                var bDDL = (byte[])rdr["DDL"];
+                var sql = SMOBaseClass.Unzip(bDDL);
+                File.WriteAllText(filePath, sql);
             }
         }
 
