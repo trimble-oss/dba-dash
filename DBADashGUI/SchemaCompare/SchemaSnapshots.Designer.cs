@@ -1,4 +1,6 @@
-﻿namespace DBADashGUI.Changes
+﻿using DBADashGUI.CustomReports;
+
+namespace DBADashGUI.Changes
 {
     partial class SchemaSnapshots
     {
@@ -35,7 +37,7 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             splitSnapshotSummary = new System.Windows.Forms.SplitContainer();
-            gvSnapshots = new System.Windows.Forms.DataGridView();
+            gvSnapshots = new DBADashDataGridView();
             dataGridViewTextBoxColumn14 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colDB = new System.Windows.Forms.DataGridViewLinkColumn();
             SnapshotDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -54,8 +56,8 @@
             toolStripLabel3 = new System.Windows.Forms.ToolStripLabel();
             tsSummaryPageSize = new System.Windows.Forms.ToolStripComboBox();
             lblStatus = new System.Windows.Forms.ToolStripLabel();
-            gvSnapshotsDetail = new System.Windows.Forms.DataGridView();
-            dgvInstanceSummary = new System.Windows.Forms.DataGridView();
+            gvSnapshotsDetail = new DBADashDataGridView();
+            dgvInstanceSummary = new DBADashDataGridView();
             colInstance = new System.Windows.Forms.DataGridViewLinkColumn();
             colLastUpdated = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colLastValidated = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -668,8 +670,8 @@
         private System.Windows.Forms.ToolStripButton tsSummaryNext;
         private System.Windows.Forms.ToolStripLabel toolStripLabel3;
         private System.Windows.Forms.ToolStripComboBox tsSummaryPageSize;
-        private System.Windows.Forms.DataGridView gvSnapshots;
-        private System.Windows.Forms.DataGridView gvSnapshotsDetail;
+        private DBADashDataGridView gvSnapshots;
+        private DBADashDataGridView gvSnapshotsDetail;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
@@ -681,7 +683,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn9;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn10;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn11;
-        private System.Windows.Forms.DataGridView dgvInstanceSummary;
+        private DBADashDataGridView dgvInstanceSummary;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn12;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn13;
         private System.Windows.Forms.ToolStrip toolStrip1;

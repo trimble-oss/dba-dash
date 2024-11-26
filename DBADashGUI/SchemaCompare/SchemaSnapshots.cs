@@ -64,7 +64,7 @@ namespace DBADashGUI.Changes
 
             var ds = DdlSnapshotDiff(snapshotDateUTC, databaseID);
             gvSnapshotsDetail.AutoGenerateColumns = false;
-            gvSnapshotsDetail.DataSource = ds.Tables[0];
+            gvSnapshotsDetail.DataSource = new DataView(ds.Tables[0]);
             gvSnapshotsDetail.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
@@ -174,7 +174,7 @@ namespace DBADashGUI.Changes
             splitSnapshotSummary.Visible = false;
             dgvInstanceSummary.Visible = true;
             var dt = DdlSnapshotInstanceSummary();
-            dgvInstanceSummary.DataSource = dt;
+            dgvInstanceSummary.DataSource = new DataView(dt);
             dgvInstanceSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
@@ -205,7 +205,7 @@ namespace DBADashGUI.Changes
             currentSummaryPage = int.Parse(tsSummaryPageSize.Text);
             var dt = GetDDLSnapshots(pageNum);
             gvSnapshots.AutoGenerateColumns = false;
-            gvSnapshots.DataSource = dt;
+            gvSnapshots.DataSource = new DataView(dt);
             gvSnapshots.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             tsSummaryPageNum.Text = "Page " + pageNum;
             tsSummaryBack.Enabled = (pageNum > 1);
