@@ -94,8 +94,8 @@ namespace DBADashGUI.Performance
                                                                         new DataGridViewTextBoxColumn()  { Name= "Total Duration (ms/sec)", DataPropertyName = "duration_ms_per_sec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.####" } },
                                                                         new DataGridViewTextBoxColumn()  { Name = "Avg Duration (sec)", DataPropertyName = "avg_duration_sec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.000" } },
                                                                         new DataGridViewTextBoxColumn()  { Name = "Executions", Visible=false, DataPropertyName = "execution_count" },
-                                                                        new DataGridViewTextBoxColumn()  { Name = "Executions/min", DataPropertyName = "execs_per_min", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.###"} },
-                                                                        new DataGridViewTextBoxColumn()  { Name = "Max Executions/min", DataPropertyName = "max_execs_per_min", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.###"} },
+                                                                        new DataGridViewTextBoxColumn()  { Name = "Executions /min", DataPropertyName = "execs_per_min", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.###"} },
+                                                                        new DataGridViewTextBoxColumn()  { Name = "Max Executions /min", DataPropertyName = "max_execs_per_min", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.###"} },
                                                                         new DataGridViewTextBoxColumn()  { Name = "Total CPU (sec)",Visible=false, DataPropertyName = "total_cpu_sec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.###" } },
                                                                         new DataGridViewTextBoxColumn()  { Name = "Total CPU (ms/sec)", DataPropertyName = "cpu_ms_per_sec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.###" } },
                                                                         new DataGridViewTextBoxColumn()  { Name = "Avg CPU (sec)", DataPropertyName = "avg_cpu_sec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.###" } },
@@ -193,6 +193,7 @@ namespace DBADashGUI.Performance
                 tsCompare.Font = new Font(tsCompare.Font, HasCompare ? FontStyle.Bold : FontStyle.Regular);
                 dgv.DataSource = new DataView(dt, filter, "total_duration_sec DESC", DataViewRowState.CurrentRows);
                 dgv.Columns.AddRange(Columns.ToArray());
+                dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
                 dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 dgv.ApplyTheme();
                 if (splitContainer1.Panel1Collapsed == false)

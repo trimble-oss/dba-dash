@@ -32,7 +32,6 @@ namespace DBADashGUI.LastGoodCheckDB
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LastGoodCheckDBControl));
             dgvLastGoodCheckDB = new DBADashDataGridView();
             Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -47,13 +46,13 @@ namespace DBADashGUI.LastGoodCheckDB
             tsCopy = new System.Windows.Forms.ToolStripButton();
             tsExcel = new System.Windows.Forms.ToolStripButton();
             statusFilterToolStrip1 = new StatusFilterToolStrip();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
             tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
             configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsTrigger = new System.Windows.Forms.ToolStripButton();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
-            tsClearFilter = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)dgvLastGoodCheckDB).BeginInit();
             toolStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
@@ -66,7 +65,7 @@ namespace DBADashGUI.LastGoodCheckDB
             dgvLastGoodCheckDB.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -74,33 +73,24 @@ namespace DBADashGUI.LastGoodCheckDB
             dgvLastGoodCheckDB.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgvLastGoodCheckDB.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvLastGoodCheckDB.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, Database, LastGoodCheckDbTime, DaysSinceLastGoodCheckDB, colCreateDate, ExcludedFromCheck, Configure });
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgvLastGoodCheckDB.DefaultCellStyle = dataGridViewCellStyle2;
             dgvLastGoodCheckDB.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvLastGoodCheckDB.EnableHeadersVisualStyles = false;
-            dgvLastGoodCheckDB.Location = new System.Drawing.Point(0, 27);
+            dgvLastGoodCheckDB.Location = new System.Drawing.Point(0, 31);
             dgvLastGoodCheckDB.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvLastGoodCheckDB.Name = "dgvLastGoodCheckDB";
             dgvLastGoodCheckDB.ReadOnly = true;
             dgvLastGoodCheckDB.ResultSetID = 0;
             dgvLastGoodCheckDB.ResultSetName = null;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvLastGoodCheckDB.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvLastGoodCheckDB.RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
             dgvLastGoodCheckDB.RowHeadersVisible = false;
             dgvLastGoodCheckDB.RowHeadersWidth = 51;
-            dgvLastGoodCheckDB.Size = new System.Drawing.Size(1250, 300);
+            dgvLastGoodCheckDB.Size = new System.Drawing.Size(1250, 296);
             dgvLastGoodCheckDB.TabIndex = 0;
             dgvLastGoodCheckDB.CellContentClick += DgvLastGoodCheckDB_CellContentClick;
             dgvLastGoodCheckDB.RowsAdded += DgvLastGoodCheckDB_RowsAdded;
@@ -162,6 +152,7 @@ namespace DBADashGUI.LastGoodCheckDB
             // Configure
             // 
             Configure.HeaderText = "Configure";
+            Configure.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             Configure.MinimumWidth = 6;
             Configure.Name = "Configure";
             Configure.ReadOnly = true;
@@ -175,7 +166,7 @@ namespace DBADashGUI.LastGoodCheckDB
             toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, statusFilterToolStrip1, tsClearFilter, tsConfigure, tsTrigger });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new System.Drawing.Size(1250, 27);
+            toolStrip1.Size = new System.Drawing.Size(1250, 31);
             toolStrip1.TabIndex = 4;
             toolStrip1.Text = "toolStrip1";
             // 
@@ -185,7 +176,7 @@ namespace DBADashGUI.LastGoodCheckDB
             tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsRefresh.Name = "tsRefresh";
-            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Size = new System.Drawing.Size(29, 28);
             tsRefresh.Text = "Refresh";
             tsRefresh.Click += TsRefresh_Click;
             // 
@@ -195,7 +186,7 @@ namespace DBADashGUI.LastGoodCheckDB
             tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCopy.Name = "tsCopy";
-            tsCopy.Size = new System.Drawing.Size(29, 24);
+            tsCopy.Size = new System.Drawing.Size(29, 28);
             tsCopy.Text = "Copy";
             tsCopy.Click += TsCopy_Click;
             // 
@@ -205,7 +196,7 @@ namespace DBADashGUI.LastGoodCheckDB
             tsExcel.Image = Properties.Resources.excel16x16;
             tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExcel.Name = "tsExcel";
-            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Size = new System.Drawing.Size(29, 28);
             tsExcel.Text = "Export Excel";
             tsExcel.Click += TsExcel_Click;
             // 
@@ -224,11 +215,20 @@ namespace DBADashGUI.LastGoodCheckDB
             statusFilterToolStrip1.NAVisible = true;
             statusFilterToolStrip1.OK = true;
             statusFilterToolStrip1.OKVisible = true;
-            statusFilterToolStrip1.Size = new System.Drawing.Size(67, 24);
+            statusFilterToolStrip1.Size = new System.Drawing.Size(67, 28);
             statusFilterToolStrip1.Text = "ALL";
             statusFilterToolStrip1.Warning = true;
             statusFilterToolStrip1.WarningVisible = true;
             statusFilterToolStrip1.UserChangedStatusFilter += Status_Selected;
+            // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Image = Properties.Resources.Filter_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 28);
+            tsClearFilter.Text = "Clear Filter";
             // 
             // tsConfigure
             // 
@@ -237,7 +237,7 @@ namespace DBADashGUI.LastGoodCheckDB
             tsConfigure.Image = Properties.Resources.SettingsOutline_16x;
             tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsConfigure.Name = "tsConfigure";
-            tsConfigure.Size = new System.Drawing.Size(34, 24);
+            tsConfigure.Size = new System.Drawing.Size(34, 28);
             tsConfigure.Text = "Configure";
             // 
             // configureInstanceThresholdsToolStripMenuItem
@@ -260,7 +260,7 @@ namespace DBADashGUI.LastGoodCheckDB
             tsTrigger.Image = Properties.Resources.ProjectSystemModelRefresh_16x;
             tsTrigger.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsTrigger.Name = "tsTrigger";
-            tsTrigger.Size = new System.Drawing.Size(151, 24);
+            tsTrigger.Size = new System.Drawing.Size(151, 28);
             tsTrigger.Text = "Trigger Collection";
             tsTrigger.Visible = false;
             tsTrigger.Click += TsTrigger_Click;
@@ -279,15 +279,6 @@ namespace DBADashGUI.LastGoodCheckDB
             // 
             lblStatus.Name = "lblStatus";
             lblStatus.Size = new System.Drawing.Size(0, 16);
-            // 
-            // tsClearFilter
-            // 
-            tsClearFilter.Enabled = false;
-            tsClearFilter.Image = Properties.Resources.Filter_16x;
-            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsClearFilter.Name = "tsClearFilter";
-            tsClearFilter.Size = new System.Drawing.Size(104, 24);
-            tsClearFilter.Text = "Clear Filter";
             // 
             // LastGoodCheckDBControl
             // 

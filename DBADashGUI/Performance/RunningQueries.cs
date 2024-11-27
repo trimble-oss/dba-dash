@@ -773,7 +773,8 @@ namespace DBADashGUI.Performance
                 }
             );
             dgv.DataSource = new DataView(dt);
-            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
+            dgv.AutoResizeColumnsWithMaxColumnWidth();
         }
 
         private static void ApplyTableModifications(DataTable dt)
@@ -852,15 +853,8 @@ namespace DBADashGUI.Performance
                 .Any(row => (row["context_info"] as string ?? "0x") != "0x");
             dgv.Columns.AddRange(RunningQueryColumns);
             dgv.DataSource = source;
-            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCellsExceptHeader);
-            dgv.Columns["colBatchText"].Width = 200;
-            dgv.Columns["colText"].Width = 200;
-            dgv.Columns["colTopSessionWaits"].Width = 200;
-            dgv.Columns["colQueryPlan"].Width = 90;
-            dgv.Columns["colSQLHandle"].Width = 70;
-            dgv.Columns["colPlanHandle"].Width = 70;
-            dgv.Columns["colQueryHash"].Width = 70;
-            dgv.Columns["colQueryPlanHash"].Width = 70;
+            dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
+            dgv.AutoResizeColumnsWithMaxColumnWidth();
             tsGroupBy.Enabled = dgv.Rows.Count > 1;
             tsBlockingFilter.Visible = SessionID == 0 && JobId == Guid.Empty;
         }

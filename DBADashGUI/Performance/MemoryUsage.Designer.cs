@@ -32,331 +32,400 @@ namespace DBADashGUI.Performance
         /// </summary>
         private void InitializeComponent()
         {
-            this.dgv = new DBADashDataGridView();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.chartClerk = new DBADashGUI.Performance.CartesianChartWithDataTable();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsAgg = new System.Windows.Forms.ToolStripDropDownButton();
-            this.avgToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.minToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.maxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsPieChart = new System.Windows.Forms.ToolStripButton();
-            this.performanceCounters1 = new DBADashGUI.Performance.PerformanceCounters();
-            this.pieChart1 = new LiveCharts.WinForms.PieChart();
-            this.tab1 = new ThemedTabControl();
-            this.tabClerks = new System.Windows.Forms.TabPage();
-            this.tabConfig = new System.Windows.Forms.TabPage();
-            this.dgvConfig = new DBADashDataGridView();
-            this.tabCounters = new System.Windows.Forms.TabPage();
-            this.performanceCounterSummaryGrid1 = new DBADashGUI.Performance.PerformanceCounterSummaryGrid();
-            ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
-            this.toolStrip1.SuspendLayout();
-            this.tab1.SuspendLayout();
-            this.tabClerks.SuspendLayout();
-            this.tabConfig.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvConfig)).BeginInit();
-            this.tabCounters.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.performanceCounterSummaryGrid1)).BeginInit();
-            this.SuspendLayout();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            PerformanceCounterMetric performanceCounterMetric1 = new PerformanceCounterMetric();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            dgv = new DBADashDataGridView();
+            splitContainer1 = new System.Windows.Forms.SplitContainer();
+            chartClerk = new CartesianChartWithDataTable();
+            performanceCounters1 = new PerformanceCounters();
+            pieChart1 = new LiveCharts.WinForms.PieChart();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            tsRefresh = new System.Windows.Forms.ToolStripButton();
+            tsCopy = new System.Windows.Forms.ToolStripButton();
+            tsExcel = new System.Windows.Forms.ToolStripButton();
+            tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
+            tsAgg = new System.Windows.Forms.ToolStripDropDownButton();
+            avgToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            minToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            maxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsPieChart = new System.Windows.Forms.ToolStripButton();
+            tab1 = new ThemedTabControl();
+            tabClerks = new System.Windows.Forms.TabPage();
+            tabConfig = new System.Windows.Forms.TabPage();
+            dgvConfig = new DBADashDataGridView();
+            tabCounters = new System.Windows.Forms.TabPage();
+            performanceCounterSummaryGrid1 = new PerformanceCounterSummaryGrid();
+            ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
+            splitContainer1.Panel1.SuspendLayout();
+            splitContainer1.Panel2.SuspendLayout();
+            splitContainer1.SuspendLayout();
+            toolStrip1.SuspendLayout();
+            tab1.SuspendLayout();
+            tabClerks.SuspendLayout();
+            tabConfig.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvConfig).BeginInit();
+            tabCounters.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)performanceCounterSummaryGrid1).BeginInit();
+            SuspendLayout();
             // 
             // dgv
             // 
-            this.dgv.AllowUserToAddRows = false;
-            this.dgv.AllowUserToDeleteRows = false;
-            this.dgv.BackgroundColor = System.Drawing.Color.White;
-            this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(3, 4);
-            this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dgv.Name = "dgv";
-            this.dgv.ReadOnly = true;
-            this.dgv.RowHeadersVisible = false;
-            this.dgv.RowHeadersWidth = 51;
-            this.dgv.ShowCellToolTips = false;
-            this.dgv.Size = new System.Drawing.Size(870, 402);
-            this.dgv.TabIndex = 0;
-            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellContentClick);
-            this.dgv.CellMouseEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellMouseEnter);
+            dgv.AllowUserToAddRows = false;
+            dgv.AllowUserToDeleteRows = false;
+            dgv.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgv.DefaultCellStyle = dataGridViewCellStyle2;
+            dgv.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgv.EnableHeadersVisualStyles = false;
+            dgv.Location = new System.Drawing.Point(3, 4);
+            dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dgv.Name = "dgv";
+            dgv.ReadOnly = true;
+            dgv.ResultSetID = 0;
+            dgv.ResultSetName = null;
+            dgv.RowHeadersVisible = false;
+            dgv.RowHeadersWidth = 51;
+            dgv.ShowCellToolTips = false;
+            dgv.Size = new System.Drawing.Size(870, 392);
+            dgv.TabIndex = 0;
+            dgv.CellContentClick += Dgv_CellContentClick;
+            dgv.CellMouseEnter += Dgv_CellMouseEnter;
             // 
             // splitContainer1
             // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.splitContainer1.Name = "splitContainer1";
-            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitContainer1.Location = new System.Drawing.Point(0, 0);
+            splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            splitContainer1.Name = "splitContainer1";
+            splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.chartClerk);
-            this.splitContainer1.Panel1.Controls.Add(this.performanceCounters1);
-            this.splitContainer1.Panel1.Controls.Add(this.pieChart1);
-            this.splitContainer1.Panel1.Controls.Add(this.toolStrip1);
+            splitContainer1.Panel1.Controls.Add(chartClerk);
+            splitContainer1.Panel1.Controls.Add(performanceCounters1);
+            splitContainer1.Panel1.Controls.Add(pieChart1);
+            splitContainer1.Panel1.Controls.Add(toolStrip1);
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.tab1);
-            this.splitContainer1.Size = new System.Drawing.Size(884, 895);
-            this.splitContainer1.SplitterDistance = 447;
-            this.splitContainer1.SplitterWidth = 5;
-            this.splitContainer1.TabIndex = 1;
+            splitContainer1.Panel2.Controls.Add(tab1);
+            splitContainer1.Size = new System.Drawing.Size(884, 895);
+            splitContainer1.SplitterDistance = 447;
+            splitContainer1.SplitterWidth = 5;
+            splitContainer1.TabIndex = 1;
             // 
-            // chartHistory
+            // chartClerk
             // 
-            this.chartClerk.DefaultLineSmoothness = 0.5D;
-            this.chartClerk.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartClerk.Location = new System.Drawing.Point(0, 27);
-            this.chartClerk.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.chartClerk.Name = "chartHistory";
-            this.chartClerk.Size = new System.Drawing.Size(884, 420);
-            this.chartClerk.TabIndex = 1;
-            this.chartClerk.Text = "cartesianChartWithDataTable1";
-            this.chartClerk.Visible = false;
-            // 
-            // toolStrip1
-            // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsRefresh,
-            this.tsCopy,
-            this.tsExcel,
-            this.tsDateGroup,
-            this.tsAgg,
-            this.tsPieChart});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(884, 27);
-            this.toolStrip1.TabIndex = 2;
-            this.toolStrip1.Text = "toolStrip1";
-            // 
-            // tsRefresh
-            // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
-            // 
-            // tsCopy
-            // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
-            // 
-            // tsExcel
-            // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Excel";
-            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
-            // 
-            // tsDateGroup
-            // 
-            this.tsDateGroup.Image = global::DBADashGUI.Properties.Resources.Time_16x;
-            this.tsDateGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsDateGroup.Name = "tsDateGroup";
-            this.tsDateGroup.Size = new System.Drawing.Size(79, 24);
-            this.tsDateGroup.Text = "None";
-            this.tsDateGroup.ToolTipText = "Date Group";
-            // 
-            // tsAgg
-            // 
-            this.tsAgg.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.avgToolStripMenuItem,
-            this.minToolStripMenuItem,
-            this.maxToolStripMenuItem});
-            this.tsAgg.Image = global::DBADashGUI.Properties.Resources.AddComputedField_16x;
-            this.tsAgg.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsAgg.Name = "tsAgg";
-            this.tsAgg.Size = new System.Drawing.Size(71, 24);
-            this.tsAgg.Text = "Max";
-            this.tsAgg.ToolTipText = "Aggregate Type";
-            // 
-            // avgToolStripMenuItem
-            // 
-            this.avgToolStripMenuItem.Name = "avgToolStripMenuItem";
-            this.avgToolStripMenuItem.Size = new System.Drawing.Size(120, 26);
-            this.avgToolStripMenuItem.Text = "Avg";
-            this.avgToolStripMenuItem.Click += new System.EventHandler(this.TsAGG_Click);
-            // 
-            // minToolStripMenuItem
-            // 
-            this.minToolStripMenuItem.Name = "minToolStripMenuItem";
-            this.minToolStripMenuItem.Size = new System.Drawing.Size(120, 26);
-            this.minToolStripMenuItem.Text = "Min";
-            this.minToolStripMenuItem.Click += new System.EventHandler(this.TsAGG_Click);
-            // 
-            // maxToolStripMenuItem
-            // 
-            this.maxToolStripMenuItem.Checked = true;
-            this.maxToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.maxToolStripMenuItem.Name = "maxToolStripMenuItem";
-            this.maxToolStripMenuItem.Size = new System.Drawing.Size(120, 26);
-            this.maxToolStripMenuItem.Text = "Max";
-            this.maxToolStripMenuItem.Click += new System.EventHandler(this.TsAGG_Click);
-            // 
-            // tsPieChart
-            // 
-            this.tsPieChart.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsPieChart.Image = global::DBADashGUI.Properties.Resources.PieChartHS;
-            this.tsPieChart.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsPieChart.Name = "tsPieChart";
-            this.tsPieChart.Size = new System.Drawing.Size(29, 24);
-            this.tsPieChart.Text = "Pie Chart";
-            this.tsPieChart.Click += new System.EventHandler(this.TsPieChart_Click);
+            chartClerk.DefaultLineSmoothness = 0.5D;
+            chartClerk.Dock = System.Windows.Forms.DockStyle.Fill;
+            chartClerk.Location = new System.Drawing.Point(0, 31);
+            chartClerk.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            chartClerk.Name = "chartClerk";
+            chartClerk.Size = new System.Drawing.Size(884, 416);
+            chartClerk.TabIndex = 1;
+            chartClerk.Text = "cartesianChartWithDataTable1";
+            chartClerk.Visible = false;
             // 
             // performanceCounters1
             // 
-            this.performanceCounters1.CounterID = 0;
-            this.performanceCounters1.CounterName = null;
-            this.performanceCounters1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.performanceCounters1.FromDate = new System.DateTime(((long)(0)));
-            this.performanceCounters1.InstanceID = 0;
-            this.performanceCounters1.Location = new System.Drawing.Point(0, 27);
-            this.performanceCounters1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
-            this.performanceCounters1.Name = "performanceCounters1";
-            this.performanceCounters1.Size = new System.Drawing.Size(884, 420);
-            this.performanceCounters1.TabIndex = 3;
-            this.performanceCounters1.ToDate = new System.DateTime(((long)(0)));
-            this.performanceCounters1.Visible = false;
+            performanceCounters1.CloseVisible = false;
+            performanceCounters1.CounterID = 0;
+            performanceCounters1.CounterName = null;
+            performanceCounters1.Dock = System.Windows.Forms.DockStyle.Fill;
+            performanceCounters1.FromDate = new System.DateTime(0L);
+            performanceCounters1.InstanceID = 0;
+            performanceCounters1.Location = new System.Drawing.Point(0, 31);
+            performanceCounters1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            performanceCounterMetric1.AggregateType = IMetric.AggregateTypes.Avg;
+            performanceCounterMetric1.CounterID = 0;
+            performanceCounterMetric1.CounterName = null;
+            performanceCounters1.Metric = performanceCounterMetric1;
+            performanceCounters1.MoveUpVisible = false;
+            performanceCounters1.Name = "performanceCounters1";
+            performanceCounters1.Size = new System.Drawing.Size(884, 416);
+            performanceCounters1.TabIndex = 3;
+            performanceCounters1.ToDate = new System.DateTime(0L);
+            performanceCounters1.Visible = false;
             // 
             // pieChart1
             // 
-            this.pieChart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pieChart1.Location = new System.Drawing.Point(0, 27);
-            this.pieChart1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.pieChart1.Name = "pieChart1";
-            this.pieChart1.Size = new System.Drawing.Size(884, 420);
-            this.pieChart1.TabIndex = 0;
-            this.pieChart1.Text = "pieChart1";
+            pieChart1.Dock = System.Windows.Forms.DockStyle.Fill;
+            pieChart1.Location = new System.Drawing.Point(0, 31);
+            pieChart1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            pieChart1.Name = "pieChart1";
+            pieChart1.Size = new System.Drawing.Size(884, 416);
+            pieChart1.TabIndex = 0;
+            pieChart1.Text = "pieChart1";
+            // 
+            // toolStrip1
+            // 
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsDateGroup, tsAgg, tsPieChart });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            toolStrip1.Size = new System.Drawing.Size(884, 31);
+            toolStrip1.TabIndex = 2;
+            toolStrip1.Text = "toolStrip1";
+            // 
+            // tsRefresh
+            // 
+            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            tsRefresh.Name = "tsRefresh";
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Text = "Refresh";
+            tsRefresh.Click += TsRefresh_Click;
+            // 
+            // tsCopy
+            // 
+            tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopy.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            tsCopy.Name = "tsCopy";
+            tsCopy.Size = new System.Drawing.Size(29, 24);
+            tsCopy.Text = "Copy";
+            tsCopy.Click += TsCopy_Click;
+            // 
+            // tsExcel
+            // 
+            tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsExcel.Image = Properties.Resources.excel16x16;
+            tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcel.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            tsExcel.Name = "tsExcel";
+            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Text = "Excel";
+            tsExcel.Click += TsExcel_Click;
+            // 
+            // tsDateGroup
+            // 
+            tsDateGroup.Image = Properties.Resources.Time_16x;
+            tsDateGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsDateGroup.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            tsDateGroup.Name = "tsDateGroup";
+            tsDateGroup.Size = new System.Drawing.Size(79, 24);
+            tsDateGroup.Text = "None";
+            tsDateGroup.ToolTipText = "Date Group";
+            // 
+            // tsAgg
+            // 
+            tsAgg.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { avgToolStripMenuItem, minToolStripMenuItem, maxToolStripMenuItem });
+            tsAgg.Image = Properties.Resources.AddComputedField_16x;
+            tsAgg.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsAgg.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            tsAgg.Name = "tsAgg";
+            tsAgg.Size = new System.Drawing.Size(71, 24);
+            tsAgg.Text = "Max";
+            tsAgg.ToolTipText = "Aggregate Type";
+            // 
+            // avgToolStripMenuItem
+            // 
+            avgToolStripMenuItem.Name = "avgToolStripMenuItem";
+            avgToolStripMenuItem.Size = new System.Drawing.Size(120, 26);
+            avgToolStripMenuItem.Text = "Avg";
+            avgToolStripMenuItem.Click += TsAGG_Click;
+            // 
+            // minToolStripMenuItem
+            // 
+            minToolStripMenuItem.Name = "minToolStripMenuItem";
+            minToolStripMenuItem.Size = new System.Drawing.Size(120, 26);
+            minToolStripMenuItem.Text = "Min";
+            minToolStripMenuItem.Click += TsAGG_Click;
+            // 
+            // maxToolStripMenuItem
+            // 
+            maxToolStripMenuItem.Checked = true;
+            maxToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            maxToolStripMenuItem.Name = "maxToolStripMenuItem";
+            maxToolStripMenuItem.Size = new System.Drawing.Size(120, 26);
+            maxToolStripMenuItem.Text = "Max";
+            maxToolStripMenuItem.Click += TsAGG_Click;
+            // 
+            // tsPieChart
+            // 
+            tsPieChart.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsPieChart.Image = Properties.Resources.PieChartHS;
+            tsPieChart.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsPieChart.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            tsPieChart.Name = "tsPieChart";
+            tsPieChart.Size = new System.Drawing.Size(29, 24);
+            tsPieChart.Text = "Pie Chart";
+            tsPieChart.Click += TsPieChart_Click;
             // 
             // tab1
             // 
-            this.tab1.Controls.Add(this.tabClerks);
-            this.tab1.Controls.Add(this.tabConfig);
-            this.tab1.Controls.Add(this.tabCounters);
-            this.tab1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tab1.Location = new System.Drawing.Point(0, 0);
-            this.tab1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tab1.Name = "tab1";
-            this.tab1.SelectedIndex = 0;
-            this.tab1.Size = new System.Drawing.Size(884, 443);
-            this.tab1.TabIndex = 1;
-            this.tab1.SelectedIndexChanged += new System.EventHandler(this.Tab1_SelectedIndexChanged);
+            tab1.Controls.Add(tabClerks);
+            tab1.Controls.Add(tabConfig);
+            tab1.Controls.Add(tabCounters);
+            tab1.Dock = System.Windows.Forms.DockStyle.Fill;
+            tab1.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
+            tab1.Location = new System.Drawing.Point(0, 0);
+            tab1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            tab1.Name = "tab1";
+            tab1.Padding = new System.Drawing.Point(20, 8);
+            tab1.SelectedIndex = 0;
+            tab1.Size = new System.Drawing.Size(884, 443);
+            tab1.TabIndex = 1;
+            tab1.SelectedIndexChanged += Tab1_SelectedIndexChanged;
             // 
             // tabClerks
             // 
-            this.tabClerks.Controls.Add(this.dgv);
-            this.tabClerks.Location = new System.Drawing.Point(4, 29);
-            this.tabClerks.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabClerks.Name = "tabClerks";
-            this.tabClerks.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabClerks.Size = new System.Drawing.Size(876, 410);
-            this.tabClerks.TabIndex = 0;
-            this.tabClerks.Text = "Memory Clerks";
-            this.tabClerks.UseVisualStyleBackColor = true;
+            tabClerks.Controls.Add(dgv);
+            tabClerks.Location = new System.Drawing.Point(4, 39);
+            tabClerks.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            tabClerks.Name = "tabClerks";
+            tabClerks.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            tabClerks.Size = new System.Drawing.Size(876, 400);
+            tabClerks.TabIndex = 0;
+            tabClerks.Text = "Memory Clerks";
+            tabClerks.UseVisualStyleBackColor = true;
             // 
             // tabConfig
             // 
-            this.tabConfig.Controls.Add(this.dgvConfig);
-            this.tabConfig.Location = new System.Drawing.Point(4, 29);
-            this.tabConfig.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabConfig.Name = "tabConfig";
-            this.tabConfig.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabConfig.Size = new System.Drawing.Size(876, 410);
-            this.tabConfig.TabIndex = 1;
-            this.tabConfig.Text = "Config";
-            this.tabConfig.UseVisualStyleBackColor = true;
+            tabConfig.Controls.Add(dgvConfig);
+            tabConfig.Location = new System.Drawing.Point(4, 39);
+            tabConfig.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            tabConfig.Name = "tabConfig";
+            tabConfig.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            tabConfig.Size = new System.Drawing.Size(876, 400);
+            tabConfig.TabIndex = 1;
+            tabConfig.Text = "Config";
+            tabConfig.UseVisualStyleBackColor = true;
             // 
             // dgvConfig
             // 
-            this.dgvConfig.AllowUserToAddRows = false;
-            this.dgvConfig.AllowUserToDeleteRows = false;
-            this.dgvConfig.BackgroundColor = System.Drawing.Color.White;
-            this.dgvConfig.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvConfig.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvConfig.Location = new System.Drawing.Point(3, 4);
-            this.dgvConfig.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dgvConfig.Name = "dgvConfig";
-            this.dgvConfig.ReadOnly = true;
-            this.dgvConfig.RowHeadersVisible = false;
-            this.dgvConfig.RowHeadersWidth = 51;
-            this.dgvConfig.Size = new System.Drawing.Size(870, 402);
-            this.dgvConfig.TabIndex = 0;
+            dgvConfig.AllowUserToAddRows = false;
+            dgvConfig.AllowUserToDeleteRows = false;
+            dgvConfig.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle3.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvConfig.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dgvConfig.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvConfig.DefaultCellStyle = dataGridViewCellStyle4;
+            dgvConfig.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvConfig.EnableHeadersVisualStyles = false;
+            dgvConfig.Location = new System.Drawing.Point(3, 4);
+            dgvConfig.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dgvConfig.Name = "dgvConfig";
+            dgvConfig.ReadOnly = true;
+            dgvConfig.ResultSetID = 0;
+            dgvConfig.ResultSetName = null;
+            dgvConfig.RowHeadersVisible = false;
+            dgvConfig.RowHeadersWidth = 51;
+            dgvConfig.Size = new System.Drawing.Size(870, 392);
+            dgvConfig.TabIndex = 0;
             // 
             // tabCounters
             // 
-            this.tabCounters.Controls.Add(this.performanceCounterSummaryGrid1);
-            this.tabCounters.Location = new System.Drawing.Point(4, 29);
-            this.tabCounters.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabCounters.Name = "tabCounters";
-            this.tabCounters.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabCounters.Size = new System.Drawing.Size(876, 410);
-            this.tabCounters.TabIndex = 2;
-            this.tabCounters.Text = "Memory Performance Counters";
-            this.tabCounters.UseVisualStyleBackColor = true;
+            tabCounters.Controls.Add(performanceCounterSummaryGrid1);
+            tabCounters.Location = new System.Drawing.Point(4, 39);
+            tabCounters.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            tabCounters.Name = "tabCounters";
+            tabCounters.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            tabCounters.Size = new System.Drawing.Size(876, 400);
+            tabCounters.TabIndex = 2;
+            tabCounters.Text = "Memory Performance Counters";
+            tabCounters.UseVisualStyleBackColor = true;
             // 
             // performanceCounterSummaryGrid1
             // 
-            this.performanceCounterSummaryGrid1.AllowUserToAddRows = false;
-            this.performanceCounterSummaryGrid1.AllowUserToDeleteRows = false;
-            this.performanceCounterSummaryGrid1.BackgroundColor = System.Drawing.Color.White;
-            this.performanceCounterSummaryGrid1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.performanceCounterSummaryGrid1.Counters = null;
-            this.performanceCounterSummaryGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.performanceCounterSummaryGrid1.InstanceID = 0;
-            this.performanceCounterSummaryGrid1.Location = new System.Drawing.Point(3, 4);
-            this.performanceCounterSummaryGrid1.Name = "performanceCounterSummaryGrid1";
-            this.performanceCounterSummaryGrid1.ReadOnly = true;
-            this.performanceCounterSummaryGrid1.RowHeadersVisible = false;
-            this.performanceCounterSummaryGrid1.RowHeadersWidth = 51;
-            this.performanceCounterSummaryGrid1.RowTemplate.Height = 29;
-            this.performanceCounterSummaryGrid1.SearchText = null;
-            this.performanceCounterSummaryGrid1.Size = new System.Drawing.Size(870, 402);
-            this.performanceCounterSummaryGrid1.TabIndex = 0;
+            performanceCounterSummaryGrid1.AllowUserToAddRows = false;
+            performanceCounterSummaryGrid1.AllowUserToDeleteRows = false;
+            performanceCounterSummaryGrid1.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
+            performanceCounterSummaryGrid1.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            performanceCounterSummaryGrid1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
+            performanceCounterSummaryGrid1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            performanceCounterSummaryGrid1.Counters = null;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle6.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            performanceCounterSummaryGrid1.DefaultCellStyle = dataGridViewCellStyle6;
+            performanceCounterSummaryGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
+            performanceCounterSummaryGrid1.EnableHeadersVisualStyles = false;
+            performanceCounterSummaryGrid1.InstanceID = 0;
+            performanceCounterSummaryGrid1.Location = new System.Drawing.Point(3, 4);
+            performanceCounterSummaryGrid1.Name = "performanceCounterSummaryGrid1";
+            performanceCounterSummaryGrid1.ReadOnly = true;
+            performanceCounterSummaryGrid1.ResultSetID = 0;
+            performanceCounterSummaryGrid1.ResultSetName = null;
+            performanceCounterSummaryGrid1.RowHeadersVisible = false;
+            performanceCounterSummaryGrid1.RowHeadersWidth = 51;
+            performanceCounterSummaryGrid1.SearchText = null;
+            performanceCounterSummaryGrid1.Size = new System.Drawing.Size(870, 392);
+            performanceCounterSummaryGrid1.TabIndex = 0;
             // 
             // MemoryUsage
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.splitContainer1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "MemoryUsage";
-            this.Size = new System.Drawing.Size(884, 895);
-            this.Load += new System.EventHandler(this.MemoryUsage_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel1.PerformLayout();
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
-            this.splitContainer1.ResumeLayout(false);
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.tab1.ResumeLayout(false);
-            this.tabClerks.ResumeLayout(false);
-            this.tabConfig.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvConfig)).EndInit();
-            this.tabCounters.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.performanceCounterSummaryGrid1)).EndInit();
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            Controls.Add(splitContainer1);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "MemoryUsage";
+            Size = new System.Drawing.Size(884, 895);
+            Load += MemoryUsage_Load;
+            ((System.ComponentModel.ISupportInitialize)dgv).EndInit();
+            splitContainer1.Panel1.ResumeLayout(false);
+            splitContainer1.Panel1.PerformLayout();
+            splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
+            splitContainer1.ResumeLayout(false);
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            tab1.ResumeLayout(false);
+            tabClerks.ResumeLayout(false);
+            tabConfig.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvConfig).EndInit();
+            tabCounters.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)performanceCounterSummaryGrid1).EndInit();
+            ResumeLayout(false);
         }
 
         #endregion

@@ -36,10 +36,10 @@ namespace DBADashGUI.Checks
             dgv = new DBADashDataGridView();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
-            statusFilterToolStrip1 = new StatusFilterToolStrip();
             tsColumns = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
             tsExcel = new System.Windows.Forms.ToolStripButton();
+            statusFilterToolStrip1 = new StatusFilterToolStrip();
             tsClearFilter = new System.Windows.Forms.ToolStripButton();
             tsConfig = new System.Windows.Forms.ToolStripDropDownButton();
             configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -73,14 +73,14 @@ namespace DBADashGUI.Checks
             dgv.DefaultCellStyle = dataGridViewCellStyle2;
             dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             dgv.EnableHeadersVisualStyles = false;
-            dgv.Location = new System.Drawing.Point(0, 27);
+            dgv.Location = new System.Drawing.Point(0, 31);
             dgv.Name = "dgv";
             dgv.ReadOnly = true;
             dgv.ResultSetID = 0;
             dgv.ResultSetName = null;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
-            dgv.Size = new System.Drawing.Size(826, 458);
+            dgv.Size = new System.Drawing.Size(826, 454);
             dgv.TabIndex = 0;
             dgv.CellContentClick += Dgv_CellContentClick;
             dgv.RowsAdded += Dgv_RowsAdded;
@@ -91,7 +91,8 @@ namespace DBADashGUI.Checks
             toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsColumns, tsCopy, tsExcel, statusFilterToolStrip1, tsClearFilter, tsConfig });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new System.Drawing.Size(826, 27);
+            toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            toolStrip1.Size = new System.Drawing.Size(826, 31);
             toolStrip1.TabIndex = 1;
             toolStrip1.Text = "toolStrip1";
             // 
@@ -100,37 +101,18 @@ namespace DBADashGUI.Checks
             tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsRefresh.Name = "tsRefresh";
             tsRefresh.Size = new System.Drawing.Size(29, 24);
             tsRefresh.Text = "Refresh";
             tsRefresh.Click += TsRefresh_Click;
-            // 
-            // statusFilterToolStrip1
-            // 
-            statusFilterToolStrip1.Acknowledged = false;
-            statusFilterToolStrip1.AcknowledgedVisible = false;
-            statusFilterToolStrip1.Critical = true;
-            statusFilterToolStrip1.CriticalVisible = true;
-            statusFilterToolStrip1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
-            statusFilterToolStrip1.Font = new System.Drawing.Font("Segoe UI", 9F);
-            statusFilterToolStrip1.Image = (System.Drawing.Image)resources.GetObject("statusFilterToolStrip1.Image");
-            statusFilterToolStrip1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            statusFilterToolStrip1.NA = true;
-            statusFilterToolStrip1.Name = "statusFilterToolStrip1";
-            statusFilterToolStrip1.NAVisible = true;
-            statusFilterToolStrip1.OK = true;
-            statusFilterToolStrip1.OKVisible = true;
-            statusFilterToolStrip1.Size = new System.Drawing.Size(67, 24);
-            statusFilterToolStrip1.Text = "ALL";
-            statusFilterToolStrip1.Warning = true;
-            statusFilterToolStrip1.WarningVisible = true;
-            statusFilterToolStrip1.UserChangedStatusFilter += Filter_Click;
             // 
             // tsColumns
             // 
             tsColumns.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsColumns.Image = Properties.Resources.Column_16x;
             tsColumns.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsColumns.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsColumns.Name = "tsColumns";
             tsColumns.Size = new System.Drawing.Size(29, 24);
             tsColumns.Text = "Columns";
@@ -141,6 +123,7 @@ namespace DBADashGUI.Checks
             tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopy.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsCopy.Name = "tsCopy";
             tsCopy.Size = new System.Drawing.Size(29, 24);
             tsCopy.Text = "Copy";
@@ -151,16 +134,40 @@ namespace DBADashGUI.Checks
             tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsExcel.Image = Properties.Resources.excel16x16;
             tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcel.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsExcel.Name = "tsExcel";
             tsExcel.Size = new System.Drawing.Size(29, 24);
             tsExcel.Text = "Export to Excel";
             tsExcel.Click += TsExcel_Click;
+            // 
+            // statusFilterToolStrip1
+            // 
+            statusFilterToolStrip1.Acknowledged = false;
+            statusFilterToolStrip1.AcknowledgedVisible = false;
+            statusFilterToolStrip1.Critical = true;
+            statusFilterToolStrip1.CriticalVisible = true;
+            statusFilterToolStrip1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
+            statusFilterToolStrip1.Font = new System.Drawing.Font("Segoe UI", 0.140625F);
+            statusFilterToolStrip1.Image = (System.Drawing.Image)resources.GetObject("statusFilterToolStrip1.Image");
+            statusFilterToolStrip1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            statusFilterToolStrip1.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            statusFilterToolStrip1.NA = true;
+            statusFilterToolStrip1.Name = "statusFilterToolStrip1";
+            statusFilterToolStrip1.NAVisible = true;
+            statusFilterToolStrip1.OK = true;
+            statusFilterToolStrip1.OKVisible = true;
+            statusFilterToolStrip1.Size = new System.Drawing.Size(39, 24);
+            statusFilterToolStrip1.Text = "ALL";
+            statusFilterToolStrip1.Warning = true;
+            statusFilterToolStrip1.WarningVisible = true;
+            statusFilterToolStrip1.UserChangedStatusFilter += Filter_Click;
             // 
             // tsClearFilter
             // 
             tsClearFilter.Enabled = false;
             tsClearFilter.Image = Properties.Resources.Filter_16x;
             tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsClearFilter.Name = "tsClearFilter";
             tsClearFilter.Size = new System.Drawing.Size(104, 24);
             tsClearFilter.Text = "Clear Filter";
@@ -171,6 +178,7 @@ namespace DBADashGUI.Checks
             tsConfig.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { configureRootThresholdsToolStripMenuItem, configureInstanceThresholdsToolStripMenuItem, configureDatabaseThresholdsToolStripMenuItem });
             tsConfig.Image = Properties.Resources.SettingsOutline_16x;
             tsConfig.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsConfig.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsConfig.Name = "tsConfig";
             tsConfig.Size = new System.Drawing.Size(34, 24);
             tsConfig.Text = "Configure";

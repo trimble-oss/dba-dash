@@ -14,6 +14,7 @@ namespace DBADashGUI.DBFiles
         {
             InitializeComponent();
             dgvTempDB.RegisterClearFilter(tsClearFilter);
+            dgvTempDB.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
         }
 
         private List<int> InstanceIDs;
@@ -38,7 +39,7 @@ namespace DBADashGUI.DBFiles
             da.Fill(dt);
             dgvTempDB.AutoGenerateColumns = false;
             dgvTempDB.DataSource = new DataView(dt);
-            dgvTempDB.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgvTempDB.AutoResizeColumnsWithMaxColumnWidth();
         }
 
         private void TsCopy_Click(object sender, EventArgs e)

@@ -31,7 +31,6 @@ namespace DBADashGUI.CollectionDates
         private void InitializeComponent()
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CollectionErrors));
             dgvDBADashErrors = new DBADashDataGridView();
             Instance = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -78,7 +77,7 @@ namespace DBADashGUI.CollectionDates
             dgvDBADashErrors.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -86,22 +85,17 @@ namespace DBADashGUI.CollectionDates
             dgvDBADashErrors.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgvDBADashErrors.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvDBADashErrors.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, ErrorDate, ErrorSource, ErrorContext, ErrorMessage });
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgvDBADashErrors.DefaultCellStyle = dataGridViewCellStyle2;
             dgvDBADashErrors.Dock = System.Windows.Forms.DockStyle.Fill;
-            dgvDBADashErrors.Location = new System.Drawing.Point(0, 27);
+            dgvDBADashErrors.EnableHeadersVisualStyles = false;
+            dgvDBADashErrors.Location = new System.Drawing.Point(0, 31);
             dgvDBADashErrors.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvDBADashErrors.Name = "dgvDBADashErrors";
             dgvDBADashErrors.ReadOnly = true;
+            dgvDBADashErrors.ResultSetID = 0;
+            dgvDBADashErrors.ResultSetName = null;
             dgvDBADashErrors.RowHeadersVisible = false;
             dgvDBADashErrors.RowHeadersWidth = 51;
-            dgvDBADashErrors.Size = new System.Drawing.Size(829, 521);
+            dgvDBADashErrors.Size = new System.Drawing.Size(829, 517);
             dgvDBADashErrors.TabIndex = 2;
             dgvDBADashErrors.CellContentClick += DgvDBADashErrors_CellContentClick;
             // 
@@ -109,6 +103,7 @@ namespace DBADashGUI.CollectionDates
             // 
             Instance.DataPropertyName = "InstanceDisplayName";
             Instance.HeaderText = "Instance";
+            Instance.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             Instance.MinimumWidth = 6;
             Instance.Name = "Instance";
             Instance.ReadOnly = true;
@@ -129,6 +124,7 @@ namespace DBADashGUI.CollectionDates
             // 
             ErrorSource.DataPropertyName = "ErrorSource";
             ErrorSource.HeaderText = "Source";
+            ErrorSource.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             ErrorSource.MinimumWidth = 6;
             ErrorSource.Name = "ErrorSource";
             ErrorSource.ReadOnly = true;
@@ -140,6 +136,7 @@ namespace DBADashGUI.CollectionDates
             // 
             ErrorContext.DataPropertyName = "ErrorContext";
             ErrorContext.HeaderText = "Error Context";
+            ErrorContext.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             ErrorContext.MinimumWidth = 6;
             ErrorContext.Name = "ErrorContext";
             ErrorContext.ReadOnly = true;
@@ -152,6 +149,7 @@ namespace DBADashGUI.CollectionDates
             ErrorMessage.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
             ErrorMessage.DataPropertyName = "ErrorMessage";
             ErrorMessage.HeaderText = "Message";
+            ErrorMessage.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             ErrorMessage.MinimumWidth = 50;
             ErrorMessage.Name = "ErrorMessage";
             ErrorMessage.ReadOnly = true;
@@ -164,7 +162,7 @@ namespace DBADashGUI.CollectionDates
             toolStrip3.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefreshErrors, tsCopyErrors, tsExcel, tsErrorDays, tsAckErrors, tsFilter });
             toolStrip3.Location = new System.Drawing.Point(0, 0);
             toolStrip3.Name = "toolStrip3";
-            toolStrip3.Size = new System.Drawing.Size(829, 27);
+            toolStrip3.Size = new System.Drawing.Size(829, 31);
             toolStrip3.TabIndex = 3;
             toolStrip3.Text = "toolStrip3";
             // 
@@ -174,7 +172,7 @@ namespace DBADashGUI.CollectionDates
             tsRefreshErrors.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefreshErrors.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsRefreshErrors.Name = "tsRefreshErrors";
-            tsRefreshErrors.Size = new System.Drawing.Size(29, 24);
+            tsRefreshErrors.Size = new System.Drawing.Size(29, 28);
             tsRefreshErrors.Text = "Refresh";
             tsRefreshErrors.Click += TsRefreshErrors_Click;
             // 
@@ -184,7 +182,7 @@ namespace DBADashGUI.CollectionDates
             tsCopyErrors.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopyErrors.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCopyErrors.Name = "tsCopyErrors";
-            tsCopyErrors.Size = new System.Drawing.Size(29, 24);
+            tsCopyErrors.Size = new System.Drawing.Size(29, 28);
             tsCopyErrors.Text = "Copy";
             tsCopyErrors.Click += TsCopyErrors_Click;
             // 
@@ -194,7 +192,7 @@ namespace DBADashGUI.CollectionDates
             tsExcel.Image = Properties.Resources.excel16x16;
             tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExcel.Name = "tsExcel";
-            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Size = new System.Drawing.Size(29, 28);
             tsExcel.Text = "Export Excel";
             tsExcel.Click += TsExcel_Click;
             // 
@@ -205,7 +203,7 @@ namespace DBADashGUI.CollectionDates
             tsErrorDays.Image = Properties.Resources.Time_16x;
             tsErrorDays.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsErrorDays.Name = "tsErrorDays";
-            tsErrorDays.Size = new System.Drawing.Size(34, 24);
+            tsErrorDays.Size = new System.Drawing.Size(34, 28);
             tsErrorDays.Text = "toolStripDropDownButton1";
             // 
             // tsErrors1Day
@@ -263,7 +261,7 @@ namespace DBADashGUI.CollectionDates
             tsAckErrors.Image = (System.Drawing.Image)resources.GetObject("tsAckErrors.Image");
             tsAckErrors.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsAckErrors.Name = "tsAckErrors";
-            tsAckErrors.Size = new System.Drawing.Size(145, 24);
+            tsAckErrors.Size = new System.Drawing.Size(145, 28);
             tsAckErrors.Text = "Acknowledge Errors";
             tsAckErrors.Click += TsAckErrors_Click;
             // 
@@ -274,7 +272,7 @@ namespace DBADashGUI.CollectionDates
             tsFilter.Image = Properties.Resources.FilterDropdown_16x;
             tsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsFilter.Name = "tsFilter";
-            tsFilter.Size = new System.Drawing.Size(76, 24);
+            tsFilter.Size = new System.Drawing.Size(76, 28);
             tsFilter.Text = "Filter";
             // 
             // contextToolStripMenuItem

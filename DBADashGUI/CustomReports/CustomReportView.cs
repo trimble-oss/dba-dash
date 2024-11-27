@@ -546,6 +546,7 @@ namespace DBADashGUI.CustomReports
                     Dock = tables.Length == 1 ? DockStyle.Fill : DockStyle.Top, // Dock to the top of the panel
                     Tag = i,
                     Padding = new Padding(0, 0, 0, 5),
+                    Width = parentPanel.Width, // Needed to ensure custom auto sizing works correctly which takes into account the width of the grid (otherwise we would need control adding to parent panel before data binding)
                 };
                 var dgv = new DBADashDataGridView()
                 {
@@ -560,6 +561,7 @@ namespace DBADashGUI.CustomReports
                     RowHeadersVisible = false,
                     ResultSetID = i,
                     ResultSetName = Report.CustomReportResults[i].ResultName,
+                    Width = parentPanel.Width, // Needed to ensure custom auto sizing works correctly which takes into account the width of the grid (otherwise we would need control adding to parent panel before data binding)
                 };
                 dgv.RowsAdded += Dgv_RowsAdded;
                 dgv.CellContentClick += Dgv_CellContentClick;
@@ -646,10 +648,10 @@ namespace DBADashGUI.CustomReports
                         UpdateClearFilter();
                     };
                 }
-
                 i += 1;
             }
             parentPanel.Controls.AddRange(panels.OrderByDescending(p => (int)p.Tag!).Cast<Control>().ToArray());
+
             OnPostGridRefresh();
             previousSchema = currentSchema;
         }
@@ -858,21 +860,19 @@ namespace DBADashGUI.CustomReports
 
         private void SetColumnLayout(DBADashDataGridView dgv)
         {
-            if (!Report.CustomReportResults.TryGetValue(dgv.ResultSetID, out var value)) return;
-            const int maxWidth = 400;
-            if (value.ColumnLayout.Count > 0)
+            if (Report.CustomReportResults.TryGetValue(dgv.ResultSetID, out var value) && value.ColumnLayout.Count > 0)
             {
                 dgv.LoadColumnLayout(value.ColumnLayout);
+                if (value.ColumnLayout.All(col => col.Value.Width == 0))
+                {
+                    dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
+                    dgv.AutoResizeColumnsWithMaxColumnWidth();
+                }
             }
             else
             {
-                dgv.AutoResizeColumns();
-                // Ensure column size is not excessive
-                foreach (DataGridViewColumn column in dgv.Columns)
-                {
-                    if (column.Width <= maxWidth) continue;
-                    column.Width = maxWidth;
-                }
+                dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
+                dgv.AutoResizeColumnsWithMaxColumnWidth();
             }
         }
 

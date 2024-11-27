@@ -15,7 +15,10 @@ using static DBADashGUI.DBADashStatus;
 using LiveChartsCore.SkiaSharpView.SKCharts;
 using SkiaSharp;
 using System.IO;
+using DocumentFormat.OpenXml.Drawing.Charts;
+using DocumentFormat.OpenXml.Office.PowerPoint.Y2021.M06.Main;
 using LiveChartsCore.SkiaSharpView.WinForms;
+using DataTable = System.Data.DataTable;
 
 namespace DBADashGUI
 {
@@ -137,7 +140,10 @@ namespace DBADashGUI
                 {
                     var savedCol = savedCols.First(savedCol => savedCol.Key == col.Name);
                     col.Visible = savedCol.Value.Visible;
-                    col.Width = savedCol.Value.Width;
+                    if (savedCol.Value.Width > 0)
+                    {
+                        col.Width = savedCol.Value.Width;
+                    }
                     if (savedCol.Value.DisplayIndex >= 0 && savedCol.Value.DisplayIndex < dgv.Columns.Count)
                     {
                         col.DisplayIndex = savedCol.Value.DisplayIndex;
@@ -767,5 +773,27 @@ namespace DBADashGUI
 
             return firstNonNullValue?.GetType() ?? typeof(string);
         }
+
+        public static void ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing(this DataGridViewColumnCollection columns)
+        {
+            foreach (var col in columns.Cast<DataGridViewColumn>())
+            {
+                col.HeaderText = col.HeaderText.Replace(" ", "\n");
+            }
+        }
+
+        public static void ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing(this DataGridView dgv) =>
+            ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing(dgv.Columns);
+
+        public static void AutoResizeColumnsWithMaxColumnWidth(this DataGridView dgv, DataGridViewAutoSizeColumnsMode mode = DataGridViewAutoSizeColumnsMode.DisplayedCells, float maxPercentWidth = DefaultMaxColumnWidthPercent)
+        {
+            dgv.AutoResizeColumns(mode);
+            foreach (var col in dgv.Columns.Cast<DataGridViewColumn>().Where(c => c.Width > maxPercentWidth * dgv.Width))
+            {
+                col.Width = Convert.ToInt32(maxPercentWidth * dgv.Width);
+            }
+        }
+
+        private const float DefaultMaxColumnWidthPercent = 0.15f;
     }
 }

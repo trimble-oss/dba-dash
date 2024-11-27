@@ -47,19 +47,19 @@ namespace DBADashGUI.Performance
             },
             ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>()
             {
-                new("DB", new PersistedColumnLayout() { Width = 100, Visible = true }),
-                new("log_date", new PersistedColumnLayout() { Width = 160, Visible = true }),
-                new("log_type", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("query_id", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("plan_id", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("object_name", new PersistedColumnLayout() { Width = 180, Visible = true }),
-                new("query_sql_text", new PersistedColumnLayout() { Width = 250, Visible = true }),
-                new("query_hash", new PersistedColumnLayout() { Width = 160, Visible = true }),
-                new("query_plan_hash", new PersistedColumnLayout() { Width = 160, Visible = true }),
-                new("user_name", new PersistedColumnLayout() { Width = 100, Visible = true }),
-                new("notes", new PersistedColumnLayout() { Width = 250, Visible = true }),
-                new("status", new PersistedColumnLayout() { Width = 120, Visible = true }),
-                new("Undo", new PersistedColumnLayout() { Width = 120, Visible = true })
+                new("DB", new PersistedColumnLayout() { Visible = true }),
+                new("log_date", new PersistedColumnLayout() {  Visible = true }),
+                new("log_type", new PersistedColumnLayout() {  Visible = true }),
+                new("query_id", new PersistedColumnLayout() { Visible = true }),
+                new("plan_id", new PersistedColumnLayout() {  Visible = true }),
+                new("object_name", new PersistedColumnLayout() {  Visible = true }),
+                new("query_sql_text", new PersistedColumnLayout() {  Visible = true }),
+                new("query_hash", new PersistedColumnLayout() { Visible = true }),
+                new("query_plan_hash", new PersistedColumnLayout() { Visible = true }),
+                new("user_name", new PersistedColumnLayout() { Visible = true }),
+                new("notes", new PersistedColumnLayout() {  Visible = true }),
+                new("status", new PersistedColumnLayout() {  Visible = true }),
+                new("Undo", new PersistedColumnLayout() {  Visible = true })
             },
             LinkColumns = new Dictionary<string, LinkColumnInfo>
             {
@@ -126,23 +126,23 @@ namespace DBADashGUI.Performance
             },
             ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>()
             {
-                new("DB", new PersistedColumnLayout() { Width = 170, Visible = true }),
-                new("query_hash", new PersistedColumnLayout() { Width = 160, Visible = true }),
-                new("query_plan_hash", new PersistedColumnLayout() { Width = 160, Visible = true }),
-                new("query_id", new PersistedColumnLayout() { Width = 80, Visible = true }),
-                new("plan_id", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("object_id", new PersistedColumnLayout() { Width = 100, Visible = false }),
-                new("object_name", new PersistedColumnLayout() { Width = 180, Visible = true }),
-                new("query_sql_text", new PersistedColumnLayout() { Width = 250, Visible = true }),
-                new("num_plans", new PersistedColumnLayout() { Width = 60, Visible = true }),
-                new("plan_forcing_type_desc", new PersistedColumnLayout() { Width = 100, Visible = true }),
-                new("force_failure_count", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("last_force_failure_reason_desc", new PersistedColumnLayout() { Width = 100, Visible = true }),
-                new("last_execution_time_plan", new PersistedColumnLayout() { Width = 160, Visible = true }),
-                new("last_execution_time_query", new PersistedColumnLayout() { Width = 160, Visible = true }),
-                new("last_compile_start_time", new PersistedColumnLayout() { Width = 160, Visible = true }),
-                new("is_parallel_plan", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("query_parameterization_type_desc", new PersistedColumnLayout() { Width = 100, Visible = false })
+                new("DB", new PersistedColumnLayout() {  Visible = true }),
+                new("query_hash", new PersistedColumnLayout() {  Visible = true }),
+                new("query_plan_hash", new PersistedColumnLayout() {  Visible = true }),
+                new("query_id", new PersistedColumnLayout() {  Visible = true }),
+                new("plan_id", new PersistedColumnLayout() {  Visible = true }),
+                new("object_id", new PersistedColumnLayout() {  Visible = false }),
+                new("object_name", new PersistedColumnLayout() { Visible = true }),
+                new("query_sql_text", new PersistedColumnLayout() {  Visible = true }),
+                new("num_plans", new PersistedColumnLayout() {  Visible = true }),
+                new("plan_forcing_type_desc", new PersistedColumnLayout() {  Visible = true }),
+                new("force_failure_count", new PersistedColumnLayout() { Visible = true }),
+                new("last_force_failure_reason_desc", new PersistedColumnLayout() { Visible = true }),
+                new("last_execution_time_plan", new PersistedColumnLayout() {  Visible = true }),
+                new("last_execution_time_query", new PersistedColumnLayout() {  Visible = true }),
+                new("last_compile_start_time", new PersistedColumnLayout() {  Visible = true }),
+                new("is_parallel_plan", new PersistedColumnLayout() {  Visible = true }),
+                new("query_parameterization_type_desc", new PersistedColumnLayout() {  Visible = false })
             },
             CellHighlightingRules =
             {
@@ -250,6 +250,7 @@ namespace DBADashGUI.Performance
             dgv.DataSource = new DataView(dt);
             dgv.ApplyTheme();
             dgv.LoadColumnLayout(forcedPlansResult.ColumnLayout);
+            dgv.AutoResizeColumnsWithMaxColumnWidth();
             dgv.Columns["Unforce"]!.Visible = true;
             lblStatus.InvokeSetStatus("Completed", string.Empty, DashColors.Success);
             return Task.CompletedTask;
@@ -342,6 +343,7 @@ namespace DBADashGUI.Performance
                 dgvLog.LoadColumnLayout(logReport.ColumnLayout);
             }
             dgvLog.DataSource = new DataView(dt);
+            dgvLog.AutoResizeColumnsWithMaxColumnWidth();
             dgvLog.ApplyTheme();
         }
 

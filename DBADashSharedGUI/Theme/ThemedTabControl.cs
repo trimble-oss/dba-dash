@@ -1,4 +1,5 @@
-﻿using System.Runtime.Versioning;
+﻿using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace DBADashGUI.Theme
 {
@@ -9,18 +10,22 @@ namespace DBADashGUI.Theme
 
         public ThemedTabControl()
         {
-            SetStyle(ControlStyles.UserPaint, true);
+            this.DrawItem += ThemedTabControl_DrawItem;
+            this.DrawMode = TabDrawMode.OwnerDrawFixed;
+
+            this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
+            this.Padding = new(20, 8);
+            this.Invalidate();
         }
 
-        protected override void OnPaint(PaintEventArgs e)
+        private void ThemedTabControl_DrawItem(object? sender, DrawItemEventArgs e)
         {
-            // Draw the background of the TabControl
             e.Graphics.Clear(theme.TabBackColor);
-
+            var font = this.Font;
             // Draw each TabPage header
-            for (int i = 0; i < TabCount; i++)
+            for (var i = 0; i < TabCount; i++)
             {
-                Rectangle rect = GetTabRect(i);
+                var rect = GetTabRect(i);
 
                 var headerColor = theme.TabHeaderBackColor;
                 var textColor = theme.TabHeaderForeColor;
@@ -48,14 +53,9 @@ namespace DBADashGUI.Theme
                         LineAlignment = StringAlignment.Center
                     };
 
-                    e.Graphics.DrawString(TabPages[i].Text, Font, brush, rect, sf);
+                    TextRenderer.DrawText(e.Graphics, TabPages[i].Text, font, rect, theme.TabHeaderForeColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 }
             }
-        }
-
-        protected override void OnPaintBackground(PaintEventArgs e)
-        {
-            // Do nothing here to prevent flickering
         }
 
         public void ApplyTheme(BaseTheme theme)

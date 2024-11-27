@@ -32,8 +32,8 @@ namespace DBADashGUI.Changes
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SchemaSnapshots));
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             splitSnapshotSummary = new System.Windows.Forms.SplitContainer();
@@ -57,6 +57,12 @@ namespace DBADashGUI.Changes
             tsSummaryPageSize = new System.Windows.Forms.ToolStripComboBox();
             lblStatus = new System.Windows.Forms.ToolStripLabel();
             gvSnapshotsDetail = new DBADashDataGridView();
+            colObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colSchemaName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colAction = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colView = new System.Windows.Forms.DataGridViewLinkColumn();
+            colDiff = new System.Windows.Forms.DataGridViewLinkColumn();
+            colExternalDiff = new System.Windows.Forms.DataGridViewLinkColumn();
             dgvInstanceSummary = new DBADashDataGridView();
             colInstance = new System.Windows.Forms.DataGridViewLinkColumn();
             colLastUpdated = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -78,12 +84,6 @@ namespace DBADashGUI.Changes
             dataGridViewTextBoxColumn11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn13 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colSchemaName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colAction = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colView = new System.Windows.Forms.DataGridViewLinkColumn();
-            colDiff = new System.Windows.Forms.DataGridViewLinkColumn();
-            colExternalDiff = new System.Windows.Forms.DataGridViewLinkColumn();
             ((System.ComponentModel.ISupportInitialize)splitSnapshotSummary).BeginInit();
             splitSnapshotSummary.Panel1.SuspendLayout();
             splitSnapshotSummary.Panel2.SuspendLayout();
@@ -123,39 +123,33 @@ namespace DBADashGUI.Changes
             gvSnapshots.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             gvSnapshots.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            gvSnapshots.ColumnHeadersHeight = 29;
+            gvSnapshots.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             gvSnapshots.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { dataGridViewTextBoxColumn14, colDB, SnapshotDate, ValidatedDate, ValidForDays, DaysSinceValidation, colCreated, Modified, Dropped, colExport, colTriggerSnapshot });
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            gvSnapshots.DefaultCellStyle = dataGridViewCellStyle2;
             gvSnapshots.Dock = System.Windows.Forms.DockStyle.Fill;
+            gvSnapshots.EnableHeadersVisualStyles = false;
             gvSnapshots.Location = new System.Drawing.Point(0, 0);
             gvSnapshots.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             gvSnapshots.Name = "gvSnapshots";
             gvSnapshots.ReadOnly = true;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            gvSnapshots.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            gvSnapshots.ResultSetID = 0;
+            gvSnapshots.ResultSetName = null;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            gvSnapshots.RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
             gvSnapshots.RowHeadersVisible = false;
             gvSnapshots.RowHeadersWidth = 51;
             gvSnapshots.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            gvSnapshots.Size = new System.Drawing.Size(2019, 748);
+            gvSnapshots.Size = new System.Drawing.Size(2019, 745);
             gvSnapshots.TabIndex = 0;
             gvSnapshots.CellContentClick += GvSnapshots_CellContentClick;
             gvSnapshots.SelectionChanged += GvSnapshots_SelectionChanged;
@@ -173,6 +167,7 @@ namespace DBADashGUI.Changes
             // 
             colDB.DataPropertyName = "DB";
             colDB.HeaderText = "DB";
+            colDB.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             colDB.MinimumWidth = 6;
             colDB.Name = "colDB";
             colDB.ReadOnly = true;
@@ -246,6 +241,7 @@ namespace DBADashGUI.Changes
             // colExport
             // 
             colExport.HeaderText = "Export";
+            colExport.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             colExport.MinimumWidth = 6;
             colExport.Name = "colExport";
             colExport.ReadOnly = true;
@@ -257,6 +253,7 @@ namespace DBADashGUI.Changes
             // colTriggerSnapshot
             // 
             colTriggerSnapshot.HeaderText = "Trigger Snapshot";
+            colTriggerSnapshot.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             colTriggerSnapshot.MinimumWidth = 6;
             colTriggerSnapshot.Name = "colTriggerSnapshot";
             colTriggerSnapshot.ReadOnly = true;
@@ -269,9 +266,10 @@ namespace DBADashGUI.Changes
             toolStrip2.Dock = System.Windows.Forms.DockStyle.Bottom;
             toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
             toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsSummaryBack, tsSummaryPageNum, tsSummaryNext, toolStripLabel3, tsSummaryPageSize, lblStatus });
-            toolStrip2.Location = new System.Drawing.Point(0, 748);
+            toolStrip2.Location = new System.Drawing.Point(0, 745);
             toolStrip2.Name = "toolStrip2";
-            toolStrip2.Size = new System.Drawing.Size(2019, 28);
+            toolStrip2.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            toolStrip2.Size = new System.Drawing.Size(2019, 31);
             toolStrip2.TabIndex = 2;
             toolStrip2.Text = "toolStrip2";
             // 
@@ -280,15 +278,17 @@ namespace DBADashGUI.Changes
             tsSummaryBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsSummaryBack.Image = (System.Drawing.Image)resources.GetObject("tsSummaryBack.Image");
             tsSummaryBack.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsSummaryBack.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsSummaryBack.Name = "tsSummaryBack";
-            tsSummaryBack.Size = new System.Drawing.Size(29, 25);
+            tsSummaryBack.Size = new System.Drawing.Size(29, 24);
             tsSummaryBack.Text = "Previous";
             tsSummaryBack.Click += TsSummaryBack_Click;
             // 
             // tsSummaryPageNum
             // 
+            tsSummaryPageNum.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsSummaryPageNum.Name = "tsSummaryPageNum";
-            tsSummaryPageNum.Size = new System.Drawing.Size(53, 25);
+            tsSummaryPageNum.Size = new System.Drawing.Size(53, 24);
             tsSummaryPageNum.Text = "Page 1";
             // 
             // tsSummaryNext
@@ -296,59 +296,57 @@ namespace DBADashGUI.Changes
             tsSummaryNext.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsSummaryNext.Image = (System.Drawing.Image)resources.GetObject("tsSummaryNext.Image");
             tsSummaryNext.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsSummaryNext.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsSummaryNext.Name = "tsSummaryNext";
-            tsSummaryNext.Size = new System.Drawing.Size(29, 25);
+            tsSummaryNext.Size = new System.Drawing.Size(29, 24);
             tsSummaryNext.Text = "Next";
             tsSummaryNext.Click += TsSummaryNext_Click;
             // 
             // toolStripLabel3
             // 
+            toolStripLabel3.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             toolStripLabel3.Name = "toolStripLabel3";
-            toolStripLabel3.Size = new System.Drawing.Size(75, 25);
+            toolStripLabel3.Size = new System.Drawing.Size(75, 24);
             toolStripLabel3.Text = "Page Size:";
             // 
             // tsSummaryPageSize
             // 
             tsSummaryPageSize.Items.AddRange(new object[] { "100", "200", "500", "1000", "5000" });
             tsSummaryPageSize.Name = "tsSummaryPageSize";
-            tsSummaryPageSize.Size = new System.Drawing.Size(121, 28);
+            tsSummaryPageSize.Size = new System.Drawing.Size(121, 31);
             tsSummaryPageSize.Text = "100";
             tsSummaryPageSize.Validated += TsSummaryPageSize_Validated;
             // 
             // lblStatus
             // 
             lblStatus.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            lblStatus.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             lblStatus.Name = "lblStatus";
-            lblStatus.Size = new System.Drawing.Size(0, 25);
+            lblStatus.Size = new System.Drawing.Size(0, 24);
             // 
             // gvSnapshotsDetail
             // 
             gvSnapshotsDetail.AllowUserToAddRows = false;
             gvSnapshotsDetail.AllowUserToDeleteRows = false;
             gvSnapshotsDetail.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            gvSnapshotsDetail.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle4;
-            gvSnapshotsDetail.ColumnHeadersHeight = 29;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            gvSnapshotsDetail.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            gvSnapshotsDetail.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             gvSnapshotsDetail.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colObjectName, colSchemaName, colAction, colView, colDiff, colExternalDiff });
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            gvSnapshotsDetail.DefaultCellStyle = dataGridViewCellStyle5;
             gvSnapshotsDetail.Dock = System.Windows.Forms.DockStyle.Fill;
+            gvSnapshotsDetail.EnableHeadersVisualStyles = false;
             gvSnapshotsDetail.Location = new System.Drawing.Point(0, 0);
             gvSnapshotsDetail.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             gvSnapshotsDetail.Name = "gvSnapshotsDetail";
             gvSnapshotsDetail.ReadOnly = true;
+            gvSnapshotsDetail.ResultSetID = 0;
+            gvSnapshotsDetail.ResultSetName = null;
             gvSnapshotsDetail.RowHeadersVisible = false;
             gvSnapshotsDetail.RowHeadersWidth = 51;
             gvSnapshotsDetail.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
@@ -356,21 +354,103 @@ namespace DBADashGUI.Changes
             gvSnapshotsDetail.TabIndex = 0;
             gvSnapshotsDetail.CellContentClick += GvSnapshotsDetail_CellContentClick;
             // 
+            // colObjectName
+            // 
+            colObjectName.DataPropertyName = "ObjectName";
+            colObjectName.HeaderText = "Object Name";
+            colObjectName.MinimumWidth = 6;
+            colObjectName.Name = "colObjectName";
+            colObjectName.ReadOnly = true;
+            colObjectName.Width = 119;
+            // 
+            // colSchemaName
+            // 
+            colSchemaName.DataPropertyName = "SchemaName";
+            colSchemaName.HeaderText = "Schema Name";
+            colSchemaName.MinimumWidth = 6;
+            colSchemaName.Name = "colSchemaName";
+            colSchemaName.ReadOnly = true;
+            colSchemaName.Width = 129;
+            // 
+            // colAction
+            // 
+            colAction.DataPropertyName = "Action";
+            colAction.HeaderText = "Action";
+            colAction.MinimumWidth = 6;
+            colAction.Name = "colAction";
+            colAction.ReadOnly = true;
+            colAction.Width = 76;
+            // 
+            // colView
+            // 
+            colView.DataPropertyName = "newDDLID";
+            colView.HeaderText = "View";
+            colView.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            colView.MinimumWidth = 6;
+            colView.Name = "colView";
+            colView.ReadOnly = true;
+            colView.Text = "View";
+            colView.UseColumnTextForLinkValue = true;
+            colView.Width = 125;
+            // 
+            // colDiff
+            // 
+            colDiff.DataPropertyName = "OldDDLID";
+            colDiff.HeaderText = "Diff";
+            colDiff.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            colDiff.MinimumWidth = 6;
+            colDiff.Name = "colDiff";
+            colDiff.ReadOnly = true;
+            colDiff.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colDiff.Text = "Diff";
+            colDiff.UseColumnTextForLinkValue = true;
+            colDiff.Width = 125;
+            // 
+            // colExternalDiff
+            // 
+            colExternalDiff.HeaderText = "External Diff";
+            colExternalDiff.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            colExternalDiff.MinimumWidth = 6;
+            colExternalDiff.Name = "colExternalDiff";
+            colExternalDiff.ReadOnly = true;
+            colExternalDiff.Text = "External Diff";
+            colExternalDiff.UseColumnTextForLinkValue = true;
+            colExternalDiff.Width = 125;
+            // 
             // dgvInstanceSummary
             // 
             dgvInstanceSummary.AllowUserToAddRows = false;
             dgvInstanceSummary.AllowUserToDeleteRows = false;
             dgvInstanceSummary.BackgroundColor = System.Drawing.Color.White;
-            dgvInstanceSummary.ColumnHeadersHeight = 29;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvInstanceSummary.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle4;
+            dgvInstanceSummary.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvInstanceSummary.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colInstance, colLastUpdated, colLastValidated });
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvInstanceSummary.DefaultCellStyle = dataGridViewCellStyle5;
             dgvInstanceSummary.Dock = System.Windows.Forms.DockStyle.Fill;
-            dgvInstanceSummary.Location = new System.Drawing.Point(0, 27);
+            dgvInstanceSummary.EnableHeadersVisualStyles = false;
+            dgvInstanceSummary.Location = new System.Drawing.Point(0, 31);
             dgvInstanceSummary.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvInstanceSummary.Name = "dgvInstanceSummary";
             dgvInstanceSummary.ReadOnly = true;
+            dgvInstanceSummary.ResultSetID = 0;
+            dgvInstanceSummary.ResultSetName = null;
             dgvInstanceSummary.RowHeadersVisible = false;
             dgvInstanceSummary.RowHeadersWidth = 51;
-            dgvInstanceSummary.Size = new System.Drawing.Size(2019, 228);
+            dgvInstanceSummary.Size = new System.Drawing.Size(2019, 224);
             dgvInstanceSummary.TabIndex = 3;
             dgvInstanceSummary.CellContentClick += DgvInstanceSummary_CellContentClick;
             // 
@@ -378,6 +458,7 @@ namespace DBADashGUI.Changes
             // 
             colInstance.DataPropertyName = "InstanceGroupName";
             colInstance.HeaderText = "Instance";
+            colInstance.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             colInstance.MinimumWidth = 6;
             colInstance.Name = "colInstance";
             colInstance.ReadOnly = true;
@@ -409,7 +490,8 @@ namespace DBADashGUI.Changes
             toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsBack, tsTrigger });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new System.Drawing.Size(2019, 27);
+            toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            toolStrip1.Size = new System.Drawing.Size(2019, 31);
             toolStrip1.TabIndex = 4;
             toolStrip1.Text = "toolStrip1";
             // 
@@ -418,6 +500,7 @@ namespace DBADashGUI.Changes
             tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsRefresh.Name = "tsRefresh";
             tsRefresh.Size = new System.Drawing.Size(29, 24);
             tsRefresh.Text = "Refresh";
@@ -428,6 +511,7 @@ namespace DBADashGUI.Changes
             tsBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsBack.Image = Properties.Resources.Previous_grey_16x;
             tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsBack.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsBack.Name = "tsBack";
             tsBack.Size = new System.Drawing.Size(29, 24);
             tsBack.Text = "Up level";
@@ -438,6 +522,7 @@ namespace DBADashGUI.Changes
             tsTrigger.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             tsTrigger.Image = Properties.Resources.ProjectSystemModelRefresh_16x;
             tsTrigger.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsTrigger.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsTrigger.Name = "tsTrigger";
             tsTrigger.Size = new System.Drawing.Size(151, 24);
             tsTrigger.Text = "Trigger Collection";
@@ -573,66 +658,6 @@ namespace DBADashGUI.Changes
             dataGridViewTextBoxColumn13.Name = "dataGridViewTextBoxColumn13";
             dataGridViewTextBoxColumn13.ReadOnly = true;
             dataGridViewTextBoxColumn13.Width = 125;
-            // 
-            // colObjectName
-            // 
-            colObjectName.DataPropertyName = "ObjectName";
-            colObjectName.HeaderText = "Object Name";
-            colObjectName.MinimumWidth = 6;
-            colObjectName.Name = "colObjectName";
-            colObjectName.ReadOnly = true;
-            colObjectName.Width = 119;
-            // 
-            // colSchemaName
-            // 
-            colSchemaName.DataPropertyName = "SchemaName";
-            colSchemaName.HeaderText = "Schema Name";
-            colSchemaName.MinimumWidth = 6;
-            colSchemaName.Name = "colSchemaName";
-            colSchemaName.ReadOnly = true;
-            colSchemaName.Width = 129;
-            // 
-            // colAction
-            // 
-            colAction.DataPropertyName = "Action";
-            colAction.HeaderText = "Action";
-            colAction.MinimumWidth = 6;
-            colAction.Name = "colAction";
-            colAction.ReadOnly = true;
-            colAction.Width = 76;
-            // 
-            // colView
-            // 
-            colView.DataPropertyName = "newDDLID";
-            colView.HeaderText = "View";
-            colView.MinimumWidth = 6;
-            colView.Name = "colView";
-            colView.ReadOnly = true;
-            colView.Text = "View";
-            colView.UseColumnTextForLinkValue = true;
-            colView.Width = 125;
-            // 
-            // colDiff
-            // 
-            colDiff.DataPropertyName = "OldDDLID";
-            colDiff.HeaderText = "Diff";
-            colDiff.MinimumWidth = 6;
-            colDiff.Name = "colDiff";
-            colDiff.ReadOnly = true;
-            colDiff.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colDiff.Text = "Diff";
-            colDiff.UseColumnTextForLinkValue = true;
-            colDiff.Width = 125;
-            // 
-            // colExternalDiff
-            // 
-            colExternalDiff.HeaderText = "External Diff";
-            colExternalDiff.MinimumWidth = 6;
-            colExternalDiff.Name = "colExternalDiff";
-            colExternalDiff.ReadOnly = true;
-            colExternalDiff.Text = "External Diff";
-            colExternalDiff.UseColumnTextForLinkValue = true;
-            colExternalDiff.Width = 125;
             // 
             // SchemaSnapshots
             // 

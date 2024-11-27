@@ -14,6 +14,8 @@ namespace DBADashGUI.Changes
             InitializeComponent();
             dgv.RegisterClearFilter(tsClearFilterDB);
             dgvPool.RegisterClearFilter(tsClearFilterPool);
+            dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
+            dgvPool.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
         }
 
         private List<int> InstanceIDs;
@@ -37,7 +39,7 @@ namespace DBADashGUI.Changes
             DateHelper.ConvertUTCToAppTimeZone(ref dt);
             dgv.AutoGenerateColumns = false;
             dgv.DataSource = new DataView(dt);
-            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgv.AutoResizeColumnsWithMaxColumnWidth();
         }
 
         private void RefreshPool()
@@ -52,7 +54,7 @@ namespace DBADashGUI.Changes
             DateHelper.ConvertUTCToAppTimeZone(ref dt);
             dgvPool.AutoGenerateColumns = false;
             dgvPool.DataSource = new DataView(dt);
-            dgvPool.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgvPool.AutoResizeColumnsWithMaxColumnWidth();
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -77,7 +79,7 @@ namespace DBADashGUI.Changes
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-             dgv.ExportToExcel();
+            dgv.ExportToExcel();
         }
 
         private void TsPoolExcel_Click(object sender, EventArgs e)

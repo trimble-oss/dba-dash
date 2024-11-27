@@ -108,6 +108,7 @@ namespace DBADashGUI.Performance
             tsSaveView = new System.Windows.Forms.ToolStripButton();
             tsDeleteView = new System.Windows.Forms.ToolStripButton();
             savedViewMenuItem1 = new SavedViewMenuItem();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewProgressBarColumn1 = new CustomProgressControl.DataGridViewProgressBarColumn();
             dataGridViewProgressBarColumn2 = new CustomProgressControl.DataGridViewProgressBarColumn();
@@ -129,7 +130,6 @@ namespace DBADashGUI.Performance
             dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn19 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            tsClearFilter = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
             toolStrip1.SuspendLayout();
             SuspendLayout();
@@ -142,25 +142,25 @@ namespace DBADashGUI.Performance
             dgv.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            dgv.ColumnHeadersHeight = 70;
+            dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { ConnectionID, AvgCPU, MaxCPU, colCPUHistogram, CriticalWaitMsPerSec, LockWaitMsPerSec, IOWaitMsPerSec, WaitMsPerSec, colSignalWaitPct, LatchWaitMsPerSec, Latency, ReadLatency, WriteLatency, MBsec, MaxReadMBsec, MaxWriteMBsec, MaxMBsec, IOPs, ReadIOPs, WriteIOPs, MaxReadIOPs, MaxWriteIOPs, MaxIOPs });
             dataGridViewCellStyle23.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle23.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle23.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            dataGridViewCellStyle23.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle23.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle23.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle23.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle23.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle23.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle23.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle23.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
             dataGridViewCellStyle23.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             dgv.DefaultCellStyle = dataGridViewCellStyle23;
             dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             dgv.EnableHeadersVisualStyles = false;
-            dgv.Location = new System.Drawing.Point(0, 27);
+            dgv.Location = new System.Drawing.Point(0, 31);
             dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgv.Name = "dgv";
             dgv.ReadOnly = true;
@@ -168,7 +168,7 @@ namespace DBADashGUI.Performance
             dgv.ResultSetName = null;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
-            dgv.Size = new System.Drawing.Size(1048, 789);
+            dgv.Size = new System.Drawing.Size(1048, 785);
             dgv.TabIndex = 0;
             dgv.CellContentClick += Dgv_CellContentClick;
             dgv.RowsAdded += Dgv_RowsAdded;
@@ -177,6 +177,7 @@ namespace DBADashGUI.Performance
             // 
             ConnectionID.DataPropertyName = "InstanceDisplayName";
             ConnectionID.HeaderText = "Instance";
+            ConnectionID.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             ConnectionID.MinimumWidth = 6;
             ConnectionID.Name = "ConnectionID";
             ConnectionID.ReadOnly = true;
@@ -448,7 +449,7 @@ namespace DBADashGUI.Performance
             toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsCols, tsSaveView, tsDeleteView, savedViewMenuItem1, tsClearFilter });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new System.Drawing.Size(1048, 27);
+            toolStrip1.Size = new System.Drawing.Size(1048, 31);
             toolStrip1.TabIndex = 3;
             toolStrip1.Text = "toolStrip1";
             // 
@@ -458,7 +459,7 @@ namespace DBADashGUI.Performance
             tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsRefresh.Name = "tsRefresh";
-            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Size = new System.Drawing.Size(29, 28);
             tsRefresh.Text = "Refresh";
             tsRefresh.Click += TsRefresh_Click;
             // 
@@ -468,7 +469,7 @@ namespace DBADashGUI.Performance
             tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCopy.Name = "tsCopy";
-            tsCopy.Size = new System.Drawing.Size(29, 24);
+            tsCopy.Size = new System.Drawing.Size(29, 28);
             tsCopy.Text = "Copy";
             tsCopy.Click += TsCopy_Click;
             // 
@@ -478,7 +479,7 @@ namespace DBADashGUI.Performance
             tsExcel.Image = Properties.Resources.excel16x16;
             tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExcel.Name = "tsExcel";
-            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Size = new System.Drawing.Size(29, 28);
             tsExcel.Text = "Export Excel";
             tsExcel.Click += TsExcel_Click;
             // 
@@ -489,7 +490,7 @@ namespace DBADashGUI.Performance
             tsCols.Image = Properties.Resources.Column_16x;
             tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCols.Name = "tsCols";
-            tsCols.Size = new System.Drawing.Size(34, 24);
+            tsCols.Size = new System.Drawing.Size(34, 28);
             tsCols.Text = "Columns";
             // 
             // standardColumnsToolStripMenuItem
@@ -517,7 +518,7 @@ namespace DBADashGUI.Performance
             tsSaveView.Image = Properties.Resources.Save_16x;
             tsSaveView.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsSaveView.Name = "tsSaveView";
-            tsSaveView.Size = new System.Drawing.Size(29, 24);
+            tsSaveView.Size = new System.Drawing.Size(29, 28);
             tsSaveView.Text = "Save Layout";
             tsSaveView.Click += TsSave_Click;
             // 
@@ -528,7 +529,7 @@ namespace DBADashGUI.Performance
             tsDeleteView.Image = Properties.Resources.Close_red_16x;
             tsDeleteView.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsDeleteView.Name = "tsDeleteView";
-            tsDeleteView.Size = new System.Drawing.Size(29, 24);
+            tsDeleteView.Size = new System.Drawing.Size(29, 28);
             tsDeleteView.Text = "Delete Layout";
             tsDeleteView.Click += TsDeleteView_Click;
             // 
@@ -539,10 +540,19 @@ namespace DBADashGUI.Performance
             savedViewMenuItem1.Image = (System.Drawing.Image)resources.GetObject("savedViewMenuItem1.Image");
             savedViewMenuItem1.ImageTransparentColor = System.Drawing.Color.Magenta;
             savedViewMenuItem1.Name = "savedViewMenuItem1";
-            savedViewMenuItem1.Size = new System.Drawing.Size(55, 24);
+            savedViewMenuItem1.Size = new System.Drawing.Size(55, 28);
             savedViewMenuItem1.Text = "View";
             savedViewMenuItem1.Type = SavedView.ViewTypes.PerformanceSummary;
             savedViewMenuItem1.SavedViewSelected += SavedViewSelected;
+            // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Image = Properties.Resources.Eraser_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 28);
+            tsClearFilter.Text = "Clear Filter";
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -765,15 +775,6 @@ namespace DBADashGUI.Performance
             dataGridViewTextBoxColumn19.Name = "dataGridViewTextBoxColumn19";
             dataGridViewTextBoxColumn19.Visible = false;
             dataGridViewTextBoxColumn19.Width = 89;
-            // 
-            // tsClearFilter
-            // 
-            tsClearFilter.Enabled = false;
-            tsClearFilter.Image = Properties.Resources.Eraser_16x;
-            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsClearFilter.Name = "tsClearFilter";
-            tsClearFilter.Size = new System.Drawing.Size(104, 24);
-            tsClearFilter.Text = "Clear Filter";
             // 
             // PerformanceSummary
             // 

@@ -106,7 +106,8 @@ namespace DBADashGUI.Changes
 
             dgv.AutoGenerateColumns = true;
             dgv.DataSource = pivotDT;
-            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
+            dgv.AutoResizeColumnsWithMaxColumnWidth();
         }
 
         private void RefreshDBSummary()
@@ -126,7 +127,8 @@ namespace DBADashGUI.Changes
             dgv.ApplyTheme();
             dgv.DataSource = new DataView(dt);
             PersistFilter = null;
-            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
+            dgv.AutoResizeColumnsWithMaxColumnWidth();
 
             dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
         }

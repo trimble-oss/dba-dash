@@ -395,8 +395,8 @@ namespace DBADashGUI.AgentJobs
         {
             var newSplitterDistance = (context == null || context.JobID == Guid.Empty)
                 ? splitContainer1.Height / 2
-                : 150;
-
+                : splitContainer1.Height / 4;
+            if (newSplitterDistance < 100) return;
             try
             {
                 splitContainer1.SplitterDistance = newSplitterDistance;

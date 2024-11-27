@@ -106,7 +106,7 @@ namespace DBADashGUI.HA
                 }
                 PersistFilter = null;
                 PersistSort = null;
-
+                dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
                 dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             });
         }

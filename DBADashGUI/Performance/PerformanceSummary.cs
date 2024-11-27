@@ -47,7 +47,8 @@ namespace DBADashGUI.Performance
             dgv.AutoGenerateColumns = false;
             GenerateHistogram(ref dt);
             dgv.DataSource ??= new DataView(dt);
-            dgv.AutoResizeColumnHeadersHeight();
+            dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
+            dgv.AutoResizeColumnsWithMaxColumnWidth();
             dgv.Columns["colCPUHistogram"]!.Width = 200;
             if (selectedView != null)
             {

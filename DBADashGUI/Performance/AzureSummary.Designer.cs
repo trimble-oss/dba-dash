@@ -31,7 +31,6 @@ namespace DBADashGUI.Performance
         private void InitializeComponent()
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -50,6 +49,7 @@ namespace DBADashGUI.Performance
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle21 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -59,7 +59,6 @@ namespace DBADashGUI.Performance
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle27 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle28 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle29 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle42 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle30 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle32 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -71,7 +70,6 @@ namespace DBADashGUI.Performance
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle38 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle39 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle40 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle41 = new System.Windows.Forms.DataGridViewCellStyle();
             dgv = new DBADashDataGridView();
             colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colDB = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -107,6 +105,7 @@ namespace DBADashGUI.Performance
             tsExcel = new System.Windows.Forms.ToolStripButton();
             toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             tsCols = new System.Windows.Forms.ToolStripButton();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -166,7 +165,6 @@ namespace DBADashGUI.Performance
             toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             tsExcelPool = new System.Windows.Forms.ToolStripButton();
             tsPoolCols = new System.Windows.Forms.ToolStripButton();
-            tsClearFilter = new System.Windows.Forms.ToolStripButton();
             tsClearFilterPool = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
             toolStrip1.SuspendLayout();
@@ -186,7 +184,7 @@ namespace DBADashGUI.Performance
             dgv.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -194,14 +192,6 @@ namespace DBADashGUI.Performance
             dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colInstance, colDB, colEdition, colServiceObjective, colElasticPool, dgv_DTUHistogram, dgv_CPUHistogram, dgv_DataHistogram, dgv_LogHistogram, colMaxDTU, colMaxDTUUsed, colUnusedDTUs, colAvgDTUPercent, colAVGDTUsUsed, colMinDTULimit, colDTULimitMax, colMaxCPUPercent, colMaxDataPct, colMaxLog, colAvgCPUPct, colAvgDataPct, colAvgLogWrite, colAllocatedSpaceMB, colUsedMB, colMaxStorageSize, colAllocatedPctMax, colUsedPctMax, colFileSnapshotAge });
-            dataGridViewCellStyle20.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle20.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle20.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            dataGridViewCellStyle20.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle20.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle20.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle20.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgv.DefaultCellStyle = dataGridViewCellStyle20;
             dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             dgv.EnableHeadersVisualStyles = false;
             dgv.Location = new System.Drawing.Point(0, 0);
@@ -212,7 +202,7 @@ namespace DBADashGUI.Performance
             dgv.ResultSetName = null;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
-            dgv.Size = new System.Drawing.Size(1455, 752);
+            dgv.Size = new System.Drawing.Size(1455, 749);
             dgv.TabIndex = 0;
             dgv.CellContentClick += Dgv_CellContentClick;
             dgv.RowsAdded += Dgv_RowsAdded;
@@ -232,6 +222,7 @@ namespace DBADashGUI.Performance
             // 
             colDB.DataPropertyName = "DB";
             colDB.HeaderText = "DB";
+            colDB.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             colDB.MinimumWidth = 6;
             colDB.Name = "colDB";
             colDB.ReadOnly = true;
@@ -252,7 +243,7 @@ namespace DBADashGUI.Performance
             // 
             colServiceObjective.DataPropertyName = "service_objective";
             colServiceObjective.HeaderText = "Service Objective";
-            colServiceObjective.LinkColor = System.Drawing.Color.Blue;
+            colServiceObjective.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             colServiceObjective.MinimumWidth = 6;
             colServiceObjective.Name = "colServiceObjective";
             colServiceObjective.ReadOnly = true;
@@ -264,6 +255,7 @@ namespace DBADashGUI.Performance
             // 
             colElasticPool.DataPropertyName = "elastic_pool_name";
             colElasticPool.HeaderText = "Elastic Pool";
+            colElasticPool.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             colElasticPool.MinimumWidth = 6;
             colElasticPool.Name = "colElasticPool";
             colElasticPool.ReadOnly = true;
@@ -549,7 +541,7 @@ namespace DBADashGUI.Performance
             toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, toolStripLabel2, tsCols, tsClearFilter });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new System.Drawing.Size(1455, 27);
+            toolStrip1.Size = new System.Drawing.Size(1455, 31);
             toolStrip1.TabIndex = 4;
             toolStrip1.Text = "toolStrip1";
             // 
@@ -559,7 +551,7 @@ namespace DBADashGUI.Performance
             tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsRefresh.Name = "tsRefresh";
-            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Size = new System.Drawing.Size(29, 28);
             tsRefresh.Text = "Refresh";
             tsRefresh.Click += TsRefresh_Click;
             // 
@@ -569,7 +561,7 @@ namespace DBADashGUI.Performance
             tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCopy.Name = "tsCopy";
-            tsCopy.Size = new System.Drawing.Size(29, 24);
+            tsCopy.Size = new System.Drawing.Size(29, 28);
             tsCopy.Text = "Copy";
             tsCopy.Click += TsCopy_Click;
             // 
@@ -579,7 +571,7 @@ namespace DBADashGUI.Performance
             tsExcel.Image = Properties.Resources.excel16x16;
             tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExcel.Name = "tsExcel";
-            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Size = new System.Drawing.Size(29, 28);
             tsExcel.Text = "Export Excel";
             tsExcel.Click += TsExcel_Click;
             // 
@@ -588,7 +580,7 @@ namespace DBADashGUI.Performance
             toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             toolStripLabel2.Name = "toolStripLabel2";
-            toolStripLabel2.Size = new System.Drawing.Size(75, 24);
+            toolStripLabel2.Size = new System.Drawing.Size(75, 28);
             toolStripLabel2.Text = "Azure DB";
             // 
             // tsCols
@@ -597,9 +589,18 @@ namespace DBADashGUI.Performance
             tsCols.Image = Properties.Resources.Column_16x;
             tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCols.Name = "tsCols";
-            tsCols.Size = new System.Drawing.Size(29, 24);
+            tsCols.Size = new System.Drawing.Size(29, 28);
             tsCols.Text = "Columns";
             tsCols.Click += TsCols_Click;
+            // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Image = Properties.Resources.Eraser_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 28);
+            tsClearFilter.Text = "Clear Filter";
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -649,10 +650,10 @@ namespace DBADashGUI.Performance
             // dataGridViewProgressBarColumn1
             // 
             dataGridViewProgressBarColumn1.DataPropertyName = "Max_DTUPercent";
-            dataGridViewCellStyle21.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle21.Format = "P1";
-            dataGridViewCellStyle21.Padding = new System.Windows.Forms.Padding(4);
-            dataGridViewProgressBarColumn1.DefaultCellStyle = dataGridViewCellStyle21;
+            dataGridViewCellStyle20.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle20.Format = "P1";
+            dataGridViewCellStyle20.Padding = new System.Windows.Forms.Padding(4);
+            dataGridViewProgressBarColumn1.DefaultCellStyle = dataGridViewCellStyle20;
             dataGridViewProgressBarColumn1.HeaderText = "Max DPU (%)";
             dataGridViewProgressBarColumn1.MinimumWidth = 6;
             dataGridViewProgressBarColumn1.Name = "dataGridViewProgressBarColumn1";
@@ -680,10 +681,10 @@ namespace DBADashGUI.Performance
             // dataGridViewProgressBarColumn2
             // 
             dataGridViewProgressBarColumn2.DataPropertyName = "Avg_DTUPercent";
-            dataGridViewCellStyle22.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle22.Format = "P1";
-            dataGridViewCellStyle22.Padding = new System.Windows.Forms.Padding(4);
-            dataGridViewProgressBarColumn2.DefaultCellStyle = dataGridViewCellStyle22;
+            dataGridViewCellStyle21.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle21.Format = "P1";
+            dataGridViewCellStyle21.Padding = new System.Windows.Forms.Padding(4);
+            dataGridViewProgressBarColumn2.DefaultCellStyle = dataGridViewCellStyle21;
             dataGridViewProgressBarColumn2.HeaderText = "Avg DTU %";
             dataGridViewProgressBarColumn2.MinimumWidth = 6;
             dataGridViewProgressBarColumn2.Name = "dataGridViewProgressBarColumn2";
@@ -720,10 +721,10 @@ namespace DBADashGUI.Performance
             // dataGridViewProgressBarColumn3
             // 
             dataGridViewProgressBarColumn3.DataPropertyName = "MaxCPUPercent";
-            dataGridViewCellStyle23.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle23.Format = "P1";
-            dataGridViewCellStyle23.Padding = new System.Windows.Forms.Padding(4);
-            dataGridViewProgressBarColumn3.DefaultCellStyle = dataGridViewCellStyle23;
+            dataGridViewCellStyle22.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle22.Format = "P1";
+            dataGridViewCellStyle22.Padding = new System.Windows.Forms.Padding(4);
+            dataGridViewProgressBarColumn3.DefaultCellStyle = dataGridViewCellStyle22;
             dataGridViewProgressBarColumn3.HeaderText = "Max CPU %";
             dataGridViewProgressBarColumn3.MinimumWidth = 6;
             dataGridViewProgressBarColumn3.Name = "dataGridViewProgressBarColumn3";
@@ -733,10 +734,10 @@ namespace DBADashGUI.Performance
             // dataGridViewProgressBarColumn4
             // 
             dataGridViewProgressBarColumn4.DataPropertyName = "MaxDataPercent";
-            dataGridViewCellStyle24.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle24.Format = "P1";
-            dataGridViewCellStyle24.Padding = new System.Windows.Forms.Padding(4);
-            dataGridViewProgressBarColumn4.DefaultCellStyle = dataGridViewCellStyle24;
+            dataGridViewCellStyle23.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle23.Format = "P1";
+            dataGridViewCellStyle23.Padding = new System.Windows.Forms.Padding(4);
+            dataGridViewProgressBarColumn4.DefaultCellStyle = dataGridViewCellStyle23;
             dataGridViewProgressBarColumn4.HeaderText = "Max Data %";
             dataGridViewProgressBarColumn4.MinimumWidth = 6;
             dataGridViewProgressBarColumn4.Name = "dataGridViewProgressBarColumn4";
@@ -746,10 +747,10 @@ namespace DBADashGUI.Performance
             // dataGridViewProgressBarColumn5
             // 
             dataGridViewProgressBarColumn5.DataPropertyName = "MaxLogWritePercent";
-            dataGridViewCellStyle25.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle25.Format = "P1";
-            dataGridViewCellStyle25.Padding = new System.Windows.Forms.Padding(4);
-            dataGridViewProgressBarColumn5.DefaultCellStyle = dataGridViewCellStyle25;
+            dataGridViewCellStyle24.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle24.Format = "P1";
+            dataGridViewCellStyle24.Padding = new System.Windows.Forms.Padding(4);
+            dataGridViewProgressBarColumn5.DefaultCellStyle = dataGridViewCellStyle24;
             dataGridViewProgressBarColumn5.HeaderText = "Max Log Write %";
             dataGridViewProgressBarColumn5.MinimumWidth = 6;
             dataGridViewProgressBarColumn5.Name = "dataGridViewProgressBarColumn5";
@@ -759,10 +760,10 @@ namespace DBADashGUI.Performance
             // dataGridViewProgressBarColumn6
             // 
             dataGridViewProgressBarColumn6.DataPropertyName = "AvgCPUPercent";
-            dataGridViewCellStyle26.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle26.Format = "P1";
-            dataGridViewCellStyle26.Padding = new System.Windows.Forms.Padding(4);
-            dataGridViewProgressBarColumn6.DefaultCellStyle = dataGridViewCellStyle26;
+            dataGridViewCellStyle25.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle25.Format = "P1";
+            dataGridViewCellStyle25.Padding = new System.Windows.Forms.Padding(4);
+            dataGridViewProgressBarColumn6.DefaultCellStyle = dataGridViewCellStyle25;
             dataGridViewProgressBarColumn6.HeaderText = "Avg CPU %";
             dataGridViewProgressBarColumn6.MinimumWidth = 6;
             dataGridViewProgressBarColumn6.Name = "dataGridViewProgressBarColumn6";
@@ -772,10 +773,10 @@ namespace DBADashGUI.Performance
             // dataGridViewProgressBarColumn7
             // 
             dataGridViewProgressBarColumn7.DataPropertyName = "AvgDataPercent";
-            dataGridViewCellStyle27.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle27.Format = "P1";
-            dataGridViewCellStyle27.Padding = new System.Windows.Forms.Padding(4);
-            dataGridViewProgressBarColumn7.DefaultCellStyle = dataGridViewCellStyle27;
+            dataGridViewCellStyle26.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle26.Format = "P1";
+            dataGridViewCellStyle26.Padding = new System.Windows.Forms.Padding(4);
+            dataGridViewProgressBarColumn7.DefaultCellStyle = dataGridViewCellStyle26;
             dataGridViewProgressBarColumn7.HeaderText = "Avg Data %";
             dataGridViewProgressBarColumn7.MinimumWidth = 6;
             dataGridViewProgressBarColumn7.Name = "dataGridViewProgressBarColumn7";
@@ -785,10 +786,10 @@ namespace DBADashGUI.Performance
             // dataGridViewProgressBarColumn8
             // 
             dataGridViewProgressBarColumn8.DataPropertyName = "AvgLogWritePercent";
-            dataGridViewCellStyle28.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle28.Format = "P1";
-            dataGridViewCellStyle28.Padding = new System.Windows.Forms.Padding(4);
-            dataGridViewProgressBarColumn8.DefaultCellStyle = dataGridViewCellStyle28;
+            dataGridViewCellStyle27.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle27.Format = "P1";
+            dataGridViewCellStyle27.Padding = new System.Windows.Forms.Padding(4);
+            dataGridViewProgressBarColumn8.DefaultCellStyle = dataGridViewCellStyle27;
             dataGridViewProgressBarColumn8.HeaderText = "Avg Log Write %";
             dataGridViewProgressBarColumn8.MinimumWidth = 6;
             dataGridViewProgressBarColumn8.Name = "dataGridViewProgressBarColumn8";
@@ -873,27 +874,19 @@ namespace DBADashGUI.Performance
             dgvPool.AllowUserToDeleteRows = false;
             dgvPool.AllowUserToOrderColumns = true;
             dgvPool.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle29.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle29.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle29.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            dataGridViewCellStyle29.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle29.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle29.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle29.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvPool.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle29;
+            dataGridViewCellStyle28.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle28.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle28.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle28.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle28.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle28.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle28.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvPool.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle28;
             dgvPool.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvPool.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { poolInstance, colPoolName, dgvPool_DTUHistogram, dgvPool_CPUHistogram, dgvPool_DataHistogram, dgvPool_LogHistogram, poolMaxDTUPct, poolMaxDTU, poolUnusedDTU, poolAVGDTUPct, poolAVGDTU, poolMinDTULimit, poolDTULimitMax, colCPULimitMin, colCPULimitMax, poolMaxCPU, poolMaxDataPct, poolMaxLogWrite, poolAvgCPU, poolAvgData, poolAvgLogWrite, colAllocatedStoragePct, colStorageLimit, colCurrentUsedGB, colCurrentFreeGB });
-            dataGridViewCellStyle42.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle42.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle42.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            dataGridViewCellStyle42.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle42.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle42.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle42.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgvPool.DefaultCellStyle = dataGridViewCellStyle42;
             dgvPool.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvPool.EnableHeadersVisualStyles = false;
-            dgvPool.Location = new System.Drawing.Point(0, 27);
+            dgvPool.Location = new System.Drawing.Point(0, 31);
             dgvPool.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvPool.Name = "dgvPool";
             dgvPool.ReadOnly = true;
@@ -901,7 +894,7 @@ namespace DBADashGUI.Performance
             dgvPool.ResultSetName = null;
             dgvPool.RowHeadersVisible = false;
             dgvPool.RowHeadersWidth = 51;
-            dgvPool.Size = new System.Drawing.Size(1455, 440);
+            dgvPool.Size = new System.Drawing.Size(1455, 435);
             dgvPool.TabIndex = 5;
             dgvPool.CellContentClick += DgvPool_CellContentClick;
             dgvPool.RowsAdded += DgvPol_RowsAdded;
@@ -920,6 +913,7 @@ namespace DBADashGUI.Performance
             // 
             colPoolName.DataPropertyName = "elastic_pool_name";
             colPoolName.HeaderText = "Elastic Pool";
+            colPoolName.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             colPoolName.MinimumWidth = 6;
             colPoolName.Name = "colPoolName";
             colPoolName.ReadOnly = true;
@@ -1030,8 +1024,8 @@ namespace DBADashGUI.Performance
             // colCPULimitMin
             // 
             colCPULimitMin.DataPropertyName = "MinCPULimit";
-            dataGridViewCellStyle30.Format = "N2";
-            colCPULimitMin.DefaultCellStyle = dataGridViewCellStyle30;
+            dataGridViewCellStyle29.Format = "N2";
+            colCPULimitMin.DefaultCellStyle = dataGridViewCellStyle29;
             colCPULimitMin.HeaderText = "CPU Limit (Min)";
             colCPULimitMin.MinimumWidth = 6;
             colCPULimitMin.Name = "colCPULimitMin";
@@ -1042,8 +1036,8 @@ namespace DBADashGUI.Performance
             // colCPULimitMax
             // 
             colCPULimitMax.DataPropertyName = "MaxCPULimit";
-            dataGridViewCellStyle31.Format = "N2";
-            colCPULimitMax.DefaultCellStyle = dataGridViewCellStyle31;
+            dataGridViewCellStyle30.Format = "N2";
+            colCPULimitMax.DefaultCellStyle = dataGridViewCellStyle30;
             colCPULimitMax.HeaderText = "CPU Limit (Max)";
             colCPULimitMax.MinimumWidth = 6;
             colCPULimitMax.Name = "colCPULimitMax";
@@ -1053,10 +1047,10 @@ namespace DBADashGUI.Performance
             // poolMaxCPU
             // 
             poolMaxCPU.DataPropertyName = "MaxCPUPercent";
-            dataGridViewCellStyle32.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle32.Format = "0.#\\%";
-            dataGridViewCellStyle32.Padding = new System.Windows.Forms.Padding(4);
-            poolMaxCPU.DefaultCellStyle = dataGridViewCellStyle32;
+            dataGridViewCellStyle31.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle31.Format = "0.#\\%";
+            dataGridViewCellStyle31.Padding = new System.Windows.Forms.Padding(4);
+            poolMaxCPU.DefaultCellStyle = dataGridViewCellStyle31;
             poolMaxCPU.HeaderText = "Max CPU %";
             poolMaxCPU.MinimumWidth = 6;
             poolMaxCPU.Name = "poolMaxCPU";
@@ -1066,10 +1060,10 @@ namespace DBADashGUI.Performance
             // poolMaxDataPct
             // 
             poolMaxDataPct.DataPropertyName = "MaxDataPercent";
-            dataGridViewCellStyle33.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle33.Format = "0.#\\%";
-            dataGridViewCellStyle33.Padding = new System.Windows.Forms.Padding(4);
-            poolMaxDataPct.DefaultCellStyle = dataGridViewCellStyle33;
+            dataGridViewCellStyle32.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle32.Format = "0.#\\%";
+            dataGridViewCellStyle32.Padding = new System.Windows.Forms.Padding(4);
+            poolMaxDataPct.DefaultCellStyle = dataGridViewCellStyle32;
             poolMaxDataPct.HeaderText = "Max Data %";
             poolMaxDataPct.MinimumWidth = 6;
             poolMaxDataPct.Name = "poolMaxDataPct";
@@ -1079,10 +1073,10 @@ namespace DBADashGUI.Performance
             // poolMaxLogWrite
             // 
             poolMaxLogWrite.DataPropertyName = "MaxLogWritePercent";
-            dataGridViewCellStyle34.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle34.Format = "0.#\\%";
-            dataGridViewCellStyle34.Padding = new System.Windows.Forms.Padding(4);
-            poolMaxLogWrite.DefaultCellStyle = dataGridViewCellStyle34;
+            dataGridViewCellStyle33.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle33.Format = "0.#\\%";
+            dataGridViewCellStyle33.Padding = new System.Windows.Forms.Padding(4);
+            poolMaxLogWrite.DefaultCellStyle = dataGridViewCellStyle33;
             poolMaxLogWrite.HeaderText = "Max Log Write %";
             poolMaxLogWrite.MinimumWidth = 6;
             poolMaxLogWrite.Name = "poolMaxLogWrite";
@@ -1092,10 +1086,10 @@ namespace DBADashGUI.Performance
             // poolAvgCPU
             // 
             poolAvgCPU.DataPropertyName = "AvgCPUPercent";
-            dataGridViewCellStyle35.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle35.Format = "0.#\\%";
-            dataGridViewCellStyle35.Padding = new System.Windows.Forms.Padding(4);
-            poolAvgCPU.DefaultCellStyle = dataGridViewCellStyle35;
+            dataGridViewCellStyle34.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle34.Format = "0.#\\%";
+            dataGridViewCellStyle34.Padding = new System.Windows.Forms.Padding(4);
+            poolAvgCPU.DefaultCellStyle = dataGridViewCellStyle34;
             poolAvgCPU.HeaderText = "Avg CPU %";
             poolAvgCPU.MinimumWidth = 6;
             poolAvgCPU.Name = "poolAvgCPU";
@@ -1105,10 +1099,10 @@ namespace DBADashGUI.Performance
             // poolAvgData
             // 
             poolAvgData.DataPropertyName = "AvgDataPercent";
-            dataGridViewCellStyle36.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle36.Format = "0.#\\%";
-            dataGridViewCellStyle36.Padding = new System.Windows.Forms.Padding(4);
-            poolAvgData.DefaultCellStyle = dataGridViewCellStyle36;
+            dataGridViewCellStyle35.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle35.Format = "0.#\\%";
+            dataGridViewCellStyle35.Padding = new System.Windows.Forms.Padding(4);
+            poolAvgData.DefaultCellStyle = dataGridViewCellStyle35;
             poolAvgData.HeaderText = "Avg Data %";
             poolAvgData.MinimumWidth = 6;
             poolAvgData.Name = "poolAvgData";
@@ -1118,10 +1112,10 @@ namespace DBADashGUI.Performance
             // poolAvgLogWrite
             // 
             poolAvgLogWrite.DataPropertyName = "AvgLogWritePercent";
-            dataGridViewCellStyle37.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle37.Format = "0.#\\%";
-            dataGridViewCellStyle37.Padding = new System.Windows.Forms.Padding(4);
-            poolAvgLogWrite.DefaultCellStyle = dataGridViewCellStyle37;
+            dataGridViewCellStyle36.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle36.Format = "0.#\\%";
+            dataGridViewCellStyle36.Padding = new System.Windows.Forms.Padding(4);
+            poolAvgLogWrite.DefaultCellStyle = dataGridViewCellStyle36;
             poolAvgLogWrite.HeaderText = "Avg Log Write %";
             poolAvgLogWrite.MinimumWidth = 6;
             poolAvgLogWrite.Name = "poolAvgLogWrite";
@@ -1131,9 +1125,9 @@ namespace DBADashGUI.Performance
             // colAllocatedStoragePct
             // 
             colAllocatedStoragePct.DataPropertyName = "current_allocated_storage_percent";
-            dataGridViewCellStyle38.Format = "###.#\\%";
-            dataGridViewCellStyle38.NullValue = null;
-            colAllocatedStoragePct.DefaultCellStyle = dataGridViewCellStyle38;
+            dataGridViewCellStyle37.Format = "###.#\\%";
+            dataGridViewCellStyle37.NullValue = null;
+            colAllocatedStoragePct.DefaultCellStyle = dataGridViewCellStyle37;
             colAllocatedStoragePct.HeaderText = "Current Allocated Storage %";
             colAllocatedStoragePct.MinimumWidth = 6;
             colAllocatedStoragePct.Name = "colAllocatedStoragePct";
@@ -1143,9 +1137,9 @@ namespace DBADashGUI.Performance
             // colStorageLimit
             // 
             colStorageLimit.DataPropertyName = "current_elastic_pool_storage_limit_gb";
-            dataGridViewCellStyle39.Format = "#,##0.0";
-            dataGridViewCellStyle39.NullValue = null;
-            colStorageLimit.DefaultCellStyle = dataGridViewCellStyle39;
+            dataGridViewCellStyle38.Format = "#,##0.0";
+            dataGridViewCellStyle38.NullValue = null;
+            colStorageLimit.DefaultCellStyle = dataGridViewCellStyle38;
             colStorageLimit.HeaderText = "Current Storage Limit (GB)";
             colStorageLimit.MinimumWidth = 6;
             colStorageLimit.Name = "colStorageLimit";
@@ -1155,8 +1149,8 @@ namespace DBADashGUI.Performance
             // colCurrentUsedGB
             // 
             colCurrentUsedGB.DataPropertyName = "current_elastic_pool_storage_used_gb";
-            dataGridViewCellStyle40.Format = "#,##0.0";
-            colCurrentUsedGB.DefaultCellStyle = dataGridViewCellStyle40;
+            dataGridViewCellStyle39.Format = "#,##0.0";
+            colCurrentUsedGB.DefaultCellStyle = dataGridViewCellStyle39;
             colCurrentUsedGB.HeaderText = "Current Used GB";
             colCurrentUsedGB.MinimumWidth = 6;
             colCurrentUsedGB.Name = "colCurrentUsedGB";
@@ -1166,8 +1160,8 @@ namespace DBADashGUI.Performance
             // colCurrentFreeGB
             // 
             colCurrentFreeGB.DataPropertyName = "current_elastic_pool_storage_free_gb";
-            dataGridViewCellStyle41.Format = "#,##0.0";
-            colCurrentFreeGB.DefaultCellStyle = dataGridViewCellStyle41;
+            dataGridViewCellStyle40.Format = "#,##0.0";
+            colCurrentFreeGB.DefaultCellStyle = dataGridViewCellStyle40;
             colCurrentFreeGB.HeaderText = "Current Free GB";
             colCurrentFreeGB.MinimumWidth = 6;
             colCurrentFreeGB.Name = "colCurrentFreeGB";
@@ -1177,7 +1171,7 @@ namespace DBADashGUI.Performance
             // splitContainer1
             // 
             splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            splitContainer1.Location = new System.Drawing.Point(0, 27);
+            splitContainer1.Location = new System.Drawing.Point(0, 31);
             splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             splitContainer1.Name = "splitContainer1";
             splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
@@ -1190,8 +1184,8 @@ namespace DBADashGUI.Performance
             // 
             splitContainer1.Panel2.Controls.Add(dgvPool);
             splitContainer1.Panel2.Controls.Add(toolStrip2);
-            splitContainer1.Size = new System.Drawing.Size(1455, 1224);
-            splitContainer1.SplitterDistance = 752;
+            splitContainer1.Size = new System.Drawing.Size(1455, 1220);
+            splitContainer1.SplitterDistance = 749;
             splitContainer1.SplitterWidth = 5;
             splitContainer1.TabIndex = 6;
             // 
@@ -1201,7 +1195,7 @@ namespace DBADashGUI.Performance
             toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefreshPool, tsCopyPool, toolStripLabel1, tsExcelPool, tsPoolCols, tsClearFilterPool });
             toolStrip2.Location = new System.Drawing.Point(0, 0);
             toolStrip2.Name = "toolStrip2";
-            toolStrip2.Size = new System.Drawing.Size(1455, 27);
+            toolStrip2.Size = new System.Drawing.Size(1455, 31);
             toolStrip2.TabIndex = 6;
             toolStrip2.Text = "toolStrip2";
             // 
@@ -1211,7 +1205,7 @@ namespace DBADashGUI.Performance
             tsRefreshPool.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefreshPool.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsRefreshPool.Name = "tsRefreshPool";
-            tsRefreshPool.Size = new System.Drawing.Size(29, 24);
+            tsRefreshPool.Size = new System.Drawing.Size(29, 28);
             tsRefreshPool.Text = "Refresh";
             tsRefreshPool.Click += TsRefreshPool_Click;
             // 
@@ -1221,7 +1215,7 @@ namespace DBADashGUI.Performance
             tsCopyPool.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopyPool.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCopyPool.Name = "tsCopyPool";
-            tsCopyPool.Size = new System.Drawing.Size(29, 24);
+            tsCopyPool.Size = new System.Drawing.Size(29, 28);
             tsCopyPool.Text = "Copy";
             tsCopyPool.Click += TsCopyPool_Click;
             // 
@@ -1230,7 +1224,7 @@ namespace DBADashGUI.Performance
             toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             toolStripLabel1.Name = "toolStripLabel1";
-            toolStripLabel1.Size = new System.Drawing.Size(88, 24);
+            toolStripLabel1.Size = new System.Drawing.Size(88, 28);
             toolStripLabel1.Text = "Elastic Pool";
             // 
             // tsExcelPool
@@ -1239,7 +1233,7 @@ namespace DBADashGUI.Performance
             tsExcelPool.Image = Properties.Resources.excel16x16;
             tsExcelPool.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExcelPool.Name = "tsExcelPool";
-            tsExcelPool.Size = new System.Drawing.Size(29, 24);
+            tsExcelPool.Size = new System.Drawing.Size(29, 28);
             tsExcelPool.Text = "Export Excel";
             tsExcelPool.Click += TsExcelPool_Click;
             // 
@@ -1249,18 +1243,9 @@ namespace DBADashGUI.Performance
             tsPoolCols.Image = Properties.Resources.Column_16x;
             tsPoolCols.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsPoolCols.Name = "tsPoolCols";
-            tsPoolCols.Size = new System.Drawing.Size(29, 24);
+            tsPoolCols.Size = new System.Drawing.Size(29, 28);
             tsPoolCols.Text = "Columns";
             tsPoolCols.Click += TsPoolCols_Click;
-            // 
-            // tsClearFilter
-            // 
-            tsClearFilter.Enabled = false;
-            tsClearFilter.Image = Properties.Resources.Eraser_16x;
-            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsClearFilter.Name = "tsClearFilter";
-            tsClearFilter.Size = new System.Drawing.Size(104, 24);
-            tsClearFilter.Text = "Clear Filter";
             // 
             // tsClearFilterPool
             // 
@@ -1268,7 +1253,7 @@ namespace DBADashGUI.Performance
             tsClearFilterPool.Image = Properties.Resources.Eraser_16x;
             tsClearFilterPool.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsClearFilterPool.Name = "tsClearFilterPool";
-            tsClearFilterPool.Size = new System.Drawing.Size(104, 24);
+            tsClearFilterPool.Size = new System.Drawing.Size(104, 28);
             tsClearFilterPool.Text = "Clear Filter";
             // 
             // AzureSummary

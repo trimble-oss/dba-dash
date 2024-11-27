@@ -30,6 +30,7 @@ namespace DBADashGUI
             dgvTests.Columns.AddRange(TestCols.ToArray());
             dgvTests.GridFilterChanged += (s, e) => UpdateClearFilter();
             dgvSummary.GridFilterChanged += (s, e) => UpdateClearFilter();
+            dgvSummary.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
         }
 
         private bool IsDefaultFilter => (string.IsNullOrEmpty(dgvTests.RowFilter) || dgvTests.RowFilter == TestRowFilter) && (string.IsNullOrEmpty(dgvSummary.RowFilter) || dgvSummary.RowFilter == SummaryRowFilter);
@@ -255,6 +256,7 @@ namespace DBADashGUI
             dgvTests.Invoke((Action)(() =>
             {
                 dgvTests.DataSource = dvTestSummary;
+                dgvTests.AutoResizeColumnsWithMaxColumnWidth(DataGridViewAutoSizeColumnsMode.AllCells);
             }));
         }
 
@@ -322,7 +324,7 @@ namespace DBADashGUI
             dgvSummary.Invoke((Action)(() =>
             {
                 dgvSummary.DataSource = dv;
-                dgvSummary.AutoResizeColumn(Instance.Index, DataGridViewAutoSizeColumnMode.DisplayedCells);
+                dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
             ));
 
