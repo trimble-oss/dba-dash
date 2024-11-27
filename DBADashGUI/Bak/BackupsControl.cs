@@ -180,6 +180,7 @@ namespace DBADashGUI.Backups
                 new DataGridViewTextBoxColumn() { HeaderText = "Encryptor_Type", DataPropertyName = "encryptor_type" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Compression Algorithm", DataPropertyName = "compression_algorithm" }
             );
+            dgvBackups.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
             dgvBackups.ApplyTheme();
             dgvBackups.DataSource = dtBackups;
             dgvBackups.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
@@ -271,6 +272,7 @@ namespace DBADashGUI.Backups
             );
             dgvBackups.ApplyTheme();
             dgvBackups.DataSource = new DataView(dt);
+            dgvBackups.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
             dgvBackups.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
 
             UseWaitCursor = false;
@@ -352,6 +354,7 @@ namespace DBADashGUI.Backups
                     new DataGridViewLinkColumn() { HeaderText = "Configure", Text = "Configure", UseColumnTextForLinkValue = true, SortMode = DataGridViewColumnSortMode.NotSortable, Name = "Configure", LinkColor = DashColors.LinkColor }
                     );
             }
+            dgvSummary.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
             dgvSummary.ApplyTheme();
             dgvSummary.Columns[0].Frozen = Common.FreezeKeyColumn;
             dgvSummary.DataSource = new DataView(dt);
@@ -366,7 +369,7 @@ namespace DBADashGUI.Backups
             dgvBackups.RegisterClearFilter(tsClearFilterBackups);
             dgvSummary.RegisterClearFilter(tsClearFilterSummary);
         }
-        
+
         private void DgvBackups_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             if (!dgvBackups.Columns.Contains("LastFull")) return;

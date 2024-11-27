@@ -15,6 +15,8 @@ namespace DBADashGUI
             InitializeComponent();
             dgvHardware.RegisterClearFilter(tsClearFilter);
             dgvHistory.RegisterClearFilter(tsClearFilterHistory);
+            dgvHardware.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
+            dgvHistory.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
         }
 
         private List<int> InstanceIDs;
@@ -46,7 +48,7 @@ namespace DBADashGUI
             DateHelper.ConvertUTCToAppTimeZone(ref dt);
             dgvHistory.AutoGenerateColumns = false;
             dgvHistory.DataSource = new DataView(dt);
-            dgvHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgvHistory.AutoResizeColumnsWithMaxColumnWidth();
         }
 
         private void RefreshHardware()
@@ -61,7 +63,7 @@ namespace DBADashGUI
             da.Fill(dt);
             dgvHardware.AutoGenerateColumns = false;
             dgvHardware.DataSource = new DataView(dt);
-            dgvHardware.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgvHardware.AutoResizeColumnsWithMaxColumnWidth();
         }
 
         private void TsCopy_Click(object sender, EventArgs e)

@@ -29,221 +29,204 @@ namespace DBADashGUI.Checks
         /// </summary>
         private void InitializeComponent()
         {
-            this.bttnUpdate = new System.Windows.Forms.Button();
-            this.pnlThresholds = new System.Windows.Forms.Panel();
-            this.label23 = new System.Windows.Forms.Label();
-            this.label24 = new System.Windows.Forms.Label();
-            this.chkEnabled = new System.Windows.Forms.CheckBox();
-            this.label25 = new System.Windows.Forms.Label();
-            this.label26 = new System.Windows.Forms.Label();
-            this.numWarning = new System.Windows.Forms.NumericUpDown();
-            this.numCritical = new System.Windows.Forms.NumericUpDown();
-            this.chkInherit = new System.Windows.Forms.CheckBox();
-            this.lnkConfigureRoot = new System.Windows.Forms.LinkLabel();
-            this.bttnClearAlert = new System.Windows.Forms.Button();
-            this.lblUptime = new System.Windows.Forms.Label();
-            this.lblStartTime = new System.Windows.Forms.Label();
-            this.pnlThresholds.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numWarning)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numCritical)).BeginInit();
-            this.SuspendLayout();
+            bttnUpdate = new System.Windows.Forms.Button();
+            pnlThresholds = new System.Windows.Forms.Panel();
+            label23 = new System.Windows.Forms.Label();
+            label24 = new System.Windows.Forms.Label();
+            chkEnabled = new System.Windows.Forms.CheckBox();
+            label25 = new System.Windows.Forms.Label();
+            label26 = new System.Windows.Forms.Label();
+            numWarning = new System.Windows.Forms.NumericUpDown();
+            numCritical = new System.Windows.Forms.NumericUpDown();
+            chkInherit = new System.Windows.Forms.CheckBox();
+            lnkConfigureRoot = new System.Windows.Forms.LinkLabel();
+            bttnClearAlert = new System.Windows.Forms.Button();
+            lblUptime = new System.Windows.Forms.Label();
+            lblStartTime = new System.Windows.Forms.Label();
+            pnlThresholds.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numWarning).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numCritical).BeginInit();
+            SuspendLayout();
             // 
             // bttnUpdate
             // 
-            this.bttnUpdate.Location = new System.Drawing.Point(466, 246);
-            this.bttnUpdate.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.bttnUpdate.Name = "bttnUpdate";
-            this.bttnUpdate.Size = new System.Drawing.Size(87, 29);
-            this.bttnUpdate.TabIndex = 46;
-            this.bttnUpdate.Text = "Update";
-            this.bttnUpdate.UseVisualStyleBackColor = true;
-            this.bttnUpdate.Click += new System.EventHandler(this.BttnUpdate_Click);
+            bttnUpdate.Location = new System.Drawing.Point(466, 246);
+            bttnUpdate.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            bttnUpdate.Name = "bttnUpdate";
+            bttnUpdate.Size = new System.Drawing.Size(87, 29);
+            bttnUpdate.TabIndex = 46;
+            bttnUpdate.Text = "Update";
+            bttnUpdate.UseVisualStyleBackColor = true;
+            bttnUpdate.Click += BttnUpdate_Click;
             // 
             // pnlThresholds
             // 
-            this.pnlThresholds.Controls.Add(this.label23);
-            this.pnlThresholds.Controls.Add(this.label24);
-            this.pnlThresholds.Controls.Add(this.chkEnabled);
-            this.pnlThresholds.Controls.Add(this.label25);
-            this.pnlThresholds.Controls.Add(this.label26);
-            this.pnlThresholds.Controls.Add(this.numWarning);
-            this.pnlThresholds.Controls.Add(this.numCritical);
-            this.pnlThresholds.Location = new System.Drawing.Point(15, 50);
-            this.pnlThresholds.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.pnlThresholds.Name = "pnlThresholds";
-            this.pnlThresholds.Size = new System.Drawing.Size(538, 105);
-            this.pnlThresholds.TabIndex = 45;
+            pnlThresholds.Controls.Add(label23);
+            pnlThresholds.Controls.Add(label24);
+            pnlThresholds.Controls.Add(chkEnabled);
+            pnlThresholds.Controls.Add(label25);
+            pnlThresholds.Controls.Add(label26);
+            pnlThresholds.Controls.Add(numWarning);
+            pnlThresholds.Controls.Add(numCritical);
+            pnlThresholds.Location = new System.Drawing.Point(15, 50);
+            pnlThresholds.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            pnlThresholds.Name = "pnlThresholds";
+            pnlThresholds.Size = new System.Drawing.Size(538, 105);
+            pnlThresholds.TabIndex = 45;
             // 
             // label23
             // 
-            this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(288, 51);
-            this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(40, 20);
-            this.label23.TabIndex = 45;
-            this.label23.Text = "mins";
+            label23.AutoSize = true;
+            label23.Location = new System.Drawing.Point(288, 51);
+            label23.Name = "label23";
+            label23.Size = new System.Drawing.Size(40, 20);
+            label23.TabIndex = 45;
+            label23.Text = "mins";
             // 
             // label24
             // 
-            this.label24.AutoSize = true;
-            this.label24.Location = new System.Drawing.Point(463, 51);
-            this.label24.Name = "label24";
-            this.label24.Size = new System.Drawing.Size(40, 20);
-            this.label24.TabIndex = 44;
-            this.label24.Text = "mins";
+            label24.AutoSize = true;
+            label24.Location = new System.Drawing.Point(463, 51);
+            label24.Name = "label24";
+            label24.Size = new System.Drawing.Size(40, 20);
+            label24.TabIndex = 44;
+            label24.Text = "mins";
             // 
             // chkEnabled
             // 
-            this.chkEnabled.AutoSize = true;
-            this.chkEnabled.Checked = true;
-            this.chkEnabled.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkEnabled.Location = new System.Drawing.Point(13, 51);
-            this.chkEnabled.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.chkEnabled.Name = "chkEnabled";
-            this.chkEnabled.Size = new System.Drawing.Size(85, 24);
-            this.chkEnabled.TabIndex = 41;
-            this.chkEnabled.Text = "Enabled";
-            this.chkEnabled.UseVisualStyleBackColor = true;
-            this.chkEnabled.CheckedChanged += new System.EventHandler(this.ChkEnabled_CheckedChanged);
+            chkEnabled.AutoSize = true;
+            chkEnabled.Checked = true;
+            chkEnabled.CheckState = System.Windows.Forms.CheckState.Checked;
+            chkEnabled.Location = new System.Drawing.Point(13, 51);
+            chkEnabled.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            chkEnabled.Name = "chkEnabled";
+            chkEnabled.Size = new System.Drawing.Size(85, 24);
+            chkEnabled.TabIndex = 41;
+            chkEnabled.Text = "Enabled";
+            chkEnabled.UseVisualStyleBackColor = true;
+            chkEnabled.CheckedChanged += ChkEnabled_CheckedChanged;
             // 
             // label25
             // 
-            this.label25.AutoSize = true;
-            this.label25.Location = new System.Drawing.Point(354, 11);
-            this.label25.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(58, 20);
-            this.label25.TabIndex = 20;
-            this.label25.Text = "Critical:";
+            label25.AutoSize = true;
+            label25.Location = new System.Drawing.Point(354, 11);
+            label25.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label25.Name = "label25";
+            label25.Size = new System.Drawing.Size(58, 20);
+            label25.TabIndex = 20;
+            label25.Text = "Critical:";
             // 
             // label26
             // 
-            this.label26.AutoSize = true;
-            this.label26.Location = new System.Drawing.Point(178, 12);
-            this.label26.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(67, 20);
-            this.label26.TabIndex = 19;
-            this.label26.Text = "Warning:";
+            label26.AutoSize = true;
+            label26.Location = new System.Drawing.Point(178, 12);
+            label26.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label26.Name = "label26";
+            label26.Size = new System.Drawing.Size(67, 20);
+            label26.TabIndex = 19;
+            label26.Text = "Warning:";
             // 
             // numWarning
             // 
-            this.numWarning.Location = new System.Drawing.Point(181, 50);
-            this.numWarning.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.numWarning.Maximum = new decimal(new int[] {
-            2147483647,
-            0,
-            0,
-            0});
-            this.numWarning.Name = "numWarning";
-            this.numWarning.Size = new System.Drawing.Size(100, 27);
-            this.numWarning.TabIndex = 22;
-            this.numWarning.Value = new decimal(new int[] {
-            2880,
-            0,
-            0,
-            0});
+            numWarning.Location = new System.Drawing.Point(181, 50);
+            numWarning.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            numWarning.Maximum = new decimal(new int[] { int.MaxValue, 0, 0, 0 });
+            numWarning.Name = "numWarning";
+            numWarning.Size = new System.Drawing.Size(100, 27);
+            numWarning.TabIndex = 22;
+            numWarning.Value = new decimal(new int[] { 2880, 0, 0, 0 });
             // 
             // numCritical
             // 
-            this.numCritical.Location = new System.Drawing.Point(355, 50);
-            this.numCritical.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.numCritical.Maximum = new decimal(new int[] {
-            2147483647,
-            0,
-            0,
-            0});
-            this.numCritical.Name = "numCritical";
-            this.numCritical.Size = new System.Drawing.Size(100, 27);
-            this.numCritical.TabIndex = 23;
-            this.numCritical.Value = new decimal(new int[] {
-            720,
-            0,
-            0,
-            0});
+            numCritical.Location = new System.Drawing.Point(355, 50);
+            numCritical.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            numCritical.Maximum = new decimal(new int[] { int.MaxValue, 0, 0, 0 });
+            numCritical.Name = "numCritical";
+            numCritical.Size = new System.Drawing.Size(100, 27);
+            numCritical.TabIndex = 23;
+            numCritical.Value = new decimal(new int[] { 720, 0, 0, 0 });
             // 
             // chkInherit
             // 
-            this.chkInherit.AutoSize = true;
-            this.chkInherit.Location = new System.Drawing.Point(15, 15);
-            this.chkInherit.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.chkInherit.Name = "chkInherit";
-            this.chkInherit.Size = new System.Drawing.Size(73, 24);
-            this.chkInherit.TabIndex = 44;
-            this.chkInherit.Text = "Inherit";
-            this.chkInherit.UseVisualStyleBackColor = true;
-            this.chkInherit.CheckedChanged += new System.EventHandler(this.ChkInherit_CheckedChanged);
+            chkInherit.AutoSize = true;
+            chkInherit.Location = new System.Drawing.Point(15, 15);
+            chkInherit.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            chkInherit.Name = "chkInherit";
+            chkInherit.Size = new System.Drawing.Size(73, 24);
+            chkInherit.TabIndex = 44;
+            chkInherit.Text = "Inherit";
+            chkInherit.UseVisualStyleBackColor = true;
+            chkInherit.CheckedChanged += ChkInherit_CheckedChanged;
             // 
             // lnkConfigureRoot
             // 
-            this.lnkConfigureRoot.AutoSize = true;
-            this.lnkConfigureRoot.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
-            this.lnkConfigureRoot.Location = new System.Drawing.Point(403, 15);
-            this.lnkConfigureRoot.Name = "lnkConfigureRoot";
-            this.lnkConfigureRoot.Size = new System.Drawing.Size(158, 20);
-            this.lnkConfigureRoot.TabIndex = 47;
-            this.lnkConfigureRoot.TabStop = true;
-            this.lnkConfigureRoot.Text = "Root Threshold Config";
-            this.lnkConfigureRoot.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.ChkConfigureRoot_LinkClicked);
+            lnkConfigureRoot.AutoSize = true;
+            lnkConfigureRoot.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            lnkConfigureRoot.Location = new System.Drawing.Point(403, 15);
+            lnkConfigureRoot.Name = "lnkConfigureRoot";
+            lnkConfigureRoot.Size = new System.Drawing.Size(158, 20);
+            lnkConfigureRoot.TabIndex = 47;
+            lnkConfigureRoot.TabStop = true;
+            lnkConfigureRoot.Text = "Root Threshold Config";
+            lnkConfigureRoot.LinkClicked += ChkConfigureRoot_LinkClicked;
             // 
             // bttnClearAlert
             // 
-            this.bttnClearAlert.Location = new System.Drawing.Point(15, 246);
-            this.bttnClearAlert.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.bttnClearAlert.Name = "bttnClearAlert";
-            this.bttnClearAlert.Size = new System.Drawing.Size(140, 29);
-            this.bttnClearAlert.TabIndex = 48;
-            this.bttnClearAlert.Text = "Clear Alert";
-            this.bttnClearAlert.UseVisualStyleBackColor = true;
-            this.bttnClearAlert.Click += new System.EventHandler(this.BttnClearAlert_Click);
+            bttnClearAlert.Location = new System.Drawing.Point(15, 246);
+            bttnClearAlert.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            bttnClearAlert.Name = "bttnClearAlert";
+            bttnClearAlert.Size = new System.Drawing.Size(140, 29);
+            bttnClearAlert.TabIndex = 48;
+            bttnClearAlert.Text = "Clear Alert";
+            bttnClearAlert.UseVisualStyleBackColor = true;
+            bttnClearAlert.Click += BttnClearAlert_Click;
             // 
             // lblUptime
             // 
-            this.lblUptime.AutoSize = true;
-            this.lblUptime.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
-            this.lblUptime.Location = new System.Drawing.Point(12, 168);
-            this.lblUptime.Name = "lblUptime";
-            this.lblUptime.Size = new System.Drawing.Size(98, 16);
-            this.lblUptime.TabIndex = 49;
-            this.lblUptime.Text = "Current Uptime:";
+            lblUptime.AutoSize = true;
+            lblUptime.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, 0);
+            lblUptime.Location = new System.Drawing.Point(12, 168);
+            lblUptime.Name = "lblUptime";
+            lblUptime.Size = new System.Drawing.Size(111, 20);
+            lblUptime.TabIndex = 49;
+            lblUptime.Text = "Current Uptime:";
             // 
             // lblStartTime
             // 
-            this.lblStartTime.AutoSize = true;
-            this.lblStartTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
-            this.lblStartTime.Location = new System.Drawing.Point(12, 201);
-            this.lblStartTime.Name = "lblStartTime";
-            this.lblStartTime.Size = new System.Drawing.Size(71, 16);
-            this.lblStartTime.TabIndex = 50;
-            this.lblStartTime.Text = "Start Time:";
+            lblStartTime.AutoSize = true;
+            lblStartTime.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, 0);
+            lblStartTime.Location = new System.Drawing.Point(12, 201);
+            lblStartTime.Name = "lblStartTime";
+            lblStartTime.Size = new System.Drawing.Size(78, 20);
+            lblStartTime.TabIndex = 50;
+            lblStartTime.Text = "Start Time:";
             // 
             // UptimeThresholdConfig
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(577, 310);
-            this.Controls.Add(this.lblStartTime);
-            this.Controls.Add(this.lblUptime);
-            this.Controls.Add(this.bttnClearAlert);
-            this.Controls.Add(this.lnkConfigureRoot);
-            this.Controls.Add(this.bttnUpdate);
-            this.Controls.Add(this.pnlThresholds);
-            this.Controls.Add(this.chkInherit);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "UptimeThresholdConfig";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Uptime Threshold Config";
-            this.Load += new System.EventHandler(this.UptimeThresholdConfig_Load);
-            this.pnlThresholds.ResumeLayout(false);
-            this.pnlThresholds.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numWarning)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numCritical)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(577, 310);
+            Controls.Add(lblStartTime);
+            Controls.Add(lblUptime);
+            Controls.Add(bttnClearAlert);
+            Controls.Add(lnkConfigureRoot);
+            Controls.Add(bttnUpdate);
+            Controls.Add(pnlThresholds);
+            Controls.Add(chkInherit);
+            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "UptimeThresholdConfig";
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            Text = "Uptime Threshold Config";
+            Load += UptimeThresholdConfig_Load;
+            pnlThresholds.ResumeLayout(false);
+            pnlThresholds.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numWarning).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numCritical).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

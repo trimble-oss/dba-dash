@@ -30,10 +30,10 @@ namespace DBADashGUI.Changes
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             dgv = new DBADashDataGridView();
             toolStripDBInfo = new System.Windows.Forms.ToolStrip();
@@ -104,26 +104,26 @@ namespace DBADashGUI.Changes
             dgv.AllowUserToAddRows = false;
             dgv.AllowUserToDeleteRows = false;
             dgv.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle6.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            dataGridViewCellStyle6.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle6.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
-            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgv.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgv.DefaultCellStyle = dataGridViewCellStyle2;
             dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             dgv.EnableHeadersVisualStyles = false;
-            dgv.Location = new System.Drawing.Point(0, 27);
+            dgv.Location = new System.Drawing.Point(0, 31);
             dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgv.Name = "dgv";
             dgv.ReadOnly = true;
@@ -131,7 +131,7 @@ namespace DBADashGUI.Changes
             dgv.ResultSetName = null;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
-            dgv.Size = new System.Drawing.Size(839, 321);
+            dgv.Size = new System.Drawing.Size(839, 317);
             dgv.TabIndex = 0;
             dgv.CellContentClick += Dgv_CellContentClick;
             dgv.RowsAdded += Dgv_RowsAdded;
@@ -142,16 +142,18 @@ namespace DBADashGUI.Changes
             toolStripDBInfo.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel2, tsRefreshInfo, tsCopyInfo, tsExcel, tsCols, tsSummary, tsDetail, tsClearFilter });
             toolStripDBInfo.Location = new System.Drawing.Point(0, 0);
             toolStripDBInfo.Name = "toolStripDBInfo";
-            toolStripDBInfo.Size = new System.Drawing.Size(839, 27);
+            toolStripDBInfo.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            toolStripDBInfo.Size = new System.Drawing.Size(839, 31);
             toolStripDBInfo.TabIndex = 1;
             toolStripDBInfo.Text = "toolStrip2";
             // 
             // toolStripLabel2
             // 
             toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 2.25F, System.Drawing.FontStyle.Bold);
+            toolStripLabel2.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             toolStripLabel2.Name = "toolStripLabel2";
-            toolStripLabel2.Size = new System.Drawing.Size(107, 24);
+            toolStripLabel2.Size = new System.Drawing.Size(57, 24);
             toolStripLabel2.Text = "Database Info";
             // 
             // tsRefreshInfo
@@ -159,6 +161,7 @@ namespace DBADashGUI.Changes
             tsRefreshInfo.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsRefreshInfo.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefreshInfo.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefreshInfo.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsRefreshInfo.Name = "tsRefreshInfo";
             tsRefreshInfo.Size = new System.Drawing.Size(29, 24);
             tsRefreshInfo.Text = "Refresh";
@@ -169,6 +172,7 @@ namespace DBADashGUI.Changes
             tsCopyInfo.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsCopyInfo.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopyInfo.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopyInfo.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsCopyInfo.Name = "tsCopyInfo";
             tsCopyInfo.Size = new System.Drawing.Size(29, 24);
             tsCopyInfo.Text = "Copy";
@@ -179,6 +183,7 @@ namespace DBADashGUI.Changes
             tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsExcel.Image = Properties.Resources.excel16x16;
             tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcel.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsExcel.Name = "tsExcel";
             tsExcel.Size = new System.Drawing.Size(29, 24);
             tsExcel.Text = "Export Excel";
@@ -189,6 +194,7 @@ namespace DBADashGUI.Changes
             tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsCols.Image = Properties.Resources.Column_16x;
             tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCols.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsCols.Name = "tsCols";
             tsCols.Size = new System.Drawing.Size(29, 24);
             tsCols.Text = "Columns";
@@ -198,8 +204,9 @@ namespace DBADashGUI.Changes
             // 
             tsSummary.Image = Properties.Resources.Table_16x;
             tsSummary.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsSummary.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsSummary.Name = "tsSummary";
-            tsSummary.Size = new System.Drawing.Size(95, 24);
+            tsSummary.Size = new System.Drawing.Size(167, 55);
             tsSummary.Text = "Summary";
             tsSummary.Visible = false;
             tsSummary.Click += TsSummary_Click;
@@ -208,6 +215,7 @@ namespace DBADashGUI.Changes
             // 
             tsDetail.Image = Properties.Resources.Table_16x;
             tsDetail.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsDetail.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsDetail.Name = "tsDetail";
             tsDetail.Size = new System.Drawing.Size(73, 24);
             tsDetail.Text = "Detail";
@@ -218,6 +226,7 @@ namespace DBADashGUI.Changes
             tsClearFilter.Enabled = false;
             tsClearFilter.Image = Properties.Resources.Filter_16x;
             tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsClearFilter.Name = "tsClearFilter";
             tsClearFilter.Size = new System.Drawing.Size(104, 24);
             tsClearFilter.Text = "Clear Filter";
@@ -227,27 +236,27 @@ namespace DBADashGUI.Changes
             dgvHistory.AllowUserToAddRows = false;
             dgvHistory.AllowUserToDeleteRows = false;
             dgvHistory.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle7.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle7.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle7.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
-            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvHistory.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle3.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvHistory.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
             dgvHistory.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvHistory.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colHInstance, colHDB, colHSetting, colHOldValue, colHValueNew, colHChangeDate });
-            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle8.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            dataGridViewCellStyle8.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle8.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle8.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
-            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgvHistory.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvHistory.DefaultCellStyle = dataGridViewCellStyle4;
             dgvHistory.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvHistory.EnableHeadersVisualStyles = false;
-            dgvHistory.Location = new System.Drawing.Point(0, 27);
+            dgvHistory.Location = new System.Drawing.Point(0, 31);
             dgvHistory.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvHistory.Name = "dgvHistory";
             dgvHistory.ReadOnly = true;
@@ -255,7 +264,7 @@ namespace DBADashGUI.Changes
             dgvHistory.ResultSetName = null;
             dgvHistory.RowHeadersVisible = false;
             dgvHistory.RowHeadersWidth = 51;
-            dgvHistory.Size = new System.Drawing.Size(839, 225);
+            dgvHistory.Size = new System.Drawing.Size(839, 221);
             dgvHistory.TabIndex = 0;
             // 
             // colHInstance
@@ -318,16 +327,18 @@ namespace DBADashGUI.Changes
             toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel1, tsRefreshHistory, tsCopyHistory, tsExcelHistory, tsHistoryCols, tsClearFilterHistory, tsFilter });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new System.Drawing.Size(839, 27);
+            toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            toolStrip1.Size = new System.Drawing.Size(839, 31);
             toolStrip1.TabIndex = 1;
             toolStrip1.Text = "toolStrip1";
             // 
             // toolStripLabel1
             // 
             toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 2.25F, System.Drawing.FontStyle.Bold);
+            toolStripLabel1.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             toolStripLabel1.Name = "toolStripLabel1";
-            toolStripLabel1.Size = new System.Drawing.Size(61, 24);
+            toolStripLabel1.Size = new System.Drawing.Size(32, 24);
             toolStripLabel1.Text = "History";
             // 
             // tsRefreshHistory
@@ -335,6 +346,7 @@ namespace DBADashGUI.Changes
             tsRefreshHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsRefreshHistory.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefreshHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefreshHistory.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsRefreshHistory.Name = "tsRefreshHistory";
             tsRefreshHistory.Size = new System.Drawing.Size(29, 24);
             tsRefreshHistory.Text = "Refresh";
@@ -345,6 +357,7 @@ namespace DBADashGUI.Changes
             tsCopyHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsCopyHistory.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopyHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopyHistory.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsCopyHistory.Name = "tsCopyHistory";
             tsCopyHistory.Size = new System.Drawing.Size(29, 24);
             tsCopyHistory.Text = "Copy";
@@ -355,6 +368,7 @@ namespace DBADashGUI.Changes
             tsExcelHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsExcelHistory.Image = Properties.Resources.excel16x16;
             tsExcelHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcelHistory.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsExcelHistory.Name = "tsExcelHistory";
             tsExcelHistory.Size = new System.Drawing.Size(29, 24);
             tsExcelHistory.Text = "Export Excel";
@@ -365,6 +379,7 @@ namespace DBADashGUI.Changes
             tsHistoryCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsHistoryCols.Image = Properties.Resources.Column_16x;
             tsHistoryCols.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsHistoryCols.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsHistoryCols.Name = "tsHistoryCols";
             tsHistoryCols.Size = new System.Drawing.Size(29, 24);
             tsHistoryCols.Text = "Columns";
@@ -375,6 +390,7 @@ namespace DBADashGUI.Changes
             tsClearFilterHistory.Enabled = false;
             tsClearFilterHistory.Image = Properties.Resources.Filter_16x;
             tsClearFilterHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilterHistory.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsClearFilterHistory.Name = "tsClearFilterHistory";
             tsClearFilterHistory.Size = new System.Drawing.Size(104, 24);
             tsClearFilterHistory.Text = "Clear Filter";
@@ -385,6 +401,7 @@ namespace DBADashGUI.Changes
             tsFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { excludeStateChangesToolStripMenuItem });
             tsFilter.Image = Properties.Resources.FilterDropdown_16x;
             tsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsFilter.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsFilter.Name = "tsFilter";
             tsFilter.Size = new System.Drawing.Size(34, 24);
             tsFilter.Text = "Filter";

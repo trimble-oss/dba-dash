@@ -34,7 +34,6 @@ namespace DBADashGUI.LogShipping
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LogShippingControl));
             dgvLogShipping = new DBADashDataGridView();
             Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -59,12 +58,14 @@ namespace DBADashGUI.LogShipping
             configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsBack = new System.Windows.Forms.ToolStripButton();
             tsTrigger = new System.Windows.Forms.ToolStripButton();
+            tsClearFilterSummary = new System.Windows.Forms.ToolStripButton();
             dgvSummary = new DBADashDataGridView();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             toolStrip2 = new System.Windows.Forms.ToolStrip();
             tsCopyDetail = new System.Windows.Forms.ToolStripButton();
             tsExportExcelDetail = new System.Windows.Forms.ToolStripButton();
             statusFilterToolStrip1 = new StatusFilterToolStrip();
+            tsClearFilterDetail = new System.Windows.Forms.ToolStripButton();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -79,8 +80,6 @@ namespace DBADashGUI.LogShipping
             dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
-            tsClearFilterSummary = new System.Windows.Forms.ToolStripButton();
-            tsClearFilterDetail = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)dgvLogShipping).BeginInit();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvSummary).BeginInit();
@@ -99,7 +98,7 @@ namespace DBADashGUI.LogShipping
             dgvLogShipping.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -107,33 +106,24 @@ namespace DBADashGUI.LogShipping
             dgvLogShipping.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgvLogShipping.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvLogShipping.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, Database, Status, RestoreDate, BackupStartDate, TimeSinceLast, LatencyOfLast, TotalTimeBehind, SnapshotAge, SnapshotDate, LastFile, ThresholdConfiguredLevel, Configure });
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgvLogShipping.DefaultCellStyle = dataGridViewCellStyle2;
             dgvLogShipping.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvLogShipping.EnableHeadersVisualStyles = false;
-            dgvLogShipping.Location = new System.Drawing.Point(0, 27);
+            dgvLogShipping.Location = new System.Drawing.Point(0, 31);
             dgvLogShipping.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvLogShipping.Name = "dgvLogShipping";
             dgvLogShipping.ReadOnly = true;
             dgvLogShipping.ResultSetID = 0;
             dgvLogShipping.ResultSetName = null;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvLogShipping.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvLogShipping.RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
             dgvLogShipping.RowHeadersVisible = false;
             dgvLogShipping.RowHeadersWidth = 51;
-            dgvLogShipping.Size = new System.Drawing.Size(698, 276);
+            dgvLogShipping.Size = new System.Drawing.Size(698, 270);
             dgvLogShipping.TabIndex = 0;
             dgvLogShipping.CellContentClick += DgvLogShipping_CellContentClick;
             dgvLogShipping.RowsAdded += DgvLogShipping_RowsAdded;
@@ -249,6 +239,7 @@ namespace DBADashGUI.LogShipping
             // Configure
             // 
             Configure.HeaderText = "Configure";
+            Configure.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             Configure.MinimumWidth = 6;
             Configure.Name = "Configure";
             Configure.ReadOnly = true;
@@ -264,7 +255,7 @@ namespace DBADashGUI.LogShipping
             toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsConfigure, tsBack, tsTrigger, tsClearFilterSummary });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new System.Drawing.Size(698, 27);
+            toolStrip1.Size = new System.Drawing.Size(698, 31);
             toolStrip1.TabIndex = 2;
             toolStrip1.Text = "toolStrip1";
             // 
@@ -274,7 +265,7 @@ namespace DBADashGUI.LogShipping
             tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsRefresh.Name = "tsRefresh";
-            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Size = new System.Drawing.Size(29, 28);
             tsRefresh.Text = "Refresh";
             tsRefresh.Click += TsRefresh_Click;
             // 
@@ -284,7 +275,7 @@ namespace DBADashGUI.LogShipping
             tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCopy.Name = "tsCopy";
-            tsCopy.Size = new System.Drawing.Size(29, 24);
+            tsCopy.Size = new System.Drawing.Size(29, 28);
             tsCopy.Text = "Copy";
             tsCopy.Click += TsCopy_Click;
             // 
@@ -294,7 +285,7 @@ namespace DBADashGUI.LogShipping
             tsExcel.Image = Properties.Resources.excel16x16;
             tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExcel.Name = "tsExcel";
-            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Size = new System.Drawing.Size(29, 28);
             tsExcel.Text = "Export Excel";
             tsExcel.Click += TsExcel_Click;
             // 
@@ -305,7 +296,7 @@ namespace DBADashGUI.LogShipping
             tsConfigure.Image = Properties.Resources.SettingsOutline_16x;
             tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsConfigure.Name = "tsConfigure";
-            tsConfigure.Size = new System.Drawing.Size(34, 24);
+            tsConfigure.Size = new System.Drawing.Size(34, 28);
             tsConfigure.Text = "Configure";
             // 
             // configureInstanceThresholdsToolStripMenuItem
@@ -328,7 +319,7 @@ namespace DBADashGUI.LogShipping
             tsBack.Image = Properties.Resources.Previous_grey_16x;
             tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsBack.Name = "tsBack";
-            tsBack.Size = new System.Drawing.Size(29, 24);
+            tsBack.Size = new System.Drawing.Size(29, 28);
             tsBack.Text = "Back";
             tsBack.Click += TsBack_Click;
             // 
@@ -338,33 +329,41 @@ namespace DBADashGUI.LogShipping
             tsTrigger.Image = Properties.Resources.ProjectSystemModelRefresh_16x;
             tsTrigger.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsTrigger.Name = "tsTrigger";
-            tsTrigger.Size = new System.Drawing.Size(151, 24);
+            tsTrigger.Size = new System.Drawing.Size(151, 28);
             tsTrigger.Text = "Trigger Collection";
             tsTrigger.Visible = false;
             tsTrigger.Click += tsTrigger_Click;
+            // 
+            // tsClearFilterSummary
+            // 
+            tsClearFilterSummary.Image = Properties.Resources.Eraser_16x;
+            tsClearFilterSummary.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilterSummary.Name = "tsClearFilterSummary";
+            tsClearFilterSummary.Size = new System.Drawing.Size(104, 28);
+            tsClearFilterSummary.Text = "Clear Filter";
             // 
             // dgvSummary
             // 
             dgvSummary.AllowUserToAddRows = false;
             dgvSummary.AllowUserToDeleteRows = false;
             dgvSummary.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvSummary.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle3.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvSummary.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
             dgvSummary.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgvSummary.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvSummary.DefaultCellStyle = dataGridViewCellStyle4;
             dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvSummary.EnableHeadersVisualStyles = false;
             dgvSummary.Location = new System.Drawing.Point(0, 0);
@@ -375,7 +374,7 @@ namespace DBADashGUI.LogShipping
             dgvSummary.ResultSetName = null;
             dgvSummary.RowHeadersVisible = false;
             dgvSummary.RowHeadersWidth = 51;
-            dgvSummary.Size = new System.Drawing.Size(698, 184);
+            dgvSummary.Size = new System.Drawing.Size(698, 182);
             dgvSummary.TabIndex = 3;
             dgvSummary.CellContentClick += DgvSummary_CellContentClick;
             dgvSummary.RowsAdded += DgvSummary_RowsAdded;
@@ -383,7 +382,7 @@ namespace DBADashGUI.LogShipping
             // splitContainer1
             // 
             splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            splitContainer1.Location = new System.Drawing.Point(0, 27);
+            splitContainer1.Location = new System.Drawing.Point(0, 31);
             splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             splitContainer1.Name = "splitContainer1";
             splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
@@ -396,8 +395,8 @@ namespace DBADashGUI.LogShipping
             // 
             splitContainer1.Panel2.Controls.Add(dgvLogShipping);
             splitContainer1.Panel2.Controls.Add(toolStrip2);
-            splitContainer1.Size = new System.Drawing.Size(698, 492);
-            splitContainer1.SplitterDistance = 184;
+            splitContainer1.Size = new System.Drawing.Size(698, 488);
+            splitContainer1.SplitterDistance = 182;
             splitContainer1.SplitterWidth = 5;
             splitContainer1.TabIndex = 4;
             // 
@@ -407,7 +406,7 @@ namespace DBADashGUI.LogShipping
             toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsCopyDetail, tsExportExcelDetail, statusFilterToolStrip1, tsClearFilterDetail });
             toolStrip2.Location = new System.Drawing.Point(0, 0);
             toolStrip2.Name = "toolStrip2";
-            toolStrip2.Size = new System.Drawing.Size(698, 27);
+            toolStrip2.Size = new System.Drawing.Size(698, 31);
             toolStrip2.TabIndex = 1;
             toolStrip2.Text = "toolStrip2";
             // 
@@ -417,7 +416,7 @@ namespace DBADashGUI.LogShipping
             tsCopyDetail.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopyDetail.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCopyDetail.Name = "tsCopyDetail";
-            tsCopyDetail.Size = new System.Drawing.Size(29, 24);
+            tsCopyDetail.Size = new System.Drawing.Size(29, 28);
             tsCopyDetail.Text = "Copy";
             tsCopyDetail.Click += TsCopyDetail_Click;
             // 
@@ -427,7 +426,7 @@ namespace DBADashGUI.LogShipping
             tsExportExcelDetail.Image = Properties.Resources.excel16x16;
             tsExportExcelDetail.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExportExcelDetail.Name = "tsExportExcelDetail";
-            tsExportExcelDetail.Size = new System.Drawing.Size(29, 24);
+            tsExportExcelDetail.Size = new System.Drawing.Size(29, 28);
             tsExportExcelDetail.Text = "Export Excel";
             tsExportExcelDetail.Click += TsExportExcelDetail_Click;
             // 
@@ -446,11 +445,19 @@ namespace DBADashGUI.LogShipping
             statusFilterToolStrip1.NAVisible = true;
             statusFilterToolStrip1.OK = true;
             statusFilterToolStrip1.OKVisible = true;
-            statusFilterToolStrip1.Size = new System.Drawing.Size(67, 24);
+            statusFilterToolStrip1.Size = new System.Drawing.Size(67, 28);
             statusFilterToolStrip1.Text = "ALL";
             statusFilterToolStrip1.Warning = true;
             statusFilterToolStrip1.WarningVisible = true;
             statusFilterToolStrip1.UserChangedStatusFilter += TsFilter_Click;
+            // 
+            // tsClearFilterDetail
+            // 
+            tsClearFilterDetail.Image = Properties.Resources.Eraser_16x;
+            tsClearFilterDetail.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilterDetail.Name = "tsClearFilterDetail";
+            tsClearFilterDetail.Size = new System.Drawing.Size(104, 28);
+            tsClearFilterDetail.Text = "Clear Filter";
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -562,22 +569,6 @@ namespace DBADashGUI.LogShipping
             // 
             lblStatus.Name = "lblStatus";
             lblStatus.Size = new System.Drawing.Size(0, 16);
-            // 
-            // tsClearFilterSummary
-            // 
-            tsClearFilterSummary.Image = Properties.Resources.Eraser_16x;
-            tsClearFilterSummary.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsClearFilterSummary.Name = "tsClearFilterSummary";
-            tsClearFilterSummary.Size = new System.Drawing.Size(104, 24);
-            tsClearFilterSummary.Text = "Clear Filter";
-            // 
-            // tsClearFilterDetail
-            // 
-            tsClearFilterDetail.Image = Properties.Resources.Eraser_16x;
-            tsClearFilterDetail.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsClearFilterDetail.Name = "tsClearFilterDetail";
-            tsClearFilterDetail.Size = new System.Drawing.Size(104, 24);
-            tsClearFilterDetail.Text = "Clear Filter";
             // 
             // LogShippingControl
             // 

@@ -46,6 +46,7 @@ namespace DBADashGUI
             Application.AddMessageFilter(this);
             FormClosed += (s, e) => Application.RemoveMessageFilter(this);
             InitializeComponent();
+            WindowState = FormWindowState.Maximized;
             commandLine = opts;
             Disposed += OnDispose;
             AddTabs();
@@ -182,7 +183,6 @@ namespace DBADashGUI
             await SetConnection(repositories.GetDefaultConnection());
             this.ApplyTheme();
             CheckTheme();
-            WindowState = FormWindowState.Maximized;
             if (splitMain.SplitterDistance > 400)
             {
                 splitMain.SplitterDistance = 400;
@@ -1058,7 +1058,7 @@ namespace DBADashGUI
             var currentTag = string.Empty;
             ToolStripMenuItem mTagName = new();
             ToolStripMenuItem mSystemTags = new("System Tags");
-            mSystemTags.Font = new Font(mSystemTags.Font, FontStyle.Italic);
+            mSystemTags.Font = new Font(mnuTags.Font, FontStyle.Italic);
             var tags = DBADashTag.GetTags();
             tags1.AllTags = tags;
             foreach (var tag in tags)
@@ -1069,6 +1069,7 @@ namespace DBADashGUI
 
                     if (tag.TagName.StartsWith('{'))
                     {
+                        mTagName.Font = mSystemTags.Font;
                         mSystemTags.DropDownItems.Add(mTagName);
                     }
                     else
@@ -1094,13 +1095,14 @@ namespace DBADashGUI
                 mTagName.DropDownItems.Add(mTagValue);
             }
 
-            mnuTags.DropDownItems.Add(mSystemTags);
             var clearTag = new ToolStripMenuItem("Clear All");
-            clearTag.Font = new Font(clearTag.Font, FontStyle.Italic);
+            clearTag.Font = new Font(mnuTags.Font, FontStyle.Italic);
             clearTag.Click += ClearTag_Click;
             var refreshTag = new ToolStripMenuItem("Refresh Tags");
-            refreshTag.Font = new Font(refreshTag.Font, FontStyle.Italic);
+            refreshTag.Font = new Font(mnuTags.Font, FontStyle.Italic);
             refreshTag.Click += RefreshTag_Click;
+
+            mnuTags.DropDownItems.Add(mSystemTags);
             mnuTags.DropDownItems.Add("-");
             mnuTags.DropDownItems.Add(refreshTag);
             mnuTags.DropDownItems.Add(clearTag);

@@ -68,7 +68,7 @@ namespace DBADashGUI.Changes
             dgv.DefaultCellStyle = dataGridViewCellStyle2;
             dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             dgv.EnableHeadersVisualStyles = false;
-            dgv.Location = new System.Drawing.Point(0, 27);
+            dgv.Location = new System.Drawing.Point(0, 31);
             dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgv.Name = "dgv";
             dgv.ReadOnly = true;
@@ -76,7 +76,7 @@ namespace DBADashGUI.Changes
             dgv.ResultSetName = null;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
-            dgv.Size = new System.Drawing.Size(897, 661);
+            dgv.Size = new System.Drawing.Size(897, 657);
             dgv.TabIndex = 0;
             // 
             // toolStrip1
@@ -85,7 +85,8 @@ namespace DBADashGUI.Changes
             toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsCols, tsClearFilter });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new System.Drawing.Size(897, 27);
+            toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            toolStrip1.Size = new System.Drawing.Size(897, 31);
             toolStrip1.TabIndex = 1;
             toolStrip1.Text = "toolStrip1";
             // 
@@ -94,6 +95,7 @@ namespace DBADashGUI.Changes
             tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsRefresh.Name = "tsRefresh";
             tsRefresh.Size = new System.Drawing.Size(29, 24);
             tsRefresh.Text = "Refresh";
@@ -104,6 +106,7 @@ namespace DBADashGUI.Changes
             tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopy.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsCopy.Name = "tsCopy";
             tsCopy.Size = new System.Drawing.Size(29, 24);
             tsCopy.Text = "Copy";
@@ -114,6 +117,7 @@ namespace DBADashGUI.Changes
             tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsExcel.Image = Properties.Resources.excel16x16;
             tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcel.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsExcel.Name = "tsExcel";
             tsExcel.Size = new System.Drawing.Size(29, 24);
             tsExcel.Text = "Export Excel";
@@ -124,6 +128,7 @@ namespace DBADashGUI.Changes
             tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsCols.Image = Properties.Resources.Column_16x;
             tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCols.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsCols.Name = "tsCols";
             tsCols.Size = new System.Drawing.Size(29, 24);
             tsCols.Text = "Columns";
@@ -134,6 +139,7 @@ namespace DBADashGUI.Changes
             tsClearFilter.Enabled = false;
             tsClearFilter.Image = Properties.Resources.Filter_16x;
             tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsClearFilter.Name = "tsClearFilter";
             tsClearFilter.Size = new System.Drawing.Size(104, 24);
             tsClearFilter.Text = "Clear Filter";

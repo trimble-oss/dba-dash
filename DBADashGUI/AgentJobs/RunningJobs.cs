@@ -56,12 +56,14 @@ namespace DBADashGUI.AgentJobs
                 new DataGridViewTextBoxColumn() { Name = "colTimeSinceSnapshot", HeaderText = "Time Since Snapshot", DataPropertyName = "TimeSinceSnapshot", ToolTipText = "Time since this data was collected", Width = 100 },
                 new DataGridViewTextBoxColumn() { Name = "colSnapshotDate", HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", ToolTipText = "Time the data was collected", Width = 110 }
                 );
+            dgvRunningJobs.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
         }
 
         public void RefreshData()
         {
             var dt = GetRunningJobs();
             dgvRunningJobs.DataSource = new DataView(dt, PersistedFilter, PersistedSort, DataViewRowState.CurrentRows);
+            dgvRunningJobs.AutoResizeColumnsWithMaxColumnWidth();
             PersistedFilter = null;
             PersistedSort = null;
         }

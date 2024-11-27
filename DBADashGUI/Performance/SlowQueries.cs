@@ -17,6 +17,7 @@ namespace DBADashGUI
         public SlowQueries()
         {
             InitializeComponent();
+            dgvSummary.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
         }
 
         private DBADashContext CurrentContext;
@@ -339,6 +340,7 @@ namespace DBADashGUI
                     dgvSummary.Invoke(() =>
                     {
                         dgvSummary.AutoGenerateColumns = false;
+                        dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                         if (dgvSummary.Columns[0].Width > dgvSummary.Width)
                         {
                             // If column has expanded to > width, reset to half width
@@ -833,17 +835,9 @@ namespace DBADashGUI
             dgvSlow.DataSource = new DataView(dt);
             if (autoSizeColumnsToolStripMenuItem.Checked)
             {
-                AutoSizeDetailGridColumns();
+                dgvSlow.AutoResizeColumnsWithMaxColumnWidth(DataGridViewAutoSizeColumnsMode.DisplayedCells, 0.25f);
             }
             dgvSlow.ApplyTheme(DBADashUser.SelectedTheme);
-        }
-
-        private void AutoSizeDetailGridColumns()
-        {
-            colText.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            dgvSlow.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            colText.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            dgvSlow.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -1049,7 +1043,7 @@ namespace DBADashGUI
         {
             if (autoSizeColumnsToolStripMenuItem.Checked)
             {
-                AutoSizeDetailGridColumns();
+                dgvSlow.AutoResizeColumnsWithMaxColumnWidth(DataGridViewAutoSizeColumnsMode.DisplayedCells, 0.25f);
             }
         }
 

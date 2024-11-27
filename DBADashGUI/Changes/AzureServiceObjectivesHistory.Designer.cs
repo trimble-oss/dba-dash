@@ -50,6 +50,7 @@ namespace DBADashGUI.Changes
             tsCopy = new System.Windows.Forms.ToolStripButton();
             toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             tsExcel = new System.Windows.Forms.ToolStripButton();
+            tsClearFilterDB = new System.Windows.Forms.ToolStripButton();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -75,7 +76,6 @@ namespace DBADashGUI.Changes
             tsCopyPool = new System.Windows.Forms.ToolStripButton();
             toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             tsPoolExcel = new System.Windows.Forms.ToolStripButton();
-            tsClearFilterDB = new System.Windows.Forms.ToolStripButton();
             tsClearFilterPool = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
             toolStrip1.SuspendLayout();
@@ -112,7 +112,7 @@ namespace DBADashGUI.Changes
             dgv.DefaultCellStyle = dataGridViewCellStyle2;
             dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             dgv.EnableHeadersVisualStyles = false;
-            dgv.Location = new System.Drawing.Point(0, 27);
+            dgv.Location = new System.Drawing.Point(0, 31);
             dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgv.Name = "dgv";
             dgv.ReadOnly = true;
@@ -120,7 +120,7 @@ namespace DBADashGUI.Changes
             dgv.ResultSetName = null;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
-            dgv.Size = new System.Drawing.Size(1344, 444);
+            dgv.Size = new System.Drawing.Size(1344, 440);
             dgv.TabIndex = 0;
             // 
             // colInstance
@@ -219,7 +219,8 @@ namespace DBADashGUI.Changes
             toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, toolStripLabel1, tsExcel, tsClearFilterDB });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new System.Drawing.Size(1344, 27);
+            toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            toolStrip1.Size = new System.Drawing.Size(1344, 31);
             toolStrip1.TabIndex = 1;
             toolStrip1.Text = "toolStrip1";
             // 
@@ -228,6 +229,7 @@ namespace DBADashGUI.Changes
             tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsRefresh.Name = "tsRefresh";
             tsRefresh.Size = new System.Drawing.Size(29, 24);
             tsRefresh.Text = "Refresh";
@@ -238,6 +240,7 @@ namespace DBADashGUI.Changes
             tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopy.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsCopy.Name = "tsCopy";
             tsCopy.Size = new System.Drawing.Size(29, 24);
             tsCopy.Text = "Copy";
@@ -246,9 +249,10 @@ namespace DBADashGUI.Changes
             // toolStripLabel1
             // 
             toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 0.5625F, System.Drawing.FontStyle.Bold);
+            toolStripLabel1.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             toolStripLabel1.Name = "toolStripLabel1";
-            toolStripLabel1.Size = new System.Drawing.Size(216, 24);
+            toolStripLabel1.Size = new System.Drawing.Size(33, 24);
             toolStripLabel1.Text = "DB Service Objectives History";
             // 
             // tsExcel
@@ -256,10 +260,21 @@ namespace DBADashGUI.Changes
             tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsExcel.Image = Properties.Resources.excel16x16;
             tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcel.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsExcel.Name = "tsExcel";
             tsExcel.Size = new System.Drawing.Size(29, 24);
             tsExcel.Text = "Export Excel";
             tsExcel.Click += TsExcel_Click;
+            // 
+            // tsClearFilterDB
+            // 
+            tsClearFilterDB.Enabled = false;
+            tsClearFilterDB.Image = Properties.Resources.Filter_16x;
+            tsClearFilterDB.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilterDB.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            tsClearFilterDB.Name = "tsClearFilterDB";
+            tsClearFilterDB.Size = new System.Drawing.Size(104, 24);
+            tsClearFilterDB.Text = "Clear Filter";
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -398,7 +413,7 @@ namespace DBADashGUI.Changes
             dgvPool.DefaultCellStyle = dataGridViewCellStyle4;
             dgvPool.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvPool.EnableHeadersVisualStyles = false;
-            dgvPool.Location = new System.Drawing.Point(0, 27);
+            dgvPool.Location = new System.Drawing.Point(0, 31);
             dgvPool.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvPool.Name = "dgvPool";
             dgvPool.ReadOnly = true;
@@ -406,7 +421,7 @@ namespace DBADashGUI.Changes
             dgvPool.ResultSetName = null;
             dgvPool.RowHeadersVisible = false;
             dgvPool.RowHeadersWidth = 51;
-            dgvPool.Size = new System.Drawing.Size(1344, 439);
+            dgvPool.Size = new System.Drawing.Size(1344, 435);
             dgvPool.TabIndex = 1;
             // 
             // colPoolInstance
@@ -487,7 +502,8 @@ namespace DBADashGUI.Changes
             toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefreshPool, tsCopyPool, toolStripLabel2, tsPoolExcel, tsClearFilterPool });
             toolStrip2.Location = new System.Drawing.Point(0, 0);
             toolStrip2.Name = "toolStrip2";
-            toolStrip2.Size = new System.Drawing.Size(1344, 27);
+            toolStrip2.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            toolStrip2.Size = new System.Drawing.Size(1344, 31);
             toolStrip2.TabIndex = 0;
             toolStrip2.Text = "toolStrip2";
             // 
@@ -496,6 +512,7 @@ namespace DBADashGUI.Changes
             tsRefreshPool.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsRefreshPool.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefreshPool.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefreshPool.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsRefreshPool.Name = "tsRefreshPool";
             tsRefreshPool.Size = new System.Drawing.Size(29, 24);
             tsRefreshPool.Text = "toolStripButton1";
@@ -506,6 +523,7 @@ namespace DBADashGUI.Changes
             tsCopyPool.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsCopyPool.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopyPool.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopyPool.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsCopyPool.Name = "tsCopyPool";
             tsCopyPool.Size = new System.Drawing.Size(29, 24);
             tsCopyPool.Text = "toolStripButton1";
@@ -514,9 +532,10 @@ namespace DBADashGUI.Changes
             // toolStripLabel2
             // 
             toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 0.5625F, System.Drawing.FontStyle.Bold);
+            toolStripLabel2.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             toolStripLabel2.Name = "toolStripLabel2";
-            toolStripLabel2.Size = new System.Drawing.Size(96, 24);
+            toolStripLabel2.Size = new System.Drawing.Size(15, 24);
             toolStripLabel2.Text = "Pool History";
             // 
             // tsPoolExcel
@@ -524,25 +543,18 @@ namespace DBADashGUI.Changes
             tsPoolExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsPoolExcel.Image = Properties.Resources.excel16x16;
             tsPoolExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsPoolExcel.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsPoolExcel.Name = "tsPoolExcel";
             tsPoolExcel.Size = new System.Drawing.Size(29, 24);
             tsPoolExcel.Text = "Export Excel";
             tsPoolExcel.Click += TsPoolExcel_Click;
-            // 
-            // tsClearFilterDB
-            // 
-            tsClearFilterDB.Enabled = false;
-            tsClearFilterDB.Image = Properties.Resources.Filter_16x;
-            tsClearFilterDB.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsClearFilterDB.Name = "tsClearFilterDB";
-            tsClearFilterDB.Size = new System.Drawing.Size(104, 24);
-            tsClearFilterDB.Text = "Clear Filter";
             // 
             // tsClearFilterPool
             // 
             tsClearFilterPool.Enabled = false;
             tsClearFilterPool.Image = Properties.Resources.Filter_16x;
             tsClearFilterPool.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilterPool.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsClearFilterPool.Name = "tsClearFilterPool";
             tsClearFilterPool.Size = new System.Drawing.Size(104, 24);
             tsClearFilterPool.Text = "Clear Filter";

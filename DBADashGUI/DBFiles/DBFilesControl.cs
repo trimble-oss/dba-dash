@@ -94,6 +94,7 @@ namespace DBADashGUI.DBFiles
             {
                 dgvFiles.AutoGenerateColumns = false;
                 dgvFiles.DataSource = new DataView(dt);
+                dgvFiles.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
                 dgvFiles.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
 
                 configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;

@@ -37,7 +37,8 @@ namespace DBADashGUI.Changes
             {
                 Common.PivotDGV(ref dgv);
             }
-            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
+            dgv.AutoResizeColumnsWithMaxColumnWidth();
         }
 
         public static DataTable GetAzureDBResourceGovernance(List<int> instanceIDs)

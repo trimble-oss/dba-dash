@@ -34,7 +34,7 @@ namespace DBADashGUI
                     HeaderText = @"Restore",
                     Text = "Restore",
                     UseColumnTextForLinkValue = true,
-                    Width = 80
+                    AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells
                 });
                 grid.Columns.Add(new DataGridViewLinkColumn()
                 {
@@ -42,7 +42,7 @@ namespace DBADashGUI
                     HeaderText = @"Delete",
                     Text = "Delete Now",
                     UseColumnTextForLinkValue = true,
-                    Width = 90
+                    AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells
                 });
                 grid.CellContentClick -= Grid_CellContentClick;
                 grid.CellContentClick += Grid_CellContentClick;
@@ -180,17 +180,17 @@ Are you sure you want to delete this instance?",
                         },
                          ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>()
                             {
-                                new ("InstanceID", new PersistedColumnLayout { Width = 100, Visible = false }),
-                                new("ConnectionID", new PersistedColumnLayout { Width = 250, Visible = true }),
-                                new("InstanceDisplayName", new PersistedColumnLayout { Width = 250, Visible = true }),
-                                new("SnapshotDate", new PersistedColumnLayout { Width = 120, Visible = true }),
-                                new("LastCollection", new PersistedColumnLayout { Width = 80, Visible = true }),
-                                new("LastCollectionMins", new PersistedColumnLayout { Width = 80, Visible = false }),
-                                new("ScheduledDeletion", new PersistedColumnLayout { Width = 120, Visible = true }),
-                                new("ScheduledDeletionDays", new PersistedColumnLayout { Width = 80, Visible = true }),
-                                new("HardDeleteThresholdDays", new PersistedColumnLayout { Width = 80, Visible = true }),
-                                new("colRestore", new PersistedColumnLayout { Width = 80, Visible = true }),
-                                new("colDelete", new PersistedColumnLayout { Width = 90, Visible = true }),
+                                new ("InstanceID", new PersistedColumnLayout { Visible = false }),
+                                new("ConnectionID", new PersistedColumnLayout { Visible = true }),
+                                new("InstanceDisplayName", new PersistedColumnLayout {  Visible = true }),
+                                new("SnapshotDate", new PersistedColumnLayout {  Visible = true }),
+                                new("LastCollection", new PersistedColumnLayout {  Visible = true }),
+                                new("LastCollectionMins", new PersistedColumnLayout {  Visible = false }),
+                                new("ScheduledDeletion", new PersistedColumnLayout {  Visible = true }),
+                                new("ScheduledDeletionDays", new PersistedColumnLayout {  Visible = true }),
+                                new("HardDeleteThresholdDays", new PersistedColumnLayout {  Visible = true }),
+                                new("colRestore", new PersistedColumnLayout { Visible = true }),
+                                new("colDelete", new PersistedColumnLayout {  Visible = true }),
                             },
                         CellHighlightingRules =
                         {

@@ -46,28 +46,31 @@
             dgvCols.AllowUserToAddRows = false;
             dgvCols.AllowUserToDeleteRows = false;
             dgvCols.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            dgvCols.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             dgvCols.BackgroundColor = System.Drawing.Color.White;
             dgvCols.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvCols.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colIsVisible, colColumn });
-            dgvCols.Location = new System.Drawing.Point(12, 33);
+            dgvCols.Location = new System.Drawing.Point(26, 68);
+            dgvCols.Margin = new System.Windows.Forms.Padding(6);
             dgvCols.Name = "dgvCols";
             dgvCols.RowHeadersVisible = false;
             dgvCols.RowHeadersWidth = 51;
             dgvCols.RowTemplate.Height = 29;
             dgvCols.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            dgvCols.Size = new System.Drawing.Size(363, 441);
+            dgvCols.Size = new System.Drawing.Size(771, 904);
             dgvCols.TabIndex = 0;
             dgvCols.KeyPress += DgvCols_KeyPress;
             // 
             // colIsVisible
             // 
+            colIsVisible.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
             colIsVisible.DataPropertyName = "IsVisible";
             colIsVisible.HeaderText = "";
             colIsVisible.MinimumWidth = 6;
             colIsVisible.Name = "colIsVisible";
             colIsVisible.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             colIsVisible.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            colIsVisible.Width = 50;
+            colIsVisible.Width = 45;
             // 
             // colColumn
             // 
@@ -83,9 +86,10 @@
             // 
             bttnOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             bttnOK.ForeColor = System.Drawing.Color.Black;
-            bttnOK.Location = new System.Drawing.Point(281, 502);
+            bttnOK.Location = new System.Drawing.Point(597, 1029);
+            bttnOK.Margin = new System.Windows.Forms.Padding(6);
             bttnOK.Name = "bttnOK";
-            bttnOK.Size = new System.Drawing.Size(94, 29);
+            bttnOK.Size = new System.Drawing.Size(200, 59);
             bttnOK.TabIndex = 1;
             bttnOK.Text = "OK";
             bttnOK.UseVisualStyleBackColor = true;
@@ -95,9 +99,10 @@
             // 
             bttnCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             bttnCancel.ForeColor = System.Drawing.Color.Black;
-            bttnCancel.Location = new System.Drawing.Point(171, 502);
+            bttnCancel.Location = new System.Drawing.Point(363, 1029);
+            bttnCancel.Margin = new System.Windows.Forms.Padding(6);
             bttnCancel.Name = "bttnCancel";
-            bttnCancel.Size = new System.Drawing.Size(94, 29);
+            bttnCancel.Size = new System.Drawing.Size(200, 59);
             bttnCancel.TabIndex = 2;
             bttnCancel.Text = "Cancel";
             bttnCancel.UseVisualStyleBackColor = true;
@@ -107,9 +112,10 @@
             // 
             lnkAll.AutoSize = true;
             lnkAll.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            lnkAll.Location = new System.Drawing.Point(12, 9);
+            lnkAll.Location = new System.Drawing.Point(26, 18);
+            lnkAll.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             lnkAll.Name = "lnkAll";
-            lnkAll.Size = new System.Drawing.Size(27, 20);
+            lnkAll.Size = new System.Drawing.Size(51, 41);
             lnkAll.TabIndex = 3;
             lnkAll.TabStop = true;
             lnkAll.Text = "All";
@@ -120,9 +126,10 @@
             // 
             lnkNone.AutoSize = true;
             lnkNone.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            lnkNone.Location = new System.Drawing.Point(57, 10);
+            lnkNone.Location = new System.Drawing.Point(121, 20);
+            lnkNone.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             lnkNone.Name = "lnkNone";
-            lnkNone.Size = new System.Drawing.Size(45, 20);
+            lnkNone.Size = new System.Drawing.Size(91, 41);
             lnkNone.TabIndex = 4;
             lnkNone.TabStop = true;
             lnkNone.Text = "None";
@@ -134,9 +141,10 @@
             lnkSelected.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             lnkSelected.AutoSize = true;
             lnkSelected.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            lnkSelected.Location = new System.Drawing.Point(259, 9);
+            lnkSelected.Location = new System.Drawing.Point(550, 18);
+            lnkSelected.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             lnkSelected.Name = "lnkSelected";
-            lnkSelected.Size = new System.Drawing.Size(116, 20);
+            lnkSelected.Size = new System.Drawing.Size(229, 41);
             lnkSelected.TabIndex = 5;
             lnkSelected.TabStop = true;
             lnkSelected.Text = "Toggle Selected";
@@ -145,15 +153,16 @@
             // 
             // SelectColumns
             // 
-            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleDimensions = new System.Drawing.SizeF(17F, 41F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(387, 552);
+            ClientSize = new System.Drawing.Size(822, 1132);
             Controls.Add(lnkSelected);
             Controls.Add(lnkNone);
             Controls.Add(lnkAll);
             Controls.Add(bttnCancel);
             Controls.Add(bttnOK);
             Controls.Add(dgvCols);
+            Margin = new System.Windows.Forms.Padding(6);
             Name = "SelectColumns";
             StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             Text = "Select Columns";

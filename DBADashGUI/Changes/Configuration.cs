@@ -82,7 +82,8 @@ namespace DBADashGUI.Changes
                 lastInstance = instance;
             }
             dgvConfig.Rows.AddRange(rows.ToArray());
-            dgvConfig.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgvConfig.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
+            dgvConfig.AutoResizeColumnsWithMaxColumnWidth();
         }
 
         private bool AdviceHighlighting => adviceConfiguredALLToolStripMenuItem.Checked || adviceConfiguredToolStripMenuItem.Checked;

@@ -104,6 +104,7 @@ namespace DBADashGUI.Checks
                 new DataGridViewTextBoxColumn() { Name = "colThresholdConfigurationLevel", HeaderText = "Config Level", DataPropertyName = "ThresholdConfigurationLevel", Visible = false },
                 new DataGridViewLinkColumn() { Name = "colEdit", HeaderText = "Edit", Text = "Edit", LinkColor = DashColors.LinkColor, ToolTipText = "Edit thresholds", UseColumnTextForLinkValue = true }
             );
+            dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
             dgv.ApplyTheme();
         }
 

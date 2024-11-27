@@ -70,6 +70,7 @@ namespace DBADashGUI.AgentJobs
             configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             acknowledgeErrorsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             statusFilterToolStrip1 = new StatusFilterToolStrip();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
             dgvJobHistory = new DBADashDataGridView();
             colRunDateTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colRunEndDateTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -92,6 +93,7 @@ namespace DBADashGUI.AgentJobs
             tsFilter = new System.Windows.Forms.ToolStripDropDownButton();
             showJobStepsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             failedOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsClearFilterHistory = new System.Windows.Forms.ToolStripButton();
             tsBack = new System.Windows.Forms.ToolStripButton();
             tsJobName = new System.Windows.Forms.ToolStripLabel();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -122,8 +124,6 @@ namespace DBADashGUI.AgentJobs
             dataGridViewTextBoxColumn26 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn27 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn28 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            tsClearFilter = new System.Windows.Forms.ToolStripButton();
-            tsClearFilterHistory = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)dgvJobs).BeginInit();
             tsJobs.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvJobHistory).BeginInit();
@@ -160,14 +160,14 @@ namespace DBADashGUI.AgentJobs
             dgvJobs.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvJobs.EnableHeadersVisualStyles = false;
             dgvJobs.Location = new System.Drawing.Point(0, 0);
-            dgvJobs.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dgvJobs.Margin = new System.Windows.Forms.Padding(14, 16, 14, 16);
             dgvJobs.Name = "dgvJobs";
             dgvJobs.ReadOnly = true;
             dgvJobs.ResultSetID = 0;
             dgvJobs.ResultSetName = null;
             dgvJobs.RowHeadersVisible = false;
             dgvJobs.RowHeadersWidth = 51;
-            dgvJobs.Size = new System.Drawing.Size(2197, 216);
+            dgvJobs.Size = new System.Drawing.Size(2334, 218);
             dgvJobs.TabIndex = 0;
             dgvJobs.CellContentClick += DgvJobs_CellContentClick;
             dgvJobs.RowsAdded += DgvJobs_RowsAdded;
@@ -175,6 +175,7 @@ namespace DBADashGUI.AgentJobs
             // colHistory
             // 
             colHistory.HeaderText = "History";
+            colHistory.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             colHistory.MinimumWidth = 6;
             colHistory.Name = "colHistory";
             colHistory.ReadOnly = true;
@@ -185,6 +186,7 @@ namespace DBADashGUI.AgentJobs
             // Acknowledge
             // 
             Acknowledge.HeaderText = "Acknowledge";
+            Acknowledge.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             Acknowledge.MinimumWidth = 6;
             Acknowledge.Name = "Acknowledge";
             Acknowledge.ReadOnly = true;
@@ -394,6 +396,7 @@ namespace DBADashGUI.AgentJobs
             // Configure
             // 
             Configure.HeaderText = "Configure";
+            Configure.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             Configure.MinimumWidth = 6;
             Configure.Name = "Configure";
             Configure.ReadOnly = true;
@@ -409,7 +412,8 @@ namespace DBADashGUI.AgentJobs
             tsJobs.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsConfigure, statusFilterToolStrip1, tsClearFilter });
             tsJobs.Location = new System.Drawing.Point(0, 0);
             tsJobs.Name = "tsJobs";
-            tsJobs.Size = new System.Drawing.Size(2197, 27);
+            tsJobs.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            tsJobs.Size = new System.Drawing.Size(2334, 31);
             tsJobs.TabIndex = 3;
             tsJobs.Text = "toolStrip1";
             // 
@@ -419,7 +423,7 @@ namespace DBADashGUI.AgentJobs
             tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsRefresh.Name = "tsRefresh";
-            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Size = new System.Drawing.Size(29, 28);
             tsRefresh.Text = "Refresh";
             tsRefresh.Click += TsRefresh_Click;
             // 
@@ -429,7 +433,7 @@ namespace DBADashGUI.AgentJobs
             tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCopy.Name = "tsCopy";
-            tsCopy.Size = new System.Drawing.Size(29, 24);
+            tsCopy.Size = new System.Drawing.Size(29, 28);
             tsCopy.Text = "Copy";
             tsCopy.Click += TsCopy_Click;
             // 
@@ -439,7 +443,7 @@ namespace DBADashGUI.AgentJobs
             tsExcel.Image = Properties.Resources.excel16x16;
             tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExcel.Name = "tsExcel";
-            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Size = new System.Drawing.Size(29, 28);
             tsExcel.Text = "Export Excel";
             tsExcel.Click += TsExcel_Click;
             // 
@@ -450,7 +454,7 @@ namespace DBADashGUI.AgentJobs
             tsConfigure.Image = Properties.Resources.SettingsOutline_16x;
             tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsConfigure.Name = "tsConfigure";
-            tsConfigure.Size = new System.Drawing.Size(34, 24);
+            tsConfigure.Size = new System.Drawing.Size(34, 28);
             tsConfigure.Text = "Configure";
             // 
             // configureInstanceThresholdsToolStripMenuItem
@@ -489,11 +493,20 @@ namespace DBADashGUI.AgentJobs
             statusFilterToolStrip1.NAVisible = true;
             statusFilterToolStrip1.OK = true;
             statusFilterToolStrip1.OKVisible = true;
-            statusFilterToolStrip1.Size = new System.Drawing.Size(67, 24);
+            statusFilterToolStrip1.Size = new System.Drawing.Size(67, 28);
             statusFilterToolStrip1.Text = "ALL";
             statusFilterToolStrip1.Warning = true;
             statusFilterToolStrip1.WarningVisible = true;
             statusFilterToolStrip1.UserChangedStatusFilter += UserChangedStatusFilter;
+            // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Image = Properties.Resources.Eraser_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 28);
+            tsClearFilter.Text = "Clear Filter";
             // 
             // dgvJobHistory
             // 
@@ -520,15 +533,15 @@ namespace DBADashGUI.AgentJobs
             dgvJobHistory.DefaultCellStyle = dataGridViewCellStyle4;
             dgvJobHistory.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvJobHistory.EnableHeadersVisualStyles = false;
-            dgvJobHistory.Location = new System.Drawing.Point(0, 27);
-            dgvJobHistory.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dgvJobHistory.Location = new System.Drawing.Point(0, 31);
+            dgvJobHistory.Margin = new System.Windows.Forms.Padding(14, 16, 14, 16);
             dgvJobHistory.Name = "dgvJobHistory";
             dgvJobHistory.ReadOnly = true;
             dgvJobHistory.ResultSetID = 0;
             dgvJobHistory.ResultSetName = null;
             dgvJobHistory.RowHeadersVisible = false;
             dgvJobHistory.RowHeadersWidth = 51;
-            dgvJobHistory.Size = new System.Drawing.Size(2197, 200);
+            dgvJobHistory.Size = new System.Drawing.Size(2334, 202);
             dgvJobHistory.TabIndex = 4;
             dgvJobHistory.CellContentClick += DgvJobHistory_CellContentClick;
             dgvJobHistory.RowsAdded += DgvJobHistory_RowsAdded;
@@ -600,6 +613,7 @@ namespace DBADashGUI.AgentJobs
             // 
             colRunDurationSec.DataPropertyName = "RunDurationSec";
             colRunDurationSec.HeaderText = "Duration (sec)";
+            colRunDurationSec.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             colRunDurationSec.MinimumWidth = 6;
             colRunDurationSec.Name = "colRunDurationSec";
             colRunDurationSec.ReadOnly = true;
@@ -611,6 +625,7 @@ namespace DBADashGUI.AgentJobs
             // 
             colRunDuration.DataPropertyName = "RunDuration";
             colRunDuration.HeaderText = "Run Duration";
+            colRunDuration.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             colRunDuration.MinimumWidth = 6;
             colRunDuration.Name = "colRunDuration";
             colRunDuration.ReadOnly = true;
@@ -632,6 +647,7 @@ namespace DBADashGUI.AgentJobs
             colMessage.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
             colMessage.DataPropertyName = "message";
             colMessage.HeaderText = "Message";
+            colMessage.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             colMessage.MinimumWidth = 100;
             colMessage.Name = "colMessage";
             colMessage.ReadOnly = true;
@@ -641,6 +657,7 @@ namespace DBADashGUI.AgentJobs
             // colViewSteps
             // 
             colViewSteps.HeaderText = "Steps";
+            colViewSteps.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             colViewSteps.MinimumWidth = 25;
             colViewSteps.Name = "colViewSteps";
             colViewSteps.ReadOnly = true;
@@ -651,7 +668,7 @@ namespace DBADashGUI.AgentJobs
             // splitContainer1
             // 
             splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            splitContainer1.Location = new System.Drawing.Point(0, 27);
+            splitContainer1.Location = new System.Drawing.Point(0, 31);
             splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             splitContainer1.Name = "splitContainer1";
             splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
@@ -665,8 +682,8 @@ namespace DBADashGUI.AgentJobs
             // 
             splitContainer1.Panel2.Controls.Add(dgvJobHistory);
             splitContainer1.Panel2.Controls.Add(toolStrip2);
-            splitContainer1.Size = new System.Drawing.Size(2197, 448);
-            splitContainer1.SplitterDistance = 216;
+            splitContainer1.Size = new System.Drawing.Size(2334, 456);
+            splitContainer1.SplitterDistance = 218;
             splitContainer1.SplitterWidth = 5;
             splitContainer1.TabIndex = 5;
             // 
@@ -676,7 +693,7 @@ namespace DBADashGUI.AgentJobs
             jobStep1.Location = new System.Drawing.Point(0, 0);
             jobStep1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             jobStep1.Name = "jobStep1";
-            jobStep1.Size = new System.Drawing.Size(2197, 216);
+            jobStep1.Size = new System.Drawing.Size(2334, 218);
             jobStep1.TabIndex = 1;
             jobStep1.Visible = false;
             // 
@@ -686,7 +703,8 @@ namespace DBADashGUI.AgentJobs
             toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefreshHistory, tsCopyHistory, tsExcelHistory, tsFilter, tsClearFilterHistory, tsBack, tsJobName });
             toolStrip2.Location = new System.Drawing.Point(0, 0);
             toolStrip2.Name = "toolStrip2";
-            toolStrip2.Size = new System.Drawing.Size(2197, 27);
+            toolStrip2.Padding = new System.Windows.Forms.Padding(0, 0, 4, 0);
+            toolStrip2.Size = new System.Drawing.Size(2334, 31);
             toolStrip2.TabIndex = 5;
             toolStrip2.Text = "toolStrip2";
             // 
@@ -696,7 +714,7 @@ namespace DBADashGUI.AgentJobs
             tsRefreshHistory.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefreshHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsRefreshHistory.Name = "tsRefreshHistory";
-            tsRefreshHistory.Size = new System.Drawing.Size(29, 24);
+            tsRefreshHistory.Size = new System.Drawing.Size(29, 28);
             tsRefreshHistory.Text = "Refresh";
             tsRefreshHistory.Click += TsRefreshHistory_Click;
             // 
@@ -706,7 +724,7 @@ namespace DBADashGUI.AgentJobs
             tsCopyHistory.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopyHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCopyHistory.Name = "tsCopyHistory";
-            tsCopyHistory.Size = new System.Drawing.Size(29, 24);
+            tsCopyHistory.Size = new System.Drawing.Size(29, 28);
             tsCopyHistory.Text = "Copy";
             tsCopyHistory.Click += TsCopyHistory_Click;
             // 
@@ -716,7 +734,7 @@ namespace DBADashGUI.AgentJobs
             tsExcelHistory.Image = Properties.Resources.excel16x16;
             tsExcelHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExcelHistory.Name = "tsExcelHistory";
-            tsExcelHistory.Size = new System.Drawing.Size(29, 24);
+            tsExcelHistory.Size = new System.Drawing.Size(29, 28);
             tsExcelHistory.Text = "Export Excel";
             tsExcelHistory.Click += TsExcelHistory_Click;
             // 
@@ -727,7 +745,7 @@ namespace DBADashGUI.AgentJobs
             tsFilter.Image = Properties.Resources.FilterDropdown_16x;
             tsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsFilter.Name = "tsFilter";
-            tsFilter.Size = new System.Drawing.Size(34, 24);
+            tsFilter.Size = new System.Drawing.Size(34, 28);
             tsFilter.Text = "Filter";
             // 
             // showJobStepsToolStripMenuItem
@@ -746,23 +764,32 @@ namespace DBADashGUI.AgentJobs
             failedOnlyToolStripMenuItem.Text = "Failed Only";
             failedOnlyToolStripMenuItem.Click += FailedOnlyToolStripMenuItem_Click;
             // 
+            // tsClearFilterHistory
+            // 
+            tsClearFilterHistory.Enabled = false;
+            tsClearFilterHistory.Image = Properties.Resources.Eraser_16x;
+            tsClearFilterHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilterHistory.Name = "tsClearFilterHistory";
+            tsClearFilterHistory.Size = new System.Drawing.Size(104, 28);
+            tsClearFilterHistory.Text = "Clear Filter";
+            // 
             // tsBack
             // 
             tsBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             tsBack.Image = Properties.Resources.Previous_grey_16x;
             tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsBack.Name = "tsBack";
-            tsBack.Size = new System.Drawing.Size(29, 24);
+            tsBack.Size = new System.Drawing.Size(29, 28);
             tsBack.Text = "Back";
             tsBack.Click += TsBack_Click;
             // 
             // tsJobName
             // 
             tsJobName.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            tsJobName.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            tsJobName.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
             tsJobName.ForeColor = System.Drawing.Color.Black;
             tsJobName.Name = "tsJobName";
-            tsJobName.Size = new System.Drawing.Size(80, 24);
+            tsJobName.Size = new System.Drawing.Size(80, 28);
             tsJobName.Text = "Job Name";
             // 
             // dataGridViewTextBoxColumn1
@@ -1004,33 +1031,15 @@ namespace DBADashGUI.AgentJobs
             dataGridViewTextBoxColumn28.Name = "dataGridViewTextBoxColumn28";
             dataGridViewTextBoxColumn28.Width = 125;
             // 
-            // tsClearFilter
-            // 
-            tsClearFilter.Enabled = false;
-            tsClearFilter.Image = Properties.Resources.Eraser_16x;
-            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsClearFilter.Name = "tsClearFilter";
-            tsClearFilter.Size = new System.Drawing.Size(104, 24);
-            tsClearFilter.Text = "Clear Filter";
-            // 
-            // tsClearFilterHistory
-            // 
-            tsClearFilterHistory.Enabled = false;
-            tsClearFilterHistory.Image = Properties.Resources.Eraser_16x;
-            tsClearFilterHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsClearFilterHistory.Name = "tsClearFilterHistory";
-            tsClearFilterHistory.Size = new System.Drawing.Size(104, 24);
-            tsClearFilterHistory.Text = "Clear Filter";
-            // 
             // AgentJobsControl
             // 
-            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            AutoScaleDimensions = new System.Drawing.SizeF(120F, 120F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             Controls.Add(splitContainer1);
             Controls.Add(tsJobs);
             Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             Name = "AgentJobsControl";
-            Size = new System.Drawing.Size(2197, 475);
+            Size = new System.Drawing.Size(2334, 487);
             Load += AgentJobsControl_Load;
             Resize += ResizeForm;
             ((System.ComponentModel.ISupportInitialize)dgvJobs).EndInit();

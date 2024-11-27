@@ -86,6 +86,7 @@ namespace DBADashGUI
             DateHelper.ConvertUTCToAppTimeZone(ref dt, new List<string>() { "PatchDate" });
             dgvVersion.AutoGenerateColumns = false;
             dgvVersion.DataSource = new DataView(dt);
+            dgvVersion.AutoResizeColumnsWithMaxColumnWidth();
 
             if (dt.Rows.Count <= 0) return;
             var versionDate = Convert.ToDateTime(dt.Rows[0]["BuildReferenceVersion"].DBNullToNull());
@@ -122,7 +123,7 @@ namespace DBADashGUI
             DateHelper.ConvertUTCToAppTimeZone(ref dt);
             dgvHistory.AutoGenerateColumns = false;
             dgvHistory.DataSource = new DataView(dt);
-            dgvHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgvHistory.AutoResizeColumnsWithMaxColumnWidth();
         }
 
         private void TsCopyVersion_Click(object sender, EventArgs e)
@@ -180,6 +181,7 @@ namespace DBADashGUI
         {
             dgvVersion.Columns.Clear();
             dgvVersion.Columns.AddRange(ColumnsList.ToArray());
+            dgvVersion.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
             dgvVersion.ApplyTheme();
             SetThresholdsMenuText();
         }

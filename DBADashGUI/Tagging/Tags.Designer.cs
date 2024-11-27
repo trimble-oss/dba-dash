@@ -64,13 +64,13 @@ namespace DBADashGUI.Tagging
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
             tsExcel = new System.Windows.Forms.ToolStripButton();
+            tsClearFilterReport = new System.Windows.Forms.ToolStripButton();
             splitEditReport = new System.Windows.Forms.SplitContainer();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            tsClearFilterReport = new System.Windows.Forms.ToolStripButton();
             panel1.SuspendLayout();
             toolStrip2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
@@ -111,7 +111,7 @@ namespace DBADashGUI.Tagging
             toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsBack, lblInstance });
             toolStrip2.Location = new System.Drawing.Point(0, 0);
             toolStrip2.Name = "toolStrip2";
-            toolStrip2.Size = new System.Drawing.Size(917, 27);
+            toolStrip2.Size = new System.Drawing.Size(917, 31);
             toolStrip2.TabIndex = 6;
             toolStrip2.Text = "toolStrip2";
             // 
@@ -121,7 +121,7 @@ namespace DBADashGUI.Tagging
             tsBack.Image = Properties.Resources.Previous_grey_16x;
             tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsBack.Name = "tsBack";
-            tsBack.Size = new System.Drawing.Size(29, 24);
+            tsBack.Size = new System.Drawing.Size(29, 28);
             tsBack.Text = "Back";
             tsBack.Click += TsBack_Click;
             // 
@@ -130,7 +130,7 @@ namespace DBADashGUI.Tagging
             lblInstance.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             lblInstance.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             lblInstance.Name = "lblInstance";
-            lblInstance.Size = new System.Drawing.Size(76, 24);
+            lblInstance.Size = new System.Drawing.Size(76, 28);
             lblInstance.Text = "Instance: ";
             // 
             // label2
@@ -330,7 +330,7 @@ namespace DBADashGUI.Tagging
             // 
             label4.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
             label4.Dock = System.Windows.Forms.DockStyle.Top;
-            label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold);
+            label4.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
             label4.ForeColor = System.Drawing.Color.White;
             label4.Location = new System.Drawing.Point(0, 0);
             label4.Name = "label4";
@@ -343,7 +343,7 @@ namespace DBADashGUI.Tagging
             // 
             label1.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
             label1.Dock = System.Windows.Forms.DockStyle.Top;
-            label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold);
+            label1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
             label1.ForeColor = System.Drawing.Color.White;
             label1.Location = new System.Drawing.Point(0, 0);
             label1.Name = "label1";
@@ -398,7 +398,7 @@ namespace DBADashGUI.Tagging
             dgvReport.DefaultCellStyle = dataGridViewCellStyle12;
             dgvReport.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvReport.EnableHeadersVisualStyles = false;
-            dgvReport.Location = new System.Drawing.Point(0, 27);
+            dgvReport.Location = new System.Drawing.Point(0, 31);
             dgvReport.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvReport.Name = "dgvReport";
             dgvReport.ReadOnly = true;
@@ -406,7 +406,7 @@ namespace DBADashGUI.Tagging
             dgvReport.ResultSetName = null;
             dgvReport.RowHeadersVisible = false;
             dgvReport.RowHeadersWidth = 51;
-            dgvReport.Size = new System.Drawing.Size(917, 466);
+            dgvReport.Size = new System.Drawing.Size(917, 462);
             dgvReport.TabIndex = 0;
             dgvReport.CellContentClick += DgvReport_CellContentClick;
             // 
@@ -416,7 +416,7 @@ namespace DBADashGUI.Tagging
             toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsClearFilterReport });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new System.Drawing.Size(917, 27);
+            toolStrip1.Size = new System.Drawing.Size(917, 31);
             toolStrip1.TabIndex = 1;
             toolStrip1.Text = "toolStrip1";
             // 
@@ -426,7 +426,7 @@ namespace DBADashGUI.Tagging
             tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsRefresh.Name = "tsRefresh";
-            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Size = new System.Drawing.Size(29, 28);
             tsRefresh.Text = "Refresh";
             tsRefresh.Click += TsRefresh_Click;
             // 
@@ -436,7 +436,7 @@ namespace DBADashGUI.Tagging
             tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCopy.Name = "tsCopy";
-            tsCopy.Size = new System.Drawing.Size(29, 24);
+            tsCopy.Size = new System.Drawing.Size(29, 28);
             tsCopy.Text = "Copy";
             tsCopy.Click += TsCopy_Click;
             // 
@@ -446,9 +446,18 @@ namespace DBADashGUI.Tagging
             tsExcel.Image = Properties.Resources.excel16x16;
             tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExcel.Name = "tsExcel";
-            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Size = new System.Drawing.Size(29, 28);
             tsExcel.Text = "Excel";
             tsExcel.Click += TsExcel_Click;
+            // 
+            // tsClearFilterReport
+            // 
+            tsClearFilterReport.Enabled = false;
+            tsClearFilterReport.Image = Properties.Resources.Filter_16x;
+            tsClearFilterReport.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilterReport.Name = "tsClearFilterReport";
+            tsClearFilterReport.Size = new System.Drawing.Size(104, 28);
+            tsClearFilterReport.Text = "Clear Filter";
             // 
             // splitEditReport
             // 
@@ -510,15 +519,6 @@ namespace DBADashGUI.Tagging
             dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
             dataGridViewTextBoxColumn5.ReadOnly = true;
             dataGridViewTextBoxColumn5.Width = 125;
-            // 
-            // tsClearFilterReport
-            // 
-            tsClearFilterReport.Enabled = false;
-            tsClearFilterReport.Image = Properties.Resources.Filter_16x;
-            tsClearFilterReport.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsClearFilterReport.Name = "tsClearFilterReport";
-            tsClearFilterReport.Size = new System.Drawing.Size(104, 24);
-            tsClearFilterReport.Text = "Clear Filter";
             // 
             // Tags
             // 

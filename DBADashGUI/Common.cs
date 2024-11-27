@@ -194,7 +194,7 @@ namespace DBADashGUI
                 foreach (DataGridViewColumn col in dgv.Columns)
                 {
                     if (!col.Visible) continue;
-                    sheet.Cell(1, colIndex).SetValue(col.HeaderText);
+                    sheet.Cell(1, colIndex).SetValue(col.HeaderText.Replace("\n", " "));
                     colIndex++;
                 }
                 foreach (DataGridViewRow row in dgv.Rows)

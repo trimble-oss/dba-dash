@@ -30,69 +30,75 @@ namespace DBADashGUI
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ConnectionOptions));
-            this.label1 = new System.Windows.Forms.Label();
-            this.optConfigure = new System.Windows.Forms.RadioButton();
-            this.optConnect = new System.Windows.Forms.RadioButton();
-            this.bttnOK = new System.Windows.Forms.Button();
-            this.SuspendLayout();
+            label1 = new System.Windows.Forms.Label();
+            optConfigure = new System.Windows.Forms.RadioButton();
+            optConnect = new System.Windows.Forms.RadioButton();
+            bttnOK = new System.Windows.Forms.Button();
+            SuspendLayout();
             // 
             // label1
             // 
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(25, 23);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(751, 90);
-            this.label1.TabIndex = 0;
-            this.label1.Text = resources.GetString("label1.Text");
+            label1.Location = new System.Drawing.Point(25, 29);
+            label1.Name = "label1";
+            label1.Size = new System.Drawing.Size(726, 112);
+            label1.TabIndex = 0;
+            label1.Text = resources.GetString("label1.Text");
             // 
             // optConfigure
             // 
-            this.optConfigure.AutoSize = true;
-            this.optConfigure.Checked = true;
-            this.optConfigure.Location = new System.Drawing.Point(29, 147);
-            this.optConfigure.Name = "optConfigure";
-            this.optConfigure.Size = new System.Drawing.Size(163, 21);
-            this.optConfigure.TabIndex = 1;
-            this.optConfigure.TabStop = true;
-            this.optConfigure.Text = "Configure the service";
-            this.optConfigure.UseVisualStyleBackColor = true;
+            optConfigure.AutoSize = true;
+            optConfigure.Checked = true;
+            optConfigure.Location = new System.Drawing.Point(29, 184);
+            optConfigure.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            optConfigure.Name = "optConfigure";
+            optConfigure.Size = new System.Drawing.Size(169, 24);
+            optConfigure.TabIndex = 1;
+            optConfigure.TabStop = true;
+            optConfigure.Text = "Configure the service";
+            optConfigure.UseVisualStyleBackColor = true;
             // 
             // optConnect
             // 
-            this.optConnect.AutoSize = true;
-            this.optConnect.Location = new System.Drawing.Point(29, 190);
-            this.optConnect.Name = "optConnect";
-            this.optConnect.Size = new System.Drawing.Size(308, 21);
-            this.optConnect.TabIndex = 2;
-            this.optConnect.Text = "Connect to an existing DBA Dash repository.";
-            this.optConnect.UseVisualStyleBackColor = true;
+            optConnect.AutoSize = true;
+            optConnect.Location = new System.Drawing.Point(29, 238);
+            optConnect.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            optConnect.Name = "optConnect";
+            optConnect.Size = new System.Drawing.Size(322, 24);
+            optConnect.TabIndex = 2;
+            optConnect.Text = "Connect to an existing DBA Dash repository.";
+            optConnect.UseVisualStyleBackColor = true;
             // 
             // bttnOK
             // 
-            this.bttnOK.Location = new System.Drawing.Point(612, 269);
-            this.bttnOK.Name = "bttnOK";
-            this.bttnOK.Size = new System.Drawing.Size(92, 32);
-            this.bttnOK.TabIndex = 3;
-            this.bttnOK.Text = "OK";
-            this.bttnOK.UseVisualStyleBackColor = true;
-            this.bttnOK.Click += new System.EventHandler(this.BttnOK_Click);
+            bttnOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            bttnOK.AutoSize = true;
+            bttnOK.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            bttnOK.Location = new System.Drawing.Point(611, 330);
+            bttnOK.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            bttnOK.Name = "bttnOK";
+            bttnOK.Padding = new System.Windows.Forms.Padding(30, 8, 30, 8);
+            bttnOK.Size = new System.Drawing.Size(99, 46);
+            bttnOK.TabIndex = 3;
+            bttnOK.Text = "OK";
+            bttnOK.UseVisualStyleBackColor = true;
+            bttnOK.Click += BttnOK_Click;
             // 
             // ConnectionOptions
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(763, 335);
-            this.Controls.Add(this.bttnOK);
-            this.Controls.Add(this.optConnect);
-            this.Controls.Add(this.optConfigure);
-            this.Controls.Add(this.label1);
-            this.Name = "ConnectionOptions";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Connection Options";
-            this.Load += new System.EventHandler(this.ConnectionOptions_Load);
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(763, 419);
+            Controls.Add(bttnOK);
+            Controls.Add(optConnect);
+            Controls.Add(optConfigure);
+            Controls.Add(label1);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "ConnectionOptions";
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            Text = "Connection Options";
+            Load += ConnectionOptions_Load;
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
