@@ -851,6 +851,7 @@ namespace DBADashGUI.CommunityTools
             URL = FirstResponderKitUrl,
             Description = "List the most resource-intensive queries from the plan cache",
             DatabaseNameParameter = "@DatabaseName",
+            ObjectParameterName = "@StoredProcName",
             Params = new Params
             {
                 ParamList = new List<Param>
@@ -1561,6 +1562,8 @@ namespace DBADashGUI.CommunityTools
             CancellationMessageWarning =
                 "Cancellation of this report will leave an extended event session running that will require cleanup.",
             DatabaseNameParameter = "@database_name",
+            ObjectParameterName = "@object_name",
+            SchemaParameterName = "@object_schema",
             Params = new Params()
             {
                 ParamList = new List<Param>
@@ -2140,6 +2143,8 @@ namespace DBADashGUI.CommunityTools
             URL = ErikDarlingUrl,
             Description = "Query store analysis",
             DatabaseNameParameter = "@database_name",
+            ObjectParameterName = "@procedure_name",
+            SchemaParameterName = "@procedure_schema",
             Params = new Params()
             {
                 ParamList = new()
@@ -2313,6 +2318,7 @@ namespace DBADashGUI.CommunityTools
             URL = ErikDarlingUrl,
             Description = "Procedure for parsing sqlserver.blocked_process_report extended event",
             DatabaseNameParameter = "@database_name",
+            ObjectParameterName = "@object_name",
             Params = new Params()
             {
                 ParamList = new()
@@ -2541,6 +2547,7 @@ namespace DBADashGUI.CommunityTools
             URL = "https://github.com/sqlstudent144/SQL-Server-Scripts/blob/main/sp_DBPermissions.sql",
             Description = "Database principals,role membership and permissions",
             DatabaseNameParameter = "@DBName",
+            ObjectParameterName = "@ObjectName",
             Params = new Params()
             {
                 ParamList = new()
@@ -2667,7 +2674,7 @@ namespace DBADashGUI.CommunityTools
                                 "RevokeScript",
                                 new TextLinkColumnInfo()
                                 {
-                                    TargetColumn = "DropScript",
+                                    TargetColumn = "RevokeScript",
                                     TextHandling = CodeEditor.CodeEditorModes.SQL
                                 }
                             },
@@ -2675,7 +2682,7 @@ namespace DBADashGUI.CommunityTools
                                 "GrantScript",
                                 new TextLinkColumnInfo()
                                 {
-                                    TargetColumn = "AddScript",
+                                    TargetColumn = "GrantScript",
                                     TextHandling = CodeEditor.CodeEditorModes.SQL
                                 }
                             }
@@ -2704,6 +2711,9 @@ namespace DBADashGUI.CommunityTools
             sp_SrvPermissions,
             sp_DBPermissions
         };
+
+        public static List<DirectExecutionReport> ProcedureLevelTools =>
+            CommunityToolsList.Where(t => !string.IsNullOrEmpty(t.ObjectParameterName)).OrderBy(t => t.ProcedureName).ToList();
 
         public static List<DirectExecutionReport> DatabaseLevelCommunityTools =>
             CommunityToolsList.Where(x => x.DatabaseNameParameter != null).ToList();

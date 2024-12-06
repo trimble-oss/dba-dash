@@ -1048,8 +1048,11 @@ namespace DBADashGUI.CustomReports
 
             if (context.ObjectID > 0)
             {
+                var objectParamName = string.IsNullOrEmpty(dxReport.ObjectParameterName) ? "@ObjectName" : dxReport.ObjectParameterName;
+                var schemaParamName = string.IsNullOrEmpty(dxReport.ObjectParameterName) ? "@SchemaName" : dxReport.ObjectParameterName;
+
                 var pObjectName = customParams.FirstOrDefault(p =>
-                    p.Param.ParameterName.Equals("@ObjectName", StringComparison.InvariantCultureIgnoreCase) &&
+                    p.Param.ParameterName.Equals(objectParamName, StringComparison.InvariantCultureIgnoreCase) &&
                     p.UseDefaultValue);
                 if (pObjectName != null && !string.IsNullOrEmpty(context.ObjectName))
                 {
@@ -1068,7 +1071,7 @@ namespace DBADashGUI.CustomReports
                 }
 
                 var pSchemaName = customParams.FirstOrDefault(p =>
-                    p.Param.ParameterName.Equals("@SchemaName", StringComparison.InvariantCultureIgnoreCase) &&
+                    p.Param.ParameterName.Equals(schemaParamName, StringComparison.InvariantCultureIgnoreCase) &&
                     p.UseDefaultValue);
                 if (pSchemaName != null && !string.IsNullOrEmpty(context.ObjectName))
                 {
