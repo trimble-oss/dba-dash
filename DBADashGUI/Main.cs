@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -848,19 +849,43 @@ namespace DBADashGUI
                     case SQLTreeItem.TreeType.StoredProcedure or SQLTreeItem.TreeType.CLRProcedure
                         or SQLTreeItem.TreeType.ScalarFunction or SQLTreeItem.TreeType.CLRScalarFunction
                         or SQLTreeItem.TreeType.Trigger or SQLTreeItem.TreeType.CLRTrigger:
-                        allowedTabs.AddRange(new[] { tabObjectExecutionSummary, tabPerformance });
+                        allowedTabs.AddRange(new[] { tabObjectExecutionSummary, tabPerformance, tabSchema });
+
+                        foreach (var tool in CommunityTools.CommunityTools.ProcedureLevelTools)
+                        {
+                            if (!Enum.TryParse<ProcedureExecutionMessage.CommandNames>(tool.ProcedureName,
+                                    out var proc)) continue;
+                            if (!n.Context.IsScriptAllowed(ProcedureExecutionMessage.CommandNames.sp_QuickieStore))
+                                continue;
+
+                            allowedTabs.Add(CommunityToolsTabPages[proc]);
+                        }
+
                         break;
 
                     case SQLTreeItem.TreeType.Table:
-                        allowedTabs.Add(tabTableSize);
+                        allowedTabs.AddRange(new[] { tabTableSize, tabSchema });
+
                         if (n.Context.IsScriptAllowed(ProcedureExecutionMessage.CommandNames.sp_BlitzIndex))
                         {
                             allowedTabs.Add(tabBlitzIndex);
                         }
+
+                        if (n.Context.IsScriptAllowed(ProcedureExecutionMessage.CommandNames.sp_DBPermissions))
+                        {
+                            allowedTabs.Add(CommunityToolsTabPages[ProcedureExecutionMessage.CommandNames.sp_DBPermissions]);
+                        }
+
+                        break;
+
+                    default:
+                        allowedTabs.Add(tabSchema);
+                        if (n.Context.IsScriptAllowed(ProcedureExecutionMessage.CommandNames.sp_DBPermissions))
+                        {
+                            allowedTabs.Add(CommunityToolsTabPages[ProcedureExecutionMessage.CommandNames.sp_DBPermissions]);
+                        }
                         break;
                 }
-
-                allowedTabs.Add(tabSchema);
             }
 
             if (allowedTabs.Contains(tabSlowQueries) && n.Context.ProductVersion?.Major < 10)
