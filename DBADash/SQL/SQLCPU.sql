@@ -13,11 +13,18 @@ BEGIN
 	SELECT	@ts_now= cpu_ticks/(cpu_ticks/ms_ticks)
 	FROM sys.dm_os_sys_info; 
 
-	/* Get number of physical numa nodes for the SQL instance */
-	SELECT @numa_nodes  = COUNT(*) 
-	FROM sys.dm_os_memory_nodes 
-	WHERE memory_node_id <> 64 /* exclude the internal node for the DAC */
-
+	IF OBJECT_ID('sys.dm_os_memory_nodes') IS NOT NULL
+	BEGIN
+		/* Get number of physical numa nodes for the SQL instance */
+		SELECT @numa_nodes  = COUNT(*) 
+		FROM sys.dm_os_memory_nodes 
+		WHERE memory_node_id <> 64 /* exclude the internal node for the DAC */
+	END
+	ELSE
+	BEGIN
+		/* For SQL 2005 */
+		SET @numa_nodes=1
+	END
 	/* 
 		SQL Process utlization might need to be divided by NUMA node count.  
 		If we still end up with more than 100% CPU, calculate SQL process as 100-system idle.
