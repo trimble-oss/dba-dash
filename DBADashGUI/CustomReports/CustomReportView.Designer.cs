@@ -94,7 +94,7 @@
             tsExecute.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExecute.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsExecute.Name = "tsExecute";
-            tsExecute.Size = new System.Drawing.Size(144, 55);
+            tsExecute.Size = new System.Drawing.Size(84, 24);
             tsExecute.Text = "Execute";
             tsExecute.Visible = false;
             tsExecute.Click += TsRefresh_Click;
@@ -241,7 +241,7 @@
             cboResults.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             cboResults.Font = new System.Drawing.Font("Segoe UI", 0.03515625F);
             cboResults.Name = "cboResults";
-            cboResults.Size = new System.Drawing.Size(150, 36);
+            cboResults.Size = new System.Drawing.Size(150, 31);
             cboResults.Visible = false;
             cboResults.SelectedIndexChanged += CboResults_SelectedIndexChanged;
             // 
@@ -250,7 +250,7 @@
             lblSelectResults.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             lblSelectResults.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             lblSelectResults.Name = "lblSelectResults";
-            lblSelectResults.Size = new System.Drawing.Size(205, 55);
+            lblSelectResults.Size = new System.Drawing.Size(102, 24);
             lblSelectResults.Text = "Select Results:";
             lblSelectResults.Visible = false;
             // 
@@ -307,7 +307,7 @@
             tsTrigger.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsTrigger.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsTrigger.Name = "tsTrigger";
-            tsTrigger.Size = new System.Drawing.Size(275, 55);
+            tsTrigger.Size = new System.Drawing.Size(151, 24);
             tsTrigger.Text = "Trigger Collection";
             tsTrigger.Visible = false;
             tsTrigger.Click += TsTrigger_Click;
@@ -326,10 +326,10 @@
             // lnkParams
             // 
             lnkParams.Dock = System.Windows.Forms.DockStyle.Fill;
-            lnkParams.Font = new System.Drawing.Font("Segoe UI", 0.03125F);
+            lnkParams.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
             lnkParams.Location = new System.Drawing.Point(0, 0);
             lnkParams.Name = "lnkParams";
-            lnkParams.Size = new System.Drawing.Size(824, 249);
+            lnkParams.Size = new System.Drawing.Size(824, 252);
             lnkParams.TabIndex = 2;
             lnkParams.TabStop = true;
             lnkParams.Text = "Set Parameters";
@@ -342,7 +342,7 @@
             pnlParams.Dock = System.Windows.Forms.DockStyle.Fill;
             pnlParams.Location = new System.Drawing.Point(0, 0);
             pnlParams.Name = "pnlParams";
-            pnlParams.Size = new System.Drawing.Size(824, 548);
+            pnlParams.Size = new System.Drawing.Size(824, 555);
             pnlParams.TabIndex = 3;
             // 
             // splitContainer2
@@ -362,17 +362,17 @@
             // 
             splitContainer2.Panel2.Controls.Add(lblParamsRequired);
             splitContainer2.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            splitContainer2.Size = new System.Drawing.Size(824, 548);
-            splitContainer2.SplitterDistance = 249;
+            splitContainer2.Size = new System.Drawing.Size(824, 555);
+            splitContainer2.SplitterDistance = 252;
             splitContainer2.TabIndex = 4;
             // 
             // lblParamsRequired
             // 
             lblParamsRequired.Dock = System.Windows.Forms.DockStyle.Fill;
-            lblParamsRequired.Font = new System.Drawing.Font("Segoe UI", 0.01953125F);
+            lblParamsRequired.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
             lblParamsRequired.Location = new System.Drawing.Point(0, 0);
             lblParamsRequired.Name = "lblParamsRequired";
-            lblParamsRequired.Size = new System.Drawing.Size(824, 295);
+            lblParamsRequired.Size = new System.Drawing.Size(824, 299);
             lblParamsRequired.TabIndex = 3;
             lblParamsRequired.Text = "Parameters are required to run the report";
             lblParamsRequired.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -390,7 +390,7 @@
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(pnlParams);
-            splitContainer1.Size = new System.Drawing.Size(1242, 548);
+            splitContainer1.Size = new System.Drawing.Size(1242, 555);
             splitContainer1.SplitterDistance = 414;
             splitContainer1.TabIndex = 4;
             // 
@@ -398,10 +398,10 @@
             // 
             statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { lblTimer, tsSep, lblDescription, lblURL });
-            statusStrip1.Location = new System.Drawing.Point(0, 579);
+            statusStrip1.Location = new System.Drawing.Point(0, 586);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.ShowItemToolTips = true;
-            statusStrip1.Size = new System.Drawing.Size(1242, 33);
+            statusStrip1.Size = new System.Drawing.Size(1242, 26);
             statusStrip1.TabIndex = 5;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -421,7 +421,7 @@
             // 
             lblDescription.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             lblDescription.Name = "lblDescription";
-            lblDescription.Size = new System.Drawing.Size(2454, 41);
+            lblDescription.Size = new System.Drawing.Size(1151, 20);
             lblDescription.Spring = true;
             lblDescription.Text = "Description...";
             lblDescription.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -432,7 +432,7 @@
             lblURL.IsLink = true;
             lblURL.LinkColor = System.Drawing.Color.FromArgb(14, 65, 108);
             lblURL.Name = "lblURL";
-            lblURL.Size = new System.Drawing.Size(0, 41);
+            lblURL.Size = new System.Drawing.Size(0, 20);
             lblURL.Visible = false;
             lblURL.Click += URL_Click;
             // 
