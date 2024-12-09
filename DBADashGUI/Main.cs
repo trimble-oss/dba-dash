@@ -2163,7 +2163,7 @@ namespace DBADashGUI
             {
                 tab.ApplyTheme();
             }
-            pnlSearch.BackColor = theme.SearchBackColor;
+            searchLayout.BackColor = theme.SearchBackColor;
             cboTimeZone.BackColor = theme.TimeZoneBackColor;
             cboTimeZone.ForeColor = theme.TimeZoneForeColor;
             cboTimeZone.FlatStyle = FlatStyle.Flat;

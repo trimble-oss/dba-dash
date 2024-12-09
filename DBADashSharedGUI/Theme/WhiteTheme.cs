@@ -19,6 +19,7 @@ namespace DBADashGUI.Theme
             TreeViewBackColor = DashColors.White;
             CodeEditorBackColor = DashColors.White;
             TabBackColor = DashColors.White;
+            SearchBackColor = DashColors.White;
         }
     }
 }

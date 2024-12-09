@@ -49,7 +49,7 @@ namespace DBADashGUI.Theme
         public Color InformationBackColor { get; set; } = DashColors.Information;
         public Color InformationForeColor { get; set; } = DashColors.Information.ContrastColor();
 
-        public Color SearchBackColor { get; set; } = DashColors.TrimbleBlue;
+        public Color SearchBackColor { get; set; } = DashColors.GrayLight;
 
         public Color TimeZoneBackColor { get; set; } = DashColors.TrimbleBlue;
 
