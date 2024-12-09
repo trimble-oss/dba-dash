@@ -34,8 +34,8 @@ namespace DBADashGUI.Backups
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BackupsControl));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BackupsControl));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -44,6 +44,7 @@ namespace DBADashGUI.Backups
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
             dgvBackups = new DBADashDataGridView();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
@@ -120,6 +121,14 @@ namespace DBADashGUI.Backups
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             dgvBackups.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgvBackups.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvBackups.DefaultCellStyle = dataGridViewCellStyle2;
             dgvBackups.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvBackups.EnableHeadersVisualStyles = false;
             dgvBackups.Location = new System.Drawing.Point(0, 31);
@@ -128,13 +137,13 @@ namespace DBADashGUI.Backups
             dgvBackups.ReadOnly = true;
             dgvBackups.ResultSetID = 0;
             dgvBackups.ResultSetName = null;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvBackups.RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvBackups.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             dgvBackups.RowHeadersVisible = false;
             dgvBackups.RowHeadersWidth = 51;
             dgvBackups.Size = new System.Drawing.Size(1947, 465);
@@ -280,23 +289,23 @@ namespace DBADashGUI.Backups
             dgvSummary.AllowUserToAddRows = false;
             dgvSummary.AllowUserToDeleteRows = false;
             dgvSummary.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle3.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvSummary.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
-            dgvSummary.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle4.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
             dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgvSummary.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvSummary.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle4;
+            dgvSummary.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvSummary.DefaultCellStyle = dataGridViewCellStyle5;
             dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvSummary.EnableHeadersVisualStyles = false;
             dgvSummary.Location = new System.Drawing.Point(0, 0);
@@ -352,7 +361,7 @@ namespace DBADashGUI.Backups
             statusFilterToolStrip1.Critical = true;
             statusFilterToolStrip1.CriticalVisible = true;
             statusFilterToolStrip1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
-            statusFilterToolStrip1.Font = new System.Drawing.Font("Segoe UI", 4.5F);
+            statusFilterToolStrip1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
             statusFilterToolStrip1.Image = (System.Drawing.Image)resources.GetObject("statusFilterToolStrip1.Image");
             statusFilterToolStrip1.ImageTransparentColor = System.Drawing.Color.Magenta;
             statusFilterToolStrip1.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
@@ -361,7 +370,7 @@ namespace DBADashGUI.Backups
             statusFilterToolStrip1.NAVisible = true;
             statusFilterToolStrip1.OK = true;
             statusFilterToolStrip1.OKVisible = true;
-            statusFilterToolStrip1.Size = new System.Drawing.Size(52, 24);
+            statusFilterToolStrip1.Size = new System.Drawing.Size(67, 24);
             statusFilterToolStrip1.Text = "ALL";
             statusFilterToolStrip1.Warning = true;
             statusFilterToolStrip1.WarningVisible = true;
@@ -410,8 +419,8 @@ namespace DBADashGUI.Backups
             // dataGridViewTextBoxColumn3
             // 
             dataGridViewTextBoxColumn3.DataPropertyName = "create_date_utc";
-            dataGridViewCellStyle5.Format = "yyyy-MM-dd HH:mm";
-            dataGridViewTextBoxColumn3.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle6.Format = "yyyy-MM-dd HH:mm";
+            dataGridViewTextBoxColumn3.DefaultCellStyle = dataGridViewCellStyle6;
             dataGridViewTextBoxColumn3.HeaderText = "Created";
             dataGridViewTextBoxColumn3.MinimumWidth = 6;
             dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
@@ -578,8 +587,8 @@ namespace DBADashGUI.Backups
             // dataGridViewTextBoxColumn20
             // 
             dataGridViewTextBoxColumn20.DataPropertyName = "Full Backup MB/sec";
-            dataGridViewCellStyle6.Format = "N3";
-            dataGridViewTextBoxColumn20.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle7.Format = "N3";
+            dataGridViewTextBoxColumn20.DefaultCellStyle = dataGridViewCellStyle7;
             dataGridViewTextBoxColumn20.HeaderText = "Full Backup MB/sec";
             dataGridViewTextBoxColumn20.MinimumWidth = 6;
             dataGridViewTextBoxColumn20.Name = "dataGridViewTextBoxColumn20";
@@ -589,8 +598,8 @@ namespace DBADashGUI.Backups
             // dataGridViewTextBoxColumn21
             // 
             dataGridViewTextBoxColumn21.DataPropertyName = "Full Backup Write MB/sec";
-            dataGridViewCellStyle7.Format = "N3";
-            dataGridViewTextBoxColumn21.DefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle8.Format = "N3";
+            dataGridViewTextBoxColumn21.DefaultCellStyle = dataGridViewCellStyle8;
             dataGridViewTextBoxColumn21.HeaderText = "Full Backup Write MB/sec";
             dataGridViewTextBoxColumn21.MinimumWidth = 6;
             dataGridViewTextBoxColumn21.Name = "dataGridViewTextBoxColumn21";
@@ -600,8 +609,8 @@ namespace DBADashGUI.Backups
             // dataGridViewTextBoxColumn22
             // 
             dataGridViewTextBoxColumn22.DataPropertyName = "Full Backup Size GB";
-            dataGridViewCellStyle8.Format = "N3";
-            dataGridViewTextBoxColumn22.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle9.Format = "N3";
+            dataGridViewTextBoxColumn22.DefaultCellStyle = dataGridViewCellStyle9;
             dataGridViewTextBoxColumn22.HeaderText = "FullBackupSizeGB";
             dataGridViewTextBoxColumn22.MinimumWidth = 6;
             dataGridViewTextBoxColumn22.Name = "dataGridViewTextBoxColumn22";
@@ -611,8 +620,8 @@ namespace DBADashGUI.Backups
             // dataGridViewTextBoxColumn23
             // 
             dataGridViewTextBoxColumn23.DataPropertyName = "Full Backup Size (Compressed) GB";
-            dataGridViewCellStyle9.Format = "N3";
-            dataGridViewTextBoxColumn23.DefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewCellStyle10.Format = "N3";
+            dataGridViewTextBoxColumn23.DefaultCellStyle = dataGridViewCellStyle10;
             dataGridViewTextBoxColumn23.HeaderText = "Full Backup Size (Compressed) GB";
             dataGridViewTextBoxColumn23.MinimumWidth = 6;
             dataGridViewTextBoxColumn23.Name = "dataGridViewTextBoxColumn23";
@@ -622,8 +631,8 @@ namespace DBADashGUI.Backups
             // dataGridViewTextBoxColumn24
             // 
             dataGridViewTextBoxColumn24.DataPropertyName = "Full Compression Saving %";
-            dataGridViewCellStyle10.Format = "P2";
-            dataGridViewTextBoxColumn24.DefaultCellStyle = dataGridViewCellStyle10;
+            dataGridViewCellStyle11.Format = "P2";
+            dataGridViewTextBoxColumn24.DefaultCellStyle = dataGridViewCellStyle11;
             dataGridViewTextBoxColumn24.HeaderText = "Full Compression Saving %";
             dataGridViewTextBoxColumn24.MinimumWidth = 6;
             dataGridViewTextBoxColumn24.Name = "dataGridViewTextBoxColumn24";
@@ -633,8 +642,8 @@ namespace DBADashGUI.Backups
             // dataGridViewTextBoxColumn25
             // 
             dataGridViewTextBoxColumn25.DataPropertyName = "Full Compression Saving %";
-            dataGridViewCellStyle11.Format = "P2";
-            dataGridViewTextBoxColumn25.DefaultCellStyle = dataGridViewCellStyle11;
+            dataGridViewCellStyle12.Format = "P2";
+            dataGridViewTextBoxColumn25.DefaultCellStyle = dataGridViewCellStyle12;
             dataGridViewTextBoxColumn25.HeaderText = "Full Compression Saving %";
             dataGridViewTextBoxColumn25.MinimumWidth = 6;
             dataGridViewTextBoxColumn25.Name = "dataGridViewTextBoxColumn25";
@@ -653,8 +662,8 @@ namespace DBADashGUI.Backups
             // dataGridViewTextBoxColumn27
             // 
             dataGridViewTextBoxColumn27.DataPropertyName = "Diff Backup MB/sec";
-            dataGridViewCellStyle12.Format = "N1";
-            dataGridViewTextBoxColumn27.DefaultCellStyle = dataGridViewCellStyle12;
+            dataGridViewCellStyle13.Format = "N1";
+            dataGridViewTextBoxColumn27.DefaultCellStyle = dataGridViewCellStyle13;
             dataGridViewTextBoxColumn27.HeaderText = "Diff Backup MB/sec";
             dataGridViewTextBoxColumn27.MinimumWidth = 6;
             dataGridViewTextBoxColumn27.Name = "dataGridViewTextBoxColumn27";
@@ -664,8 +673,8 @@ namespace DBADashGUI.Backups
             // dataGridViewTextBoxColumn28
             // 
             dataGridViewTextBoxColumn28.DataPropertyName = "Diff Backup Write MB/sec";
-            dataGridViewCellStyle13.Format = "N1";
-            dataGridViewTextBoxColumn28.DefaultCellStyle = dataGridViewCellStyle13;
+            dataGridViewCellStyle14.Format = "N1";
+            dataGridViewTextBoxColumn28.DefaultCellStyle = dataGridViewCellStyle14;
             dataGridViewTextBoxColumn28.HeaderText = "Diff Backup Write MB/sec";
             dataGridViewTextBoxColumn28.MinimumWidth = 6;
             dataGridViewTextBoxColumn28.Name = "dataGridViewTextBoxColumn28";
