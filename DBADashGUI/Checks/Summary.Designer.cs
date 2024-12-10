@@ -803,7 +803,7 @@ namespace DBADashGUI
             // 
             refresh1.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
             refresh1.Dock = System.Windows.Forms.DockStyle.Fill;
-            refresh1.Font = new System.Drawing.Font("Segoe UI", 0.0107421875F);
+            refresh1.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
             refresh1.ForeColor = System.Drawing.Color.White;
             refresh1.Location = new System.Drawing.Point(0, 31);
             refresh1.Margin = new System.Windows.Forms.Padding(0);

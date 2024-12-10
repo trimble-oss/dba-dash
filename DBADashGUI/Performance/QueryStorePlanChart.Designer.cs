@@ -98,7 +98,7 @@
             // refresh1
             // 
             refresh1.Dock = System.Windows.Forms.DockStyle.Fill;
-            refresh1.Font = new System.Drawing.Font("Segoe UI", 11F);
+            refresh1.Font = new System.Drawing.Font("Segoe UI", 13.8F);
             refresh1.Location = new System.Drawing.Point(0, 27);
             refresh1.Margin = new System.Windows.Forms.Padding(4);
             refresh1.Name = "refresh1";

@@ -37,6 +37,7 @@
             // lblRefresh
             // 
             lblRefresh.Dock = System.Windows.Forms.DockStyle.Fill;
+            lblRefresh.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
             lblRefresh.Location = new System.Drawing.Point(0, 0);
             lblRefresh.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lblRefresh.Name = "lblRefresh";
@@ -56,7 +57,7 @@
             AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             Controls.Add(lblRefresh);
-            Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            Font = new System.Drawing.Font("Segoe UI", 11F);
             Margin = new System.Windows.Forms.Padding(4);
             Name = "Refresh";
             Size = new System.Drawing.Size(188, 188);
