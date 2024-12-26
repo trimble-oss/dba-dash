@@ -749,6 +749,7 @@
     <Build Include="dbo\Stored Procedures\ServerRoleMembers_Get.sql" />
     <Build Include="Security\SecurityReports.sql" />
     <Build Include="Security\CommunityScripts.sql" />
+    <Build Include="dbo\Stored Procedures\QueryPlan_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
