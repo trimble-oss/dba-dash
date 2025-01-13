@@ -4,8 +4,11 @@ SELECT Q.InstanceID,
     I.InstanceDisplayName,
     HD.HumanDuration AS [Duration],
     QT.text AS batch_text,
-	SUBSTRING(QT.text,ISNULL((NULLIF(Q.statement_start_offset,-1)/2)+1,0),ISNULL((NULLIF(NULLIF(Q.statement_end_offset,-1),0) - NULLIF(Q.statement_start_offset,-1))/2+1,2147483647)) AS text,
+    COMPRESS(QT.[text]) AS batch_text_compressed,
+	x.[text],
+	COMPRESS(x.[text]) AS text_compressed,
 	CAST(DECOMPRESS(QP.query_plan_compresed) AS NVARCHAR(MAX)) query_plan,
+	QP.query_plan_compresed AS query_plan_compressed,
 	ISNULL(QT.object_id,QP.object_id) AS object_id,
 	O.SchemaName + '.' +  O.ObjectName AS object_name,
     Q.SnapshotDateUTC,
@@ -122,3 +125,4 @@ CROSS APPLY dbo.MillisecondsToHumanDuration (RQBRS.BlockWaitTimeMs) AS BlockWait
 CROSS APPLY dbo.MillisecondsToHumanDuration (RQBRS.BlockWaitTimeRecursiveMs) AS BlockWaitTimeRecursive
 CROSS APPLY dbo.MillisecondsToHumanDuration (DATEDIFF_BIG(ms,Q.last_request_end_time_utc,Q.SnapshotDateUTC)) AS TimeSinceLastRequestEnd
 CROSS APPLY dbo.MillisecondsToHumanDuration (DATEDIFF_BIG(ms,Q.last_request_start_time_utc,Q.last_request_end_time_utc)) AS LastRequestDuration
+CROSS APPLY (SELECT SUBSTRING(QT.text,ISNULL((NULLIF(Q.statement_start_offset,-1)/2)+1,0),ISNULL((NULLIF(NULLIF(Q.statement_end_offset,-1),0) - NULLIF(Q.statement_start_offset,-1))/2+1,2147483647)) AS [text]) x

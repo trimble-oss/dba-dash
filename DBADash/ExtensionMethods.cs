@@ -6,6 +6,9 @@ using System.Text.RegularExpressions;
 using System.IO.Compression;
 using System.IO;
 using Microsoft.Data.SqlClient;
+using System.Data;
+using System.Text;
+using System;
 
 namespace DBADash
 {
@@ -104,5 +107,47 @@ namespace DBADash
         }
 
         public static SqlParameter[] GetParameters(this List<CustomSqlParameter> parameters) => parameters.Where(p => !p.UseDefaultValue).Select(p => p.Param).ToArray();
+
+        public static void AddDecompressedColumns(this DataTable table, Dictionary<string, string> columnMappings)
+        {
+            // Validate all compressed columns exist before processing
+            var missingColumns = columnMappings.Keys.Where(col => !table.Columns.Contains(col)).ToList();
+            if (missingColumns.Count != 0)
+                throw new ArgumentException($"Columns not found in DataTable: {string.Join(", ", missingColumns)}");
+
+            // Add new columns first
+            foreach (var mapping in columnMappings)
+            {
+                if (!table.Columns.Contains(mapping.Value))
+                    table.Columns.Add(mapping.Value, typeof(string));
+            }
+
+            // Process each row once for all columns
+            foreach (DataRow row in table.Rows)
+            {
+                foreach (var mapping in columnMappings)
+                {
+                    string compressedColumnName = mapping.Key;
+                    string decompressedColumnName = mapping.Value;
+
+                    // Skip if the compressed data is null
+                    if (row[compressedColumnName] == DBNull.Value)
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        byte[] compressedData = (byte[])row[compressedColumnName];
+                        string decompressedString = Encoding.Unicode.GetString(compressedData.Decompress().ToArray());
+                        row[decompressedColumnName] = decompressedString;
+                    }
+                    catch (Exception ex)
+                    {
+                        row[decompressedColumnName] = $"Decompression error: {ex.Message}";
+                    }
+                }
+            }
+        }
     }
 }
