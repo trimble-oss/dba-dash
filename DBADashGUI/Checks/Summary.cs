@@ -224,7 +224,7 @@ namespace DBADashGUI
             {
                 var row = grouped.NewRow();
                 row["Test"] = statusCol;
-                row["DisplayText"] = dgvSummary.Columns[statusCol].HeaderText;
+                row["DisplayText"] = dgvSummary.Columns[statusCol].HeaderText.Replace("\n"," ");
                 row["OK"] = 0;
                 row["Warning"] = 0;
                 row["Critical"] = 0;
