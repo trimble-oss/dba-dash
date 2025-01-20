@@ -64,7 +64,7 @@ namespace DBADashGUI
 
         private readonly Dictionary<string, string> tabMapping = new() { { "FullBackupStatus", "tabBackups" }, { "LogShippingStatus", "tabLogShipping" }, { "DiffBackupStatus", "tabBackups" }, { "LogBackupStatus", "tabBackups" }, { "DriveStatus", "tabDrives" },
                                                             { "JobStatus", "tabJobs" }, { "CollectionErrorStatus", "tabDBADashErrorLog"}, { "AGStatus", "tabAG" }, {"LastGoodCheckDBStatus","tabLastGood"}, {"SnapshotAgeStatus","tabCollectionDates"  },
-                                                            {"MemoryDumpStatus","" }, {"UptimeStatus","" }, {"CorruptionStatus","" }, {"AlertStatus","tabAlerts" }, {"FileFreeSpaceStatus","tabFiles" },
+                                                            {"MemoryDumpStatus","" }, {"UptimeStatus","" }, {"CorruptionStatus","" }, {"AlertStatus","tabSQLAgentAlerts" }, {"FileFreeSpaceStatus","tabFiles" },
                                                             {"CustomCheckStatus","tabCustomChecks"  }, {"MirroringStatus","tabMirroring" },{"ElasticPoolStorageStatus","tabAzureSummary"},{"PctMaxSizeStatus","tabFiles"}, {"QueryStoreStatus","tabQS" },
                                                             {"LogFreeSpaceStatus","tabFiles"},{"DBMailStatus","" },{"IdentityStatus","tabIdentityColumns"  }, {"IsAgentRunningStatus","" },{"DatabaseStateStatus","tabDBOptions" }};
 

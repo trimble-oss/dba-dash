@@ -1381,7 +1381,7 @@ namespace DBADashGUI
                         parent.Expand();
                     }
 
-                    if (e.Tab is "tabAlerts" or "tabQS" or "tabDBOptions") // Configuration Node
+                    if (e.Tab is "tabSQLAgentAlerts" or "tabQS" or "tabDBOptions") // Configuration Node
                     {
                         nInstance.Expand();
                         tv1.SelectedNode = nInstance.FindChildOfType(SQLTreeItem.TreeType.Configuration);
