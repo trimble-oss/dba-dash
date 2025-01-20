@@ -68,7 +68,7 @@
     <Compile Update="Bak\BackupsControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="Changes\Alerts.cs">
+    <Compile Update="Changes\SQLAgentAlerts.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Update="Changes\AzureServiceObjectivesHistory.cs">

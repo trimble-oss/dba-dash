@@ -2,7 +2,7 @@
 
 namespace DBADashGUI.Changes
 {
-    partial class Alerts
+    partial class SQLAgentAlerts
     {
         /// <summary> 
         /// Required designer variable.

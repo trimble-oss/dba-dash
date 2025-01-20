@@ -9,9 +9,9 @@ using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.Changes
 {
-    public partial class Alerts : UserControl, ISetContext
+    public partial class SQLAgentAlerts : UserControl, ISetContext
     {
-        public Alerts()
+        public SQLAgentAlerts()
         {
             InitializeComponent();
             dgvAlerts.RegisterClearFilter(tsClearFilterAlerts);
