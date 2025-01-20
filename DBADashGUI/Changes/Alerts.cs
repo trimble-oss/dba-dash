@@ -236,7 +236,7 @@ namespace DBADashGUI.Changes
 
         private void AcknowledgeALLToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var dt = (DataTable)dgvAlerts.DataSource;
+            var dt = ((DataView)dgvAlerts.DataSource).Table;
             if (dt == null) return;
             var instanceIDs = dt.AsEnumerable()
                 .Where(row => row.Field<int>("AlertStatus") == 1 || row.Field<int>("AlertStatus") == 2)
