@@ -63,7 +63,11 @@ namespace DBADash.Alert
 
             using var client = new SmtpClient();
             await client.ConnectAsync(Host, Port, SecureSocketOption);
-            await client.AuthenticateAsync(UserName, Password);
+            if (!string.IsNullOrEmpty(UserName) || !string.IsNullOrEmpty(Password)) // Authenticate if username or password is supplied
+            {
+                await client.AuthenticateAsync(UserName, Password);
+            }
+
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
         }
