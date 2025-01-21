@@ -31,7 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CodeEditorForm));
             panel1 = new System.Windows.Forms.Panel();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
-            webView = new Microsoft.Web.WebView2.WinForms.WebView2();
+            webView2Wrapper = new DBADashGUI.AgentJobs.WebView2Wrapper();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsSave = new System.Windows.Forms.ToolStripButton();
             bttnCopy = new System.Windows.Forms.ToolStripButton();
@@ -44,11 +44,11 @@
             pnlDialog = new System.Windows.Forms.Panel();
             bttnCancel = new System.Windows.Forms.Button();
             bttnOK = new System.Windows.Forms.Button();
+            lblError = new System.Windows.Forms.ToolStripLabel();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)webView).BeginInit();
             toolStrip1.SuspendLayout();
             pnlDialog.SuspendLayout();
             SuspendLayout();
@@ -71,28 +71,23 @@
             // 
             // splitContainer1.Panel2
             // 
-            splitContainer1.Panel2.Controls.Add(webView);
-            splitContainer1.Panel2Collapsed = true;
+            splitContainer1.Panel2.Controls.Add(webView2Wrapper);
             splitContainer1.Size = new System.Drawing.Size(800, 370);
-            splitContainer1.SplitterDistance = 366;
+            splitContainer1.SplitterDistance = 365;
             splitContainer1.TabIndex = 0;
             // 
-            // webView
+            // webView2Wrapper
             // 
-            webView.AllowExternalDrop = true;
-            webView.CreationProperties = null;
-            webView.DefaultBackgroundColor = System.Drawing.Color.White;
-            webView.Dock = System.Windows.Forms.DockStyle.Fill;
-            webView.Location = new System.Drawing.Point(0, 0);
-            webView.Name = "webView";
-            webView.Size = new System.Drawing.Size(96, 100);
-            webView.TabIndex = 0;
-            webView.ZoomFactor = 1D;
+            webView2Wrapper.Dock = System.Windows.Forms.DockStyle.Fill;
+            webView2Wrapper.Location = new System.Drawing.Point(0, 0);
+            webView2Wrapper.Name = "webView2Wrapper";
+            webView2Wrapper.Size = new System.Drawing.Size(431, 370);
+            webView2Wrapper.TabIndex = 0;
             // 
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsSave, bttnCopy, tsLineNumbers, tsWrapText, tsMarkdownView });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsSave, bttnCopy, tsLineNumbers, tsWrapText, tsMarkdownView, lblError });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(800, 27);
@@ -203,6 +198,15 @@
             bttnOK.Text = "&OK";
             bttnOK.UseVisualStyleBackColor = true;
             // 
+            // lblError
+            // 
+            lblError.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            lblError.ForeColor = System.Drawing.Color.Red;
+            lblError.Name = "lblError";
+            lblError.Size = new System.Drawing.Size(41, 24);
+            lblError.Text = "Error";
+            lblError.Visible = false;
+            // 
             // CodeEditorForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -217,7 +221,6 @@
             splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)webView).EndInit();
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
             pnlDialog.ResumeLayout(false);
@@ -231,7 +234,6 @@
         private System.Windows.Forms.Button bttnCancel;
         private System.Windows.Forms.Button bttnOK;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private Microsoft.Web.WebView2.WinForms.WebView2 webView;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsSave;
         private System.Windows.Forms.ToolStripButton bttnCopy;
@@ -241,5 +243,7 @@
         private System.Windows.Forms.ToolStripMenuItem markdownToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem markdownPreviewToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem previewToolStripMenuItem;
+        private AgentJobs.WebView2Wrapper webView2Wrapper;
+        private System.Windows.Forms.ToolStripLabel lblError;
     }
 }
