@@ -212,7 +212,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
             };
             rule.RuleID = ruleID;
             rule.Priority = (Alert.Priorities)priority;
-            rule.ApplyToTag = applyToTagID <= 0 ? null : new DBADashTag()
+            rule.ApplyToTag = applyToTagID <= 0 ? DBADashTag.AllInstancesTag() : new DBADashTag()
             { TagID = applyToTagID, TagName = applyToTag.Split(":")[0], TagValue = applyToTag.Split(":")[1] };
             rule.EvaluationPeriodMins = evaluationPeriodMins;
             rule.IsActive = isActive;
