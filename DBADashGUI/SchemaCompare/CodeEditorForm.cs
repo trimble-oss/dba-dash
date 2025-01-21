@@ -40,14 +40,15 @@ namespace DBADashGUI.SchemaCompare
                 codeEditor1.Mode = value;
                 splitContainer1.Panel2Collapsed = value != CodeEditor.CodeEditorModes.Markdown;
                 tsMarkdownView.Visible = value == CodeEditor.CodeEditorModes.Markdown;
-                ShowMarkdownPreview();
+                _ = ShowMarkdownPreview();
             }
         }
 
-        private void ShowMarkdownPreview()
+        private async Task ShowMarkdownPreview()
         {
             if (codeEditor1.Mode != CodeEditor.CodeEditorModes.Markdown) return;
             if (!isWebViewInit) return;
+            lblError.Visible = false;
             try
             {
                 var pipeline = new MarkdownPipelineBuilder()
@@ -56,12 +57,16 @@ namespace DBADashGUI.SchemaCompare
                     .Build();
 
                 var html = Markdig.Markdown.ToHtml(codeEditor1.txtCode.Text, pipeline);
-                webView.NavigateToString(html);
-                ToggleMarkdown(EditEnabled, true);
+
+                var success = await webView2Wrapper.NavigateToLargeString(html);
+                ToggleMarkdown(EditEnabled | !success, true);
             }
             catch (Exception ex)
             {
-                webView.NavigateToString(ex.Message);
+                ToggleMarkdown(true, false);
+                lblError.Text = "Error loading markdown preview";
+                lblError.ToolTipText = ex.Message;
+                lblError.Visible = true;
             }
         }
 
@@ -90,9 +95,8 @@ namespace DBADashGUI.SchemaCompare
 
         private async void InitializeAsync()
         {
-            await webView.EnsureCoreWebView2Async(null);
             isWebViewInit = true;
-            ShowMarkdownPreview();
+            await ShowMarkdownPreview();
         }
 
         private void TsLineNumbers_Click(object sender, EventArgs e)

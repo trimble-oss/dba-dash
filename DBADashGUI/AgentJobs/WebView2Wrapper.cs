@@ -73,7 +73,7 @@ namespace DBADashGUI.AgentJobs
             SetupCompleted?.Invoke();
         }
 
-        public async Task NavigateToLargeString(string html)
+        public async Task<bool> NavigateToLargeString(string html)
         {
             try
             {
@@ -81,7 +81,7 @@ namespace DBADashGUI.AgentJobs
             }
             catch (Exception)
             {
-                return;
+                return false;
             }
             try
             {
@@ -91,6 +91,8 @@ namespace DBADashGUI.AgentJobs
             {
                 LoadHTMLFromDisk(ex, html); // NavigateToString might fail if size exceeds 2MB.  Try loading from disk instead.
             }
+
+            return true;
         }
 
         // <summary>
