@@ -43,7 +43,7 @@ WITH DeDupe AS (
 			R.RuleID,
 			ROW_NUMBER() OVER(PARTITION BY I.InstanceID ORDER BY R.Priority, R.RuleID) rnum
 	FROM Alert.Rules R
-	CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey) I
+	CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
 	WHERE R.Type = @Type
 	AND R.IsActive=1
 )

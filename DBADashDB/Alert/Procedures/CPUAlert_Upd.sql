@@ -41,7 +41,7 @@ WITH T AS (
 		TRY_CAST(R.Threshold AS TINYINT) AS Threshold,
 		ROW_NUMBER() OVER(PARTITION BY I.InstanceID,R.EvaluationPeriodMins,R.Priority ORDER BY R.Threshold,R.RuleID) rnum
 	FROM Alert.Rules R
-	CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey) I
+	CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
 	WHERE R.Type = @Type
 	AND R.Threshold<=100
 	AND R.IsActive=1

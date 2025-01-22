@@ -124,6 +124,10 @@ namespace DBADashGUI.DBADashAlerts.Rules
         [Browsable(false)]
         public abstract string AlertKey { get; }
 
+        [JsonIgnore]
+        [DisplayName("Apply To Hidden"), Category("Instance Filtering"), Description("Option to apply alert to instances marked as hidden.  Default is false.")]
+        public bool ApplyToHidden { get; set; }
+
         public abstract (bool isValid, string message) Validate();
 
         public void Save()
@@ -155,6 +159,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
             cmd.Parameters.AddWithValue("@Details", GetDetails());
             cmd.Parameters.AddWithValue("@AlertKey", AlertKey);
             cmd.Parameters.AddWithValue("@Notes", Notes);
+            cmd.Parameters.AddWithValue("@ApplyToHidden", ApplyToHidden);
             cn.Open();
             cmd.ExecuteNonQuery();
         }
@@ -190,7 +195,8 @@ namespace DBADashGUI.DBADashAlerts.Rules
                     rdr.GetString("ApplyToTag"),
                     rdr.IsDBNull("ApplyToInstanceID") ? null : rdr.GetInt32("ApplyToInstanceID"),
                     rdr.IsDBNull("ApplyToInstanceID") ? null : Convert.ToString(rdr["ApplyToInstance"]),
-                (string)rdr["Notes"].DBNullToNull());
+                (string)rdr["Notes"].DBNullToNull(),
+                     (bool)rdr["ApplyToHidden"]);
             }
             else
             {
@@ -198,7 +204,9 @@ namespace DBADashGUI.DBADashAlerts.Rules
             }
         }
 
-        public static AlertRuleBase GetRule(int ruleID, RuleTypes ruleType, short priority, int applyToTagID, decimal? threshold, int? evaluationPeriodMins, bool isActive, string details, string applyToTag, int? applyToInstanceId, string applyToInstance, string notes)
+        public static AlertRuleBase GetRule(int ruleID, RuleTypes ruleType, short priority, int applyToTagID, decimal? threshold,
+            int? evaluationPeriodMins, bool isActive, string details, string applyToTag, int? applyToInstanceId,
+            string applyToInstance, string notes, bool applyToHidden)
         {
             AlertRuleBase rule = ruleType switch
             {
@@ -220,6 +228,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
             rule.ApplyToInstanceID = applyToInstanceId;
             rule.ApplyToInstance = applyToInstance;
             rule.Notes = notes;
+            rule.ApplyToHidden = applyToHidden;
             return rule;
         }
     }

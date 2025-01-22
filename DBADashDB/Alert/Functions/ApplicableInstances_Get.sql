@@ -1,7 +1,8 @@
 ﻿CREATE  FUNCTION Alert.ApplicableInstances_Get(
 	@TagID INT, 
 	@InstanceID INT,
-	@AlertKey NVARCHAR(128)='%'
+	@AlertKey NVARCHAR(128)='%',
+	@ApplyToHidden BIT=0
 )
 RETURNS TABLE
 AS
@@ -33,4 +34,5 @@ WHERE EXISTS(
 	)
 AND I.IsActive=1
 AND BP.IsBlackout=0
+AND (I.ShowInSummary=1 OR @ApplyToHidden=1)
 

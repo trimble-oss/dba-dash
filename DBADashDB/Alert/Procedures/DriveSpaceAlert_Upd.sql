@@ -48,7 +48,7 @@ SELECT I.InstanceID,
 	R.AlertKey,
 	R.RuleID
 FROM Alert.Rules R
-CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey) I
+CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
 WHERE R.Type = @Type
 AND R.IsActive=1;
 

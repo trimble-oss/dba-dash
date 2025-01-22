@@ -21,6 +21,7 @@ SELECT R.RuleID,
 	   CASE WHEN R.ApplyToTagID = -1 THEN '{ALL}' ELSE CONCAT(T.TagName,':',T.TagValue) END AS ApplyToTag,
        R.ApplyToInstanceID,
        I.InstanceDisplayName AS ApplyToInstance,
+       R.ApplyToHidden,
        R.Notes
 FROM Alert.Rules R
 LEFT JOIN dbo.Tags T ON R.ApplyToTagID = T.TagID

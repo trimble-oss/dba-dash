@@ -8,8 +8,9 @@
 	@EvaluationPeriodMins INT,
 	@IsActive BIT=1,
 	@Details NVARCHAR(MAX),
-	@Notes NVARCHAR(MAX)=NULL
+	@Notes NVARCHAR(MAX)=NULL,
+	@ApplyToHidden BIT=0
 )
 AS
-INSERT INTO Alert.Rules (Type, AlertKey, Priority, ApplyToTagID,ApplyToInstanceID, Threshold, EvaluationPeriodMins, IsActive, Details, Notes)
-VALUES (@Type, @AlertKey, @Priority, @ApplyToTagID,@ApplyToInstanceID, @Threshold, @EvaluationPeriodMins, @IsActive, @Details, @Notes)
+INSERT INTO Alert.Rules (Type, AlertKey, Priority, ApplyToTagID,ApplyToInstanceID, Threshold, EvaluationPeriodMins, IsActive, Details, Notes, ApplyToHidden)
+VALUES (@Type, @AlertKey, @Priority, @ApplyToTagID,@ApplyToInstanceID, @Threshold, @EvaluationPeriodMins, @IsActive, @Details, @Notes, @ApplyToHidden)

@@ -47,7 +47,7 @@ FROM Alert.Rules R
 OUTER APPLY(SELECT 	NULLIF(TRY_CAST(JSON_VALUE(R.Details,'$.Reference') AS VARCHAR(100)),'') AS Reference,
 					ISNULL(TRY_CAST(JSON_VALUE(R.Details,'$.UseCriticalStatus') AS BIT),0) AS UseCriticalStatus
 		) AS Calc
-CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey) I
+CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
 JOIN dbo.CollectionDatesStatus CDS ON CDS.InstanceID = I.InstanceID 
 		AND (CDS.Status=1 OR Calc.UseCriticalStatus=0)
 		AND (CDS.SnapshotAge >= R.Threshold OR R.Threshold IS NULL)
