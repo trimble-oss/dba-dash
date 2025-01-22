@@ -73,7 +73,7 @@ WITH DeDupe AS (
 	JOIN dbo.DriveStatus DS ON T.InstanceID = DS.InstanceID
 	WHERE (DS.Status = 1 OR T.UseCriticalStatus=0)
 	AND (DS.PctFreeSpace <= (T.Threshold/100.0) OR T.Threshold IS NULL OR T.IsThresholdPercentage=0)
-	AND (DS.FreeGB >= T.Threshold*1024.0 OR T.IsThresholdPercentage=1 OR T.Threshold IS NULL)
+	AND (DS.FreeGB <= T.Threshold/1024.0 OR T.IsThresholdPercentage=1 OR T.Threshold IS NULL)
 )
 INSERT INTO #ExceededThreshold(
 	InstanceID,
