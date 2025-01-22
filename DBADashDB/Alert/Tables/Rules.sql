@@ -10,7 +10,8 @@
 	IsActive BIT NOT NULL,
 	Details NVARCHAR(MAX) NULL,
 	Notes NVARCHAR(MAX) NULL,
-	RuleHash AS HASHBYTES('SHA2_256',CONCAT(Type,'|',AlertKey,'|',ApplyToTagID,'|',ApplyToInstanceID,'|',Threshold,'|',EvaluationPeriodMins,'|',IsActive,'|',Details)),
+	ApplyToHidden BIT NOT NULL CONSTRAINT DF_Alert_Rules_ApplyToHidden DEFAULT(0),
+	RuleHash AS HASHBYTES('SHA2_256',CONCAT(Type,'|',AlertKey,'|',ApplyToTagID,'|',ApplyToInstanceID,'|',Threshold,'|',EvaluationPeriodMins,'|',IsActive,'|',Details,'|',ApplyToHidden)),
 	CONSTRAINT PK_Alert_Rules PRIMARY KEY(RuleID),
 	CONSTRAINT CK_Rule_Priority CHECK(Priority BETWEEN 0 AND 41),
 	CONSTRAINT CK_Rule_ApplyTo CHECK(NOT (ApplyToInstanceID IS NOT NULL AND ApplyToTagID > 0)), /* Should be one or the other */

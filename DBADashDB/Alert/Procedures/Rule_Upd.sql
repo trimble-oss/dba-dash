@@ -9,7 +9,8 @@
 	@EvaluationPeriodMins INT,
 	@IsActive BIT=1,
 	@Details NVARCHAR(MAX),
-	@Notes NVARCHAR(MAX)=NULL
+	@Notes NVARCHAR(MAX)=NULL,
+	@ApplyToHidden BIT=0
 )
 AS
 UPDATE Alert.Rules SET
@@ -22,5 +23,6 @@ UPDATE Alert.Rules SET
 	EvaluationPeriodMins = @EvaluationPeriodMins,
 	IsActive = @IsActive,
 	Details = @Details,
-	Notes = @Notes
+	Notes = @Notes,
+	ApplyToHidden = @ApplyToHidden
 WHERE RuleID = @RuleID
