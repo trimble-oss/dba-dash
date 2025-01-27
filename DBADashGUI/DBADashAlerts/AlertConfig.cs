@@ -214,6 +214,14 @@ namespace DBADashGUI.DBADashAlerts
                 });
                 channelGrid.Columns.Add(new DataGridViewLinkColumn()
                 {
+                    Name = "colCopy",
+                    HeaderText = @"Copy",
+                    Text = "Copy",
+                    AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader,
+                    UseColumnTextForLinkValue = true,
+                });
+                channelGrid.Columns.Add(new DataGridViewLinkColumn()
+                {
                     Name = "colEdit",
                     HeaderText = @"Edit",
                     Text = "Edit",
@@ -260,78 +268,77 @@ namespace DBADashGUI.DBADashAlerts
             if (e.RowIndex < 0) return;
             var grid = (DBADashDataGridView)sender;
             var channelID = (int)grid.Rows[e.RowIndex].Cells["NotificationChannelID"].Value;
-            switch (grid.Columns[e.ColumnIndex].Name)
+            try
             {
-                case "colEdit":
-                    try
-                    {
-                        var channel = NotificationChannelBase.GetChannel(channelID, Common.ConnectionString);
-                        EditChannel(channel);
-
-                        RefreshData();
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-
-                    break;
-
-                case "colEnableDisable":
-                    try
-                    {
-                        var isActive = (bool)grid.Rows[e.RowIndex].Cells["IsActive"].Value;
-                        var channel = NotificationChannelBase.GetChannel(channelID, Common.ConnectionString);
-                        if (isActive) // Disable
+                switch (grid.Columns[e.ColumnIndex].Name)
+                {
+                    case "colCopy":
                         {
-                            channel.DisableFrom = DateTime.UtcNow;
-                            channel.DisableTo = null;
+                            var channel = NotificationChannelBase.GetChannel(channelID, Common.ConnectionString);
+                            channel.ChannelID = null;
+                            EditChannel(channel);
+
+                            RefreshData();
+                            break;
                         }
-                        else // Enable
+                    case "colEdit":
+
                         {
-                            channel.DisableFrom = null;
-                            channel.DisableTo = null;
+                            var channel = NotificationChannelBase.GetChannel(channelID, Common.ConnectionString);
+                            EditChannel(channel);
+
+                            RefreshData();
+                            break;
                         }
-                        channel.Save(Common.ConnectionString);
-                        RefreshData();
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    break;
 
-                case "colDelete":
-                    try
-                    {
-                        var channel = NotificationChannelBase.GetChannel(channelID, Common.ConnectionString);
-                        if (MessageBox.Show(@$"Delete {channel.ChannelName}?", @"Delete", MessageBoxButtons.YesNo,
-                                MessageBoxIcon.Question) != DialogResult.Yes) return;
+                    case "colEnableDisable":
 
-                        channel.Delete(Common.ConnectionString);
-                        RefreshData();
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    break;
+                        {
+                            var isActive = (bool)grid.Rows[e.RowIndex].Cells["IsActive"].Value;
+                            var channel = NotificationChannelBase.GetChannel(channelID, Common.ConnectionString);
+                            if (isActive) // Disable
+                            {
+                                channel.DisableFrom = DateTime.UtcNow;
+                                channel.DisableTo = null;
+                            }
+                            else // Enable
+                            {
+                                channel.DisableFrom = null;
+                                channel.DisableTo = null;
+                            }
 
-                case "colTest":
-                    try
-                    {
-                        var channel = NotificationChannelBase.GetChannel(channelID, Common.ConnectionString);
-                        if (MessageBox.Show(@$"Send a test notification to {channel.ChannelName}?", @"Send", MessageBoxButtons.YesNo,
-                                MessageBoxIcon.Question) != DialogResult.Yes) return;
+                            channel.Save(Common.ConnectionString);
+                            RefreshData();
+                            break;
+                        }
 
-                        await channel.SendNotificationAsync(Alert.GetTestAlert(), string.Empty);
-                        RefreshData();
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    break;
+                    case "colDelete":
+                        {
+                            var channel = NotificationChannelBase.GetChannel(channelID, Common.ConnectionString);
+                            if (MessageBox.Show(@$"Delete {channel.ChannelName}?", @"Delete", MessageBoxButtons.YesNo,
+                                    MessageBoxIcon.Question) != DialogResult.Yes) return;
+
+                            channel.Delete(Common.ConnectionString);
+                            RefreshData();
+                            break;
+                        }
+
+                    case "colTest":
+                        {
+                            var channel = NotificationChannelBase.GetChannel(channelID, Common.ConnectionString);
+                            if (MessageBox.Show(@$"Send a test notification to {channel.ChannelName}?", @"Send",
+                                    MessageBoxButtons.YesNo,
+                                    MessageBoxIcon.Question) != DialogResult.Yes) return;
+
+                            await channel.SendNotificationAsync(Alert.GetTestAlert(), string.Empty);
+                            RefreshData();
+                            break;
+                        }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -373,6 +380,7 @@ namespace DBADashGUI.DBADashAlerts
                         blackout.BlackoutPeriodID = null;
                         await EditBlackout(blackout);
                         break;
+
                     case "colDelete":
 
                         if (MessageBox.Show("Are you sure you want to delete this?", "Delete",
@@ -434,6 +442,7 @@ namespace DBADashGUI.DBADashAlerts
                         RefreshData();
 
                         break;
+
                     case "colBlackout":
                         var blackout = AlertRuleBase.GetRule(ruleID).CreateBlackout();
                         blackout.StartDate = DateHelper.AppNow;
