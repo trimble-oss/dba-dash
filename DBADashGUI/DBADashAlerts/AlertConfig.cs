@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DBADash;
 
 namespace DBADashGUI.DBADashAlerts
 {
@@ -172,6 +173,14 @@ namespace DBADashGUI.DBADashAlerts
             ruleGrid?.AutoResizeColumnsWithMaxColumnWidth();
             if (blackoutGrid != null && !blackoutGrid.Columns.Contains("colDelete"))
             {
+                blackoutGrid.Columns.Add(new DataGridViewLinkColumn()
+                {
+                    Name = "colCopy",
+                    HeaderText = @"Copy",
+                    Text = "Copy",
+                    AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader,
+                    UseColumnTextForLinkValue = true,
+                });
                 blackoutGrid.Columns.Add(new DataGridViewLinkColumn()
                 {
                     Name = "colEdit",
@@ -360,6 +369,10 @@ namespace DBADashGUI.DBADashAlerts
                 };
                 switch (grid.Columns[e.ColumnIndex].Name)
                 {
+                    case "colCopy":
+                        blackout.BlackoutPeriodID = null;
+                        await EditBlackout(blackout);
+                        break;
                     case "colDelete":
 
                         if (MessageBox.Show("Are you sure you want to delete this?", "Delete",
