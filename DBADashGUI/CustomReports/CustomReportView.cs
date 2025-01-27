@@ -274,8 +274,6 @@ namespace DBADashGUI.CustomReports
                 {
                     DateHelper.ConvertUTCToAppTimeZone(ref dt, convertCols);
                 }
-
-                i += 1;
             }
         }
 
