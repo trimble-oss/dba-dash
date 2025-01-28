@@ -23,7 +23,7 @@ OUTER APPLY(SELECT	CASE IC.max_length
 						WHEN 1 THEN POWER(2.,IC.max_length*8) 
 							ELSE POWER(2.,IC.max_length*8-1)-1 
 					END AS max_ident,
-					POWER(2.,IC.max_length*8) AS max_rows,
+					POWER(2E0,IC.max_length*8) AS max_rows,
 					CAST(IC.last_value AS BIGINT) as last_value_big
 			) calc
 OUTER APPLY(SELECT SUM(PS.row_count) row_count
