@@ -24,3 +24,4 @@
 	CONSTRAINT PK_ClosedAlerts PRIMARY KEY(AlertID)
 )
 GO
+CREATE NONCLUSTERED INDEX IX_Alert_ClosedAlerts_ClosedDate ON Alert.ClosedAlerts(ClosedDate)

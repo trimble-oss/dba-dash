@@ -804,6 +804,7 @@
     <Build Include="Alert\Procedures\CollectionDatesAlert_Upd.sql" />
     <Build Include="Alert\Procedures\NotificationLog_Get.sql" />
     <Build Include="dbo\User Defined Types\BigIDs.sql" />
+    <Build Include="dbo\Stored Procedures\PurgeClosedAlerts.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

@@ -30,7 +30,8 @@ VALUES	('MemoryDumpCriticalThresholdHrs',48),
 		('GUIDrivePerformanceMaxDrives',NULL),
 		('IdleWarningThresholdForSleepingSessionWithOpenTran',NULL),
 		('IdleCriticalThresholdForSleepingSessionWithOpenTran',NULL),
-		('GUICellToolTipMaxLength',NULL)
+		('GUICellToolTipMaxLength',NULL),
+		('ExcludeClosedAlertsWithNotesFromPurge',CAST(1 AS BIT))
 
 /* If reset, remove any customized settings to be re-inserted with defaults */
 IF @Reset=1
@@ -66,7 +67,9 @@ FROM (VALUES('PurgeCollectionErrorLog_StartDate'),
 			('PurgePartitions_CompletedDate'),
 			('MemoryDumpAckDate'),
 			('PurgeBlockingSnapshotSummary_CompletedDate'),
-			('PurgeBlockingSnapshotSummary_StartDate')
+			('PurgeBlockingSnapshotSummary_StartDate'),
+			('PurgeClosedAlerts_StartDate'),
+			('PurgeClosedAlerts_CompletedDate')
 	  ) T(SettingName)
 WHERE NOT EXISTS(SELECT 1 
 				FROM dbo.Settings S

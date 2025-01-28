@@ -146,6 +146,35 @@ BEGIN
 	PRINT 'Skipping BlockingSnapshotSummary (Ran withing last 24hrs)'
 END
 
+/* Remove old data from ClosedAlerts table.  Run once per day */
+UPDATE dbo.Settings
+	SET SettingValue = GETUTCDATE()
+WHERE SettingName = 'PurgeClosedAlerts_StartDate'
+AND SettingValue < DATEADD(d,-1,GETUTCDATE())
+
+IF @@ROWCOUNT =1
+BEGIN
+	PRINT 'Cleanup ClosedAlerts'
+	DECLARE @KeepNotes BIT = 1
+	IF EXISTS(	SELECT 1 
+				FROM dbo.Settings 
+				WHERE SettingName = 'ExcludeClosedAlertsWithNotesFromPurge' 
+				AND SettingValue = CAST(0 AS BIT)
+				)
+	BEGIN
+		PRINT 'ClosedAlerts with notes will be purged'
+		SET @KeepNotes=0
+	END
+	EXEC dbo.PurgeClosedAlerts @KeepNotes=@KeepNotes
+
+	UPDATE dbo.Settings
+		SET SettingValue = GETUTCDATE()
+	WHERE SettingName = 'PurgeClosedAlerts_CompletedDate'
+END
+BEGIN
+	PRINT 'Skipping ClosedAlerts (Ran withing last 24hrs)'
+END
+
 /* Service Broker Cleanup */
 EXEC Messaging.Cleanup
 
