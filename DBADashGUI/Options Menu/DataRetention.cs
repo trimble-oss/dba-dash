@@ -103,7 +103,8 @@ namespace DBADashGUI
         {
             using SqlConnection cn = new(Common.ConnectionString);
             cn.Open();
-            SqlCommand cmd = new("dbo.PurgeData", cn);
+            using SqlCommand cmd = new("dbo.PurgeData", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
+            cmd.Parameters.AddWithValue("Force", true);
             cmd.ExecuteNonQuery();
         }
 
