@@ -10,8 +10,8 @@ SELECT CASE WHEN EXISTS(
 				FROM Alert.BlackoutPeriod BP 
 				OUTER APPLY(SELECT SYSDATETIMEOFFSET() AT TIME ZONE TimeZone AS CurrentTime) AS TZ
 				WHERE BP.ApplyToInstanceID = -1
-				AND  BP.StartDate < SYSUTCDATETIME() 
-				AND BP.EndDate > SYSUTCDATETIME()
+				AND  (BP.StartDate < SYSUTCDATETIME() OR BP.StartDate IS NULL)
+				AND (BP.EndDate > SYSUTCDATETIME() OR BP.EndDate IS NULL)
 				AND @AlertKey LIKE BP.AlertKey
 				AND CHOOSE(DATEPART(dw,TZ.CurrentTime),BP.Monday,BP.Tuesday,BP.Wednesday,BP.Thursday,BP.Friday,BP.Saturday,BP.Sunday) = CAST(1 AS BIT)
 				AND (CAST(TZ.CurrentTime AS TIME) >= BP.TimeFrom OR BP.TimeFrom IS NULL)
@@ -47,8 +47,8 @@ SELECT CASE WHEN EXISTS(
 				OUTER APPLY(SELECT SYSDATETIMEOFFSET() AT TIME ZONE TimeZone AS CurrentTime) AS TZ
 				WHERE BP.ApplyToInstanceID = @InstanceID
 				AND BP.ApplyToTagID = -1
-				AND  BP.StartDate < SYSUTCDATETIME() 
-				AND BP.EndDate > SYSUTCDATETIME()
+				AND  (BP.StartDate < SYSUTCDATETIME() OR BP.StartDate IS NULL)
+				AND (BP.EndDate > SYSUTCDATETIME() OR BP.EndDate IS NULL)
 				AND @AlertKey LIKE BP.AlertKey
 				AND CHOOSE(DATEPART(dw,TZ.CurrentTime),BP.Monday,BP.Tuesday,BP.Wednesday,BP.Thursday,BP.Friday,BP.Saturday,BP.Sunday) = CAST(1 AS BIT)
 				AND (CAST(TZ.CurrentTime AS TIME) >= BP.TimeFrom OR BP.TimeFrom IS NULL)

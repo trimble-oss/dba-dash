@@ -60,12 +60,12 @@ namespace DBADashGUI.DBADashAlerts
         public string AlertKey { get; set; } = "%";
 
         [Category("Effective Period")]
-        [DisplayName("1. Start Date")]
-        public DateTime StartDate { get; set; }
+        [DisplayName("1. Start Date"),Description("Option to start blackout period at a future date/time.  To start now, set to current date or leave blank.")]
+        public DateTime? StartDate { get; set; }
 
         [Category("Effective Period")]
-        [DisplayName("2. End Date")]
-        public DateTime EndDate { get; set; }
+        [DisplayName("2. End Date"), Description("Date/Time the blackout period should end.  For recurring blackouts, leave blank or set to a date in the distant future.")]
+        public DateTime? EndDate { get; set; }
 
         [Description("Add notes. Markdown is supported")]
         [Editor(typeof(MarkdownEditor), typeof(System.Drawing.Design.UITypeEditor))]
@@ -73,14 +73,14 @@ namespace DBADashGUI.DBADashAlerts
 
         public void AdjustDatesToUtc()
         {
-            StartDate = StartDate.AppTimeZoneToUtc();
-            EndDate = EndDate.AppTimeZoneToUtc();
+            StartDate = StartDate?.AppTimeZoneToUtc();
+            EndDate = EndDate?.AppTimeZoneToUtc();
         }
 
         public void AdjustDatesToAppTimeZone()
         {
-            StartDate = StartDate.ToAppTimeZone();
-            EndDate = EndDate.ToAppTimeZone();
+            StartDate = StartDate?.ToAppTimeZone();
+            EndDate = EndDate?.ToAppTimeZone();
         }
 
         public async Task Save()
@@ -99,8 +99,8 @@ namespace DBADashGUI.DBADashAlerts
             cmd.Parameters.AddWithValue("ApplyToInstanceID", ApplyToInstanceID);
             cmd.Parameters.AddWithValue("ApplyToTagID", ApplyToTag.TagID);
             cmd.Parameters.AddWithValue("AlertKey", string.IsNullOrEmpty(AlertKey) ? "%" : AlertKey);
-            cmd.Parameters.AddWithValue("StartDate", StartDate);
-            cmd.Parameters.AddWithValue("EndDate", EndDate);
+            cmd.Parameters.AddWithValue("StartDate", StartDate.HasValue ? StartDate : DBNull.Value);
+            cmd.Parameters.AddWithValue("EndDate", EndDate.HasValue ? EndDate : DBNull.Value);
             cmd.Parameters.AddWithValue("Monday", Monday);
             cmd.Parameters.AddWithValue("Tuesday", Tuesday);
             cmd.Parameters.AddWithValue("Wednesday", Wednesday);
