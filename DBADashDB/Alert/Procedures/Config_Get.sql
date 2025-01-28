@@ -37,7 +37,7 @@ SELECT BP.BlackoutPeriodID,
 				' and ',CONVERT(CHAR(5),ISNULL(BP.TimeTo,'00:00'),114),' (' + BP.TimeZone + ')',
 				IIF(DATEDIFF(d,GETUTCDATE(),BP.EndDate)>365,'',', (Ends in ' + HDEndsIn.HumanDuration + ')')
 			)
-		ELSE 'Active' + IIF(DATEDIFF(d,GETUTCDATE(),BP.EndDate)>365,'',' (Ends in ' + HDEndsIn.HumanDuration + ')')  END AS CurrentStatus,
+		ELSE 'Active' + IIF(DATEDIFF(d,GETUTCDATE(),BP.EndDate)>365 OR BP.EndDate IS NULL,'',' (Ends in ' + HDEndsIn.HumanDuration + ')')  END AS CurrentStatus,
 		HDStartsIn.HumanDuration AS StartsIn,
 		HDEndsIn.HumanDuration AS EndsIn,
 		BP.Notes
