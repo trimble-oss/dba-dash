@@ -1147,41 +1147,42 @@ WHEN NOT MATCHED BY TARGET THEN
 						   N'PVS_PREALLOCATE',N'REDO_THREAD_PENDING_WORK'
                          )
 GO
-INSERT INTO dbo.DataRetention
-(
+INSERT INTO dbo.DataRetention(
+	SchemaName,
     TableName,
     RetentionDays
 )
-SELECT t.TableName,t.RetentionDays
-FROM (VALUES('ObjectExecutionStats',120),
-				('Waits',120),
-				('DBIOStats',120),
-				('CPU',365),
-				('SlowQueries',120),
-				('AzureDBElasticPoolResourceStats',120),
-				('AzureDBResourceStats',120),
-				('CustomChecksHistory',120),
-				('DBIOStats_60MIN',730),
-				('CPU_60MIN',730),
-				('ObjectExecutionStats_60MIN',730),
-				('AzureDBElasticPoolResourceStats_60MIN',730),
-				('AzureDBResourceStats_60MIN',730),
-				('Waits_60MIN',730),
-				('PerformanceCounters', 180),
-				('PerformanceCounters_60MIN',730),
-				('JobStats_60MIN',730),
-				('JobHistory',8),
-				('RunningQueries',30),
-				('CollectionErrorLog',14),
-				('MemoryUsage',30),
-				('SessionWaits',30),
-				('IdentityColumnsHistory',730),
-				('TableSize',730)
-				) AS t(TableName,RetentionDays)
+SELECT t.SchemaName,t.TableName,t.RetentionDays
+FROM (VALUES('dbo','ObjectExecutionStats',120),
+				('dbo','Waits',120),
+				('dbo','DBIOStats',120),
+				('dbo','CPU',365),
+				('dbo','SlowQueries',120),
+				('dbo','AzureDBElasticPoolResourceStats',120),
+				('dbo','AzureDBResourceStats',120),
+				('dbo','CustomChecksHistory',120),
+				('dbo','DBIOStats_60MIN',730),
+				('dbo','CPU_60MIN',730),
+				('dbo','ObjectExecutionStats_60MIN',730),
+				('dbo','AzureDBElasticPoolResourceStats_60MIN',730),
+				('dbo','AzureDBResourceStats_60MIN',730),
+				('dbo','Waits_60MIN',730),
+				('dbo','PerformanceCounters', 180),
+				('dbo','PerformanceCounters_60MIN',730),
+				('dbo','JobStats_60MIN',730),
+				('dbo','JobHistory',8),
+				('dbo','RunningQueries',30),
+				('dbo','CollectionErrorLog',14),
+				('dbo','MemoryUsage',30),
+				('dbo','SessionWaits',30),
+				('dbo','IdentityColumnsHistory',730),
+				('dbo','TableSize',730),
+				('Alert','ClosedAlerts',180)
+				) AS t(SchemaName,TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1 
 				FROM dbo.DataRetention DR
 				WHERE DR.TableName = T.TableName
-				AND DR.SchemaName = 'dbo')
+				AND DR.SchemaName = T.SchemaName)
 
 DELETE dbo.OSLoadedModulesStatus
 WHERE IsSystem=1

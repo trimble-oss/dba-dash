@@ -41,7 +41,8 @@ namespace DBADashGUI.Options_Menu
             ("HardDeleteThresholdDays","Remove all the data associated with a (soft) deleted instance a specified number of days after the last collection.",typeof(int?),Config.HardDeleteThresholdDays ),
             ("GUISlowQueriesDrillDownMaxRows", "Max drill down rows for Slow Queries tab", typeof(int),Config.SlowQueriesDrillDownMaxRows),
             ("AlertAutoCloseThresholdMins","Automatically close resolved alerts after a specified period of time (mins)", typeof(int),AlertAutoCloseThresholdMins ),
-            ("AlertMaxNotificationCount " , "Maximum number of alert notifications to send" , typeof(int) , AlertMaxNotificationCount)
+            ("AlertMaxNotificationCount " , "Maximum number of alert notifications to send" , typeof(int) , AlertMaxNotificationCount),
+            ("ExcludeClosedAlertsWithNotesFromPurge","Exclude closed alerts with notes from data retention",typeof(bool),true)
         };
 
         private void Options_Load(object sender, EventArgs e)
