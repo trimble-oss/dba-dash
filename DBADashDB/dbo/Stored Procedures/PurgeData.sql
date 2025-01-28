@@ -1,4 +1,6 @@
-﻿CREATE PROC dbo.PurgeData
+﻿CREATE PROC dbo.PurgeData(
+	@Force BIT=0 /* Option to force purge of non-partitioned tables which usually run once per day */
+)
 AS
 SET NOCOUNT ON
 SET XACT_ABORT ON
@@ -75,7 +77,7 @@ UPDATE dbo.Settings
 WHERE SettingName = 'PurgeCollectionErrorLog_StartDate'
 AND SettingValue < DATEADD(d,-1,GETUTCDATE())
 
-IF @@ROWCOUNT =1
+IF @@ROWCOUNT =1 OR @Force=1
 BEGIN
 	PRINT 'Cleanup CollectionErrorLog'
 	EXEC dbo.PurgeCollectionErrorLog
@@ -95,7 +97,7 @@ UPDATE dbo.Settings
 WHERE SettingName = 'PurgeQueryPlans_StartDate'
 AND SettingValue < DATEADD(d,-1,GETUTCDATE())
 
-IF @@ROWCOUNT =1
+IF @@ROWCOUNT =1 OR @Force=1
 BEGIN
 	PRINT 'Cleanup QueryPlans'
 	EXEC dbo.PurgeQueryPlans
@@ -114,7 +116,7 @@ UPDATE dbo.Settings
 WHERE SettingName = 'PurgeQueryText_StartDate'
 AND SettingValue < DATEADD(d,-1,GETUTCDATE())
 
-IF @@ROWCOUNT =1
+IF @@ROWCOUNT =1 OR @Force=1
 BEGIN
 	PRINT 'Cleanup QueryText'
 	EXEC dbo.PurgeQueryText
@@ -133,7 +135,7 @@ UPDATE dbo.Settings
 WHERE SettingName = 'PurgeBlockingSnapshotSummary_StartDate'
 AND SettingValue < DATEADD(d,-1,GETUTCDATE())
 
-IF @@ROWCOUNT =1
+IF @@ROWCOUNT =1 OR @Force=1
 BEGIN
 	PRINT 'Cleanup QueryText'
 	EXEC dbo.PurgeBlockingSnapshotSummary
@@ -152,7 +154,7 @@ UPDATE dbo.Settings
 WHERE SettingName = 'PurgeClosedAlerts_StartDate'
 AND SettingValue < DATEADD(d,-1,GETUTCDATE())
 
-IF @@ROWCOUNT =1
+IF @@ROWCOUNT =1 OR @Force=1
 BEGIN
 	PRINT 'Cleanup ClosedAlerts'
 	DECLARE @KeepNotes BIT = 1
