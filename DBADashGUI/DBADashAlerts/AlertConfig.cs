@@ -77,13 +77,25 @@ namespace DBADashGUI.DBADashAlerts
         private async void AddBlackout_Click(object sender, EventArgs e)
         {
             var blackout = new BlackoutPeriod() { StartDate = DateHelper.AppNow, EndDate = DateHelper.AppNow.AddHours(1), TimeZone = DateHelper.AppTimeZone };
-            await EditBlackout(blackout);
+            if (!string.IsNullOrEmpty(CurrentContext.InstanceName))
+            {
+                blackout.ApplyToInstance = CurrentContext.InstanceName;
+            }
+            await EditBlackoutLocal(blackout);
         }
 
-        private async Task EditBlackout(BlackoutPeriod blackout)
+        private async Task EditBlackoutLocal(BlackoutPeriod blackout)
+        {
+            if (await EditBlackout(blackout))
+            {
+                RefreshData();
+            }
+        }
+
+        public static async Task<bool> EditBlackout(BlackoutPeriod blackout)
         {
             using var frm = new PropertyGridDialog() { Text = blackout.BlackoutPeriodID.HasValue ? "Edit Blackout" : "Add Blackout", SelectedObject = blackout };
-            if (frm.ShowDialog() != DialogResult.OK) return;
+            if (frm.ShowDialog() != DialogResult.OK) return false;
             try
             {
                 blackout.AdjustDatesToUtc();
@@ -93,7 +105,8 @@ namespace DBADashGUI.DBADashAlerts
             {
                 MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            RefreshData();
+
+            return true;
         }
 
         private void AddRule_Click(object sender, EventArgs e)
@@ -378,7 +391,7 @@ namespace DBADashGUI.DBADashAlerts
                 {
                     case "colCopy":
                         blackout.BlackoutPeriodID = null;
-                        await EditBlackout(blackout);
+                        await EditBlackoutLocal(blackout);
                         break;
 
                     case "colDelete":
@@ -396,7 +409,7 @@ namespace DBADashGUI.DBADashAlerts
 
                     case "colEdit":
 
-                        await EditBlackout(blackout);
+                        await EditBlackoutLocal(blackout);
 
                         break;
                 }
@@ -448,7 +461,7 @@ namespace DBADashGUI.DBADashAlerts
                         blackout.StartDate = DateHelper.AppNow;
                         blackout.EndDate = DateHelper.AppNow.AddHours(1);
                         blackout.TimeZone = DateHelper.AppTimeZone;
-                        await EditBlackout(blackout);
+                        await EditBlackoutLocal(blackout);
                         break;
                 }
             }

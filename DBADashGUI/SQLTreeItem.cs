@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.DBADashAlerts;
+using DBADashGUI.Performance;
 
 namespace DBADashGUI
 {
@@ -647,6 +649,10 @@ namespace DBADashGUI
 
             var mnuInstanceActions = new ToolStripMenuItem("Instance Actions") { Image = Resources.DatabaseSettings_16x };
 
+            var mnuAddAlertBlackout = new ToolStripMenuItem("Add Alert Blackout")
+                { Image = Resources.NotificationAlertMute_16x };
+            mnuAddAlertBlackout.Click += MnuAddAlertBlackout_Click;
+
             var mnuHidden = new ToolStripMenuItem("Hidden");
             mnuHidden.Checked = !IsVisibleInSummary;
             mnuHidden.CheckOnClick = true;
@@ -661,7 +667,7 @@ namespace DBADashGUI
             switch (Type)
             {
                 case TreeType.Instance:
-                    mnuInstanceActions.DropDownItems.AddRange(new ToolStripItem[] { mnuHidden, mnuRename, mnuDelete });
+                    mnuInstanceActions.DropDownItems.AddRange(new ToolStripItem[] { mnuAddAlertBlackout, mnuHidden, mnuRename, mnuDelete });
                     break;
 
                 case TreeType.AzureDatabase:
@@ -669,6 +675,19 @@ namespace DBADashGUI
                     break;
             }
             ContextMenuStrip.Items.Add(mnuInstanceActions);
+        }
+
+        private async void MnuAddAlertBlackout_Click(object sender, EventArgs e)
+        {
+            var blackout = new BlackoutPeriod()
+            {
+                ApplyToInstance = InstanceName,
+                ApplyToInstanceID = InstanceID,
+                StartDate = DateHelper.AppNow,
+                EndDate = DateHelper.AppNow.AddHours(1),
+                TimeZone = DateHelper.AppTimeZone
+            };
+            await AlertConfig.EditBlackout(blackout);
         }
 
         private void HideInstance_Click(object sender, EventArgs e)
