@@ -76,7 +76,7 @@ namespace DBADashGUI.DBADashAlerts
             foreach (var row in selectedRows.OfType<DataGridViewRow>())
             {
                 var alertId = (long)row.Cells["AlertID"].Value;
-                UpdateNotes(alertId, frm.Code);
+                EditNotesLinkColumnInfo.UpdateNotes(alertId, frm.Code);
             }
             RefreshData();
         }
@@ -209,7 +209,6 @@ namespace DBADashGUI.DBADashAlerts
             e.Value = grid.Columns[e.ColumnIndex].Name switch
             {
                 "colAck" => isAcknowledged ? "Clear" : "Acknowledge",
-                "Notes" => string.IsNullOrEmpty((string)e.Value.DBNullToNull()) ? "Add notes..." : e.Value,
                 _ => e.Value
             };
         }
@@ -224,7 +223,7 @@ namespace DBADashGUI.DBADashAlerts
             var isAcknowledged = (bool)grid.Rows[e.RowIndex].Cells["IsAcknowledged"].Value;
             var alertTypeString = (string)grid.Rows[e.RowIndex].Cells["AlertType"].Value;
             Enum.TryParse(typeof(AlertRuleBase.RuleTypes), alertTypeString, true, out var alertType);
-            var notes = (string)grid.Rows[e.RowIndex].Cells["Notes"].Value.DBNullToNull();
+          
             var ruleId = (int?)grid.Rows[e.RowIndex].Cells["RuleID"].Value.DBNullToNull();
             try
             {
@@ -258,16 +257,6 @@ namespace DBADashGUI.DBADashAlerts
                             { Instance = instanceName, InstanceID = instanceID, Tab = tab });
                         break;
 
-                    case "Notes":
-                        {
-                            using var frm = new CodeEditorForm();
-                            frm.Code = notes;
-                            frm.Syntax = CodeEditor.CodeEditorModes.Markdown;
-                            if (frm.ShowDialog() != DialogResult.OK) return;
-                            UpdateNotes(alertID, frm.Code);
-                            RefreshData();
-                            break;
-                        }
                     case "RuleID":
                         if (ruleId == null) return;
                         AlertConfig.EditRule(ruleId.Value);
@@ -306,15 +295,7 @@ namespace DBADashGUI.DBADashAlerts
             notificationViewer.ShowDialog();
         }
 
-        private static void UpdateNotes(long alertID, string notes)
-        {
-            using var cn = new SqlConnection(Common.ConnectionString);
-            cn.Open();
-            using var cmd = new SqlCommand("Alert.ActiveAlerts_Notes_Upd", cn) { CommandType = CommandType.StoredProcedure };
-            cmd.Parameters.AddWithValue("@AlertID", alertID);
-            cmd.Parameters.AddWithValue("@Notes", notes);
-            cmd.ExecuteNonQuery();
-        }
+
 
         private static void AckAlert(long alertID, bool isAck) => AckAlert(new List<long>() { alertID }, isAck);
 
@@ -491,7 +472,7 @@ namespace DBADashGUI.DBADashAlerts
                             },
                             {
                                 "Notes",
-                                null
+                                new EditNotesLinkColumnInfo()
                             },
                             {
                                 "RuleID",
@@ -513,6 +494,10 @@ namespace DBADashGUI.DBADashAlerts
                                     TargetColumn = "RuleNotes"
                                 }
                             },
+                        },
+                        CellNullValue = new Dictionary<string, string>()
+                        {
+                            {"Notes","Add Notes..."}
                         },
                         CellHighlightingRules =
                         {
@@ -635,11 +620,7 @@ namespace DBADashGUI.DBADashAlerts
                             },
                             {
                                 "Notes",
-                                new TextLinkColumnInfo()
-                                {
-                                    TextHandling = CodeEditor.CodeEditorModes.Markdown,
-                                    TargetColumn = "Notes"
-                                }
+                                new EditNotesLinkColumnInfo()
                             },
                             {
                                 "RuleNotes",
@@ -649,6 +630,10 @@ namespace DBADashGUI.DBADashAlerts
                                     TargetColumn = "RuleNotes"
                                 }
                             },
+                        },
+                        CellNullValue = new Dictionary<string, string>()
+                        {
+                            {"Notes","Add Notes..."}
                         },
                         CellHighlightingRules =
                         {
