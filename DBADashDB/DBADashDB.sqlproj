@@ -796,7 +796,7 @@
     <Build Include="Alert\Procedures\Config_Get.sql" />
     <Build Include="Alert\Procedures\AlertCount_Get.sql" />
     <Build Include="Alert\Tables\NotificationLog.sql" />
-    <Build Include="Alert\Procedures\ActiveAlerts_Notes_Upd.sql" />
+    <Build Include="Alert\Procedures\Alerts_Notes_Upd.sql" />
     <Build Include="Alert\Procedures\ClosedAlerts_Get.sql" />
     <Build Include="Alert\Tables\CurrentAgent.sql" />
     <Build Include="Alert\Procedures\CurrentAgent_Upd.sql" />

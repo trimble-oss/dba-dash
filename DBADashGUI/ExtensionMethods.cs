@@ -667,7 +667,9 @@ namespace DBADashGUI
                     customReportResult.CellFormatString.TryGetValue(dataColumn.ColumnName, out var value)
                         ? value
                         : "";
-
+                column.DefaultCellStyle.NullValue = customReportResult.CellNullValue.TryGetValue(dataColumn.ColumnName, out var nullValue)
+                    ? nullValue
+                    : string.Empty;
                 column.DataPropertyName = dataColumn.ColumnName;
                 column.Name = dataColumn.ColumnName;
                 column.HeaderText =

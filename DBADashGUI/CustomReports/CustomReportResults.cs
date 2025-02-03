@@ -11,6 +11,8 @@ namespace DBADashGUI.CustomReports
 
         public Dictionary<string, string> CellFormatString { get; set; } = new();
 
+        public Dictionary<string, string> CellNullValue { get; set; } = new();
+
         /// <summary>
         /// Option to exclude DateTime columns from automatic time zone conversion
         /// </summary>
