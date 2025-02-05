@@ -54,7 +54,7 @@ namespace DBADash.Alert
             using var message = new MimeMessage();
             message.From.Add(new MailboxAddress(From, FromEmail));
             message.To.Add(new MailboxAddress(string.IsNullOrEmpty(To) ? ChannelName : To, ToEmail));
-            message.Subject = alert.AlertName + " triggered on " + alert.ConnectionID;
+            message.Subject = alert.AlertName + (alert.IsResolved ? " resolved on " : " triggered on ") + alert.ConnectionID;
 
             message.Body = new TextPart("plain")
             {
