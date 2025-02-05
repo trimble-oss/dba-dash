@@ -63,21 +63,21 @@ namespace DBADashGUI.DBADashAlerts
         public async Task SendNotificationAsync(Alert alert, string connectionString)
         {
             Log.Information("Sending alert notification to {ChannelName}", ChannelName);
-            var errorMessage = string.Empty;
             try
             {
                 await InternalSendNotificationAsync(alert, connectionString);
+                await UpdateLastNotified(alert, connectionString, string.Empty);
             }
             catch (Exception ex)
             {
-                errorMessage = ex.ToString();
+                await UpdateLastNotified(alert, connectionString, ex.Message);
+                throw;
             }
-            if (string.IsNullOrEmpty(connectionString)) return; // Might not be set for testing
-            await UpdateLastNotified(alert, connectionString, errorMessage);
         }
 
         protected async Task UpdateLastNotified(Alert alert, string connectionString, string errorMessage)
         {
+            if (string.IsNullOrEmpty(connectionString)) return;
             await using var cn = new SqlConnection(connectionString);
             await cn.OpenAsync();
             await using var cmd = new SqlCommand("Alert.AlertNotification_Upd", cn)
