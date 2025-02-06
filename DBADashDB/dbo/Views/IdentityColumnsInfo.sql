@@ -53,9 +53,9 @@ SELECT	IC.InstanceID,
 FROM dbo.IdentityColumns IC
 JOIN dbo.Instances I ON I.InstanceID = IC.InstanceID
 JOIN dbo.Databases D ON D.DatabaseID = IC.DatabaseID
-OUTER APPLY (SELECT CASE WHEN IC.last_value <0 THEN (ABS(IC.min_ident)-ABS(IC.last_value)) / IC.max_rows ELSE IC.last_value/IC.max_ident END AS pct_ident_used,
+OUTER APPLY (SELECT CASE WHEN IC.last_value <0 THEN (ABS(IC.min_ident)-ABS(CONVERT(decimal(38,0), IC.last_value))) / IC.max_rows ELSE IC.last_value/IC.max_ident END AS pct_ident_used,
 					IC.row_count/IC.max_rows AS pct_rows_used,
-					CASE WHEN IC.last_value < 0 THEN ABS(IC.last_value)+IC.max_ident ELSE IC.max_ident - IC.last_value END AS remaining_ident_count,
+					CASE WHEN IC.last_value < 0 THEN ABS(CONVERT(decimal(38,0), IC.last_value))+IC.max_ident ELSE IC.max_ident - IC.last_value END AS remaining_ident_count,
 					IC.max_rows-IC.row_count AS remaining_row_count
 	
 		) AS calc
