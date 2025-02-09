@@ -13,40 +13,6 @@ namespace DBADash.Alert
     {
         public override NotificationChannelTypes NotificationChannelType => NotificationChannelTypes.Webhook;
 
-        private static string GetIcon(Alert alert)
-        {
-            if (alert.IsResolved)
-            {
-                return "DBADash_Success.png";
-            }
-
-            return (short)alert.Priority switch
-            {
-                41 => "DBADash_Success.png",
-                < 11 => "DBADash_Critical.png",
-                < 21 => "DBADash_Warning.png",
-                < 31 => "DBADash_WarningLow.png",
-                _ => "DBADash_Neutral.png"
-            };
-        }
-
-        private static string GetEmoji(Alert alert)
-        {
-            if (alert.IsResolved)
-            {
-                return "✅";
-            }
-
-            return (short)alert.Priority switch
-            {
-                41 => "✅",
-                < 11 => "‼️",
-                < 21 => "⚠️",
-                < 31 => "🟡",
-                _ => "ℹ️"
-            };
-        }
-
         [DisplayName("Message Template")]
         [Description("Json message template (Leave blank to use default template).  Available parameters to replace: {title}, {text}, {instance}, {threadkey}, {icon}, {emoji}")]
         [Category("Webhook Config")]
@@ -233,9 +199,12 @@ namespace DBADash.Alert
         {
             return template.Replace("{title}", EscapeText($"{alert.AlertName}[{alert.Status}]"), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{instance}", EscapeText(alert.ConnectionID), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{AlertKey}", EscapeText(alert.AlertName), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{Action}", EscapeText(alert.Action), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{text}", EscapeText(alert.Message), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{icon}", GetIcon(alert), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{emoji}", GetEmoji(alert), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{icon}", alert.GetIcon(), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{IconUrl}", alert.GetIconUrl(), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{emoji}", alert.GetEmoji(), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{threadkey}", EscapeText(alert.ThreadKey), StringComparison.InvariantCultureIgnoreCase);
         }
     }
