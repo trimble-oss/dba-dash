@@ -2,6 +2,7 @@
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -49,16 +50,51 @@ namespace DBADash.Alert
         [Category("Email Config")]
         public string To { get; set; }
 
+        [Description($"Optional.  Default: {DefaultEmailSubjectTemplate}.\nPlaceholders: {{Emoji}}, {{AlertKey}}, {{Action}}, {{Instance}}, {{Priority}}, {{Title}}.")]
+        [Category("Email Message"), DisplayName("Email Subject Template")]
+        public string EmailSubjectTemplate { get; set; }
+
+        [Description($"Optional.  Default: {DefaultEmailMessageTemplate}\nPlaceholders: {{Emoji}}, {{AlertKey}}, {{Action}}, {{Instance}}, {{Priority}}, {{Title}}, {{Text}}.\nHTML Default:{DefaultHTMLMessageTemplate}")]
+        [Category("Email Message"), DisplayName("Email Message Template")]
+        public string EmailMessageTemplate { get; set; }
+
+        [Category("Email Message"), DisplayName("Is HTML?")]
+        public bool IsHTML { get; set; }
+
+        private const string DefaultEmailSubjectTemplate = "{Emoji} {AlertKey} {Action} on {Instance}";
+        private const string DefaultEmailMessageTemplate = "{Text}";
+
+        private const string DefaultHTMLMessageTemplate =
+            "<h1><img src=\"{iconurl}\" alt=\"{Priority}\" width=\"30\" height=\"30\"/> {title}<h1/>\r\n<h2>{instance}</h2>\r\n<h3>Priority: {Priority}</h3>\r\n<p>\r\n{text}\r\n</p>\r\n<hr>\r\n<i>Alert generated from <a href=\"https://dbadash.com\">DBA Dash</a></i>\r\n</body>\r\n</html>\r\n";
+
+        private string GetEmailSubjectTemplate() => string.IsNullOrEmpty(EmailSubjectTemplate)
+            ? DefaultEmailSubjectTemplate
+            : EmailSubjectTemplate;
+
+        private string GetEmailMessageTemplate() => string.IsNullOrEmpty(EmailMessageTemplate)
+            ? IsHTML ? DefaultHTMLMessageTemplate : DefaultEmailMessageTemplate
+            : EmailMessageTemplate;
+
+        private static string ReplacePlaceholders(Alert alert, string template) => template.Replace("{Emoji}", alert.GetEmoji(), StringComparison.InvariantCultureIgnoreCase)
+            .Replace("{AlertKey}", alert.AlertName, StringComparison.InvariantCultureIgnoreCase)
+            .Replace("{Action}", alert.Action, StringComparison.InvariantCultureIgnoreCase)
+            .Replace("{Title}", $"{alert.AlertName} [{alert.Status}]", StringComparison.InvariantCultureIgnoreCase)
+            .Replace("{instance}", alert.ConnectionID, StringComparison.InvariantCultureIgnoreCase)
+            .Replace("{Priority}", alert.Priority.ToString(), StringComparison.InvariantCultureIgnoreCase)
+            .Replace("{Text}", alert.Message, StringComparison.InvariantCultureIgnoreCase)
+            .Replace("{Icon}", alert.GetIcon(), StringComparison.InvariantCultureIgnoreCase)
+            .Replace("{IconUrl}", alert.GetIconUrl(), StringComparison.InvariantCultureIgnoreCase);
+
         protected override async Task InternalSendNotificationAsync(Alert alert, string connectionString)
         {
             using var message = new MimeMessage();
             message.From.Add(new MailboxAddress(From, FromEmail));
             message.To.Add(new MailboxAddress(string.IsNullOrEmpty(To) ? ChannelName : To, ToEmail));
-            message.Subject = alert.AlertName + (alert.IsResolved ? " resolved on " : " triggered on ") + alert.ConnectionID;
+            message.Subject = ReplacePlaceholders(alert, GetEmailSubjectTemplate());
 
-            message.Body = new TextPart("plain")
+            message.Body = new TextPart(IsHTML ? "html" : "plain")
             {
-                Text = alert.Message
+                Text = ReplacePlaceholders(alert, GetEmailMessageTemplate())
             };
 
             using var client = new SmtpClient();

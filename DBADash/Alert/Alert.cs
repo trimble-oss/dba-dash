@@ -7,7 +7,6 @@ namespace DBADash.Alert
 {
     public class Alert
     {
-
         public enum Priorities
         {
             Critical = 0,
@@ -69,6 +68,8 @@ namespace DBADash.Alert
 
         public string Status => IsResolved ? "Resolved" : "Active";
 
+        public string Action => IsResolved ? "resolved" : "triggered";
+
         public DateTime TriggerDate { get; set; }
 
         public string CustomThreadKey { get; set; }
@@ -76,6 +77,42 @@ namespace DBADash.Alert
         public string ThreadKey => string.IsNullOrEmpty(CustomThreadKey) ? DefaultThreadKey : CustomThreadKey;
 
         public string DefaultThreadKey => $"DBADash_{ConnectionID}_{AlertName}_{TriggerDate.Ticks}";
+
+        public string GetEmoji()
+        {
+            if (IsResolved)
+            {
+                return "✅";
+            }
+
+            return (short)Priority switch
+            {
+                41 => "✅",
+                < 11 => "‼️",
+                < 21 => "⚠️",
+                < 31 => "🟡",
+                _ => "ℹ️"
+            };
+        }
+
+        public string GetIcon()
+        {
+            if (IsResolved)
+            {
+                return "DBADash_Success.png";
+            }
+
+            return (short)Priority switch
+            {
+                41 => "DBADash_Success.png",
+                < 11 => "DBADash_Critical.png",
+                < 21 => "DBADash_Warning.png",
+                < 31 => "DBADash_WarningLow.png",
+                _ => "DBADash_Neutral.png"
+            };
+        }
+
+        public string GetIconUrl() => "https://dbadash.com/" + GetIcon();
 
         public static Alert GetTestAlert()
         {

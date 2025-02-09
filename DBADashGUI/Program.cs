@@ -40,6 +40,9 @@ namespace DBADashGUI
 
             TypeDescriptor.AddAttributes(typeof(JsonString),
                 new EditorAttribute(typeof(JsonStringEditor), typeof(UITypeEditor)));
+
+            TypeDescriptor.AddAttributes(typeof(string),
+                new EditorAttribute(typeof(MultilineStringEditor), typeof(UITypeEditor)));
         }
     }
 }
