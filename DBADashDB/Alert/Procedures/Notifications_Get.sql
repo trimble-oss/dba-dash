@@ -41,7 +41,7 @@ AND EXISTS(
 			WHERE NC.NotificationChannelID = NCS.NotificationChannelID
 			AND CHOOSE(DATEPART(dw,TZ.CurrentTime),NCS.Monday,NCS.Tuesday,NCS.Wednesday,NCS.Thursday,NCS.Friday,NCS.Saturday,NCS.Sunday) = CAST(1 AS BIT)
 			AND (CAST(TZ.CurrentTime AS TIME) >= NCS.TimeFrom OR NCS.TimeFrom IS NULL)
-			AND (CAST(TZ.CurrentTime AS TIME) >= NCS.TimeTo OR NCS.TimeTo IS NULL)
+			AND (CAST(TZ.CurrentTime AS TIME) < NCS.TimeTo OR NCS.TimeTo IS NULL)
 			AND NCS.AlertNotificationLevel>=AA.Priority
 			AND (	/* Only notifiy if re-trigger threshold has passed,
 						Or we haven't notified,
