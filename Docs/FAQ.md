@@ -19,7 +19,7 @@ Are you able to fix the bug yourself?  Please mention this in the issue.  We acc
 
 ## I have a feature suggestion
 
-Please create an [Issue](https://github.com/trimble-oss/dba-dash/issues).  Before submitting an issue, please check if there is an existing issue for the feature request. Provide a clear description for the feature.  If you are willing to help develop the new feature, please mention this in the issue.  DBA Dash is an open soure project and will improve through community contributions.
+Please create an [Issue](https://github.com/trimble-oss/dba-dash/issues).  Before submitting an issue, please check if there is an existing issue for the feature request. Provide a clear description for the feature.  If you are willing to help develop the new feature, please mention this in the issue.  DBA Dash is an open source project and will improve through community contributions.
 
 ## How Do I Contribute?
 
