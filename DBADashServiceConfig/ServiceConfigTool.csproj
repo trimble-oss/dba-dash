@@ -46,9 +46,9 @@
     <ProjectReference Include="..\DBADash\DBADash.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.7.401.2" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.412.2" />
-    <PackageReference Include="Azure.Core" Version="1.44.1" />
+    <PackageReference Include="AWSSDK.Core" Version="3.7.401.12" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.414.2" />
+    <PackageReference Include="Azure.Core" Version="1.45.0" />
     <PackageReference Include="Azure.Identity" Version="1.13.2" />
     <PackageReference Include="Common.Logging" Version="3.4.1" />
     <PackageReference Include="Common.Logging.Core" Version="3.4.1" />
@@ -57,19 +57,20 @@
     <PackageReference Include="Meziantou.Framework.Win32.CredentialManager" Version="1.7.1" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.1" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.1" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.67.2" />
-    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.67.2" />
-    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.3.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="8.3.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="8.3.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.3.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.3.1" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.68.0" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.68.0" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.4.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="8.4.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="8.4.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.4.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.4.0" />
     <PackageReference Include="Microsoft.SqlServer.Assessment" Version="1.1.17" />
     <PackageReference Include="Microsoft.SqlServer.Assessment.Authoring" Version="1.1.0" />
-    <PackageReference Include="Microsoft.SqlServer.Management.SqlParser" Version="172.1.1" />
-    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="172.52.0" />
+    <PackageReference Include="Microsoft.SqlServer.Management.SqlParser" Version="172.14.1" />
+    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="172.61.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Quartz" Version="3.13.1" />
     <PackageReference Include="System.Buffers" Version="4.6.0" />
@@ -77,7 +78,7 @@
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="9.0.1" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.3.1" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.4.0" />
     <PackageReference Include="System.IO.Packaging" Version="9.0.1" />
     <PackageReference Include="System.Memory" Version="4.6.0" />
     <PackageReference Include="System.Memory.Data" Version="9.0.1" />
