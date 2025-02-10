@@ -76,7 +76,7 @@ namespace DBADashGUI.SchemaCompare
             set
             {
                 codeEditor1.txtCode.Text = value;
-                ShowMarkdownPreview();
+                ShowMarkdownPreview().Wait();
             }
         }
 
@@ -84,12 +84,14 @@ namespace DBADashGUI.SchemaCompare
         {
             InitializeComponent();
             InitializeAsync();
+            splitContainer1.Panel2Collapsed = codeEditor1.Mode != CodeEditor.CodeEditorModes.Markdown;
+            tsMarkdownView.Visible = codeEditor1.Mode == CodeEditor.CodeEditorModes.Markdown;
             elHost.Dock = DockStyle.Fill;
             splitContainer1.Panel1.Controls.Add(elHost);
             elHost.Child = codeEditor1;
-            codeEditor1.TextChanged += (_, _) =>
+            codeEditor1.TextChanged += async (_, _) =>
             {
-                ShowMarkdownPreview();
+                await ShowMarkdownPreview();
             };
         }
 
