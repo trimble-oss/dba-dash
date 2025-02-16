@@ -97,6 +97,7 @@ function ExpandWithRetry([string]$ZipFile,[int]$RetryCount,[int]$WaitBetweenRetr
 }
 
 $ErrorActionPreference = "Stop"
+$ProgressPreference = 'SilentlyContinue' # Improves performance of Invoke-WebRequest. #1233
 $upgradeFile = "DBADash.Upgrade"
 
 # Set security protocol to avoid 'Could not create SSL/TLS secure channel' error.
