@@ -18,6 +18,7 @@ namespace DBADashGUI.CollectionDates
         {
             InitializeComponent();
             dgvCollectionDates.RegisterClearFilter(tsClearFilter);
+            dgvCollectionDates.GridFilterChanged += ((_, _) => PersistFilter = dgvCollectionDates.RowFilter);
         }
 
         private string PersistFilter;
@@ -62,8 +63,13 @@ namespace DBADashGUI.CollectionDates
             return dt;
         }
 
+        private DBADashContext CurrentContext;
+
         public void SetContext(DBADashContext _context)
         {
+            if (CurrentContext == _context) return;
+            CurrentContext = _context;
+            if (InstanceIDs == _context.InstanceIDs.ToList()) return;
             InstanceIDs = _context.InstanceIDs.ToList();
             IncludeCritical = true;
             IncludeWarning = true;
@@ -86,10 +92,9 @@ namespace DBADashGUI.CollectionDates
             dgvCollectionDates.DataSource = new DataView(dt, PersistFilter, PersistSort, DataViewRowState.CurrentRows);
             dgvCollectionDates.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             UseWaitCursor = false;
-            dgvCollectionDates.Columns["colRun"]!.Visible = DBADashUser.AllowMessaging && dt.Rows.Cast<DataRow>().Any(r => r["MessagingEnabled"] != DBNull.Value && (bool)r["MessagingEnabled"]);
-            tsTrigger.Visible = DBADashUser.AllowMessaging && dt.Rows.Cast<DataRow>().Any(r => r["MessagingEnabled"] != DBNull.Value && (bool)r["MessagingEnabled"] && r["Status"] is 1 or 2);
-            PersistFilter = null;
-            PersistSort = null;
+            dgvCollectionDates.Columns["colRun"]!.Visible = DBADashUser.AllowMessaging && dt.Rows.Cast<DataRow>().Any(r => r.Field<bool>("MessagingEnabled"));
+            tsTriggerMenu.Visible = DBADashUser.AllowMessaging && dt.Rows.Cast<DataRow>().Any(r => r.Field<bool>("MessagingEnabled"));
+            tsTriggerWarningAndCritical.Enabled = dt.Rows.Cast<DataRow>().Any(r => r.Field<bool>("MessagingEnabled") && r["Status"] is 1 or 2);
         }
 
         private void Status_Selected(object sender, EventArgs e)
@@ -201,44 +206,73 @@ namespace DBADashGUI.CollectionDates
             dgvCollectionDates.ExportToExcel();
         }
 
-        private async void TsTrigger_Click(object sender, EventArgs e)
+        private async void tsTriggerWarningAndCritical_Click(object sender, EventArgs e)
         {
             RefreshData();
-            var dt = (dgvCollectionDates.DataSource as DataView)?.Table;
-            if (dt == null) return;
-            List<CollectionType> collectionTypes = new();
-            foreach (var row in dt.Rows.Cast<DataRow>().Where(r => r["Status"] is 1 or 2 && (bool)r["MessagingEnabled"]).GroupBy((r => r["ConnectionID"])))
+            var rows = dgvCollectionDates.Rows.Cast<DataGridViewRow>().Select(r => ((DataRowView)r.DataBoundItem).Row).Where(row => row.Field<int>("Status") is 1 or 2 && CanRowBeTriggered(row)).ToList();
+            await TriggerCollections(rows);
+        }
+
+        private static bool CanRowBeTriggered(DataRow row)
+        {
+            return row.Field<bool>("MessagingEnabled") && !NoTriggerCollectionTypes.Any(r =>
+                string.Equals(r, row.Field<string>("Reference"), StringComparison.OrdinalIgnoreCase));
+        }
+
+        private async Task TriggerCollections(List<DataRow> rows)
+        {
+            var filteredAndGrouped = rows.Where(CanRowBeTriggered)
+                .GroupBy(row => row.Field<string>("ConnectionID"))
+                .ToDictionary(
+                    group => group.Key,
+                    group => new
+                    {
+                        References = group.Select(row => row.Field<string>("Reference")).ToList(),
+                        ImportAgentID = group.First().Field<int>("ImportAgentID"),
+                        CollectionAgentID = group.First().Field<int>("CollectAgentID")
+                    }
+                );
+            if (rows.Count == 0)
             {
-                var instance = (string)row.Key;
-                await TriggerCriticalAndWarningForConnectionID(instance, dt);
+                MessageBox.Show("Nothing to trigger.", "Trigger Collections", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+            if (rows.Count > Config.CollectionTriggerLimit)
+            {
+                MessageBox.Show(
+                    $"Unable to trigger {rows.Count} collections.  Collection Trigger limit is set to {Config.CollectionTriggerLimit}",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            if (MessageBox.Show($"Trigger {rows.Count} collection(s) across {filteredAndGrouped.Count} instance(s)?", "Trigger Collections", MessageBoxButtons.YesNo,
+                 rows.Count > Config.CollectionTriggerWarningLimit ? MessageBoxIcon.Warning : MessageBoxIcon.Question) != DialogResult.Yes) return;
+            PersistFilter = dgvCollectionDates.RowFilter;
+            PersistSort = dgvCollectionDates.SortString;
+            foreach (var group in filteredAndGrouped)
+            {
+                try
+                {
+                    await CollectionMessaging.TriggerCollection(group.Key, group.Value.References,
+                        group.Value.CollectionAgentID, group.Value.ImportAgentID, this);
+                }
+                catch (Exception ex)
+                {
+                    SetStatus(ex.Message, ex.ToString(), DashColors.Fail);
+                }
             }
         }
 
-        private async Task TriggerCriticalAndWarningForConnectionID(string connectionID, DataTable dt)
+        private async void tsTriggerSelected_Click(object sender, EventArgs e)
         {
-            List<string> collectionTypes = new();
-            var importAgentID = 0;
-            var collectAgentID = 0;
-            foreach (var row in dt.Rows.Cast<DataRow>()
-                         .Where(r => r["Status"] is 1 or 2
-                                     && (bool)r["MessagingEnabled"]
-                                     && string.Equals((string)r["ConnectionID"], connectionID, StringComparison.OrdinalIgnoreCase)
-                                     && !NoTriggerCollectionTypes.Any(s => string.Equals((string)r["Reference"], s, StringComparison.OrdinalIgnoreCase)))
-                         .OrderBy(r => r["ConnectionID"]))
-            {
-                importAgentID = (int)row["ImportAgentID"];
-                collectAgentID = (int)row["CollectAgentID"];
-                collectionTypes.Add((string)row["Reference"]);
-            }
-            if (importAgentID == 0 || collectionTypes.Count == 0) return;
-            try
-            {
-                await CollectionMessaging.TriggerCollection(connectionID, collectionTypes, collectAgentID, importAgentID, this);
-            }
-            catch (Exception ex)
-            {
-                SetStatus(ex.Message, ex.ToString(), DashColors.Fail);
-            }
+            var rows = dgvCollectionDates.SelectedCells.Cast<DataGridViewCell>().Select(cell => ((DataRowView)cell.OwningRow.DataBoundItem).Row).Where(CanRowBeTriggered).Distinct();
+            await TriggerCollections(rows.ToList());
+        }
+
+        private async void tsTriggerAll_Click(object sender, EventArgs e)
+        {
+            var rows = dgvCollectionDates.Rows.Cast<DataGridViewRow>().Select(r => ((DataRowView)r.DataBoundItem).Row).Where(CanRowBeTriggered).ToList();
+            await TriggerCollections(rows);
         }
     }
 }
