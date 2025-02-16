@@ -42,7 +42,9 @@ namespace DBADashGUI.Options_Menu
             ("GUISlowQueriesDrillDownMaxRows", "Max drill down rows for Slow Queries tab", typeof(int),Config.SlowQueriesDrillDownMaxRows),
             ("AlertAutoCloseThresholdMins","Automatically close resolved alerts after a specified period of time (mins)", typeof(int),AlertAutoCloseThresholdMins ),
             ("AlertMaxNotificationCount " , "Maximum number of alert notifications to send" , typeof(int) , AlertMaxNotificationCount),
-            ("ExcludeClosedAlertsWithNotesFromPurge","Exclude closed alerts with notes from data retention",typeof(bool),true)
+            ("ExcludeClosedAlertsWithNotesFromPurge","Exclude closed alerts with notes from data retention",typeof(bool),true),
+            ("CollectionTriggerLimit","Maximum number of collections that can be triggered on Collection Dates tab.",typeof(int), Config.CollectionTriggerLimit),
+            ("CollectionTriggerWarningLimit","Maximum number of collections that can be triggered before warning icon is displayed on Collection Dates tab.",typeof(int), Config.CollectionTriggerWarningLimit)
         };
 
         private void Options_Load(object sender, EventArgs e)

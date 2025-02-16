@@ -31,12 +31,18 @@ namespace DBADashGUI.CollectionDates
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CollectionDates));
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
             tsExcel = new System.Windows.Forms.ToolStripButton();
             statusFilterToolStrip1 = new StatusFilterToolStrip();
-            tsTrigger = new System.Windows.Forms.ToolStripButton();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
+            tsTriggerMenu = new System.Windows.Forms.ToolStripDropDownButton();
+            tsTriggerWarningAndCritical = new System.Windows.Forms.ToolStripMenuItem();
+            tsTriggerSelected = new System.Windows.Forms.ToolStripMenuItem();
+            tsTriggerAll = new System.Windows.Forms.ToolStripMenuItem();
             dgvCollectionDates = new DBADashDataGridView();
             Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             Reference = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -50,7 +56,6 @@ namespace DBADashGUI.CollectionDates
             colRun = new System.Windows.Forms.DataGridViewLinkColumn();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
-            tsClearFilter = new System.Windows.Forms.ToolStripButton();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvCollectionDates).BeginInit();
             statusStrip1.SuspendLayout();
@@ -59,7 +64,7 @@ namespace DBADashGUI.CollectionDates
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, statusFilterToolStrip1, tsTrigger, tsClearFilter });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, statusFilterToolStrip1, tsClearFilter, tsTriggerMenu });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1357, 27);
@@ -117,28 +122,77 @@ namespace DBADashGUI.CollectionDates
             statusFilterToolStrip1.WarningVisible = true;
             statusFilterToolStrip1.UserChangedStatusFilter += Status_Selected;
             // 
-            // tsTrigger
+            // tsClearFilter
             // 
-            tsTrigger.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            tsTrigger.Image = Properties.Resources.ProjectSystemModelRefresh_16x;
-            tsTrigger.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsTrigger.Name = "tsTrigger";
-            tsTrigger.Size = new System.Drawing.Size(192, 24);
-            tsTrigger.Text = "Trigger Warning, Critical";
-            tsTrigger.Click += TsTrigger_Click;
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Image = Properties.Resources.Filter_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            tsClearFilter.Text = "Clear Filter";
+            // 
+            // tsTriggerMenu
+            // 
+            tsTriggerMenu.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsTriggerMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsTriggerWarningAndCritical, tsTriggerSelected, tsTriggerAll });
+            tsTriggerMenu.Image = Properties.Resources.ProjectSystemModelRefresh_16x;
+            tsTriggerMenu.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsTriggerMenu.Name = "tsTriggerMenu";
+            tsTriggerMenu.Size = new System.Drawing.Size(167, 24);
+            tsTriggerMenu.Text = "Trigger Collections";
+            // 
+            // tsTriggerWarningAndCritical
+            // 
+            tsTriggerWarningAndCritical.Name = "tsTriggerWarningAndCritical";
+            tsTriggerWarningAndCritical.Size = new System.Drawing.Size(224, 26);
+            tsTriggerWarningAndCritical.Text = "Warning && Critical";
+            tsTriggerWarningAndCritical.Click += tsTriggerWarningAndCritical_Click;
+            // 
+            // tsTriggerSelected
+            // 
+            tsTriggerSelected.Name = "tsTriggerSelected";
+            tsTriggerSelected.Size = new System.Drawing.Size(224, 26);
+            tsTriggerSelected.Text = "Selected";
+            tsTriggerSelected.Click += tsTriggerSelected_Click;
+            // 
+            // tsTriggerAll
+            // 
+            tsTriggerAll.Name = "tsTriggerAll";
+            tsTriggerAll.Size = new System.Drawing.Size(224, 26);
+            tsTriggerAll.Text = "All";
+            tsTriggerAll.Click += tsTriggerAll_Click;
             // 
             // dgvCollectionDates
             // 
             dgvCollectionDates.AllowUserToAddRows = false;
             dgvCollectionDates.AllowUserToDeleteRows = false;
             dgvCollectionDates.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvCollectionDates.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgvCollectionDates.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvCollectionDates.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, Reference, WarningThreshold, CriticalThreshold, SnapshotAge, SnapshotDate, ConfiguredLevel, Configure, ConfigureRoot, colRun });
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvCollectionDates.DefaultCellStyle = dataGridViewCellStyle2;
             dgvCollectionDates.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvCollectionDates.EnableHeadersVisualStyles = false;
             dgvCollectionDates.Location = new System.Drawing.Point(0, 27);
             dgvCollectionDates.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvCollectionDates.Name = "dgvCollectionDates";
             dgvCollectionDates.ReadOnly = true;
+            dgvCollectionDates.ResultSetID = 0;
+            dgvCollectionDates.ResultSetName = null;
             dgvCollectionDates.RowHeadersVisible = false;
             dgvCollectionDates.RowHeadersWidth = 51;
             dgvCollectionDates.Size = new System.Drawing.Size(1357, 457);
@@ -213,6 +267,7 @@ namespace DBADashGUI.CollectionDates
             // Configure
             // 
             Configure.HeaderText = "Configure Instance";
+            Configure.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             Configure.MinimumWidth = 6;
             Configure.Name = "Configure";
             Configure.ReadOnly = true;
@@ -223,6 +278,7 @@ namespace DBADashGUI.CollectionDates
             // ConfigureRoot
             // 
             ConfigureRoot.HeaderText = "Configure Root";
+            ConfigureRoot.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             ConfigureRoot.MinimumWidth = 6;
             ConfigureRoot.Name = "ConfigureRoot";
             ConfigureRoot.ReadOnly = true;
@@ -233,6 +289,7 @@ namespace DBADashGUI.CollectionDates
             // colRun
             // 
             colRun.HeaderText = "Run";
+            colRun.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             colRun.MinimumWidth = 6;
             colRun.Name = "colRun";
             colRun.ReadOnly = true;
@@ -257,15 +314,6 @@ namespace DBADashGUI.CollectionDates
             lblStatus.Spring = true;
             lblStatus.Text = "Ready";
             lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // tsClearFilter
-            // 
-            tsClearFilter.Enabled = false;
-            tsClearFilter.Image = Properties.Resources.Filter_16x;
-            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsClearFilter.Name = "tsClearFilter";
-            tsClearFilter.Size = new System.Drawing.Size(104, 24);
-            tsClearFilter.Text = "Clear Filter";
             // 
             // CollectionDates
             // 
@@ -306,7 +354,10 @@ namespace DBADashGUI.CollectionDates
         private System.Windows.Forms.DataGridViewLinkColumn colRun;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel lblStatus;
-        private System.Windows.Forms.ToolStripButton tsTrigger;
         private System.Windows.Forms.ToolStripButton tsClearFilter;
+        private System.Windows.Forms.ToolStripDropDownButton tsTriggerMenu;
+        private System.Windows.Forms.ToolStripMenuItem tsTriggerWarningAndCritical;
+        private System.Windows.Forms.ToolStripMenuItem tsTriggerSelected;
+        private System.Windows.Forms.ToolStripMenuItem tsTriggerAll;
     }
 }
