@@ -1,6 +1,7 @@
 ﻿CREATE PROC Alert.ActiveAlerts_Upd(
 	@AlertDetails AlertDetails READONLY,
-	@AlertType VARCHAR(50)
+	@AlertType VARCHAR(50),
+	@ResolveAlertsOfType BIT=1
 )
 AS
 /* 
@@ -36,24 +37,26 @@ SELECT InstanceID,
 FROM DeDupe
 WHERE rnum=1
 
-
-/* Resolve existing issues if there is an existing alert that is no longer active */
-UPDATE AA
-	SET ResolvedDate = SYSUTCDATETIME(),
-	IsResolved = 1,
-	LastMessage = 'Issue resolved',
-	UpdateCount +=1,
-	ResolvedCount +=1,
-	UpdatedDate = SYSUTCDATETIME()
-FROM Alert.ActiveAlerts AA
-WHERE AlertType = @AlertType
-AND NOT EXISTS(SELECT 1 
-			FROM @AD AD
-			WHERE AD.InstanceID = AA.InstanceID
-			AND AD.AlertKey = AA.AlertKey
-			)
-AND IsResolved=0
-AND IsBlackout=0
+IF @ResolveAlertsOfType=1
+BEGIN
+	/* Resolve existing issues if there is an existing alert that is no longer active */
+	UPDATE AA
+		SET ResolvedDate = SYSUTCDATETIME(),
+		IsResolved = 1,
+		LastMessage = 'Issue resolved',
+		UpdateCount +=1,
+		ResolvedCount +=1,
+		UpdatedDate = SYSUTCDATETIME()
+	FROM Alert.ActiveAlerts AA
+	WHERE AlertType = @AlertType
+	AND NOT EXISTS(SELECT 1 
+				FROM @AD AD
+				WHERE AD.InstanceID = AA.InstanceID
+				AND AD.AlertKey = AA.AlertKey
+				)
+	AND IsResolved=0
+	AND IsBlackout=0
+END
 
 /* Update active alerts with current date and message */
 UPDATE AA
