@@ -40,7 +40,7 @@ SELECT 	I.InstanceID,
 		R.Priority,	
 		R.AlertKey,
 		CDS.Reference,
-		CASE WHEN Calc.UseCriticalStatus=1 AND CDS.CriticalThreshold<R.Threshold THEN CDS.CriticalThreshold ELSE R.Threshold END AS Threshold,
+		ISNULL(CASE WHEN Calc.UseCriticalStatus=1 AND (CDS.CriticalThreshold<R.Threshold OR R.Threshold IS NULL) THEN CDS.CriticalThreshold ELSE R.Threshold END,0) AS Threshold,
 		R.RuleID,
 		CDS.SnapshotAge
 FROM Alert.Rules R 
