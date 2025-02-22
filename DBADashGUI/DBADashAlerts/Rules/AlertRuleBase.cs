@@ -27,7 +27,8 @@ namespace DBADashGUI.DBADashAlerts.Rules
             Counter,
             CPU,
             DriveSpace,
-            Wait
+            Wait,
+            AgentJob
         }
 
         public static AlertRuleBase CreateRule(RuleTypes type)
@@ -40,6 +41,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
                 RuleTypes.AGHealth => new AGHealthRule(),
                 RuleTypes.DriveSpace => new DriveSpaceRule(),
                 RuleTypes.CollectionDates => new CollectionDatesRule(),
+                RuleTypes.AgentJob => new AgentJobRule(),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
@@ -216,6 +218,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
                 RuleTypes.Counter => string.IsNullOrEmpty(details) ? new CounterRule() : JsonConvert.DeserializeObject<CounterRule>(details),
                 RuleTypes.DriveSpace => string.IsNullOrEmpty(details) ? new DriveSpaceRule() : JsonConvert.DeserializeObject<DriveSpaceRule>(details),
                 RuleTypes.CollectionDates => string.IsNullOrEmpty(details) ? new CollectionDatesRule() : JsonConvert.DeserializeObject<CollectionDatesRule>(details),
+                RuleTypes.AgentJob => string.IsNullOrEmpty(details) ? new AgentJobRule() : JsonConvert.DeserializeObject<AgentJobRule>(details),
                 _ => throw new NotImplementedException()
             };
             rule.RuleID = ruleID;
