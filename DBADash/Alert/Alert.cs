@@ -78,6 +78,10 @@ namespace DBADash.Alert
 
         public string DefaultThreadKey => $"DBADash_{ConnectionID}_{AlertName}_{TriggerDate.Ticks}";
 
+        public int NotificationCount { get; set; }
+
+        public int MaxNotifications { get; set; }
+
         public string GetEmoji()
         {
             if (IsResolved)

@@ -1,21 +1,19 @@
-﻿using System;
+﻿using DBADash;
+using DBADashGUI.DBADashAlerts;
+using Microsoft.Data.SqlClient;
+using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DBADash;
-using DBADash.Alert;
-using DBADashGUI.DBADashAlerts;
-using MailKit.Search;
-using Microsoft.Data.SqlClient;
-using Serilog;
+using Alert = DBADash.Alert.Alert;
 
 namespace DBADashService
 {
     internal class AlertProcessing
     {
-
         public int NotificationProcessingFrequencySeconds { get; set; } = CollectionConfig.DefaultAlertProcessingFrequencySeconds;
         private readonly DBADashConnection Connection;
         private string ConnectionString => Connection.ConnectionString;
@@ -30,12 +28,12 @@ namespace DBADashService
                 if (_agentId.HasValue) return _agentId.Value;
                 try
                 {
-                    _agentId= DBADashAgent.GetCurrent().GetDBADashAgentID(ConnectionString);
+                    _agentId = DBADashAgent.GetCurrent().GetDBADashAgentID(ConnectionString);
                     return _agentId.Value;
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex,"Error getting DBA Dash Agent ID");
+                    Log.Error(ex, "Error getting DBA Dash Agent ID");
                     throw;
                 }
             }
@@ -82,14 +80,14 @@ namespace DBADashService
             // ReSharper disable once FunctionNeverReturns
         }
 
-        private void LogError(Exception exception,string message)
+        private void LogError(Exception exception, string message)
         {
             try
             {
-                Log.Error(exception,message);
+                Log.Error(exception, message);
                 var dtErrors = DBCollector.GetErrorDataTableSchema();
-                DBCollector.AddErrorRow(ref dtErrors,"Alert",exception.ToString(),"AlertProcessing");
-                DBImporter.InsertErrors(ConnectionString,null,DateTime.UtcNow, dtErrors,default);
+                DBCollector.AddErrorRow(ref dtErrors, "Alert", exception.ToString(), "AlertProcessing");
+                DBImporter.InsertErrors(ConnectionString, null, DateTime.UtcNow, dtErrors, default);
             }
             catch (Exception ex)
             {
@@ -97,12 +95,14 @@ namespace DBADashService
             }
         }
 
-        public async Task ProcessNotifications()
+        private async Task<Dictionary<int, List<Alert>>> GetGroupedAlerts()
         {
             await using var cn = new SqlConnection(ConnectionString);
             await cn.OpenAsync();
             await using var cmd = new SqlCommand("Alert.Notifications_Get", cn) { CommandType = CommandType.StoredProcedure };
-            var rdr= await cmd.ExecuteReaderAsync();
+            var rdr = await cmd.ExecuteReaderAsync();
+            var groupedAlerts = new Dictionary<int, List<Alert>>();
+
             while (await rdr.ReadAsync())
             {
                 var alert = new Alert
@@ -115,31 +115,104 @@ namespace DBADashService
                     ResolvedDate = rdr["ResolvedDate"] == DBNull.Value ? null : (DateTime?)rdr["ResolvedDate"],
                     IsResolved = (bool)rdr["IsResolved"],
                     TriggerDate = (DateTime)rdr["TriggerDate"],
-                    CustomThreadKey = rdr["CustomThreadKey"] == DBNull.Value ? null : (string)rdr["CustomThreadKey"]
+                    CustomThreadKey = rdr["CustomThreadKey"] == DBNull.Value ? null : (string)rdr["CustomThreadKey"],
+                    NotificationCount = (int)rdr["NotificationCount"],
+                    MaxNotifications = (int)rdr["AlertMaxNotificationCount"]
                 };
-                var notificationChannelId = (int)rdr["NotificationChannelID"];
-                var channel = NotificationChannelBase.GetChannelWithCaching(notificationChannelId, ConnectionString);
-                var notificationCount = (int)rdr["NotificationCount"];
-                var maxNotifications = (int)rdr["AlertMaxNotificationCount"];
-                notificationCount++;
 
-                if (notificationCount >= maxNotifications)
+                var notificationChannelId = (int)rdr["NotificationChannelID"];
+
+                if (!groupedAlerts.ContainsKey(notificationChannelId))
                 {
-                    alert.Message += $"\n\nAlert has reached the maximum notification count {notificationCount}.  Further notifications are supressed until the alert is closed.";
+                    groupedAlerts.Add(notificationChannelId, (new List<Alert> { alert }));
                 }
                 else
                 {
-                    alert.Message +=$"\n\nAlert has been sent {notificationCount} times of a maximum of {maxNotifications}";
+                    groupedAlerts[notificationChannelId].Add(alert);
                 }
+            }
 
+            return groupedAlerts;
+        }
+
+        public async Task ProcessNotifications()
+        {
+            var groupedAlerts = await GetGroupedAlerts();
+
+            foreach (var (notificationChannelId, alerts) in groupedAlerts)
+            {
+                var channel = NotificationChannelBase.GetChannelWithCaching(notificationChannelId, ConnectionString);
+                if (alerts.Count >= (channel.AlertConsolidationThreshold ?? NotificationChannelBase.DefaultAlertConsolidationThreshold))
+                {
+                    await SendConsolidatedAlertNotification(channel, alerts);
+                }
+                else
+                {
+                    await SendIndividualAlertNotification(channel, alerts);
+                }
+            }
+        }
+
+        private async Task SendIndividualAlertNotification(NotificationChannelBase channel, List<Alert> alerts)
+        {
+            foreach (var alert in alerts)
+            {
+                if (alert.NotificationCount >= alert.MaxNotifications)
+                {
+                    alert.Message += $"\n\nAlert has reached the maximum notification count {alert.NotificationCount}.  Further notifications are supressed until the alert is closed.";
+                }
+                else
+                {
+                    alert.Message += $"\n\nAlert has been sent {alert.NotificationCount} times of a maximum of {alert.MaxNotifications}";
+                }
                 try
                 {
                     await channel.SendNotificationAsync(alert, ConnectionString);
                 }
                 catch (Exception ex)
                 {
-                    LogError(ex,$"Error sending notification to channel {channel.ChannelName}");
+                    LogError(ex, $"Error sending notification to channel {channel.ChannelName}");
                 }
+            }
+        }
+
+        private async Task SendConsolidatedAlertNotification(NotificationChannelBase channel, List<Alert> alerts)
+        {
+            var consolidatedAlert = new Alert()
+            {
+                AlertName = $"{alerts.Count} alert notifications for your attention",
+                Priority = alerts.Min(a => a.Priority),
+                IsResolved = alerts.All(a => a.IsResolved),
+                ConnectionID = alerts.Select(a => a.ConnectionID).Distinct().Count() == 1 ? alerts.First().ConnectionID : alerts.Select(a => a.ConnectionID).Distinct().Count().ToString() + " Instances",
+                TriggerDate = DateTime.UtcNow
+            };
+            var sb = new StringBuilder();
+            foreach (var group in alerts.GroupBy(a => a.ConnectionID).OrderBy(a => a.Key))
+            {
+                sb.AppendLine(group.Key);
+                foreach (var alert in group.OrderBy(a => a.Priority))
+                {
+                    sb.AppendLine(alert.GetEmoji() + "[" + alert.Status + "] " + alert.AlertName + "\n" + alert.Message + "\n");
+                }
+
+                sb.AppendLine();
+            }
+
+            consolidatedAlert.Message = sb.ToString();
+
+            var errorMessage = string.Empty;
+            try
+            {
+                await channel.SendNotificationAsync(consolidatedAlert, ConnectionString);
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+            }
+
+            foreach (var alert in alerts)
+            {
+                await channel.UpdateLastNotified(alert, ConnectionString, errorMessage);
             }
         }
 
@@ -147,7 +220,7 @@ namespace DBADashService
         {
             await using var cn = new SqlConnection(ConnectionString);
             await cn.OpenAsync();
-            await using var cmd = new SqlCommand("Alert.Alerts_UPD",cn) {CommandType = CommandType.StoredProcedure };
+            await using var cmd = new SqlCommand("Alert.Alerts_UPD", cn) { CommandType = CommandType.StoredProcedure };
             await cmd.ExecuteNonQueryAsync();
         }
     }

@@ -55,6 +55,12 @@ namespace DBADashGUI.DBADashAlerts
         [Category("DBA Dash Notification Channel")]
         [JsonIgnore] public List<NotificationChannelSchedule> Schedules { get; set; }
 
+        [DisplayName("Alert Consolidation Threshold"), Description("Number of alerts that result in a consolidated alert message to reduce the number of notifications."), DefaultValue(DefaultAlertConsolidationThreshold)]
+        [Category("DBA Dash Notification Channel")]
+        public int? AlertConsolidationThreshold { get; set; }
+
+        public const int DefaultAlertConsolidationThreshold = 5;
+
         protected NotificationChannelBase()
         {
             Schedules = new() { new NotificationChannelSchedule() };
@@ -75,9 +81,9 @@ namespace DBADashGUI.DBADashAlerts
             }
         }
 
-        protected async Task UpdateLastNotified(Alert alert, string connectionString, string errorMessage)
+        public async Task UpdateLastNotified(Alert alert, string connectionString, string errorMessage)
         {
-            if (string.IsNullOrEmpty(connectionString)) return;
+            if (string.IsNullOrEmpty(connectionString) || alert.AlertID <= 0) return;
             await using var cn = new SqlConnection(connectionString);
             await cn.OpenAsync();
             await using var cmd = new SqlCommand("Alert.AlertNotification_Upd", cn)
