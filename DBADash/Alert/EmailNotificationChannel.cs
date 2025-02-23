@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace DBADash.Alert
@@ -75,13 +76,13 @@ namespace DBADash.Alert
             ? IsHTML ? DefaultHTMLMessageTemplate : DefaultEmailMessageTemplate
             : EmailMessageTemplate;
 
-        private static string ReplacePlaceholders(Alert alert, string template) => template.Replace("{Emoji}", alert.GetEmoji(), StringComparison.InvariantCultureIgnoreCase)
+        private string ReplacePlaceholders(Alert alert, string template) => template.Replace("{Emoji}", alert.GetEmoji(), StringComparison.InvariantCultureIgnoreCase)
             .Replace("{AlertKey}", alert.AlertName, StringComparison.InvariantCultureIgnoreCase)
             .Replace("{Action}", alert.Action, StringComparison.InvariantCultureIgnoreCase)
             .Replace("{Title}", $"{alert.AlertName} [{alert.Status}]", StringComparison.InvariantCultureIgnoreCase)
             .Replace("{instance}", alert.ConnectionID, StringComparison.InvariantCultureIgnoreCase)
             .Replace("{Priority}", alert.Priority.ToString(), StringComparison.InvariantCultureIgnoreCase)
-            .Replace("{Text}", alert.Message, StringComparison.InvariantCultureIgnoreCase)
+            .Replace("{Text}", IsHTML ? WebUtility.HtmlEncode(alert.Message).Replace("\r\n", "\n").Replace("\n", "<br>") : alert.Message, StringComparison.InvariantCultureIgnoreCase)
             .Replace("{Icon}", alert.GetIcon(), StringComparison.InvariantCultureIgnoreCase)
             .Replace("{IconUrl}", alert.GetIconUrl(), StringComparison.InvariantCultureIgnoreCase);
 
