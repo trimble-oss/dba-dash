@@ -102,13 +102,14 @@ UPDATE AA
 		ResolvedCount +=1,
 		UpdatedDate = SYSUTCDATETIME()
 FROM Alert.ActiveAlerts AA
-WHERE AlertType = @Type
+WHERE AA.AlertType = @Type
 AND EXISTS(SELECT 1 
 			FROM dbo.Jobs J 
 			WHERE J.InstanceID = AA.InstanceID 
 			AND J.name = STUFF(AA.AlertKey,1,LEN(@AlertKeyPrefix),'') 
 			AND (J.LastSucceeded>LastFailed OR J.enabled=0)
 			)
+AND AA.IsResolved=0
 
 /* Update the snapshot or recently failed jobs */
 TRUNCATE TABLE Alert.AgentJobSnapshot
