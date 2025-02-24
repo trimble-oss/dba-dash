@@ -250,6 +250,7 @@ namespace DBADashGUI.DBADashAlerts
                             AlertRuleBase.RuleTypes.AGHealth => "tabAG",  
                             AlertRuleBase.RuleTypes.Counter => "tabPC",
                             AlertRuleBase.RuleTypes.CollectionDates => "tabCollectionDates",
+                            AlertRuleBase.RuleTypes.AgentJob => "tabJobs",
                             _ => "tabPerformance"
                         };
                         Instance_Selected?.Invoke(this,
