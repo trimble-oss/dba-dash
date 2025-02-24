@@ -22,7 +22,8 @@ SELECT AA.AlertID,
 		@AlertMaxNotificationCount AS AlertMaxNotificationCount,
 		AA.TriggerDate,
 		CASE WHEN AA.Escalated > AA.LastNotification THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsEscalated,
-		CTK.ThreadKey AS CustomThreadKey
+		CTK.ThreadKey AS CustomThreadKey,
+		AA.AlertType
 FROM Alert.ActiveAlerts AA
 JOIN dbo.Instances I ON AA.InstanceID = I.InstanceID
 CROSS JOIN Alert.NotificationChannel NC

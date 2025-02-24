@@ -117,7 +117,8 @@ namespace DBADashService
                     TriggerDate = (DateTime)rdr["TriggerDate"],
                     CustomThreadKey = rdr["CustomThreadKey"] == DBNull.Value ? null : (string)rdr["CustomThreadKey"],
                     NotificationCount = (int)rdr["NotificationCount"],
-                    MaxNotifications = (int)rdr["AlertMaxNotificationCount"]
+                    MaxNotifications = (int)rdr["AlertMaxNotificationCount"],
+                    AlertType = (string)rdr["AlertType"]
                 };
 
                 var notificationChannelId = (int)rdr["NotificationChannelID"];

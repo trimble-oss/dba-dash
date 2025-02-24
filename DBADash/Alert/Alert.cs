@@ -82,6 +82,8 @@ namespace DBADash.Alert
 
         public int MaxNotifications { get; set; }
 
+        public string AlertType { get; set; }
+
         public string GetEmoji()
         {
             if (IsResolved)
@@ -127,7 +129,8 @@ namespace DBADash.Alert
                 Priority = Priorities.Information1,
                 TriggerDate = DateTime.Now,
                 Message = "Test Alert",
-                ConnectionID = Environment.MachineName
+                ConnectionID = Environment.MachineName,
+                AlertType = "Demo"
             };
         }
 
