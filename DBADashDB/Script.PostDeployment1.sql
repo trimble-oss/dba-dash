@@ -1889,7 +1889,8 @@ MERGE INTO Alert.NotificationChannelType AS [Target]
 USING (VALUES
 	(1,N'Webhook'),
 	(2,N'Email'),
-	(3,N'Slack')
+	(3,N'Slack'),
+	(4,N'PagerDuty')
 ) AS [Source]([NotificationChannelTypeID],[NotificationChannelType])
 ON ([Target].[NotificationChannelTypeID] = [Source].[NotificationChannelTypeID])
 WHEN MATCHED AND (
