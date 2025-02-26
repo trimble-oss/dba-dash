@@ -26,6 +26,8 @@ namespace DBADash.Alert
 
         public override NotificationChannelTypes NotificationChannelType => NotificationChannelTypes.PagerDuty;
 
+        public override bool IncludeNotificationCountInMessage => false;
+
         private string PagerDutySeverity(Alert.Priorities priority)
         {
             if (!string.IsNullOrEmpty(Severity)) return Severity;

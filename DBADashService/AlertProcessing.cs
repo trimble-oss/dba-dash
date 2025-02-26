@@ -160,14 +160,20 @@ namespace DBADashService
             foreach (var alert in alerts)
             {
                 var notificationCount = alert.NotificationCount + 1; // Notification count after this notification is sent
-                if (notificationCount >= alert.MaxNotifications)
+                if (channel.IncludeNotificationCountInMessage)
                 {
-                    alert.Message += $"\n\nAlert has reached the maximum notification count {notificationCount}.  Further notifications are supressed until the alert is closed.";
+                    if (notificationCount >= alert.MaxNotifications)
+                    {
+                        alert.Message +=
+                            $"\n\nAlert has reached the maximum notification count {notificationCount}.  Further notifications are supressed until the alert is closed.";
+                    }
+                    else
+                    {
+                        alert.Message +=
+                            $"\n\nAlert has been sent {notificationCount} times of a maximum of {alert.MaxNotifications}";
+                    }
                 }
-                else
-                {
-                    alert.Message += $"\n\nAlert has been sent {notificationCount} times of a maximum of {alert.MaxNotifications}";
-                }
+
                 try
                 {
                     await channel.SendNotificationAsync(alert, ConnectionString);

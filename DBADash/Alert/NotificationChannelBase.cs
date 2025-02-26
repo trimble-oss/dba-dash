@@ -68,6 +68,10 @@ namespace DBADashGUI.DBADashAlerts
 
         public const int DefaultAlertConsolidationThreshold = 5;
 
+        [Browsable(false)]
+        [JsonIgnore]
+        public virtual bool IncludeNotificationCountInMessage => true;
+
         protected NotificationChannelBase()
         {
             Schedules = new() { new NotificationChannelSchedule() };
