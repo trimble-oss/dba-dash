@@ -159,13 +159,14 @@ namespace DBADashService
         {
             foreach (var alert in alerts)
             {
-                if (alert.NotificationCount >= alert.MaxNotifications)
+                var notificationCount = alert.NotificationCount + 1; // Notification count after this notification is sent
+                if (notificationCount >= alert.MaxNotifications)
                 {
-                    alert.Message += $"\n\nAlert has reached the maximum notification count {alert.NotificationCount}.  Further notifications are supressed until the alert is closed.";
+                    alert.Message += $"\n\nAlert has reached the maximum notification count {notificationCount}.  Further notifications are supressed until the alert is closed.";
                 }
                 else
                 {
-                    alert.Message += $"\n\nAlert has been sent {alert.NotificationCount} times of a maximum of {alert.MaxNotifications}";
+                    alert.Message += $"\n\nAlert has been sent {notificationCount} times of a maximum of {alert.MaxNotifications}";
                 }
                 try
                 {
