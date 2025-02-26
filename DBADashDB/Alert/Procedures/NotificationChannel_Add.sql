@@ -4,6 +4,7 @@
 	@DisableTo DATETIME=NULL,
 	@NotificationChannelTypeID INT,
 	@ChannelDetails NVARCHAR(MAX),
+	@AcknowledgedNotification BIT=0,
 	@NotificationChannelID INT OUT
 )
 AS
@@ -12,9 +13,10 @@ INSERT INTO Alert.NotificationChannel(
 	ChannelName,
 	DisableFrom,
 	DisableTo,
-	ChannelDetails
+	ChannelDetails,
+	AcknowledgedNotification
 	)
-VALUES(@NotificationChannelTypeID,@ChannelName,@DisableFrom,@DisableTo,@ChannelDetails);
+VALUES(@NotificationChannelTypeID,@ChannelName,@DisableFrom,@DisableTo,@ChannelDetails,@AcknowledgedNotification);
 
 SET @NotificationChannelID = SCOPE_IDENTITY();
 GO

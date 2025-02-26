@@ -98,13 +98,13 @@ namespace DBADash.Alert
             var pagerDutyEvent = new
             {
                 routing_key = IntegrationKey,
-                event_action = alert.IsResolved ? "resolve" : "trigger",
+                event_action = alert.IsResolved ? "resolve" : alert.IsAcknowledged ? "acknowledge" : "trigger",
                 dedup_key = alert.DefaultThreadKey,
                 payload = new
                 {
                     component = "SQL Server",
                     @class = alert.AlertType,
-                    summary = alert.AlertName,
+                    summary = alert.AlertName + " on " + alert.ConnectionID,
                     source = alert.ConnectionID,
                     severity = PagerDutySeverity(alert.Priority),
                     timestamp = alert.TriggerDate,

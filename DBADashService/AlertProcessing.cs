@@ -118,7 +118,8 @@ namespace DBADashService
                     CustomThreadKey = rdr["CustomThreadKey"] == DBNull.Value ? null : (string)rdr["CustomThreadKey"],
                     NotificationCount = (int)rdr["NotificationCount"],
                     MaxNotifications = (int)rdr["AlertMaxNotificationCount"],
-                    AlertType = (string)rdr["AlertType"]
+                    AlertType = (string)rdr["AlertType"],
+                    IsAcknowledged = (bool)rdr["IsAcknowledged"]
                 };
 
                 var notificationChannelId = (int)rdr["NotificationChannelID"];

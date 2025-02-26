@@ -23,13 +23,14 @@ SELECT AA.AlertID,
 		AA.TriggerDate,
 		CASE WHEN AA.Escalated > AA.LastNotification THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsEscalated,
 		CTK.ThreadKey AS CustomThreadKey,
-		AA.AlertType
+		AA.AlertType,
+		AA.IsAcknowledged
 FROM Alert.ActiveAlerts AA
 JOIN dbo.Instances I ON AA.InstanceID = I.InstanceID
 CROSS JOIN Alert.NotificationChannel NC
 LEFT JOIN Alert.CustomThreadKey CTK ON AA.AlertID = CTK.AlertID AND NC.NotificationChannelID = CTK.NotificationChannelID
 WHERE (AA.UpdatedDate > AA.LastNotification OR AA.LastNotification IS NULL)
-AND AA.IsAcknowledged = 0
+AND (AA.IsAcknowledged = 0 OR (AA.AcknowledgedDate > AA.LastNotification AND NC.AcknowledgedNotification=1))
 AND AA.NotificationCount < @AlertMaxNotificationCount
 AND (NC.DisableFrom IS NULL /* Not disabled */
 	OR NC.DisableFrom>SYSUTCDATETIME() /* Disabled period hasn't started */
@@ -55,6 +56,7 @@ AND EXISTS(
 					OR (AA.IsResolved=1 AND AA.ResolvedCount=1)
 					OR (AA.IsResolved=0 AND AA.ResolvedDate > AA.LastNotification AND AA.ResolvedCount=1)
 					OR (AA.Escalated > AA.LastNotification)
+					OR (AA.AcknowledgedDate > AA.LastNotification)
 					)
 			AND EXISTS(
 					SELECT 1
