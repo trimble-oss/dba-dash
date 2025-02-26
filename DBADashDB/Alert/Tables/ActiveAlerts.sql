@@ -22,6 +22,7 @@
 	DeEscalated DATETIME2 NULL,
 	Notes NVARCHAR(MAX) NULL,
 	RuleID INT NULL,
+	AcknowledgedDate DATETIME2 NULL,
 	CONSTRAINT FK_ActiveAlerts_Instances FOREIGN KEY(InstanceID) REFERENCES dbo.Instances(InstanceID),
 	CONSTRAINT FK_ActiveAlerts_Rules FOREIGN KEY(RuleID) REFERENCES Alert.Rules(RuleID),
 	CONSTRAINT PK_ActiveAlerts PRIMARY KEY(AlertID),

@@ -6,7 +6,8 @@
 AS 
 /* Toggle the acknowledged status for alerts specified */
 UPDATE AA
-    SET AA.IsAcknowledged = @IsAcknowledged
+    SET AA.IsAcknowledged = @IsAcknowledged,
+    AA.AcknowledgedDate = CASE WHEN @IsAcknowledged = 1 THEN SYSUTCDATETIME() ELSE NULL END
 FROM Alert.ActiveAlerts AA
 WHERE EXISTS(
             SELECT 1 

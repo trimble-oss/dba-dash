@@ -66,9 +66,9 @@ namespace DBADash.Alert
 
         public bool IsResolved { get; set; }
 
-        public string Status => IsResolved ? "Resolved" : "Active";
+        public string Status => IsResolved ? "Resolved" : IsAcknowledged ? "Acknowledged" : "Active";
 
-        public string Action => IsResolved ? "resolved" : "triggered";
+        public string Action => IsResolved ? "resolved" : IsAcknowledged ? "acknowledged" : "triggered";
 
         public DateTime TriggerDate { get; set; }
 
@@ -84,6 +84,8 @@ namespace DBADash.Alert
 
         public string AlertType { get; set; }
 
+        public bool IsAcknowledged { get; set; }
+
         public string GetEmoji()
         {
             if (IsResolved)
@@ -91,6 +93,10 @@ namespace DBADash.Alert
                 return "✅";
             }
 
+            if (IsAcknowledged)
+            {
+                return "👋";
+            }
             return (short)Priority switch
             {
                 41 => "✅",
@@ -107,7 +113,10 @@ namespace DBADash.Alert
             {
                 return "DBADash_Success.png";
             }
-
+            if (IsAcknowledged)
+            {
+                return "DBADash_Neutral.png";
+            }
             return (short)Priority switch
             {
                 41 => "DBADash_Success.png",

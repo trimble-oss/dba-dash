@@ -32,14 +32,15 @@ SELECT	NC.NotificationChannelID,
 			LEFT JOIN dbo.Tags T ON T.TagID = NCS.ApplyToTagID
 			WHERE NCS.NotificationChannelID = NC.NotificationChannelID
 			FOR XML PATH(''''),TYPE).value(''.'',''NVARCHAR(MAX)''),1,2,'''') AS Tags,
-		LastFailedNotification,
-		LastSucceededNotification,
-		FailedNotificationCount,
-		SucceededNotificationCount,
-		LastFailure,
-		CASE WHEN LastSucceededNotification IS NULL AND LastFailedNotification IS NULL THEN 3 
-			WHEN LastFailedNotification > ISNULL(LastSucceededNotification,''19000101'') OR LastSucceededNotification IS NULL THEN 1 
-			WHEN LastFailedNotification > DATEADD(d,-3,SYSUTCDATETIME()) THEN 2  ELSE 4 END AS LastFailureStatus
+		NC.LastFailedNotification,
+		NC.LastSucceededNotification,
+		NC.FailedNotificationCount,
+		NC.SucceededNotificationCount,
+		NC.LastFailure,
+		CASE WHEN NC.LastSucceededNotification IS NULL AND NC.LastFailedNotification IS NULL THEN 3 
+			WHEN NC.LastFailedNotification > ISNULL(NC.LastSucceededNotification,''19000101'') OR LastSucceededNotification IS NULL THEN 1 
+			WHEN NC.LastFailedNotification > DATEADD(d,-3,SYSUTCDATETIME()) THEN 2  ELSE 4 END AS LastFailureStatus,
+		NC.AcknowledgedNotification
 FROM Alert.NotificationChannel NC 
 JOIN Alert.NotificationChannelType NCT ON NC.NotificationChannelTypeID = NCT.NotificationChannelTypeID
 OUTER APPLY(SELECT COUNT(*) AS ScheduleCount

@@ -10,6 +10,7 @@
 	FailedNotificationCount INT NOT NULL CONSTRAINT DF_Alert_NotificationChannel_FailedNotificationCount DEFAULT(0),
 	SucceededNotificationCount INT NOT NULL CONSTRAINT DF_Alert_NotificationChannel_SucceededNotificationCount DEFAULT(0),
 	LastFailure NVARCHAR(MAX) NULL,
+	AcknowledgedNotification BIT NOT NULL CONSTRAINT DF_Alert_AcknowledgedNotification DEFAULT(0),
 	CONSTRAINT FK_NotificationChannel_NotificationChannelType FOREIGN KEY(NotificationChannelTypeID) REFERENCES Alert.NotificationChannelType(NotificationChannelTypeID),
 	CONSTRAINT PK_NotificationChannel PRIMARY KEY(NotificationChannelID)
 )

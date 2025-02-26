@@ -60,6 +60,12 @@ namespace DBADashGUI.DBADashAlerts
         [Category("DBA Dash Notification Channel")]
         public int? AlertConsolidationThreshold { get; set; }
 
+        [JsonIgnore]
+        [Description("Option to enable/disable notifications when alert is acknowledged in DBA Dash.")]
+        [DisplayName("Acknowledged Notification)")]
+        [Category("DBA Dash Notification Channel")]
+        public bool AcknowledgedNotification { get; set; } = true;
+
         public const int DefaultAlertConsolidationThreshold = 5;
 
         protected NotificationChannelBase()
@@ -198,6 +204,7 @@ namespace DBADashGUI.DBADashAlerts
             cmd.Parameters.AddWithValue("@DisableTo", DisableTo);
             cmd.Parameters.AddWithValue("@NotificationChannelTypeID", NotificationChannelType);
             cmd.Parameters.AddWithValue("@ChannelDetails", GetChannelDetails());
+            cmd.Parameters.AddWithValue("@AcknowledgedNotification", AcknowledgedNotification);
             cmd.ExecuteNonQuery();
         }
 
@@ -212,6 +219,7 @@ namespace DBADashGUI.DBADashAlerts
             cmd.Parameters.AddWithValue("@DisableTo", DisableTo);
             cmd.Parameters.AddWithValue("@ChannelDetails", GetChannelDetails());
             cmd.Parameters.AddWithValue("@NotificationChannelTypeID", NotificationChannelType);
+            cmd.Parameters.AddWithValue("@AcknowledgedNotification", AcknowledgedNotification);
             var pChannelID = new SqlParameter("@NotificationChannelID", SqlDbType.Int)
             { Direction = ParameterDirection.Output };
             cmd.Parameters.Add(pChannelID);
@@ -263,6 +271,7 @@ namespace DBADashGUI.DBADashAlerts
                     : (DateTime)rdr["DisableFrom"];
                 channel.DisableTo = rdr["DisableTo"] == DBNull.Value ? null : (DateTime)rdr["DisableTo"];
                 channel.Schedules = GetSchedules(channelId, connectionString);
+                channel.AcknowledgedNotification = (bool)rdr["AcknowledgedNotification"];
                 return channel;
             }
             else

@@ -25,7 +25,8 @@ INSERT INTO Alert.ClosedAlerts(
            IsResolved,
            ResolvedDate,
            Notes,
-           RuleID)
+           RuleID,
+           AcknowledgedDate)
 SELECT AlertID,
            InstanceID,
            Priority,
@@ -45,7 +46,8 @@ SELECT AlertID,
            IsResolved,
            ResolvedDate,
            Notes,
-           RuleID
+           RuleID,
+           AcknowledgedDate
 FROM Alert.ActiveAlerts AA
 WHERE EXISTS(
             SELECT 1 

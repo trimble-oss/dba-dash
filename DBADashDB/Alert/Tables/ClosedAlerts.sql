@@ -20,6 +20,7 @@
 	ClosedDate DATETIME2 NOT NULL CONSTRAINT DF_Alert_ClosedAlerts_ClosedDate DEFAULT(SYSUTCDATETIME()),
 	Notes NVARCHAR(MAX) NULL,
 	RuleID INT NULL,
+	AcknowledgedDate DATETIME2 NULL,
 	CONSTRAINT FK_ClosedAlerts_Instances FOREIGN KEY(InstanceID) REFERENCES dbo.Instances(InstanceID),
 	CONSTRAINT PK_ClosedAlerts PRIMARY KEY(AlertID)
 )
