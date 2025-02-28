@@ -76,7 +76,9 @@ SELECT InstanceID,
        has_plan,
        statement_start_offset,
        statement_end_offset,
-       context_info
+       context_info,
+       transaction_duration_ms,
+       transaction_duration
 FROM dbo.RunningQueriesInfo Q
 WHERE Q.SnapshotDateUTC >= @SnapshotDateFrom 
 AND Q.SnapshotDateUTC < @SnapshotDateTo

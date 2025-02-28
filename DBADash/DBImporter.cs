@@ -209,10 +209,13 @@ namespace DBADash
                 {
                     dtRunningQueries.Columns.Add("last_request_end_time_utc", typeof(DateTime));
                 }
-
                 if (!dtRunningQueries.Columns.Contains("context_info"))
                 {
                     dtRunningQueries.Columns.Add("context_info", typeof(byte[]));
+                }
+                if (!dtRunningQueries.Columns.Contains("transaction_begin_time_utc"))
+                {
+                    dtRunningQueries.Columns.Add("transaction_begin_time_utc", typeof(DateTime));
                 }
             }
 

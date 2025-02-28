@@ -81,10 +81,14 @@ SELECT Q.InstanceID,
     CASE WHEN QP.query_plan_compresed IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS has_plan,
     Q.statement_start_offset,
     Q.statement_end_offset,
-    Q.context_info
+    Q.context_info,
+    Q.transaction_begin_time_utc,
+    calc.transaction_duration_ms,
+    TranHD.HumanDuration AS transaction_duration
 FROM dbo.RunningQueries Q
 JOIN dbo.Instances I ON Q.InstanceID = I.InstanceID
-CROSS APPLY(SELECT CASE WHEN Q.start_time_utc < Q.SnapshotDateUTC OR Q.start_time_utc IS NULL  THEN DATEDIFF_BIG(ms,ISNULL(Q.start_time_utc,Q.last_request_start_time_utc),Q.SnapshotDateUTC) ELSE 0 END AS Duration) calc
+CROSS APPLY(SELECT CASE WHEN Q.start_time_utc < Q.SnapshotDateUTC OR Q.start_time_utc IS NULL  THEN DATEDIFF_BIG(ms,ISNULL(Q.start_time_utc,Q.last_request_start_time_utc),Q.SnapshotDateUTC) ELSE 0 END AS Duration,
+                   CASE WHEN Q.transaction_begin_time_utc<Q.SnapshotDateUTC OR Q.transaction_begin_time_utc IS NULL THEN DATEDIFF_BIG(ms,Q.transaction_begin_time_utc,Q.SnapshotDateUTC) ELSE 0 END AS transaction_duration_ms) calc
 CROSS APPLY dbo.MillisecondsToHumanDuration (calc.Duration) HD
 CROSS APPLY dbo.SplitWaitResource(Q.wait_resource) waitR
 LEFT JOIN dbo.QueryText QT ON QT.sql_handle = Q.sql_handle
@@ -122,3 +126,4 @@ CROSS APPLY dbo.MillisecondsToHumanDuration (RQBRS.BlockWaitTimeMs) AS BlockWait
 CROSS APPLY dbo.MillisecondsToHumanDuration (RQBRS.BlockWaitTimeRecursiveMs) AS BlockWaitTimeRecursive
 CROSS APPLY dbo.MillisecondsToHumanDuration (DATEDIFF_BIG(ms,Q.last_request_end_time_utc,Q.SnapshotDateUTC)) AS TimeSinceLastRequestEnd
 CROSS APPLY dbo.MillisecondsToHumanDuration (DATEDIFF_BIG(ms,Q.last_request_start_time_utc,Q.last_request_end_time_utc)) AS LastRequestDuration
+CROSS APPLY dbo.MillisecondsToHumanDuration (calc.transaction_duration_ms) TranHD

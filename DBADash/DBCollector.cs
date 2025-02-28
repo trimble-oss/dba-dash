@@ -1156,6 +1156,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             using var cmd = new SqlCommand(SqlStrings.RunningQueries, cn);
             using var da = new SqlDataAdapter(cmd);
             cmd.Parameters.AddWithValue("CollectSessionWaits", Source.CollectSessionWaits);
+            cmd.Parameters.AddWithValue("CollectTranBeginTime", Source.CollectTranBeginTime);
             var ds = new DataSet();
             da.Fill(ds);
             var dtRunningQueries = ds.Tables[0];

@@ -154,6 +154,16 @@ namespace DBADashGUI.Performance
                 },
                 new DataGridViewTextBoxColumn()
                 {
+                    HeaderText = "Transaction Duration", DataPropertyName = "transaction_duration", Name = "colTranDuration",
+                    SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60
+                },
+                new DataGridViewTextBoxColumn()
+                {
+                    HeaderText = "Transaction Duration (ms)", DataPropertyName = "transaction_duration_ms", Name = "colTranDurationMs",
+                    SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, Visible = false
+                },
+                new DataGridViewTextBoxColumn()
+                {
                     HeaderText = "CPU Time", DataPropertyName = "cpu_time",
                     SortMode = DataGridViewColumnSortMode.Automatic,
                     DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60
@@ -770,6 +780,13 @@ namespace DBADashGUI.Performance
                     SortMode = DataGridViewColumnSortMode.Automatic,
                     DefaultCellStyle = Common.DataGridViewNumericCellStyle,
                     ToolTipText = $"Max idle time for sleeping sessions with open transactions.\n\n{IdleThresholdInfo}"
+                },
+                new DataGridViewTextBoxColumn()
+                {
+                    Name = "colOldestTran",
+                    HeaderText = "Oldest Transaction",
+                    DataPropertyName = "OldestTransaction",
+                    SortMode = DataGridViewColumnSortMode.Automatic,
                 }
             );
             dgv.DataSource = new DataView(dt);
