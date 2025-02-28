@@ -49,6 +49,7 @@ BEGIN
 						   t.login_time_utc,
 						   t.last_request_end_time_utc,
 						   t.context_info,
+						   t.transaction_begin_time_utc,
 						   ROW_NUMBER() OVER(PARTITION BY t.session_id ORDER BY t.cpu_time DESC) rnum
 					FROM  @RunningQueries t
 	)
@@ -85,7 +86,8 @@ BEGIN
 	    query_plan_hash,
 		login_time_utc,
 		last_request_end_time_utc,
-		context_info
+		context_info,
+		transaction_begin_time_utc
 	)
 	SELECT  SnapshotDateUTC,
 	    session_id,
@@ -118,7 +120,8 @@ BEGIN
 	    query_plan_hash,
 		login_time_utc,
 		last_request_end_time_utc,
-		context_info
+		context_info,
+		transaction_begin_time_utc
 	FROM deDupe
 	WHERE deDupe.rnum=1
 
@@ -138,9 +141,10 @@ BEGIN
         TempDBWaitTimeMs,
 		SumMemoryGrant,
 		SleepingSessionsCount,
-		SleepingSessionsMaxIdleTimeMs
+		SleepingSessionsMaxIdleTimeMs,
+		OldestTransactionMs
     )
-    SELECT @InstanceID as InstanceID,
+    SELECT	@InstanceID as InstanceID,
             R.SnapshotDateUTC,
 		    COUNT(*) AS RunningQueries,
 		    SUM(CASE WHEN R.blocking_session_id>0 THEN 1 ELSE 0 END) AS BlockedQueries,
@@ -156,9 +160,11 @@ BEGIN
             SUM(CASE WHEN calc.IsTempDB=1 THEN CAST(R.wait_time AS BIGINT) ELSE 0 END) AS TempDBWaitTimeMs,
 			ISNULL(SUM(R.granted_query_memory),0) AS SumMemoryGrant,
 			SUM(CASE WHEN R.open_transaction_count>0 AND R.status='sleeping' THEN 1 ELSE 0 END) AS SleepingSessionsCount,
-			MAX(CASE WHEN R.open_transaction_count>0 AND R.status='sleeping' THEN DATEDIFF_BIG(ms,R.last_request_end_time_utc,R.SnapshotDateUTC) ELSE NULL END) AS SleepingSessionsMaxIdleTimeMs
+			MAX(CASE WHEN R.open_transaction_count>0 AND R.status='sleeping' THEN DATEDIFF_BIG(ms,R.last_request_end_time_utc,R.SnapshotDateUTC) ELSE NULL END) AS SleepingSessionsMaxIdleTimeMs,
+			MAX(CASE WHEN calc.TransactionDurationMs<0 THEN 0 ELSE calc.TransactionDurationMs END) AS OldestTransactionMs
     FROM @RunningQueriesDD R 
     CROSS APPLY(SELECT DATEDIFF_BIG(ms,ISNULL(start_time_utc,last_request_start_time_utc),R.SnapshotDateUTC) AS Duration,
+						DATEDIFF_BIG(ms,R.transaction_begin_time_utc,R.SnapshotDateUTC) AS TransactionDurationMs,
                         CASE WHEN wait_resource LIKE '2:%' 
 			                    OR wait_resource LIKE 'PAGE 2:%'
 			                    OR wait_resource LIKE 'OBJECT: 2:%'
@@ -186,9 +192,10 @@ BEGIN
             TempDBWaitTimeMs,
 			SumMemoryGrant,
 			SleepingSessionsCount,
-			SleepingSessionsMaxIdleTimeMs
+			SleepingSessionsMaxIdleTimeMs,
+			OldestTransactionMs
 		)
-		VALUES(@InstanceID,@SnapshotDate,0,0,0,0,0,0,0,0,0,0,0,NULL)
+		VALUES(@InstanceID,@SnapshotDate,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL)
 	END
     /* Running Queries replaces legacy blocking snapshot collection */
     INSERT INTO dbo.BlockingSnapshotSummary(
@@ -243,7 +250,8 @@ BEGIN
         query_plan_hash,
 		login_time_utc,
 		last_request_end_time_utc,
-		context_info
+		context_info,
+		transaction_begin_time_utc
     )
     SELECT @InstanceID as InstanceID,
         SnapshotDateUTC,
@@ -277,7 +285,8 @@ BEGIN
         query_plan_hash,
 		login_time_utc,
 		last_request_end_time_utc,
-		context_info
+		context_info,
+		transaction_begin_time_utc
     FROM @RunningQueriesDD;
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  

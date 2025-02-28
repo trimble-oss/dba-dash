@@ -24,13 +24,16 @@ SELECT TOP(@MaxRows) I.InstanceID,
        TempDBHD.HumanDuration AS TempDBWaitTime,
        S.SleepingSessionsCount,
        S.SleepingSessionsMaxIdleTimeMs,
-       MaxIdleHD.HumanDuration as MaxIdleTime
+       MaxIdleHD.HumanDuration as MaxIdleTime,
+       S.OldestTransactionMs,
+       OldestTranHD.HumanDuration AS OldestTransaction
 FROM dbo.RunningQueriesSummary S
 JOIN dbo.Instances I ON I.InstanceID = S.InstanceID
 CROSS APPLY dbo.MillisecondsToHumanDuration (S.LongestRunningQueryMs) LongestHD
 CROSS APPLY dbo.MillisecondsToHumanDuration (S.BlockedQueriesWaitMs) BlockedHD
 CROSS APPLY dbo.MillisecondsToHumanDuration (S.TempDBWaitTimeMs) TempDBHD
 CROSS APPLY dbo.MillisecondsToHumanDuration (S.SleepingSessionsMaxIdleTimeMs) MaxIdleHD
+CROSS APPLY dbo.MillisecondsToHumanDuration (S.OldestTransactionMs) OldestTranHD
 WHERE S.InstanceID = @InstanceID
 AND S.SnapshotDateUTC >=@FromDate
 AND S.SnapshotDateUTC < @ToDate

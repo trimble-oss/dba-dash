@@ -1,7 +1,16 @@
-﻿DECLARE @UTCOffset INT 
+﻿/*
+DECLARE @CollectSessionWaits BIT 
+DECLARE @CollectTranBeginTime BIT 
+SELECT @CollectSessionWaits =0,@CollectTranBeginTime = 1
+*/
+
+DECLARE @HasOpenTranCount BIT
+DECLARE @UTCOffset INT 
 DECLARE @SnapshotDateUTC DATETIME
-SET @UTCOffset = CAST(ROUND(DATEDIFF(s,GETDATE(),GETUTCDATE())/60.0,0) AS INT)
-SET @SnapshotDateUTC = GETUTCDATE() 
+SELECT	@HasOpenTranCount =CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_sessions'),'open_transaction_count','ColumnId') IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END,
+		@UTCOffset = CAST(ROUND(DATEDIFF(s,GETDATE(),GETUTCDATE())/60.0,0) AS INT),
+		@SnapshotDateUTC = GETUTCDATE()
+
 DECLARE @SQL NVARCHAR(MAX) 
 SET @SQL = N'
 SELECT @SnapshotDateUTC as SnapshotDateUTC,
@@ -35,16 +44,29 @@ SELECT @SnapshotDateUTC as SnapshotDateUTC,
 	' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_requests'),'query_plan_hash','ColumnID') IS NULL THEN 'CAST(NULL AS BINARY(8)) AS query_plan_hash,' ELSE 'r.query_plan_hash,' END + '
 	DATEADD(mi,@UTCOffset, s.login_time) AS login_time_utc,
 	DATEADD(mi,@UTCOffset, s.last_request_end_time) AS last_request_end_time_utc,
-	s.context_info
+	s.context_info,
+	' + CASE WHEN @CollectTranBeginTime=1 OR @HasOpenTranCount=0 THEN 'DATEADD(mi,@UTCOffset, t.transaction_begin_time)' ELSE 'CAST(NULL AS DATETIME)' END + ' AS transaction_begin_time_utc
 FROM sys.dm_exec_sessions s
+' + CASE WHEN @CollectTranBeginTime=1 OR @HasOpenTranCount=0 THEN '
+LEFT HASH JOIN (
+		/*	
+			Get oldest transaction for the session.
+			With MARS there might be more than one tran associated with a session.  
+			We could get the tran associated with the request joining on transaction_id from sys.dm_exec_requests. 
+			This way we get the tran begin time even if there is no active request.
+		*/
+		SELECT	ST.session_id,
+				MIN(AT.transaction_begin_time) AS transaction_begin_time
+		FROM sys.dm_tran_session_transactions ST 
+		INNER HASH JOIN sys.dm_tran_active_transactions AT ON ST.transaction_id = AT.transaction_id
+		GROUP BY ST.session_id
+	) AS t ON s.session_id = t.session_id' ELSE '' END + '
 INNER JOIN sys.dm_exec_connections c ON c.session_id= s.session_id
 LEFT JOIN sys.dm_exec_requests r on s.session_id = r.session_id
 WHERE s.is_user_process=1
-' +CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_sessions'),'open_transaction_count','ColumnId') IS NULL 
+' +CASE WHEN @HasOpenTranCount = 0 
 		-- For older instances
-		THEN 'AND (r.session_id IS NOT NULL 
-						OR EXISTS(SELECT 1 FROM sys.dm_tran_session_transactions t WHERE t.session_id = s.session_id)
-				)' 
+		THEN 'AND (t.transaction_begin_time IS NOT NULL OR r.session_id IS NOT NULL)' 
 		-- For 2012+
 		ELSE 'AND (s.open_transaction_count > 0 OR r.session_id IS NOT NULL)' END + '
 AND s.session_id <> @@SPID
