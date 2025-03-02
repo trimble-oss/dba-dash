@@ -54,7 +54,7 @@ WITH T AS (
 			AVG(PC.Value) AS AvgValue,
 			SUM(PC.Value) as TotalValue,
 			COUNT(*) as SampleCount,' END + '
-			(SELECT TOP(1) Value FROM dbo.PerformanceCounters LV WHERE LV.InstanceID = IC.InstanceID AND LV.CounterID = C.CounterID ORDER BY LV.SnapshotDate DESC) AS CurrentValue,
+			(SELECT TOP(1) Value FROM dbo.PerformanceCountersBetweenDates(DATEADD(mi,-120,GETUTCDATE()),GETUTCDATE(),IC.InstanceID,C.CounterID,C.CounterType) LV WHERE LV.InstanceID = IC.InstanceID AND LV.CounterID = C.CounterID ORDER BY LV.SnapshotDate DESC) AS CurrentValue,
 			COALESCE(IC.CriticalFrom,C.CriticalFrom,C.SystemCriticalFrom) AS CriticalFrom,
 			COALESCE(IC.CriticalTo,C.CriticalTo,C.SystemCriticalTo) AS CriticalTo,
 			COALESCE(IC.WarningFrom,C.WarningFrom,C.SystemWarningFrom) AS WarningFrom,
@@ -64,9 +64,8 @@ WITH T AS (
 	FROM dbo.InstanceCounters IC
 	JOIN dbo.Instances I ON I.InstanceID = IC.InstanceID
 	JOIN dbo.Counters C ON C.CounterID = IC.CounterID
-	JOIN dbo.PerformanceCounters' + CASE WHEN @Use60Min=1 THEN '_60MIN' ELSE '' END + ' PC ON PC.InstanceID = IC.InstanceID AND PC.CounterID = IC.CounterID
-	WHERE PC.SnapshotDate>=@FromDate
-	AND PC.SnapshotDate<@ToDate
+	CROSS APPLY dbo.PerformanceCountersBetweenDates' + CASE WHEN @Use60Min=1 THEN '_60MIN' ELSE '' END + '(@FromDate,@ToDate,IC.InstanceID,C.CounterID,C.CounterType) PC 
+	WHERE 1=1
 	' + CASE WHEN @InstanceID IS NULL THEN '' ELSE 'AND IC.InstanceID = @InstanceID' END + '
 	' + CASE WHEN @InstanceIDs IS NULL THEN '' ELSE 'AND EXISTS(SELECT * FROM STRING_SPLIT(@InstanceIDs,'','') ss WHERE IC.InstanceID = ss.Value)' END + '
 	' + CASE WHEN @Counters IS NULL THEN '' ELSE 'AND EXISTS(SELECT * FROM STRING_SPLIT(@Counters,'','') ss WHERE IC.CounterID = ss.Value)' END + '
@@ -100,7 +99,8 @@ GROUP BY	C.CounterID,
 			C.SystemWarningFrom,
 			C.SystemWarningTo,
 			C.SystemGoodFrom,
-			C.SystemGoodTo
+			C.SystemGoodTo,
+			C.CounterType
 )
 SELECT *,
 		CASE	WHEN MinValueStatus =1 OR MaxValueStatus =1 OR AvgValueStatus=1 OR CurrentValueStatus=1 THEN 1

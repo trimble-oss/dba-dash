@@ -15,11 +15,13 @@
 	SystemWarningTo DECIMAL (28, 9)  NULL,
 	SystemGoodFrom DECIMAL (28, 9)  NULL,
 	SystemGoodTo DECIMAL (28, 9)  NULL,
+	CounterType TINYINT NOT NULL CONSTRAINT DF_Counters_CounterType DEFAULT(1),
     CONSTRAINT [PK_Counters] PRIMARY KEY CLUSTERED (CounterID ASC)
 );
 
 
 GO
 CREATE UNIQUE NONCLUSTERED INDEX IX_Counters_object_name_counter_name_instance_name
-    ON dbo.Counters(object_name ASC, counter_name ASC, instance_name ASC);
+    ON dbo.Counters(object_name ASC, counter_name ASC, instance_name ASC)
+INCLUDE(CounterType);
 
