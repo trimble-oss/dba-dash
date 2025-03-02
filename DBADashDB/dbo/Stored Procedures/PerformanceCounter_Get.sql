@@ -27,6 +27,11 @@ SELECT @HoursCsv =  STUFF((SELECT ',' + CAST(ID AS VARCHAR)
 FROM @Hours
 FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
 
+DECLARE @CounterType TINYINT
+SELECT @CounterType = CounterType
+FROM dbo.Counters
+WHERE CounterID = @CounterID
+
 SET @SQL = N'SELECT PC.CounterID,
        ' + @DateGroupingSQL + ' AS SnapshotDate,
        ' + CASE WHEN @Use60Min=1 THEN 'SUM(PC.Value_Total) AS Value_Total,
@@ -40,12 +45,9 @@ SET @SQL = N'SELECT PC.CounterID,
 					AVG(PC.Value) AS Value_Avg,
 					COUNT(*) AS SampleCount'
 	END + '
-FROM dbo.PerformanceCounters' + CASE WHEN @Use60Min=1 THEN '_60MIN' ELSE '' END + ' PC
+FROM dbo.PerformanceCountersBetweenDates' + CASE WHEN @Use60Min=1 THEN '_60MIN' ELSE '' END + '(@FromDate,@ToDate,@InstanceID,@CounterID,@CounterType) PC
 ' + CASE WHEN @DateGroupingMin = 0 OR @DateGroupingMin IS NULL THEN '' ELSE 'CROSS APPLY dbo.DateGroupingMins(PC.SnapshotDate,@DateGroupingMin) DG' END + '
-WHERE PC.InstanceID =@InstanceID
-AND PC.CounterID = @CounterID
-AND PC.SnapshotDate>=@FromDate
-AND PC.SnapshotDate<@ToDate
+WHERE 1=1
 	' + CASE WHEN @DaysOfWeekCsv IS NULL THEN N'' ELSE 'AND DATEPART(dw,DATEADD(mi, @UTCOffset, PC.SnapshotDate)) IN (' + @DaysOfWeekCsv + ')' END + '
 	' + CASE WHEN @HoursCsv IS NULL THEN N'' ELSE 'AND DATEPART(hh,DATEADD(mi, @UTCOffset, PC.SnapshotDate)) IN(' + @HoursCsv + ')' END + '
 GROUP BY ' + @DateGroupingSQL + ',PC.CounterID
@@ -57,10 +59,12 @@ EXEC sp_executesql @SQL,
 					@InstanceID INT,
 					@CounterID INT,
 					@DateGroupingMin INT,
-					@UTCOffset INT',
+					@UTCOffset INT,
+					@CounterType TINYINT',
 					@FromDate,
 					@ToDate,
 					@InstanceID,
 					@CounterID,
 					@DateGroupingMin,
-					@UTCOffset
+					@UTCOffset,
+					@CounterType

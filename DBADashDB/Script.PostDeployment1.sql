@@ -1924,6 +1924,36 @@ UPDATE dbo.Instances
 		ProductRevision = TRY_CAST(PARSENAME(ProductVersion,1) AS INT)
 WHERE (ProductMinorVersion IS NULL OR ProductBuild IS NULL OR ProductRevision IS NULL)
 
+INSERT INTO dbo.Counters(
+	object_name,
+	counter_name,
+	instance_name,
+	CounterType
+)
+SELECT object_name,counter_name,instance_name,CounterType 
+FROM (VALUES('Running Queries','Running Query Count','',2),
+	('Running Queries','Blocked Query Count','',2),
+	('Running Queries','Oldest Transaction (ms)','',2),
+	('Running Queries','Blocked Queries Wait (ms)','',2),
+	('Running Queries','Max Memory Grant KB','',2),
+	('Running Queries','Sum Memory Grant KB','',2),
+	('Running Queries','Longest Running Query (ms)','',2),
+	('Running Queries','Critical Wait Count','',2),
+	('Running Queries','Critical Wait Time (ms)','',2),
+	('Running Queries','TempDB Wait Count','',2),
+	('Running Queries','TempDB Wait Time (ms)','',2),
+	('Running Queries','Sleeping Sessions Count','',2),
+	('Running Queries','Sleeping Sessions Max Idle Time (ms)','',2)
+	) VirtualCounters(object_name,counter_name,instance_name,CounterType)
+WHERE NOT EXISTS(
+				SELECT 1 
+				FROM dbo.Counters C 
+				WHERE C.counter_name = VirtualCounters.counter_name
+				AND C.object_name = VirtualCounters.object_name
+				AND C.instance_name = VirtualCounters.instance_name
+				)
+
+
 ALTER DATABASE [$(DatabaseName)] SET AUTO_UPDATE_STATISTICS_ASYNC ON WITH NO_WAIT
 
 /* Cleanup old objects */

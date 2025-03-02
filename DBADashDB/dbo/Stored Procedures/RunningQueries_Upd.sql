@@ -293,4 +293,24 @@ BEGIN
 										 @Reference = @Ref,
 										 @SnapshotDate = @SnapshotDate;
     COMMIT
+
+	INSERT INTO dbo.InstanceCounters(InstanceID,CounterID)
+	SELECT @InstanceID,CounterID
+	FROM dbo.Counters 
+	WHERE CounterType = 2
+	AND object_name = 'Running Queries'
+	EXCEPT 
+	SELECT	InstanceID,
+			CounterID 
+	FROM dbo.InstanceCounters
+	WHERE InstanceID =@InstanceID
+
+	UPDATE IC
+		SET IC.UpdatedDate = @SnapshotDate 
+	FROM dbo.InstanceCounters IC 
+	JOIN dbo.Counters C ON IC.CounterID = C.CounterID
+	WHERE IC.InstanceID = @InstanceID
+	AND C.object_name = 'Running Queries'
+	AND C.CounterType = 2
+
 END

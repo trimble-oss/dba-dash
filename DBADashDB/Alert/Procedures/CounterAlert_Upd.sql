@@ -27,6 +27,7 @@ CREATE TABLE #EffectiveThresholds (
 	Aggregation VARCHAR(10) COLLATE DATABASE_DEFAULT NOT NULL,
 	Threshold DECIMAL(28,9) NULL,
 	ComparisonSymbol VARCHAR(10) COLLATE DATABASE_DEFAULT NOT NULL,
+	CounterType TINYINT NOT NULL
 )
 /* Get rule details & the instances they apply to */
 INSERT INTO #EffectiveThresholds(
@@ -38,7 +39,8 @@ INSERT INTO #EffectiveThresholds(
 	CounterID,
 	Aggregation,
 	Threshold,
-	ComparisonSymbol
+	ComparisonSymbol,
+	CounterType
 )
 SELECT 	I.InstanceID,
 		R.RuleID,
@@ -48,7 +50,8 @@ SELECT 	I.InstanceID,
 		C.CounterID,
 		Calc.Aggregation,
 		R.Threshold,
-		Calc.ComparisonSymbol
+		Calc.ComparisonSymbol,
+		C.CounterType
 FROM Alert.Rules R 
 OUTER APPLY(SELECT TRY_CAST(JSON_VALUE(R.Details,'$.Counter.ObjectName') AS NVARCHAR(128)) AS ObjectName,
 		TRY_CAST(JSON_VALUE(R.Details,'$.Counter.CounterName') AS NVARCHAR(128)) AS CounterName,
@@ -107,12 +110,10 @@ CROSS APPLY(
 					WHEN T.Aggregation ='SUM' THEN SUM(PC.Value)
 					WHEN T.Aggregation='MIN' THEN MIN(PC.Value)
 					ELSE NULL END AS CounterValue
-			FROM dbo.PerformanceCounters PC
+			FROM dbo.PerformanceCountersBetweenDates(DATEADD(mi,-T.EvaluationPeriodMins,SYSUTCDATETIME()),SYSUTCDATETIME(),T.InstanceID,T.CounterID,T.CounterType) PC
 			WHERE PC.InstanceID = T.InstanceID
 			AND PC.CounterID = T.CounterID
-			AND PC.SnapshotDate >= CAST(DATEADD(mi,-60,SYSUTCDATETIME()) AS DATETIME2(2))
-			AND PC.SnapshotDate >= DATEADD(mi,-T.EvaluationPeriodMins,SYSUTCDATETIME())
-			AND PC.SnapshotDate <= CAST(SYSUTCDATETIME() AS DATETIME2(2))
+			AND PC.SnapshotDate >=DATEADD(mi,-60,SYSUTCDATETIME())
 			) Agg
 WHERE	(
 			(Agg.CounterValue >= T.Threshold AND T.ComparisonSymbol='>=')

@@ -807,6 +807,9 @@
     <Build Include="dbo\Stored Procedures\PurgeClosedAlerts.sql" />
     <Build Include="Alert\Tables\AgentJobSnapshot.sql" />
     <Build Include="Alert\Procedures\AgentJobAlert_Upd.sql" />
+    <Build Include="dbo\Views\RunningQueriesPerformanceCounters.sql" />
+    <Build Include="dbo\Functions\PerformanceCountersBetweenDates.sql" />
+    <Build Include="dbo\Functions\PerformanceCountersBetweenDates_60MIN.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
