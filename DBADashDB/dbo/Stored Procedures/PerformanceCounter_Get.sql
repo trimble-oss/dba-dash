@@ -38,12 +38,12 @@ SET @SQL = N'SELECT PC.CounterID,
 										MIN(PC.Value_Min) AS Value_Min,
 										MAX(PC.Value_Max) AS Value_Max,
 										SUM(PC.Value_Total)/SUM(PC.SampleCount*1.0) AS Value_Avg,
-										SUM(PC.SampleCount) AS SampleCount'
+										SUM(PC.SampleCount) AS Value_SampleCount'
 		ELSE  'SUM(PC.Value) AS Value_Total,
 					MIN(PC.Value) AS Value_Min,
 					MAX(PC.Value) AS Value_Max,
 					AVG(PC.Value) AS Value_Avg,
-					COUNT(*) AS SampleCount'
+					COUNT(*) AS Value_SampleCount'
 	END + '
 FROM dbo.PerformanceCountersBetweenDates' + CASE WHEN @Use60Min=1 THEN '_60MIN' ELSE '' END + '(@FromDate,@ToDate,@InstanceID,@CounterID,@CounterType) PC
 ' + CASE WHEN @DateGroupingMin = 0 OR @DateGroupingMin IS NULL THEN '' ELSE 'CROSS APPLY dbo.DateGroupingMins(PC.SnapshotDate,@DateGroupingMin) DG' END + '
