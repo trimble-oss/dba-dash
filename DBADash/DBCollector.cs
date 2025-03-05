@@ -109,7 +109,6 @@ namespace DBADash
         private bool IsHadrEnabled;
         private Policy retryPolicy;
         private DatabaseEngineEdition engineEdition;
-        private DBADashAgent dashAgent;
         public bool IsExtendedEventsNotSupportedException;
         private readonly bool DisableRetry;
 
@@ -281,8 +280,7 @@ namespace DBADash
         private void Startup()
         {
             noWMI = Source.NoWMI;
-            dashAgent = DBADashAgent.GetCurrent();
-
+ 
             retryPolicy = Policy.Handle<Exception>(ShouldRetry)
                 .WaitAndRetry(new[]
                 {
@@ -344,8 +342,9 @@ namespace DBADash
         /// <summary>
         /// Add MetaData relating to the DBA Dash service used for collection.
         /// </summary>
-        private void AddDBADashServiceMetaData(ref DataTable dt)
+        public static void AddDBADashServiceMetaData(ref DataTable dt)
         {
+            var dashAgent = DBADashAgent.GetCurrent();
             dt.Columns.AddRange(new[]
             {
                 new DataColumn("AgentVersion", typeof(string)),
@@ -358,6 +357,10 @@ namespace DBADash
                 new DataColumn("MessagingEnabled", typeof(bool)),
                 new DataColumn("AllowedScripts", typeof(string))
             });
+            if(dt.Rows.Count == 0)
+            {
+                dt.Rows.Add(dt.NewRow());
+            }
             dt.Rows[0]["AgentVersion"] = dashAgent.AgentVersion;
             dt.Rows[0]["AgentHostName"] = dashAgent.AgentHostName;
             dt.Rows[0]["AgentServiceName"] = dashAgent.AgentServiceName;
@@ -1332,7 +1335,16 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
         {
             using var cn = new SqlConnection(ConnectionString);
             using var da = new SqlDataAdapter(SQL, cn);
-            cn.Open();
+            try
+            {
+                cn.Open();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Unable to connect to the SQL instance.");
+                throw new DatabaseConnectionException("Unable to connect to the SQL instance.", ex);
+            }
+
             DataTable dt = new();
             da.SelectCommand.CommandTimeout = commandTimeout;
             if (param != null)

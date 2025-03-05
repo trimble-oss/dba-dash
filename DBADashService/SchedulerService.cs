@@ -128,6 +128,7 @@ namespace DBADashService
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             stoppingToken.Register(Stop);
+            var offlineCheckTask = OfflineInstances.AddIfOffline(config.SourceConnections, stoppingToken);
             await scheduler.Start(stoppingToken);
             try
             {
@@ -140,6 +141,26 @@ namespace DBADashService
             }
             try
             {
+                Log.Information("Checking connections");
+                await offlineCheckTask;
+                var offlineCount = OfflineInstances.OfflineInstanceCount;
+                if(offlineCount > 0)
+                {
+                    Log.Warning("{offlineCount} connections are offline", offlineCount);
+                }
+                else
+                {
+                    Log.Information("All source connections are online");
+                } 
+                _ = Task.Run(() => OfflineInstances.ManageOfflineInstances(config, stoppingToken), stoppingToken);
+
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "CheckConnectionsAsync error");
+            }
+            try
+            {
                 await ScheduleJobsAsync().WaitAsync(stoppingToken);
             }
             catch (Exception ex)
@@ -147,7 +168,6 @@ namespace DBADashService
                 Log.Error(ex, "Error scheduling collections.  Please check configuration.");
                 throw;
             }
-
             try
             {
                 await UpdateBuildReferenceFromFile().WaitAsync(stoppingToken);
@@ -263,10 +283,10 @@ namespace DBADashService
 
         private async Task ScanForAzureDBsAsync(DBADashSource src)
         {
-            if (config.ScanForAzureDBs && src.SourceConnection.Type == ConnectionType.SQL)
+            if (config.ScanForAzureDBs && src.SourceConnection.Type == ConnectionType.SQL && !OfflineInstances.IsOffline(src))
             {
                 var isAzureDBMaster = false;
-
+ 
                 try
                 {
                     isAzureDBMaster = src.SourceConnection.ConnectionInfo.IsAzureMasterDB;
@@ -497,7 +517,7 @@ namespace DBADashService
 
         private async Task RemoveEventSessionAsync(DBADashSource src)
         {
-            if (src.SourceConnection.Type == ConnectionType.SQL)
+            if (src.SourceConnection.Type == ConnectionType.SQL && !OfflineInstances.IsOffline(src))
             {
                 try
                 {

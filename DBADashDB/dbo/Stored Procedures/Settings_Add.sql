@@ -69,7 +69,9 @@ FROM (VALUES('PurgeCollectionErrorLog_StartDate'),
 			('PurgeBlockingSnapshotSummary_CompletedDate'),
 			('PurgeBlockingSnapshotSummary_StartDate'),
 			('PurgeClosedAlerts_StartDate'),
-			('PurgeClosedAlerts_CompletedDate')
+			('PurgeClosedAlerts_CompletedDate'),
+			('PurgeOfflineInstances_StartDate'),
+			('PurgeOfflineInstances_CompletedDate')
 	  ) T(SettingName)
 WHERE NOT EXISTS(SELECT 1 
 				FROM dbo.Settings S

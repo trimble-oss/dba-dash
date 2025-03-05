@@ -486,6 +486,9 @@ BEGIN
 
 	DELETE Alert.Rules
 	WHERE ApplyToInstanceID = @InstanceID
+
+	DELETE dbo.OfflineInstances
+	WHERE InstanceID = @InstanceID
 	
 	DELETE dbo.Instances
 	WHERE InstanceID = @InstanceID

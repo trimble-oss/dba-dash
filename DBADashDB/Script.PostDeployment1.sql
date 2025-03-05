@@ -1177,7 +1177,8 @@ FROM (VALUES('dbo','ObjectExecutionStats',120),
 				('dbo','SessionWaits',30),
 				('dbo','IdentityColumnsHistory',730),
 				('dbo','TableSize',730),
-				('Alert','ClosedAlerts',180)
+				('Alert','ClosedAlerts',180),
+				('dbo','OfflineInstances',730)
 				) AS t(SchemaName,TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1 
 				FROM dbo.DataRetention DR

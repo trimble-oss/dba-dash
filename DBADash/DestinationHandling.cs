@@ -41,6 +41,31 @@ namespace DBADash
                 throw new AggregateException(exceptions);
             }
         }
+        public static async Task WriteAllDestinations(DataSet ds,string fileName, CollectionConfig cfg)
+        {
+            List<Exception> exceptions = new();
+            foreach (var d in cfg.AllDestinations)
+            {
+                try
+                {
+                    using (var op = Operation.Begin("Write to destination {destination}",
+                               d.ConnectionForPrint))
+                    {
+                        await Write(ds, d, fileName, cfg);
+                        op.Complete();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error writing to destination {destination}", d.ConnectionForPrint);
+                    exceptions.Add(ex);
+                }
+            }
+            if (exceptions.Count > 0)
+            {
+                throw new AggregateException(exceptions);
+            }
+        }
 
         public static async Task Write(DataSet ds, DBADashConnection d, string fileName, CollectionConfig cfg)
         {

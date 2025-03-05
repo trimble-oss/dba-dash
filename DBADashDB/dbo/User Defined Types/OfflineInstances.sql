@@ -1,0 +1,8 @@
+﻿CREATE TYPE dbo.OfflineInstances AS TABLE(
+	ConnectionID NVARCHAR(128) NOT NULL,
+	FirstFail DATETIME2 NOT NULL,
+	LastFail DATETIME2 NULL,
+	FirstMessage NVARCHAR(MAX) NULL,
+	LastMessage NVARCHAR(MAX) NULL,
+	FailCount INT NOT NULL
+)

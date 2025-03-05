@@ -828,5 +828,41 @@ namespace DBADashGUI
                 _ => throw new ArgumentException($"Unknown symbol: {symbol}", nameof(symbol))
             };
         }
+
+        /// <summary>
+        /// Checks if the control is truly visible to the user, considering parent visibility and TabControl visibility.
+        /// </summary>
+        /// <param name="control">The control to check.</param>
+        /// <returns>True if the control, its parent controls, and its TabPage (if any) are visible; otherwise, false.</returns>
+        public static bool IsTrulyVisible(this Control control)
+        {
+            if (control == null)
+            {
+                return false;
+            }
+
+            // Check the control and its parents for visibility.
+            var current = control;
+            while (current != null)
+            {
+                if (!current.Visible)
+                {
+                    return false;
+                }
+
+                // If the current control is a TabPage, check if it is the selected tab.
+                if (current is TabPage tabPage)
+                {
+                    if (tabPage.Parent is TabControl tabControl && tabControl.SelectedTab != tabPage)
+                    {
+                        return false;
+                    }
+                }
+
+                current = current.Parent;
+            }
+
+            return true;
+        }
     }
 }

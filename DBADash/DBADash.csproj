@@ -105,6 +105,7 @@
     <PackageReference Include="AWSSDK.SQS" Version="3.7.400.99" />
     <PackageReference Include="Azure.Core" Version="1.45.0" />
     <PackageReference Include="Azure.Identity" Version="1.13.2" />
+    <PackageReference Include="Humanizer.Core" Version="2.14.1" />
     <PackageReference Include="MailKit" Version="4.10.0" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.2" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />

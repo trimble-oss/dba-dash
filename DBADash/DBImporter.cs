@@ -304,8 +304,34 @@ namespace DBADash
             "SessionWaits", "IdentityColumns", "RunningJobs", "TableSize", "ServerServices","ObjectExecutionStatsLegacy"
         };
 
+
+        private void UpdateOffline()
+        {
+            var agentRow = data.Tables["DBADash"]!.Rows[0];
+            var collectAgent = GetAgent(agentRow);
+            snapshotDate = (DateTime)agentRow["SnapshotDateUTC"];
+            var dt = data.Tables["OfflineInstances"];
+            using var cn = new SqlConnection(connectionString);
+            using var cmd = new SqlCommand("OfflineInstances_Add", cn) { CommandTimeout = CommandTimeout, CommandType = CommandType.StoredProcedure };
+            cn.Open();
+            if (dt.Rows.Count > 0)
+            {
+                cmd.Parameters.AddWithValue("OfflineInstances", dt);
+            }
+            
+            cmd.Parameters.AddWithValue("CollectAgentID", collectAgent.GetDBADashAgentID(connectionString));
+            cmd.Parameters.AddWithValue("ImportAgentID", importAgent.GetDBADashAgentID(connectionString));
+            cmd.Parameters.AddWithValue("SnapshotDate", DateTime.UtcNow);
+            cmd.ExecuteNonQuery();
+        }
+
         public void Update()
         {
+            if (data.DataSetName == "OfflineInstances")
+            {
+                UpdateOffline();
+                return;
+            }
             List<Exception> exceptions = new();
             var rInstance = data.Tables["DBADash"]?.Rows[0];
             snapshotDate = (DateTime)rInstance!["SnapshotDateUTC"];
@@ -560,6 +586,21 @@ namespace DBADash
             
         }
 
+        private static DBADashAgent GetAgent(DataRow row)
+        {
+            return new DBADashAgent()
+            {
+                AgentHostName = (string)row["AgentHostName"],
+                AgentVersion = (string)row["AgentVersion"],
+                AgentPath = row.Table.Columns.Contains("AgentPath") ? (string)row["AgentPath"] : "",
+                AgentServiceName = row.Table.Columns.Contains("AgentServiceName") ? (string)row["AgentServiceName"] : "{DBADashService}",
+                ServiceSQSQueueUrl = row.Table.Columns.Contains("ServiceSQSQueueUrl") && row["ServiceSQSQueueUrl"] != DBNull.Value ? (string)row["ServiceSQSQueueUrl"] : null,
+                S3Path = row.Table.Columns.Contains("S3Path") && row["S3Path"] != DBNull.Value ? (string)row["S3Path"] : null,
+                MessagingEnabled = row.Table.Columns.Contains("MessagingEnabled") && row["MessagingEnabled"] != DBNull.Value && (bool)row["MessagingEnabled"],
+                AllowedScripts = row.Table.Columns.Contains("AllowedScripts") && row["AllowedScripts"] != DBNull.Value ? new HashSet<string>(((string)row["AllowedScripts"]).Split(',').Select(part => part.Trim())) : new HashSet<string>(),
+            };
+        }
+
         private int UpdateInstance(ref DataRow rInstance)
         {
             using (var cn = new SqlConnection(connectionString))
@@ -572,17 +613,7 @@ namespace DBADash
                 cmd.Parameters.AddWithValue("SnapshotDate", (DateTime)rInstance["SnapshotDateUTC"]);
 
                 var importAgentID = importAgent.GetDBADashAgentID(connectionString);
-                var collectAgent = new DBADashAgent()
-                {
-                    AgentHostName = (string)rInstance["AgentHostName"],
-                    AgentVersion = (string)rInstance["AgentVersion"],
-                    AgentPath = rInstance.Table.Columns.Contains("AgentPath") ? (string)rInstance["AgentPath"] : "",
-                    AgentServiceName = rInstance.Table.Columns.Contains("AgentServiceName") ? (string)rInstance["AgentServiceName"] : "{DBADashService}",
-                    ServiceSQSQueueUrl = rInstance.Table.Columns.Contains("ServiceSQSQueueUrl") && rInstance["ServiceSQSQueueUrl"] != DBNull.Value ? (string)rInstance["ServiceSQSQueueUrl"] : null,
-                    S3Path = rInstance.Table.Columns.Contains("S3Path") && rInstance["S3Path"] != DBNull.Value ? (string)rInstance["S3Path"] : null,
-                    MessagingEnabled = rInstance.Table.Columns.Contains("MessagingEnabled") && rInstance["MessagingEnabled"] != DBNull.Value && (bool)rInstance["MessagingEnabled"],
-                    AllowedScripts = rInstance.Table.Columns.Contains("AllowedScripts") && rInstance["AllowedScripts"] != DBNull.Value ? new HashSet<string>(((string)rInstance["AllowedScripts"]).Split(',').Select(part => part.Trim())) : new HashSet<string>(),
-                };
+                var collectAgent = GetAgent(rInstance);
                 var collectAgentID = collectAgent.Equals(importAgent) ? importAgentID : collectAgent.GetDBADashAgentID(connectionString);
 
                 cmd.Parameters.AddWithValue("CollectAgentID", collectAgentID);

@@ -106,6 +106,7 @@ BEGIN
 		SET SettingValue = GETUTCDATE()
 	WHERE SettingName = 'PurgeQueryPlans_CompletedDate'
 END
+ELSE
 BEGIN
 	PRINT 'Skipping QueryPlans (Ran withing last 24hrs)'
 END
@@ -125,6 +126,7 @@ BEGIN
 		SET SettingValue = GETUTCDATE()
 	WHERE SettingName = 'PurgeQueryText_CompletedDate'
 END
+ELSE
 BEGIN
 	PRINT 'Skipping QueryText (Ran withing last 24hrs)'
 END
@@ -144,6 +146,7 @@ BEGIN
 		SET SettingValue = GETUTCDATE()
 	WHERE SettingName = 'PurgeBlockingSnapshotSummary_CompletedDate'
 END
+ELSE
 BEGIN
 	PRINT 'Skipping BlockingSnapshotSummary (Ran withing last 24hrs)'
 END
@@ -173,8 +176,30 @@ BEGIN
 		SET SettingValue = GETUTCDATE()
 	WHERE SettingName = 'PurgeClosedAlerts_CompletedDate'
 END
+ELSE
 BEGIN
 	PRINT 'Skipping ClosedAlerts (Ran withing last 24hrs)'
+END
+
+/* Remove old data from OfflineInstances table.  Run once per day */
+UPDATE dbo.Settings
+	SET SettingValue = GETUTCDATE()
+WHERE SettingName = 'PurgeOfflineInstances_StartDate'
+AND SettingValue < DATEADD(d,-1,GETUTCDATE())
+
+IF @@ROWCOUNT =1 OR @Force=1
+BEGIN
+	PRINT 'Cleanup OfflineInstances'
+
+	EXEC dbo.PurgeOfflineInstances
+
+	UPDATE dbo.Settings
+		SET SettingValue = GETUTCDATE()
+	WHERE SettingName = 'PurgeOfflineInstances_CompletedDate'
+END
+ELSE
+BEGIN
+	PRINT 'Skipping OfflineInstances (Ran withing last 24hrs)'
 END
 
 /* Service Broker Cleanup */

@@ -1674,7 +1674,7 @@ namespace DBADashGUI
             tabSQLAgentAlerts.Margin = new System.Windows.Forms.Padding(1, 2, 1, 2);
             tabSQLAgentAlerts.Name = "tabSQLAgentAlerts";
             tabSQLAgentAlerts.Padding = new System.Windows.Forms.Padding(1, 2, 1, 2);
-            tabSQLAgentAlerts.Size = new System.Drawing.Size(1578, 955);
+            tabSQLAgentAlerts.Size = new System.Drawing.Size(192, 57);
             tabSQLAgentAlerts.TabIndex = 20;
             tabSQLAgentAlerts.Text = "SQL Agent Alerts";
             tabSQLAgentAlerts.UseVisualStyleBackColor = true;
@@ -1685,7 +1685,7 @@ namespace DBADashGUI
             alerts1.Location = new System.Drawing.Point(1, 2);
             alerts1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
             alerts1.Name = "alerts1";
-            alerts1.Size = new System.Drawing.Size(1576, 951);
+            alerts1.Size = new System.Drawing.Size(190, 53);
             alerts1.TabIndex = 0;
             alerts1.UseAlertName = false;
             // 
