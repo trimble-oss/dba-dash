@@ -26,6 +26,7 @@ using DocumentFormat.OpenXml.Vml.Office;
 using Microsoft.SqlServer.Management.XEvent;
 using Version = System.Version;
 using System.Text;
+using DBADashGUI.Checks;
 
 namespace DBADashGUI
 {
@@ -46,6 +47,7 @@ namespace DBADashGUI
         private TabPage tabBlitzIndex => CommunityToolsTabPages[ProcedureExecutionMessage.CommandNames.sp_BlitzIndex];
         private TabPage tabDBADashAlerts;
         private NotifyIcon notifyIcon;
+        private TabPage tabOfflineInstances;
 
         public Main(CommandLineOptions opts)
         {
@@ -71,6 +73,11 @@ namespace DBADashGUI
             var alertsCsControl = new ActiveAlerts() { Dock = DockStyle.Fill };
             alertsCsControl.Instance_Selected += Instance_Selected;
             tabDBADashAlerts.Controls.Add(alertsCsControl);
+
+            tabOfflineInstances = new TabPage("Offline Instances");
+            var offlineInstancesControl = new OfflineInstances() { Dock = DockStyle.Fill };
+            tabOfflineInstances.Controls.Add(offlineInstancesControl);
+         
         }
 
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommandNames proc)
@@ -107,7 +114,7 @@ namespace DBADashGUI
             (new List<TabPage>()
             {
                 tabPerformanceSummary, tabPerformance, tabSlowQueries, tabAzureDB, tabAzureSummary, tabPC,
-                tabObjectExecutionSummary, tabWaits, tabRunningQueries, tabMemory, tabJobStats, tabJobTimeline, tabDrivePerformance, tabTopQueries
+                tabObjectExecutionSummary, tabWaits, tabRunningQueries, tabMemory, tabJobStats, tabJobTimeline, tabDrivePerformance, tabTopQueries, tabOfflineInstances
             }).Contains(tabs.SelectedTab) || (tabs.SelectedTab == tabCustomReport && ((SQLTreeItem)tv1.SelectedNode).Report.TimeFilterSupported);
 
         private bool IsAzureOnly;
@@ -790,6 +797,7 @@ namespace DBADashGUI
             else if (n.Type == SQLTreeItem.TreeType.DBAChecks)
             {
                 allowedTabs.Add(tabSummary);
+                allowedTabs.Add(tabOfflineInstances);
                 if (!IsAzureOnly && parent.Type != SQLTreeItem.TreeType.AzureInstance)
                 {
                     allowedTabs.AddRange(new[] { tabLastGood, tabOSLoadedModules });

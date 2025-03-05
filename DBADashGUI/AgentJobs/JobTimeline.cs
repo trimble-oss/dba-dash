@@ -13,7 +13,7 @@ namespace DBADashGUI.AgentJobs
 {
     public partial class JobTimeline : UserControl, ISetContext, IRefreshData
     {
-        private readonly string template = @"
+        public const string Template = @"
 <html>
     <head>
         <style>
@@ -119,7 +119,7 @@ namespace DBADashGUI.AgentJobs
   </body>
 </html>";
 
-        private const string NoDataHTMLTemplate = @"
+        public const string NoDataHTMLTemplate = @"
 <html>
     <head>
         <style>
@@ -359,11 +359,11 @@ namespace DBADashGUI.AgentJobs
                     tlr.End.ToString("s", System.Globalization.CultureInfo.InvariantCulture));
                 previousTlr = tlr;
             }
-            html = ReplaceColors(template.Replace("##DATEFORMAT##", DateFormat).Replace("##SERVERNAME##", context.InstanceName).Replace("##HEIGHT##", ChartHeight(rowCount).ToString()));
+            html = ReplaceColors(Template.Replace("##DATEFORMAT##", DateFormat).Replace("##SERVERNAME##", context.InstanceName).Replace("##HEIGHT##", ChartHeight(rowCount).ToString()));
             html = html.Replace("##DATA##", sb.ToString());
         }
 
-        private static string ReplaceColors(string html)
+        public static string ReplaceColors(string html)
         {
             var theme = DBADashUser.SelectedTheme;
             return html.Replace("##WARNING_B_COLOR##", theme.WarningBackColor.ToHexString())

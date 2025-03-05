@@ -44,6 +44,11 @@ namespace DBADashService
 
             try
             {
+                if(OfflineInstances.IsOffline(cfg))
+                {
+                    Log.Warning("Skipping {job} on {instance} as it is offline",context.JobDetail.Key, cfg.ConnectionID ?? cfg.SourceConnection.ConnectionForPrint);
+                    return;
+                }
                 switch (cfg.SourceConnection.Type)
                 {
                     case ConnectionType.Directory:
@@ -105,12 +110,16 @@ namespace DBADashService
             {
                 types = types.Where(t => t != CollectionType.Jobs).ToArray(); // Remove Jobs collection - we will save this to last
             }
+
             try
             {
-                if (types.Length > 0 || customCollections.Count > 0) // Might be zero if we are only collecting Jobs in this batch (collected in the next section)
+                if (types.Length > 0 ||
+                    customCollections.Count >
+                    0) // Might be zero if we are only collecting Jobs in this batch (collected in the next section)
                 {
                     // Value used to disable future collections of SlowQueries if we encounter a not supported error on a RDS instance not running Standard or Enterprise edition
-                    dataMap.TryGetBooleanValue("IsExtendedEventsNotSupportedException", out var dataMapExtendedEventsNotSupported);
+                    dataMap.TryGetBooleanValue("IsExtendedEventsNotSupportedException",
+                        out var dataMapExtendedEventsNotSupported);
                     var collector = new DBCollector(cfg, config.ServiceName)
                     {
                         Job_instance_id = dataMap.GetInt("Job_instance_id"),
@@ -118,28 +127,38 @@ namespace DBADashService
                     };
                     if (SchedulerServiceConfig.Config.IdentityCollectionThreshold.HasValue)
                     {
-                        collector.IdentityCollectionThreshold = (int)SchedulerServiceConfig.Config.IdentityCollectionThreshold;
+                        collector.IdentityCollectionThreshold =
+                            (int)SchedulerServiceConfig.Config.IdentityCollectionThreshold;
                     }
 
                     if (context.PreviousFireTimeUtc.HasValue)
                     {
-                        collector.PerformanceCollectionPeriodMins = (Int32)DateTime.UtcNow.Subtract(context.PreviousFireTimeUtc.Value.UtcDateTime).TotalMinutes + 5;
+                        collector.PerformanceCollectionPeriodMins = (Int32)DateTime.UtcNow
+                            .Subtract(context.PreviousFireTimeUtc.Value.UtcDateTime).TotalMinutes + 5;
                     }
                     else
                     {
                         collector.PerformanceCollectionPeriodMins = 30;
                     }
-                    collector.LogInternalPerformanceCounters = SchedulerServiceConfig.Config.LogInternalPerformanceCounters;
-                    using (var op = Operation.Begin("Collect {types} from instance {instance}", string.Join(", ", types.Select(s => s.ToString()).ToArray()), cfg.SourceConnection.ConnectionForPrint))
+
+                    collector.LogInternalPerformanceCounters =
+                        SchedulerServiceConfig.Config.LogInternalPerformanceCounters;
+                    using (var op = Operation.Begin("Collect {types} from instance {instance}",
+                               string.Join(", ", types.Select(s => s.ToString()).ToArray()),
+                               cfg.SourceConnection.ConnectionForPrint))
                     {
                         collector.Collect(types);
                         if (!dataMapExtendedEventsNotSupported && collector.IsExtendedEventsNotSupportedException)
                         {
                             // We encountered an error setting up extended events on a RDS instance because it's only supported for Standard and Enterprise editions.  Disable the collection
-                            Log.Information("Disabling Extended events collection for {0}.  Instance type doesn't support extended events", cfg.SourceConnection.ConnectionForPrint);
+                            Log.Information(
+                                "Disabling Extended events collection for {0}.  Instance type doesn't support extended events",
+                                cfg.SourceConnection.ConnectionForPrint);
                             dataMap.Put("IsExtendedEventsNotSupportedException", true);
                         }
-                        dataMap.Put("Job_instance_id", collector.Job_instance_id); // Store instance_id so we can get new history only on next run
+
+                        dataMap.Put("Job_instance_id",
+                            collector.Job_instance_id); // Store instance_id so we can get new history only on next run
                         op.Complete();
                     }
 
@@ -164,8 +183,10 @@ namespace DBADashService
                     }
                     catch (Exception ex)
                     {
-                        Log.Error(ex, "Error writing {filename} to destination.  File will be copied to {folder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
-                        DestinationHandling.WriteFolder(collector.Data, SchedulerServiceConfig.FailedMessageFolder, fileName, config);
+                        Log.Error(ex, "Error writing {filename} to destination.  File will be copied to {folder}",
+                            fileName, SchedulerServiceConfig.FailedMessageFolder);
+                        DestinationHandling.WriteFolder(collector.Data, SchedulerServiceConfig.FailedMessageFolder,
+                            fileName, config);
                     }
                 }
 
@@ -173,7 +194,8 @@ namespace DBADashService
                 {
                     try
                     {
-                        using (var op = Operation.Begin("Collect Jobs from instance {instance}", cfg.SourceConnection.ConnectionForPrint))
+                        using (var op = Operation.Begin("Collect Jobs from instance {instance}",
+                                   cfg.SourceConnection.ConnectionForPrint))
                         {
                             CollectJobs(cfg, dataMap);
                             op.Complete();
@@ -184,6 +206,10 @@ namespace DBADashService
                         Log.Error(ex, "Error running CollectJobs");
                     }
                 }
+            }
+            catch (DatabaseConnectionException ex)
+            {
+                OfflineInstances.Add(cfg,ex.InnerException.Message);
             }
             catch (Exception ex)
             {
