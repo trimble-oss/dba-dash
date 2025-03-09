@@ -810,6 +810,14 @@
     <Build Include="dbo\Views\RunningQueriesPerformanceCounters.sql" />
     <Build Include="dbo\Functions\PerformanceCountersBetweenDates.sql" />
     <Build Include="dbo\Functions\PerformanceCountersBetweenDates_60MIN.sql" />
+    <Build Include="dbo\Tables\OfflineInstances.sql" />
+    <Build Include="dbo\Stored Procedures\OfflineInstances_Add.sql" />
+    <Build Include="dbo\User Defined Types\OfflineInstances.sql" />
+    <Build Include="dbo\Tables\ErrorMessage.sql" />
+    <Build Include="dbo\Stored Procedures\OfflineInstances_Get.sql" />
+    <Build Include="dbo\Stored Procedures\OfflineInstanceTimeline_Get.sql" />
+    <Build Include="dbo\Stored Procedures\PurgeOfflineInstances.sql" />
+    <Build Include="Alert\Procedures\OfflineAlert_Upd.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
