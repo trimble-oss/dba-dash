@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Humanizer.Localisation;
 using static DBADashGUI.DBADashStatus;
 using static DBADashGUI.Main;
 
@@ -224,7 +225,7 @@ namespace DBADashGUI
             {
                 var row = grouped.NewRow();
                 row["Test"] = statusCol;
-                row["DisplayText"] = dgvSummary.Columns[statusCol].HeaderText.Replace("\n"," ");
+                row["DisplayText"] = dgvSummary.Columns[statusCol].HeaderText.Replace("\n", " ");
                 row["OK"] = 0;
                 row["Warning"] = 0;
                 row["Critical"] = 0;
@@ -367,10 +368,15 @@ namespace DBADashGUI
                 dgvSummary.Rows[idx].Cells["QueryStoreStatus"].Value = (int)row["QueryStoreStatus"] == 3 ? "" : "View";
                 var identPct = (row["MaxIdentityPctUsed"] == DBNull.Value
                     ? string.Empty : ((decimal)row["MaxIdentityPctUsed"]).ToString("P1"));
-                var identDays = row["MinIdentityEstimatedDays"] == DBNull.Value
-                    ? string.Empty
-                    : ((long)row["MinIdentityEstimatedDays"]) + " days";
-                dgvSummary.Rows[idx].Cells["IdentityStatus"].Value = string.Join(" / ", new[] { identPct, identDays }.Where(s => !string.IsNullOrEmpty(s)));
+                var identDays = (long?)row["MinIdentityEstimatedDays"].DBNullToNull();
+                var identDaysString = string.Empty;
+                if (identDays.HasValue)
+                {
+                    identDaysString = identDays.Value < TimeSpan.MaxValue.Days
+                        ? TimeSpan.FromDays(identDays.Value).Humanize(1, minUnit: TimeUnit.Day, maxUnit: TimeUnit.Year)
+                        : "∞";
+                }
+                dgvSummary.Rows[idx].Cells["IdentityStatus"].Value = string.Join(" / ", new[] { identPct, identDaysString }.Where(s => !string.IsNullOrEmpty(s)));
 
                 dgvSummary.Rows[idx].Cells["CorruptionStatus"].Value = row["DetectedCorruptionDateUtc"] == DBNull.Value
                     ? ""
@@ -384,22 +390,63 @@ namespace DBADashGUI
 
                 if (row["sqlserver_uptime"] != DBNull.Value)
                 {
-                    var uptime = (int)row["sqlserver_uptime"];
-                    var addUptime = (int)row["AdditionalUptime"];
-                    string uptimeString;
-                    if (uptime < 120)
+                    try
                     {
-                        uptimeString = uptime + " Mins (+" + addUptime + "mins)";
+                        var offlineSince = (DateTime?)row["OfflineSince"].DBNullToNull();
+                        var startTime = (DateTime?)row["sqlserver_start_time_utc"].DBNullToNull();
+                        var lastFail = (DateTime?)row["LastFail"].DBNullToNull();
+                        var hostStart = (DateTime?)row["host_start_time_utc"].DBNullToNull();
+                        var osInfoSnapshot = (DateTime?)row["OSInfoSnapshotDate"].DBNullToNull();
+                        var uptimeString = string.Empty;
+                        if (offlineSince.HasValue)
+                        {
+                            uptimeString = $"Offline {DateTime.UtcNow.Subtract(offlineSince.Value).Humanize(precision: 2, minUnit: TimeUnit.Second)}";
+                        }
+                        else if (startTime.HasValue)
+                        {
+                            uptimeString = DateTime.UtcNow.Subtract(startTime.Value).Humanize(precision: 2, minUnit: TimeUnit.Second);
+
+                            if (lastFail > startTime.Value.AddMinutes(2))
+                            {
+                                uptimeString += " / " + DateTime.UtcNow.Subtract(lastFail.Value).Humanize(precision: 2, minUnit: TimeUnit.Second);
+                            }
+                        }
+
+                        var toolTip = string.Empty;
+                        if (startTime.HasValue)
+                        {
+                            toolTip = $"SQL Server start time {startTime.Value.ToAppTimeZone()}\nTime since SQL Server start: {DateTime.UtcNow.Subtract(startTime.Value).Humanize(precision: 2, minUnit: TimeUnit.Second)}\n";
+                        }
+
+                        if (hostStart.HasValue)
+                        {
+                            toolTip += $"OS boot Time: {hostStart.Value.ToAppTimeZone()}\nTime since OS boot: {DateTime.UtcNow.Subtract(hostStart.Value).Humanize(precision: 2, minUnit: TimeUnit.Second)}\n";
+                        }
+                        if (osInfoSnapshot.HasValue)
+                        {
+                            toolTip +=
+                                $"Uptime info checked: {osInfoSnapshot.Value.ToAppTimeZone()} ({DateTime.UtcNow.Subtract(osInfoSnapshot.Value).Humanize(precision: 2, minUnit: TimeUnit.Second)})\n";
+                        }
+
+                        if (startTime.HasValue && lastFail > startTime.Value.AddMinutes(2))
+                        {
+                            toolTip +=
+                                $"Last Connectivity Failure: {lastFail.Value.ToAppTimeZone()}\nTime since failure: {DateTime.UtcNow.Subtract(lastFail.Value).Humanize(precision: 2, minUnit: TimeUnit.Second)}\n";
+                        }
+
+                        if (offlineSince.HasValue)
+                        {
+                            toolTip = $"Instance appears to be offline since {offlineSince.Value.ToAppTimeZone()} ({DateTime.UtcNow.Subtract(offlineSince.Value).Humanize(precision: 2, minUnit: TimeUnit.Second)})\n" + toolTip;
+                        }
+
+                        dgvSummary.Rows[idx].Cells["UptimeStatus"].Value = uptimeString;
+                        dgvSummary.Rows[idx].Cells["UptimeStatus"].ToolTipText = toolTip;
                     }
-                    else if (uptime < 1440)
+                    catch (Exception ex)
                     {
-                        uptimeString = (uptime / 60).ToString("0") + " Hours  (+" + addUptime + "mins)";
+                        dgvSummary.Rows[idx].Cells["UptimeStatus"].Value = "Error";
+                        dgvSummary.Rows[idx].Cells["UptimeStatus"].ToolTipText = ex.Message;
                     }
-                    else
-                    {
-                        uptimeString = (uptime / 1440).ToString("0") + " days";
-                    }
-                    dgvSummary.Rows[idx].Cells["UptimeStatus"].Value = uptimeString;
                 }
 
                 if (row["SnapshotAgeMin"] == DBNull.Value || row["SnapshotAgeMax"] == DBNull.Value)
@@ -410,13 +457,13 @@ namespace DBADashGUI
                 {
                     var snapshotAgeMin = (int)row["SnapshotAgeMin"];
                     var snapshotAgeMax = (int)row["SnapshotAgeMax"];
-                    if (snapshotAgeMax == snapshotAgeMin)
+                    if (TimeSpan.FromMinutes(snapshotAgeMax).Humanize(minUnit: TimeUnit.Minute, maxUnit: TimeUnit.Year) == TimeSpan.FromMinutes(snapshotAgeMin).Humanize(minUnit: TimeUnit.Minute, maxUnit: TimeUnit.Year))
                     {
-                        dgvSummary.Rows[idx].Cells["SnapshotAgeStatus"].Value = snapshotAgeMax + "mins";
+                        dgvSummary.Rows[idx].Cells["SnapshotAgeStatus"].Value = TimeSpan.FromMinutes(snapshotAgeMax).Humanize(minUnit: TimeUnit.Minute, maxUnit: TimeUnit.Year);
                     }
                     else
                     {
-                        dgvSummary.Rows[idx].Cells["SnapshotAgeStatus"].Value = snapshotAgeMin + " to " + snapshotAgeMax + "mins";
+                        dgvSummary.Rows[idx].Cells["SnapshotAgeStatus"].Value = TimeSpan.FromMinutes(snapshotAgeMin).Humanize(minUnit: TimeUnit.Minute, maxUnit: TimeUnit.Year) + " to " + TimeSpan.FromMinutes(snapshotAgeMax).Humanize(minUnit: TimeUnit.Minute, maxUnit: TimeUnit.Year);
                     }
                 }
                 if (row["DaysSinceLastGoodCheckDB"] != DBNull.Value)

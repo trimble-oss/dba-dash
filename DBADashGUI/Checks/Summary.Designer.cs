@@ -33,17 +33,44 @@ namespace DBADashGUI
             components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
             dgvSummary = new DBADashDataGridView();
+            Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colHidden = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            MemoryDumpStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            CorruptionStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            LastGoodCheckDBStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            AlertStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            FullBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            DiffBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            LogBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            DriveStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            JobStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            IsAgentRunningStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            LogShippingStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            MirroringStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            AGStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            LogFreeSpaceStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            FileFreeSpaceStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            PctMaxSizeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            ElasticPoolStorageStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            QueryStoreStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            CustomCheckStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            CollectionErrorStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            SnapshotAgeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            DBMailStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            IdentityStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            DatabaseStateStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            UptimeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopyGrid = new System.Windows.Forms.ToolStripDropDownButton();
@@ -86,33 +113,6 @@ namespace DBADashGUI
             refresh1 = new Refresh();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             dgvTests = new DBADashDataGridView();
-            Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colHidden = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            MemoryDumpStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            CorruptionStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            LastGoodCheckDBStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            AlertStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            FullBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            DiffBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            LogBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            DriveStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            JobStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            IsAgentRunningStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            LogShippingStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            MirroringStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            AGStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            LogFreeSpaceStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            FileFreeSpaceStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            PctMaxSizeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            ElasticPoolStorageStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            QueryStoreStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            CustomCheckStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            CollectionErrorStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            SnapshotAgeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            DBMailStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            IdentityStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            DatabaseStateStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            UptimeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             ((System.ComponentModel.ISupportInitialize)dgvSummary).BeginInit();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -160,6 +160,312 @@ namespace DBADashGUI
             dgvSummary.CellContentClick += DgvSummary_CellContentClick;
             dgvSummary.ColumnHeaderMouseClick += DgvSummary_ColumnHeaderMouseClick;
             dgvSummary.RowsAdded += DgvSummary_RowAdded;
+            // 
+            // Instance
+            // 
+            Instance.DataPropertyName = "InstanceGroupName";
+            Instance.HeaderText = "Instance";
+            Instance.MinimumWidth = 6;
+            Instance.Name = "Instance";
+            Instance.ReadOnly = true;
+            Instance.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            Instance.Width = 125;
+            // 
+            // colHidden
+            // 
+            colHidden.DataPropertyName = "IsHidden";
+            colHidden.HeaderText = "Hidden";
+            colHidden.MinimumWidth = 6;
+            colHidden.Name = "colHidden";
+            colHidden.ReadOnly = true;
+            colHidden.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colHidden.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            colHidden.ToolTipText = "Checked if instance is hidden by default at root level";
+            colHidden.Visible = false;
+            colHidden.Width = 70;
+            // 
+            // MemoryDumpStatus
+            // 
+            MemoryDumpStatus.HeaderText = "Memory Dump";
+            MemoryDumpStatus.MinimumWidth = 6;
+            MemoryDumpStatus.Name = "MemoryDumpStatus";
+            MemoryDumpStatus.ReadOnly = true;
+            MemoryDumpStatus.Width = 70;
+            // 
+            // CorruptionStatus
+            // 
+            CorruptionStatus.HeaderText = "Corruption";
+            CorruptionStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            CorruptionStatus.MinimumWidth = 6;
+            CorruptionStatus.Name = "CorruptionStatus";
+            CorruptionStatus.ReadOnly = true;
+            CorruptionStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            CorruptionStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            CorruptionStatus.Width = 75;
+            // 
+            // LastGoodCheckDBStatus
+            // 
+            LastGoodCheckDBStatus.HeaderText = "Last Good Check DB";
+            LastGoodCheckDBStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            LastGoodCheckDBStatus.MinimumWidth = 6;
+            LastGoodCheckDBStatus.Name = "LastGoodCheckDBStatus";
+            LastGoodCheckDBStatus.ReadOnly = true;
+            LastGoodCheckDBStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            LastGoodCheckDBStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            LastGoodCheckDBStatus.Width = 70;
+            // 
+            // AlertStatus
+            // 
+            AlertStatus.HeaderText = "SQL Agent Alerts";
+            AlertStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            AlertStatus.MinimumWidth = 6;
+            AlertStatus.Name = "AlertStatus";
+            AlertStatus.ReadOnly = true;
+            AlertStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            AlertStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            AlertStatus.Width = 70;
+            // 
+            // FullBackupStatus
+            // 
+            FullBackupStatus.HeaderText = "Backup FULL";
+            FullBackupStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            FullBackupStatus.MinimumWidth = 6;
+            FullBackupStatus.Name = "FullBackupStatus";
+            FullBackupStatus.ReadOnly = true;
+            FullBackupStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            FullBackupStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            FullBackupStatus.Width = 70;
+            // 
+            // DiffBackupStatus
+            // 
+            DiffBackupStatus.HeaderText = "Backup DIFF";
+            DiffBackupStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            DiffBackupStatus.MinimumWidth = 6;
+            DiffBackupStatus.Name = "DiffBackupStatus";
+            DiffBackupStatus.ReadOnly = true;
+            DiffBackupStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            DiffBackupStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            DiffBackupStatus.Width = 70;
+            // 
+            // LogBackupStatus
+            // 
+            LogBackupStatus.HeaderText = "Backup LOG";
+            LogBackupStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            LogBackupStatus.MinimumWidth = 6;
+            LogBackupStatus.Name = "LogBackupStatus";
+            LogBackupStatus.ReadOnly = true;
+            LogBackupStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            LogBackupStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            LogBackupStatus.Width = 70;
+            // 
+            // DriveStatus
+            // 
+            DriveStatus.HeaderText = "Drive Space";
+            DriveStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            DriveStatus.MinimumWidth = 6;
+            DriveStatus.Name = "DriveStatus";
+            DriveStatus.ReadOnly = true;
+            DriveStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            DriveStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            DriveStatus.Width = 70;
+            // 
+            // JobStatus
+            // 
+            JobStatus.HeaderText = "Agent Jobs";
+            JobStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            JobStatus.MinimumWidth = 6;
+            JobStatus.Name = "JobStatus";
+            JobStatus.ReadOnly = true;
+            JobStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            JobStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            JobStatus.Width = 70;
+            // 
+            // IsAgentRunningStatus
+            // 
+            IsAgentRunningStatus.HeaderText = "Is Agent Running";
+            IsAgentRunningStatus.MinimumWidth = 6;
+            IsAgentRunningStatus.Name = "IsAgentRunningStatus";
+            IsAgentRunningStatus.ReadOnly = true;
+            IsAgentRunningStatus.Width = 70;
+            // 
+            // LogShippingStatus
+            // 
+            LogShippingStatus.HeaderText = "Log Shipping";
+            LogShippingStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            LogShippingStatus.MinimumWidth = 6;
+            LogShippingStatus.Name = "LogShippingStatus";
+            LogShippingStatus.ReadOnly = true;
+            LogShippingStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            LogShippingStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            LogShippingStatus.Width = 70;
+            // 
+            // MirroringStatus
+            // 
+            MirroringStatus.HeaderText = "Mirroring";
+            MirroringStatus.MinimumWidth = 6;
+            MirroringStatus.Name = "MirroringStatus";
+            MirroringStatus.ReadOnly = true;
+            MirroringStatus.Width = 70;
+            // 
+            // AGStatus
+            // 
+            AGStatus.HeaderText = "Availability Groups";
+            AGStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            AGStatus.MinimumWidth = 6;
+            AGStatus.Name = "AGStatus";
+            AGStatus.ReadOnly = true;
+            AGStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            AGStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            AGStatus.Text = "";
+            AGStatus.Width = 80;
+            // 
+            // LogFreeSpaceStatus
+            // 
+            LogFreeSpaceStatus.HeaderText = "Log Space";
+            LogFreeSpaceStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            LogFreeSpaceStatus.MinimumWidth = 6;
+            LogFreeSpaceStatus.Name = "LogFreeSpaceStatus";
+            LogFreeSpaceStatus.ReadOnly = true;
+            LogFreeSpaceStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            LogFreeSpaceStatus.Text = "View";
+            LogFreeSpaceStatus.UseColumnTextForLinkValue = true;
+            LogFreeSpaceStatus.Width = 70;
+            // 
+            // FileFreeSpaceStatus
+            // 
+            dataGridViewCellStyle2.NullValue = "View";
+            FileFreeSpaceStatus.DefaultCellStyle = dataGridViewCellStyle2;
+            FileFreeSpaceStatus.HeaderText = "File Space";
+            FileFreeSpaceStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            FileFreeSpaceStatus.MinimumWidth = 6;
+            FileFreeSpaceStatus.Name = "FileFreeSpaceStatus";
+            FileFreeSpaceStatus.ReadOnly = true;
+            FileFreeSpaceStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            FileFreeSpaceStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            FileFreeSpaceStatus.Width = 70;
+            // 
+            // PctMaxSizeStatus
+            // 
+            dataGridViewCellStyle3.Format = "P1";
+            PctMaxSizeStatus.DefaultCellStyle = dataGridViewCellStyle3;
+            PctMaxSizeStatus.HeaderText = "% Max Size";
+            PctMaxSizeStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            PctMaxSizeStatus.MinimumWidth = 6;
+            PctMaxSizeStatus.Name = "PctMaxSizeStatus";
+            PctMaxSizeStatus.ReadOnly = true;
+            PctMaxSizeStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            PctMaxSizeStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            PctMaxSizeStatus.Text = "View";
+            PctMaxSizeStatus.UseColumnTextForLinkValue = true;
+            PctMaxSizeStatus.Width = 70;
+            // 
+            // ElasticPoolStorageStatus
+            // 
+            ElasticPoolStorageStatus.HeaderText = "Elastic Pool Storage";
+            ElasticPoolStorageStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            ElasticPoolStorageStatus.MinimumWidth = 6;
+            ElasticPoolStorageStatus.Name = "ElasticPoolStorageStatus";
+            ElasticPoolStorageStatus.ReadOnly = true;
+            ElasticPoolStorageStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            ElasticPoolStorageStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            ElasticPoolStorageStatus.Width = 70;
+            // 
+            // QueryStoreStatus
+            // 
+            QueryStoreStatus.HeaderText = "QS";
+            QueryStoreStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            QueryStoreStatus.MinimumWidth = 6;
+            QueryStoreStatus.Name = "QueryStoreStatus";
+            QueryStoreStatus.ReadOnly = true;
+            QueryStoreStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            QueryStoreStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            QueryStoreStatus.Text = "View";
+            QueryStoreStatus.ToolTipText = "Query Store";
+            QueryStoreStatus.UseColumnTextForLinkValue = true;
+            QueryStoreStatus.Width = 70;
+            // 
+            // CustomCheckStatus
+            // 
+            dataGridViewCellStyle4.NullValue = "View";
+            CustomCheckStatus.DefaultCellStyle = dataGridViewCellStyle4;
+            CustomCheckStatus.HeaderText = "Custom Checks";
+            CustomCheckStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            CustomCheckStatus.MinimumWidth = 6;
+            CustomCheckStatus.Name = "CustomCheckStatus";
+            CustomCheckStatus.ReadOnly = true;
+            CustomCheckStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            CustomCheckStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            CustomCheckStatus.Width = 70;
+            // 
+            // CollectionErrorStatus
+            // 
+            CollectionErrorStatus.DataPropertyName = "CollectionErrorCount";
+            dataGridViewCellStyle5.NullValue = "View";
+            CollectionErrorStatus.DefaultCellStyle = dataGridViewCellStyle5;
+            CollectionErrorStatus.HeaderText = "DBA Dash Errors (24hrs)";
+            CollectionErrorStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            CollectionErrorStatus.MinimumWidth = 6;
+            CollectionErrorStatus.Name = "CollectionErrorStatus";
+            CollectionErrorStatus.ReadOnly = true;
+            CollectionErrorStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            CollectionErrorStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            CollectionErrorStatus.Width = 70;
+            // 
+            // SnapshotAgeStatus
+            // 
+            SnapshotAgeStatus.HeaderText = "Snapshot Age";
+            SnapshotAgeStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            SnapshotAgeStatus.MinimumWidth = 6;
+            SnapshotAgeStatus.Name = "SnapshotAgeStatus";
+            SnapshotAgeStatus.ReadOnly = true;
+            SnapshotAgeStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            SnapshotAgeStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            SnapshotAgeStatus.Width = 110;
+            // 
+            // DBMailStatus
+            // 
+            DBMailStatus.HeaderText = "DB Mail";
+            DBMailStatus.MinimumWidth = 6;
+            DBMailStatus.Name = "DBMailStatus";
+            DBMailStatus.ReadOnly = true;
+            DBMailStatus.Width = 70;
+            // 
+            // IdentityStatus
+            // 
+            dataGridViewCellStyle6.Format = "P1";
+            IdentityStatus.DefaultCellStyle = dataGridViewCellStyle6;
+            IdentityStatus.HeaderText = "Identity Columns";
+            IdentityStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            IdentityStatus.MinimumWidth = 6;
+            IdentityStatus.Name = "IdentityStatus";
+            IdentityStatus.ReadOnly = true;
+            IdentityStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            IdentityStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            IdentityStatus.ToolTipText = "Check for identity columns running out of values.  Show Max % used";
+            IdentityStatus.Width = 70;
+            // 
+            // DatabaseStateStatus
+            // 
+            DatabaseStateStatus.HeaderText = "Database State";
+            DatabaseStateStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            DatabaseStateStatus.MinimumWidth = 6;
+            DatabaseStateStatus.Name = "DatabaseStateStatus";
+            DatabaseStateStatus.ReadOnly = true;
+            DatabaseStateStatus.Text = "View";
+            DatabaseStateStatus.ToolTipText = "Check for databases in Recovery Pending, Suspect or Emergency state";
+            DatabaseStateStatus.UseColumnTextForLinkValue = true;
+            DatabaseStateStatus.Width = 70;
+            // 
+            // UptimeStatus
+            // 
+            UptimeStatus.HeaderText = "Instance Uptime";
+            UptimeStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            UptimeStatus.MinimumWidth = 6;
+            UptimeStatus.Name = "UptimeStatus";
+            UptimeStatus.ReadOnly = true;
+            UptimeStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            UptimeStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            UptimeStatus.Width = 110;
             // 
             // toolStrip1
             // 
@@ -558,312 +864,6 @@ namespace DBADashGUI
             dgvTests.TabIndex = 0;
             dgvTests.CellContentClick += DgvTests_CellContentClick;
             dgvTests.RowsAdded += DgvTests_RowsAdded;
-            // 
-            // Instance
-            // 
-            Instance.DataPropertyName = "InstanceGroupName";
-            Instance.HeaderText = "Instance";
-            Instance.MinimumWidth = 6;
-            Instance.Name = "Instance";
-            Instance.ReadOnly = true;
-            Instance.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            Instance.Width = 125;
-            // 
-            // colHidden
-            // 
-            colHidden.DataPropertyName = "IsHidden";
-            colHidden.HeaderText = "Hidden";
-            colHidden.MinimumWidth = 6;
-            colHidden.Name = "colHidden";
-            colHidden.ReadOnly = true;
-            colHidden.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colHidden.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            colHidden.ToolTipText = "Checked if instance is hidden by default at root level";
-            colHidden.Visible = false;
-            colHidden.Width = 70;
-            // 
-            // MemoryDumpStatus
-            // 
-            MemoryDumpStatus.HeaderText = "Memory Dump";
-            MemoryDumpStatus.MinimumWidth = 6;
-            MemoryDumpStatus.Name = "MemoryDumpStatus";
-            MemoryDumpStatus.ReadOnly = true;
-            MemoryDumpStatus.Width = 70;
-            // 
-            // CorruptionStatus
-            // 
-            CorruptionStatus.HeaderText = "Corruption";
-            CorruptionStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            CorruptionStatus.MinimumWidth = 6;
-            CorruptionStatus.Name = "CorruptionStatus";
-            CorruptionStatus.ReadOnly = true;
-            CorruptionStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            CorruptionStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            CorruptionStatus.Width = 75;
-            // 
-            // LastGoodCheckDBStatus
-            // 
-            LastGoodCheckDBStatus.HeaderText = "Last Good Check DB";
-            LastGoodCheckDBStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            LastGoodCheckDBStatus.MinimumWidth = 6;
-            LastGoodCheckDBStatus.Name = "LastGoodCheckDBStatus";
-            LastGoodCheckDBStatus.ReadOnly = true;
-            LastGoodCheckDBStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            LastGoodCheckDBStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            LastGoodCheckDBStatus.Width = 70;
-            // 
-            // AlertStatus
-            // 
-            AlertStatus.HeaderText = "SQL Agent Alerts";
-            AlertStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            AlertStatus.MinimumWidth = 6;
-            AlertStatus.Name = "AlertStatus";
-            AlertStatus.ReadOnly = true;
-            AlertStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            AlertStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            AlertStatus.Width = 70;
-            // 
-            // FullBackupStatus
-            // 
-            FullBackupStatus.HeaderText = "Backup FULL";
-            FullBackupStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            FullBackupStatus.MinimumWidth = 6;
-            FullBackupStatus.Name = "FullBackupStatus";
-            FullBackupStatus.ReadOnly = true;
-            FullBackupStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            FullBackupStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            FullBackupStatus.Width = 70;
-            // 
-            // DiffBackupStatus
-            // 
-            DiffBackupStatus.HeaderText = "Backup DIFF";
-            DiffBackupStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            DiffBackupStatus.MinimumWidth = 6;
-            DiffBackupStatus.Name = "DiffBackupStatus";
-            DiffBackupStatus.ReadOnly = true;
-            DiffBackupStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            DiffBackupStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            DiffBackupStatus.Width = 70;
-            // 
-            // LogBackupStatus
-            // 
-            LogBackupStatus.HeaderText = "Backup LOG";
-            LogBackupStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            LogBackupStatus.MinimumWidth = 6;
-            LogBackupStatus.Name = "LogBackupStatus";
-            LogBackupStatus.ReadOnly = true;
-            LogBackupStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            LogBackupStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            LogBackupStatus.Width = 70;
-            // 
-            // DriveStatus
-            // 
-            DriveStatus.HeaderText = "Drive Space";
-            DriveStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            DriveStatus.MinimumWidth = 6;
-            DriveStatus.Name = "DriveStatus";
-            DriveStatus.ReadOnly = true;
-            DriveStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            DriveStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            DriveStatus.Width = 70;
-            // 
-            // JobStatus
-            // 
-            JobStatus.HeaderText = "Agent Jobs";
-            JobStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            JobStatus.MinimumWidth = 6;
-            JobStatus.Name = "JobStatus";
-            JobStatus.ReadOnly = true;
-            JobStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            JobStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            JobStatus.Width = 70;
-            // 
-            // IsAgentRunningStatus
-            // 
-            IsAgentRunningStatus.HeaderText = "Is Agent Running";
-            IsAgentRunningStatus.MinimumWidth = 6;
-            IsAgentRunningStatus.Name = "IsAgentRunningStatus";
-            IsAgentRunningStatus.ReadOnly = true;
-            IsAgentRunningStatus.Width = 70;
-            // 
-            // LogShippingStatus
-            // 
-            LogShippingStatus.HeaderText = "Log Shipping";
-            LogShippingStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            LogShippingStatus.MinimumWidth = 6;
-            LogShippingStatus.Name = "LogShippingStatus";
-            LogShippingStatus.ReadOnly = true;
-            LogShippingStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            LogShippingStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            LogShippingStatus.Width = 70;
-            // 
-            // MirroringStatus
-            // 
-            MirroringStatus.HeaderText = "Mirroring";
-            MirroringStatus.MinimumWidth = 6;
-            MirroringStatus.Name = "MirroringStatus";
-            MirroringStatus.ReadOnly = true;
-            MirroringStatus.Width = 70;
-            // 
-            // AGStatus
-            // 
-            AGStatus.HeaderText = "Availability Groups";
-            AGStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            AGStatus.MinimumWidth = 6;
-            AGStatus.Name = "AGStatus";
-            AGStatus.ReadOnly = true;
-            AGStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            AGStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            AGStatus.Text = "";
-            AGStatus.Width = 80;
-            // 
-            // LogFreeSpaceStatus
-            // 
-            LogFreeSpaceStatus.HeaderText = "Log Space";
-            LogFreeSpaceStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            LogFreeSpaceStatus.MinimumWidth = 6;
-            LogFreeSpaceStatus.Name = "LogFreeSpaceStatus";
-            LogFreeSpaceStatus.ReadOnly = true;
-            LogFreeSpaceStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            LogFreeSpaceStatus.Text = "View";
-            LogFreeSpaceStatus.UseColumnTextForLinkValue = true;
-            LogFreeSpaceStatus.Width = 70;
-            // 
-            // FileFreeSpaceStatus
-            // 
-            dataGridViewCellStyle2.NullValue = "View";
-            FileFreeSpaceStatus.DefaultCellStyle = dataGridViewCellStyle2;
-            FileFreeSpaceStatus.HeaderText = "File Space";
-            FileFreeSpaceStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            FileFreeSpaceStatus.MinimumWidth = 6;
-            FileFreeSpaceStatus.Name = "FileFreeSpaceStatus";
-            FileFreeSpaceStatus.ReadOnly = true;
-            FileFreeSpaceStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            FileFreeSpaceStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            FileFreeSpaceStatus.Width = 70;
-            // 
-            // PctMaxSizeStatus
-            // 
-            dataGridViewCellStyle3.Format = "P1";
-            PctMaxSizeStatus.DefaultCellStyle = dataGridViewCellStyle3;
-            PctMaxSizeStatus.HeaderText = "% Max Size";
-            PctMaxSizeStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            PctMaxSizeStatus.MinimumWidth = 6;
-            PctMaxSizeStatus.Name = "PctMaxSizeStatus";
-            PctMaxSizeStatus.ReadOnly = true;
-            PctMaxSizeStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            PctMaxSizeStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            PctMaxSizeStatus.Text = "View";
-            PctMaxSizeStatus.UseColumnTextForLinkValue = true;
-            PctMaxSizeStatus.Width = 70;
-            // 
-            // ElasticPoolStorageStatus
-            // 
-            ElasticPoolStorageStatus.HeaderText = "Elastic Pool Storage";
-            ElasticPoolStorageStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            ElasticPoolStorageStatus.MinimumWidth = 6;
-            ElasticPoolStorageStatus.Name = "ElasticPoolStorageStatus";
-            ElasticPoolStorageStatus.ReadOnly = true;
-            ElasticPoolStorageStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            ElasticPoolStorageStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            ElasticPoolStorageStatus.Width = 70;
-            // 
-            // QueryStoreStatus
-            // 
-            QueryStoreStatus.HeaderText = "QS";
-            QueryStoreStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            QueryStoreStatus.MinimumWidth = 6;
-            QueryStoreStatus.Name = "QueryStoreStatus";
-            QueryStoreStatus.ReadOnly = true;
-            QueryStoreStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            QueryStoreStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            QueryStoreStatus.Text = "View";
-            QueryStoreStatus.ToolTipText = "Query Store";
-            QueryStoreStatus.UseColumnTextForLinkValue = true;
-            QueryStoreStatus.Width = 70;
-            // 
-            // CustomCheckStatus
-            // 
-            dataGridViewCellStyle4.NullValue = "View";
-            CustomCheckStatus.DefaultCellStyle = dataGridViewCellStyle4;
-            CustomCheckStatus.HeaderText = "Custom Checks";
-            CustomCheckStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            CustomCheckStatus.MinimumWidth = 6;
-            CustomCheckStatus.Name = "CustomCheckStatus";
-            CustomCheckStatus.ReadOnly = true;
-            CustomCheckStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            CustomCheckStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            CustomCheckStatus.Width = 70;
-            // 
-            // CollectionErrorStatus
-            // 
-            CollectionErrorStatus.DataPropertyName = "CollectionErrorCount";
-            dataGridViewCellStyle5.NullValue = "View";
-            CollectionErrorStatus.DefaultCellStyle = dataGridViewCellStyle5;
-            CollectionErrorStatus.HeaderText = "DBA Dash Errors (24hrs)";
-            CollectionErrorStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            CollectionErrorStatus.MinimumWidth = 6;
-            CollectionErrorStatus.Name = "CollectionErrorStatus";
-            CollectionErrorStatus.ReadOnly = true;
-            CollectionErrorStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            CollectionErrorStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            CollectionErrorStatus.Width = 70;
-            // 
-            // SnapshotAgeStatus
-            // 
-            SnapshotAgeStatus.HeaderText = "Snapshot Age";
-            SnapshotAgeStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            SnapshotAgeStatus.MinimumWidth = 6;
-            SnapshotAgeStatus.Name = "SnapshotAgeStatus";
-            SnapshotAgeStatus.ReadOnly = true;
-            SnapshotAgeStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            SnapshotAgeStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            SnapshotAgeStatus.Width = 110;
-            // 
-            // DBMailStatus
-            // 
-            DBMailStatus.HeaderText = "DB Mail";
-            DBMailStatus.MinimumWidth = 6;
-            DBMailStatus.Name = "DBMailStatus";
-            DBMailStatus.ReadOnly = true;
-            DBMailStatus.Width = 70;
-            // 
-            // IdentityStatus
-            // 
-            dataGridViewCellStyle6.Format = "P1";
-            IdentityStatus.DefaultCellStyle = dataGridViewCellStyle6;
-            IdentityStatus.HeaderText = "Identity Columns";
-            IdentityStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            IdentityStatus.MinimumWidth = 6;
-            IdentityStatus.Name = "IdentityStatus";
-            IdentityStatus.ReadOnly = true;
-            IdentityStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            IdentityStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            IdentityStatus.ToolTipText = "Check for identity columns running out of values.  Show Max % used";
-            IdentityStatus.Width = 70;
-            // 
-            // DatabaseStateStatus
-            // 
-            DatabaseStateStatus.HeaderText = "Database State";
-            DatabaseStateStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            DatabaseStateStatus.MinimumWidth = 6;
-            DatabaseStateStatus.Name = "DatabaseStateStatus";
-            DatabaseStateStatus.ReadOnly = true;
-            DatabaseStateStatus.Text = "View";
-            DatabaseStateStatus.ToolTipText = "Check for databases in Recovery Pending, Suspect or Emergency state";
-            DatabaseStateStatus.UseColumnTextForLinkValue = true;
-            DatabaseStateStatus.Width = 70;
-            // 
-            // UptimeStatus
-            // 
-            UptimeStatus.HeaderText = "Instance Uptime";
-            UptimeStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            UptimeStatus.MinimumWidth = 6;
-            UptimeStatus.Name = "UptimeStatus";
-            UptimeStatus.ReadOnly = true;
-            UptimeStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            UptimeStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            UptimeStatus.Width = 110;
             // 
             // Summary
             // 

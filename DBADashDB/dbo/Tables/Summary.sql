@@ -61,5 +61,8 @@
 	RefreshDate DATETIME NOT NULL,
 	IsAzure BIT NOT NULL,
     MinIdentityEstimatedDays BIGINT NULL,
+    OfflineSince DATETIME2 NULL,
+    LastFail DATETIME2 NULL,
+    OSInfoSnapshotDate DATETIME2 NULL,
 	CONSTRAINT PK_Summary PRIMARY KEY(InstanceID)
 );

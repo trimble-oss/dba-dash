@@ -128,7 +128,10 @@ SELECT 	InstanceID,
 		IsHidden,
 		DatabaseStateStatus,
 		RefreshDate,
-		CAST(0 AS BIT) AS IsAzure
+		CAST(0 AS BIT) AS IsAzure,
+		OfflineSince,
+		LastFail,
+		OSInfoSnapshotDate
 FROM dbo.Summary S
 WHERE EXISTS	(	
 				SELECT 1 
@@ -199,7 +202,10 @@ SELECT 	NULL AS InstanceID,
 		~CAST(MAX(CAST(S.ShowInSummary AS TINYINT)) AS BIT) AS IsHidden,
 		ISNULL(MIN(S.DatabaseStateStatus),4) AS DatabaseStateStatus,
 		MIN(S.RefreshDate) AS RefreshDate,
-		CAST(1 AS BIT) AS IsAzure
+		CAST(1 AS BIT) AS IsAzure,
+		MIN(OfflineSince) AS OfflineSince,
+		MAX(LastFail) AS LastFail,
+		MIN(OSInfoSnapshotDate) AS OSInfoSnapshotDate
 FROM dbo.Summary S
 WHERE EXISTS	(	
 				SELECT 1 
