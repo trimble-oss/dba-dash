@@ -216,9 +216,11 @@ SELECT I.InstanceID,
 	I.UTCOffset,
 	DATEDIFF(mi,DATEADD(mi,I.UTCOffset,I.sqlserver_start_time),OSInfoCD.SnapshotDate) AS sqlserver_uptime,
 	CASE WHEN UTT.UptimeWarningThreshold IS NULL AND UTT.UptimeCriticalThreshold IS NULL THEN 3
-		WHEN I.UptimeAckDate > DATEADD(mi,I.UTCOffset,I.sqlserver_start_time) THEN 4
+		WHEN I.UptimeAckDate > DATEADD(mi,I.UTCOffset,I.sqlserver_start_time) AND I.UptimeAckDate > ISNULL(LastOffline.LastFail,'19000101') THEN 4
 		WHEN DATEDIFF(mi,DATEADD(mi,I.UTCOffset,I.sqlserver_start_time),OSInfoCD.SnapshotDate)<UTT.UptimeCriticalThreshold THEN 1
-		WHEN DATEDIFF(mi,DATEADD(mi,I.UTCOffset,I.sqlserver_start_time),OSInfoCD.SnapshotDate)<UTT.UptimeWarningThreshold THEN 2		
+		WHEN DATEDIFF(mi,LastOffline.LastFail,GETUTCDATE()) < UTT.UptimeCriticalThreshold THEN 1
+		WHEN DATEDIFF(mi,DATEADD(mi,I.UTCOffset,I.sqlserver_start_time),OSInfoCD.SnapshotDate)<UTT.UptimeWarningThreshold THEN 2
+		WHEN DATEDIFF(mi,LastOffline.LastFail,GETUTCDATE()) <UTT.UptimeWarningThreshold THEN 2		
 		ELSE 4 END AS UptimeStatus,
 	UTT.UptimeWarningThreshold,
 	UTT.UptimeCriticalThreshold,
@@ -263,7 +265,10 @@ SELECT I.InstanceID,
 	ISNULL(DBState.DatabaseStateStatus,4) AS DatabaseStateStatus,
 	GETUTCDATE() AS RefreshDate,
 	CAST(0 AS BIT) AS IsAzure,
-	Ident.MinIdentityEstimatedDays
+	Ident.MinIdentityEstimatedDays,
+	CASE WHEN LastOffline.Iscurrent=1 THEN LastOffline.FirstFail ELSE NULL END AS OfflineSince,
+	LastOffline.LastFail,
+	OSInfoCD.SnapshotDate AS OSInfoSnapshotDate
 INTO #Summary
 FROM dbo.Instances I 
 OUTER APPLY(
@@ -306,6 +311,14 @@ LEFT JOIN #MirroringStatus dbm ON dbm.InstanceID = I.InstanceID
 LEFT JOIN #QueryStoreStatus QS ON QS.InstanceID = I.InstanceID
 LEFT JOIN #IdentityStatus Ident ON Ident.InstanceID = I.InstanceID
 LEFT JOIN #DatabaseStateStatus DBState ON I.InstanceID = DBState.InstanceID
+OUTER APPLY(
+			SELECT TOP(1)	FirstFail,
+							LastFail,
+							IsCurrent
+			FROM dbo.OfflineInstances OI
+			WHERE OI.InstanceID = I.InstanceID
+			ORDER BY OI.FirstFail DESC
+) AS LastOffline
 WHERE I.IsActive=1
 AND I.EngineEdition<> 5 -- not azure
 UNION ALL
@@ -370,7 +383,10 @@ SELECT I.InstanceID,
 	ISNULL(DBState.DatabaseStateStatus,4) AS DatabaseStateStatus,
 	GETUTCDATE() AS RefreshDate,
 	CAST(1 AS BIT) AS IsAzure,
-	Ident.MinIdentityEstimatedDays
+	Ident.MinIdentityEstimatedDays,
+	CASE WHEN LastOffline.Iscurrent=1 THEN LastOffline.FirstFail ELSE NULL END AS OfflineSince,
+	LastOffline.FirstFail,
+	CAST(NULL AS DATETIME2) AS OSInfoSnapshotDate 
 FROM dbo.Instances I
 LEFT JOIN #CollectionErrorStatus errSummary  ON I.InstanceID = errSummary.InstanceID
 LEFT JOIN #FileGroupStatus F ON I.InstanceID = F.InstanceID
@@ -380,6 +396,14 @@ LEFT JOIN #ElasticPoolStatus EPS ON I.InstanceID = EPS.InstanceID
 LEFT JOIN #QueryStoreStatus QS ON QS.InstanceID = I.InstanceID
 LEFT JOIN #IdentityStatus Ident ON Ident.InstanceID = I.InstanceID
 LEFT JOIN #DatabaseStateStatus DBState ON I.InstanceID = DBState.InstanceID
+OUTER APPLY(
+			SELECT TOP(1)	FirstFail,
+							LastFail,
+							IsCurrent
+			FROM dbo.OfflineInstances OI
+			WHERE OI.InstanceID = I.InstanceID
+			ORDER BY OI.FirstFail DESC
+) AS LastOffline
 WHERE I.EngineEdition=5 -- azure
 AND I.IsActive=1
 
@@ -448,7 +472,10 @@ INSERT INTO dbo.Summary(
 	DatabaseStateStatus,
 	RefreshDate,
 	IsAzure,
-	MinIdentityEstimatedDays
+	MinIdentityEstimatedDays,
+	OfflineSince,
+	LastFail,
+	OSInfoSnapshotDate
 )
 SELECT InstanceID,
 	Instance,
@@ -511,7 +538,10 @@ SELECT InstanceID,
 	DatabaseStateStatus,
 	RefreshDate,
 	IsAzure,
-	MinIdentityEstimatedDays
+	MinIdentityEstimatedDays,
+	OfflineSince,
+	LastFail,
+	OSInfoSnapshotDate
 FROM #Summary
 
 COMMIT
