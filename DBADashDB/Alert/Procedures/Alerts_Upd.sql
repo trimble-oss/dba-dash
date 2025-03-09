@@ -37,6 +37,7 @@ EXEC Alert.AGAlert_Upd
 EXEC Alert.DriveSpaceAlert_Upd
 EXEC Alert.CollectionDatesAlert_Upd
 EXEC Alert.AgentJobAlert_Upd
+EXEC Alert.OfflineAlert_Upd
 
 /* Close Alerts that have been resolved for a period of time */
 

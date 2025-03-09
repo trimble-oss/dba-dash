@@ -28,7 +28,8 @@ namespace DBADashGUI.DBADashAlerts.Rules
             CPU,
             DriveSpace,
             Wait,
-            AgentJob
+            AgentJob,
+            Offline
         }
 
         public static AlertRuleBase CreateRule(RuleTypes type)
@@ -42,6 +43,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
                 RuleTypes.DriveSpace => new DriveSpaceRule(),
                 RuleTypes.CollectionDates => new CollectionDatesRule(),
                 RuleTypes.AgentJob => new AgentJobRule(),
+                RuleTypes.Offline => new OfflineRule(),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
@@ -219,6 +221,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
                 RuleTypes.DriveSpace => string.IsNullOrEmpty(details) ? new DriveSpaceRule() : JsonConvert.DeserializeObject<DriveSpaceRule>(details),
                 RuleTypes.CollectionDates => string.IsNullOrEmpty(details) ? new CollectionDatesRule() : JsonConvert.DeserializeObject<CollectionDatesRule>(details),
                 RuleTypes.AgentJob => string.IsNullOrEmpty(details) ? new AgentJobRule() : JsonConvert.DeserializeObject<AgentJobRule>(details),
+                RuleTypes.Offline => string.IsNullOrEmpty(details) ? new OfflineRule() : JsonConvert.DeserializeObject<OfflineRule>(details),
                 _ => throw new NotImplementedException()
             };
             rule.RuleID = ruleID;
