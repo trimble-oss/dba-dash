@@ -1372,7 +1372,7 @@ FROM
 (-1,'Alerts',125,180),
 (-1,'DBTuningOptions',125,180),
 (-1,'DBConfig',125,180),
-(-1,'OSInfo',125,180),
+(-1,'OSInfo',5,10),
 (-1,'Drives',125,180),
 (-1,'Databases',125,180),
 (-1,'Instance',125,180),

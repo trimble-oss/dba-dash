@@ -23,7 +23,6 @@ namespace DBADashService
                             {CollectionType.ServerExtraProperties, new CollectionSchedule(){ Schedule = hourly } },
                             {CollectionType.DBConfig, new CollectionSchedule(){ Schedule = hourly } },
                             {CollectionType.Corruption, new CollectionSchedule(){ Schedule = hourly } },
-                            {CollectionType.OSInfo, new CollectionSchedule(){ Schedule = hourly } },
                             {CollectionType.TraceFlags, new CollectionSchedule(){ Schedule = hourly } },
                             {CollectionType.DBTuningOptions, new CollectionSchedule(){ Schedule = hourly } },
                             {CollectionType.AzureDBServiceObjectives, new CollectionSchedule(){ Schedule = hourly } },
@@ -50,6 +49,7 @@ namespace DBADashService
                             {CollectionType.AvailabilityReplicas, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },
                             {CollectionType.MemoryUsage, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },
                             {CollectionType.RunningJobs, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },
+                            {CollectionType.OSInfo, new CollectionSchedule(){ Schedule = every1min } },
 
                             {CollectionType.ServerPrincipals, new CollectionSchedule(){ Schedule = midnight } },
                             {CollectionType.ServerRoleMembers, new CollectionSchedule(){ Schedule = midnight } },
