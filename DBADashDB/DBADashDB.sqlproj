@@ -818,6 +818,7 @@
     <Build Include="dbo\Stored Procedures\OfflineInstanceTimeline_Get.sql" />
     <Build Include="dbo\Stored Procedures\PurgeOfflineInstances.sql" />
     <Build Include="Alert\Procedures\OfflineAlert_Upd.sql" />
+    <Build Include="Alert\Procedures\RestartAlert_Upd.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
