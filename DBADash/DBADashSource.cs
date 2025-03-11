@@ -1,4 +1,5 @@
 ﻿using DBADashService;
+using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -210,6 +211,13 @@ namespace DBADash
 
         public DBADashSource()
         {
+        }
+
+        public void SetConnectionIDFromBuilderIfNotSet()
+        {
+            if (SourceConnection.Type != ConnectionType.SQL || !string.IsNullOrEmpty(ConnectionID)) return;
+            var builder = new SqlConnectionStringBuilder(SourceConnection.ConnectionString);
+            ConnectionID = builder.DataSource is "." or "LOCALHOST" ? Environment.MachineName : builder.DataSource;
         }
 
         public string GetGeneratedConnectionID()

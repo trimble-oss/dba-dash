@@ -25,7 +25,8 @@ SetServiceName - Change the name of the DBA Dash service
 Encrypt - Encrypt the config file with a password (--EncryptionPassword)
 Decrypt - Decrypt the config file. --DecryptionPassword can be used if required.
 SetConfigFileBackupRetention - Specify how long to keep config file backups. --RetentionDays
-PopulateConnectionID - Add ConnectionID to source connections without a ConnectionID")]
+PopulateConnectionID - Add ConnectionID to source connections without a ConnectionID
+PopulateConnectionID2 - Add ConnectionID to source connections without a ConnectionID.  If connection fails, set ConnectionID based on Data Source in connection string.")]
         public CommandLineActionOption Option { get; set; }
 
         [Option('r', "Replace", Required = false, HelpText = "Option to replace the existing connection if it already exists", Default = false)]
@@ -123,7 +124,8 @@ PopulateConnectionID - Add ConnectionID to source connections without a Connecti
             RemoveAndDelete,
             Delete,
             Restore,
-            PopulateConnectionID
+            PopulateConnectionID,
+            PopulateConnectionID2
         }
     }
 }

@@ -115,7 +115,7 @@ namespace DBADashServiceConfig
                     CollectSessionWaits = chkCollectSessionWaits.Checked,
                     ScriptAgentJobs = chkScriptJobs.Checked,
                     IOCollectionLevel = (DBADashSource.IOCollectionLevels)cboIOLevel.SelectedItem,
-                    WriteToSecondaryDestinations = chkWriteToSecondaryDestinations.Checked,
+                    WriteToSecondaryDestinations = chkWriteToSecondaryDestinations.Checked
                 };
                 src.CustomCollections = src.SourceConnection.Type == ConnectionType.SQL ? CustomCollectionsNew : null;
                 bool validated = ValidateSource(sourceString);
@@ -188,8 +188,11 @@ namespace DBADashServiceConfig
                         src.SlowQueryThresholdMs = -1;
                         src.PersistXESessions = false;
                     }
+                    // Ensure we have a ConnectionID set for SQL connections
+                    src.SetConnectionIDFromBuilderIfNotSet();
 
-                    var existingConnection = collectionConfig.GetSourceFromConnectionString(sourceString);
+                    var existingConnection = collectionConfig.FindSourceConnection(sourceString,src.ConnectionID); // Check if the connection string exists in the config
+
                     if (existingConnection != null)
                     {
                         src.CollectionSchedules = existingConnection.CollectionSchedules;
@@ -210,7 +213,7 @@ namespace DBADashServiceConfig
                             continue;
                         }
                     }
-
+         
                     collectionConfig.SourceConnections.Add(src);
                 }
             }
