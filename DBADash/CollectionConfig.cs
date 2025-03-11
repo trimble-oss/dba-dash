@@ -396,5 +396,24 @@ namespace DBADash
             }
             throw new ArgumentException($"Unable to find instance with ConnectionID {connectionID}");
         }
+
+
+        /// <summary>
+        /// Get source connection from connection string or ConnectionID.  Returns null if not found
+        /// </summary>
+        public DBADashSource FindSourceConnection(string connectionString, string connectionId)
+        {
+            var source = GetSourceFromConnectionString(connectionString);
+            try
+            {
+                source = GetSourceConnection(connectionId);
+            }
+            catch
+            {
+                // ignore
+            }
+
+            return source;
+        }
     }
 }

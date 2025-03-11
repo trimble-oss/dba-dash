@@ -142,20 +142,7 @@ namespace DBADashConfig
             }
 
             Log.Information("Add new connection: {Connection}", o.ConnectionString);
-            // check if connection exists before adding a new connection
-            if (config.SourceExists(o.ConnectionString))
-            {
-                if (o.Replace)
-                {
-                    Log.Information("Replace existing connection");
-                    config.SourceConnections.Remove(config.GetSourceFromConnectionString(o.ConnectionString));
-                }
-                else
-                {
-                    Log.Information("Source connection already exists");
-                    Environment.Exit(0);
-                }
-            }
+
             var source = new DBADashSource()
             {
                 IOCollectionLevel = (DBADashSource.IOCollectionLevels)o.IOCollectionLevel,
@@ -183,9 +170,10 @@ namespace DBADashConfig
             {
                 source.ConnectionID = source.GetGeneratedConnectionID();
             }
-            else
+            else if(source.SourceConnection.Type == DBADashConnection.ConnectionType.SQL)
             {
-                Log.Warning("Validation skipped & ConnectionID not specified. ConnectionID will be generated on collection.");
+                source.SetConnectionIDFromBuilderIfNotSet();
+                Log.Warning("Validation skipped & ConnectionID not specified. ConnectionID set to {ConnectionID} based on Data Source", source.ConnectionID);
             }
             if (!string.IsNullOrEmpty(o.SchemaSnapshotDBs) && o.SchemaSnapshotDBs != "<null>") // <null> was added for PowerShell script as passing a blank string results in an error with commandline parser
             {
@@ -198,10 +186,26 @@ namespace DBADashConfig
                 source.PlanCollectionDurationThreshold = o.PlanCollectionDurationThreshold;
                 source.PlanCollectionMemoryGrantThreshold = o.PlanCollectionMemoryGrantThreshold;
             }
-
+            // check if connection exists before adding a new connection
+            var oldSource = config.FindSourceConnection(o.ConnectionString, source.ConnectionID);
+            if (oldSource!=null)
+            {
+                if (o.Replace)
+                {
+                    Log.Information("Replace existing connection");
+                    config.SourceConnections.Remove(oldSource);
+                }
+                else
+                {
+                    Log.Warning("Source connection already exists.  Use --Replace to update the existing connection.");
+                    Environment.Exit(0);
+                }
+            }
             config.SourceConnections.Add(source);
             SaveConfig(config, o);
         }
+
+
 
         public static void ListConnections(CollectionConfig config)
         {
@@ -349,7 +353,7 @@ namespace DBADashConfig
             SaveConfig(config, o);
         }
 
-        public static void PopulateConnectionID(CollectionConfig config, Options o)
+        public static void PopulateConnectionID(CollectionConfig config, Options o, bool force)
         {
             var errors = 0;
             var succeeded = 0;
@@ -363,8 +367,17 @@ namespace DBADashConfig
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Error generating ConnectionID for {ConnectionString}", source.SourceConnection.ConnectionForPrint);
-                    errors++;
+                    if (force)
+                    {
+                        source.SetConnectionIDFromBuilderIfNotSet();
+                        succeeded++;
+                        Log.Warning(ex, "Error generating ConnectionID for {ConnectionString}.  Connection set to {ConnectionID} from connection string builder.", source.SourceConnection.ConnectionForPrint,source.ConnectionID);
+                    }
+                    else
+                    {
+                        Log.Error(ex, "Error generating ConnectionID for {ConnectionString}", source.SourceConnection.ConnectionForPrint);
+                        errors++;
+                    }
                 }
             }
             if (succeeded > 0)

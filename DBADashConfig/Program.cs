@@ -115,7 +115,10 @@ try
                       break;
 
                   case CommandLineActionOption.PopulateConnectionID:
-                      Helper.PopulateConnectionID(config, o);
+                      Helper.PopulateConnectionID(config, o,false);
+                      break;
+                  case CommandLineActionOption.PopulateConnectionID2:
+                      Helper.PopulateConnectionID(config, o,true);
                       break;
               }
           });
