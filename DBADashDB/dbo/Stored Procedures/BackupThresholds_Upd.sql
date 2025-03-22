@@ -11,7 +11,9 @@
 	@UsePartial BIT=0,
 	@Inherit BIT=0,
 	@ExcludedDatabases NVARCHAR(MAX)=NULL,
-	@MinimumAge INT=NULL
+	@MinimumAge INT=NULL,
+	@ConsiderSnapshotBackups BIT=1,
+	@ConsiderCopyOnlyBackups BIT=1
 )
 AS
 SET XACT_ABORT ON
@@ -34,21 +36,25 @@ INSERT INTO dbo.BackupThresholds
     ConsiderPartialBackups,
     ConsiderFGBackups,
 	ExcludedDatabases,
-	MinimumAge
+	MinimumAge,
+	ConsiderSnapshotBackups,
+	ConsiderCopyOnlyBackups
 )
-VALUES
-(   @InstanceID,
-   @DatabaseID,
-   @LogWarning,
-   @LogCritical,
-   @FullWarning,
-   @FullCritical,
-   @DiffWarning,
-   @DiffCritical,
-   @UsePartial,
-   @UseFG,
-   @ExcludedDatabases,
-   @MinimumAge
+VALUES(   
+	@InstanceID,
+	@DatabaseID,
+	@LogWarning,
+	@LogCritical,
+	@FullWarning,
+	@FullCritical,
+	@DiffWarning,
+	@DiffCritical,
+	@UsePartial,
+	@UseFG,
+	@ExcludedDatabases,
+	@MinimumAge,
+	@ConsiderSnapshotBackups,
+	@ConsiderCopyOnlyBackups
     )
 END
 COMMIT

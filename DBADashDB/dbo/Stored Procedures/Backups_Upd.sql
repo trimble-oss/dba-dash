@@ -18,14 +18,16 @@ BEGIN
 	DELETE B 
 	FROM dbo.Backups B 
 	WHERE EXISTS(
-		SELECT 1
-		FROM @Backups t 
-		JOIN dbo.Databases d ON d.name = t.database_name
-		AND d.IsActive=1
-		AND d.InstanceID=@InstanceID
-		AND B.DatabaseID = d.DatabaseID
-		AND B.type = t.type
-		) 
+				SELECT 1
+				FROM @Backups t 
+				JOIN dbo.Databases d ON d.name = t.database_name
+				WHERE d.IsActive=1
+				AND d.InstanceID=@InstanceID
+				AND B.DatabaseID = d.DatabaseID
+				AND B.type = t.type
+				AND B.is_copy_only = ISNULL(t.is_copy_only,0)
+				AND B.is_snapshot = ISNULL(t.is_snapshot,0)
+				) 
 
 	INSERT INTO dbo.Backups(DatabaseID,
 					type,
@@ -61,14 +63,14 @@ BEGIN
 					t.is_password_protected,
 					t.recovery_model,
 					t.has_bulk_logged_data,
-					t.is_snapshot,
+					ISNULL(t.is_snapshot,0),
 					t.is_readonly,
 					t.is_single_user,
 					t.has_backup_checksums,
 					t.is_damaged,
 					t.has_incomplete_metadata,
 					t.is_force_offline,
-					t.is_copy_only,
+					ISNULL(t.is_copy_only,0),
 					t.database_guid,
 					t.family_guid,
 					t.compressed_backup_size,

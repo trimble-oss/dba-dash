@@ -38,3 +38,17 @@ BEGIN
 
 	TRUNCATE TABLE dbo.LogRestores
 END
+/* Shouldn't be NULL but run update before making column NOT NULL just in case */
+IF COLUMNPROPERTY(OBJECT_ID('dbo.Backups'),'is_copy_only','AllowsNull') =1
+BEGIN
+	UPDATE dbo.Backups
+	SET is_copy_only=0
+	WHERE is_copy_only IS NULL
+END
+/* Shouldn't be NULL but run update before making column NOT NULL just in case */
+IF COLUMNPROPERTY(OBJECT_ID('dbo.Backups'),'is_snapshot','AllowsNull') =1
+BEGIN
+	UPDATE dbo.Backups
+	SET is_snapshot=0
+	WHERE is_snapshot IS NULL
+END

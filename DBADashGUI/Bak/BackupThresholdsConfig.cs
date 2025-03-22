@@ -6,7 +6,6 @@ namespace DBADashGUI.Backups
 {
     public partial class BackupThresholdsConfig : Form
     {
-
         public int InstanceID = -1;
         public int DatabaseID = -1;
 
@@ -27,7 +26,6 @@ namespace DBADashGUI.Backups
             }
             else
             {
-
                 chkFull.Checked = false;
             }
             if (thresholds.DiffCritical != null && thresholds.DiffWarning != null)
@@ -38,7 +36,6 @@ namespace DBADashGUI.Backups
             }
             else
             {
-
                 chkDiff.Checked = false;
             }
             if (thresholds.LogCritical != null && thresholds.LogWarning != null)
@@ -49,7 +46,6 @@ namespace DBADashGUI.Backups
             }
             else
             {
-
                 chkLog.Checked = false;
             }
 
@@ -68,7 +64,8 @@ namespace DBADashGUI.Backups
                 chkBackupInherit.Enabled = true;
             }
 
-
+            chkCopyOnlyBackups.Checked = thresholds.ConsiderCopyOnlyBackups;
+            chkSnapshotBackups.Checked = thresholds.ConsiderSnapshotBackups;
         }
 
         public BackupThresholds BackupThreshold
@@ -83,7 +80,9 @@ namespace DBADashGUI.Backups
                     UseFG = chkUseFG.Checked,
                     UsePartial = chkUsePartial.Checked,
                     ExcludedDBs = txtExcluded.Text.Trim(),
-                    MinimumAge = Convert.ToInt32(numMinimumAge.Value)
+                    MinimumAge = Convert.ToInt32(numMinimumAge.Value),
+                    ConsiderCopyOnlyBackups = chkCopyOnlyBackups.Checked,
+                    ConsiderSnapshotBackups = chkSnapshotBackups.Checked
                 };
                 if (chkFull.Checked) { thresholds.FullCritical = (int?)numFullCritical.Value; }
                 if (chkFull.Checked) { thresholds.FullWarning = (int?)numFullWarning.Value; }
@@ -94,7 +93,6 @@ namespace DBADashGUI.Backups
                 return thresholds;
             }
         }
-
 
         private void BackupThresholds_Load(object sender, EventArgs e)
         {
@@ -110,7 +108,6 @@ namespace DBADashGUI.Backups
         {
             BackupThreshold.Save();
             DialogResult = DialogResult.OK;
-
         }
 
         private void ChkFull_CheckedChanged(object sender, EventArgs e)
