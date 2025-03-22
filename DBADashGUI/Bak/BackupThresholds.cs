@@ -23,6 +23,9 @@ namespace DBADashGUI.Backups
 
         public string ExcludedDBs { get; set; } = string.Empty;
 
+        public bool ConsiderSnapshotBackups { get; set; } = true;
+
+        public bool ConsiderCopyOnlyBackups { get; set; } = true;
 
         public static BackupThresholds GetThresholds(int InstanceID, int DatabaseID)
         {
@@ -38,7 +41,6 @@ namespace DBADashGUI.Backups
                 {
                     if (rdr["FullBackupCriticalThreshold"] != DBNull.Value && rdr["FullBackupWarningThreshold"] != DBNull.Value)
                     {
-
                         thresholds.FullCritical = (int)rdr["FullBackupCriticalThreshold"];
                         thresholds.FullWarning = (int)rdr["FullBackupWarningThreshold"];
                     }
@@ -57,12 +59,13 @@ namespace DBADashGUI.Backups
                     thresholds.UsePartial = (bool)rdr["ConsiderPartialBackups"];
                     thresholds.UseFG = (bool)rdr["ConsiderFGBackups"];
                     thresholds.ExcludedDBs = Convert.ToString(rdr["ExcludedDatabases"]);
+                    thresholds.ConsiderCopyOnlyBackups = (bool)rdr["ConsiderCopyOnlyBackups"];
+                    thresholds.ConsiderSnapshotBackups = (bool)rdr["ConsiderSnapshotBackups"];
                 }
                 else
                 {
                     thresholds.Inherit = true;
                 }
-
             }
             return thresholds;
         }
@@ -86,10 +89,11 @@ namespace DBADashGUI.Backups
                 cmd.Parameters.AddWithValue("Inherit", Inherit);
                 cmd.Parameters.AddWithValue("ExcludedDatabases", ExcludedDBs);
                 if (MinimumAge > 0) { cmd.Parameters.AddWithValue("MinimumAge", MinimumAge); }
+
+                cmd.Parameters.AddWithValue("ConsiderCopyOnlyBackups", ConsiderCopyOnlyBackups);
+                cmd.Parameters.AddWithValue("ConsiderSnapshotBackups", ConsiderSnapshotBackups);
                 cmd.ExecuteNonQuery();
             }
-
         }
-
     }
 }

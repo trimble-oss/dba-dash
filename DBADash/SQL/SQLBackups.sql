@@ -25,7 +25,7 @@ WITH T AS (
 	' + CASE WHEN NOT EXISTS(SELECT 1 FROM msdb.sys.columns WHERE object_id = OBJECT_ID('msdb.dbo.backupset') AND name = 'key_algorithm') THEN 'CAST(NULL AS NVARCHAR(32)) AS key_algorithm,' ELSE 'key_algorithm,' END + '
 	' + CASE WHEN NOT EXISTS(SELECT 1 FROM msdb.sys.columns WHERE object_id = OBJECT_ID('msdb.dbo.backupset') AND name = 'encryptor_type') THEN 'CAST(NULL AS NVARCHAR(32)) AS encryptor_type,' ELSE 'encryptor_type,' END + '
 	' + CASE WHEN NOT EXISTS(SELECT 1 FROM msdb.sys.columns WHERE object_id = OBJECT_ID('msdb.dbo.backupset') AND name = 'compression_algorithm') THEN 'CAST(NULL AS NVARCHAR(32)) AS compression_algorithm,' ELSE 'compression_algorithm,' END + '
-	ROW_NUMBER() OVER(PARTITION BY database_name,type ORDER BY backup_finish_date DESC) rnum
+	ROW_NUMBER() OVER(PARTITION BY database_name,type,is_snapshot,is_copy_only ORDER BY backup_finish_date DESC) rnum
 	FROM msdb.dbo.backupset bs
 	WHERE server_name=CAST(SERVERPROPERTY(''SERVERNAME'') AS NVARCHAR(128)) COLLATE SQL_Latin1_General_CP1_CI_AS
 	AND backup_finish_date>=DATEADD(d,-10,GETUTCDATE())

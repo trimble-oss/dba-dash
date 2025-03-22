@@ -6,7 +6,8 @@ AS
 WITH hadr AS (
 	SELECT D.DatabaseID,
 		partnr.DatabaseID BackupDatabaseID,
-		partnr.DatabaseID PartnerDatabaseID
+		partnr.DatabaseID PartnerDatabaseID,
+        D.InstanceID
 	FROM dbo.Databases D
 	JOIN dbo.DatabasesHADR hadr ON D.DatabaseID = hadr.DatabaseID
 	JOIN dbo.DatabasesHADR partnr ON hadr.group_database_id = partnr.group_database_id AND D.DatabaseID <> partnr.DatabaseID 
@@ -15,11 +16,13 @@ WITH hadr AS (
 	UNION ALL
 	SELECT D.DatabaseID,
 		D.DatabaseID,
-		NULL as PartnerDatabaseID
+		NULL as PartnerDatabaseID,
+        D.InstanceID
 	FROM dbo.Databases D
 ),
 LastBackup AS (
-	SELECT hadr.DatabaseID,
+	SELECT  hadr.InstanceID,
+            hadr.DatabaseID,
             B.type,
             B.backup_type_desc,
             B.backup_start_date,
@@ -60,6 +63,15 @@ LastBackup AS (
 			ROW_NUMBER() OVER(PARTITION BY hadr.DatabaseID,B.type ORDER BY B.backup_start_date_utc DESC) rnum
 	FROM dbo.BackupStats B
 	JOIN hadr ON hadr.BackupDatabaseID = B.DatabaseID
+    OUTER APPLY(SELECT TOP(1) T.ConsiderCopyOnlyBackups,
+                              T.ConsiderSnapshotBackups
+			FROM dbo.BackupThresholds T 
+			WHERE (hadr.InstanceID = T.InstanceID OR T.InstanceID = -1)
+			AND (hadr.DatabaseID = T.DatabaseID  OR T.DatabaseID = -1)
+			ORDER BY T.InstanceID DESC,T.DatabaseID DESC
+			) AS TH
+    WHERE NOT(TH.ConsiderCopyOnlyBackups=0 AND B.is_copy_only=1)
+    AND NOT(TH.ConsiderSnapshotBackups=0 AND B.is_snapshot=1)
 )
 SELECT B.DatabaseID,
        B.type,

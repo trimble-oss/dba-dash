@@ -77,7 +77,6 @@ namespace DBADashGUI
             tabOfflineInstances = new TabPage("Offline Instances");
             var offlineInstancesControl = new OfflineInstances() { Dock = DockStyle.Fill };
             tabOfflineInstances.Controls.Add(offlineInstancesControl);
-         
         }
 
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommandNames proc)
