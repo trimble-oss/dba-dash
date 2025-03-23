@@ -66,6 +66,7 @@ namespace DBADashGUI.Backups
 
             chkCopyOnlyBackups.Checked = thresholds.ConsiderCopyOnlyBackups;
             chkSnapshotBackups.Checked = thresholds.ConsiderSnapshotBackups;
+            chkConsiderFull.Checked = thresholds.ConsiderFullBackupWithDiffThreshold;
         }
 
         public BackupThresholds BackupThreshold
@@ -82,7 +83,8 @@ namespace DBADashGUI.Backups
                     ExcludedDBs = txtExcluded.Text.Trim(),
                     MinimumAge = Convert.ToInt32(numMinimumAge.Value),
                     ConsiderCopyOnlyBackups = chkCopyOnlyBackups.Checked,
-                    ConsiderSnapshotBackups = chkSnapshotBackups.Checked
+                    ConsiderSnapshotBackups = chkSnapshotBackups.Checked,
+                    ConsiderFullBackupWithDiffThreshold = chkConsiderFull.Checked
                 };
                 if (chkFull.Checked) { thresholds.FullCritical = (int?)numFullCritical.Value; }
                 if (chkFull.Checked) { thresholds.FullWarning = (int?)numFullWarning.Value; }

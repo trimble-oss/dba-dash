@@ -33,6 +33,8 @@
             chkUsePartial = new System.Windows.Forms.CheckBox();
             chkBackupInherit = new System.Windows.Forms.CheckBox();
             pnlBackupThresholds = new System.Windows.Forms.Panel();
+            chkCopyOnlyBackups = new System.Windows.Forms.CheckBox();
+            chkSnapshotBackups = new System.Windows.Forms.CheckBox();
             label3 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
             numMinimumAge = new System.Windows.Forms.NumericUpDown();
@@ -57,8 +59,7 @@
             numFullCritical = new System.Windows.Forms.NumericUpDown();
             bttnUpdate = new System.Windows.Forms.Button();
             toolTip1 = new System.Windows.Forms.ToolTip(components);
-            chkSnapshotBackups = new System.Windows.Forms.CheckBox();
-            chkCopyOnlyBackups = new System.Windows.Forms.CheckBox();
+            chkConsiderFull = new System.Windows.Forms.CheckBox();
             pnlBackupThresholds.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numMinimumAge).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numLogWarning).BeginInit();
@@ -105,6 +106,7 @@
             // 
             // pnlBackupThresholds
             // 
+            pnlBackupThresholds.Controls.Add(chkConsiderFull);
             pnlBackupThresholds.Controls.Add(chkCopyOnlyBackups);
             pnlBackupThresholds.Controls.Add(chkSnapshotBackups);
             pnlBackupThresholds.Controls.Add(label3);
@@ -134,8 +136,32 @@
             pnlBackupThresholds.Location = new System.Drawing.Point(13, 52);
             pnlBackupThresholds.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             pnlBackupThresholds.Name = "pnlBackupThresholds";
-            pnlBackupThresholds.Size = new System.Drawing.Size(633, 402);
+            pnlBackupThresholds.Size = new System.Drawing.Size(633, 427);
             pnlBackupThresholds.TabIndex = 41;
+            // 
+            // chkCopyOnlyBackups
+            // 
+            chkCopyOnlyBackups.AutoSize = true;
+            chkCopyOnlyBackups.Checked = true;
+            chkCopyOnlyBackups.CheckState = System.Windows.Forms.CheckState.Checked;
+            chkCopyOnlyBackups.Location = new System.Drawing.Point(278, 359);
+            chkCopyOnlyBackups.Name = "chkCopyOnlyBackups";
+            chkCopyOnlyBackups.Size = new System.Drawing.Size(185, 24);
+            chkCopyOnlyBackups.TabIndex = 60;
+            chkCopyOnlyBackups.Text = "Use Copy Only Backups";
+            chkCopyOnlyBackups.UseVisualStyleBackColor = true;
+            // 
+            // chkSnapshotBackups
+            // 
+            chkSnapshotBackups.AutoSize = true;
+            chkSnapshotBackups.Checked = true;
+            chkSnapshotBackups.CheckState = System.Windows.Forms.CheckState.Checked;
+            chkSnapshotBackups.Location = new System.Drawing.Point(278, 329);
+            chkSnapshotBackups.Name = "chkSnapshotBackups";
+            chkSnapshotBackups.Size = new System.Drawing.Size(178, 24);
+            chkSnapshotBackups.TabIndex = 59;
+            chkSnapshotBackups.Text = "Use Snapshot Backups";
+            chkSnapshotBackups.UseVisualStyleBackColor = true;
             // 
             // label3
             // 
@@ -361,44 +387,32 @@
             // 
             // bttnUpdate
             // 
-            bttnUpdate.Location = new System.Drawing.Point(555, 464);
+            bttnUpdate.Location = new System.Drawing.Point(536, 488);
             bttnUpdate.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             bttnUpdate.Name = "bttnUpdate";
-            bttnUpdate.Size = new System.Drawing.Size(75, 29);
+            bttnUpdate.Size = new System.Drawing.Size(94, 29);
             bttnUpdate.TabIndex = 45;
             bttnUpdate.Text = "Update";
             bttnUpdate.UseVisualStyleBackColor = true;
             bttnUpdate.Click += BttnUpdate_Click;
             // 
-            // chkSnapshotBackups
+            // chkConsiderFull
             // 
-            chkSnapshotBackups.AutoSize = true;
-            chkSnapshotBackups.Checked = true;
-            chkSnapshotBackups.CheckState = System.Windows.Forms.CheckState.Checked;
-            chkSnapshotBackups.Location = new System.Drawing.Point(278, 329);
-            chkSnapshotBackups.Name = "chkSnapshotBackups";
-            chkSnapshotBackups.Size = new System.Drawing.Size(178, 24);
-            chkSnapshotBackups.TabIndex = 59;
-            chkSnapshotBackups.Text = "Use Snapshot Backups";
-            chkSnapshotBackups.UseVisualStyleBackColor = true;
-            // 
-            // chkCopyOnlyBackups
-            // 
-            chkCopyOnlyBackups.AutoSize = true;
-            chkCopyOnlyBackups.Checked = true;
-            chkCopyOnlyBackups.CheckState = System.Windows.Forms.CheckState.Checked;
-            chkCopyOnlyBackups.Location = new System.Drawing.Point(278, 359);
-            chkCopyOnlyBackups.Name = "chkCopyOnlyBackups";
-            chkCopyOnlyBackups.Size = new System.Drawing.Size(185, 24);
-            chkCopyOnlyBackups.TabIndex = 60;
-            chkCopyOnlyBackups.Text = "Use Copy Only Backups";
-            chkCopyOnlyBackups.UseVisualStyleBackColor = true;
+            chkConsiderFull.AutoSize = true;
+            chkConsiderFull.Checked = true;
+            chkConsiderFull.CheckState = System.Windows.Forms.CheckState.Checked;
+            chkConsiderFull.Location = new System.Drawing.Point(278, 389);
+            chkConsiderFull.Name = "chkConsiderFull";
+            chkConsiderFull.Size = new System.Drawing.Size(318, 24);
+            chkConsiderFull.TabIndex = 61;
+            chkConsiderFull.Text = "Ignore DIFF Threshold if FULL meets criteria";
+            chkConsiderFull.UseVisualStyleBackColor = true;
             // 
             // BackupThresholdsConfig
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(661, 508);
+            ClientSize = new System.Drawing.Size(661, 529);
             Controls.Add(bttnUpdate);
             Controls.Add(chkBackupInherit);
             Controls.Add(pnlBackupThresholds);
@@ -454,5 +468,6 @@
         private System.Windows.Forms.NumericUpDown numMinimumAge;
         private System.Windows.Forms.CheckBox chkCopyOnlyBackups;
         private System.Windows.Forms.CheckBox chkSnapshotBackups;
+        private System.Windows.Forms.CheckBox chkConsiderFull;
     }
 }

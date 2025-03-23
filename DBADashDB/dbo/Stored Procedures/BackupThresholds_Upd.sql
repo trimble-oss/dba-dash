@@ -13,7 +13,8 @@
 	@ExcludedDatabases NVARCHAR(MAX)=NULL,
 	@MinimumAge INT=NULL,
 	@ConsiderSnapshotBackups BIT=1,
-	@ConsiderCopyOnlyBackups BIT=1
+	@ConsiderCopyOnlyBackups BIT=1,
+	@ConsiderFullBackupWithDiffThreshold BIT=1
 )
 AS
 SET XACT_ABORT ON
@@ -38,7 +39,8 @@ INSERT INTO dbo.BackupThresholds
 	ExcludedDatabases,
 	MinimumAge,
 	ConsiderSnapshotBackups,
-	ConsiderCopyOnlyBackups
+	ConsiderCopyOnlyBackups,
+	ConsiderFullBackupWithDiffThreshold
 )
 VALUES(   
 	@InstanceID,
@@ -54,7 +56,8 @@ VALUES(
 	@ExcludedDatabases,
 	@MinimumAge,
 	@ConsiderSnapshotBackups,
-	@ConsiderCopyOnlyBackups
+	@ConsiderCopyOnlyBackups,
+	@ConsiderFullBackupWithDiffThreshold
     )
 END
 COMMIT

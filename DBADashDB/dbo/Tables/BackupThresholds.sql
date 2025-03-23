@@ -13,5 +13,6 @@
     MinimumAge INT NULL,
     ConsiderSnapshotBackups BIT NOT NULL CONSTRAINT DF_BackupThreshold_ConsiderSnapshotBackups DEFAULT(1),
     ConsiderCopyOnlyBackups BIT NOT NULL CONSTRAINT DF_BackupThreshold_ConsiderCopyOnlyBackups DEFAULT(1),
+    ConsiderFullBackupWithDiffThreshold BIT NOT NULL CONSTRAINT DF_BackupThreshold_ConsiderFullBackupWithDiffThreshold DEFAULT(0),
     CONSTRAINT PK_BackupThresholds PRIMARY KEY CLUSTERED (InstanceID ASC,DatabaseID ASC)
 )
