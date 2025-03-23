@@ -27,6 +27,8 @@ namespace DBADashGUI.Backups
 
         public bool ConsiderCopyOnlyBackups { get; set; } = true;
 
+        public bool ConsiderFullBackupWithDiffThreshold { get; set; } = true;
+
         public static BackupThresholds GetThresholds(int InstanceID, int DatabaseID)
         {
             BackupThresholds thresholds = new();
@@ -61,6 +63,7 @@ namespace DBADashGUI.Backups
                     thresholds.ExcludedDBs = Convert.ToString(rdr["ExcludedDatabases"]);
                     thresholds.ConsiderCopyOnlyBackups = (bool)rdr["ConsiderCopyOnlyBackups"];
                     thresholds.ConsiderSnapshotBackups = (bool)rdr["ConsiderSnapshotBackups"];
+                    thresholds.ConsiderFullBackupWithDiffThreshold = (bool)rdr["ConsiderFullBackupWithDiffThreshold"];
                 }
                 else
                 {
@@ -92,6 +95,7 @@ namespace DBADashGUI.Backups
 
                 cmd.Parameters.AddWithValue("ConsiderCopyOnlyBackups", ConsiderCopyOnlyBackups);
                 cmd.Parameters.AddWithValue("ConsiderSnapshotBackups", ConsiderSnapshotBackups);
+                cmd.Parameters.AddWithValue("ConsiderFullBackupWithDiffThreshold", ConsiderFullBackupWithDiffThreshold);
                 cmd.ExecuteNonQuery();
             }
         }

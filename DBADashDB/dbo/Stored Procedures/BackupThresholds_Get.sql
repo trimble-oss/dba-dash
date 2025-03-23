@@ -15,7 +15,8 @@ SELECT BT.InstanceID,
        BT.ExcludedDatabases,
        BT.MinimumAge,
        BT.ConsiderSnapshotBackups,
-       BT.ConsiderCopyOnlyBackups
+       BT.ConsiderCopyOnlyBackups,
+       BT.ConsiderFullBackupWithDiffThreshold
 FROM dbo.BackupThresholds BT
 LEFT JOIN dbo.Databases D ON BT.DatabaseID = D.DatabaseID
 LEFT JOIN dbo.Instances I ON BT.InstanceID = I.InstanceID

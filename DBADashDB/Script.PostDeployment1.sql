@@ -1297,10 +1297,11 @@ BEGIN
 		DiffBackupWarningThreshold,
 		DiffBackupCriticalThreshold,
 		ConsiderPartialBackups,
-		ConsiderFGBackups
+		ConsiderFGBackups,
+		ConsiderFullBackupWithDiffThreshold
 	)
 	VALUES
-	( -1, -1, 720, 1440, 10080, 14400, NULL, NULL, 0, 0 )
+	( -1, -1, 720, 1440, 10080, 14400, NULL, NULL, 0, 0, 1 )
 END
 IF NOT EXISTS(SELECT 1 FROM dbo.DDL WHERE DDLID=-1)
 BEGIN

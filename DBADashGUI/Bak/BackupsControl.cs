@@ -244,6 +244,7 @@ namespace DBADashGUI.Backups
                 new DataGridViewCheckBoxColumn() { HeaderText = "Consider FG Backups", DataPropertyName = "ConsiderFGBackups", SortMode = DataGridViewColumnSortMode.Automatic },
                 new DataGridViewCheckBoxColumn() { HeaderText = "Consider Copy Only Backups", DataPropertyName = "ConsiderCopyOnlyBackups", SortMode = DataGridViewColumnSortMode.Automatic },
                 new DataGridViewCheckBoxColumn() { HeaderText = "Consider Snapshot Backups", DataPropertyName = "ConsiderSnapshotBackups", SortMode = DataGridViewColumnSortMode.Automatic },
+                new DataGridViewCheckBoxColumn() { HeaderText = "Ignore DIFF Threshold if FULL meets criteria", DataPropertyName = "ConsiderFullBackupWithDiffThreshold", SortMode = DataGridViewColumnSortMode.Automatic },
                 new DataGridViewTextBoxColumn() { HeaderText = "Last Full Duration", DataPropertyName = "LastFullDuration" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Full Backup Size (GB)", DataPropertyName = "FullBackupSizeGB", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N1" } },
                 new DataGridViewTextBoxColumn() { HeaderText = "Full Backup MB/sec", DataPropertyName = "FullBackupMBsec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N1" } },

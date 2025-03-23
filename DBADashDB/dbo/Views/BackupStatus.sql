@@ -77,6 +77,7 @@ SELECT I.InstanceID,
     cfg.ConsiderFGBackups,
 	cfg.ConsiderCopyOnlyBackups,
 	cfg.ConsiderSnapshotBackups,
+	cfg.ConsiderFullBackupWithDiffThreshold,
 	CASE WHEN cfg.InstanceID = D.InstanceID AND cfg.DatabaseID = D.DatabaseID THEN 'Database' WHEN cfg.InstanceID=D.InstanceID THEN 'Instance' ELSE 'Root' END AS ThresholdsConfiguredLevel,
 	SSD.SnapshotDate,
 	HD.HumanDuration AS SnapshotAge,
@@ -135,6 +136,18 @@ OUTER APPLY(SELECT TOP(1) T.*,
 			AND (D.DatabaseID = T.DatabaseID  OR T.DatabaseID = -1)
 			ORDER BY InstanceID DESC,DatabaseID DESC
 			) cfg
+OUTER APPLY(SELECT	DATEDIFF(mi,
+								CASE WHEN cfg.ConsiderFGBackups=1 AND (LastFG> LastFull OR LastFull IS NULL) AND (cfg.ConsiderPartialBackups=0 OR LastPartial<LastFG OR LastPartial IS NULL) THEN LastFG
+									WHEN cfg.ConsiderPartialBackups=1 AND (LastPartial>LastFull OR LastFull IS NULL) THEN LastPartial
+								ELSE LastFull END,
+							GETUTCDATE()) AS FullBackupAge,
+					DATEDIFF(mi,
+								CASE WHEN cfg.ConsiderFGBackups=1 AND (LastFGDiff> LastDiff OR LastDiff IS NULL) AND (cfg.ConsiderPartialBackups=0 OR LastPartialDiff<LastFGDiff OR LastPartialDiff IS NULL) THEN LastFGDiff
+									WHEN cfg.ConsiderPartialBackups=1 AND (LastPartialDiff>LastDiff OR LastDiff IS NULL) THEN LastPartialDiff
+								ELSE LastDiff END,
+							GETUTCDATE()) DiffBackupAge,
+					DATEDIFF(mi,LastLog,GETUTCDATE()) LogBackupAge
+		) AS calc
 OUTER APPLY(SELECT STUFF(CONCAT(CASE WHEN d.source_database_id IS NOT NULL THEN ', Snapshot' ELSE NULL END,
 								CASE WHEN d.state NOT IN(0,4,5) THEN ', ' + d.state_desc ELSE NULL END,
 								CASE WHEN d.is_in_standby=1 THEN ', Standby' ELSE NULL END,
@@ -150,7 +163,12 @@ OUTER APPLY(SELECT STUFF(CONCAT(CASE WHEN d.source_database_id IS NOT NULL THEN 
 								CASE WHEN cfg.IsExcludedByName=1 THEN ', name' ELSE NULL END,
 								CASE WHEN cfg.IsExcludedByDate=1 THEN ', created_date' ELSE NULL END,
 								CASE WHEN d.name = 'master' THEN ', master' ELSE NULL END,
-								CASE WHEN cfg.DiffBackupWarningThreshold IS NULL AND cfg.DiffBackupCriticalThreshold IS NULL THEN ', No Threshold' END
+								CASE WHEN cfg.DiffBackupWarningThreshold IS NULL AND cfg.DiffBackupCriticalThreshold IS NULL THEN ', No Threshold' END,
+								CASE WHEN cfg.ConsiderFullBackupWithDiffThreshold =1 
+									AND  calc.FullBackupAge < ISNULL(calc.DiffBackupAge,214748364)
+									AND calc.FullBackupAge < (SELECT MIN(dt) FROM (VALUES (cfg.DiffBackupCriticalThreshold),(cfg.DiffBackupWarningThreshold)) AS T(dt))
+									AND ISNULL(calc.DiffBackupAge,214748364) > (SELECT MIN(dt) FROM (VALUES (cfg.DiffBackupCriticalThreshold),(cfg.DiffBackupWarningThreshold)) AS T(dt))
+									THEN ', Full Backup' ELSE NULL END /* Diff backup doesn't meet thresholds, but we have a full backup that does. */
 								),1,2,'') as DiffBackupExcludedReason,
 					STUFF(CONCAT(CASE WHEN d.source_database_id IS NOT NULL THEN ', Snapshot' ELSE NULL END,
 								CASE WHEN d.state NOT IN(0,4,5) THEN ', ' + d.state_desc ELSE NULL END,
@@ -160,33 +178,23 @@ OUTER APPLY(SELECT STUFF(CONCAT(CASE WHEN d.source_database_id IS NOT NULL THEN 
 								CASE WHEN cfg.IsExcludedByDate=1 THEN ', created_date' ELSE NULL END,
 								CASE WHEN d.recovery_model=3 THEN ', SIMPLE' ELSE NULL END,
 								CASE WHEN cfg.LogBackupWarningThreshold IS NULL AND cfg.LogBackupCriticalThreshold IS NULL THEN ', No Threshold' END
-								),1,2,'') as LogBackupExcludedReason,
-					DATEDIFF(mi,
-								CASE WHEN cfg.ConsiderFGBackups=1 AND (LastFG> LastFull OR LastFull IS NULL) AND (cfg.ConsiderPartialBackups=0 OR LastPartial<LastFG OR LastPartial IS NULL) THEN LastFG
-									WHEN cfg.ConsiderPartialBackups=1 AND (LastPartial>LastFull OR LastFull IS NULL) THEN LastPartial
-								ELSE LastFull END,
-							GETUTCDATE()) AS FullBackupAge,
-					DATEDIFF(mi,
-								CASE WHEN cfg.ConsiderFGBackups=1 AND (LastFGDiff> LastDiff OR LastDiff IS NULL) AND (cfg.ConsiderPartialBackups=0 OR LastPartialDiff<LastFGDiff OR LastPartialDiff IS NULL) THEN LastFGDiff
-									WHEN cfg.ConsiderPartialBackups=1 AND (LastPartialDiff>LastDiff OR LastDiff IS NULL) THEN LastPartialDiff
-								ELSE LastDiff END,
-							GETUTCDATE()) DiffBackupAge,
-					DATEDIFF(mi,LastLog,GETUTCDATE()) LogBackupAge
+								),1,2,'') as LogBackupExcludedReason
+	
 			) f
 OUTER APPLY(SELECT CASE WHEN f.FullBackupExcludedReason IS NOT NULL THEN 3
 						WHEN B.IsFullDamaged=1 THEN 1
-						WHEN ISNULL(f.FullBackupAge,cfg.FullBackupCriticalThreshold) >= cfg.FullBackupCriticalThreshold THEN 1
-						WHEN f.FullBackupAge>=cfg.FullBackupWarningThreshold THEN 2
+						WHEN ISNULL(calc.FullBackupAge,cfg.FullBackupCriticalThreshold) >= cfg.FullBackupCriticalThreshold THEN 1
+						WHEN calc.FullBackupAge>=cfg.FullBackupWarningThreshold THEN 2
 						ELSE 4 END AS FullBackupStatus,
 					CASE WHEN f.DiffBackupExcludedReason IS NOT NULL THEN 3
 						WHEN B.IsDiffDamaged=1 THEN 1
-						WHEN ISNULL(f.DiffBackupAge,cfg.DiffBackupCriticalThreshold) >= cfg.DiffBackupCriticalThreshold THEN 1
-						WHEN f.DiffBackupAge>=cfg.DiffBackupWarningThreshold THEN 2
+						WHEN ISNULL(calc.DiffBackupAge,cfg.DiffBackupCriticalThreshold) >= cfg.DiffBackupCriticalThreshold THEN 1
+						WHEN calc.DiffBackupAge>=cfg.DiffBackupWarningThreshold THEN 2
 					ELSE 4 END AS DiffBackupStatus,
 					CASE WHEN LogBackupExcludedReason IS NOT NULL THEN 3
 						WHEN B.IsLogDamaged=1 THEN 1
-						WHEN ISNULL(f.LogBackupAge,cfg.LogBackupCriticalThreshold) >= cfg.LogBackupCriticalThreshold THEN 1
-						WHEN f.LogBackupAge>=cfg.LogBackupWarningThreshold THEN 2
+						WHEN ISNULL(calc.LogBackupAge,cfg.LogBackupCriticalThreshold) >= cfg.LogBackupCriticalThreshold THEN 1
+						WHEN calc.LogBackupAge>=cfg.LogBackupWarningThreshold THEN 2
 					ELSE 4 END AS LogBackupStatus
 			) AS chk
 WHERE d.IsActive=1
