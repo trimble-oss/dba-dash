@@ -5,7 +5,9 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using UserControl = System.Windows.Forms.UserControl;
 
 namespace DBADashGUI.Performance
 {
@@ -79,7 +81,36 @@ namespace DBADashGUI.Performance
             RefreshData();
         }
 
-        public void RefreshData()
+        private async Task<DataTable> GetCpuDataTable()
+        {
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand("dbo.CPU_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
+            await cn.OpenAsync();
+            cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("@FromDate", DateRange.FromUTC);
+            cmd.Parameters.AddWithValue("@ToDate", DateRange.ToUTC);
+            cmd.Parameters.AddWithValue("@DateGroupingMin", DateGrouping);
+            cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
+            if (DateRange.HasTimeOfDayFilter)
+            {
+                cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
+            }
+
+            if (DateRange.HasDayOfWeekFilter)
+            {
+                cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
+            }
+
+            await using var rdr = await cmd.ExecuteReaderAsync();
+
+            var dt = new DataTable();
+            dt.Load(rdr);
+            return dt;
+        }
+
+        private DataTable CpuDataTable = new();
+
+        public async void RefreshData()
         {
             if (durationMins != DateRange.DurationMins) // Update date grouping only if date range has changed
             {
@@ -88,39 +119,21 @@ namespace DBADashGUI.Performance
                 durationMins = DateRange.DurationMins;
             }
 
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.CPU_Get", cn) { CommandType = CommandType.StoredProcedure })
+            CpuDataTable = await GetCpuDataTable();
+
+            var sqlProcessValues = new ChartValues<DateTimePoint>();
+            var otherValues = new ChartValues<DateTimePoint>();
+            var maxValues = new ChartValues<DateTimePoint>();
+
+            foreach (DataRow row in CpuDataTable.Rows)
             {
-                cn.Open();
-                cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("@FromDate", DateRange.FromUTC);
-                cmd.Parameters.AddWithValue("@ToDate", DateRange.ToUTC);
-                cmd.Parameters.AddWithValue("@DateGroupingMin", DateGrouping);
-                cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
-                if (DateRange.HasTimeOfDayFilter)
-                {
-                    cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
-                }
-                if (DateRange.HasDayOfWeekFilter)
-                {
-                    cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
-                }
-                cmd.CommandTimeout = Config.DefaultCommandTimeout;
-                using var rdr = cmd.ExecuteReader();
+                var eventTime = (DateTime)row["EventTime"];
+                sqlProcessValues.Add(new DateTimePoint(eventTime.ToAppTimeZone(), decimal.ToDouble((decimal)row["SQLProcessCPU"]) / 100.0));
+                otherValues.Add(new DateTimePoint(eventTime.ToAppTimeZone(), decimal.ToDouble((decimal)row["OtherCPU"]) / 100.0));
+                maxValues.Add(new DateTimePoint(eventTime.ToAppTimeZone(), decimal.ToDouble((decimal)row["MaxCPU"]) / 100.0));
+            }
 
-                var sqlProcessValues = new ChartValues<DateTimePoint>();
-                var otherValues = new ChartValues<DateTimePoint>();
-                var maxValues = new ChartValues<DateTimePoint>();
-
-                while (rdr.Read())
-                {
-                    var eventTime = (DateTime)rdr["EventTime"];
-                    sqlProcessValues.Add(new DateTimePoint(eventTime.ToAppTimeZone(), decimal.ToDouble((decimal)rdr["SQLProcessCPU"]) / 100.0));
-                    otherValues.Add(new DateTimePoint(eventTime.ToAppTimeZone(), decimal.ToDouble((decimal)rdr["OtherCPU"]) / 100.0));
-                    maxValues.Add(new DateTimePoint(eventTime.ToAppTimeZone(), decimal.ToDouble((decimal)rdr["MaxCPU"]) / 100.0));
-                }
-
-                SeriesCollection s1 = new()
+            SeriesCollection s1 = new()
                 {
                     new StackedAreaSeries
                     {
@@ -142,29 +155,28 @@ namespace DBADashGUI.Performance
                     PointGeometrySize = PointSize,
                     }
                 };
-                chartCPU.AxisX.Clear();
-                chartCPU.AxisY.Clear();
-                string format = durationMins < 1440 ? "HH:mm" : "yyyy-MM-dd HH:mm";
-                chartCPU.AxisX.Add(new Axis
-                {
-                    LabelFormatter = val => new DateTime((long)val).ToString(format)
-                });
-                chartCPU.AxisY.Add(new Axis
-                {
-                    LabelFormatter = val => val.ToString("P1"),
-                    MaxValue = 1,
-                    MinValue = 0,
-                });
-                if (maxValues.Count > 1)
-                {
-                    chartCPU.Series = s1;
-                }
-                else
-                {
-                    chartCPU.Series.Clear();
-                }
-                UpdateVisibility();
+            chartCPU.AxisX.Clear();
+            chartCPU.AxisY.Clear();
+            var format = durationMins < 1440 ? "HH:mm" : "yyyy-MM-dd HH:mm";
+            chartCPU.AxisX.Add(new Axis
+            {
+                LabelFormatter = val => new DateTime((long)val).ToString(format)
+            });
+            chartCPU.AxisY.Add(new Axis
+            {
+                LabelFormatter = val => val.ToString("P1"),
+                MaxValue = 1,
+                MinValue = 0,
+            });
+            if (maxValues.Count > 1)
+            {
+                chartCPU.Series = s1;
             }
+            else
+            {
+                chartCPU.Series.Clear();
+            }
+            UpdateVisibility();
         }
 
         private void UpdateVisibility()
@@ -214,6 +226,16 @@ namespace DBADashGUI.Performance
         private void TsUp_Click(object sender, EventArgs e)
         {
             MoveUp.Invoke(this, EventArgs.Empty);
+        }
+
+        private void CopyData_Click(object sender, EventArgs e)
+        {
+            Common.CopyDataTableToClipboard(CpuDataTable);
+        }
+
+        private void ExportDataToExcel_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataTableToXLSX(CpuDataTable);
         }
     }
 }

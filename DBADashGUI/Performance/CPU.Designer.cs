@@ -28,127 +28,150 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.chartCPU = new LiveCharts.WinForms.CartesianChart();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsClose = new System.Windows.Forms.ToolStripButton();
-            this.tsUp = new System.Windows.Forms.ToolStripButton();
-            this.lblCPU = new System.Windows.Forms.ToolStripLabel();
-            this.tsDateGrouping = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsAgg = new System.Windows.Forms.ToolStripDropDownButton();
-            this.AVGToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.MAXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStrip1.SuspendLayout();
-            this.SuspendLayout();
+            components = new System.ComponentModel.Container();
+            chartCPU = new LiveCharts.WinForms.CartesianChart();
+            contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(components);
+            tsCopyData = new System.Windows.Forms.ToolStripMenuItem();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            tsClose = new System.Windows.Forms.ToolStripButton();
+            tsUp = new System.Windows.Forms.ToolStripButton();
+            lblCPU = new System.Windows.Forms.ToolStripLabel();
+            tsDateGrouping = new System.Windows.Forms.ToolStripDropDownButton();
+            tsAgg = new System.Windows.Forms.ToolStripDropDownButton();
+            AVGToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            MAXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            exportDataToExcelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            contextMenuStrip1.SuspendLayout();
+            toolStrip1.SuspendLayout();
+            SuspendLayout();
             // 
             // chartCPU
             // 
-            this.chartCPU.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartCPU.Location = new System.Drawing.Point(0, 27);
-            this.chartCPU.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.chartCPU.Name = "chartCPU";
-            this.chartCPU.Size = new System.Drawing.Size(878, 303);
-            this.chartCPU.TabIndex = 1;
-            this.chartCPU.Text = "CPU";
+            chartCPU.ContextMenuStrip = contextMenuStrip1;
+            chartCPU.Dock = System.Windows.Forms.DockStyle.Fill;
+            chartCPU.Location = new System.Drawing.Point(0, 27);
+            chartCPU.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            chartCPU.Name = "chartCPU";
+            chartCPU.Size = new System.Drawing.Size(878, 303);
+            chartCPU.TabIndex = 1;
+            chartCPU.Text = "CPU";
+            // 
+            // contextMenuStrip1
+            // 
+            contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsCopyData, exportDataToExcelToolStripMenuItem });
+            contextMenuStrip1.Name = "contextMenuStrip1";
+            contextMenuStrip1.Size = new System.Drawing.Size(218, 84);
+            // 
+            // tsCopyData
+            // 
+            tsCopyData.Image = Properties.Resources.ASX_Copy_grey_16x;
+            tsCopyData.Name = "tsCopyData";
+            tsCopyData.Size = new System.Drawing.Size(217, 26);
+            tsCopyData.Text = "Copy Data";
+            tsCopyData.Click += CopyData_Click;
             // 
             // toolStrip1
             // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsClose,
-            this.tsUp,
-            this.lblCPU,
-            this.tsDateGrouping,
-            this.tsAgg});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(878, 27);
-            this.toolStrip1.TabIndex = 2;
-            this.toolStrip1.Text = "toolStrip1";
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsClose, tsUp, lblCPU, tsDateGrouping, tsAgg });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new System.Drawing.Size(878, 27);
+            toolStrip1.TabIndex = 2;
+            toolStrip1.Text = "toolStrip1";
             // 
             // tsClose
             // 
-            this.tsClose.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsClose.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsClose.Image = global::DBADashGUI.Properties.Resources.Close_red_16x;
-            this.tsClose.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsClose.Name = "tsClose";
-            this.tsClose.Size = new System.Drawing.Size(29, 24);
-            this.tsClose.Text = "Close";
-            this.tsClose.Visible = false;
-            this.tsClose.Click += new System.EventHandler(this.TsClose_Click);
+            tsClose.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsClose.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsClose.Image = Properties.Resources.Close_red_16x;
+            tsClose.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClose.Name = "tsClose";
+            tsClose.Size = new System.Drawing.Size(29, 24);
+            tsClose.Text = "Close";
+            tsClose.Visible = false;
+            tsClose.Click += TsClose_Click;
             // 
             // tsUp
             // 
-            this.tsUp.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsUp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsUp.Image = global::DBADashGUI.Properties.Resources.arrow_Up_16xLG;
-            this.tsUp.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsUp.Name = "tsUp";
-            this.tsUp.Size = new System.Drawing.Size(29, 24);
-            this.tsUp.Text = "Move Up";
-            this.tsUp.Click += new System.EventHandler(this.TsUp_Click);
+            tsUp.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsUp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsUp.Image = Properties.Resources.arrow_Up_16xLG;
+            tsUp.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsUp.Name = "tsUp";
+            tsUp.Size = new System.Drawing.Size(29, 24);
+            tsUp.Text = "Move Up";
+            tsUp.Click += TsUp_Click;
             // 
             // lblCPU
             // 
-            this.lblCPU.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.lblCPU.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblCPU.Name = "lblCPU";
-            this.lblCPU.Size = new System.Drawing.Size(105, 24);
-            this.lblCPU.Text = "CPU: Instance";
+            lblCPU.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            lblCPU.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            lblCPU.Name = "lblCPU";
+            lblCPU.Size = new System.Drawing.Size(105, 24);
+            lblCPU.Text = "CPU: Instance";
             // 
             // tsDateGrouping
             // 
-            this.tsDateGrouping.Image = global::DBADashGUI.Properties.Resources.Time_16x;
-            this.tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsDateGrouping.Name = "tsDateGrouping";
-            this.tsDateGrouping.Size = new System.Drawing.Size(76, 24);
-            this.tsDateGrouping.Text = "1min";
+            tsDateGrouping.Image = Properties.Resources.Time_16x;
+            tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsDateGrouping.Name = "tsDateGrouping";
+            tsDateGrouping.Size = new System.Drawing.Size(76, 24);
+            tsDateGrouping.Text = "1min";
             // 
             // tsAgg
             // 
-            this.tsAgg.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.AVGToolStripMenuItem,
-            this.MAXToolStripMenuItem});
-            this.tsAgg.Image = global::DBADashGUI.Properties.Resources.AddComputedField_16x;
-            this.tsAgg.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsAgg.Name = "tsAgg";
-            this.tsAgg.Size = new System.Drawing.Size(69, 24);
-            this.tsAgg.Text = "Avg";
+            tsAgg.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { AVGToolStripMenuItem, MAXToolStripMenuItem });
+            tsAgg.Image = Properties.Resources.AddComputedField_16x;
+            tsAgg.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsAgg.Name = "tsAgg";
+            tsAgg.Size = new System.Drawing.Size(69, 24);
+            tsAgg.Text = "Avg";
             // 
             // AVGToolStripMenuItem
             // 
-            this.AVGToolStripMenuItem.Checked = true;
-            this.AVGToolStripMenuItem.CheckOnClick = true;
-            this.AVGToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.AVGToolStripMenuItem.Name = "AVGToolStripMenuItem";
-            this.AVGToolStripMenuItem.Size = new System.Drawing.Size(120, 26);
-            this.AVGToolStripMenuItem.Tag = "Avg";
-            this.AVGToolStripMenuItem.Text = "Avg";
-            this.AVGToolStripMenuItem.Click += new System.EventHandler(this.AVGToolStripMenuItem_Click);
+            AVGToolStripMenuItem.Checked = true;
+            AVGToolStripMenuItem.CheckOnClick = true;
+            AVGToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            AVGToolStripMenuItem.Name = "AVGToolStripMenuItem";
+            AVGToolStripMenuItem.Size = new System.Drawing.Size(120, 26);
+            AVGToolStripMenuItem.Tag = "Avg";
+            AVGToolStripMenuItem.Text = "Avg";
+            AVGToolStripMenuItem.Click += AVGToolStripMenuItem_Click;
             // 
             // MAXToolStripMenuItem
             // 
-            this.MAXToolStripMenuItem.CheckOnClick = true;
-            this.MAXToolStripMenuItem.Name = "MAXToolStripMenuItem";
-            this.MAXToolStripMenuItem.Size = new System.Drawing.Size(120, 26);
-            this.MAXToolStripMenuItem.Tag = "Max";
-            this.MAXToolStripMenuItem.Text = "Max";
-            this.MAXToolStripMenuItem.Click += new System.EventHandler(this.MAXToolStripMenuItem_Click);
+            MAXToolStripMenuItem.CheckOnClick = true;
+            MAXToolStripMenuItem.Name = "MAXToolStripMenuItem";
+            MAXToolStripMenuItem.Size = new System.Drawing.Size(120, 26);
+            MAXToolStripMenuItem.Tag = "Max";
+            MAXToolStripMenuItem.Text = "Max";
+            MAXToolStripMenuItem.Click += MAXToolStripMenuItem_Click;
+            // 
+            // exportDataToExcelToolStripMenuItem
+            // 
+            exportDataToExcelToolStripMenuItem.Image = Properties.Resources.excel16x16;
+            exportDataToExcelToolStripMenuItem.Name = "exportDataToExcelToolStripMenuItem";
+            exportDataToExcelToolStripMenuItem.Size = new System.Drawing.Size(217, 26);
+            exportDataToExcelToolStripMenuItem.Text = "Export Data to Excel";
+            exportDataToExcelToolStripMenuItem.Click += ExportDataToExcel_Click;
             // 
             // CPU
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.chartCPU);
-            this.Controls.Add(this.toolStrip1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "CPU";
-            this.Size = new System.Drawing.Size(878, 330);
-            this.Load += new System.EventHandler(this.CPU_Load);
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            Controls.Add(chartCPU);
+            Controls.Add(toolStrip1);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "CPU";
+            Size = new System.Drawing.Size(878, 330);
+            Load += CPU_Load;
+            contextMenuStrip1.ResumeLayout(false);
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
 
         }
 
@@ -163,5 +186,8 @@
         private System.Windows.Forms.ToolStripDropDownButton tsDateGrouping;
         private System.Windows.Forms.ToolStripButton tsClose;
         private System.Windows.Forms.ToolStripButton tsUp;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem tsCopyData;
+        private System.Windows.Forms.ToolStripMenuItem exportDataToExcelToolStripMenuItem;
     }
 }

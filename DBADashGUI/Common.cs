@@ -1,5 +1,8 @@
-﻿using Microsoft.Data.SqlClient;
-using ClosedXML.Excel;
+﻿using ClosedXML.Excel;
+using DBADash;
+using DBADashGUI.CustomReports;
+using DBADashGUI.SchemaCompare;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
 using System.Diagnostics;
@@ -8,11 +11,8 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Windows.Forms;
-using DBADashGUI.SchemaCompare;
-using System.Xml.Linq;
 using System.Xml;
-using DBADash;
-using DBADashGUI.CustomReports;
+using System.Xml.Linq;
 
 namespace DBADashGUI
 {
@@ -133,6 +133,44 @@ namespace DBADashGUI
             CopyHtmlToClipBoard(html.ToString());
         }
 
+        public static string DataTableToHTML(DataTable dt, Color? headerBGcolor = null, Color? headerColor = null)
+        {
+            headerBGcolor ??= DashColors.TrimbleBlue;
+            headerColor ??= DashColors.White;
+            var DataGridView1Counts = dt.Rows.Count;
+
+            StringBuilder html = new();
+            html.Append("<table>");
+
+            if (DataGridView1Counts > 0)
+            {
+                html.Append("<tr>");
+                foreach (DataColumn col in dt.Columns)
+                {
+                    html.Append(string.Format("<th style=\"background-color:{1};color:{2};\">{0}</th>", col.Caption, headerBGcolor.Value.ToHexString(), headerColor.Value.ToHexString()));
+                }
+                html.Append("</tr>");
+
+                foreach (DataRow row in dt.Rows)
+                {
+                    html.Append("<tr>");
+                    foreach (DataColumn col in dt.Columns)
+                    {
+                        html.AppendFormat("<td>{0}</td>", row[col]);
+                    }
+                    html.Append("</tr>");
+                }
+            }
+            html.Append("</table>");
+            return html.ToString();
+        }
+
+        public static void CopyDataTableToClipboard(DataTable dt, Color? headerBGcolor = null, Color? headerColor = null)
+        {
+            var html = DataTableToHTML(dt, headerBGcolor, headerColor);
+            CopyHtmlToClipBoard(html);
+        }
+
         public static void PromptSaveDataGridView(ref DataGridView dgv)
         {
             PromptSaveDataGridView(new DataGridView[] { dgv });
@@ -168,6 +206,38 @@ namespace DBADashGUI
             {
                 Debug.WriteLine("XmlException exporting to Excel, retrying with invalid XML characters removed", ex.ToString());
                 SaveDataGridViewsToXLSX(dgv, ofd.FileName, true); // Try again with invalid XML characters removed
+                Debug.WriteLine("Invalid XML characters removed");
+            }
+
+            var psi = new ProcessStartInfo(ofd.FileName) { UseShellExecute = true };
+            Process.Start(psi);
+        }
+
+        public static void PromptSaveDataTableToXLSX(DataTable dt)
+        {
+            var defaultFileName = "DBADash_" + DateHelper.AppNow.ToString("yyyyMMdd_HHmmss") + ".xlsx";
+            using var ofd = new SaveFileDialog() { FileName = defaultFileName, AddExtension = true, DefaultExt = ".xlsx" };
+            if (ofd.ShowDialog() != DialogResult.OK) return;
+            if (File.Exists(ofd.FileName))
+            {
+                if (MessageBox.Show($"Are you sure you want to replace the existing file: {ofd.FileName}", "Confirm Replace", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                {
+                    File.Delete(ofd.FileName);
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            try
+            {
+                SaveDataTableToXLSX(dt, ofd.FileName); // Assume there will be no invalid XML characters
+            }
+            catch (XmlException ex)
+            {
+                Debug.WriteLine("XmlException exporting to Excel, retrying with invalid XML characters removed", ex.ToString());
+                SaveDataTableToXLSX(dt, ofd.FileName, true); // Try again with invalid XML characters removed
                 Debug.WriteLine("Invalid XML characters removed");
             }
 
@@ -287,6 +357,68 @@ namespace DBADashGUI
                 sheetIndex += 1;
             }
             workbook.SaveAs(path);
+        }
+
+        public static void SaveDataTableToXLSX(DataTable dataTable, string excelFilePath, bool replaceInvalidChars = false)
+        {
+            using var workbook = new XLWorkbook();
+            var sheet = workbook.Worksheets.Add("Sheet1");
+
+            // Header
+            for (var i = 0; i < dataTable.Columns.Count; i++)
+            {
+                sheet.Cell(1, i + 1).Value = dataTable.Columns[i].ColumnName;
+            }
+
+            // Add the DataTable's data to the Excel file, starting from the second row
+            for (var rowIndex = 0; rowIndex < dataTable.Rows.Count; rowIndex++)
+            {
+                for (var colIndex = 0; colIndex < dataTable.Columns.Count; colIndex++)
+                {
+                    var value = dataTable.Rows[rowIndex][colIndex];
+                    if (value == DBNull.Value)
+                    {
+                        continue;
+                    }
+
+                    var valueType = value.GetType();
+                    if (valueType.IsNumericType())
+                    {
+                        sheet.Cell(rowIndex + 2, colIndex + 1).SetValue(Convert.ToDecimal(value));
+                    }
+                    else if (valueType == typeof(DateTime))
+                    {
+                        sheet.Cell(rowIndex + 2, colIndex + 1).SetValue(Convert.ToDateTime(value));
+                    }
+                    else if (valueType == typeof(bool))
+                    {
+                        sheet.Cell(rowIndex + 2, colIndex + 1).SetValue(Convert.ToBoolean(value));
+                    }
+                    else
+                    {
+                        sheet.Cell(rowIndex + 2, colIndex + 1).SetValue(value.ToString());
+                        sheet.Cell(rowIndex, colIndex).SetValue(replaceInvalidChars
+                            ? Convert.ToString(value.ToString()).StripInvalidXmlChars().Truncate(32767, true)
+                            : Convert.ToString(value.ToString()).Truncate(32767, true));
+                    }
+                }
+            }
+
+            var table = sheet.Range(sheet.Cell(1, 1).Address, sheet.Cell(dataTable.Rows.Count + 1, dataTable.Columns.Count).Address).CreateTable();
+            table.Theme = XLTableTheme.None;
+            var header = sheet.Range(1, 1, 1, dataTable.Columns.Count);
+            header.Style.Fill.SetBackgroundColor(XLColor.FromColor(DashColors.TrimbleBlue));
+            header.Style.Font.SetFontColor(XLColor.White);
+            header.Style.Font.SetBold();
+            var maxColumnWidth = 150;
+            sheet.Columns().AdjustToContents();
+            for (var i = 1; i <= dataTable.Columns.Count; i++)
+            {
+                sheet.Column(i).Width = Math.Min(sheet.Column(i).Width, maxColumnWidth);
+            }
+
+            // Save the workbook to the specified file path
+            workbook.SaveAs(excelFilePath);
         }
 
         public static void SaveDataGridViewToXLSX(ref DataGridView dgv, string path, bool replaceInvalidChars = false)
