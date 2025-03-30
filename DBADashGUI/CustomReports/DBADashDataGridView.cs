@@ -688,7 +688,7 @@ namespace DBADashGUI.CustomReports
             foreach (DataGridViewColumn column in dgv.Columns)
             {
                 if (!column.Visible) continue; // Add only visible columns to DataTable
-                var columnName = column.HeaderText;
+                var columnName = column.HeaderText.Replace("\n", " ");
                 // Ensure unique column names for the DataTable
                 var duplicateCount = 0;
                 while (columnNames.Contains(columnName))
