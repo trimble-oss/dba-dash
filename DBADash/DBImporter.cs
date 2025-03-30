@@ -124,6 +124,17 @@ namespace DBADash
                     dtDatabasesHADR.Columns.Add("is_local", typeof(bool));
                     dtDatabasesHADR.Columns.Add("secondary_lag_seconds", typeof(long));
                 }
+
+                if (!dtDatabasesHADR!.Columns.Contains("last_sent_time"))
+                {
+                    dtDatabasesHADR.Columns.Add("last_sent_time", typeof(DateTimeOffset));
+                    dtDatabasesHADR.Columns.Add("last_received_time", typeof(DateTimeOffset));
+                    dtDatabasesHADR.Columns.Add("last_hardened_time", typeof(DateTimeOffset));
+                    dtDatabasesHADR.Columns.Add("last_redone_time", typeof(DateTimeOffset));
+                    dtDatabasesHADR.Columns.Add("log_send_queue_size", typeof(long));
+                    dtDatabasesHADR.Columns.Add("log_send_rate", typeof(long));
+                    dtDatabasesHADR.Columns.Add("redo_queue_size", typeof(long));
+                }
             }
             if (data.Tables.Contains("Databases"))
             {
