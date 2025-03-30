@@ -127,8 +127,7 @@ namespace DBADashGUI.HA
             using SqlConnection cn = new(Common.ConnectionString);
             using SqlCommand cmd = new("AvailabilityGroupSummary_Get", cn) { CommandType = CommandType.StoredProcedure };
             using SqlDataAdapter da = new(cmd);
-            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            cmd.Parameters.AddWithValue("InstanceIDs", InstanceIDs.AsDataTable());
             var dt = new DataTable();
             da.Fill(dt);
             return dt;

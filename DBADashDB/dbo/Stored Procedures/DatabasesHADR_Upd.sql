@@ -34,7 +34,17 @@ BEGIN
 		is_commit_participant,
 		database_state,
 		is_local,
-		secondary_lag_seconds
+		secondary_lag_seconds,
+		last_sent_time,
+		last_received_time,
+		last_hardened_time,
+		last_redone_time,
+		log_send_queue_size,
+		log_send_rate,
+		redo_queue_size,
+		redo_rate,	
+		filestream_send_rate,
+		last_commit_time
 	)
 	SELECT @InstanceID,
 		   d.DatabaseID,
@@ -49,7 +59,17 @@ BEGIN
 		   hadr.is_commit_participant,
 		   hadr.database_state,
 		   hadr.is_local,
-		   hadr.secondary_lag_seconds
+		   hadr.secondary_lag_seconds,
+		   hadr.last_sent_time,
+		   hadr.last_received_time,
+		   hadr.last_hardened_time,
+		   hadr.last_redone_time,
+		   hadr.log_send_queue_size,
+		   hadr.log_send_rate,
+		   hadr.redo_queue_size,
+		   hadr.redo_rate,	
+		   hadr.filestream_send_rate,
+		   hadr.last_commit_time
 	FROM @DatabasesHADR hadr
 		JOIN dbo.Databases d ON hadr.database_id = d.database_id
 	WHERE d.InstanceID = @InstanceID

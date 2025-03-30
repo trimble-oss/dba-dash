@@ -11,6 +11,16 @@
     is_commit_participant BIT NULL,
     database_state TINYINT NULL,
     is_local BIT NULL,
-    secondary_lag_seconds BIGINT NULL
+    secondary_lag_seconds BIGINT NULL,
+    last_sent_time DATETIMEOFFSET NULL,
+    last_received_time DATETIMEOFFSET NULL,
+    last_hardened_time DATETIMEOFFSET NULL,
+    last_redone_time DATETIMEOFFSET NULL,
+    log_send_queue_size BIGINT NULL,
+    log_send_rate BIGINT NULL,
+    redo_queue_size BIGINT NULL,
+    redo_rate BIGINT NULL,	
+    filestream_send_rate BIGINT NULL,
+    last_commit_time DATETIMEOFFSET NULL
 );
 

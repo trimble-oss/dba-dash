@@ -1,6 +1,5 @@
 ﻿CREATE PROC dbo.AvailabilityGroupSummary_Get(
-    @InstanceIDs VARCHAR(MAX),
-    @ShowHidden BIT=1
+    @InstanceIDs IDs READONLY
 )
 AS
 SELECT I.InstanceID,
@@ -21,6 +20,9 @@ SELECT I.InstanceID,
        SUM(CASE WHEN HADR.synchronization_state = 3 AND HADR.is_local = 0 THEN 1 ELSE 0 END) AS [Remote Reverting],
        SUM(CASE WHEN HADR.synchronization_state = 4 AND HADR.is_local = 0 THEN 1 ELSE 0 END) AS [Remote Initializing],
        CASE MIN(HADR.synchronization_health)WHEN 0 THEN 'NOT_HEALTHY' WHEN 1 THEN 'PARTIALLY_HEALTHY' WHEN 2 THEN 'HEALTHY' ELSE NULL END AS [Sync Health],
+       MAX(HADR.secondary_lag_seconds) AS [Max Secondary Lag (sec)],
+       MAX(CASE WHEN HADR.is_primary_replica = 1 THEN -1 WHEN HADR.synchronization_state=2 THEN 0 ELSE ISNULL(DATEDIFF(ss, HADR.last_commit_time, PrimaryHADR.last_commit_time), -2) END) [Max Estimated Data Loss (sec)],
+       MAX(CASE WHEN HADR.is_primary_replica = 1 THEN -1 WHEN HADR.redo_queue_size is null THEN -2 WHEN HADR.redo_queue_size = 0 THEN 0 WHEN HADR.redo_rate is null or HADR.redo_rate = 0 THEN -2 ELSE CAST(HADR.redo_queue_size AS float) / HADR.redo_rate END) AS [Max Estimated Recovery Time],
        MAX(CD.SnapshotDate) as [Snapshot Date],
        MAX(CD.Status) as [Snapshot Status],
        MAX(CD.SnapshotAge) as [Snapshot Age]
@@ -32,9 +34,14 @@ LEFT JOIN dbo.AvailabilityReplicas AR ON D.InstanceID = AR.InstanceID
 LEFT JOIN dbo.AvailabilityGroups AG ON HADR.group_id = AG.group_id
                                        AND D.InstanceID = AG.InstanceID
 LEFT JOIN dbo.CollectionDatesStatus CD ON D.InstanceID = CD.InstanceID AND CD.Reference='DatabaseHADR'
-WHERE EXISTS(SELECT 1 FROM STRING_SPLIT(@InstanceIDs,',') ss WHERE ss.value = I.InstanceID
-		UNION ALL
-		SELECT 1 WHERE @InstanceIDs IS NULL)
+LEFT JOIN dbo.DatabasesHADR PrimaryHADR ON PrimaryHADR.InstanceID = HADR.InstanceID 
+                                         AND PrimaryHADR.group_database_id = HADR.group_database_id 
+                                         AND PrimaryHADR.is_primary_replica = 1
+                                         AND PrimaryHADR.is_local = 1     
+WHERE EXISTS(
+        SELECT 1 
+        FROM @InstanceIDs T 
+        WHERE T.ID= I.InstanceID
+        )
 AND D.IsActive=1
-AND (I.ShowInSummary = 1 OR  @ShowHidden = 1)
 GROUP BY I.Instance,I.InstanceID,I.InstanceDisplayName;
