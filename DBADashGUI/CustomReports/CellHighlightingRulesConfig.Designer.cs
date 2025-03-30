@@ -107,7 +107,6 @@ namespace DBADashGUI.CustomReports
             dgv.Name = "dgv";
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
-            dgv.RowTemplate.Height = 29;
             dgv.Size = new System.Drawing.Size(884, 274);
             dgv.TabIndex = 0;
             dgv.CellContentClick += Dgv_CellContentClick;
@@ -203,7 +202,7 @@ namespace DBADashGUI.CustomReports
             // bttnAdd
             // 
             bttnAdd.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            bttnAdd.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            bttnAdd.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             bttnAdd.Location = new System.Drawing.Point(802, 395);
             bttnAdd.Name = "bttnAdd";
             bttnAdd.Size = new System.Drawing.Size(94, 36);
@@ -631,8 +630,8 @@ namespace DBADashGUI.CustomReports
             // label7
             // 
             label7.AutoSize = true;
-            label7.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
-            label7.Location = new System.Drawing.Point(120, 111);
+            label7.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
+            label7.Location = new System.Drawing.Point(119, 92);
             label7.Name = "label7";
             label7.Size = new System.Drawing.Size(545, 20);
             label7.TabIndex = 2;
@@ -646,7 +645,7 @@ namespace DBADashGUI.CustomReports
             grpStatus.Dock = System.Windows.Forms.DockStyle.Fill;
             grpStatus.Location = new System.Drawing.Point(3, 3);
             grpStatus.Name = "grpStatus";
-            grpStatus.Size = new System.Drawing.Size(870, 135);
+            grpStatus.Size = new System.Drawing.Size(870, 125);
             grpStatus.TabIndex = 38;
             grpStatus.TabStop = false;
             grpStatus.Text = "Status";
@@ -656,8 +655,10 @@ namespace DBADashGUI.CustomReports
             tabFormatting.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             tabFormatting.Controls.Add(tabStatus);
             tabFormatting.Controls.Add(tabCustom);
+            tabFormatting.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
             tabFormatting.Location = new System.Drawing.Point(12, 215);
             tabFormatting.Name = "tabFormatting";
+            tabFormatting.Padding = new System.Drawing.Point(20, 8);
             tabFormatting.SelectedIndex = 0;
             tabFormatting.Size = new System.Drawing.Size(884, 174);
             tabFormatting.TabIndex = 40;
@@ -665,10 +666,10 @@ namespace DBADashGUI.CustomReports
             // tabStatus
             // 
             tabStatus.Controls.Add(grpStatus);
-            tabStatus.Location = new System.Drawing.Point(4, 29);
+            tabStatus.Location = new System.Drawing.Point(4, 39);
             tabStatus.Name = "tabStatus";
             tabStatus.Padding = new System.Windows.Forms.Padding(3);
-            tabStatus.Size = new System.Drawing.Size(876, 141);
+            tabStatus.Size = new System.Drawing.Size(876, 131);
             tabStatus.TabIndex = 0;
             tabStatus.Text = "Status (Red, Amber, Green)";
             tabStatus.UseVisualStyleBackColor = true;
@@ -699,10 +700,10 @@ namespace DBADashGUI.CustomReports
             tabCustom.Controls.Add(txtForeColorDark);
             tabCustom.Controls.Add(txtBackColorDark);
             tabCustom.Controls.Add(lblBackColorDark);
-            tabCustom.Location = new System.Drawing.Point(4, 29);
+            tabCustom.Location = new System.Drawing.Point(4, 39);
             tabCustom.Name = "tabCustom";
             tabCustom.Padding = new System.Windows.Forms.Padding(3);
-            tabCustom.Size = new System.Drawing.Size(876, 141);
+            tabCustom.Size = new System.Drawing.Size(876, 131);
             tabCustom.TabIndex = 1;
             tabCustom.Text = "Custom Formatting";
             tabCustom.UseVisualStyleBackColor = true;
