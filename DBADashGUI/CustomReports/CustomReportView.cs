@@ -719,6 +719,7 @@ namespace DBADashGUI.CustomReports
             dgv.ColumnContextMenu.Items.Add(editReport);
             dgv.ColumnContextMenuOpening += (sender, args) =>
             {
+                if (args.ColumnIndex < 0) return;
                 convertLocalMenuItem.Checked = dgv.Columns[args.ColumnIndex].ValueType == typeof(DateTime) &&
                                        !Report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Contains(dgv.Columns[args.ColumnIndex].DataPropertyName);
                 convertLocalMenuItem.Visible = dgv.Columns[args.ColumnIndex].ValueType == typeof(DateTime);
