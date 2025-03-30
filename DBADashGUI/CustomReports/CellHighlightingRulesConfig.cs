@@ -59,10 +59,13 @@ namespace DBADashGUI.CustomReports
             RefreshGrid();
             cboTargetColumn.SelectedIndexChanged -= CboTargetColumn_SelectedIndexChanged;
             cboTargetColumn.DataSource = ColumnList.Cast<DataGridViewColumn>()
-                .Select(column => column.HeaderText)
+                .Select(column => new { Display = column.HeaderText.Replace("\n", " "), Value = column.Name })
                 .ToList();
+            cboTargetColumn.DisplayMember = "Display";
+            cboTargetColumn.ValueMember = "Value";
+
             cboTargetColumn.SelectedIndexChanged += CboTargetColumn_SelectedIndexChanged;
-            cboTargetColumn.Text = CellHighlightingRules.Value.TargetColumn;
+            cboTargetColumn.SelectedValue = CellHighlightingRules.Value.TargetColumn;
             txtColumn.Text = CellHighlightingRules.Key;
             if (CellValue != null)
             {
@@ -469,13 +472,13 @@ namespace DBADashGUI.CustomReports
                 if (MessageBox.Show("Overwrite existing rules?", "Overwrite", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No) return;
             }
             CellHighlightingRules = new(CellHighlightingRules.Key, SavedRules.DeepCopy());
-            CellHighlightingRules.Value.TargetColumn = cboTargetColumn.Text;
+            CellHighlightingRules.Value.TargetColumn = cboTargetColumn.SelectedValue?.ToString();
             RefreshGrid();
         }
 
         private void CboTargetColumn_SelectedIndexChanged(object sender, EventArgs e)
         {
-            CellHighlightingRules.Value.TargetColumn = cboTargetColumn.Text;
+            CellHighlightingRules.Value.TargetColumn = cboTargetColumn.SelectedValue?.ToString();
         }
 
         private void TsGradient_Click(object sender, EventArgs e)
