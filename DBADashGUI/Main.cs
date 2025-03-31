@@ -1909,9 +1909,7 @@ namespace DBADashGUI
             if (!IsLoadingTimeZones)
             {
                 DateHelper.AppTimeZone = cboTimeZone.SelectedItem as TimeZoneInfo;
-                ShowRefresh();
-                LoadSelectedTab();
-                ShowRefresh(false);
+                tabs.SelectedTab?.Controls.OfType<IRefreshData>().ToList().ForEach(c => c.RefreshData());
             }
         }
 
