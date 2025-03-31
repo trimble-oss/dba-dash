@@ -1956,6 +1956,36 @@ WHERE NOT EXISTS(
 				)
 
 
+INSERT INTO dbo.AvailabilityGroupMetricsConfig(
+	InstanceID,
+	MetricName,
+	IsAggregate,
+	IsEnabled
+)
+SELECT -1,MetricName,IsAggregate,IsEnabled 
+FROM (VALUES -- aggregate
+			('Max Estimated Data Loss (sec)',1,1),
+			('Max Estimated Recovery Time (sec)',1,1),
+			('Max Secondary Lag (sec)',1,1),
+			('Total Redo Queue Size (KB)',1,0),
+			('Avg Redo Queue Size (KB)',1,1),
+			('Total Log Send Queue Size (KB)',1,0),
+			('Avg Log Send Queue Size (KB)',1,1),
+			-- Per database
+			('Estimated Data Loss (sec)',0,0),
+			('Estimated Recovery Time (sec)',0,0),
+			('Secondary Lag (sec)',0,0),
+			('Redo Queue Size (KB)',0,0),
+			('Log Send Queue Size (KB)',0,0)
+		) M(MetricName,IsAggregate,IsEnabled)
+WHERE NOT EXISTS(
+				SELECT 1 
+				FROM dbo.AvailabilityGroupMetricsConfig AGM
+				WHERE M.MetricName = AGM.MetricName
+				AND AGM.InstanceID = -1
+				)
+
+
 ALTER DATABASE [$(DatabaseName)] SET AUTO_UPDATE_STATISTICS_ASYNC ON WITH NO_WAIT
 
 /* Cleanup old objects */
