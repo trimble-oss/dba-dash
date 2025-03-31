@@ -14,9 +14,13 @@ SELECT D.name AS [Database],
        AR.failover_mode_desc AS [Failover Mode],
 	   HADR.is_primary_replica [Is Primary],
 	   AR.primary_role_allow_connections_desc [Primary Connections],
-	   AR.secondary_role_allow_connections_desc [Seconadary Connections],	  
-       CASE WHEN HADR.is_primary_replica = 1 THEN -1 WHEN HADR.synchronization_state=2 THEN 0 ELSE ISNULL(DATEDIFF(ss, HADR.last_commit_time, PrimaryHADR.last_commit_time), -2) END [Max Estimated Data Loss (sec)],
-       CASE WHEN HADR.is_primary_replica = 1 THEN -1 WHEN HADR.redo_queue_size is null THEN -2 WHEN HADR.redo_queue_size = 0 THEN 0 WHEN HADR.redo_rate is null or HADR.redo_rate = 0 THEN -2 ELSE CAST(HADR.redo_queue_size AS float) / HADR.redo_rate END AS [Max Estimated Recovery Time],
+	   AR.secondary_role_allow_connections_desc [Secondary Connections],	  
+       calc.[Estimated Data Loss (sec)],
+       calc.[Estimated Recovery Time (sec)],
+       HADR.secondary_lag_seconds AS [Secondary Lag (sec)],
+       CASE WHEN Calc.[Estimated Data Loss (sec)] =-1 THEN 'None (Primary)' WHEN Calc.[Estimated Data Loss (sec)]=-2 THEN 'Unknown' ELSE HDDataLoss.HumanDuration END AS [Estimated Data Loss],
+       CASE WHEN calc.[Estimated Recovery Time (sec)]=-1 THEN 'None (Primary)' WHEN calc.[Estimated Recovery Time (sec)]=-2 THEN 'Unknown' ELSE HDRecovery.HumanDuration END AS [Estimated Recovery Time],
+       CASE WHEN HADR.is_primary_replica =1 THEN 'None (Primary)' WHEN HADR.is_local=1 THEN 'Reported on Primary' WHEN PrimaryHADR.is_suspended=1 THEN PrimaryHADR.suspend_reason_desc ELSE HDLag.HumanDuration END AS [Secondary Lag],
        HADR.log_send_queue_size AS [Log Send Queue Size (KB)],
        HADR.log_send_rate AS [Log Send Rate (KB/s)],
        HADR.redo_queue_size AS [Log Redo Queue Size (KB)],        
@@ -28,7 +32,7 @@ SELECT D.name AS [Database],
        HADR.last_commit_time AS [Last Commit Time],      
        CD.SnapshotDate as [Snapshot Date],
        CD.Status as [Snapshot Status],
-       CD.SnapshotAge as [Snapshot Age]
+       CD.HumanSnapshotAge as [Snapshot Age]
 FROM dbo.DatabasesHADR HADR
 JOIN dbo.Databases D ON D.DatabaseID = HADR.DatabaseID
 LEFT JOIN dbo.AvailabilityReplicas AR ON D.InstanceID = AR.InstanceID
@@ -40,6 +44,12 @@ LEFT JOIN dbo.DatabasesHADR PrimaryHADR ON PrimaryHADR.InstanceID = HADR.Instanc
                                          AND PrimaryHADR.group_database_id = HADR.group_database_id 
                                          AND PrimaryHADR.is_primary_replica = 1
                                          AND PrimaryHADR.is_local = 1     
+OUTER APPLY(SELECT  CASE WHEN HADR.is_primary_replica = 1 THEN -1 WHEN HADR.synchronization_state=2 THEN 0 ELSE DATEDIFF(ss, HADR.last_commit_time, PrimaryHADR.last_commit_time) END [Estimated Data Loss (sec)],
+                    CASE WHEN HADR.is_primary_replica = 1 THEN -1 WHEN HADR.redo_queue_size IS NULL THEN -2 WHEN HADR.redo_queue_size = 0 THEN 0 WHEN HADR.redo_rate IS NULL OR HADR.redo_rate = 0 THEN -2 ELSE CAST(HADR.redo_queue_size AS FLOAT) / HADR.redo_rate END AS [Estimated Recovery Time (sec)]
+            ) AS Calc
+OUTER APPLY dbo.SecondsToHumanDuration(calc.[Estimated Data Loss (sec)]) AS HDDataLoss
+OUTER APPLY dbo.SecondsToHumanDuration(calc.[Estimated Recovery Time (sec)]) AS HDRecovery
+OUTER APPLY dbo.SecondsToHumanDuration(HADR.secondary_lag_seconds) AS HDLag
 WHERE D.InstanceID = @InstanceID
 AND HADR.InstanceID = @InstanceID
 AND D.IsActive=1
