@@ -267,7 +267,7 @@ namespace DBADashGUI.CustomReports
                 var dt = ds.Tables[i];
                 var convertCols = dt.Columns.Cast<DataColumn>()
                     .Where(column =>
-                        column.DataType == typeof(DateTime) &&
+                        (column.DataType == typeof(DateTime) || column.DataType == typeof(DateTimeOffset)) &&
                         !result.DoNotConvertToLocalTimeZone.Contains(column.ColumnName))
                     .Select(column => column.ColumnName).ToList();
                 if (convertCols.Count > 0)
@@ -1018,7 +1018,7 @@ namespace DBADashGUI.CustomReports
             Report = _context.Report ?? Report;
             customParams = sqlParams ?? Report.GetCustomSqlParameters();
             SetContextParametersForDirectExecutionReport();
-            tsParams.Enabled = customParams.Count > 0;
+            tsParams.Visible = Report.UserParams.Any();
             tsConfigure.Visible = Report.CanEditReport;
             SetStatus(Report.Description, Report.Description, DBADashUser.SelectedTheme.ForegroundColor);
             lblDescription.Visible = !string.IsNullOrEmpty(Report.Description);
