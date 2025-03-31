@@ -1,174 +1,656 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADash;
+using DBADashGUI.CustomReports;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.Interface;
+using static DBADashGUI.CustomReports.CellHighlightingRule;
 using static DBADashGUI.DBADashStatus;
-using DBADash;
-using DBADashGUI.Messaging;
 
 namespace DBADashGUI.HA
 {
-    public partial class AG : UserControl, INavigation, ISetContext, ISetStatus
+    public partial class AG : UserControl, ISetContext, INavigation, IRefreshData
     {
+        #region "Report Definitions"
+
+        private readonly SystemReport AGSummaryReport = new()
+        {
+            SchemaName = "dbo",
+            ProcedureName = "AvailabilityGroupSummary_Get",
+            QualifiedProcedureName = "dbo.AvailabilityGroupSummary_Get",
+            ReportName = "Availability Group Summary",
+            Params = new Params
+            {
+                ParamList = new List<Param>
+                {
+                    new()
+                    {
+                        ParamName = "@InstanceIDs",
+                        ParamType = "IDS"
+                    }
+                }
+            },
+            CustomReportResults = new Dictionary<int, CustomReportResult>
+            {
+                {
+                    0,
+                    new CustomReportResult
+                    {
+                        ColumnAlias = new Dictionary<string, string>
+                        {
+                            {
+                                "Primary Replicas",
+                                "Primary\nReplicas"
+                            },
+                            {
+                                "Secondary Replicas",
+                                "Secondary\nReplicas"
+                            },
+                            {
+                                "Readable Secondaries",
+                                "Readable\nSecondaries"
+                            },
+                            {
+                                "Async Commit",
+                                "Async\nCommit"
+                            },
+                            {
+                                "Sync Commit",
+                                "Sync\nCommit"
+                            },
+                            {
+                                "Not Synchronizing",
+                                "Not\nSynchronizing"
+                            },
+                            {
+                                "Remote Not Synchronizing",
+                                "Remote\nNot\nSynchronizing"
+                            },
+                            {
+                                "Remote Synchronizing",
+                                "Remote\nSynchronizing"
+                            },
+                            {
+                                "Remote Synchronized",
+                                "Remote\nSynchronized"
+                            },
+                            {
+                                "Remote Reverting",
+                                "Remote\nReverting"
+                            },
+                            {
+                                "Remote Initializing",
+                                "Remote\nInitializing"
+                            },
+                            {
+                                "Sync Health",
+                                "Sync\nHealth"
+                            },
+                            {
+                                "Max Secondary Lag (sec)",
+                                "Max\nSecondary\nLag\n(sec)"
+                            },
+                            {
+                                "Max Secondary Lag",
+                                "Max\nSecondary\nLag"
+                            },
+                            {
+                                "Max Estimated Data Loss (sec)",
+                                "Max\nEstimated\nData\nLoss\n(sec)"
+                            },
+                            {
+                                "Max Estimated Data Loss",
+                                "Max\nEstimated\nData\nLoss"
+                            },
+                            {
+                                "Max Estimated Recovery Time (sec)",
+                                "Max\nEstimated\nRecovery\nTime (sec)"
+                            },
+                            {
+                                "Max Estimated Recovery Time",
+                                "Max\nEstimated\nRecovery\nTime"
+                            },
+                            {
+                                "Total Redo Queue Size (KB)",
+                                "Total\nRedo\nQueue\nSize\n(KB)"
+                            },
+                            {
+                                "Avg Redo Queue Size (KB)",
+                                "Avg\nRedo\nQueue\nSize\n(KB)"
+                            },
+                            {
+                                "Total Log Send Queue Size (KB)",
+                                "Total\nLog\nSend\nQueue\nSize\n(KB)"
+                            },
+                            {
+                                "Avg Log Send Queue Size (KB)",
+                                "Avg\nLog\nSend\nQueue\nSize\n(KB)"
+                            },
+                            {
+                                "Snapshot Date",
+                                "Snapshot\nDate"
+                            },
+                            {
+                                "Snapshot Age",
+                                "Snapshot\nAge"
+                            },
+                            {
+                                "Synchronized Status",
+                                "Synchronized\nStatus"
+                            }
+                        },
+                        ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>
+                        {
+                            new("InstanceID", new PersistedColumnLayout(){Visible = false}),
+                            new("Instance", new PersistedColumnLayout() { Visible = true }) ,
+                            new("Primary Replicas", new PersistedColumnLayout(){ Visible = true }),
+                            new("Secondary Replicas", new PersistedColumnLayout(){ Visible = true }),
+                            new("Readable Secondaries", new PersistedColumnLayout(){ Visible = true }),
+                            new("Async Commit", new PersistedColumnLayout(){ Visible = true }),
+                            new("Sync Commit", new PersistedColumnLayout(){ Visible = true }),
+                            new("Not Synchronizing", new PersistedColumnLayout(){ Visible = true }),
+                            new("Synchronizing", new PersistedColumnLayout(){ Visible = true }),
+                            new("Synchronized", new PersistedColumnLayout() { Visible = true }),
+                            new("Reverting", new PersistedColumnLayout() { Visible = true }),
+                            new("Initializing", new PersistedColumnLayout() { Visible = true }),
+                            new("Remote Not Synchronizing", new PersistedColumnLayout() { Visible = true }),
+                            new("Remote Synchronizing", new PersistedColumnLayout() { Visible = true }),
+                            new("Remote Synchronized", new PersistedColumnLayout() { Visible = true }),
+                            new("Remote Reverting", new PersistedColumnLayout() { Visible = true }),
+                            new("Remote Initializing", new PersistedColumnLayout() { Visible = true }),
+                            new("Sync Health", new PersistedColumnLayout() { Visible = true }),
+                            new("Snapshot Date", new PersistedColumnLayout() { Visible = true }),
+                            new("Snapshot Status", new PersistedColumnLayout() {Visible = false}),
+                            new("Snapshot Age", new PersistedColumnLayout() { Visible = true }),
+                            new("Synchronized Status", new PersistedColumnLayout() { Visible = false }),
+                            new("Max Secondary Lag (sec)", new PersistedColumnLayout() { Visible = false }),
+                            new("Max Estimated Data Loss (sec)", new PersistedColumnLayout() { Visible = false }),
+                            new("Max Estimated Recovery Time (sec)", new PersistedColumnLayout() { Visible = false }),
+                            new("Max Secondary Lag", new PersistedColumnLayout() { Visible = true }),
+                            new("Max Estimated Data Loss", new PersistedColumnLayout() { Visible = true }),
+                            new("Max Estimated Recovery Time", new PersistedColumnLayout() { Visible = true }),
+                            new("Total Redo Queue Size (KB)", new PersistedColumnLayout() { Visible = false }),
+                            new("Avg Redo Queue Size (KB)", new PersistedColumnLayout() { Visible = true }),
+                            new("Total Log Send Queue Size (KB)", new PersistedColumnLayout() { Visible = false }),
+                            new("Avg Log Send Queue Size (KB)", new PersistedColumnLayout() { Visible = true }),
+                        },
+                        CellFormatString = new Dictionary<string, string>(),
+                        CellNullValue = new Dictionary<string, string>(),
+                        DoNotConvertToLocalTimeZone = new List<string>(),
+                        ResultName = "Availability Group Summary",
+                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        {
+                            {
+                                "Instance",
+                                new DrillDownLinkColumnInfo()
+                            }
+                        },
+                        CellHighlightingRules = new CellHighlightingRuleSetCollection
+                        {
+                            {
+                                "Not Synchronizing",
+                                new CellHighlightingRuleSet
+                                {
+                                    Rules = new List<CellHighlightingRule>
+                                    {
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.Critical,
+                                            Value1 = "1",
+                                            ConditionType = ConditionTypes.GreaterThan
+                                        },
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.OK,
+                                            Value1 = "0"
+                                        }
+                                    },
+                                    TargetColumn = "Not Synchronizing"
+                                }
+                            },
+                            {
+                                "Remote Not Synchronizing",
+                                new CellHighlightingRuleSet
+                                {
+                                    Rules = new List<CellHighlightingRule>
+                                    {
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.Critical,
+                                            Value1 = "0",
+                                            ConditionType = ConditionTypes.GreaterThan
+                                        },
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.OK,
+                                            Value1 = "0"
+                                        }
+                                    },
+                                    TargetColumn = "Remote Not Synchronizing"
+                                }
+                            },
+                            {
+                                "Reverting",
+                                new CellHighlightingRuleSet
+                                {
+                                    Rules = new List<CellHighlightingRule>
+                                    {
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.Critical,
+                                            Value1 = "0",
+                                            ConditionType = ConditionTypes.GreaterThan
+                                        },
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.OK,
+                                            Value1 = "0"
+                                        }
+                                    },
+                                    TargetColumn = "Reverting"
+                                }
+                            },
+                            {
+                                "Remote Reverting",
+                                new CellHighlightingRuleSet
+                                {
+                                    Rules = new List<CellHighlightingRule>
+                                    {
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.Critical,
+                                            Value1 = "0",
+                                            ConditionType = ConditionTypes.GreaterThan
+                                        },
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.OK,
+                                            Value1 = "0"
+                                        }
+                                    },
+                                    TargetColumn = "Remote Reverting"
+                                }
+                            },
+                            {
+                                "Initializing",
+                                new CellHighlightingRuleSet
+                                {
+                                    Rules = new List<CellHighlightingRule>
+                                    {
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.Critical,
+                                            Value1 = "0",
+                                            ConditionType = ConditionTypes.GreaterThan
+                                        },
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.OK,
+                                            Value1 = "0"
+                                        }
+                                    },
+                                    TargetColumn = "Initializing"
+                                }
+                            },
+                            {
+                                "Remote Initializing",
+                                new CellHighlightingRuleSet
+                                {
+                                    Rules = new List<CellHighlightingRule>
+                                    {
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.Critical,
+                                            Value1 = "0",
+                                            ConditionType = ConditionTypes.GreaterThan
+                                        },
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.OK,
+                                            Value1 = "0"
+                                        }
+                                    },
+                                    TargetColumn = "Remote Initializing"
+                                }
+                            },
+                            {
+                                "Sync Health",
+                                new CellHighlightingRuleSet
+                                {
+                                    Rules = new List<CellHighlightingRule>
+                                    {
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.OK,
+                                            Value1 = "HEALTHY"
+                                        },
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.Warning,
+                                            Value1 = "PARTIALLY_HEALTHY"
+                                        },
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.Critical,
+                                            ConditionType = ConditionTypes.All
+                                        }
+                                    },
+                                    TargetColumn = "Sync Health"
+                                }
+                            },
+                            {
+                                "Snapshot Date",
+                                new CellHighlightingRuleSet
+                                {
+                                    IsStatusColumn = true,
+                                    TargetColumn = "Snapshot Status"
+                                }
+                            },
+                            {
+                                "Snapshot Age",
+                                new CellHighlightingRuleSet
+                                {
+                                    TargetColumn = "Snapshot Status",
+                                    IsStatusColumn = true
+                                }
+                            },
+                            {
+                                "Snapshot Status",
+                                new CellHighlightingRuleSet
+                                {
+                                    TargetColumn = "Snapshot Status",
+                                    IsStatusColumn = true
+                                }
+                            },
+                            {
+                                "Synchronized",
+                                new CellHighlightingRuleSet
+                                {
+                                    IsStatusColumn = true,
+                                    TargetColumn = "Synchronized Status"
+                                }
+                            },
+                            {
+                                "Synchronized Status",
+                                new CellHighlightingRuleSet
+                                {
+                                    IsStatusColumn = true,
+                                    TargetColumn = "Synchronized Status"
+                                }
+                            },
+                        }
+                    }
+                }
+            }
+        };
+
+        private readonly SystemReport AGDetailReport = new()
+        {
+            SchemaName = "dbo",
+            ProcedureName = "AvailabilityGroup_Get",
+            QualifiedProcedureName = "dbo.AvailabilityGroup_Get",
+            ReportName = "Availability Group Detail",
+            TriggerCollectionTypes = new List<string>() { CollectionType.AvailabilityGroups.ToString(), CollectionType.AvailabilityReplicas.ToString(), CollectionType.DatabasesHADR.ToString() },
+            Params = new Params
+            {
+                ParamList = new List<Param>
+                {
+                    new()
+                    {
+                        ParamName = "@InstanceID",
+                        ParamType = "INT"
+                    }
+                }
+            },
+            CustomReportResults = new Dictionary<int, CustomReportResult>
+                {
+                    {
+                        0,
+                        new CustomReportResult
+                        {
+                            ColumnAlias = new Dictionary<string, string>(),
+                            CellFormatString = new Dictionary<string, string>
+                            {
+                                {
+                                    "Log Redo Rate (KB/s)",
+                                    "N0"
+                                },
+                                {
+                                    "Log Redo Queue Size (KB)",
+                                    "N0"
+                                },
+                                {
+                                    "Log Send Rate (KB/s)",
+                                    "N0"
+                                },
+                                {
+                                    "Log Send Queue Size (KB)",
+                                    "N0"
+                                },
+                                {
+                                    "Estimated Recovery Time",
+                                    "N0"
+                                },
+                                {
+                                    "Estimated Data Loss (sec)",
+                                    "N0"
+                                },
+                                {
+                                    "Secondary Lag (sec)",
+                                    "N0"
+                                },
+                                {
+                                    "Last Sent Time",
+                                    "G"
+                                },
+                                {
+                                    "Last Received Time",
+                                    "G"
+                                },
+                                {
+                                    "Last Hardened Time",
+                                    "G"
+                                },
+                                {
+                                    "Last Redone Time",
+                                    "G"
+                                },
+                                {
+                                    "Last Commit Time",
+                                    "G"
+                                }
+                            },
+                            CellNullValue = new Dictionary<string, string>(),
+                            DoNotConvertToLocalTimeZone = new List<string>(),
+                            ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>
+                            {
+                                new("Database", new PersistedColumnLayout() { Visible = true }),
+                                new("Availability Group", new PersistedColumnLayout(){ Visible = true }),
+                                new("Replica Server", new PersistedColumnLayout(){ Visible = true }),
+                                new("Sync State", new PersistedColumnLayout(){ Visible = true }),
+                                new("Sync Health", new PersistedColumnLayout(){ Visible = true }),
+                                new("Suspend Reason", new PersistedColumnLayout(){ Visible = true }),
+                                new("Database State", new PersistedColumnLayout(){ Visible = true }),
+                                new("Is Local", new PersistedColumnLayout(){ Visible = true }),
+                                new("Availability Mode", new PersistedColumnLayout(){ Visible = true }),
+                                new("Failover Mode", new PersistedColumnLayout(){ Visible = true }),
+                                new("Is Primary", new PersistedColumnLayout(){ Visible = true }),
+                                new("Primary Connections", new PersistedColumnLayout(){ Visible = true }),
+                                new("Secondary Connections", new PersistedColumnLayout(){ Visible = true }),
+                                new("Estimated Data Loss (sec)", new PersistedColumnLayout(){ Visible = false }),
+                                new("Estimated Recovery Time (sec)", new PersistedColumnLayout(){ Visible = false }),
+                                new("Secondary Lag (sec)", new PersistedColumnLayout(){ Visible = false }),
+                                new("Estimated Data Loss", new PersistedColumnLayout(){ Visible = true }),
+                                new("Estimated Recovery Time", new PersistedColumnLayout(){ Visible = true }),
+                                new("Secondary Lag", new PersistedColumnLayout(){ Visible = true }),
+                                new("Log Send Queue Size (KB)", new PersistedColumnLayout(){ Visible = false }),
+                                new("Log Send Rate (KB/s)", new PersistedColumnLayout(){ Visible = false }),
+                                new("Log Redo Queue Size (KB)", new PersistedColumnLayout(){ Visible = false }),
+                                new("Log Redo Rate (KB/s)", new PersistedColumnLayout(){ Visible = false }),
+                                new("Last Sent Time", new PersistedColumnLayout(){ Visible = false }),
+                                new("Last Received Time", new PersistedColumnLayout(){ Visible = false }),
+                                new("Last Hardened Time", new PersistedColumnLayout(){ Visible = false }),
+                                new("Last Redone Time", new PersistedColumnLayout(){ Visible = false }),
+                                new("Last Commit Time", new PersistedColumnLayout(){ Visible = false }),
+                                new("Snapshot Date", new PersistedColumnLayout(){ Visible = true }),
+                                new("Snapshot Status", new PersistedColumnLayout(){ Visible = false }),
+                                new("Snapshot Age", new PersistedColumnLayout(){ Visible = true })
+                            },
+                            ResultName = "Availability Group Detail",
+                            LinkColumns = new Dictionary<string, LinkColumnInfo>(),
+                            CellHighlightingRules = new CellHighlightingRuleSetCollection
+                            {
+                                {
+                                    "Sync Health",
+                                    new CellHighlightingRuleSet
+                                    {
+                                        Rules = new List<CellHighlightingRule>
+                                        {
+                                            new()
+                                            {
+                                                Status = DBADashStatusEnum.OK,
+                                                Value1 = "HEALTHY"
+                                            },
+                                            new()
+                                            {
+                                                Status = DBADashStatusEnum.Warning,
+                                                Value1 = "PARTIALLY_HEALTHY"
+                                            },
+                                            new()
+                                            {
+                                                Status = DBADashStatusEnum.Critical,
+                                                ConditionType = ConditionTypes.All
+                                            }
+                                        },
+                                        TargetColumn = "Sync Health"
+                                    }
+                                },
+                                {
+                                    "Sync State",
+                                    new CellHighlightingRuleSet
+                                    {
+                                        Rules = new List<CellHighlightingRule>
+                                        {
+                                            new()
+                                            {
+                                                Status = DBADashStatusEnum.OK,
+                                                Value1 = "HEALTHY"
+                                            },
+                                            new()
+                                            {
+                                                Status = DBADashStatusEnum.Warning,
+                                                Value1 = "PARTIALLY_HEALTHY"
+                                            },
+                                            new()
+                                            {
+                                                Status = DBADashStatusEnum.Critical,
+                                                ConditionType = ConditionTypes.All
+                                            }
+                                        },
+                                        TargetColumn = "Sync Health"
+                                    }
+                                },
+                                {
+                                    "Snapshot Date",
+                                    new CellHighlightingRuleSet
+                                    {
+                                        Rules = new List<CellHighlightingRule>(),
+                                        TargetColumn = "Snapshot Status",
+                                        IsStatusColumn = true
+                                    }
+                                },
+                                {
+                                    "Snapshot Age",
+                                    new CellHighlightingRuleSet
+                                    {
+                                        Rules = new List<CellHighlightingRule>(),
+                                        TargetColumn = "Snapshot Status",
+                                        IsStatusColumn = true
+                                    }
+                                },
+                                {
+                                    "Snapshot Status",
+                                    new CellHighlightingRuleSet
+                                    {
+                                        Rules = new List<CellHighlightingRule>(),
+                                        TargetColumn = "Snapshot Status",
+                                        IsStatusColumn = true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+        };
+
+        #endregion "Report Definitions"
+
+        private readonly ToolStripMenuItem navigateBackMenuItem =
+            new("Navigate Back", Properties.Resources.Previous_grey_16x)
+            { DisplayStyle = ToolStripItemDisplayStyle.Image };
+
         public AG()
         {
             InitializeComponent();
-            dgv.RegisterClearFilter(tsClearFilter);
+            customReportView1.PostGridRefresh += PostGridRefresh;
+            customReportView1.ToolStrip.Items.Add(navigateBackMenuItem);
+            navigateBackMenuItem.Click += (sender, e) => NavigateBack();
+        }
+
+        private void PostGridRefresh(object sender, EventArgs e)
+        {
+            foreach (var grid in customReportView1.Grids)
+            {
+                grid.CellContentClick -= Dgv_CellContentClick;
+                grid.CellContentClick += Dgv_CellContentClick;
+            }
         }
 
         private List<int> InstanceIDs => CurrentContext?.RegularInstanceIDs.ToList();
-        private int instanceId = -1;
 
-        public bool CanNavigateBack => tsBack.Enabled;
+        //public bool CanNavigateBack =>  tsBack.Enabled;
         private DBADashContext CurrentContext;
-        private string PersistFilter;
-        private string PersistSort;
 
         public void SetContext(DBADashContext _context)
         {
-            tsTrigger.Visible = _context.CanMessage;
-            lblStatus.Visible = false;
+            if (_context == CurrentContext) return;
             CurrentContext = _context;
-            ResetAndRefreshData();
+            ResetAndRefreshData(_context);
         }
 
-        public void ResetAndRefreshData()
+        public void ResetAndRefreshData(DBADashContext _context)
         {
-            instanceId = InstanceIDs.Count == 1 ? InstanceIDs[0] : -1;
-            RefreshData();
-        }
-
-        public void SetStatus(string message, string tooltip, Color color)
-        {
-            lblStatus.InvokeSetStatus(message, tooltip, color);
+            customReportView1.Report = _context.InstanceIDs.Count == 1 ? AGDetailReport : AGSummaryReport;
+            customReportView1.SetContext(_context);
+            navigateBackMenuItem.Enabled = _context != CurrentContext;
         }
 
         public void RefreshData()
         {
-            Invoke(() =>
-            {
-                tsBack.Enabled = instanceId > 0 && InstanceIDs.Count > 1;
-                dgv.DataSource = null;
-                dgv.Columns.Clear();
-                DataTable dt;
-
-                dgv.Columns.Add(new DataGridViewTextBoxColumn()
-                {
-                    DataPropertyName = "InstanceID",
-                    Visible = false,
-                    Name = "colInstanceID",
-                    Frozen = Common.FreezeKeyColumn
-                });
-                dgv.Columns.Add(new DataGridViewTextBoxColumn()
-                {
-                    DataPropertyName = "Snapshot Status",
-                    Name = "colSnapshotStatus",
-                    Visible = false,
-                    Frozen = Common.FreezeKeyColumn
-                });
-                if (instanceId > 0)
-                {
-                    dt = GetAvailabilityGroup(instanceId);
-                    dgv.Columns.Add(new DataGridViewTextBoxColumn()
-                    {
-                        DataPropertyName = "Database",
-                        Name = "colDatabase",
-                        HeaderText = "Database",
-                        Frozen = Common.FreezeKeyColumn
-                    });
-                }
-                else
-                {
-                    dt = GetAvailabilityGroupSummary(InstanceIDs);
-                    dgv.Columns.Add(new DataGridViewLinkColumn()
-                    {
-                        HeaderText = "Instance",
-                        DataPropertyName = "Instance",
-                        Name = "colInstance",
-                        LinkColor = DashColors.LinkColor,
-                        Frozen = Common.FreezeKeyColumn,
-                        SortMode = DataGridViewColumnSortMode.Automatic
-                    });
-                }
-
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                try
-                {
-                    dgv.DataSource = new DataView(dt, PersistFilter, PersistSort, DataViewRowState.CurrentRows);
-                }
-                catch
-                {
-                    dgv.DataSource = new DataView(dt);
-                }
-                PersistFilter = null;
-                PersistSort = null;
-                dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
-                dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            });
-        }
-
-        public static DataTable GetAvailabilityGroup(int InstanceID)
-        {
-            using SqlConnection cn = new(Common.ConnectionString);
-            using SqlCommand cmd = new("AvailabilityGroup_Get", cn) { CommandType = CommandType.StoredProcedure };
-            using SqlDataAdapter da = new(cmd);
-            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-            var dt = new DataTable();
-            da.Fill(dt);
-            return dt;
-        }
-
-        public static DataTable GetAvailabilityGroupSummary(List<int> InstanceIDs)
-        {
-            using SqlConnection cn = new(Common.ConnectionString);
-            using SqlCommand cmd = new("AvailabilityGroupSummary_Get", cn) { CommandType = CommandType.StoredProcedure };
-            using SqlDataAdapter da = new(cmd);
-            cmd.Parameters.AddWithValue("InstanceIDs", InstanceIDs.AsDataTable());
-            var dt = new DataTable();
-            da.Fill(dt);
-            return dt;
-        }
-
-        private void TsCopy_Click(object sender, EventArgs e)
-        {
-            dgv.CopyGrid();
-        }
-
-        private void TsRefresh_Click(object sender, EventArgs e)
-        {
-            PersistFilter = dgv.RowFilter;
-            PersistSort = dgv.SortString;
-            RefreshData();
+            customReportView1.RefreshData();
         }
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0 && dgv.Columns[e.ColumnIndex].Name == "colInstance")
+            var dgv = (DataGridView)sender;
+            if (e.RowIndex >= 0 && dgv.Columns[e.ColumnIndex].Name == "Instance")
             {
                 var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                instanceId = (int)row["InstanceID"];
+                var instanceId = (int)row["InstanceID"];
                 var tempContext = (DBADashContext)CurrentContext.Clone();
                 tempContext.InstanceID = instanceId;
-                tsTrigger.Visible = tempContext.CanMessage;
-                RefreshData();
+                tempContext.RegularInstanceIDsWithHidden = new HashSet<int> { instanceId };
+                tempContext.AzureInstanceIDsWithHidden = new HashSet<int>();
+                ResetAndRefreshData(tempContext);
             }
-        }
-
-        private void TsBack_Click(object sender, EventArgs e)
-        {
-            NavigateBack();
         }
 
         public bool NavigateBack()
         {
             if (CanNavigateBack)
             {
-                ResetAndRefreshData();
-                tsTrigger.Visible = CurrentContext.CanMessage;
+                ResetAndRefreshData(CurrentContext);
                 return true;
             }
             else
@@ -177,54 +659,6 @@ namespace DBADashGUI.HA
             }
         }
 
-        private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
-        {
-            if (dgv.Columns.Contains("Snapshot Date"))
-            {
-                for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
-                {
-                    var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
-                    var r = dgv.Rows[idx];
-                    var snapshotStatus = (DBADashStatusEnum)row["Snapshot Status"];
-                    r.Cells["Snapshot Date"].SetStatusColor(snapshotStatus);
-                    r.Cells["Snapshot Age"].SetStatusColor(snapshotStatus);
-                    if (instanceId > 0)
-                    {
-                        var syncStateStatus = Convert.ToString(row["Sync Health"]) == "HEALTHY" ? DBADashStatusEnum.OK :
-                                 Convert.ToString(row["Sync Health"]) == "PARTIALLY_HEALTHY" ? DBADashStatusEnum.Warning : DBADashStatusEnum.Critical;
-                        r.Cells["Sync State"].SetStatusColor(syncStateStatus);
-                    }
-                    else
-                    {
-                        var secondaryReplicas = (int)row["Secondary Replicas"];
-                        var primaryReplicas = (int)row["Primary Replicas"];
-                        var totalReplicas = primaryReplicas + secondaryReplicas;
-
-                        r.Cells["Not Synchronizing"].SetStatusColor((int)row["Not Synchronizing"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
-                        r.Cells["Remote Not Synchronizing"].SetStatusColor((int)row["Remote Not Synchronizing"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
-                        r.Cells["Synchronized"].SetStatusColor((int)row["Synchronized"] == totalReplicas ? DBADashStatusEnum.OK : DBADashStatusEnum.WarningLow);
-                        r.Cells["Reverting"].SetStatusColor((int)row["Reverting"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
-                        r.Cells["Remote Reverting"].SetStatusColor((int)row["Remote Reverting"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
-                        r.Cells["Initializing"].SetStatusColor((int)row["Initializing"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
-                        r.Cells["Remote Initializing"].SetStatusColor((int)row["Remote Initializing"] > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.OK);
-                    }
-                    var syncHealthStatus = Convert.ToString(row["Sync Health"]) == "HEALTHY" ? DBADashStatusEnum.OK :
-                                                     Convert.ToString(row["Sync Health"]) == "PARTIALLY_HEALTHY" ? DBADashStatusEnum.Warning : DBADashStatusEnum.Critical;
-                    dgv.Rows[idx].Cells["Sync Health"].SetStatusColor(syncHealthStatus);
-                }
-            }
-        }
-
-        private void TsExcel_Click(object sender, EventArgs e)
-        {
-            dgv.ExportToExcel();
-        }
-
-        private async void tsTrigger_Click(object sender, EventArgs e)
-        {
-            PersistFilter = dgv.RowFilter;
-            PersistSort = dgv.SortString;
-            await CollectionMessaging.TriggerCollection(instanceId > 0 ? instanceId : CurrentContext.InstanceID, new List<CollectionType>() { CollectionType.AvailabilityGroups, CollectionType.AvailabilityReplicas, CollectionType.DatabasesHADR }, this);
-        }
+        public bool CanNavigateBack => navigateBackMenuItem.Enabled;
     }
 }
