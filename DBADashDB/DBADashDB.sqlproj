@@ -820,6 +820,9 @@
     <Build Include="Alert\Procedures\OfflineAlert_Upd.sql" />
     <Build Include="Alert\Procedures\RestartAlert_Upd.sql" />
     <Build Include="dbo\Tables\AvailabilityGroupMetricsConfig.sql" />
+    <Build Include="dbo\Stored Procedures\AvailabilityGroupMetricsConfig_Get.sql" />
+    <Build Include="dbo\Stored Procedures\AvailabilityGroupMetricsConfig_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\AvailabilityGroupMetricsConfig_Del.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
