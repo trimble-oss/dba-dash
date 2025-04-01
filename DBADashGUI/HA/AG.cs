@@ -590,12 +590,34 @@ namespace DBADashGUI.HA
             new("Navigate Back", Properties.Resources.Previous_grey_16x)
             { DisplayStyle = ToolStripItemDisplayStyle.Image };
 
+        private readonly ToolStripMenuItem metricsConfigMenuItem =
+            new("Configure Metrics", Properties.Resources.SettingsOutline_16x)
+                { DisplayStyle = ToolStripItemDisplayStyle.ImageAndText };
+
+        private readonly ToolStripMenuItem metricsConfigRootMenuItem =
+            new("Configure Metrics (Root)")
+                { DisplayStyle = ToolStripItemDisplayStyle.Text };
+        private readonly ToolStripMenuItem metricsConfigInstanceMenuItem =
+            new("Configure Metrics (Instance)")
+                { DisplayStyle = ToolStripItemDisplayStyle.Text };
+
         public AG()
         {
             InitializeComponent();
+            metricsConfigMenuItem.DropDownItems.Add(metricsConfigRootMenuItem);
+            metricsConfigMenuItem.DropDownItems.Add(metricsConfigInstanceMenuItem);
             customReportView1.PostGridRefresh += PostGridRefresh;
             customReportView1.ToolStrip.Items.Add(navigateBackMenuItem);
+            customReportView1.ToolStrip.Items.Add(metricsConfigMenuItem);
             navigateBackMenuItem.Click += (sender, e) => NavigateBack();
+            metricsConfigRootMenuItem.Click += (sender, e) => ConfigureMetrics(-1);
+            metricsConfigInstanceMenuItem.Click += (sender, e) => ConfigureMetrics(ReportContext.InstanceID);
+        }
+
+        private static void ConfigureMetrics(int instanceId)
+        {
+            using var metricsConfig = new AGMetricsConfig() { InstanceID = instanceId };
+            metricsConfig.ShowDialog();
         }
 
         private void PostGridRefresh(object sender, EventArgs e)
@@ -609,13 +631,15 @@ namespace DBADashGUI.HA
 
         private List<int> InstanceIDs => CurrentContext?.RegularInstanceIDs.ToList();
 
-        //public bool CanNavigateBack =>  tsBack.Enabled;
         private DBADashContext CurrentContext;
+        private DBADashContext ReportContext;
 
         public void SetContext(DBADashContext _context)
         {
             if (_context == CurrentContext) return;
             CurrentContext = _context;
+            // Metrics config visible to App role and admin users.  Not visible to AppReadOnly role.
+            metricsConfigMenuItem.Visible = DBADashUser.IsAdmin || DBADashUser.Roles.Contains("App");
             ResetAndRefreshData(_context);
         }
 
@@ -624,6 +648,8 @@ namespace DBADashGUI.HA
             customReportView1.Report = _context.InstanceIDs.Count == 1 ? AGDetailReport : AGSummaryReport;
             customReportView1.SetContext(_context);
             navigateBackMenuItem.Enabled = _context != CurrentContext;
+            ReportContext = _context;
+            metricsConfigInstanceMenuItem.Enabled = _context.InstanceID > 0;
         }
 
         public void RefreshData()
