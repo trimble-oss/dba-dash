@@ -134,6 +134,9 @@ namespace DBADash
                     dtDatabasesHADR.Columns.Add("log_send_queue_size", typeof(long));
                     dtDatabasesHADR.Columns.Add("log_send_rate", typeof(long));
                     dtDatabasesHADR.Columns.Add("redo_queue_size", typeof(long));
+                    dtDatabasesHADR.Columns.Add("redo_rate", typeof(long));
+                    dtDatabasesHADR.Columns.Add("filestream_send_rate", typeof(long));
+                    dtDatabasesHADR.Columns.Add("last_commit_time", typeof(DateTimeOffset));
                 }
             }
             if (data.Tables.Contains("Databases"))
