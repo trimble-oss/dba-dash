@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace DBADash
 {
+    [Serializable]
     public class DatabaseConnectionException : Exception
     {
-        public DatabaseConnectionException() { }
+        public DatabaseConnectionException()
+        { }
 
         public DatabaseConnectionException(string message)
             : base(message) { }
@@ -16,5 +18,4 @@ namespace DBADash
         public DatabaseConnectionException(string message, Exception inner)
             : base(message, inner) { }
     }
-
 }

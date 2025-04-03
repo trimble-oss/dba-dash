@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Serilog;
+using System;
 using System.Data;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Serilog;
 
 namespace DBADash.Messaging
 {
@@ -21,7 +21,25 @@ namespace DBADash.Messaging
 
         public ResponseTypes Type { get; set; }
 
-        public Exception Exception { get; set; }
+        private Exception _exception;
+
+        public Exception Exception
+        {
+            get => _exception;
+            set
+            {
+                try
+                {
+                    // Check exception can be serialized #1284.
+                    JsonConvert.DeserializeObject<Exception>(JsonConvert.SerializeObject(value));
+                    _exception = value;
+                }
+                catch (Exception ex)
+                {
+                    _exception = new Exception(value.ToString()); // Create a new exception that can be serialized if needed
+                }
+            }
+        }
 
         public string Message { get; set; }
 
