@@ -14,7 +14,7 @@ namespace DBADashGUI.HA
     {
         #region "Report Definitions"
 
-        private readonly SystemReport AGSummaryReport = new()
+        private SystemReport AGSummaryReport = new()
         {
             SchemaName = "dbo",
             ProcedureName = "AvailabilityGroupSummary_Get",
@@ -385,7 +385,7 @@ namespace DBADashGUI.HA
             }
         };
 
-        private readonly SystemReport AGDetailReport = new()
+        private SystemReport AGDetailReport = new()
         {
             SchemaName = "dbo",
             ProcedureName = "AvailabilityGroup_Get",
@@ -478,15 +478,17 @@ namespace DBADashGUI.HA
                                 new("Is Primary", new PersistedColumnLayout(){ Visible = true }),
                                 new("Primary Connections", new PersistedColumnLayout(){ Visible = true }),
                                 new("Secondary Connections", new PersistedColumnLayout(){ Visible = true }),
+                                new("Snapshot Status", new PersistedColumnLayout(){ Visible = false }),
+                                new("Snapshot Age", new PersistedColumnLayout(){ Visible = true }),
                                 new("Estimated Data Loss (sec)", new PersistedColumnLayout(){ Visible = false }),
                                 new("Estimated Recovery Time (sec)", new PersistedColumnLayout(){ Visible = false }),
                                 new("Secondary Lag (sec)", new PersistedColumnLayout(){ Visible = false }),
                                 new("Estimated Data Loss", new PersistedColumnLayout(){ Visible = true }),
                                 new("Estimated Recovery Time", new PersistedColumnLayout(){ Visible = true }),
                                 new("Secondary Lag", new PersistedColumnLayout(){ Visible = true }),
-                                new("Log Send Queue Size (KB)", new PersistedColumnLayout(){ Visible = false }),
+                                new("Log Send Queue Size (KB)", new PersistedColumnLayout(){ Visible = true }),
                                 new("Log Send Rate (KB/s)", new PersistedColumnLayout(){ Visible = false }),
-                                new("Log Redo Queue Size (KB)", new PersistedColumnLayout(){ Visible = false }),
+                                new("Log Redo Queue Size (KB)", new PersistedColumnLayout(){ Visible = true }),
                                 new("Log Redo Rate (KB/s)", new PersistedColumnLayout(){ Visible = false }),
                                 new("Last Sent Time", new PersistedColumnLayout(){ Visible = false }),
                                 new("Last Received Time", new PersistedColumnLayout(){ Visible = false }),
@@ -494,8 +496,6 @@ namespace DBADashGUI.HA
                                 new("Last Redone Time", new PersistedColumnLayout(){ Visible = false }),
                                 new("Last Commit Time", new PersistedColumnLayout(){ Visible = false }),
                                 new("Snapshot Date", new PersistedColumnLayout(){ Visible = true }),
-                                new("Snapshot Status", new PersistedColumnLayout(){ Visible = false }),
-                                new("Snapshot Age", new PersistedColumnLayout(){ Visible = true })
                             },
                             ResultName = "Availability Group Detail",
                             LinkColumns = new Dictionary<string, LinkColumnInfo>(),
@@ -643,8 +643,29 @@ namespace DBADashGUI.HA
             ResetAndRefreshData(_context);
         }
 
+
+        /// <summary>
+        /// Saves report layout when changing context (until app is restarted)
+        /// </summary>
+        private void SaveLayout()
+        {
+            if (customReportView1.Grids.Count <= 0) return;
+            switch (customReportView1.Report?.ProcedureName)
+            {
+                case "AvailabilityGroup_Get":
+                    AGDetailReport.CustomReportResults[0].ColumnLayout =
+                        customReportView1.Grids[0].GetColumnLayout();
+                    break;
+                case "AvailabilityGroupSummary_Get":
+                    AGSummaryReport.CustomReportResults[0].ColumnLayout =
+                        customReportView1.Grids[0].GetColumnLayout();
+                    break;
+            }
+        }
+
         public void ResetAndRefreshData(DBADashContext _context)
         {
+            SaveLayout(); // Persist layout before changing context
             customReportView1.Report = _context.InstanceIDs.Count == 1 ? AGDetailReport : AGSummaryReport;
             customReportView1.SetContext(_context);
             navigateBackMenuItem.Enabled = _context != CurrentContext;
