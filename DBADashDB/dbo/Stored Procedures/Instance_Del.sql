@@ -489,6 +489,9 @@ BEGIN
 
 	DELETE dbo.OfflineInstances
 	WHERE InstanceID = @InstanceID
+
+	DELETE dbo.AvailabilityGroupMetricsConfig
+	WHERE InstanceID = @InstanceID
 	
 	DELETE dbo.Instances
 	WHERE InstanceID = @InstanceID
