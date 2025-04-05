@@ -53,7 +53,9 @@ DECLARE @AlertIDs BigIDs
 INSERT INTO @AlertIDs
 SELECT AlertID 
 FROM Alert.ActiveAlerts
-WHERE IsResolved=1
-AND ResolvedDate < DATEADD(mi,-@AlertAutoCloseThresholdMins,SYSUTCDATETIME())
+WHERE (
+	(IsResolved=1 AND ResolvedDate < DATEADD(mi,-@AlertAutoCloseThresholdMins,SYSUTCDATETIME()))
+	OR UpdatedDate < DATEADD(mi,-@AlertAutoCloseThresholdMins,SYSUTCDATETIME())
+	)
 
 EXEC Alert.ClosedAlerts_Add @AlertIDs=@AlertIDs

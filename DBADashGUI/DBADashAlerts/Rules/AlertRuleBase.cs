@@ -30,7 +30,8 @@ namespace DBADashGUI.DBADashAlerts.Rules
             Wait,
             AgentJob,
             Offline,
-            Restart
+            Restart,
+            SQLAgentAlert
         }
 
         public static AlertRuleBase CreateRule(RuleTypes type)
@@ -46,6 +47,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
                 RuleTypes.AgentJob => new AgentJobRule(),
                 RuleTypes.Offline => new OfflineRule(),
                 RuleTypes.Restart => new RestartRule(),
+                RuleTypes.SQLAgentAlert => new SQLAgentAlertRule(),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
@@ -225,6 +227,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
                 RuleTypes.AgentJob => string.IsNullOrEmpty(details) ? new AgentJobRule() : JsonConvert.DeserializeObject<AgentJobRule>(details),
                 RuleTypes.Offline => string.IsNullOrEmpty(details) ? new OfflineRule() : JsonConvert.DeserializeObject<OfflineRule>(details),
                 RuleTypes.Restart => string.IsNullOrEmpty(details) ? new RestartRule() : JsonConvert.DeserializeObject<RestartRule>(details),
+                RuleTypes.SQLAgentAlert => string.IsNullOrEmpty(details) ? new SQLAgentAlertRule() : JsonConvert.DeserializeObject<SQLAgentAlertRule>(details),
                 _ => throw new NotImplementedException()
             };
             rule.RuleID = ruleID;
