@@ -100,7 +100,7 @@ namespace DBADashGUI
                             MessageBox.Show(@"Please wait for the current delete operation to complete before starting another.", $@"Delete {instanceName}", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
                         }
-                        var lastCollectionMins = (int)grid.Rows[e.RowIndex].Cells["LastCollectionMins"].Value;
+                        var lastCollectionMins = (int?)grid.Rows[e.RowIndex].Cells["LastCollectionMins"].Value.DBNullToNull();
                         if (lastCollectionMins <= 1440)
                         {
                             MessageBox.Show(@"Please wait at least 1 day before deleting this instance.", $@"Delete {instanceName}",
