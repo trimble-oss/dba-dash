@@ -223,7 +223,7 @@ namespace DBADashGUI.DBADashAlerts
             var isAcknowledged = (bool)grid.Rows[e.RowIndex].Cells["IsAcknowledged"].Value;
             var alertTypeString = (string)grid.Rows[e.RowIndex].Cells["AlertType"].Value;
             Enum.TryParse(typeof(AlertRuleBase.RuleTypes), alertTypeString, true, out var alertType);
-          
+
             var ruleId = (int?)grid.Rows[e.RowIndex].Cells["RuleID"].Value.DBNullToNull();
             try
             {
@@ -245,12 +245,14 @@ namespace DBADashGUI.DBADashAlerts
 
                     case "InstanceDisplayName":
                         var tab = alertType switch
-                        { 
+                        {
                             AlertRuleBase.RuleTypes.DriveSpace => "tabDrives",
-                            AlertRuleBase.RuleTypes.AGHealth => "tabAG",  
+                            AlertRuleBase.RuleTypes.AGHealth => "tabAG",
                             AlertRuleBase.RuleTypes.Counter => "tabPC",
                             AlertRuleBase.RuleTypes.CollectionDates => "tabCollectionDates",
                             AlertRuleBase.RuleTypes.AgentJob => "tabJobs",
+                            AlertRuleBase.RuleTypes.SQLAgentAlert => "tabSQLAgentAlerts",
+                            AlertRuleBase.RuleTypes.Offline => "tabOfflineInstances",
                             _ => "tabPerformance"
                         };
                         Instance_Selected?.Invoke(this,
@@ -295,8 +297,6 @@ namespace DBADashGUI.DBADashAlerts
             };
             notificationViewer.ShowDialog();
         }
-
-
 
         private static void AckAlert(long alertID, bool isAck) => AckAlert(new List<long>() { alertID }, isAck);
 

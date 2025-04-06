@@ -74,7 +74,7 @@ namespace DBADashGUI
             alertsCsControl.Instance_Selected += Instance_Selected;
             tabDBADashAlerts.Controls.Add(alertsCsControl);
 
-            tabOfflineInstances = new TabPage("Offline Instances");
+            tabOfflineInstances = new TabPage("Offline Instances") { Name = "tabOfflineInstances" };
             var offlineInstancesControl = new OfflineInstances() { Dock = DockStyle.Fill };
             tabOfflineInstances.Controls.Add(offlineInstancesControl);
         }
