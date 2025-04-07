@@ -79,8 +79,8 @@ INSERT INTO @AlertDetails(
 )
 SELECT J.InstanceID,
 		AJA.Priority, 
-		J.Name + ' job failed',
-		CONCAT(@AlertKeyPrefix, J.Name) AS AlertKey,
+		J.name + ' job failed',
+		CONCAT(@AlertKeyPrefix, J.name) AS AlertKey,
 		AJA.RuleID
 FROM dbo.Jobs J
 JOIN #AgentJobApplicable AJA ON J.InstanceID = AJA.InstanceID 
