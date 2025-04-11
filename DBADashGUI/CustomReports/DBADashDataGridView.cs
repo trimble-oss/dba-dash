@@ -1,16 +1,16 @@
 ﻿using DBADash;
+using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
-using DBADashGUI.SchemaCompare;
-using System.Globalization;
 
 namespace DBADashGUI.CustomReports
 {
@@ -61,6 +61,9 @@ namespace DBADashGUI.CustomReports
         private ToolStripMenuItem GetEditFilterMenuItem() => new("Edit Filter", Properties.Resources.EditFilter_16x,
             (_, _) => PromptFilter());
 
+        private readonly ToolStripMenuItem CellRowColCountToolStripMenuItem = new ToolStripMenuItem();
+        private readonly ToolStripMenuItem RowColumnCountToolStripMenuItem = new ToolStripMenuItem();
+
         public int ClickedColumnIndex { get; private set; } = -1;
         public int ClickedRowIndex { get; private set; } = -1;
 
@@ -110,6 +113,8 @@ namespace DBADashGUI.CustomReports
                     editFilter,
                     clearFilter,
                     new ToolStripSeparator(),
+                    RowColumnCountToolStripMenuItem,
+                    new ToolStripSeparator(),
                 }
             );
             ColumnContextMenuOpening += (sender, e) =>
@@ -120,6 +125,7 @@ namespace DBADashGUI.CustomReports
                 editFilter.Visible = filterSupported;
                 saveTable.DropDownItems[0].Enabled = DataSource is DataTable or DataView;
                 hideColumn.Visible = ClickedColumnIndex >= 0;
+                RowColumnCountToolStripMenuItem.Text = GetRowColCount;
             };
         }
 
@@ -173,6 +179,8 @@ namespace DBADashGUI.CustomReports
                     editFilter,
                     cellClearFilterMenuItem,
                     filterSeparator,
+                    CellRowColCountToolStripMenuItem,
+                    new ToolStripSeparator(),
                 }
             );
 
@@ -201,8 +209,11 @@ namespace DBADashGUI.CustomReports
                 cellClearFilterMenuItem.Visible = filterSupported;
                 filterSeparator.Visible = filterSupported;
                 saveTable.DropDownItems[0].Enabled = DataSource is DataTable or DataView;
+                CellRowColCountToolStripMenuItem.Text = GetRowColCount;
             };
         }
+
+        private string GetRowColCount => $"Rows: {Rows.Count}   |   Cols: {Columns.Cast<DataGridViewColumn>().Count(column => column.Visible)}";
 
         public bool HasFilter => !string.IsNullOrEmpty(RowFilter);
 
