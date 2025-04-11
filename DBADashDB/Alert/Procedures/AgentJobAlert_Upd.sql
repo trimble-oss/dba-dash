@@ -84,8 +84,8 @@ SELECT J.InstanceID,
 		AJA.RuleID
 FROM dbo.Jobs J
 JOIN #AgentJobApplicable AJA ON J.InstanceID = AJA.InstanceID 
-		AND (J.category LIKE AJA.Category OR AJA.Category IS NULL)
-		AND(J.name LIKE AJA.JobName OR AJA.JobName IS NULL)
+		AND (J.category LIKE AJA.Category OR J.category = AJA.Category OR AJA.Category IS NULL)
+		AND(J.name LIKE AJA.JobName OR J.name = AJA.JobName OR AJA.JobName IS NULL)
 LEFT JOIN Alert.AgentJobSnapshot SS ON SS.InstanceID = J.InstanceID AND SS.job_id = J.job_id /* previous snapshot of recently failed jobs */
 WHERE (J.LastFailed > SS.LastFailed OR SS.LastFailed IS NULL) /* Job has failed since the last time this proc was run */
 AND J.LastFailed>=DATEADD(mi,-60,SYSUTCDATETIME()) /* Job has failed within the last hour */
