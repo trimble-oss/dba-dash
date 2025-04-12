@@ -84,7 +84,7 @@ namespace DBADashService
                         break;
                     }
                     case ConnectionType.SQL:
-                        CollectSQL(cfg, dataMap, context);
+                        await CollectSQL(cfg, dataMap, context);
                         break;
                     case ConnectionType.Invalid:
                     default:
@@ -100,7 +100,7 @@ namespace DBADashService
         /// <summary>
         /// Collect data from monitored SQL instance
         /// </summary>
-        private static void CollectSQL(DBADashSource cfg, JobDataMap dataMap, IJobExecutionContext context)
+        private static async Task CollectSQL(DBADashSource cfg, JobDataMap dataMap, IJobExecutionContext context)
         {
             var types = JsonConvert.DeserializeObject<CollectionType[]>(dataMap.GetString("Type")!);
             var collectJobs = types.Contains(CollectionType.Jobs);
@@ -120,11 +120,9 @@ namespace DBADashService
                     // Value used to disable future collections of SlowQueries if we encounter a not supported error on a RDS instance not running Standard or Enterprise edition
                     dataMap.TryGetBooleanValue("IsExtendedEventsNotSupportedException",
                         out var dataMapExtendedEventsNotSupported);
-                    var collector = new DBCollector(cfg, config.ServiceName)
-                    {
-                        Job_instance_id = dataMap.GetInt("Job_instance_id"),
-                        IsExtendedEventsNotSupportedException = dataMapExtendedEventsNotSupported,
-                    };
+                    var collector = await DBCollector.CreateAsync(cfg, config.ServiceName);
+                    collector.Job_instance_id = dataMap.GetInt("Job_instance_id");
+                    collector.IsExtendedEventsNotSupportedException = dataMapExtendedEventsNotSupported;
                     if (SchedulerServiceConfig.Config.IdentityCollectionThreshold.HasValue)
                     {
                         collector.IdentityCollectionThreshold =
@@ -147,7 +145,7 @@ namespace DBADashService
                                string.Join(", ", types.Select(s => s.ToString()).ToArray()),
                                cfg.SourceConnection.ConnectionForPrint))
                     {
-                        collector.Collect(types);
+                        await collector.CollectAsync(types);
                         if (!dataMapExtendedEventsNotSupported && collector.IsExtendedEventsNotSupportedException)
                         {
                             // We encountered an error setting up extended events on a RDS instance because it's only supported for Standard and Enterprise editions.  Disable the collection
@@ -168,7 +166,7 @@ namespace DBADashService
                                    string.Join(", ", customCollections.Select(s => s.Key).ToArray()),
                                    cfg.SourceConnection.ConnectionForPrint))
                         {
-                            collector.Collect(customCollections);
+                            await collector.CollectAsync(customCollections);
                             op.Complete();
                         }
                     }
@@ -217,17 +215,14 @@ namespace DBADashService
             }
         }
 
-        private static void CollectJobs(DBADashSource cfg, JobDataMap dataMap)
+        private static async Task CollectJobs(DBADashSource cfg, JobDataMap dataMap)
         {
             dataMap.TryGetDateTimeValue("JobCollectDate", out var jobLastCollected);
             dataMap.TryGetDateTimeValue("JobLastModified", out var jobLastModified);
             var minsSinceLastCollection = DateTime.Now.Subtract(jobLastCollected).TotalMinutes;
             var forcedCollectionDate = jobLastCollected.AddMinutes(MAX_TIME_SINCE_LAST_JOB_COLLECTION);
 
-            var collector = new DBCollector(cfg, config.ServiceName)
-            {
-                LogInternalPerformanceCounters = SchedulerServiceConfig.Config.LogInternalPerformanceCounters
-            };
+            var collector = await DBCollector.CreateAsync(cfg, config.ServiceName,default,SchedulerServiceConfig.Config.LogInternalPerformanceCounters);
 
             // Setting the JobLastModified means we will only collect job data if jobs have been updated since the last collection.
             // This won't detect all changes - like changes to schedules.  Skip setting JobLastModified if we haven't collected in 1 day to ensure we collect at least once per day
@@ -246,7 +241,7 @@ namespace DBADashService
                 Log.Debug("Skipping setting JobLastModified to {JobLastModified} - forcing job collection to run. {MinsSinceLastCollection}mins since last collection ({LastCollected}) on {Connection}.", jobLastModified, minsSinceLastCollection.ToString("N0"), jobLastCollected, cfg.SourceConnection.ConnectionForPrint);
             }
 
-            collector.Collect(CollectionType.Jobs);
+            await collector.CollectAsync(CollectionType.Jobs);
             bool containsJobs = collector.Data.Tables.Contains("Jobs");
             if (containsJobs) // Only set JobLastModified/JobCollectDate and write to destination if Jobs collection ran
             {

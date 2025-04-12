@@ -53,7 +53,7 @@ namespace DBADash.Messaging
                     ConnectionID,
                     Id,
                     handle);
-                var src = cfg.GetSourceConnection(ConnectionID);
+                var src = await cfg.GetSourceConnectionAsync(ConnectionID);
 
                 await using var cn = new SqlConnection(src.SourceConnection.ConnectionString);
                 await using var cmd = new SqlCommand(CommandName.ToString(), cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Lifetime };

@@ -5,6 +5,8 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Build.Utilities;
 using static DBADash.DBADashConnection;
 
 namespace DBADash
@@ -363,7 +365,7 @@ namespace DBADash
             return DestinationConnection.Hash == hash ? DestinationConnection : SecondaryDestinationConnections.FirstOrDefault(c => c.Hash == hash);
         }
 
-        public DBADashSource GetSourceConnection(string connectionID)
+        public async Task<DBADashSource> GetSourceConnectionAsync(string connectionID)
         {
             var src = SourceConnections.FirstOrDefault(s => string.Equals(s.ConnectionID, connectionID, StringComparison.InvariantCultureIgnoreCase));
             if (src != null) // We have a match on ConnectionID
@@ -385,7 +387,7 @@ namespace DBADash
                         InitialCatalog = connectionID.Split('|')[1]
                     };
                     src.SourceConnection.ConnectionString = builder.ToString();
-                    var collector = new DBCollector(src, ServiceName);
+                    var collector = await DBCollector.CreateAsync(src,ServiceName);
                     src.ConnectionID = collector.ConnectionID;
                     // Double check that the generated ConnectionID matches the one we're looking for & return the connection
                     if (string.Equals(src.ConnectionID, connectionID, StringComparison.InvariantCultureIgnoreCase))
@@ -401,12 +403,12 @@ namespace DBADash
         /// <summary>
         /// Get source connection from connection string or ConnectionID.  Returns null if not found
         /// </summary>
-        public DBADashSource FindSourceConnection(string connectionString, string connectionId)
+        public async Task<DBADashSource> FindSourceConnectionAsync(string connectionString, string connectionId)
         {
             var source = GetSourceFromConnectionString(connectionString);
             try
             {
-                source = GetSourceConnection(connectionId);
+                source = await GetSourceConnectionAsync(connectionId);
             }
             catch
             {

@@ -523,7 +523,7 @@ namespace DBADashService
                 {
                     if (src.SourceConnection.ConnectionInfo.IsXESupported)
                     {
-                        var collector = new DBCollector(src, config.ServiceName);
+                        var collector = await DBCollector.CreateAsync(src, config.ServiceName);
                         if (src.PersistXESessions)
                         {
                             Log.Logger.Information("Stop DBADash event sessions for {connection}", src.SourceConnection.ConnectionForPrint);

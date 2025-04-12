@@ -14,9 +14,9 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Caching;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
-using System.Text.RegularExpressions;
 
 namespace DBADash
 {
@@ -154,12 +154,12 @@ namespace DBADash
 
         private int job_instance_id;
 
-        public DateTime GetJobLastModified()
+        public async Task<DateTime> GetJobLastModifiedAsync()
         {
-            using SqlConnection cn = new(ConnectionString);
-            using SqlCommand cmd = new("SELECT MAX(date_modified) FROM msdb.dbo.sysjobs", cn);
-            cn.Open();
-            var result = cmd.ExecuteScalar();
+            await using SqlConnection cn = new(ConnectionString);
+            await using SqlCommand cmd = new("SELECT MAX(date_modified) FROM msdb.dbo.sysjobs", cn);
+            await cn.OpenAsync();
+            var result = await cmd.ExecuteScalarAsync();
             return result == DBNull.Value ? DateTime.MinValue : (DateTime)result;
         }
 
@@ -167,11 +167,18 @@ namespace DBADash
 
         public bool IsQueryStoreSupported => IsAzureDB || (!productVersion.StartsWith("8.") && !productVersion.StartsWith("9.") && !productVersion.StartsWith("10.") && !productVersion.StartsWith("11.") && !productVersion.StartsWith("12."));
 
-        public DBCollector(DBADashSource source, string serviceName, bool disableRetry = false)
+        private DBCollector(DBADashSource source, string serviceName, bool disableRetry, bool logInternalPerformanceCounters)
         {
             DisableRetry = disableRetry;
+            LogInternalPerformanceCounters = logInternalPerformanceCounters;
             Source = source;
-            Startup();
+        }
+
+        public static async Task<DBCollector> CreateAsync(DBADashSource source, string serviceName, bool disableRetry = false, bool logInternalPerformanceCounters = false)
+        {
+            var collector = new DBCollector(source, serviceName, disableRetry, logInternalPerformanceCounters);
+            await collector.StartupAsync();
+            return collector;
         }
 
         public void LogError(Exception ex, string errorSource, string errorContext = "Collect")
@@ -189,7 +196,7 @@ namespace DBADash
 
         private void LogDBError(string errorSource, string errorMessage, string errorContext = "Collect")
         {
-            AddErrorRow(ref dtErrors,errorSource,errorMessage,errorContext);
+            AddErrorRow(ref dtErrors, errorSource, errorMessage, errorContext);
         }
 
         public static void AddErrorRow(ref DataTable dt, string errorSource, string errorMessage, string errorContext)
@@ -277,10 +284,10 @@ namespace DBADash
             return true;
         }
 
-        private void Startup()
+        private async Task StartupAsync()
         {
             noWMI = Source.NoWMI;
- 
+
             retryPolicy = Policy.Handle<Exception>(ShouldRetry)
                 .WaitAndRetry(new[]
                 {
@@ -296,10 +303,9 @@ namespace DBADash
 
             Data.Tables.Add(dtErrors);
 
-            retryPolicy.Execute(
-                _ => GetInstance(),
+            await retryPolicy.Execute(async _ => await GetInstanceAsync(),
                 new Context("Instance")
-              );
+            );
         }
 
         public static DataTable GetErrorDataTableSchema()
@@ -357,7 +363,7 @@ namespace DBADash
                 new DataColumn("MessagingEnabled", typeof(bool)),
                 new DataColumn("AllowedScripts", typeof(string))
             });
-            if(dt.Rows.Count == 0)
+            if (dt.Rows.Count == 0)
             {
                 dt.Rows.Add(dt.NewRow());
             }
@@ -372,10 +378,10 @@ namespace DBADash
                 : string.Join(',', dashAgent.AllowedScripts);
         }
 
-        public void GetInstance()
+        public async Task GetInstanceAsync()
         {
             StartCollection(CollectionType.Instance.ToString());
-            var dt = GetDT("DBADash", SqlStrings.Instance, CollectionCommandTimeout.GetDefaultCommandTimeout());
+            var dt = await GetDataTableAsync("DBADash", SqlStrings.Instance, CollectionCommandTimeout.GetDefaultCommandTimeout());
             AddDBADashServiceMetaData(ref dt);
             var clusterOrComputerName = (string)dt.Rows[0]["MachineName"];
             computerName = (string)dt.Rows[0]["ComputerNamePhysicalNetBIOS"];
@@ -455,26 +461,25 @@ namespace DBADash
             StopCollection();
         }
 
-        public void Collect(CollectionType[] collectionTypes)
+        public async Task CollectAsync(CollectionType[] collectionTypes)
         {
             foreach (CollectionType type in collectionTypes)
             {
-                Collect(type);
+                await CollectAsync(type);
             }
         }
 
-        public void Collect(Dictionary<string, CustomCollection> customCollections)
+        public async Task CollectAsync(Dictionary<string, CustomCollection> customCollections)
         {
             foreach (var customCollection in customCollections)
             {
                 var collectionReference = "UserData." + customCollection.Key;
                 try
                 {
-                    retryPolicy.Execute(
-                        _ =>
+                    await retryPolicy.Execute(async _ =>
                         {
                             StartCollection(collectionReference);
-                            Collect(customCollection);
+                            await CollectAsync(customCollection);
                             StopCollection();
                         },
                         new Context(collectionReference)
@@ -494,11 +499,12 @@ namespace DBADash
             }
         }
 
-        public void Collect(KeyValuePair<string, CustomCollection> customCollection)
+        public async Task CollectAsync(KeyValuePair<string, CustomCollection> customCollection)
         {
-            using var cn = new SqlConnection(ConnectionString);
-            using var cmd = new SqlCommand(customCollection.Value.ProcedureName, cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = customCollection.Value.CommandTimeout ?? CollectionCommandTimeout.GetDefaultCommandTimeout() };
+            await using var cn = new SqlConnection(ConnectionString);
+            await using var cmd = new SqlCommand(customCollection.Value.ProcedureName, cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = customCollection.Value.CommandTimeout ?? CollectionCommandTimeout.GetDefaultCommandTimeout() };
             using var da = new SqlDataAdapter(cmd);
+            await cn.OpenAsync();
             var dt = new DataTable("UserData." + customCollection.Key);
             da.Fill(dt);
             Data.Tables.Add(dt);
@@ -588,7 +594,7 @@ namespace DBADash
             }
         }
 
-        public void Collect(CollectionType collectionType)
+        public async Task CollectAsync(CollectionType collectionType)
         {
             var collectionTypeString = EnumToString(collectionType);
 
@@ -599,11 +605,10 @@ namespace DBADash
 
             try
             {
-                retryPolicy.Execute(
-                    _ =>
+                await retryPolicy.Execute(async _ =>
                     {
                         StartCollection(collectionType.ToString());
-                        ExecuteCollection(collectionType);
+                        await ExecuteCollectionAsync(collectionType);
                         StopCollection();
                     },
                     new Context(collectionTypeString)
@@ -943,7 +948,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             return handles;
         }
 
-        private void ExecuteCollection(CollectionType collectionType)
+        private async Task ExecuteCollectionAsync(CollectionType collectionType)
         {
             var collectionTypeString = EnumToString(collectionType);
             // Add params where required
@@ -980,11 +985,11 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
 
             if (collectionType == CollectionType.Drives)
             {
-                CollectDrives();
+                await CollectDrivesAsync();
             }
             else if (collectionType == CollectionType.ServerExtraProperties)
             {
-                CollectServerExtraProperties();
+                await CollectServerExtraPropertiesAsync();
             }
             else if (collectionType == CollectionType.DriversWMI)
             {
@@ -994,7 +999,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             {
                 try
                 {
-                    CollectSlowQueries();
+                    await CollectSlowQueriesAsync();
                 }
                 catch (SqlException ex) when (ex.Message.StartsWith("Unable to create/alter extended events session: RDS for SQL Server supports extended events"))
                 {
@@ -1007,18 +1012,18 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             }
             else if (collectionType == CollectionType.PerformanceCounters)
             {
-                CollectPerformanceCounters();
+                await CollectPerformanceCountersAsync();
             }
             else if (collectionType == CollectionType.Jobs)
             {
-                var currentJobModified = GetJobLastModified();
+                var currentJobModified = await GetJobLastModifiedAsync();
                 if (currentJobModified > JobLastModified)
                 {
                     var ss = new AgentJobs(Source.SourceConnection, new SchemaSnapshotDBOptions());
                     try
                     {
                         //ss.SnapshotJobs(ref Data);
-                        ss.CollectJobs(ref Data, Source.ScriptAgentJobs, IsRDS);
+                        await ss.CollectJobsAsync(Data, Source.ScriptAgentJobs, IsRDS);
                         JobLastModified = currentJobModified;
                     }
                     catch (Microsoft.SqlServer.Management.Smo.UnsupportedFeatureException ex)
@@ -1041,19 +1046,19 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             }
             else if (collectionType == CollectionType.RunningQueries)
             {
-                CollectRunningQueries();
+                await CollectRunningQueriesAsync();
             }
             else if (collectionType == CollectionType.RunningJobs)
             {
-                CollectRunningJobs();
+                await CollectRunningJobsAsync();
             }
             else
             {
-                AddDT(collectionTypeString, SqlStrings.GetSqlString(collectionType), collectionType.GetCommandTimeout(), param);
+                await AddDataTableAsync(collectionTypeString, SqlStrings.GetSqlString(collectionType), collectionType.GetCommandTimeout(), param);
             }
         }
 
-        private DataTable GetRunningJobsSchema()
+        private static DataTable GetRunningJobsSchema()
         {
             var dtRunningJobs = new DataTable("RunningJobs");
             dtRunningJobs.Columns.Add("job_id", typeof(Guid));
@@ -1072,13 +1077,13 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             return dtRunningJobs;
         }
 
-        private void CollectRunningJobsRDS() //Permissions Issue with msdb.dbo.syssessions prevents usual collection.  Get the data we can from sp_help_job
+        private async Task CollectRunningJobsRDSAsync() //Permissions Issue with msdb.dbo.syssessions prevents usual collection.  Get the data we can from sp_help_job
         {
-            using var cn = new SqlConnection(ConnectionString);
-            using var cmd = new SqlCommand("msdb.dbo.sp_help_job", cn) { CommandType = CommandType.StoredProcedure };
+            await using var cn = new SqlConnection(ConnectionString);
+            await using var cmd = new SqlCommand("msdb.dbo.sp_help_job", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@execution_status", 0);
-            cn.Open();
-            using var rdr = cmd.ExecuteReader();
+            await cn.OpenAsync();
+            await using var rdr = await cmd.ExecuteReaderAsync();
             var dtRunningJobs = GetRunningJobsSchema();
             var snapshotDate = DateTime.UtcNow;
             while (rdr.Read())
@@ -1097,18 +1102,19 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             Data.Tables.Add(dtRunningJobs);
         }
 
-        private void CollectRunningJobs()
+        private async Task CollectRunningJobsAsync()
         {
             if (IsRDS)
             {
-                CollectRunningJobsRDS();
+                await CollectRunningJobsRDSAsync();
                 return;
             }
-            using var cn = new SqlConnection(ConnectionString);
-            using var cmd = new SqlCommand(SqlStrings.RunningJobs, cn);
+
+            await using var cn = new SqlConnection(ConnectionString);
+            await using var cmd = new SqlCommand(SqlStrings.RunningJobs, cn);
             using var da = new SqlDataAdapter(cmd);
-            cn.Open();
-            using var rdr = cmd.ExecuteReader();
+            await cn.OpenAsync();
+            await using var rdr = await cmd.ExecuteReaderAsync();
             var dtRunningJobs = GetRunningJobsSchema();
             dtRunningJobs.Load(rdr);
 
@@ -1153,13 +1159,14 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             return true;
         }
 
-        private void CollectRunningQueries()
+        private async Task CollectRunningQueriesAsync()
         {
-            using var cn = new SqlConnection(ConnectionString);
-            using var cmd = new SqlCommand(SqlStrings.RunningQueries, cn);
+            await using var cn = new SqlConnection(ConnectionString);
+            await using var cmd = new SqlCommand(SqlStrings.RunningQueries, cn);
             using var da = new SqlDataAdapter(cmd);
             cmd.Parameters.AddWithValue("CollectSessionWaits", Source.CollectSessionWaits);
             cmd.Parameters.AddWithValue("CollectTranBeginTime", Source.CollectTranBeginTime);
+            await cn.OpenAsync();
             var ds = new DataSet();
             da.Fill(ds);
             var dtRunningQueries = ds.Tables[0];
@@ -1193,13 +1200,13 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             return sql;
         }
 
-        private DataSet GetPerformanceCounters()
+        private async Task<DataSet> GetPerformanceCountersAsync()
         {
-            string sql = PerformanceCountersSQL();
+            var sql = PerformanceCountersSQL();
             if (sql == string.Empty) return null;
-            using var cn = new SqlConnection(ConnectionString);
+            await using var cn = new SqlConnection(ConnectionString);
             using var da = new SqlDataAdapter(sql, cn);
-            cn.Open();
+            await cn.OpenAsync();
             var ds = new DataSet();
             SqlParameter pCountersXML = new("CountersXML", PerformanceCounters.PerformanceCountersXML)
             {
@@ -1243,9 +1250,9 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             }
         }
 
-        private void CollectPerformanceCounters()
+        private async Task CollectPerformanceCountersAsync()
         {
-            var ds = GetPerformanceCounters();
+            var ds = await GetPerformanceCountersAsync();
             if (ds == null) return;
             var dt = ds.Tables[0];
             if (ds.Tables.Count == 2)
@@ -1258,28 +1265,28 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             Data.Tables.Add(dt);
         }
 
-        private object GetSlowQueries()
+        private async Task<object> GetSlowQueriesAsync()
         {
             SqlConnectionStringBuilder builder = new(ConnectionString)
             {
                 ApplicationName = "DBADashXE"
             };
             var slowQueriesSQL = IsAzureDB ? SqlStrings.SlowQueriesAzure : SqlStrings.SlowQueries;
-            using var cn = new SqlConnection(builder.ConnectionString);
-            using var cmd = new SqlCommand(slowQueriesSQL, cn) { CommandTimeout = CollectionType.SlowQueries.GetCommandTimeout() };
-            cn.Open();
+            await using var cn = new SqlConnection(builder.ConnectionString);
+            await using var cmd = new SqlCommand(slowQueriesSQL, cn) { CommandTimeout = CollectionType.SlowQueries.GetCommandTimeout() };
+            await cn.OpenAsync();
 
             cmd.Parameters.AddWithValue("SlowQueryThreshold", Source.SlowQueryThresholdMs * 1000);
             cmd.Parameters.AddWithValue("MaxMemory", Source.SlowQuerySessionMaxMemoryKB);
             cmd.Parameters.AddWithValue("UseDualSession", Source.UseDualEventSession);
             cmd.Parameters.AddWithValue("MaxTargetMemory", Source.SlowQueryTargetMaxMemoryKB);
-            return cmd.ExecuteScalar();
+            return await cmd.ExecuteScalarAsync();
         }
 
-        private void CollectSlowQueries()
+        private async Task CollectSlowQueriesAsync()
         {
             if (!IsXESupported) return;
-            var result = GetSlowQueries();
+            var result = await GetSlowQueriesAsync();
             if (result == DBNull.Value)
             {
                 throw new Exception("Result is NULL");
@@ -1294,7 +1301,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             AddDT(dtAtt);
         }
 
-        private void CollectServerExtraProperties()
+        private async Task CollectServerExtraPropertiesAsync()
         {
             if (IsAzureDB)
             {
@@ -1311,7 +1318,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             {
                 query = query.Replace("DATETIMEOFFSET", "DATETIME");
             }
-            AddDT("ServerExtraProperties", query, CollectionType.ServerExtraProperties.GetCommandTimeout());
+            await AddDataTableAsync("ServerExtraProperties", query, CollectionType.ServerExtraProperties.GetCommandTimeout());
             Data.Tables["ServerExtraProperties"]!.Columns.Add("WindowsCaption");
             if (manufacturer != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemManufacturer"] = manufacturer; }
             if (model != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemProductName"] = model; }
@@ -1331,13 +1338,14 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             }
         }
 
-        public DataTable GetDT(string tableName, string SQL, int commandTimeout, SqlParameter[] param = null)
+        public async Task<DataTable> GetDataTableAsync(string tableName, string SQL, int commandTimeout, SqlParameter[] param = null)
         {
-            using var cn = new SqlConnection(ConnectionString);
-            using var da = new SqlDataAdapter(SQL, cn);
+            await using var cn = new SqlConnection(ConnectionString);
+            var cmd = new SqlCommand(SQL, cn) { CommandTimeout = commandTimeout };
+            using var da = new SqlDataAdapter(cmd);
             try
             {
-                cn.Open();
+                await cn.OpenAsync();
             }
             catch (Exception ex)
             {
@@ -1346,21 +1354,20 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             }
 
             DataTable dt = new();
-            da.SelectCommand.CommandTimeout = commandTimeout;
             if (param != null)
             {
-                da.SelectCommand.Parameters.AddRange(param);
+                cmd.Parameters.AddRange(param);
             }
             da.Fill(dt);
             dt.TableName = tableName;
             return dt;
         }
 
-        public void AddDT(string tableName, string sql, int commandTimeout, SqlParameter[] param = null)
+        public async Task AddDataTableAsync(string tableName, string sql, int commandTimeout, SqlParameter[] param = null)
         {
             if (!Data.Tables.Contains(tableName))
             {
-                Data.Tables.Add(GetDT(tableName, sql, commandTimeout, param));
+                Data.Tables.Add(await GetDataTableAsync(tableName, sql, commandTimeout, param));
             }
         }
 
@@ -1372,11 +1379,11 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             }
         }
 
-        public void CollectDrivesSQL()
+        public async Task CollectDrivesSQLAsync()
         {
             try
             {
-                AddDT("Drives", SqlStrings.Drives, CollectionType.Drives.GetCommandTimeout());
+                await AddDataTableAsync("Drives", SqlStrings.Drives, CollectionType.Drives.GetCommandTimeout());
             }
             catch (Exception ex)
             {
@@ -1384,11 +1391,11 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             }
         }
 
-        public void CollectDrives()
+        public async Task CollectDrivesAsync()
         {
             if (noWMI)
             {
-                CollectDrivesSQL();
+                await CollectDrivesSQLAsync();
             }
             else
             {
@@ -1400,7 +1407,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                 {
                     LogDBError("Drives", "Error collecting drives via WMI.  Drive info will be collected from SQL, but might be incomplete.  Use No WMI option to collect through SQL as default." + Environment.NewLine + ex.Message, "Collect:WMI");
                     Log.Warning(ex, "Error collecting drives via WMI.Drive info will be collected from SQL, but might be incomplete. Use NoWMI to collect through SQL as default.");
-                    CollectDrivesSQL();
+                    await CollectDrivesSQLAsync();
                 }
             }
         }

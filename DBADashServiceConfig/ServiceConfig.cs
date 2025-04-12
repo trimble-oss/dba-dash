@@ -52,7 +52,7 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void BttnAdd_Click(object sender, EventArgs e)
+        private async void BttnAdd_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(txtSource.Text))
             {
@@ -140,7 +140,7 @@ namespace DBADashServiceConfig
                         {
                             src.SourceConnection.Validate();
                             validated = true;
-                            src.ConnectionID = src.GetGeneratedConnectionID();
+                            src.ConnectionID = await src.GetGeneratedConnectionIDAsync();
                             if (src.SourceConnection.ApplicationIntent() == ApplicationIntent.ReadOnly)
                             {
                                 src.ConnectionID += "|ReadOnly";
@@ -191,7 +191,7 @@ namespace DBADashServiceConfig
                     // Ensure we have a ConnectionID set for SQL connections
                     src.SetConnectionIDFromBuilderIfNotSet();
 
-                    var existingConnection = collectionConfig.FindSourceConnection(sourceString,src.ConnectionID); // Check if the connection string exists in the config
+                    var existingConnection = await collectionConfig.FindSourceConnectionAsync(sourceString,src.ConnectionID); // Check if the connection string exists in the config
 
                     if (existingConnection != null)
                     {
@@ -1936,7 +1936,7 @@ Cancel = cancel the operation.", @"Mark deleted?", MessageBoxButtons.YesNoCancel
             }
         }
 
-        private void ChkEnableMessaging_CheckedChanged(object sender, EventArgs e)
+        private async void ChkEnableMessaging_CheckedChanged(object sender, EventArgs e)
         {
             if (IsSetFromJson) return;
             collectionConfig.EnableMessaging = chkEnableMessaging.Checked;
@@ -1949,43 +1949,44 @@ Cancel = cancel the operation.", @"Mark deleted?", MessageBoxButtons.YesNoCancel
                         "Messaging requires an explicit ConnectionID to be defined in the config file. One or more connections do not have a ConnectionID defined.\nWould you like to automatically populate this now?\n\nNote:This might take a while depending on the number of connections and their availability.",
                         "Messaging", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
                 {
-                    PopulateConnectionID();
+                    await PopulateConnectionIDAsync();
                 }
             }
         }
 
-        private void PopulateConnectionID()
+        private async Task PopulateConnectionIDAsync()
         {
-            var errors = new StringBuilder(); // Using StringBuilder instead of StringBuilder() for consistency
+            var errors = new ConcurrentBag<string>();
 
-            // Use Parallel.ForEach to process the collection in parallel
-            Parallel.ForEach(collectionConfig.SourceConnections, src =>
-            {
-                if (!string.IsNullOrEmpty(src.ConnectionID) || src.SourceConnection.Type != ConnectionType.SQL) return;
-                try
+            var tasks = collectionConfig.SourceConnections
+                .Where(src => string.IsNullOrEmpty(src.ConnectionID) && src.SourceConnection.Type == ConnectionType.SQL)
+                .Select(async src =>
                 {
-                    var collector = new DBCollector(src, collectionConfig.ServiceName, true);
-                    src.ConnectionID = src.GetGeneratedConnectionID();
-                }
-                catch (Exception ex)
-                {
-                    lock (errors) // Ensure thread safety when appending to the errors StringBuilder
+                    try
                     {
-                        errors.AppendLine(
-                            $"Error getting ConnectionID for {src.SourceConnection.ConnectionForPrint}: {ex.Message}");
+                        var collector = await DBCollector.CreateAsync(src, collectionConfig.ServiceName, true);
+                        src.ConnectionID = await src.GetGeneratedConnectionIDAsync();
                     }
-                }
-            });
+                    catch (Exception ex)
+                    {
+                        errors.Add($"Error getting ConnectionID for {src.SourceConnection.ConnectionForPrint}: {ex.Message}");
+                    }
+                });
 
-            // Check errors and display message
-            if (errors.Length > 0)
+            await Task.WhenAll(tasks);
+
+            if (errors.Count > 0)
             {
-                MessageBox.Show(errors.ToString(), "Errors", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                var errorStringBuilder = new StringBuilder();
+                foreach (var error in errors)
+                {
+                    errorStringBuilder.AppendLine(error);
+                }
+                MessageBox.Show(errorStringBuilder.ToString(), "Errors", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             else
             {
-                MessageBox.Show("ConnectionID populated successfully", "Messaging", MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                MessageBox.Show("ConnectionID populated successfully", "Messaging", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
@@ -2038,7 +2039,7 @@ Cancel = cancel the operation.", @"Mark deleted?", MessageBoxButtons.YesNoCancel
                         "One or more connections do not have a ConnectionID defined. Would you like to automatically populate this now?",
                         "Connection ID", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
                 {
-                    PopulateConnectionID();
+                    await PopulateConnectionIDAsync();
                 }
             }
 
