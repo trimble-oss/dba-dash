@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using static DBADash.DBADashConnection;
 
 namespace DBADash
@@ -220,11 +221,11 @@ namespace DBADash
             ConnectionID = builder.DataSource is "." or "LOCALHOST" ? Environment.MachineName : builder.DataSource;
         }
 
-        public string GetGeneratedConnectionID()
+        public async Task<string> GetGeneratedConnectionIDAsync()
         {
             if (SourceConnection.Type != ConnectionType.SQL) return string.Empty;
             if (!string.IsNullOrEmpty(generatedConnectionID)) return generatedConnectionID;
-            var collector = new DBCollector(this, "DBADashService");
+            var collector = await DBCollector.CreateAsync(this, "DBADashService");
             generatedConnectionID = collector.ConnectionID;
             return generatedConnectionID;
         }

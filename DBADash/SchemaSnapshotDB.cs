@@ -941,7 +941,7 @@ namespace DBADash
             var connectionString = src.GetSource();
             SqlConnectionStringBuilder builder = new(connectionString);
 
-            var collector = new DBCollector(src, Config.ServiceName);
+            var collector = await DBCollector.CreateAsync(src, Config.ServiceName);
             var dsSnapshot = collector.Data;
             var dbs = src.SchemaSnapshotDBs.Split(',');
 

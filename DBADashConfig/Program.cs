@@ -14,7 +14,7 @@ CollectionConfig config;
 try
 {
     Parser.Default.ParseArguments<Options>(args)
-          .WithParsed(o =>
+          .WithParsed(async o =>
           {
               // Read config from json file or create a new config if the file doesn't exist
               if (!(BasicConfig.ConfigExists))
@@ -60,15 +60,15 @@ try
                       break;
                   // Add a new source connection
                   case CommandLineActionOption.Add:
-                      Helper.AddSourceConnection(config, o);
+                      await Helper.AddSourceConnectionAsync(config, o);
                       break;
 
                   case CommandLineActionOption.Remove:
-                      Helper.RemoveSourceConnection(o, config, false);
+                      await Helper.RemoveSourceConnectionAsync(o, config, false);
                       break;
 
                   case CommandLineActionOption.RemoveAndDelete:
-                      Helper.RemoveSourceConnection(o, config, true);
+                      await Helper.RemoveSourceConnectionAsync(o, config, true);
                       break;
 
                   case CommandLineActionOption.SetDestination:
@@ -115,10 +115,10 @@ try
                       break;
 
                   case CommandLineActionOption.PopulateConnectionID:
-                      Helper.PopulateConnectionID(config, o,false);
+                      await Helper.PopulateConnectionIDAsync(config, o,false);
                       break;
                   case CommandLineActionOption.PopulateConnectionID2:
-                      Helper.PopulateConnectionID(config, o,true);
+                      await Helper.PopulateConnectionIDAsync(config, o,true);
                       break;
               }
           });

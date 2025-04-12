@@ -43,7 +43,7 @@ namespace DBADash.Messaging
                 handle);
             try
             {
-                var src = cfg.GetSourceConnection(ConnectionID);
+                var src = await cfg.GetSourceConnectionAsync(ConnectionID);
                 var builder = new SqlConnectionStringBuilder(src.SourceConnection.ConnectionString)
                 {
                     InitialCatalog = DatabaseName

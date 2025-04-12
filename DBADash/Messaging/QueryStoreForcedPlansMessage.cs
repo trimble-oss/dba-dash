@@ -25,7 +25,7 @@ namespace DBADash.Messaging
     handle);
             try
             {
-                var src = cfg.GetSourceConnection(ConnectionID);
+                var src = await cfg.GetSourceConnectionAsync(ConnectionID);
                 List<string> databases;
                 if (string.IsNullOrEmpty(DatabaseName))
                 {

@@ -6,6 +6,8 @@ using SerilogTimings;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlTypes;
+using System.Threading.Tasks;
 
 namespace DBADash
 {
@@ -72,12 +74,12 @@ namespace DBADash
             return jobStepDT;
         }
 
-        public void CollectJobs(ref DataSet ds, bool scriptJobs, bool isRDS)
+        public async Task CollectJobsAsync(DataSet ds, bool scriptJobs, bool isRDS)
         {
             DataTable jobsDT;
             using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Run Jobs query on instance {instance}", SourceConnection.ConnectionForPrint))
             {
-                jobsDT = GetJobsDT();
+                jobsDT = await GetJobsDTAsync();
                 op.Complete();
             }
 
@@ -137,17 +139,16 @@ namespace DBADash
             }
         }
 
-        private DataTable GetJobsDT()
+        private async Task<DataTable> GetJobsDTAsync()
         {
-            using (var cn = new SqlConnection(ConnectionString))
-            using (var da = new SqlDataAdapter(SqlStrings.Jobs, cn))
-            {
-                cn.Open();
-                da.SelectCommand.CommandTimeout = CollectionType.Jobs.GetCommandTimeout();
-                var jobDT = JobDataTableSchema();
-                da.Fill(jobDT);
-                return jobDT;
-            }
+            await using var cn = new SqlConnection(ConnectionString);
+            await using var cmd = new SqlCommand(SqlStrings.Jobs, cn)
+            { CommandTimeout = CollectionType.Jobs.GetCommandTimeout() };
+            using var da = new SqlDataAdapter(cmd);
+            await cn.OpenAsync();
+            var jobDT = JobDataTableSchema();
+            da.Fill(jobDT);
+            return jobDT;
         }
 
         private DataTable GetJobStepsDT()
@@ -168,7 +169,7 @@ namespace DBADash
             var jobStepDT = JobStepTableSchema();
             using var cn = new SqlConnection(ConnectionString);
             var instance = new Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
-            
+
             foreach (Job job in instance.JobServer.Jobs)
             {
                 foreach (JobStep step in job.JobSteps)

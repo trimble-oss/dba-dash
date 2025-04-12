@@ -50,13 +50,13 @@ namespace DBADash.Messaging
                 Id,
                 CollectionTypes,
                 ConnectionID);
-            var src = cfg.GetSourceConnection(ConnectionID);
+            var src =await cfg.GetSourceConnectionAsync(ConnectionID);
 
             var (standardCollections, customCollections) = ParseCollectionTypes(src, cfg);
 
-            var collector = new DBCollector(src, cfg.ServiceName, true);
-            collector.Collect(standardCollections.ToArray());
-            collector.Collect(customCollections);
+            var collector = await DBCollector.CreateAsync(src, cfg.ServiceName, true);
+            await collector.CollectAsync(standardCollections.ToArray());
+            await collector.CollectAsync(customCollections);
 
             if (standardCollections.Contains(CollectionType.SchemaSnapshot))
             {

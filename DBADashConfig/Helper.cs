@@ -46,7 +46,7 @@ namespace DBADashConfig
             }
         }
 
-        public static DBADashSource? GetSourceConnection(Options o, CollectionConfig config)
+        public static async Task<DBADashSource?> GetSourceConnectionAsync(Options o, CollectionConfig config)
         {
             if (!string.IsNullOrEmpty(o.ConnectionString))
             {
@@ -56,7 +56,7 @@ namespace DBADashConfig
             {
                 try
                 {
-                    return config.GetSourceConnection(o.ConnectionID);
+                    return await config.GetSourceConnectionAsync(o.ConnectionID);
                 }
                 catch (Exception ex)
                 {
@@ -73,9 +73,9 @@ namespace DBADashConfig
             return null;
         }
 
-        public static void RemoveSourceConnection(Options o, CollectionConfig config, bool delete)
+        public static async Task RemoveSourceConnectionAsync(Options o, CollectionConfig config, bool delete)
         {
-            var sourceToRemove = GetSourceConnection(o, config);
+            var sourceToRemove = await GetSourceConnectionAsync(o, config);
             if (sourceToRemove == null)
             {
                 Log.Error("Source connection not found.");
@@ -132,7 +132,7 @@ namespace DBADashConfig
             Console.WriteLine(latest.Body);
         }
 
-        public static void AddSourceConnection(CollectionConfig config, Options o)
+        public static async Task AddSourceConnectionAsync(CollectionConfig config, Options o)
         {
             if (string.IsNullOrEmpty(o.ConnectionString))
             {
@@ -168,7 +168,7 @@ namespace DBADashConfig
             }
             else if (!o.SkipValidation)
             {
-                source.ConnectionID = source.GetGeneratedConnectionID();
+                source.ConnectionID = await source.GetGeneratedConnectionIDAsync();
             }
             else if(source.SourceConnection.Type == DBADashConnection.ConnectionType.SQL)
             {
@@ -187,7 +187,7 @@ namespace DBADashConfig
                 source.PlanCollectionMemoryGrantThreshold = o.PlanCollectionMemoryGrantThreshold;
             }
             // check if connection exists before adding a new connection
-            var oldSource = config.FindSourceConnection(o.ConnectionString, source.ConnectionID);
+            var oldSource = await config.FindSourceConnectionAsync(o.ConnectionString, source.ConnectionID);
             if (oldSource!=null)
             {
                 if (o.Replace)
@@ -353,7 +353,7 @@ namespace DBADashConfig
             SaveConfig(config, o);
         }
 
-        public static void PopulateConnectionID(CollectionConfig config, Options o, bool force)
+        public static async Task PopulateConnectionIDAsync(CollectionConfig config, Options o, bool force)
         {
             var errors = 0;
             var succeeded = 0;
@@ -361,7 +361,7 @@ namespace DBADashConfig
             {
                 try
                 {
-                    source.ConnectionID = source.GetGeneratedConnectionID();
+                    source.ConnectionID = await source.GetGeneratedConnectionIDAsync();
                     Log.Information("ConnectionID {ConnectionID} generated", source.ConnectionID);
                     succeeded++;
                 }
