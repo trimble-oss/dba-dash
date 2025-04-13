@@ -73,21 +73,21 @@ namespace DBADashService
                 }
                 catch (Exception ex)
                 {
-                    LogError(ex, "Error processing alerts");
+                    await LogErrorAsync(ex, "Error processing alerts");
                 }
                 await Task.Delay(NotificationProcessingFrequencySeconds * 1000);
             }
             // ReSharper disable once FunctionNeverReturns
         }
 
-        private void LogError(Exception exception, string message)
+        private async Task LogErrorAsync(Exception exception, string message)
         {
             try
             {
                 Log.Error(exception, message);
                 var dtErrors = DBCollector.GetErrorDataTableSchema();
                 DBCollector.AddErrorRow(ref dtErrors, "Alert", exception.ToString(), "AlertProcessing");
-                DBImporter.InsertErrors(ConnectionString, null, DateTime.UtcNow, dtErrors, default);
+                await DBImporter.InsertErrorsAsync(ConnectionString, null, DateTime.UtcNow, dtErrors, default);
             }
             catch (Exception ex)
             {
@@ -180,7 +180,7 @@ namespace DBADashService
                 }
                 catch (Exception ex)
                 {
-                    LogError(ex, $"Error sending notification to channel {channel.ChannelName}");
+                    await LogErrorAsync(ex, $"Error sending notification to channel {channel.ChannelName}");
                 }
             }
         }

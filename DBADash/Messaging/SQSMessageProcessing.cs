@@ -289,7 +289,7 @@ namespace DBADash.Messaging
                 var fileName = $"{handle}.message";
                 Log.Debug("Writing message to S3 {filename}", fileName);
                 messageDataPath = msg.CollectAgent.S3Path.AppendToUrl(fileName);
-                await DestinationHandling.WriteS3(ds, msg.CollectAgent.S3Path, fileName, Config);
+                await DestinationHandling.WriteS3Async(ds, msg.CollectAgent.S3Path, fileName, Config);
             }
 
             // Send a reply message to the source agent
@@ -380,9 +380,9 @@ namespace DBADash.Messaging
             if (responseMessage.Data != null && responseMessage.Data.Tables.Contains("DBADash"))
             {
                 Log.Debug("Writing data to SQL");
-                await _retryPolicy.ExecuteAsync(() =>
+                await _retryPolicy.ExecuteAsync(async () =>
                 {
-                    DestinationHandling.WriteDB(responseMessage.Data, destination.ConnectionString,
+                    await DestinationHandling.WriteDBAsync(responseMessage.Data, destination.ConnectionString,
                         Config);
                     return Task.CompletedTask;
                 });

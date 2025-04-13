@@ -11,7 +11,7 @@ namespace DBADashService
 {
     public class MaintenanceJob : IJob
     {
-        public Task Execute(IJobExecutionContext context)
+        public async Task Execute(IJobExecutionContext context)
         {
             var dataMap = context.JobDetail.JobDataMap;
             var connectionString = dataMap.GetString("ConnectionString");
@@ -19,53 +19,47 @@ namespace DBADashService
             var purgeDataCommandTimeout = dataMap.GetInt("PurgeDataCommandTimeout");
             try
             {
-                AddPartitions(connectionString, addPartitionsCommandTimeout);
+                await AddPartitionsAsync(connectionString, addPartitionsCommandTimeout);
             }
             catch (Exception ex)
             {
-                LogError(ex, connectionString, "AddPartitions", ex.Message);
+                await LogErrorAsync(ex, connectionString, "AddPartitions", ex.Message);
             }
             try
             {
-                PurgeData(connectionString, purgeDataCommandTimeout);
+                await PurgeDataAsync(connectionString, purgeDataCommandTimeout);
             }
             catch (Exception ex)
             {
-                LogError(ex, connectionString, "PurgeData", ex.Message);
+                await LogErrorAsync(ex, connectionString, "PurgeData", ex.Message);
             }
-
-            return Task.CompletedTask;
         }
 
-        public static void AddPartitions(string connectionString, int commandTimeout)
+        public static async Task AddPartitionsAsync(string connectionString, int commandTimeout)
         {
-            using (var op = Operation.Begin("AddPartitions"))
-            {
-                using var cn = new SqlConnection(connectionString);
-                using var cmd = new SqlCommand("dbo.Partitions_Add", cn)
-                { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout };
-                cn.Open();
-                Log.Information("Maintenance: Creating partitions");
-                cmd.ExecuteNonQuery();
-                op.Complete();
-            }
+            using var op = Operation.Begin("AddPartitions");
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand("dbo.Partitions_Add", cn)
+            { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout };
+            await cn.OpenAsync();
+            Log.Information("Maintenance: Creating partitions");
+            await cmd.ExecuteNonQueryAsync();
+            op.Complete();
         }
 
-        public static void PurgeData(string connectionString, int commandTimeout)
+        public static async Task PurgeDataAsync(string connectionString, int commandTimeout)
         {
-            using (var op = Operation.Begin("PurgeData"))
-            {
-                using var cn = new SqlConnection(connectionString);
-                using var cmd = new SqlCommand("dbo.PurgeData", cn)
-                { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout };
-                cn.Open();
-                Log.Information("Maintenance : PurgeData");
-                cmd.ExecuteNonQuery();
-                op.Complete();
-            }
+            using var op = Operation.Begin("PurgeData");
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand("dbo.PurgeData", cn)
+            { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout };
+            await cn.OpenAsync();
+            Log.Information("Maintenance : PurgeData");
+            await cmd.ExecuteNonQueryAsync();
+            op.Complete();
         }
 
-        private static void LogError(Exception ex, string connectionString, string errorSource, string errorMessage, string errorContext = "Maintenance")
+        private static async Task LogErrorAsync(Exception ex, string connectionString, string errorSource, string errorMessage, string errorContext = "Maintenance")
         {
             Log.Error(ex, "{errorContext} | {errorSource}", errorContext, errorSource);
             try
@@ -81,7 +75,7 @@ namespace DBADashService
                 dtErrors.Rows.Add(rError);
                 DataSet ds = new();
                 ds.Tables.Add(dtErrors);
-                DBImporter.InsertErrors(connectionString, null, DateTime.UtcNow, ds, 60);
+                await DBImporter.InsertErrorsAsync(connectionString, null, DateTime.UtcNow, ds, 60);
             }
             catch (Exception ex2)
             {

@@ -15,8 +15,6 @@ namespace DBADashService
 {
     internal class Program
     {
-        public static readonly NamedLocker Locker = new();
-
         private static void Main(string[] args)
         {
             SetupLogging();
