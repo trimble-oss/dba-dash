@@ -63,7 +63,7 @@ namespace DBADashService
             scheduler = factory.GetScheduler().ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
-        private void UpgradeDB()
+        private async Task UpgradeDBAsync()
         {
             foreach (var d in config.AllDestinations.Where(dest => dest.Type == ConnectionType.SQL))
             {
@@ -91,7 +91,7 @@ namespace DBADashService
                         Log.Information("Validating destination");
                         CollectionConfig.ValidateDestination(d);
                         Log.Information("Create repository database");
-                        DBValidations.UpgradeDBAsync(d.ConnectionString).Wait();
+                        await DBValidations.UpgradeDBAsync(d.ConnectionString);
                         Log.Information("Repository database created");
                         break;
 
@@ -102,7 +102,7 @@ namespace DBADashService
                             Log.Information("Validating destination");
                             CollectionConfig.ValidateDestination(d);
                             Log.Information("Upgrade DB from {oldVersion} to {newVersion}", status.DBVersion.ToString(), status.DACVersion.ToString());
-                            DBValidations.UpgradeDBAsync(d.ConnectionString).Wait();
+                            await DBValidations.UpgradeDBAsync(d.ConnectionString);
                             status = DBValidations.VersionStatus(d.ConnectionString);
                             if (status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
                             {
@@ -132,7 +132,7 @@ namespace DBADashService
             await scheduler.Start(stoppingToken);
             try
             {
-                UpgradeDB();
+                await UpgradeDBAsync();
             }
             catch (Exception ex)
             {
@@ -144,16 +144,15 @@ namespace DBADashService
                 Log.Information("Checking connections");
                 await offlineCheckTask;
                 var offlineCount = OfflineInstances.OfflineInstanceCount;
-                if(offlineCount > 0)
+                if (offlineCount > 0)
                 {
                     Log.Warning("{offlineCount} connections are offline", offlineCount);
                 }
                 else
                 {
                     Log.Information("All source connections are online");
-                } 
+                }
                 _ = Task.Run(() => OfflineInstances.ManageOfflineInstances(config, stoppingToken), stoppingToken);
-
             }
             catch (Exception ex)
             {
@@ -193,13 +192,13 @@ namespace DBADashService
             File.Delete(filePath);
         }
 
-        public void Stop()
+        public async void Stop()
         {
             Log.Information("Pause schedules...");
-            scheduler.Standby().ConfigureAwait(false).GetAwaiter().GetResult();
+            await scheduler.Standby();
             Log.Information("Wait for jobs to complete...");
             var waitCount = 0;
-            while (scheduler.GetCurrentlyExecutingJobs().ConfigureAwait(false).GetAwaiter().GetResult().Count > 0)
+            while ((await scheduler.GetCurrentlyExecutingJobs()).Count > 0)
             {
                 Thread.Sleep(500);
                 waitCount++;
@@ -210,9 +209,9 @@ namespace DBADashService
                 }
             }
             Log.Information("Remove Event Sessions");
-            RemoveEventSessionsAsync().Wait();
+            await RemoveEventSessionsAsync();
             Log.Information("Shutdown Scheduler");
-            scheduler.Shutdown().ConfigureAwait(false).GetAwaiter().GetResult();
+            await scheduler.Shutdown();
             Log.Information("Shutdown complete");
         }
 
@@ -286,7 +285,7 @@ namespace DBADashService
             if (config.ScanForAzureDBs && src.SourceConnection.Type == ConnectionType.SQL && !OfflineInstances.IsOffline(src))
             {
                 var isAzureDBMaster = false;
- 
+
                 try
                 {
                     isAzureDBMaster = src.SourceConnection.ConnectionInfo.IsAzureMasterDB;
@@ -315,9 +314,9 @@ namespace DBADashService
             await ScheduleCollectionsAsync(config.AddAzureDBs());
         }
 
-        private void ScanForAzureDBs(object sender, ElapsedEventArgs e)
+        private async void ScanForAzureDBs(object sender, ElapsedEventArgs e)
         {
-            ScanForAzureDBsAsync().Wait();
+            await ScanForAzureDBsAsync();
         }
 
         private async Task ScheduleSourceAsync(DBADashSource src)
@@ -440,10 +439,10 @@ namespace DBADashService
             if (config.ProcessAlerts)
             {
                 foreach (var alertProcessing in config.SQLDestinations.Select(dest => new AlertProcessing(dest)
-                         {
-                             NotificationProcessingStartupDelaySeconds = config.AlertProcessingStartupDelaySeconds ?? CollectionConfig.DefaultAlertProcessingStartupDelaySeconds,
-                            NotificationProcessingFrequencySeconds = config.AlertProcessingFrequencySeconds ?? CollectionConfig.DefaultAlertProcessingFrequencySeconds
-                         }))
+                {
+                    NotificationProcessingStartupDelaySeconds = config.AlertProcessingStartupDelaySeconds ?? CollectionConfig.DefaultAlertProcessingStartupDelaySeconds,
+                    NotificationProcessingFrequencySeconds = config.AlertProcessingFrequencySeconds ?? CollectionConfig.DefaultAlertProcessingFrequencySeconds
+                }))
                 {
                     _ = Task.Run(() => alertProcessing.ProcessAlerts());
                 }

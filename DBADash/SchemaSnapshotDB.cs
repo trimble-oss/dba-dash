@@ -189,7 +189,7 @@ namespace DBADash
                 dtSchema.Columns.Add("DDL", typeof(byte[]));
                 dtSchema.Columns.Add("ObjectDateCreated", typeof(DateTime));
                 dtSchema.Columns.Add("ObjectDateModified", typeof(DateTime));
-                var instance = new Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn) );
+                var instance = new Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
                 instance.ConnectionContext.StatementTimeout = CollectionType.SchemaSnapshot.GetCommandTimeout();
                 instance.SetDefaultInitFields(typeof(Table), true);
 
@@ -311,7 +311,7 @@ namespace DBADash
                     {
                         using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "Synonyms"))
                         {
-                            AddSynonyms(db, dtSchema,errorLogger);
+                            AddSynonyms(db, dtSchema, errorLogger);
                             op.Complete();
                         }
                     }
@@ -467,7 +467,7 @@ namespace DBADash
             }
 
             if (db.Parent.VersionMajor < 10) return; // Broker priorities supported on SQL 2008
-            
+
             foreach (BrokerPriority p in db.ServiceBroker.Priorities)
             {
                 var r = dtSchema.NewRow();
@@ -483,7 +483,6 @@ namespace DBADash
                 r["ObjectDateModified"] = "1900-01-01";
                 dtSchema.Rows.Add(r);
             }
-            
         }
 
         private void AddSeq(Database db, DataTable dtSchema)
@@ -977,7 +976,7 @@ namespace DBADash
                 try
                 {
                     var fileName = DBADashSource.GenerateFileName(src.SourceConnection.ConnectionForFileName);
-                    await DestinationHandling.WriteAllDestinations(dsSnapshot, src, fileName, Config);
+                    await DestinationHandling.WriteAllDestinationsAsync(dsSnapshot, src, fileName, Config);
                 }
                 catch (Exception ex)
                 {

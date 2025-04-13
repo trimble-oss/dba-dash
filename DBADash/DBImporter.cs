@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace DBADash
 {
@@ -56,10 +57,10 @@ namespace DBADash
             return true;
         }
 
-        public void TestConnection()
+        public async Task TestConnectionAsync()
         {
-            using var cn = new SqlConnection(connectionString);
-            cn.Open();
+            await using var cn = new SqlConnection(connectionString);
+            await cn.OpenAsync();
         }
 
         // Adds error to Errors DataTable to be imported into CollectionErrorLog table later.
@@ -318,32 +319,31 @@ namespace DBADash
             "SessionWaits", "IdentityColumns", "RunningJobs", "TableSize", "ServerServices","ObjectExecutionStatsLegacy"
         };
 
-
-        private void UpdateOffline()
+        private async Task UpdateOfflineAsync()
         {
             var agentRow = data.Tables["DBADash"]!.Rows[0];
             var collectAgent = GetAgent(agentRow);
             snapshotDate = (DateTime)agentRow["SnapshotDateUTC"];
             var dt = data.Tables["OfflineInstances"];
-            using var cn = new SqlConnection(connectionString);
-            using var cmd = new SqlCommand("OfflineInstances_Add", cn) { CommandTimeout = CommandTimeout, CommandType = CommandType.StoredProcedure };
-            cn.Open();
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand("OfflineInstances_Add", cn) { CommandTimeout = CommandTimeout, CommandType = CommandType.StoredProcedure };
+            await cn.OpenAsync();
             if (dt.Rows.Count > 0)
             {
                 cmd.Parameters.AddWithValue("OfflineInstances", dt);
             }
-            
+
             cmd.Parameters.AddWithValue("CollectAgentID", collectAgent.GetDBADashAgentID(connectionString));
             cmd.Parameters.AddWithValue("ImportAgentID", importAgent.GetDBADashAgentID(connectionString));
             cmd.Parameters.AddWithValue("SnapshotDate", DateTime.UtcNow);
-            cmd.ExecuteNonQuery();
+            await cmd.ExecuteNonQueryAsync();
         }
 
-        public void Update()
+        public async Task UpdateAsync()
         {
             if (data.DataSetName == "OfflineInstances")
             {
-                UpdateOffline();
+                await UpdateOfflineAsync();
                 return;
             }
             List<Exception> exceptions = new();
@@ -351,9 +351,8 @@ namespace DBADash
             snapshotDate = (DateTime)rInstance!["SnapshotDateUTC"];
 
             // we need to get the instanceID to continue further.  retry based on policy then exception will be thrown to catch higher up
-            instanceID = retryPolicy.Execute(
-              context => UpdateInstance(ref rInstance),
-              new Context("Instance")
+            instanceID = await retryPolicy.Execute(async _ => await UpdateInstanceAsync(rInstance),
+                new Context("Instance")
             );
 
             var tablesInDataSet = new HashSet<string>(data.Tables
@@ -363,13 +362,13 @@ namespace DBADash
             // Process Databases first as some collections will need the list of databases to be populated.
             if (tablesInDataSet.Contains("Databases"))
             {
-                TryUpdate("Databases", ref exceptions);
+                await TryUpdateAsync("Databases", exceptions);
             }
             foreach (var tableName in tablesInDataSet.Where(tableName => tableName != "Databases"))
             {
                 if (tablesToProcess.Contains(tableName) || tableName.StartsWith("UserData."))
                 {
-                    TryUpdate(tableName, ref exceptions);
+                    await TryUpdateAsync(tableName, exceptions);
                 }
             }
 
@@ -380,8 +379,7 @@ namespace DBADash
                 var databaseName = tableName[snapshotPrefix.Length..];
                 try
                 {
-                    retryPolicy.Execute(
-                          context => UpdateSnapshot(tableName, databaseName),
+                    await retryPolicy.Execute(async _ => await UpdateSnapshotAsync(tableName, databaseName),
                           new Context(tableName)
                       );
                 }
@@ -393,10 +391,9 @@ namespace DBADash
             }
             try
             {
-                retryPolicy.Execute(
-                   context => UpdateServerExtraProperties(),
-                   new Context("ServerExtraProperties")
-               );
+                await retryPolicy.Execute(async _ => await UpdateServerExtraPropertiesAsync(),
+                    new Context("ServerExtraProperties")
+                );
             }
             catch (Exception ex)
             {
@@ -404,54 +401,51 @@ namespace DBADash
                 exceptions.Add(ex);
             }
             // retry based on policy then let caller handle the exception
-            retryPolicy.Execute(
-            context => InsertErrors(),
-                            new Context("InsertErrors")
-                );
+            await retryPolicy.Execute(async _ => await InsertErrorsAsync(),
+                new Context("InsertErrors")
+            );
             if (exceptions.Count > 0)
             {
                 throw new AggregateException(exceptions);
             }
         }
 
-        private void UpdateSnapshot(string tableName, string databaseName)
+        private async Task UpdateSnapshotAsync(string tableName, string databaseName)
         {
             var dtSS = data.Tables[tableName];
             try
             {
-                using (var cn = new SqlConnection(connectionString))
-                using (var cmd = new SqlCommand("DDLSnapshot_Add", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout })
+                await using var cn = new SqlConnection(connectionString);
+                await using var cmd = new SqlCommand("DDLSnapshot_Add", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout };
+                await cn.OpenAsync();
+                DateTime StartTime;
+                DateTime EndTime;
+                if (dtSS!.ExtendedProperties.ContainsKey("StartTime"))
                 {
-                    cn.Open();
-                    DateTime StartTime;
-                    DateTime EndTime;
-                    if (dtSS!.ExtendedProperties.ContainsKey("StartTime"))
-                    {
-                        // legacy
-                        StartTime = Convert.ToDateTime(dtSS.ExtendedProperties["StartTime"]);
-                        EndTime = Convert.ToDateTime(dtSS.ExtendedProperties["EndTime"]);
-                    }
-                    else if (dtSS.ExtendedProperties.Contains("StartTimeBin"))
-                    {
-                        StartTime = DateTime.FromBinary(long.Parse(((string)dtSS.ExtendedProperties["StartTimeBin"])!));
-                        EndTime = DateTime.FromBinary(long.Parse(((string)dtSS.ExtendedProperties["EndTimeBin"])!));
-                    }
-                    else
-                    {
-                        throw new Exception("Extended properties missing from schema snapshot");
-                    }
-                    var snapshotOptions = (string)dtSS.ExtendedProperties["SnapshotOptions"];
-                    var snapshotOptionsHash = SHA256.HashData(System.Text.Encoding.ASCII.GetBytes(snapshotOptions!));
-                    cmd.Parameters.AddWithValue("ss", dtSS);
-                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                    cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
-                    cmd.Parameters.AddWithValue("DB", databaseName);
-                    cmd.Parameters.AddWithValue("StartTime", StartTime);
-                    cmd.Parameters.AddWithValue("EndTime", EndTime);
-                    cmd.Parameters.AddWithValue("SnapshotOptions", snapshotOptions);
-                    cmd.Parameters.AddWithValue("SnapshotOptionsHash", snapshotOptionsHash);
-                    cmd.ExecuteNonQuery();
+                    // legacy
+                    StartTime = Convert.ToDateTime(dtSS.ExtendedProperties["StartTime"]);
+                    EndTime = Convert.ToDateTime(dtSS.ExtendedProperties["EndTime"]);
                 }
+                else if (dtSS.ExtendedProperties.Contains("StartTimeBin"))
+                {
+                    StartTime = DateTime.FromBinary(long.Parse(((string)dtSS.ExtendedProperties["StartTimeBin"])!));
+                    EndTime = DateTime.FromBinary(long.Parse(((string)dtSS.ExtendedProperties["EndTimeBin"])!));
+                }
+                else
+                {
+                    throw new Exception("Extended properties missing from schema snapshot");
+                }
+                var snapshotOptions = (string)dtSS.ExtendedProperties["SnapshotOptions"];
+                var snapshotOptionsHash = SHA256.HashData(System.Text.Encoding.ASCII.GetBytes(snapshotOptions!));
+                cmd.Parameters.AddWithValue("ss", dtSS);
+                cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+                cmd.Parameters.AddWithValue("DB", databaseName);
+                cmd.Parameters.AddWithValue("StartTime", StartTime);
+                cmd.Parameters.AddWithValue("EndTime", EndTime);
+                cmd.Parameters.AddWithValue("SnapshotOptions", snapshotOptions);
+                cmd.Parameters.AddWithValue("SnapshotOptionsHash", snapshotOptionsHash);
+                await cmd.ExecuteNonQueryAsync();
             }
             catch (SqlException ex) when (ex.Number == 2627)
             {
@@ -459,54 +453,52 @@ namespace DBADash
             }
         }
 
-        private void UpdateServerExtraProperties()
+        private async Task UpdateServerExtraPropertiesAsync()
         {
             if (data.Tables.Contains("ServerExtraProperties") && data.Tables["ServerExtraProperties"]!.Rows.Count == 1)
             {
                 var r = data.Tables["ServerExtraProperties"].Rows[0];
-                using (var cn = new SqlConnection(connectionString))
-                using (var cmd = new SqlCommand("ServerExtraProperties_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout })
-                {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                    cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
-                    cmd.Parameters.AddWithValue("ActivePowerPlanGUID", r["ActivePowerPlanGUID"]);
-                    cmd.Parameters.AddWithValue("ActivePowerPlan", r["ActivePowerPlan"]);
-                    cmd.Parameters.AddWithValue("ProcessorNameString", r["ProcessorNameString"]);
-                    cmd.Parameters.AddWithValue("SystemManufacturer", r["SystemManufacturer"]);
-                    cmd.Parameters.AddWithValue("SystemProductName", r["SystemProductName"]);
-                    cmd.Parameters.AddWithValue("IsAgentRunning", r["IsAgentRunning"]);
-                    cmd.Parameters.AddWithValue("InstantFileInitializationEnabled", r["InstantFileInitializationEnabled"]);
-                    cmd.Parameters.AddWithValue("OfflineSchedulers", r["OfflineSchedulers"]);
-                    cmd.Parameters.AddWithValue("ResourceGovernorEnabled", r["ResourceGovernorEnabled"]);
-                    if (r.Table.Columns.Contains("WindowsRelease"))
-                    { // older version of the agent.  no longer collected here
-                        cmd.Parameters.AddWithValue("WindowsRelease", r["WindowsRelease"]);
-                        cmd.Parameters.AddWithValue("WindowsSP", r["WindowsServicePackLevel"]);
-                        cmd.Parameters.AddWithValue("WindowsSKU", r["WindowsSKU"]);
-                    }
-                    cmd.Parameters.AddWithValue("LastMemoryDump", r["LastMemoryDump"]);
-                    cmd.Parameters.AddWithValue("MemoryDumpCount", r["MemoryDumpCount"]);
-                    cmd.Parameters.AddWithValue("WindowsCaption", r["WindowsCaption"]);
-                    if (r.Table.Columns.Contains("DBMailStatus")) // Backward compatibility with older agent versions
-                    {
-                        cmd.Parameters.AddWithValue("DBMailStatus", r["DBMailStatus"]);
-                    }
-                    if (r.Table.Columns.Contains("IsWindowsUpdate"))
-                    {
-                        cmd.Parameters.AddWithValue("IsWindowsUpdate", r["IsWindowsUpdate"]);
-                    }
-                    cmd.ExecuteNonQuery();
+                await using var cn = new SqlConnection(connectionString);
+                await using var cmd = new SqlCommand("ServerExtraProperties_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout };
+
+                await cn.OpenAsync();
+                cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+                cmd.Parameters.AddWithValue("ActivePowerPlanGUID", r["ActivePowerPlanGUID"]);
+                cmd.Parameters.AddWithValue("ActivePowerPlan", r["ActivePowerPlan"]);
+                cmd.Parameters.AddWithValue("ProcessorNameString", r["ProcessorNameString"]);
+                cmd.Parameters.AddWithValue("SystemManufacturer", r["SystemManufacturer"]);
+                cmd.Parameters.AddWithValue("SystemProductName", r["SystemProductName"]);
+                cmd.Parameters.AddWithValue("IsAgentRunning", r["IsAgentRunning"]);
+                cmd.Parameters.AddWithValue("InstantFileInitializationEnabled", r["InstantFileInitializationEnabled"]);
+                cmd.Parameters.AddWithValue("OfflineSchedulers", r["OfflineSchedulers"]);
+                cmd.Parameters.AddWithValue("ResourceGovernorEnabled", r["ResourceGovernorEnabled"]);
+                if (r.Table.Columns.Contains("WindowsRelease"))
+                { // older version of the agent.  no longer collected here
+                    cmd.Parameters.AddWithValue("WindowsRelease", r["WindowsRelease"]);
+                    cmd.Parameters.AddWithValue("WindowsSP", r["WindowsServicePackLevel"]);
+                    cmd.Parameters.AddWithValue("WindowsSKU", r["WindowsSKU"]);
                 }
+                cmd.Parameters.AddWithValue("LastMemoryDump", r["LastMemoryDump"]);
+                cmd.Parameters.AddWithValue("MemoryDumpCount", r["MemoryDumpCount"]);
+                cmd.Parameters.AddWithValue("WindowsCaption", r["WindowsCaption"]);
+                if (r.Table.Columns.Contains("DBMailStatus")) // Backward compatibility with older agent versions
+                {
+                    cmd.Parameters.AddWithValue("DBMailStatus", r["DBMailStatus"]);
+                }
+                if (r.Table.Columns.Contains("IsWindowsUpdate"))
+                {
+                    cmd.Parameters.AddWithValue("IsWindowsUpdate", r["IsWindowsUpdate"]);
+                }
+                await cmd.ExecuteNonQueryAsync();
             }
         }
 
-        private void TryUpdate(string tableName, ref List<Exception> exceptions)
+        private async Task TryUpdateAsync(string tableName, List<Exception> exceptions)
         {
             try
             {
-                retryPolicy.Execute(
-                    context => Update(tableName),
+                await retryPolicy.Execute(async _ => await UpdateAsync(tableName),
                     new Context(tableName)
                 );
             }
@@ -541,38 +533,38 @@ namespace DBADash
             }
         }
 
-        private void Update(string tableName)
+        private async Task UpdateAsync(string tableName)
         {
             var procName = (tableName.StartsWith("UserData.") ? "" : "dbo.") + tableName + "_Upd";
             var paramName = tableName.Replace("UserData.", "");
             var dt = data.Tables[tableName];
             if (dt == null) return;
-            using var cn = new SqlConnection(connectionString);
-            using var cmd = new SqlCommand(procName, cn) { CommandTimeout = CommandTimeout, CommandType = CommandType.StoredProcedure };
-            cn.Open();
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand(procName, cn) { CommandTimeout = CommandTimeout, CommandType = CommandType.StoredProcedure };
+            await cn.OpenAsync();
             if (dt.Rows.Count > 0)
             {
                 cmd.Parameters.AddWithValue(paramName, dt);
             }
             cmd.Parameters.AddWithValue("InstanceID", instanceID);
             cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
-            cmd.ExecuteNonQuery();
+            await cmd.ExecuteNonQueryAsync();
         }
 
-        public void InsertErrors()
+        public async Task InsertErrorsAsync()
         {
-            InsertErrors(connectionString, instanceID, snapshotDate, data, CommandTimeout);
+            await InsertErrorsAsync(connectionString, instanceID, snapshotDate, data, CommandTimeout);
         }
 
-        public static void InsertErrors(string connectionString, int? instanceID, DateTime SnapshotDate, DataSet ds, int commandTimeout)
+        public static async Task InsertErrorsAsync(string connectionString, int? instanceID, DateTime SnapshotDate, DataSet ds, int commandTimeout)
         {
             if (!ds.Tables.Contains("Errors") || ds.Tables["Errors"]!.Rows.Count <= 0) return;
             var dt = ds.Tables["Errors"];
-            InsertErrors(connectionString,instanceID,SnapshotDate,dt,commandTimeout);
+            await InsertErrorsAsync(connectionString, instanceID, SnapshotDate, dt, commandTimeout);
         }
 
-        public static void InsertErrors(string connectionString, int? instanceID, DateTime SnapshotDate, DataTable dt,
-            int commandTimeout=30)
+        public static async Task InsertErrorsAsync(string connectionString, int? instanceID, DateTime SnapshotDate, DataTable dt,
+            int commandTimeout = 30)
         {
             if (dt.Rows.Count == 0) return;
             if (dt.Columns.Count == 2)
@@ -580,11 +572,11 @@ namespace DBADash
                 dt.Columns.Add("ErrorContext");
             }
 
-            using var cn = new SqlConnection(connectionString);
-            using var cmd = new SqlCommand("CollectionErrorLog_Add", cn)
-                { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout };
-            
-            cn.Open();
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand("CollectionErrorLog_Add", cn)
+            { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout };
+
+            await cn.OpenAsync();
 
             cmd.Parameters.AddWithValue("Errors", dt);
             if (instanceID == null)
@@ -596,8 +588,7 @@ namespace DBADash
                 cmd.Parameters.AddWithValue("InstanceID", instanceID);
             }
             cmd.Parameters.AddWithValue("ErrorDate", SnapshotDate);
-            cmd.ExecuteNonQuery();
-            
+            await cmd.ExecuteNonQueryAsync();
         }
 
         private static DBADashAgent GetAgent(DataRow row)
@@ -615,51 +606,49 @@ namespace DBADash
             };
         }
 
-        private int UpdateInstance(ref DataRow rInstance)
+        private async Task<int> UpdateInstanceAsync(DataRow rInstance)
         {
-            using (var cn = new SqlConnection(connectionString))
-            using (var cmd = new SqlCommand("Instance_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout })
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand("Instance_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout };
+
+            await cn.OpenAsync();
+            cmd.Parameters.AddWithValue("ConnectionID", (string)rInstance["ConnectionID"]);
+            cmd.Parameters.AddWithValue("Instance", (string)rInstance["Instance"]);
+            cmd.Parameters.AddWithValue("SnapshotDate", (DateTime)rInstance["SnapshotDateUTC"]);
+
+            var importAgentID = importAgent.GetDBADashAgentID(connectionString);
+            var collectAgent = GetAgent(rInstance);
+            var collectAgentID = collectAgent.Equals(importAgent) ? importAgentID : collectAgent.GetDBADashAgentID(connectionString);
+
+            cmd.Parameters.AddWithValue("CollectAgentID", collectAgentID);
+            cmd.Parameters.AddWithValue("ImportAgentID", importAgentID);
+            if (rInstance.Table.Columns.Contains("host_platform"))
             {
-                cn.Open();
-
-                cmd.Parameters.AddWithValue("ConnectionID", (string)rInstance["ConnectionID"]);
-                cmd.Parameters.AddWithValue("Instance", (string)rInstance["Instance"]);
-                cmd.Parameters.AddWithValue("SnapshotDate", (DateTime)rInstance["SnapshotDateUTC"]);
-
-                var importAgentID = importAgent.GetDBADashAgentID(connectionString);
-                var collectAgent = GetAgent(rInstance);
-                var collectAgentID = collectAgent.Equals(importAgent) ? importAgentID : collectAgent.GetDBADashAgentID(connectionString);
-
-                cmd.Parameters.AddWithValue("CollectAgentID", collectAgentID);
-                cmd.Parameters.AddWithValue("ImportAgentID", importAgentID);
-                if (rInstance.Table.Columns.Contains("host_platform"))
-                {
-                    cmd.Parameters.AddWithValue("HostPlatform", rInstance["host_platform"]);
-                    cmd.Parameters.AddWithValue("HostDistribution", rInstance["host_distribution"]);
-                    cmd.Parameters.AddWithValue("HostRelease", rInstance["host_release"]);
-                    cmd.Parameters.AddWithValue("HostServicePackLevel", rInstance["host_service_pack_level"]);
-                    cmd.Parameters.AddWithValue("HostSKU", rInstance["host_sku"]);
-                    cmd.Parameters.AddWithValue("OSLanguageVersion", rInstance["os_language_version"]);
-                }
-                cmd.Parameters.AddWithValue("EditionID", (long)rInstance["EditionID"]);
-                if (rInstance.Table.Columns.Contains("UTCOffset"))
-                {
-                    cmd.Parameters.AddWithValue("UTCOffset", Convert.ToInt32(rInstance["UTCOffset"]));
-                }
-                if (rInstance.Table.Columns.Contains("contained_availability_group_id"))
-                {
-                    cmd.Parameters.AddWithValue("contained_availability_group_id", rInstance["contained_availability_group_id"]);
-                    cmd.Parameters.AddWithValue("contained_availability_group_name", rInstance["contained_availability_group_name"]);
-                }
-                if (rInstance.Table.Columns.Contains("EngineEdition"))
-                {
-                    cmd.Parameters.AddWithValue("EngineEdition", rInstance["EngineEdition"]);
-                }
-                var pInstanceID = cmd.Parameters.Add("InstanceID", SqlDbType.Int);
-                pInstanceID.Direction = ParameterDirection.Output;
-                cmd.ExecuteNonQuery();
-                return (int)pInstanceID.Value;
+                cmd.Parameters.AddWithValue("HostPlatform", rInstance["host_platform"]);
+                cmd.Parameters.AddWithValue("HostDistribution", rInstance["host_distribution"]);
+                cmd.Parameters.AddWithValue("HostRelease", rInstance["host_release"]);
+                cmd.Parameters.AddWithValue("HostServicePackLevel", rInstance["host_service_pack_level"]);
+                cmd.Parameters.AddWithValue("HostSKU", rInstance["host_sku"]);
+                cmd.Parameters.AddWithValue("OSLanguageVersion", rInstance["os_language_version"]);
             }
+            cmd.Parameters.AddWithValue("EditionID", (long)rInstance["EditionID"]);
+            if (rInstance.Table.Columns.Contains("UTCOffset"))
+            {
+                cmd.Parameters.AddWithValue("UTCOffset", Convert.ToInt32(rInstance["UTCOffset"]));
+            }
+            if (rInstance.Table.Columns.Contains("contained_availability_group_id"))
+            {
+                cmd.Parameters.AddWithValue("contained_availability_group_id", rInstance["contained_availability_group_id"]);
+                cmd.Parameters.AddWithValue("contained_availability_group_name", rInstance["contained_availability_group_name"]);
+            }
+            if (rInstance.Table.Columns.Contains("EngineEdition"))
+            {
+                cmd.Parameters.AddWithValue("EngineEdition", rInstance["EngineEdition"]);
+            }
+            var pInstanceID = cmd.Parameters.Add("InstanceID", SqlDbType.Int);
+            pInstanceID.Direction = ParameterDirection.Output;
+            await cmd.ExecuteNonQueryAsync();
+            return (int)pInstanceID.Value;
         }
     }
 }

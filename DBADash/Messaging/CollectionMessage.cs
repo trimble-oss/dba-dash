@@ -50,7 +50,7 @@ namespace DBADash.Messaging
                 Id,
                 CollectionTypes,
                 ConnectionID);
-            var src =await cfg.GetSourceConnectionAsync(ConnectionID);
+            var src = await cfg.GetSourceConnectionAsync(ConnectionID);
 
             var (standardCollections, customCollections) = ParseCollectionTypes(src, cfg);
 
@@ -85,7 +85,7 @@ namespace DBADash.Messaging
             else
             {
                 var fileName = DBADashSource.GenerateFileName(src.SourceConnection.ConnectionForFileName);
-                await DestinationHandling.WriteAllDestinations(collector.Data, src, fileName, cfg);
+                await DestinationHandling.WriteAllDestinationsAsync(collector.Data, src, fileName, cfg);
                 op.Complete();
                 return null;
             }

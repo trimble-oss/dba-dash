@@ -1,4 +1,5 @@
 ﻿using Amazon.S3.Model;
+using AsyncKeyedLock;
 using DBADash;
 using Newtonsoft.Json;
 using Quartz;
@@ -15,13 +16,14 @@ using static DBADash.DBADashConnection;
 
 namespace DBADashService
 {
-
-   [DisallowConcurrentExecution, PersistJobDataAfterExecution]
+    [DisallowConcurrentExecution, PersistJobDataAfterExecution]
     public class DBADashJob : IJob
     {
         private static readonly CollectionConfig config = SchedulerServiceConfig.Config;
         /* Ensure the Jobs collection runs once every ~24hrs.  Allowing 10mins as Jobs runs every 1hr by default */
         private static readonly int MAX_TIME_SINCE_LAST_JOB_COLLECTION = 1430;
+
+        private static readonly AsyncKeyedLocker<string> _asyncKeyedLocker = new();
 
         private static string GetID(DataSet ds)
         {
@@ -44,48 +46,49 @@ namespace DBADashService
 
             try
             {
-                if(OfflineInstances.IsOffline(cfg))
+                if (OfflineInstances.IsOffline(cfg))
                 {
-                    Log.Warning("Skipping {job} on {instance} as it is offline",context.JobDetail.Key, cfg.ConnectionID ?? cfg.SourceConnection.ConnectionForPrint);
+                    Log.Warning("Skipping {job} on {instance} as it is offline", context.JobDetail.Key, cfg.ConnectionID ?? cfg.SourceConnection.ConnectionForPrint);
                     return;
                 }
                 switch (cfg.SourceConnection.Type)
                 {
                     case ConnectionType.Directory:
-                    {
-                        Log.Debug("Wait for lock {0}", context.JobDetail.Key);
-                        // Ensures that this folder can only be processed by 1 job instance at a time.
-                        // Note: DisallowConcurrentExecution didn't prevent triggered at startup job from overlapping with the scheduled one
-                        lock (Program.Locker.GetLock(cfg.ConnectionString))
                         {
-                            Log.Debug("Lock acquired {0}", context.JobDetail.Key);
-                            CollectFolder(cfg);
-                        }
+                            Log.Debug("Wait for lock {0}", context.JobDetail.Key);
+                            // Ensures that this folder can only be processed by 1 job instance at a time.
+                            // Note: DisallowConcurrentExecution didn't prevent triggered at startup job from overlapping with the scheduled one
+                            using (await _asyncKeyedLocker.LockAsync(cfg.ConnectionString))
+                            {
+                                Log.Debug("Lock acquired {0}", context.JobDetail.Key);
+                                await CollectFolderAsync(cfg);
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                     case ConnectionType.AWSS3:
-                    {
-                        Log.Debug("Wait for lock {0}", context.JobDetail.Key);
-                        // Ensures that S3 folder can only be processed by 1 job instance at a time.
-                        // Note: DisallowConcurrentExecution didn't prevent triggered at startup job from overlapping with the scheduled one
-                        var semaphore =  ScheduleService.Locker.GetOrAdd(cfg.ConnectionString, _ => new SemaphoreSlim(1, 1));
-                        await semaphore.WaitAsync();
-                        try
                         {
-                            Log.Debug("Lock acquired {0}", context.JobDetail.Key);
-                            await CollectS3(cfg);
-                        }
-                        finally
-                        {
-                            semaphore.Release();
-                        }
+                            Log.Debug("Wait for lock {0}", context.JobDetail.Key);
+                            // Ensures that S3 folder can only be processed by 1 job instance at a time.
+                            // Note: DisallowConcurrentExecution didn't prevent triggered at startup job from overlapping with the scheduled one
+                            var semaphore = ScheduleService.Locker.GetOrAdd(cfg.ConnectionString, _ => new SemaphoreSlim(1, 1));
+                            await semaphore.WaitAsync();
+                            try
+                            {
+                                Log.Debug("Lock acquired {0}", context.JobDetail.Key);
+                                await CollectS3(cfg);
+                            }
+                            finally
+                            {
+                                semaphore.Release();
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                     case ConnectionType.SQL:
                         await CollectSQL(cfg, dataMap, context);
                         break;
+
                     case ConnectionType.Invalid:
                     default:
                         throw new Exception("Invalid Connection Type");
@@ -162,19 +165,17 @@ namespace DBADashService
 
                     if (customCollections.Count > 0)
                     {
-                        using (var op = Operation.Begin("Collect Custom Collections {types} from instance {instance}",
-                                   string.Join(", ", customCollections.Select(s => s.Key).ToArray()),
-                                   cfg.SourceConnection.ConnectionForPrint))
-                        {
-                            await collector.CollectAsync(customCollections);
-                            op.Complete();
-                        }
+                        using var op = Operation.Begin("Collect Custom Collections {types} from instance {instance}",
+                            string.Join(", ", customCollections.Select(s => s.Key).ToArray()),
+                            cfg.SourceConnection.ConnectionForPrint);
+                        await collector.CollectAsync(customCollections);
+                        op.Complete();
                     }
 
                     var fileName = DBADashSource.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
                     try
                     {
-                        DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName, config).Wait();
+                        await DestinationHandling.WriteAllDestinationsAsync(collector.Data, cfg, fileName, config);
 
                         collector.CacheCollectedText();
                         collector.CacheCollectedPlans();
@@ -183,7 +184,7 @@ namespace DBADashService
                     {
                         Log.Error(ex, "Error writing {filename} to destination.  File will be copied to {folder}",
                             fileName, SchedulerServiceConfig.FailedMessageFolder);
-                        DestinationHandling.WriteFolder(collector.Data, SchedulerServiceConfig.FailedMessageFolder,
+                        await DestinationHandling.WriteFolderAsync(collector.Data, SchedulerServiceConfig.FailedMessageFolder,
                             fileName, config);
                     }
                 }
@@ -192,12 +193,10 @@ namespace DBADashService
                 {
                     try
                     {
-                        using (var op = Operation.Begin("Collect Jobs from instance {instance}",
-                                   cfg.SourceConnection.ConnectionForPrint))
-                        {
-                            CollectJobs(cfg, dataMap);
-                            op.Complete();
-                        }
+                        using var op = Operation.Begin("Collect Jobs from instance {instance}",
+                            cfg.SourceConnection.ConnectionForPrint);
+                        await CollectJobsAsync(cfg, dataMap);
+                        op.Complete();
                     }
                     catch (Exception ex)
                     {
@@ -207,7 +206,7 @@ namespace DBADashService
             }
             catch (DatabaseConnectionException ex)
             {
-                OfflineInstances.Add(cfg,ex.InnerException.Message);
+                OfflineInstances.Add(cfg, ex.InnerException.Message);
             }
             catch (Exception ex)
             {
@@ -215,14 +214,14 @@ namespace DBADashService
             }
         }
 
-        private static async Task CollectJobs(DBADashSource cfg, JobDataMap dataMap)
+        private static async Task CollectJobsAsync(DBADashSource cfg, JobDataMap dataMap)
         {
             dataMap.TryGetDateTimeValue("JobCollectDate", out var jobLastCollected);
             dataMap.TryGetDateTimeValue("JobLastModified", out var jobLastModified);
             var minsSinceLastCollection = DateTime.Now.Subtract(jobLastCollected).TotalMinutes;
             var forcedCollectionDate = jobLastCollected.AddMinutes(MAX_TIME_SINCE_LAST_JOB_COLLECTION);
 
-            var collector = await DBCollector.CreateAsync(cfg, config.ServiceName,default,SchedulerServiceConfig.Config.LogInternalPerformanceCounters);
+            var collector = await DBCollector.CreateAsync(cfg, config.ServiceName, default, SchedulerServiceConfig.Config.LogInternalPerformanceCounters);
 
             // Setting the JobLastModified means we will only collect job data if jobs have been updated since the last collection.
             // This won't detect all changes - like changes to schedules.  Skip setting JobLastModified if we haven't collected in 1 day to ensure we collect at least once per day
@@ -253,12 +252,12 @@ namespace DBADashService
                 var fileName = DBADashSource.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
                 try
                 {
-                    DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName, config).Wait();
+                    await DestinationHandling.WriteAllDestinationsAsync(collector.Data, cfg, fileName, config);
                 }
                 catch (Exception ex)
                 {
                     Log.Error(ex, "Error writing {filename} to destination.  File will be copied to {folder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
-                    DestinationHandling.WriteFolder(collector.Data, SchedulerServiceConfig.FailedMessageFolder, fileName, config);
+                    await DestinationHandling.WriteFolderAsync(collector.Data, SchedulerServiceConfig.FailedMessageFolder, fileName, config);
                 }
             }
         }
@@ -296,7 +295,7 @@ namespace DBADashService
         /// <summary>
         /// Get files to import from folder and process in parallel for each instance.
         /// </summary>
-        private static void CollectFolder(DBADashSource cfg)
+        private static async Task CollectFolderAsync(DBADashSource cfg)
         {
             var folder = cfg.GetSource();
             Log.Logger.Information("Import from folder {folder}", folder);
@@ -306,13 +305,11 @@ namespace DBADashService
                 {
                     var files = Directory.EnumerateFiles(folder, "DBADash_*", SearchOption.TopDirectoryOnly).Where(f => f.EndsWith(".xml")).ToList();
 
-                    Dictionary<string, List<string>> filesToProcessByInstance = GetFilesToProcessByInstance(files);
+                    var filesToProcessByInstance = GetFilesToProcessByInstance(files);
                     // Parallel processing of files for each instance, but process the files for a given instance in order
-                    Parallel.ForEach(filesToProcessByInstance, instanceItem =>
-                    {
-                        List<string> instanceFiles = instanceItem.Value;
-                        ProcessFileListForCollectFolder(instanceFiles, cfg);
-                    });
+                    var tasks = filesToProcessByInstance.Select(instanceItem => instanceItem.Value).Select(instanceFiles => ProcessFileListForCollectFolderAsync(instanceFiles, cfg)).ToList();
+
+                    await Task.WhenAll(tasks);
                 }
                 catch (Exception ex)
                 {
@@ -328,19 +325,20 @@ namespace DBADashService
         /// <summary>
         /// Process a given list of files in order for a specific instance, writing collected data to the DBADash repository database
         /// </summary>
-        private static void ProcessFileListForCollectFolder(List<string> files, DBADashSource cfg)
+        private static async Task ProcessFileListForCollectFolderAsync(List<string> files, DBADashSource cfg)
         {
             files.Sort(); // Ensure we process files in order
-            foreach (string f in files)
+            foreach (var f in files)
             {
                 Log.Information("Processing file {0}", f);
                 var fileName = Path.GetFileName(f);
                 try
                 {
                     var ds = DataSetSerialization.DeserializeFromFile(f);
-                    lock (Program.Locker.GetLock(GetID(ds)))
+                    var id = GetID(ds);
+                    using (await Locker.AsyncLocker.LockAsync(id))
                     {
-                        DestinationHandling.WriteAllDestinations(ds, cfg, fileName, config).Wait();
+                        await DestinationHandling.WriteAllDestinationsAsync(ds, cfg, fileName, config);
                     }
                 }
                 catch (Exception ex)
@@ -369,12 +367,7 @@ namespace DBADashService
 
                 do
                 {
-                    ListObjectsResponse resp;
-                    using (var listObjectsTask = s3Cli.ListObjectsAsync(request))
-                    {
-                        listObjectsTask.Wait();
-                        resp = listObjectsTask.Result;
-                    }
+                    var resp = await s3Cli.ListObjectsAsync(request);
 
                     var fileList = resp.S3Objects.Where(f => f.Key.EndsWith(".xml")).Select(f => f.Key).ToList();
                     var filesToProcessByInstance = GetFilesToProcessByInstance(fileList);
@@ -382,11 +375,10 @@ namespace DBADashService
                     Log.Information("Processing {0} files from {1}. Instance Count: {2}", resp.S3Objects.Count, uri.Key, filesToProcessByInstance.Count);
 
                     // Start a thread to process the files associated with each instance.  Each instance will have it's files processed sequentially in the order they were collected.
-                    Parallel.ForEach(filesToProcessByInstance, instanceItem =>
-                    {
-                        List<string> instanceFiles = instanceItem.Value;
-                        ProcessS3FileListForCollectS3(instanceFiles, s3Cli, uri, cfg);
-                    });
+                    var tasks = filesToProcessByInstance.Select(instanceItem => instanceItem.Value).Select(instanceFiles => ProcessS3FileListForCollectS3Async(instanceFiles, s3Cli, uri, cfg)).ToList();
+
+                    await Task.WhenAll(tasks);
+
                     if (resp.IsTruncated)
                     {
                         Log.Debug("Response truncated.  Processing next marker for {0}", uri.Key);
@@ -408,38 +400,38 @@ namespace DBADashService
         /// <summary>
         /// Process a given list of S3 files for a specific instance in order, writing collected data to DBA Dash repository database
         /// </summary>
-        private static void ProcessS3FileListForCollectS3(List<string> instanceFiles, Amazon.S3.AmazonS3Client s3Cli, Amazon.S3.Util.AmazonS3Uri uri, DBADashSource cfg)
+        private static async Task ProcessS3FileListForCollectS3Async(List<string> instanceFiles, Amazon.S3.AmazonS3Client s3Cli, Amazon.S3.Util.AmazonS3Uri uri, DBADashSource cfg)
         {
             instanceFiles.Sort(); // Ensure files are processed in order
             foreach (var s3Path in instanceFiles)
             {
-                using var getObjectTask = s3Cli.GetObjectAsync(uri.Bucket, s3Path);
-                getObjectTask.Wait();
-
-                using var response = getObjectTask.Result;
-                using var responseStream = response.ResponseStream;
+                using var response = await s3Cli.GetObjectAsync(uri.Bucket, s3Path);
+                await using var responseStream = response.ResponseStream;
 
                 var ds = new DataSet();
                 ds.ReadXml(responseStream);
-
-                lock (Program.Locker.GetLock(GetID(ds))) // Ensures we process 1 item at a time for each instance
+                var id = GetID(ds);
+                using (await Locker.AsyncLocker.LockAsync(id))
                 {
                     var fileName = Path.GetFileName(s3Path);
                     try
                     {
-                        DestinationHandling.WriteAllDestinations(ds, cfg, fileName, config).Wait();
+                        await DestinationHandling.WriteAllDestinationsAsync(ds, cfg, fileName, config);
                     }
                     catch (Exception ex)
                     {
-                        Log.Error(ex, "Error importing file {filename}.  Writing file to failed message folder {folder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
-                        DestinationHandling.WriteFolder(ds, SchedulerServiceConfig.FailedMessageFolder, fileName, config);
+                        Log.Error(ex,
+                            "Error importing file {filename}.  Writing file to failed message folder {folder}",
+                            fileName, SchedulerServiceConfig.FailedMessageFolder);
+                        await DestinationHandling.WriteFolderAsync(ds, SchedulerServiceConfig.FailedMessageFolder,
+                            fileName, config);
                     }
                     finally
                     {
-                        using var deleteTask = s3Cli.DeleteObjectAsync(uri.Bucket, s3Path);
-                        deleteTask.Wait();
+                        await s3Cli.DeleteObjectAsync(uri.Bucket, s3Path);
                     }
                 }
+
                 Log.Information("Imported {file}", s3Path);
             }
         }

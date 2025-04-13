@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using DBADashGUI.Theme;
 
@@ -38,28 +39,25 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void AddBuckets()
+        private async Task AddBuckets()
         {
             var cred = DBADash.AWSTools.GetCredentials(AWSProfile, AccessKey, SecretKey);
-            using (var s3 = new Amazon.S3.AmazonS3Client(cred))
-            using (var listBucketsTask = s3.ListBucketsAsync())
-            {
-                listBucketsTask.Wait();
+            using var s3 = new Amazon.S3.AmazonS3Client(cred);
+            var result = await s3.ListBucketsAsync();
 
-                foreach (var b in listBucketsTask.Result.Buckets)
-                {
-                    cboBuckets.Items.Add(b.BucketName);
-                }
+            foreach (var b in result.Buckets)
+            {
+                cboBuckets.Items.Add(b.BucketName);
             }
         }
 
-        private void CboBuckets_DropDown(object sender, EventArgs e)
+        private async void CboBuckets_DropDown(object sender, EventArgs e)
         {
             if (cboBuckets.Items.Count == 0)
             {
                 try
                 {
-                    AddBuckets();
+                    await AddBuckets();
                 }
                 catch (Exception ex)
                 {

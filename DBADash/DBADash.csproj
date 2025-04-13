@@ -100,6 +100,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AsyncKeyedLock" Version="7.1.6" />
     <PackageReference Include="AWSSDK.Core" Version="3.7.402.35" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.416.5" />
     <PackageReference Include="AWSSDK.SQS" Version="3.7.400.129" />

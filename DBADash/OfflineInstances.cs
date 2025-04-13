@@ -16,10 +16,9 @@ namespace DBADashService
 {
     public static class OfflineInstances
     {
-
         private static CancellationTokenSource newInstanceAddedSignal = new CancellationTokenSource();
 
-        private static ConcurrentDictionary<string, (DBADashSource Source,DateTime FirstFail,DateTime LastFail,int FailCount,string FirstMessage, string LastMessage)> Instances { get; } = new();
+        private static ConcurrentDictionary<string, (DBADashSource Source, DateTime FirstFail, DateTime LastFail, int FailCount, string FirstMessage, string LastMessage)> Instances { get; } = new();
 
         public static int OfflineInstanceCount => Instances.Count;
 
@@ -39,8 +38,7 @@ namespace DBADashService
         {
             var tasks = connections.Where(src => src.SourceConnection.Type == DBADashConnection.ConnectionType.SQL)
                 .Select(instance => CheckConnectionAsync(instance, stoppingToken));
-            
-            
+
             // Await all tasks to complete
             var results = await Task.WhenAll(tasks);
 
@@ -49,7 +47,7 @@ namespace DBADashService
             {
                 if (!result.IsConnected)
                 {
-                    AddInternal(result.Source,result.message);
+                    AddInternal(result.Source, result.message);
                 }
             }
             await newInstanceAddedSignal.CancelAsync();
@@ -60,7 +58,7 @@ namespace DBADashService
             return Instances.ContainsKey(src.SourceConnection.ConnectionString);
         }
 
-        private static async Task DelayBetweenIterations(DateTime waitUntil,CancellationToken stoppingToken)
+        private static async Task DelayBetweenIterations(DateTime waitUntil, CancellationToken stoppingToken)
         {
             while (DateTime.Now < waitUntil)
             {
@@ -105,7 +103,7 @@ namespace DBADashService
                 }
                 try
                 {
-                    await LogOfflineInstances(config,lastCheck);
+                    await LogOfflineInstances(config, lastCheck);
                 }
                 catch (Exception ex)
                 {
@@ -133,9 +131,9 @@ namespace DBADashService
                     Log.Warning("{instance} is offline & doesn't have a ConnectionID set for tracking", instance.Value.Source.SourceConnection.ConnectionForPrint);
                     continue;
                 }
-                dt.Rows.Add(connectionId, instance.Value.FirstFail, instance.Value.LastFail, instance.Value.FirstMessage,instance.Value.LastMessage, instance.Value.FailCount);
+                dt.Rows.Add(connectionId, instance.Value.FirstFail, instance.Value.LastFail, instance.Value.FirstMessage, instance.Value.LastMessage, instance.Value.FailCount);
             }
-            
+
             dt.TableName = "OfflineInstances";
             ds.Tables.Add(dt);
             var dtAgent = GetAgentDataTable();
@@ -162,17 +160,17 @@ namespace DBADashService
             return AgentDataTable.Copy();
         }
 
-        public static async Task LogOfflineInstances(CollectionConfig config,DateTime snapshotDate)
+        public static async Task LogOfflineInstances(CollectionConfig config, DateTime snapshotDate)
         {
             var offlineInstances = GetOfflineDataSet(snapshotDate);
             var fileName = DBADashSource.GenerateFileName("OfflineInstances");
-            await DestinationHandling.WriteAllDestinations(offlineInstances,fileName, config);
+            await DestinationHandling.WriteAllDestinationsAsync(offlineInstances, fileName, config);
         }
 
         private static async Task CheckConnectionsAsync(CancellationToken stoppingToken)
         {
             var tasks = Instances.Select(instance => CheckConnectionAsync(instance.Value.Source, stoppingToken)).ToList();
-            
+
             // Await all tasks to complete
             var results = await Task.WhenAll(tasks);
 
@@ -186,31 +184,29 @@ namespace DBADashService
                 }
                 else
                 {
-                    var (Source, FirstFail, LastFail, FailCount,FirstMessage,LastMessage) = Instances[result.Source.SourceConnection.ConnectionString];
-                    Instances[result.Source.SourceConnection.ConnectionString] = (Source, FirstFail, result.FailTime,FailCount+1,FirstMessage,result.message);
+                    var (Source, FirstFail, LastFail, FailCount, FirstMessage, LastMessage) = Instances[result.Source.SourceConnection.ConnectionString];
+                    Instances[result.Source.SourceConnection.ConnectionString] = (Source, FirstFail, result.FailTime, FailCount + 1, FirstMessage, result.message);
                 }
             }
-            if(Instances.Count > 0)
+            if (Instances.Count > 0)
             {
                 Log.Warning("{InstanceCount} instances are offline", Instances.Count);
             }
         }
 
-        private static async Task<(DBADashSource Source, bool IsConnected,string message,DateTime FailTime)> CheckConnectionAsync(DBADashSource source,CancellationToken stoppingToken)
+        private static async Task<(DBADashSource Source, bool IsConnected, string message, DateTime FailTime)> CheckConnectionAsync(DBADashSource source, CancellationToken stoppingToken)
         {
             try
             {
-                await using var cn = new SqlConnection(source.SourceConnection.ConnectionString); 
-                
+                await using var cn = new SqlConnection(source.SourceConnection.ConnectionString);
+
                 await cn.OpenAsync(stoppingToken); // Attempt to open the connection asynchronously
-                return(source, true, string.Empty,DateTime.UtcNow); // Connection successful
+                return (source, true, string.Empty, DateTime.UtcNow); // Connection successful
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-               return (source, false,ex.Message, DateTime.UtcNow); // Connection failed
+                return (source, false, ex.Message, DateTime.UtcNow); // Connection failed
             }
-
         }
-
     }
 }
