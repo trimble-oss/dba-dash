@@ -7,7 +7,7 @@ AS
 UPDATE C
 	SET C.IsEnabled = CASE WHEN S.value IS NOT NULL THEN 1 ELSE 0 END
 FROM dbo.AvailabilityGroupMetricsConfig C
-LEFT JOIN STRING_SPLIT(@EnabledMetrics,',') S ON C.MetricName = TRIM(S.value)
+LEFT JOIN STRING_SPLIT(@EnabledMetrics,',') S ON C.MetricName = LTRIM(RTRIM(S.value))
 WHERE C.InstanceID = @InstanceID
 
 IF @InstanceID >0
@@ -24,7 +24,7 @@ BEGIN
 		   RootCfg.IsAggregate,
 		   CAST(1 AS BIT) AS IsEnabled
 	FROM dbo.AvailabilityGroupMetricsConfig RootCfg
-	INNER JOIN STRING_SPLIT(@EnabledMetrics,',') S ON RootCfg.MetricName = TRIM(S.value) /* Inner join as we only need to copy the enabled metrics */
+	INNER JOIN STRING_SPLIT(@EnabledMetrics,',') S ON RootCfg.MetricName = LTRIM(RTRIM(S.value)) /* Inner join as we only need to copy the enabled metrics */
 	WHERE RootCfg.InstanceID = -1 /*Root Level */
 	AND NOT EXISTS(SELECT 1 
 					FROM dbo.AvailabilityGroupMetricsConfig InstanceCfg
