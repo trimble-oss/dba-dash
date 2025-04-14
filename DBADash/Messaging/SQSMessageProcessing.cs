@@ -8,6 +8,9 @@ using Microsoft.Data.SqlClient;
 using Polly.Retry;
 using Polly;
 using System.Collections.Concurrent;
+using System.Data;
+using System.Linq;
+using System.Text;
 using System.Threading;
 
 namespace DBADash.Messaging
@@ -386,6 +389,24 @@ namespace DBADash.Messaging
                         Config);
                     return Task.CompletedTask;
                 });
+                if (responseMessage.Exception==null && responseMessage.Data.Tables.Contains("Errors") && responseMessage.Data.Tables["Errors"]!.Rows.Count>0)
+                {
+                    var dtErrors = responseMessage.Data.Tables["Errors"];
+                    var sbErrors = new StringBuilder();
+                    responseMessage.Type = ResponseMessage.ResponseTypes.Failure;
+                    try
+                    {
+                        dtErrors.Rows.Cast<DataRow>().Select(row => (string)row["ErrorMessage"]).ToList()
+                            .ForEach(errorMessage => { sbErrors.AppendLine(errorMessage); });
+                    }
+                    catch (Exception ex)
+                    {
+                        sbErrors.AppendLine("One of more errors occurred.");
+                        sbErrors.AppendLine(ex.Message);
+                    }
+
+                    responseMessage.Exception = new Exception(sbErrors.ToString());
+                }
                 responseMessage.Data = null;
             }
 

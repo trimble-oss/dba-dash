@@ -111,6 +111,7 @@ namespace DBADash
         private DatabaseEngineEdition engineEdition;
         public bool IsExtendedEventsNotSupportedException;
         private readonly bool DisableRetry;
+        public List<Exception> Exceptions = new();
 
         public const int DefaultIdentityCollectionThreshold = 5;
 
@@ -184,6 +185,7 @@ namespace DBADash
         public void LogError(Exception ex, string errorSource, string errorContext = "Collect")
         {
             Log.Error(ex, "{ErrorContext} {ErrorSource} {Connection}", errorContext, errorSource, Source.SourceConnection.ConnectionForPrint);
+            Exceptions.Add(ex);
             LogDBError(errorSource, ex.ToString(), errorContext);
         }
 
