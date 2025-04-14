@@ -938,5 +938,13 @@ namespace DBADashGUI.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        internal static System.Drawing.Bitmap PivotTable
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("PivotTable", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
