@@ -285,7 +285,7 @@ namespace DBADash.Messaging
             cmd.Parameters.AddWithValue("@InitDlgHandle", handle);
             cmd.Parameters.AddWithValue("@ConversationGroup", messageGroup);
             cmd.Parameters.AddWithValue("@DBADashAgentID", agentID);
-            cmd.Parameters.AddWithValue("@LifeTime", LifeTime);
+            cmd.Parameters.AddWithValue("@Lifetime", LifeTime);
             await cmd.ExecuteNonQueryAsync();
         }
     }
