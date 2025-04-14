@@ -8,7 +8,7 @@
 WITH EXECUTE AS OWNER
 AS
 /* 
-	Used by the GUI to communicate with the service 
+	Used by the GUI to communicate with the service.
 */
 DECLARE @Service NVARCHAR(128) = CONCAT('//dbadash.com/DBADashService/ComsTarget',@DBADashAgentID)
 DECLARE @SQL NVARCHAR(MAX)
@@ -25,7 +25,7 @@ BEGIN DIALOG @InitDlgHandle
 	FROM SERVICE [//dbadash.com/DBADashService/ComsInit]
     TO SERVICE @Service
 	ON CONTRACT [//dbadash.com/DBADashService/ComsContract] 
-	WITH ENCRYPTION = OFF,RELATED_CONVERSATION_GROUP = @ConversationGroup,LIFETIME = @LifeTime;
+	WITH ENCRYPTION = OFF,RELATED_CONVERSATION_GROUP = @ConversationGroup,LIFETIME = @Lifetime;
 
 SEND ON CONVERSATION @InitDlgHandle
         MESSAGE TYPE
