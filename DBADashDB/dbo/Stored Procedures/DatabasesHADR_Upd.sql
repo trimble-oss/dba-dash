@@ -5,7 +5,7 @@
 )
 AS
 SET XACT_ABORT ON;
-DECLARE @Ref VARCHAR(30)='DatabaseHADR'
+DECLARE @Ref VARCHAR(30)='DatabasesHADR'
 IF NOT EXISTS(	SELECT 1 
 				FROM dbo.CollectionDates 
 				WHERE SnapshotDate>=@SnapshotDate 
