@@ -1422,16 +1422,20 @@ DELETE dbo.CollectionDates
 WHERE Reference IN('AgentJobs','BlockingSnapshot','Database')
 
 --replace old defaults
-UPDATE CollectionDatesThresholds
+UPDATE dbo.CollectionDatesThresholds
 SET WarningThreshold=1445,
 	CriticalThreshold=2880
 WHERE Reference IN('Drivers','OSLoadedModules')
 AND WarningThreshold=125
 AND CriticalThreshold=180
 
+UPDATE dbo.CollectionDates
+	SET Reference = 'DatabasesHADR'
+WHERE Reference = 'DatabaseHADR'
+
 DELETE CD 
 FROM dbo.CollectionDates CD
-WHERE Reference='DatabaseHADR'
+WHERE Reference='DatabasesHADR'
 AND NOT EXISTS(SELECT 1 
 		FROM dbo.DatabasesHADR HA
 		JOIN dbo.Databases D ON D.DatabaseID = HA.DatabaseID
