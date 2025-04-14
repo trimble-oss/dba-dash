@@ -86,6 +86,10 @@ namespace DBADash.Messaging
             {
                 var fileName = DBADashSource.GenerateFileName(src.SourceConnection.ConnectionForFileName);
                 await DestinationHandling.WriteAllDestinationsAsync(collector.Data, src, fileName, cfg);
+                if (collector.Exceptions.Any())
+                {
+                    throw new AggregateException(collector.Exceptions);
+                }
                 op.Complete();
                 return null;
             }
