@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
+using Font = System.Drawing.Font;
 
 namespace DBADashGUI.CustomReports
 {
@@ -156,6 +157,13 @@ namespace DBADashGUI.CustomReports
             var equal = new ToolStripMenuItem("=", null, (_, _) => FilterByValueWithPrompt("="));
             var notEqual = new ToolStripMenuItem("<>", null, (_, _) => FilterByValueWithPrompt("<>"));
 
+            var transpose = new ToolStripMenuItem("Transpose", Properties.Resources.PivotTable);
+            var transposeGrid = new ToolStripMenuItem("Grid", Properties.Resources.PivotTable,
+                (_, _) => TransposeGrid());
+            var transposeSelected = new ToolStripMenuItem("Selected Rows", Properties.Resources.PivotTable,
+                (sender, args) => TransposeSelected());
+            transpose.DropDownItems.AddRange(new ToolStripItem[] { transposeSelected, transposeGrid });
+
             allFilters.DropDownItems.AddRange(new ToolStripItem[]
                 { filterLike, filterNotLike, equal, notEqual, greaterThan, lessThan, greaterThanEqual, lessThanEqual });
             var saveTable = GetSaveTableMenuItem();
@@ -168,6 +176,8 @@ namespace DBADashGUI.CustomReports
                     copyCell,
                     GetExportToExcelMenuItem(),
                     saveTable,
+                    new ToolStripSeparator(),
+                    transpose,
                     new ToolStripSeparator(),
                     GetColumnsMenuItem(),
                     new ToolStripSeparator(),
@@ -211,6 +221,121 @@ namespace DBADashGUI.CustomReports
                 saveTable.DropDownItems[0].Enabled = DataSource is DataTable or DataView;
                 CellRowColCountToolStripMenuItem.Text = GetRowColCount;
             };
+        }
+
+        private void TransposeSelected()
+        {
+            var rows = SelectedCells.Cast<DataGridViewCell>().Select(cell => cell.RowIndex).Distinct()
+                .Select(rowIndex => Rows[rowIndex]).ToList();
+            ShowTransposedRows(rows);
+        }
+
+        private void TransposeGrid()
+        {
+            ShowTransposedRows(Rows.Cast<DataGridViewRow>().ToList());
+        }
+
+        /// <summary>
+        /// Allow user to update the header text of the selected row in the transposed grid.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private static void TransposedGrid_CellContentClick(object sender, DataGridViewCellEventArgs args)
+        {
+            if (args.RowIndex < 0 || args.ColumnIndex != 0) return;
+            if (MessageBox.Show("Update header text to selected row?", "Update Header", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+
+            var newGrid = (DataGridView)sender;
+            var existingHeaders = new HashSet<string>();
+            for (var colIndex = 1; colIndex < newGrid.Columns.Count; colIndex++)
+            {
+                var cellValue = newGrid.Rows[args.RowIndex].Cells[colIndex].FormattedValue;
+                var headerTextBase = cellValue?.ToString() ?? newGrid.Columns[colIndex].Name;
+                if (string.IsNullOrEmpty(headerTextBase))
+                {
+                    headerTextBase = "{empty}";
+                }
+                var headerText = headerTextBase;
+                var i = 1;
+                // Ensure column header is unique
+                while (existingHeaders.Contains(headerText))
+                {
+                    headerText = headerTextBase + $" [{i}]";
+                    i++;
+                }
+                existingHeaders.Add(headerText);
+                newGrid.Columns[colIndex].HeaderText = headerText;
+            }
+        }
+
+        /// <summary>
+        /// Convert rows to columns and columns to rows.  This is used for transposing the grid.
+        /// </summary>
+        /// <param name="grid"></param>
+        /// <param name="rows"></param>
+        /// <returns></returns>
+        public static DataGridView TransposeRows(DataGridView grid, IReadOnlyCollection<DataGridViewRow> rows)
+        {
+            const int maxRows = 65535;
+            if (rows.Count > maxRows)
+            {
+                throw new ArgumentException($"Maximum row count {maxRows} exceeded");
+            }
+            const string UpdateHeaderTextToolTipText = "Click to update header text";
+            var newGrid = new DBADashDataGridView() { Dock = DockStyle.Fill, AllowUserToAddRows = false, AllowUserToDeleteRows = false, ReadOnly = true, RowHeadersVisible = false };
+            newGrid.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Column", ToolTipText = UpdateHeaderTextToolTipText, FillWeight = 1, SortMode = DataGridViewColumnSortMode.Automatic });
+
+            newGrid.CellContentClick += TransposedGrid_CellContentClick;
+
+            foreach (DataGridViewColumn col in grid.Columns)
+            {
+                newGrid.Rows.Add(col.HeaderText.Replace("\n", " "));
+                if (!col.Visible)
+                {
+                    newGrid.Rows[^1].Visible = false;
+                }
+                newGrid.Rows[^1].Cells[0].ToolTipText = UpdateHeaderTextToolTipText;
+            }
+
+            for (var rowIndex = 0; rowIndex < rows.Count(); rowIndex++)
+            {
+                newGrid.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = $"{$"Row {rowIndex + 1}"}", Name = (rowIndex + 1).ToString(), FillWeight = 1, SortMode = DataGridViewColumnSortMode.Automatic });
+                var newColIndex = rowIndex + 1;
+                for (var colIndex = 0; colIndex < grid.Columns.Count; colIndex++)
+                {
+                    var newCell = newGrid[newColIndex, colIndex];
+                    var oldCell = grid.Rows[rowIndex].Cells[colIndex];
+                    newCell.Value = grid.Rows[rowIndex].Cells[colIndex].FormattedValue?.ToString();
+                    newCell.Style = oldCell.Style;
+                }
+            }
+
+            return newGrid;
+        }
+
+        private void ShowTransposedRows(IReadOnlyCollection<DataGridViewRow> rows)
+        {
+            try
+            {
+                var newGrid = TransposeRows(this, rows);
+                ShowGridInNewForm(newGrid, $"Transposed {ResultSetName}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public static void ShowGridInNewForm(Control grid, string title)
+        {
+            if (grid.Parent != null)
+            {
+                grid = grid.DeepCopy();
+            }
+            var frm = new Form() { Text = title, WindowState = FormWindowState.Maximized };
+            grid.Dock = DockStyle.Fill;
+            frm.Controls.Add(grid);
+            frm.Show();
         }
 
         private string GetRowColCount => $"Rows: {Rows.Count}   |   Cols: {Columns.Cast<DataGridViewColumn>().Count(column => column.Visible)}";
