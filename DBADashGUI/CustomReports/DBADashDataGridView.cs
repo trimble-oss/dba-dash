@@ -54,7 +54,7 @@ namespace DBADashGUI.CustomReports
         }
 
         private ToolStripMenuItem GetClearFilterMenuItem() => new("Clear Filters", Properties.Resources.Eraser_16x,
-            (_, _) => SetFilter(string.Empty));
+            (_, _) => ClearFilter());
 
         private ToolStripMenuItem GetColumnsMenuItem() => new("Columns", Properties.Resources.Column_16x,
             (_, _) => this.PromptColumnSelection());
@@ -120,10 +120,9 @@ namespace DBADashGUI.CustomReports
             );
             ColumnContextMenuOpening += (sender, e) =>
             {
-                var filterSupported = DataSource is DataView;
-                clearFilter.Enabled = !string.IsNullOrEmpty((DataSource as DataView)?.RowFilter);
-                clearFilter.Visible = filterSupported;
-                editFilter.Visible = filterSupported;
+                var isDataView = DataSource is DataView;
+                clearFilter.Enabled = HasFilter || (!isDataView); 
+                editFilter.Visible = isDataView;
                 saveTable.DropDownItems[0].Enabled = DataSource is DataTable or DataView;
                 hideColumn.Visible = ClickedColumnIndex >= 0;
                 RowColumnCountToolStripMenuItem.Text = GetRowColCount;
@@ -199,25 +198,22 @@ namespace DBADashGUI.CustomReports
                 var dgv = (DataGridView)sender;
                 if (dgv == null) return;
                 var columnType = dgv.Columns[ClickedColumnIndex].ValueType;
-                var filterSupported = DataSource is DataView;
-                var columnFilterSupported = filterSupported &&
-                                            columnType != typeof(byte[]) &&
+                var isDataView = DataSource is DataView;
+                var columnFilterSupported = columnType != typeof(byte[]) &&
                                             columnType != typeof(object) &&
-                                            !string.IsNullOrEmpty(dgv.Columns[ClickedColumnIndex].DataPropertyName);
+                                            (!(string.IsNullOrEmpty(dgv.Columns[ClickedColumnIndex].DataPropertyName) && isDataView));
                 var inFilterSupported = AreMultipleCellsSelectedFromTheSameColumnOnlyAndMatchClickedColumnIndex() &&
-                                        columnFilterSupported;
-                var likeFilterSupported = columnFilterSupported && columnType == typeof(string);
-                allFilters.Visible = columnFilterSupported;
+                                        columnFilterSupported && isDataView;
+                var likeFilterSupported = columnFilterSupported && columnType == typeof(string) && isDataView;
+                allFilters.Visible = isDataView && columnFilterSupported;
                 inFilter.Visible = inFilterSupported;
                 notInFilter.Visible = inFilterSupported;
                 filterLike.Visible = likeFilterSupported;
                 filterNotLike.Visible = likeFilterSupported;
-                cellClearFilterMenuItem.Enabled = HasFilter;
+                cellClearFilterMenuItem.Enabled = HasFilter || (!isDataView);
                 filterByValue.Visible = columnFilterSupported;
                 excludeValue.Visible = columnFilterSupported;
-                editFilter.Visible = filterSupported;
-                cellClearFilterMenuItem.Visible = filterSupported;
-                filterSeparator.Visible = filterSupported;
+                editFilter.Visible = isDataView;
                 saveTable.DropDownItems[0].Enabled = DataSource is DataTable or DataView;
                 CellRowColCountToolStripMenuItem.Text = GetRowColCount;
             };
@@ -542,7 +538,25 @@ namespace DBADashGUI.CustomReports
             }
         }
 
-        public void ClearFilter() => SetFilter(string.Empty);
+        public void ClearFilter()
+        {
+            if (DataSource is DataView)
+            {
+                SetFilter(string.Empty);
+            }
+            else
+            {
+                SetAllRowsVisible();
+            }
+        }
+
+        public void SetAllRowsVisible()
+        {
+            foreach (var row in Rows.OfType<DataGridViewRow>())
+            {
+                row.Visible = true;
+            }
+        }
 
         private void FormatFilteredColumns()
         {
@@ -593,10 +607,30 @@ namespace DBADashGUI.CustomReports
             }
         }
 
+        /// <summary>
+        /// Filter by value when data source is not a DataView.  Marking rows visible/not visible based on the value.
+        /// </summary>
+        private void GridFilterByValue(int colIndex, string operatorSymbol, object value)
+        {
+            foreach (var row in Rows.OfType<DataGridViewRow>())
+            {
+                row.Visible = operatorSymbol switch
+                {
+                    "=" => row.Visible && row.Cells[colIndex].Value.DBNullToNull()?.ToString() == value?.ToString(),
+                    "<>" => row.Visible && row.Cells[colIndex].Value.DBNullToNull()?.ToString() != value?.ToString(),
+                    _ => throw new ArgumentException("Operator symbol is not supported", nameof(operatorSymbol))
+                };
+            }
+        }
+
         private void FilterByValue_Click(object sender, EventArgs e)
         {
-            if (DataSource is not DataView dv) return;
             var operatorSymbol = ((ToolStripMenuItem)sender).Tag!.ToString();
+            if (DataSource is not DataView dv)
+            {
+                GridFilterByValue(ClickedColumnIndex, operatorSymbol, SelectedValue);
+                return;
+            }
 
             AppendFilter(SelectedValue, SelectedColumnName, operatorSymbol);
         }
