@@ -62,6 +62,30 @@ namespace DBADashGUI.CustomReports
         private ToolStripMenuItem GetEditFilterMenuItem() => new("Edit Filter", Properties.Resources.EditFilter_16x,
             (_, _) => PromptFilter());
 
+        private ToolStripMenuItem GetAutoResizeColumns()
+        {
+            var tsAutoResize = new ToolStripMenuItem("Auto Resize Columns", Properties.Resources.AutosizeStretch_16x);
+            tsAutoResize.DropDownItems.AddRange(new[] {
+                    new ToolStripMenuItem("[Smart] All", null,
+                        (_, _) => this.AutoResizeColumnsWithMaxColumnWidth(DataGridViewAutoSizeColumnsMode.AllCells)),
+                    new ToolStripMenuItem("[Smart] All Except Header",null,
+                        (_, _) => this.AutoResizeColumnsWithMaxColumnWidth(DataGridViewAutoSizeColumnsMode.AllCellsExceptHeader)),
+                    new ToolStripMenuItem("[Smart] Displayed", null,
+                        (_, _) => this.AutoResizeColumnsWithMaxColumnWidth(DataGridViewAutoSizeColumnsMode.DisplayedCells)),
+                    new ToolStripMenuItem("[Smart] Displayed Except Header", null,
+                        (_, _) => this.AutoResizeColumnsWithMaxColumnWidth(DataGridViewAutoSizeColumnsMode.DisplayedCellsExceptHeader)),
+                    new ToolStripMenuItem("All", null,
+                        (_, _) => this.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells)),
+                    new ToolStripMenuItem("All Except Header", null,
+                        (_, _) => this.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCellsExceptHeader)),
+                    new ToolStripMenuItem("Displayed", null,
+                        (_, _) => this.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells)),
+                    new ToolStripMenuItem("Displayed Except Header", null,
+                        (_, _) => this.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCellsExceptHeader)),
+            });
+            return tsAutoResize;
+        }
+
         private readonly ToolStripMenuItem CellRowColCountToolStripMenuItem = new ToolStripMenuItem();
         private readonly ToolStripMenuItem RowColumnCountToolStripMenuItem = new ToolStripMenuItem();
 
@@ -109,6 +133,7 @@ namespace DBADashGUI.CustomReports
                     saveTable,
                     new ToolStripSeparator(),
                     GetColumnsMenuItem(),
+                    GetAutoResizeColumns(),
                     hideColumn,
                     new ToolStripSeparator(),
                     editFilter,
@@ -121,7 +146,7 @@ namespace DBADashGUI.CustomReports
             ColumnContextMenuOpening += (sender, e) =>
             {
                 var isDataView = DataSource is DataView;
-                clearFilter.Enabled = HasFilter || (!isDataView); 
+                clearFilter.Enabled = HasFilter || (!isDataView);
                 editFilter.Visible = isDataView;
                 saveTable.DropDownItems[0].Enabled = DataSource is DataTable or DataView;
                 hideColumn.Visible = ClickedColumnIndex >= 0;
@@ -179,6 +204,7 @@ namespace DBADashGUI.CustomReports
                     transpose,
                     new ToolStripSeparator(),
                     GetColumnsMenuItem(),
+                    GetAutoResizeColumns(),
                     new ToolStripSeparator(),
                     inFilter,
                     notInFilter,

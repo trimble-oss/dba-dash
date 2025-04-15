@@ -946,5 +946,15 @@ namespace DBADashGUI.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+
+        internal static System.Drawing.Bitmap AutosizeStretch_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("AutosizeStretch_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
     }
 }
