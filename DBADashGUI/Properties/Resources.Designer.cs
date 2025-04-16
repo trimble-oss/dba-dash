@@ -956,5 +956,39 @@ namespace DBADashGUI.Properties {
             }
         }
 
+        internal static System.Drawing.Bitmap SelectRows
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("SelectRows", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        internal static System.Drawing.Bitmap SelectColumns
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("SelectColumns", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap SelectTable
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("SelectTable", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap Select
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("Select", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

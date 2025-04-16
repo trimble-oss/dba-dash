@@ -192,6 +192,20 @@ namespace DBADashGUI.CustomReports
                 { filterLike, filterNotLike, equal, notEqual, greaterThan, lessThan, greaterThanEqual, lessThanEqual });
             var saveTable = GetSaveTableMenuItem();
 
+            var select = new ToolStripMenuItem("Select", Properties.Resources.Select);
+            var selectRow = new ToolStripMenuItem("Row", Properties.Resources.SelectRows,
+                (_, _) => this.Rows[ClickedRowIndex].Selected = true);
+            var selectColumn = new ToolStripMenuItem("Column", Properties.Resources.SelectColumns,
+                (_, _) =>
+                {
+                    foreach (var row in Rows.OfType<DataGridViewRow>())
+                    {
+                        row.Cells[ClickedColumnIndex].Selected = true;
+                    }
+                });
+            var selectAll = new ToolStripMenuItem("All", Properties.Resources.SelectTable, (_, _) => SelectAll());
+            select.DropDownItems.AddRange(new ToolStripItem[] { selectRow, selectColumn, selectAll });
+
             CellContextMenu.Items.AddRange(
                 new ToolStripItem[]
                 {
@@ -203,6 +217,7 @@ namespace DBADashGUI.CustomReports
                     new ToolStripSeparator(),
                     transpose,
                     new ToolStripSeparator(),
+                    select,
                     GetColumnsMenuItem(),
                     GetAutoResizeColumns(),
                     new ToolStripSeparator(),
