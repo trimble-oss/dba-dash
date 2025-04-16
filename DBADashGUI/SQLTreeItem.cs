@@ -1,14 +1,15 @@
 ﻿using DBADash;
 using DBADashGUI.CustomReports;
+using DBADashGUI.DBADashAlerts;
 using DBADashGUI.Properties;
+using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.DBADashAlerts;
-using DBADashGUI.Performance;
 
 namespace DBADashGUI
 {
@@ -242,30 +243,18 @@ namespace DBADashGUI
 
         public string FullName() => string.IsNullOrEmpty(_schemaName) ? _objectName : _schemaName + "." + _objectName;
 
-        public SQLTreeItem(string objectName, string schemaName, TreeType type) : base()
+        public SQLTreeItem(string objectName, TreeType type, Dictionary<string, object> attributes = null, string schemaName = null) : base()
         {
-            _objectName = objectName;
             _schemaName = schemaName;
-            Type = type;
-            Text = FullName();
-            SetIcon();
-        }
-
-        public SQLTreeItem(string objectName, TreeType type) : base()
-        {
-            _objectName = objectName;
-            Text = objectName;
-            Type = type;
-            SetIcon();
-        }
-
-        public SQLTreeItem(string objectName, TreeType type, Dictionary<string, object> attributes) : base()
-        {
             _objectName = objectName;
             Text = objectName;
             Type = type;
             _attributes = attributes;
             SetIcon();
+            if (type is TreeType.DBADashRoot or TreeType.Instance or TreeType.InstanceFolder or TreeType.AzureInstance)
+            {
+                AddFindDatabase();
+            }
         }
 
         public SQLTreeItem(string objectName, string schemaName, string type)
@@ -526,7 +515,7 @@ namespace DBADashGUI
 
         public void AddDummyNode()
         {
-            SQLTreeItem dummyNode = new("", "", TreeType.DummyNode);
+            SQLTreeItem dummyNode = new("", TreeType.DummyNode);
             Nodes.Add(dummyNode);
             AddRefreshContextMenu();
         }
@@ -617,6 +606,98 @@ namespace DBADashGUI
             mnuRefresh.Click += MnuRefresh_Click;
         }
 
+        private void AddFindDatabase()
+        {
+            ContextMenuStrip ??= new ContextMenuStrip();
+            if (ContextMenuStrip.Items.Cast<ToolStripMenuItem>().Any(mnu => mnu.Text == @"Find Database")) return;
+            var mnuFindDB = new ToolStripMenuItem("Find Database") { Image = Resources.Database_16x };
+            ContextMenuStrip.Items.Add(mnuFindDB);
+            mnuFindDB.Click += FindDatabase;
+        }
+
+        private async void FindDatabase(object sender, EventArgs e)
+        {
+            const int MaxMatches = 10;
+            var dbName = string.Empty;
+            if (CommonShared.ShowInputDialog(ref dbName, "Find Database", default, "Enter database name") != DialogResult.OK || string.IsNullOrEmpty(dbName)) return;
+            try
+            {
+                var dbs = await CommonData.GetDatabasesAsync(Context.InstanceIDs, dbName);
+
+                if (dbs.Count > 0)
+                {
+                    var foundCount = 0;
+                    foreach (var db in dbs)
+                    {
+                        var instanceNode = FindInstance(db.InstanceID);
+                        if (instanceNode == null) continue;
+                        if (!instanceNode.Parent.IsExpanded)
+                        {
+                            instanceNode.Parent.Expand();
+                        }
+                        instanceNode.Expand();
+                        SQLTreeItem dbNode;
+                        if (instanceNode.Type == TreeType.AzureDatabase)
+                        {
+                            dbNode = instanceNode;
+                        }
+                        else
+                        {
+                            var dbFolder = instanceNode.FindChildOfType(TreeType.DatabasesFolder);
+                            dbFolder.Expand();
+                            var systemDbs = dbFolder.FindChildOfType(TreeType.Folder);
+                            dbNode = dbFolder.Nodes.OfType<SQLTreeItem>().FirstOrDefault(
+                                n => n.DatabaseID == db.DatabaseID,
+                                systemDbs.Nodes.OfType<SQLTreeItem>()
+
+                                    .FirstOrDefault(n => n.DatabaseID == db.DatabaseID));
+                            if (dbNode == null) continue;
+                            if (dbNode.Parent == systemDbs)
+                            {
+                                systemDbs.Expand();
+                            }
+
+                            dbNode.Expand();
+                        }
+
+                        dbNode.NodeFont = new Font(this.TreeView.Font, FontStyle.Bold);
+                        dbNode.Text = dbNode.Text; // Fix for text truncation after applying bold font
+                        if (foundCount == 0)
+                        {
+                            this.TreeView.SelectedNode = dbNode; // Select the first match
+                        }
+                        foundCount++;
+                        if (foundCount >= MaxMatches)
+                        {
+                            MessageBox.Show(
+                                $"Search returned {dbs.Count} matches.  Highlighting the top {foundCount} databases",
+                                "Find Database", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            break;
+                        }
+                    }
+
+                    var selectedNode = (SQLTreeItem)(this.TreeView.SelectedNode);
+                    MessageBox.Show($"Found {foundCount} database(s).\nSelected {selectedNode.DatabaseName} on {selectedNode.InstanceName}", "Find Database", MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Database not found", "Find Database", MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                }
+            }
+            catch (SqlException ex)
+            {
+                MessageBox.Show("Error finding database.\n" + ex.Message, "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error finding database.  Try refreshing the tree\n" + ex.Message, "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void MnuRefresh_Click(object sender, EventArgs e)
         {
             RefreshNode();
@@ -650,7 +731,7 @@ namespace DBADashGUI
             var mnuInstanceActions = new ToolStripMenuItem("Instance Actions") { Image = Resources.DatabaseSettings_16x };
 
             var mnuAddAlertBlackout = new ToolStripMenuItem("Add Alert Blackout")
-                { Image = Resources.NotificationAlertMute_16x };
+            { Image = Resources.NotificationAlertMute_16x };
             mnuAddAlertBlackout.Click += MnuAddAlertBlackout_Click;
 
             var mnuHidden = new ToolStripMenuItem("Hidden");

@@ -823,6 +823,7 @@
     <Build Include="dbo\Stored Procedures\AvailabilityGroupMetricsConfig_Get.sql" />
     <Build Include="dbo\Stored Procedures\AvailabilityGroupMetricsConfig_Upd.sql" />
     <Build Include="dbo\Stored Procedures\AvailabilityGroupMetricsConfig_Del.sql" />
+    <Build Include="dbo\Stored Procedures\DatabaseFinder_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

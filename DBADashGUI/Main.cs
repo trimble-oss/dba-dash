@@ -417,13 +417,12 @@ namespace DBADashGUI
 
         #region Tree
 
-        private ContextMenuStrip RootRefreshContextMenu()
+        private void AddRootRefreshContextMenu(SQLTreeItem rootNode)
         {
-            var ctxMnu = new ContextMenuStrip();
+            rootNode.ContextMenuStrip ??= new ContextMenuStrip();
             var mnuRootRefresh = new ToolStripMenuItem("Refresh") { Image = Resources._112_RefreshArrow_Green_16x16_72 };
-            ctxMnu.Items.Add(mnuRootRefresh);
+            rootNode.ContextMenuStrip.Items.Insert(0, mnuRootRefresh);
             mnuRootRefresh.Click += MnuRootRefresh_Click;
-            return ctxMnu;
         }
 
         private void MnuRootRefresh_Click(object sender, EventArgs e)
@@ -436,8 +435,8 @@ namespace DBADashGUI
             VisitedNodes.Clear();
             tsBack.Enabled = false;
             tv1.Nodes.Clear();
-            var root = new SQLTreeItem(Common.RepositoryDBConnection.Name, SQLTreeItem.TreeType.DBADashRoot)
-            { ContextMenuStrip = RootRefreshContextMenu() };
+            var root = new SQLTreeItem(Common.RepositoryDBConnection.Name, SQLTreeItem.TreeType.DBADashRoot);
+            AddRootRefreshContextMenu(root);
             var changes = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
             var hadr = new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR);
             var checks = new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks);

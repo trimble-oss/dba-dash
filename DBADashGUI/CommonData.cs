@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Runtime.Caching;
+using System.Threading.Tasks;
 using DBADash;
+using DocumentFormat.OpenXml.Office2021.DocumentTasks;
 
 namespace DBADashGUI
 {
@@ -34,6 +36,23 @@ namespace DBADashGUI
             DataTable dt = new();
             da.Fill(dt);
             return dt;
+        }
+
+        public static async Task<List<DatabaseInfo>> GetDatabasesAsync(HashSet<int> InstanceIDs, string searchString)
+        {
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand("dbo.DatabaseFinder_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cn.Open();
+            cmd.Parameters.AddWithValue("SearchString", searchString);
+            cmd.Parameters.AddWithValue("InstanceIDs", InstanceIDs.AsDataTable());
+            await using var rdr = await cmd.ExecuteReaderAsync();
+            var results = new List<DatabaseInfo>();
+            while (rdr.Read())
+            {
+                results.Add(new DatabaseInfo(rdr.GetFieldValue<int>("InstanceID"), rdr.GetFieldValue<int>("DatabaseID"),
+                    rdr.GetFieldValue<string>("InstanceGroupName"), rdr.GetFieldValue<string>("DatabaseName")));
+            }
+            return results;
         }
 
         public static int GetDatabaseID(string instanceGroupName, string dbName)
