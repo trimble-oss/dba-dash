@@ -157,10 +157,10 @@ namespace DBADashGUI.Performance
                 };
             chartCPU.AxisX.Clear();
             chartCPU.AxisY.Clear();
-            var format = durationMins < 1440 ? "HH:mm" : "yyyy-MM-dd HH:mm";
+
             chartCPU.AxisX.Add(new Axis
             {
-                LabelFormatter = val => new DateTime((long)val).ToString(format)
+                LabelFormatter = val => new DateTime((long)val).ToString(DateRange.DateFormatString)
             });
             chartCPU.AxisY.Add(new Axis
             {

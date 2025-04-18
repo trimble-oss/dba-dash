@@ -40,8 +40,10 @@ namespace DBADashGUI.Performance
         public string CounterName { get => Metric.CounterName; set => Metric.CounterName = value; }
 
         private PerformanceCounterMetric _metric = new();
+
         public PerformanceCounterMetric Metric
         { get => _metric; set { _metric = value; SelectAggregate(); } }
+
         IMetric IMetricChart.Metric => Metric;
 
         public bool SmoothLines = false;
@@ -130,10 +132,9 @@ namespace DBADashGUI.Performance
                         }
                     };
 
-            string format = "yyyy-MM-dd HH:mm";
             chart1.AxisX.Add(new Axis
             {
-                LabelFormatter = val => new DateTime((long)val).ToString(format)
+                LabelFormatter = val => new DateTime((long)val).ToString(DateRange.DateFormatString)
             });
             chart1.AxisY.Add(new Axis
             {
@@ -148,31 +149,29 @@ namespace DBADashGUI.Performance
 
         private DataTable GetPerformanceCounter()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.PerformanceCounter_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.PerformanceCounter_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
 
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("FromDate", FromDate == DateTime.MinValue ? DateRange.FromUTC : FromDate);
-                cmd.Parameters.AddWithValue("ToDate", ToDate == DateTime.MinValue ? DateRange.ToUTC : ToDate);
-                cmd.Parameters.AddWithValue("CounterID", Metric.CounterID);
-                cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
-                cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
-                if (DateRange.HasDayOfWeekFilter)
-                {
-                    cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
-                }
-                if (DateRange.HasTimeOfDayFilter)
-                {
-                    cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
-                }
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                return dt;
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("FromDate", FromDate == DateTime.MinValue ? DateRange.FromUTC : FromDate);
+            cmd.Parameters.AddWithValue("ToDate", ToDate == DateTime.MinValue ? DateRange.ToUTC : ToDate);
+            cmd.Parameters.AddWithValue("CounterID", Metric.CounterID);
+            cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
+            cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
+            if (DateRange.HasDayOfWeekFilter)
+            {
+                cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
             }
+            if (DateRange.HasTimeOfDayFilter)
+            {
+                cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
+            }
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            return dt;
         }
 
         private void PerformanceCounters_Load(object sender, EventArgs e)

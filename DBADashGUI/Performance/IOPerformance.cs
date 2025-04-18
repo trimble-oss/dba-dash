@@ -285,13 +285,9 @@ namespace DBADashGUI.Performance
             RefreshData(InstanceID, -1);
         }
 
-        private static readonly string DateFormat = "HH:mm";
-        private static readonly string LongDateFormat = "yyyy-MM-dd HH:mm";
-
         public Axis TimeAxis = new()
         {
-            Title = "Time",
-            LabelFormatter = val => new DateTime((long)val).ToString(DateFormat)
+            Title = "Time"
         };
 
         public Axis MBsecAxis = new()
@@ -329,7 +325,7 @@ namespace DBADashGUI.Performance
                 DateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 200);
             }
 
-            TimeAxis.LabelFormatter = val => new DateTime((long)val).ToString(mins > 1440 ? LongDateFormat : DateFormat);
+            TimeAxis.LabelFormatter = val => new DateTime((long)val).ToString(DateRange.DateFormatString);
 
             var dt = IOStats(instanceID, DateRange.FromUTC, DateRange.ToUTC, databaseID, Metric.Drive);
             var cnt = dt.Rows.Count;

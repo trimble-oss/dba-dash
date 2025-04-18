@@ -95,7 +95,7 @@ namespace DBADashGUI.Performance
                 AxisX.Add(new Axis
                 {
                     Title = "Time",
-                    LabelFormatter = val => new DateTime((long)val).ToString("yyyy-MM-dd HH:mm")
+                    LabelFormatter = val => new DateTime((long)val).ToString(DateRange.DateFormatString)
                 });
             }
             if (Series[0].Values.Count == 1)
