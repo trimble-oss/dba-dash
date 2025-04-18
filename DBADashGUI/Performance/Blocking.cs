@@ -44,30 +44,28 @@ namespace DBADashGUI.Performance
 
         private DataTable GetDT()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.BlockingSnapshots_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.BlockingSnapshots_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("@FromDate", DateRange.FromUTC);
+            cmd.Parameters.AddWithValue("@ToDate", DateRange.ToUTC);
+            cmd.Parameters.AddIfGreaterThanZero("@DatabaseID", databaseID);
+            cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
+            if (DateRange.HasTimeOfDayFilter)
             {
-                cn.Open();
-                cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("@FromDate", DateRange.FromUTC);
-                cmd.Parameters.AddWithValue("@ToDate", DateRange.ToUTC);
-                cmd.Parameters.AddIfGreaterThanZero("@DatabaseID", databaseID);
-                cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
-                if (DateRange.HasTimeOfDayFilter)
-                {
-                    cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
-                }
-                if (DateRange.HasDayOfWeekFilter)
-                {
-                    cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
-                }
-                cmd.CommandTimeout = Config.DefaultCommandTimeout;
-
-                DataTable dt = new();
-                da.Fill(dt);
-                return dt;
+                cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
             }
+            if (DateRange.HasDayOfWeekFilter)
+            {
+                cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
+            }
+            cmd.CommandTimeout = Config.DefaultCommandTimeout;
+
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
         }
 
         private double MaxPointShapeDiameter => maxBlockedTime switch
@@ -131,12 +129,11 @@ namespace DBADashGUI.Performance
                     }
                 };
 
-            var format = DateRange.DurationMins < 1440 ? "HH:mm" : "yyyy-MM-dd HH:mm";
             chartBlocking.AxisX.Add(new Axis
             {
-                LabelFormatter = val => new DateTime((long)val).ToString(format),
+                LabelFormatter = val => new DateTime((long)val).ToString(DateRange.DateFormatString),
                 MinValue = DateRange.FromUTC.ToAppTimeZone().Ticks,
-                MaxValue = DateRange.ToUTC.ToAppTimeZone().Ticks
+                MaxValue = Math.Min(DateHelper.AppNow.Ticks, DateRange.ToUTC.ToAppTimeZone().Ticks)
             });
             chartBlocking.AxisY.Add(new Axis
             {
@@ -148,7 +145,7 @@ namespace DBADashGUI.Performance
             chartBlocking.Series = s1;
 
             lblBlocking.Text = databaseID > 0 ? "Blocking: Database" : "Blocking: Instance";
-            toolStrip1.Tag = databaseID > 0 ? "ALT": null; // set tag to ALT to use the alternate menu renderer
+            toolStrip1.Tag = databaseID > 0 ? "ALT" : null; // set tag to ALT to use the alternate menu renderer
             toolStrip1.ApplyTheme(DBADashUser.SelectedTheme);
         }
 

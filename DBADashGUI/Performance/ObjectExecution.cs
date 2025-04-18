@@ -137,18 +137,9 @@ namespace DBADashGUI.Performance
             }
             objectExecChart.Series = s1;
 
-            var format = "t";
-            if (dateGrouping >= 1440)
-            {
-                format = "yyyy-MM-dd";
-            }
-            else if (mins >= 1440)
-            {
-                format = "yyyy-MM-dd HH:mm";
-            }
             objectExecChart.AxisX.Add(new Axis
             {
-                LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(dateGrouping == 0 ? 1 : dateGrouping).Ticks)).ToString(format)
+                LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(dateGrouping == 0 ? 1 : dateGrouping).Ticks)).ToString(DateRange.DateFormatString)
             });
 
             objectExecChart.AxisY.Add(new Axis

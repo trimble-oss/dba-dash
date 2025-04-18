@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace DBADashGUI.Performance
@@ -15,6 +16,8 @@ namespace DBADashGUI.Performance
         public static bool CurrentDateRangeSupportsTimeOfDayFilter => DurationMins >= 1440;
 
         public static bool CurrentDateRangeSupportsDayOfWeekFilter => DurationMins >= 10080;
+
+        public static string DateFormatString => DateRange.DurationMins < 1440 ? "t" : "g";
 
         public static void SetMins(int minutes)
         {

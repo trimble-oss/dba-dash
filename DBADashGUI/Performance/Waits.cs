@@ -93,33 +93,31 @@ namespace DBADashGUI.Performance
 
         private DataTable GetWaitsDT()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.Waits_Get", cn))
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.Waits_Get", cn);
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
 
-                cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
-                cmd.Parameters.AddWithValue("CriticalWaitsOnly", criticalWaitsOnlyToolStripMenuItem.Checked);
-                cmd.Parameters.AddStringIfNotNullOrEmpty("WaitType", Metric.WaitType);
-                cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
-                if (DateRange.HasTimeOfDayFilter)
-                {
-                    cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
-                }
-                if (DateRange.HasDayOfWeekFilter)
-                {
-                    cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
-                }
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandTimeout = Config.DefaultCommandTimeout;
-                DataTable dt = new();
-                da.Fill(dt);
-                return dt;
+            cmd.Parameters.AddWithValue("InstanceID", instanceID);
+            cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+            cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+            cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
+            cmd.Parameters.AddWithValue("CriticalWaitsOnly", criticalWaitsOnlyToolStripMenuItem.Checked);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("WaitType", Metric.WaitType);
+            cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
+            if (DateRange.HasTimeOfDayFilter)
+            {
+                cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
             }
+            if (DateRange.HasDayOfWeekFilter)
+            {
+                cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
+            }
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandTimeout = Config.DefaultCommandTimeout;
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
         }
 
         private void CalcTopWaits(ref DataTable dt)
@@ -225,18 +223,9 @@ namespace DBADashGUI.Performance
             }
             waitChart.Series = s1;
 
-            var format = "t";
-            if (dateGrouping >= 1440)
-            {
-                format = "yyyy-MM-dd";
-            }
-            else if (mins >= 1440)
-            {
-                format = "yyyy-MM-dd HH:mm";
-            }
             waitChart.AxisX.Add(new Axis
             {
-                LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(dateGrouping == 0 ? 1 : dateGrouping).Ticks)).ToString(format)
+                LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(dateGrouping == 0 ? 1 : dateGrouping).Ticks)).ToString(DateRange.DateFormatString)
             });
             waitChart.AxisY.Add(new Axis
             {
