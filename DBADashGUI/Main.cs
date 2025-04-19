@@ -2312,6 +2312,26 @@ namespace DBADashGUI
             Settings.Default.Save();
         }
 
+        private void setTimeFormatToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var format = DBADashUser.TimeFormatString;
+            if (CommonShared.ShowInputDialog(ref format, "Enter Time format string.  e.g 't', 'HH:mm'") !=
+                DialogResult.OK) return;
+            DBADashUser.TimeFormatString = format;
+            MessageBox.Show(
+                $"The time format has been set.\n\n The current time is {DateHelper.AppNow.ToString(DBADashUser.TimeFormatString)}.\n\nThe new format will be used when the chart is refreshed.", "Time Format", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void setDateTimeFormatToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var format = DBADashUser.DateTimeFormatString;
+            if (CommonShared.ShowInputDialog(ref format,
+                    "Enter Date/Time format string.  e.g 'g', 'yyyy-MM-dd HH:mm'") != DialogResult.OK) return;
+            DBADashUser.DateTimeFormatString = format;
+            MessageBox.Show(
+                $"The date/time format has been set.\n\nThe current time is {DateHelper.AppNow.ToString(DBADashUser.DateTimeFormatString)}.\n\nThe new format will be used when the chart is refreshed.", "Time Format", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
         void IThemedControl.ApplyTheme(BaseTheme theme)
         {
             Controls.ApplyTheme(theme);

@@ -27,6 +27,26 @@ namespace DBADashGUI
 
         public static HashSet<string> Roles;
 
+        public static string DateTimeFormatString
+        {
+            get => string.IsNullOrEmpty(Properties.Settings.Default.DateTimeFormatString) ? "g" : Properties.Settings.Default.DateTimeFormatString;
+            set
+            {
+                Properties.Settings.Default.DateTimeFormatString = value;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        public static string TimeFormatString
+        {
+            get => string.IsNullOrEmpty(Properties.Settings.Default.TimeFormatString) ? "t" : Properties.Settings.Default.TimeFormatString;
+            set
+            {
+                Properties.Settings.Default.TimeFormatString = value;
+                Properties.Settings.Default.Save();
+            }
+        }
+
         public static void Update()
         {
             using var cn = new SqlConnection(Common.ConnectionString);

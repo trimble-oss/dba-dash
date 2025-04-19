@@ -49,6 +49,9 @@ namespace DBADashGUI
             freezeKeyColumnsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             manageInstancesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             repoSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            dateTimeFormatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            setTimeFormatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            setDateTimeFormatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             saveTimeZonePreferenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             setAutoRefreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             secondsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -406,7 +409,7 @@ namespace DBADashGUI
             // 
             // optionsToolStripMenuItem
             // 
-            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { configureDisplayNameToolStripMenuItem, externalDiffToolToolStripMenuItem, dataRetentionToolStripMenuItem, desktopNotificationsToolStripMenuItem, freezeKeyColumnsToolStripMenuItem, manageInstancesToolStripMenuItem, repoSettingsToolStripMenuItem, saveTimeZonePreferenceToolStripMenuItem, setAutoRefreshToolStripMenuItem, showHiddenToolStripMenuItem, themeToolStripMenuItem });
+            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { configureDisplayNameToolStripMenuItem, externalDiffToolToolStripMenuItem, dataRetentionToolStripMenuItem, desktopNotificationsToolStripMenuItem, freezeKeyColumnsToolStripMenuItem, manageInstancesToolStripMenuItem, repoSettingsToolStripMenuItem, dateTimeFormatToolStripMenuItem, saveTimeZonePreferenceToolStripMenuItem, setAutoRefreshToolStripMenuItem, showHiddenToolStripMenuItem, themeToolStripMenuItem });
             optionsToolStripMenuItem.Enabled = false;
             optionsToolStripMenuItem.Image = Properties.Resources.SettingsOutline_16x;
             optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
@@ -469,6 +472,27 @@ namespace DBADashGUI
             repoSettingsToolStripMenuItem.Size = new System.Drawing.Size(276, 26);
             repoSettingsToolStripMenuItem.Text = "Repository Settings";
             repoSettingsToolStripMenuItem.Click += RepositorySettings_Click;
+            // 
+            // dateTimeFormatToolStripMenuItem
+            // 
+            dateTimeFormatToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { setTimeFormatToolStripMenuItem, setDateTimeFormatToolStripMenuItem });
+            dateTimeFormatToolStripMenuItem.Name = "dateTimeFormatToolStripMenuItem";
+            dateTimeFormatToolStripMenuItem.Size = new System.Drawing.Size(276, 26);
+            dateTimeFormatToolStripMenuItem.Text = "Date/Time Format";
+            // 
+            // setTimeFormatToolStripMenuItem
+            // 
+            setTimeFormatToolStripMenuItem.Name = "setTimeFormatToolStripMenuItem";
+            setTimeFormatToolStripMenuItem.Size = new System.Drawing.Size(253, 26);
+            setTimeFormatToolStripMenuItem.Text = "Set Time Format";
+            setTimeFormatToolStripMenuItem.Click += setTimeFormatToolStripMenuItem_Click;
+            // 
+            // setDateTimeFormatToolStripMenuItem
+            // 
+            setDateTimeFormatToolStripMenuItem.Name = "setDateTimeFormatToolStripMenuItem";
+            setDateTimeFormatToolStripMenuItem.Size = new System.Drawing.Size(253, 26);
+            setDateTimeFormatToolStripMenuItem.Text = "Set Date && Time Format";
+            setDateTimeFormatToolStripMenuItem.Click += setDateTimeFormatToolStripMenuItem_Click;
             // 
             // saveTimeZonePreferenceToolStripMenuItem
             // 
@@ -1455,7 +1479,7 @@ namespace DBADashGUI
             tabPerformance.Margin = new System.Windows.Forms.Padding(1, 2, 1, 2);
             tabPerformance.Name = "tabPerformance";
             tabPerformance.Padding = new System.Windows.Forms.Padding(1, 2, 1, 2);
-            tabPerformance.Size = new System.Drawing.Size(192, 57);
+            tabPerformance.Size = new System.Drawing.Size(1578, 955);
             tabPerformance.TabIndex = 10;
             tabPerformance.Text = "Performance";
             tabPerformance.UseVisualStyleBackColor = true;
@@ -1465,9 +1489,9 @@ namespace DBADashGUI
             performance1.AutoScroll = true;
             performance1.Dock = System.Windows.Forms.DockStyle.Fill;
             performance1.Location = new System.Drawing.Point(1, 2);
-            performance1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            performance1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             performance1.Name = "performance1";
-            performance1.Size = new System.Drawing.Size(190, 53);
+            performance1.Size = new System.Drawing.Size(1576, 951);
             performance1.TabIndex = 0;
             // 
             // tabDBADashErrorLog
@@ -2808,7 +2832,6 @@ namespace DBADashGUI
         private System.Windows.Forms.TabPage tabLastGood;
         private LastGoodCheckDB.LastGoodCheckDBControl lastGoodCheckDBControl1;
         private System.Windows.Forms.TabPage tabPerformance;
-        private Performance.Performance performance1;
         private System.Windows.Forms.TabPage tabDBADashErrorLog;
         private System.Windows.Forms.TabPage tabCollectionDates;
         private CollectionDates.CollectionDates collectionDates1;
@@ -2993,5 +3016,9 @@ namespace DBADashGUI
         private System.Windows.Forms.ToolStripMenuItem tsAlert;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.ToolStripMenuItem desktopNotificationsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dateTimeFormatToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem setTimeFormatToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem setDateTimeFormatToolStripMenuItem;
+        private Performance.Performance performance1;
     }
 }
