@@ -108,7 +108,7 @@ namespace DBADashGUI.Performance
             return dt;
         }
 
-        private DataTable CpuDataTable = new();
+        private DataTable CpuDataTable;
 
         public async void RefreshData()
         {
@@ -230,11 +230,21 @@ namespace DBADashGUI.Performance
 
         private void CopyData_Click(object sender, EventArgs e)
         {
+            if (CpuDataTable is null)
+            {
+                MessageBox.Show("Nothing to copy", "Copy Data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             Common.CopyDataTableToClipboard(CpuDataTable);
         }
 
         private void ExportDataToExcel_Click(object sender, EventArgs e)
         {
+            if (CpuDataTable is null)
+            {
+                MessageBox.Show("Nothing to export", "Export Data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             Common.PromptSaveDataTableToXLSX(CpuDataTable);
         }
     }

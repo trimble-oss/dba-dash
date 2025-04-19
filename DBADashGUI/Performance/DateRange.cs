@@ -17,7 +17,7 @@ namespace DBADashGUI.Performance
 
         public static bool CurrentDateRangeSupportsDayOfWeekFilter => DurationMins >= 10080;
 
-        public static string DateFormatString => DateRange.DurationMins < 1440 ? "t" : "g";
+        public static string DateFormatString => DateRange.DurationMins < 1440 ? DBADashUser.TimeFormatString : DBADashUser.DateTimeFormatString;
 
         public static void SetMins(int minutes)
         {
