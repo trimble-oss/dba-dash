@@ -1960,31 +1960,45 @@ WHERE NOT EXISTS(
 				)
 
 
-INSERT INTO dbo.AvailabilityGroupMetricsConfig(
+INSERT INTO dbo.RepositoryMetricsConfig(
 	InstanceID,
 	MetricName,
 	IsAggregate,
-	IsEnabled
+	IsEnabled,
+	Metrictype
 )
-SELECT -1,MetricName,IsAggregate,IsEnabled 
-FROM (VALUES -- aggregate
-			('Max Estimated Data Loss (sec)',1,1),
-			('Max Estimated Recovery Time (sec)',1,1),
-			('Max Secondary Lag (sec)',1,1),
-			('Total Redo Queue Size (KB)',1,0),
-			('Avg Redo Queue Size (KB)',1,1),
-			('Total Log Send Queue Size (KB)',1,0),
-			('Avg Log Send Queue Size (KB)',1,1),
-			-- Per database
-			('Estimated Data Loss (sec)',0,0),
-			('Estimated Recovery Time (sec)',0,0),
-			('Secondary Lag (sec)',0,0),
-			('Redo Queue Size (KB)',0,0),
-			('Log Send Queue Size (KB)',0,0)
-		) M(MetricName,IsAggregate,IsEnabled)
+SELECT -1,MetricName,IsAggregate,IsEnabled,MetricType
+FROM (VALUES -- AG aggregate
+			('Max Estimated Data Loss (sec)',1,1,'AG'),
+			('Max Estimated Recovery Time (sec)',1,1,'AG'),
+			('Max Secondary Lag (sec)',1,1,'AG'),
+			('Total Redo Queue Size (KB)',1,0,'AG'),
+			('Avg Redo Queue Size (KB)',1,1,'AG'),
+			('Total Log Send Queue Size (KB)',1,0,'AG'),
+			('Avg Log Send Queue Size (KB)',1,1,'AG'),
+			-- AG Per database
+			('Estimated Data Loss (sec)',0,0,'AG'),
+			('Estimated Recovery Time (sec)',0,0,'AG'),
+			('Secondary Lag (sec)',0,0,'AG'),
+			('Redo Queue Size (KB)',0,0,'AG'),
+			('Log Send Queue Size (KB)',0,0,'AG'),
+			-- Log Shipping aggregate
+			('Max Total Time Behind (min)',1,1,'LogShipping'),
+			('Avg Total Time Behind (min)',1,1,'LogShipping'),
+			('Min Total Time Behind (min)',1,1,'LogShipping'),
+			('Max Latency Of Last (min)',1,0,'LogShipping'),
+			('Avg Latency Of Last (min)',1,0,'LogShipping'),
+			('Min Latency Of Last (min)',1,0,'LogShipping'),
+			('Max Time Since Last (min)',1,0,'LogShipping'),
+			('Avg Time Since Last (min)',1,0,'LogShipping'),
+			('Min Time Since Last (min)',1,0,'LogShipping'),
+			('Log Shipped Database Count',1,0,'LogShipping'),
+			('Warning Count',1,0,'LogShipping'),
+			('Critical Count',1,0,'LogShipping')
+		) M(MetricName,IsAggregate,IsEnabled,MetricType)
 WHERE NOT EXISTS(
 				SELECT 1 
-				FROM dbo.AvailabilityGroupMetricsConfig AGM
+				FROM dbo.RepositoryMetricsConfig AGM
 				WHERE M.MetricName = AGM.MetricName
 				AND AGM.InstanceID = -1
 				)

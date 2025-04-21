@@ -592,14 +592,15 @@ namespace DBADashGUI.HA
 
         private readonly ToolStripMenuItem metricsConfigMenuItem =
             new("Configure Metrics", Properties.Resources.SettingsOutline_16x)
-                { DisplayStyle = ToolStripItemDisplayStyle.ImageAndText };
+            { DisplayStyle = ToolStripItemDisplayStyle.ImageAndText };
 
         private readonly ToolStripMenuItem metricsConfigRootMenuItem =
             new("Configure Metrics (Root)")
-                { DisplayStyle = ToolStripItemDisplayStyle.Text };
+            { DisplayStyle = ToolStripItemDisplayStyle.Text };
+
         private readonly ToolStripMenuItem metricsConfigInstanceMenuItem =
             new("Configure Metrics (Instance)")
-                { DisplayStyle = ToolStripItemDisplayStyle.Text };
+            { DisplayStyle = ToolStripItemDisplayStyle.Text };
 
         public AG()
         {
@@ -616,7 +617,7 @@ namespace DBADashGUI.HA
 
         private static void ConfigureMetrics(int instanceId)
         {
-            using var metricsConfig = new AGMetricsConfig() { InstanceID = instanceId };
+            using var metricsConfig = new RepositoryMetricsConfig() { InstanceID = instanceId, MetricType = RepositoryMetricsConfig.RepositoryMetricTypes.AG };
             metricsConfig.ShowDialog();
         }
 
@@ -643,7 +644,6 @@ namespace DBADashGUI.HA
             ResetAndRefreshData(_context);
         }
 
-
         /// <summary>
         /// Saves report layout when changing context (until app is restarted)
         /// </summary>
@@ -656,6 +656,7 @@ namespace DBADashGUI.HA
                     AGDetailReport.CustomReportResults[0].ColumnLayout =
                         customReportView1.Grids[0].GetColumnLayout();
                     break;
+
                 case "AvailabilityGroupSummary_Get":
                     AGSummaryReport.CustomReportResults[0].ColumnLayout =
                         customReportView1.Grids[0].GetColumnLayout();

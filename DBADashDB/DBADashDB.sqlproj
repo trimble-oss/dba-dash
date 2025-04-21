@@ -338,7 +338,7 @@
     <Build Include="dbo\Functions\SQLVersionName.sql" />
     <Build Include="dbo\Stored Procedures\SystemTags_Upd.sql" />
     <Build Include="dbo\Stored Procedures\Backups_Get.sql" />
-    <Build Include="dbo\Stored Procedures\Logshipping_Get.sql" />
+    <Build Include="dbo\Stored Procedures\LogShipping_Get.sql" />
     <Build Include="dbo\Stored Procedures\AgentJobThresholds_Upd.sql" />
     <Build Include="dbo\Stored Procedures\AgentJobThresholds_Get.sql" />
     <Build Include="dbo\Stored Procedures\AgentJobs_Get.sql" />
@@ -819,10 +819,10 @@
     <Build Include="dbo\Stored Procedures\PurgeOfflineInstances.sql" />
     <Build Include="Alert\Procedures\OfflineAlert_Upd.sql" />
     <Build Include="Alert\Procedures\RestartAlert_Upd.sql" />
-    <Build Include="dbo\Tables\AvailabilityGroupMetricsConfig.sql" />
-    <Build Include="dbo\Stored Procedures\AvailabilityGroupMetricsConfig_Get.sql" />
-    <Build Include="dbo\Stored Procedures\AvailabilityGroupMetricsConfig_Upd.sql" />
-    <Build Include="dbo\Stored Procedures\AvailabilityGroupMetricsConfig_Del.sql" />
+    <Build Include="dbo\Tables\RepositoryMetricsConfig.sql" />
+    <Build Include="dbo\Stored Procedures\RepositoryMetricsConfig_Get.sql" />
+    <Build Include="dbo\Stored Procedures\RepositoryMetricsConfig_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\RepositoryMetricsConfig_Del.sql" />
     <Build Include="dbo\Stored Procedures\DatabaseFinder_Get.sql" />
   </ItemGroup>
   <ItemGroup>

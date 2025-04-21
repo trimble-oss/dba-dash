@@ -33,14 +33,31 @@ namespace DBADashGUI.LogShipping
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LogShippingControl));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LogShippingControl));
             dgvLogShipping = new DBADashDataGridView();
+            Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            Status = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            RestoreDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            BackupStartDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            TotalTimeBehind = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            LatencyOfLast = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            TimeSinceLast = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            TotalTimeBehindDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            LatencyOfLastDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            TimeSinceLastDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            SnapshotAge = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            SnapshotAgeDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            SnapshotDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            LastFile = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ThresholdConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            Configure = new System.Windows.Forms.DataGridViewLinkColumn();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
@@ -51,6 +68,9 @@ namespace DBADashGUI.LogShipping
             tsBack = new System.Windows.Forms.ToolStripButton();
             tsTrigger = new System.Windows.Forms.ToolStripButton();
             tsClearFilterSummary = new System.Windows.Forms.ToolStripButton();
+            tsConfigureMetrics = new System.Windows.Forms.ToolStripDropDownButton();
+            tsConfigureRoot = new System.Windows.Forms.ToolStripMenuItem();
+            tsConfigureInstance = new System.Windows.Forms.ToolStripMenuItem();
             dgvSummary = new DBADashDataGridView();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             toolStrip2 = new System.Windows.Forms.ToolStrip();
@@ -72,23 +92,6 @@ namespace DBADashGUI.LogShipping
             dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
-            Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            Status = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            RestoreDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            BackupStartDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            TotalTimeBehind = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            LatencyOfLast = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            TimeSinceLast = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            TotalTimeBehindDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            LatencyOfLastDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            TimeSinceLastDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            SnapshotAge = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            SnapshotAgeDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            SnapshotDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            LastFile = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            ThresholdConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            Configure = new System.Windows.Forms.DataGridViewLinkColumn();
             ((System.ComponentModel.ISupportInitialize)dgvLogShipping).BeginInit();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvSummary).BeginInit();
@@ -145,10 +148,179 @@ namespace DBADashGUI.LogShipping
             dgvLogShipping.CellContentClick += DgvLogShipping_CellContentClick;
             dgvLogShipping.RowsAdded += DgvLogShipping_RowsAdded;
             // 
+            // Instance
+            // 
+            Instance.DataPropertyName = "InstanceDisplayName";
+            Instance.HeaderText = "Instance";
+            Instance.MinimumWidth = 6;
+            Instance.Name = "Instance";
+            Instance.ReadOnly = true;
+            Instance.Width = 90;
+            // 
+            // Database
+            // 
+            Database.DataPropertyName = "name";
+            Database.HeaderText = "Database";
+            Database.MinimumWidth = 6;
+            Database.Name = "Database";
+            Database.ReadOnly = true;
+            Database.Width = 98;
+            // 
+            // Status
+            // 
+            Status.DataPropertyName = "StatusDescription";
+            Status.HeaderText = "Status";
+            Status.MinimumWidth = 6;
+            Status.Name = "Status";
+            Status.ReadOnly = true;
+            Status.Width = 77;
+            // 
+            // RestoreDate
+            // 
+            RestoreDate.DataPropertyName = "restore_date";
+            RestoreDate.HeaderText = "Restore Date";
+            RestoreDate.MinimumWidth = 6;
+            RestoreDate.Name = "RestoreDate";
+            RestoreDate.ReadOnly = true;
+            RestoreDate.Width = 111;
+            // 
+            // BackupStartDate
+            // 
+            BackupStartDate.DataPropertyName = "backup_start_date";
+            BackupStartDate.HeaderText = "Backup Start Date";
+            BackupStartDate.MinimumWidth = 6;
+            BackupStartDate.Name = "BackupStartDate";
+            BackupStartDate.ReadOnly = true;
+            BackupStartDate.Width = 112;
+            // 
+            // TotalTimeBehind
+            // 
+            TotalTimeBehind.DataPropertyName = "TotalTimeBehind";
+            dataGridViewCellStyle2.Format = "N0";
+            TotalTimeBehind.DefaultCellStyle = dataGridViewCellStyle2;
+            TotalTimeBehind.HeaderText = "Total Time Behind (Mins)";
+            TotalTimeBehind.MinimumWidth = 6;
+            TotalTimeBehind.Name = "TotalTimeBehind";
+            TotalTimeBehind.ReadOnly = true;
+            TotalTimeBehind.Visible = false;
+            TotalTimeBehind.Width = 139;
+            // 
+            // LatencyOfLast
+            // 
+            LatencyOfLast.DataPropertyName = "LatencyOfLast";
+            dataGridViewCellStyle3.Format = "N0";
+            LatencyOfLast.DefaultCellStyle = dataGridViewCellStyle3;
+            LatencyOfLast.HeaderText = "Latency of Last (Mins)";
+            LatencyOfLast.MinimumWidth = 6;
+            LatencyOfLast.Name = "LatencyOfLast";
+            LatencyOfLast.ReadOnly = true;
+            LatencyOfLast.Visible = false;
+            LatencyOfLast.Width = 99;
+            // 
+            // TimeSinceLast
+            // 
+            TimeSinceLast.DataPropertyName = "TimeSinceLast";
+            dataGridViewCellStyle4.Format = "N0";
+            TimeSinceLast.DefaultCellStyle = dataGridViewCellStyle4;
+            TimeSinceLast.HeaderText = "Time Since Last (Mins)";
+            TimeSinceLast.MinimumWidth = 6;
+            TimeSinceLast.Name = "TimeSinceLast";
+            TimeSinceLast.ReadOnly = true;
+            TimeSinceLast.Visible = false;
+            TimeSinceLast.Width = 127;
+            // 
+            // TotalTimeBehindDuration
+            // 
+            TotalTimeBehindDuration.DataPropertyName = "TotalTimeBehindDuration";
+            TotalTimeBehindDuration.HeaderText = "Total Time Behind";
+            TotalTimeBehindDuration.MinimumWidth = 6;
+            TotalTimeBehindDuration.Name = "TotalTimeBehindDuration";
+            TotalTimeBehindDuration.ReadOnly = true;
+            TotalTimeBehindDuration.Width = 125;
+            // 
+            // LatencyOfLastDuration
+            // 
+            LatencyOfLastDuration.DataPropertyName = "LatencyOfLastDuration";
+            LatencyOfLastDuration.HeaderText = "Latency Of Last";
+            LatencyOfLastDuration.MinimumWidth = 6;
+            LatencyOfLastDuration.Name = "LatencyOfLastDuration";
+            LatencyOfLastDuration.ReadOnly = true;
+            LatencyOfLastDuration.Width = 125;
+            // 
+            // TimeSinceLastDuration
+            // 
+            TimeSinceLastDuration.DataPropertyName = "TimeSinceLastDuration";
+            TimeSinceLastDuration.HeaderText = "Time Since Last";
+            TimeSinceLastDuration.MinimumWidth = 6;
+            TimeSinceLastDuration.Name = "TimeSinceLastDuration";
+            TimeSinceLastDuration.ReadOnly = true;
+            TimeSinceLastDuration.Width = 125;
+            // 
+            // SnapshotAge
+            // 
+            SnapshotAge.DataPropertyName = "SnapshotAge";
+            dataGridViewCellStyle5.Format = "N0";
+            SnapshotAge.DefaultCellStyle = dataGridViewCellStyle5;
+            SnapshotAge.HeaderText = "Snapshot Age (Mins)";
+            SnapshotAge.MinimumWidth = 6;
+            SnapshotAge.Name = "SnapshotAge";
+            SnapshotAge.ReadOnly = true;
+            SnapshotAge.Visible = false;
+            SnapshotAge.Width = 116;
+            // 
+            // SnapshotAgeDuration
+            // 
+            SnapshotAgeDuration.DataPropertyName = "SnapshotAgeDuration";
+            SnapshotAgeDuration.HeaderText = "Snapshot Age";
+            SnapshotAgeDuration.MinimumWidth = 6;
+            SnapshotAgeDuration.Name = "SnapshotAgeDuration";
+            SnapshotAgeDuration.ReadOnly = true;
+            SnapshotAgeDuration.Width = 125;
+            // 
+            // SnapshotDate
+            // 
+            SnapshotDate.DataPropertyName = "SnapshotDate";
+            SnapshotDate.HeaderText = "Snapshot Date";
+            SnapshotDate.MinimumWidth = 6;
+            SnapshotDate.Name = "SnapshotDate";
+            SnapshotDate.ReadOnly = true;
+            SnapshotDate.Width = 143;
+            // 
+            // LastFile
+            // 
+            LastFile.DataPropertyName = "last_file";
+            LastFile.HeaderText = "Last File";
+            LastFile.MinimumWidth = 6;
+            LastFile.Name = "LastFile";
+            LastFile.ReadOnly = true;
+            LastFile.Width = 64;
+            // 
+            // ThresholdConfiguredLevel
+            // 
+            ThresholdConfiguredLevel.DataPropertyName = "ThresholdConfiguredLevel";
+            ThresholdConfiguredLevel.HeaderText = "Threshold Configured Level";
+            ThresholdConfiguredLevel.MinimumWidth = 6;
+            ThresholdConfiguredLevel.Name = "ThresholdConfiguredLevel";
+            ThresholdConfiguredLevel.ReadOnly = true;
+            ThresholdConfiguredLevel.Width = 163;
+            // 
+            // Configure
+            // 
+            Configure.HeaderText = "Configure";
+            Configure.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            Configure.MinimumWidth = 6;
+            Configure.Name = "Configure";
+            Configure.ReadOnly = true;
+            Configure.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            Configure.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            Configure.Text = "Configure";
+            Configure.UseColumnTextForLinkValue = true;
+            Configure.Width = 98;
+            // 
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsConfigure, tsBack, tsTrigger, tsClearFilterSummary });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsConfigure, tsBack, tsTrigger, tsClearFilterSummary, tsConfigureMetrics });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(698, 27);
@@ -237,6 +409,29 @@ namespace DBADashGUI.LogShipping
             tsClearFilterSummary.Name = "tsClearFilterSummary";
             tsClearFilterSummary.Size = new System.Drawing.Size(104, 24);
             tsClearFilterSummary.Text = "Clear Filter";
+            // 
+            // tsConfigureMetrics
+            // 
+            tsConfigureMetrics.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsConfigureRoot, tsConfigureInstance });
+            tsConfigureMetrics.Image = Properties.Resources.SettingsOutline_16x;
+            tsConfigureMetrics.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsConfigureMetrics.Name = "tsConfigureMetrics";
+            tsConfigureMetrics.Size = new System.Drawing.Size(160, 24);
+            tsConfigureMetrics.Text = "Configure Metrics";
+            // 
+            // tsConfigureRoot
+            // 
+            tsConfigureRoot.Name = "tsConfigureRoot";
+            tsConfigureRoot.Size = new System.Drawing.Size(224, 26);
+            tsConfigureRoot.Text = "Root Level";
+            tsConfigureRoot.Click += ConfigureRoot_Click;
+            // 
+            // tsConfigureInstance
+            // 
+            tsConfigureInstance.Name = "tsConfigureInstance";
+            tsConfigureInstance.Size = new System.Drawing.Size(224, 26);
+            tsConfigureInstance.Text = "Instance Level";
+            tsConfigureInstance.Click += ConfigureInstance_Click;
             // 
             // dgvSummary
             // 
@@ -466,175 +661,6 @@ namespace DBADashGUI.LogShipping
             lblStatus.Name = "lblStatus";
             lblStatus.Size = new System.Drawing.Size(0, 16);
             // 
-            // Instance
-            // 
-            Instance.DataPropertyName = "InstanceDisplayName";
-            Instance.HeaderText = "Instance";
-            Instance.MinimumWidth = 6;
-            Instance.Name = "Instance";
-            Instance.ReadOnly = true;
-            Instance.Width = 90;
-            // 
-            // Database
-            // 
-            Database.DataPropertyName = "name";
-            Database.HeaderText = "Database";
-            Database.MinimumWidth = 6;
-            Database.Name = "Database";
-            Database.ReadOnly = true;
-            Database.Width = 98;
-            // 
-            // Status
-            // 
-            Status.DataPropertyName = "StatusDescription";
-            Status.HeaderText = "Status";
-            Status.MinimumWidth = 6;
-            Status.Name = "Status";
-            Status.ReadOnly = true;
-            Status.Width = 77;
-            // 
-            // RestoreDate
-            // 
-            RestoreDate.DataPropertyName = "restore_date";
-            RestoreDate.HeaderText = "Restore Date";
-            RestoreDate.MinimumWidth = 6;
-            RestoreDate.Name = "RestoreDate";
-            RestoreDate.ReadOnly = true;
-            RestoreDate.Width = 111;
-            // 
-            // BackupStartDate
-            // 
-            BackupStartDate.DataPropertyName = "backup_start_date";
-            BackupStartDate.HeaderText = "Backup Start Date";
-            BackupStartDate.MinimumWidth = 6;
-            BackupStartDate.Name = "BackupStartDate";
-            BackupStartDate.ReadOnly = true;
-            BackupStartDate.Width = 112;
-            // 
-            // TotalTimeBehind
-            // 
-            TotalTimeBehind.DataPropertyName = "TotalTimeBehind";
-            dataGridViewCellStyle2.Format = "N0";
-            TotalTimeBehind.DefaultCellStyle = dataGridViewCellStyle2;
-            TotalTimeBehind.HeaderText = "Total Time Behind (Mins)";
-            TotalTimeBehind.MinimumWidth = 6;
-            TotalTimeBehind.Name = "TotalTimeBehind";
-            TotalTimeBehind.ReadOnly = true;
-            TotalTimeBehind.Visible = false;
-            TotalTimeBehind.Width = 139;
-            // 
-            // LatencyOfLast
-            // 
-            LatencyOfLast.DataPropertyName = "LatencyOfLast";
-            dataGridViewCellStyle3.Format = "N0";
-            LatencyOfLast.DefaultCellStyle = dataGridViewCellStyle3;
-            LatencyOfLast.HeaderText = "Latency of Last (Mins)";
-            LatencyOfLast.MinimumWidth = 6;
-            LatencyOfLast.Name = "LatencyOfLast";
-            LatencyOfLast.ReadOnly = true;
-            LatencyOfLast.Visible = false;
-            LatencyOfLast.Width = 99;
-            // 
-            // TimeSinceLast
-            // 
-            TimeSinceLast.DataPropertyName = "TimeSinceLast";
-            dataGridViewCellStyle4.Format = "N0";
-            TimeSinceLast.DefaultCellStyle = dataGridViewCellStyle4;
-            TimeSinceLast.HeaderText = "Time Since Last (Mins)";
-            TimeSinceLast.MinimumWidth = 6;
-            TimeSinceLast.Name = "TimeSinceLast";
-            TimeSinceLast.ReadOnly = true;
-            TimeSinceLast.Visible = false;
-            TimeSinceLast.Width = 127;
-            // 
-            // TotalTimeBehindDuration
-            // 
-            TotalTimeBehindDuration.DataPropertyName = "TotalTimeBehindDuration";
-            TotalTimeBehindDuration.HeaderText = "Total Time Behind";
-            TotalTimeBehindDuration.MinimumWidth = 6;
-            TotalTimeBehindDuration.Name = "TotalTimeBehindDuration";
-            TotalTimeBehindDuration.ReadOnly = true;
-            TotalTimeBehindDuration.Width = 125;
-            // 
-            // LatencyOfLastDuration
-            // 
-            LatencyOfLastDuration.DataPropertyName = "LatencyOfLastDuration";
-            LatencyOfLastDuration.HeaderText = "Latency Of Last";
-            LatencyOfLastDuration.MinimumWidth = 6;
-            LatencyOfLastDuration.Name = "LatencyOfLastDuration";
-            LatencyOfLastDuration.ReadOnly = true;
-            LatencyOfLastDuration.Width = 125;
-            // 
-            // TimeSinceLastDuration
-            // 
-            TimeSinceLastDuration.DataPropertyName = "TimeSinceLastDuration";
-            TimeSinceLastDuration.HeaderText = "Time Since Last";
-            TimeSinceLastDuration.MinimumWidth = 6;
-            TimeSinceLastDuration.Name = "TimeSinceLastDuration";
-            TimeSinceLastDuration.ReadOnly = true;
-            TimeSinceLastDuration.Width = 125;
-            // 
-            // SnapshotAge
-            // 
-            SnapshotAge.DataPropertyName = "SnapshotAge";
-            dataGridViewCellStyle5.Format = "N0";
-            SnapshotAge.DefaultCellStyle = dataGridViewCellStyle5;
-            SnapshotAge.HeaderText = "Snapshot Age (Mins)";
-            SnapshotAge.MinimumWidth = 6;
-            SnapshotAge.Name = "SnapshotAge";
-            SnapshotAge.ReadOnly = true;
-            SnapshotAge.Visible = false;
-            SnapshotAge.Width = 116;
-            // 
-            // SnapshotAgeDuration
-            // 
-            SnapshotAgeDuration.DataPropertyName = "SnapshotAgeDuration";
-            SnapshotAgeDuration.HeaderText = "Snapshot Age";
-            SnapshotAgeDuration.MinimumWidth = 6;
-            SnapshotAgeDuration.Name = "SnapshotAgeDuration";
-            SnapshotAgeDuration.ReadOnly = true;
-            SnapshotAgeDuration.Width = 125;
-            // 
-            // SnapshotDate
-            // 
-            SnapshotDate.DataPropertyName = "SnapshotDate";
-            SnapshotDate.HeaderText = "Snapshot Date";
-            SnapshotDate.MinimumWidth = 6;
-            SnapshotDate.Name = "SnapshotDate";
-            SnapshotDate.ReadOnly = true;
-            SnapshotDate.Width = 143;
-            // 
-            // LastFile
-            // 
-            LastFile.DataPropertyName = "last_file";
-            LastFile.HeaderText = "Last File";
-            LastFile.MinimumWidth = 6;
-            LastFile.Name = "LastFile";
-            LastFile.ReadOnly = true;
-            LastFile.Width = 64;
-            // 
-            // ThresholdConfiguredLevel
-            // 
-            ThresholdConfiguredLevel.DataPropertyName = "ThresholdConfiguredLevel";
-            ThresholdConfiguredLevel.HeaderText = "Threshold Configured Level";
-            ThresholdConfiguredLevel.MinimumWidth = 6;
-            ThresholdConfiguredLevel.Name = "ThresholdConfiguredLevel";
-            ThresholdConfiguredLevel.ReadOnly = true;
-            ThresholdConfiguredLevel.Width = 163;
-            // 
-            // Configure
-            // 
-            Configure.HeaderText = "Configure";
-            Configure.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            Configure.MinimumWidth = 6;
-            Configure.Name = "Configure";
-            Configure.ReadOnly = true;
-            Configure.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            Configure.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            Configure.Text = "Configure";
-            Configure.UseColumnTextForLinkValue = true;
-            Configure.Width = 98;
-            // 
             // LogShippingControl
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -713,5 +739,8 @@ namespace DBADashGUI.LogShipping
         private System.Windows.Forms.DataGridViewTextBoxColumn LastFile;
         private System.Windows.Forms.DataGridViewTextBoxColumn ThresholdConfiguredLevel;
         private System.Windows.Forms.DataGridViewLinkColumn Configure;
+        private System.Windows.Forms.ToolStripDropDownButton tsConfigureMetrics;
+        private System.Windows.Forms.ToolStripMenuItem tsConfigureRoot;
+        private System.Windows.Forms.ToolStripMenuItem tsConfigureInstance;
     }
 }
