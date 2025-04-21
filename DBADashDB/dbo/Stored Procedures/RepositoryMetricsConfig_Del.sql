@@ -1,13 +1,15 @@
-﻿CREATE PROC dbo.AvailabilityGroupMetricsConfig_Del(
-	@InstanceID INT
+﻿CREATE PROC dbo.RepositoryMetricsConfig_Del(
+	@InstanceID INT,
+	@MetricType VARCHAR(20)
 )
 AS
 IF @InstanceID >0
 BEGIN
 	/* Delete metrics for instance (Inherit from root) */
 	DELETE C
-	FROM dbo.AvailabilityGroupMetricsConfig C
+	FROM dbo.RepositoryMetricsConfig C
 	WHERE C.InstanceID = @InstanceID
+	AND C.MetricType = @MetricType
 END
 ELSE
 BEGIN

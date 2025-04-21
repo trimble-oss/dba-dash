@@ -1,6 +1,6 @@
 ﻿namespace DBADashGUI.HA
 {
-    partial class AGMetricsConfig
+    partial class RepositoryMetricsConfig
     {
         /// <summary>
         /// Required designer variable.
@@ -31,7 +31,7 @@
             components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AGMetricsConfig));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RepositoryMetricsConfig));
             chkInherit = new System.Windows.Forms.CheckBox();
             bttnOK = new System.Windows.Forms.Button();
             bttnCancel = new System.Windows.Forms.Button();

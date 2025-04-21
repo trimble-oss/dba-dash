@@ -28,4 +28,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="backup_start_date" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="743fff5c-5f35-42e6-a929-6a9ecc5939c5" ChangeDateTime="04/21/2025 16:47:23">
+    <Property Name="ElementName" Value="[dbo].[AvailabilityGroupMetricsConfig]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="RepositoryMetricsConfig" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5426fd56-b664-4dd6-8926-dc8d73054621" ChangeDateTime="04/21/2025 16:50:48">
+    <Property Name="ElementName" Value="[dbo].[PK_AvailabilityGroupMetricsConfig]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[RepositoryMetricsConfig]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="PK_RepositoryMetricsConfig" />
+  </Operation>
 </Operations>

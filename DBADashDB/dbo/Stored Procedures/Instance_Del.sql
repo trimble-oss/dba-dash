@@ -490,7 +490,7 @@ BEGIN
 	DELETE dbo.OfflineInstances
 	WHERE InstanceID = @InstanceID
 
-	DELETE dbo.AvailabilityGroupMetricsConfig
+	DELETE dbo.RepositoryMetricsConfig
 	WHERE InstanceID = @InstanceID
 	
 	DELETE dbo.Instances

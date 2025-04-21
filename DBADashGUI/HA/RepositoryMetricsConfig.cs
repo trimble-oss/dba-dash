@@ -1,40 +1,50 @@
-﻿using System;
+﻿using DBADashGUI.Theme;
+using Microsoft.Data.SqlClient;
+using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
-using Microsoft.Data.SqlClient;
+using static DBADashGUI.Performance.IMetric;
 
 namespace DBADashGUI.HA
 {
-    public partial class AGMetricsConfig : Form
+    public partial class RepositoryMetricsConfig : Form
     {
-        public AGMetricsConfig()
+        public RepositoryMetricsConfig()
         {
             InitializeComponent();
             dgvConfig.AutoGenerateColumns = false;
             dgvConfig.Columns.AddRange(
                 new DataGridViewTextBoxColumn { DataPropertyName = "MetricName", HeaderText = "Metric", ReadOnly = true },
-                new DataGridViewTextBoxColumn { DataPropertyName = "MetricType", HeaderText = "Type", ReadOnly = true },
+                new DataGridViewTextBoxColumn { DataPropertyName = "MetricLevel", HeaderText = "Level", ReadOnly = true },
                 new DataGridViewCheckBoxColumn { DataPropertyName = "IsEnabled", HeaderText = "Enable/Disable", ReadOnly = false }
                 );
             dgvConfig.DataBindingComplete += (s, e) => dgvConfig.AutoResizeColumns();
             this.ApplyTheme();
         }
 
+        public enum RepositoryMetricTypes
+        {
+            AG,
+            LogShipping
+        }
+
         public int InstanceID { get; set; } = -1;
+        public RepositoryMetricTypes MetricType { get; set; } = RepositoryMetricTypes.AG;
 
-
-        private static async Task<DataTable> GetAGMetricsConfig(int instanceId)
+        private static async Task<DataTable> GetAGMetricsConfig(int instanceId, RepositoryMetricTypes metricType)
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
-            await using var cmd = new SqlCommand("AvailabilityGroupMetricsConfig_Get", cn) { CommandType = CommandType.StoredProcedure };
+            await using var cmd = new SqlCommand("RepositoryMetricsConfig_Get", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@InstanceID", instanceId);
+            cmd.Parameters.AddWithValue("MetricType", metricType.ToString());
             await cn.OpenAsync();
             await using var reader = await cmd.ExecuteReaderAsync();
             var dt = new DataTable();
@@ -43,33 +53,50 @@ namespace DBADashGUI.HA
             return dt;
         }
 
-        private static async Task UpdateAGMetrics(int instanceId, IEnumerable<string> enabledMetrics)
+        private static async Task UpdateAGMetrics(int instanceId, IEnumerable<string> enabledMetrics, RepositoryMetricTypes metricType)
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
-            await using var cmd = new SqlCommand("AvailabilityGroupMetricsConfig_Upd", cn) { CommandType = CommandType.StoredProcedure };
+            await using var cmd = new SqlCommand("RepositoryMetricsConfig_Upd", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@InstanceID", instanceId);
             cmd.Parameters.AddWithValue("@EnabledMetrics", string.Join(',', enabledMetrics));
+            cmd.Parameters.AddWithValue("MetricType", metricType.ToString());
+
             await cn.OpenAsync();
             await cmd.ExecuteNonQueryAsync();
         }
 
-        private static async Task DeleteAGMetrics(int instanceId)
+        private static async Task DeleteAGMetrics(int instanceId, RepositoryMetricTypes metricType)
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
-            await using var cmd = new SqlCommand("AvailabilityGroupMetricsConfig_Del", cn) { CommandType = CommandType.StoredProcedure };
+            await using var cmd = new SqlCommand("RepositoryMetricsConfig_Del", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@InstanceID", instanceId);
+            cmd.Parameters.AddWithValue("MetricType", metricType.ToString());
             await cn.OpenAsync();
             await cmd.ExecuteNonQueryAsync();
+        }
+
+        public string TitleText
+        {
+            get
+            {
+                var level = InstanceID == -1 ? " (Root)" : " (Instance)";
+                return MetricType switch
+                {
+                    RepositoryMetricTypes.AG => $"Availability Group Metrics Configuration {level}",
+                    RepositoryMetricTypes.LogShipping => $"Log Shipping Metrics Configuration {level}",
+                    _ => throw new NotImplementedException()
+                };
+            }
         }
 
         private async Task RefreshData()
         {
-            var dt = await GetAGMetricsConfig(InstanceID);
+            var dt = await GetAGMetricsConfig(InstanceID, MetricType);
             dgvConfig.DataSource = new DataView(dt);
             dgvConfig.Refresh();
             chkInherit.Checked = false;
             chkInherit.Visible = InstanceID != -1;
-            Text = $"Availability Group Metrics Configuration " + (InstanceID == -1 ? " (Root)" : " (Instance)");
+            Text = TitleText;
             if (dt.Rows.Count > 0)
             {
                 var instanceId = (int)dt.Rows[0]["InstanceID"];
@@ -98,13 +125,13 @@ namespace DBADashGUI.HA
                 .Select(r => (string)r["MetricName"]);
             try
             {
-                if(chkInherit.Checked && InstanceID >0)
+                if (chkInherit.Checked && InstanceID > 0)
                 {
-                    await DeleteAGMetrics(InstanceID);
+                    await DeleteAGMetrics(InstanceID, MetricType);
                 }
                 else
                 {
-                    await UpdateAGMetrics(InstanceID, enabledMetrics);
+                    await UpdateAGMetrics(InstanceID, enabledMetrics, MetricType);
                 }
             }
             catch (Exception ex)
@@ -117,19 +144,18 @@ namespace DBADashGUI.HA
 
         private async void Inherit_Click(object sender, EventArgs e)
         {
-            if(chkInherit.Checked)
+            if (chkInherit.Checked)
             {
                 await RefreshData();
                 chkInherit.Checked = true;
             }
             ToggleGrid(!chkInherit.Checked);
-            
         }
 
         private void ToggleGrid(bool enabled)
         {
             dgvConfig.Enabled = enabled;
-            if(enabled)
+            if (enabled)
             {
                 dgvConfig.ApplyTheme();
             }

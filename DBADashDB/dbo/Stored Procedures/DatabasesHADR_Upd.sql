@@ -81,11 +81,11 @@ BEGIN
 	COMMIT;
 
 	DECLARE @MetricsInstanceID INT 
-	SELECT @MetricsInstanceID = CASE WHEN EXISTS(SELECT 1 FROM dbo.AvailabilityGroupMetricsConfig WHERE InstanceID = @InstanceID) THEN @InstanceID ELSE -1 END
+	SELECT @MetricsInstanceID = CASE WHEN EXISTS(SELECT 1 FROM dbo.RepositoryMetricsConfig WHERE InstanceID = @InstanceID AND MetricType='AG') THEN @InstanceID ELSE -1 END
 
 	DECLARE @PerformanceCounters dbo.PerformanceCounters
 	IF EXISTS(SELECT 1 
-			FROM dbo.AvailabilityGroupMetricsConfig 
+			FROM dbo.RepositoryMetricsConfig 
 			WHERE IsEnabled = 1
 			AND IsAggregate = 1
 			AND InstanceID = @MetricsInstanceID
@@ -128,15 +128,16 @@ BEGIN
 									)
 		) UNPVT
 		WHERE EXISTS(	SELECT 1 
-						FROM dbo.AvailabilityGroupMetricsConfig M
+						FROM dbo.RepositoryMetricsConfig M
 						WHERE M.MetricName = UNPVT.counter_name
 						AND M.IsEnabled = 1
 						AND M.IsAggregate = 1
 						AND M.InstanceID = @MetricsInstanceID
+						AND M.MetricType = 'AG'
 					)
 	END
 	IF EXISTS(SELECT 1 
-			FROM dbo.AvailabilityGroupMetricsConfig 
+			FROM dbo.RepositoryMetricsConfig 
 			WHERE IsEnabled = 1
 			AND IsAggregate = 0
 			)
@@ -177,11 +178,12 @@ BEGIN
 									)
 		) UNPVT
 		WHERE EXISTS(	SELECT 1 
-						FROM dbo.AvailabilityGroupMetricsConfig M
+						FROM dbo.RepositoryMetricsConfig M
 						WHERE M.MetricName = UNPVT.counter_name
 						AND M.IsEnabled = 1
 						AND M.IsAggregate = 0
 						AND M.InstanceID = @MetricsInstanceID
+						AND M.MetricType = 'AG'
 					)
 	END
 	IF EXISTS(SELECT 1 FROM @PerformanceCounters)

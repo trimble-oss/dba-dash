@@ -1,4 +1,5 @@
 ﻿using DBADash;
+using DBADashGUI.HA;
 using DBADashGUI.Interface;
 using DBADashGUI.Messaging;
 using DBADashGUI.Performance;
@@ -10,6 +11,8 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DocumentFormat.OpenXml.InkML;
+using Microsoft.Web.WebView2.Core.Raw;
 
 namespace DBADashGUI.LogShipping
 {
@@ -130,13 +133,14 @@ namespace DBADashGUI.LogShipping
             }
             RefreshSummary();
             var dt = GetLogShippingDataTable();
-
+            // Metrics config visible to App role and admin users.  Not visible to AppReadOnly role.
+            tsConfigureMetrics.Visible = DBADashUser.IsAdmin || DBADashUser.Roles.Contains("App");
             tsBack.Enabled = (context.RegularInstanceIDs.Count > 1 && InstanceIDs.Count == 1);
             dgvLogShipping.AutoGenerateColumns = false;
             dgvLogShipping.Columns[0].Frozen = Common.FreezeKeyColumn;
             dgvLogShipping.DataSource = new DataView(dt);
             dgvLogShipping.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-
+            tsConfigureInstance.Enabled = InstanceIDs.Count == 1;
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
         }
 
@@ -315,6 +319,23 @@ namespace DBADashGUI.LogShipping
             }
             var instanceId = InstanceIDs[0];
             await CollectionMessaging.TriggerCollection(instanceId, new List<CollectionType>() { CollectionType.LogRestores, CollectionType.Databases }, this);
+        }
+
+        private void ConfigureRoot_Click(object sender, EventArgs e)
+        {
+            ConfigureMetrics(-1);
+        }
+
+        private static void ConfigureMetrics(int instanceId)
+        {
+            using var metricsConfig = new RepositoryMetricsConfig() { InstanceID = instanceId, MetricType = RepositoryMetricsConfig.RepositoryMetricTypes.LogShipping };
+            metricsConfig.ShowDialog();
+        }
+
+        private void ConfigureInstance_Click(object sender, EventArgs e)
+        {
+            if (InstanceIDs.Count != 1) return;
+            ConfigureMetrics(InstanceIDs[0]);
         }
     }
 }
