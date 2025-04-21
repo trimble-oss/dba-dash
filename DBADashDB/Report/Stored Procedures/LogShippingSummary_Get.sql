@@ -32,7 +32,7 @@ SELECT InstanceID,
        CriticalCount,
        MaxTotalTimeBehind,
        MaxLatencyOfLast,
-       TimeSinceLast,
+       MaxTimeSinceLast AS TimeSinceLast,
        SnapshotAge,
        MinDateOfLastBackupRestored,
        MinLastRestoreCompleted
