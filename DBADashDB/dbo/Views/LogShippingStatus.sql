@@ -10,9 +10,13 @@ SELECT I.InstanceID,
 	LR.backup_start_date,
 	utc.backup_start_date_utc,
 	l.TimeSinceLast,
+	TimeSinceLastHD.HumanDuration AS TimeSinceLastDuration,
 	l.LatencyOfLast,
+	LatencyOfLastHD.HumanDuration as LatencyOfLastDuration,
 	l.TotalTimeBehind,
-	DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) AS SnapshotAge,
+	TotalTimeBehindHD.HumanDuration AS TotalTimeBehindDuration,
+	l.SnapshotAge,
+	SnapshotAgeHD.HumanDuration AS SnapshotAgeDuration,
 	SSD.SnapshotDate,
 	SSD.Status AS SnapshotAgeStatus,
 	chk.Status,
@@ -35,14 +39,19 @@ OUTER APPLY(SELECT DATEADD(mi,ISNULL(NULLIF(-LR.backup_time_zone,127)*15,I.UTCOf
 				DATEADD(mi,I.UTCOffset,LR.restore_date) AS restore_date_utc,
 				DATEADD(mi,I.UTCOffset,D.create_date) AS create_date_utc
 				) AS utc
-OUTER APPLY(SELECT DATEDIFF(mi,utc.restore_date_utc,GETUTCDATE()) AS TimeSinceLast,
-					DATEDIFF(mi,utc.backup_start_date_utc,restore_date_utc) AS LatencyOfLast,
-					DATEDIFF(mi,utc.backup_start_date_utc,GETUTCDATE()) AS TotalTimeBehind) l
+OUTER APPLY(SELECT DATEDIFF_BIG(s,utc.restore_date_utc,GETUTCDATE())/60.0 AS TimeSinceLast,
+					DATEDIFF_BIG(s,utc.backup_start_date_utc,restore_date_utc)/60.0 AS LatencyOfLast,
+					DATEDIFF_BIG(s,utc.backup_start_date_utc,GETUTCDATE())/60.0 AS TotalTimeBehind,
+					DATEDIFF_BIG(s,SSD.SnapshotDate,GETUTCDATE())/60.0 AS SnapshotAge) l
+OUTER APPLY dbo.SecondsToHumanDuration(l.TimeSinceLast*60.0) AS TimeSinceLastHD
+OUTER APPLY dbo.SecondsToHumanDuration(l.LatencyOfLast*60.0) AS LatencyOfLastHD
+OUTER APPLY dbo.SecondsToHumanDuration(l.TotalTimeBehind*60.0) AS TotalTimeBehindHD
+OUTER APPLY dbo.SecondsToHumanDuration(l.SnapshotAge*60.0) AS SnapshotAgeHD
 OUTER APPLY(SELECT CASE WHEN utc.create_date_utc > DATEADD(mi,-cfg.NewDatabaseExcludePeriodMin,GETUTCDATE()) THEN 3
 	WHEN l.TimeSinceLast >cfg.TimeSinceLastCriticalThreshold THEN 1
 	WHEN l.TimeSinceLast IS NULL AND cfg.TimeSinceLastCriticalThreshold IS NOT NULL THEN 1
 	WHEN l.LatencyOfLast IS NULL AND cfg.LatencyCriticalThreshold IS NOT NULL THEN 1
-	WHEN l.LatencyOfLast> cfg.LatencyCriticalThreshold THEN 1
+	WHEN l.LatencyOfLast > cfg.LatencyCriticalThreshold THEN 1
 	WHEN l.TimeSinceLast >cfg.TimeSinceLastWarningThreshold THEN 2
 	WHEN l.LatencyOfLast > cfg.LatencyWarningThreshold THEN 2
 	WHEN cfg.LatencyCriticalThreshold IS NULL AND cfg.TimeSinceLastCriticalThreshold IS NULL AND cfg.LatencyWarningThreshold IS NULL AND cfg.TimeSinceLastWarningThreshold IS NULL  THEN 3

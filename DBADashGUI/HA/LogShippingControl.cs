@@ -1,6 +1,7 @@
 ﻿using DBADash;
 using DBADashGUI.Interface;
 using DBADashGUI.Messaging;
+using DBADashGUI.Performance;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System;
@@ -54,36 +55,52 @@ namespace DBADashGUI.LogShipping
 
         private void RefreshSummary()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.LogShippingSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.LogShippingSummary_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("InstanceIDs", InstanceIDs.AsDataTable());
+            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            dgvSummary.AutoGenerateColumns = false;
+            if (dgvSummary.Columns.Count == 0)
             {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceIDs", InstanceIDs.AsDataTable());
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                dgvSummary.AutoGenerateColumns = false;
-                if (dgvSummary.Columns.Count == 0)
-                {
-                    dgvSummary.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn });
-                    dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { Name = "Status", HeaderText = "Status", DataPropertyName = "StatusDescription" });
-                    dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Log Shipped DBs", DataPropertyName = "LogshippedDBCount" });
-                    dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Warning", DataPropertyName = "WarningCount" });
-                    dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Critical", DataPropertyName = "CriticalCount" });
-                    dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Max Total Time Behind", DataPropertyName = "MaxTotalTimeBehind" });
-                    dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Max Latency of Last", DataPropertyName = "MaxLatencyOfLast" });
-                    dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Max Time Since Last", DataPropertyName = "TimeSinceLast" });
-                    dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { Name = "SnapshotAge", HeaderText = "Snapshot Age", DataPropertyName = "SnapshotAge" });
-                    dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Backup Date of Oldest File", DataPropertyName = "MinDateOfLastBackupRestored" });
-                    dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Restore Date of Oldest File", DataPropertyName = "MinLastRestoreCompleted" });
-                    dgvSummary.Columns.Add(new DataGridViewLinkColumn() { Name = "Configure", HeaderText = "Configure", Text = "Configure", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
-                }
-                dgvSummary.ApplyTheme();
-                dgvSummary.DataSource = new DataView(dt);
-                dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                dgvSummary.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { Name = "Status", HeaderText = "Status", DataPropertyName = "StatusDescription" });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Log Shipped DBs", DataPropertyName = "LogshippedDBCount" });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Warning", DataPropertyName = "WarningCount" });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Critical", DataPropertyName = "CriticalCount" });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Max Total Time Behind (Mins)", DataPropertyName = "MaxTotalTimeBehind", Visible = false, DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Min Total Time Behind (Mins)", DataPropertyName = "MinTotalTimeBehind", Visible = false, DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Avg Total Time Behind (Mins)", DataPropertyName = "AvgTotalTimeBehind", Visible = false, DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Max Latency of Last (Mins)", DataPropertyName = "MaxLatencyOfLast", Visible = false, DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Avg Latency of Last (Mins)", DataPropertyName = "AvgLatencyOfLast", Visible = false, DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Min Latency of Last (Mins)", DataPropertyName = "MinLatencyOfLast", Visible = false, DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Max Time Since Last (Mins)", DataPropertyName = "MaxTimeSinceLast", Visible = false, DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Min Time Since Last (Mins)", DataPropertyName = "MinTimeSinceLast", Visible = false, DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Avg Time Since Last (Mins)", DataPropertyName = "AvgTimeSinceLast", Visible = false, DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Max Total Time Behind", DataPropertyName = "MaxTotalTimeBehindDuration" });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Min Total Time Behind", DataPropertyName = "MinTotalTimeBehindDuration" });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Avg Total Time Behind", DataPropertyName = "AvgTotalTimeBehindDuration" });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Max Latency of Last", DataPropertyName = "MaxLatencyOfLastDuration" });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Min Latency of Last", DataPropertyName = "MinLatencyOfLastDuration" });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Avg Latency of Last", DataPropertyName = "AvgLatencyOfLastDuration" });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Max Time Since Last", DataPropertyName = "MaxTimeSinceLastDuration" });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Min Time Since Last", DataPropertyName = "MinTimeSinceLastDuration" });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Avg Time Since Last", DataPropertyName = "AvgTimeSinceLastDuration" });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { Name = "SnapshotAge", HeaderText = "Snapshot Age (Mins)", DataPropertyName = "SnapshotAge", Visible = false, DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { Name = "SnapshotAgeDuration", HeaderText = "Snapshot Age", DataPropertyName = "SnapshotAgeDuration" });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Backup Date of Oldest File", DataPropertyName = "MinDateOfLastBackupRestored" });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Backup Date of Newest File", DataPropertyName = "MaxDateOfLastBackupRestored" });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Restore Date of Oldest File", DataPropertyName = "MinLastRestoreCompleted" });
+                dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Restore Date of Newest File", DataPropertyName = "MaxLastRestoreCompleted" });
+                dgvSummary.Columns.Add(new DataGridViewLinkColumn() { Name = "Configure", HeaderText = "Configure", Text = "Configure", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
             }
+            dgvSummary.ApplyTheme();
+            dgvSummary.DataSource = new DataView(dt);
+            dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
         private DataTable GetLogShippingDataTable()
@@ -187,6 +204,7 @@ namespace DBADashGUI.LogShipping
                 var status = (DBADashStatus.DBADashStatusEnum)row["Status"];
                 var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["SnapshotAgeStatus"];
                 dgvLogShipping.Rows[idx].Cells["SnapshotAge"].SetStatusColor(snapshotStatus);
+                dgvLogShipping.Rows[idx].Cells["SnapshotAgeDuration"].SetStatusColor(snapshotStatus);
                 dgvLogShipping.Rows[idx].Cells["Status"].SetStatusColor(status);
                 dgvLogShipping.Rows[idx].Cells["Configure"].Style.Font = (string)row["ThresholdConfiguredLevel"] == "Database" ? new Font(dgvLogShipping.Font, FontStyle.Bold) : new Font(dgvLogShipping.Font, FontStyle.Regular);
             }
@@ -262,6 +280,7 @@ namespace DBADashGUI.LogShipping
                 var Status = (DBADashStatus.DBADashStatusEnum)row["Status"];
                 var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["SnapshotAgeStatus"];
                 dgvSummary.Rows[idx].Cells["SnapshotAge"].SetStatusColor(snapshotStatus);
+                dgvSummary.Rows[idx].Cells["SnapshotAgeDuration"].SetStatusColor(snapshotStatus);
                 dgvSummary.Rows[idx].Cells["Status"].SetStatusColor(Status);
                 if ((bool)row["InstanceLevelThreshold"])
                 {
