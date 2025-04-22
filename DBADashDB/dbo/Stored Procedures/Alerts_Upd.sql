@@ -25,10 +25,10 @@ BEGIN
 				)
 	BEGIN
 		CREATE TABLE #NewAlerts(
-			name NVARCHAR(MAX),
+			name NVARCHAR(MAX) COLLATE DATABASE_DEFAULT,
 			message_id INT,
 			severity INT,
-			notification_message NVARCHAR(512)
+			notification_message NVARCHAR(512) COLLATE DATABASE_DEFAULT
 		)
 		/* Get new alerts - alerts that have been triggered since the last collection */
 		INSERT INTO #NewAlerts(
