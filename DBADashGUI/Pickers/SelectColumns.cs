@@ -34,7 +34,7 @@ namespace DBADashGUI
 
             foreach (var item in items)
             {
-                dtItems.Rows.Add(item.Name, item.IsVisible);
+                dtItems.Rows.Add(item.Name.Replace("\n", " "), item.IsVisible);
             }
             return dtItems;
         }
