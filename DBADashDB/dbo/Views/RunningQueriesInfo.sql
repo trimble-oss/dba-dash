@@ -84,7 +84,8 @@ SELECT Q.InstanceID,
     Q.context_info,
     Q.transaction_begin_time_utc,
     calc.transaction_duration_ms,
-    TranHD.HumanDuration AS transaction_duration
+    TranHD.HumanDuration AS transaction_duration,
+    Q.is_implicit_transaction
 FROM dbo.RunningQueries Q
 JOIN dbo.Instances I ON Q.InstanceID = I.InstanceID
 CROSS APPLY(SELECT CASE WHEN Q.start_time_utc < Q.SnapshotDateUTC OR Q.start_time_utc IS NULL  THEN DATEDIFF_BIG(ms,ISNULL(Q.start_time_utc,Q.last_request_start_time_utc),Q.SnapshotDateUTC) ELSE 0 END AS Duration,

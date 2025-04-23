@@ -45,7 +45,8 @@ SELECT @SnapshotDateUTC as SnapshotDateUTC,
 	DATEADD(mi,@UTCOffset, s.login_time) AS login_time_utc,
 	DATEADD(mi,@UTCOffset, s.last_request_end_time) AS last_request_end_time_utc,
 	s.context_info,
-	' + CASE WHEN @CollectTranBeginTime=1 OR @HasOpenTranCount=0 THEN 'DATEADD(mi,@UTCOffset, t.transaction_begin_time)' ELSE 'CAST(NULL AS DATETIME)' END + ' AS transaction_begin_time_utc
+	' + CASE WHEN @CollectTranBeginTime=1 OR @HasOpenTranCount=0 THEN 'DATEADD(mi,@UTCOffset, t.transaction_begin_time)' ELSE 'CAST(NULL AS DATETIME)' END + ' AS transaction_begin_time_utc,
+	' + CASE WHEN @CollectTranBeginTime=1 OR @HasOpenTranCount=0 THEN 'ISNULL(t.is_implicit_transaction,CAST(0 AS BIT))' ELSE 'CAST(NULL AS BIT)' END + ' AS is_implicit_transaction
 FROM sys.dm_exec_sessions s
 ' + CASE WHEN @CollectTranBeginTime=1 OR @HasOpenTranCount=0 THEN '
 LEFT HASH JOIN (
@@ -56,7 +57,8 @@ LEFT HASH JOIN (
 			This way we get the tran begin time even if there is no active request.
 		*/
 		SELECT	ST.session_id,
-				MIN(AT.transaction_begin_time) AS transaction_begin_time
+				MIN(AT.transaction_begin_time) AS transaction_begin_time,
+				CAST(MAX(CASE WHEN AT.name = ''implicit_transaction'' THEN 1 ELSE 0 END) AS BIT) AS is_implicit_transaction
 		FROM sys.dm_tran_session_transactions ST 
 		INNER HASH JOIN sys.dm_tran_active_transactions AT ON ST.transaction_id = AT.transaction_id
 		GROUP BY ST.session_id

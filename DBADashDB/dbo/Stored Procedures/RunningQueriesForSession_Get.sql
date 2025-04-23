@@ -78,7 +78,8 @@ SELECT InstanceID,
        statement_end_offset,
        context_info,
        transaction_duration_ms,
-       transaction_duration
+       transaction_duration,
+       is_implicit_transaction
 FROM dbo.RunningQueriesInfo Q
 WHERE Q.SnapshotDateUTC >= @SnapshotDateFrom 
 AND Q.SnapshotDateUTC < @SnapshotDateTo
