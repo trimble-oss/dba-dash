@@ -186,7 +186,9 @@ namespace DBADashGUI.CustomReports
                 (_, _) => TransposeGrid());
             var transposeSelected = new ToolStripMenuItem("Selected Rows", Properties.Resources.PivotTable,
                 (sender, args) => TransposeSelected());
-            transpose.DropDownItems.AddRange(new ToolStripItem[] { transposeSelected, transposeGrid });
+            var transposeContext = new ToolStripMenuItem("Context Row (Right Click)", Properties.Resources.PivotTable,
+                (sender, args) => TransposeContextRow());
+            transpose.DropDownItems.AddRange(new ToolStripItem[] { transposeContext, transposeSelected, transposeGrid });
 
             allFilters.DropDownItems.AddRange(new ToolStripItem[]
                 { filterLike, filterNotLike, equal, notEqual, greaterThan, lessThan, greaterThanEqual, lessThanEqual });
@@ -258,6 +260,13 @@ namespace DBADashGUI.CustomReports
                 saveTable.DropDownItems[0].Enabled = DataSource is DataTable or DataView;
                 CellRowColCountToolStripMenuItem.Text = GetRowColCount;
             };
+        }
+
+        // Right click row
+        private void TransposeContextRow()
+        {
+            var rows = new DataGridViewRow[] { Rows[ClickedRowIndex] };
+            ShowTransposedRows(rows);
         }
 
         private void TransposeSelected()
@@ -334,17 +343,19 @@ namespace DBADashGUI.CustomReports
                 newGrid.Rows[^1].Cells[0].ToolTipText = UpdateHeaderTextToolTipText;
             }
 
-            for (var rowIndex = 0; rowIndex < rows.Count(); rowIndex++)
+            var rowIndex = 0;
+            foreach (var row in rows)
             {
                 newGrid.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = $"{$"Row {rowIndex + 1}"}", Name = (rowIndex + 1).ToString(), FillWeight = 1, SortMode = DataGridViewColumnSortMode.Automatic });
                 var newColIndex = rowIndex + 1;
                 for (var colIndex = 0; colIndex < grid.Columns.Count; colIndex++)
                 {
                     var newCell = newGrid[newColIndex, colIndex];
-                    var oldCell = grid.Rows[rowIndex].Cells[colIndex];
-                    newCell.Value = grid.Rows[rowIndex].Cells[colIndex].FormattedValue?.ToString();
+                    var oldCell = row.Cells[colIndex];
+                    newCell.Value = row.Cells[colIndex].FormattedValue?.ToString();
                     newCell.Style = oldCell.Style;
                 }
+                rowIndex++;
             }
 
             return newGrid;
