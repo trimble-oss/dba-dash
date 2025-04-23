@@ -232,6 +232,10 @@ namespace DBADash
                 {
                     dtRunningQueries.Columns.Add("transaction_begin_time_utc", typeof(DateTime));
                 }
+                if (!dtRunningQueries.Columns.Contains("is_implicit_transaction"))
+                {
+                    dtRunningQueries.Columns.Add("is_implicit_transaction", typeof(bool));
+                }
             }
 
             if (data.Tables.Contains("IdentityColumns"))

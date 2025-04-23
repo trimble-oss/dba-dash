@@ -59,6 +59,7 @@ namespace DBADashGUI.Performance
         private bool IsGroupBy => dgv.Columns.Contains("colGroup");
         private bool IsInstanceDrillDown => CurrentContext != null && InstanceID != CurrentContext.InstanceID;
         private RunningQueriesFilters forceDetailFilters;
+        private bool hasImplicitTran;
 
         private static string IdleThresholdInfo =>
             $"Red = Sleeping session with an open transaction that has been idle for longer than {TimeSpan.FromSeconds(Config.IdleCriticalThresholdForSleepingSessionWithOpenTran).Humanize(maxUnit: TimeUnit.Year, precision: 3)}.\nYellow=Sleeping session with an open transaction that has been idle for longer than {TimeSpan.FromSeconds(Config.IdleWarningThresholdForSleepingSessionWithOpenTran).Humanize(maxUnit: TimeUnit.Year, precision: 3)}.";
@@ -156,6 +157,12 @@ namespace DBADashGUI.Performance
                 {
                     HeaderText = "Transaction Duration", DataPropertyName = "transaction_duration", Name = "colTranDuration",
                     SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60
+                },
+                new DataGridViewCheckBoxColumn()
+                {
+                    HeaderText = "Implicit Tran", DataPropertyName = "is_implicit_transaction", Name = "colImplicitTran",
+                    SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60,Visible = hasImplicitTran,
+                    ToolTipText = "Implicit transactions are something that should be avoided.  When on, transactions will be started without an explicit BEGIN TRAN statement."
                 },
                 new DataGridViewTextBoxColumn()
                 {
@@ -868,6 +875,9 @@ namespace DBADashGUI.Performance
             dgv.AutoGenerateColumns = false;
             hasContextInfo = source.Table.Columns.Contains("context_info") && source.Cast<DataRowView>()
                 .Any(row => (row["context_info"] as string ?? "0x") != "0x");
+            hasImplicitTran = source.Table.Columns.Contains("is_implicit_transaction") && source.Cast<DataRowView>()
+                .Any(row => (bool?)row["is_implicit_transaction"].DBNullToNull() == true);
+
             dgv.Columns.AddRange(RunningQueryColumns);
             dgv.DataSource = source;
             dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
@@ -1249,6 +1259,20 @@ namespace DBADashGUI.Performance
                 else
                 {
                     dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
+                }
+            }
+            else if (dgv.Columns[e.ColumnIndex].Name == "colImplicitTran")
+            {
+                var isImplicit = (bool?)dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.DBNullToNull();
+                if (!isImplicit.HasValue)
+                {
+                    dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
+                    dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = "Unknown";
+                }
+                else if (isImplicit.Value)
+                {
+                    dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].SetStatusColor(DBADashStatus.DBADashStatusEnum.Critical);
+                    dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = "WARNING: This session is using implicit transactions";
                 }
             }
         }

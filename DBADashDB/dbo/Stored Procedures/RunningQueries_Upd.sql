@@ -50,6 +50,7 @@ BEGIN
 						   t.last_request_end_time_utc,
 						   t.context_info,
 						   t.transaction_begin_time_utc,
+						   t.is_implicit_transaction,
 						   ROW_NUMBER() OVER(PARTITION BY t.session_id ORDER BY t.cpu_time DESC) rnum
 					FROM  @RunningQueries t
 	)
@@ -87,7 +88,8 @@ BEGIN
 		login_time_utc,
 		last_request_end_time_utc,
 		context_info,
-		transaction_begin_time_utc
+		transaction_begin_time_utc,
+		is_implicit_transaction
 	)
 	SELECT  SnapshotDateUTC,
 	    session_id,
@@ -121,7 +123,8 @@ BEGIN
 		login_time_utc,
 		last_request_end_time_utc,
 		context_info,
-		transaction_begin_time_utc
+		transaction_begin_time_utc,
+		is_implicit_transaction
 	FROM deDupe
 	WHERE deDupe.rnum=1
 
@@ -251,7 +254,8 @@ BEGIN
 		login_time_utc,
 		last_request_end_time_utc,
 		context_info,
-		transaction_begin_time_utc
+		transaction_begin_time_utc,
+		is_implicit_transaction
     )
     SELECT @InstanceID as InstanceID,
         SnapshotDateUTC,
@@ -286,7 +290,8 @@ BEGIN
 		login_time_utc,
 		last_request_end_time_utc,
 		context_info,
-		transaction_begin_time_utc
+		transaction_begin_time_utc,
+		is_implicit_transaction
     FROM @RunningQueriesDD;
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  

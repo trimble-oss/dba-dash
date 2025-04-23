@@ -33,6 +33,7 @@
     last_request_end_time_utc DATETIME NULL,
     context_info VARBINARY(128) NULL,
     transaction_begin_time_utc DATETIME NULL,
+    is_implicit_transaction BIT NULL,
     CONSTRAINT PK_RunningQueries PRIMARY KEY(InstanceID,SnapshotDateUTC,session_id) WITH (DATA_COMPRESSION = PAGE) ON PS_RunningQueries(SnapshotDateUTC)
 ) ON PS_RunningQueries(SnapshotDateUTC);
 GO
