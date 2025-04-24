@@ -3,7 +3,6 @@ using DBADashGUI.Interface;
 using DBADashGUI.Messaging;
 using DBADashGUI.Theme;
 using Humanizer;
-using Humanizer.Localisation;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -13,10 +12,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
-using ClosedXML.Excel;
-using Microsoft.SqlServer.Management.Smo;
-using System.ComponentModel;
-using Octokit;
+using TimeUnit = Humanizer.Localisation.TimeUnit;
 
 namespace DBADashGUI.Performance
 {
@@ -34,6 +30,18 @@ namespace DBADashGUI.Performance
                     tsGroupByFilter.Visible = false;
                 }
             };
+            var openInNewWindow = new ToolStripMenuItem("Open In New Window", Properties.Resources.NewWindow_16x,
+                OpenInNewWindow);
+            dgv.CellContextMenu.Items.Insert(0, openInNewWindow);
+            dgv.CellContextMenu.Items.Insert(1, new ToolStripSeparator());
+        }
+
+        private void OpenInNewWindow(object sender, EventArgs e)
+        {
+            var row = (DataRowView)dgv.Rows[dgv.ClickedRowIndex].DataBoundItem;
+            var snapshotDate = ((DateTime)row["SnapshotDate"]).AppTimeZoneToUtc();
+            var instanceId = (int)row["InstanceID"];
+            OpenInNewWindow(snapshotDate, instanceId);
         }
 
         private DBADashContext CurrentContext;
@@ -946,6 +954,17 @@ namespace DBADashGUI.Performance
             Common.ShowCodeViewer(sql, "Find Plan");
         }
 
+        private void OpenInNewWindow(DateTime snapshotDate, int instanceId)
+        {
+            var viewer = new RunningQueriesViewer()
+            {
+                InstanceID = instanceId,
+                SnapshotDateFrom = snapshotDate,
+                SnapshotDateTo = snapshotDate
+            };
+            viewer.Show();
+        }
+
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
@@ -960,13 +979,7 @@ namespace DBADashGUI.Performance
                         InstanceID = (int)row["InstanceID"];
                         if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
                         {
-                            var viewer = new RunningQueriesViewer()
-                            {
-                                InstanceID = InstanceID,
-                                SnapshotDateFrom = snapshotDate,
-                                SnapshotDateTo = snapshotDate
-                            };
-                            viewer.Show();
+                            OpenInNewWindow(snapshotDate, InstanceID);
                             return;
                         }
                         LoadSnapshot(snapshotDate);
