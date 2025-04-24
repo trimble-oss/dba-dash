@@ -958,6 +958,17 @@ namespace DBADashGUI.Performance
                     {
                         var snapshotDate = ((DateTime)row["SnapshotDate"]).AppTimeZoneToUtc();
                         InstanceID = (int)row["InstanceID"];
+                        if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
+                        {
+                            var viewer = new RunningQueriesViewer()
+                            {
+                                InstanceID = InstanceID,
+                                SnapshotDateFrom = snapshotDate,
+                                SnapshotDateTo = snapshotDate
+                            };
+                            viewer.Show();
+                            return;
+                        }
                         LoadSnapshot(snapshotDate);
                         tsBack.Enabled = true;
                         break;
