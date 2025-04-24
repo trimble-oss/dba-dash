@@ -30,10 +30,56 @@ namespace DBADashGUI.Performance
                     tsGroupByFilter.Visible = false;
                 }
             };
-            var openInNewWindow = new ToolStripMenuItem("Open In New Window", Properties.Resources.NewWindow_16x,
+            var openInNewWindow = new ToolStripMenuItem("Open In New Window", Properties.Resources.NewWindow_16x);
+            var contextRowInNewWindow = new ToolStripMenuItem("Context Row", Properties.Resources.Select,
                 OpenInNewWindow);
+            var selectedInNewWindow = new ToolStripMenuItem("Selected", Properties.Resources.SelectRows,
+                OpenSelectedInNewWindow);
+            openInNewWindow.DropDownItems.AddRange(new ToolStripItem[] { contextRowInNewWindow, selectedInNewWindow });
             dgv.CellContextMenu.Items.Insert(0, openInNewWindow);
             dgv.CellContextMenu.Items.Insert(1, new ToolStripSeparator());
+        }
+
+        private const int MaxSnapshotsToLoadBeforePrompt = 20;
+        private const int MaxSnapshotTabs = 100; // Tabs wil be loaded on demand after first few tabs
+
+        public void AutoResizeColumnsWithMaxColumnWidth(DataGridViewAutoSizeColumnsMode mode = DataGridViewAutoSizeColumnsMode.AllCells) => dgv.AutoResizeColumnsWithMaxColumnWidth(mode);
+
+        private void OpenSelectedInNewWindow(object sender, EventArgs e)
+        {
+            var snapshots = dgv.SelectedCellRows
+                .Select(row => (DataRowView)row.DataBoundItem)
+                .Select(row =>
+                    new RunningQueriesSnapshotInfo(((DateTime)row["SnapshotDate"]).AppTimeZoneToUtc(),
+                            (int)row["InstanceID"],
+                            InstanceID > 0 ?
+                            ((DateTime)row["SnapshotDate"]).ToString(CultureInfo.CurrentCulture) : (string)row["InstanceDisplayName"])
+                        )
+                        .Distinct().ToList();
+
+            if (snapshots.Count > MaxSnapshotTabs)
+            {
+                MessageBox.Show($"Too many snapshots selected ({snapshots.Count}).", "Warning", MessageBoxButtons.OK,
+                    MessageBoxIcon.Exclamation);
+                return;
+            }
+            if (snapshots.Count > MaxSnapshotsToLoadBeforePrompt)
+            {
+                if (MessageBox.Show(
+                        $"Are you sure you want to open {snapshots.Count} snapshots?",
+                        "Open Snapshots", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+            }
+
+            if (snapshots.Count() == 1)
+            {
+                OpenInNewWindow(snapshots[0].SnapshotDateUtc, snapshots[0].InstanceID);
+            }
+            else
+            {
+                var viewer = new RunningQueriesViewer();
+                viewer.LoadSnapshots(snapshots);
+                viewer.Show();
+            }
         }
 
         private void OpenInNewWindow(object sender, EventArgs e)
@@ -50,7 +96,7 @@ namespace DBADashGUI.Performance
         private bool IsForceDetail;
 
         public int InstanceID;
-        private HashSet<int> InstanceIDs => CurrentContext.InstanceIDs;
+        private HashSet<int> InstanceIDs => InstanceID > 0 ? new HashSet<int>(InstanceID) : CurrentContext.InstanceIDs;
         private DateTime currentSnapshotDate;
         private DataTable snapshotDT;
         public DateTime SnapshotDateFrom;

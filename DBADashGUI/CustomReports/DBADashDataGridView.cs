@@ -262,6 +262,9 @@ namespace DBADashGUI.CustomReports
             };
         }
 
+        public List<DataGridViewRow> SelectedCellRows =>
+            SelectedCells.Cast<DataGridViewCell>().Select(cell => cell.RowIndex).Distinct().Select(rowIndex => Rows[rowIndex]).ToList();
+
         // Right click row
         private void TransposeContextRow()
         {
@@ -269,12 +272,7 @@ namespace DBADashGUI.CustomReports
             ShowTransposedRows(rows);
         }
 
-        private void TransposeSelected()
-        {
-            var rows = SelectedCells.Cast<DataGridViewCell>().Select(cell => cell.RowIndex).Distinct()
-                .Select(rowIndex => Rows[rowIndex]).ToList();
-            ShowTransposedRows(rows);
-        }
+        private void TransposeSelected() => ShowTransposedRows(SelectedCellRows);
 
         private void TransposeGrid()
         {
