@@ -715,7 +715,7 @@ namespace DBADashGUI.Performance
             else // Show the last snapshot for all instances
             {
                 dt = RunningQueriesSummary();
-                tsBack.Enabled = InstanceIDs is { Count: > 1 };
+                tsBack.Enabled = CurrentContext?.InstanceIDs is { Count: > 1 };
                 lblRowLimit.Visible = dt.Rows.Count == Properties.Settings.Default.RunningQueriesSummaryMaxRows;
                 tsEditLimit.Visible = true;
             }
