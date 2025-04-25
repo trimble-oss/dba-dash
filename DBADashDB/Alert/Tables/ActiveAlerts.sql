@@ -26,7 +26,7 @@
 	CONSTRAINT FK_ActiveAlerts_Instances FOREIGN KEY(InstanceID) REFERENCES dbo.Instances(InstanceID),
 	CONSTRAINT FK_ActiveAlerts_Rules FOREIGN KEY(RuleID) REFERENCES Alert.Rules(RuleID),
 	CONSTRAINT PK_ActiveAlerts PRIMARY KEY(AlertID),
-	CONSTRAINT CK_ActiveAlerts_Priority CHECK(Priority BETWEEN 0 AND 41),
+	CONSTRAINT CK_ActiveAlerts_Priority CHECK(Priority >= 0 AND Priority <= 41),
 )
 GO
 CREATE UNIQUE NONCLUSTERED INDEX IX_ActiveAlerts_InstanceID_AlertKey ON Alert.ActiveAlerts(InstanceID,AlertKey)
