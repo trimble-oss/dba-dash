@@ -97,7 +97,8 @@ N'SELECT TOP(@Top) SQ.InstanceID,
 	   SQ.session_id,
 	   DATEADD(ms,-duration/1000,timestamp) AS start_time,
 	   HD.HumanDuration AS Duration,
-	   SQ.context_info
+	   SQ.context_info,
+	   SQ.row_count
 FROM dbo.SlowQueries SQ
 JOIN dbo.Instances I ON I.InstanceID = SQ.InstanceID
 CROSS APPLY dbo.MillisecondsToHumanDuration(SQ.Duration/1000) HD

@@ -211,6 +211,10 @@ namespace DBADash
                 {
                     dtSlowQueries.Columns.Add("context_info", typeof(byte[]));
                 }
+                if (!dtSlowQueries.Columns.Contains("row_count"))
+                {
+                    dtSlowQueries.Columns.Add("row_count", typeof(long));
+                }
             }
 
             if (data.Tables.Contains("RunningQueries"))
