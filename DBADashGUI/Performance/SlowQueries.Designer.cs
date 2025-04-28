@@ -49,7 +49,6 @@ namespace DBADashGUI
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SlowQueries));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle25 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle26 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle27 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -59,11 +58,13 @@ namespace DBADashGUI
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle32 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle34 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle21 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
             dgvSummary = new DBADashDataGridView();
             Grp = new System.Windows.Forms.DataGridViewLinkColumn();
             _lt5 = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -1370,14 +1371,14 @@ namespace DBADashGUI
             dgvSlow.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle18;
             dgvSlow.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvSlow.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, DatabaseName, event_type, object_name, timestamp, colDuration, duration, cpu_time, logical_reads, physical_reads, Writes, colRowCount, username, client_hostname, client_app_name, colContextInfo, Result, colSessionID, colText });
-            dataGridViewCellStyle24.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle24.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            dataGridViewCellStyle24.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle24.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle24.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
-            dataGridViewCellStyle24.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle24.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgvSlow.DefaultCellStyle = dataGridViewCellStyle24;
+            dataGridViewCellStyle25.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle25.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle25.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle25.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle25.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle25.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle25.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvSlow.DefaultCellStyle = dataGridViewCellStyle25;
             dgvSlow.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvSlow.EnableHeadersVisualStyles = false;
             dgvSlow.Location = new System.Drawing.Point(0, 48);
@@ -1547,8 +1548,8 @@ namespace DBADashGUI
             // dataGridViewTextBoxColumn1
             // 
             dataGridViewTextBoxColumn1.DataPropertyName = "TotalDuration";
-            dataGridViewCellStyle25.Format = "#,#,,.000";
-            dataGridViewTextBoxColumn1.DefaultCellStyle = dataGridViewCellStyle25;
+            dataGridViewCellStyle26.Format = "#,#,,.000";
+            dataGridViewTextBoxColumn1.DefaultCellStyle = dataGridViewCellStyle26;
             dataGridViewTextBoxColumn1.HeaderText = "Total Duration (sec)";
             dataGridViewTextBoxColumn1.MinimumWidth = 6;
             dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
@@ -1558,8 +1559,8 @@ namespace DBADashGUI
             // dataGridViewTextBoxColumn2
             // 
             dataGridViewTextBoxColumn2.DataPropertyName = "TotalCPU";
-            dataGridViewCellStyle26.Format = "#,#,,.000";
-            dataGridViewTextBoxColumn2.DefaultCellStyle = dataGridViewCellStyle26;
+            dataGridViewCellStyle27.Format = "#,#,,.000";
+            dataGridViewTextBoxColumn2.DefaultCellStyle = dataGridViewCellStyle27;
             dataGridViewTextBoxColumn2.HeaderText = "Total CPU (sec)";
             dataGridViewTextBoxColumn2.MinimumWidth = 6;
             dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
@@ -1569,8 +1570,8 @@ namespace DBADashGUI
             // dataGridViewTextBoxColumn3
             // 
             dataGridViewTextBoxColumn3.DataPropertyName = "TotalIO";
-            dataGridViewCellStyle27.Format = "N0";
-            dataGridViewTextBoxColumn3.DefaultCellStyle = dataGridViewCellStyle27;
+            dataGridViewCellStyle28.Format = "N0";
+            dataGridViewTextBoxColumn3.DefaultCellStyle = dataGridViewCellStyle28;
             dataGridViewTextBoxColumn3.HeaderText = "Total IO";
             dataGridViewTextBoxColumn3.MinimumWidth = 6;
             dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
@@ -1580,8 +1581,8 @@ namespace DBADashGUI
             // dataGridViewTextBoxColumn4
             // 
             dataGridViewTextBoxColumn4.DataPropertyName = "TotalPhysicalIO";
-            dataGridViewCellStyle28.Format = "N0";
-            dataGridViewTextBoxColumn4.DefaultCellStyle = dataGridViewCellStyle28;
+            dataGridViewCellStyle29.Format = "N0";
+            dataGridViewTextBoxColumn4.DefaultCellStyle = dataGridViewCellStyle29;
             dataGridViewTextBoxColumn4.HeaderText = "Total Physical IO";
             dataGridViewTextBoxColumn4.MinimumWidth = 6;
             dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
@@ -1636,8 +1637,8 @@ namespace DBADashGUI
             // dataGridViewTextBoxColumn10
             // 
             dataGridViewTextBoxColumn10.DataPropertyName = "duration";
-            dataGridViewCellStyle29.Format = "#,#,,.000";
-            dataGridViewTextBoxColumn10.DefaultCellStyle = dataGridViewCellStyle29;
+            dataGridViewCellStyle30.Format = "#,#,,.000";
+            dataGridViewTextBoxColumn10.DefaultCellStyle = dataGridViewCellStyle30;
             dataGridViewTextBoxColumn10.HeaderText = "Duration (sec)";
             dataGridViewTextBoxColumn10.MinimumWidth = 6;
             dataGridViewTextBoxColumn10.Name = "dataGridViewTextBoxColumn10";
@@ -1647,8 +1648,8 @@ namespace DBADashGUI
             // dataGridViewTextBoxColumn11
             // 
             dataGridViewTextBoxColumn11.DataPropertyName = "cpu_time";
-            dataGridViewCellStyle30.Format = "#,#,,.000";
-            dataGridViewTextBoxColumn11.DefaultCellStyle = dataGridViewCellStyle30;
+            dataGridViewCellStyle31.Format = "#,#,,.000";
+            dataGridViewTextBoxColumn11.DefaultCellStyle = dataGridViewCellStyle31;
             dataGridViewTextBoxColumn11.HeaderText = "CPU (sec)";
             dataGridViewTextBoxColumn11.MinimumWidth = 6;
             dataGridViewTextBoxColumn11.Name = "dataGridViewTextBoxColumn11";
@@ -1658,8 +1659,8 @@ namespace DBADashGUI
             // dataGridViewTextBoxColumn12
             // 
             dataGridViewTextBoxColumn12.DataPropertyName = "logical_reads";
-            dataGridViewCellStyle31.Format = "N0";
-            dataGridViewTextBoxColumn12.DefaultCellStyle = dataGridViewCellStyle31;
+            dataGridViewCellStyle32.Format = "N0";
+            dataGridViewTextBoxColumn12.DefaultCellStyle = dataGridViewCellStyle32;
             dataGridViewTextBoxColumn12.HeaderText = "Logical Reads";
             dataGridViewTextBoxColumn12.MinimumWidth = 6;
             dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
@@ -1669,8 +1670,8 @@ namespace DBADashGUI
             // dataGridViewTextBoxColumn13
             // 
             dataGridViewTextBoxColumn13.DataPropertyName = "physical_reads";
-            dataGridViewCellStyle32.Format = "N0";
-            dataGridViewTextBoxColumn13.DefaultCellStyle = dataGridViewCellStyle32;
+            dataGridViewCellStyle33.Format = "N0";
+            dataGridViewTextBoxColumn13.DefaultCellStyle = dataGridViewCellStyle33;
             dataGridViewTextBoxColumn13.HeaderText = "Physical Reads";
             dataGridViewTextBoxColumn13.MinimumWidth = 6;
             dataGridViewTextBoxColumn13.Name = "dataGridViewTextBoxColumn13";
@@ -1680,8 +1681,8 @@ namespace DBADashGUI
             // dataGridViewTextBoxColumn14
             // 
             dataGridViewTextBoxColumn14.DataPropertyName = "Writes";
-            dataGridViewCellStyle33.Format = "N0";
-            dataGridViewTextBoxColumn14.DefaultCellStyle = dataGridViewCellStyle33;
+            dataGridViewCellStyle34.Format = "N0";
+            dataGridViewTextBoxColumn14.DefaultCellStyle = dataGridViewCellStyle34;
             dataGridViewTextBoxColumn14.HeaderText = "Writes";
             dataGridViewTextBoxColumn14.MinimumWidth = 6;
             dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
@@ -1845,6 +1846,8 @@ namespace DBADashGUI
             // colRowCount
             // 
             colRowCount.DataPropertyName = "row_count";
+            dataGridViewCellStyle24.Format = "N0";
+            colRowCount.DefaultCellStyle = dataGridViewCellStyle24;
             colRowCount.HeaderText = "Row Count";
             colRowCount.MinimumWidth = 6;
             colRowCount.Name = "colRowCount";
