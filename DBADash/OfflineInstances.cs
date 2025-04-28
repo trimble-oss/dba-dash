@@ -154,10 +154,16 @@ namespace DBADashService
 
         private static DataTable GetAgentDataTable()
         {
-            if (AgentDataTable != null) return AgentDataTable.Copy();
-            AgentDataTable = new DataTable("DBADash");
-            DBCollector.AddDBADashServiceMetaData(ref AgentDataTable);
+            if (AgentDataTable is { Rows.Count: 1 }) return AgentDataTable.Copy();
+            AgentDataTable = GenerateDBADashDataTable();
             return AgentDataTable.Copy();
+        }
+
+        private static DataTable GenerateDBADashDataTable()
+        {
+            var dt = new DataTable("DBADash");
+            DBCollector.AddDBADashServiceMetaData(ref dt);
+            return dt;
         }
 
         public static async Task LogOfflineInstances(CollectionConfig config, DateTime snapshotDate)
