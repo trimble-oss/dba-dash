@@ -1,4 +1,7 @@
 ﻿using DBADash;
+using DBADash.Messaging;
+using DBADashGUI.Theme;
+using Humanizer;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Concurrent;
@@ -11,13 +14,10 @@ using System.Globalization;
 using System.Linq;
 using System.ServiceProcess;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 using static DBADash.DBADashConnection;
 using SortOrder = System.Windows.Forms.SortOrder;
-using System.Threading.Tasks;
-using DBADash.Messaging;
-using Humanizer;
 
 namespace DBADashServiceConfig
 {
@@ -32,7 +32,6 @@ namespace DBADashServiceConfig
 
         private string originalJson = "";
         private CollectionConfig collectionConfig = new();
-        private ServiceController svcCtrl;
         private bool isInstalled;
         private Dictionary<string, CustomCollection> _customCollectionsNew;
 
@@ -191,7 +190,7 @@ namespace DBADashServiceConfig
                     // Ensure we have a ConnectionID set for SQL connections
                     src.SetConnectionIDFromBuilderIfNotSet();
 
-                    var existingConnection = await collectionConfig.FindSourceConnectionAsync(sourceString,src.ConnectionID); // Check if the connection string exists in the config
+                    var existingConnection = await collectionConfig.FindSourceConnectionAsync(sourceString, src.ConnectionID); // Check if the connection string exists in the config
 
                     if (existingConnection != null)
                     {
@@ -213,7 +212,7 @@ namespace DBADashServiceConfig
                             continue;
                         }
                     }
-         
+
                     collectionConfig.SourceConnections.Add(src);
                 }
             }
@@ -535,7 +534,7 @@ namespace DBADashServiceConfig
             }
 
             SetConnectionCount();
-            RefreshServiceStatus();
+            _ = Task.Run(AutoRefreshServiceStatus);
             ValidateDestination();
             RefreshEncryption();
             dgvConnections.ApplyTheme();
@@ -785,73 +784,97 @@ namespace DBADashServiceConfig
             ApplySearch();
         }
 
+        private string lastStatus = string.Empty;
+        private const string NotInstalled = "Not Installed";
+
+        private async Task AutoRefreshServiceStatus()
+        {
+            while (true)
+            {
+                RefreshServiceStatus();
+                await Task.Delay(5000);
+            }
+            // ReSharper disable once FunctionNeverReturns
+        }
+
         private void RefreshServiceStatus()
         {
-            svcCtrl = ServiceController.GetServices()
-                .FirstOrDefault(s => s.ServiceName == collectionConfig.ServiceName);
-
-            lblServiceWarning.Visible = false;
             try
             {
+                using var service = new ServiceController(collectionConfig.ServiceName);
                 var nameOfServiceFromPath = ServiceTools.GetServiceNameFromPath();
                 var pathOfService = ServiceTools.GetPathOfService(collectionConfig.ServiceName);
-
-                if (!pathOfService.Contains(ServiceTools.ServicePath, StringComparison.CurrentCultureIgnoreCase) &&
+                var warningText = string.Empty;
+                var status = service.Status;
+                if (!pathOfService.Contains(ServiceTools.ServicePath,
+                        StringComparison.CurrentCultureIgnoreCase) &&
                     pathOfService != string.Empty)
                 {
-                    lblServiceWarning.Text =
-                        $"Warning service with name {collectionConfig.ServiceName} is installed at a different location: {pathOfService}";
-                    lblServiceWarning.Visible = true;
+                    warningText = $"Warning service with name {collectionConfig.ServiceName} is installed at a different location: {pathOfService}";
                 }
-                else if (nameOfServiceFromPath != collectionConfig.ServiceName && nameOfServiceFromPath != string.Empty)
+                else if (nameOfServiceFromPath != collectionConfig.ServiceName &&
+                         nameOfServiceFromPath != string.Empty)
                 {
-                    lblServiceWarning.Text =
+                    warningText =
                         $"Warning: Service name from path {nameOfServiceFromPath} does not match the service name {collectionConfig.ServiceName} in ServiceConfig.json.";
-                    lblServiceWarning.Visible = true;
+                }
+
+                if (service.Status.ToString() != lastStatus || lblServiceWarning.Text != warningText)
+                {
+                    this.Invoke(() =>
+                    {
+                        lblServiceWarning.Visible = !string.IsNullOrEmpty(warningText);
+                        lblServiceWarning.Text = warningText;
+                        isInstalled = true;
+                        lblServiceStatus.Text =
+                            "Service Status: " + Enum.GetName(typeof(ServiceControllerStatus), status);
+                        lblServiceStatus.ForeColor = status switch
+                        {
+                            ServiceControllerStatus.Running => Color.Green,
+                            ServiceControllerStatus.Stopped or ServiceControllerStatus.StopPending
+                                or ServiceControllerStatus.Paused => Color.Red,
+                            _ => Color.Orange
+                        };
+                        lnkStart.Enabled = (status == ServiceControllerStatus.Stopped);
+                        lnkStop.Enabled = (status == ServiceControllerStatus.Running);
+                        lnkInstall.Font = new Font(lnkInstall.Font, FontStyle.Regular);
+                        toolTip1.SetToolTip(lnkInstall, "Remove Windows service for DBA Dash agent");
+                        lnkInstall.Text = "Uninstall service";
+                        lastStatus = status.ToString();
+                    });
                 }
             }
             catch (Exception ex)
             {
-                lblServiceWarning.Text = $"Warning: Could not determine service name from path: {ex.Message}";
-                lblServiceWarning.Visible = true;
-            }
-
-            if (svcCtrl == null)
-            {
-                isInstalled = false;
-                lnkStart.Enabled = false;
-                lnkStop.Enabled = false;
-                lnkInstall.Enabled = true;
-                lnkInstall.Font = new Font(lnkInstall.Font, FontStyle.Bold);
-                lnkInstall.Text = "Install as service";
-                toolTip1.SetToolTip(lnkInstall, "Install DBA Dash agent as a Windows service");
-                lblServiceStatus.Text = "Service Status: Not Installed";
-                lblServiceStatus.ForeColor = Color.Brown;
-            }
-            else
-            {
-                isInstalled = true;
-                lblServiceStatus.Text =
-                    "Service Status: " + Enum.GetName(typeof(ServiceControllerStatus), svcCtrl.Status);
-                if (svcCtrl.Status == ServiceControllerStatus.Running)
+                string status, warningText = string.Empty;
+                if (ex is InvalidOperationException && ex.Message.Contains("not found"))
                 {
-                    lblServiceStatus.ForeColor = Color.Green;
-                }
-                else if (svcCtrl.Status is ServiceControllerStatus.Stopped or ServiceControllerStatus.StopPending
-                         or ServiceControllerStatus.Paused)
-                {
-                    lblServiceStatus.ForeColor = Color.Red;
+                    status = NotInstalled;
                 }
                 else
                 {
-                    lblServiceStatus.ForeColor = Color.Orange;
+                    status = "Error";
+                    warningText = $"Error checking service {ex.Message}";
                 }
 
-                lnkStart.Enabled = (svcCtrl.Status == ServiceControllerStatus.Stopped);
-                lnkStop.Enabled = (svcCtrl.Status == ServiceControllerStatus.Running);
-                lnkInstall.Font = new Font(lnkInstall.Font, FontStyle.Regular);
-                toolTip1.SetToolTip(lnkInstall, "Remove Windows service for DBA Dash agent");
-                lnkInstall.Text = "Uninstall service";
+                if (lastStatus != status || lblServiceWarning.Text != warningText)
+                {
+                    this.Invoke(() =>
+                    {
+                        lblServiceWarning.Text = warningText;
+                        lblServiceWarning.Visible = !(string.IsNullOrEmpty(warningText));
+                        isInstalled = false;
+                        lnkStart.Enabled = false;
+                        lnkStop.Enabled = false;
+                        lnkInstall.Enabled = true;
+                        lnkInstall.Font = new Font(lnkInstall.Font, FontStyle.Bold);
+                        lnkInstall.Text = "Install as service";
+                        toolTip1.SetToolTip(lnkInstall, "Install DBA Dash agent as a Windows service");
+                        lblServiceStatus.Text = "Service Status: Not Installed";
+                        lblServiceStatus.ForeColor = Color.Brown;
+                        lastStatus = NotInstalled;
+                    });
+                }
             }
         }
 
@@ -900,20 +923,20 @@ namespace DBADashServiceConfig
         private void StartService()
         {
             PromptSaveChanges();
-            svcCtrl.Refresh();
-            if (svcCtrl.Status == ServiceControllerStatus.Stopped)
+            try
             {
-                try
+                using var service = new ServiceController(collectionConfig.ServiceName);
+                service.Refresh();
+                if (service.Status == ServiceControllerStatus.Stopped)
                 {
-                    svcCtrl.Start();
+                    service.Start();
                     System.Threading.Thread.Sleep(500);
                 }
-                catch (Exception ex)
-                {
-                    PromptError(ex);
-                }
             }
-
+            catch (Exception ex)
+            {
+                PromptError(ex);
+            }
             RefreshServiceStatus();
             ValidateDestination();
         }
@@ -939,20 +962,19 @@ namespace DBADashServiceConfig
 
         private void StopService()
         {
-            svcCtrl.Refresh();
-            if (svcCtrl.Status == ServiceControllerStatus.Running)
+            try
             {
-                try
+                using var service = new ServiceController(collectionConfig.ServiceName);
+                if (service.Status == ServiceControllerStatus.Running)
                 {
-                    svcCtrl.Stop();
+                    service.Stop();
                     System.Threading.Thread.Sleep(500);
                 }
-                catch (Exception ex)
-                {
-                    PromptError(ex);
-                }
             }
-
+            catch (Exception ex)
+            {
+                PromptError(ex);
+            }
             RefreshServiceStatus();
         }
 
