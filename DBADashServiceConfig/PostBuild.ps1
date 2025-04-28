@@ -1,6 +1,7 @@
 ﻿param([string]$TargetDir);
 $ErrorActionPreference = "Stop"
-$URL = "https://github.com/trimble-oss/serialized-dataset-viewer/releases/download/1.1.0/SerializedDataSetViewer_1.1.0.zip"
+$ProgressPreference = 'SilentlyContinue'
+$URL = "https://github.com/trimble-oss/serialized-dataset-viewer/releases/download/1.2.0/SerializedDataSetViewer_1.2.0.zip"
 $FileName = [System.IO.Path]::GetFileName($URL)
 
 $DownloadPath = [System.IO.Path]::Combine($TargetDir, $FileName)
