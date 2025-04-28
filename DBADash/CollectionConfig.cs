@@ -33,7 +33,7 @@ namespace DBADash
         public int? PurgeDataCommandTimeout { get; set; }
         public int? AddPartitionsCommandTimeout { get; set; }
 
-        public bool EnableMessaging { get; set; }
+        public bool EnableMessaging { get; set; } = true;
 
         public bool AllowPlanForcing { get; set; }
 

@@ -814,6 +814,8 @@ namespace DBADashServiceConfig
             // chkEnableMessaging
             // 
             chkEnableMessaging.AutoSize = true;
+            chkEnableMessaging.Checked = true;
+            chkEnableMessaging.CheckState = System.Windows.Forms.CheckState.Checked;
             chkEnableMessaging.Location = new System.Drawing.Point(18, 39);
             chkEnableMessaging.Name = "chkEnableMessaging";
             chkEnableMessaging.Size = new System.Drawing.Size(185, 24);
