@@ -27,7 +27,15 @@ namespace DBADashService
 
         private static string GetID(DataSet ds)
         {
-            return ds.Tables["DBADash"].Rows[0]["Instance"] + "_" + ds.Tables["DBADash"].Rows[0]["DBName"];
+            try
+            {
+                return ds.Tables["DBADash"].Rows[0]["Instance"] + "_" + ds.Tables["DBADash"].Rows[0]["DBName"];
+            }
+            catch(Exception ex)
+            {
+                Log.Error(ex, "Error getting ID from DataSet");
+                return "DEFAULT";
+            }
         }
 
         /// <summary>
