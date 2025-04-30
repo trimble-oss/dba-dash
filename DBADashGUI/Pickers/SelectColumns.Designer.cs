@@ -38,26 +38,30 @@
             lnkNone = new System.Windows.Forms.LinkLabel();
             lnkSelected = new System.Windows.Forms.LinkLabel();
             toolTip1 = new System.Windows.Forms.ToolTip(components);
+            pnlOKCancel = new System.Windows.Forms.Panel();
+            pnlTop = new System.Windows.Forms.Panel();
+            tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             ((System.ComponentModel.ISupportInitialize)dgvCols).BeginInit();
+            pnlOKCancel.SuspendLayout();
+            pnlTop.SuspendLayout();
+            tableLayoutPanel1.SuspendLayout();
             SuspendLayout();
             // 
             // dgvCols
             // 
             dgvCols.AllowUserToAddRows = false;
             dgvCols.AllowUserToDeleteRows = false;
-            dgvCols.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             dgvCols.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             dgvCols.BackgroundColor = System.Drawing.Color.White;
             dgvCols.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvCols.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colIsVisible, colColumn });
-            dgvCols.Location = new System.Drawing.Point(26, 68);
-            dgvCols.Margin = new System.Windows.Forms.Padding(6);
+            dgvCols.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvCols.Location = new System.Drawing.Point(23, 3);
             dgvCols.Name = "dgvCols";
             dgvCols.RowHeadersVisible = false;
             dgvCols.RowHeadersWidth = 51;
-            dgvCols.RowTemplate.Height = 29;
             dgvCols.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            dgvCols.Size = new System.Drawing.Size(771, 904);
+            dgvCols.Size = new System.Drawing.Size(374, 452);
             dgvCols.TabIndex = 0;
             dgvCols.KeyPress += DgvCols_KeyPress;
             // 
@@ -70,7 +74,7 @@
             colIsVisible.Name = "colIsVisible";
             colIsVisible.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             colIsVisible.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            colIsVisible.Width = 45;
+            colIsVisible.Width = 23;
             // 
             // colColumn
             // 
@@ -86,12 +90,11 @@
             // 
             bttnOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             bttnOK.ForeColor = System.Drawing.Color.Black;
-            bttnOK.Location = new System.Drawing.Point(597, 1029);
-            bttnOK.Margin = new System.Windows.Forms.Padding(6);
+            bttnOK.Location = new System.Drawing.Point(303, 13);
             bttnOK.Name = "bttnOK";
-            bttnOK.Size = new System.Drawing.Size(200, 59);
+            bttnOK.Size = new System.Drawing.Size(94, 29);
             bttnOK.TabIndex = 1;
-            bttnOK.Text = "OK";
+            bttnOK.Text = "&OK";
             bttnOK.UseVisualStyleBackColor = true;
             bttnOK.Click += BttnOK_Click;
             // 
@@ -99,12 +102,11 @@
             // 
             bttnCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             bttnCancel.ForeColor = System.Drawing.Color.Black;
-            bttnCancel.Location = new System.Drawing.Point(363, 1029);
-            bttnCancel.Margin = new System.Windows.Forms.Padding(6);
+            bttnCancel.Location = new System.Drawing.Point(203, 13);
             bttnCancel.Name = "bttnCancel";
-            bttnCancel.Size = new System.Drawing.Size(200, 59);
+            bttnCancel.Size = new System.Drawing.Size(94, 29);
             bttnCancel.TabIndex = 2;
-            bttnCancel.Text = "Cancel";
+            bttnCancel.Text = "&Cancel";
             bttnCancel.UseVisualStyleBackColor = true;
             bttnCancel.Click += BttnCancel_Click;
             // 
@@ -112,10 +114,9 @@
             // 
             lnkAll.AutoSize = true;
             lnkAll.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            lnkAll.Location = new System.Drawing.Point(26, 18);
-            lnkAll.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            lnkAll.Location = new System.Drawing.Point(23, 18);
             lnkAll.Name = "lnkAll";
-            lnkAll.Size = new System.Drawing.Size(51, 41);
+            lnkAll.Size = new System.Drawing.Size(27, 20);
             lnkAll.TabIndex = 3;
             lnkAll.TabStop = true;
             lnkAll.Text = "All";
@@ -126,10 +127,9 @@
             // 
             lnkNone.AutoSize = true;
             lnkNone.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            lnkNone.Location = new System.Drawing.Point(121, 20);
-            lnkNone.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            lnkNone.Location = new System.Drawing.Point(56, 18);
             lnkNone.Name = "lnkNone";
-            lnkNone.Size = new System.Drawing.Size(91, 41);
+            lnkNone.Size = new System.Drawing.Size(45, 20);
             lnkNone.TabIndex = 4;
             lnkNone.TabStop = true;
             lnkNone.Text = "None";
@@ -141,35 +141,71 @@
             lnkSelected.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             lnkSelected.AutoSize = true;
             lnkSelected.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            lnkSelected.Location = new System.Drawing.Point(550, 18);
-            lnkSelected.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            lnkSelected.Location = new System.Drawing.Point(281, 18);
             lnkSelected.Name = "lnkSelected";
-            lnkSelected.Size = new System.Drawing.Size(229, 41);
+            lnkSelected.Size = new System.Drawing.Size(116, 20);
             lnkSelected.TabIndex = 5;
             lnkSelected.TabStop = true;
             lnkSelected.Text = "Toggle Selected";
             toolTip1.SetToolTip(lnkSelected, "Check/Uncheck all the selected items.  Use spacebar to activate from the keyboard.");
             lnkSelected.LinkClicked += LnkSelected_LinkClicked;
             // 
+            // pnlOKCancel
+            // 
+            pnlOKCancel.Controls.Add(bttnCancel);
+            pnlOKCancel.Controls.Add(bttnOK);
+            pnlOKCancel.Dock = System.Windows.Forms.DockStyle.Bottom;
+            pnlOKCancel.Location = new System.Drawing.Point(0, 499);
+            pnlOKCancel.Name = "pnlOKCancel";
+            pnlOKCancel.Size = new System.Drawing.Size(420, 66);
+            pnlOKCancel.TabIndex = 6;
+            // 
+            // pnlTop
+            // 
+            pnlTop.Controls.Add(lnkAll);
+            pnlTop.Controls.Add(lnkNone);
+            pnlTop.Controls.Add(lnkSelected);
+            pnlTop.Dock = System.Windows.Forms.DockStyle.Top;
+            pnlTop.Location = new System.Drawing.Point(0, 0);
+            pnlTop.Name = "pnlTop";
+            pnlTop.Size = new System.Drawing.Size(420, 41);
+            pnlTop.TabIndex = 7;
+            // 
+            // tableLayoutPanel1
+            // 
+            tableLayoutPanel1.ColumnCount = 3;
+            tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            tableLayoutPanel1.Controls.Add(dgvCols, 1, 0);
+            tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            tableLayoutPanel1.Location = new System.Drawing.Point(0, 41);
+            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.RowCount = 1;
+            tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanel1.Size = new System.Drawing.Size(420, 458);
+            tableLayoutPanel1.TabIndex = 8;
+            // 
             // SelectColumns
             // 
-            AutoScaleDimensions = new System.Drawing.SizeF(17F, 41F);
+            AcceptButton = bttnOK;
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(822, 1132);
-            Controls.Add(lnkSelected);
-            Controls.Add(lnkNone);
-            Controls.Add(lnkAll);
-            Controls.Add(bttnCancel);
-            Controls.Add(bttnOK);
-            Controls.Add(dgvCols);
-            Margin = new System.Windows.Forms.Padding(6);
+            CancelButton = bttnCancel;
+            ClientSize = new System.Drawing.Size(420, 565);
+            Controls.Add(tableLayoutPanel1);
+            Controls.Add(pnlTop);
+            Controls.Add(pnlOKCancel);
             Name = "SelectColumns";
             StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             Text = "Select Columns";
             Load += SelectColumns_Load;
             ((System.ComponentModel.ISupportInitialize)dgvCols).EndInit();
+            pnlOKCancel.ResumeLayout(false);
+            pnlTop.ResumeLayout(false);
+            pnlTop.PerformLayout();
+            tableLayoutPanel1.ResumeLayout(false);
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
@@ -183,5 +219,8 @@
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.DataGridViewCheckBoxColumn colIsVisible;
         private System.Windows.Forms.DataGridViewTextBoxColumn colColumn;
+        private System.Windows.Forms.Panel pnlOKCancel;
+        private System.Windows.Forms.Panel pnlTop;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     }
 }
