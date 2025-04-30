@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using TimeUnit = Humanizer.Localisation.TimeUnit;
 
@@ -911,6 +912,10 @@ namespace DBADashGUI.Performance
             cmd.Parameters.AddRange(parameters);
             var pSnapshotDateFrom = parameters.First(p => p.ParameterName == "SnapshotDateFrom");
             da.Fill(dt);
+
+            // Empty column to cache query plans when they're requested
+            dt.Columns.Add("query_plan_text");
+
             filters.From = Convert.ToDateTime(pSnapshotDateFrom.Value);
             ApplyTableModifications(dt);
             return dt;
@@ -971,15 +976,35 @@ namespace DBADashGUI.Performance
 
         private static void ShowPlan(DataRowView row)
         {
-            if (row["query_plan"] == DBNull.Value)
+            if (!(bool)row["has_plan"])
             {
                 FindPlan(row);
             }
             else
             {
-                var plan = (string)row["query_plan"];
+                if (row["query_plan_text"] == DBNull.Value)
+                {
+                    row["query_plan_text"] = GetPlan(row);
+                }
+                var plan = (string)row["query_plan_text"];
                 Common.ShowQueryPlan(plan);
             }
+        }
+
+        private static string GetPlan(DataRowView row)
+        {
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.QueryPlan_Get", cn) { CommandType = CommandType.StoredProcedure };
+
+            cmd.Parameters.AddWithValue("plan_handle", row["plan_handle_bin"]);
+            cmd.Parameters.AddWithValue("query_plan_hash", row["query_plan_hash_bin"]);
+            cmd.Parameters.AddWithValue("statement_start_offset", row["statement_start_offset"]);
+            cmd.Parameters.AddWithValue("statement_end_offset", row["statement_end_offset"]);
+
+            cn.Open();
+            var result = cmd.ExecuteScalar();
+
+            return Encoding.Unicode.GetString(((byte[])result).Decompress().ToArray());
         }
 
         private static void FindPlan(DataRowView row)
