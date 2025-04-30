@@ -633,7 +633,7 @@ namespace DBADash
                 }
                 try
                 {
-                    CollectPlans();
+                    await CollectPlansAsync();
                 }
                 catch (Exception ex)
                 {
@@ -642,63 +642,15 @@ namespace DBADash
             }
         }
 
-        private static string ByteArrayToHexString(byte[] bytes)
-        {
-            string hex = BitConverter.ToString(bytes);
-            return hex.Replace("-", "");
-        }
-
-        private DataTable GetPlans(string plansSQL)
-        {
-            if (string.IsNullOrEmpty(plansSQL)) return null;
-
-            using var cn = new SqlConnection(ConnectionString);
-            using var da = new SqlDataAdapter(plansSQL, cn);
-            var dt = new DataTable("QueryPlans");
-            da.Fill(dt);
-            return dt;
-        }
-
-        private void CollectPlans()
+        private async Task CollectPlansAsync()
         {
             if (!Data.Tables.Contains("RunningQueries") || !Source.PlanCollectionEnabled) return;
-            var plansSQL = GetPlansSQL();
-
-            var dt = GetPlans(plansSQL);
-
-            if (dt is { Rows.Count: > 0 })
+            var plans = GetPlansToCollect();
+            DataTable dt = null;
+            if (plans.Count > 0)
             {
-                dt.Columns.Add("query_plan_hash", typeof(byte[]));
-                dt.Columns.Add("query_plan_compressed", typeof(byte[]));
-                foreach (DataRow r in dt.Rows)
-                {
-                    try
-                    {
-                        string strPlan = r["query_plan"] == DBNull.Value ? string.Empty : (string)r["query_plan"];
-                        r["query_plan_compressed"] = SMOBaseClass.Zip(strPlan);
-                        var hash = GetPlanHash(strPlan);
-                        r["query_plan_hash"] = hash;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex, "Error processing query plans");
-                    }
-                }
-                dt.Columns.Remove("query_plan");
-
-                var nullRows = dt.Select("query_plan_hash IS NULL");
-
-                // Remove rows with null query plan hash
-                if (nullRows.Length > 0)
-                {
-                    Log.Information("Removing {0} rows with NULL query_plan_hash", nullRows.Length);
-                    foreach (var row in nullRows)
-                    {
-                        row.Delete();
-                    }
-                    dt.AcceptChanges();
-                }
-                if (dt.Rows.Count > 0) // Check if we still have rows
+                dt = await Plan.GetPlansAsync(plans, ConnectionString);
+                if (dt is { Rows.Count: > 0 })
                 {
                     Data.Tables.Add(dt);
                 }
@@ -707,101 +659,15 @@ namespace DBADash
         }
 
         ///<summary>
-        ///Get the query plan hash from a  string of the plan XML
-        ///</summary>
-        public static byte[] GetPlanHash(string strPlan)
-        {
-            using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(strPlan)))
-            {
-                ms.Position = 0;
-                using (var xr = new XmlTextReader(ms))
-                {
-                    while (xr.Read())
-                    {
-                        if (xr.Name == "StmtSimple")
-                        {
-                            string strHash = xr.GetAttribute("QueryPlanHash");
-                            return StringToByteArray(strHash);
-                        }
-                    }
-                }
-            }
-            return Array.Empty<byte>();
-        }
-
-        public static byte[] StringToByteArray(string hex)
-        {
-            if (hex.StartsWith("0x"))
-            {
-                hex = hex.Remove(0, 2);
-            }
-            return Enumerable.Range(0, hex.Length)
-                             .Where(x => x % 2 == 0)
-                             .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
-                             .ToArray();
-        }
-
-        ///<summary>
-        ///Generate a SQL query to get the query plan text for running queries. Captured plan handles get cached with a call to CacheCollectedPlans later <br/>
-        ///Limits the cost associated with plan capture - less plans to capture, send and process<br/>
-        ///Note: Caching takes query_plan_hash into account as a statement can get recompiled without the plan handle changing.
-        ///</summary>
-        public string GetPlansSQL()
-        {
-            var plans = GetPlansList();
-            var sb = new StringBuilder();
-            sb.Append(@"DECLARE @plans TABLE(plan_handle VARBINARY(64),statement_start_offset int,statement_end_offset int)
-INSERT INTO @plans(plan_handle,statement_start_offset,statement_end_offset)
-VALUES");
-
-            // Already have a distinct list by plan handle, hash and offsets.
-            // Filter this list by plans not already collected and get a distinct list by handle and offsets (excluding the hash as this can cause duplicates in rare cases)
-            var collectList = plans.Where(p => !cache.Contains(p.Key))
-                .GroupBy(p => Convert.ToBase64String(p.PlanHandle.Concat(BitConverter.GetBytes(p.StartOffset)).Concat(BitConverter.GetBytes(p.EndOffset)).ToArray()))
-                .Select(p => p.First())
-                .ToList();
-
-            collectList.ForEach(p => sb.AppendFormat("{3}(0x{0},{1},{2}),", ByteArrayToHexString(p.PlanHandle), p.StartOffset, p.EndOffset, Environment.NewLine));
-
-            Log.Information("Plans {0}, {1} to collect from {2}", plans.Count, collectList.Count, instanceName);
-
-            LogInternalPerformanceCounter("DBADash", "Count of plans meeting threshold for collection", "", plans.Count); // Total number of plans that meet the threshold for collection
-            LogInternalPerformanceCounter("DBADash", "Count of plans to collect", "", collectList.Count); // Total number of plans we want to collect (plans that meet the threshold that are not cached)
-            LogInternalPerformanceCounter("DBADash", "Count of plans from cache", "", plans.Count - collectList.Count); // Plan count we didn't collect because they have been collected previously and we cached the handles/hashes.
-
-            if (collectList.Count == 0)
-            {
-                return string.Empty;
-            }
-            else
-            {
-                sb.Remove(sb.Length - 1, 1);
-                sb.AppendLine("OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid polluting the plan cache
-                sb.AppendLine();
-                sb.Append(@"SELECT t.plan_handle,
-        t.statement_start_offset,
-        t.statement_end_offset,
-        pln.dbid,
-        pln.objectid,
-        pln.encrypted,
-        pln.query_plan
-FROM @plans t
-CROSS APPLY sys.dm_exec_text_query_plan(t.plan_handle,t.statement_start_offset,t.statement_end_offset) pln
-OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid polluting the plan cache
-                return sb.ToString();
-            }
-        }
-
-        ///<summary>
         ///Get a list of plan handles from RunningQueries including statement start/end offsets as we want to capture plans at the statement level. Query plan hash is used to detect changes in the plan for caching purposes <br/>
         ///Capture a distinct list so we collect the plan for each statement once even if there are multiple instances of statements running with the same plan.<br/>
         ///Filter for plans matching the specified threshold to limit the plans captured to the ones that are likely to be of interest<br/>
         ///</summary>
-        private List<Plan> GetPlansList()
+        private List<Plan> GetPlansToCollect()
         {
             if (Data.Tables.Contains("RunningQueries"))
             {
-                DataTable dt = Data.Tables["RunningQueries"];
+                var dt = Data.Tables["RunningQueries"];
                 var plans = (from r in dt!.AsEnumerable()
                              where r["plan_handle"] != DBNull.Value
                              && r["query_plan_hash"] != DBNull.Value
@@ -811,6 +677,20 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                              group r by new Plan((byte[])r["plan_handle"], (byte[])r["query_plan_hash"], (int)r["statement_start_offset"], (int)r["statement_end_offset"]) into g
                              where g.Sum(r => Convert.ToInt64(r["cpu_time"])) >= Source.PlanCollectionCPUThreshold || g.Sum(r => Convert.ToInt64(r["granted_query_memory"])) >= Source.PlanCollectionMemoryGrantThreshold || g.Count() >= Source.PlanCollectionCountThreshold || g.Max(r => ((DateTime)r["SnapshotDateUTC"]).Subtract((DateTime)r["last_request_start_time_utc"])).TotalMilliseconds >= Source.PlanCollectionDurationThreshold
                              select g.Key).Distinct().ToList();
+
+                // Already have a distinct list by plan handle, hash and offsets.
+                // Filter this list by plans not already collected and get a distinct list by handle and offsets (excluding the hash as this can cause duplicates in rare cases)
+                var collectList = plans.Where(p => !cache.Contains(p.Key))
+                    .GroupBy(p => Convert.ToBase64String(p.PlanHandle.Concat(BitConverter.GetBytes(p.StartOffset)).Concat(BitConverter.GetBytes(p.EndOffset)).ToArray()))
+                    .Select(p => p.First())
+                    .ToList();
+
+                Log.Information("Plans {0}, {1} to collect from {2}", plans.Count, collectList.Count, instanceName);
+
+                LogInternalPerformanceCounter("DBADash", "Count of plans meeting threshold for collection", "", plans.Count); // Total number of plans that meet the threshold for collection
+                LogInternalPerformanceCounter("DBADash", "Count of plans to collect", "", collectList.Count); // Total number of plans we want to collect (plans that meet the threshold that are not cached)
+                LogInternalPerformanceCounter("DBADash", "Count of plans from cache", "", plans.Count - collectList.Count); // Plan count we didn't collect because they have been collected previously and we cached the handles/hashes.
+
                 return plans;
             }
             else
@@ -867,7 +747,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             var dt = Data.Tables["QueryText"];
             foreach (DataRow r in dt!.Rows)
             {
-                cache.Add(ByteArrayToHexString((byte[])r["sql_handle"]), "", policy);
+                cache.Add(((byte[])r["sql_handle"]).ToHexString(), "", policy);
             }
         }
 
@@ -946,7 +826,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
         {
             var handles = (from r in Data.Tables["RunningQueries"]!.AsEnumerable()
                            where r["sql_handle"] != DBNull.Value
-                           select ByteArrayToHexString((byte[])r["sql_handle"])).Distinct().ToList();
+                           select ((byte[])r["sql_handle"]).ToHexString()).Distinct().ToList();
             return handles;
         }
 

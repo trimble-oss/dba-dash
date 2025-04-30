@@ -1,4 +1,5 @@
 ﻿using DBADash;
+using DBADash.Messaging;
 using DBADashGUI.Interface;
 using DBADashGUI.Messaging;
 using DBADashGUI.Theme;
@@ -12,6 +13,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using TimeUnit = Humanizer.Localisation.TimeUnit;
 
@@ -960,25 +962,31 @@ namespace DBADashGUI.Performance
 
             tsBlockingFilter.Text = $"Blocking ({blockedCount} Blocked)";
             tsBlockingFilter.Enabled = blockedCount > 0;
-            tsStatus.Visible = SessionID == 0 && JobId == Guid.Empty;
-            tsStatus.Text =
-                $"Blocked Sessions: {blockedCount}, Blocked Wait Time: {TimeSpan.FromMilliseconds(blockedWait):dd\\ hh\\:mm\\:ss}, Running Jobs {runningJobCount}";
-            tsStatus.Font = blockedCount > 0
-                ? new Font(tsStatus.Font, FontStyle.Bold)
-                : new Font(tsStatus.Font, FontStyle.Regular);
-            tsStatus.ForeColor = DBADashUser.SelectedTheme.ThemeIdentifier == ThemeType.Dark
+            var status = SessionID == 0 && JobId == Guid.Empty ?
+                $"Blocked Sessions: {blockedCount}, Blocked Wait Time: {TimeSpan.FromMilliseconds(blockedWait):dd\\ hh\\:mm\\:ss}, Running Jobs {runningJobCount}" : string.Empty;
+            var statusColor = DBADashUser.SelectedTheme.ThemeIdentifier == ThemeType.Dark
                 ?
                 DBADashUser.SelectedTheme.ForegroundColor
                 : blockedCount > 0
                     ? DashColors.Fail
                     : DashColors.Success;
+            SetStatus(status, string.Empty, statusColor);
+            tsStatus.Font = blockedCount > 0
+                ? new Font(tsStatus.Font, FontStyle.Bold)
+                : new Font(tsStatus.Font, FontStyle.Regular);
         }
 
-        private static void ShowPlan(DataRowView row)
+        private void ShowPlan(DataRowView row)
         {
             if (!(bool)row["has_plan"])
             {
-                FindPlan(row);
+                var context = CommonData.GetDBADashContext((int)row["InstanceID"]);
+                if (context.CanMessage)
+                {
+                    CollectPlan(row, context);
+                    return;
+                }
+                FindPlanScript(row);
             }
             else
             {
@@ -1007,7 +1015,123 @@ namespace DBADashGUI.Performance
             return Encoding.Unicode.GetString(((byte[])result).Decompress().ToArray());
         }
 
-        private static void FindPlan(DataRowView row)
+        private static QueryPlanCollectionMessage GetPlanCollectionMessage(DataRowView row, DBADashContext context)
+        {
+            if (row["plan_handle_bin"] == DBNull.Value)
+            {
+                throw new Exception("No plan handle");
+            }
+            if (row["query_plan_hash_bin"] == DBNull.Value)
+            {
+                throw new Exception("No plan hash");
+            }
+            var plan = new Plan((byte[])row["plan_handle_bin"],
+                (byte[])row["query_plan_hash_bin"],
+                (int)row["statement_start_offset"],
+                (int)row["statement_end_offset"]);
+            return new QueryPlanCollectionMessage()
+            {
+                ConnectionID = context.ConnectionID,
+                CollectAgent = context.CollectAgent,
+                ImportAgent = context.ImportAgent,
+                PlansToCollect = new List<Plan>() { plan }
+            };
+        }
+
+        private async Task ProcessPlanCollectionMessageReply(ResponseMessage reply, Guid messageGroup)
+        {
+            try
+            {
+                var request = PlanCollectionRequests[messageGroup];
+                PlanCollectionRequests.Remove(messageGroup);
+
+                if (reply.Type != ResponseMessage.ResponseTypes.Success)
+                {
+                    SetStatus(reply.Message, reply.Exception?.ToString(), DashColors.Fail);
+                    return;
+                }
+                SetStatus("Loading Plan...", string.Empty, DashColors.Information);
+
+                var context = CommonData.GetDBADashContext(request.ConnectionID);
+
+                var dtPlan = reply.Data.Tables["QueryPlans"];
+                if (dtPlan == null || dtPlan.Rows.Count == 0)
+                {
+                    SetStatus("Query plan was not found", string.Empty, DashColors.Fail);
+                    MessageBox.Show("Query plan was not found", "Warning", MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                var status = "Plan collected.  Loading in default app.";
+                var tooltip = string.Empty;
+                var statusColor = DashColors.Green;
+                try
+                {
+                    await DBImporter.UpdateCollectionAsync(dtPlan, context.InstanceID, DateTime.UtcNow, Common.ConnectionString);
+                }
+                catch (Exception ex)
+                {
+                    status = "Plan collected, but error saving to repository database.";
+                    tooltip = ex.Message;
+                    statusColor = DashColors.Warning;
+                }
+
+                var planBin = dtPlan.Rows[0].Field<byte[]>("query_plan_compressed");
+                var planHandle = dtPlan.Rows[0].Field<byte[]>("plan_handle").ToHexString();
+                var planHash = dtPlan.Rows[0].Field<byte[]>("query_plan_hash").ToHexString();
+                var startOffset = dtPlan.Rows[0].Field<int>("statement_start_offset");
+                var endOffset = dtPlan.Rows[0].Field<int>("statement_end_offset");
+                var planText = SMOBaseClass.Unzip(planBin);
+                var dtGrid = ((DataView)dgv.DataSource).Table;
+                if (dtGrid == null)
+                {
+                    throw new Exception("DataTable is null");
+                }
+                foreach (var row in dtGrid.Rows.Cast<DataRow>().Where(r =>
+                             r.Field<byte[]>("plan_handle_bin").ToHexString() == planHandle
+                             && r.Field<byte[]>("query_plan_hash_bin").ToHexString() == planHash
+                             && r.Field<int>("statement_start_offset") == startOffset
+                             && r.Field<int>("statement_end_offset") == endOffset))
+                {
+                    row["has_plan"] = true;
+                    row["query_plan_text"] = planText;
+                }
+
+                Common.ShowQueryPlan(planText);
+                SetStatus(status, tooltip, statusColor);
+            }
+            catch (Exception ex)
+            {
+                SetStatus(ex.Message, ex.ToString(), DashColors.Red);
+            }
+        }
+
+        private readonly Dictionary<Guid, QueryPlanCollectionMessage> PlanCollectionRequests = new();
+
+        private void CollectPlan(DataRowView row, DBADashContext context)
+        {
+            if (context.CanMessage)
+            {
+                try
+                {
+                    var planCollectionMessage = GetPlanCollectionMessage(row, context);
+                    var id = Guid.NewGuid();
+                    PlanCollectionRequests.Add(id, planCollectionMessage);
+                    _ = MessagingHelper.SendMessageAndProcessReply((MessageBase)planCollectionMessage, context,
+                        tsStatus, ProcessPlanCollectionMessageReply, id);
+                    SetStatus("Plan collection message SENT", string.Empty, DashColors.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Plan Collection Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+
+                return;
+            }
+        }
+
+        private static void FindPlanScript(DataRowView row)
         {
             var db = Convert.ToString(row["database_name"]);
             var planHandle = Convert.ToString(row["plan_handle"]);
@@ -1087,7 +1211,7 @@ namespace DBADashGUI.Performance
                 case "colQueryPlanHash":
                 case "colQueryHash":
                 case "colSQLHandle":
-                    FindPlan(row);
+                    FindPlanScript(row);
                     break;
                 // Running query snapshot has been grouped by some value and the user has selected to drill down - filter the grid by the selected value for the column we have grouped by
                 case "colGroup":
@@ -1298,7 +1422,7 @@ namespace DBADashGUI.Performance
         {
             if (dgv.Columns[e.ColumnIndex].Name == "colQueryPlan")
             {
-                e.Value = Convert.ToBoolean(e.Value) ? "View Plan" : "Find Plan";
+                e.Value = Convert.ToBoolean(e.Value) ? "View Plan" : dgv.Rows[e.RowIndex].Cells["colPlanHandle"].Value == DBNull.Value || dgv.Rows[e.RowIndex].Cells["colQueryPlanHash"].Value == DBNull.Value ? "" : "Find Plan";
             }
             else if (Convert.ToString(e.Value)?.Length > 1000)
             {

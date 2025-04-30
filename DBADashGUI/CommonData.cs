@@ -8,6 +8,7 @@ using System.Runtime.Caching;
 using System.Threading.Tasks;
 using DBADash;
 using DocumentFormat.OpenXml.Office2021.DocumentTasks;
+using Microsoft.SqlServer.Management.Smo;
 
 namespace DBADashGUI
 {
@@ -298,6 +299,36 @@ namespace DBADashGUI
             agent = DBADashAgent.GetDBADashAgent(Common.ConnectionString, agentID);
             cache.Add(cacheKey, agent, DateTimeOffset.Now.AddMinutes(10));
             return agent;
+        }
+
+        public static DBADashContext GetDBADashContext(string connectionID)
+        {
+            var row = Instances.Rows
+                .Cast<DataRow>().First(r => r.Field<string>("ConnectionID") == connectionID);
+            return GetDBADashContext(row);
+        }
+
+        public static DBADashContext GetDBADashContext(int instanceID)
+        {
+            var row = Instances.Rows
+                .Cast<DataRow>().First(r => r.Field<int>("InstanceID") == instanceID);
+
+            return GetDBADashContext(row);
+        }
+
+        private static DBADashContext GetDBADashContext(DataRow row)
+        {
+            var instanceID = row.Field<int>("InstanceID");
+            var isAzureDB = (int?)row["EngineEdition"].DBNullToNull() == 5;
+            var context = new DBADashContext()
+            {
+                RegularInstanceIDsWithHidden = isAzureDB ? new HashSet<int>() : new HashSet<int>() { instanceID },
+                AzureInstanceIDsWithHidden = isAzureDB ? new HashSet<int>() { instanceID } : new HashSet<int>(),
+                InstanceID = instanceID,
+                InstanceName = (string)row["Instance"],
+                Type = isAzureDB ? SQLTreeItem.TreeType.AzureDatabase : SQLTreeItem.TreeType.Instance,
+            };
+            return context;
         }
 
         public static void ClearCache()

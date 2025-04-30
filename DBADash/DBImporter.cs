@@ -543,12 +543,18 @@ namespace DBADash
 
         private async Task UpdateAsync(string tableName)
         {
-            var procName = (tableName.StartsWith("UserData.") ? "" : "dbo.") + tableName + "_Upd";
-            var paramName = tableName.Replace("UserData.", "");
             var dt = data.Tables[tableName];
             if (dt == null) return;
+            await UpdateCollectionAsync(dt, instanceID, snapshotDate, connectionString, CommandTimeout);
+        }
+
+        public static async Task UpdateCollectionAsync(DataTable dt, int? instanceID, DateTime snapshotDate, string connectionString, int timeOut = 30)
+        {
+            var tableName = dt.TableName;
+            var procName = (tableName.StartsWith("UserData.") ? "" : "dbo.") + tableName + "_Upd";
+            var paramName = tableName.Replace("UserData.", "");
             await using var cn = new SqlConnection(connectionString);
-            await using var cmd = new SqlCommand(procName, cn) { CommandTimeout = CommandTimeout, CommandType = CommandType.StoredProcedure };
+            await using var cmd = new SqlCommand(procName, cn) { CommandTimeout = timeOut, CommandType = CommandType.StoredProcedure };
             await cn.OpenAsync();
             if (dt.Rows.Count > 0)
             {

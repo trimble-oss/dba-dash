@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.IO.Compression;
-using System.IO;
-using Microsoft.Data.SqlClient;
 
 namespace DBADash
 {
@@ -104,5 +105,24 @@ namespace DBADash
         }
 
         public static SqlParameter[] GetParameters(this List<CustomSqlParameter> parameters) => parameters.Where(p => !p.UseDefaultValue).Select(p => p.Param).ToArray();
+
+        public static string ToHexString(this byte[] bytes)
+        {
+            if (bytes == null) return "";
+            var hex = BitConverter.ToString(bytes);
+            return hex.Replace("-", "");
+        }
+
+        public static byte[] ToByteArray(this string hex)
+        {
+            if (hex.StartsWith("0x"))
+            {
+                hex = hex.Remove(0, 2);
+            }
+            return Enumerable.Range(0, hex.Length)
+                .Where(x => x % 2 == 0)
+                .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
+                .ToArray();
+        }
     }
 }
