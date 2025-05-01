@@ -89,38 +89,18 @@ namespace DBADashGUI.CustomReports
 
         private void FreezeColumn()
         {
-            // Set context menu item as checked
-            var freezeColumnMenuItem = ColumnContextMenu.Items.OfType<ToolStripMenuItem>().FirstOrDefault(item => item.Text == "Freeze Column");
+            var applyFreeze = !Columns[ClickedColumnIndex].Frozen;
+           
+            var colIndex = applyFreeze ? ClickedColumnIndex : Columns.GetFirstColumn(DataGridViewElementStates.Visible)!.Index;
 
-            if (!Columns[ClickedColumnIndex].Frozen)
+            // If column is being frozen then freeze it and highlight all frozen columns (incl all to the left)
+            // If column is being unfrozen, then remove highlighting and unfreeze the first visible column (effectively removing frozen status from all columns)
+            Columns[colIndex].Frozen = applyFreeze;
+
+            foreach (DataGridViewColumn column in Columns)
             {
-                // If column is being frozen then freeze it and highlight all frozen columns (incl all to the left)
-                Columns[ClickedColumnIndex].Frozen = true;
-
-                foreach (DataGridViewColumn column in Columns)
-                {
-                    if (column.Frozen)
-                    {
-                        column.HeaderCell.Style.BackColor = Color.LightBlue;
-                    }
-                }
-
-                freezeColumnMenuItem.Checked = true;
-            }
-            else
-            {
-                // If column is being unfrozen, then remove highlighting and unfreeze the first visible column (effectively removing frozen status from all columns)
-
-                foreach (DataGridViewColumn column in Columns)
-                {
-                    if (column.Frozen)
-                    {
-                        column.HeaderCell.Style.BackColor = Color.Empty;
-                    }
-                }
-
-                Columns.GetFirstColumn(DataGridViewElementStates.Visible).Frozen = false;
-                freezeColumnMenuItem.Checked = false;
+                column.HeaderCell.Style.BackColor = column.Frozen ? DashColors.BluePale : Color.Empty;
+                column.HeaderCell.Style.ForeColor =  column.Frozen ? DashColors.TrimbleBlueDark : Color.Empty;
             }
         }
 
@@ -162,6 +142,7 @@ namespace DBADashGUI.CustomReports
             var clearFilter = GetClearFilterMenuItem();
             var editFilter = GetEditFilterMenuItem();
             var saveTable = GetSaveTableMenuItem();
+            var freezeColumn = GetFreezeColumnMenuItem();
             ColumnContextMenu.Items.AddRange(
                 new ToolStripItem[]
                 {
@@ -173,7 +154,7 @@ namespace DBADashGUI.CustomReports
                     GetColumnsMenuItem(),
                     GetAutoResizeColumns(),
                     hideColumn,
-                    GetFreezeColumnMenuItem(),
+                    freezeColumn,
                     new ToolStripSeparator(),
                     editFilter,
                     clearFilter,
@@ -190,6 +171,9 @@ namespace DBADashGUI.CustomReports
                 saveTable.DropDownItems[0].Enabled = DataSource is DataTable or DataView;
                 hideColumn.Visible = ClickedColumnIndex >= 0;
                 RowColumnCountToolStripMenuItem.Text = GetRowColCount;
+                freezeColumn.Text = ClickedColumnIndex >= 0 && Columns[ClickedColumnIndex].Frozen ? "Unfreeze Column" : "Freeze Column";
+                freezeColumn.Visible = ClickedColumnIndex >= 0;
+                freezeColumn.Checked = ClickedColumnIndex >= 0 && Columns[ClickedColumnIndex].Frozen;
             };
         }
 
