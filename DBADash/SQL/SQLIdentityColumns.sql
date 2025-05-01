@@ -23,7 +23,7 @@ OUTER APPLY(SELECT	CASE IC.max_length
 						WHEN 1 THEN POWER(2.,IC.max_length*8) 
 							ELSE POWER(2.,IC.max_length*8-1)-1 
 					END AS max_ident,
-					POWER(2E0,IC.max_length*8) AS max_rows,
+					POWER(2.,IC.max_length*8) AS max_rows,
 					CAST(IC.last_value AS BIGINT) as last_value_big
 			) calc
 OUTER APPLY(SELECT SUM(PS.row_count) row_count
@@ -33,11 +33,11 @@ OUTER APPLY(SELECT SUM(PS.row_count) row_count
 			) RC
 WHERE (
 	/* last_value is more than threshold percent of the max identity value */
-	calc.last_value_big / calc.max_ident * 100 > @IdentityCollectionThreshold 
+	calc.last_value_big / CAST(calc.max_ident AS FLOAT) * 100 > @IdentityCollectionThreshold 
 	/* Table row count is more than the threshold percent of the max number of rows (taking negative values into account)  
 	   This is useful if identity was started with a negative number or if the identity was reseeded later with a negative number
 	*/
-	OR RC.row_count  / calc.max_rows * 100 > @IdentityCollectionThreshold 
+	OR RC.row_count  / CAST(calc.max_rows AS FLOAT) * 100 > @IdentityCollectionThreshold 
 	)
 AND IC.max_length < 9 /* Exclude decimal types that would be larger than BIGINT and break calculations */
 ORDER BY object_name;'
