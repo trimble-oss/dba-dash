@@ -85,6 +85,44 @@ namespace DBADashGUI.CustomReports
             });
             return tsAutoResize;
         }
+        private ToolStripMenuItem GetFreezeColumnMenuItem() => new ("Freeze Column", Properties.Resources.FreezeColumn_16x, (_, _) => FreezeColumn());
+
+        private void FreezeColumn()
+        {
+            // Set context menu item as checked
+            var freezeColumnMenuItem = ColumnContextMenu.Items.OfType<ToolStripMenuItem>().FirstOrDefault(item => item.Text == "Freeze Column");
+
+            if (!Columns[ClickedColumnIndex].Frozen)
+            {
+                // If column is being frozen then freeze it and highlight all frozen columns (incl all to the left)
+                Columns[ClickedColumnIndex].Frozen = true;
+
+                foreach (DataGridViewColumn column in Columns)
+                {
+                    if (column.Frozen)
+                    {
+                        column.HeaderCell.Style.BackColor = Color.LightBlue;
+                    }
+                }
+
+                freezeColumnMenuItem.Checked = true;
+            }
+            else
+            {
+                // If column is being unfrozen, then remove highlighting and unfreeze the first visible column (effectively removing frozen status from all columns)
+
+                foreach (DataGridViewColumn column in Columns)
+                {
+                    if (column.Frozen)
+                    {
+                        column.HeaderCell.Style.BackColor = Color.Empty;
+                    }
+                }
+
+                Columns.GetFirstColumn(DataGridViewElementStates.Visible).Frozen = false;
+                freezeColumnMenuItem.Checked = false;
+            }
+        }
 
         private readonly ToolStripMenuItem CellRowColCountToolStripMenuItem = new ToolStripMenuItem();
         private readonly ToolStripMenuItem RowColumnCountToolStripMenuItem = new ToolStripMenuItem();
@@ -104,6 +142,7 @@ namespace DBADashGUI.CustomReports
             AddCellContextMenuItems();
             AddColumnContextMenuItems();
             this.ApplyTheme();
+            this.AllowUserToOrderColumns = true;
         }
 
         private static void Dgv_ColumnsAdded(object sender, DataGridViewColumnEventArgs e)
@@ -119,8 +158,7 @@ namespace DBADashGUI.CustomReports
         private void AddColumnContextMenuItems()
         {
             ColumnContextMenu = new();
-            var hideColumn = new ToolStripMenuItem("Hide Column", Properties.Resources.DeleteColumn_16x,
-                (_, _) => Columns[ClickedColumnIndex].Visible = false);
+            var hideColumn = new ToolStripMenuItem("Hide Column", Properties.Resources.DeleteColumn_16x, (_, _) => Columns[ClickedColumnIndex].Visible = false);
             var clearFilter = GetClearFilterMenuItem();
             var editFilter = GetEditFilterMenuItem();
             var saveTable = GetSaveTableMenuItem();
@@ -135,6 +173,7 @@ namespace DBADashGUI.CustomReports
                     GetColumnsMenuItem(),
                     GetAutoResizeColumns(),
                     hideColumn,
+                    GetFreezeColumnMenuItem(),
                     new ToolStripSeparator(),
                     editFilter,
                     clearFilter,
