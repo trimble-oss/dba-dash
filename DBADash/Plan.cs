@@ -152,7 +152,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             using var xr = new XmlTextReader(ms);
             while (xr.Read())
             {
-                if (xr.Name != "StmtSimple") continue;
+                if (xr.Name is not ("StmtSimple" or "StmtCond")) continue;
                 var strHash = xr.GetAttribute("QueryPlanHash");
                 return strHash.ToByteArray();
             }
