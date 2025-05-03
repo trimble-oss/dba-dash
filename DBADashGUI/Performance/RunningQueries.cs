@@ -1207,9 +1207,15 @@ namespace DBADashGUI.Performance
                     ShowPlan(row);
                     break;
 
-                case "colPlanHandle":
                 case "colQueryPlanHash":
+                    LoadQueryStore(row, false, true);
+                    break;
+
                 case "colQueryHash":
+                    LoadQueryStore(row, true, false);
+                    break;
+
+                case "colPlanHandle":
                 case "colSQLHandle":
                     FindPlanScript(row);
                     break;
@@ -1251,6 +1257,38 @@ namespace DBADashGUI.Performance
                     DecipherWaitResource(row);
                     break;
             }
+        }
+
+        private static void LoadQueryStore(DataRowView row, bool isQueryHash, bool isPlanHash)
+        {
+            var db = Convert.ToString(row["database_name"].DBNullToNull());
+            var planHash = (byte[])(row["query_plan_hash_bin"].DBNullToNull());
+            var queryHash = ((string)(row["query_hash"].DBNullToNull())).HexStringToByteArray();
+            var instanceID = Convert.ToInt32(row["InstanceID"]);
+            var isQueryStoreOn = row["is_query_store_on"] != DBNull.Value && Convert.ToBoolean(row["is_query_store_on"]);
+            if (!isQueryStoreOn)
+            {
+                MessageBox.Show("Query store is not enabled for this database", "Warning", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
+            var context = CommonData.GetDBADashContext(instanceID);
+            if (!context.CanMessage)
+            {
+                MessageBox.Show("You don't have access to the messaging feature required to access query store",
+                    "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            context.DatabaseName = db;
+
+            var planViewer = new QueryStoreViewer()
+            {
+                PlanHash = isPlanHash ? planHash : null,
+                QueryHash = isQueryHash ? queryHash : null,
+                Context = context
+            };
+            planViewer.Show();
         }
 
         private static void DecipherWaitResource(DataRowView row)

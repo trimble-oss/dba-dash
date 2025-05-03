@@ -106,11 +106,11 @@ namespace DBADash
 
         public static SqlParameter[] GetParameters(this List<CustomSqlParameter> parameters) => parameters.Where(p => !p.UseDefaultValue).Select(p => p.Param).ToArray();
 
-        public static string ToHexString(this byte[] bytes)
+        public static string ToHexString(this byte[] bytes, bool prefixZeroX = false)
         {
             if (bytes == null) return "";
             var hex = BitConverter.ToString(bytes);
-            return hex.Replace("-", "");
+            return (prefixZeroX ? "0x" : string.Empty) + hex.Replace("-", "");
         }
 
         public static byte[] ToByteArray(this string hex)

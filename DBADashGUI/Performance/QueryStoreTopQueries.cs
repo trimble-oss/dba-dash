@@ -8,6 +8,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DBADash;
 using DBADashGUI.Messaging;
 
 namespace DBADashGUI.Performance
@@ -23,6 +24,9 @@ namespace DBADashGUI.Performance
             dgv.RowsAdded += (sender, args) => topQueriesResult.CellHighlightingRules.FormatRowsAdded((DataGridView)sender, args);
             dgvDrillDown.RowsAdded += (sender, args) => topQueriesResult.CellHighlightingRules.FormatRowsAdded((DataGridView)sender, args);
         }
+
+        public byte[] QueryHash { get; set; } = null;
+        public byte[] PlanHash { get; set; } = null;
 
         public void SetContext(DBADashContext _context)
         {
@@ -52,6 +56,11 @@ namespace DBADashGUI.Performance
 
         public async void RefreshData()
         {
+            txtObjectName.Enabled = QueryHash == null && PlanHash == null;
+            txtPlan.Enabled = QueryHash == null && PlanHash == null;
+            txtPlan.Text = PlanHash != null ? PlanHash.ToHexString(true) : txtPlan.Text;
+            txtObjectName.Text = QueryHash != null ? QueryHash.ToHexString(true) : txtObjectName.Text;
+
             if (lblStatus.Text == messageSentMessage)
             {
                 MessageBox.Show(@"Please wait for the current operation to complete", "Busy", MessageBoxButtons.OK,
@@ -64,7 +73,12 @@ namespace DBADashGUI.Performance
             byte[] queryHash = null;
             byte[] planHash = null;
             int? planId = null;
-            if (txtObjectName.Text.IsHex())
+
+            if (QueryHash != null || PlanHash != null)
+            {
+                // Don't parse
+            }
+            else if (txtObjectName.Text.IsHex())
             {
                 queryHash = txtObjectName.Text.HexStringToByteArray();
             }
@@ -99,8 +113,8 @@ namespace DBADashGUI.Performance
                     QueryID = queryId,
                     PlanID = planId,
                     NearestInterval = tsNearestInterval.Checked,
-                    QueryHash = queryHash,
-                    QueryPlanHash = planHash,
+                    QueryHash = QueryHash ?? queryHash,
+                    QueryPlanHash = PlanHash ?? planHash,
                     GroupBy = groupBy,
                     ConnectionID = CurrentContext.ConnectionID,
                     DatabaseName = CurrentContext.DatabaseName,
@@ -135,14 +149,19 @@ namespace DBADashGUI.Performance
             return Task.CompletedTask;
         }
 
-        private Task ProcessCompletedDrillDownTask(ResponseMessage reply, Guid messageGroup)
+        private async Task ProcessCompletedDrillDownTask(ResponseMessage reply, Guid messageGroup)
         {
-            return ProcessCompletedTopQueriesOrDrillDownMessage(reply, dgvDrillDown, null);
+            await ProcessCompletedTopQueriesOrDrillDownMessage(reply, dgvDrillDown, null);
         }
 
-        private Task ProcessCompletedTopQueriesMessage(ResponseMessage reply, Guid messageGroup)
+        private async Task ProcessCompletedTopQueriesMessage(ResponseMessage reply, Guid messageGroup)
         {
-            return ProcessCompletedTopQueriesOrDrillDownMessage(reply, dgv, UserColumnLayout);
+            await ProcessCompletedTopQueriesOrDrillDownMessage(reply, dgv, UserColumnLayout);
+            if ((QueryHash != null || PlanHash != null) && dgv.Rows.Count == 1 && !string.IsNullOrEmpty(CurrentContext.DatabaseName))
+            {
+                var queryId = (long)dgv.Rows[0].Cells["query_id"].Value;
+                QueryDrillDown(queryId, CurrentContext.DatabaseName);
+            }
         }
 
         private Task ProcessCompletedTopQueriesOrDrillDownMessage(ResponseMessage reply, DataGridView _dgv, List<KeyValuePair<string, PersistedColumnLayout>> layout)
