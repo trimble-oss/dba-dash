@@ -166,7 +166,13 @@ namespace DBADashGUI.Performance
 
         private Task ProcessCompletedTopQueriesOrDrillDownMessage(ResponseMessage reply, DataGridView _dgv, List<KeyValuePair<string, PersistedColumnLayout>> layout)
         {
-            lblStatus.InvokeSetStatus(reply.Message, string.Empty, DashColors.Success);
+            lblStatus.InvokeSetStatus(reply.Message, reply.Exception?.ToString(), reply.Type switch
+            {
+                ResponseMessage.ResponseTypes.Success => DashColors.Success,
+                ResponseMessage.ResponseTypes.Progress => DashColors.Information,
+                _ => DashColors.Fail
+            });
+            if (reply.Type != ResponseMessage.ResponseTypes.Success) return Task.CompletedTask;
             Invoke(() =>
             {
                 var ds = reply.Data;
