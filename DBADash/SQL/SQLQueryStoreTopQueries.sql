@@ -16,6 +16,7 @@ DECLARE @ParallelPlans BIT
 DECLARE @IncludeWaits BIT=1
 DECLARE @MinimumPlanCount INT=1
 */
+SET NUMERIC_ROUNDABORT OFF
 IF NOT EXISTS(
 	SELECT 1 
 	FROM sys.databases 
