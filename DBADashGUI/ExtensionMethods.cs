@@ -48,7 +48,7 @@ namespace DBADashGUI
             return NumericTypes.Contains(Nullable.GetUnderlyingType(myType) ?? myType);
         }
 
-        public static DataTable AsDataTable<T>(this IEnumerable<T> list,string columnName="ID")
+        public static DataTable AsDataTable<T>(this IEnumerable<T> list, string columnName = "ID")
         {
             var dt = new DataTable();
             dt.Columns.Add(columnName, typeof(T));
@@ -863,6 +863,11 @@ namespace DBADashGUI
             }
 
             return true;
+        }
+
+        public static byte[] GetHexStringColumnAsByteArray(this DataRowView row, string columnName)
+        {
+            return row[columnName] == DBNull.Value ? null : ((string)row[columnName]).HexStringToByteArray();
         }
     }
 }
