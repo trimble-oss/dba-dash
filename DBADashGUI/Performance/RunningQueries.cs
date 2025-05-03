@@ -1004,8 +1004,8 @@ namespace DBADashGUI.Performance
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("dbo.QueryPlan_Get", cn) { CommandType = CommandType.StoredProcedure };
 
-            cmd.Parameters.AddWithValue("plan_handle", row["plan_handle_bin"]);
-            cmd.Parameters.AddWithValue("query_plan_hash", row["query_plan_hash_bin"]);
+            cmd.Parameters.AddWithValue("plan_handle", row.GetHexStringColumnAsByteArray("plan_handle"));
+            cmd.Parameters.AddWithValue("query_plan_hash", row.GetHexStringColumnAsByteArray("query_plan_hash"));
             cmd.Parameters.AddWithValue("statement_start_offset", row["statement_start_offset"]);
             cmd.Parameters.AddWithValue("statement_end_offset", row["statement_end_offset"]);
 
@@ -1017,16 +1017,16 @@ namespace DBADashGUI.Performance
 
         private static QueryPlanCollectionMessage GetPlanCollectionMessage(DataRowView row, DBADashContext context)
         {
-            if (row["plan_handle_bin"] == DBNull.Value)
+            if (row["plan_handle"] == DBNull.Value)
             {
                 throw new Exception("No plan handle");
             }
-            if (row["query_plan_hash_bin"] == DBNull.Value)
+            if (row["query_plan_hash"] == DBNull.Value)
             {
                 throw new Exception("No plan hash");
             }
-            var plan = new Plan((byte[])row["plan_handle_bin"],
-                (byte[])row["query_plan_hash_bin"],
+            var plan = new Plan(row.GetHexStringColumnAsByteArray("plan_handle"),
+                row.GetHexStringColumnAsByteArray("query_plan_hash"),
                 (int)row["statement_start_offset"],
                 (int)row["statement_end_offset"]);
             return new QueryPlanCollectionMessage()
@@ -1078,8 +1078,8 @@ namespace DBADashGUI.Performance
                 }
 
                 var planBin = dtPlan.Rows[0].Field<byte[]>("query_plan_compressed");
-                var planHandle = dtPlan.Rows[0].Field<byte[]>("plan_handle").ToHexString();
-                var planHash = dtPlan.Rows[0].Field<byte[]>("query_plan_hash").ToHexString();
+                var planHandle = dtPlan.Rows[0].Field<byte[]>("plan_handle").ToHexString(true);
+                var planHash = dtPlan.Rows[0].Field<byte[]>("query_plan_hash").ToHexString(true);
                 var startOffset = dtPlan.Rows[0].Field<int>("statement_start_offset");
                 var endOffset = dtPlan.Rows[0].Field<int>("statement_end_offset");
                 var planText = SMOBaseClass.Unzip(planBin);
@@ -1089,8 +1089,8 @@ namespace DBADashGUI.Performance
                     throw new Exception("DataTable is null");
                 }
                 foreach (var row in dtGrid.Rows.Cast<DataRow>().Where(r =>
-                             r.Field<byte[]>("plan_handle_bin").ToHexString() == planHandle
-                             && r.Field<byte[]>("query_plan_hash_bin").ToHexString() == planHash
+                             r.Field<string>("plan_handle") == planHandle
+                             && r.Field<string>("query_plan_hash") == planHash
                              && r.Field<int>("statement_start_offset") == startOffset
                              && r.Field<int>("statement_end_offset") == endOffset))
                 {
@@ -1262,8 +1262,8 @@ namespace DBADashGUI.Performance
         private static void LoadQueryStore(DataRowView row, bool isQueryHash, bool isPlanHash)
         {
             var db = Convert.ToString(row["database_name"].DBNullToNull());
-            var planHash = (byte[])(row["query_plan_hash_bin"].DBNullToNull());
-            var queryHash = ((string)(row["query_hash"].DBNullToNull())).HexStringToByteArray();
+            var planHash = row.GetHexStringColumnAsByteArray("query_plan_hash");
+            var queryHash = row.GetHexStringColumnAsByteArray("query_hash");
             var instanceID = Convert.ToInt32(row["InstanceID"]);
             var isQueryStoreOn = row["is_query_store_on"] != DBNull.Value && Convert.ToBoolean(row["is_query_store_on"]);
             if (!isQueryStoreOn)
