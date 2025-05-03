@@ -31,7 +31,7 @@ namespace DBADashService
             {
                 return ds.Tables["DBADash"].Rows[0]["Instance"] + "_" + ds.Tables["DBADash"].Rows[0]["DBName"];
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.Error(ex, "Error getting ID from DataSet");
                 return "DEFAULT";
@@ -387,7 +387,7 @@ namespace DBADashService
 
                     await Task.WhenAll(tasks);
 
-                    if (resp.IsTruncated)
+                    if (resp.IsTruncated == true)
                     {
                         Log.Debug("Response truncated.  Processing next marker for {0}", uri.Key);
                         request.Marker = resp.NextMarker;
