@@ -869,5 +869,9 @@ namespace DBADashGUI
         {
             return row[columnName] == DBNull.Value ? null : ((string)row[columnName]).HexStringToByteArray();
         }
+
+        public static DateTime StartOfMonth(this DateTime dt) => new DateTime(dt.Year, dt.Month, 1);
+
+        public static TimeSpan TimeSpan(this ValueTuple<DateTime, DateTime> range) => range.Item2.Subtract(range.Item1);
     }
 }

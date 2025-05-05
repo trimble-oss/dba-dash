@@ -70,27 +70,9 @@ namespace DBADashGUI.DBFiles
 
         public string DateFormat = "yyyy-MM-dd";
 
-        private int Days = 90;
+        private DateTime From => tsDateRange.DateFromUtc;
 
-        private DateTime customFrom;
-        private DateTime customTo;
-
-        private DateTime From
-        {
-            get
-            {
-                if (Days > 0)
-                {
-                    return DateTime.UtcNow.Date.AddDays(-Days);
-                }
-                else
-                {
-                    return customFrom;
-                }
-            }
-        }
-
-        private DateTime To => Days > 0 ? DateTime.UtcNow.Date.AddDays(1) : customTo;
+        private DateTime To => tsDateRange.DateToUtc;
 
         private int PointSize => pointsToolStripMenuItem.Checked ? 10 : 0;
 
@@ -139,6 +121,7 @@ namespace DBADashGUI.DBFiles
             var cnt = HistoryDT.Rows.Count;
             if (cnt < 2)
             {
+                chart1.Series = null;
                 return;
             }
             var columns = new Dictionary<string, ColumnMetaData>
@@ -199,82 +182,43 @@ namespace DBADashGUI.DBFiles
 
         public DataTable DBFileSnapshot()
         {
-            using (var cn = new SqlConnection(connectionString))
-            using (var cmd = new SqlCommand("dbo.DBFileSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
+            using var cn = new SqlConnection(connectionString);
+            using var cmd = new SqlCommand("dbo.DBFileSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("FromDate", From);
+            cmd.Parameters.AddWithValue("ToDate", To);
+            cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceGroupName", InstanceGroupName);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("DBName", DBName);
+            cmd.Parameters.AddWithNullableValue("DataSpaceID", DataSpaceID);
+
+            if (!string.IsNullOrEmpty(FileName))
             {
-                cn.Open();
-                cmd.Parameters.AddWithValue("FromDate", From);
-                cmd.Parameters.AddWithValue("ToDate", To);
-                cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
-                cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceGroupName", InstanceGroupName);
-                cmd.Parameters.AddStringIfNotNullOrEmpty("DBName", DBName);
-                cmd.Parameters.AddWithNullableValue("DataSpaceID", DataSpaceID);
-
-                if (!string.IsNullOrEmpty(FileName))
-                {
-                    cmd.Parameters.AddWithValue("FileName", FileName);
-                }
-                DataTable dt = new();
-                da.Fill(dt);
-
-                dt.Columns.Add("SizeGB", typeof(decimal));
-                dt.Columns.Add("UsedGB", typeof(decimal));
-                dt.Columns.Add("SizeTB", typeof(decimal));
-                dt.Columns.Add("UsedTB", typeof(decimal));
-                foreach (DataRow row in dt.Rows)
-                {
-                    if (row["SizeMB"] != DBNull.Value)
-                    {
-                        row["SizeGB"] = Convert.ToDecimal(row["SizeMB"]) / 1024;
-                        row["SizeTB"] = Convert.ToDecimal(row["SizeGB"]) / 1024;
-                    }
-                    if (row["UsedMB"] != DBNull.Value)
-                    {
-                        row["UsedGB"] = Convert.ToDecimal(row["UsedMB"]) / 1024;
-                        row["UsedTB"] = Convert.ToDecimal(row["UsedGB"]) / 1024;
-                    }
-                }
-
-                return dt;
+                cmd.Parameters.AddWithValue("FileName", FileName);
             }
-        }
+            DataTable dt = new();
+            da.Fill(dt);
 
-        private void Days_Click(object sender, EventArgs e)
-        {
-            Days = int.Parse(((string)((ToolStripMenuItem)sender).Tag)!);
-            SetTimeChecked();
-            RefreshData();
-        }
-
-        private void SetTimeChecked()
-        {
-            foreach (ToolStripItem ts in tsTime.DropDownItems)
+            dt.Columns.Add("SizeGB", typeof(decimal));
+            dt.Columns.Add("UsedGB", typeof(decimal));
+            dt.Columns.Add("SizeTB", typeof(decimal));
+            dt.Columns.Add("UsedTB", typeof(decimal));
+            foreach (DataRow row in dt.Rows)
             {
-                if (ts.GetType() == typeof(ToolStripMenuItem))
+                if (row["SizeMB"] != DBNull.Value)
                 {
-                    var itm = (ToolStripMenuItem)ts;
-                    itm.Checked = (string)itm.Tag == Days.ToString();
+                    row["SizeGB"] = Convert.ToDecimal(row["SizeMB"]) / 1024;
+                    row["SizeTB"] = Convert.ToDecimal(row["SizeGB"]) / 1024;
+                }
+                if (row["UsedMB"] != DBNull.Value)
+                {
+                    row["UsedGB"] = Convert.ToDecimal(row["UsedMB"]) / 1024;
+                    row["UsedTB"] = Convert.ToDecimal(row["UsedGB"]) / 1024;
                 }
             }
-        }
 
-        private void Custom_Click(object sender, EventArgs e)
-        {
-            var frm = new CustomTimePicker
-            {
-                FromDate = From,
-                ToDate = To
-            };
-            frm.ShowDialog();
-            if (frm.DialogResult == DialogResult.OK)
-            {
-                customFrom = frm.FromDate;
-                customTo = frm.ToDate;
-                Days = -1;
-                SetTimeChecked();
-                RefreshData();
-            }
+            return dt;
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -447,6 +391,11 @@ namespace DBADashGUI.DBFiles
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             SetPanelSize();
             RefreshChart();
+        }
+
+        private void DateRangeChanged(object sender, EventArgs e)
+        {
+            RefreshData();
         }
     }
 }

@@ -28,6 +28,8 @@ namespace DBADashGUI.Performance
         public byte[] QueryHash { get; set; } = null;
         public byte[] PlanHash { get; set; } = null;
 
+        public bool UseGlobalTime { get => !tsDateRange.Visible; set => tsDateRange.Visible = !value; }
+
         public void SetContext(DBADashContext _context)
         {
             if (_context != CurrentContext)
@@ -53,6 +55,14 @@ namespace DBADashGUI.Performance
         private QueryStoreTopQueriesMessage.QueryStoreGroupByEnum groupBy = QueryStoreTopQueriesMessage.QueryStoreGroupByEnum.query_id;
         private bool IncludeWaits => includeWaitsToolStripMenuItem.Checked && includeWaitsToolStripMenuItem.Enabled;
         private const string messageSentMessage = "Message sent...";
+
+        private DateTimeOffset FromOffset => UseGlobalTime
+            ? new DateTimeOffset(DateRange.FromUTC, TimeSpan.Zero)
+            : new DateTimeOffset(tsDateRange.DateFromUtc, TimeSpan.Zero);
+
+        private DateTimeOffset ToOffset => UseGlobalTime
+            ? new DateTimeOffset(DateRange.ToUTC, TimeSpan.Zero)
+            : new DateTimeOffset(tsDateRange.DateToUtc, TimeSpan.Zero);
 
         public async void RefreshData()
         {
@@ -120,8 +130,8 @@ namespace DBADashGUI.Performance
                     DatabaseName = CurrentContext.DatabaseName,
                     ParallelPlans = parallelPlansOnlyToolStripMenuItem.Checked,
                     MinimumPlanCount = GetMinimumPlanCount(),
-                    From = new DateTimeOffset(DateRange.FromUTC, TimeSpan.Zero),
-                    To = new DateTimeOffset(DateRange.ToUTC, TimeSpan.Zero),
+                    From = FromOffset,
+                    To = ToOffset,
                     IncludeWaits = IncludeWaits,
                     Lifetime = Config.DefaultCommandTimeout
                 };
@@ -475,7 +485,7 @@ namespace DBADashGUI.Performance
         {
             if (tabDrillDown.SelectedTab == tabChart && !IsChartLoaded)
             {
-                Task.Run(() => queryStorePlanChart1.ShowChart(CurrentContext, DrillDownDB, DrillDownQueryId, tsNearestInterval.Checked, new DateTimeOffset(DateRange.FromUTC, TimeSpan.Zero), new DateTimeOffset(DateRange.ToUTC, TimeSpan.Zero)));
+                Task.Run(() => queryStorePlanChart1.ShowChart(CurrentContext, DrillDownDB, DrillDownQueryId, tsNearestInterval.Checked, FromOffset, ToOffset));
                 splitContainer1.Panel2Collapsed = false;
                 IsChartLoaded = true;
             }
@@ -493,8 +503,8 @@ namespace DBADashGUI.Performance
                     GroupBy = QueryStoreTopQueriesMessage.QueryStoreGroupByEnum.plan_id,
                     ConnectionID = CurrentContext.ConnectionID,
                     DatabaseName = DrillDownDB,
-                    From = new DateTimeOffset(DateRange.FromUTC, TimeSpan.Zero),
-                    To = new DateTimeOffset(DateRange.ToUTC, TimeSpan.Zero),
+                    From = FromOffset,
+                    To = ToOffset,
                     IncludeWaits = IncludeWaits,
                     Lifetime = Config.DefaultCommandTimeout
                 };
@@ -805,6 +815,24 @@ namespace DBADashGUI.Performance
             {
                 RefreshData();
             }
+        }
+
+        private void QueryStoreTopQueries_Load(object sender, EventArgs e)
+        {
+            if (UseGlobalTime) return;
+            if (DateRange.SelectedTimeSpan.HasValue)
+            {
+                tsDateRange.SetTimeSpan(DateRange.SelectedTimeSpan.Value);
+            }
+            else
+            {
+                tsDateRange.SetDateRangeUtc(DateRange.FromUTC, DateRange.ToUTC);
+            }
+        }
+
+        private void DateRangeChanged(object sender, EventArgs e)
+        {
+            RefreshData();
         }
     }
 }

@@ -31,7 +31,11 @@ namespace DBADashGUI.Performance
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(QueryStoreTopQueries));
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             dgv = new DBADashDataGridView();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             TsCopy = new System.Windows.Forms.ToolStripButton();
@@ -71,6 +75,7 @@ namespace DBADashGUI.Performance
             txtObjectName = new System.Windows.Forms.ToolStripTextBox();
             toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             txtPlan = new System.Windows.Forms.ToolStripTextBox();
+            tsDateRange = new DateRangeToolStripMenuItem();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
@@ -97,11 +102,31 @@ namespace DBADashGUI.Performance
             dgv.AllowUserToAddRows = false;
             dgv.AllowUserToDeleteRows = false;
             dgv.AllowUserToOrderColumns = true;
+            dgv.BackgroundColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgv.DefaultCellStyle = dataGridViewCellStyle2;
             dgv.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgv.EnableHeadersVisualStyles = false;
             dgv.Location = new System.Drawing.Point(0, 0);
             dgv.Name = "dgv";
             dgv.ReadOnly = true;
+            dgv.ResultSetID = 0;
+            dgv.ResultSetName = null;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
             dgv.Size = new System.Drawing.Size(1408, 267);
@@ -112,7 +137,7 @@ namespace DBADashGUI.Performance
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { TsCopy, tsExcel, tsOptions, tsReset, tsColumns, tsExecute, tsTop, tsGroupBy, tsSort, tsFilter, toolStripLabel1, txtObjectName, toolStripLabel2, txtPlan });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { TsCopy, tsExcel, tsOptions, tsReset, tsColumns, tsExecute, tsTop, tsGroupBy, tsSort, tsFilter, toolStripLabel1, txtObjectName, toolStripLabel2, txtPlan, tsDateRange });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1408, 27);
@@ -429,6 +454,19 @@ namespace DBADashGUI.Performance
             txtPlan.Size = new System.Drawing.Size(100, 27);
             txtPlan.KeyDown += RefreshOn_KeyDown;
             // 
+            // tsDateRange
+            // 
+            tsDateRange.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsDateRange.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
+            tsDateRange.Font = new System.Drawing.Font("Segoe UI", 9F);
+            tsDateRange.Image = (System.Drawing.Image)resources.GetObject("tsDateRange.Image");
+            tsDateRange.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsDateRange.Name = "tsDateRange";
+            tsDateRange.Size = new System.Drawing.Size(71, 24);
+            tsDateRange.Text = "1 Hr";
+            tsDateRange.Visible = false;
+            tsDateRange.DateRangeChanged += DateRangeChanged;
+            // 
             // statusStrip1
             // 
             statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
@@ -468,8 +506,10 @@ namespace DBADashGUI.Performance
             tabDrillDown.Controls.Add(tabSummary);
             tabDrillDown.Controls.Add(tabChart);
             tabDrillDown.Dock = System.Windows.Forms.DockStyle.Fill;
+            tabDrillDown.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
             tabDrillDown.Location = new System.Drawing.Point(0, 0);
             tabDrillDown.Name = "tabDrillDown";
+            tabDrillDown.Padding = new System.Drawing.Point(20, 8);
             tabDrillDown.SelectedIndex = 0;
             tabDrillDown.Size = new System.Drawing.Size(1408, 342);
             tabDrillDown.TabIndex = 1;
@@ -481,7 +521,7 @@ namespace DBADashGUI.Performance
             tabSummary.Location = new System.Drawing.Point(4, 4);
             tabSummary.Name = "tabSummary";
             tabSummary.Padding = new System.Windows.Forms.Padding(3);
-            tabSummary.Size = new System.Drawing.Size(1400, 309);
+            tabSummary.Size = new System.Drawing.Size(1400, 299);
             tabSummary.TabIndex = 0;
             tabSummary.Text = "Summary";
             tabSummary.UseVisualStyleBackColor = true;
@@ -490,13 +530,34 @@ namespace DBADashGUI.Performance
             // 
             dgvDrillDown.AllowUserToAddRows = false;
             dgvDrillDown.AllowUserToDeleteRows = false;
+            dgvDrillDown.AllowUserToOrderColumns = true;
+            dgvDrillDown.BackgroundColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle3.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvDrillDown.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
             dgvDrillDown.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvDrillDown.DefaultCellStyle = dataGridViewCellStyle4;
             dgvDrillDown.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvDrillDown.EnableHeadersVisualStyles = false;
             dgvDrillDown.Location = new System.Drawing.Point(3, 3);
             dgvDrillDown.Name = "dgvDrillDown";
+            dgvDrillDown.ResultSetID = 0;
+            dgvDrillDown.ResultSetName = null;
             dgvDrillDown.RowHeadersVisible = false;
             dgvDrillDown.RowHeadersWidth = 51;
-            dgvDrillDown.Size = new System.Drawing.Size(1394, 303);
+            dgvDrillDown.Size = new System.Drawing.Size(1394, 293);
             dgvDrillDown.TabIndex = 0;
             dgvDrillDown.CellContentClick += Dgv_CellContentClick;
             dgvDrillDown.CellFormatting += Dgv_CellFormatting;
@@ -508,7 +569,7 @@ namespace DBADashGUI.Performance
             tabChart.Location = new System.Drawing.Point(4, 4);
             tabChart.Name = "tabChart";
             tabChart.Padding = new System.Windows.Forms.Padding(3);
-            tabChart.Size = new System.Drawing.Size(1400, 309);
+            tabChart.Size = new System.Drawing.Size(1400, 299);
             tabChart.TabIndex = 1;
             tabChart.Text = "Chart";
             tabChart.UseVisualStyleBackColor = true;
@@ -518,7 +579,7 @@ namespace DBADashGUI.Performance
             queryStorePlanChart1.Dock = System.Windows.Forms.DockStyle.Fill;
             queryStorePlanChart1.Location = new System.Drawing.Point(3, 3);
             queryStorePlanChart1.Name = "queryStorePlanChart1";
-            queryStorePlanChart1.Size = new System.Drawing.Size(1394, 303);
+            queryStorePlanChart1.Size = new System.Drawing.Size(1394, 293);
             queryStorePlanChart1.TabIndex = 0;
             // 
             // QueryStoreTopQueries
@@ -530,6 +591,7 @@ namespace DBADashGUI.Performance
             Controls.Add(statusStrip1);
             Name = "QueryStoreTopQueries";
             Size = new System.Drawing.Size(1408, 662);
+            Load += QueryStoreTopQueries_Load;
             ((System.ComponentModel.ISupportInitialize)dgv).EndInit();
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
@@ -596,5 +658,6 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.TabPage tabSummary;
         private System.Windows.Forms.TabPage tabChart;
         private QueryStorePlanChart queryStorePlanChart1;
+        private DateRangeToolStripMenuItem tsDateRange;
     }
 }

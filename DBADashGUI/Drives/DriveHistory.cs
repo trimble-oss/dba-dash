@@ -19,7 +19,6 @@ namespace DBADashGUI.Drives
             InitializeComponent();
             lblInsufficientData.BackColor = DashColors.Warning;
             lblInsufficientData.ForeColor = Color.White;
-            SetTimeChecked();
             dgv.Columns.Clear();
             var cols = new DataGridViewColumn[] {
                     new DataGridViewTextBoxColumn { HeaderText = "Date", DataPropertyName = "SnapshotDate" },
@@ -44,17 +43,9 @@ namespace DBADashGUI.Drives
 
         public string DateFormat => DateGroupingMins < 1440 ? "yyyy-MM-dd HH:mm" : "yyyy-MM-dd";
 
-        private int Days = 7;
-        private DateTime customFrom;
-        private DateTime customTo;
+        private DateTime From => tsDateRange.DateFromUtc;
 
-        private DateTime From => Days > 0
-                    ? new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, DateTime.UtcNow.Hour, 0, 0).AddDays(-Days)
-                    : customFrom;
-
-        private DateTime To => Days > 0
-                    ? new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, DateTime.UtcNow.Hour, 0, 0).AddHours(1)
-                    : customTo;
+        private DateTime To => tsDateRange.DateToUtc;
 
         private int PointSize => pointsToolStripMenuItem.Checked ? 10 : 0;
 
@@ -159,43 +150,6 @@ namespace DBADashGUI.Drives
             return dt;
         }
 
-        private void Days_Click(object sender, EventArgs e)
-        {
-            Days = int.Parse(((string)((ToolStripMenuItem)sender).Tag)!);
-            SetTimeChecked();
-            RefreshData();
-        }
-
-        private void SetTimeChecked()
-        {
-            foreach (var itm in tsTime.DropDownItems.OfType<ToolStripMenuItem>())
-            {
-                itm.Checked = (string)itm.Tag == Days.ToString();
-                if (itm.Checked)
-                {
-                    tsTime.Text = itm.Text;
-                }
-            }
-        }
-
-        private void Custom_Click(object sender, EventArgs e)
-        {
-            var frm = new CustomTimePicker
-            {
-                FromDate = From,
-                ToDate = To
-            };
-            frm.ShowDialog(this);
-            if (frm.DialogResult == DialogResult.OK)
-            {
-                customFrom = frm.FromDate;
-                customTo = frm.ToDate;
-                Days = -1;
-                SetTimeChecked();
-                RefreshData();
-            }
-        }
-
         private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
@@ -244,6 +198,11 @@ namespace DBADashGUI.Drives
         private void TsCopy_Click(object sender, EventArgs e)
         {
             dgv.CopyGrid();
+        }
+
+        private void DateRangeChanged(object sender, EventArgs e)
+        {
+            RefreshData();
         }
     }
 }

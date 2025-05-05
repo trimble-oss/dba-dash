@@ -66,28 +66,9 @@ namespace DBADashGUI
             darkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             whiteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsAlert = new System.Windows.Forms.ToolStripMenuItem();
-            tsTime = new System.Windows.Forms.ToolStripDropDownButton();
-            minsToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-            minsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            minsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            ts30Min = new System.Windows.Forms.ToolStripMenuItem();
-            ts1Hr = new System.Windows.Forms.ToolStripMenuItem();
-            ts2Hr = new System.Windows.Forms.ToolStripMenuItem();
-            ts3Hr = new System.Windows.Forms.ToolStripMenuItem();
-            ts6Hr = new System.Windows.Forms.ToolStripMenuItem();
-            ts12Hr = new System.Windows.Forms.ToolStripMenuItem();
-            dayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            daysToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            daysToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            days7ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            days14toolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            days28ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            dateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            dummyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            tsCustom = new System.Windows.Forms.ToolStripMenuItem();
             helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsDateRange = new DateRangeToolStripMenuItem();
             tsTimeFilter = new System.Windows.Forms.ToolStripMenuItem();
             tsDayOfWeek = new System.Windows.Forms.ToolStripMenuItem();
             cboTimeZone = new System.Windows.Forms.ToolStripComboBox();
@@ -368,7 +349,7 @@ namespace DBADashGUI
             // 
             menuStrip1.GripMargin = new System.Windows.Forms.Padding(2);
             menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsConnect, diffToolStripMenuItem, optionsToolStripMenuItem, tsAlert, tsTime, helpToolStripMenuItem, tsTimeFilter, tsDayOfWeek, cboTimeZone });
+            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsConnect, diffToolStripMenuItem, optionsToolStripMenuItem, tsAlert, helpToolStripMenuItem, tsDateRange, tsTimeFilter, tsDayOfWeek, cboTimeZone });
             menuStrip1.Location = new System.Drawing.Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Padding = new System.Windows.Forms.Padding(3, 1, 0, 1);
@@ -609,175 +590,6 @@ namespace DBADashGUI
             tsAlert.Click += TsAlert_Click;
             tsAlert.MouseHover += ShowAlertToolTip;
             // 
-            // tsTime
-            // 
-            tsTime.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            tsTime.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { minsToolStripMenuItem2, minsToolStripMenuItem1, minsToolStripMenuItem, ts30Min, ts1Hr, ts2Hr, ts3Hr, ts6Hr, ts12Hr, dayToolStripMenuItem, daysToolStripMenuItem, daysToolStripMenuItem1, days7ToolStripMenuItem, days14toolStripMenuItem, days28ToolStripMenuItem, toolStripSeparator1, dateToolStripMenuItem, tsCustom });
-            tsTime.Image = Properties.Resources.Time_16x;
-            tsTime.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsTime.Name = "tsTime";
-            tsTime.Size = new System.Drawing.Size(67, 25);
-            tsTime.Text = "1Hr";
-            tsTime.Visible = false;
-            // 
-            // minsToolStripMenuItem2
-            // 
-            minsToolStripMenuItem2.CheckOnClick = true;
-            minsToolStripMenuItem2.Name = "minsToolStripMenuItem2";
-            minsToolStripMenuItem2.Size = new System.Drawing.Size(144, 26);
-            minsToolStripMenuItem2.Tag = "5";
-            minsToolStripMenuItem2.Text = "5 Mins";
-            minsToolStripMenuItem2.Click += TsTime_Click;
-            // 
-            // minsToolStripMenuItem1
-            // 
-            minsToolStripMenuItem1.CheckOnClick = true;
-            minsToolStripMenuItem1.Name = "minsToolStripMenuItem1";
-            minsToolStripMenuItem1.Size = new System.Drawing.Size(144, 26);
-            minsToolStripMenuItem1.Tag = "10";
-            minsToolStripMenuItem1.Text = "10 Mins";
-            minsToolStripMenuItem1.Click += TsTime_Click;
-            // 
-            // minsToolStripMenuItem
-            // 
-            minsToolStripMenuItem.CheckOnClick = true;
-            minsToolStripMenuItem.Name = "minsToolStripMenuItem";
-            minsToolStripMenuItem.Size = new System.Drawing.Size(144, 26);
-            minsToolStripMenuItem.Tag = "15";
-            minsToolStripMenuItem.Text = "15 Mins";
-            minsToolStripMenuItem.Click += TsTime_Click;
-            // 
-            // ts30Min
-            // 
-            ts30Min.CheckOnClick = true;
-            ts30Min.Name = "ts30Min";
-            ts30Min.Size = new System.Drawing.Size(144, 26);
-            ts30Min.Tag = "30";
-            ts30Min.Text = "30 Mins";
-            ts30Min.Click += TsTime_Click;
-            // 
-            // ts1Hr
-            // 
-            ts1Hr.Checked = true;
-            ts1Hr.CheckState = System.Windows.Forms.CheckState.Checked;
-            ts1Hr.Name = "ts1Hr";
-            ts1Hr.Size = new System.Drawing.Size(144, 26);
-            ts1Hr.Tag = "60";
-            ts1Hr.Text = "1Hr";
-            ts1Hr.Click += TsTime_Click;
-            // 
-            // ts2Hr
-            // 
-            ts2Hr.CheckOnClick = true;
-            ts2Hr.Name = "ts2Hr";
-            ts2Hr.Size = new System.Drawing.Size(144, 26);
-            ts2Hr.Tag = "120";
-            ts2Hr.Text = "2Hr";
-            ts2Hr.Click += TsTime_Click;
-            // 
-            // ts3Hr
-            // 
-            ts3Hr.CheckOnClick = true;
-            ts3Hr.Name = "ts3Hr";
-            ts3Hr.Size = new System.Drawing.Size(144, 26);
-            ts3Hr.Tag = "180";
-            ts3Hr.Text = "3Hr";
-            ts3Hr.Click += TsTime_Click;
-            // 
-            // ts6Hr
-            // 
-            ts6Hr.CheckOnClick = true;
-            ts6Hr.Name = "ts6Hr";
-            ts6Hr.Size = new System.Drawing.Size(144, 26);
-            ts6Hr.Tag = "360";
-            ts6Hr.Text = "6Hr";
-            ts6Hr.Click += TsTime_Click;
-            // 
-            // ts12Hr
-            // 
-            ts12Hr.CheckOnClick = true;
-            ts12Hr.Name = "ts12Hr";
-            ts12Hr.Size = new System.Drawing.Size(144, 26);
-            ts12Hr.Tag = "720";
-            ts12Hr.Text = "12Hr";
-            ts12Hr.Click += TsTime_Click;
-            // 
-            // dayToolStripMenuItem
-            // 
-            dayToolStripMenuItem.Name = "dayToolStripMenuItem";
-            dayToolStripMenuItem.Size = new System.Drawing.Size(144, 26);
-            dayToolStripMenuItem.Tag = "1440";
-            dayToolStripMenuItem.Text = "1 Day";
-            dayToolStripMenuItem.Click += TsTime_Click;
-            // 
-            // daysToolStripMenuItem
-            // 
-            daysToolStripMenuItem.Name = "daysToolStripMenuItem";
-            daysToolStripMenuItem.Size = new System.Drawing.Size(144, 26);
-            daysToolStripMenuItem.Tag = "2880";
-            daysToolStripMenuItem.Text = "2 Days";
-            daysToolStripMenuItem.Click += TsTime_Click;
-            // 
-            // daysToolStripMenuItem1
-            // 
-            daysToolStripMenuItem1.Name = "daysToolStripMenuItem1";
-            daysToolStripMenuItem1.Size = new System.Drawing.Size(144, 26);
-            daysToolStripMenuItem1.Tag = "4320";
-            daysToolStripMenuItem1.Text = "3 Days";
-            daysToolStripMenuItem1.Click += TsTime_Click;
-            // 
-            // days7ToolStripMenuItem
-            // 
-            days7ToolStripMenuItem.Name = "days7ToolStripMenuItem";
-            days7ToolStripMenuItem.Size = new System.Drawing.Size(144, 26);
-            days7ToolStripMenuItem.Tag = "10080";
-            days7ToolStripMenuItem.Text = "7 Days";
-            days7ToolStripMenuItem.Click += TsTime_Click;
-            // 
-            // days14toolStripMenuItem
-            // 
-            days14toolStripMenuItem.Name = "days14toolStripMenuItem";
-            days14toolStripMenuItem.Size = new System.Drawing.Size(144, 26);
-            days14toolStripMenuItem.Tag = "20160";
-            days14toolStripMenuItem.Text = "14 Days";
-            days14toolStripMenuItem.Click += TsTime_Click;
-            // 
-            // days28ToolStripMenuItem
-            // 
-            days28ToolStripMenuItem.Name = "days28ToolStripMenuItem";
-            days28ToolStripMenuItem.Size = new System.Drawing.Size(144, 26);
-            days28ToolStripMenuItem.Tag = "40320";
-            days28ToolStripMenuItem.Text = "28 Days";
-            days28ToolStripMenuItem.Click += TsTime_Click;
-            // 
-            // toolStripSeparator1
-            // 
-            toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(141, 6);
-            // 
-            // dateToolStripMenuItem
-            // 
-            dateToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { dummyToolStripMenuItem });
-            dateToolStripMenuItem.Name = "dateToolStripMenuItem";
-            dateToolStripMenuItem.Size = new System.Drawing.Size(144, 26);
-            dateToolStripMenuItem.Tag = "Date";
-            dateToolStripMenuItem.Text = "Date";
-            dateToolStripMenuItem.DropDownOpening += DateToolStripMenuItem_Opening;
-            // 
-            // dummyToolStripMenuItem
-            // 
-            dummyToolStripMenuItem.Name = "dummyToolStripMenuItem";
-            dummyToolStripMenuItem.Size = new System.Drawing.Size(144, 26);
-            dummyToolStripMenuItem.Text = "Dummy";
-            // 
-            // tsCustom
-            // 
-            tsCustom.Name = "tsCustom";
-            tsCustom.Size = new System.Drawing.Size(144, 26);
-            tsCustom.Tag = "-1";
-            tsCustom.Text = "Custom";
-            tsCustom.Click += TsCustomTime_Click;
-            // 
             // helpToolStripMenuItem
             // 
             helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { aboutToolStripMenuItem });
@@ -792,6 +604,18 @@ namespace DBADashGUI
             aboutToolStripMenuItem.Size = new System.Drawing.Size(133, 26);
             aboutToolStripMenuItem.Text = "About";
             aboutToolStripMenuItem.Click += AboutToolStripMenuItem_Click;
+            // 
+            // tsDateRange
+            // 
+            tsDateRange.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsDateRange.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
+            tsDateRange.Font = new System.Drawing.Font("Segoe UI", 9F);
+            tsDateRange.Image = (System.Drawing.Image)resources.GetObject("tsDateRange.Image");
+            tsDateRange.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsDateRange.Name = "tsDateRange";
+            tsDateRange.Size = new System.Drawing.Size(71, 25);
+            tsDateRange.Text = "1 Hr";
+            tsDateRange.DateRangeChanged += DateRangeChanged;
             // 
             // tsTimeFilter
             // 
@@ -1288,6 +1112,7 @@ namespace DBADashGUI
             // 
             // tags1
             // 
+            tags1.AllTags = null;
             tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             tags1.Location = new System.Drawing.Point(1, 2);
             tags1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
@@ -1479,7 +1304,7 @@ namespace DBADashGUI
             tabPerformance.Margin = new System.Windows.Forms.Padding(1, 2, 1, 2);
             tabPerformance.Name = "tabPerformance";
             tabPerformance.Padding = new System.Windows.Forms.Padding(1, 2, 1, 2);
-            tabPerformance.Size = new System.Drawing.Size(1578, 955);
+            tabPerformance.Size = new System.Drawing.Size(192, 57);
             tabPerformance.TabIndex = 10;
             tabPerformance.Text = "Performance";
             tabPerformance.UseVisualStyleBackColor = true;
@@ -1491,7 +1316,7 @@ namespace DBADashGUI
             performance1.Location = new System.Drawing.Point(1, 2);
             performance1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             performance1.Name = "performance1";
-            performance1.Size = new System.Drawing.Size(1576, 951);
+            performance1.Size = new System.Drawing.Size(190, 53);
             performance1.TabIndex = 0;
             // 
             // tabDBADashErrorLog
@@ -2393,8 +2218,11 @@ namespace DBADashGUI
             queryStoreTop.Location = new System.Drawing.Point(1, 2);
             queryStoreTop.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             queryStoreTop.Name = "queryStoreTop";
+            queryStoreTop.PlanHash = null;
+            queryStoreTop.QueryHash = null;
             queryStoreTop.Size = new System.Drawing.Size(190, 53);
             queryStoreTop.TabIndex = 0;
+            queryStoreTop.UseGlobalTime = true;
             // 
             // tabQueryStoreForcedPlans
             // 
@@ -2900,22 +2728,6 @@ namespace DBADashGUI
         private System.Windows.Forms.TabPage tabObjectExecutionSummary;
         private Performance.ObjectExecutionSummary objectExecutionSummary1;
         private Changes.SchemaSnapshots schemaSnapshots1;
-        private System.Windows.Forms.ToolStripDropDownButton tsTime;
-        private System.Windows.Forms.ToolStripMenuItem minsToolStripMenuItem2;
-        private System.Windows.Forms.ToolStripMenuItem minsToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem minsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem ts30Min;
-        private System.Windows.Forms.ToolStripMenuItem ts1Hr;
-        private System.Windows.Forms.ToolStripMenuItem ts2Hr;
-        private System.Windows.Forms.ToolStripMenuItem ts3Hr;
-        private System.Windows.Forms.ToolStripMenuItem ts6Hr;
-        private System.Windows.Forms.ToolStripMenuItem ts12Hr;
-        private System.Windows.Forms.ToolStripMenuItem dayToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem days7ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem days14toolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem days28ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripMenuItem tsCustom;
         private System.Windows.Forms.TabPage tabWaits;
         private Performance.WaitsSummary waitsSummary1;
         private System.Windows.Forms.TabPage tabMirroring;
@@ -2931,8 +2743,6 @@ namespace DBADashGUI
         private Changes.ResourceGovernor resourceGovernor1;
         private System.Windows.Forms.TabPage tabAzureDBesourceGovernance;
         private Changes.AzureDBResourceGovernance azureDBResourceGovernance1;
-        private System.Windows.Forms.ToolStripMenuItem daysToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem daysToolStripMenuItem1;
         private System.Windows.Forms.TabPage tabRunningQueries;
         private Performance.RunningQueries runningQueries1;
         private System.Windows.Forms.DataGridViewTextBoxColumn ObjectName;
@@ -2962,8 +2772,6 @@ namespace DBADashGUI
         private System.Windows.Forms.Label lblSQLMonitoring;
         private System.Windows.Forms.Label lblVersion;
         private System.Windows.Forms.ToolStripMenuItem freezeKeyColumnsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem dateToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem dummyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem tsTimeFilter;
         private System.Windows.Forms.ToolStripMenuItem tsDayOfWeek;
         private System.Windows.Forms.TabPage tabIdentityColumns;
@@ -3020,5 +2828,6 @@ namespace DBADashGUI
         private System.Windows.Forms.ToolStripMenuItem setTimeFormatToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem setDateTimeFormatToolStripMenuItem;
         private Performance.Performance performance1;
+        private DateRangeToolStripMenuItem tsDateRange;
     }
 }
