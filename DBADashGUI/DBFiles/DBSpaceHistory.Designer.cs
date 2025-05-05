@@ -29,324 +29,246 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DBSpaceHistory));
-            this.chart1 = new LiveCharts.WinForms.CartesianChart();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsTime = new System.Windows.Forms.ToolStripDropDownButton();
-            this.days7ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.days30ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.days90ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.days180ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.yearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsCustom = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
-            this.smoothLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.tsFileGroup = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsFile = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsGrid = new System.Windows.Forms.ToolStripButton();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.tsUnits = new System.Windows.Forms.ToolStripDropDownButton();
-            this.mBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.gBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.dgv = new System.Windows.Forms.DataGridView();
-            this.toolStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
-            this.SuspendLayout();
+            chart1 = new LiveCharts.WinForms.CartesianChart();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            tsDateRange = new DateRangeToolStripMenuItem();
+            toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
+            smoothLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            pointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsRefresh = new System.Windows.Forms.ToolStripButton();
+            tsFileGroup = new System.Windows.Forms.ToolStripDropDownButton();
+            tsFile = new System.Windows.Forms.ToolStripDropDownButton();
+            tsUnits = new System.Windows.Forms.ToolStripDropDownButton();
+            mBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            gBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsGrid = new System.Windows.Forms.ToolStripButton();
+            tsCopy = new System.Windows.Forms.ToolStripButton();
+            tsExcel = new System.Windows.Forms.ToolStripButton();
+            splitContainer1 = new System.Windows.Forms.SplitContainer();
+            dgv = new System.Windows.Forms.DataGridView();
+            toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
+            splitContainer1.Panel1.SuspendLayout();
+            splitContainer1.Panel2.SuspendLayout();
+            splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
+            SuspendLayout();
             // 
             // chart1
             // 
-            this.chart1.BackColor = System.Drawing.Color.White;
-            this.chart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chart1.Location = new System.Drawing.Point(0, 0);
-            this.chart1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.chart1.Name = "chart1";
-            this.chart1.Size = new System.Drawing.Size(1134, 521);
-            this.chart1.TabIndex = 0;
-            this.chart1.Text = "cartesianChart1";
+            chart1.BackColor = System.Drawing.Color.White;
+            chart1.Dock = System.Windows.Forms.DockStyle.Fill;
+            chart1.Location = new System.Drawing.Point(0, 0);
+            chart1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            chart1.Name = "chart1";
+            chart1.Size = new System.Drawing.Size(1134, 521);
+            chart1.TabIndex = 0;
+            chart1.Text = "cartesianChart1";
             // 
             // toolStrip1
             // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsTime,
-            this.toolStripDropDownButton1,
-            this.tsRefresh,
-            this.tsFileGroup,
-            this.tsFile,
-            this.tsUnits,
-            this.tsGrid,
-            this.tsCopy,
-            this.tsExcel});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1134, 27);
-            this.toolStrip1.TabIndex = 3;
-            this.toolStrip1.Text = "toolStrip1";
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsDateRange, toolStripDropDownButton1, tsRefresh, tsFileGroup, tsFile, tsUnits, tsGrid, tsCopy, tsExcel });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new System.Drawing.Size(1134, 27);
+            toolStrip1.TabIndex = 3;
+            toolStrip1.Text = "toolStrip1";
             // 
-            // tsTime
+            // tsDateRange
             // 
-            this.tsTime.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsTime.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.days7ToolStripMenuItem,
-            this.days30ToolStripMenuItem,
-            this.days90ToolStripMenuItem,
-            this.days180ToolStripMenuItem,
-            this.yearToolStripMenuItem,
-            this.toolStripSeparator1,
-            this.tsCustom});
-            this.tsTime.Image = global::DBADashGUI.Properties.Resources.Time_16x;
-            this.tsTime.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsTime.Name = "tsTime";
-            this.tsTime.Size = new System.Drawing.Size(34, 24);
-            this.tsTime.Text = "Time";
-            // 
-            // days7ToolStripMenuItem
-            // 
-            this.days7ToolStripMenuItem.Name = "days7ToolStripMenuItem";
-            this.days7ToolStripMenuItem.Size = new System.Drawing.Size(152, 26);
-            this.days7ToolStripMenuItem.Tag = "7";
-            this.days7ToolStripMenuItem.Text = "7 Days";
-            this.days7ToolStripMenuItem.Click += new System.EventHandler(this.Days_Click);
-            // 
-            // days30ToolStripMenuItem
-            // 
-            this.days30ToolStripMenuItem.Name = "days30ToolStripMenuItem";
-            this.days30ToolStripMenuItem.Size = new System.Drawing.Size(152, 26);
-            this.days30ToolStripMenuItem.Tag = "30";
-            this.days30ToolStripMenuItem.Text = "30 Days";
-            this.days30ToolStripMenuItem.Click += new System.EventHandler(this.Days_Click);
-            // 
-            // days90ToolStripMenuItem
-            // 
-            this.days90ToolStripMenuItem.Checked = true;
-            this.days90ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.days90ToolStripMenuItem.Name = "days90ToolStripMenuItem";
-            this.days90ToolStripMenuItem.Size = new System.Drawing.Size(152, 26);
-            this.days90ToolStripMenuItem.Tag = "90";
-            this.days90ToolStripMenuItem.Text = "90 Days";
-            this.days90ToolStripMenuItem.Click += new System.EventHandler(this.Days_Click);
-            // 
-            // days180ToolStripMenuItem
-            // 
-            this.days180ToolStripMenuItem.Name = "days180ToolStripMenuItem";
-            this.days180ToolStripMenuItem.Size = new System.Drawing.Size(152, 26);
-            this.days180ToolStripMenuItem.Tag = "180";
-            this.days180ToolStripMenuItem.Text = "180 Days";
-            this.days180ToolStripMenuItem.Click += new System.EventHandler(this.Days_Click);
-            // 
-            // yearToolStripMenuItem
-            // 
-            this.yearToolStripMenuItem.Name = "yearToolStripMenuItem";
-            this.yearToolStripMenuItem.Size = new System.Drawing.Size(152, 26);
-            this.yearToolStripMenuItem.Tag = "365";
-            this.yearToolStripMenuItem.Text = "1 Year";
-            this.yearToolStripMenuItem.Click += new System.EventHandler(this.Days_Click);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
-            // 
-            // tsCustom
-            // 
-            this.tsCustom.Name = "tsCustom";
-            this.tsCustom.Size = new System.Drawing.Size(152, 26);
-            this.tsCustom.Tag = "-1";
-            this.tsCustom.Text = "Custom";
-            this.tsCustom.Click += new System.EventHandler(this.Custom_Click);
+            tsDateRange.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsDateRange.DefaultTimeSpan = System.TimeSpan.Parse("90.00:00:00");
+            tsDateRange.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
+            tsDateRange.Font = new System.Drawing.Font("Segoe UI", 9F);
+            tsDateRange.Image = (System.Drawing.Image)resources.GetObject("tsDateRange.Image");
+            tsDateRange.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsDateRange.MaximumTimeSpan = System.TimeSpan.Parse("10675199.02:48:05.4775807");
+            tsDateRange.MinimumTimeSpan = System.TimeSpan.Parse("1.00:00:00");
+            tsDateRange.Name = "tsDateRange";
+            tsDateRange.SelectedTimeSpan = System.TimeSpan.Parse("90.00:00:00");
+            tsDateRange.Size = new System.Drawing.Size(95, 24);
+            tsDateRange.Text = "90 Days";
+            tsDateRange.DateRangeChanged += DateRangeChanged;
             // 
             // toolStripDropDownButton1
             // 
-            this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.smoothLinesToolStripMenuItem,
-            this.pointsToolStripMenuItem});
-            this.toolStripDropDownButton1.Image = global::DBADashGUI.Properties.Resources.LineChart_16x;
-            this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
-            this.toolStripDropDownButton1.Size = new System.Drawing.Size(34, 24);
-            this.toolStripDropDownButton1.Text = "Chart Options";
+            toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { smoothLinesToolStripMenuItem, pointsToolStripMenuItem });
+            toolStripDropDownButton1.Image = Properties.Resources.LineChart_16x;
+            toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            toolStripDropDownButton1.Name = "toolStripDropDownButton1";
+            toolStripDropDownButton1.Size = new System.Drawing.Size(34, 24);
+            toolStripDropDownButton1.Text = "Chart Options";
             // 
             // smoothLinesToolStripMenuItem
             // 
-            this.smoothLinesToolStripMenuItem.Checked = true;
-            this.smoothLinesToolStripMenuItem.CheckOnClick = true;
-            this.smoothLinesToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.smoothLinesToolStripMenuItem.Name = "smoothLinesToolStripMenuItem";
-            this.smoothLinesToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.smoothLinesToolStripMenuItem.Text = "Smooth Lines";
-            this.smoothLinesToolStripMenuItem.Click += new System.EventHandler(this.SmoothLinesToolStripMenuItem_Click);
+            smoothLinesToolStripMenuItem.Checked = true;
+            smoothLinesToolStripMenuItem.CheckOnClick = true;
+            smoothLinesToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            smoothLinesToolStripMenuItem.Name = "smoothLinesToolStripMenuItem";
+            smoothLinesToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            smoothLinesToolStripMenuItem.Text = "Smooth Lines";
+            smoothLinesToolStripMenuItem.Click += SmoothLinesToolStripMenuItem_Click;
             // 
             // pointsToolStripMenuItem
             // 
-            this.pointsToolStripMenuItem.Checked = true;
-            this.pointsToolStripMenuItem.CheckOnClick = true;
-            this.pointsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.pointsToolStripMenuItem.Name = "pointsToolStripMenuItem";
-            this.pointsToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.pointsToolStripMenuItem.Text = "Points";
-            this.pointsToolStripMenuItem.Click += new System.EventHandler(this.PointsToolStripMenuItem_Click);
+            pointsToolStripMenuItem.Checked = true;
+            pointsToolStripMenuItem.CheckOnClick = true;
+            pointsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            pointsToolStripMenuItem.Name = "pointsToolStripMenuItem";
+            pointsToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            pointsToolStripMenuItem.Text = "Points";
+            pointsToolStripMenuItem.Click += PointsToolStripMenuItem_Click;
             // 
             // tsRefresh
             // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
+            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Name = "tsRefresh";
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Text = "Refresh";
+            tsRefresh.Click += TsRefresh_Click;
             // 
             // tsFileGroup
             // 
-            this.tsFileGroup.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
-            this.tsFileGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsFileGroup.Name = "tsFileGroup";
-            this.tsFileGroup.Size = new System.Drawing.Size(107, 24);
-            this.tsFileGroup.Text = "FileGroup";
-            this.tsFileGroup.Visible = false;
+            tsFileGroup.Image = Properties.Resources.FilterDropdown_16x;
+            tsFileGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsFileGroup.Name = "tsFileGroup";
+            tsFileGroup.Size = new System.Drawing.Size(107, 24);
+            tsFileGroup.Text = "FileGroup";
+            tsFileGroup.Visible = false;
             // 
             // tsFile
             // 
-            this.tsFile.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
-            this.tsFile.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsFile.Name = "tsFile";
-            this.tsFile.Size = new System.Drawing.Size(66, 24);
-            this.tsFile.Text = "File";
-            this.tsFile.Visible = false;
-            // 
-            // tsGrid
-            // 
-            this.tsGrid.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsGrid.Image = global::DBADashGUI.Properties.Resources.Table_16x;
-            this.tsGrid.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsGrid.Name = "tsGrid";
-            this.tsGrid.Size = new System.Drawing.Size(29, 24);
-            this.tsGrid.Text = "Toggle Grid";
-            this.tsGrid.Click += new System.EventHandler(this.TsGrid_Click);
-            // 
-            // tsCopy
-            // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy Grid";
-            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
-            // 
-            // tsExcel
-            // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export to Excel";
-            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
+            tsFile.Image = Properties.Resources.FilterDropdown_16x;
+            tsFile.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsFile.Name = "tsFile";
+            tsFile.Size = new System.Drawing.Size(66, 24);
+            tsFile.Text = "File";
+            tsFile.Visible = false;
             // 
             // tsUnits
             // 
-            this.tsUnits.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsUnits.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mBToolStripMenuItem,
-            this.gBToolStripMenuItem,
-            this.tBToolStripMenuItem});
-            this.tsUnits.Image = ((System.Drawing.Image)(resources.GetObject("tsUnits.Image")));
-            this.tsUnits.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsUnits.Name = "tsUnits";
-            this.tsUnits.Size = new System.Drawing.Size(56, 24);
-            this.tsUnits.Text = "Units";
+            tsUnits.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            tsUnits.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { mBToolStripMenuItem, gBToolStripMenuItem, tBToolStripMenuItem });
+            tsUnits.Image = (System.Drawing.Image)resources.GetObject("tsUnits.Image");
+            tsUnits.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsUnits.Name = "tsUnits";
+            tsUnits.Size = new System.Drawing.Size(56, 24);
+            tsUnits.Text = "Units";
             // 
             // mBToolStripMenuItem
             // 
-            this.mBToolStripMenuItem.Checked = true;
-            this.mBToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.mBToolStripMenuItem.Name = "mBToolStripMenuItem";
-            this.mBToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.mBToolStripMenuItem.Tag = "MB";
-            this.mBToolStripMenuItem.Text = "MB";
-            this.mBToolStripMenuItem.Click += new System.EventHandler(this.SetUnit);
+            mBToolStripMenuItem.Checked = true;
+            mBToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            mBToolStripMenuItem.Name = "mBToolStripMenuItem";
+            mBToolStripMenuItem.Size = new System.Drawing.Size(114, 26);
+            mBToolStripMenuItem.Tag = "MB";
+            mBToolStripMenuItem.Text = "MB";
+            mBToolStripMenuItem.Click += SetUnit;
             // 
             // gBToolStripMenuItem
             // 
-            this.gBToolStripMenuItem.Name = "gBToolStripMenuItem";
-            this.gBToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.gBToolStripMenuItem.Tag = "GB";
-            this.gBToolStripMenuItem.Text = "GB";
-            this.gBToolStripMenuItem.Click += new System.EventHandler(this.SetUnit);
+            gBToolStripMenuItem.Name = "gBToolStripMenuItem";
+            gBToolStripMenuItem.Size = new System.Drawing.Size(114, 26);
+            gBToolStripMenuItem.Tag = "GB";
+            gBToolStripMenuItem.Text = "GB";
+            gBToolStripMenuItem.Click += SetUnit;
             // 
             // tBToolStripMenuItem
             // 
-            this.tBToolStripMenuItem.Name = "tBToolStripMenuItem";
-            this.tBToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.tBToolStripMenuItem.Tag = "TB";
-            this.tBToolStripMenuItem.Text = "TB";
-            this.tBToolStripMenuItem.Click += new System.EventHandler(this.SetUnit);
+            tBToolStripMenuItem.Name = "tBToolStripMenuItem";
+            tBToolStripMenuItem.Size = new System.Drawing.Size(114, 26);
+            tBToolStripMenuItem.Tag = "TB";
+            tBToolStripMenuItem.Text = "TB";
+            tBToolStripMenuItem.Click += SetUnit;
+            // 
+            // tsGrid
+            // 
+            tsGrid.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsGrid.Image = Properties.Resources.Table_16x;
+            tsGrid.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsGrid.Name = "tsGrid";
+            tsGrid.Size = new System.Drawing.Size(29, 24);
+            tsGrid.Text = "Toggle Grid";
+            tsGrid.Click += TsGrid_Click;
+            // 
+            // tsCopy
+            // 
+            tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopy.Name = "tsCopy";
+            tsCopy.Size = new System.Drawing.Size(29, 24);
+            tsCopy.Text = "Copy Grid";
+            tsCopy.Click += TsCopy_Click;
+            // 
+            // tsExcel
+            // 
+            tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsExcel.Image = Properties.Resources.excel16x16;
+            tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcel.Name = "tsExcel";
+            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Text = "Export to Excel";
+            tsExcel.Click += TsExcel_Click;
             // 
             // splitContainer1
             // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 27);
-            this.splitContainer1.Name = "splitContainer1";
+            splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitContainer1.Location = new System.Drawing.Point(0, 27);
+            splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.chart1);
+            splitContainer1.Panel1.Controls.Add(chart1);
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.dgv);
-            this.splitContainer1.Panel2Collapsed = true;
-            this.splitContainer1.Size = new System.Drawing.Size(1134, 521);
-            this.splitContainer1.SplitterDistance = 649;
-            this.splitContainer1.TabIndex = 4;
+            splitContainer1.Panel2.Controls.Add(dgv);
+            splitContainer1.Panel2Collapsed = true;
+            splitContainer1.Size = new System.Drawing.Size(1134, 521);
+            splitContainer1.SplitterDistance = 649;
+            splitContainer1.TabIndex = 4;
             // 
             // dgv
             // 
-            this.dgv.AllowUserToAddRows = false;
-            this.dgv.AllowUserToDeleteRows = false;
-            this.dgv.BackgroundColor = System.Drawing.Color.White;
-            this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 0);
-            this.dgv.Name = "dgv";
-            this.dgv.ReadOnly = true;
-            this.dgv.RowHeadersVisible = false;
-            this.dgv.RowHeadersWidth = 51;
-            this.dgv.RowTemplate.Height = 29;
-            this.dgv.Size = new System.Drawing.Size(96, 100);
-            this.dgv.TabIndex = 0;
+            dgv.AllowUserToAddRows = false;
+            dgv.AllowUserToDeleteRows = false;
+            dgv.BackgroundColor = System.Drawing.Color.White;
+            dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgv.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgv.Location = new System.Drawing.Point(0, 0);
+            dgv.Name = "dgv";
+            dgv.ReadOnly = true;
+            dgv.RowHeadersVisible = false;
+            dgv.RowHeadersWidth = 51;
+            dgv.Size = new System.Drawing.Size(96, 100);
+            dgv.TabIndex = 0;
             // 
             // DBSpaceHistory
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.splitContainer1);
-            this.Controls.Add(this.toolStrip1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "DBSpaceHistory";
-            this.Size = new System.Drawing.Size(1134, 548);
-            this.Load += new System.EventHandler(this.DBSpaceHistory_Load);
-            this.Resize += new System.EventHandler(this.DBSpaceHistory_Resize);
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
-            this.splitContainer1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            Controls.Add(splitContainer1);
+            Controls.Add(toolStrip1);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "DBSpaceHistory";
+            Size = new System.Drawing.Size(1134, 548);
+            Load += DBSpaceHistory_Load;
+            Resize += DBSpaceHistory_Resize;
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            splitContainer1.Panel1.ResumeLayout(false);
+            splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
+            splitContainer1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgv).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
 
         }
 
@@ -354,14 +276,6 @@
 
         private LiveCharts.WinForms.CartesianChart chart1;
         private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.ToolStripDropDownButton tsTime;
-        private System.Windows.Forms.ToolStripMenuItem days7ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem days30ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem days90ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem days180ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem yearToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripMenuItem tsCustom;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
         private System.Windows.Forms.ToolStripMenuItem smoothLinesToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsRefresh;
@@ -377,5 +291,6 @@
         private System.Windows.Forms.ToolStripMenuItem mBToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gBToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem tBToolStripMenuItem;
+        private DateRangeToolStripMenuItem tsDateRange;
     }
 }

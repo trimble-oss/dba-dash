@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DBADashGUI.Theme;
 using OpenTK.Graphics;
 
 namespace DBADashGUI.Performance
@@ -25,6 +26,7 @@ namespace DBADashGUI.Performance
 
         private void QueryStoreViewer_Load(object sender, EventArgs e)
         {
+            this.ApplyTheme();
             queryStoreTopQueries1.SetContext(Context);
             if (PlanHash != null || QueryHash != null)
             {

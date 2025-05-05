@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 namespace DBADashGUI.Performance
 {
     public static class DateRange
     {
-        private static int mins = 60;
+        private static TimeSpan? _selectedTimeSpan = TimeSpan.FromHours(1);
         private static DateTime customFrom = DateTime.MinValue;
         private static DateTime customTo = DateTime.MinValue;
         private static List<int> timeOfDay = new();
@@ -19,9 +18,11 @@ namespace DBADashGUI.Performance
 
         public static string DateFormatString => DateRange.DurationMins < 1440 ? DBADashUser.TimeFormatString : DBADashUser.DateTimeFormatString;
 
-        public static void SetMins(int minutes)
+        public static TimeSpan? SelectedTimeSpan => _selectedTimeSpan;
+
+        public static void SetTimeSpan(TimeSpan ts)
         {
-            mins = minutes;
+            _selectedTimeSpan = ts;
             customFrom = DateTime.MinValue;
             customTo = DateTime.MinValue;
             ResetIfNotSupported();
@@ -31,7 +32,7 @@ namespace DBADashGUI.Performance
         {
             customFrom = fromUTC;
             customTo = toUTC;
-            mins = -1;
+            _selectedTimeSpan = null;
             ResetIfNotSupported();
         }
 
@@ -115,26 +116,19 @@ namespace DBADashGUI.Performance
         {
             get
             {
-                var utc = DateTime.UtcNow.AddMinutes(-mins);
-                if (mins < 0)
+                if (!_selectedTimeSpan.HasValue)
                 {
                     return customFrom;
                 }
-                else if (mins > 120)
-                {
-                    return new DateTime(utc.Year, utc.Month, utc.Day, utc.Hour, 0, 0);
-                }
-                else
-                {
-                    return utc;
-                }
+                var utc = DateTime.UtcNow.Subtract(_selectedTimeSpan.Value);
+                return _selectedTimeSpan.Value.TotalMinutes > 120 ? new DateTime(utc.Year, utc.Month, utc.Day, utc.Hour, 0, 0) : utc;
             }
         }
 
-        public static DateTime ToUTC => mins < 0 || customTo == DateTime.MaxValue ? customTo : DateTime.UtcNow;
+        public static DateTime ToUTC => _selectedTimeSpan.HasValue || customTo == DateTime.MaxValue ? DateTime.UtcNow : customTo;
 
-        public static int DurationMins => mins > 0 ? mins : Convert.ToInt32(TimeSpan.TotalMinutes);
+        public static int DurationMins => Convert.ToInt32(TimeSpan.TotalMinutes);
 
-        public static TimeSpan TimeSpan => ToUTC.Subtract(FromUTC);
+        public static TimeSpan TimeSpan => SelectedTimeSpan ?? ToUTC.Subtract(FromUTC);
     }
 }

@@ -1451,36 +1451,9 @@ namespace DBADashGUI
             }
         }
 
-        private void TsTime_Click(object sender, EventArgs e)
-        {
-            var tag = (string)((ToolStripMenuItem)sender).Tag;
-            CheckTime(tag);
-            DateRange.SetMins(Convert.ToInt32(tag));
-            DateRangeChanged();
-        }
-
-        private void CheckTime(string tag)
-        {
-            tsTime.Font = tag != "60" ? new Font(tsTime.Font, FontStyle.Bold) : new Font(tsTime.Font, FontStyle.Regular);
-
-            foreach (var itm in tsTime.DropDownItems)
-            {
-                if (itm.GetType() == typeof(ToolStripMenuItem))
-                {
-                    var ts = (ToolStripMenuItem)itm;
-                    ts.Font = new Font(ts.Font, FontStyle.Regular);
-                    ts.Checked = (string)ts.Tag == tag;
-                    if (ts.Checked)
-                    {
-                        tsTime.Text = ts.Text;
-                    }
-                }
-            }
-        }
-
         private void UpdateTimeFilterVisibility()
         {
-            tsTime.Visible = GlobalTimeIsVisible;
+            tsDateRange.Visible = GlobalTimeIsVisible;
             tsDayOfWeek.Visible = DateRange.CurrentDateRangeSupportsDayOfWeekFilter &&
                                   CurrentTabSupportsDayOfWeekFilter && GlobalTimeIsVisible;
             tsTimeFilter.Visible = DateRange.CurrentDateRangeSupportsTimeOfDayFilter &&
@@ -1491,26 +1464,28 @@ namespace DBADashGUI
                 DateRange.HasTimeOfDayFilter ? FontStyle.Bold : FontStyle.Regular);
         }
 
+        private void DateRangeChanged(object sender, EventArgs e) => DateRangeChanged();
+
         private void DateRangeChanged()
         {
+            if (tsDateRange.SelectedDateTo != null && tsDateRange.SelectedDateFrom != null)
+            {
+                DateRange.SetCustom(tsDateRange.DateFromUtc, tsDateRange.DateToUtc);
+            }
+            else if (tsDateRange.SelectedTimeSpan != null)
+            {
+                DateRange.SetTimeSpan(tsDateRange.SelectedTimeSpan.Value);
+            }
+            else
+            {
+                DateRange.SetTimeSpan(TimeSpan.FromMinutes(60));
+            }
+
             UpdateTimeFilterVisibility();
 
-            foreach (var ctrl in tabs.SelectedTab.Controls.OfType<IRefreshData>())
+            foreach (var ctrl in tabs.SelectedTab!.Controls.OfType<IRefreshData>())
             {
                 ctrl.RefreshData();
-            }
-        }
-
-        private void TsCustomTime_Click(object sender, EventArgs e)
-        {
-            var frm = new CustomTimePicker()
-            { FromDate = DateRange.FromUTC.ToAppTimeZone(), ToDate = DateRange.ToUTC.ToAppTimeZone() };
-            frm.ShowDialog();
-            if (frm.DialogResult == DialogResult.OK)
-            {
-                DateRange.SetCustom(frm.FromDate.AppTimeZoneToUtc(), frm.ToDate.AppTimeZoneToUtc());
-                CheckTime((string)((ToolStripMenuItem)sender).Tag);
-                DateRangeChanged();
             }
         }
 
@@ -1640,36 +1615,6 @@ namespace DBADashGUI
         {
             Common.FreezeKeyColumn = freezeKeyColumnsToolStripMenuItem.Checked;
             LoadSelectedTab();
-        }
-
-        private void DateToolStripMenuItem_Opening(object sender, EventArgs e)
-        {
-            dateToolStripMenuItem.DropDownItems.Clear();
-            for (var i = 0; i <= 14; i++)
-            {
-                var date = DateHelper.AppNow.AddDays(-i).Date;
-                var daysAgo = i == 0 ? "Today" : i == 1 ? "Yesterday" : i + " days ago";
-                var humanDateString = date.ToShortDateString() + " (" + date.DayOfWeek.ToString()[..3] + " - " +
-                                      daysAgo + ")";
-                var dateItem = new ToolStripMenuItem(humanDateString)
-                {
-                    Tag = date,
-                    Checked = DateRange.FromUTC == date.AppTimeZoneToUtc() &&
-                              DateRange.ToUTC == date.AddDays(1).AppTimeZoneToUtc()
-                };
-                dateItem.Click += DateItem_Click;
-                dateToolStripMenuItem.DropDownItems.Add(dateItem);
-            }
-        }
-
-        private void DateItem_Click(object sender, EventArgs e)
-        {
-            var dateItem = (ToolStripMenuItem)sender;
-            var selectedDate = (DateTime)dateItem.Tag;
-            DateRange.SetCustom(selectedDate.AppTimeZoneToUtc(), selectedDate.AppTimeZoneToUtc().AddDays(1));
-            CheckTime("Date");
-            tsTime.Text = dateItem.Text;
-            DateRangeChanged();
         }
 
         // F5 to refresh

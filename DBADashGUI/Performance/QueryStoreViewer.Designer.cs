@@ -38,14 +38,15 @@
             queryStoreTopQueries1.Name = "queryStoreTopQueries1";
             queryStoreTopQueries1.PlanHash = null;
             queryStoreTopQueries1.QueryHash = null;
-            queryStoreTopQueries1.Size = new System.Drawing.Size(1279, 796);
+            queryStoreTopQueries1.Size = new System.Drawing.Size(1471, 796);
             queryStoreTopQueries1.TabIndex = 0;
+            queryStoreTopQueries1.UseGlobalTime = false;
             // 
             // QueryStoreViewer
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(1279, 796);
+            ClientSize = new System.Drawing.Size(1471, 796);
             Controls.Add(queryStoreTopQueries1);
             Name = "QueryStoreViewer";
             Text = "Query Store Viewer";
