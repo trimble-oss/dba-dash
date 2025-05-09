@@ -1867,6 +1867,7 @@ namespace DBADashGUI.Performance
         private void RunningQueries_Load(object sender, EventArgs e)
         {
             tsEditLimit.LinkColor = DashColors.LinkColor;
+            Common.AddContextInfoDisplayAsMenu(dgv, "colContextInfo");
         }
 
         private void UpdateRowLimit()

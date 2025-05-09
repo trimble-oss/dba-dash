@@ -8,6 +8,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Windows.Forms;
@@ -725,18 +726,109 @@ namespace DBADashGUI
 
         public const float ColorBrightnessIncrement = 0.05f;
 
-        public static void ReplaceBinaryContextInfoColumn(ref DataTable dt)
+        public enum ContextInfoDisplayStyles
         {
+            Hex,
+            UTF8String,
+            UnicodeString,
+            ASCIIString,
+            Guid,
+            Int
+        }
+
+        public static Common.ContextInfoDisplayStyles ContextInfoDisplayStyle { get; set; } = Common.ContextInfoDisplayStyles.Hex;
+
+        public static void ReplaceBinaryContextInfoColumn(ref DataTable dt, bool redo = false)
+        {
+            if (redo && dt.Columns.Contains("context_info_bin") && dt.Columns.Contains("context_info"))
+            {
+                dt.Columns.Remove("context_info");
+                dt.Columns["context_info_bin"]!.ColumnName = "context_info";
+            }
             if (!dt.Columns.Contains("context_info")) return;
             if (dt.Columns.Contains("context_info_bin")) return;
             dt.Columns["context_info"]!.ColumnName = "context_info_bin";
             dt.Columns.Add("context_info", typeof(string));
-            foreach (DataRow row in dt.Rows)
+            try
             {
-                var contextInfo = row["context_info_bin"] == DBNull.Value
-                    ? string.Empty
-                    : "0x" + Convert.ToHexString((byte[])row["context_info_bin"]);
-                row["context_info"] = contextInfo;
+                foreach (DataRow row in dt.Rows)
+                {
+                    string contextInfo;
+                    if (row["context_info_bin"] == DBNull.Value)
+                    {
+                        contextInfo = string.Empty;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            var contextInfoBin = (byte[])row["context_info_bin"];
+                            contextInfo = ContextInfoDisplayStyle switch
+                            {
+                                ContextInfoDisplayStyles.Hex => contextInfoBin.ToHexString(true),
+                                ContextInfoDisplayStyles.UTF8String => Encoding.UTF8.GetString(contextInfoBin),
+                                ContextInfoDisplayStyles.UnicodeString => Encoding.Unicode.GetString(contextInfoBin),
+                                ContextInfoDisplayStyles.ASCIIString => Encoding.ASCII.GetString(contextInfoBin),
+                                ContextInfoDisplayStyles.Guid => contextInfoBin.Length == 16
+                                    ? new Guid(contextInfoBin).ToString()
+                                    : "Error converting value: Invalid Length for GUID",
+                                ContextInfoDisplayStyles.Int => contextInfoBin.Length switch
+                                {
+                                    4 => contextInfoBin.ByteArrayToIntBigEndian().ToString(),
+                                    8 => contextInfoBin.ByteArrayToLongBigEndian().ToString(),
+                                    _ => "Error converting value: Invalid Length for INT/BIGINT"
+                                },
+                                _ => ((byte[])row["context_info_bin"]).ToHexString(true)
+                            };
+                        }
+                        catch (Exception ex)
+                        {
+                            contextInfo = "Error converting value: " + ex.Message;
+                        }
+                    }
+
+                    row["context_info"] = contextInfo;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public static void AddContextInfoDisplayAsMenu(DBADashDataGridView dgv, string colName)
+        {
+            const string name = "ContextInfoDisplayAs";
+            var mnuDisplayAs = dgv.CellContextMenu.Items.OfType<ToolStripMenuItem>().FirstOrDefault(itm => itm.Name == name);
+            if (mnuDisplayAs != null) return;
+            {
+                mnuDisplayAs = new ToolStripMenuItem("Display As") { Name = name };
+                var mnuSep = new ToolStripSeparator();
+                foreach (var value in Enum.GetValues<Common.ContextInfoDisplayStyles>())
+                {
+                    var itm = new ToolStripMenuItem(value.ToString())
+                    { Tag = value, Checked = value == Common.ContextInfoDisplayStyle };
+                    itm.Click += (_sender, _e) =>
+                    {
+                        Common.ContextInfoDisplayStyle = (Common.ContextInfoDisplayStyles)(((ToolStripMenuItem)_sender)!).Tag!;
+                        foreach (var itm in mnuDisplayAs.DropDownItems.OfType<ToolStripMenuItem>())
+                        {
+                            itm.Checked = (Common.ContextInfoDisplayStyles)itm.Tag! == Common.ContextInfoDisplayStyle;
+                        }
+
+                        var dt = ((DataView)dgv.DataSource).Table;
+
+                        Common.ReplaceBinaryContextInfoColumn(ref dt, true);
+                    };
+                    mnuDisplayAs.DropDownItems.Add(itm);
+                }
+                dgv.CellContextMenu.Items.Insert(0, mnuDisplayAs);
+                dgv.CellContextMenu.Items.Insert(1, mnuSep);
+                dgv.CellContextMenuOpening += (sender, e) =>
+                {
+                    mnuDisplayAs.Visible = dgv.Columns[e.ColumnIndex].Name == colName;
+                    mnuSep.Visible = dgv.Columns[e.ColumnIndex].Name == colName;
+                };
             }
         }
     }
