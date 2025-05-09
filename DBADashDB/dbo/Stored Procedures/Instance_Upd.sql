@@ -19,24 +19,48 @@
 	@contained_availability_group_id UNIQUEIDENTIFIER=NULL,
 	@contained_availability_group_name NVARCHAR(128)=NULL,
 	@EngineEdition INT=NULL,
-	@InstanceID INT OUT
+	@InstanceID INT OUT,
+	@IsActive BIT=NULL OUT
 )
 AS
 DECLARE @Ref VARCHAR(30)='Instance'
+DECLARE @ErrorMsg NVARCHAR(2048)
 
-SELECT @InstanceID = InstanceID
+SELECT	@InstanceID = InstanceID,
+		@IsActive = IsActive
 FROM dbo.Instances 
 WHERE ConnectionID = @ConnectionID
 
+IF @@ROWCOUNT=0
+BEGIN
+	SET @IsActive=1
+END
+
 IF @SnapshotDate > DATEADD(mi,5,GETUTCDATE())
 BEGIN
-	DECLARE @ErrorMsg NVARCHAR(2048)
 	SET @ErrorMsg=CONCAT('Error SnapshotDate {',@SnapshotDate,'} is greater than current UTC datetime {',GETUTCDATE(),'}') ;
 
 	INSERT INTO dbo.CollectionErrorLog(ErrorDate,InstanceID,ErrorSource,ErrorMessage,ErrorContext)
 	VALUES(GETUTCDATE(),@InstanceID,'Instance',@ErrorMsg,'Import');
 
 	THROW 50000,@ErrorMsg,1;
+END
+IF @IsActive=0 /* Instance is deleted, collections should not be running */
+BEGIN
+	SET @ErrorMsg = 'Warning: Data is being collected for an instance marked as deleted.  Remove the instance from the config tool & restart the service or use the recycle bin folder to restore the instance.  This message is logged once per hour.'
+	-- Log 1 message per hour for the instance if it's marked as deleted and collections are still running
+	IF NOT EXISTS(
+			SELECT 1 
+			FROM CollectionErrorLog
+			WHERE InstanceID = @InstanceID
+			AND ErrorContext = 'Import'
+			AND ErrorMessage = @ErrorMsg
+			AND ErrorDate >= DATEADD(mi,-60,GETUTCDATE())
+	)
+	BEGIN
+		INSERT INTO dbo.CollectionErrorLog(ErrorDate,InstanceID,ErrorSource,ErrorMessage,ErrorContext)
+		VALUES(GETUTCDATE(),@InstanceID,'Instance',@ErrorMsg,'Import');
+	END
 END
 
 IF @CollectAgentID IS NULL
@@ -116,5 +140,6 @@ BEGIN
 		EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
 										 @Reference = @Ref,
 										 @SnapshotDate = @SnapshotDate
+
 	END
 END

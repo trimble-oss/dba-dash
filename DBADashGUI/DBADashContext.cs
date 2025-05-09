@@ -27,7 +27,9 @@ namespace DBADashGUI
         public int DatabaseID { get; set; }
         public long ObjectID { get; set; }
         public string ObjectName { get; set; }
-        public string SchemaName{ get; set; }
+        public string SchemaName { get; set; }
+
+        public int TreeLevel { get; set; }
 
         public Guid JobID { get; set; }
         public int JobStepID { get; set; }
@@ -129,10 +131,8 @@ namespace DBADashGUI
         }
 
         public bool IsScriptAllowed(ProcedureExecutionMessage.CommandNames proc) => IsScriptAllowed(proc.ToString());
-      
 
-        public bool IsScriptAllowed(string procName)=>CanMessage && DBADashUser.CommunityScripts && (CollectAgent.IsAllowAllScripts || CollectAgent.AllowedScripts.Contains(procName));
-       
+        public bool IsScriptAllowed(string procName) => CanMessage && DBADashUser.CommunityScripts && (CollectAgent.IsAllowAllScripts || CollectAgent.AllowedScripts.Contains(procName));
 
         public DBADashAgent ImportAgent => ImportAgentID == null ? null : CommonData.GetDBADashAgent((int)ImportAgentID);
 

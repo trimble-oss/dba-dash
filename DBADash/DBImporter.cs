@@ -626,7 +626,8 @@ namespace DBADash
             await using var cmd = new SqlCommand("Instance_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout };
 
             await cn.OpenAsync();
-            cmd.Parameters.AddWithValue("ConnectionID", (string)rInstance["ConnectionID"]);
+            var connectionID = (string)rInstance["ConnectionID"];
+            cmd.Parameters.AddWithValue("ConnectionID", connectionID);
             cmd.Parameters.AddWithValue("Instance", (string)rInstance["Instance"]);
             cmd.Parameters.AddWithValue("SnapshotDate", (DateTime)rInstance["SnapshotDateUTC"]);
 
@@ -659,9 +660,13 @@ namespace DBADash
             {
                 cmd.Parameters.AddWithValue("EngineEdition", rInstance["EngineEdition"]);
             }
-            var pInstanceID = cmd.Parameters.Add("InstanceID", SqlDbType.Int);
-            pInstanceID.Direction = ParameterDirection.Output;
+            var pInstanceID = cmd.Parameters.Add(new SqlParameter("InstanceID", SqlDbType.Int) { Direction = ParameterDirection.Output });
+            var pIsActive = cmd.Parameters.Add(new SqlParameter("IsActive", SqlDbType.Bit) { Direction = ParameterDirection.Output });
             await cmd.ExecuteNonQueryAsync();
+            if (!(bool)pIsActive.Value)
+            {
+                Log.Warning("Connection {ConnectionID} is marked deleted in the repository database.  Remove the connection from the service config tool and restart the service or use the recycle bin folder to restore the instance.", connectionID);
+            }
             return (int)pInstanceID.Value;
         }
     }
