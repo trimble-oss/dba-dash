@@ -131,6 +131,7 @@ namespace DBADashGUI
                     DriveName = DriveName,
                     Report = Report,
                     ElasticPoolName = ElasticPoolName,
+                    TreeLevel = Level
                 };
                 switch (Type)
                 {

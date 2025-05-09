@@ -47,14 +47,14 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         [JsonIgnore]
         public IEnumerable<Param> UserParams => Params == null ? new List<Param>() : Params.ParamList.Where(p =>
-                                                                                                                                                                                                                                                    !SystemParamNames.Contains(p.ParamName.ToUpper()));
+                                                                                                                                                                                                                                                            !SystemParamNames.Contains(p.ParamName.ToUpper()));
 
         /// <summary>
         /// Parameters for the stored procedure that are supplied automatically based on context
         /// </summary>
         [JsonIgnore]
         public IEnumerable<Param> SystemParams => Params == null ? new List<Param>() : Params.ParamList.Where(p =>
-                                                                                                                                                    SystemParamNames.Contains(p.ParamName.ToUpper()));
+                                                                                                                                                            SystemParamNames.Contains(p.ParamName.ToUpper()));
 
         [JsonIgnore]
         public bool IsRootLevel => Params != null && Params.ParamList.Any(p => p.ParamName.Equals("@INSTANCEIDS", StringComparison.OrdinalIgnoreCase));
@@ -75,8 +75,10 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         [JsonIgnore]
         public bool TimeFilterSupported => Params != null && Params.ParamList.Any(p =>
-                                                                                                                                                                                                                                                    p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
-                                                                                                                                                                                                                                                    p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase));
+                                                                                                                                                                                                                                                            p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
+                                                                                                                                                                                                                                                            p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase));
+
+        public bool ForceRefreshWithoutContextChange { get; set; }
 
         /// <summary>
         /// Save customizations

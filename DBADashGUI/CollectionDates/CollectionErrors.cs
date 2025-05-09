@@ -83,7 +83,7 @@ namespace DBADashGUI.CollectionDates
         private void RefreshDataLocal()
         {
             tsFilter.Font = IsFiltered ? new Font(tsFilter.Font, FontStyle.Bold) : new Font(tsFilter.Font, FontStyle.Regular);
-            DataTable dt = GetErrorLog(InstanceID, InstanceGroupName, txtInstance.Text.Trim(), txtSource.Text.Trim(), txtContext.Text.Trim(), txtMessage.Text.Trim(), Days, Context.InstanceIDs);
+            DataTable dt = GetErrorLog(InstanceID, InstanceGroupName, txtInstance.Text.Trim(), txtSource.Text.Trim(), txtContext.Text.Trim(), txtMessage.Text.Trim(), Days, Context.TreeLevel == 1 && Context.Type == SQLTreeItem.TreeType.DBAChecks ? new HashSet<int>() : Context.InstanceIDs);
             dgvDBADashErrors.AutoGenerateColumns = false;
             dgvDBADashErrors.DataSource = new DataView(dt);
             dgvDBADashErrors.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);

@@ -161,6 +161,7 @@ Are you sure you want to delete this instance?",
             ProcedureName = "DeletedInstances_Get",
             QualifiedProcedureName = "dbo.DeletedInstances_Get",
             CanEditReport = false,
+            ForceRefreshWithoutContextChange = true,
             CustomReportResults = new Dictionary<int, CustomReportResult>
             {
                 {
