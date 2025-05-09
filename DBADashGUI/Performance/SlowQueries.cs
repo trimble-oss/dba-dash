@@ -595,6 +595,7 @@ namespace DBADashGUI
             dgvSummary.ApplyTheme();
             dgvSlow.ApplyTheme();
             SelectGroupBy();
+            Common.AddContextInfoDisplayAsMenu(dgvSlow, "colContextInfo");
         }
 
         private void ResetToolStripMenuItem_Click(object sender, EventArgs e)

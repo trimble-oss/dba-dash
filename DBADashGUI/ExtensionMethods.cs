@@ -873,5 +873,27 @@ namespace DBADashGUI
         public static DateTime StartOfMonth(this DateTime dt) => new DateTime(dt.Year, dt.Month, 1);
 
         public static TimeSpan TimeSpan(this ValueTuple<DateTime, DateTime> range) => range.Item2.Subtract(range.Item1);
+
+        public static int ByteArrayToIntBigEndian(this byte[] bytes)
+        {
+            if (bytes is not { Length: 4 })
+            {
+                throw new ArgumentException("Byte array must not be null and must have a length of 4.");
+            }
+            // Reverse the byte array for big-endian interpretation
+            var reversedBytes = bytes.Reverse().ToArray();
+            return BitConverter.ToInt32(reversedBytes, 0);
+        }
+
+        public static long ByteArrayToLongBigEndian(this byte[] bytes)
+        {
+            if (bytes is not { Length: 8 })
+            {
+                throw new ArgumentException("Byte array must not be null and must have a length of 4.");
+            }
+            // Reverse the byte array for big-endian interpretation
+            var reversedBytes = bytes.Reverse().ToArray();
+            return BitConverter.ToInt64(reversedBytes, 0);
+        }
     }
 }
