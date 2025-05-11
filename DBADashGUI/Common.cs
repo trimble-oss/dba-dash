@@ -831,5 +831,63 @@ namespace DBADashGUI
                 };
             }
         }
+
+        // Very simple grid diff tool.  Relies on rows being in order.
+        public static void HighlightGridDifferences(DataGridView grid1, DataGridView grid2)
+        {
+            var rowCount1 = grid1.RowCount;
+            var rowCount2 = grid2.RowCount;
+            var minRowCount = Math.Min(rowCount1, rowCount2);
+            var highlightBackColor = DashColors.RedPale;
+            var highlightForeColor = DashColors.TrimbleGray;
+
+            // Compare cells in the common rows
+            for (var row = 0; row < minRowCount; row++)
+            {
+                if (row >= grid1.RowCount || row >= grid2.RowCount) continue; // Ensure index is within bounds
+                for (var col = 0; col < grid1.ColumnCount && col < grid2.ColumnCount; col++)
+                {
+                    var value1 = grid1.Rows[row].Cells[col].Value;
+                    var value2 = grid2.Rows[row].Cells[col].Value;
+
+                    if ((value1 == null && value2 != null) || (value1 != null && !value1.Equals(value2)))
+                    {
+                        grid1.Rows[row].Cells[col].SetColor(highlightBackColor, highlightForeColor);
+                        grid2.Rows[row].Cells[col].SetColor(highlightBackColor, highlightForeColor);
+                    }
+                }
+                // Handle potential column count differences within the common rows
+                for (var col = grid1.ColumnCount; col < grid2.ColumnCount && row < grid2.RowCount; col++)
+                {
+                    // Highlight extra columns in grid2
+                    grid2.Rows[row].Cells[col].SetColor(highlightBackColor, highlightForeColor);
+                }
+                for (var col = grid2.ColumnCount; col < grid1.ColumnCount && row < grid1.RowCount; col++)
+                {
+                    // Highlight extra columns in grid1
+                    grid1.Rows[row].Cells[col].SetColor(highlightBackColor, highlightForeColor);
+                }
+            }
+
+            // Highlight extra rows in grid1
+            for (var row = minRowCount; row < rowCount1; row++)
+            {
+                for (var col = 0; col < grid1.ColumnCount; col++)
+                {
+                    // Indicate extra row in grid1
+                    grid1.Rows[row].Cells[col].SetColor(highlightBackColor, highlightForeColor);
+                }
+            }
+
+            // Highlight extra rows in grid2
+            for (var row = minRowCount; row < rowCount2; row++)
+            {
+                for (var col = 0; col < grid2.ColumnCount; col++)
+                {
+                    // Indicate extra row in grid2
+                    grid2.Rows[row].Cells[col].SetColor(highlightBackColor, highlightForeColor);
+                }
+            }
+        }
     }
 }

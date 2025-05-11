@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADash;
 using DBADashGUI.Performance;
 using DBADashGUI.Theme;
 using SortOrder = System.Windows.Forms.SortOrder;
@@ -151,6 +152,9 @@ namespace DBADashGUI.AgentJobs
         {
             if (e.RowIndex < 0) return;
             var row = (DataRowView)dgvJobs.Rows[e.RowIndex].DataBoundItem;
+            var _instanceId = (int)row["InstanceID"];
+            var jobId = (Guid)row["job_id"];
+            var jobName = (string)row["name"];
             if (dgvJobs.Columns[e.ColumnIndex].HeaderText == "Configure")
             {
                 ConfigureThresholds((int)row["InstanceID"], (Guid)row["job_id"]);
@@ -163,8 +167,24 @@ namespace DBADashGUI.AgentJobs
             else if (e.ColumnIndex == Acknowledge.Index)
             {
                 var clear = (DBADashStatus.DBADashStatusEnum)row["JobStatus"] == DBADashStatus.DBADashStatusEnum.Acknowledged;
-                AcknowledgeJobErrors((int)row["InstanceID"], (Guid)row["job_id"], clear);
+                AcknowledgeJobErrors(_instanceId, jobId, clear);
                 RefreshData();
+            }
+            else if (e.ColumnIndex == name.Index)
+            {
+                try
+                {
+                    var jobContext = CommonData.GetDBADashContext(_instanceId);
+                    jobContext.Type = SQLTreeItem.TreeType.AgentJob;
+                    jobContext.JobID = jobId;
+                    jobContext.ObjectName = jobName;
+                    var frm = new JobInfoForm() { DBADashContext = jobContext };
+                    frm.Show();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 

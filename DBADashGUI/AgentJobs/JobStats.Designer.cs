@@ -41,11 +41,12 @@ namespace DBADashGUI.AgentJobs
             tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
             tsJob = new System.Windows.Forms.ToolStripLabel();
             tsMeasures = new System.Windows.Forms.ToolStripDropDownButton();
-            tsBack = new System.Windows.Forms.ToolStripButton();
-            splitContainer1 = new System.Windows.Forms.SplitContainer();
-            chart1 = new Performance.CartesianChartWithDataTable();
-            dgv = new DBADashDataGridView();
             tsClearFilter = new System.Windows.Forms.ToolStripButton();
+            tsBack = new System.Windows.Forms.ToolStripButton();
+            dateRangeToolStripMenuItem1 = new DateRangeToolStripMenuItem();
+            splitContainer1 = new System.Windows.Forms.SplitContainer();
+            chart1 = new DBADashGUI.Performance.CartesianChartWithDataTable();
+            dgv = new DBADashDataGridView();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
@@ -57,7 +58,7 @@ namespace DBADashGUI.AgentJobs
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsDateGroup, tsJob, tsMeasures, tsClearFilter, tsBack });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsDateGroup, tsJob, tsMeasures, tsClearFilter, tsBack, dateRangeToolStripMenuItem1 });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(904, 27);
@@ -121,6 +122,15 @@ namespace DBADashGUI.AgentJobs
             tsMeasures.Size = new System.Drawing.Size(34, 24);
             tsMeasures.Text = "Measures";
             // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Image = Properties.Resources.Eraser_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            tsClearFilter.Text = "Clear Filter";
+            // 
             // tsBack
             // 
             tsBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -130,6 +140,23 @@ namespace DBADashGUI.AgentJobs
             tsBack.Size = new System.Drawing.Size(29, 24);
             tsBack.Text = "Back";
             tsBack.Click += TsBack_Click;
+            // 
+            // dateRangeToolStripMenuItem1
+            // 
+            dateRangeToolStripMenuItem1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            dateRangeToolStripMenuItem1.DefaultTimeSpan = System.TimeSpan.Parse("01:00:00");
+            dateRangeToolStripMenuItem1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
+            dateRangeToolStripMenuItem1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dateRangeToolStripMenuItem1.Image = (System.Drawing.Image)resources.GetObject("dateRangeToolStripMenuItem1.Image");
+            dateRangeToolStripMenuItem1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            dateRangeToolStripMenuItem1.MaximumTimeSpan = System.TimeSpan.Parse("10675199.02:48:05.4775807");
+            dateRangeToolStripMenuItem1.MinimumTimeSpan = System.TimeSpan.Parse("-10675199.02:48:05.4775808");
+            dateRangeToolStripMenuItem1.Name = "dateRangeToolStripMenuItem1";
+            dateRangeToolStripMenuItem1.SelectedTimeSpan = System.TimeSpan.Parse("01:00:00");
+            dateRangeToolStripMenuItem1.Size = new System.Drawing.Size(71, 24);
+            dateRangeToolStripMenuItem1.Text = "1 Hr";
+            dateRangeToolStripMenuItem1.Visible = false;
+            dateRangeToolStripMenuItem1.DateRangeChanged += DateRangeChanged;
             // 
             // splitContainer1
             // 
@@ -166,6 +193,7 @@ namespace DBADashGUI.AgentJobs
             // 
             dgv.AllowUserToAddRows = false;
             dgv.AllowUserToDeleteRows = false;
+            dgv.AllowUserToOrderColumns = true;
             dgv.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
@@ -197,15 +225,6 @@ namespace DBADashGUI.AgentJobs
             dgv.Size = new System.Drawing.Size(904, 327);
             dgv.TabIndex = 0;
             dgv.CellContentClick += Dgv_CellContentClick;
-            // 
-            // tsClearFilter
-            // 
-            tsClearFilter.Enabled = false;
-            tsClearFilter.Image = Properties.Resources.Eraser_16x;
-            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsClearFilter.Name = "tsClearFilter";
-            tsClearFilter.Size = new System.Drawing.Size(104, 24);
-            tsClearFilter.Text = "Clear Filter";
             // 
             // JobStats
             // 
@@ -242,5 +261,6 @@ namespace DBADashGUI.AgentJobs
         private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.ToolStripButton tsExcel;
         private System.Windows.Forms.ToolStripButton tsClearFilter;
+        private DateRangeToolStripMenuItem dateRangeToolStripMenuItem1;
     }
 }

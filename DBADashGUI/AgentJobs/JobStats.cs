@@ -22,6 +22,18 @@ namespace DBADashGUI.AgentJobs
         private Guid JobID { get; set; }
         private int StepID { get; set; }
 
+        public bool UseGlobalTime
+        {
+            get => !dateRangeToolStripMenuItem1.Visible;
+            set => dateRangeToolStripMenuItem1.Visible = !value;
+        }
+
+        private DateTime FromDateUtc => UseGlobalTime ? DateRange.FromUTC : dateRangeToolStripMenuItem1.DateFromUtc;
+        private DateTime ToDateUtc => UseGlobalTime ? DateRange.ToUTC : dateRangeToolStripMenuItem1.DateToUtc;
+
+        public TimeSpan? SelectedTimeSpan =>
+            UseGlobalTime ? DateRange.TimeSpan : dateRangeToolStripMenuItem1.SelectedTimeSpan;
+
         public bool CanNavigateBack => StepID != context.JobStepID || JobID != context.JobID;
 
         private int dateGrouping = 60;
@@ -39,8 +51,8 @@ namespace DBADashGUI.AgentJobs
             cmd.Parameters.AddWithValue("JobID", selectedJobID == Guid.Empty ? JobID : selectedJobID);
             var stepId = selectedStepID >= 0 ? selectedStepID : StepID;
             cmd.Parameters.AddWithValue("StepID", stepId);
-            cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-            cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+            cmd.Parameters.AddWithValue("FromDate", FromDateUtc);
+            cmd.Parameters.AddWithValue("ToDate", ToDateUtc);
             var pDateGrouping = cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
             pDateGrouping.Direction = ParameterDirection.InputOutput;
             DataTable dt = new();
@@ -64,8 +76,8 @@ namespace DBADashGUI.AgentJobs
             {
                 cmd.Parameters.AddWithValue("StepID", StepID);
             }
-            cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-            cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+            cmd.Parameters.AddWithValue("FromDate", FromDateUtc);
+            cmd.Parameters.AddWithValue("ToDate", ToDateUtc);
             DataTable dt = new();
             da.Fill(dt);
             return dt;
@@ -96,7 +108,7 @@ namespace DBADashGUI.AgentJobs
         {
             tsBack.Enabled = CanNavigateBack;
             tsJob.Visible = false;
-            dateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 200);
+            dateGrouping = DateHelper.DateGrouping(Convert.ToInt32(SelectedTimeSpan?.TotalMinutes ?? 60), 200);
             tsDateGroup.Text = DateHelper.DateGroupString(dateGrouping);
 
             dgv.Columns["colRetry"]!.Visible = JobID != Guid.Empty;
@@ -185,6 +197,16 @@ namespace DBADashGUI.AgentJobs
                 dd.Click += MeasureDropDown_Click;
                 tsMeasures.DropDownItems.Add(dd);
             }
+
+            if (UseGlobalTime) return;
+            if (DateRange.SelectedTimeSpan.HasValue)
+            {
+                dateRangeToolStripMenuItem1.SetTimeSpan(DateRange.SelectedTimeSpan.Value);
+            }
+            else
+            {
+                dateRangeToolStripMenuItem1.SetDateRangeUtc(DateRange.FromUTC, DateRange.ToUTC);
+            }
         }
 
         private void MeasureDropDown_Click(object sender, EventArgs e)
@@ -261,6 +283,11 @@ namespace DBADashGUI.AgentJobs
             {
                 return false;
             }
+        }
+
+        private void DateRangeChanged(object sender, EventArgs e)
+        {
+            RefreshData();
         }
     }
 }

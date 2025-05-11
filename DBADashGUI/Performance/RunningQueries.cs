@@ -1,5 +1,6 @@
 ﻿using DBADash;
 using DBADash.Messaging;
+using DBADashGUI.AgentJobs;
 using DBADashGUI.Interface;
 using DBADashGUI.Messaging;
 using DBADashGUI.Theme;
@@ -355,15 +356,15 @@ namespace DBADashGUI.Performance
                     HeaderText = "Program Name", DataPropertyName = "program_name",
                     SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40
                 },
-                new DataGridViewTextBoxColumn()
+                new DataGridViewLinkColumn()
                 {
                     HeaderText = "Job ID", DataPropertyName = "job_id", SortMode = DataGridViewColumnSortMode.Automatic,
-                    Visible = runningJobCount > 0, MinimumWidth = 40
+                    Visible = runningJobCount > 0, MinimumWidth = 40, Name = "colJobID"
                 },
-                new DataGridViewTextBoxColumn()
+                new DataGridViewLinkColumn()
                 {
                     HeaderText = "Job Name", DataPropertyName = "job_name",
-                    SortMode = DataGridViewColumnSortMode.Automatic, Visible = runningJobCount > 0, MinimumWidth = 40
+                    SortMode = DataGridViewColumnSortMode.Automatic, Visible = runningJobCount > 0, MinimumWidth = 40, Name = "colJobName"
                 },
                 new DataGridViewTextBoxColumn()
                 {
@@ -1256,6 +1257,36 @@ namespace DBADashGUI.Performance
                 case "colWaitResource":
                     DecipherWaitResource(row);
                     break;
+
+                case "colJobName":
+                case "colJobID":
+                    ShowJob(row);
+                    break;
+            }
+        }
+
+        private static void ShowJob(DataRowView row)
+        {
+            try
+            {
+                if (row["job_id"] == DBNull.Value)
+                {
+                    MessageBox.Show("Job ID is null", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                var instanceId = (int)row["InstanceID"];
+                var jobId = (Guid)row["job_id"];
+                var jobName = (string)(row["job_name"].DBNullToNull());
+                var jobContext = CommonData.GetDBADashContext(instanceId);
+                jobContext.Type = SQLTreeItem.TreeType.AgentJob;
+                jobContext.JobID = jobId;
+                jobContext.ObjectName = jobName;
+                var frm = new JobInfoForm() { DBADashContext = jobContext };
+                frm.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

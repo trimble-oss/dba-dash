@@ -147,6 +147,18 @@ namespace DBADashGUI.AgentJobs
         private bool IncludeSteps => stepsToolStripMenuItem.Checked || bothToolStripMenuItem.Checked || context.JobID != Guid.Empty;
         private bool IncludeOutcome => outcomeToolStripMenuItem.Checked || bothToolStripMenuItem.Checked || context.JobID != Guid.Empty;
 
+        public bool UseGlobalTime
+        {
+            get => !dateRangeToolStripMenuItem1.Visible;
+            set => dateRangeToolStripMenuItem1.Visible = !value;
+        }
+
+        private DateTime FromDateUtc => UseGlobalTime ? DateRange.FromUTC : dateRangeToolStripMenuItem1.DateFromUtc;
+        private DateTime ToDateUtc => UseGlobalTime ? DateRange.ToUTC : dateRangeToolStripMenuItem1.DateToUtc;
+
+        public TimeSpan SelectedTimeSpan =>
+            UseGlobalTime ? DateRange.TimeSpan : dateRangeToolStripMenuItem1.SelectedTimeSpan ?? DateRange.TimeSpan;
+
         private int DateGrouping
         {
             get => (int)tsDateGroup.Tag!;
@@ -175,37 +187,33 @@ namespace DBADashGUI.AgentJobs
         /// </summary>
         private static DataTable GetJobTimelineData(int InstanceID, DateTime from, DateTime to, string category, Guid job_id, bool steps, bool outcome, int dateGroup)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.JobTimeline_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("@FromDate", from);
-                cmd.Parameters.AddWithValue("@ToDate", to);
-                cmd.Parameters.AddWithValue("@IncludeSteps", steps);
-                cmd.Parameters.AddWithValue("@IncludeOutcome", outcome);
-                cmd.Parameters.AddGuidIfNotEmpty("@job_id", job_id);
-                cmd.Parameters.AddStringIfNotNullOrEmpty("category", category);
-                cmd.Parameters.AddWithValue("@DateGroupingMin", dateGroup);
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.JobTimeline_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("@FromDate", from);
+            cmd.Parameters.AddWithValue("@ToDate", to);
+            cmd.Parameters.AddWithValue("@IncludeSteps", steps);
+            cmd.Parameters.AddWithValue("@IncludeOutcome", outcome);
+            cmd.Parameters.AddGuidIfNotEmpty("@job_id", job_id);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("category", category);
+            cmd.Parameters.AddWithValue("@DateGroupingMin", dateGroup);
 
-                DataTable dt = new();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                return dt;
-            }
+            DataTable dt = new();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            return dt;
         }
 
         private static DataTable GetJobCategories(int InstanceID)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.JobCategories_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
-                DataTable dt = new();
-                da.Fill(dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.JobCategories_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
         }
 
         /// <summary>
@@ -249,12 +257,12 @@ namespace DBADashGUI.AgentJobs
         {
             if (mins != DateRange.DurationMins)
             {
-                DateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 1440);
+                DateGrouping = DateHelper.DateGrouping(Convert.ToInt32(SelectedTimeSpan.TotalMinutes), 1440);
                 mins = DateRange.DurationMins;
             }
             RefreshCategories();
-            from = DateRange.FromUTC;
-            to = DateRange.ToUTC;
+            from = FromDateUtc;
+            to = ToDateUtc;
 
             dt = GetJobTimelineData(context.InstanceID, from, to, selectedCategory, context.JobID, IncludeSteps, IncludeOutcome, DateGrouping);
             await DrawTimeline();
@@ -391,7 +399,7 @@ namespace DBADashGUI.AgentJobs
         /// <summary>
         /// Use a suitable date format based on duration.
         /// </summary>
-        private static string DateFormat => DateRange.DurationMins < 1500 ? "HH:mm" : "MMM dd HH:mm";
+        private string DateFormat => SelectedTimeSpan.TotalMinutes < 1500 ? "HH:mm" : "MMM dd HH:mm";
 
         public void SetContext(DBADashContext _context)
         {
@@ -437,6 +445,24 @@ namespace DBADashGUI.AgentJobs
         private void WebView2_SetupCompleted()
         {
             Invoke(RefreshData);
+        }
+
+        private void DateRangeChanged(object sender, EventArgs e)
+        {
+            RefreshData();
+        }
+
+        private void JobTimeline_Load(object sender, EventArgs e)
+        {
+            if (UseGlobalTime) return;
+            if (DateRange.SelectedTimeSpan.HasValue)
+            {
+                dateRangeToolStripMenuItem1.SetTimeSpan(DateRange.SelectedTimeSpan.Value);
+            }
+            else
+            {
+                dateRangeToolStripMenuItem1.SetDateRangeUtc(DateRange.FromUTC, DateRange.ToUTC);
+            }
         }
     }
 }
