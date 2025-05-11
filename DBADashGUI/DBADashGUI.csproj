@@ -258,6 +258,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.4" />
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="172.64.0" />
+    <PackageReference Include="Microsoft.SqlServer.TransactSql.ScriptDom" Version="170.28.0" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3179.45" />
     <PackageReference Include="System.Collections.Immutable" Version="9.0.4" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />

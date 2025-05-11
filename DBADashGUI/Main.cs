@@ -26,6 +26,7 @@ using DocumentFormat.OpenXml.Vml.Office;
 using Microsoft.SqlServer.Management.XEvent;
 using Version = System.Version;
 using System.Text;
+using DBADashGUI.AgentJobs;
 using DBADashGUI.Checks;
 
 namespace DBADashGUI
@@ -48,6 +49,7 @@ namespace DBADashGUI
         private TabPage tabDBADashAlerts;
         private NotifyIcon notifyIcon;
         private TabPage tabOfflineInstances;
+        private TabPage tabJobInfo;
 
         public Main(CommandLineOptions opts)
         {
@@ -77,6 +79,10 @@ namespace DBADashGUI
             tabOfflineInstances = new TabPage("Offline Instances") { Name = "tabOfflineInstances" };
             var offlineInstancesControl = new OfflineInstances() { Dock = DockStyle.Fill };
             tabOfflineInstances.Controls.Add(offlineInstancesControl);
+
+            tabJobInfo = new TabPage("Job Info");
+            tabJobInfo.Controls.Add(new JobInfo() { Dock = DockStyle.Fill });
+            tabs.TabPages.Add(tabJobInfo);
         }
 
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommandNames proc)
@@ -786,7 +792,7 @@ namespace DBADashGUI
             }
             else if (n.Type == SQLTreeItem.TreeType.AgentJob)
             {
-                allowedTabs.AddRange(new[] { tabJobs, tabJobDDL, tabJobStats, tabJobTimeline });
+                allowedTabs.AddRange(new[] { tabJobInfo, tabJobs, tabJobDDL, tabJobStats, tabJobTimeline });
             }
             else if (n.Type == SQLTreeItem.TreeType.HADR)
             {

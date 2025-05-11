@@ -36,31 +36,6 @@ namespace DBADashGUI.AgentJobs
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             dgvJobs = new DBADashDataGridView();
-            colHistory = new System.Windows.Forms.DataGridViewLinkColumn();
-            Acknowledge = new System.Windows.Forms.DataGridViewLinkColumn();
-            Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            name = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colEnabled = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            Description = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            LastFail = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            IsLastFail = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            TimeSinceLastFail = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            StepLastFailed = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            LastSucceeded = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            TimeSinceLastSucceeded = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colAckDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            FailCount24Hrs = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            SucceedCount24Hrs = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            FailCount7Days = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            SucceedCount7Days = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            JobStepFails24Hrs = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            JobStepFails7Days = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            MaxDurationSec = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colMaxDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            AvgDurationSec = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colAvgDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            ConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            Configure = new System.Windows.Forms.DataGridViewLinkColumn();
             tsJobs = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
@@ -124,6 +99,31 @@ namespace DBADashGUI.AgentJobs
             dataGridViewTextBoxColumn26 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn27 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn28 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colHistory = new System.Windows.Forms.DataGridViewLinkColumn();
+            Acknowledge = new System.Windows.Forms.DataGridViewLinkColumn();
+            Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            name = new System.Windows.Forms.DataGridViewLinkColumn();
+            colEnabled = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            Description = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            LastFail = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            IsLastFail = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            TimeSinceLastFail = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            StepLastFailed = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            LastSucceeded = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            TimeSinceLastSucceeded = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colAckDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            FailCount24Hrs = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            SucceedCount24Hrs = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            FailCount7Days = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            SucceedCount7Days = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            JobStepFails24Hrs = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            JobStepFails7Days = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            MaxDurationSec = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colMaxDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            AvgDurationSec = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colAvgDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            Configure = new System.Windows.Forms.DataGridViewLinkColumn();
             ((System.ComponentModel.ISupportInitialize)dgvJobs).BeginInit();
             tsJobs.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvJobHistory).BeginInit();
@@ -138,6 +138,7 @@ namespace DBADashGUI.AgentJobs
             // 
             dgvJobs.AllowUserToAddRows = false;
             dgvJobs.AllowUserToDeleteRows = false;
+            dgvJobs.AllowUserToOrderColumns = true;
             dgvJobs.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
@@ -167,244 +168,10 @@ namespace DBADashGUI.AgentJobs
             dgvJobs.ResultSetName = null;
             dgvJobs.RowHeadersVisible = false;
             dgvJobs.RowHeadersWidth = 51;
-            dgvJobs.Size = new System.Drawing.Size(2334, 218);
+            dgvJobs.Size = new System.Drawing.Size(2334, 219);
             dgvJobs.TabIndex = 0;
             dgvJobs.CellContentClick += DgvJobs_CellContentClick;
             dgvJobs.RowsAdded += DgvJobs_RowsAdded;
-            // 
-            // colHistory
-            // 
-            colHistory.HeaderText = "History";
-            colHistory.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            colHistory.MinimumWidth = 6;
-            colHistory.Name = "colHistory";
-            colHistory.ReadOnly = true;
-            colHistory.Text = "View History";
-            colHistory.UseColumnTextForLinkValue = true;
-            colHistory.Width = 58;
-            // 
-            // Acknowledge
-            // 
-            Acknowledge.HeaderText = "Acknowledge";
-            Acknowledge.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            Acknowledge.MinimumWidth = 6;
-            Acknowledge.Name = "Acknowledge";
-            Acknowledge.ReadOnly = true;
-            Acknowledge.Text = "Acknowledge";
-            Acknowledge.Width = 125;
-            // 
-            // Instance
-            // 
-            Instance.DataPropertyName = "InstanceDisplayName";
-            Instance.HeaderText = "Instance";
-            Instance.MinimumWidth = 6;
-            Instance.Name = "Instance";
-            Instance.ReadOnly = true;
-            Instance.Width = 90;
-            // 
-            // name
-            // 
-            name.DataPropertyName = "name";
-            name.HeaderText = "Job Name";
-            name.MinimumWidth = 6;
-            name.Name = "name";
-            name.ReadOnly = true;
-            name.Width = 101;
-            // 
-            // colEnabled
-            // 
-            colEnabled.DataPropertyName = "enabled";
-            colEnabled.HeaderText = "Enabled";
-            colEnabled.MinimumWidth = 6;
-            colEnabled.Name = "colEnabled";
-            colEnabled.ReadOnly = true;
-            colEnabled.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            colEnabled.Width = 125;
-            // 
-            // Description
-            // 
-            Description.DataPropertyName = "description";
-            Description.HeaderText = "Description";
-            Description.MinimumWidth = 6;
-            Description.Name = "Description";
-            Description.ReadOnly = true;
-            Description.Width = 108;
-            // 
-            // LastFail
-            // 
-            LastFail.DataPropertyName = "LastFailed";
-            LastFail.HeaderText = "Last Failed";
-            LastFail.MinimumWidth = 6;
-            LastFail.Name = "LastFail";
-            LastFail.ReadOnly = true;
-            LastFail.Width = 106;
-            // 
-            // IsLastFail
-            // 
-            IsLastFail.DataPropertyName = "IsLastFail";
-            IsLastFail.HeaderText = "Is Last Fail?";
-            IsLastFail.MinimumWidth = 6;
-            IsLastFail.Name = "IsLastFail";
-            IsLastFail.ReadOnly = true;
-            IsLastFail.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            IsLastFail.Width = 89;
-            // 
-            // TimeSinceLastFail
-            // 
-            TimeSinceLastFail.DataPropertyName = "TimeSinceLastFailed";
-            TimeSinceLastFail.HeaderText = "Time Since Last Fail";
-            TimeSinceLastFail.MinimumWidth = 6;
-            TimeSinceLastFail.Name = "TimeSinceLastFail";
-            TimeSinceLastFail.ReadOnly = true;
-            TimeSinceLastFail.Width = 130;
-            // 
-            // StepLastFailed
-            // 
-            StepLastFailed.DataPropertyName = "StepLastFailed";
-            StepLastFailed.HeaderText = "Step Last Failed";
-            StepLastFailed.MinimumWidth = 6;
-            StepLastFailed.Name = "StepLastFailed";
-            StepLastFailed.ReadOnly = true;
-            StepLastFailed.Width = 125;
-            // 
-            // LastSucceeded
-            // 
-            LastSucceeded.DataPropertyName = "LastSucceeded";
-            LastSucceeded.HeaderText = "Last Succeeded";
-            LastSucceeded.MinimumWidth = 6;
-            LastSucceeded.Name = "LastSucceeded";
-            LastSucceeded.ReadOnly = true;
-            LastSucceeded.Width = 127;
-            // 
-            // TimeSinceLastSucceeded
-            // 
-            TimeSinceLastSucceeded.DataPropertyName = "TimeSinceLastSucceeded";
-            TimeSinceLastSucceeded.HeaderText = "Time Since Last Succeded";
-            TimeSinceLastSucceeded.MinimumWidth = 6;
-            TimeSinceLastSucceeded.Name = "TimeSinceLastSucceeded";
-            TimeSinceLastSucceeded.ReadOnly = true;
-            TimeSinceLastSucceeded.Width = 193;
-            // 
-            // colAckDate
-            // 
-            colAckDate.DataPropertyName = "AckDate";
-            colAckDate.HeaderText = "Acknowledged Date";
-            colAckDate.MinimumWidth = 6;
-            colAckDate.Name = "colAckDate";
-            colAckDate.ReadOnly = true;
-            colAckDate.Width = 125;
-            // 
-            // FailCount24Hrs
-            // 
-            FailCount24Hrs.DataPropertyName = "FailCount24Hrs";
-            FailCount24Hrs.HeaderText = "Fail Count (24Hrs)";
-            FailCount24Hrs.MinimumWidth = 6;
-            FailCount24Hrs.Name = "FailCount24Hrs";
-            FailCount24Hrs.ReadOnly = true;
-            FailCount24Hrs.Width = 139;
-            // 
-            // SucceedCount24Hrs
-            // 
-            SucceedCount24Hrs.DataPropertyName = "SucceedCount24Hrs";
-            SucceedCount24Hrs.HeaderText = "Succeed Count (24Hrs)";
-            SucceedCount24Hrs.MinimumWidth = 6;
-            SucceedCount24Hrs.Name = "SucceedCount24Hrs";
-            SucceedCount24Hrs.ReadOnly = true;
-            SucceedCount24Hrs.Width = 126;
-            // 
-            // FailCount7Days
-            // 
-            FailCount7Days.DataPropertyName = "FailCount7Days";
-            FailCount7Days.HeaderText = "Fail Count (7 Days)";
-            FailCount7Days.MinimumWidth = 6;
-            FailCount7Days.Name = "FailCount7Days";
-            FailCount7Days.ReadOnly = true;
-            FailCount7Days.Width = 111;
-            // 
-            // SucceedCount7Days
-            // 
-            SucceedCount7Days.DataPropertyName = "SucceedCount7Days";
-            SucceedCount7Days.HeaderText = "Succeed Count (7 Days)";
-            SucceedCount7Days.MinimumWidth = 6;
-            SucceedCount7Days.Name = "SucceedCount7Days";
-            SucceedCount7Days.ReadOnly = true;
-            SucceedCount7Days.Width = 141;
-            // 
-            // JobStepFails24Hrs
-            // 
-            JobStepFails24Hrs.DataPropertyName = "JobStepFails24Hrs";
-            JobStepFails24Hrs.HeaderText = "Job Step Fails (24Hrs)";
-            JobStepFails24Hrs.MinimumWidth = 6;
-            JobStepFails24Hrs.Name = "JobStepFails24Hrs";
-            JobStepFails24Hrs.ReadOnly = true;
-            JobStepFails24Hrs.Width = 119;
-            // 
-            // JobStepFails7Days
-            // 
-            JobStepFails7Days.DataPropertyName = "JobStepFails7Days";
-            JobStepFails7Days.HeaderText = "Job Step Fails (7 Days)";
-            JobStepFails7Days.MinimumWidth = 6;
-            JobStepFails7Days.Name = "JobStepFails7Days";
-            JobStepFails7Days.ReadOnly = true;
-            JobStepFails7Days.Width = 135;
-            // 
-            // MaxDurationSec
-            // 
-            MaxDurationSec.DataPropertyName = "MaxDurationSec";
-            MaxDurationSec.HeaderText = "Max Duration (sec)";
-            MaxDurationSec.MinimumWidth = 6;
-            MaxDurationSec.Name = "MaxDurationSec";
-            MaxDurationSec.ReadOnly = true;
-            MaxDurationSec.Width = 143;
-            // 
-            // colMaxDuration
-            // 
-            colMaxDuration.DataPropertyName = "MaxDuration";
-            colMaxDuration.HeaderText = "Max Duration";
-            colMaxDuration.MinimumWidth = 6;
-            colMaxDuration.Name = "colMaxDuration";
-            colMaxDuration.ReadOnly = true;
-            colMaxDuration.Width = 125;
-            // 
-            // AvgDurationSec
-            // 
-            AvgDurationSec.DataPropertyName = "AvgDurationSec";
-            AvgDurationSec.HeaderText = "Avg Duration (sec)";
-            AvgDurationSec.MinimumWidth = 6;
-            AvgDurationSec.Name = "AvgDurationSec";
-            AvgDurationSec.ReadOnly = true;
-            AvgDurationSec.Width = 142;
-            // 
-            // colAvgDuration
-            // 
-            colAvgDuration.DataPropertyName = "AvgDuration";
-            colAvgDuration.HeaderText = "Avg Duration";
-            colAvgDuration.MinimumWidth = 6;
-            colAvgDuration.Name = "colAvgDuration";
-            colAvgDuration.ReadOnly = true;
-            colAvgDuration.Width = 125;
-            // 
-            // ConfiguredLevel
-            // 
-            ConfiguredLevel.DataPropertyName = "ConfiguredLevel";
-            ConfiguredLevel.HeaderText = "Configured Level";
-            ConfiguredLevel.MinimumWidth = 6;
-            ConfiguredLevel.Name = "ConfiguredLevel";
-            ConfiguredLevel.ReadOnly = true;
-            ConfiguredLevel.Width = 132;
-            // 
-            // Configure
-            // 
-            Configure.HeaderText = "Configure";
-            Configure.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            Configure.MinimumWidth = 6;
-            Configure.Name = "Configure";
-            Configure.ReadOnly = true;
-            Configure.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            Configure.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            Configure.Text = "Configure";
-            Configure.UseColumnTextForLinkValue = true;
-            Configure.Width = 98;
             // 
             // tsJobs
             // 
@@ -413,7 +180,7 @@ namespace DBADashGUI.AgentJobs
             tsJobs.Location = new System.Drawing.Point(0, 0);
             tsJobs.Name = "tsJobs";
             tsJobs.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            tsJobs.Size = new System.Drawing.Size(2334, 31);
+            tsJobs.Size = new System.Drawing.Size(2334, 27);
             tsJobs.TabIndex = 3;
             tsJobs.Text = "toolStrip1";
             // 
@@ -423,7 +190,7 @@ namespace DBADashGUI.AgentJobs
             tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsRefresh.Name = "tsRefresh";
-            tsRefresh.Size = new System.Drawing.Size(29, 28);
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
             tsRefresh.Text = "Refresh";
             tsRefresh.Click += TsRefresh_Click;
             // 
@@ -433,7 +200,7 @@ namespace DBADashGUI.AgentJobs
             tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCopy.Name = "tsCopy";
-            tsCopy.Size = new System.Drawing.Size(29, 28);
+            tsCopy.Size = new System.Drawing.Size(29, 24);
             tsCopy.Text = "Copy";
             tsCopy.Click += TsCopy_Click;
             // 
@@ -443,7 +210,7 @@ namespace DBADashGUI.AgentJobs
             tsExcel.Image = Properties.Resources.excel16x16;
             tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExcel.Name = "tsExcel";
-            tsExcel.Size = new System.Drawing.Size(29, 28);
+            tsExcel.Size = new System.Drawing.Size(29, 24);
             tsExcel.Text = "Export Excel";
             tsExcel.Click += TsExcel_Click;
             // 
@@ -454,7 +221,7 @@ namespace DBADashGUI.AgentJobs
             tsConfigure.Image = Properties.Resources.SettingsOutline_16x;
             tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsConfigure.Name = "tsConfigure";
-            tsConfigure.Size = new System.Drawing.Size(34, 28);
+            tsConfigure.Size = new System.Drawing.Size(34, 24);
             tsConfigure.Text = "Configure";
             // 
             // configureInstanceThresholdsToolStripMenuItem
@@ -493,7 +260,7 @@ namespace DBADashGUI.AgentJobs
             statusFilterToolStrip1.NAVisible = true;
             statusFilterToolStrip1.OK = true;
             statusFilterToolStrip1.OKVisible = true;
-            statusFilterToolStrip1.Size = new System.Drawing.Size(67, 28);
+            statusFilterToolStrip1.Size = new System.Drawing.Size(67, 24);
             statusFilterToolStrip1.Text = "ALL";
             statusFilterToolStrip1.Warning = true;
             statusFilterToolStrip1.WarningVisible = true;
@@ -505,13 +272,14 @@ namespace DBADashGUI.AgentJobs
             tsClearFilter.Image = Properties.Resources.Eraser_16x;
             tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsClearFilter.Name = "tsClearFilter";
-            tsClearFilter.Size = new System.Drawing.Size(104, 28);
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
             tsClearFilter.Text = "Clear Filter";
             // 
             // dgvJobHistory
             // 
             dgvJobHistory.AllowUserToAddRows = false;
             dgvJobHistory.AllowUserToDeleteRows = false;
+            dgvJobHistory.AllowUserToOrderColumns = true;
             dgvJobHistory.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
@@ -533,7 +301,7 @@ namespace DBADashGUI.AgentJobs
             dgvJobHistory.DefaultCellStyle = dataGridViewCellStyle4;
             dgvJobHistory.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvJobHistory.EnableHeadersVisualStyles = false;
-            dgvJobHistory.Location = new System.Drawing.Point(0, 31);
+            dgvJobHistory.Location = new System.Drawing.Point(0, 27);
             dgvJobHistory.Margin = new System.Windows.Forms.Padding(14, 16, 14, 16);
             dgvJobHistory.Name = "dgvJobHistory";
             dgvJobHistory.ReadOnly = true;
@@ -541,7 +309,7 @@ namespace DBADashGUI.AgentJobs
             dgvJobHistory.ResultSetName = null;
             dgvJobHistory.RowHeadersVisible = false;
             dgvJobHistory.RowHeadersWidth = 51;
-            dgvJobHistory.Size = new System.Drawing.Size(2334, 202);
+            dgvJobHistory.Size = new System.Drawing.Size(2334, 209);
             dgvJobHistory.TabIndex = 4;
             dgvJobHistory.CellContentClick += DgvJobHistory_CellContentClick;
             dgvJobHistory.RowsAdded += DgvJobHistory_RowsAdded;
@@ -668,7 +436,7 @@ namespace DBADashGUI.AgentJobs
             // splitContainer1
             // 
             splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            splitContainer1.Location = new System.Drawing.Point(0, 31);
+            splitContainer1.Location = new System.Drawing.Point(0, 27);
             splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             splitContainer1.Name = "splitContainer1";
             splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
@@ -682,8 +450,8 @@ namespace DBADashGUI.AgentJobs
             // 
             splitContainer1.Panel2.Controls.Add(dgvJobHistory);
             splitContainer1.Panel2.Controls.Add(toolStrip2);
-            splitContainer1.Size = new System.Drawing.Size(2334, 456);
-            splitContainer1.SplitterDistance = 218;
+            splitContainer1.Size = new System.Drawing.Size(2334, 460);
+            splitContainer1.SplitterDistance = 219;
             splitContainer1.SplitterWidth = 5;
             splitContainer1.TabIndex = 5;
             // 
@@ -693,7 +461,7 @@ namespace DBADashGUI.AgentJobs
             jobStep1.Location = new System.Drawing.Point(0, 0);
             jobStep1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             jobStep1.Name = "jobStep1";
-            jobStep1.Size = new System.Drawing.Size(2334, 218);
+            jobStep1.Size = new System.Drawing.Size(2334, 219);
             jobStep1.TabIndex = 1;
             jobStep1.Visible = false;
             // 
@@ -704,7 +472,7 @@ namespace DBADashGUI.AgentJobs
             toolStrip2.Location = new System.Drawing.Point(0, 0);
             toolStrip2.Name = "toolStrip2";
             toolStrip2.Padding = new System.Windows.Forms.Padding(0, 0, 4, 0);
-            toolStrip2.Size = new System.Drawing.Size(2334, 31);
+            toolStrip2.Size = new System.Drawing.Size(2334, 27);
             toolStrip2.TabIndex = 5;
             toolStrip2.Text = "toolStrip2";
             // 
@@ -714,7 +482,7 @@ namespace DBADashGUI.AgentJobs
             tsRefreshHistory.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefreshHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsRefreshHistory.Name = "tsRefreshHistory";
-            tsRefreshHistory.Size = new System.Drawing.Size(29, 28);
+            tsRefreshHistory.Size = new System.Drawing.Size(29, 24);
             tsRefreshHistory.Text = "Refresh";
             tsRefreshHistory.Click += TsRefreshHistory_Click;
             // 
@@ -724,7 +492,7 @@ namespace DBADashGUI.AgentJobs
             tsCopyHistory.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopyHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCopyHistory.Name = "tsCopyHistory";
-            tsCopyHistory.Size = new System.Drawing.Size(29, 28);
+            tsCopyHistory.Size = new System.Drawing.Size(29, 24);
             tsCopyHistory.Text = "Copy";
             tsCopyHistory.Click += TsCopyHistory_Click;
             // 
@@ -734,7 +502,7 @@ namespace DBADashGUI.AgentJobs
             tsExcelHistory.Image = Properties.Resources.excel16x16;
             tsExcelHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExcelHistory.Name = "tsExcelHistory";
-            tsExcelHistory.Size = new System.Drawing.Size(29, 28);
+            tsExcelHistory.Size = new System.Drawing.Size(29, 24);
             tsExcelHistory.Text = "Export Excel";
             tsExcelHistory.Click += TsExcelHistory_Click;
             // 
@@ -745,7 +513,7 @@ namespace DBADashGUI.AgentJobs
             tsFilter.Image = Properties.Resources.FilterDropdown_16x;
             tsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsFilter.Name = "tsFilter";
-            tsFilter.Size = new System.Drawing.Size(34, 28);
+            tsFilter.Size = new System.Drawing.Size(34, 24);
             tsFilter.Text = "Filter";
             // 
             // showJobStepsToolStripMenuItem
@@ -770,7 +538,7 @@ namespace DBADashGUI.AgentJobs
             tsClearFilterHistory.Image = Properties.Resources.Eraser_16x;
             tsClearFilterHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsClearFilterHistory.Name = "tsClearFilterHistory";
-            tsClearFilterHistory.Size = new System.Drawing.Size(104, 28);
+            tsClearFilterHistory.Size = new System.Drawing.Size(104, 24);
             tsClearFilterHistory.Text = "Clear Filter";
             // 
             // tsBack
@@ -779,7 +547,7 @@ namespace DBADashGUI.AgentJobs
             tsBack.Image = Properties.Resources.Previous_grey_16x;
             tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsBack.Name = "tsBack";
-            tsBack.Size = new System.Drawing.Size(29, 28);
+            tsBack.Size = new System.Drawing.Size(29, 24);
             tsBack.Text = "Back";
             tsBack.Click += TsBack_Click;
             // 
@@ -789,7 +557,7 @@ namespace DBADashGUI.AgentJobs
             tsJobName.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
             tsJobName.ForeColor = System.Drawing.Color.Black;
             tsJobName.Name = "tsJobName";
-            tsJobName.Size = new System.Drawing.Size(80, 28);
+            tsJobName.Size = new System.Drawing.Size(80, 24);
             tsJobName.Text = "Job Name";
             // 
             // dataGridViewTextBoxColumn1
@@ -1031,6 +799,243 @@ namespace DBADashGUI.AgentJobs
             dataGridViewTextBoxColumn28.Name = "dataGridViewTextBoxColumn28";
             dataGridViewTextBoxColumn28.Width = 125;
             // 
+            // colHistory
+            // 
+            colHistory.HeaderText = "History";
+            colHistory.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            colHistory.MinimumWidth = 6;
+            colHistory.Name = "colHistory";
+            colHistory.ReadOnly = true;
+            colHistory.Text = "View History";
+            colHistory.UseColumnTextForLinkValue = true;
+            colHistory.Width = 58;
+            // 
+            // Acknowledge
+            // 
+            Acknowledge.HeaderText = "Acknowledge";
+            Acknowledge.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            Acknowledge.MinimumWidth = 6;
+            Acknowledge.Name = "Acknowledge";
+            Acknowledge.ReadOnly = true;
+            Acknowledge.Text = "Acknowledge";
+            Acknowledge.Width = 125;
+            // 
+            // Instance
+            // 
+            Instance.DataPropertyName = "InstanceDisplayName";
+            Instance.HeaderText = "Instance";
+            Instance.MinimumWidth = 6;
+            Instance.Name = "Instance";
+            Instance.ReadOnly = true;
+            Instance.Width = 90;
+            // 
+            // name
+            // 
+            name.DataPropertyName = "name";
+            name.HeaderText = "Job Name";
+            name.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            name.MinimumWidth = 6;
+            name.Name = "name";
+            name.ReadOnly = true;
+            name.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            name.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            name.Width = 101;
+            // 
+            // colEnabled
+            // 
+            colEnabled.DataPropertyName = "enabled";
+            colEnabled.HeaderText = "Enabled";
+            colEnabled.MinimumWidth = 6;
+            colEnabled.Name = "colEnabled";
+            colEnabled.ReadOnly = true;
+            colEnabled.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            colEnabled.Width = 125;
+            // 
+            // Description
+            // 
+            Description.DataPropertyName = "description";
+            Description.HeaderText = "Description";
+            Description.MinimumWidth = 6;
+            Description.Name = "Description";
+            Description.ReadOnly = true;
+            Description.Width = 108;
+            // 
+            // LastFail
+            // 
+            LastFail.DataPropertyName = "LastFailed";
+            LastFail.HeaderText = "Last Failed";
+            LastFail.MinimumWidth = 6;
+            LastFail.Name = "LastFail";
+            LastFail.ReadOnly = true;
+            LastFail.Width = 106;
+            // 
+            // IsLastFail
+            // 
+            IsLastFail.DataPropertyName = "IsLastFail";
+            IsLastFail.HeaderText = "Is Last Fail?";
+            IsLastFail.MinimumWidth = 6;
+            IsLastFail.Name = "IsLastFail";
+            IsLastFail.ReadOnly = true;
+            IsLastFail.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            IsLastFail.Width = 89;
+            // 
+            // TimeSinceLastFail
+            // 
+            TimeSinceLastFail.DataPropertyName = "TimeSinceLastFailed";
+            TimeSinceLastFail.HeaderText = "Time Since Last Fail";
+            TimeSinceLastFail.MinimumWidth = 6;
+            TimeSinceLastFail.Name = "TimeSinceLastFail";
+            TimeSinceLastFail.ReadOnly = true;
+            TimeSinceLastFail.Width = 130;
+            // 
+            // StepLastFailed
+            // 
+            StepLastFailed.DataPropertyName = "StepLastFailed";
+            StepLastFailed.HeaderText = "Step Last Failed";
+            StepLastFailed.MinimumWidth = 6;
+            StepLastFailed.Name = "StepLastFailed";
+            StepLastFailed.ReadOnly = true;
+            StepLastFailed.Width = 125;
+            // 
+            // LastSucceeded
+            // 
+            LastSucceeded.DataPropertyName = "LastSucceeded";
+            LastSucceeded.HeaderText = "Last Succeeded";
+            LastSucceeded.MinimumWidth = 6;
+            LastSucceeded.Name = "LastSucceeded";
+            LastSucceeded.ReadOnly = true;
+            LastSucceeded.Width = 127;
+            // 
+            // TimeSinceLastSucceeded
+            // 
+            TimeSinceLastSucceeded.DataPropertyName = "TimeSinceLastSucceeded";
+            TimeSinceLastSucceeded.HeaderText = "Time Since Last Succeded";
+            TimeSinceLastSucceeded.MinimumWidth = 6;
+            TimeSinceLastSucceeded.Name = "TimeSinceLastSucceeded";
+            TimeSinceLastSucceeded.ReadOnly = true;
+            TimeSinceLastSucceeded.Width = 193;
+            // 
+            // colAckDate
+            // 
+            colAckDate.DataPropertyName = "AckDate";
+            colAckDate.HeaderText = "Acknowledged Date";
+            colAckDate.MinimumWidth = 6;
+            colAckDate.Name = "colAckDate";
+            colAckDate.ReadOnly = true;
+            colAckDate.Width = 125;
+            // 
+            // FailCount24Hrs
+            // 
+            FailCount24Hrs.DataPropertyName = "FailCount24Hrs";
+            FailCount24Hrs.HeaderText = "Fail Count (24Hrs)";
+            FailCount24Hrs.MinimumWidth = 6;
+            FailCount24Hrs.Name = "FailCount24Hrs";
+            FailCount24Hrs.ReadOnly = true;
+            FailCount24Hrs.Width = 139;
+            // 
+            // SucceedCount24Hrs
+            // 
+            SucceedCount24Hrs.DataPropertyName = "SucceedCount24Hrs";
+            SucceedCount24Hrs.HeaderText = "Succeed Count (24Hrs)";
+            SucceedCount24Hrs.MinimumWidth = 6;
+            SucceedCount24Hrs.Name = "SucceedCount24Hrs";
+            SucceedCount24Hrs.ReadOnly = true;
+            SucceedCount24Hrs.Width = 126;
+            // 
+            // FailCount7Days
+            // 
+            FailCount7Days.DataPropertyName = "FailCount7Days";
+            FailCount7Days.HeaderText = "Fail Count (7 Days)";
+            FailCount7Days.MinimumWidth = 6;
+            FailCount7Days.Name = "FailCount7Days";
+            FailCount7Days.ReadOnly = true;
+            FailCount7Days.Width = 111;
+            // 
+            // SucceedCount7Days
+            // 
+            SucceedCount7Days.DataPropertyName = "SucceedCount7Days";
+            SucceedCount7Days.HeaderText = "Succeed Count (7 Days)";
+            SucceedCount7Days.MinimumWidth = 6;
+            SucceedCount7Days.Name = "SucceedCount7Days";
+            SucceedCount7Days.ReadOnly = true;
+            SucceedCount7Days.Width = 141;
+            // 
+            // JobStepFails24Hrs
+            // 
+            JobStepFails24Hrs.DataPropertyName = "JobStepFails24Hrs";
+            JobStepFails24Hrs.HeaderText = "Job Step Fails (24Hrs)";
+            JobStepFails24Hrs.MinimumWidth = 6;
+            JobStepFails24Hrs.Name = "JobStepFails24Hrs";
+            JobStepFails24Hrs.ReadOnly = true;
+            JobStepFails24Hrs.Width = 119;
+            // 
+            // JobStepFails7Days
+            // 
+            JobStepFails7Days.DataPropertyName = "JobStepFails7Days";
+            JobStepFails7Days.HeaderText = "Job Step Fails (7 Days)";
+            JobStepFails7Days.MinimumWidth = 6;
+            JobStepFails7Days.Name = "JobStepFails7Days";
+            JobStepFails7Days.ReadOnly = true;
+            JobStepFails7Days.Width = 135;
+            // 
+            // MaxDurationSec
+            // 
+            MaxDurationSec.DataPropertyName = "MaxDurationSec";
+            MaxDurationSec.HeaderText = "Max Duration (sec)";
+            MaxDurationSec.MinimumWidth = 6;
+            MaxDurationSec.Name = "MaxDurationSec";
+            MaxDurationSec.ReadOnly = true;
+            MaxDurationSec.Width = 143;
+            // 
+            // colMaxDuration
+            // 
+            colMaxDuration.DataPropertyName = "MaxDuration";
+            colMaxDuration.HeaderText = "Max Duration";
+            colMaxDuration.MinimumWidth = 6;
+            colMaxDuration.Name = "colMaxDuration";
+            colMaxDuration.ReadOnly = true;
+            colMaxDuration.Width = 125;
+            // 
+            // AvgDurationSec
+            // 
+            AvgDurationSec.DataPropertyName = "AvgDurationSec";
+            AvgDurationSec.HeaderText = "Avg Duration (sec)";
+            AvgDurationSec.MinimumWidth = 6;
+            AvgDurationSec.Name = "AvgDurationSec";
+            AvgDurationSec.ReadOnly = true;
+            AvgDurationSec.Width = 142;
+            // 
+            // colAvgDuration
+            // 
+            colAvgDuration.DataPropertyName = "AvgDuration";
+            colAvgDuration.HeaderText = "Avg Duration";
+            colAvgDuration.MinimumWidth = 6;
+            colAvgDuration.Name = "colAvgDuration";
+            colAvgDuration.ReadOnly = true;
+            colAvgDuration.Width = 125;
+            // 
+            // ConfiguredLevel
+            // 
+            ConfiguredLevel.DataPropertyName = "ConfiguredLevel";
+            ConfiguredLevel.HeaderText = "Configured Level";
+            ConfiguredLevel.MinimumWidth = 6;
+            ConfiguredLevel.Name = "ConfiguredLevel";
+            ConfiguredLevel.ReadOnly = true;
+            ConfiguredLevel.Width = 132;
+            // 
+            // Configure
+            // 
+            Configure.HeaderText = "Configure";
+            Configure.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            Configure.MinimumWidth = 6;
+            Configure.Name = "Configure";
+            Configure.ReadOnly = true;
+            Configure.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            Configure.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            Configure.Text = "Configure";
+            Configure.UseColumnTextForLinkValue = true;
+            Configure.Width = 98;
+            // 
             // AgentJobsControl
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(120F, 120F);
@@ -1109,10 +1114,24 @@ namespace DBADashGUI.AgentJobs
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn28;
         private StatusFilterToolStrip statusFilterToolStrip1;
         private System.Windows.Forms.ToolStripMenuItem acknowledgeErrorsToolStripMenuItem;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colRunDateTime;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colRunEndDateTime;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colStepID;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colStepName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colMessageID;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colSeverity;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colRunStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn colRunDurationSec;
+        private System.Windows.Forms.DataGridViewLinkColumn colRunDuration;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colRetries;
+        private System.Windows.Forms.DataGridViewLinkColumn colMessage;
+        private System.Windows.Forms.DataGridViewLinkColumn colViewSteps;
+        private System.Windows.Forms.ToolStripButton tsClearFilter;
+        private System.Windows.Forms.ToolStripButton tsClearFilterHistory;
         private System.Windows.Forms.DataGridViewLinkColumn colHistory;
         private System.Windows.Forms.DataGridViewLinkColumn Acknowledge;
         private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
-        private System.Windows.Forms.DataGridViewTextBoxColumn name;
+        private System.Windows.Forms.DataGridViewLinkColumn name;
         private System.Windows.Forms.DataGridViewCheckBoxColumn colEnabled;
         private System.Windows.Forms.DataGridViewTextBoxColumn Description;
         private System.Windows.Forms.DataGridViewTextBoxColumn LastFail;
@@ -1134,19 +1153,5 @@ namespace DBADashGUI.AgentJobs
         private System.Windows.Forms.DataGridViewTextBoxColumn colAvgDuration;
         private System.Windows.Forms.DataGridViewTextBoxColumn ConfiguredLevel;
         private System.Windows.Forms.DataGridViewLinkColumn Configure;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colRunDateTime;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colRunEndDateTime;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colStepID;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colStepName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colMessageID;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colSeverity;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colRunStatus;
-        private System.Windows.Forms.DataGridViewLinkColumn colRunDurationSec;
-        private System.Windows.Forms.DataGridViewLinkColumn colRunDuration;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colRetries;
-        private System.Windows.Forms.DataGridViewLinkColumn colMessage;
-        private System.Windows.Forms.DataGridViewLinkColumn colViewSteps;
-        private System.Windows.Forms.ToolStripButton tsClearFilter;
-        private System.Windows.Forms.ToolStripButton tsClearFilterHistory;
     }
 }
