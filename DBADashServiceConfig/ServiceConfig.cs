@@ -34,6 +34,8 @@ namespace DBADashServiceConfig
         private CollectionConfig collectionConfig = new();
         private bool isInstalled;
         private Dictionary<string, CustomCollection> _customCollectionsNew;
+        private DateTime lastUserActivity = DateTime.Now;
+        private DateTime lastServiceActivity = DateTime.Now;
 
         private string[] NewSourceConnections =>
             txtSource.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
@@ -534,10 +536,27 @@ namespace DBADashServiceConfig
             }
 
             SetConnectionCount();
+            SubscribeActivityEvents(this);
             _ = Task.Run(AutoRefreshServiceStatus);
             ValidateDestination();
             RefreshEncryption();
             dgvConnections.ApplyTheme();
+        }
+
+        private void SubscribeActivityEvents(Control parent)
+        {
+            parent.MouseMove += UpdateActivityTime;
+
+            //// Recursively subscribe for child controls
+            foreach (Control c in parent.Controls)
+            {
+                SubscribeActivityEvents(c);
+            }
+        }
+
+        private void UpdateActivityTime(object sender, EventArgs e)
+        {
+            lastUserActivity = DateTime.Now;
         }
 
         private void dgvConnections_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
@@ -791,8 +810,14 @@ namespace DBADashServiceConfig
         {
             while (true)
             {
-                RefreshServiceStatus();
-                await Task.Delay(5000);
+                // Only refresh service status if there has been user activity within the last 5min & selected tab is tab with service control/status
+                if (DateTime.Now.Subtract(lastUserActivity).TotalMinutes < 5 && tab1.SelectedTab == tabDest)
+                {
+                    RefreshServiceStatus();
+                }
+                // Use a short 5 second delay between refreshes if the app is loaded within the last 2min or the user has started/stopped or installed the service.
+                // Otherwise use a longer 30 second delay between iterations
+                await Task.Delay(DateTime.Now.Subtract(lastServiceActivity).TotalMinutes < 2 ? 5000 : 30000);
             }
             // ReSharper disable once FunctionNeverReturns
         }
@@ -846,7 +871,7 @@ namespace DBADashServiceConfig
             }
             catch (Exception ex)
             {
-                string status, warningText = string.Empty;
+                string status, warningText = string.Empty, warningToolTip = string.Empty;
                 if (ex is InvalidOperationException && ex.Message.Contains("not found"))
                 {
                     status = NotInstalled;
@@ -855,6 +880,7 @@ namespace DBADashServiceConfig
                 {
                     status = "Error";
                     warningText = $"Error checking service {ex.Message}";
+                    warningToolTip = ex.ToString();
                 }
 
                 if (lastStatus != status || lblServiceWarning.Text != warningText)
@@ -862,15 +888,16 @@ namespace DBADashServiceConfig
                     this.Invoke(() =>
                     {
                         lblServiceWarning.Text = warningText;
+                        toolTip1.SetToolTip(lblServiceWarning, warningToolTip);
                         lblServiceWarning.Visible = !(string.IsNullOrEmpty(warningText));
                         isInstalled = false;
-                        lnkStart.Enabled = false;
-                        lnkStop.Enabled = false;
+                        lnkStart.Enabled = status != NotInstalled;
+                        lnkStop.Enabled = status != NotInstalled;
                         lnkInstall.Enabled = true;
                         lnkInstall.Font = new Font(lnkInstall.Font, FontStyle.Bold);
                         lnkInstall.Text = "Install as service";
                         toolTip1.SetToolTip(lnkInstall, "Install DBA Dash agent as a Windows service");
-                        lblServiceStatus.Text = "Service Status: Not Installed";
+                        lblServiceStatus.Text = "Service Status: " + status;
                         lblServiceStatus.ForeColor = Color.Brown;
                         lastStatus = NotInstalled;
                     });
@@ -925,6 +952,7 @@ namespace DBADashServiceConfig
             PromptSaveChanges();
             try
             {
+                lastServiceActivity = DateTime.Now;
                 using var service = new ServiceController(collectionConfig.ServiceName);
                 service.Refresh();
                 if (service.Status == ServiceControllerStatus.Stopped)
@@ -964,6 +992,7 @@ namespace DBADashServiceConfig
         {
             try
             {
+                lastServiceActivity = DateTime.Now;
                 using var service = new ServiceController(collectionConfig.ServiceName);
                 if (service.Status == ServiceControllerStatus.Running)
                 {
@@ -996,6 +1025,7 @@ namespace DBADashServiceConfig
             {
                 try
                 {
+                    lastServiceActivity = DateTime.Now;
                     var result = ServiceTools.UninstallService(collectionConfig.ServiceName);
                     MessageBox.Show(result.Output, "Uninstall", MessageBoxButtons.OK,
                         result.Success ? MessageBoxIcon.Information : MessageBoxIcon.Error);
@@ -1733,6 +1763,7 @@ Cancel = cancel the operation.", @"Mark deleted?", MessageBoxButtons.YesNoCancel
                     ServiceName = collectionConfig.ServiceName
                 };
                 frm.ShowDialog();
+                lastServiceActivity = DateTime.Now;
                 RefreshServiceStatus();
                 ValidateDestination(); // DB could be upgraded on service start so refresh destination
             }
