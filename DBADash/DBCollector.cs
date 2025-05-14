@@ -158,10 +158,10 @@ namespace DBADash
         public async Task<DateTime> GetJobLastModifiedAsync()
         {
             await using SqlConnection cn = new(ConnectionString);
-            await using SqlCommand cmd = new("SELECT MAX(date_modified) FROM msdb.dbo.sysjobs", cn);
+            await using SqlCommand cmd = new(SqlStrings.MaxJobLastModified, cn);
             await cn.OpenAsync();
             var result = await cmd.ExecuteScalarAsync();
-            return result == DBNull.Value ? DateTime.MinValue : (DateTime)result;
+            return result == DBNull.Value || result == null ? DateTime.MinValue : (DateTime)result;
         }
 
         public bool IsXESupported => !IsExtendedEventsNotSupportedException && DBADashConnection.IsXESupported(productVersion);

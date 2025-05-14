@@ -63,6 +63,7 @@
 	<EmbeddedResource Include="SQL\SQLInstance.sql" />
 	<EmbeddedResource Include="SQL\SQLIOStats.sql" />
 	<EmbeddedResource Include="SQL\SQLJobHistory.sql" />
+	<EmbeddedResource Include="SQL\SQLMaxJobLastModified.sql" />
 	<EmbeddedResource Include="SQL\SQLJobs.sql" />
 	<EmbeddedResource Include="SQL\SQLJobSteps.sql" />
 	<EmbeddedResource Include="SQL\SQLLastGoodCheckDB.sql" />
