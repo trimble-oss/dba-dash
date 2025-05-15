@@ -29,10 +29,13 @@ namespace DBADashGUI.CustomReports
         public string ResultSetName { get; set; }
 
         private ToolStripMenuItem GetCopyGridMenuItem() =>
-            new("Copy Grid", Properties.Resources.ASX_Copy_blue_16x, (_, _) => CopyGrid());
+            new("Grid", Properties.Resources.Table_16x, (_, _) => CopyGrid());
 
         private ToolStripMenuItem GetCopyColumnMenuItem() =>
-            new("Copy Column", Properties.Resources.ASX_Copy_yellow_16x, (_, _) => CopyColumn());
+            new("Column", Properties.Resources.SelectColumns, (_, _) => CopyColumn());
+
+        private ToolStripMenuItem GetCopySelectedMenuItem() =>
+            new("Selected", Properties.Resources.SelectRows, (_, _) => CopySelected());
 
         private ToolStripMenuItem GetExportToExcelMenuItem() => new("Export Excel", Properties.Resources.excel16x16,
             (_, _) => ExportToExcel());
@@ -85,12 +88,13 @@ namespace DBADashGUI.CustomReports
             });
             return tsAutoResize;
         }
-        private ToolStripMenuItem GetFreezeColumnMenuItem() => new ("Freeze Column", Properties.Resources.FreezeColumn_16x, (_, _) => FreezeColumn());
+
+        private ToolStripMenuItem GetFreezeColumnMenuItem() => new("Freeze Column", Properties.Resources.FreezeColumn_16x, (_, _) => FreezeColumn());
 
         private void FreezeColumn()
         {
             var applyFreeze = !Columns[ClickedColumnIndex].Frozen;
-           
+
             var colIndex = applyFreeze ? ClickedColumnIndex : Columns.GetFirstColumn(DataGridViewElementStates.Visible)!.Index;
 
             // If column is being frozen then freeze it and highlight all frozen columns (incl all to the left)
@@ -100,7 +104,7 @@ namespace DBADashGUI.CustomReports
             foreach (DataGridViewColumn column in Columns)
             {
                 column.HeaderCell.Style.BackColor = column.Frozen ? DashColors.BluePale : Color.Empty;
-                column.HeaderCell.Style.ForeColor =  column.Frozen ? DashColors.TrimbleBlueDark : Color.Empty;
+                column.HeaderCell.Style.ForeColor = column.Frozen ? DashColors.TrimbleBlueDark : Color.Empty;
             }
         }
 
@@ -143,11 +147,17 @@ namespace DBADashGUI.CustomReports
             var editFilter = GetEditFilterMenuItem();
             var saveTable = GetSaveTableMenuItem();
             var freezeColumn = GetFreezeColumnMenuItem();
+            var copy = new ToolStripMenuItem("Copy", Properties.Resources.ASX_Copy_blue_16x);
+            copy.DropDownItems.AddRange(new ToolStripItem[]
+            {
+                GetCopyGridMenuItem(),
+                GetCopyColumnMenuItem(),
+                GetCopySelectedMenuItem()
+            });
             ColumnContextMenu.Items.AddRange(
                 new ToolStripItem[]
                 {
-                    GetCopyGridMenuItem(),
-                    GetCopyColumnMenuItem(),
+                    copy,
                     GetExportToExcelMenuItem(),
                     saveTable,
                     new ToolStripSeparator(),
@@ -190,7 +200,8 @@ namespace DBADashGUI.CustomReports
             var inFilter = new ToolStripMenuItem("IN", Properties.Resources.Filter_16x, (_, _) => InFilter());
             var notInFilter =
                 new ToolStripMenuItem("NOT IN", Properties.Resources.StopFilter_16x, (_, _) => NotInFilter());
-            var copyCell = new ToolStripMenuItem("Copy Cell", Properties.Resources.ASX_Copy_grey_16x, CopyCell);
+            var copyCell = new ToolStripMenuItem("Cell", Properties.Resources.SelectCell_16x, CopyCell);
+            var copyRow = new ToolStripMenuItem("Row", Properties.Resources.SelectRows, CopyRow);
             var editFilter = GetEditFilterMenuItem();
             var filterSeparator = new ToolStripSeparator();
 
@@ -230,13 +241,20 @@ namespace DBADashGUI.CustomReports
                 });
             var selectAll = new ToolStripMenuItem("All", Properties.Resources.SelectTable, (_, _) => SelectAll());
             select.DropDownItems.AddRange(new ToolStripItem[] { selectRow, selectColumn, selectAll });
+            var copy = new ToolStripMenuItem("Copy", Properties.Resources.ASX_Copy_blue_16x);
+            copy.DropDownItems.AddRange(new ToolStripItem[]
+            {
+                GetCopyGridMenuItem(),
+                GetCopyColumnMenuItem(),
+                copyCell,
+                copyRow,
+                GetCopySelectedMenuItem()
+            });
 
             CellContextMenu.Items.AddRange(
                 new ToolStripItem[]
                 {
-                    GetCopyGridMenuItem(),
-                    GetCopyColumnMenuItem(),
-                    copyCell,
+                    copy,
                     GetExportToExcelMenuItem(),
                     saveTable,
                     new ToolStripSeparator(),
@@ -459,6 +477,56 @@ namespace DBADashGUI.CustomReports
             if (CommonShared.ShowInputDialog(ref filter, "Edit Filter") == DialogResult.OK)
             {
                 SetFilter(filter);
+            }
+        }
+
+        private void CopyRow(object sender, EventArgs e)
+        {
+            if (ClickedRowIndex < 0) return;
+            ClearSelection();
+            Rows[ClickedRowIndex].Selected = true;
+            CopySelected();
+        }
+
+        private void CopySelected()
+        {
+            var sb = new StringBuilder();
+            var minCol = SelectedCells
+                .Cast<DataGridViewCell>()
+                .Min(c => c.ColumnIndex);
+            var maxCol = SelectedCells
+                .Cast<DataGridViewCell>()
+                .Max(c => c.ColumnIndex);
+            foreach (var row in SelectedCellRows.Where(row => !row.IsNewRow && row.Visible))
+            {
+                for (var colIndex = minCol; colIndex <= maxCol; colIndex++)
+                {
+                    if (!Columns[colIndex].Visible) continue;
+                    if (row.Cells[colIndex].Selected)
+                    {
+                        sb.Append(row.Cells[colIndex].ValueType == typeof(string)
+                            ? Convert.ToString(row.Cells[colIndex].Value)
+                            : Convert.ToString(row.Cells[colIndex].FormattedValue));
+                    }
+
+                    sb.Append("\t");
+                }
+                if (sb.Length > 0 && sb[^1] == '\t')
+                {
+                    // Remove the last character (the tab)
+                    sb.Remove(sb.Length - 1, 1);
+                }
+
+                sb.AppendLine();
+            }
+
+            if (sb.Length > 0)
+            {
+                Clipboard.SetText(sb.ToString());
+            }
+            else
+            {
+                MessageBox.Show("No data to copy", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 

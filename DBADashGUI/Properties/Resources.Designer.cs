@@ -999,5 +999,14 @@ namespace DBADashGUI.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+
+        internal static System.Drawing.Bitmap SelectCell_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("SelectCell_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
