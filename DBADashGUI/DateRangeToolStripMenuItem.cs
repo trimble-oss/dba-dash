@@ -79,7 +79,7 @@ namespace DBADashGUI
 
         private void SetTextAndCheck()
         {
-            Text = string.Empty;
+            selectedText = string.Empty;
             var selectedRange = SelectedDateFrom.HasValue && SelectedDateTo.HasValue ? new ValueTuple<DateTime, DateTime>(SelectedDateFrom.Value, SelectedDateTo.Value) : new ValueTuple<DateTime, DateTime>(DateTime.MinValue, DateTime.MaxValue);
             foreach (var itm in this.DropDownItems.OfType<ToolStripMenuItem>())
             {
@@ -104,7 +104,7 @@ namespace DBADashGUI
                 }
             }
 
-            if (Text == string.Empty)
+            if (selectedText == string.Empty)
             {
                 selectedText = "Custom";
                 customMenuItem.Checked = true;
