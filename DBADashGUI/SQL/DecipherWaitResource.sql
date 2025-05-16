@@ -100,7 +100,7 @@ BEGIN
 	ELSE IF @WaitResource LIKE '[0-9]%:%:%(%)'
 	BEGIN
 		/*  
-			Format: DatabaseID:FileID:PageID (Additial Info)
+			Format: DatabaseID:FileID:PageID (Additional Info)
 			Example: 6:3:749442168 (LATCH 0x000005E1CE68AE98: Class: BUFFER KP: 0 SH: 0 UP: 0 EX: 1 DT: 0 Sublatch: 0 HasWaiters: 1 Task: 0x000001F2D801C8C8 AnyReleasor: 1)
 			Strip (Additional Info)
 		*/
