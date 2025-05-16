@@ -20,7 +20,7 @@
 
 ----------------------------------------------------------
 */
-DECLARE @WaitResource NVARCHAR(128)
+DECLARE @WaitResource NVARCHAR(256)
 
 SELECT @WaitResource='{wait_resource}'
 
@@ -36,7 +36,7 @@ DECLARE @idx1 INT
 DECLARE @idx2 INT
 DECLARE @m_type INT
 DECLARE @PageType VARCHAR(100)
-DECLARE @NormalizedWaitResource NVARCHAR(128)
+DECLARE @NormalizedWaitResource NVARCHAR(256)
 
 IF @WaitResource='0:0:0'
 BEGIN
@@ -96,6 +96,15 @@ BEGIN
 			Strip PAGE: prefix.
 		*/
 		SET @NormalizedWaitResource = SUBSTRING(@NormalizedWaitResource ,7,LEN(@NormalizedWaitResource))
+	END
+	ELSE IF @WaitResource LIKE '[0-9]%:%:%(%)'
+	BEGIN
+		/*  
+			Format: DatabaseID:FileID:PageID (Additial Info)
+			Example: 6:3:749442168 (LATCH 0x000005E1CE68AE98: Class: BUFFER KP: 0 SH: 0 UP: 0 EX: 1 DT: 0 Sublatch: 0 HasWaiters: 1 Task: 0x000001F2D801C8C8 AnyReleasor: 1)
+			Strip (Additional Info)
+		*/
+		SET @NormalizedWaitResource = SUBSTRING(@NormalizedWaitResource ,1,CHARINDEX('(',@NormalizedWaitResource)-1)
 	END
 
 	SELECT @idx1 = CHARINDEX(':',@NormalizedWaitResource)
