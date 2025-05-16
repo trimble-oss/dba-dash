@@ -41,7 +41,8 @@ WITH wr AS (
 				OR @WaitResource LIKE 'RID: %:%:%:%'
 					THEN SUBSTRING(@WaitResource,wr.sc2+1,wr.sc3-wr.sc2-1) 
 			ELSE NULL END AS INT)AS wait_file_id,
-		TRY_CAST(CASE WHEN @WaitResource LIKE '[0-9]%:%:%' THEN SUBSTRING(@WaitResource,wr.sc2+1,wr.lenwr-wr.sc2) 
+		TRY_CAST(CASE WHEN @WaitResource LIKE '[0-9]%:%:%(%)' THEN SUBSTRING(@WaitResource,wr.sc2+1,wr.ocb1-1-wr.sc2) 
+			WHEN @WaitResource LIKE '[0-9]%:%:%' THEN SUBSTRING(@WaitResource,wr.sc2+1,wr.lenwr-wr.sc2) 
 			WHEN @WaitResource LIKE 'PAGE: [0-9]%:%:%' 
 				OR @WaitResource LIKE 'RID: %:%:%:%'
 				THEN SUBSTRING(@WaitResource,wr.sc3+1,ISNULL(NULLIF(wr.sc4,0)-1,wr.lenwr)-wr.sc3) 
