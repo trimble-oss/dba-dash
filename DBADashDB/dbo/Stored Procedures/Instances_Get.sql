@@ -4,6 +4,7 @@ CREATE PROC dbo.Instances_Get(
 	@IsAzure BIT=NULL,
 	@SearchString NVARCHAR(128)=NULL,
 	@GroupByTag NVARCHAR(50)=NULL,
+	@ConnectionID NVARCHAR(128)=NULL,
 	@Debug BIT =0
 )
 AS
@@ -37,6 +38,7 @@ WHERE (D.InstanceID IS NOT NULL OR I.EngineEdition <> 5 OR I.EngineEdition IS NU
 ' + CASE WHEN @IsActive IS NULL THEN '' ELSE 'AND I.IsActive=@IsActive' END + '
 ' + CASE WHEN @IsAzure=1 THEN 'AND I.EngineEdition = 5' WHEN @IsAzure=0 THEN 'AND I.EngineEdition <> 5' ELSE '' END + '
 ' + CASE WHEN @SearchString IS NULL THEN '' ELSE 'AND (I.ConnectionID LIKE @SearchString OR I.Alias LIKE @SearchString OR I.Instance LIKE @SearchString)' END + '
+' + CASE WHEN @ConnectionID IS NULL THEN '' ELSE 'AND I.ConnectionID = @ConnectionID' END + '
 ORDER BY TagGroup,I.InstanceDisplayName'
 
 IF @Debug=1
@@ -44,5 +46,5 @@ BEGIN
 	EXEC dbo.PrintMax @SQL
 END
 
-EXEC sp_executesql @SQL,N'@TagIDs VARCHAR(MAX),@IsActive BIT,@SearchString NVARCHAR(128),@GroupByTag NVARCHAR(50)',@TagIDs,@IsActive,@SearchString,@GroupByTag
+EXEC sp_executesql @SQL,N'@TagIDs VARCHAR(MAX),@IsActive BIT,@SearchString NVARCHAR(128),@GroupByTag NVARCHAR(50),@ConnectionID NVARCHAR(128)',@TagIDs,@IsActive,@SearchString,@GroupByTag,@ConnectionID
 

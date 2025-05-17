@@ -63,65 +63,85 @@ namespace DBADashServiceConfig
                 return;
             }
 
-            string schemaSnapshotDBs = txtSnapshotDBs.Text.Trim();
+            try
+            {
+                await AddInstance();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error adding instance:\n" + ex.Message, "Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        private DBADashSource CreateSourceConnection(string sourceString, string schemaSnapshotDBs)
+        {
+            if (!sourceString.Contains(';') && !sourceString.Contains(':') && !sourceString.StartsWith("\\\\") &&
+                !sourceString.StartsWith("//"))
+            {
+                // Providing the name of the SQL instances - build the connection string automatically
+                var builder = new SqlConnectionStringBuilder
+                {
+                    DataSource = sourceString,
+                    IntegratedSecurity = true,
+                    TrustServerCertificate = true,
+                    Encrypt = true,
+                    ApplicationName = "DBADash"
+                };
+                sourceString = builder.ConnectionString;
+            }
+
+            var src = new DBADashSource(sourceString)
+            {
+                NoWMI = chkNoWMI.Checked,
+                UseDualEventSession = chkDualSession.Checked,
+                PersistXESessions = chkPersistXESession.Checked,
+                SlowQueryThresholdMs = chkSlowQueryThreshold.Checked ? (int)numSlowQueryThreshold.Value : -1,
+                RunningQueryPlanThreshold = chkCollectPlans.Checked
+                    ? new PlanCollectionThreshold()
+                    {
+                        CountThreshold = int.Parse(txtCountThreshold.Text),
+                        CPUThreshold = int.Parse(txtCPUThreshold.Text),
+                        DurationThreshold = int.Parse(txtDurationThreshold.Text),
+                        MemoryGrantThreshold = int.Parse(txtGrantThreshold.Text)
+                    }
+                    : null,
+                SchemaSnapshotDBs = schemaSnapshotDBs,
+                CollectSessionWaits = chkCollectSessionWaits.Checked,
+                ScriptAgentJobs = chkScriptJobs.Checked,
+                IOCollectionLevel = (DBADashSource.IOCollectionLevels)cboIOLevel.SelectedItem!,
+                WriteToSecondaryDestinations = chkWriteToSecondaryDestinations.Checked
+            };
+            src.CustomCollections = src.SourceConnection.Type == ConnectionType.SQL ? CustomCollectionsNew : null;
+            return src;
+        }
+
+        private async Task AddInstance()
+        {
+            var schemaSnapshotDBs = txtSnapshotDBs.Text.Trim();
             if (!string.IsNullOrEmpty(schemaSnapshotDBs) && collectionConfig.SchemaSnapshotOptions == null)
             {
                 collectionConfig.SchemaSnapshotOptions = new SchemaSnapshotDBOptions();
             }
 
-            bool hasUpdateApproval = false;
-            bool warnXENotSupported = false;
-            bool addUnvalidated = false;
-            bool doNotAddUnvalidated = false;
-            bool doesNotHaveUpdateApproval = false;
-            foreach (string splitSource in NewSourceConnections)
+            var hasUpdateApproval = false;
+            var warnXENotSupported = false;
+            var addUnvalidated = false;
+            var doNotAddUnvalidated = false;
+            var doesNotHaveUpdateApproval = false;
+            var isDeleted = false;
+            foreach (var splitSource in NewSourceConnections)
             {
-                string sourceString = splitSource.Trim();
+                var sourceString = splitSource.Trim();
                 if (string.IsNullOrEmpty(splitSource))
                 {
                     continue;
                 }
 
-                if (!sourceString.Contains(';') && !sourceString.Contains(':') && !sourceString.StartsWith("\\\\") &&
-                    !sourceString.StartsWith("//"))
-                {
-                    // Providing the name of the SQL instances - build the connection string automatically
-                    var builder = new SqlConnectionStringBuilder
-                    {
-                        DataSource = sourceString,
-                        IntegratedSecurity = true,
-                        TrustServerCertificate = true,
-                        Encrypt = true,
-                        ApplicationName = "DBADash"
-                    };
-                    sourceString = builder.ConnectionString;
-                }
+                var src = CreateSourceConnection(sourceString, schemaSnapshotDBs);
+                var validated = ValidateSource(sourceString);
 
-                var src = new DBADashSource(sourceString)
-                {
-                    NoWMI = chkNoWMI.Checked,
-                    UseDualEventSession = chkDualSession.Checked,
-                    PersistXESessions = chkPersistXESession.Checked,
-                    SlowQueryThresholdMs = chkSlowQueryThreshold.Checked ? (Int32)numSlowQueryThreshold.Value : -1,
-                    RunningQueryPlanThreshold = chkCollectPlans.Checked
-                        ? new PlanCollectionThreshold()
-                        {
-                            CountThreshold = int.Parse(txtCountThreshold.Text),
-                            CPUThreshold = int.Parse(txtCPUThreshold.Text),
-                            DurationThreshold = int.Parse(txtDurationThreshold.Text),
-                            MemoryGrantThreshold = int.Parse(txtGrantThreshold.Text)
-                        }
-                        : null,
-                    SchemaSnapshotDBs = schemaSnapshotDBs,
-                    CollectSessionWaits = chkCollectSessionWaits.Checked,
-                    ScriptAgentJobs = chkScriptJobs.Checked,
-                    IOCollectionLevel = (DBADashSource.IOCollectionLevels)cboIOLevel.SelectedItem,
-                    WriteToSecondaryDestinations = chkWriteToSecondaryDestinations.Checked
-                };
-                src.CustomCollections = src.SourceConnection.Type == ConnectionType.SQL ? CustomCollectionsNew : null;
-                bool validated = ValidateSource(sourceString);
-
-                string validationError = "";
+                var validationError = "";
                 if (validated)
                 {
                     if (!(src.SourceConnection.Type == ConnectionType.SQL ||
@@ -215,6 +235,22 @@ namespace DBADashServiceConfig
                         }
                     }
 
+                    if (RepoDbVersionStatus?.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
+                    {
+                        try // Check if instance is marked deleted so we can warn the user that the instance needs to be restored
+                        {
+                            foreach (var dest in collectionConfig.SQLDestinations.Where(dest => !isDeleted))
+                            {
+                                isDeleted = await IsInstanceDeleted(src.ConnectionID, dest.ConnectionString);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Error checking connection status in repository database:\n" + ex.Message,
+                                "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+
                     collectionConfig.SourceConnections.Add(src);
                 }
             }
@@ -223,12 +259,29 @@ namespace DBADashServiceConfig
             SetConnectionCount();
             SetDgv();
             RefreshEncryption();
+            if (isDeleted)
+            {
+                MessageBox.Show(
+                    "Warning. The instance you have added is marked deleted in the repository database.  Use the recycle bin folder in the GUI to restore the instance.",
+                    "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
             if (warnXENotSupported)
             {
                 MessageBox.Show(
-                    "Warning: Slow query capture requires an extended event session which is not supported for one or more connections.\nRequirements:\nSQL 2012 or later.\nStandard or Enteprise Edition on Amazon RDS",
+                    "Warning: Slow query capture requires an extended event session which is not supported for one or more connections.\nRequirements:\nSQL 2012 or later.\nStandard or Enterprise Edition on Amazon RDS",
                     "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+        }
+
+        private async Task<bool> IsInstanceDeleted(string connectionID, string connectionString)
+        {
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand("dbo.Instances_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("IsActive", 0);
+            cmd.Parameters.AddWithValue("ConnectionID", connectionID);
+            await cn.OpenAsync();
+            await using var rdr = await cmd.ExecuteReaderAsync();
+            return rdr.Read(); // Instance is soft deleted (IsActive=0) if a row is returned
         }
 
         private bool ValidateSource(string sourceString)
@@ -251,8 +304,11 @@ namespace DBADashServiceConfig
             }
         }
 
+        private DBValidations.DBVersionStatus? RepoDbVersionStatus;
+
         private bool ValidateDestination()
         {
+            RepoDbVersionStatus = null;
             errorProvider1.SetError(txtDestination, null);
             lblServerNameWarning.Visible = false;
             DBADashConnection dest = new(txtDestination.Text);
@@ -293,35 +349,45 @@ namespace DBADashServiceConfig
                         lblServerNameWarning.Visible = true;
                     }
 
-                    var status = DBValidations.VersionStatus(dest.ConnectionString);
-                    if (status.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB)
-                    {
-                        lblVersionInfo.Text =
-                            "Start service to create repository database or click Deploy to create manually.";
-                        lblVersionInfo.ForeColor = DashColors.Fail;
-                        return true;
-                    }
+                    RepoDbVersionStatus = DBValidations.VersionStatus(dest.ConnectionString);
 
-                    if (status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
+                    switch (RepoDbVersionStatus?.VersionStatus)
                     {
-                        lblVersionInfo.Text = "Repository database upgrade not required. DacVersion/DB Version: " +
-                                              status.DACVersion;
-                        lblVersionInfo.ForeColor = DashColors.Success;
-                        bttnDeployDatabase.Enabled = true;
-                    }
-                    else if (status.VersionStatus == DBValidations.DBVersionStatusEnum.AppUpgradeRequired)
-                    {
-                        lblVersionInfo.Text =
-                            $"Repository database version {status.DBVersion} is newer than dac version {status.DACVersion}.  Please update this app.";
-                        lblVersionInfo.ForeColor = DashColors.Fail;
-                        bttnDeployDatabase.Enabled = false;
-                    }
-                    else
-                    {
-                        lblVersionInfo.Text =
-                            $"Repository database version {status.DBVersion}  requires upgrade to {status.DACVersion}.  Database will be upgraded on service start.";
-                        lblVersionInfo.ForeColor = DashColors.Fail;
-                        bttnDeployDatabase.Enabled = true;
+                        case null:
+                            lblVersionInfo.Text =
+                                "???";
+                            lblVersionInfo.ForeColor = DashColors.Fail;
+                            break;
+
+                        case DBValidations.DBVersionStatusEnum.CreateDB:
+                            lblVersionInfo.Text =
+                                "Start service to create repository database or click Deploy to create manually.";
+                            lblVersionInfo.ForeColor = DashColors.Fail;
+                            return true;
+
+                        case DBValidations.DBVersionStatusEnum.OK:
+                            lblVersionInfo.Text = "Repository database upgrade not required. DacVersion/DB Version: " +
+                                                  RepoDbVersionStatus.DACVersion;
+                            lblVersionInfo.ForeColor = DashColors.Success;
+                            bttnDeployDatabase.Enabled = true;
+                            break;
+
+                        case DBValidations.DBVersionStatusEnum.AppUpgradeRequired:
+                            lblVersionInfo.Text =
+                                $"Repository database version {RepoDbVersionStatus.DBVersion} is newer than dac version {RepoDbVersionStatus.DACVersion}.  Please update this app.";
+                            lblVersionInfo.ForeColor = DashColors.Fail;
+                            bttnDeployDatabase.Enabled = false;
+                            break;
+
+                        case DBValidations.DBVersionStatusEnum.UpgradeRequired:
+                            lblVersionInfo.Text =
+                                $"Repository database version {RepoDbVersionStatus.DBVersion}  requires upgrade to {RepoDbVersionStatus.DACVersion}.  Database will be upgraded on service start.";
+                            lblVersionInfo.ForeColor = DashColors.Fail;
+                            bttnDeployDatabase.Enabled = true;
+                            break;
+
+                        default:
+                            throw new ArgumentOutOfRangeException();
                     }
 
                     return true;
