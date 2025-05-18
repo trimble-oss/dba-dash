@@ -304,9 +304,9 @@ namespace DBADashGUI.Performance
                     HeaderText = "Object ID", DataPropertyName = "object_id",
                     SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40
                 },
-                new DataGridViewTextBoxColumn()
+                new DataGridViewLinkColumn()
                 {
-                    HeaderText = "Object Name", DataPropertyName = "object_name",
+                    HeaderText = "Object Name", DataPropertyName = "object_name", Name = "colObjectName",
                     SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40
                 },
                 new DataGridViewLinkColumn
@@ -1262,7 +1262,30 @@ namespace DBADashGUI.Performance
                 case "colJobID":
                     ShowJob(row);
                     break;
+
+                case "colObjectName":
+                    ShowObject(row);
+                    break;
             }
+        }
+
+        private void ShowObject(DataRowView row)
+        {
+            var context = CurrentContext.DeepCopy();
+            context.ObjectID = row.Row.Field<long>("DBADashObjectID");
+            context.ObjectName = row.Row.Field<string>("ObjectName");
+            context.InstanceID = row.Row.Field<int>("InstanceID");
+            context.Type = SQLTreeItem.TreeType.StoredProcedure;
+            var frm = new Form()
+            {
+                Text = context.ObjectName,
+                WindowState = FormWindowState.Maximized
+            };
+            var oes = new ObjectExecutionSummary() { Dock = DockStyle.Fill };
+            oes.SetContext(context);
+            frm.Controls.Add(oes);
+
+            frm.Show();
         }
 
         private static void ShowJob(DataRowView row)

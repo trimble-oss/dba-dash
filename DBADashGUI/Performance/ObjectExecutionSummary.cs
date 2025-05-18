@@ -22,6 +22,7 @@ namespace DBADashGUI.Performance
                     txtSearch.Text = string.Empty;
                 }
             };
+            splitContainer1.Panel1Collapsed = true;
         }
 
         private string Instance => CurrentContext.InstanceName;
@@ -163,6 +164,11 @@ namespace DBADashGUI.Performance
         public void SetContext(DBADashContext context)
         {
             CurrentContext = context;
+            // Hide menu items that are not applicable when an individual object is selected
+            lblSearch.Visible = ObjectID <= 0;
+            tsClearFilter.Visible = ObjectID <= 0;
+            txtSearch.Visible = ObjectID <= 0;
+            tsSep1.Visible = ObjectID <= 0;
             RefreshData();
         }
 
@@ -183,10 +189,6 @@ namespace DBADashGUI.Performance
                 dgv.DataSource = null;
 
                 var dt = GetObjectExecutionStatsSummary();
-                if (dt.Rows.Count == 1)
-                {
-                    RefreshChart((long)dt.Rows[0]["ObjectID"], (string)dt.Rows[0]["ObjectName"]);
-                }
 
                 dgv.Columns.Clear();
                 dgv.AutoGenerateColumns = false;
@@ -196,7 +198,16 @@ namespace DBADashGUI.Performance
                 dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
                 dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 dgv.ApplyTheme();
-                if (splitContainer1.Panel1Collapsed == false)
+                if (dgv.Rows.Count == 0)
+                {
+                    splitContainer1.Panel2Collapsed = true;
+                    splitContainer1.Panel1Collapsed = true;
+                }
+                else if (dt.Rows.Count == 1)
+                {
+                    RefreshChart((long)dt.Rows[0]["ObjectID"], (string)dt.Rows[0]["ObjectName"]);
+                }
+                else if (splitContainer1.Panel1Collapsed == false)
                 {
                     RefreshChart();
                 }
@@ -284,7 +295,6 @@ namespace DBADashGUI.Performance
 
         private void ObjectExecutionSummary_Load(object sender, EventArgs e)
         {
-            splitContainer1.Panel1Collapsed = true;
         }
 
         private void TsCustomCompare_Click(object sender, EventArgs e)
