@@ -1279,9 +1279,11 @@ namespace DBADashGUI.Performance
             var frm = new Form()
             {
                 Text = context.ObjectName,
-                WindowState = FormWindowState.Maximized
+                WindowState = FormWindowState.Maximized,
+                Width = this.Width / 2,
+                Height = this.Height / 2,
             };
-            var oes = new ObjectExecutionSummary() { Dock = DockStyle.Fill };
+            var oes = new ObjectExecutionSummary() { Dock = DockStyle.Fill, UseGlobalTime = false };
             oes.SetContext(context);
             frm.Controls.Add(oes);
 

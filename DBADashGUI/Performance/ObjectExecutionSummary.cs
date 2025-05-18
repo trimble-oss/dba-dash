@@ -30,6 +30,20 @@ namespace DBADashGUI.Performance
         private int DatabaseID => CurrentContext.DatabaseID;
         private long ObjectID => (CurrentContext.Type is SQLTreeItem.TreeType.Database or SQLTreeItem.TreeType.AzureDatabase) ? -1 : CurrentContext.ObjectID;
 
+        public bool UseGlobalTime { get => !tsDateRange.Visible; set => tsDateRange.Visible = !value; }
+
+        private DateTime FromUTC => UseGlobalTime
+            ? DateRange.FromUTC
+            : tsDateRange.DateFromUtc;
+
+        private DateTime ToUTC => UseGlobalTime
+            ? DateRange.ToUTC
+            : tsDateRange.DateToUtc;
+
+        private TimeSpan SelectedTimeSpan => UseGlobalTime
+            ? DateRange.TimeSpan
+            : tsDateRange.SelectedTimeSpan ?? TimeSpan.FromMinutes(60);
+
         private DBADashContext CurrentContext;
 
         public string Types
@@ -58,10 +72,10 @@ namespace DBADashGUI.Performance
             {
                 if (tsPreviousPeriod.Checked)
                 {
-                    return DateRange.FromUTC;
+                    return FromUTC;
                 }
                 return CompareOffset > 0
-                    ? DateRange.ToUTC.AddMinutes(-CompareOffset)
+                    ? ToUTC.AddMinutes(-CompareOffset)
                     : _compareTo;
             }
         }
@@ -72,9 +86,9 @@ namespace DBADashGUI.Performance
             {
                 if (tsPreviousPeriod.Checked)
                 {
-                    return DateRange.FromUTC.AddSeconds(-DateRange.TimeSpan.TotalSeconds);
+                    return FromUTC.AddSeconds(-SelectedTimeSpan.TotalSeconds);
                 }
-                return CompareOffset > 0 ? DateRange.FromUTC.AddMinutes(-CompareOffset) :
+                return CompareOffset > 0 ? FromUTC.AddMinutes(-CompareOffset) :
                     _compareFrom;
             }
         }
@@ -174,7 +188,7 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-            var status = DateRange.FromUTC.ToAppTimeZone() + " - " + DateRange.ToUTC.ToAppTimeZone() + (HasCompare ? " comparing to " + CompareFrom.ToAppTimeZone() + " - " + CompareTo.ToAppTimeZone() : "");
+            var status = FromUTC.ToAppTimeZone() + " - " + ToUTC.ToAppTimeZone() + (HasCompare ? " comparing to " + CompareFrom.ToAppTimeZone() + " - " + CompareTo.ToAppTimeZone() : "");
             lblStatus.ForeColor = Color.Black;
             lblStatus.Text = "Refreshing Data...";
             Cursor = Cursors.WaitCursor;
@@ -248,17 +262,17 @@ namespace DBADashGUI.Performance
 
             cmd.Parameters.AddStringIfNotNullOrEmpty("Types", Types);
 
-            if (DateRange.HasDayOfWeekFilter)
+            if (DateRange.HasDayOfWeekFilter && UseGlobalTime)
             {
                 cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
             }
-            if (DateRange.HasTimeOfDayFilter)
+            if (DateRange.HasTimeOfDayFilter && UseGlobalTime)
             {
                 cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
             }
 
-            cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-            cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+            cmd.Parameters.AddWithValue("FromDate", FromUTC);
+            cmd.Parameters.AddWithValue("ToDate", ToUTC);
             cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
             cmd.Parameters.AddWithValue("InstanceIDs", CurrentContext.InstanceIDs.AsDataTable());
             var dt = new DataTable();
@@ -295,14 +309,23 @@ namespace DBADashGUI.Performance
 
         private void ObjectExecutionSummary_Load(object sender, EventArgs e)
         {
+            if (UseGlobalTime) return;
+            if (DateRange.SelectedTimeSpan.HasValue)
+            {
+                tsDateRange.SetTimeSpan(DateRange.SelectedTimeSpan.Value);
+            }
+            else
+            {
+                tsDateRange.SetDateRangeUtc(DateRange.FromUTC, DateRange.ToUTC);
+            }
         }
 
         private void TsCustomCompare_Click(object sender, EventArgs e)
         {
             var frm = new CustomTimePicker
             {
-                FromDate = CompareFrom > DateTime.MinValue && CompareFrom < DateTime.MaxValue ? CompareFrom.ToAppTimeZone() : DateRange.FromUTC.ToAppTimeZone(),
-                ToDate = CompareTo > DateTime.MinValue && CompareTo < DateTime.MaxValue ? CompareTo.ToAppTimeZone() : DateRange.ToUTC.ToAppTimeZone()
+                FromDate = CompareFrom > DateTime.MinValue && CompareFrom < DateTime.MaxValue ? CompareFrom.ToAppTimeZone() : FromUTC.ToAppTimeZone(),
+                ToDate = CompareTo > DateTime.MinValue && CompareTo < DateTime.MaxValue ? CompareTo.ToAppTimeZone() : ToUTC.ToAppTimeZone()
             };
             frm.ShowDialog();
             if (frm.DialogResult != DialogResult.OK) return;
@@ -368,8 +391,8 @@ namespace DBADashGUI.Performance
             {
                 splitChart.Panel2Collapsed = true;
             }
-            objectExecutionLineChart1.FromDate = DateRange.FromUTC;
-            objectExecutionLineChart1.ToDate = DateRange.ToUTC;
+            objectExecutionLineChart1.FromDate = FromUTC;
+            objectExecutionLineChart1.ToDate = ToUTC;
             objectExecutionLineChart1.RefreshData();
         }
 
@@ -439,6 +462,11 @@ namespace DBADashGUI.Performance
             if (dgv.PromptColumnSelection() != DialogResult.OK) return;
             dgv.AutoResizeColumns();
             dgv.AutoResizeRows();
+        }
+
+        private void DateRangeChanged(object sender, EventArgs e)
+        {
+            RefreshData();
         }
     }
 }
