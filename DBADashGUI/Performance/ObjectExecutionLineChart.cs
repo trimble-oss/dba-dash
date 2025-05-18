@@ -47,11 +47,12 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-            if (DateRange.DurationMins != durationMins) // Update date grouping only if duration has changed
+            var newDurationMins = Convert.ToInt32(ToDate.Subtract(FromDate).TotalMinutes);
+            if (newDurationMins != durationMins) // Update date grouping only if duration has changed
             {
-                dateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 200);
+                dateGrouping = DateHelper.DateGrouping(newDurationMins, 200);
                 tsGroup.Text = DateHelper.DateGroupString(dateGrouping);
-                durationMins = DateRange.DurationMins;
+                durationMins = newDurationMins;
             }
             var dt = CommonData.ObjectExecutionStats(InstanceID, -1, ObjectID, dateGrouping, "AvgDuration", FromDate, ToDate, Instance);
             chart1.Series.Clear();

@@ -120,6 +120,17 @@
   <metadata name="toolStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="tsDateRange.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADlSURBVDhPrZO9DYMwFIQzQbbxAhQUVAzAOGxAR80EzECU
+        MAUJCyRprqB50YdIRBxbUX4snWTZd5/8nu3NxhuSnKRa0iBpWsScNef7H0PSVlIzjqNVVWVFUViaprOY
+        s8YeHryhcN+2rWVZZmVZWtft7DicZjFnjT08eJ8gUNnI89wO+94u52tQ7OFZIM097DgadD+cJEkQgncp
+        xwGoqY8j+uYQAOElQxbAQJOo0zfGAHjJkAUw0Wma5RtjALxkyL4FrBUDREuIyS8h2sSY/CZGrzGkl2v8
+        +SH95SmvIN99pvX49DvfAN2c2o86NEGQAAAAAElFTkSuQmCC
+</value>
+  </data>
   <metadata name="statusStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>268, 17</value>
   </metadata>
