@@ -10,7 +10,7 @@ namespace DBADash
     public class DBADashConnection
     {
         private readonly List<int> supportedEngineEditions = new() { 1, 2, 3, 4, 5, 8 }; // Personal, Standard, Enterprise, Express, Azure DB, Azure MI
-        private readonly List<int> supportedProductVersions = new() { 9, 10, 11, 12, 13, 14, 15, 16 }; // SQL 2005 to 2022 & Azure
+        private readonly List<int> supportedProductVersions = new() { 9, 10, 11, 12, 13, 14, 15, 16, 17 }; // SQL 2005 to 2025 & Azure
 
         public enum ConnectionType
         {
