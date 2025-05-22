@@ -167,7 +167,7 @@ namespace DBADash.Messaging
                 var msg = MessageBase.Deserialize(message);
                 if (msg.IsExpired)
                 {
-                    Log.Error("Message {Id} with handle {handle} created at {Created} is expired.", msg.Id, type, handle);
+                    Log.Error("Message {Id} of type {type} with handle {handle} created at {Created} is expired.", msg.Id, type,handle,msg.Created);
                     await SendReplyMessage(handle,
                         (new ResponseMessage()
                         { Type = ResponseMessage.ResponseTypes.Failure, Message = "Message is Expired." }).Serialize(),
@@ -175,7 +175,7 @@ namespace DBADash.Messaging
                 }
                 else if (msg.CollectAgent.AgentIdentifier != DBADashAgent.GetCurrent().AgentIdentifier)
                 {
-                    Log.Error("Message {Id} with handle {handle} created at {Created} is expired.", msg.Id, type, handle);
+                    Log.Information("Message {Id} with handle {handle} needs to be relayed to the remote service {host} via {sqs}", msg.Id, handle,msg.CollectAgent.AgentHostName,msg.CollectAgent.ServiceSQSQueueUrl);
                     // The message needs to be relayed to the remote agent via SQS queue
                     await SendReplyMessage(handle,
                                                (new ResponseMessage()
