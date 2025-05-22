@@ -14,6 +14,7 @@ namespace DBADashGUI.Performance
         public MemoryUsage()
         {
             InitializeComponent();
+            ChartView = ChartViews.Pie; // Update control visibility
         }
 
         private int InstanceID;
@@ -240,6 +241,11 @@ namespace DBADashGUI.Performance
 
         private void ShowMemoryUsageForClerk(string format = "N0")
         {
+            if (string.IsNullOrEmpty(selectedClerk))
+            {
+                MessageBox.Show("Please select a memory clerk to view.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             ChartView = ChartViews.MemoryClerk;
             chartClerk.Series.Clear();
             var dt = GetMemoryClerkUsage(selectedClerk, dateGrouping, tsAgg.Text, selectedCounter);
