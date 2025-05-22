@@ -66,7 +66,7 @@ namespace DBADash.Messaging
                 {
                     var receiveMessageResponse = await _sqsClient.ReceiveMessageAsync(receiveMessageRequest).ConfigureAwait(false);
 
-                    if (receiveMessageResponse.Messages.Count > 0)
+                    if (receiveMessageResponse is { Messages.Count: > 0 })
                     {
                         foreach (var message in receiveMessageResponse.Messages)
                         {
