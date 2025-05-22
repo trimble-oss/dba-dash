@@ -376,18 +376,20 @@ namespace DBADashService
                 do
                 {
                     var resp = await s3Cli.ListObjectsAsync(request);
+                    if (resp is { S3Objects: not null })
+                    {
+                        var fileList = resp.S3Objects.Where(f => f.Key.EndsWith(".xml")).Select(f => f.Key).ToList();
+                        var filesToProcessByInstance = GetFilesToProcessByInstance(fileList);
 
-                    var fileList = resp.S3Objects.Where(f => f.Key.EndsWith(".xml")).Select(f => f.Key).ToList();
-                    var filesToProcessByInstance = GetFilesToProcessByInstance(fileList);
+                        Log.Information("Processing {0} files from {1}. Instance Count: {2}", resp.S3Objects.Count, uri.Key, filesToProcessByInstance.Count);
 
-                    Log.Information("Processing {0} files from {1}. Instance Count: {2}", resp.S3Objects.Count, uri.Key, filesToProcessByInstance.Count);
+                        // Start a thread to process the files associated with each instance.  Each instance will have it's files processed sequentially in the order they were collected.
+                        var tasks = filesToProcessByInstance.Select(instanceItem => instanceItem.Value).Select(instanceFiles => ProcessS3FileListForCollectS3Async(instanceFiles, s3Cli, uri, cfg)).ToList();
 
-                    // Start a thread to process the files associated with each instance.  Each instance will have it's files processed sequentially in the order they were collected.
-                    var tasks = filesToProcessByInstance.Select(instanceItem => instanceItem.Value).Select(instanceFiles => ProcessS3FileListForCollectS3Async(instanceFiles, s3Cli, uri, cfg)).ToList();
+                        await Task.WhenAll(tasks);
+                    }
 
-                    await Task.WhenAll(tasks);
-
-                    if (resp.IsTruncated == true)
+                    if (resp?.IsTruncated == true)
                     {
                         Log.Debug("Response truncated.  Processing next marker for {0}", uri.Key);
                         request.Marker = resp.NextMarker;
