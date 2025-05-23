@@ -9,6 +9,8 @@ namespace DBADash
 
         public const string DACPackFile = "DBADashDB.dacpac";
 
+        public static string DACPackPath => System.IO.Path.Combine(AppContext.BaseDirectory, DACPackFile);
+
         public enum DBVersionStatusEnum
         {
             OK,
@@ -83,7 +85,7 @@ END
         {
             DBVersionStatus status = new()
             {
-                DACVersion = DacpacUtility.DacpacService.GetVersion(DACPackFile)
+                DACVersion = DacpacUtility.DacpacService.GetVersion(DACPackPath)
             };
             if (!DBExists(connectionString))
             {
@@ -129,7 +131,7 @@ END
             var status = VersionStatus(connectionString);
             if (status.VersionStatus is DBVersionStatusEnum.UpgradeRequired or DBVersionStatusEnum.CreateDB)
             {
-                return Task.Run(() => dac.ProcessDacPac(connectionString, db, DACPackFile, status.VersionStatus));
+                return Task.Run(() => dac.ProcessDacPac(connectionString, db, DACPackPath, status.VersionStatus));
             }
             else
             {
