@@ -194,7 +194,7 @@ AND database_id > 4 ";
             DacpacUtility.DacpacService dac = new();
             string _db = DB;
             string _connectionString = ConnectionString;
-            var t = Task.Run(() => dac.ProcessDacPac(_connectionString, _db, DBValidations.DACPackFile, dbVersionStatus.VersionStatus));
+            var t = Task.Run(() => dac.ProcessDacPac(_connectionString, _db, DBValidations.DACPackPath, dbVersionStatus.VersionStatus));
             lblNotice.Visible = true;
             bttnGenerate.Enabled = false;
             bttnDeploy.Enabled = false;
