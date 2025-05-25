@@ -57,7 +57,8 @@ SELECT  T.job_id,
 		HDAvg.HumanDuration AS AvgDuration,
 		HDMax.HumanDuration AS MaxDuration,
 		HDMin.HumanDuration AS MinDuration,
-		HDTotal.HumanDuration AS TotalDuration
+		HDTotal.HumanDuration AS TotalDuration,
+		@InstanceID InstanceID
 FROM T
 CROSS APPLY dbo.SecondsToHumanDuration(T.AvgDurationSec) HDAvg
 CROSS APPLY dbo.SecondsToHumanDuration(T.MaxDurationSec) HDMax

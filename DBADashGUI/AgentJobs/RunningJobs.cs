@@ -1,15 +1,20 @@
-﻿using DBADashGUI.Performance;
+﻿using DBADash;
+using DBADashGUI.Interface;
+using DBADashGUI.Messaging;
+using DBADashGUI.Performance;
 using Humanizer;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.AgentJobs
 {
-    public partial class RunningJobs : UserControl, IRefreshData, ISetContext
+    public partial class RunningJobs : UserControl, IRefreshData, ISetContext, ISetStatus
     {
         private DBADashContext context;
 
@@ -21,6 +26,7 @@ namespace DBADashGUI.AgentJobs
             InitializeComponent();
             dgvRunningJobs.RegisterClearFilter(tsClearFilter);
             AddColsToDGV();
+            AgentJobsControl.AddContextMenuItems(dgvRunningJobs, this);
         }
 
         private void AddColsToDGV()
@@ -55,17 +61,27 @@ namespace DBADashGUI.AgentJobs
                 new DataGridViewTextBoxColumn() { HeaderText = "Step Duration (sec)", DataPropertyName = "CurrentStepDurationSec", Visible = false, DefaultCellStyle = Common.DataGridViewNumericCellStyle, Width = 60, ToolTipText = "Duration job has been on the current step at the time the data was collected" },
                 new DataGridViewTextBoxColumn() { Name = "colTimeSinceSnapshot", HeaderText = "Time Since Snapshot", DataPropertyName = "TimeSinceSnapshot", ToolTipText = "Time since this data was collected", Width = 100 },
                 new DataGridViewTextBoxColumn() { Name = "colSnapshotDate", HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", ToolTipText = "Time the data was collected", Width = 110 }
-                );
+            );
             dgvRunningJobs.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
         }
 
         public void RefreshData()
         {
+            if (InvokeRequired)
+            {
+                Invoke(RefreshData);
+                return;
+            }
             var dt = GetRunningJobs();
             dgvRunningJobs.DataSource = new DataView(dt, PersistedFilter, PersistedSort, DataViewRowState.CurrentRows);
             dgvRunningJobs.AutoResizeColumnsWithMaxColumnWidth();
             PersistedFilter = null;
             PersistedSort = null;
+        }
+
+        public void SetStatus(string message, string tooltip, Color color)
+        {
+            tsStatus.InvokeSetStatus(message, tooltip, color);
         }
 
         private DataTable GetRunningJobs()
@@ -88,6 +104,8 @@ namespace DBADashGUI.AgentJobs
         public void SetContext(DBADashContext _context)
         {
             this.context = _context;
+            tsStatus.InvokeSetStatus(string.Empty, string.Empty, DashColors.Information);
+            tsTrigger.Visible = context.InstanceID > 0 && context.CanMessage;
             RefreshData();
         }
 
@@ -171,35 +189,56 @@ namespace DBADashGUI.AgentJobs
         private static JobStatusAndHistory JobHistoryForm;
         private static RunningQueriesViewer RunningViewer;
 
-        private void DgvRunningJobs_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private async void DgvRunningJobs_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0 && e.ColumnIndex == dgvRunningJobs.Columns["colJobName"]!.Index)
+            if (e.RowIndex < 0) return;
+            var row = (DataRowView)dgvRunningJobs.Rows[e.RowIndex].DataBoundItem;
+            var instanceId = (int)row["InstanceID"];
+            var jobId = (Guid)row["job_id"];
+            var jobName = (string)row["job_name"];
+            if (e.ColumnIndex == dgvRunningJobs.Columns["colJobName"]!.Index)
             {
-                var row = (DataRowView)dgvRunningJobs.Rows[e.RowIndex].DataBoundItem;
-                var instanceId = (int)row["InstanceID"];
-                var jobId = (Guid)row["job_id"];
-
                 JobHistoryForm?.Close();
                 JobHistoryForm = new();
-                var jobContext = new DBADashContext() { InstanceID = instanceId, JobID = jobId, RegularInstanceIDsWithHidden = new HashSet<int>() { instanceId }, JobStepID = -1 };
+                var jobContext = new DBADashContext()
+                {
+                    InstanceID = instanceId,
+                    JobID = jobId,
+                    RegularInstanceIDsWithHidden = new HashSet<int>() { instanceId },
+                    JobStepID = -1
+                };
                 JobHistoryForm.ShowSteps = true;
                 JobHistoryForm.SetContext(jobContext);
                 JobHistoryForm.FormClosed += delegate { JobHistoryForm = null; };
                 JobHistoryForm.Show();
             }
-            else if (e.RowIndex >= 0 && e.ColumnIndex == dgvRunningJobs.Columns["colRunningTime"]!.Index)
+            else if (e.ColumnIndex == dgvRunningJobs.Columns["colRunningTime"]!.Index)
             {
-                var row = (DataRowView)dgvRunningJobs.Rows[e.RowIndex].DataBoundItem;
-                var instanceId = (int)row["InstanceID"];
-                var jobId = (Guid)row["job_id"];
                 var from = ((DateTime)row["start_execution_date"]).ToUniversalTime();
                 var to = DateTime.UtcNow;
                 RunningViewer?.Close();
-                RunningViewer = new() { SnapshotDateFrom = from, SnapshotDateTo = to, InstanceID = instanceId, JobId = jobId };
+                RunningViewer = new()
+                { SnapshotDateFrom = from, SnapshotDateTo = to, InstanceID = instanceId, JobId = jobId };
 
                 RunningViewer.FormClosed += delegate { RunningViewer = null; };
                 RunningViewer.Show();
             }
+        }
+
+        private async void tsTrigger_Click(object sender, EventArgs e)
+        {
+            await TriggerCollection(context);
+        }
+
+        private async Task TriggerCollection(DBADashContext triggerContext)
+        {
+            var types = new List<CollectionType>()
+            {
+                CollectionType.RunningJobs
+            };
+            if (triggerContext.CollectAgentID == null || triggerContext.ImportAgentID == null) return;
+            tsStatus.InvokeSetStatus("Message Sent", string.Empty, DashColors.Information);
+            await CollectionMessaging.TriggerCollection(triggerContext.ConnectionID, types, triggerContext.CollectAgentID.Value, triggerContext.ImportAgentID.Value, this);
         }
 
         public int MinimumDuration

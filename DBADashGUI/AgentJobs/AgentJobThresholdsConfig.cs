@@ -13,6 +13,7 @@ namespace DBADashGUI.AgentJobs
         private void GetConfig()
         {
             var threshold = AgentJobThreshold.GetAgentJobThreshold(InstanceID, JobID, connectionString);
+            this.Text = "Agent Job Thresholds - " + threshold.ConfiguredAt;
             chkFailCount24Hrs.Checked = threshold.FailCount24HrsCritical != null && threshold.FailCount24HrsWarning != null;
             chkFailCount7Days.Checked = threshold.FailCount7DaysCritical != null && threshold.FailCount7DaysWarning != null;
             chkJobStep24Hrs.Checked = threshold.JobStepFails24HrsCritical != null && threshold.JobStepFails24HrsWarning != null;
@@ -35,9 +36,8 @@ namespace DBADashGUI.AgentJobs
             numTimeSinceLastSucceededWarning.Value = threshold.TimeSinceLastSucceededWarning ?? 0;
             chkLastFailIsCritical.Checked = threshold.LastFailIsCritical;
             chkLastFailIsWarning.Checked = threshold.LastFailIsWarning;
-            chkAgentIsRunningCheck.Checked =JobID!=Guid.Empty || threshold.AgentIsRunningCheck;
-            chkAgentIsRunningCheck.Visible= JobID == Guid.Empty;
-
+            chkAgentIsRunningCheck.Checked = JobID != Guid.Empty || threshold.AgentIsRunningCheck;
+            chkAgentIsRunningCheck.Visible = JobID == Guid.Empty;
         }
 
         public AgentJobThreshold Threshold
@@ -143,7 +143,14 @@ namespace DBADashGUI.AgentJobs
 
         private void BttnUpdate_Click(object sender, EventArgs e)
         {
-            Threshold.Save(connectionString);
+            try
+            {
+                Threshold.Save(connectionString);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
             DialogResult = DialogResult.OK;
             Close();
         }

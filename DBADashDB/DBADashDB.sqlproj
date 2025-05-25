@@ -825,6 +825,7 @@
     <Build Include="dbo\Stored Procedures\RepositoryMetricsConfig_Del.sql" />
     <Build Include="dbo\Stored Procedures\DatabaseFinder_Get.sql" />
     <Build Include="dbo\Stored Procedures\QueryPlan_Get.sql" />
+    <Build Include="Security\AllowJobExecution.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

@@ -23,6 +23,8 @@ namespace DBADashGUI
 
         public static bool CommunityScripts;
 
+        public static bool AllowJobExecution;
+
         public static TimeZoneInfo UserTimeZone = TimeZoneInfo.Local;
 
         public static HashSet<string> Roles;
@@ -76,10 +78,11 @@ namespace DBADashGUI
             var pManageGlobalViews = new SqlParameter("ManageGlobalViews", SqlDbType.Bit) { Direction = ParameterDirection.Output };
             var pAllowMessaging = new SqlParameter("AllowMessaging", SqlDbType.Bit) { Direction = ParameterDirection.Output };
             var pAllowPlanForcing = new SqlParameter("AllowPlanForcing", SqlDbType.Bit) { Direction = ParameterDirection.Output };
+            var pAllowJobExecution = new SqlParameter("AllowJobExecution", SqlDbType.Bit) { Direction = ParameterDirection.Output };
             var pTZ = new SqlParameter("TimeZone", SqlDbType.VarChar, 50) { Direction = ParameterDirection.Output };
             var pTheme = new SqlParameter("Theme", SqlDbType.VarChar, 50) { Direction = ParameterDirection.Output };
             var pIsAdmin = new SqlParameter("IsAdmin", SqlDbType.Bit) { Direction = ParameterDirection.Output };
-            cmd.Parameters.AddRange(new[] { pUserID, pManageGlobalViews, pTZ, pTheme, pAllowMessaging, pAllowPlanForcing, pIsAdmin });
+            cmd.Parameters.AddRange(new[] { pUserID, pManageGlobalViews, pTZ, pTheme, pAllowMessaging, pAllowPlanForcing, pIsAdmin, pAllowJobExecution });
             using var rdr = cmd.ExecuteReader();
             Roles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             while (rdr.Read())
@@ -94,7 +97,8 @@ namespace DBADashGUI
                 UserID = (int)pUserID.Value;
                 HasManageGlobalViews = (bool)pManageGlobalViews.Value;
                 AllowMessaging = (bool)pAllowMessaging.Value;
-                AllowPlanForcing = (bool)pAllowPlanForcing.Value;
+                AllowPlanForcing = (bool)pAllowPlanForcing.Value && AllowMessaging;
+                AllowJobExecution = (bool)pAllowJobExecution.Value && AllowMessaging;
                 IsAdmin = (bool)pIsAdmin.Value;
                 CommunityScripts = (Roles.Contains("CommunityScripts") && AllowMessaging) || IsAdmin;
                 if (pTZ.Value != DBNull.Value)

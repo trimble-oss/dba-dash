@@ -1,18 +1,22 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADash;
+using DBADashGUI.Interface;
+using DBADashGUI.Messaging;
+using DBADashGUI.Performance;
+using DBADashGUI.Theme;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADash;
-using DBADashGUI.Performance;
-using DBADashGUI.Theme;
+using DBADashGUI.CustomReports;
 using SortOrder = System.Windows.Forms.SortOrder;
 
 namespace DBADashGUI.AgentJobs
 {
-    public partial class AgentJobsControl : UserControl, ISetContext
+    public partial class AgentJobsControl : UserControl, ISetContext, ISetStatus
     {
         private List<int> InstanceIDs;
         private int? instance_id;
@@ -46,54 +50,70 @@ namespace DBADashGUI.AgentJobs
             IncludeCritical = true;
             IncludeAcknowledged = true;
             InstanceIDs = _context.RegularInstanceIDs.ToList();
-
+            tsTriggerCollection.Visible = _context.CanMessage;
+            SetStatus("", "", DashColors.Information);
             SetSplitterDistance();
             RefreshData();
         }
 
         public void RefreshData()
         {
-            dgvJobs.Columns[0].Frozen = Common.FreezeKeyColumn;
-            dgvJobs.Columns[1].Frozen = Common.FreezeKeyColumn;
-            failedOnlyToolStripMenuItem.Checked = false;
-            splitContainer1.Panel2Collapsed = true;
-            dgvJobHistory.DataSource = null;
-            if (StepID > 0 && InstanceIDs.Count == 1)
+            try
             {
-                tsJobs.Visible = false;
-                dgvJobs.Visible = false;
-                jobStep1.Visible = true;
-                jobStep1.JobID = context.JobID;
-                jobID = context.JobID;
-                instanceId = InstanceIDs[0];
-                jobStep1.InstanceID = InstanceIDs[0];
-                jobStep1.StepID = StepID;
-                jobStep1.RefreshData();
-                ShowHistory();
+                if (InvokeRequired)
+                {
+                    Invoke(RefreshData);
+                    return;
+                }
+                dgvJobs.Columns[0].Frozen = Common.FreezeKeyColumn;
+                dgvJobs.Columns[1].Frozen = Common.FreezeKeyColumn;
+                failedOnlyToolStripMenuItem.Checked = false;
+                splitContainer1.Panel2Collapsed = true;
+                dgvJobHistory.DataSource = null;
+                if (StepID > 0 && InstanceIDs.Count == 1)
+                {
+                    tsJobs.Visible = false;
+                    dgvJobs.Visible = false;
+                    jobStep1.Visible = true;
+                    jobStep1.JobID = context.JobID;
+                    jobID = context.JobID;
+                    instanceId = InstanceIDs[0];
+                    jobStep1.InstanceID = InstanceIDs[0];
+                    jobStep1.StepID = StepID;
+                    jobStep1.RefreshData();
+                    ShowHistory();
+                }
+                else
+                {
+                    tsJobs.Visible = true;
+                    dgvJobs.Visible = true;
+                    jobStep1.Visible = false;
+                    var dt = GetJobs();
+                    dgvJobs.AutoGenerateColumns = false;
+                    var sort = "";
+                    if (dgvJobs.SortedColumn != null)
+                    {
+                        sort = dgvJobs.SortedColumn.DataPropertyName +
+                               (dgvJobs.SortOrder == SortOrder.Descending ? " DESC" : " ASC");
+                    }
+
+                    dgvJobs.DataSource = new DataView(dt, "", sort, DataViewRowState.CurrentRows);
+                    if (DoAutoSize) // AutoResize on first refresh only.  Persist user column widths after that.
+                    {
+                        dgvJobs.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                        DoAutoSize = false;
+                    }
+
+                    configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
+                    if (context.JobID != Guid.Empty && dt.Rows.Count == 1)
+                    {
+                        ShowHistory(dt.Rows[0], null);
+                    }
+                }
             }
-            else
+            catch (Exception ex)
             {
-                tsJobs.Visible = true;
-                dgvJobs.Visible = true;
-                jobStep1.Visible = false;
-                var dt = GetJobs();
-                dgvJobs.AutoGenerateColumns = false;
-                var sort = "";
-                if (dgvJobs.SortedColumn != null)
-                {
-                    sort = dgvJobs.SortedColumn.DataPropertyName + (dgvJobs.SortOrder == SortOrder.Descending ? " DESC" : " ASC");
-                }
-                dgvJobs.DataSource = new DataView(dt, "", sort, DataViewRowState.CurrentRows);
-                if (DoAutoSize) // AutoResize on first refresh only.  Persist user column widths after that.
-                {
-                    dgvJobs.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                    DoAutoSize = false;
-                }
-                configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
-                if (context.JobID != Guid.Empty && dt.Rows.Count == 1)
-                {
-                    ShowHistory(dt.Rows[0]);
-                }
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -122,18 +142,18 @@ namespace DBADashGUI.AgentJobs
 
         private void ConfigureRootThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            ConfigureThresholds(-1, Guid.Empty);
+            ConfigureThresholds(-1, Guid.Empty, this);
         }
 
         private void ConfigureInstanceThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (InstanceIDs.Count == 1)
             {
-                ConfigureThresholds(InstanceIDs[0], Guid.Empty);
+                ConfigureThresholds(InstanceIDs[0], Guid.Empty, this);
             }
         }
 
-        private void ConfigureThresholds(int InstanceID, Guid _jobID)
+        private static void ConfigureThresholds(int InstanceID, Guid _jobID, IRefreshData control)
         {
             var frm = new AgentJobThresholdsConfig
             {
@@ -144,7 +164,7 @@ namespace DBADashGUI.AgentJobs
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
-                RefreshData();
+                control.RefreshData();
             }
         }
 
@@ -152,44 +172,42 @@ namespace DBADashGUI.AgentJobs
         {
             if (e.RowIndex < 0) return;
             var row = (DataRowView)dgvJobs.Rows[e.RowIndex].DataBoundItem;
-            var _instanceId = (int)row["InstanceID"];
-            var jobId = (Guid)row["job_id"];
-            var jobName = (string)row["name"];
             if (dgvJobs.Columns[e.ColumnIndex].HeaderText == "Configure")
             {
-                ConfigureThresholds((int)row["InstanceID"], (Guid)row["job_id"]);
+                ConfigureThresholds(GetInstanceID(row), GetJobId(row), this);
             }
             else if (dgvJobs.Columns[e.ColumnIndex] == colHistory)
             {
-                failedOnlyToolStripMenuItem.Checked = false;
-                ShowHistory(row.Row);
+                ShowHistory(row.Row, false);
             }
             else if (e.ColumnIndex == Acknowledge.Index)
             {
-                var clear = (DBADashStatus.DBADashStatusEnum)row["JobStatus"] == DBADashStatus.DBADashStatusEnum.Acknowledged;
-                AcknowledgeJobErrors(_instanceId, jobId, clear);
-                RefreshData();
+                AcknowledgeRow(row, this);
             }
             else if (e.ColumnIndex == name.Index)
             {
-                try
-                {
-                    var jobContext = CommonData.GetDBADashContext(_instanceId);
-                    jobContext.Type = SQLTreeItem.TreeType.AgentJob;
-                    jobContext.JobID = jobId;
-                    jobContext.ObjectName = jobName;
-                    var frm = new JobInfoForm() { DBADashContext = jobContext };
-                    frm.Show();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                ShowJobInfoForm(row);
             }
         }
 
-        private void ShowHistory(DataRow row)
+        private static void AcknowledgeRow(DataRowView row, IRefreshData control)
         {
+            try
+            {
+                var clear = (DBADashStatus.DBADashStatusEnum)row["JobStatus"] ==
+                            DBADashStatus.DBADashStatusEnum.Acknowledged;
+                AcknowledgeJobErrors(GetInstanceID(row), GetJobId(row), clear);
+                control.RefreshData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public void ShowHistory(DataRow row, bool? failedOnly)
+        {
+            failedOnlyToolStripMenuItem.Checked = failedOnly ?? failedOnlyToolStripMenuItem.Checked;
             if (row["job_id"] != DBNull.Value)
             {
                 instanceId = (int)row["InstanceID"];
@@ -302,31 +320,29 @@ namespace DBADashGUI.AgentJobs
 
         private void DgvJobHistory_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex < 0) return;
+            var row = (DataRowView)dgvJobHistory.Rows[e.RowIndex].DataBoundItem;
+            if (e.ColumnIndex == colViewSteps.Index)
             {
-                var row = (DataRowView)dgvJobHistory.Rows[e.RowIndex].DataBoundItem;
-                if (e.ColumnIndex == colViewSteps.Index)
-                {
-                    instance_id = (int)row["instance_id"];
-                    ShowHistory();
-                }
-                else if (e.ColumnIndex == colMessage.Index)
-                {
-                    Convert.ToString(row["Message"]).OpenAsTextFile();
-                }
-                else if (e.ColumnIndex == colRunDuration.Index || e.ColumnIndex == colRunDurationSec.Index)
-                {
-                    var from = ((DateTime)dgvJobHistory.Rows[e.RowIndex].Cells[colRunDateTime.Index].Value).ToUniversalTime();
-                    var to = from.AddSeconds(
-                        Convert.ToDouble(dgvJobHistory.Rows[e.RowIndex].Cells[colRunDurationSec.Index].Value));
-                    var jobId = (Guid)row["job_id"];
-                    var id = (int)row["InstanceID"];
-                    RunningViewer?.Close();
-                    RunningViewer = new() { SnapshotDateFrom = from, SnapshotDateTo = to, InstanceID = id, JobId = jobId };
+                instance_id = (int)row["instance_id"];
+                ShowHistory();
+            }
+            else if (e.ColumnIndex == colMessage.Index)
+            {
+                Convert.ToString(row["Message"]).OpenAsTextFile();
+            }
+            else if (e.ColumnIndex == colRunDuration.Index || e.ColumnIndex == colRunDurationSec.Index)
+            {
+                var from = ((DateTime)dgvJobHistory.Rows[e.RowIndex].Cells[colRunDateTime.Index].Value).ToUniversalTime();
+                var to = from.AddSeconds(
+                    Convert.ToDouble(dgvJobHistory.Rows[e.RowIndex].Cells[colRunDurationSec.Index].Value));
+                var jobId = (Guid)row["job_id"];
+                var id = (int)row["InstanceID"];
+                RunningViewer?.Close();
+                RunningViewer = new() { SnapshotDateFrom = from, SnapshotDateTo = to, InstanceID = id, JobId = jobId };
 
-                    RunningViewer.FormClosed += delegate { RunningViewer = null; };
-                    RunningViewer.Show();
-                }
+                RunningViewer.FormClosed += delegate { RunningViewer = null; };
+                RunningViewer.Show();
             }
         }
 
@@ -378,7 +394,160 @@ namespace DBADashGUI.AgentJobs
         {
             dgvJobHistory.ApplyTheme();
             dgvJobs.ApplyTheme();
+            AddContextMenuItems(dgvJobs, this);
         }
+
+        #region Shared Context Menu
+
+        public static void AddContextMenuItems(DBADashDataGridView grid, IRefreshData control)
+        {
+            grid.CellContextMenu ??= new ContextMenuStrip();
+            var strip = grid.CellContextMenu;
+            var tsStartJob = new ToolStripMenuItem("Start/Stop Job", Properties.Resources.ProjectSystemModelRefresh_16x);
+            var tsConfig = new ToolStripMenuItem("Configure Thresholds", Properties.Resources.SettingsOutline_16x);
+            var tsConfigJob = new ToolStripMenuItem("Job Level", Properties.Resources.TableScript_16x);
+            var tsConfigInstance = new ToolStripMenuItem("Instance Level", Properties.Resources.Database_16x);
+            var tsConfigRoot = new ToolStripMenuItem("Root Level", Properties.Resources.StrongHierarchy_16x);
+            tsConfig.DropDownItems.AddRange(new ToolStripItem[] { tsConfigJob, tsConfigInstance, tsConfigRoot });
+            var tsJobInfo = new ToolStripMenuItem("Job Info", Properties.Resources.Information_blue_6227_16x16);
+            var tsJobHistory = new ToolStripMenuItem("Show History", Properties.Resources.Time_16x);
+            var tsAcknowledge = new ToolStripMenuItem("Acknowledge", Properties.Resources.Tick_Blue_32x32_72);
+            var lblJobName = new ToolStripLabel();
+            lblJobName.Font = new Font(lblJobName.Font, FontStyle.Italic);
+            tsJobHistory.Visible = control is AgentJobsControl;
+            tsAcknowledge.Visible = control is AgentJobsControl;
+            var tsJobActions = new ToolStripMenuItem("Agent Job Actions", Properties.Resources.MonthCalendar_16x);
+            tsJobActions.DropDownItems.AddRange(new ToolStripItem[]
+                {
+                    lblJobName,
+                    new ToolStripSeparator(),
+                    tsJobInfo,
+                    tsJobHistory,
+                    tsAcknowledge,
+                    tsConfig,
+                    tsStartJob
+                }
+                );
+
+            tsStartJob.Click += (_, _) =>
+            {
+                var row = (DataRowView)grid.Rows[grid.ClickedRowIndex].DataBoundItem;
+                StartJob(row);
+            };
+            tsConfigJob.Click += (_, _) =>
+            {
+                var row = (DataRowView)grid.Rows[grid.ClickedRowIndex].DataBoundItem;
+                ConfigureThresholds(GetInstanceID(row), GetJobId(row), control);
+            };
+            tsConfigInstance.Click += (_, _) =>
+            {
+                var row = (DataRowView)grid.Rows[grid.ClickedRowIndex].DataBoundItem;
+                ConfigureThresholds(GetInstanceID(row), Guid.Empty, control);
+            };
+            tsConfigRoot.Click += (_, _) =>
+            {
+                ConfigureThresholds(-1, Guid.Empty, control);
+            };
+            tsJobInfo.Click += (_, _) =>
+            {
+                var row = (DataRowView)grid.Rows[grid.ClickedRowIndex].DataBoundItem;
+                ShowJobInfoForm(row);
+            };
+            tsJobHistory.Click += (_, _) =>
+            {
+                var row = (DataRowView)grid.Rows[grid.ClickedRowIndex].DataBoundItem;
+                ((AgentJobsControl)control).ShowHistory(row.Row, false);
+            };
+            tsAcknowledge.Click += (_, _) =>
+            {
+                var row = (DataRowView)grid.Rows[grid.ClickedRowIndex].DataBoundItem;
+                AcknowledgeRow(row, control);
+            };
+            strip.Opening += (_, _) =>
+            {
+                var row = (DataRowView)grid.Rows[grid.ClickedRowIndex].DataBoundItem;
+                lblJobName.Text = GetJobName(row);
+                lblJobName.Visible = !string.IsNullOrEmpty(lblJobName.Text);
+
+                if (tsAcknowledge.Visible)
+                {
+                    var jobStatus = (DBADashStatus.DBADashStatusEnum)row["JobStatus"];
+                    tsAcknowledge.Text =
+                        jobStatus == DBADashStatus.DBADashStatusEnum.Acknowledged ? "Clear Acknowledgement" : "Acknowledge";
+                    tsAcknowledge.Enabled = jobStatus is DBADashStatus.DBADashStatusEnum.Critical
+                        or DBADashStatus.DBADashStatusEnum.Warning or DBADashStatus.DBADashStatusEnum.Acknowledged;
+                }
+
+                tsStartJob.Visible = DBADashUser.AllowJobExecution;
+            };
+            strip.Items.Insert(0, new ToolStripSeparator());
+            strip.Items.Insert(0, tsJobActions);
+        }
+
+        private static string GetJobName(DataRowView row)
+        {
+            if (row.Row.Table.Columns.Contains("name"))
+            {
+                return (string)row["name"];
+            }
+            else if (row.Row.Table.Columns.Contains("JobName"))
+            {
+                return (string)row["JobName"];
+            }
+            else if (row.Row.Table.Columns.Contains("job_name"))
+            {
+                return (string)row["job_name"];
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+
+        private static int GetInstanceID(DataRowView row)
+        {
+            return (int)row["InstanceID"];
+        }
+
+        private static Guid GetJobId(DataRowView row)
+        {
+            return (Guid)row["job_id"];
+        }
+
+        private static void StartJob(DataRowView row)
+        {
+            RunJob(GetJobId(row), GetInstanceID(row), GetJobName(row));
+        }
+
+        private static void ShowJobInfoForm(DataRowView row)
+        {
+            try
+            {
+                var jobContext = CommonData.GetDBADashContext(GetInstanceID(row));
+                jobContext.Type = SQLTreeItem.TreeType.AgentJob;
+                jobContext.JobID = GetJobId(row);
+                jobContext.ObjectName = GetJobName(row);
+                var frm = new JobInfoForm() { DBADashContext = jobContext };
+                frm.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private static void RunJob(Guid jobId, int _instanceId, string jobName)
+        {
+            var runJobDialog = new JobExecutionDialog()
+            {
+                InstanceId = _instanceId,
+                JobId = jobId,
+                JobName = jobName,
+            };
+            runJobDialog.Show();
+        }
+
+        #endregion Shared Context Menu
 
         private void UserChangedStatusFilter(object sender, EventArgs e)
         {
@@ -453,6 +622,29 @@ namespace DBADashGUI.AgentJobs
                 {
                     dgvJobHistory.Rows[idx].DefaultCellStyle.Font = new Font(dgvJobHistory.Font, FontStyle.Italic);
                 }
+            }
+        }
+
+        private async void TriggerCollection_Click(object sender, EventArgs e)
+        {
+            var types = new List<CollectionType>()
+            {
+                CollectionType.JobHistory, CollectionType.Jobs, CollectionType.RunningJobs
+            };
+            if (context.CollectAgentID == null || context.ImportAgentID == null) return;
+            await CollectionMessaging.TriggerCollection(context.ConnectionID, types, context.CollectAgentID.Value, context.ImportAgentID.Value, this);
+        }
+
+        public void SetStatus(string message, string tooltip, Color color)
+        {
+            tsStatus.InvokeSetStatus(message, tooltip, color);
+            if (message.Contains("completed", StringComparison.OrdinalIgnoreCase))
+            {
+                _ = Task.Run(() =>
+                {
+                    Task.Delay(3000);
+                    RefreshData();
+                });
             }
         }
     }

@@ -27,12 +27,17 @@ namespace DBADashGUI.Messaging
         private static readonly List<CollectionType> RecentlyTriggeredExcludedList = new()
         {
             CollectionType.RunningQueries, CollectionType.AvailabilityGroups, CollectionType.AvailabilityReplicas,
-            CollectionType.DatabasesHADR
+            CollectionType.DatabasesHADR, CollectionType.RunningJobs
         };
 
         public static async Task TriggerCollection(string connectionID, CollectionType type, int collectAgentID, int importAgentID, ISetStatus control)
         {
             await TriggerCollection(connectionID, new List<string>() { Enum.GetName(type) }, collectAgentID, importAgentID, control);
+        }
+
+        public static async Task TriggerCollection(string connectionID, List<CollectionType> types, int collectAgentID, int importAgentID, ISetStatus control)
+        {
+            await TriggerCollection(connectionID, types.Select(Enum.GetName).ToList(), collectAgentID, importAgentID, control);
         }
 
         public static async Task TriggerCollection(string connectionID, string type, int collectAgentID, int importAgentID, ISetStatus control)
@@ -41,7 +46,7 @@ namespace DBADashGUI.Messaging
         }
 
         public static async Task TriggerCollection(string connectionID, List<string> types, int collectAgentID, int importAgentID,
-            ISetStatus control,string db=null)
+            ISetStatus control, string db = null)
         {
             if (PendingRequests >= PendingRequestsThreshold)
             {
@@ -66,10 +71,9 @@ namespace DBADashGUI.Messaging
             var typesString = string.Join(", ", types.Select(s => s.ToString()));
             var messageBase = $"{typesString} collection for {key}: ";
 
-
             var collectAgent = DBADashAgent.GetDBADashAgent(Common.ConnectionString, collectAgentID);
             var importAgent = DBADashAgent.GetDBADashAgent(Common.ConnectionString, importAgentID);
-            var x = new CollectionMessage(types, connectionID) { CollectAgent = collectAgent, ImportAgent = importAgent, DatabaseName = db, Lifetime = CollectionDialogLifetime};
+            var x = new CollectionMessage(types, connectionID) { CollectAgent = collectAgent, ImportAgent = importAgent, DatabaseName = db, Lifetime = CollectionDialogLifetime };
 
             var payload = x.Serialize();
             var messageGroup = Guid.NewGuid();
@@ -83,7 +87,7 @@ namespace DBADashGUI.Messaging
             await Task.Run(() => ReceiveReply(messageGroup, messageBase, control));
         }
 
-        public static async Task TriggerCollection(int InstanceID, List<CollectionType> types, ISetStatus control,string db=null)
+        public static async Task TriggerCollection(int InstanceID, List<CollectionType> types, ISetStatus control, string db = null)
         {
             var row = CommonData.Instances.AsEnumerable().FirstOrDefault(i => (int)i["InstanceID"] == InstanceID);
             if (row == null) return;
@@ -96,7 +100,7 @@ namespace DBADashGUI.Messaging
                 MessageBox.Show("Messaging is not enabled for this instance", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            await TriggerCollection(connectionID, types.Select(Enum.GetName).ToList(), collectAgentID, importAgentID, control,db);
+            await TriggerCollection(connectionID, types.Select(Enum.GetName).ToList(), collectAgentID, importAgentID, control, db);
         }
 
         public static async Task TriggerCollection(int InstanceID, CollectionType type, ISetStatus control)
@@ -119,26 +123,28 @@ namespace DBADashGUI.Messaging
             {
                 var completed = false;
                 while (!completed)
-                { 
-                    var reply = await ReceiveReply(group, CollectionDialogLifetime*1000);
+                {
+                    var reply = await ReceiveReply(group, CollectionDialogLifetime * 1000);
                     switch (reply.Type)
                     {
                         case ResponseMessage.ResponseTypes.Failure:
                             control.SetStatus(messageBase + reply.Message, reply.Exception?.ToString(), DashColors.Fail);
                             completed = true;
                             break;
+
                         case ResponseMessage.ResponseTypes.EndConversation:
                             completed = true;
                             break;
+
                         case ResponseMessage.ResponseTypes.Progress:
                             control.SetStatus(messageBase + reply.Message, null, DashColors.Information);
                             break;
+
                         case ResponseMessage.ResponseTypes.Success:
                             control.SetStatus(messageBase + reply.Message, null, DashColors.Success);
                             control.RefreshData();
                             break;
                     }
-
                 }
             }
             catch (Exception ex)
@@ -156,7 +162,7 @@ namespace DBADashGUI.Messaging
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
             await using var cmd = new SqlCommand("Messaging.ReceiveReplyFromServiceToGUI", cn)
-                { CommandType = CommandType.StoredProcedure, CommandTimeout = 0 };
+            { CommandType = CommandType.StoredProcedure, CommandTimeout = 0 };
             cmd.Parameters.AddWithValue("@ConversationGroupID", group);
             cmd.Parameters.AddWithValue("@Timeout", timeout);
             await cn.OpenAsync();
@@ -191,7 +197,6 @@ namespace DBADashGUI.Messaging
                             return new ResponseMessage()
                             { Message = message + ex.Message, Type = ResponseMessage.ResponseTypes.Failure };
                         }
-
                     }
                 case MessageProcessing.EndDialogMessageType:
                     try
@@ -213,7 +218,6 @@ namespace DBADashGUI.Messaging
                     return new ResponseMessage()
                     { Message = $"Unknown message type: {reply.Type}", Type = ResponseMessage.ResponseTypes.Failure };
             }
-
         }
 
         public static string ServiceBrokerXMLErrorToSimpleString(string xml)
@@ -247,8 +251,6 @@ namespace DBADashGUI.Messaging
             return xml;
         }
 
-
-        
         private static bool IsRecentlyTriggered(string instanceName, string typeName)
         {
             lock (LockObject)
