@@ -1008,5 +1008,32 @@ namespace DBADashGUI.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+
+        internal static System.Drawing.Bitmap MonthCalendar_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("MonthCalendar_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap Tick_Blue_32x32_72
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("Tick_Blue_32x32_72", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        internal static System.Drawing.Bitmap StrongHierarchy_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("StrongHierarchy_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
     }
 }

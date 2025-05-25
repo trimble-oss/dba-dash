@@ -6,12 +6,14 @@
 	@Theme VARCHAR(50)=NULL OUT,
 	@AllowMessaging BIT =NULL OUT,
 	@AllowPlanForcing BIT =NULL OUT,
-	@IsAdmin BIT=NULL OUT
+	@IsAdmin BIT=NULL OUT,
+	@AllowJobExecution BIT=NULL OUT
 )
 AS
 SELECT @ManageGlobalViews = IS_ROLEMEMBER('db_owner') | IS_ROLEMEMBER('ManageGlobalViews')
 SELECT @AllowMessaging = ISNULL(HAS_PERMS_BY_NAME('Messaging','SCHEMA','EXECUTE'),0)
 SELECT @AllowPlanForcing = IS_ROLEMEMBER('db_owner') | IS_ROLEMEMBER('AllowPlanForcing')
+SELECT @AllowJobExecution = IS_ROLEMEMBER('db_owner') | IS_ROLEMEMBER('AllowJobExecution')
 SELECT @IsAdmin = IS_ROLEMEMBER('db_owner')
 
 SELECT	@UserID = UserID,

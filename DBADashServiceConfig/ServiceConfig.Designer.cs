@@ -76,6 +76,10 @@ namespace DBADashServiceConfig
             numAlertPollingFrequency = new System.Windows.Forms.NumericUpDown();
             chkProcessAlerts = new System.Windows.Forms.CheckBox();
             groupBox6 = new System.Windows.Forms.GroupBox();
+            lnkAllowNoJobs = new System.Windows.Forms.LinkLabel();
+            lnkAllowAllJobs = new System.Windows.Forms.LinkLabel();
+            txtAllowedJobs = new System.Windows.Forms.TextBox();
+            label21 = new System.Windows.Forms.Label();
             lnkAllowExplicit = new System.Windows.Forms.LinkLabel();
             lnkAllowNone = new System.Windows.Forms.LinkLabel();
             lnkAllowAll = new System.Windows.Forms.LinkLabel();
@@ -614,9 +618,9 @@ namespace DBADashServiceConfig
             groupBox7.Controls.Add(label19);
             groupBox7.Controls.Add(numAlertPollingFrequency);
             groupBox7.Controls.Add(chkProcessAlerts);
-            groupBox7.Location = new System.Drawing.Point(9, 604);
+            groupBox7.Location = new System.Drawing.Point(8, 631);
             groupBox7.Name = "groupBox7";
-            groupBox7.Size = new System.Drawing.Size(1112, 91);
+            groupBox7.Size = new System.Drawing.Size(1112, 84);
             groupBox7.TabIndex = 40;
             groupBox7.TabStop = false;
             groupBox7.Text = "Alerts";
@@ -696,6 +700,10 @@ namespace DBADashServiceConfig
             // 
             // groupBox6
             // 
+            groupBox6.Controls.Add(lnkAllowNoJobs);
+            groupBox6.Controls.Add(lnkAllowAllJobs);
+            groupBox6.Controls.Add(txtAllowedJobs);
+            groupBox6.Controls.Add(label21);
             groupBox6.Controls.Add(lnkAllowExplicit);
             groupBox6.Controls.Add(lnkAllowNone);
             groupBox6.Controls.Add(lnkAllowAll);
@@ -709,10 +717,50 @@ namespace DBADashServiceConfig
             groupBox6.Controls.Add(chkEnableMessaging);
             groupBox6.Location = new System.Drawing.Point(9, 417);
             groupBox6.Name = "groupBox6";
-            groupBox6.Size = new System.Drawing.Size(1112, 181);
+            groupBox6.Size = new System.Drawing.Size(1112, 208);
             groupBox6.TabIndex = 39;
             groupBox6.TabStop = false;
             groupBox6.Text = "Messaging";
+            // 
+            // lnkAllowNoJobs
+            // 
+            lnkAllowNoJobs.AutoSize = true;
+            lnkAllowNoJobs.Location = new System.Drawing.Point(665, 178);
+            lnkAllowNoJobs.Name = "lnkAllowNoJobs";
+            lnkAllowNoJobs.Size = new System.Drawing.Size(50, 20);
+            lnkAllowNoJobs.TabIndex = 15;
+            lnkAllowNoJobs.TabStop = true;
+            lnkAllowNoJobs.Text = "NONE";
+            lnkAllowNoJobs.LinkClicked += lnkAllowNoJobs_LinkClicked;
+            // 
+            // lnkAllowAllJobs
+            // 
+            lnkAllowAllJobs.AutoSize = true;
+            lnkAllowAllJobs.Location = new System.Drawing.Point(626, 178);
+            lnkAllowAllJobs.Name = "lnkAllowAllJobs";
+            lnkAllowAllJobs.Size = new System.Drawing.Size(33, 20);
+            lnkAllowAllJobs.TabIndex = 14;
+            lnkAllowAllJobs.TabStop = true;
+            lnkAllowAllJobs.Text = "ALL";
+            lnkAllowAllJobs.LinkClicked += lnkAllowAllJobs_LinkClicked;
+            // 
+            // txtAllowedJobs
+            // 
+            txtAllowedJobs.Location = new System.Drawing.Point(247, 175);
+            txtAllowedJobs.Name = "txtAllowedJobs";
+            txtAllowedJobs.Size = new System.Drawing.Size(370, 27);
+            txtAllowedJobs.TabIndex = 13;
+            txtAllowedJobs.TextChanged += AllowedJobs_TextChanged;
+            // 
+            // label21
+            // 
+            label21.AutoSize = true;
+            label21.Location = new System.Drawing.Point(18, 172);
+            label21.Name = "label21";
+            label21.Size = new System.Drawing.Size(159, 20);
+            label21.TabIndex = 12;
+            label21.Text = "Allowed Job Execution";
+            toolTip1.SetToolTip(label21, "Comma separated list of allowed jobs, categories or job IDs.  Prefix with - to deny.  Use * or % as wildcard characters. ");
             // 
             // lnkAllowExplicit
             // 
@@ -1873,6 +1921,10 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.CheckBox chkAlertStartupDelay;
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.NumericUpDown numAlertStartupDelay;
+        private System.Windows.Forms.LinkLabel lnkAllowNoJobs;
+        private System.Windows.Forms.LinkLabel lnkAllowAllJobs;
+        private System.Windows.Forms.TextBox txtAllowedJobs;
+        private System.Windows.Forms.Label label21;
     }
 }
 

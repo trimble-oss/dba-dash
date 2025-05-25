@@ -25,6 +25,8 @@ namespace DBADashGUI.AgentJobs
         public bool LastFailIsWarning { get; set; }
         public bool AgentIsRunningCheck { get; set; }
 
+        public string ConfiguredAt { get; set; }
+
         public bool IsRootLevel => InstanceID == -1 && JobID == Guid.Empty;
 
         public static AgentJobThreshold GetAgentJobThreshold(int InstanceID, Guid JobID, string connectionString)
@@ -60,19 +62,43 @@ namespace DBADashGUI.AgentJobs
                 threshold.LastFailIsWarning = rdr["LastFailIsWarning"] != DBNull.Value && (bool)rdr["LastFailIsWarning"];
                 threshold.AgentIsRunningCheck = rdr["AgentIsRunningCheck"] != DBNull.Value && (bool)rdr["AgentIsRunningCheck"];
             }
-            else if(JobID != Guid.Empty) // No threshold at Job level.  Get threshold for instance, marking as inherited
+            else if (JobID != Guid.Empty) // No threshold at Job level.  Get threshold for instance, marking as inherited
             {
                 threshold = GetAgentJobThreshold(InstanceID, Guid.Empty, connectionString);
                 threshold.JobID = JobID;
-                threshold.IsInherited = true; 
+                threshold.IsInherited = true;
             }
-            else if(InstanceID!=-1) // No threshold at instance level. Get root level threshold, marking as inherited
+            else if (InstanceID != -1) // No threshold at instance level. Get root level threshold, marking as inherited
             {
                 threshold = GetAgentJobThreshold(-1, Guid.Empty, connectionString);
                 threshold.JobID = JobID;
                 threshold.InstanceID = InstanceID;
                 threshold.IsInherited = true;
             }
+
+            if (JobID == Guid.Empty && InstanceID == -1)
+            {
+                threshold.ConfiguredAt = "{Root}";
+            }
+            else if (JobID != Guid.Empty)
+            {
+                var job = CommonData.GetJobs(InstanceID, JobID);
+                var instance = CommonData.GetDBADashContext(InstanceID);
+                if (job.Rows.Count == 1)
+                {
+                    threshold.ConfiguredAt = instance.InstanceName + " \\ " + job.Rows[0].Field<string>("name");
+                }
+                else
+                {
+                    threshold.ConfiguredAt = instance.InstanceName + " \\ ??";
+                }
+            }
+            else
+            {
+                var instance = CommonData.GetDBADashContext(InstanceID);
+                threshold.ConfiguredAt = instance.InstanceName;
+            }
+
             return threshold;
         }
 

@@ -821,6 +821,7 @@ namespace DBADashServiceConfig
                 txtSQS.Text = collectionConfig.ServiceSQSQueueUrl;
                 chkAllowPlanForcing.Checked = collectionConfig.AllowPlanForcing;
                 txtAllowScripts.Text = collectionConfig.AllowedScripts;
+                txtAllowedJobs.Text = collectionConfig.AllowedJobs;
                 chkProcessAlerts.Checked = collectionConfig.ProcessAlerts;
                 chkAlertPollingFrequency.Checked = collectionConfig.AlertProcessingFrequencySeconds != null;
                 numAlertPollingFrequency.Value = collectionConfig.AlertProcessingFrequencySeconds ?? CollectionConfig.DefaultAlertProcessingFrequencySeconds;
@@ -2337,6 +2338,21 @@ Cancel = cancel the operation.", @"Mark deleted?", MessageBoxButtons.YesNoCancel
                 : CollectionConfig.DefaultAlertProcessingStartupDelaySeconds;
             numAlertStartupDelay.Enabled = chkAlertStartupDelay.Checked && chkProcessAlerts.Checked;
             SetJson();
+        }
+
+        private void lnkAllowAllJobs_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            txtAllowedJobs.Text = "*";
+        }
+
+        private void lnkAllowNoJobs_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            txtAllowedJobs.Text = string.Empty;
+        }
+
+        private void AllowedJobs_TextChanged(object sender, EventArgs e)
+        {
+            collectionConfig.AllowedJobs = txtAllowedJobs.Text;
         }
     }
 }

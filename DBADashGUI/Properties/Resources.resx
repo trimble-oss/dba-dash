@@ -379,4 +379,13 @@
   <data name="SelectCell_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\SelectCell_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="MonthCalendar_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\MonthCalendar_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Tick_Blue_32x32_72" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\112_Tick_Blue_32x32_72.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="StrongHierarchy_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\StrongHierarchy_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

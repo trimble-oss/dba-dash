@@ -12,6 +12,8 @@ namespace DBADashGUI.Messaging
     {
         public delegate Task MessageCompletedDelegate(ResponseMessage reply, Guid messageGroup);
 
+        public delegate Task MessageResponseDelegate(ResponseMessage reply, Guid messageGroup);
+
         public delegate void SetStatusDelegate(string message, string details, Color color);
 
         public static async Task SendMessageAndProcessReply(MessageBase message, DBADashContext context,
