@@ -373,5 +373,42 @@ namespace DBADashGUI.DBADashAlerts
                 yield return result;
             }
         }
+
+        public List<string> Placeholders => new List<string>
+        {
+            "{Title}",
+            "{Instance}",
+            "{AlertKey}",
+            "{Action}",
+            "{Text}",
+            "{Icon}",
+            "{IconUrl}",
+            "{Emoji}",
+            "{ThreadKey}",
+            "{Priority}"
+        };
+
+        public string ReplacePlaceholders(Alert alert, string template)
+        {
+            return template.Replace("{Title}", EscapeText($"{alert.AlertName}[{alert.Status}]"), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{Instance}", EscapeText(alert.ConnectionID), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{AlertKey}", EscapeText(alert.AlertName), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{Action}", EscapeText(alert.Action), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{Text}", EscapeText(alert.Message), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{Icon}", alert.GetIcon(), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{IconUrl}", alert.GetIconUrl(), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{Emoji}", alert.GetEmoji(), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{ThreadKey}", EscapeText(alert.ThreadKey), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{Priority}", EscapeText(alert.Priority.ToString()), StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        public virtual string EscapeText(string text) => text;
+
+        public static string EscapeTextJson(string text)
+        {
+            // Serialize the text to a JSON string, which handles escaping.
+            // and trim the leading and trailing double quotes from the serialized string.
+            return System.Text.Json.JsonSerializer.Serialize(text).Trim('"');
+        }
     }
 }

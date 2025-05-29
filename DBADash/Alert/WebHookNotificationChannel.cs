@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -163,12 +164,7 @@ namespace DBADash.Alert
 
         private const string GoogleWebhookReplyOption = "&messageReplyOption=REPLY_MESSAGE_FALLBACK_TO_NEW_THREAD";
 
-        public static string EscapeText(string text)
-        {
-            // Serialize the text to a JSON string, which handles escaping.
-            // and trim the leading and trailing double quotes from the serialized string.
-            return System.Text.Json.JsonSerializer.Serialize(text).Trim('"');
-        }
+        public override string EscapeText(string text) => EscapeTextJson(text);
 
         protected override async Task InternalSendNotificationAsync(Alert alert, string connectionString)
         {
@@ -179,7 +175,7 @@ namespace DBADash.Alert
             }
 
             using var client = new HttpClient();
-            var payload = GeneratePayloadFromTemplate(alert, Template);
+            var payload = ReplacePlaceholders(alert, Template);
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
             var response = await client.PostAsync(url, content);
             response.EnsureSuccessStatusCode();
@@ -191,21 +187,16 @@ namespace DBADash.Alert
             {
                 yield return new ValidationResult("Webhook Url is required");
             }
-
+            if (!string.IsNullOrEmpty(MessageTemplate))
+            {
+                if (!Placeholders.Any(p => MessageTemplate.ToString().Contains(p, StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    yield return new ValidationResult($"Message template must contain at least one of the following placeholders: {string.Join(", ", Placeholders)}.  Or leave blank to use the default template.");
+                }
+            }
             foreach (var validationResult in ValidateBase(validationContext)) yield return validationResult;
         }
 
-        public static string GeneratePayloadFromTemplate(Alert alert, string template)
-        {
-            return template.Replace("{title}", EscapeText($"{alert.AlertName}[{alert.Status}]"), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{instance}", EscapeText(alert.ConnectionID), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{AlertKey}", EscapeText(alert.AlertName), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{Action}", EscapeText(alert.Action), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{text}", EscapeText(alert.Message), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{icon}", alert.GetIcon(), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{IconUrl}", alert.GetIconUrl(), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{emoji}", alert.GetEmoji(), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{threadkey}", EscapeText(alert.ThreadKey), StringComparison.InvariantCultureIgnoreCase);
-        }
+
     }
 }
