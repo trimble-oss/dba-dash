@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -119,6 +120,13 @@ namespace DBADash.Alert
             if (string.IsNullOrEmpty(ToEmail))
             {
                 yield return new ValidationResult("Email to is required");
+            }
+            if(!string.IsNullOrEmpty(EmailMessageTemplate) && !string.IsNullOrEmpty(EmailSubjectTemplate))
+            {
+                if (!Placeholders.Any(p => EmailMessageTemplate.Contains(p, StringComparison.InvariantCultureIgnoreCase) || EmailSubjectTemplate.Contains(p, StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    yield return new ValidationResult($"Email templates must contain at least one of the following placeholders: {string.Join(", ", Placeholders)}.  Or leave blank to use the default template.");
+                }
             }
 
             foreach (var validationResult in ValidateBase(validationContext)) yield return validationResult;

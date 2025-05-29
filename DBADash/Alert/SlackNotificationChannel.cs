@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,13 +34,14 @@ namespace DBADash.Alert
             ? WebhookNotificationChannel.SlackTemplate
             : MessageTemplate;
 
+        public override string EscapeText(string text)=> EscapeTextJson(text);
+
         protected override async Task InternalSendNotificationAsync(Alert alert, string connectionString)
         {
             using var client = new HttpClient();
             const string url = "https://slack.com/api/chat.postMessage";
 
-            var payload =
-                WebhookNotificationChannel.GeneratePayloadFromTemplate(alert, Template);
+            var payload = ReplacePlaceholders(alert, Template);
 
             // Add channel to the template
             var jObj = JObject.Parse(payload);
@@ -91,6 +93,13 @@ namespace DBADash.Alert
             if (string.IsNullOrEmpty(Token))
             {
                 yield return new ValidationResult("Token is required");
+            }
+            if (!string.IsNullOrEmpty(MessageTemplate))
+            {
+                if (!Placeholders.Any(p => MessageTemplate.ToString().Contains(p, StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    yield return new ValidationResult($"Message template must contain at least one of the following placeholders: {string.Join(", ", Placeholders)}.  Or leave blank to use the default template.");
+                }
             }
 
             foreach (var validationResult in ValidateBase(validationContext)) yield return validationResult;
