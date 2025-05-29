@@ -42,6 +42,8 @@ namespace DBADashGUI
         public static int SlowQueriesDrillDownMaxRows;
         public static int CollectionTriggerWarningLimit;
         public static int CollectionTriggerLimit;
+        public static int AlertAutoCloseThresholdMins;
+        public static int AlertMaxNotificationCount;
 
         static Config()
         {
@@ -72,7 +74,7 @@ namespace DBADashGUI
             using var rdr = cmd.ExecuteReader();
             while (rdr.Read())
             {
-                var setting = (string)rdr["SettingName"];
+                var setting = ((string)rdr["SettingName"]).Trim();
                 var value = rdr["SettingValue"].DBNullToNull();
                 settings.Add(setting, value);
             }
@@ -110,6 +112,8 @@ namespace DBADashGUI
             SlowQueriesDrillDownMaxRows = settings.GetValueAsInt("GUISlowQueriesDrillDownMaxRows", 1000);
             CollectionTriggerLimit = settings.GetValueAsInt("CollectionTriggerLimit", 500);
             CollectionTriggerWarningLimit = settings.GetValueAsInt("CollectionTriggerWarningLimit", 100);
+            AlertAutoCloseThresholdMins = settings.GetValueAsInt("AlertAutoCloseThresholdMins", 1440);
+            AlertMaxNotificationCount = settings.GetValueAsInt("AlertMaxNotificationCount", 6);
         }
 
         public static void ResetDefaults()

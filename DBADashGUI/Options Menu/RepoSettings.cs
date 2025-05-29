@@ -8,13 +8,17 @@ namespace DBADashGUI.Options_Menu
 {
     public partial class RepoSettings : Form
     {
-        private const int AlertAutoCloseThresholdMins = 1440;
-        private const int AlertMaxNotificationCount = 6;
-
         public RepoSettings()
         {
             InitializeComponent();
             this.ApplyTheme();
+            this.FormClosing += (s, e) =>
+            {
+                if (dgv.IsCurrentCellDirty)
+                {
+                    dgv.CommitEdit(DataGridViewDataErrorContexts.Commit);
+                }
+            };
         }
 
         private List<(string SettingName, string Description, Type DataType, object value)> Settings => new()
@@ -40,8 +44,8 @@ namespace DBADashGUI.Options_Menu
             ("CriticalWaitWarningThreshold","Critical wait ms/sec warning threshold. Performance summary tab.",typeof(int), Config.CriticalWaitWarningThreshold),
             ("HardDeleteThresholdDays","Remove all the data associated with a (soft) deleted instance a specified number of days after the last collection.",typeof(int?),Config.HardDeleteThresholdDays ),
             ("GUISlowQueriesDrillDownMaxRows", "Max drill down rows for Slow Queries tab", typeof(int),Config.SlowQueriesDrillDownMaxRows),
-            ("AlertAutoCloseThresholdMins","Automatically close resolved alerts after a specified period of time (mins)", typeof(int),AlertAutoCloseThresholdMins ),
-            ("AlertMaxNotificationCount " , "Maximum number of alert notifications to send" , typeof(int) , AlertMaxNotificationCount),
+            ("AlertAutoCloseThresholdMins","Automatically close resolved alerts after a specified period of time (mins)", typeof(int),Config.AlertAutoCloseThresholdMins ),
+            ("AlertMaxNotificationCount" , "Maximum number of alert notifications to send" , typeof(int) , Config.AlertMaxNotificationCount),
             ("ExcludeClosedAlertsWithNotesFromPurge","Exclude closed alerts with notes from data retention",typeof(bool),true),
             ("CollectionTriggerLimit","Maximum number of collections that can be triggered on Collection Dates tab.",typeof(int), Config.CollectionTriggerLimit),
             ("CollectionTriggerWarningLimit","Maximum number of collections that can be triggered before warning icon is displayed on Collection Dates tab.",typeof(int), Config.CollectionTriggerWarningLimit)
