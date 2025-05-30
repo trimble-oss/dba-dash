@@ -10,6 +10,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DBADashGUI.AgentJobs;
 
 namespace DBADashGUI
 {
@@ -252,9 +253,15 @@ namespace DBADashGUI
             Type = type;
             _attributes = attributes;
             SetIcon();
-            if (type is TreeType.DBADashRoot or TreeType.Instance or TreeType.InstanceFolder or TreeType.AzureInstance)
+            switch (type)
             {
-                AddFindDatabase();
+                case TreeType.DBADashRoot or TreeType.Instance or TreeType.InstanceFolder or TreeType.AzureInstance:
+                    AddFindDatabase();
+                    break;
+
+                case TreeType.AgentJob:
+                    AddAgentJobContextMenuItems();
+                    break;
             }
         }
 
@@ -601,7 +608,7 @@ namespace DBADashGUI
         private void AddRefreshContextMenu()
         {
             ContextMenuStrip ??= new ContextMenuStrip();
-            if (ContextMenuStrip.Items.Cast<ToolStripMenuItem>().Any(mnu => mnu.Text == @"Refresh")) return;
+            if (ContextMenuStrip.Items.OfType<ToolStripMenuItem>().Any(mnu => mnu.Text == @"Refresh")) return;
             var mnuRefresh = new ToolStripMenuItem("Refresh") { Image = Resources._112_RefreshArrow_Green_16x16_72 };
             ContextMenuStrip.Items.Add(mnuRefresh);
             mnuRefresh.Click += MnuRefresh_Click;
@@ -614,6 +621,51 @@ namespace DBADashGUI
             var mnuFindDB = new ToolStripMenuItem("Find Database") { Image = Resources.Database_16x };
             ContextMenuStrip.Items.Add(mnuFindDB);
             mnuFindDB.Click += FindDatabase;
+        }
+
+        private void AddAgentJobContextMenuItems()
+        {
+            ContextMenuStrip ??= new ContextMenuStrip();
+            if (ContextMenuStrip.Items.Cast<ToolStripMenuItem>().Any(mnu => mnu.Text == @"Start/Stop Job")) return;
+            var mnuStartStop = new ToolStripMenuItem("Start/Stop Job") { Image = Resources.ProjectSystemModelRefresh_16x };
+            var mnuInfo = new ToolStripMenuItem("Job Info", Resources.Information_blue_6227_16x16);
+            var mnuConfigureThresholds =
+                new ToolStripMenuItem("Configure Thresholds", Resources.SettingsOutline_16x);
+            ContextMenuStrip.Items.AddRange(new ToolStripItem[] { mnuInfo, mnuConfigureThresholds, mnuStartStop, new ToolStripSeparator() });
+            mnuStartStop.Click += StartStopJob_Click;
+            mnuInfo.Click += JobInfo_Click;
+            mnuConfigureThresholds.Click += ConfigureJobThresholds_Click;
+        }
+
+        private void ConfigureJobThresholds_Click(object sender, EventArgs e)
+        {
+            var frm = new AgentJobThresholdsConfig()
+            {
+                InstanceID = Context.InstanceID,
+                JobID = Context.JobID,
+                connectionString = Common.ConnectionString
+            };
+            frm.Show();
+        }
+
+        private void JobInfo_Click(object sender, EventArgs e)
+        {
+            var frm = new JobInfoForm()
+            {
+                DBADashContext = Context
+            };
+            frm.Show();
+        }
+
+        private void StartStopJob_Click(object sender, EventArgs e)
+        {
+            var frm = new JobExecutionDialog()
+            {
+                InstanceId = Context.InstanceID,
+                JobId = Context.JobID,
+                JobName = Context.ObjectName
+            };
+            frm.Show();
         }
 
         private async void FindDatabase(object sender, EventArgs e)
