@@ -7,6 +7,7 @@ using Newtonsoft.Json.Converters;
 using Polly;
 using Serilog;
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -259,8 +260,8 @@ namespace DBADash
             LogInternalPerformanceCounter("DBADash", "Collection Duration (ms)", currentCollection, Convert.ToDecimal(swatch.Elapsed.TotalMilliseconds));
         }
 
-        private static readonly HashSet<int> ExcludedErrorCodes = new()
-        {
+        private static readonly FrozenSet<int> ExcludedErrorCodes =
+        [
             -2, // retryPolicy excludes query timeout #581
             218, // Could not find the type '%.*ls'. Either it does not exist or you do not have the necessary permission.
             219, // The type '%.*ls' already exists, or you do not have permission to create it.
@@ -273,8 +274,8 @@ namespace DBADash
             349,  // The procedure "%.*ls" has no parameter named "%.*ls".
             500,  // Trying to pass a table-valued parameter with %d column(s) where the corresponding user-defined table type requires %d column(s).
             2812, // Could not find stored procedure '%.*ls'.
-            6335, // XML data type instance has too many levels of nested nodes. Maximum allowed depth is %d levels.
-        };
+            6335 // XML data type instance has too many levels of nested nodes. Maximum allowed depth is %d levels.
+        ];
 
         public bool ShouldRetry(Exception ex)
         {

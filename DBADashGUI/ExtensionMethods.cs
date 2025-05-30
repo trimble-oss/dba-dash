@@ -20,6 +20,7 @@ using DocumentFormat.OpenXml.Office.PowerPoint.Y2021.M06.Main;
 using LiveChartsCore.SkiaSharpView.WinForms;
 using DataTable = System.Data.DataTable;
 using static DBADashGUI.DBADashAlerts.Rules.AlertRuleBase;
+using System.Collections.Frozen;
 
 namespace DBADashGUI
 {
@@ -35,13 +36,13 @@ namespace DBADashGUI
             return value[..Math.Min(value.Length, maxLength)];
         }
 
-        private static readonly HashSet<Type> NumericTypes = new()
-        {
+        private static readonly FrozenSet<Type> NumericTypes =
+        [
             typeof(int), typeof(double), typeof(decimal),
             typeof(long), typeof(short), typeof(sbyte),
             typeof(byte), typeof(ulong), typeof(ushort),
             typeof(uint), typeof(float)
-        };
+        ];
 
         public static bool IsNumeric(this Type myType)
         {

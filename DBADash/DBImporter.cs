@@ -2,6 +2,7 @@
 using Polly;
 using Serilog;
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -40,13 +41,13 @@ namespace DBADash
                 });
         }
 
-        private static readonly HashSet<int> ExcludedErrorCodes = new()
-        {
+        private static readonly FrozenSet<int> ExcludedErrorCodes =
+        [
             2812, // Could not find stored procedure '%.*ls'.
             349,  // The procedure "%.*ls" has no parameter named "%.*ls".
             500,  // Trying to pass a table-valued parameter with %d column(s) where the corresponding user-defined table type requires %d column(s).
             245   // Conversion failed when converting the %ls value '%.*ls' to data type %ls.
-        };
+        ];
 
         public static bool ShouldRetry(Exception ex)
         {
@@ -312,8 +313,8 @@ namespace DBADash
             }
         }
 
-        private readonly HashSet<string> tablesToProcess = new()
-        {
+        private static readonly FrozenSet<string> tablesToProcess =
+        [
             "Databases", "Drives", "ServerProperties", "Backups", "AgentJobs", "LogRestores", "DBFiles", "DBConfig",
             "Corruption", "DatabasesHADR", "SysConfig", "OSInfo", "TraceFlags", "CPU", "Drivers",
             "BlockingSnapshot", "IOStats", "Waits", "OSLoadedModules", "DBTuningOptions", "AzureDBResourceStats",
@@ -325,7 +326,7 @@ namespace DBADash
             "DatabaseQueryStoreOptions", "ResourceGovernorConfiguration", "AzureDBResourceGovernance",
             "RunningQueries", "QueryText", "QueryPlans", "InternalPerformanceCounters", "MemoryUsage",
             "SessionWaits", "IdentityColumns", "RunningJobs", "TableSize", "ServerServices","ObjectExecutionStatsLegacy"
-        };
+        ];
 
         private async Task UpdateOfflineAsync()
         {
