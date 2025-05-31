@@ -141,7 +141,7 @@ namespace DBADashGUI.Checks
                 var start = firstFail < appFrom ? appFrom : firstFail;
                 var end = lastFail > appTo ? appTo : lastFail;
 
-                var message = HttpUtility.HtmlEncode(r.Field<string>("Message")).Replace(",", "<br>").Replace("\n", "<br>");
+                var message = HttpUtility.HtmlEncode(r.Field<string>("Message")).Replace(",", "<br>").Replace(Environment.NewLine, "<br>").Replace("\n", "<br>");
                 if (start < minStart) minStart = start;
                 if (end > maxEnd) maxEnd = end;
                 lastInstance = instanceName;
