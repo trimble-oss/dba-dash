@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using Microsoft.ApplicationInsights;
 
 namespace DBADash
 {
@@ -31,6 +32,10 @@ namespace DBADash
 
         public bool IsEncrypted => isEncrypted;
 
+        public bool IsIntegratedSecurity { private set; get; }
+
+        public string UserName { private set; get; }
+
         public DBADashConnection(string connectionString)
         {
             SetConnectionString(connectionString);
@@ -48,6 +53,8 @@ namespace DBADash
                 {
                     ApplicationName = "DBADash"
                 };
+                IsIntegratedSecurity = builder.IntegratedSecurity || builder.Authentication == SqlAuthenticationMethod.ActiveDirectoryIntegrated;
+                UserName = builder.UserID;
                 value = builder.ToString();
             }
             encryptedConnectionString = GetConnectionStringWithEncryptedPassword(value);

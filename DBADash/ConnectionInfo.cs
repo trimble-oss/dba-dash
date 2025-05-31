@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 
 namespace DBADash
@@ -16,6 +17,8 @@ namespace DBADash
         public string ServerName { get; set; }
 
         public string ComputerNetBIOSName { get; set; }
+
+        public bool IsLinux { get; set; }
 
         public int MajorVersion => GetMajorVersion(ProductVersion);
 
@@ -45,11 +48,16 @@ namespace DBADash
 
         public static ConnectionInfo GetConnectionInfo(string connectionString)
         {
+            return Task.Run(async () => await GetConnectionInfoAsync(connectionString)).GetAwaiter().GetResult();
+        }
+
+        public static async Task<ConnectionInfo> GetConnectionInfoAsync(string connectionString)
+        {
             var connectionInfo = new ConnectionInfo();
-            using var cn = new SqlConnection(connectionString);
-            using var cmd = new SqlCommand("SELECT SERVERPROPERTY('EngineEdition'),SERVERPROPERTY('ProductVersion'),DB_NAME(),@@SERVERNAME,SERVERPROPERTY('ComputerNamePhysicalNetBIOS')", cn);
-            cn.Open();
-            using var rdr = cmd.ExecuteReader();
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand("SELECT SERVERPROPERTY('EngineEdition'),SERVERPROPERTY('ProductVersion'),DB_NAME(),@@SERVERNAME,SERVERPROPERTY('ComputerNamePhysicalNetBIOS'),CASE WHEN SERVERPROPERTY('PathSeparator') = '/' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsLinux", cn);
+            await cn.OpenAsync();
+            await using var rdr = await cmd.ExecuteReaderAsync();
             rdr.Read();
             connectionInfo.EngineEditionValue = rdr.GetInt32(0);
             try
@@ -64,6 +72,7 @@ namespace DBADash
             connectionInfo.DatabaseName = rdr.GetString(2);
             connectionInfo.ServerName = rdr.IsDBNull(3) ? "" : rdr.GetString(3);
             connectionInfo.ComputerNetBIOSName = rdr.IsDBNull(4) ? "" : rdr.GetString(4);  /* ComputerNamePhysicalNetBIOS is NULL for AzureDB */
+            connectionInfo.IsLinux = rdr.GetBoolean(5);
 
             return connectionInfo;
         }
