@@ -6,9 +6,11 @@
     <AssemblyName>DBADashServiceConfigTool</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <Configurations>Debug;Release;CLI</Configurations>
+    <ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -42,6 +44,7 @@
     <Content Include="services.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DBADashGUI\DBADashGUI.csproj" />
     <ProjectReference Include="..\DBADashSharedGUI\DBADashSharedGUI.csproj" />
     <ProjectReference Include="..\DBADash\DBADash.csproj" />
   </ItemGroup>

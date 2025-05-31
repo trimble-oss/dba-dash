@@ -1,5 +1,6 @@
 ﻿using DBADash;
 using DBADash.Messaging;
+using DBADashGUI.Changes;
 using DBADashGUI.Theme;
 using Humanizer;
 using Microsoft.Data.SqlClient;
@@ -116,6 +117,13 @@ namespace DBADashServiceConfig
             return src;
         }
 
+        private List<DBADashSource> GetNewSourceConnections()
+        {
+            var schemaSnapshotDBs = txtSnapshotDBs.Text.Trim();
+            return NewSourceConnections.Select(src => src.Trim()).Where(src => !string.IsNullOrEmpty(src))
+                .Select(src => CreateSourceConnection(src, schemaSnapshotDBs)).ToList();
+        }
+
         private async Task AddInstance()
         {
             var schemaSnapshotDBs = txtSnapshotDBs.Text.Trim();
@@ -130,16 +138,9 @@ namespace DBADashServiceConfig
             var doNotAddUnvalidated = false;
             var doesNotHaveUpdateApproval = false;
             var isDeleted = false;
-            foreach (var splitSource in NewSourceConnections)
+            foreach (var src in GetNewSourceConnections())
             {
-                var sourceString = splitSource.Trim();
-                if (string.IsNullOrEmpty(splitSource))
-                {
-                    continue;
-                }
-
-                var src = CreateSourceConnection(sourceString, schemaSnapshotDBs);
-                var validated = ValidateSource(sourceString);
+                var validated = ValidateSource(src.SourceConnection.ConnectionString);
 
                 var validationError = "";
                 if (validated)
@@ -212,7 +213,7 @@ namespace DBADashServiceConfig
                     // Ensure we have a ConnectionID set for SQL connections
                     src.SetConnectionIDFromBuilderIfNotSet();
 
-                    var existingConnection = await collectionConfig.FindSourceConnectionAsync(sourceString, src.ConnectionID); // Check if the connection string exists in the config
+                    var existingConnection = await collectionConfig.FindSourceConnectionAsync(src.SourceConnection.ConnectionString, src.ConnectionID); // Check if the connection string exists in the config
 
                     if (existingConnection != null)
                     {
@@ -2353,6 +2354,27 @@ Cancel = cancel the operation.", @"Mark deleted?", MessageBoxButtons.YesNoCancel
         private void AllowedJobs_TextChanged(object sender, EventArgs e)
         {
             collectionConfig.AllowedJobs = txtAllowedJobs.Text;
+        }
+
+        private void bttnPermissionsHelper_Click(object sender, EventArgs e)
+        {
+            ShowPermissionsHelper(collectionConfig.SourceConnections.Where(src => src.SourceConnection.Type == ConnectionType.SQL).ToList());
+        }
+
+        private void ShowPermissionsHelper(List<DBADashSource> sourceConnections)
+        {
+            if (sourceConnections.Count == 0)
+            {
+                MessageBox.Show("No source connections", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            var frm = new PermissionsHelper() { ServiceName = collectionConfig.ServiceName, Connections = sourceConnections };
+            frm.ShowDialog();
+        }
+
+        private void lnkGrant_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            ShowPermissionsHelper(GetNewSourceConnections().Where(src => src.SourceConnection.Type == ConnectionType.SQL).ToList());
         }
     }
 }

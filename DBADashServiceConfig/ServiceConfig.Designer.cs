@@ -63,6 +63,7 @@ namespace DBADashServiceConfig
             bttnAWS = new System.Windows.Forms.Button();
             chkLogInternalPerfCounters = new System.Windows.Forms.CheckBox();
             bttnCheckConnections = new System.Windows.Forms.Button();
+            label21 = new System.Windows.Forms.Label();
             panel1 = new System.Windows.Forms.Panel();
             tabJson = new System.Windows.Forms.TabPage();
             txtJson = new System.Windows.Forms.TextBox();
@@ -79,7 +80,6 @@ namespace DBADashServiceConfig
             lnkAllowNoJobs = new System.Windows.Forms.LinkLabel();
             lnkAllowAllJobs = new System.Windows.Forms.LinkLabel();
             txtAllowedJobs = new System.Windows.Forms.TextBox();
-            label21 = new System.Windows.Forms.Label();
             lnkAllowExplicit = new System.Windows.Forms.LinkLabel();
             lnkAllowNone = new System.Windows.Forms.LinkLabel();
             lnkAllowAll = new System.Windows.Forms.LinkLabel();
@@ -112,6 +112,7 @@ namespace DBADashServiceConfig
             groupBox2 = new System.Windows.Forms.GroupBox();
             tabSrcOptions = new ThemedTabControl();
             tabGeneral = new System.Windows.Forms.TabPage();
+            lnkGrant = new System.Windows.Forms.LinkLabel();
             txtSource = new System.Windows.Forms.TextBox();
             label1 = new System.Windows.Forms.Label();
             tabExtendedEvents = new System.Windows.Forms.TabPage();
@@ -145,6 +146,7 @@ namespace DBADashServiceConfig
             chkNoWMI = new System.Windows.Forms.CheckBox();
             bttnAdd = new System.Windows.Forms.Button();
             groupBox1 = new System.Windows.Forms.GroupBox();
+            bttnPermissionsHelper = new System.Windows.Forms.Button();
             label12 = new System.Windows.Forms.Label();
             cboDeleteAction = new System.Windows.Forms.ComboBox();
             dgvConnections = new System.Windows.Forms.DataGridView();
@@ -559,6 +561,16 @@ namespace DBADashServiceConfig
             bttnCheckConnections.UseVisualStyleBackColor = true;
             bttnCheckConnections.Click += bttnCheckConnections_Click;
             // 
+            // label21
+            // 
+            label21.AutoSize = true;
+            label21.Location = new System.Drawing.Point(18, 172);
+            label21.Name = "label21";
+            label21.Size = new System.Drawing.Size(159, 20);
+            label21.TabIndex = 12;
+            label21.Text = "Allowed Job Execution";
+            toolTip1.SetToolTip(label21, "Comma separated list of allowed jobs, categories or job IDs.  Prefix with - to deny.  Use * or % as wildcard characters. ");
+            // 
             // panel1
             // 
             panel1.Controls.Add(bttnSave);
@@ -751,16 +763,6 @@ namespace DBADashServiceConfig
             txtAllowedJobs.Size = new System.Drawing.Size(370, 27);
             txtAllowedJobs.TabIndex = 13;
             txtAllowedJobs.TextChanged += AllowedJobs_TextChanged;
-            // 
-            // label21
-            // 
-            label21.AutoSize = true;
-            label21.Location = new System.Drawing.Point(18, 172);
-            label21.Name = "label21";
-            label21.Size = new System.Drawing.Size(159, 20);
-            label21.TabIndex = 12;
-            label21.Text = "Allowed Job Execution";
-            toolTip1.SetToolTip(label21, "Comma separated list of allowed jobs, categories or job IDs.  Prefix with - to deny.  Use * or % as wildcard characters. ");
             // 
             // lnkAllowExplicit
             // 
@@ -1115,6 +1117,7 @@ namespace DBADashServiceConfig
             // 
             // tabGeneral
             // 
+            tabGeneral.Controls.Add(lnkGrant);
             tabGeneral.Controls.Add(pictureBox2);
             tabGeneral.Controls.Add(txtSource);
             tabGeneral.Controls.Add(bttnS3Src);
@@ -1129,6 +1132,17 @@ namespace DBADashServiceConfig
             tabGeneral.TabIndex = 0;
             tabGeneral.Text = "General";
             tabGeneral.UseVisualStyleBackColor = true;
+            // 
+            // lnkGrant
+            // 
+            lnkGrant.AutoSize = true;
+            lnkGrant.Location = new System.Drawing.Point(725, 144);
+            lnkGrant.Name = "lnkGrant";
+            lnkGrant.Size = new System.Drawing.Size(226, 16);
+            lnkGrant.TabIndex = 15;
+            lnkGrant.TabStop = true;
+            lnkGrant.Text = "Grant permissions to service account";
+            lnkGrant.LinkClicked += lnkGrant_LinkClicked;
             // 
             // txtSource
             // 
@@ -1485,6 +1499,7 @@ namespace DBADashServiceConfig
             // groupBox1
             // 
             groupBox1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBox1.Controls.Add(bttnPermissionsHelper);
             groupBox1.Controls.Add(label12);
             groupBox1.Controls.Add(cboDeleteAction);
             groupBox1.Controls.Add(bttnCheckConnections);
@@ -1500,6 +1515,17 @@ namespace DBADashServiceConfig
             groupBox1.TabIndex = 26;
             groupBox1.TabStop = false;
             groupBox1.Text = "Existing Connections";
+            // 
+            // bttnPermissionsHelper
+            // 
+            bttnPermissionsHelper.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            bttnPermissionsHelper.Location = new System.Drawing.Point(532, 342);
+            bttnPermissionsHelper.Name = "bttnPermissionsHelper";
+            bttnPermissionsHelper.Size = new System.Drawing.Size(214, 29);
+            bttnPermissionsHelper.TabIndex = 26;
+            bttnPermissionsHelper.Text = "Permissions Helper";
+            bttnPermissionsHelper.UseVisualStyleBackColor = true;
+            bttnPermissionsHelper.Click += bttnPermissionsHelper_Click;
             // 
             // label12
             // 
@@ -1925,6 +1951,8 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.LinkLabel lnkAllowAllJobs;
         private System.Windows.Forms.TextBox txtAllowedJobs;
         private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.Button bttnPermissionsHelper;
+        private System.Windows.Forms.LinkLabel lnkGrant;
     }
 }
 
