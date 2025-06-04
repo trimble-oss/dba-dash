@@ -6,6 +6,8 @@ namespace DBADashSharedGUI
     {
         public static System.Windows.Media.Color ToMediaColor(this Color color) => System.Windows.Media.Color.FromArgb(color.A, color.R, color.G, color.B);
 
+        private const float DefaultMaxColumnWidthPercent = 0.15f;
+
         public static Color AdjustBasedOnLuminance(this Color color)
         {
             // Calculate luminance using a common formula
@@ -51,5 +53,16 @@ namespace DBADashSharedGUI
 
             return $"{dataTypeName}{typeDetails}{nullability}";
         }
+
+        public static void AutoResizeColumnsWithMaxColumnWidth(this DataGridView dgv, DataGridViewAutoSizeColumnsMode mode = DataGridViewAutoSizeColumnsMode.DisplayedCells, float maxPercentWidth = DefaultMaxColumnWidthPercent)
+        {
+            dgv.AutoResizeColumns(mode);
+            foreach (var col in dgv.Columns.Cast<DataGridViewColumn>().Where(c => c.Width > maxPercentWidth * dgv.Width))
+            {
+                col.Width = Convert.ToInt32(maxPercentWidth * dgv.Width);
+            }
+        }
+
+        public static string ToHexString(this Color c) => $"#{c.R:X2}{c.G:X2}{c.B:X2}";
     }
 }

@@ -115,8 +115,6 @@ namespace DBADashGUI
                 Status.GetForeColor());
         }
 
-        public static string ToHexString(this Color c) => $"#{c.R:X2}{c.G:X2}{c.B:X2}";
-
         /// <summary>
         /// Returns structure with column layout - size, position & visibility
         /// </summary>
@@ -771,17 +769,6 @@ namespace DBADashGUI
 
         public static void ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing(this DataGridView dgv) =>
             ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing(dgv.Columns);
-
-        public static void AutoResizeColumnsWithMaxColumnWidth(this DataGridView dgv, DataGridViewAutoSizeColumnsMode mode = DataGridViewAutoSizeColumnsMode.DisplayedCells, float maxPercentWidth = DefaultMaxColumnWidthPercent)
-        {
-            dgv.AutoResizeColumns(mode);
-            foreach (var col in dgv.Columns.Cast<DataGridViewColumn>().Where(c => c.Width > maxPercentWidth * dgv.Width))
-            {
-                col.Width = Convert.ToInt32(maxPercentWidth * dgv.Width);
-            }
-        }
-
-        private const float DefaultMaxColumnWidthPercent = 0.15f;
 
         public static string ToSymbol(this RuleComparisonTypes ruleComparisonType)
         {

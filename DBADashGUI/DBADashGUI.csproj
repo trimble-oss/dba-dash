@@ -36,9 +36,6 @@
     <None Remove="SQL\CorruptionInfo.sql" />
     <None Remove="SQL\DecipherWaitResource.sql" />
     <None Remove="SQL\FindPlan.sql" />
-    <None Remove="SyntaxHighlighting\Json.xshd" />
-    <None Remove="SyntaxHighlighting\MarkDown.xshd" />
-    <None Remove="SyntaxHighlighting\SQL-Light.xshd" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
@@ -220,14 +217,9 @@
     <Compile Update="Tagging\Tags.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <EmbeddedResource Include="SyntaxHighlighting\Json.xshd" />
-    <EmbeddedResource Include="SyntaxHighlighting\MarkDown.xshd" />
-    <EmbeddedResource Include="SyntaxHighlighting\PowerShell.xshd" />
-    <EmbeddedResource Include="SyntaxHighlighting\SQL-Dark.xshd" />
     <EmbeddedResource Include="SQL\CorruptionInfo.sql" />
     <EmbeddedResource Include="SQL\DecipherWaitResource.sql" />
     <EmbeddedResource Include="SQL\FindPlan.sql" />
-    <EmbeddedResource Include="SyntaxHighlighting\SQL-Light.xshd" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="DatabaseUnknown_16x.ico" />
@@ -242,7 +234,6 @@
     <ProjectReference Include="..\DBADash\DBADash.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
     <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="DiffPlex" Version="1.8.0" />
@@ -252,8 +243,6 @@
     <PackageReference Include="LiveCharts.WinForms" Version="0.9.7.1" />
     <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WinForms" Version="2.0.0-rc4.5" />
-    <PackageReference Include="Markdig" Version="0.41.1" />
-    <PackageReference Include="Markdig.SyntaxHighlighting" Version="1.1.7" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.5" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.5" />

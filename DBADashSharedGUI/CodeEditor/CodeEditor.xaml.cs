@@ -2,11 +2,11 @@
 using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Windows.Controls;
 using System.Windows.Media;
 using System.Xml.Linq;
 using DBADashGUI.Theme;
-using ICSharpCode.AvalonEdit.Document;
+using DBADashSharedGUI;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace DBADashGUI.SchemaCompare
 {
@@ -73,19 +73,19 @@ namespace DBADashGUI.SchemaCompare
 
         private void SetHighlighting()
         {
-            var theme = DBADashUser.SelectedTheme;
+            var theme = ThemeExtensions.CurrentTheme;
             string resourceName = null;
             if (mode == CodeEditorModes.SQL && theme is DarkTheme)
             {
-                resourceName = "DBADashGUI.SyntaxHighlighting.SQL-Dark.xshd";
+                resourceName = "DBADashSharedGUI.SyntaxHighlighting.SQL-Dark.xshd";
             }
             else if (mode == CodeEditorModes.SQL)
             {
-                resourceName = "DBADashGUI.SyntaxHighlighting.SQL-Light.xshd";
+                resourceName = "DBADashSharedGUI.SyntaxHighlighting.SQL-Light.xshd";
             }
             else if (mode == CodeEditorModes.PowerShell)
             {
-                resourceName = "DBADashGUI.SyntaxHighlighting.PowerShell.xshd";
+                resourceName = "DBADashSharedGUI.SyntaxHighlighting.PowerShell.xshd";
             }
             else if (mode == CodeEditorModes.XML)
             {
@@ -102,7 +102,7 @@ namespace DBADashGUI.SchemaCompare
             }
             else if (mode == CodeEditorModes.Json)
             {
-                resourceName = "DBADashGUI.SyntaxHighlighting.Json.xshd";
+                resourceName = "DBADashSharedGUI.SyntaxHighlighting.Json.xshd";
             }
             else if (mode == CodeEditorModes.Markdown)
             {
@@ -174,7 +174,7 @@ namespace DBADashGUI.SchemaCompare
             {
                 _text = value;
                 txtCode.Text = value;
-                var theme = DBADashUser.SelectedTheme;
+                var theme = ThemeExtensions.CurrentTheme;
                 SetHighlighting();
                 if (theme is DarkTheme && Mode != CodeEditorModes.SQL)
                 {

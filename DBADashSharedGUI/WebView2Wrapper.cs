@@ -4,6 +4,8 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
+using Azure.Core;
+using DBADashSharedGUI;
 
 namespace DBADashGUI.AgentJobs
 {
@@ -41,7 +43,7 @@ namespace DBADashGUI.AgentJobs
             WebView2.Visible = true;
         }
 
-        private static string WebView2SetupTempPath => Path.Combine(Path.GetTempPath(), Common.TempFilePrefix + "MicrosoftEdgeWebview2Setup.exe");
+        private static string WebView2SetupTempPath => Path.Combine(Path.GetTempPath(), CommonShared.TempFilePrefix + "MicrosoftEdgeWebview2Setup.exe");
 
         /// <summary>
         /// Download & Install WebView2 runtime.  Fire Setup_Completed event when finished.
@@ -56,7 +58,7 @@ namespace DBADashGUI.AgentJobs
                 {
                     File.Delete(path);
                 }
-                Common.DownloadFile(path, url);
+                CommonShared.DownloadFile(path, url);
                 var pSetup = System.Diagnostics.Process.Start(path);
                 if (pSetup == null) return;
                 pSetup.EnableRaisingEvents = true;
@@ -102,7 +104,7 @@ namespace DBADashGUI.AgentJobs
         {
             try
             {
-                var tempFilePath = Common.GetTempFilePath(".html"); // Generate a unique file.  Setting source to same file doesn't refresh
+                var tempFilePath = CommonShared.GetTempFilePath(".html"); // Generate a unique file.  Setting source to same file doesn't refresh
                 File.WriteAllText(tempFilePath, html);
                 WebView2.Source = new Uri(tempFilePath);
             }
@@ -118,7 +120,7 @@ namespace DBADashGUI.AgentJobs
             var t = WebView2.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", "{}");
             var json = await t;
             var base64Image = JObject.Parse(json).Value<string>("data");
-            var img = Common.Base64StringAsImage(base64Image);
+            var img = CommonShared.Base64StringAsImage(base64Image);
             Clipboard.SetImage(img);
         }
     }

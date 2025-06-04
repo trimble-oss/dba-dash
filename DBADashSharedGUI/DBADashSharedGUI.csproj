@@ -15,14 +15,28 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="SyntaxHighlighting\Json.xshd">
+      <SubType>Form</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxHighlighting\MarkDown.xshd" />
+    <EmbeddedResource Include="SyntaxHighlighting\PowerShell.xshd" />
+    <EmbeddedResource Include="SyntaxHighlighting\SQL-Dark.xshd" />
+    <EmbeddedResource Include="SyntaxHighlighting\SQL-Light.xshd" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
     <PackageReference Include="DiffPlex" Version="1.8.0" />
     <PackageReference Include="DiffPlex.Wpf" Version="1.4.0" />
     <PackageReference Include="LiveCharts" Version="0.9.7" />
     <PackageReference Include="LiveCharts.WinForms" Version="0.9.7.1" />
     <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
+    <PackageReference Include="Markdig" Version="0.41.1" />
+    <PackageReference Include="Markdig.SyntaxHighlighting" Version="1.1.7" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.5" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3240.44" />
     <PackageReference Include="System.Collections.Immutable" Version="9.0.5" />
     <PackageReference Include="System.IO.Packaging" Version="9.0.5" />
     <PackageReference Include="System.Reflection.Metadata" Version="9.0.5" />
@@ -37,12 +51,33 @@
     <Compile Update="About.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="CodeEditor\CodeEditorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CodeEditor\CodeViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="DBConnection.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Update="Theme\ThemedTabControl.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Update="WebView2Wrapper.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>
