@@ -1,7 +1,6 @@
 ﻿using ClosedXML.Excel;
 using DBADash;
 using DBADashGUI.CustomReports;
-using DBADashGUI.SchemaCompare;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
@@ -9,7 +8,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
@@ -26,7 +24,7 @@ namespace DBADashGUI
         public static bool FreezeKeyColumn { get; set; }
 
         public static bool IsApplicationRunning { get; set; } = false; /* Set to true if App is running - used to detect design time mode */
-        private static CodeViewer FrmCodeViewer;
+
         public static RepositoryConnection RepositoryDBConnection { get; set; }
 
         public static void SetConnectionString(RepositoryConnection connection)
@@ -479,44 +477,6 @@ namespace DBADashGUI
         {
             return new DataGridViewCellStyle() { Format = format };
         }
-
-        public static void ShowCodeViewer(string sql, string title = "", CodeEditor.CodeEditorModes Language = CodeEditor.CodeEditorModes.SQL)
-        {
-            FrmCodeViewer?.Close();
-            FrmCodeViewer = new CodeViewer
-            {
-                Language = Language,
-                Code = sql,
-                Text = "Code Viewer" + (string.IsNullOrEmpty(title) ? "" : " - " + title)
-            };
-            if (FrmCodeViewer.WindowState == FormWindowState.Minimized)
-            {
-                FrmCodeViewer.WindowState = FormWindowState.Normal;
-            }
-            FrmCodeViewer.FormClosed += (s, e) => FrmCodeViewer = null;
-            FrmCodeViewer.Show();
-        }
-
-        public static Image Base64StringAsImage(string base64String)
-        {
-            var bytes = Convert.FromBase64String(base64String);
-
-            using MemoryStream ms = new(bytes);
-            return Image.FromStream(ms);
-        }
-
-        internal static void DownloadFile(string localPath, string url)
-        {
-            using var client = new HttpClient();
-            using var s = client.GetStreamAsync(url);
-            using var fs = new FileStream(localPath, FileMode.OpenOrCreate);
-            s.Result.CopyTo(fs);
-        }
-
-        internal static readonly string TempFilePrefix = "DBADashGUITemp_";
-
-        internal static string GetTempFilePath(string extension)
-            => Path.Combine(Path.GetTempPath(), TempFilePrefix + Guid.NewGuid() + (extension.StartsWith(".") ? extension : "." + extension));
 
         /// <summary>
         /// Delete temp files generated

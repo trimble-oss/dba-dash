@@ -1,6 +1,4 @@
 ﻿using DBADash;
-using DBADashGUI;
-using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System;
@@ -15,6 +13,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using DBADashGUI.SchemaCompare;
 using Task = System.Threading.Tasks.Task;
 
 namespace DBADashServiceConfig

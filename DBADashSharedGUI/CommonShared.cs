@@ -1,16 +1,21 @@
 ﻿using DBADash;
 using DBADashGUI;
+using DBADashGUI.SchemaCompare;
+using DBADashGUI.Theme;
 using Microsoft.SqlServer.Management.Common;
 using System.Diagnostics;
-using System.Runtime.Versioning;
-using DBADashGUI.Theme;
 using System.IO;
+using System.Net.Http;
+using System.Runtime.Versioning;
 using System.Security;
 
 namespace DBADashSharedGUI
 {
     public class CommonShared
     {
+        private static CodeViewer FrmCodeViewer;
+        public static readonly string TempFilePrefix = "DBADashGUITemp_";
+
         public static void OpenURL(string url)
         {
             if (!IsValidUrl(url))
@@ -218,6 +223,42 @@ namespace DBADashSharedGUI
             var result = inputBox.ShowDialog();
             input = textBox.Text; // Update the input parameter with the text entered by the user
             return result; // Return the result of the dialog box
+        }
+
+        public static void ShowCodeViewer(string sql, string title = "", CodeEditor.CodeEditorModes Language = CodeEditor.CodeEditorModes.SQL)
+        {
+            FrmCodeViewer?.Close();
+            FrmCodeViewer = new CodeViewer
+            {
+                Language = Language,
+                Code = sql,
+                Text = "Code Viewer" + (string.IsNullOrEmpty(title) ? "" : " - " + title)
+            };
+            if (FrmCodeViewer.WindowState == FormWindowState.Minimized)
+            {
+                FrmCodeViewer.WindowState = FormWindowState.Normal;
+            }
+            FrmCodeViewer.FormClosed += (s, e) => FrmCodeViewer = null;
+            FrmCodeViewer.Show();
+        }
+
+        public static string GetTempFilePath(string extension)
+            => Path.Combine(Path.GetTempPath(), TempFilePrefix + Guid.NewGuid() + (extension.StartsWith(".") ? extension : "." + extension));
+
+        public static Image Base64StringAsImage(string base64String)
+        {
+            var bytes = Convert.FromBase64String(base64String);
+
+            using MemoryStream ms = new(bytes);
+            return Image.FromStream(ms);
+        }
+
+        public static void DownloadFile(string localPath, string url)
+        {
+            using var client = new HttpClient();
+            using var s = client.GetStreamAsync(url);
+            using var fs = new FileStream(localPath, FileMode.OpenOrCreate);
+            s.Result.CopyTo(fs);
         }
     }
 }
