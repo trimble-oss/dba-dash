@@ -1,4 +1,5 @@
 ﻿using DBADash;
+using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System;
@@ -6,14 +7,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.DirectoryServices;
-using System.Drawing.Text;
 using System.Linq;
 using System.Management;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
-using DBADashGUI.SchemaCompare;
 using Task = System.Threading.Tasks.Task;
 
 namespace DBADashServiceConfig
@@ -35,6 +35,10 @@ namespace DBADashServiceConfig
         private const string ReadyResult = "";
         private const string FailedResult = "Failed";
         private bool ApplyToSQLAuth;
+        private int TotalTasks = 0;
+        private int CompletedTasks = 0;
+        private int ProgressDots = 0;
+        private const int ProgressMaxDots = 5;
 
         private string ServiceAccountName
         {
@@ -208,8 +212,8 @@ namespace DBADashServiceConfig
             }
 
             var script = GetScript();
+            StartProgress(Connections.Count);
             var tasks = Connections.Select(src => ExecuteSQL(script, src)).ToList();
-
             try
             {
                 await Task.WhenAll(tasks);
@@ -217,6 +221,10 @@ namespace DBADashServiceConfig
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                StopProgress();
             }
             dgvInstances.AutoResizeColumnsWithMaxColumnWidth(DataGridViewAutoSizeColumnsMode.AllCells, 0.6f);
             var succeededCount = InstancesDT.Rows.Cast<DataRow>().Count(r => (string)r["Result"] == SucceededResult);
@@ -238,7 +246,12 @@ namespace DBADashServiceConfig
         private async Task ExecuteSQL(string sql, DBADashSource src)
         {
             var row = InstancesDT.Rows.Find(GetSourceID(src));
-            if (row == null) return;
+            if (row == null)
+            {
+                Interlocked.Increment(ref CompletedTasks);
+                return;
+            }
+
             try
             {
                 var connectionInfo = await ConnectionInfo.GetConnectionInfoAsync(src.SourceConnection.ConnectionString);
@@ -248,18 +261,22 @@ namespace DBADashServiceConfig
                     row["Message"] = "AzureDB is not currently supported by the permissions helper dialog.";
                     return;
                 }
+
                 if (!src.SourceConnection.IsIntegratedSecurity && !ApplyToSQLAuth)
                 {
                     row["Result"] = ExcludedResult;
                     row["Message"] = "Not using Windows authentication";
                     return;
                 }
+
                 if (connectionInfo.MajorVersion < 12)
                 {
                     row["Result"] = ExcludedResult;
-                    row["Message"] = "Versions of SQL Server prior to 2014 are not supported by the permissions helper dialog.";
+                    row["Message"] =
+                        "Versions of SQL Server prior to 2014 are not supported by the permissions helper dialog.";
                     return;
                 }
+
                 await using var cn = new SqlConnection(src.SourceConnection.ConnectionString);
                 await using var cmd = new SqlCommand(sql, cn);
                 await cn.OpenAsync();
@@ -271,11 +288,15 @@ namespace DBADashServiceConfig
                 row["Result"] = FailedResult;
                 row["Message"] = ex.ToString();
             }
+            finally
+            {
+                Interlocked.Increment(ref CompletedTasks);
+            }
         }
 
         private void bttnViewScript_Click(object sender, EventArgs e)
         {
-            DBADashGUI.Common.ShowCodeViewer(GetScript(), "Permissions Helper script", CodeEditor.CodeEditorModes.SQL);
+            CommonShared.ShowCodeViewer(GetScript(), "Permissions Helper script", CodeEditor.CodeEditorModes.SQL);
         }
 
         private async void LocalAdmin_Click(object sender, EventArgs e)
@@ -292,6 +313,7 @@ namespace DBADashServiceConfig
                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
+            StartProgress(Connections.Count);
             var tasks = Connections.Select(AddToLocalAdmin).ToList();
             try
             {
@@ -300,6 +322,10 @@ namespace DBADashServiceConfig
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                StopProgress();
             }
             var succeededCount = InstancesDT.Rows.Cast<DataRow>().Count(r => (string)r["Result"] == SucceededResult);
             var failedCount = InstancesDT.Rows.Cast<DataRow>().Count(r => (string)r["Result"] == FailedResult);
@@ -315,40 +341,45 @@ namespace DBADashServiceConfig
         private async Task AddToLocalAdmin(DBADashSource src)
         {
             var row = InstancesDT.Rows.Find(GetSourceID(src));
-            if (row == null) return;
-            if (src.NoWMI && !chkRevokeLocalAdmin.Checked)
+            if (row == null)
             {
-                row["Result"] = ExcludedResult;
-                row["Message"] = "WMI is not enabled.  Local admin is not required.";
+                Interlocked.Increment(ref CompletedTasks);
                 return;
             }
-
-            string computerName;
             try
             {
+                if (src.NoWMI && !chkRevokeLocalAdmin.Checked)
+                {
+                    row["Result"] = ExcludedResult;
+                    row["Message"] = "WMI is not enabled.  Local admin is not required.";
+                    return;
+                }
                 var connectionInfo = await ConnectionInfo.GetConnectionInfoAsync(src.SourceConnection.ConnectionString);
-                computerName = connectionInfo.ComputerNetBIOSName;
+                var computerName = connectionInfo.ComputerNetBIOSName;
                 if (connectionInfo.IsAzureDB || connectionInfo.IsRDS || connectionInfo.IsLinux)
                 {
                     row["Result"] = ExcludedResult;
                     row["Message"] = "Invalid instance type for WMI (AzureDB, RDS, Linux)";
                     return;
                 }
+
+                if (src.NoWMI)
+                {
+                    await RemoveUserFromLocalAdmin(src, computerName, row);
+                }
+                else
+                {
+                    await AddUserToLocalAdmin(src, computerName, row);
+                }
             }
             catch (Exception ex)
             {
                 row["Result"] = FailedResult;
                 row["Message"] = "Error getting computer name: " + ex;
-                return;
             }
-
-            if (src.NoWMI)
+            finally
             {
-                await RemoveUserFromLocalAdmin(src, computerName, row);
-            }
-            else
-            {
-                await AddUserToLocalAdmin(src, computerName, row);
+                Interlocked.Increment(ref CompletedTasks);
             }
         }
 
@@ -442,6 +473,52 @@ namespace DBADashServiceConfig
 
             group.Invoke(remove ? "Remove" : "Add", userPath);
             group.CommitChanges();
+        }
+
+        private void StartProgress(int count)
+        {
+            InstancesDT.Rows.Cast<DataRow>().ToList().ForEach(row => SetRowResult(row, "Pending", string.Empty));
+            TotalTasks = count;
+            CompletedTasks = 0;
+            UpdateProgress();
+            lblProgress.Visible = true;
+            timer1.Enabled = true;
+            bttnGrant.Enabled = false;
+            bttnLocalAdmin.Enabled = false;
+        }
+
+        private void StopProgress()
+        {
+            UpdateProgress();
+            lblProgress.Text = "Done";
+            timer1.Enabled = false;
+            bttnGrant.Enabled = true;
+            bttnLocalAdmin.Enabled = true;
+        }
+
+        private void UpdateProgress()
+        {
+            if (InvokeRequired)
+            {
+                Invoke(UpdateProgress);
+                return;
+            }
+
+            ProgressDots = (ProgressDots + 1) % (ProgressMaxDots + 1);
+            var pct = (double)CompletedTasks / TotalTasks;
+            var dots = new string('.', ProgressDots);
+
+            lblProgress.Text = $"In progress.  Completed {CompletedTasks}/{TotalTasks} ({pct:P1}){dots}";
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            UpdateProgress();
+        }
+
+        private void Instances_UserDeletedRow(object sender, DataGridViewRowEventArgs e)
+        {
+            Connections.RemoveAll(src => InstancesDT.Rows.Find(GetSourceID(src)) == null);
         }
     }
 }
