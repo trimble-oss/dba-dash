@@ -104,7 +104,9 @@ namespace DBADashServiceConfig
             new PermissionItem(){Name = "msdb:db_datareader", PermissionState = PermissionItem.PermissionStates.Grant, PermissionType = PermissionItem.PermissionTypes.DatabaseRole},
             new PermissionItem(){Name = "msdb:SQLAgentReaderRole", PermissionState = PermissionItem.PermissionStates.None, PermissionType = PermissionItem.PermissionTypes.DatabaseRole},
             new PermissionItem(){Name = "msdb:SQLAgentOperatorRole", PermissionState = PermissionItem.PermissionStates.Grant, PermissionType = PermissionItem.PermissionTypes.DatabaseRole},
-            new PermissionItem(){Name = "sysadmin", PermissionState = PermissionItem.PermissionStates.None, PermissionType = PermissionItem.PermissionTypes.ServerRole}
+            new PermissionItem(){Name = "sysadmin", PermissionState = PermissionItem.PermissionStates.None, PermissionType = PermissionItem.PermissionTypes.ServerRole},
+            new PermissionItem(){Name = "DBADash_CustomCheck", PermissionState = PermissionItem.PermissionStates.Grant, PermissionType = PermissionItem.PermissionTypes.ExecuteProcedure },
+            new PermissionItem(){Name = "DBADash_CustomPerformanceCounters", PermissionState = PermissionItem.PermissionStates.Grant, PermissionType = PermissionItem.PermissionTypes.ExecuteProcedure }
         };
 
         private void LoadGrid()
@@ -132,56 +134,78 @@ namespace DBADashServiceConfig
             dgvPermissions.AutoResizeColumns();
         }
 
+        private string currentDB;
+        private HashSet<string> UserCreatedDb = new();
+
         private string GetScript()
         {
             var sb = new StringBuilder();
-            var db = string.Empty;
-            var lastDb = string.Empty;
+            UserCreatedDb = new();
+            currentDB = string.Empty;
+
             if (ServiceIsDomainAccount)
             {
-                sb.AppendLine("USE [master]");
                 sb.AppendLine($"IF SUSER_ID({ServiceAccountName.SqlSingleQuoteWithEncapsulation()}) IS NULL");
                 sb.AppendLine("BEGIN");
                 sb.AppendLine(
                     $"    CREATE LOGIN {ServiceAccountName.SqlQuoteName()} FROM WINDOWS WITH DEFAULT_DATABASE=[master]");
                 sb.AppendLine("END");
             }
-
-            foreach (var p in Permissions.Where(p => p.PermissionState != PermissionItem.PermissionStates.None).OrderBy(p => (p.PermissionType == PermissionItem.PermissionTypes.DatabaseRole ? "Z" : "A") + p.Name))
+            CreateUserInCurrentDB(sb);
+            foreach (var p in Permissions.Where(p => p.PermissionState != PermissionItem.PermissionStates.None).OrderBy(p => (p.PermissionType is PermissionItem.PermissionTypes.ExecuteProcedure ? "A" : "Z") + p.Name))
             {
                 switch (p.PermissionType)
                 {
+                    case PermissionItem.PermissionTypes.ExecuteProcedure: /* This is run first before we change database */
+                        sb.AppendLine($"IF OBJECT_ID({p.Name.SqlSingleQuoteWithEncapsulation()}) IS NOT NULL");
+                        sb.AppendLine("BEGIN");
+                        sb.AppendLine($"\tGRANT EXECUTE ON{p.Name.SqlQuoteName()} TO {ServiceAccountName.SqlQuoteName()}");
+                        sb.AppendLine("END");
+                        break;
+
                     case PermissionItem.PermissionTypes.ServerPermission:
+                        UseDatabase(sb, "master");
+                        CreateUserInCurrentDB(sb);
                         sb.AppendLine((p.Grant ? "GRANT " : "REVOKE ") + p.Name + " TO " + ServiceAccountName.SqlQuoteName());
                         break;
 
                     case PermissionItem.PermissionTypes.DatabaseRole:
                         {
-                            db = p.Name.Split(":")[0];
+                            var db = p.Name.Split(":")[0];
                             var role = p.Name.Split(":")[1];
-                            if (db != lastDb)
-                            {
-                                sb.AppendLine("USE " + db.SqlQuoteName() + "");
-                                sb.AppendLine($"IF NOT EXISTS(SELECT 1 FROM sys.database_principals WHERE name = {ServiceAccountName.SqlSingleQuoteWithEncapsulation()})");
-                                sb.AppendLine("BEGIN");
-                                sb.AppendLine($"    CREATE USER {ServiceAccountName.SqlQuoteName()} FOR LOGIN {ServiceAccountName.SqlQuoteName()}");
-                                sb.AppendLine("END");
-                            }
-
+                            UseDatabase(sb, db);
+                            CreateUserInCurrentDB(sb);
                             sb.AppendLine("ALTER ROLE " + role.SqlQuoteName() + (p.Grant ? " ADD " : " DROP ") + " MEMBER " + ServiceAccountName.SqlQuoteName());
                             break;
                         }
                     case PermissionItem.PermissionTypes.ServerRole:
+                        UseDatabase(sb, "master");
+                        CreateUserInCurrentDB(sb);
                         sb.AppendLine("ALTER SERVER ROLE " + p.Name.SqlQuoteName() + (p.Grant ? " ADD " : " DROP ") + " MEMBER " + ServiceAccountName.SqlQuoteName());
                         break;
 
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-
-                lastDb = db;
             }
             return sb.ToString();
+        }
+
+        private void UseDatabase(StringBuilder sb, string db)
+        {
+            if (currentDB == db) return;
+            sb.AppendLine("USE " + db.SqlQuoteName() + "");
+            currentDB = db;
+        }
+
+        private void CreateUserInCurrentDB(StringBuilder sb)
+        {
+            if (UserCreatedDb.Contains(currentDB)) return;
+            sb.AppendLine($"IF NOT EXISTS(SELECT 1 FROM sys.database_principals WHERE name = {ServiceAccountName.SqlSingleQuoteWithEncapsulation()})");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine($"    CREATE USER {ServiceAccountName.SqlQuoteName()} FOR LOGIN {ServiceAccountName.SqlQuoteName()}");
+            sb.AppendLine("END");
+            UserCreatedDb.Add(currentDB);
         }
 
         private async void bttnGrant_Click(object sender, EventArgs e)
