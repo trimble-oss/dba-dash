@@ -2367,7 +2367,14 @@ Cancel = cancel the operation.", @"Mark deleted?", MessageBoxButtons.YesNoCancel
                 MessageBox.Show("No source connections", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
-            var frm = new PermissionsHelper() { ServiceName = collectionConfig.ServiceName, Connections = sourceConnections };
+
+            var procs = sourceConnections
+                .SelectMany(src => src.CustomCollections.Values.Select(cc => cc.ProcedureName))
+                .Concat(collectionConfig.CustomCollections.Values.Select(cc => cc.ProcedureName))
+                .Distinct()
+                .ToList();
+
+            var frm = new PermissionsHelper() { ServiceName = collectionConfig.ServiceName, Connections = sourceConnections, ProcedureNames = procs };
             frm.ShowDialog();
         }
 
