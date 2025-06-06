@@ -31,7 +31,8 @@ namespace DBADashServiceConfig
         {
             ServerPermission,
             DatabaseRole,
-            ServerRole
+            ServerRole,
+            ExecuteProcedure
         }
 
         public override string ToString()
