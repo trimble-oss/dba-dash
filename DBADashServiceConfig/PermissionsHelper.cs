@@ -29,6 +29,7 @@ namespace DBADashServiceConfig
         public string ServiceName { get; set; }
 
         public List<DBADashSource> Connections { get; set; }
+        public List<string> ProcedureNames { get; set; }
 
         private const string ExcludedResult = "Excluded";
         private const string SucceededResult = "Succeeded";
@@ -115,9 +116,17 @@ namespace DBADashServiceConfig
             dgvPermissions.Columns.AddRange(new DataGridViewColumn[]
             {
                 new DataGridViewTextBoxColumn() { DataPropertyName = "Name", HeaderText = "Name"},
+                new DataGridViewTextBoxColumn() { DataPropertyName = "PermissionType", HeaderText = "Type"},
                 new DataGridViewCheckBoxColumn() { DataPropertyName = "Grant", HeaderText = "Grant"},
                 new DataGridViewCheckBoxColumn() { DataPropertyName = "Revoke", HeaderText = "Revoke"}
             });
+
+            ProcedureNames.ForEach(p => Permissions.Add(new PermissionItem()
+            {
+                Name = p,
+                PermissionState = PermissionItem.PermissionStates.Grant,
+                PermissionType = PermissionItem.PermissionTypes.ExecuteProcedure
+            }));
             dgvPermissions.DataSource = Permissions;
             dgvPermissions.CellValueChanged += (sender, e) =>
             {
@@ -136,6 +145,14 @@ namespace DBADashServiceConfig
 
         private string currentDB;
         private HashSet<string> UserCreatedDb = new();
+
+        private static string ReApplySqlQuoteName(string proc)
+        {
+            // Note: There will be some edge cases where this doesn't work, but we will output safe SQL
+            var unQuoted = proc.Replace("[", "").Replace("]", ""); // Object might be quoted already so remove quotes.
+            // Split into components (schema + object), reapply quotename then combine.
+            return string.Join(".", unQuoted.Split(".").Select(part => part.SqlQuoteName()));
+        }
 
         private string GetScript()
         {
@@ -159,7 +176,7 @@ namespace DBADashServiceConfig
                     case PermissionItem.PermissionTypes.ExecuteProcedure: /* This is run first before we change database */
                         sb.AppendLine($"IF OBJECT_ID({p.Name.SqlSingleQuoteWithEncapsulation()}) IS NOT NULL");
                         sb.AppendLine("BEGIN");
-                        sb.AppendLine($"\tGRANT EXECUTE ON{p.Name.SqlQuoteName()} TO {ServiceAccountName.SqlQuoteName()}");
+                        sb.AppendLine($"\tGRANT EXECUTE ON {ReApplySqlQuoteName(p.Name)} TO {ServiceAccountName.SqlQuoteName()}");
                         sb.AppendLine("END");
                         break;
 
@@ -203,7 +220,7 @@ namespace DBADashServiceConfig
             if (UserCreatedDb.Contains(currentDB)) return;
             sb.AppendLine($"IF NOT EXISTS(SELECT 1 FROM sys.database_principals WHERE name = {ServiceAccountName.SqlSingleQuoteWithEncapsulation()})");
             sb.AppendLine("BEGIN");
-            sb.AppendLine($"    CREATE USER {ServiceAccountName.SqlQuoteName()} FOR LOGIN {ServiceAccountName.SqlQuoteName()}");
+            sb.AppendLine($"\tCREATE USER {ServiceAccountName.SqlQuoteName()} FOR LOGIN {ServiceAccountName.SqlQuoteName()}");
             sb.AppendLine("END");
             UserCreatedDb.Add(currentDB);
         }
