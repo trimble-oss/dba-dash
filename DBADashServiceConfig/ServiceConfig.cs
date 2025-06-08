@@ -2357,30 +2357,30 @@ Cancel = cancel the operation.", @"Mark deleted?", MessageBoxButtons.YesNoCancel
 
         private void bttnPermissionsHelper_Click(object sender, EventArgs e)
         {
-            ShowPermissionsHelper(collectionConfig.SourceConnections.Where(src => src.SourceConnection.Type == ConnectionType.SQL).ToList());
+            ShowPermissionsHelper(collectionConfig.SourceConnections);
         }
 
         private void ShowPermissionsHelper(List<DBADashSource> sourceConnections)
         {
-            if (sourceConnections.Count == 0)
-            {
-                MessageBox.Show("No source connections", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                return;
-            }
-
-            var procs = sourceConnections
-                .SelectMany(src => src.CustomCollections.Values.Select(cc => cc.ProcedureName))
-                .Concat(collectionConfig.CustomCollections.Values.Select(cc => cc.ProcedureName))
-                .Distinct()
-                .ToList();
-
-            var frm = new PermissionsHelper() { ServiceName = collectionConfig.ServiceName, Connections = sourceConnections, ProcedureNames = procs };
+            var frm = new PermissionsHelper() { Connections = sourceConnections, Config = collectionConfig };
             frm.ShowDialog();
         }
 
         private void lnkGrant_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            ShowPermissionsHelper(GetNewSourceConnections().Where(src => src.SourceConnection.Type == ConnectionType.SQL).ToList());
+            var connections = GetNewSourceConnections();
+            if (connections.Count == 0)
+            {
+                MessageBox.Show(
+                    "Enter a connection string then click this link to provision access to the service account. Or click the Permissions Helper button to provision access to existing connections", "Permissions Helper", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            ShowPermissionsHelper(GetNewSourceConnections());
+        }
+
+        private void bttnGrantAccessToServiceAccount_Click(object sender, EventArgs e)
+        {
+            ShowPermissionsHelper(collectionConfig.SourceConnections);
         }
     }
 }
