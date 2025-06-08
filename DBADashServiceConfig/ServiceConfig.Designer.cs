@@ -153,6 +153,7 @@ namespace DBADashServiceConfig
             label13 = new System.Windows.Forms.Label();
             txtSearch = new System.Windows.Forms.TextBox();
             tabDest = new System.Windows.Forms.TabPage();
+            bttnGrantAccessToServiceAccount = new System.Windows.Forms.Button();
             lblServerNameWarning = new System.Windows.Forms.Label();
             lblServiceWarning = new System.Windows.Forms.Label();
             bttnAbout = new System.Windows.Forms.Button();
@@ -1135,6 +1136,7 @@ namespace DBADashServiceConfig
             // 
             // lnkGrant
             // 
+            lnkGrant.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             lnkGrant.AutoSize = true;
             lnkGrant.Location = new System.Drawing.Point(725, 144);
             lnkGrant.Name = "lnkGrant";
@@ -1590,6 +1592,7 @@ namespace DBADashServiceConfig
             // 
             // tabDest
             // 
+            tabDest.Controls.Add(bttnGrantAccessToServiceAccount);
             tabDest.Controls.Add(lblServerNameWarning);
             tabDest.Controls.Add(lblServiceWarning);
             tabDest.Controls.Add(bttnAbout);
@@ -1610,6 +1613,17 @@ namespace DBADashServiceConfig
             tabDest.TabIndex = 2;
             tabDest.Text = "Destination:";
             tabDest.UseVisualStyleBackColor = true;
+            // 
+            // bttnGrantAccessToServiceAccount
+            // 
+            bttnGrantAccessToServiceAccount.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            bttnGrantAccessToServiceAccount.Location = new System.Drawing.Point(723, 59);
+            bttnGrantAccessToServiceAccount.Name = "bttnGrantAccessToServiceAccount";
+            bttnGrantAccessToServiceAccount.Size = new System.Drawing.Size(283, 29);
+            bttnGrantAccessToServiceAccount.TabIndex = 26;
+            bttnGrantAccessToServiceAccount.Text = "Grant Access To Service Account";
+            bttnGrantAccessToServiceAccount.UseVisualStyleBackColor = true;
+            bttnGrantAccessToServiceAccount.Click += bttnGrantAccessToServiceAccount_Click;
             // 
             // lblServerNameWarning
             // 
@@ -1953,6 +1967,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.Button bttnPermissionsHelper;
         private System.Windows.Forms.LinkLabel lnkGrant;
+        private System.Windows.Forms.Button bttnGrantAccessToServiceAccount;
     }
 }
 

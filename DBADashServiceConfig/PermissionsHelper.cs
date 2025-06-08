@@ -26,11 +26,23 @@ namespace DBADashServiceConfig
             this.ApplyTheme();
         }
 
-        public string ServiceName { get; set; }
+        public CollectionConfig Config { get; set; }
 
-        public List<DBADashSource> Connections { get; set; }
-        public List<string> ProcedureNames { get; set; }
+        public List<DBADashSource> Connections
+        {
+            get => _connections;
+            set => _connections = value.Where(src => src.SourceConnection.Type == DBADashConnection.ConnectionType.SQL).ToList();
+        }
 
+        private List<string> ProcedureNames =>
+            Connections
+                .SelectMany(src => src.CustomCollections.Values.Select(cc => cc.ProcedureName))
+                .Concat(Config.CustomCollections.Values.Select(cc => cc.ProcedureName))
+                .Distinct()
+                .ToList();
+
+        private string ServiceName => Config.ServiceName;
+        private List<DBADashSource> _connections;
         private const string ExcludedResult = "Excluded";
         private const string SucceededResult = "Succeeded";
         private const string ReadyResult = "";
@@ -47,7 +59,7 @@ namespace DBADashServiceConfig
             set => txtServiceAccount.Text = value;
         }
 
-        private bool ServiceIsDomainAccount => ServiceAccountName.Split("\\").Length == 2;
+        private bool IsDomainAccount(string accountName) => accountName.Split("\\").Length == 2 || accountName.Contains("@");
 
         private static string GetServiceAccount(string serviceName)
         {
@@ -67,6 +79,8 @@ namespace DBADashServiceConfig
                 {
                     ServiceAccountName = Connections[0].SourceConnection.UserName;
                 }
+
+                bttnGrantRepositoryDB.Enabled = Config.SQLDestinations.Any();
                 LoadConnections();
             }
             catch (Exception ex)
@@ -93,6 +107,8 @@ namespace DBADashServiceConfig
             }
             dgvInstances.DataSource = InstancesDT;
             dgvInstances.AutoResizeColumnsWithMaxColumnWidth(DataGridViewAutoSizeColumnsMode.AllCells, 0.6f);
+            bttnGrant.Enabled = Connections.Any();
+            bttnLocalAdmin.Enabled = Connections.Any();
         }
 
         private readonly BindingList<PermissionItem> Permissions = new()
@@ -154,18 +170,18 @@ namespace DBADashServiceConfig
             return string.Join(".", unQuoted.Split(".").Select(part => part.SqlQuoteName()));
         }
 
-        private string GetScript()
+        private string GetScript(string serviceAccount)
         {
             var sb = new StringBuilder();
             UserCreatedDb = new();
             currentDB = string.Empty;
 
-            if (ServiceIsDomainAccount)
+            if (IsDomainAccount(serviceAccount))
             {
-                sb.AppendLine($"IF SUSER_ID({ServiceAccountName.SqlSingleQuoteWithEncapsulation()}) IS NULL");
+                sb.AppendLine($"IF SUSER_ID({serviceAccount.SqlSingleQuoteWithEncapsulation()}) IS NULL");
                 sb.AppendLine("BEGIN");
                 sb.AppendLine(
-                    $"    CREATE LOGIN {ServiceAccountName.SqlQuoteName()} FROM WINDOWS WITH DEFAULT_DATABASE=[master]");
+                    $"    CREATE LOGIN {serviceAccount.SqlQuoteName()} FROM WINDOWS WITH DEFAULT_DATABASE=[master]");
                 sb.AppendLine("END");
             }
             CreateUserInCurrentDB(sb);
@@ -176,14 +192,14 @@ namespace DBADashServiceConfig
                     case PermissionItem.PermissionTypes.ExecuteProcedure: /* This is run first before we change database */
                         sb.AppendLine($"IF OBJECT_ID({p.Name.SqlSingleQuoteWithEncapsulation()}) IS NOT NULL");
                         sb.AppendLine("BEGIN");
-                        sb.AppendLine($"\tGRANT EXECUTE ON {ReApplySqlQuoteName(p.Name)} TO {ServiceAccountName.SqlQuoteName()}");
+                        sb.AppendLine($"\tGRANT EXECUTE ON {ReApplySqlQuoteName(p.Name)} TO {serviceAccount.SqlQuoteName()}");
                         sb.AppendLine("END");
                         break;
 
                     case PermissionItem.PermissionTypes.ServerPermission:
                         UseDatabase(sb, "master");
                         CreateUserInCurrentDB(sb);
-                        sb.AppendLine((p.Grant ? "GRANT " : "REVOKE ") + p.Name + " TO " + ServiceAccountName.SqlQuoteName());
+                        sb.AppendLine((p.Grant ? "GRANT " : "REVOKE ") + p.Name + " TO " + serviceAccount.SqlQuoteName());
                         break;
 
                     case PermissionItem.PermissionTypes.DatabaseRole:
@@ -192,13 +208,13 @@ namespace DBADashServiceConfig
                             var role = p.Name.Split(":")[1];
                             UseDatabase(sb, db);
                             CreateUserInCurrentDB(sb);
-                            sb.AppendLine("ALTER ROLE " + role.SqlQuoteName() + (p.Grant ? " ADD " : " DROP ") + " MEMBER " + ServiceAccountName.SqlQuoteName());
+                            sb.AppendLine("ALTER ROLE " + role.SqlQuoteName() + (p.Grant ? " ADD " : " DROP ") + " MEMBER " + serviceAccount.SqlQuoteName());
                             break;
                         }
                     case PermissionItem.PermissionTypes.ServerRole:
                         UseDatabase(sb, "master");
                         CreateUserInCurrentDB(sb);
-                        sb.AppendLine("ALTER SERVER ROLE " + p.Name.SqlQuoteName() + (p.Grant ? " ADD " : " DROP ") + " MEMBER " + ServiceAccountName.SqlQuoteName());
+                        sb.AppendLine("ALTER SERVER ROLE " + p.Name.SqlQuoteName() + (p.Grant ? " ADD " : " DROP ") + " MEMBER " + serviceAccount.SqlQuoteName());
                         break;
 
                     default:
@@ -218,11 +234,18 @@ namespace DBADashServiceConfig
         private void CreateUserInCurrentDB(StringBuilder sb)
         {
             if (UserCreatedDb.Contains(currentDB)) return;
-            sb.AppendLine($"IF NOT EXISTS(SELECT 1 FROM sys.database_principals WHERE name = {ServiceAccountName.SqlSingleQuoteWithEncapsulation()})");
-            sb.AppendLine("BEGIN");
-            sb.AppendLine($"\tCREATE USER {ServiceAccountName.SqlQuoteName()} FOR LOGIN {ServiceAccountName.SqlQuoteName()}");
-            sb.AppendLine("END");
+            sb.Append(GetCreateUserInCurrentDBScript(ServiceAccountName));
             UserCreatedDb.Add(currentDB);
+        }
+
+        public static string GetCreateUserInCurrentDBScript(string loginName, string linePrefix = "")
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"{linePrefix}IF NOT EXISTS(SELECT 1 FROM sys.database_principals WHERE name = {loginName.SqlSingleQuoteWithEncapsulation()})");
+            sb.AppendLine($"{linePrefix}BEGIN");
+            sb.AppendLine($"{linePrefix}\tCREATE USER {loginName.SqlQuoteName()} FOR LOGIN {loginName.SqlQuoteName()}");
+            sb.AppendLine($"{linePrefix}END");
+            return sb.ToString();
         }
 
         private async void bttnGrant_Click(object sender, EventArgs e)
@@ -234,27 +257,29 @@ namespace DBADashServiceConfig
                 return;
             }
 
+            var serviceAccount = ServiceAccountName;
+
             if (Connections.Count == 1 && !string.IsNullOrEmpty(Connections[0].SourceConnection.UserName))
             {
+                // 1 connection using SQL auth
                 MessageBox.Show("Please enter the connecting details of the user that will provision access", Text,
                     MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
-                var connectionDialog = new DBConnection() { ConnectionString = Connections[0].ConnectionString };
+                var connectionDialog = new DBConnection() { ConnectionString = Connections[0].SourceConnection.ConnectionString };
                 connectionDialog.ShowDialog();
                 if (connectionDialog.DialogResult != DialogResult.OK) return;
                 Connections[0] = new DBADashSource(connectionDialog.ConnectionString);
                 LoadConnections();
                 ApplyToSQLAuth = true;
             }
-            else if (!ServiceIsDomainAccount)
+            else if (!IsDomainAccount(ServiceAccountName))
             {
                 MessageBox.Show("The service account doesn't appear to be a domain user account.", Text,
                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
 
-            var script = GetScript();
             StartProgress(Connections.Count);
-            var tasks = Connections.Select(src => ExecuteSQL(script, src)).ToList();
+            var tasks = Connections.Select(src => ExecuteSQL(GetScript(GetServiceAccountName(src.SourceConnection)), src)).ToList();
             try
             {
                 await Task.WhenAll(tasks);
@@ -317,11 +342,7 @@ namespace DBADashServiceConfig
                         "Versions of SQL Server prior to 2014 are not supported by the permissions helper dialog.";
                     return;
                 }
-
-                await using var cn = new SqlConnection(src.SourceConnection.ConnectionString);
-                await using var cmd = new SqlCommand(sql, cn);
-                await cn.OpenAsync();
-                await cmd.ExecuteNonQueryAsync();
+                await ExecuteSQL(sql, src.SourceConnection);
                 row["Result"] = SucceededResult;
             }
             catch (Exception ex)
@@ -335,9 +356,12 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void bttnViewScript_Click(object sender, EventArgs e)
+        private static async Task ExecuteSQL(string sql, DBADashConnection src)
         {
-            CommonShared.ShowCodeViewer(GetScript(), "Permissions Helper script", CodeEditor.CodeEditorModes.SQL);
+            await using var cn = new SqlConnection(src.ConnectionString);
+            await using var cmd = new SqlCommand(sql, cn);
+            await cn.OpenAsync();
+            await cmd.ExecuteNonQueryAsync();
         }
 
         private async void LocalAdmin_Click(object sender, EventArgs e)
@@ -348,7 +372,7 @@ namespace DBADashServiceConfig
                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
-            if (!ServiceIsDomainAccount)
+            if (!IsDomainAccount(ServiceAccountName))
             {
                 MessageBox.Show("The service account doesn't appear to be a domain user account.", Text,
                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
@@ -560,6 +584,117 @@ namespace DBADashServiceConfig
         private void Instances_UserDeletedRow(object sender, DataGridViewRowEventArgs e)
         {
             Connections.RemoveAll(src => InstancesDT.Rows.Find(GetSourceID(src)) == null);
+        }
+
+        private string GetServiceAccountName(DBADashConnection conn)
+        {
+            return string.IsNullOrEmpty(conn.UserName) ? ServiceAccountName : conn.UserName;
+        }
+
+        private async void GrantRepositoryDB_Click(object sender, EventArgs e)
+        {
+            var serviceAccount = GetServiceAccountName(Config.DestinationConnection);
+
+            if (string.IsNullOrEmpty(serviceAccount))
+            {
+                MessageBox.Show("Please enter a name of the service account", "Permissions Helper",
+                    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            try
+            {
+                var tasks = new List<Task>();
+                foreach (var dest in Config.SQLDestinations)
+                {
+                    var repoDB = dest.InitialCatalog();
+                    DBADashConnection masterCn;
+                    if (dest.IsIntegratedSecurity && !dest.IsAzureDB())
+                    {
+                        var builder = new SqlConnectionStringBuilder(dest.ConnectionString)
+                        {
+                            InitialCatalog = "master"
+                        };
+                        masterCn = new DBADashConnection(builder.ToString());
+                    }
+                    else
+                    {
+                        var prompt = new DBConnection() { ConnectionString = dest.ConnectionString };
+                        prompt.ShowDialog();
+                        if (prompt.DialogResult == DialogResult.OK)
+                        {
+                            masterCn = new DBADashConnection(prompt.ConnectionString);
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                    tasks.Add(ExecuteSQL(GetRepositoryDBScript(repoDB, serviceAccount), masterCn));
+                }
+
+                await Task.WhenAll(tasks);
+                if (!tasks.Any())
+                {
+                    MessageBox.Show("No destination connection to update", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "Service account has been granted permissions to the repository database.\n(db_owner or CREATE ANY DATABASE if the repository database hasn't been created yet)",
+                        Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private static string GetRepositoryDBScript(string db, string serviceAccount)
+        {
+            if (string.IsNullOrEmpty(db))
+            {
+                db = "DBADashDB";
+            }
+            var sb = new StringBuilder();
+            var sbDynamic = new StringBuilder();
+            sb.AppendLine("IF DB_ID(" + db.SqlSingleQuoteWithEncapsulation() + ") IS NOT NULL");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine("\tDECLARE @SQL NVARCHAR(MAX)");
+            sb.Append("\tSET @SQL = N");
+            sbDynamic.AppendLine("\tUSE " + db.SqlQuoteName() + "");
+            sbDynamic.Append(PermissionsHelper.GetCreateUserInCurrentDBScript(serviceAccount, "\t"));
+            sbDynamic.AppendLine("\tALTER ROLE db_owner ADD MEMBER " + serviceAccount.SqlQuoteName());
+            sbDynamic.AppendLine("\tUSE [master]");
+            sbDynamic.AppendLine("\tREVOKE CREATE ANY DATABASE TO " + serviceAccount.SqlQuoteName());
+            sb.AppendLine(sbDynamic.ToString().SqlSingleQuoteWithEncapsulation());
+            sb.AppendLine("\tEXEC sp_executesql @SQL");
+            sb.AppendLine("END");
+            sb.AppendLine("ELSE");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine("\tUSE [master]");
+            sb.AppendLine("\tGRANT CREATE ANY DATABASE TO " + serviceAccount.SqlQuoteName());
+            sb.AppendLine("END");
+            return sb.ToString();
+        }
+
+        private void ViewMonitoredInstanceScript_Click(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var serviceAccount = ServiceAccountName;
+
+            if (Connections.Count == 1)
+            {
+                serviceAccount = GetServiceAccountName(Connections[0].SourceConnection);
+            }
+            CommonShared.ShowCodeViewer(GetScript(serviceAccount), "Permissions Helper script", CodeEditor.CodeEditorModes.SQL);
+        }
+
+        private void ViewRepositoryDBScript_Click(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var serviceAccount = GetServiceAccountName(Config.DestinationConnection);
+            var script = GetRepositoryDBScript(Config.DestinationConnection.InitialCatalog(), serviceAccount);
+            CommonShared.ShowCodeViewer(script, "Repository DB Permissions Script");
         }
     }
 }

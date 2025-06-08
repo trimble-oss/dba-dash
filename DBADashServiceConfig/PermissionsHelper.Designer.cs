@@ -38,12 +38,14 @@
             label2 = new System.Windows.Forms.Label();
             label3 = new System.Windows.Forms.Label();
             bttnClose = new System.Windows.Forms.Button();
-            bttnViewScript = new System.Windows.Forms.Button();
             bttnLocalAdmin = new System.Windows.Forms.Button();
             chkRevokeLocalAdmin = new System.Windows.Forms.CheckBox();
             timer1 = new System.Windows.Forms.Timer(components);
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblProgress = new System.Windows.Forms.ToolStripStatusLabel();
+            bttnGrantRepositoryDB = new System.Windows.Forms.Button();
+            lnkViewRepositoryDBScript = new System.Windows.Forms.LinkLabel();
+            lnkViewMonitoredInstanceScript = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dgvPermissions).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dgvInstances).BeginInit();
@@ -73,11 +75,11 @@
             // bttnGrant
             // 
             bttnGrant.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            bttnGrant.Location = new System.Drawing.Point(674, 609);
+            bttnGrant.Location = new System.Drawing.Point(498, 609);
             bttnGrant.Name = "bttnGrant";
-            bttnGrant.Size = new System.Drawing.Size(94, 29);
+            bttnGrant.Size = new System.Drawing.Size(270, 29);
             bttnGrant.TabIndex = 6;
-            bttnGrant.Text = "Grant";
+            bttnGrant.Text = "Grant Access to monitored instances";
             bttnGrant.UseVisualStyleBackColor = true;
             bttnGrant.Click += bttnGrant_Click;
             // 
@@ -87,11 +89,11 @@
             dgvPermissions.AllowUserToDeleteRows = false;
             dgvPermissions.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             dgvPermissions.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvPermissions.Location = new System.Drawing.Point(36, 377);
+            dgvPermissions.Location = new System.Drawing.Point(36, 389);
             dgvPermissions.Name = "dgvPermissions";
             dgvPermissions.RowHeadersVisible = false;
             dgvPermissions.RowHeadersWidth = 51;
-            dgvPermissions.Size = new System.Drawing.Size(732, 226);
+            dgvPermissions.Size = new System.Drawing.Size(732, 212);
             dgvPermissions.TabIndex = 7;
             // 
             // dgvInstances
@@ -103,7 +105,7 @@
             dgvInstances.Name = "dgvInstances";
             dgvInstances.ReadOnly = true;
             dgvInstances.RowHeadersWidth = 51;
-            dgvInstances.Size = new System.Drawing.Size(732, 196);
+            dgvInstances.Size = new System.Drawing.Size(732, 208);
             dgvInstances.TabIndex = 8;
             dgvInstances.UserDeletedRow += Instances_UserDeletedRow;
             // 
@@ -120,7 +122,7 @@
             // 
             label3.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             label3.AutoSize = true;
-            label3.Location = new System.Drawing.Point(36, 354);
+            label3.Location = new System.Drawing.Point(36, 366);
             label3.Name = "label3";
             label3.Size = new System.Drawing.Size(88, 20);
             label3.TabIndex = 10;
@@ -129,30 +131,19 @@
             // bttnClose
             // 
             bttnClose.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            bttnClose.Location = new System.Drawing.Point(574, 609);
+            bttnClose.Location = new System.Drawing.Point(398, 609);
             bttnClose.Name = "bttnClose";
             bttnClose.Size = new System.Drawing.Size(94, 29);
             bttnClose.TabIndex = 11;
             bttnClose.Text = "&Close";
             bttnClose.UseVisualStyleBackColor = true;
             // 
-            // bttnViewScript
-            // 
-            bttnViewScript.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            bttnViewScript.Location = new System.Drawing.Point(36, 609);
-            bttnViewScript.Name = "bttnViewScript";
-            bttnViewScript.Size = new System.Drawing.Size(94, 29);
-            bttnViewScript.TabIndex = 12;
-            bttnViewScript.Text = "View Script";
-            bttnViewScript.UseVisualStyleBackColor = true;
-            bttnViewScript.Click += bttnViewScript_Click;
-            // 
             // bttnLocalAdmin
             // 
             bttnLocalAdmin.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            bttnLocalAdmin.Location = new System.Drawing.Point(530, 306);
+            bttnLocalAdmin.Location = new System.Drawing.Point(498, 318);
             bttnLocalAdmin.Name = "bttnLocalAdmin";
-            bttnLocalAdmin.Size = new System.Drawing.Size(238, 29);
+            bttnLocalAdmin.Size = new System.Drawing.Size(270, 29);
             bttnLocalAdmin.TabIndex = 13;
             bttnLocalAdmin.Text = "Grant Local Admin (WMI only)";
             bttnLocalAdmin.UseVisualStyleBackColor = true;
@@ -162,7 +153,7 @@
             // 
             chkRevokeLocalAdmin.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             chkRevokeLocalAdmin.AutoSize = true;
-            chkRevokeLocalAdmin.Location = new System.Drawing.Point(322, 309);
+            chkRevokeLocalAdmin.Location = new System.Drawing.Point(277, 321);
             chkRevokeLocalAdmin.Name = "chkRevokeLocalAdmin";
             chkRevokeLocalAdmin.Size = new System.Drawing.Size(202, 24);
             chkRevokeLocalAdmin.TabIndex = 14;
@@ -178,7 +169,7 @@
             // 
             statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { lblProgress });
-            statusStrip1.Location = new System.Drawing.Point(0, 663);
+            statusStrip1.Location = new System.Drawing.Point(0, 675);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new System.Drawing.Size(800, 26);
             statusStrip1.TabIndex = 16;
@@ -190,16 +181,51 @@
             lblProgress.Size = new System.Drawing.Size(74, 20);
             lblProgress.Text = "Progress...";
             // 
+            // bttnGrantRepositoryDB
+            // 
+            bttnGrantRepositoryDB.Location = new System.Drawing.Point(498, 33);
+            bttnGrantRepositoryDB.Name = "bttnGrantRepositoryDB";
+            bttnGrantRepositoryDB.Size = new System.Drawing.Size(270, 29);
+            bttnGrantRepositoryDB.TabIndex = 17;
+            bttnGrantRepositoryDB.Text = "Grant Access to repository database";
+            bttnGrantRepositoryDB.UseVisualStyleBackColor = true;
+            bttnGrantRepositoryDB.Click += GrantRepositoryDB_Click;
+            // 
+            // lnkViewRepositoryDBScript
+            // 
+            lnkViewRepositoryDBScript.AutoSize = true;
+            lnkViewRepositoryDBScript.Location = new System.Drawing.Point(685, 65);
+            lnkViewRepositoryDBScript.Name = "lnkViewRepositoryDBScript";
+            lnkViewRepositoryDBScript.Size = new System.Drawing.Size(83, 20);
+            lnkViewRepositoryDBScript.TabIndex = 18;
+            lnkViewRepositoryDBScript.TabStop = true;
+            lnkViewRepositoryDBScript.Text = "View Script";
+            lnkViewRepositoryDBScript.LinkClicked += ViewRepositoryDBScript_Click;
+            // 
+            // lnkViewMonitoredInstanceScript
+            // 
+            lnkViewMonitoredInstanceScript.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            lnkViewMonitoredInstanceScript.AutoSize = true;
+            lnkViewMonitoredInstanceScript.Location = new System.Drawing.Point(685, 641);
+            lnkViewMonitoredInstanceScript.Name = "lnkViewMonitoredInstanceScript";
+            lnkViewMonitoredInstanceScript.Size = new System.Drawing.Size(83, 20);
+            lnkViewMonitoredInstanceScript.TabIndex = 19;
+            lnkViewMonitoredInstanceScript.TabStop = true;
+            lnkViewMonitoredInstanceScript.Text = "View Script";
+            lnkViewMonitoredInstanceScript.LinkClicked += ViewMonitoredInstanceScript_Click;
+            // 
             // PermissionsHelper
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             CancelButton = bttnClose;
-            ClientSize = new System.Drawing.Size(800, 689);
+            ClientSize = new System.Drawing.Size(800, 701);
+            Controls.Add(lnkViewMonitoredInstanceScript);
+            Controls.Add(lnkViewRepositoryDBScript);
+            Controls.Add(bttnGrantRepositoryDB);
             Controls.Add(statusStrip1);
             Controls.Add(chkRevokeLocalAdmin);
             Controls.Add(bttnLocalAdmin);
-            Controls.Add(bttnViewScript);
             Controls.Add(bttnClose);
             Controls.Add(label3);
             Controls.Add(label2);
@@ -239,5 +265,8 @@
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel lblProgress;
+        private System.Windows.Forms.Button bttnGrantRepositoryDB;
+        private System.Windows.Forms.LinkLabel lnkViewMonitoredInstanceScript;
+        private System.Windows.Forms.LinkLabel lnkViewRepositoryDBScript;
     }
 }
