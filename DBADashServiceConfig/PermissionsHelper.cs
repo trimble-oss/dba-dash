@@ -6,11 +6,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.DirectoryServices;
 using System.Linq;
 using System.Management;
-using System.Reflection;
-using System.Runtime.InteropServices;
+using System.Management.Automation;
+using System.Management.Automation.Runspaces;
+using System.Security;
+using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -450,19 +451,14 @@ namespace DBADashServiceConfig
 
         private async Task AddUserToLocalAdmin(DBADashSource src, string computerName, DataRow row)
         {
-            const int UserInGroupHResult = unchecked((int)0x80070562);
             try
             {
                 await Task.Run(() => AddUserToLocalAdmin(computerName, ServiceAccountName));
                 SetRowResult(row, SucceededResult, $"User added to Administrators group on {computerName}");
             }
-            catch (TargetInvocationException ex) when (ex.InnerException is COMException { HResult: UserInGroupHResult })
+            catch (NothingToDoException ex)
             {
-                SetRowResult(row, SucceededResult, $"User is already a member of Administrators group on {computerName}");
-            }
-            catch (COMException ex) when (ex.HResult == UserInGroupHResult)
-            {
-                SetRowResult(row, SucceededResult, $"User is already a member of Administrators group on {computerName}");
+                SetRowResult(row, SucceededResult, ex.Message);
             }
             catch (Exception ex)
             {
@@ -473,22 +469,14 @@ namespace DBADashServiceConfig
 
         private async Task RemoveUserFromLocalAdmin(DBADashSource src, string computerName, DataRow row)
         {
-            const int UserNotInGroupHResult = unchecked((int)0x80070561);
             try
             {
                 await Task.Run(() => RemoveUserFromLocalAdmin(computerName, ServiceAccountName));
                 SetRowResult(row, SucceededResult, $"User removed from Administrators group on {computerName}");
             }
-            catch (TargetInvocationException ex) when (ex.InnerException is COMException
+            catch (NothingToDoException ex)
             {
-                HResult: UserNotInGroupHResult
-            })
-            {
-                SetRowResult(row, SucceededResult, $"User is not a member of Administrators group on {computerName}");
-            }
-            catch (COMException ex) when (ex.HResult == UserNotInGroupHResult)
-            {
-                SetRowResult(row, SucceededResult, $"User is not a member of Administrators group on {computerName}");
+                SetRowResult(row, SucceededResult, ex.Message);
             }
             catch (Exception ex)
             {
@@ -504,40 +492,130 @@ namespace DBADashServiceConfig
 
         private static void AddUserToLocalAdmin(string remoteComputer, string username,
             string adminUsername = null, string adminPassword = null) =>
-            AddRemoveUserFromLocalAdmin(remoteComputer, username, false, adminUsername, adminPassword);
+            AddRemoveUserFromLocalAdminViaWinRM(remoteComputer, username, false, adminUsername, adminPassword);
 
         private static void RemoveUserFromLocalAdmin(string remoteComputer, string username,
             string adminUsername = null, string adminPassword = null) =>
-            AddRemoveUserFromLocalAdmin(remoteComputer, username, true, adminUsername, adminPassword);
+            AddRemoveUserFromLocalAdminViaWinRM(remoteComputer, username, true, adminUsername, adminPassword);
 
-        private static void AddRemoveUserFromLocalAdmin(string remoteComputer, string username, bool remove,
-            string adminUsername = null, string adminPassword = null)
+        private static string GetSID(string accountName)
         {
-            var groupPath = $"WinNT://{remoteComputer}/Administrators,group";
-            var userPath = $"WinNT://{username},user";
+            var account = new NTAccount(accountName);
+            var sid = (SecurityIdentifier)account.Translate(typeof(SecurityIdentifier));
+            return sid.Value;
+        }
 
-            // If dealing with domain user, format differently
-            if (username.Contains("\\"))
-            {
-                var parts = username.Split('\\');
-                userPath = $"WinNT://{parts[0]}/{parts[1]},user";
-            }
-            else if (username.Contains("@"))
-            {
-                // Handle UPN format
-                userPath = $"WinNT://{username},user";
-            }
-
-            using var group = new DirectoryEntry(groupPath);
-            // Set credentials if provided
+        public static void AddRemoveUserFromLocalAdminViaWinRM(string remoteComputer, string username, bool remove,
+        string adminUsername = null, string adminPassword = null)
+        {
+            WSManConnectionInfo connectionInfo;
             if (!string.IsNullOrEmpty(adminUsername) && !string.IsNullOrEmpty(adminPassword))
             {
-                group.Username = adminUsername;
-                group.Password = adminPassword;
+                var securePassword = new SecureString();
+                foreach (var c in adminPassword)
+                    securePassword.AppendChar(c);
+                var credential = new PSCredential(adminUsername, securePassword);
+                connectionInfo = new WSManConnectionInfo(false, remoteComputer, 5985, "/wsman",
+                    "http://schemas.microsoft.com/powershell/Microsoft.PowerShell", credential);
+            }
+            else
+            {
+                connectionInfo = new WSManConnectionInfo(new Uri($"http://{remoteComputer}:5985/wsman"));
             }
 
-            group.Invoke(remove ? "Remove" : "Add", userPath);
-            group.CommitChanges();
+            using var runspace = RunspaceFactory.CreateRunspace(connectionInfo);
+            try
+            {
+                var serviceSid = GetSID(username);
+                runspace.Open();
+
+                // Get the actual administrators group name (handles renamed groups)
+                var adminGroupName = GetAdministratorsGroupName(runspace);
+
+                if (string.IsNullOrEmpty(adminGroupName))
+                {
+                    throw new Exception($"Cannot find the Administrators group on {remoteComputer}");
+                }
+
+                // Check current membership status
+                var isCurrentlyMember = IsLocalGroupMember(runspace, serviceSid, adminGroupName);
+
+                switch (remove)
+                {
+                    case true when !isCurrentlyMember:
+                        throw new NothingToDoException(
+                            $"User '{username}' is not a member of {adminGroupName} group on {remoteComputer}");
+                    case false when isCurrentlyMember:
+                        throw new NothingToDoException(
+                            $"User '{username}' is already a member of {adminGroupName} group on {remoteComputer}");
+                        return;
+                }
+
+                // Perform the operation using the actual group name
+                using var ps = PowerShell.Create();
+                ps.Runspace = runspace;
+                var command = remove ? "Remove-LocalGroupMember" : "Add-LocalGroupMember";
+
+                ps.AddCommand(command)
+                    .AddParameter("Group", adminGroupName)
+                    .AddParameter("Member", username)
+                    .AddParameter("ErrorAction", "Stop");
+
+                var results = ps.Invoke();
+
+                if (!ps.HadErrors) return;
+                foreach (var error in ps.Streams.Error)
+                {
+                    throw new Exception($"PowerShell error: {error}");
+                }
+            }
+            finally
+            {
+                if (runspace.RunspaceStateInfo.State == RunspaceState.Opened)
+                    runspace.Close();
+            }
+        }
+
+        private static bool IsLocalGroupMember(Runspace runspace, string sid, string adminGroupName)
+        {
+            using var ps = PowerShell.Create();
+            ps.Runspace = runspace;
+
+            ps.AddCommand("Get-LocalGroupMember")
+                .AddParameter("Group", adminGroupName)
+                .AddParameter("ErrorAction", "SilentlyContinue");
+
+            var results = ps.Invoke();
+
+            foreach (var result in results)
+            {
+                var memberSid = result.Properties["SID"]?.Value?.ToString();
+                if (sid == null) continue;
+                if (string.Equals(sid, memberSid, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static string GetAdministratorsGroupName(Runspace runspace)
+        {
+            using var ps = PowerShell.Create();
+            ps.Runspace = runspace;
+
+            // Method 1: Try using the well-known SID for Administrators group
+            // S-1-5-32-544 is the universal SID for the built-in Administrators group
+            ps.AddCommand("Get-LocalGroup")
+                .AddParameter("SID", "S-1-5-32-544")
+                .AddParameter("ErrorAction", "SilentlyContinue");
+
+            var results = ps.Invoke();
+
+            if (results.Count <= 0) return null;
+            var groupName = results[0].Properties["Name"]?.Value?.ToString();
+            return !string.IsNullOrEmpty(groupName) ? groupName : null;
         }
 
         private void StartProgress(int count)
@@ -695,6 +773,23 @@ namespace DBADashServiceConfig
             var serviceAccount = GetServiceAccountName(Config.DestinationConnection);
             var script = GetRepositoryDBScript(Config.DestinationConnection.InitialCatalog(), serviceAccount);
             CommonShared.ShowCodeViewer(script, "Repository DB Permissions Script");
+        }
+    }
+
+    public class NothingToDoException : Exception
+    {
+        public NothingToDoException()
+        {
+        }
+
+        public NothingToDoException(string message)
+            : base(message)
+        {
+        }
+
+        public NothingToDoException(string message, Exception inner)
+            : base(message, inner)
+        {
         }
     }
 }
