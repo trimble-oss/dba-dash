@@ -1,11 +1,13 @@
-﻿using Meziantou.Framework.Win32;
+﻿using DBADash;
+using DBADashGUI.Theme;
+using Meziantou.Framework.Win32;
 using System;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Security.AccessControl;
 using System.ServiceProcess;
 using System.Windows.Forms;
-using DBADash;
-using DBADashGUI.Theme;
 
 namespace DBADashServiceConfig
 {
@@ -26,6 +28,7 @@ namespace DBADashServiceConfig
             switch (cboServiceCredentials.SelectedIndex)
             {
                 case 0: // LocalSystem (default)
+                    username = "NT AUTHORITY\\System";
                     break;
 
                 case 1:
@@ -88,7 +91,38 @@ namespace DBADashServiceConfig
                 return false;
             }
 
+            try
+            {
+                GrantFullControlToUser(AppContext.BaseDirectory, username);
+                txtOutput.AppendText($"Granted {username} access to {AppContext.BaseDirectory}");
+            }
+            catch (Exception ex)
+            {
+                txtOutput.AppendText($"Error granting {username} access to {AppContext.BaseDirectory}\n{ex}");
+            }
+
             return true;
+        }
+
+        private static void GrantFullControlToUser(string folderPath, string userName)
+        {
+            // Get the directory's access control list
+            var dirInfo = new DirectoryInfo(folderPath);
+            var dirSecurity = dirInfo.GetAccessControl();
+
+            // Create a new access rule for the specified user
+            var accessRule = new FileSystemAccessRule(
+                userName,
+                FileSystemRights.FullControl,
+                InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
+                PropagationFlags.None,
+                AccessControlType.Allow);
+
+            // Add the new rule to the directory's access control list
+            dirSecurity.AddAccessRule(accessRule);
+
+            // Apply the changes to the directory
+            dirInfo.SetAccessControl(dirSecurity);
         }
 
         private void BttnInstall_Click(object sender, EventArgs e)
