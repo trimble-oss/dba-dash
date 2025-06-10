@@ -169,17 +169,16 @@
             // 
             statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { lblProgress });
-            statusStrip1.Location = new System.Drawing.Point(0, 675);
+            statusStrip1.Location = new System.Drawing.Point(0, 677);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new System.Drawing.Size(800, 26);
+            statusStrip1.Size = new System.Drawing.Size(800, 24);
             statusStrip1.TabIndex = 16;
             statusStrip1.Text = "statusStrip1";
             // 
             // lblProgress
             // 
             lblProgress.Name = "lblProgress";
-            lblProgress.Size = new System.Drawing.Size(74, 20);
-            lblProgress.Text = "Progress...";
+            lblProgress.Size = new System.Drawing.Size(0, 18);
             // 
             // bttnGrantRepositoryDB
             // 
