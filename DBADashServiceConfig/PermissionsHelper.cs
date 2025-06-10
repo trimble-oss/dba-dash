@@ -60,7 +60,7 @@ namespace DBADashServiceConfig
             set => txtServiceAccount.Text = value;
         }
 
-        private bool IsDomainAccount(string accountName) => accountName.Split("\\").Length == 2 || accountName.Contains("@");
+        private static bool IsDomainAccount(string accountName) => (!accountName.StartsWith("NT AUTHORITY") && accountName.Split("\\").Length == 2) || accountName.Contains("@");
 
         private static string GetServiceAccount(string serviceName)
         {
@@ -671,24 +671,28 @@ namespace DBADashServiceConfig
 
         private async void GrantRepositoryDB_Click(object sender, EventArgs e)
         {
-            var serviceAccount = GetServiceAccountName(Config.DestinationConnection);
-
-            if (string.IsNullOrEmpty(serviceAccount))
+            if (string.IsNullOrEmpty(ServiceAccountName))
             {
                 MessageBox.Show("Please enter a name of the service account", "Permissions Helper",
                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
-
             try
             {
                 var tasks = new List<Task>();
                 foreach (var dest in Config.SQLDestinations)
                 {
+                    var serviceAccount = GetServiceAccountName(dest);
+
                     var repoDB = dest.InitialCatalog();
                     DBADashConnection masterCn;
                     if (dest.IsIntegratedSecurity && !dest.IsAzureDB())
                     {
+                        if (!IsDomainAccount(serviceAccount))
+                        {
+                            MessageBox.Show($"Unable to assign permissions to non-domain user account {serviceAccount} with integrated security.  Use a domain user account or use SQL authentication to connect to the repository database.", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
                         var builder = new SqlConnectionStringBuilder(dest.ConnectionString)
                         {
                             InitialCatalog = "master"
