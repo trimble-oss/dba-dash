@@ -1617,11 +1617,11 @@ namespace DBADashServiceConfig
             // bttnGrantAccessToServiceAccount
             // 
             bttnGrantAccessToServiceAccount.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            bttnGrantAccessToServiceAccount.Location = new System.Drawing.Point(723, 59);
+            bttnGrantAccessToServiceAccount.Location = new System.Drawing.Point(835, 59);
             bttnGrantAccessToServiceAccount.Name = "bttnGrantAccessToServiceAccount";
-            bttnGrantAccessToServiceAccount.Size = new System.Drawing.Size(283, 29);
+            bttnGrantAccessToServiceAccount.Size = new System.Drawing.Size(171, 29);
             bttnGrantAccessToServiceAccount.TabIndex = 26;
-            bttnGrantAccessToServiceAccount.Text = "Grant Access To Service Account";
+            bttnGrantAccessToServiceAccount.Text = "Permissions Helper";
             bttnGrantAccessToServiceAccount.UseVisualStyleBackColor = true;
             bttnGrantAccessToServiceAccount.Click += bttnGrantAccessToServiceAccount_Click;
             // 

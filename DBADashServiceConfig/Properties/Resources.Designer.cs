@@ -183,5 +183,17 @@ namespace DBADashServiceConfig.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap PowerShellScript_24x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("PowerShellScript_24x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
