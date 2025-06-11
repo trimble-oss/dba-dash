@@ -30,28 +30,15 @@ namespace DBADashServiceConfig
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(InstallService));
-            lnkPermissions = new System.Windows.Forms.LinkLabel();
             cboServiceCredentials = new System.Windows.Forms.ComboBox();
             lblServiceCredentials = new System.Windows.Forms.Label();
             bttnInstall = new System.Windows.Forms.Button();
             bttnCancel = new System.Windows.Forms.Button();
             txtOutput = new System.Windows.Forms.TextBox();
             pictureBox1 = new System.Windows.Forms.PictureBox();
+            lnkCreateServiceAccountScript = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
-            // 
-            // lnkPermissions
-            // 
-            lnkPermissions.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            lnkPermissions.AutoSize = true;
-            lnkPermissions.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            lnkPermissions.Location = new System.Drawing.Point(34, 442);
-            lnkPermissions.Name = "lnkPermissions";
-            lnkPermissions.Size = new System.Drawing.Size(248, 20);
-            lnkPermissions.TabIndex = 32;
-            lnkPermissions.TabStop = true;
-            lnkPermissions.Text = "Permissions required for service user";
-            lnkPermissions.LinkClicked += LnkPermissions_LinkClicked;
             // 
             // cboServiceCredentials
             // 
@@ -77,7 +64,7 @@ namespace DBADashServiceConfig
             // bttnInstall
             // 
             bttnInstall.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            bttnInstall.Location = new System.Drawing.Point(800, 442);
+            bttnInstall.Location = new System.Drawing.Point(800, 557);
             bttnInstall.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             bttnInstall.Name = "bttnInstall";
             bttnInstall.Size = new System.Drawing.Size(104, 44);
@@ -90,7 +77,7 @@ namespace DBADashServiceConfig
             // 
             bttnCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             bttnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            bttnCancel.Location = new System.Drawing.Point(677, 442);
+            bttnCancel.Location = new System.Drawing.Point(677, 557);
             bttnCancel.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             bttnCancel.Name = "bttnCancel";
             bttnCancel.Size = new System.Drawing.Size(104, 42);
@@ -107,21 +94,33 @@ namespace DBADashServiceConfig
             txtOutput.Multiline = true;
             txtOutput.Name = "txtOutput";
             txtOutput.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            txtOutput.Size = new System.Drawing.Size(892, 354);
+            txtOutput.Size = new System.Drawing.Size(892, 469);
             txtOutput.TabIndex = 35;
             txtOutput.Text = resources.GetString("txtOutput.Text");
             // 
             // pictureBox1
             // 
             pictureBox1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            pictureBox1.Image = Properties.Resources.Information_blue_6227_16x16_cyan;
-            pictureBox1.Location = new System.Drawing.Point(12, 442);
+            pictureBox1.Image = Properties.Resources.PowerShellScript_24x;
+            pictureBox1.Location = new System.Drawing.Point(12, 557);
             pictureBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new System.Drawing.Size(16, 16);
+            pictureBox1.Size = new System.Drawing.Size(24, 24);
             pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             pictureBox1.TabIndex = 33;
             pictureBox1.TabStop = false;
+            // 
+            // lnkCreateServiceAccountScript
+            // 
+            lnkCreateServiceAccountScript.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            lnkCreateServiceAccountScript.AutoSize = true;
+            lnkCreateServiceAccountScript.Location = new System.Drawing.Point(42, 561);
+            lnkCreateServiceAccountScript.Name = "lnkCreateServiceAccountScript";
+            lnkCreateServiceAccountScript.Size = new System.Drawing.Size(215, 20);
+            lnkCreateServiceAccountScript.TabIndex = 36;
+            lnkCreateServiceAccountScript.TabStop = true;
+            lnkCreateServiceAccountScript.Text = "Script to create service account";
+            lnkCreateServiceAccountScript.LinkClicked += CreateServiceAccountScript_LinkClicked;
             // 
             // InstallService
             // 
@@ -129,11 +128,11 @@ namespace DBADashServiceConfig
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             CancelButton = bttnCancel;
-            ClientSize = new System.Drawing.Size(916, 500);
+            ClientSize = new System.Drawing.Size(916, 615);
+            Controls.Add(lnkCreateServiceAccountScript);
             Controls.Add(txtOutput);
             Controls.Add(bttnCancel);
             Controls.Add(pictureBox1);
-            Controls.Add(lnkPermissions);
             Controls.Add(cboServiceCredentials);
             Controls.Add(lblServiceCredentials);
             Controls.Add(bttnInstall);
@@ -151,11 +150,11 @@ namespace DBADashServiceConfig
         #endregion
 
         private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.LinkLabel lnkPermissions;
         private System.Windows.Forms.ComboBox cboServiceCredentials;
         private System.Windows.Forms.Label lblServiceCredentials;
         private System.Windows.Forms.Button bttnInstall;
         private System.Windows.Forms.Button bttnCancel;
         private System.Windows.Forms.TextBox txtOutput;
+        private System.Windows.Forms.LinkLabel lnkCreateServiceAccountScript;
     }
 }

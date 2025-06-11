@@ -5,9 +5,12 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.AccessControl;
 using System.ServiceProcess;
 using System.Windows.Forms;
+using DBADashGUI;
+using DBADashGUI.SchemaCompare;
 
 namespace DBADashServiceConfig
 {
@@ -165,9 +168,23 @@ namespace DBADashServiceConfig
             cboServiceCredentials.SelectedIndex = 3;
         }
 
-        private void LnkPermissions_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void CreateServiceAccountScript_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            CommonShared.OpenURL("https://dbadash.com/docs/help/security/");
+            var script = ReadResourceString("CreateMSA.ps1");
+            var frm = new CodeViewer() { Language = CodeEditor.CodeEditorModes.PowerShell, Code = script };
+            frm.Show();
+        }
+
+        public string ReadResourceString(string name)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourcePath = assembly.GetManifestResourceNames()
+                    .Single(str => str.EndsWith(name));
+
+            using var stream = assembly.GetManifestResourceStream(resourcePath);
+            if (stream == null) return null;
+            using var reader = new StreamReader(stream);
+            return reader.ReadToEnd();
         }
     }
 }

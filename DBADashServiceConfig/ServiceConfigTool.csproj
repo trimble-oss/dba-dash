@@ -38,10 +38,16 @@
     <Deterministic>True</Deterministic>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="CreateMSA.ps1" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="services.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="CreateMSA.ps1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DBADashGUI\DBADashGUI.csproj" />
