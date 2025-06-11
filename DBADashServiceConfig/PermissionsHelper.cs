@@ -171,22 +171,25 @@ namespace DBADashServiceConfig
             return string.Join(".", unQuoted.Split(".").Select(part => part.SqlQuoteName()));
         }
 
+        private static void AddCreateLogin(StringBuilder sb, string serviceAccount)
+        {
+            if (!IsDomainAccount(serviceAccount)) return;
+
+            sb.AppendLine($"IF SUSER_ID({serviceAccount.SqlSingleQuoteWithEncapsulation()}) IS NULL");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine($"\tCREATE LOGIN {serviceAccount.SqlQuoteName()} FROM WINDOWS WITH DEFAULT_DATABASE=[master]");
+            sb.AppendLine("END");
+            sb.AppendLine();
+        }
+
         private string GetScript(string serviceAccount)
         {
             var sb = new StringBuilder();
             UserCreatedDb = new();
             currentDB = string.Empty;
 
-            if (IsDomainAccount(serviceAccount))
-            {
-                sb.AppendLine($"IF SUSER_ID({serviceAccount.SqlSingleQuoteWithEncapsulation()}) IS NULL");
-                sb.AppendLine("BEGIN");
-                sb.AppendLine(
-                    $"    CREATE LOGIN {serviceAccount.SqlQuoteName()} FROM WINDOWS WITH DEFAULT_DATABASE=[master]");
-                sb.AppendLine("END");
-            }
+            AddCreateLogin(sb, serviceAccount);
 
-            sb.AppendLine();
             sb.AppendLine("DECLARE @UserName SYSNAME");
             sb.AppendLine("DECLARE @SQL NVARCHAR(MAX)");
             sb.AppendLine();
@@ -775,6 +778,7 @@ namespace DBADashServiceConfig
             sb.AppendLine("\tOtherwise allow the service account permissions to create the database.  Revoke this permission if the database exists as it's no longer required.");
             sb.AppendLine("*/");
             sb.AppendLine();
+            AddCreateLogin(sb, serviceAccount);
             sb.AppendLine("IF DB_ID(" + db.SqlSingleQuoteWithEncapsulation() + ") IS NOT NULL");
             sb.AppendLine("BEGIN");
             sb.AppendLine("\tDECLARE @SQL NVARCHAR(MAX)");
