@@ -60,7 +60,7 @@ namespace DBADashServiceConfig
             set => txtServiceAccount.Text = value;
         }
 
-        private static bool IsDomainAccount(string accountName) => (!accountName.StartsWith("NT AUTHORITY") && accountName.Split("\\").Length == 2) || accountName.Contains("@");
+        private static bool IsDomainAccount(string accountName) => (!accountName.StartsWith("NT AUTHORITY") && accountName.Split("\\").Length == 2) || accountName.Contains('@');
 
         private static string GetServiceAccount(string serviceName)
         {
@@ -81,7 +81,7 @@ namespace DBADashServiceConfig
                     ServiceAccountName = Connections[0].SourceConnection.UserName;
                 }
 
-                bttnGrantRepositoryDB.Enabled = Config.SQLDestinations.Any();
+                bttnGrantRepositoryDB.Enabled = Config.SQLDestinations.Count != 0;
                 LoadConnections();
             }
             catch (Exception ex)
@@ -108,8 +108,8 @@ namespace DBADashServiceConfig
             }
             dgvInstances.DataSource = InstancesDT;
             dgvInstances.AutoResizeColumnsWithMaxColumnWidth(DataGridViewAutoSizeColumnsMode.AllCells, 0.6f);
-            bttnGrant.Enabled = Connections.Any();
-            bttnLocalAdmin.Enabled = Connections.Any();
+            bttnGrant.Enabled = Connections.Count != 0;
+            bttnLocalAdmin.Enabled = Connections.Count != 0;
         }
 
         private readonly BindingList<PermissionItem> Permissions = new()
@@ -185,71 +185,83 @@ namespace DBADashServiceConfig
                     $"    CREATE LOGIN {serviceAccount.SqlQuoteName()} FROM WINDOWS WITH DEFAULT_DATABASE=[master]");
                 sb.AppendLine("END");
             }
-            CreateUserInCurrentDB(sb);
-            foreach (var p in Permissions.Where(p => p.PermissionState != PermissionItem.PermissionStates.None).OrderBy(p => (p.PermissionType is PermissionItem.PermissionTypes.ExecuteProcedure ? "A" : "Z") + p.Name))
+
+            sb.AppendLine();
+            sb.AppendLine("DECLARE @UserName SYSNAME");
+            sb.AppendLine("DECLARE @SQL NVARCHAR(MAX)");
+            sb.AppendLine();
+            sb.AppendLine(CreateUserOrGetMappedUserNameInCurrentDB(serviceAccount));
+            PermissionItem.PermissionTypes? lastPermissionType = null;
+            foreach (var p in Permissions.Where(p => p.PermissionState != PermissionItem.PermissionStates.None).OrderBy(p => (p.PermissionType is PermissionItem.PermissionTypes.ExecuteProcedure ? "A" : "Z") + p.PermissionType + p.Name))
             {
                 switch (p.PermissionType)
                 {
                     case PermissionItem.PermissionTypes.ExecuteProcedure: /* This is run first before we change database */
+                        if (lastPermissionType != p.PermissionType)
+                        {
+                            sb.AppendLine("/* GRANT EXECUTE */ ");
+                        }
                         sb.AppendLine($"IF OBJECT_ID({p.Name.SqlSingleQuoteWithEncapsulation()}) IS NOT NULL");
                         sb.AppendLine("BEGIN");
-                        sb.AppendLine($"\tGRANT EXECUTE ON {ReApplySqlQuoteName(p.Name)} TO {serviceAccount.SqlQuoteName()}");
+                        sb.AppendLine($"\tSET @SQL = N'GRANT EXECUTE ON {ReApplySqlQuoteName(p.Name)} TO ' + QUOTENAME(@UserName)");
+                        sb.AppendLine("\tPRINT @SQL");
+                        sb.AppendLine("\tEXEC sp_executesql @SQL");
                         sb.AppendLine("END");
                         break;
 
                     case PermissionItem.PermissionTypes.ServerPermission:
-                        UseDatabase(sb, "master");
-                        CreateUserInCurrentDB(sb);
+                        if (lastPermissionType != p.PermissionType)
+                        {
+                            sb.AppendLine("/* SERVER LEVEL GRANTS */ ");
+                        }
+                        UseDatabaseAndCreateUserOrGetMappedUserName(sb, "master", serviceAccount);
+
                         sb.AppendLine((p.Grant ? "GRANT " : "REVOKE ") + p.Name + " TO " + serviceAccount.SqlQuoteName());
+
                         break;
 
                     case PermissionItem.PermissionTypes.DatabaseRole:
+
+                        if (lastPermissionType != p.PermissionType)
                         {
-                            var db = p.Name.Split(":")[0];
-                            var role = p.Name.Split(":")[1];
-                            UseDatabase(sb, db);
-                            CreateUserInCurrentDB(sb);
-                            sb.AppendLine("ALTER ROLE " + role.SqlQuoteName() + (p.Grant ? " ADD " : " DROP ") + " MEMBER " + serviceAccount.SqlQuoteName());
-                            break;
+                            sb.AppendLine("/* Add Database Roles */ ");
                         }
+                        var db = p.Name.Split(":")[0];
+                        var role = p.Name.Split(":")[1];
+                        UseDatabaseAndCreateUserOrGetMappedUserName(sb, db, serviceAccount);
+
+                        sb.AppendLine("SET @SQL = N'ALTER ROLE " + role.SqlQuoteName() + (p.Grant ? " ADD " : " DROP ") + "MEMBER ' + QUOTENAME(@UserName)");
+                        sb.AppendLine("\tPRINT @SQL");
+                        sb.AppendLine("EXEC sp_executesql @SQL");
+                        break;
+
                     case PermissionItem.PermissionTypes.ServerRole:
-                        UseDatabase(sb, "master");
-                        CreateUserInCurrentDB(sb);
-                        sb.AppendLine("ALTER SERVER ROLE " + p.Name.SqlQuoteName() + (p.Grant ? " ADD " : " DROP ") + " MEMBER " + serviceAccount.SqlQuoteName());
+                        if (lastPermissionType != p.PermissionType)
+                        {
+                            sb.AppendLine("/* Add Server Roles */ ");
+                        }
+                        UseDatabaseAndCreateUserOrGetMappedUserName(sb, "master", serviceAccount);
+                        sb.AppendLine("ALTER SERVER ROLE " + p.Name.SqlQuoteName() + (p.Grant ? " ADD " : " DROP ") + "MEMBER " + serviceAccount.SqlQuoteName());
                         break;
 
                     default:
-                        throw new ArgumentOutOfRangeException();
+                        throw new ArgumentOutOfRangeException(p.ToString());
                 }
+
+                lastPermissionType = p.PermissionType;
             }
             return sb.ToString();
         }
 
-        private void UseDatabase(StringBuilder sb, string db)
+        private void UseDatabaseAndCreateUserOrGetMappedUserName(StringBuilder sb, string db, string serviceAccount)
         {
             if (currentDB == db) return;
             sb.AppendLine("USE " + db.SqlQuoteName() + "");
+            sb.AppendLine(CreateUserOrGetMappedUserNameInCurrentDB(serviceAccount));
             currentDB = db;
         }
 
-        private void CreateUserInCurrentDB(StringBuilder sb)
-        {
-            if (UserCreatedDb.Contains(currentDB)) return;
-            sb.Append(GetCreateUserInCurrentDBScript(ServiceAccountName));
-            UserCreatedDb.Add(currentDB);
-        }
-
-        public static string GetCreateUserInCurrentDBScript(string loginName, string linePrefix = "")
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine($"{linePrefix}IF NOT EXISTS(SELECT 1 FROM sys.database_principals WHERE name = {loginName.SqlSingleQuoteWithEncapsulation()})");
-            sb.AppendLine($"{linePrefix}BEGIN");
-            sb.AppendLine($"{linePrefix}\tCREATE USER {loginName.SqlQuoteName()} FOR LOGIN {loginName.SqlQuoteName()}");
-            sb.AppendLine($"{linePrefix}END");
-            return sb.ToString();
-        }
-
-        private async void bttnGrant_Click(object sender, EventArgs e)
+        private async void Grant_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(txtServiceAccount.Text))
             {
@@ -431,11 +443,11 @@ namespace DBADashServiceConfig
 
                 if (src.NoWMI)
                 {
-                    await RemoveUserFromLocalAdmin(src, computerName, row);
+                    await RemoveUserFromLocalAdmin(computerName, row);
                 }
                 else
                 {
-                    await AddUserToLocalAdmin(src, computerName, row);
+                    await AddUserToLocalAdmin(computerName, row);
                 }
             }
             catch (Exception ex)
@@ -449,7 +461,7 @@ namespace DBADashServiceConfig
             }
         }
 
-        private async Task AddUserToLocalAdmin(DBADashSource src, string computerName, DataRow row)
+        private async Task AddUserToLocalAdmin(string computerName, DataRow row)
         {
             try
             {
@@ -467,7 +479,7 @@ namespace DBADashServiceConfig
             }
         }
 
-        private async Task RemoveUserFromLocalAdmin(DBADashSource src, string computerName, DataRow row)
+        private async Task RemoveUserFromLocalAdmin(string computerName, DataRow row)
         {
             try
             {
@@ -548,7 +560,6 @@ namespace DBADashServiceConfig
                     case false when isCurrentlyMember:
                         throw new NothingToDoException(
                             $"User '{username}' is already a member of {adminGroupName} group on {remoteComputer}");
-                        return;
                 }
 
                 // Perform the operation using the actual group name
@@ -716,7 +727,7 @@ namespace DBADashServiceConfig
                 }
 
                 await Task.WhenAll(tasks);
-                if (!tasks.Any())
+                if (tasks.Count == 0)
                 {
                     MessageBox.Show("No destination connection to update", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
@@ -733,6 +744,24 @@ namespace DBADashServiceConfig
             }
         }
 
+        private static string CreateUserOrGetMappedUserNameInCurrentDB(string serviceAccount)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("/* Find the user mapped to the login */");
+            sb.AppendLine("SET @UserName = NULL");
+            sb.AppendLine("SELECT @UserName = name");
+            sb.AppendLine("FROM sys.database_principals");
+            sb.AppendLine($"WHERE sid=(SELECT sid FROM sys.syslogins where name = {serviceAccount.SqlSingleQuoteWithEncapsulation()})");
+            sb.AppendLine();
+            sb.AppendLine("/* Create a user for the login if required */");
+            sb.AppendLine($"IF @UserName IS NULL");
+            sb.AppendLine($"BEGIN");
+            sb.AppendLine($"\tCREATE USER {serviceAccount.SqlQuoteName()} FOR LOGIN {serviceAccount.SqlQuoteName()}");
+            sb.AppendLine($"\tSET @UserName = {serviceAccount.SqlSingleQuoteWithEncapsulation()}");
+            sb.AppendLine($"END");
+            return sb.ToString();
+        }
+
         private static string GetRepositoryDBScript(string db, string serviceAccount)
         {
             if (string.IsNullOrEmpty(db))
@@ -741,15 +770,27 @@ namespace DBADashServiceConfig
             }
             var sb = new StringBuilder();
             var sbDynamic = new StringBuilder();
+            sb.AppendLine("/*");
+            sb.AppendLine("\tIf the repository database exists, create a user associated with the service account (if required) and make it db_owner");
+            sb.AppendLine("\tOtherwise allow the service account permissions to create the database.  Revoke this permission if the database exists as it's no longer required.");
+            sb.AppendLine("*/");
+            sb.AppendLine();
             sb.AppendLine("IF DB_ID(" + db.SqlSingleQuoteWithEncapsulation() + ") IS NOT NULL");
             sb.AppendLine("BEGIN");
             sb.AppendLine("\tDECLARE @SQL NVARCHAR(MAX)");
             sb.Append("\tSET @SQL = N");
-            sbDynamic.AppendLine("\tUSE " + db.SqlQuoteName() + "");
-            sbDynamic.Append(PermissionsHelper.GetCreateUserInCurrentDBScript(serviceAccount, "\t"));
-            sbDynamic.AppendLine("\tALTER ROLE db_owner ADD MEMBER " + serviceAccount.SqlQuoteName());
-            sbDynamic.AppendLine("\tUSE [master]");
-            sbDynamic.AppendLine("\tREVOKE CREATE ANY DATABASE TO " + serviceAccount.SqlQuoteName());
+            sbDynamic.AppendLine("USE " + db.SqlQuoteName() + "");
+            sbDynamic.AppendLine("DECLARE @UserName SYSNAME");
+            sbDynamic.AppendLine(CreateUserOrGetMappedUserNameInCurrentDB(serviceAccount));
+            sbDynamic.AppendLine("DECLARE @OwnerSQL NVARCHAR(MAX)");
+            sbDynamic.AppendLine("SET @OwnerSQL = N'ALTER ROLE db_owner ADD MEMBER ' + QUOTENAME(@UserName)");
+            sbDynamic.AppendLine("IF @UserName <> 'dbo'");
+            sbDynamic.AppendLine("BEGIN");
+            sbDynamic.AppendLine("\tEXEC sp_executesql @OwnerSQL");
+            sbDynamic.AppendLine("END");
+            sbDynamic.AppendLine();
+            sbDynamic.AppendLine("USE [master]");
+            sbDynamic.AppendLine("REVOKE CREATE ANY DATABASE TO " + serviceAccount.SqlQuoteName());
             sb.AppendLine(sbDynamic.ToString().SqlSingleQuoteWithEncapsulation());
             sb.AppendLine("\tEXEC sp_executesql @SQL");
             sb.AppendLine("END");
