@@ -81,7 +81,7 @@
             bttnGrant.TabIndex = 6;
             bttnGrant.Text = "Grant Access to monitored instances";
             bttnGrant.UseVisualStyleBackColor = true;
-            bttnGrant.Click += bttnGrant_Click;
+            bttnGrant.Click += Grant_Click;
             // 
             // dgvPermissions
             // 
