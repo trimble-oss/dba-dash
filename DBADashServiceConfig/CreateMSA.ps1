@@ -38,4 +38,6 @@ New-ADServiceAccount -name $ServiceName -DNSHostName $DNSHostName -PrincipalsAll
 # Install the service account so we can use it on this server
 Install-ADServiceAccount $ServiceName
 
-"Enter '" + ((Get-ADDomain).DNSRoot) + "\" + $ServiceName + "$' as the service name when installing the DBA Dash Service.  Use the permissions helper to assign permissions to the service account."
+"Enter '" + ((Get-ADDomain).NetBIOSName) + "\" + $ServiceName + "$' as the service name when installing the DBA Dash Service.  
+Leave the password blank.
+Use the permissions helper to assign permissions to the service account."
