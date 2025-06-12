@@ -32,7 +32,7 @@ namespace DBADash
             }
             catch (Exception ex)
             {
-                throw new AggregateException("Failed to decrypt config.  Check that the password is correct", ex);
+                throw new ConfigDecryptionError("Failed to decrypt config.  Check that the password is correct", ex);
             }
         }
 
@@ -73,18 +73,33 @@ namespace DBADash
 
         public static void SetPassword(string password, bool createTempKey)
         {
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new Exception("Password is required");
+            }
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 SavePassword(password);
             }
             if (createTempKey)
             {
-                var encryptedPass = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                    ? password.MachineEncryptString()
-                    : password.EncryptString(random);
-                File.WriteAllText(tempKey, encryptedPass);
+                CreateTemporaryKey(password);
             }
         }
+
+        public static void CreateTemporaryKey(string password)
+        {
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new Exception("Password is required");
+            }
+            var encryptedPass = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? password.MachineEncryptString()
+                : password.EncryptString(random);
+            File.WriteAllText(tempKey, encryptedPass);
+        }
+
+        public static void CreateTemporaryKey() => CreateTemporaryKey(GetPassword());
 
         [SupportedOSPlatform("windows")]
         public static void SavePassword(string password)
@@ -135,6 +150,23 @@ namespace DBADash
                 }
                 File.Delete(tempKey);
             }
+        }
+    }
+
+    public class ConfigDecryptionError : Exception
+    {
+        public ConfigDecryptionError()
+        {
+        }
+
+        public ConfigDecryptionError(string message)
+            : base(message)
+        {
+        }
+
+        public ConfigDecryptionError(string message, Exception inner)
+            : base(message, inner)
+        {
         }
     }
 }

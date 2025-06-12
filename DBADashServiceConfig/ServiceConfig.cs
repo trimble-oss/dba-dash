@@ -11,18 +11,23 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static DBADash.DBADashConnection;
+using Control = System.Windows.Forms.Control;
+using Font = System.Drawing.Font;
 using SortOrder = System.Windows.Forms.SortOrder;
 
 namespace DBADashServiceConfig
 {
     public partial class ServiceConfig : Form, IThemedControl
     {
+        private static string FatalErrorFilePath => Path.Combine(AppContext.BaseDirectory, "Logs", "FatalError.txt");
+
         public ServiceConfig()
         {
             InitializeComponent();
@@ -36,6 +41,7 @@ namespace DBADashServiceConfig
         private Dictionary<string, CustomCollection> _customCollectionsNew;
         private DateTime lastUserActivity = DateTime.Now;
         private DateTime lastServiceActivity = DateTime.Now;
+        private DateTime lastFatalErrorPrompt = DateTime.MinValue;
 
         private string[] NewSourceConnections =>
             txtSource.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
@@ -306,101 +312,125 @@ namespace DBADashServiceConfig
 
         private DBValidations.DBVersionStatus? RepoDbVersionStatus;
 
-        private bool ValidateDestination()
+        private void ValidateDestination()
         {
-            RepoDbVersionStatus = null;
             errorProvider1.SetError(txtDestination, null);
             lblServerNameWarning.Visible = false;
             DBADashConnection dest = new(txtDestination.Text);
-            lblVersionInfo.ForeColor = Color.Black;
-            lblVersionInfo.Text = "";
-            lblVersionInfo.Font = new Font(lblVersionInfo.Font, FontStyle.Regular);
-            if (txtDestination.Text == "")
-            {
-                lblVersionInfo.Text =
-                    "Please start by setting the destination connection for your DBA Dash repository database.";
-                lblVersionInfo.ForeColor = Color.Brown;
-                lblVersionInfo.Font = new Font(lblVersionInfo.Font, FontStyle.Bold);
-                return false;
-            }
 
             if (dest.Type == ConnectionType.Invalid)
             {
                 errorProvider1.SetError(txtDestination, "Invalid connection string, directory or S3 path");
-                return false;
+                return;
             }
-
             try
             {
                 CollectionConfig.ValidateDestination(dest);
+                UpdateDBVersionStatus();
             }
             catch (Exception ex)
             {
                 errorProvider1.SetError(txtDestination, ex.Message);
-                return false;
+            }
+        }
+
+        private static void InvokeSetSetStatus(Control statusControl, string status, Color color, FontStyle style)
+        {
+            if (statusControl.InvokeRequired)
+            {
+                statusControl.Invoke(() => InvokeSetSetStatus(statusControl, status, color, style));
+                return;
+            }
+            statusControl.Text = status;
+            statusControl.ForeColor = color;
+            statusControl.Font = new Font(statusControl.Font, style);
+            statusControl.Visible = status != string.Empty;
+        }
+
+        private static void InvokeSetVisible(Control control, bool isVisible)
+        {
+            if (control.InvokeRequired)
+            {
+                control.Invoke(() => InvokeSetVisible(control, isVisible));
+                return;
+            }
+            control.Visible = isVisible;
+        }
+
+        private static void InvokeEnable(Control control, bool isEnabled)
+        {
+            if (control.InvokeRequired)
+            {
+                control.Invoke(() => InvokeEnable(control, isEnabled));
+            }
+            control.Enabled = isEnabled;
+        }
+
+        private void UpdateDBVersionStatus()
+        {
+            RepoDbVersionStatus = null;
+            InvokeSetSetStatus(lblVersionInfo, string.Empty, DashColors.TrimbleBlue, FontStyle.Regular);
+
+            var dest = collectionConfig.DestinationConnection;
+            if (collectionConfig.Destination == "")
+            {
+                InvokeSetSetStatus(lblVersionInfo, "Please start by setting the destination connection for your DBA Dash repository database.", DashColors.Information, FontStyle.Bold);
+                return;
             }
 
-            if (dest.Type == ConnectionType.SQL)
+            if (dest.Type != ConnectionType.SQL) return;
+
+            try
             {
-                try
+                if (string.IsNullOrEmpty(dest.MasterConnection().ConnectionInfo.ServerName))
                 {
-                    if (string.IsNullOrEmpty(dest.MasterConnection().ConnectionInfo.ServerName))
-                    {
-                        lblServerNameWarning.Visible = true;
-                    }
-
-                    RepoDbVersionStatus = DBValidations.VersionStatus(dest.ConnectionString);
-
-                    switch (RepoDbVersionStatus?.VersionStatus)
-                    {
-                        case null:
-                            lblVersionInfo.Text =
-                                "???";
-                            lblVersionInfo.ForeColor = DashColors.Fail;
-                            break;
-
-                        case DBValidations.DBVersionStatusEnum.CreateDB:
-                            lblVersionInfo.Text =
-                                "Start service to create repository database or click Deploy to create manually.";
-                            lblVersionInfo.ForeColor = DashColors.Fail;
-                            return true;
-
-                        case DBValidations.DBVersionStatusEnum.OK:
-                            lblVersionInfo.Text = "Repository database upgrade not required. DacVersion/DB Version: " +
-                                                  RepoDbVersionStatus.DACVersion;
-                            lblVersionInfo.ForeColor = DashColors.Success;
-                            bttnDeployDatabase.Enabled = true;
-                            break;
-
-                        case DBValidations.DBVersionStatusEnum.AppUpgradeRequired:
-                            lblVersionInfo.Text =
-                                $"Repository database version {RepoDbVersionStatus.DBVersion} is newer than dac version {RepoDbVersionStatus.DACVersion}.  Please update this app.";
-                            lblVersionInfo.ForeColor = DashColors.Fail;
-                            bttnDeployDatabase.Enabled = false;
-                            break;
-
-                        case DBValidations.DBVersionStatusEnum.UpgradeRequired:
-                            lblVersionInfo.Text =
-                                $"Repository database version {RepoDbVersionStatus.DBVersion}  requires upgrade to {RepoDbVersionStatus.DACVersion}.  Database will be upgraded on service start.";
-                            lblVersionInfo.ForeColor = DashColors.Fail;
-                            bttnDeployDatabase.Enabled = true;
-                            break;
-
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-
-                    return true;
+                    InvokeSetSetStatus(lblServerNameWarning, lblServerNameWarning.Text, lblServerNameWarning.ForeColor, lblServerNameWarning.Font.Style);
+                    InvokeSetVisible(lblServerNameWarning, true);
                 }
-                catch (Exception ex)
+
+                RepoDbVersionStatus = DBValidations.VersionStatus(dest.ConnectionString);
+
+                switch (RepoDbVersionStatus?.VersionStatus)
                 {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return false;
+                    case null:
+                        InvokeSetSetStatus(lblVersionInfo, "???", DashColors.Fail, FontStyle.Bold);
+                        break;
+
+                    case DBValidations.DBVersionStatusEnum.CreateDB:
+                        InvokeSetSetStatus(lblVersionInfo,
+                            "Start service to create repository database or click Deploy to create manually.",
+                            DashColors.Warning, FontStyle.Bold);
+                        InvokeEnable(bttnDeployDatabase, true);
+                        return;
+
+                    case DBValidations.DBVersionStatusEnum.OK:
+                        InvokeSetSetStatus(lblVersionInfo,
+                            "Repository database version check successful. DacVersion/DB Version: " +
+                            RepoDbVersionStatus.DACVersion, DashColors.Success, FontStyle.Regular);
+                        InvokeEnable(bttnDeployDatabase, true);
+                        break;
+
+                    case DBValidations.DBVersionStatusEnum.AppUpgradeRequired:
+                        InvokeSetSetStatus(lblVersionInfo,
+                            $"Repository database version {RepoDbVersionStatus.DBVersion} is newer than dac version {RepoDbVersionStatus.DACVersion}.  Please update this app.",
+                            DashColors.Warning, FontStyle.Bold);
+                        InvokeEnable(bttnDeployDatabase, false);
+                        break;
+
+                    case DBValidations.DBVersionStatusEnum.UpgradeRequired:
+                        InvokeSetSetStatus(lblVersionInfo,
+                            $"Repository database version {RepoDbVersionStatus.DBVersion}  requires upgrade to {RepoDbVersionStatus.DACVersion}.  Database will be upgraded on service start.",
+                            DashColors.Warning, FontStyle.Bold);
+                        InvokeEnable(bttnDeployDatabase, true);
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
             }
-            else
+            catch (Exception ex)
             {
-                return true;
+                InvokeSetSetStatus(lblVersionInfo, ex.Message, DashColors.Fail, FontStyle.Regular);
             }
         }
 
@@ -603,10 +633,10 @@ namespace DBADashServiceConfig
 
             SetConnectionCount();
             SubscribeActivityEvents(this);
-            _ = Task.Run(AutoRefreshServiceStatus);
             ValidateDestination();
             RefreshEncryption();
             dgvConnections.ApplyTheme();
+            _ = Task.Run(AutoRefreshServiceStatus);
         }
 
         private void SubscribeActivityEvents(Control parent)
@@ -878,9 +908,22 @@ namespace DBADashServiceConfig
             while (true)
             {
                 // Only refresh service status if there has been user activity within the last 5min & selected tab is tab with service control/status
-                if (DateTime.Now.Subtract(lastUserActivity).TotalMinutes < 5 && tab1.SelectedTab == tabDest)
+                var isDestTabSelected = tab1.Invoke(new Func<bool>(() => tab1.SelectedTab == tabDest));
+                if (DateTime.Now.Subtract(lastUserActivity).TotalMinutes < 5 && isDestTabSelected)
                 {
                     RefreshServiceStatus();
+                    if (RepoDbVersionStatus?.VersionStatus is DBValidations.DBVersionStatusEnum.CreateDB
+                        or DBValidations.DBVersionStatusEnum.UpgradeRequired)
+                    {
+                        try
+                        {
+                            UpdateDBVersionStatus();
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(ex);
+                        }
+                    }
                 }
                 // Use a short 5 second delay between refreshes if the app is loaded within the last 2min or the user has started/stopped or installed the service.
                 // Otherwise use a longer 30 second delay between iterations
@@ -935,6 +978,7 @@ namespace DBADashServiceConfig
                         lastStatus = status.ToString();
                     });
                 }
+                ProcessFatalError();
             }
             catch (Exception ex)
             {
@@ -1009,11 +1053,6 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void BttnStart_Click(object sender, EventArgs e)
-        {
-            StartService();
-        }
-
         private void StartService()
         {
             PromptSaveChanges();
@@ -1030,13 +1069,55 @@ namespace DBADashServiceConfig
             }
             catch (Exception ex)
             {
-                PromptError(ex);
+                if (File.Exists(FatalErrorFilePath))
+                {
+                    ProcessFatalError();
+                }
+                else
+                {
+                    PromptError(ex);
+                }
             }
             RefreshServiceStatus();
             ValidateDestination();
         }
 
-        private static void PromptError(Exception ex)
+        private void ProcessFatalError()
+        {
+            if (!File.Exists(FatalErrorFilePath)) return;
+
+            var lastWrite = File.GetLastWriteTime(FatalErrorFilePath);
+            if (lastFatalErrorPrompt >= lastWrite) return;
+            if (this.InvokeRequired)
+            {
+                Invoke(ProcessFatalError);
+                return;
+            }
+            lastFatalErrorPrompt = lastWrite;
+            var fatalError = File.ReadAllText(FatalErrorFilePath);
+            if (fatalError.Contains(nameof(ConfigDecryptionError)))
+            {
+                if (MessageBox.Show(
+                        "The service was unable to decrypt the config file, preventing it from starting.  Do you want to create a temporary key and retry?",
+                        "Decryption Error", MessageBoxButtons.YesNo, MessageBoxIcon.Error) != DialogResult.Yes) return;
+                try
+                {
+                    EncryptedConfig.CreateTemporaryKey();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error creating temporary key\n" + ex.Message, "Error", MessageBoxButtons.OK);
+                    return;
+                }
+                StartService();
+            }
+            else
+            {
+                MessageBox.Show($"Warning, there was fatal error last time the service started at {lastWrite}: " + fatalError, "Fatal error starting service", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private static string GetMessages(Exception ex)
         {
             var sbError = new StringBuilder();
             sbError.Append(ex.Message);
@@ -1046,8 +1127,13 @@ namespace DBADashServiceConfig
                 sbError.AppendLine();
                 sbError.Append(ex.InnerException.Message);
             }
+            return sbError.ToString();
+        }
 
-            MessageBox.Show(sbError.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        private static void PromptError(Exception ex)
+        {
+            var message = GetMessages(ex);
+            MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         private void BttnStop_Click(object sender, EventArgs e)

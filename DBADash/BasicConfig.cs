@@ -142,7 +142,7 @@ namespace DBADash
                 }
                 if (string.IsNullOrEmpty(password))
                 {
-                    throw new Exception("Password not available for decryption of config file");
+                    throw new ConfigDecryptionError("Password not available for decryption of config file");
                 }
                 config = EncryptedConfig.Deserialize(config).GetConfig(password);
             }

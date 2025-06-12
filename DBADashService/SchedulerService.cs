@@ -136,7 +136,7 @@ namespace DBADashService
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "upgradeDB failed");
+                Program.LogFatalError(new Exception("Upgrade DB failed", ex));
                 throw;
             }
             try
@@ -164,7 +164,7 @@ namespace DBADashService
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error scheduling collections.  Please check configuration.");
+                Program.LogFatalError(new Exception("Error scheduling collections.  Please check configuration.", ex));
                 throw;
             }
             try
