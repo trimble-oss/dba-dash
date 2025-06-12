@@ -10,19 +10,55 @@ using CommandLine;
 using DBADash;
 using System.Runtime.Versioning;
 using CommandLine.Text;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace DBADashService
 {
     internal class Program
     {
+        private static string FatalErrorFilePath => Path.Combine(AppContext.BaseDirectory, "Logs", "FatalError.txt");
+
         private static void Main(string[] args)
+        {
+            try
+            {
+                TryRemoveFile(FatalErrorFilePath);
+                Startup(args);
+            }
+            catch (Exception ex)
+            {
+                LogFatalError(ex);
+                throw;
+            }
+        }
+
+        public static void LogFatalError(Exception ex)
+        {
+            Log.Logger.Error(ex, "Fatal error during startup");
+            File.WriteAllText(FatalErrorFilePath, ex.ToString());
+        }
+
+        private static void TryRemoveFile(string path)
+        {
+            try
+            {
+                File.Delete(path);
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.Error(ex, "Error deleting {path}", path);
+            }
+        }
+
+        private static void Startup(string[] args)
         {
             SetupLogging();
             Console.WriteLine(Properties.Resources.LogoText);
             Log.Information("Running as service {RunningAsService}", !Environment.UserInteractive);
             var cfg = SchedulerServiceConfig.Config;
 
-            if (Environment.UserInteractive && ProcessCommandLine(args, cfg)) // Commandline options are not processed when running as a service
+            if (Environment.UserInteractive &&
+                ProcessCommandLine(args, cfg)) // Commandline options are not processed when running as a service
             {
                 return;
             }
@@ -31,7 +67,6 @@ namespace DBADashService
             {
                 const string message =
                     $"Incomplete upgrade of DBA Dash detected.  File '{Upgrade.UpgradeFile}' found in directory. Upgrade might have failed due to locked files. More info: https://dbadash.com/upgrades/";
-                Log.Logger.Error(message);
                 throw new Exception(message);
             }
 
