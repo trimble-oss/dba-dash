@@ -37,7 +37,7 @@ namespace DBADashGUI
             new DataGridViewTextBoxColumn() { DataPropertyName = "EditionID", HeaderText = "Edition ID", ReadOnly = true, Width = 90, Name = "colEditionID", Visible = false},
             new DataGridViewTextBoxColumn() { DataPropertyName = "ProductLevel", HeaderText = "Product Level", ReadOnly = true, Width = 60, Name = "colProductLevel" },
             new DataGridViewTextBoxColumn() { DataPropertyName = "ProductUpdateLevel", HeaderText = "Product Update Level", ReadOnly = true, Width = 60, Name = "colProductUpdateLevel" },
-            new DataGridViewLinkColumn() { DataPropertyName = "ProductUpdateReference", HeaderText = "Product Update Reference", ReadOnly = true, Width = 100, Name = "colProductUpdateReference" },
+            new DataGridViewLinkColumn() { DataPropertyName = "ProductUpdateReference", HeaderText = "Product Update Reference", ReadOnly = true, Width = 100, Name = "colProductUpdateReference", SortMode = DataGridViewColumnSortMode.Automatic},
             new DataGridViewTextBoxColumn() { DataPropertyName = "ProductBuildType", HeaderText = "Build Type", ReadOnly = true, Width = 96, Name = "colBuildType", Visible = false},
             new DataGridViewTextBoxColumn() { DataPropertyName = "ResourceVersion", HeaderText = "Resource Version", ReadOnly = true, Width = 137, Name = "colResourceVersion", Visible =false},
             new DataGridViewTextBoxColumn() { DataPropertyName = "ResourceLastUpdateDateTime", HeaderText = "Resource Last Update", ReadOnly = true, Width = 122, Name = "colResourceLastUpdateDateTime", Visible = false },
@@ -50,8 +50,8 @@ namespace DBADashGUI
             new DataGridViewTextBoxColumn() { DataPropertyName = "DaysUntilSupportExpires", HeaderText = "Days Until Support Expires", ReadOnly = true, Width = 60, Name = "colDaysUntilSupportExpires", Visible = true,DefaultCellStyle = new DataGridViewCellStyle() { Font = new Font(DefaultFont, FontStyle.Italic)  }, ToolTipText = "Days until extended support expires for this version/build of SQL Server" },
             new DataGridViewLinkColumn()  { DataPropertyName = "MainstreamEndDate", HeaderText = "Supported Until (Mainstream)", Width=100, ReadOnly = true, Name = "colMainstreamEndDate", DefaultCellStyle = new DataGridViewCellStyle() { Font = new Font(DefaultFont, FontStyle.Italic)  }, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Date mainstream support expires for this version of SQL Server"},
             new DataGridViewTextBoxColumn() { DataPropertyName = "DaysUntilMainstreamSupportExpires", HeaderText = "Days Until Mainstream Support Expires", ReadOnly = true, Width = 80, Name = "colDaysUntilMainstreamSupportExpires", Visible = true,DefaultCellStyle = new DataGridViewCellStyle() { Font = new Font(DefaultFont, FontStyle.Italic)  }, ToolTipText = "Days until mainstream support expires for this version of SQL Server"},
-            new DataGridViewLinkColumn() { DataPropertyName = "KBList", HeaderText = "KB List", ReadOnly = true, Name = "colKBList", DefaultCellStyle = new DataGridViewCellStyle() { Font = new Font(DefaultFont, FontStyle.Italic)} },
-            new DataGridViewCheckBoxColumn() { DataPropertyName = "IsUpdateAvailable", HeaderText = "Update Available?", ReadOnly = true,Width = 80, Name = "colIsUpdateAvailable", DefaultCellStyle = new DataGridViewCellStyle() { Font = new Font(DefaultFont, FontStyle.Italic)  }, ToolTipText = "Value is true when a later build is available."},
+            new DataGridViewLinkColumn() { DataPropertyName = "KBList", HeaderText = "KB List", ReadOnly = true, Name = "colKBList", DefaultCellStyle = new DataGridViewCellStyle() { Font = new Font(DefaultFont, FontStyle.Italic)}, SortMode = DataGridViewColumnSortMode.Automatic},
+            new DataGridViewCheckBoxColumn() { DataPropertyName = "IsUpdateAvailable", HeaderText = "Update Available?", ReadOnly = true,Width = 80, Name = "colIsUpdateAvailable", DefaultCellStyle = new DataGridViewCellStyle() { Font = new Font(DefaultFont, FontStyle.Italic)  }, ToolTipText = "Value is true when a later build is available.", SortMode = DataGridViewColumnSortMode.Automatic},
             new DataGridViewTextBoxColumn()  { DataPropertyName = "SPBehind", HeaderText = "SP Behind", ReadOnly = true, Name = "colSPBehind",Width=60, DefaultCellStyle = new DataGridViewCellStyle() { Font = new Font(DefaultFont, FontStyle.Italic)  }, ToolTipText = "Service packs behind latest build"},
             new DataGridViewTextBoxColumn()  { DataPropertyName = "CUBehind", HeaderText = "CU Behind", ReadOnly = true, Name = "colCUBehind",Width=60, DefaultCellStyle = new DataGridViewCellStyle() { Font = new Font(DefaultFont, FontStyle.Italic)  }, ToolTipText = "Cumulative updates behind latest build within this service pack"},
             new DataGridViewTextBoxColumn()  { DataPropertyName = "LatestVersion", HeaderText = "Latest Version", ReadOnly = true,Width=100, Name = "colLatestVersion", DefaultCellStyle = new DataGridViewCellStyle() { Font = new Font(DefaultFont, FontStyle.Italic)  }, ToolTipText = "Latest build available for this version of SQL"},
@@ -231,6 +231,7 @@ namespace DBADashGUI
 
         private void DgvVersion_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
+            if (e.RowIndex < 0) return;
             switch (dgvVersion.Columns[e.ColumnIndex].Name)
             {
                 case "colKBList":
