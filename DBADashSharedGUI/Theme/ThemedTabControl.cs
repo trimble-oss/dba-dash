@@ -18,7 +18,7 @@ namespace DBADashGUI.Theme
             this.Invalidate();
         }
 
-        private void ThemedTabControl_DrawItem(object? sender, DrawItemEventArgs e)
+        private void ThemedTabControl_DrawItem(object sender, DrawItemEventArgs e)
         {
             e.Graphics.Clear(theme.TabBackColor);
             var font = this.Font;

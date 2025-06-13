@@ -35,7 +35,6 @@ namespace DBADash.Alert
             {
                 case Alert.Priorities.Critical:
                     return "critical";
-                    break;
 
                 case Alert.Priorities.High1:
                 case Alert.Priorities.High2:
@@ -48,7 +47,6 @@ namespace DBADash.Alert
                 case Alert.Priorities.High9:
                 case Alert.Priorities.High10:
                     return "error";
-                    break;
 
                 case Alert.Priorities.Medium1:
                 case Alert.Priorities.Medium2:
@@ -71,7 +69,6 @@ namespace DBADash.Alert
                 case Alert.Priorities.Low9:
                 case Alert.Priorities.Low10:
                     return "warning";
-                    break;
 
                 case Alert.Priorities.Information1:
                 case Alert.Priorities.Information2:
@@ -85,7 +82,6 @@ namespace DBADash.Alert
                 case Alert.Priorities.Information10:
                 case Alert.Priorities.Success:
                     return "info";
-                    break;
 
                 default:
                     return "info";

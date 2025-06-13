@@ -31,7 +31,6 @@ namespace DBADashGUI
             }
         }
 
-
         private void SetDrive()
         {
             if (DisplayInstanceName)
@@ -59,15 +58,15 @@ namespace DBADashGUI
             pbSpace.ForeColor = Color.White;
             if (drive.DriveStatus == DBADashStatusEnum.Critical)
             {
-                picStatus.Image = imageList1.Images[0];
+                picStatus.Image = Properties.Resources.StatusCriticalError_16x;
             }
             else if (drive.DriveStatus == DBADashStatusEnum.Warning)
             {
-                picStatus.Image = imageList1.Images[1];
+                picStatus.Image = Properties.Resources.StatusAnnotations_Warning_16xLG_color;
             }
             else if (drive.DriveStatus == DBADashStatusEnum.OK)
             {
-                picStatus.Image = imageList1.Images[2];
+                picStatus.Image = Properties.Resources.StatusOK_16x;
             }
             else if (drive.DriveStatus == DBADashStatusEnum.NA)
             {

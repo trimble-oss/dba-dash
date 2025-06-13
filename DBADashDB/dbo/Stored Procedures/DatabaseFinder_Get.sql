@@ -15,6 +15,6 @@ WHERE EXISTS(SELECT 1
 			)
 AND I.IsActive=1
 AND D.IsActive=1
-AND (D.Name = @SearchString OR D.Name LIKE @SearchString)
+AND (D.name = @SearchString OR D.name LIKE @SearchString)
 ORDER BY	InstanceGroupName,
 			DatabaseName

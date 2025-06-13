@@ -251,14 +251,12 @@
         private System.Windows.Forms.TextBox txtServiceAccount;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ErrorProvider errorProvider1;
-        private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.Button bttnGrant;
         private System.Windows.Forms.DataGridView dgvPermissions;
         private System.Windows.Forms.DataGridView dgvInstances;
         private System.Windows.Forms.Button bttnClose;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Button bttnViewScript;
         private System.Windows.Forms.Button bttnLocalAdmin;
         private System.Windows.Forms.CheckBox chkRevokeLocalAdmin;
         private System.Windows.Forms.Timer timer1;

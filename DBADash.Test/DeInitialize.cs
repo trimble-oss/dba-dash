@@ -3,6 +3,7 @@ using System.IO;
 
 namespace DBADashConfig.Test
 {
+    [TestClass]
     public class DeInitialize
     {
         [AssemblyCleanup]

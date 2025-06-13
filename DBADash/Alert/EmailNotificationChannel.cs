@@ -77,16 +77,6 @@ namespace DBADash.Alert
             ? IsHTML ? DefaultHTMLMessageTemplate : DefaultEmailMessageTemplate
             : EmailMessageTemplate;
 
-        private string ReplacePlaceholders(Alert alert, string template) => template.Replace("{Emoji}", alert.GetEmoji(), StringComparison.InvariantCultureIgnoreCase)
-            .Replace("{AlertKey}", alert.AlertName, StringComparison.InvariantCultureIgnoreCase)
-            .Replace("{Action}", alert.Action, StringComparison.InvariantCultureIgnoreCase)
-            .Replace("{Title}", $"{alert.AlertName} [{alert.Status}]", StringComparison.InvariantCultureIgnoreCase)
-            .Replace("{instance}", alert.ConnectionID, StringComparison.InvariantCultureIgnoreCase)
-            .Replace("{Priority}", alert.Priority.ToString(), StringComparison.InvariantCultureIgnoreCase)
-            .Replace("{Text}", IsHTML ? WebUtility.HtmlEncode(alert.Message).Replace("\r\n", "\n").Replace("\n", "<br>") : alert.Message, StringComparison.InvariantCultureIgnoreCase)
-            .Replace("{Icon}", alert.GetIcon(), StringComparison.InvariantCultureIgnoreCase)
-            .Replace("{IconUrl}", alert.GetIconUrl(), StringComparison.InvariantCultureIgnoreCase);
-
         protected override async Task InternalSendNotificationAsync(Alert alert, string connectionString)
         {
             using var message = new MimeMessage();
@@ -121,7 +111,7 @@ namespace DBADash.Alert
             {
                 yield return new ValidationResult("Email to is required");
             }
-            if(!string.IsNullOrEmpty(EmailMessageTemplate) && !string.IsNullOrEmpty(EmailSubjectTemplate))
+            if (!string.IsNullOrEmpty(EmailMessageTemplate) && !string.IsNullOrEmpty(EmailSubjectTemplate))
             {
                 if (!Placeholders.Any(p => EmailMessageTemplate.Contains(p, StringComparison.InvariantCultureIgnoreCase) || EmailSubjectTemplate.Contains(p, StringComparison.InvariantCultureIgnoreCase)))
                 {

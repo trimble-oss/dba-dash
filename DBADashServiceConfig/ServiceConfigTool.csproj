@@ -50,7 +50,6 @@
     <EmbeddedResource Include="CreateMSA.ps1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DBADashGUI\DBADashGUI.csproj" />
     <ProjectReference Include="..\DBADashSharedGUI\DBADashSharedGUI.csproj" />
     <ProjectReference Include="..\DBADash\DBADash.csproj" />
   </ItemGroup>
