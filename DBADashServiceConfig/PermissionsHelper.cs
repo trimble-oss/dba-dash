@@ -437,7 +437,7 @@ namespace DBADashServiceConfig
                 }
                 var connectionInfo = await ConnectionInfo.GetConnectionInfoAsync(src.SourceConnection.ConnectionString);
                 var computerName = connectionInfo.ComputerNetBIOSName;
-                if (connectionInfo.IsAzureDB || connectionInfo.IsRDS || connectionInfo.IsLinux)
+                if (connectionInfo.IsAzureDB || connectionInfo.IsRDS || connectionInfo.IsLinux || string.IsNullOrEmpty(computerName))
                 {
                     row["Result"] = ExcludedResult;
                     row["Message"] = "Invalid instance type for WMI (AzureDB, RDS, Linux)";
