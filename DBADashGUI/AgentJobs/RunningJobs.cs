@@ -189,7 +189,7 @@ namespace DBADashGUI.AgentJobs
         private static JobStatusAndHistory JobHistoryForm;
         private static RunningQueriesViewer RunningViewer;
 
-        private async void DgvRunningJobs_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void DgvRunningJobs_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
             var row = (DataRowView)dgvRunningJobs.Rows[e.RowIndex].DataBoundItem;

@@ -239,7 +239,7 @@ namespace DBADashGUI.Theme
             chart.DefaultLegend.Foreground = new SolidColorBrush(theme.ForegroundColor.ToMediaColor());
         }
 
-        public static void TruncateTooltipTextHandler(object? sender, DataGridViewCellFormattingEventArgs e)
+        public static void TruncateTooltipTextHandler(object sender, DataGridViewCellFormattingEventArgs e)
         {
             try
             {

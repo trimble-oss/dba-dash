@@ -46,9 +46,9 @@ namespace DBADashConfig.Test
         }
 
         [TestMethod]
-        [DataRow(-1, false, int.MaxValue, Int32.MaxValue, Int32.MaxValue, Int32.MaxValue, "", 1)]
-        [DataRow(999, true, 2, 1000, 1001, 8000, "*", 2)]
-        [DataRow(2000, true, 1, 2000, 2001, 6400, "DB1,DB2,DB3", 3)]
+        [DataRow(-1, false, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, "", DBADashSource.IOCollectionLevels.Database)]
+        [DataRow(999, true, 2, 1000, 1001, 8000, "*", DBADashSource.IOCollectionLevels.Drive)]
+        [DataRow(2000, true, 1, 2000, 2001, 6400, "DB1,DB2,DB3", DBADashSource.IOCollectionLevels.Full)]
         public void AddDBADashSourceTest(int slowQueryThreshold, bool planCollectionEnabled, int planCollectionCountThreshold, int planCollectionCPUThreshold, int planCollectionDurationThreshold, int PlanCollectionMemoryGrantThreshold, string schemaSnapshotDBs, DBADashSource.IOCollectionLevels IOCollectionLevel)
         {
             // Add connection

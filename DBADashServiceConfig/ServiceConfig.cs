@@ -310,7 +310,7 @@ namespace DBADashServiceConfig
             }
         }
 
-        private DBValidations.DBVersionStatus? RepoDbVersionStatus;
+        private DBValidations.DBVersionStatus RepoDbVersionStatus;
 
         private void ValidateDestination()
         {

@@ -34,7 +34,7 @@ namespace DBADash.Messaging
                     JsonConvert.DeserializeObject<Exception>(JsonConvert.SerializeObject(value));
                     _exception = value;
                 }
-                catch (Exception ex)
+                catch
                 {
                     _exception = new Exception(value.ToString()); // Create a new exception that can be serialized if needed
                 }

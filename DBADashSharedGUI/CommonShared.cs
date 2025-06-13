@@ -130,7 +130,7 @@ namespace DBADashSharedGUI
         }
 
         [SupportedOSPlatform("windows")]
-        public static DialogResult ShowInputDialog(ref string input, string title, char passwordChar = '\0', string? description = null)
+        public static DialogResult ShowInputDialog(ref string input, string title, char passwordChar = '\0', string description = null)
         {
             var inputBox = new Form
             {
