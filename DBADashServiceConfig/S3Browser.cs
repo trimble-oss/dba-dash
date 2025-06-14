@@ -53,16 +53,14 @@ namespace DBADashServiceConfig
 
         private async void CboBuckets_DropDown(object sender, EventArgs e)
         {
-            if (cboBuckets.Items.Count == 0)
+            if (cboBuckets.Items.Count != 0) return;
+            try
             {
-                try
-                {
-                    await AddBuckets();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error listing buckets.  If you don't have list bucket access, enter the name of the bucket manually." + ex.Message, "List Bucket Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                await AddBuckets();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error listing buckets.  If you don't have list bucket access, enter the name of the bucket manually.", "List Bucket Error");
             }
         }
 

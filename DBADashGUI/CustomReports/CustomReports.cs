@@ -39,8 +39,7 @@ namespace DBADashGUI.CustomReports
             catch (Exception ex)
             {
                 _customReports = new CustomReports();
-                MessageBox.Show("Error getting custom reports:" + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error getting custom reports");
             }
 
             return _customReports;

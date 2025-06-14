@@ -172,8 +172,7 @@ namespace DBADashGUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error updating build reference\n" + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error updating build reference");
             }
         }
 
@@ -297,7 +296,7 @@ namespace DBADashGUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
         }
 

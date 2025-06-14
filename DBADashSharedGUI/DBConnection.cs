@@ -175,13 +175,14 @@ namespace DBADash
             catch (SqlException ex) when (ex.Number == -2146893019)
             {
                 Cursor = Cursors.Default;
-                MessageBox.Show($"Error: Deploy a trusted certificate or use the 'Trust Server Certificate' connection option.\n\n{ex.Message}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex,
+                    "Deploy a trusted certificate or use the 'Trust Server Certificate' connection option.");
                 return;
             }
             catch (Exception ex)
             {
                 Cursor = Cursors.Default;
-                MessageBox.Show($"Error connecting to data source. \n{ex.Message}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error connecting to data source.");
                 return;
             }
             finally
@@ -212,7 +213,7 @@ namespace DBADash
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
         }
 
@@ -260,7 +261,7 @@ namespace DBADash
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
         }
 

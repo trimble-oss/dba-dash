@@ -54,24 +54,24 @@ namespace DBADashGUI
                 var alias = Convert.ToString(dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value);
                 try
                 {
-                    SharedData.UpdateAlias(instanceID, ref alias,Common.ConnectionString);
+                    SharedData.UpdateAlias(instanceID, ref alias, Common.ConnectionString);
                     row["InstanceDisplayName"] = alias;
                     row.EndEdit();
                     _editCount++; // Keep track of edits made so we can decide to refresh the tree
                 }
                 catch (SqlException ex) when (ex.Number == 2601)
                 {
-                    MessageBox.Show("A server with the specified alias already exists.  Please enter a unique alias.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    CommonShared.ShowExceptionDialog(ex, "A server with the specified alias already exists.", default,
+                        default, "Please enter a unique alias.");
                     row.CancelEdit();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error updating alias: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CommonShared.ShowExceptionDialog(ex, "Error updating alias");
                     row.CancelEdit();
                 }
             }
         }
-
 
         private void Dgv_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {

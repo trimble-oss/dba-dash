@@ -234,7 +234,7 @@ namespace DBADashGUI.Checks
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error saving changes:\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CommonShared.ShowExceptionDialog(ex, "Error saving changes");
                 }
                 try
                 {
@@ -242,7 +242,7 @@ namespace DBADashGUI.Checks
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error refreshing statuses:\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CommonShared.ShowExceptionDialog(ex, "Error refreshing statuses");
                 }
                 RefreshData();
             }

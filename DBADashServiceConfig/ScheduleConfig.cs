@@ -98,15 +98,15 @@ namespace DBADashServiceConfig
 
         private void Dgv_RowValidating(object sender, DataGridViewCellCancelEventArgs e)
         {
-            string schedule = (string)dgv[1, e.RowIndex].Value;
+            var schedule = (string)dgv[1, e.RowIndex].Value;
 
             try
             {
                 dgv[2, e.RowIndex].Value = GetScheduleDescription(schedule);
             }
-            catch
+            catch (Exception ex)
             {
-                MessageBox.Show("Invalid cron expression", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Invalid cron expression");
                 e.Cancel = true;
             }
         }

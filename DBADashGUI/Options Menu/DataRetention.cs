@@ -22,7 +22,8 @@ namespace DBADashGUI
             }
             catch (SqlException ex) when (ex.Number == 262)
             {
-                MessageBox.Show("Insufficient permissions", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                CommonShared.ShowExceptionDialog(ex, "Insufficient permissions", default,
+                    TaskDialogIcon.ShieldWarningYellowBar);
                 Close();
             }
         }
@@ -69,7 +70,7 @@ namespace DBADashGUI
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CommonShared.ShowExceptionDialog(ex);
                 }
             }
             else
@@ -120,7 +121,7 @@ namespace DBADashGUI
             catch (Exception ex)
             {
                 Cursor = Cursors.Default;
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
         }
     }

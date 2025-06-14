@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
+using DBADashSharedGUI;
 using Markdig;
 using Markdig.Syntax;
 using Markdig.SyntaxHighlighting;
@@ -129,7 +130,7 @@ namespace DBADashGUI.SchemaCompare
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error saving file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error saving file");
             }
         }
 

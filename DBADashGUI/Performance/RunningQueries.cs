@@ -684,7 +684,7 @@ namespace DBADashGUI.Performance
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
 
             dgv.ApplyTheme(DBADashUser.SelectedTheme);
@@ -1125,7 +1125,7 @@ namespace DBADashGUI.Performance
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Plan Collection Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    CommonShared.ShowExceptionDialog(ex, "Plan collection error", "Warning", TaskDialogIcon.Warning);
                 }
 
                 return;
@@ -1311,7 +1311,7 @@ namespace DBADashGUI.Performance
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
         }
 
@@ -1368,7 +1368,7 @@ namespace DBADashGUI.Performance
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Filter error: " + filter + Environment.NewLine + ex.Message);
+                CommonShared.ShowExceptionDialog(ex, $"Filter '{filter}' is invalid.");
                 return;
             }
 

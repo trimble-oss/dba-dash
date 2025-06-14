@@ -230,7 +230,7 @@ namespace DBADashGUI.Performance
             catch (Exception ex)
             {
                 Cursor = Cursors.Default;
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
                 status = "Error: " + ex.Message;
             }
             finally
@@ -451,7 +451,7 @@ namespace DBADashGUI.Performance
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Filter Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    CommonShared.ShowExceptionDialog(ex, "Filter error", "Warning", TaskDialogIcon.Warning);
                     dgv.ClearFilter();
                 }
             }

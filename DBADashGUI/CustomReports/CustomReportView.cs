@@ -80,7 +80,7 @@ namespace DBADashGUI.CustomReports
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error scripting tables: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error scripting tables");
             }
         }
 
@@ -122,8 +122,7 @@ namespace DBADashGUI.CustomReports
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error setting highlighting rules: " + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error setting highlighting rules");
             }
         }
 
@@ -163,8 +162,7 @@ namespace DBADashGUI.CustomReports
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error adding link: " + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error adding link");
             }
         }
 
@@ -211,8 +209,7 @@ namespace DBADashGUI.CustomReports
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error saving time zone preference: " + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error saving time zone preference");
             }
 
             RefreshData();
@@ -240,8 +237,7 @@ namespace DBADashGUI.CustomReports
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error saving alias: " + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error saving alias");
             }
         }
 
@@ -465,7 +461,7 @@ namespace DBADashGUI.CustomReports
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error running report:" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CommonShared.ShowExceptionDialog(ex, "Error running report");
                 }
             }
             else if (reply.Type == ResponseMessage.ResponseTypes.Failure)
@@ -1209,8 +1205,7 @@ namespace DBADashGUI.CustomReports
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error saving title: " + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error saving title");
             }
         }
 
@@ -1288,8 +1283,7 @@ namespace DBADashGUI.CustomReports
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error scripting report:" + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error scripting report");
             }
         }
 
@@ -1373,8 +1367,7 @@ namespace DBADashGUI.CustomReports
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error navigating to link: " + ex.Message, "Error", MessageBoxButtons.OK,
-                                       MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error navigating to link");
             }
         }
 

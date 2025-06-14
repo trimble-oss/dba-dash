@@ -254,7 +254,7 @@ namespace DBADashGUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
                 return;
             }
 
@@ -264,7 +264,7 @@ namespace DBADashGUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
                 return;
             }
 
@@ -285,7 +285,7 @@ namespace DBADashGUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
         }
 
@@ -322,8 +322,11 @@ namespace DBADashGUI
                 }
                 catch (Exception ex)
                 {
-                    if (MessageBox.Show("Error connecting to repository database\n" + ex.Message, "Connection Error",
-                            MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Cancel)
+                    if (CommonShared.ShowExceptionDialog(ex, "Error connecting to repository database",
+                            "Connection Error", TaskDialogIcon.Error, default, new TaskDialogButtonCollection()
+                            {
+                                TaskDialogButton.Retry, TaskDialogButton.Cancel
+                            }) == TaskDialogButton.Cancel)
                     {
                         break;
                     }
@@ -1218,8 +1221,7 @@ namespace DBADashGUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Unexpected error loading tree layout\n" + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Unexpected error loading tree layout");
             }
         }
 
@@ -1359,7 +1361,7 @@ namespace DBADashGUI
             }
 
             DataRetentionForm.Show();
-            DataRetentionForm.Focus();
+            DataRetentionForm?.Focus();
         }
 
         private void Instance_Selected(object sender, InstanceSelectedEventArgs e)
@@ -1445,8 +1447,7 @@ namespace DBADashGUI
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error selecting instance: " + ex.Message, "Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
+                    CommonShared.ShowExceptionDialog(ex, "Error selecting instance");
                 }
                 finally
                 {
@@ -1837,8 +1838,7 @@ namespace DBADashGUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error switching to DBA Dash repository database:\n" + ex.Message, "Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error switching to DBA Dash repository database");
                 await SetConnection(oldConnection);
             }
         }
@@ -1996,7 +1996,7 @@ namespace DBADashGUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
                 return;
             }
 

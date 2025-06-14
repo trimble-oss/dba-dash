@@ -90,7 +90,7 @@ namespace DBADashGUI.CustomReports
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error loading picker items: " + ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error loading picker items");
             }
 
             dgv.DataSource = dtPickerItems;
@@ -106,7 +106,7 @@ namespace DBADashGUI.CustomReports
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
         }
 
@@ -208,7 +208,7 @@ namespace DBADashGUI.CustomReports
 
         private void DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
-            MessageBox.Show(e.Exception?.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            CommonShared.ShowExceptionDialog(e.Exception);
         }
     }
 }

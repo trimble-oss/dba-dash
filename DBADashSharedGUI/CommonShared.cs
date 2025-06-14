@@ -6,6 +6,8 @@ using Microsoft.SqlServer.Management.Common;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security;
 
@@ -88,8 +90,7 @@ namespace DBADashSharedGUI
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(@"Error getting repository version: " + ex.Message, "Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    ShowExceptionDialog(ex, @"Error getting repository version");
                 }
             }
             using About frm = new()
@@ -259,6 +260,91 @@ namespace DBADashSharedGUI
             using var s = client.GetStreamAsync(url);
             using var fs = new FileStream(localPath, FileMode.OpenOrCreate);
             s.Result.CopyTo(fs);
+        }
+
+        /// <summary>
+        /// Show exception dialog.  Includes OK and Copy Error Details buttons by default.
+        /// </summary>
+        /// <param name="ex">Exception</param>
+        /// <param name="heading">Defaults to exception message</param>
+        /// <param name="caption">Title.  e.g. "Error"</param>
+        /// <param name="icon">Defaults to error icon</param>
+        /// <param name="text">Additional text.  If heading is set, defaults to exception message</param>
+        /// <param name="buttons">Option to replace OK button.  Copy Error Details button is always included</param>
+        /// <returns></returns>
+        public static TaskDialogButton ShowExceptionDialog(Exception ex, string heading = null, string caption = "Error", TaskDialogIcon icon = null, string text = null, TaskDialogButtonCollection buttons = null)
+        {
+            heading ??= ex.Message;
+            text ??= heading == ex.Message ? null : ex.Message;
+            return ShowExceptionDialog(heading, text, ex.ToString(), caption, icon, buttons);
+        }
+
+        /// <summary>
+        /// Show exception dialog.  Includes OK and Copy Error Details buttons by default.
+        /// </summary>
+        /// <param name="heading">Main exception message</param>
+        /// <param name="text">Additional text.</param>
+        /// <param name="expanderText">Exception details. Hidden by default</param>
+        /// <param name="caption">Title.  e.g. "Error"</param>
+        /// <param name="icon">Defaults to error icon</param>
+        /// <param name="buttons">Option to replace OK button.  Copy Error Details button is always included</param>
+        /// <returns></returns>
+        public static TaskDialogButton ShowExceptionDialog(string heading, string text, string expanderText, string caption = "Error", TaskDialogIcon icon = null, TaskDialogButtonCollection buttons = null)
+        {
+            var copyButton = new TaskDialogButton("Copy Error Details") { AllowCloseDialog = false };
+            buttons ??= new TaskDialogButtonCollection() { TaskDialogButton.OK };
+            buttons.Add(copyButton);
+            icon ??= TaskDialogIcon.Error;
+            var page = new TaskDialogPage
+            {
+                Caption = caption,
+                Heading = heading,
+                Text = text,
+                Icon = icon,
+                Buttons = buttons,
+                Expander = new TaskDialogExpander()
+                {
+                    Text = expanderText,
+                    CollapsedButtonText = "Show error details",
+                    ExpandedButtonText = "Hide error details"
+                },
+                SizeToContent = true
+            };
+            copyButton.Click += (sender, e) =>
+            {
+                var clipboardText = BuildClipboardText(caption, heading, text, expanderText);
+                try
+                {
+                    Clipboard.SetText(clipboardText);
+                }
+                catch (ExternalException)
+                {
+                    // Clipboard access failed - silently continue
+                    // Could optionally show a brief message or beep
+                }
+            };
+            return TaskDialog.ShowDialog(page);
+        }
+
+        private static string BuildClipboardText(string caption, string heading, string text, string expanderText)
+        {
+            var parts = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(caption) && caption != "Error")
+                parts.Add(caption);
+
+            if (!string.IsNullOrWhiteSpace(heading))
+                parts.Add(heading);
+
+            if (!string.IsNullOrWhiteSpace(text))
+                parts.Add(text);
+
+            if (!string.IsNullOrWhiteSpace(expanderText))
+                parts.Add($"{Environment.NewLine}Details:{Environment.NewLine}{new string('-', 8)}{Environment.NewLine}{expanderText}");
+            parts.Add($"${Environment.NewLine}{new string('-', 8)}{Environment.NewLine}{Application.ProductName} {Application.ProductVersion}");
+            parts.Add($"Date: {DateTimeOffset.Now}");
+
+            return string.Join(Environment.NewLine, parts);
         }
     }
 }

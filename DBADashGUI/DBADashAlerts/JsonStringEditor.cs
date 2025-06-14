@@ -40,7 +40,7 @@ namespace DBADashGUI.DBADashAlerts
                 }
                 catch (ArgumentException ex)
                 {
-                    MessageBox.Show(ex.Message, "Invalid JSON", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CommonShared.ShowExceptionDialog(ex, "Invalid JSON");
                     // Return the original value if the JSON is invalid
                     return value;
                 }

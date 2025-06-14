@@ -51,7 +51,7 @@ namespace DBADashServiceConfig
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CommonShared.ShowExceptionDialog(ex);
                 }
                 DB = db;
             }
@@ -111,7 +111,7 @@ AND database_id > 4 ";
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
                 DialogResult = DialogResult.Abort;
             }
             DbChanged();
@@ -227,20 +227,15 @@ AND database_id > 4 ";
                 }
                 else
                 {
-                    MessageBox.Show("Deploy failed", "Deploy", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     var sb = new StringBuilder();
                     foreach (var item in dac.MessageList)
                     {
                         sb.AppendLine(item);
                     }
+                    CommonShared.ShowExceptionDialog("Deploy failed", string.Empty, sb.ToString());
                     DeployScript = sb.ToString();
                 }
             }
-        }
-
-        private void TxtConnectionString_Validated(object sender, EventArgs e)
-        {
-            DbChanged();
         }
 
         private void CboDatabase_DropDown(object sender, EventArgs e)
@@ -254,7 +249,7 @@ AND database_id > 4 ";
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CommonShared.ShowExceptionDialog(ex);
                 }
                 finally
                 {
@@ -329,7 +324,7 @@ AND database_id > 4 ";
             {
                 bttnGenerate.Enabled = false;
                 bttnDeploy.Enabled = false;
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
         }
 

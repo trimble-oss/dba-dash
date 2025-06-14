@@ -186,7 +186,7 @@ namespace DBADashGUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error loading saved view\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error loading saved view");
             }
         }
 
@@ -797,7 +797,7 @@ namespace DBADashGUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error saving view options\n", ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error saving view options");
             }
         }
 

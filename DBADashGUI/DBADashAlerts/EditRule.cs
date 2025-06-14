@@ -47,7 +47,7 @@ namespace DBADashGUI.DBADashAlerts
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
 
             propertyGrid1.SelectedObject = AlertRule;
@@ -67,11 +67,11 @@ namespace DBADashGUI.DBADashAlerts
             }
             catch (SqlException ex) when (ex.Number == 2601)
             {
-                MessageBox.Show(@"A duplicate rule exists.", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "A duplicate rule exists");
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
         }
     }
