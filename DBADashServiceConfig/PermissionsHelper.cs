@@ -302,7 +302,7 @@ namespace DBADashServiceConfig
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
             finally
             {
@@ -402,7 +402,7 @@ namespace DBADashServiceConfig
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
             finally
             {
@@ -743,7 +743,7 @@ namespace DBADashServiceConfig
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
         }
 

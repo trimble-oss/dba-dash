@@ -100,29 +100,27 @@ namespace DBADashGUI
             }
         }
 
-        #endregion
+        #endregion Assembly Attribute Accessors
 
         public Version DBVersion = new();
         public bool upgradeAvailable;
         public string upgradeMessage = "The upgrade check hasn't completed yet.\nIf this server doesn't have internet access, an offline upgrade can be performed. See:\nhttps://dbadash.com/upgrades";
         public bool StartGUIOnUpgrade;
-        MessageBoxIcon upgradeIcon = MessageBoxIcon.Warning;
+        private MessageBoxIcon upgradeIcon = MessageBoxIcon.Warning;
 
         private void LnkDBADash_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             CommonShared.OpenURL(Upgrade.AppURL);
         }
 
-
         private async void About_Load(object sender, EventArgs e)
         {
             lblDeploymentType.Text = Upgrade.DeploymentType.ToString();
             lblRepoVersion.Text = DBVersion.ToString();
-            await SetLatestVersionAsync(); // Display the latest version from github       
+            await SetLatestVersionAsync(); // Display the latest version from github
         }
 
-
-        /// <summary>Update about box with latest version info</summary> 
+        /// <summary>Update about box with latest version info</summary>
         private async Task SetLatestVersionAsync()
         {
             Release release;
@@ -168,7 +166,6 @@ namespace DBADashGUI
                 lblLatest.Text = "Latest Version (Unable to Compare):";
                 upgradeMessage = "Error comparing versions.  Upgrade is not available at this time. See:\nhttps://dbadash.com/upgrades";
             }
-
         }
 
         private void LnkLatestRelease_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -201,16 +198,15 @@ namespace DBADashGUI
             {
                 await Upgrade.UpgradeDBADashAsync(startGUI: StartGUIOnUpgrade);
             }
-            catch (NotFoundException)
+            catch (NotFoundException ex)
             {
-                MessageBox.Show("Upgrade script is not available.  Please check the upgrade instructions on the GitHub page", "Not Available", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                CommonShared.ShowExceptionDialog(ex, "Upgrade script is not available.", "Script not found", TaskDialogIcon.Warning, "Please check the upgrade instructions at https://dbadash.com");
                 CommonShared.OpenURL(Upgrade.LatestVersionLink);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error running upgrade" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                CommonShared.ShowExceptionDialog(ex, "Error running upgrade script");
             }
         }
-
     }
 }

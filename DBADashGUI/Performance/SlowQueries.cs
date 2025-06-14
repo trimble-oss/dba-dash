@@ -276,7 +276,7 @@ namespace DBADashGUI
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Invalid Context Info\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        CommonShared.ShowExceptionDialog(ex, "Invalid Context Info");
                     }
                 }
                 if (txtExcludeContextInfo.Text.Length > 0)
@@ -288,7 +288,7 @@ namespace DBADashGUI
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Invalid Exclude Context Info\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        CommonShared.ShowExceptionDialog(ex, "Invalid Exclude Context Info");
                     }
                 }
 
@@ -411,7 +411,7 @@ namespace DBADashGUI
                 }
                 else
                 {
-                    MessageBox.Show("Invalid input", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Invalid input '{groupingInput}'", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -777,7 +777,7 @@ namespace DBADashGUI
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Invalid Context Info\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        CommonShared.ShowExceptionDialog(ex, $"Invalid Context Info '{contextInfo}'");
                     }
                 }
                 if (txtExcludeContextInfo.Text.Length > 0)
@@ -789,7 +789,7 @@ namespace DBADashGUI
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Invalid Exclude Context Info\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        CommonShared.ShowExceptionDialog(ex, $"Invalid Exclude Context Info '{txtExcludeContextInfo.Text}'");
                     }
                 }
 
@@ -1015,8 +1015,7 @@ namespace DBADashGUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error loading saved view\n" + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error loading saved view");
             }
         }
 
@@ -1036,7 +1035,7 @@ namespace DBADashGUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error saving grid layout\n", ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error saving grid layout");
             }
         }
 
@@ -1074,8 +1073,7 @@ namespace DBADashGUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error deleting saved view\n" + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error deleting saved view");
             }
         }
 

@@ -53,11 +53,13 @@ namespace DBADashGUI
             }
             catch (SqlException ex) when (ex.Number == 229)
             {
-                MessageBox.Show(ex.Message + "\n\nThe App or AppReadOnly role can be used to grant access to the GUI", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Permissions error", default,
+                    TaskDialogIcon.ShieldWarningYellowBar,
+                    "The 'App' or 'AppReadOnly' roles can be used to grant access to the GUI");
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error getting application settings\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error getting application settings");
             }
         }
 

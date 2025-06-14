@@ -75,8 +75,7 @@ namespace DBADashServiceConfig
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error adding instance:\n" + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error adding instance");
             }
         }
 
@@ -252,8 +251,7 @@ namespace DBADashServiceConfig
                         }
                         catch (Exception ex)
                         {
-                            MessageBox.Show("Error checking connection status in repository database:\n" + ex.Message,
-                                "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            CommonShared.ShowExceptionDialog(ex, "Error checking connection status in repository database:");
                         }
                     }
 
@@ -443,7 +441,7 @@ namespace DBADashServiceConfig
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
         }
 
@@ -619,8 +617,7 @@ namespace DBADashServiceConfig
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error reading ServiceConfig.json: " + ex.Message, "Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
+                    CommonShared.ShowExceptionDialog(ex, "Error reading ServiceConfig.json: ");
                     tab1.SelectedTab = tabJson; // Set tab to Json to allow user to correct error in Json
                 }
             }
@@ -1032,7 +1029,7 @@ namespace DBADashServiceConfig
             catch (Exception ex)
             {
                 errorProvider1.SetError(txtJson, ex.Message);
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "SetFromJson error");
             }
         }
 
@@ -1106,14 +1103,14 @@ namespace DBADashServiceConfig
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error creating temporary key\n" + ex.Message, "Error", MessageBoxButtons.OK);
+                    CommonShared.ShowExceptionDialog(ex, "Error creating temporary key");
                     return;
                 }
                 StartService();
             }
             else
             {
-                MessageBox.Show($"Warning, there was fatal error last time the service started at {lastWrite}: " + fatalError, "Fatal error starting service", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog($"Warning, there was fatal error last time the service started at {lastWrite}: ", fatalError.Split("\n")[0], fatalError, "Fatal error starting service", TaskDialogIcon.Warning);
             }
         }
 
@@ -1133,7 +1130,7 @@ namespace DBADashServiceConfig
         private static void PromptError(Exception ex)
         {
             var message = GetMessages(ex);
-            MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            CommonShared.ShowExceptionDialog(ex, message);
         }
 
         private void BttnStop_Click(object sender, EventArgs e)
@@ -1700,15 +1697,38 @@ namespace DBADashServiceConfig
                     @"Remove?", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
             }
 
-            return cboDeleteAction.SelectedIndex switch
+            switch (cboDeleteAction.SelectedIndex)
             {
-                1 => DialogResult.No,
-                2 => DialogResult.Yes,
-                _ => MessageBox.Show(@$"Mark connection '{src.ConnectionID}' deleted in repository database?
-Yes = remove connection and mark as deleted
-No =  to remove only.
-Cancel = cancel the operation.", @"Mark deleted?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question)
-            };
+                case 1:
+                    return DialogResult.No;
+
+                case 2:
+                    return DialogResult.Yes;
+
+                default:
+                    {
+                        var removeAndMarkDeleted =
+                            new TaskDialogRadioButton($"Remove from config && mark deleted");
+                        var removeOnly = new TaskDialogRadioButton("Remove from config only") { Checked = true };
+                        var page = new TaskDialogPage
+                        {
+                            Heading =
+                                $"Would you like to remove remove '{src.ConnectionID ?? src.SourceConnection.DataSource()}' from config only or also mark it deleted in the repository database?",
+                            Caption = "Delete Connection",
+                            Text =
+                                "💡A connection marked deleted can be restored using the recycle bin folder in the DBA Dash GUI.",
+                            Icon = TaskDialogIcon.Warning,
+                            Buttons = new TaskDialogButtonCollection() { TaskDialogButton.OK, TaskDialogButton.Cancel },
+                            SizeToContent = true,
+                            RadioButtons = new TaskDialogRadioButtonCollection() { removeOnly, removeAndMarkDeleted }
+                        };
+
+                        if (TaskDialog.ShowDialog(page) != TaskDialogButton.OK) return DialogResult.Cancel;
+
+                        return removeAndMarkDeleted.Checked ? DialogResult.Yes :
+                            removeOnly.Checked ? DialogResult.No : DialogResult.Cancel;
+                    }
+            }
         }
 
         private void DeleteInstance(DBADashSource src)
@@ -1727,7 +1747,8 @@ Cancel = cancel the operation.", @"Mark deleted?", MessageBoxButtons.YesNoCancel
             }
             if (exceptions.Count > 0)
             {
-                MessageBox.Show(@"Error marking connection deleted in repository database: " + string.Join(Environment.NewLine, exceptions.Select(ex => ex.Message)), @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(new AggregateException(exceptions),
+                    string.Join(Environment.NewLine, exceptions.Select(ex => ex.Message)).Truncate(500));
             }
         }
 
@@ -2162,7 +2183,7 @@ Cancel = cancel the operation.", @"Mark deleted?", MessageBoxButtons.YesNoCancel
 
         private async Task PopulateConnectionIDAsync()
         {
-            var errors = new ConcurrentBag<string>();
+            var errors = new ConcurrentBag<Exception>();
 
             var tasks = collectionConfig.SourceConnections
                 .Where(src => string.IsNullOrEmpty(src.ConnectionID) && src.SourceConnection.Type == ConnectionType.SQL)
@@ -2175,7 +2196,7 @@ Cancel = cancel the operation.", @"Mark deleted?", MessageBoxButtons.YesNoCancel
                     }
                     catch (Exception ex)
                     {
-                        errors.Add($"Error getting ConnectionID for {src.SourceConnection.ConnectionForPrint}: {ex.Message}");
+                        errors.Add(new Exception($"Error getting ConnectionID for {src.SourceConnection.ConnectionForPrint}: {ex.Message}", ex));
                     }
                 });
 
@@ -2183,12 +2204,7 @@ Cancel = cancel the operation.", @"Mark deleted?", MessageBoxButtons.YesNoCancel
 
             if (errors.Count > 0)
             {
-                var errorStringBuilder = new StringBuilder();
-                foreach (var error in errors)
-                {
-                    errorStringBuilder.AppendLine(error);
-                }
-                MessageBox.Show(errorStringBuilder.ToString(), "Errors", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog($"{errors.Count} errors occurred populating ConnectionID", string.Join("\n", errors.Select(e => e.Message)).Truncate(300), string.Join("\n", errors.Select(ex => ex.ToString())));
             }
             else
             {
@@ -2291,8 +2307,7 @@ Cancel = cancel the operation.", @"Mark deleted?", MessageBoxButtons.YesNoCancel
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error getting snapshot dates: " + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error getting snapshot dates");
             }
         }
 

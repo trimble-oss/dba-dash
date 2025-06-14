@@ -107,7 +107,7 @@ namespace DBADashGUI.DBADashAlerts
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
 
             RefreshData();
@@ -132,7 +132,7 @@ namespace DBADashGUI.DBADashAlerts
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK);
+                CommonShared.ShowExceptionDialog(ex);
             }
 
             RefreshData();
@@ -276,11 +276,11 @@ namespace DBADashGUI.DBADashAlerts
             }
             catch (SqlException ex) when (ex.Number == 229)
             {
-                MessageBox.Show(ex.Message, @"Insufficient permissions", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                CommonShared.ShowExceptionDialog(ex, "Insufficient permissions", default, TaskDialogIcon.ShieldWarningYellowBar);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
         }
 

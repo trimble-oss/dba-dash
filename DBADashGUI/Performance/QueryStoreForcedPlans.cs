@@ -297,8 +297,7 @@ namespace DBADashGUI.Performance
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(@"Error navigating to link: " + ex.Message, @"Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
+                    CommonShared.ShowExceptionDialog(ex, @"Error navigating to link");
                 }
             }
         }

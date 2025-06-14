@@ -39,7 +39,7 @@ namespace DBADashGUI.AgentJobs
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
         }
 

@@ -99,7 +99,7 @@ namespace DBADashGUI.Changes
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CommonShared.ShowExceptionDialog(ex);
                 }
             }
             else
@@ -298,7 +298,7 @@ namespace DBADashGUI.Changes
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Export", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
         }
 

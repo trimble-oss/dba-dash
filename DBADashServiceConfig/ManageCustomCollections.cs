@@ -112,8 +112,7 @@ ORDER BY ProcName", cn);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error loading stored procedures:" + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error loading stored procedures:");
             }
         }
 
@@ -186,8 +185,7 @@ ORDER BY ProcName", cn);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error getting script:" + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error getting script:");
             }
             finally
             {
@@ -693,9 +691,7 @@ ORDER BY ProcName", cn);
                 }
                 catch (Exception ex)
                 {
-                    Invoke(() => MessageBox.Show("Error executing procedure:" + ex.Message, "Error",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error));
+                    CommonShared.ShowExceptionDialog(ex, "Error executing procedure:");
                 }
                 finally
                 {

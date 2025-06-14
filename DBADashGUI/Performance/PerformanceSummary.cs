@@ -272,7 +272,7 @@ namespace DBADashGUI.Performance
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error migrating saved view: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CommonShared.ShowExceptionDialog(ex, "Error migrating saved view");
                     Properties.Settings.Default.PerformanceSummaryMigrated = true;
                     Properties.Settings.Default.Save();
                 }
@@ -473,7 +473,7 @@ namespace DBADashGUI.Performance
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading the saved view " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CommonShared.ShowExceptionDialog(ex, "Error loading the saved view");
                 }
             }
             if (selectedView == null)

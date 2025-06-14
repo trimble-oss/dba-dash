@@ -409,7 +409,7 @@ namespace DBADashGUI.CustomReports
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
         }
 
@@ -674,8 +674,7 @@ namespace DBADashGUI.CustomReports
             catch (Exception ex)
             {
                 dv.RowFilter = previousFilter;
-                MessageBox.Show("Error setting row filter: " + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error setting row filter");
             }
         }
 
@@ -743,8 +742,7 @@ namespace DBADashGUI.CustomReports
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error converting value: " + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error converting value");
             }
         }
 
@@ -981,8 +979,7 @@ namespace DBADashGUI.CustomReports
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error saving table: " + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error saving table");
             }
         }
 
@@ -1048,8 +1045,7 @@ namespace DBADashGUI.CustomReports
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error generating script: " + ex.Message, "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error generating script");
             }
         }
 

@@ -66,7 +66,7 @@ namespace DBADashGUI.AgentJobs
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error downloading/running webview2 setup:\n" + ex.Message + "\nPlease setup manually from:\n" + url, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error downloading/running webview2 setup.", default, default, "Please setup manually from:\n" + url);
             }
         }
 

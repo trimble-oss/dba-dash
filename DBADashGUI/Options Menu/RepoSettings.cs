@@ -83,7 +83,7 @@ namespace DBADashGUI.Options_Menu
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
             Config.RefreshConfig();
             ThemeExtensions.CellToolTipMaxLength = Config.CellToolTipMaxLength;

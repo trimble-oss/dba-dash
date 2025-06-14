@@ -741,13 +741,11 @@ namespace DBADashGUI
             }
             catch (SqlException ex)
             {
-                MessageBox.Show("Error finding database.\n" + ex.Message, "Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error finding database");
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error finding database.  Try refreshing the tree\n" + ex.Message, "Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex, "Error finding database. Try refreshing the tree");
             }
         }
 
@@ -852,7 +850,7 @@ namespace DBADashGUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
         }
 
@@ -871,7 +869,7 @@ namespace DBADashGUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
         }
 
@@ -886,7 +884,7 @@ namespace DBADashGUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CommonShared.ShowExceptionDialog(ex);
             }
         }
 

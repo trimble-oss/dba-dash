@@ -54,23 +54,31 @@ namespace DBADashServiceConfig
                         return false;
                     }
                     var domain = creds.Domain;
-
                     if (string.IsNullOrEmpty(domain) && !creds.UserName.StartsWith(".\\"))
                     {
-                        var input = MessageBox.Show(
-                            $"Warning domain hasn't been specified.  Is this a local user account?\n\nSelect Yes to use {Environment.MachineName} (local) \nSelect No to use {Environment.UserDomainName} (domain)", "", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
-                        switch (input)
+                        if (Environment.UserDomainName == Environment.MachineName)
                         {
-                            case DialogResult.Yes:
-                                domain = Environment.MachineName;
-                                break;
+                            domain = Environment.MachineName;
+                        }
+                        else
+                        {
+                            var localAccount =
+                                new TaskDialogRadioButton($"Local account {Environment.MachineName}\\{creds.UserName}");
+                            var domainAccount = new TaskDialogRadioButton($"Domain account {Environment.UserDomainName}\\{creds.UserName}") { Checked = true };
+                            var page = new TaskDialogPage
+                            {
+                                Heading =
+                                    $"A domain name hasn't been specified.  Is this a local or a domain user account?",
+                                Caption = "Select account type",
+                                Icon = TaskDialogIcon.None,
+                                Buttons = new TaskDialogButtonCollection()
+                                    { TaskDialogButton.OK, TaskDialogButton.Cancel },
+                                SizeToContent = true,
+                                RadioButtons = new TaskDialogRadioButtonCollection() { domainAccount, localAccount },
+                            };
+                            if (TaskDialog.ShowDialog(page) != TaskDialogButton.OK) return false;
 
-                            case DialogResult.No:
-                                domain = Environment.UserDomainName;
-                                break;
-
-                            default:
-                                return false;
+                            domain = localAccount.Checked ? Environment.MachineName : Environment.UserDomainName;
                         }
                     }
                     username = domain + "\\" + creds.UserName;

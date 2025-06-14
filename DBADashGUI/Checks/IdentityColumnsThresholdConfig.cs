@@ -142,7 +142,7 @@ namespace DBADashGUI.Checks
             }
             catch (SqlException ex)
             {
-                MessageBox.Show("Error updating thresholds:" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                CommonShared.ShowExceptionDialog(ex, "Error updating thresholds");
                 return;
             }
 

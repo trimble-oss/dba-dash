@@ -261,7 +261,7 @@ namespace DBADashGUI.Performance
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading the saved view " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CommonShared.ShowExceptionDialog(ex, "Error loading the saved view");
                 }
             }
             splitContainer1.Visible = false; // Prevent flickering when adding/removing controls
