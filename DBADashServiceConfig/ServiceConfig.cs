@@ -316,7 +316,12 @@ namespace DBADashServiceConfig
             lblServerNameWarning.Visible = false;
             DBADashConnection dest = new(txtDestination.Text);
 
-            if (dest.Type == ConnectionType.Invalid)
+            if (collectionConfig.Destination == "")
+            {
+                InvokeSetSetStatus(lblVersionInfo, "Please start by setting the destination connection for your DBA Dash repository database.", DashColors.Information, FontStyle.Bold);
+                return;
+            }
+            else if (dest.Type == ConnectionType.Invalid)
             {
                 errorProvider1.SetError(txtDestination, "Invalid connection string, directory or S3 path");
                 return;
@@ -370,11 +375,6 @@ namespace DBADashServiceConfig
             InvokeSetSetStatus(lblVersionInfo, string.Empty, DashColors.TrimbleBlue, FontStyle.Regular);
 
             var dest = collectionConfig.DestinationConnection;
-            if (collectionConfig.Destination == "")
-            {
-                InvokeSetSetStatus(lblVersionInfo, "Please start by setting the destination connection for your DBA Dash repository database.", DashColors.Information, FontStyle.Bold);
-                return;
-            }
 
             if (dest.Type != ConnectionType.SQL) return;
 
