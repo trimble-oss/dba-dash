@@ -205,7 +205,6 @@ namespace DBADashServiceConfig
             // bttnSave
             // 
             bttnSave.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            bttnSave.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             bttnSave.Location = new System.Drawing.Point(909, 16);
             bttnSave.Name = "bttnSave";
             bttnSave.Size = new System.Drawing.Size(101, 35);
@@ -238,11 +237,10 @@ namespace DBADashServiceConfig
             // lnkSourceConnections
             // 
             lnkSourceConnections.AutoSize = true;
-            lnkSourceConnections.Font = new System.Drawing.Font("Arial", 7.8F);
             lnkSourceConnections.LinkColor = System.Drawing.Color.Black;
             lnkSourceConnections.Location = new System.Drawing.Point(27, 25);
             lnkSourceConnections.Name = "lnkSourceConnections";
-            lnkSourceConnections.Size = new System.Drawing.Size(128, 16);
+            lnkSourceConnections.Size = new System.Drawing.Size(142, 20);
             lnkSourceConnections.TabIndex = 18;
             lnkSourceConnections.TabStop = true;
             lnkSourceConnections.Text = "Source Connections:";
@@ -314,7 +312,7 @@ namespace DBADashServiceConfig
             chkScriptJobs.CheckState = System.Windows.Forms.CheckState.Checked;
             chkScriptJobs.Location = new System.Drawing.Point(146, 8);
             chkScriptJobs.Name = "chkScriptJobs";
-            chkScriptJobs.Size = new System.Drawing.Size(96, 20);
+            chkScriptJobs.Size = new System.Drawing.Size(102, 24);
             chkScriptJobs.TabIndex = 28;
             chkScriptJobs.Text = "Script Jobs";
             toolTip1.SetToolTip(chkScriptJobs, "If Jobs collection is enabled, the job definition will be scripted via SMO");
@@ -328,7 +326,7 @@ namespace DBADashServiceConfig
             chkCollectSessionWaits.Location = new System.Drawing.Point(9, 8);
             chkCollectSessionWaits.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             chkCollectSessionWaits.Name = "chkCollectSessionWaits";
-            chkCollectSessionWaits.Size = new System.Drawing.Size(159, 20);
+            chkCollectSessionWaits.Size = new System.Drawing.Size(170, 24);
             chkCollectSessionWaits.TabIndex = 27;
             chkCollectSessionWaits.Text = "Collect Session Waits";
             toolTip1.SetToolTip(chkCollectSessionWaits, "Collect Session Waits for Running Queries");
@@ -341,7 +339,7 @@ namespace DBADashServiceConfig
             chkDualSession.Location = new System.Drawing.Point(6, 71);
             chkDualSession.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             chkDualSession.Name = "chkDualSession";
-            chkDualSession.Size = new System.Drawing.Size(133, 20);
+            chkDualSession.Size = new System.Drawing.Size(139, 24);
             chkDualSession.TabIndex = 17;
             chkDualSession.Text = "Use dual session";
             toolTip1.SetToolTip(chkDualSession, "Uses overlapping event sessions to try to capture events that occur during the breif period where the session is stopped to flush the ring buffer.");
@@ -1089,7 +1087,6 @@ namespace DBADashServiceConfig
             groupBox2.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             groupBox2.Controls.Add(tabSrcOptions);
             groupBox2.Controls.Add(bttnAdd);
-            groupBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             groupBox2.Location = new System.Drawing.Point(10, 8);
             groupBox2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             groupBox2.Name = "groupBox2";
@@ -1107,7 +1104,6 @@ namespace DBADashServiceConfig
             tabSrcOptions.Controls.Add(tabRunningQueries);
             tabSrcOptions.Controls.Add(tabAddConnectionOther);
             tabSrcOptions.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
-            tabSrcOptions.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             tabSrcOptions.Location = new System.Drawing.Point(16, 27);
             tabSrcOptions.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             tabSrcOptions.Name = "tabSrcOptions";
@@ -1125,11 +1121,11 @@ namespace DBADashServiceConfig
             tabGeneral.Controls.Add(bttnSrcFolder);
             tabGeneral.Controls.Add(bttnConnectSource);
             tabGeneral.Controls.Add(label1);
-            tabGeneral.Location = new System.Drawing.Point(4, 35);
+            tabGeneral.Location = new System.Drawing.Point(4, 39);
             tabGeneral.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             tabGeneral.Name = "tabGeneral";
             tabGeneral.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            tabGeneral.Size = new System.Drawing.Size(1059, 182);
+            tabGeneral.Size = new System.Drawing.Size(1059, 178);
             tabGeneral.TabIndex = 0;
             tabGeneral.Text = "General";
             tabGeneral.UseVisualStyleBackColor = true;
@@ -1138,9 +1134,9 @@ namespace DBADashServiceConfig
             // 
             lnkGrant.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             lnkGrant.AutoSize = true;
-            lnkGrant.Location = new System.Drawing.Point(725, 144);
+            lnkGrant.Location = new System.Drawing.Point(701, 140);
             lnkGrant.Name = "lnkGrant";
-            lnkGrant.Size = new System.Drawing.Size(226, 16);
+            lnkGrant.Size = new System.Drawing.Size(250, 20);
             lnkGrant.TabIndex = 15;
             lnkGrant.TabStop = true;
             lnkGrant.Text = "Grant permissions to service account";
@@ -1153,7 +1149,7 @@ namespace DBADashServiceConfig
             txtSource.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             txtSource.Multiline = true;
             txtSource.Name = "txtSource";
-            txtSource.Size = new System.Drawing.Size(945, 105);
+            txtSource.Size = new System.Drawing.Size(945, 101);
             txtSource.TabIndex = 13;
             // 
             // label1
@@ -1161,19 +1157,18 @@ namespace DBADashServiceConfig
             label1.AutoSize = true;
             label1.Location = new System.Drawing.Point(27, 8);
             label1.Name = "label1";
-            label1.Size = new System.Drawing.Size(56, 16);
+            label1.Size = new System.Drawing.Size(61, 20);
             label1.TabIndex = 2;
             label1.Text = "Source: ";
             // 
             // tabExtendedEvents
             // 
             tabExtendedEvents.Controls.Add(pnlExtendedEvents);
-            tabExtendedEvents.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            tabExtendedEvents.Location = new System.Drawing.Point(4, 35);
+            tabExtendedEvents.Location = new System.Drawing.Point(4, 39);
             tabExtendedEvents.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             tabExtendedEvents.Name = "tabExtendedEvents";
             tabExtendedEvents.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            tabExtendedEvents.Size = new System.Drawing.Size(1059, 182);
+            tabExtendedEvents.Size = new System.Drawing.Size(1059, 178);
             tabExtendedEvents.TabIndex = 1;
             tabExtendedEvents.Text = "Extended Events";
             tabExtendedEvents.UseVisualStyleBackColor = true;
@@ -1190,7 +1185,7 @@ namespace DBADashServiceConfig
             pnlExtendedEvents.Location = new System.Drawing.Point(3, 4);
             pnlExtendedEvents.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             pnlExtendedEvents.Name = "pnlExtendedEvents";
-            pnlExtendedEvents.Size = new System.Drawing.Size(1053, 174);
+            pnlExtendedEvents.Size = new System.Drawing.Size(1053, 170);
             pnlExtendedEvents.TabIndex = 18;
             // 
             // chkSlowQueryThreshold
@@ -1199,7 +1194,7 @@ namespace DBADashServiceConfig
             chkSlowQueryThreshold.Location = new System.Drawing.Point(6, 4);
             chkSlowQueryThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             chkSlowQueryThreshold.Name = "chkSlowQueryThreshold";
-            chkSlowQueryThreshold.Size = new System.Drawing.Size(263, 20);
+            chkSlowQueryThreshold.Size = new System.Drawing.Size(289, 24);
             chkSlowQueryThreshold.TabIndex = 13;
             chkSlowQueryThreshold.Text = "Capture Slow Queries (Extended Event)";
             chkSlowQueryThreshold.UseVisualStyleBackColor = true;
@@ -1214,7 +1209,7 @@ namespace DBADashServiceConfig
             numSlowQueryThreshold.Maximum = new decimal(new int[] { 604800000, 0, 0, 0 });
             numSlowQueryThreshold.Minimum = new decimal(new int[] { 1, 0, 0, int.MinValue });
             numSlowQueryThreshold.Name = "numSlowQueryThreshold";
-            numSlowQueryThreshold.Size = new System.Drawing.Size(173, 22);
+            numSlowQueryThreshold.Size = new System.Drawing.Size(173, 27);
             numSlowQueryThreshold.TabIndex = 12;
             numSlowQueryThreshold.Value = new decimal(new int[] { 1, 0, 0, int.MinValue });
             // 
@@ -1223,7 +1218,7 @@ namespace DBADashServiceConfig
             label9.AutoSize = true;
             label9.Location = new System.Drawing.Point(6, 109);
             label9.Name = "label9";
-            label9.Size = new System.Drawing.Size(100, 16);
+            label9.Size = new System.Drawing.Size(110, 20);
             label9.TabIndex = 16;
             label9.Text = "Threshold (ms):";
             // 
@@ -1232,7 +1227,7 @@ namespace DBADashServiceConfig
             lblSlow.AutoSize = true;
             lblSlow.Location = new System.Drawing.Point(6, 145);
             lblSlow.Name = "lblSlow";
-            lblSlow.Size = new System.Drawing.Size(524, 16);
+            lblSlow.Size = new System.Drawing.Size(582, 20);
             lblSlow.TabIndex = 14;
             lblSlow.Text = "Extended events trace to capture slow rpc and batch completed events is NOT enabled";
             // 
@@ -1243,7 +1238,7 @@ namespace DBADashServiceConfig
             chkPersistXESession.Location = new System.Drawing.Point(6, 37);
             chkPersistXESession.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             chkPersistXESession.Name = "chkPersistXESession";
-            chkPersistXESession.Size = new System.Drawing.Size(347, 20);
+            chkPersistXESession.Size = new System.Drawing.Size(387, 24);
             chkPersistXESession.TabIndex = 15;
             chkPersistXESession.Text = "Persist XE sessions (to allow for manual configuration)";
             chkPersistXESession.UseVisualStyleBackColor = true;
@@ -1253,10 +1248,10 @@ namespace DBADashServiceConfig
             tabRunningQueries.Controls.Add(chkCollectPlans);
             tabRunningQueries.Controls.Add(grpRunningQueryThreshold);
             tabRunningQueries.Controls.Add(chkCollectSessionWaits);
-            tabRunningQueries.Location = new System.Drawing.Point(4, 35);
+            tabRunningQueries.Location = new System.Drawing.Point(4, 39);
             tabRunningQueries.Name = "tabRunningQueries";
             tabRunningQueries.Padding = new System.Windows.Forms.Padding(3);
-            tabRunningQueries.Size = new System.Drawing.Size(1059, 182);
+            tabRunningQueries.Size = new System.Drawing.Size(1059, 178);
             tabRunningQueries.TabIndex = 4;
             tabRunningQueries.Text = "Running Queries";
             tabRunningQueries.UseVisualStyleBackColor = true;
@@ -1267,7 +1262,7 @@ namespace DBADashServiceConfig
             chkCollectPlans.Location = new System.Drawing.Point(9, 43);
             chkCollectPlans.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             chkCollectPlans.Name = "chkCollectPlans";
-            chkCollectPlans.Size = new System.Drawing.Size(227, 20);
+            chkCollectPlans.Size = new System.Drawing.Size(250, 24);
             chkCollectPlans.TabIndex = 13;
             chkCollectPlans.Text = "Collect Plans for Running Queries";
             chkCollectPlans.UseVisualStyleBackColor = true;
@@ -1299,7 +1294,7 @@ namespace DBADashServiceConfig
             label15.AutoSize = true;
             label15.Location = new System.Drawing.Point(6, 40);
             label15.Name = "label15";
-            label15.Size = new System.Drawing.Size(124, 16);
+            label15.Size = new System.Drawing.Size(139, 20);
             label15.TabIndex = 17;
             label15.Text = "Duration Threshold:";
             // 
@@ -1308,7 +1303,7 @@ namespace DBADashServiceConfig
             txtDurationThreshold.Location = new System.Drawing.Point(146, 37);
             txtDurationThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             txtDurationThreshold.Name = "txtDurationThreshold";
-            txtDurationThreshold.Size = new System.Drawing.Size(100, 22);
+            txtDurationThreshold.Size = new System.Drawing.Size(100, 27);
             txtDurationThreshold.TabIndex = 16;
             // 
             // txtCountThreshold
@@ -1316,7 +1311,7 @@ namespace DBADashServiceConfig
             txtCountThreshold.Location = new System.Drawing.Point(385, 79);
             txtCountThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             txtCountThreshold.Name = "txtCountThreshold";
-            txtCountThreshold.Size = new System.Drawing.Size(100, 22);
+            txtCountThreshold.Size = new System.Drawing.Size(100, 27);
             txtCountThreshold.TabIndex = 20;
             // 
             // label17
@@ -1324,7 +1319,7 @@ namespace DBADashServiceConfig
             label17.AutoSize = true;
             label17.Location = new System.Drawing.Point(263, 83);
             label17.Name = "label17";
-            label17.Size = new System.Drawing.Size(108, 16);
+            label17.Size = new System.Drawing.Size(120, 20);
             label17.TabIndex = 21;
             label17.Text = "Count Threshold:";
             // 
@@ -1333,7 +1328,7 @@ namespace DBADashServiceConfig
             label14.AutoSize = true;
             label14.Location = new System.Drawing.Point(6, 83);
             label14.Name = "label14";
-            label14.Size = new System.Drawing.Size(102, 16);
+            label14.Size = new System.Drawing.Size(108, 20);
             label14.TabIndex = 15;
             label14.Text = "CPU Threshold:";
             // 
@@ -1342,7 +1337,7 @@ namespace DBADashServiceConfig
             txtCPUThreshold.Location = new System.Drawing.Point(146, 79);
             txtCPUThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             txtCPUThreshold.Name = "txtCPUThreshold";
-            txtCPUThreshold.Size = new System.Drawing.Size(100, 22);
+            txtCPUThreshold.Size = new System.Drawing.Size(100, 27);
             txtCPUThreshold.TabIndex = 14;
             // 
             // txtGrantThreshold
@@ -1350,7 +1345,7 @@ namespace DBADashServiceConfig
             txtGrantThreshold.Location = new System.Drawing.Point(385, 37);
             txtGrantThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             txtGrantThreshold.Name = "txtGrantThreshold";
-            txtGrantThreshold.Size = new System.Drawing.Size(100, 22);
+            txtGrantThreshold.Size = new System.Drawing.Size(100, 27);
             txtGrantThreshold.TabIndex = 18;
             // 
             // label16
@@ -1358,7 +1353,7 @@ namespace DBADashServiceConfig
             label16.AutoSize = true;
             label16.Location = new System.Drawing.Point(263, 40);
             label16.Name = "label16";
-            label16.Size = new System.Drawing.Size(106, 16);
+            label16.Size = new System.Drawing.Size(117, 20);
             label16.TabIndex = 19;
             label16.Text = "Grant Threshold:";
             // 
@@ -1376,11 +1371,11 @@ namespace DBADashServiceConfig
             tabAddConnectionOther.Controls.Add(lblSchemaSnapshotDBs);
             tabAddConnectionOther.Controls.Add(txtSnapshotDBs);
             tabAddConnectionOther.Controls.Add(chkNoWMI);
-            tabAddConnectionOther.Location = new System.Drawing.Point(4, 35);
+            tabAddConnectionOther.Location = new System.Drawing.Point(4, 39);
             tabAddConnectionOther.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             tabAddConnectionOther.Name = "tabAddConnectionOther";
             tabAddConnectionOther.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            tabAddConnectionOther.Size = new System.Drawing.Size(1059, 182);
+            tabAddConnectionOther.Size = new System.Drawing.Size(1059, 178);
             tabAddConnectionOther.TabIndex = 3;
             tabAddConnectionOther.Text = "Other";
             tabAddConnectionOther.UseVisualStyleBackColor = true;
@@ -1402,7 +1397,7 @@ namespace DBADashServiceConfig
             chkWriteToSecondaryDestinations.CheckState = System.Windows.Forms.CheckState.Checked;
             chkWriteToSecondaryDestinations.Location = new System.Drawing.Point(264, 8);
             chkWriteToSecondaryDestinations.Name = "chkWriteToSecondaryDestinations";
-            chkWriteToSecondaryDestinations.Size = new System.Drawing.Size(216, 20);
+            chkWriteToSecondaryDestinations.Size = new System.Drawing.Size(240, 24);
             chkWriteToSecondaryDestinations.TabIndex = 31;
             chkWriteToSecondaryDestinations.Text = "Write to secondary destinations";
             chkWriteToSecondaryDestinations.UseVisualStyleBackColor = true;
@@ -1412,7 +1407,7 @@ namespace DBADashServiceConfig
             lblIOCollectionLevel.AutoSize = true;
             lblIOCollectionLevel.Location = new System.Drawing.Point(9, 49);
             lblIOCollectionLevel.Name = "lblIOCollectionLevel";
-            lblIOCollectionLevel.Size = new System.Drawing.Size(121, 16);
+            lblIOCollectionLevel.Size = new System.Drawing.Size(136, 20);
             lblIOCollectionLevel.TabIndex = 30;
             lblIOCollectionLevel.Text = "IO Collection Level:";
             // 
@@ -1421,7 +1416,7 @@ namespace DBADashServiceConfig
             cboIOLevel.FormattingEnabled = true;
             cboIOLevel.Location = new System.Drawing.Point(224, 45);
             cboIOLevel.Name = "cboIOLevel";
-            cboIOLevel.Size = new System.Drawing.Size(135, 24);
+            cboIOLevel.Size = new System.Drawing.Size(135, 28);
             cboIOLevel.TabIndex = 29;
             // 
             // lnkExample
@@ -1430,7 +1425,7 @@ namespace DBADashServiceConfig
             lnkExample.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             lnkExample.Location = new System.Drawing.Point(613, 115);
             lnkExample.Name = "lnkExample";
-            lnkExample.Size = new System.Drawing.Size(60, 16);
+            lnkExample.Size = new System.Drawing.Size(66, 20);
             lnkExample.TabIndex = 25;
             lnkExample.TabStop = true;
             lnkExample.Text = "Example";
@@ -1442,7 +1437,7 @@ namespace DBADashServiceConfig
             lnkNone.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             lnkNone.Location = new System.Drawing.Point(565, 115);
             lnkNone.Name = "lnkNone";
-            lnkNone.Size = new System.Drawing.Size(40, 16);
+            lnkNone.Size = new System.Drawing.Size(45, 20);
             lnkNone.TabIndex = 24;
             lnkNone.TabStop = true;
             lnkNone.Text = "None";
@@ -1454,7 +1449,7 @@ namespace DBADashServiceConfig
             lnkALL.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             lnkALL.Location = new System.Drawing.Point(535, 115);
             lnkALL.Name = "lnkALL";
-            lnkALL.Size = new System.Drawing.Size(22, 16);
+            lnkALL.Size = new System.Drawing.Size(27, 20);
             lnkALL.TabIndex = 23;
             lnkALL.TabStop = true;
             lnkALL.Text = "All";
@@ -1465,7 +1460,7 @@ namespace DBADashServiceConfig
             lblSchemaSnapshotDBs.AutoSize = true;
             lblSchemaSnapshotDBs.Location = new System.Drawing.Point(9, 91);
             lblSchemaSnapshotDBs.Name = "lblSchemaSnapshotDBs";
-            lblSchemaSnapshotDBs.Size = new System.Drawing.Size(190, 16);
+            lblSchemaSnapshotDBs.Size = new System.Drawing.Size(202, 20);
             lblSchemaSnapshotDBs.TabIndex = 20;
             lblSchemaSnapshotDBs.Text = "Schema Snapshot Databases:";
             // 
@@ -1474,7 +1469,7 @@ namespace DBADashServiceConfig
             txtSnapshotDBs.Location = new System.Drawing.Point(224, 88);
             txtSnapshotDBs.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             txtSnapshotDBs.Name = "txtSnapshotDBs";
-            txtSnapshotDBs.Size = new System.Drawing.Size(449, 22);
+            txtSnapshotDBs.Size = new System.Drawing.Size(449, 27);
             txtSnapshotDBs.TabIndex = 17;
             // 
             // chkNoWMI
@@ -1482,7 +1477,7 @@ namespace DBADashServiceConfig
             chkNoWMI.AutoSize = true;
             chkNoWMI.Location = new System.Drawing.Point(9, 8);
             chkNoWMI.Name = "chkNoWMI";
-            chkNoWMI.Size = new System.Drawing.Size(115, 20);
+            chkNoWMI.Size = new System.Drawing.Size(128, 24);
             chkNoWMI.TabIndex = 6;
             chkNoWMI.Text = "Don't use WMI";
             chkNoWMI.UseVisualStyleBackColor = true;
@@ -1508,7 +1503,6 @@ namespace DBADashServiceConfig
             groupBox1.Controls.Add(dgvConnections);
             groupBox1.Controls.Add(label13);
             groupBox1.Controls.Add(txtSearch);
-            groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             groupBox1.Location = new System.Drawing.Point(10, 325);
             groupBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             groupBox1.Name = "groupBox1";
@@ -1535,7 +1529,7 @@ namespace DBADashServiceConfig
             label12.AutoSize = true;
             label12.Location = new System.Drawing.Point(199, 348);
             label12.Name = "label12";
-            label12.Size = new System.Drawing.Size(115, 16);
+            label12.Size = new System.Drawing.Size(131, 20);
             label12.TabIndex = 29;
             label12.Text = "Grid delete action:";
             // 
@@ -1547,7 +1541,7 @@ namespace DBADashServiceConfig
             cboDeleteAction.Items.AddRange(new object[] { "Prompt", "Remove Only", "Remove And Mark Deleted" });
             cboDeleteAction.Location = new System.Drawing.Point(331, 344);
             cboDeleteAction.Name = "cboDeleteAction";
-            cboDeleteAction.Size = new System.Drawing.Size(172, 24);
+            cboDeleteAction.Size = new System.Drawing.Size(172, 28);
             cboDeleteAction.TabIndex = 28;
             // 
             // dgvConnections
@@ -1573,10 +1567,9 @@ namespace DBADashServiceConfig
             // 
             label13.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             label13.AutoSize = true;
-            label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             label13.Location = new System.Drawing.Point(830, 348);
             label13.Name = "label13";
-            label13.Size = new System.Drawing.Size(53, 16);
+            label13.Size = new System.Drawing.Size(56, 20);
             label13.TabIndex = 25;
             label13.Text = "Search:";
             // 
@@ -1586,7 +1579,7 @@ namespace DBADashServiceConfig
             txtSearch.Location = new System.Drawing.Point(893, 345);
             txtSearch.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             txtSearch.Name = "txtSearch";
-            txtSearch.Size = new System.Drawing.Size(191, 22);
+            txtSearch.Size = new System.Drawing.Size(191, 27);
             txtSearch.TabIndex = 27;
             txtSearch.TextChanged += TxtSearch_TextChanged;
             // 
@@ -1690,7 +1683,6 @@ namespace DBADashServiceConfig
             // lnkInstall
             // 
             lnkInstall.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            lnkInstall.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold);
             lnkInstall.Image = Properties.Resources.install;
             lnkInstall.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             lnkInstall.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
@@ -1729,10 +1721,9 @@ namespace DBADashServiceConfig
             // lblVersionInfo
             // 
             lblVersionInfo.AutoSize = true;
-            lblVersionInfo.Font = new System.Drawing.Font("Arial", 7.8F);
             lblVersionInfo.Location = new System.Drawing.Point(103, 127);
             lblVersionInfo.Name = "lblVersionInfo";
-            lblVersionInfo.Size = new System.Drawing.Size(83, 16);
+            lblVersionInfo.Size = new System.Drawing.Size(95, 20);
             lblVersionInfo.TabIndex = 6;
             lblVersionInfo.Text = "version info...";
             // 
