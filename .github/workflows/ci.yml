@@ -112,7 +112,9 @@ jobs:
         run: | 
           "Wait 5min"
           Start-Sleep -s 300
-
+      - name: Stop services
+        run: |
+          net stop DBADashService
       - name: Output CollectionErrorLog
         shell: powershell
         run: | 

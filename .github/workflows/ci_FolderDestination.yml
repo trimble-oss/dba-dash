@@ -151,6 +151,10 @@ jobs:
           "Wait 5min"
           Start-Sleep -s 300
 
+      - name: Stop services
+        run: |
+          net stop DBADashReadFromFolder
+          net stop DBADashWriteToFolder
       - name: Output Log (DBADashWriteToFolder)
         shell: powershell
         run: | 
