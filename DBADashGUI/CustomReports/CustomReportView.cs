@@ -1363,12 +1363,20 @@ namespace DBADashGUI.CustomReports
             Report.CustomReportResults[dgv.ResultSetID].LinkColumns?.TryGetValue(colName, out linkColumnInfo);
             try
             {
-                linkColumnInfo?.Navigate(context, dgv.Rows[e.RowIndex], dgv.ResultSetID);
+                linkColumnInfo?.Navigate(GetContext(), dgv.Rows[e.RowIndex], dgv.ResultSetID);
             }
             catch (Exception ex)
             {
                 CommonShared.ShowExceptionDialog(ex, "Error navigating to link");
             }
+        }
+
+        private DBADashContext GetContext()
+        {
+            if (context.Report != null) return context;
+            var tempContext = context.DeepCopy();
+            tempContext.Report = Report;
+            return tempContext;
         }
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
