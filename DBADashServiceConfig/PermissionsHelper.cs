@@ -700,7 +700,7 @@ namespace DBADashServiceConfig
 
                     var repoDB = dest.InitialCatalog();
                     DBADashConnection masterCn;
-                    if (dest.IsIntegratedSecurity && !dest.IsAzureDB())
+                    if (dest.IsIntegratedSecurity)
                     {
                         if (!IsDomainAccount(serviceAccount))
                         {
@@ -712,6 +712,11 @@ namespace DBADashServiceConfig
                             InitialCatalog = "master"
                         };
                         masterCn = new DBADashConnection(builder.ToString());
+                        if (masterCn.IsAzureDB())
+                        {
+                            MessageBox.Show("AzureDB is not currently supported by the permissions helper dialog.", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
                     }
                     else
                     {
