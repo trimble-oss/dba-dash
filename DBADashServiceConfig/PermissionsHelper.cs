@@ -173,14 +173,26 @@ namespace DBADashServiceConfig
 
         private static void AddCreateLogin(StringBuilder sb, string serviceAccount)
         {
+           
+           
+            sb.AppendLine("/* For case sensitive collations, we want the @LoginName case to match what is in sys.server_principals if the login exists. */");
+            sb.AppendLine("SELECT @LoginName = name");
+            sb.AppendLine("FROM sys.server_principals");
+            sb.AppendLine("WHERE name = @LoginName COLLATE SQL_Latin1_General_CP1_CI_AS");
+            sb.AppendLine();
             if (!IsDomainAccount(serviceAccount)) return;
-
-            sb.AppendLine($"IF SUSER_ID({serviceAccount.SqlSingleQuoteWithEncapsulation()}) IS NULL");
+            sb.AppendLine("/* Create the login if it doesn't exist */");
+            sb.AppendLine($"IF NOT EXISTS(SELECT 1 FROM sys.server_principals WHERE name = @LoginName)");
             sb.AppendLine("BEGIN");
-            sb.AppendLine($"\tCREATE LOGIN {serviceAccount.SqlQuoteName()} FROM WINDOWS WITH DEFAULT_DATABASE=[master]");
+            sb.AppendLine($"\tSET @SQL = N'CREATE LOGIN ' + QUOTENAME(@LoginName) + ' FROM WINDOWS WITH DEFAULT_DATABASE=[master]'");
+            sb.AppendLine("\tPRINT @SQL");
+            sb.AppendLine("\tEXEC sp_executesql @SQL");
             sb.AppendLine("END");
             sb.AppendLine();
         }
+
+        private static string GetDeclareLoginName(string serviceAccount) =>
+            $"DECLARE @LoginName SYSNAME = {serviceAccount.SqlSingleQuoteWithEncapsulation()}" + (string.IsNullOrEmpty(serviceAccount) ? " /* !!!NOT SET!!! */" : "");
 
         private string GetScript(string serviceAccount)
         {
@@ -188,10 +200,12 @@ namespace DBADashServiceConfig
             UserCreatedDb = new();
             currentDB = string.Empty;
 
-            AddCreateLogin(sb, serviceAccount);
-
+            sb.AppendLine(GetDeclareLoginName(serviceAccount));
             sb.AppendLine("DECLARE @UserName SYSNAME");
             sb.AppendLine("DECLARE @SQL NVARCHAR(MAX)");
+            sb.AppendLine();
+            AddCreateLogin(sb, serviceAccount);
+
             sb.AppendLine();
             sb.AppendLine(CreateUserOrGetMappedUserNameInCurrentDB(serviceAccount));
             PermissionItem.PermissionTypes? lastPermissionType = null;
@@ -219,7 +233,9 @@ namespace DBADashServiceConfig
                         }
                         UseDatabaseAndCreateUserOrGetMappedUserName(sb, "master", serviceAccount);
 
-                        sb.AppendLine((p.Grant ? "GRANT " : "REVOKE ") + p.Name + " TO " + serviceAccount.SqlQuoteName());
+                        sb.AppendLine("SET @SQL = N'" + (p.Grant ? "GRANT " : "REVOKE ") + p.Name + " TO ' + QUOTENAME(@LoginName)");
+                        sb.AppendLine("PRINT @SQL");
+                        sb.AppendLine("EXEC sp_executesql @SQL");
 
                         break;
 
@@ -234,7 +250,7 @@ namespace DBADashServiceConfig
                         UseDatabaseAndCreateUserOrGetMappedUserName(sb, db, serviceAccount);
 
                         sb.AppendLine("SET @SQL = N'ALTER ROLE " + role.SqlQuoteName() + (p.Grant ? " ADD " : " DROP ") + "MEMBER ' + QUOTENAME(@UserName)");
-                        sb.AppendLine("\tPRINT @SQL");
+                        sb.AppendLine("PRINT @SQL");
                         sb.AppendLine("EXEC sp_executesql @SQL");
                         break;
 
@@ -244,7 +260,9 @@ namespace DBADashServiceConfig
                             sb.AppendLine("/* Add Server Roles */ ");
                         }
                         UseDatabaseAndCreateUserOrGetMappedUserName(sb, "master", serviceAccount);
-                        sb.AppendLine("ALTER SERVER ROLE " + p.Name.SqlQuoteName() + (p.Grant ? " ADD " : " DROP ") + "MEMBER " + serviceAccount.SqlQuoteName());
+                        sb.AppendLine("SET @SQL = 'ALTER SERVER ROLE " + p.Name.SqlQuoteName() + (p.Grant ? " ADD " : " DROP ") + "MEMBER ' + QUOTENAME(@LoginName)");
+                        sb.AppendLine("PRINT @SQL");
+                        sb.AppendLine("EXEC sp_executesql @SQL");
                         break;
 
                     default:
@@ -759,13 +777,15 @@ namespace DBADashServiceConfig
             sb.AppendLine("SET @UserName = NULL");
             sb.AppendLine("SELECT @UserName = name");
             sb.AppendLine("FROM sys.database_principals");
-            sb.AppendLine($"WHERE sid=(SELECT sid FROM sys.syslogins where name = {serviceAccount.SqlSingleQuoteWithEncapsulation()})");
+            sb.AppendLine($"WHERE sid= SUSER_SID(@LoginName)");
             sb.AppendLine();
             sb.AppendLine("/* Create a user for the login if required */");
             sb.AppendLine($"IF @UserName IS NULL");
             sb.AppendLine($"BEGIN");
-            sb.AppendLine($"\tCREATE USER {serviceAccount.SqlQuoteName()} FOR LOGIN {serviceAccount.SqlQuoteName()}");
-            sb.AppendLine($"\tSET @UserName = {serviceAccount.SqlSingleQuoteWithEncapsulation()}");
+            sb.AppendLine($"\tSET @SQL = N'CREATE USER ' + QUOTENAME(@LoginName) + ' FOR LOGIN ' + QUOTENAME(@LoginName)");
+            sb.AppendLine("\tPRINT @SQL");
+            sb.AppendLine("\tEXEC sp_executesql @SQL");
+            sb.AppendLine($"\tSET @UserName = @LoginName");
             sb.AppendLine($"END");
             return sb.ToString();
         }
@@ -783,30 +803,37 @@ namespace DBADashServiceConfig
             sb.AppendLine("\tOtherwise allow the service account permissions to create the database.  Revoke this permission if the database exists as it's no longer required.");
             sb.AppendLine("*/");
             sb.AppendLine();
+            sb.AppendLine(GetDeclareLoginName(serviceAccount));
+            sb.AppendLine("DECLARE @SQL NVARCHAR(MAX)");
             AddCreateLogin(sb, serviceAccount);
             sb.AppendLine("IF DB_ID(" + db.SqlSingleQuoteWithEncapsulation() + ") IS NOT NULL");
             sb.AppendLine("BEGIN");
-            sb.AppendLine("\tDECLARE @SQL NVARCHAR(MAX)");
             sb.Append("\tSET @SQL = N");
             sbDynamic.AppendLine("USE " + db.SqlQuoteName() + "");
+            sbDynamic.AppendLine("DECLARE @SQL NVARCHAR(MAX)");
             sbDynamic.AppendLine("DECLARE @UserName SYSNAME");
             sbDynamic.AppendLine(CreateUserOrGetMappedUserNameInCurrentDB(serviceAccount));
             sbDynamic.AppendLine("DECLARE @OwnerSQL NVARCHAR(MAX)");
             sbDynamic.AppendLine("SET @OwnerSQL = N'ALTER ROLE db_owner ADD MEMBER ' + QUOTENAME(@UserName)");
-            sbDynamic.AppendLine("IF @UserName <> 'dbo'");
+            sbDynamic.AppendLine("IF @UserName <> 'dbo' COLLATE DATABASE_DEFAULT");
             sbDynamic.AppendLine("BEGIN");
+            sbDynamic.AppendLine("\tPRINT @OwnerSQL");
             sbDynamic.AppendLine("\tEXEC sp_executesql @OwnerSQL");
             sbDynamic.AppendLine("END");
             sbDynamic.AppendLine();
             sbDynamic.AppendLine("USE [master]");
-            sbDynamic.AppendLine("REVOKE CREATE ANY DATABASE TO " + serviceAccount.SqlQuoteName());
+            sbDynamic.AppendLine("SET @SQL = 'REVOKE CREATE ANY DATABASE TO ' + QUOTENAME(@LoginName)");
+            sbDynamic.AppendLine("PRINT @SQL");
+            sbDynamic.AppendLine("EXEC sp_executesql @SQL");
             sb.AppendLine(sbDynamic.ToString().SqlSingleQuoteWithEncapsulation());
-            sb.AppendLine("\tEXEC sp_executesql @SQL");
+            sb.AppendLine("\tEXEC sp_executesql @SQL,N'@LoginName SYSNAME',@LoginName");
             sb.AppendLine("END");
             sb.AppendLine("ELSE");
             sb.AppendLine("BEGIN");
             sb.AppendLine("\tUSE [master]");
-            sb.AppendLine("\tGRANT CREATE ANY DATABASE TO " + serviceAccount.SqlQuoteName());
+            sb.AppendLine("\tSET @SQL = 'GRANT CREATE ANY DATABASE TO ' + QUOTENAME(@LoginName)");
+            sb.AppendLine("\tPRINT @SQL");
+            sb.AppendLine("\tEXEC sp_executesql @SQL");
             sb.AppendLine("END");
             return sb.ToString();
         }
