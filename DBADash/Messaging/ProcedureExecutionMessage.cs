@@ -38,10 +38,12 @@ namespace DBADash.Messaging
             sp_DBPermissions
         }
 
+        public static bool IsScriptAllowed(string script, string allowedScripts) => allowedScripts.Split(",").Contains(script, StringComparer.OrdinalIgnoreCase) || allowedScripts == "*";
+
         public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
             ThrowIfExpired();
-            if (cfg.AllowedScripts == null || (!cfg.AllowedScripts.Split(",").Contains(CommandName.ToString()) && cfg.AllowedScripts != "*"))
+            if (!IsScriptAllowed(CommandName.ToString(), cfg.AllowedScripts))
             {
                 Log.Error("Command {CommandName} is not allowed.  Use the service configuration tool to enable access", CommandName);
                 throw new Exception($"Command {CommandName} is not allowed.  Use the service configuration tool to enable access");

@@ -1,4 +1,5 @@
 ﻿using DBADash;
+using DBADash.Messaging;
 using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
@@ -144,6 +145,25 @@ namespace DBADashServiceConfig
                 PermissionState = PermissionItem.PermissionStates.Grant,
                 PermissionType = PermissionItem.PermissionTypes.ExecuteProcedure
             }));
+
+            var excluded = new string[]
+            {
+                ProcedureExecutionMessage.CommandNames.sp_Blitz.ToString(),
+                ProcedureExecutionMessage.CommandNames.sp_LogHunter.ToString(),
+                ProcedureExecutionMessage.CommandNames.sp_BlitzIndex.ToString()
+            }; // EXECUTE permission is insufficient
+            foreach (var p in Enum.GetNames<ProcedureExecutionMessage.CommandNames>().Where(proc =>
+                        ProcedureExecutionMessage.IsScriptAllowed(proc, Config.AllowedScripts)))
+            {
+                if (excluded.Contains(p)) continue;
+                Permissions.Add(new PermissionItem()
+                {
+                    Name = p,
+                    PermissionState = PermissionItem.PermissionStates.None,
+                    PermissionType = PermissionItem.PermissionTypes.ExecuteProcedure
+                });
+            }
+
             dgvPermissions.DataSource = Permissions;
             dgvPermissions.CellValueChanged += (sender, e) =>
             {
@@ -173,8 +193,6 @@ namespace DBADashServiceConfig
 
         private static void AddCreateLogin(StringBuilder sb, string serviceAccount)
         {
-           
-           
             sb.AppendLine("/* For case sensitive collations, we want the @LoginName case to match what is in sys.server_principals if the login exists. */");
             sb.AppendLine("SELECT @LoginName = name");
             sb.AppendLine("FROM sys.server_principals");
@@ -194,9 +212,22 @@ namespace DBADashServiceConfig
         private static string GetDeclareLoginName(string serviceAccount) =>
             $"DECLARE @LoginName SYSNAME = {serviceAccount.SqlSingleQuoteWithEncapsulation()}" + (string.IsNullOrEmpty(serviceAccount) ? " /* !!!NOT SET!!! */" : "");
 
+        private static string GrantExecuteProcedure(string procName)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"IF OBJECT_ID({procName.SqlSingleQuoteWithEncapsulation()}) IS NOT NULL");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine($"\tSET @SQL = N'GRANT EXECUTE ON {ReApplySqlQuoteName(procName)} TO ' + QUOTENAME(@UserName)");
+            sb.AppendLine("\tPRINT @SQL");
+            sb.AppendLine("\tEXEC sp_executesql @SQL");
+            sb.AppendLine("END");
+            return sb.ToString();
+        }
+
         private string GetScript(string serviceAccount)
         {
             var sb = new StringBuilder();
+            var sbMasterGrant = new StringBuilder();
             UserCreatedDb = new();
             currentDB = string.Empty;
 
@@ -218,12 +249,12 @@ namespace DBADashServiceConfig
                         {
                             sb.AppendLine("/* GRANT EXECUTE */ ");
                         }
-                        sb.AppendLine($"IF OBJECT_ID({p.Name.SqlSingleQuoteWithEncapsulation()}) IS NOT NULL");
-                        sb.AppendLine("BEGIN");
-                        sb.AppendLine($"\tSET @SQL = N'GRANT EXECUTE ON {ReApplySqlQuoteName(p.Name)} TO ' + QUOTENAME(@UserName)");
-                        sb.AppendLine("\tPRINT @SQL");
-                        sb.AppendLine("\tEXEC sp_executesql @SQL");
-                        sb.AppendLine("END");
+                        var grantSQL = GrantExecuteProcedure(p.Name);
+                        sb.AppendLine(grantSQL);
+                        if (p.Name.StartsWith("sp_")) // These procs might live in master (which might not be the initial catalog)
+                        {
+                            sbMasterGrant.AppendLine(grantSQL);
+                        }
                         break;
 
                     case PermissionItem.PermissionTypes.ServerPermission:
@@ -271,6 +302,15 @@ namespace DBADashServiceConfig
 
                 lastPermissionType = p.PermissionType;
             }
+
+            if (sbMasterGrant.Length > 0)
+            {
+                sb.AppendLine();
+                UseDatabaseAndCreateUserOrGetMappedUserName(sb, "master", serviceAccount);
+                sb.AppendLine("/* GRANT EXECUTE in master */");
+                sb.AppendLine(sbMasterGrant.ToString());
+            }
+
             return sb.ToString();
         }
 
