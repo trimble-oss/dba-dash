@@ -315,33 +315,29 @@ namespace DBADashServiceConfig
             errorProvider1.SetError(txtDestination, null);
             lblServerNameWarning.Visible = false;
             DBADashConnection dest = new(txtDestination.Text);
-
-            if (collectionConfig.Destination == "")
+            if(!string.IsNullOrEmpty(txtDestination.Text))
             {
-                InvokeSetSetStatus(lblVersionInfo, "Please start by setting the destination connection for your DBA Dash repository database.", DashColors.Information, FontStyle.Bold);
-                return;
+                try
+                {
+                    if (dest.Type == ConnectionType.Invalid)
+                    {
+                        throw new ArgumentException("Invalid connection string, directory or S3 path");
+                    }
+                    CollectionConfig.ValidateDestination(dest);
+                }
+                catch (Exception ex)
+                {
+                    errorProvider1.SetError(txtDestination, ex.Message);
+                }
             }
-            else if (dest.Type == ConnectionType.Invalid)
-            {
-                errorProvider1.SetError(txtDestination, "Invalid connection string, directory or S3 path");
-                return;
-            }
-            try
-            {
-                CollectionConfig.ValidateDestination(dest);
-                UpdateDBVersionStatus();
-            }
-            catch (Exception ex)
-            {
-                errorProvider1.SetError(txtDestination, ex.Message);
-            }
+            UpdateDBVersionStatus();
         }
 
-        private static void InvokeSetSetStatus(Control statusControl, string status, Color color, FontStyle style)
+        private static void InvokeSetStatus(Control statusControl, string status, Color color, FontStyle style)
         {
             if (statusControl.InvokeRequired)
             {
-                statusControl.Invoke(() => InvokeSetSetStatus(statusControl, status, color, style));
+                statusControl.Invoke(() => InvokeSetStatus(statusControl, status, color, style));
                 return;
             }
             statusControl.Text = status;
@@ -371,18 +367,33 @@ namespace DBADashServiceConfig
 
         private void UpdateDBVersionStatus()
         {
-            RepoDbVersionStatus = null;
-            InvokeSetSetStatus(lblVersionInfo, string.Empty, DashColors.TrimbleBlue, FontStyle.Regular);
-
+            
             var dest = collectionConfig.DestinationConnection;
 
-            if (dest.Type != ConnectionType.SQL) return;
+            if (collectionConfig.Destination == "")
+            {
+                RepoDbVersionStatus = null;
+                InvokeSetStatus(lblVersionInfo, "Please start by setting the destination connection for your DBA Dash repository database.", DashColors.Information, FontStyle.Bold);
+                return;
+            }
+            if (dest.Type == ConnectionType.Invalid)
+            {
+                RepoDbVersionStatus = null;
+                InvokeSetStatus(lblVersionInfo, "Invalid connection string, directory or S3 path", DashColors.Fail, FontStyle.Regular);
+                return;
+            }
+            if (dest.Type != ConnectionType.SQL)
+            {
+                RepoDbVersionStatus = null;
+                InvokeSetStatus(lblVersionInfo, string.Empty, DashColors.TrimbleBlue, FontStyle.Regular);
+                return;
+            }
 
             try
             {
                 if (string.IsNullOrEmpty(dest.MasterConnection().ConnectionInfo.ServerName))
                 {
-                    InvokeSetSetStatus(lblServerNameWarning, lblServerNameWarning.Text, lblServerNameWarning.ForeColor, lblServerNameWarning.Font.Style);
+                    InvokeSetStatus(lblServerNameWarning, lblServerNameWarning.Text, lblServerNameWarning.ForeColor, lblServerNameWarning.Font.Style);
                     InvokeSetVisible(lblServerNameWarning, true);
                 }
 
@@ -391,32 +402,32 @@ namespace DBADashServiceConfig
                 switch (RepoDbVersionStatus?.VersionStatus)
                 {
                     case null:
-                        InvokeSetSetStatus(lblVersionInfo, "???", DashColors.Fail, FontStyle.Bold);
+                        InvokeSetStatus(lblVersionInfo, "???", DashColors.Fail, FontStyle.Bold);
                         break;
 
                     case DBValidations.DBVersionStatusEnum.CreateDB:
-                        InvokeSetSetStatus(lblVersionInfo,
+                        InvokeSetStatus(lblVersionInfo,
                             "Start service to create repository database or click Deploy to create manually.",
                             DashColors.Warning, FontStyle.Bold);
                         InvokeEnable(bttnDeployDatabase, true);
                         return;
 
                     case DBValidations.DBVersionStatusEnum.OK:
-                        InvokeSetSetStatus(lblVersionInfo,
+                        InvokeSetStatus(lblVersionInfo,
                             "Repository database version check successful. DacVersion/DB Version: " +
                             RepoDbVersionStatus.DACVersion, DashColors.Success, FontStyle.Regular);
                         InvokeEnable(bttnDeployDatabase, true);
                         break;
 
                     case DBValidations.DBVersionStatusEnum.AppUpgradeRequired:
-                        InvokeSetSetStatus(lblVersionInfo,
+                        InvokeSetStatus(lblVersionInfo,
                             $"Repository database version {RepoDbVersionStatus.DBVersion} is newer than dac version {RepoDbVersionStatus.DACVersion}.  Please update this app.",
                             DashColors.Warning, FontStyle.Bold);
                         InvokeEnable(bttnDeployDatabase, false);
                         break;
 
                     case DBValidations.DBVersionStatusEnum.UpgradeRequired:
-                        InvokeSetSetStatus(lblVersionInfo,
+                        InvokeSetStatus(lblVersionInfo,
                             $"Repository database version {RepoDbVersionStatus.DBVersion}  requires upgrade to {RepoDbVersionStatus.DACVersion}.  Database will be upgraded on service start.",
                             DashColors.Warning, FontStyle.Bold);
                         InvokeEnable(bttnDeployDatabase, true);
@@ -428,7 +439,7 @@ namespace DBADashServiceConfig
             }
             catch (Exception ex)
             {
-                InvokeSetSetStatus(lblVersionInfo, ex.Message, DashColors.Fail, FontStyle.Regular);
+                InvokeSetStatus(lblVersionInfo, ex.Message, DashColors.Fail, FontStyle.Regular);
             }
         }
 
@@ -1204,7 +1215,16 @@ namespace DBADashServiceConfig
         {
             if (collectionConfig.Destination != txtDestination.Text)
             {
-                collectionConfig.Destination = txtDestination.Text;
+                try
+                {
+                    collectionConfig.Destination = txtDestination.Text;
+                }
+                catch (Exception ex)
+                {
+                    errorProvider1.SetError(txtDestination, ex.Message);
+                    return;
+                }
+
                 SetJson();
                 ValidateDestination();
                 RefreshEncryption();
