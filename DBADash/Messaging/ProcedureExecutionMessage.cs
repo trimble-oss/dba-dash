@@ -38,7 +38,7 @@ namespace DBADash.Messaging
             sp_DBPermissions
         }
 
-        public static bool IsScriptAllowed(string script, string allowedScripts) => allowedScripts.Split(",").Contains(script, StringComparer.OrdinalIgnoreCase) || allowedScripts == "*";
+        public static bool IsScriptAllowed(string script, string allowedScripts) =>allowedScripts!=null && (allowedScripts.Split(",").Contains(script, StringComparer.OrdinalIgnoreCase) || allowedScripts == "*");
 
         public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
