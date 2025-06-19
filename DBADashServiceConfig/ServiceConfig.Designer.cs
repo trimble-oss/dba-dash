@@ -32,6 +32,8 @@ namespace DBADashServiceConfig
         {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ServiceConfig));
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             errorProvider1 = new System.Windows.Forms.ErrorProvider(components);
             bttnSave = new System.Windows.Forms.Button();
             label5 = new System.Windows.Forms.Label();
@@ -153,12 +155,13 @@ namespace DBADashServiceConfig
             label13 = new System.Windows.Forms.Label();
             txtSearch = new System.Windows.Forms.TextBox();
             tabDest = new System.Windows.Forms.TabPage();
+            bttnViewServiceLog = new System.Windows.Forms.Button();
+            bttnRestartAsAdmin = new System.Windows.Forms.Button();
             bttnGrantAccessToServiceAccount = new System.Windows.Forms.Button();
             lblServerNameWarning = new System.Windows.Forms.Label();
             lblServiceWarning = new System.Windows.Forms.Label();
             bttnAbout = new System.Windows.Forms.Button();
-            groupBox5 = new System.Windows.Forms.GroupBox();
-            bttnViewServiceLog = new System.Windows.Forms.Button();
+            grpService = new System.Windows.Forms.GroupBox();
             lnkInstall = new System.Windows.Forms.LinkLabel();
             lblServiceStatus = new System.Windows.Forms.Label();
             chkAutoUpgradeRepoDB = new System.Windows.Forms.CheckBox();
@@ -194,7 +197,7 @@ namespace DBADashServiceConfig
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvConnections).BeginInit();
             tabDest.SuspendLayout();
-            groupBox5.SuspendLayout();
+            grpService.SuspendLayout();
             tab1.SuspendLayout();
             SuspendLayout();
             // 
@@ -226,7 +229,7 @@ namespace DBADashServiceConfig
             // 
             bttnCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             bttnCancel.Location = new System.Drawing.Point(1016, 15);
-            bttnCancel.Margin = new System.Windows.Forms.Padding(5);
+            bttnCancel.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             bttnCancel.Name = "bttnCancel";
             bttnCancel.Size = new System.Drawing.Size(101, 35);
             bttnCancel.TabIndex = 15;
@@ -270,7 +273,7 @@ namespace DBADashServiceConfig
             // 
             // bttnScanNow
             // 
-            bttnScanNow.Location = new System.Drawing.Point(420, 67);
+            bttnScanNow.Location = new System.Drawing.Point(421, 67);
             bttnScanNow.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             bttnScanNow.Name = "bttnScanNow";
             bttnScanNow.Size = new System.Drawing.Size(104, 37);
@@ -551,7 +554,7 @@ namespace DBADashServiceConfig
             // bttnCheckConnections
             // 
             bttnCheckConnections.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            bttnCheckConnections.Location = new System.Drawing.Point(16, 342);
+            bttnCheckConnections.Location = new System.Drawing.Point(16, 341);
             bttnCheckConnections.Name = "bttnCheckConnections";
             bttnCheckConnections.Size = new System.Drawing.Size(163, 29);
             bttnCheckConnections.TabIndex = 26;
@@ -649,7 +652,7 @@ namespace DBADashServiceConfig
             // label20
             // 
             label20.AutoSize = true;
-            label20.Location = new System.Drawing.Point(569, 42);
+            label20.Location = new System.Drawing.Point(569, 43);
             label20.Name = "label20";
             label20.Size = new System.Drawing.Size(201, 20);
             label20.TabIndex = 52;
@@ -680,7 +683,7 @@ namespace DBADashServiceConfig
             // label19
             // 
             label19.AutoSize = true;
-            label19.Location = new System.Drawing.Point(180, 38);
+            label19.Location = new System.Drawing.Point(181, 37);
             label19.Name = "label19";
             label19.Size = new System.Drawing.Size(231, 20);
             label19.TabIndex = 49;
@@ -701,7 +704,7 @@ namespace DBADashServiceConfig
             // chkProcessAlerts
             // 
             chkProcessAlerts.AutoSize = true;
-            chkProcessAlerts.Location = new System.Drawing.Point(14, 38);
+            chkProcessAlerts.Location = new System.Drawing.Point(14, 37);
             chkProcessAlerts.Name = "chkProcessAlerts";
             chkProcessAlerts.Size = new System.Drawing.Size(122, 24);
             chkProcessAlerts.TabIndex = 47;
@@ -736,7 +739,7 @@ namespace DBADashServiceConfig
             // lnkAllowNoJobs
             // 
             lnkAllowNoJobs.AutoSize = true;
-            lnkAllowNoJobs.Location = new System.Drawing.Point(665, 178);
+            lnkAllowNoJobs.Location = new System.Drawing.Point(665, 179);
             lnkAllowNoJobs.Name = "lnkAllowNoJobs";
             lnkAllowNoJobs.Size = new System.Drawing.Size(50, 20);
             lnkAllowNoJobs.TabIndex = 15;
@@ -747,7 +750,7 @@ namespace DBADashServiceConfig
             // lnkAllowAllJobs
             // 
             lnkAllowAllJobs.AutoSize = true;
-            lnkAllowAllJobs.Location = new System.Drawing.Point(626, 178);
+            lnkAllowAllJobs.Location = new System.Drawing.Point(626, 179);
             lnkAllowAllJobs.Name = "lnkAllowAllJobs";
             lnkAllowAllJobs.Size = new System.Drawing.Size(33, 20);
             lnkAllowAllJobs.TabIndex = 14;
@@ -766,7 +769,7 @@ namespace DBADashServiceConfig
             // lnkAllowExplicit
             // 
             lnkAllowExplicit.AutoSize = true;
-            lnkAllowExplicit.Location = new System.Drawing.Point(721, 142);
+            lnkAllowExplicit.Location = new System.Drawing.Point(721, 141);
             lnkAllowExplicit.Name = "lnkAllowExplicit";
             lnkAllowExplicit.Size = new System.Drawing.Size(95, 20);
             lnkAllowExplicit.TabIndex = 11;
@@ -777,7 +780,7 @@ namespace DBADashServiceConfig
             // lnkAllowNone
             // 
             lnkAllowNone.AutoSize = true;
-            lnkAllowNone.Location = new System.Drawing.Point(665, 142);
+            lnkAllowNone.Location = new System.Drawing.Point(665, 141);
             lnkAllowNone.Name = "lnkAllowNone";
             lnkAllowNone.Size = new System.Drawing.Size(50, 20);
             lnkAllowNone.TabIndex = 10;
@@ -788,7 +791,7 @@ namespace DBADashServiceConfig
             // lnkAllowAll
             // 
             lnkAllowAll.AutoSize = true;
-            lnkAllowAll.Location = new System.Drawing.Point(626, 142);
+            lnkAllowAll.Location = new System.Drawing.Point(626, 141);
             lnkAllowAll.Name = "lnkAllowAll";
             lnkAllowAll.Size = new System.Drawing.Size(33, 20);
             lnkAllowAll.TabIndex = 9;
@@ -799,7 +802,7 @@ namespace DBADashServiceConfig
             // label18
             // 
             label18.AutoSize = true;
-            label18.Location = new System.Drawing.Point(18, 138);
+            label18.Location = new System.Drawing.Point(18, 139);
             label18.Name = "label18";
             label18.Size = new System.Drawing.Size(192, 20);
             label18.TabIndex = 8;
@@ -844,7 +847,7 @@ namespace DBADashServiceConfig
             // 
             // txtSQS
             // 
-            txtSQS.Location = new System.Drawing.Point(247, 102);
+            txtSQS.Location = new System.Drawing.Point(247, 101);
             txtSQS.Name = "txtSQS";
             txtSQS.Size = new System.Drawing.Size(370, 27);
             txtSQS.TabIndex = 2;
@@ -856,7 +859,7 @@ namespace DBADashServiceConfig
             label4.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
             label4.Location = new System.Drawing.Point(623, 39);
             label4.Name = "label4";
-            label4.Size = new System.Drawing.Size(466, 54);
+            label4.Size = new System.Drawing.Size(466, 53);
             label4.TabIndex = 1;
             label4.Text = "Allow the GUI to send messages to this service via the service broker.  e.g. To trigger collections to run on demand.";
             // 
@@ -893,7 +896,7 @@ namespace DBADashServiceConfig
             groupBox3.Controls.Add(chkLogInternalPerfCounters);
             groupBox3.Location = new System.Drawing.Point(8, 19);
             groupBox3.Name = "groupBox3";
-            groupBox3.Size = new System.Drawing.Size(1113, 246);
+            groupBox3.Size = new System.Drawing.Size(1113, 245);
             groupBox3.TabIndex = 38;
             groupBox3.TabStop = false;
             groupBox3.Text = "Miscellaneous";
@@ -1025,7 +1028,7 @@ namespace DBADashServiceConfig
             groupBox4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             groupBox4.Name = "groupBox4";
             groupBox4.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            groupBox4.Size = new System.Drawing.Size(1113, 138);
+            groupBox4.Size = new System.Drawing.Size(1113, 139);
             groupBox4.TabIndex = 30;
             groupBox4.TabStop = false;
             groupBox4.Text = "Azure DB";
@@ -1149,7 +1152,7 @@ namespace DBADashServiceConfig
             txtSource.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             txtSource.Multiline = true;
             txtSource.Name = "txtSource";
-            txtSource.Size = new System.Drawing.Size(945, 101);
+            txtSource.Size = new System.Drawing.Size(945, 99);
             txtSource.TabIndex = 13;
             // 
             // label1
@@ -1250,7 +1253,7 @@ namespace DBADashServiceConfig
             tabRunningQueries.Controls.Add(chkCollectSessionWaits);
             tabRunningQueries.Location = new System.Drawing.Point(4, 39);
             tabRunningQueries.Name = "tabRunningQueries";
-            tabRunningQueries.Padding = new System.Windows.Forms.Padding(3);
+            tabRunningQueries.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
             tabRunningQueries.Size = new System.Drawing.Size(1059, 178);
             tabRunningQueries.TabIndex = 4;
             tabRunningQueries.Text = "Running Queries";
@@ -1382,7 +1385,7 @@ namespace DBADashServiceConfig
             // 
             // bttnCustomCollectionsNew
             // 
-            bttnCustomCollectionsNew.Location = new System.Drawing.Point(860, 8);
+            bttnCustomCollectionsNew.Location = new System.Drawing.Point(859, 8);
             bttnCustomCollectionsNew.Name = "bttnCustomCollectionsNew";
             bttnCustomCollectionsNew.Size = new System.Drawing.Size(193, 37);
             bttnCustomCollectionsNew.TabIndex = 32;
@@ -1515,7 +1518,7 @@ namespace DBADashServiceConfig
             // bttnPermissionsHelper
             // 
             bttnPermissionsHelper.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            bttnPermissionsHelper.Location = new System.Drawing.Point(532, 342);
+            bttnPermissionsHelper.Location = new System.Drawing.Point(533, 341);
             bttnPermissionsHelper.Name = "bttnPermissionsHelper";
             bttnPermissionsHelper.Size = new System.Drawing.Size(214, 29);
             bttnPermissionsHelper.TabIndex = 26;
@@ -1549,7 +1552,23 @@ namespace DBADashServiceConfig
             dgvConnections.AllowUserToAddRows = false;
             dgvConnections.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             dgvConnections.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvConnections.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgvConnections.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvConnections.DefaultCellStyle = dataGridViewCellStyle2;
             dgvConnections.Location = new System.Drawing.Point(16, 27);
             dgvConnections.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvConnections.Name = "dgvConnections";
@@ -1585,11 +1604,13 @@ namespace DBADashServiceConfig
             // 
             // tabDest
             // 
+            tabDest.Controls.Add(bttnViewServiceLog);
+            tabDest.Controls.Add(bttnRestartAsAdmin);
             tabDest.Controls.Add(bttnGrantAccessToServiceAccount);
             tabDest.Controls.Add(lblServerNameWarning);
             tabDest.Controls.Add(lblServiceWarning);
             tabDest.Controls.Add(bttnAbout);
-            tabDest.Controls.Add(groupBox5);
+            tabDest.Controls.Add(grpService);
             tabDest.Controls.Add(bttnS3);
             tabDest.Controls.Add(bttnDestFolder);
             tabDest.Controls.Add(chkAutoUpgradeRepoDB);
@@ -1606,6 +1627,30 @@ namespace DBADashServiceConfig
             tabDest.TabIndex = 2;
             tabDest.Text = "Destination:";
             tabDest.UseVisualStyleBackColor = true;
+            // 
+            // bttnViewServiceLog
+            // 
+            bttnViewServiceLog.Location = new System.Drawing.Point(10, 673);
+            bttnViewServiceLog.Name = "bttnViewServiceLog";
+            bttnViewServiceLog.Size = new System.Drawing.Size(187, 29);
+            bttnViewServiceLog.TabIndex = 20;
+            bttnViewServiceLog.Text = "View Service Log";
+            bttnViewServiceLog.UseVisualStyleBackColor = true;
+            bttnViewServiceLog.Click += BttnViewServiceLog_Click;
+            // 
+            // bttnRestartAsAdmin
+            // 
+            bttnRestartAsAdmin.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
+            bttnRestartAsAdmin.Image = Properties.Resources.Security_Shields_Alert_32xLG_color;
+            bttnRestartAsAdmin.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            bttnRestartAsAdmin.Location = new System.Drawing.Point(103, 253);
+            bttnRestartAsAdmin.Name = "bttnRestartAsAdmin";
+            bttnRestartAsAdmin.Size = new System.Drawing.Size(483, 56);
+            bttnRestartAsAdmin.TabIndex = 24;
+            bttnRestartAsAdmin.Text = "Restart as Administrator to enable service controls";
+            bttnRestartAsAdmin.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            bttnRestartAsAdmin.UseVisualStyleBackColor = true;
+            bttnRestartAsAdmin.Click += RestartAsAdmin_Click;
             // 
             // bttnGrantAccessToServiceAccount
             // 
@@ -1635,7 +1680,7 @@ namespace DBADashServiceConfig
             lblServiceWarning.BackColor = System.Drawing.Color.FromArgb(228, 147, 37);
             lblServiceWarning.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             lblServiceWarning.ForeColor = System.Drawing.Color.White;
-            lblServiceWarning.Location = new System.Drawing.Point(9, 499);
+            lblServiceWarning.Location = new System.Drawing.Point(10, 504);
             lblServiceWarning.Name = "lblServiceWarning";
             lblServiceWarning.Size = new System.Drawing.Size(1103, 47);
             lblServiceWarning.TabIndex = 24;
@@ -1652,33 +1697,22 @@ namespace DBADashServiceConfig
             bttnAbout.UseVisualStyleBackColor = true;
             bttnAbout.Click += BttnAbout_Click;
             // 
-            // groupBox5
+            // grpService
             // 
-            groupBox5.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            groupBox5.Controls.Add(bttnViewServiceLog);
-            groupBox5.Controls.Add(lnkInstall);
-            groupBox5.Controls.Add(lblServiceStatus);
-            groupBox5.Controls.Add(lnkRefresh);
-            groupBox5.Controls.Add(lnkStart);
-            groupBox5.Controls.Add(lnkStop);
-            groupBox5.Location = new System.Drawing.Point(9, 549);
-            groupBox5.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            groupBox5.Name = "groupBox5";
-            groupBox5.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            groupBox5.Size = new System.Drawing.Size(1103, 140);
-            groupBox5.TabIndex = 19;
-            groupBox5.TabStop = false;
-            groupBox5.Text = "Service";
-            // 
-            // bttnViewServiceLog
-            // 
-            bttnViewServiceLog.Location = new System.Drawing.Point(15, 88);
-            bttnViewServiceLog.Name = "bttnViewServiceLog";
-            bttnViewServiceLog.Size = new System.Drawing.Size(187, 29);
-            bttnViewServiceLog.TabIndex = 20;
-            bttnViewServiceLog.Text = "View Service Log";
-            bttnViewServiceLog.UseVisualStyleBackColor = true;
-            bttnViewServiceLog.Click += BttnViewServiceLog_Click;
+            grpService.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            grpService.Controls.Add(lnkInstall);
+            grpService.Controls.Add(lblServiceStatus);
+            grpService.Controls.Add(lnkRefresh);
+            grpService.Controls.Add(lnkStart);
+            grpService.Controls.Add(lnkStop);
+            grpService.Location = new System.Drawing.Point(10, 556);
+            grpService.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            grpService.Name = "grpService";
+            grpService.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            grpService.Size = new System.Drawing.Size(1103, 99);
+            grpService.TabIndex = 19;
+            grpService.TabStop = false;
+            grpService.Text = "Service";
             // 
             // lnkInstall
             // 
@@ -1771,7 +1805,7 @@ namespace DBADashServiceConfig
             Controls.Add(label5);
             Controls.Add(panel1);
             Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
-            MinimumSize = new System.Drawing.Size(842, 866);
+            MinimumSize = new System.Drawing.Size(842, 863);
             Name = "ServiceConfig";
             Text = "DBA Dash Service Config";
             FormClosing += ServiceConfig_FromClosing;
@@ -1817,8 +1851,8 @@ namespace DBADashServiceConfig
             ((System.ComponentModel.ISupportInitialize)dgvConnections).EndInit();
             tabDest.ResumeLayout(false);
             tabDest.PerformLayout();
-            groupBox5.ResumeLayout(false);
-            groupBox5.PerformLayout();
+            grpService.ResumeLayout(false);
+            grpService.PerformLayout();
             tab1.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
@@ -1837,7 +1871,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.TabPage tabDest;
         private System.Windows.Forms.Label lblServiceWarning;
         private System.Windows.Forms.Button bttnAbout;
-        private System.Windows.Forms.GroupBox groupBox5;
+        private System.Windows.Forms.GroupBox grpService;
         private System.Windows.Forms.Button bttnViewServiceLog;
         private System.Windows.Forms.LinkLabel lnkInstall;
         private System.Windows.Forms.Label lblServiceStatus;
@@ -1959,6 +1993,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Button bttnPermissionsHelper;
         private System.Windows.Forms.LinkLabel lnkGrant;
         private System.Windows.Forms.Button bttnGrantAccessToServiceAccount;
+        private System.Windows.Forms.Button bttnRestartAsAdmin;
     }
 }
 

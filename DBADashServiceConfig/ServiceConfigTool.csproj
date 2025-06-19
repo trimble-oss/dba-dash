@@ -12,9 +12,7 @@
     <Configurations>Debug;Release;CLI</Configurations>
     <ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
   </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-  </PropertyGroup>
+  <PropertyGroup />
   <PropertyGroup>
     <ApplicationIcon>services.ico</ApplicationIcon>
     <BaseOutputPath>..\DBADashBuild</BaseOutputPath>
@@ -37,6 +35,9 @@
     <NoWarn>1701;1702;CA1416</NoWarn>
     <Deterministic>True</Deterministic>
   </PropertyGroup>
+  <ItemGroup>
+    <AdditionalFiles Remove="app.manifest" />
+  </ItemGroup>
   <ItemGroup>
     <None Remove="CreateMSA.ps1" />
   </ItemGroup>
