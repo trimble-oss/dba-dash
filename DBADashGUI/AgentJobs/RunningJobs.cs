@@ -208,9 +208,9 @@ namespace DBADashGUI.AgentJobs
                     JobStepID = -1
                 };
                 JobHistoryForm.ShowSteps = true;
-                JobHistoryForm.SetContext(jobContext);
                 JobHistoryForm.FormClosed += delegate { JobHistoryForm = null; };
                 JobHistoryForm.Show();
+                JobHistoryForm.SetContext(jobContext);
             }
             else if (e.ColumnIndex == dgvRunningJobs.Columns["colRunningTime"]!.Index)
             {
