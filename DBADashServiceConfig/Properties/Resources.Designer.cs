@@ -195,5 +195,17 @@ namespace DBADashServiceConfig.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Security_Shields_Alert_32xLG_color
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("Security_Shields_Alert_32xLG_color", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

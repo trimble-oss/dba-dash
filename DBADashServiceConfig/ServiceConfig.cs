@@ -27,6 +27,7 @@ namespace DBADashServiceConfig
     public partial class ServiceConfig : Form, IThemedControl
     {
         private static string FatalErrorFilePath => Path.Combine(AppContext.BaseDirectory, "Logs", "FatalError.txt");
+        private bool IsAdmin;
 
         public ServiceConfig()
         {
@@ -315,7 +316,7 @@ namespace DBADashServiceConfig
             errorProvider1.SetError(txtDestination, null);
             lblServerNameWarning.Visible = false;
             DBADashConnection dest = new(txtDestination.Text);
-            if(!string.IsNullOrEmpty(txtDestination.Text))
+            if (!string.IsNullOrEmpty(txtDestination.Text))
             {
                 try
                 {
@@ -367,7 +368,6 @@ namespace DBADashServiceConfig
 
         private void UpdateDBVersionStatus()
         {
-            
             var dest = collectionConfig.DestinationConnection;
 
             if (collectionConfig.Destination == "")
@@ -468,6 +468,11 @@ namespace DBADashServiceConfig
 
         private async void ServiceConfig_Load(object sender, EventArgs e)
         {
+            IsAdmin = CommonShared.IsRunningAsAdmin();
+            bttnRestartAsAdmin.Visible = !IsAdmin;
+            grpService.Enabled = IsAdmin;
+            grpService.Text = IsAdmin ? "Service" : "Service (Controls disabled.  Please run as Administrator)";
+
             cboDeleteAction.SelectedIndex = 0;
             dgvConnections.ColumnHeaderMouseClick += dgvConnections_ColumnHeaderMouseClick;
 
@@ -944,6 +949,7 @@ namespace DBADashServiceConfig
         {
             try
             {
+                if (!IsAdmin) return;
                 using var service = new ServiceController(collectionConfig.ServiceName);
                 var nameOfServiceFromPath = ServiceTools.GetServiceNameFromPath();
                 var pathOfService = ServiceTools.GetPathOfService(collectionConfig.ServiceName);
@@ -2502,6 +2508,19 @@ namespace DBADashServiceConfig
         private void bttnGrantAccessToServiceAccount_Click(object sender, EventArgs e)
         {
             ShowPermissionsHelper(collectionConfig.SourceConnections);
+        }
+
+        private void RestartAsAdmin_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                PromptSaveChanges();
+                CommonShared.RestartAsAdmin();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
         }
     }
 }

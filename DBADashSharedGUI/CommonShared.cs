@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security;
+using System.Security.Principal;
 
 namespace DBADashSharedGUI
 {
@@ -345,6 +346,44 @@ namespace DBADashSharedGUI
             parts.Add($"Date: {DateTimeOffset.Now}");
 
             return string.Join(Environment.NewLine, parts);
+        }
+
+        public static bool IsRunningAsAdmin()
+        {
+            try
+            {
+                var identity = WindowsIdentity.GetCurrent();
+                var principal = new WindowsPrincipal(identity);
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static void RestartAsAdmin()
+        {
+            try
+            {
+                if (Environment.ProcessPath == null)
+                {
+                    throw new Exception("Environment.ProcessPath returned null");
+                }
+                var processInfo = new ProcessStartInfo
+                {
+                    FileName = Environment.ProcessPath,
+                    UseShellExecute = true,
+                    Verb = "runas"
+                };
+
+                Process.Start(processInfo);
+                Application.Exit();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Failed to restart as administrator: {ex.Message}", ex);
+            }
         }
     }
 }
