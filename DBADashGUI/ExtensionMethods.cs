@@ -633,7 +633,7 @@ namespace DBADashGUI
                 }
                 else if (dataColumn.DataType == typeof(bool))
                 {
-                    column = new DataGridViewCheckBoxColumn();
+                    column = new DataGridViewCheckBoxColumn() { ThreeState = true, IndeterminateValue = DBNull.Value };
                 }
                 else
                 {
