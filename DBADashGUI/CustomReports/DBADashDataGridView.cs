@@ -127,6 +127,13 @@ namespace DBADashGUI.CustomReports
             AddColumnContextMenuItems();
             this.ApplyTheme();
             this.AllowUserToOrderColumns = true;
+            this.DataError += DBADashDataGridView_DataError;
+        }
+
+        private void DBADashDataGridView_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+            this.Rows[e.RowIndex].Cells[e.ColumnIndex].ErrorText =
+                $"Grid Data Error on `{e.Context.ToString()}`: {e.Exception}";
         }
 
         private static void Dgv_ColumnsAdded(object sender, DataGridViewColumnEventArgs e)
