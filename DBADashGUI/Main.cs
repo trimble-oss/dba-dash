@@ -893,14 +893,14 @@ namespace DBADashGUI
                     case SQLTreeItem.TreeType.Table:
                         allowedTabs.AddRange(new[] { tabTableSize, tabSchema });
 
-                        if (n.Context.IsScriptAllowed(ProcedureExecutionMessage.CommandNames.sp_BlitzIndex))
+                        foreach (var tool in CommunityTools.CommunityTools.TableLevelTools)
                         {
-                            allowedTabs.Add(tabBlitzIndex);
-                        }
+                            if (!Enum.TryParse<ProcedureExecutionMessage.CommandNames>(tool.ProcedureName,
+                                    out var proc)) continue;
+                            if (!n.Context.IsScriptAllowed(ProcedureExecutionMessage.CommandNames.sp_QuickieStore))
+                                continue;
 
-                        if (n.Context.IsScriptAllowed(ProcedureExecutionMessage.CommandNames.sp_DBPermissions))
-                        {
-                            allowedTabs.Add(CommunityToolsTabPages[ProcedureExecutionMessage.CommandNames.sp_DBPermissions]);
+                            allowedTabs.Add(CommunityToolsTabPages[proc]);
                         }
 
                         break;

@@ -35,10 +35,11 @@ namespace DBADash.Messaging
             sp_QuickieStore,
             sp_HumanEventsBlockViewer,
             sp_SrvPermissions,
-            sp_DBPermissions
+            sp_DBPermissions,
+            sp_IndexCleanup
         }
 
-        public static bool IsScriptAllowed(string script, string allowedScripts) =>allowedScripts!=null && (allowedScripts.Split(",").Contains(script, StringComparer.OrdinalIgnoreCase) || allowedScripts == "*");
+        public static bool IsScriptAllowed(string script, string allowedScripts) => allowedScripts != null && (allowedScripts.Split(",").Contains(script, StringComparer.OrdinalIgnoreCase) || allowedScripts == "*");
 
         public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {

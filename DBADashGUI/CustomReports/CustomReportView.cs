@@ -996,7 +996,7 @@ namespace DBADashGUI.CustomReports
             if (_context == this.context)
             {
                 // By default refresh is skipped unless context has changed.
-                if (_context.Report.ForceRefreshWithoutContextChange && AutoLoad)
+                if (Report.ForceRefreshWithoutContextChange && AutoLoad)
                 {
                     RefreshData();
                 }
