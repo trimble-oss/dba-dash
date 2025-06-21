@@ -22,6 +22,7 @@ namespace DBADashService
         private static readonly CollectionConfig config = SchedulerServiceConfig.Config;
         /* Ensure the Jobs collection runs once every ~24hrs.  Allowing 10mins as Jobs runs every 1hr by default */
         private static readonly int MAX_TIME_SINCE_LAST_JOB_COLLECTION = 1430;
+        private const uint ERROR_SHARING_VIOLATION = 0x80070020;
 
         private static readonly AsyncKeyedLocker<string> _asyncKeyedLocker = new();
 
@@ -338,26 +339,54 @@ namespace DBADashService
             files.Sort(); // Ensure we process files in order
             foreach (var f in files)
             {
-                Log.Information("Processing file {0}", f);
-                var fileName = Path.GetFileName(f);
-                try
+                await ProcessFile(f, cfg);
+                TryDeleteFile(f);
+            }
+        }
+
+        private static void TryDeleteFile(string filePath)
+        {
+            if (!File.Exists(filePath)) return;
+            try
+            {
+                File.Delete(filePath);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error deleting file");
+            }
+        }
+
+        private static async Task ProcessFile(string f, DBADashSource cfg, int tryCount = 1)
+        {
+            const int MaxTryCount = 5;
+            const int RetryDelay = 10;
+            Log.Information("Processing file {0}", f);
+            var fileName = Path.GetFileName(f);
+            try
+            {
+                var ds = DataSetSerialization.DeserializeFromFile(f);
+                var id = GetID(ds);
+                using (await Locker.AsyncLocker.LockAsync(id))
                 {
-                    var ds = DataSetSerialization.DeserializeFromFile(f);
-                    var id = GetID(ds);
-                    using (await Locker.AsyncLocker.LockAsync(id))
-                    {
-                        await DestinationHandling.WriteAllDestinationsAsync(ds, cfg, fileName, config);
-                    }
+                    await DestinationHandling.WriteAllDestinationsAsync(ds, cfg, fileName, config);
                 }
-                catch (Exception ex)
+            }
+            catch (IOException ex) when ((uint)ex.HResult == ERROR_SHARING_VIOLATION) // Another process has a lock on the file.  It might still be being written to.
+            {
+                if (tryCount > MaxTryCount)
                 {
-                    Log.Error(ex, "Error importing from {filename}.  File will be copied to {failedMessageFolder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
-                    File.Copy(f, Path.Combine(SchedulerServiceConfig.FailedMessageFolder, f));
+                    Log.Warning("File {FileName} is in use.  Exceeded max wait/retry.  File will be processed on the next iteration", fileName);
+                    return;
                 }
-                finally
-                {
-                    File.Delete(f);
-                }
+                Log.Information("File {FileName} is in use.  Waiting for lock to release. Attempt {TryCount}/{MaxRetryCount}", fileName, tryCount, MaxTryCount);
+                await Task.Delay(RetryDelay);
+                await ProcessFile(f, cfg, tryCount + 1);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error importing from {filename}.  File will be copied to {failedMessageFolder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
+                File.Copy(f, Path.Combine(SchedulerServiceConfig.FailedMessageFolder, f));
             }
         }
 
