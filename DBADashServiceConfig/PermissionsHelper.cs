@@ -77,10 +77,6 @@ namespace DBADashServiceConfig
             try
             {
                 ServiceAccountName = GetServiceAccount(ServiceName);
-                if (Connections.Count == 1 && !string.IsNullOrEmpty(Connections[0].SourceConnection.UserName))
-                {
-                    ServiceAccountName = Connections[0].SourceConnection.UserName;
-                }
 
                 bttnGrantRepositoryDB.Enabled = Config.SQLDestinations.Count != 0;
                 LoadConnections();
@@ -333,7 +329,7 @@ namespace DBADashServiceConfig
             }
 
             var serviceAccount = ServiceAccountName;
-
+            DBADashSource connectAsSrc = null;
             if (Connections.Count == 1 && !string.IsNullOrEmpty(Connections[0].SourceConnection.UserName))
             {
                 // 1 connection using SQL auth
@@ -342,8 +338,7 @@ namespace DBADashServiceConfig
                 var connectionDialog = new DBConnection() { ConnectionString = Connections[0].SourceConnection.ConnectionString };
                 connectionDialog.ShowDialog();
                 if (connectionDialog.DialogResult != DialogResult.OK) return;
-                Connections[0] = new DBADashSource(connectionDialog.ConnectionString);
-                LoadConnections();
+                connectAsSrc = new DBADashSource(connectionDialog.ConnectionString) { ConnectionID = Connections[0].ConnectionID };
                 ApplyToSQLAuth = true;
             }
             else if (!IsDomainAccount(ServiceAccountName))
@@ -354,7 +349,7 @@ namespace DBADashServiceConfig
             }
 
             StartProgress(Connections.Count);
-            var tasks = Connections.Select(src => ExecuteSQL(GetScript(GetServiceAccountName(src.SourceConnection)), src)).ToList();
+            var tasks = Connections.Select(src => ExecuteSQL(GetScript(GetServiceAccountName(src.SourceConnection)), connectAsSrc ?? src)).ToList();
             try
             {
                 await Task.WhenAll(tasks);
