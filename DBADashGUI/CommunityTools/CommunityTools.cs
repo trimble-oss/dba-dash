@@ -600,6 +600,7 @@ namespace DBADashGUI.CommunityTools
             URL = FirstResponderKitUrl,
             Description = "SQL Server Index Analysis Stored Procedure",
             DatabaseNameParameter = "@DatabaseName",
+            ObjectParameterName = "@TableName",
             Params = new Params
             {
                 ParamList = new List<Param>
@@ -2692,6 +2693,92 @@ namespace DBADashGUI.CommunityTools
             }
         };
 
+        public static DirectExecutionReport sp_IndexCleanup = new()
+        {
+            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_IndexCleanup.ToString(),
+            ReportName = ProcedureExecutionMessage.CommandNames.sp_IndexCleanup.ToString(),
+            URL = ErikDarlingUrl,
+            Description = "This stored procedure helps identify unused and duplicate indexes in your SQL Server databases that could be candidates for removal. It analyzes index usage statistics and can generate scripts for removing unnecessary indexes.",
+            DatabaseNameParameter = "@database_name",
+            ObjectParameterName = "@table_name",
+            Params = new Params()
+            {
+                ParamList = new()
+                {
+                    new Param { ParamName = "@database_name", ParamType = "NVARCHAR" },
+                    new Param { ParamName ="@schema_name", ParamType = "NVARCHAR"},
+                    new Param { ParamName = "@table_name", ParamType = "NVARCHAR" },
+                    new Param { ParamName = "@min_reads", ParamType = "BIGINT"},
+                    new Param { ParamName ="@min_writes",ParamType = "BIGINT"},
+                    new Param {ParamName = "@min_size_gb",@ParamType = "DECIMAL"},
+                    new Param {ParamName = "@min_rows",ParamType = "BIGINT"},
+                    new Param {ParamName = "@dedupe_only",ParamType = "BIT"},
+                    new Param {ParamName = "@get_all_databases",ParamType = "BIT"},
+                    new Param {ParamName = "include_databases", ParamType = "NVARCHAR"},
+                    new Param {ParamName = "@exclude_databases",@ParamType = "NVARCHAR"},
+                    new Param { ParamName = "@help", ParamType = "BIT" }
+                }
+            },
+            Pickers = new List<Picker>
+            {
+                new()
+                {
+                    ParameterName = "@get_all_databases",
+                    Name = "Get All Databases",
+                    DefaultValue = true,
+                    PickerItems = BooleanPickerItems
+                }
+            },
+            CustomReportResults = new Dictionary<int, CustomReportResult>
+            {
+                {
+                    0, new CustomReportResult
+                    {
+                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        {
+                            {
+                                "original_index_definition",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "original_index_definition",
+                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                }
+                            },
+                            {
+                                "script",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "script",
+                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                }
+                            },
+                        }
+                    }
+                },
+                {
+                    1, new CustomReportResult
+                    {
+                    }
+                },
+                {
+                    2, new CustomReportResult
+                    {
+                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        {
+                            {
+                                "original_index_definition",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "original_index_definition",
+                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                }
+                            }
+                        }
+                    }
+                },
+            }
+        };
+
         public static List<DirectExecutionReport> CommunityToolsList = new()
         {
             sp_LogHunter,
@@ -2709,13 +2796,27 @@ namespace DBADashGUI.CommunityTools
             sp_QuickieStore,
             sp_HumanEventsBlockViewer,
             sp_SrvPermissions,
-            sp_DBPermissions
+            sp_DBPermissions,
+            sp_IndexCleanup
         };
-
-        public static List<DirectExecutionReport> ProcedureLevelTools =>
-            CommunityToolsList.Where(t => !string.IsNullOrEmpty(t.ObjectParameterName)).OrderBy(t => t.ProcedureName).ToList();
 
         public static List<DirectExecutionReport> DatabaseLevelCommunityTools =>
             CommunityToolsList.Where(x => x.DatabaseNameParameter != null).ToList();
+
+        public static List<DirectExecutionReport> ProcedureLevelTools = new()
+        {
+            sp_BlitzCache,
+            sp_DBPermissions,
+            sp_HumanEvents,
+            sp_HumanEventsBlockViewer,
+            sp_QuickieStore
+        };
+
+        public static List<DirectExecutionReport> TableLevelTools = new()
+        {
+            sp_BlitzIndex,
+            sp_IndexCleanup,
+            sp_DBPermissions,
+        };
     }
 }
