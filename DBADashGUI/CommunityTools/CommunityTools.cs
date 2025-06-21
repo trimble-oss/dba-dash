@@ -804,6 +804,14 @@ namespace DBADashGUI.CommunityTools
                                 }
                             },
                             {
+                                "Drop TSQL",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "Drop TSQL",
+                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                }
+                            },
+                            {
                                 "More Info",
                                 new TextLinkColumnInfo()
                                 {
