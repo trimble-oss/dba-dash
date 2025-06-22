@@ -11,6 +11,8 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using DBADashGUI.AgentJobs;
+using DBADashGUI.CommunityTools;
+using System.Threading.Tasks;
 
 namespace DBADashGUI
 {
@@ -75,7 +77,9 @@ namespace DBADashGUI
             SystemReport,
             RecycleBin,
             CommunityToolsFolder,
-            CommunityTool
+            CommunityTool,
+            CustomToolsFolder,
+            CustomTool
         }
 
         private DatabaseEngineEdition _engineEdition = DatabaseEngineEdition.Unknown;
@@ -501,6 +505,14 @@ namespace DBADashGUI
                     ImageIndex = 30;
                     break;
 
+                case TreeType.CustomToolsFolder:
+                    ImageIndex = 20;
+                    break;
+
+                case TreeType.CustomTool:
+                    ImageIndex = 30;
+                    break;
+
                 default:
                     ImageIndex = 5;
                     break;
@@ -570,6 +582,7 @@ namespace DBADashGUI
             var nTriggers = NewFolder("Triggers", "TA,TR", true);
             AddReportsFolder(CustomReports.CustomReports.GetCustomReports().DatabaseLevelReports);
             AddCommunityTools();
+            AddCustomToolsFolder();
             nTypes.Nodes.Add(nTableTypes);
             nTypes.Nodes.Add(nDataTypes);
             nTypes.Nodes.Add(nUserDefinedTypes);
@@ -1062,6 +1075,29 @@ namespace DBADashGUI
             }
             if (communityTools.Nodes.Count > 0)
                 Nodes.Add(communityTools);
+        }
+
+        public void AddCustomToolsFolder()
+        {
+            if (!Context.CanMessage) return;
+            if (!DBADashUser.IsInRole("CustomTools") && !DBADashUser.IsAdmin) return;
+            var customTools = new SQLTreeItem("Custom Tools", TreeType.CustomToolsFolder);
+            customTools.AddDummyNode();
+            Nodes.Add(customTools);
+        }
+
+        public async Task AddCustomToolsAsync()
+        {
+            Nodes.Clear();
+            var tools = await CommonData.GetCustomToolsAsync(Context.InstanceID);
+            if (tools == null) return;
+            foreach (var tool in tools)
+            {
+                if (!tool.IsDatabaseLevel && DatabaseID > 0) continue;
+                if (!DBADashUser.IsInRole(tool.ReportVisibilityRole) && !DBADashUser.IsAdmin) continue;
+                var n = new SQLTreeItem(tool.ReportName, TreeType.CustomTool) { Report = tool };
+                Nodes.Add(n);
+            }
         }
     }
 }

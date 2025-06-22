@@ -78,21 +78,6 @@ namespace DBADashServiceConfig
             label19 = new System.Windows.Forms.Label();
             numAlertPollingFrequency = new System.Windows.Forms.NumericUpDown();
             chkProcessAlerts = new System.Windows.Forms.CheckBox();
-            groupBox6 = new System.Windows.Forms.GroupBox();
-            lnkAllowNoJobs = new System.Windows.Forms.LinkLabel();
-            lnkAllowAllJobs = new System.Windows.Forms.LinkLabel();
-            txtAllowedJobs = new System.Windows.Forms.TextBox();
-            lnkAllowExplicit = new System.Windows.Forms.LinkLabel();
-            lnkAllowNone = new System.Windows.Forms.LinkLabel();
-            lnkAllowAll = new System.Windows.Forms.LinkLabel();
-            label18 = new System.Windows.Forms.Label();
-            txtAllowScripts = new System.Windows.Forms.TextBox();
-            chkAllowPlanForcing = new System.Windows.Forms.CheckBox();
-            label8 = new System.Windows.Forms.Label();
-            label6 = new System.Windows.Forms.Label();
-            txtSQS = new System.Windows.Forms.TextBox();
-            label4 = new System.Windows.Forms.Label();
-            chkEnableMessaging = new System.Windows.Forms.CheckBox();
             groupBox3 = new System.Windows.Forms.GroupBox();
             bttnCustomCollections = new System.Windows.Forms.Button();
             lblSummaryRefreshCron = new System.Windows.Forms.Label();
@@ -110,6 +95,23 @@ namespace DBADashServiceConfig
             numAzureScanInterval = new System.Windows.Forms.NumericUpDown();
             label11 = new System.Windows.Forms.Label();
             label10 = new System.Windows.Forms.Label();
+            groupBox6 = new System.Windows.Forms.GroupBox();
+            label22 = new System.Windows.Forms.Label();
+            txtAllowedCustomProcs = new System.Windows.Forms.TextBox();
+            lnkAllowNoJobs = new System.Windows.Forms.LinkLabel();
+            lnkAllowAllJobs = new System.Windows.Forms.LinkLabel();
+            txtAllowedJobs = new System.Windows.Forms.TextBox();
+            lnkAllowExplicit = new System.Windows.Forms.LinkLabel();
+            lnkAllowNone = new System.Windows.Forms.LinkLabel();
+            lnkAllowAll = new System.Windows.Forms.LinkLabel();
+            label18 = new System.Windows.Forms.Label();
+            txtAllowScripts = new System.Windows.Forms.TextBox();
+            chkAllowPlanForcing = new System.Windows.Forms.CheckBox();
+            label8 = new System.Windows.Forms.Label();
+            label6 = new System.Windows.Forms.Label();
+            txtSQS = new System.Windows.Forms.TextBox();
+            label4 = new System.Windows.Forms.Label();
+            chkEnableMessaging = new System.Windows.Forms.CheckBox();
             tabSource = new System.Windows.Forms.TabPage();
             groupBox2 = new System.Windows.Forms.GroupBox();
             tabSrcOptions = new ThemedTabControl();
@@ -169,6 +171,7 @@ namespace DBADashServiceConfig
             label7 = new System.Windows.Forms.Label();
             txtDestination = new System.Windows.Forms.TextBox();
             tab1 = new ThemedTabControl();
+            tabMessaging = new System.Windows.Forms.TabPage();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
@@ -178,12 +181,12 @@ namespace DBADashServiceConfig
             groupBox7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numAlertStartupDelay).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numAlertPollingFrequency).BeginInit();
-            groupBox6.SuspendLayout();
             groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numBackupRetention).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numIdentityCollectionThreshold).BeginInit();
             groupBox4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numAzureScanInterval).BeginInit();
+            groupBox6.SuspendLayout();
             tabSource.SuspendLayout();
             groupBox2.SuspendLayout();
             tabSrcOptions.SuspendLayout();
@@ -199,6 +202,7 @@ namespace DBADashServiceConfig
             tabDest.SuspendLayout();
             grpService.SuspendLayout();
             tab1.SuspendLayout();
+            tabMessaging.SuspendLayout();
             SuspendLayout();
             // 
             // errorProvider1
@@ -229,7 +233,7 @@ namespace DBADashServiceConfig
             // 
             bttnCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             bttnCancel.Location = new System.Drawing.Point(1016, 15);
-            bttnCancel.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            bttnCancel.Margin = new System.Windows.Forms.Padding(5);
             bttnCancel.Name = "bttnCancel";
             bttnCancel.Size = new System.Drawing.Size(101, 35);
             bttnCancel.TabIndex = 15;
@@ -566,7 +570,7 @@ namespace DBADashServiceConfig
             // label21
             // 
             label21.AutoSize = true;
-            label21.Location = new System.Drawing.Point(18, 172);
+            label21.Location = new System.Drawing.Point(18, 203);
             label21.Name = "label21";
             label21.Size = new System.Drawing.Size(159, 20);
             label21.TabIndex = 12;
@@ -611,7 +615,6 @@ namespace DBADashServiceConfig
             // tabOther
             // 
             tabOther.Controls.Add(groupBox7);
-            tabOther.Controls.Add(groupBox6);
             tabOther.Controls.Add(groupBox3);
             tabOther.Controls.Add(groupBox4);
             tabOther.Location = new System.Drawing.Point(4, 39);
@@ -632,7 +635,7 @@ namespace DBADashServiceConfig
             groupBox7.Controls.Add(label19);
             groupBox7.Controls.Add(numAlertPollingFrequency);
             groupBox7.Controls.Add(chkProcessAlerts);
-            groupBox7.Location = new System.Drawing.Point(8, 631);
+            groupBox7.Location = new System.Drawing.Point(9, 418);
             groupBox7.Name = "groupBox7";
             groupBox7.Size = new System.Drawing.Size(1112, 84);
             groupBox7.TabIndex = 40;
@@ -711,170 +714,6 @@ namespace DBADashServiceConfig
             chkProcessAlerts.Text = "Process Alerts";
             chkProcessAlerts.UseVisualStyleBackColor = true;
             chkProcessAlerts.CheckedChanged += ChkProcessNotifications_CheckedChanged;
-            // 
-            // groupBox6
-            // 
-            groupBox6.Controls.Add(lnkAllowNoJobs);
-            groupBox6.Controls.Add(lnkAllowAllJobs);
-            groupBox6.Controls.Add(txtAllowedJobs);
-            groupBox6.Controls.Add(label21);
-            groupBox6.Controls.Add(lnkAllowExplicit);
-            groupBox6.Controls.Add(lnkAllowNone);
-            groupBox6.Controls.Add(lnkAllowAll);
-            groupBox6.Controls.Add(label18);
-            groupBox6.Controls.Add(txtAllowScripts);
-            groupBox6.Controls.Add(chkAllowPlanForcing);
-            groupBox6.Controls.Add(label8);
-            groupBox6.Controls.Add(label6);
-            groupBox6.Controls.Add(txtSQS);
-            groupBox6.Controls.Add(label4);
-            groupBox6.Controls.Add(chkEnableMessaging);
-            groupBox6.Location = new System.Drawing.Point(9, 417);
-            groupBox6.Name = "groupBox6";
-            groupBox6.Size = new System.Drawing.Size(1112, 208);
-            groupBox6.TabIndex = 39;
-            groupBox6.TabStop = false;
-            groupBox6.Text = "Messaging";
-            // 
-            // lnkAllowNoJobs
-            // 
-            lnkAllowNoJobs.AutoSize = true;
-            lnkAllowNoJobs.Location = new System.Drawing.Point(665, 179);
-            lnkAllowNoJobs.Name = "lnkAllowNoJobs";
-            lnkAllowNoJobs.Size = new System.Drawing.Size(50, 20);
-            lnkAllowNoJobs.TabIndex = 15;
-            lnkAllowNoJobs.TabStop = true;
-            lnkAllowNoJobs.Text = "NONE";
-            lnkAllowNoJobs.LinkClicked += lnkAllowNoJobs_LinkClicked;
-            // 
-            // lnkAllowAllJobs
-            // 
-            lnkAllowAllJobs.AutoSize = true;
-            lnkAllowAllJobs.Location = new System.Drawing.Point(626, 179);
-            lnkAllowAllJobs.Name = "lnkAllowAllJobs";
-            lnkAllowAllJobs.Size = new System.Drawing.Size(33, 20);
-            lnkAllowAllJobs.TabIndex = 14;
-            lnkAllowAllJobs.TabStop = true;
-            lnkAllowAllJobs.Text = "ALL";
-            lnkAllowAllJobs.LinkClicked += lnkAllowAllJobs_LinkClicked;
-            // 
-            // txtAllowedJobs
-            // 
-            txtAllowedJobs.Location = new System.Drawing.Point(247, 175);
-            txtAllowedJobs.Name = "txtAllowedJobs";
-            txtAllowedJobs.Size = new System.Drawing.Size(370, 27);
-            txtAllowedJobs.TabIndex = 13;
-            txtAllowedJobs.TextChanged += AllowedJobs_TextChanged;
-            // 
-            // lnkAllowExplicit
-            // 
-            lnkAllowExplicit.AutoSize = true;
-            lnkAllowExplicit.Location = new System.Drawing.Point(721, 141);
-            lnkAllowExplicit.Name = "lnkAllowExplicit";
-            lnkAllowExplicit.Size = new System.Drawing.Size(95, 20);
-            lnkAllowExplicit.TabIndex = 11;
-            lnkAllowExplicit.TabStop = true;
-            lnkAllowExplicit.Text = "ALL (Explicit)";
-            lnkAllowExplicit.LinkClicked += lnkAllowExplicit_LinkClicked;
-            // 
-            // lnkAllowNone
-            // 
-            lnkAllowNone.AutoSize = true;
-            lnkAllowNone.Location = new System.Drawing.Point(665, 141);
-            lnkAllowNone.Name = "lnkAllowNone";
-            lnkAllowNone.Size = new System.Drawing.Size(50, 20);
-            lnkAllowNone.TabIndex = 10;
-            lnkAllowNone.TabStop = true;
-            lnkAllowNone.Text = "NONE";
-            lnkAllowNone.LinkClicked += lnkAllowNone_LinkClicked;
-            // 
-            // lnkAllowAll
-            // 
-            lnkAllowAll.AutoSize = true;
-            lnkAllowAll.Location = new System.Drawing.Point(626, 141);
-            lnkAllowAll.Name = "lnkAllowAll";
-            lnkAllowAll.Size = new System.Drawing.Size(33, 20);
-            lnkAllowAll.TabIndex = 9;
-            lnkAllowAll.TabStop = true;
-            lnkAllowAll.Text = "ALL";
-            lnkAllowAll.LinkClicked += lnkAllowAll_LinkClicked;
-            // 
-            // label18
-            // 
-            label18.AutoSize = true;
-            label18.Location = new System.Drawing.Point(18, 139);
-            label18.Name = "label18";
-            label18.Size = new System.Drawing.Size(192, 20);
-            label18.TabIndex = 8;
-            label18.Text = "Allowed Community Scripts";
-            // 
-            // txtAllowScripts
-            // 
-            txtAllowScripts.Location = new System.Drawing.Point(247, 135);
-            txtAllowScripts.Name = "txtAllowScripts";
-            txtAllowScripts.Size = new System.Drawing.Size(370, 27);
-            txtAllowScripts.TabIndex = 7;
-            txtAllowScripts.TextChanged += TxtAllowScripts_TextChanged;
-            // 
-            // chkAllowPlanForcing
-            // 
-            chkAllowPlanForcing.AutoSize = true;
-            chkAllowPlanForcing.Location = new System.Drawing.Point(18, 69);
-            chkAllowPlanForcing.Name = "chkAllowPlanForcing";
-            chkAllowPlanForcing.Size = new System.Drawing.Size(154, 24);
-            chkAllowPlanForcing.TabIndex = 5;
-            chkAllowPlanForcing.Text = "Allow Plan Forcing";
-            chkAllowPlanForcing.UseVisualStyleBackColor = true;
-            chkAllowPlanForcing.CheckedChanged += ChkAllowPlanForcing_CheckedChanged;
-            // 
-            // label8
-            // 
-            label8.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
-            label8.Location = new System.Drawing.Point(623, 93);
-            label8.Name = "label8";
-            label8.Size = new System.Drawing.Size(466, 45);
-            label8.TabIndex = 4;
-            label8.Text = "SQS Url only required to communicate with remote agents that connect to the repository via a S3 bucket";
-            // 
-            // label6
-            // 
-            label6.AutoSize = true;
-            label6.Location = new System.Drawing.Point(18, 105);
-            label6.Name = "label6";
-            label6.Size = new System.Drawing.Size(62, 20);
-            label6.TabIndex = 3;
-            label6.Text = "SQS Url:";
-            // 
-            // txtSQS
-            // 
-            txtSQS.Location = new System.Drawing.Point(247, 101);
-            txtSQS.Name = "txtSQS";
-            txtSQS.Size = new System.Drawing.Size(370, 27);
-            txtSQS.TabIndex = 2;
-            txtSQS.Validating += TxtSQS_Validating;
-            txtSQS.Validated += TxtSQS_Validated;
-            // 
-            // label4
-            // 
-            label4.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
-            label4.Location = new System.Drawing.Point(623, 39);
-            label4.Name = "label4";
-            label4.Size = new System.Drawing.Size(466, 53);
-            label4.TabIndex = 1;
-            label4.Text = "Allow the GUI to send messages to this service via the service broker.  e.g. To trigger collections to run on demand.";
-            // 
-            // chkEnableMessaging
-            // 
-            chkEnableMessaging.AutoSize = true;
-            chkEnableMessaging.Checked = true;
-            chkEnableMessaging.CheckState = System.Windows.Forms.CheckState.Checked;
-            chkEnableMessaging.Location = new System.Drawing.Point(18, 39);
-            chkEnableMessaging.Name = "chkEnableMessaging";
-            chkEnableMessaging.Size = new System.Drawing.Size(185, 24);
-            chkEnableMessaging.TabIndex = 0;
-            chkEnableMessaging.Text = "Enable Communication";
-            chkEnableMessaging.UseVisualStyleBackColor = true;
-            chkEnableMessaging.CheckedChanged += ChkEnableMessaging_CheckedChanged;
             // 
             // groupBox3
             // 
@@ -1072,6 +911,189 @@ namespace DBADashServiceConfig
             label10.TabIndex = 24;
             label10.Text = resources.GetString("label10.Text");
             // 
+            // groupBox6
+            // 
+            groupBox6.Controls.Add(label22);
+            groupBox6.Controls.Add(txtAllowedCustomProcs);
+            groupBox6.Controls.Add(lnkAllowNoJobs);
+            groupBox6.Controls.Add(lnkAllowAllJobs);
+            groupBox6.Controls.Add(txtAllowedJobs);
+            groupBox6.Controls.Add(label21);
+            groupBox6.Controls.Add(lnkAllowExplicit);
+            groupBox6.Controls.Add(lnkAllowNone);
+            groupBox6.Controls.Add(lnkAllowAll);
+            groupBox6.Controls.Add(label18);
+            groupBox6.Controls.Add(txtAllowScripts);
+            groupBox6.Controls.Add(chkAllowPlanForcing);
+            groupBox6.Controls.Add(label8);
+            groupBox6.Controls.Add(label6);
+            groupBox6.Controls.Add(txtSQS);
+            groupBox6.Controls.Add(label4);
+            groupBox6.Controls.Add(chkEnableMessaging);
+            groupBox6.Location = new System.Drawing.Point(8, 6);
+            groupBox6.Name = "groupBox6";
+            groupBox6.Size = new System.Drawing.Size(1112, 301);
+            groupBox6.TabIndex = 39;
+            groupBox6.TabStop = false;
+            groupBox6.Text = "Messaging";
+            // 
+            // label22
+            // 
+            label22.AutoSize = true;
+            label22.Location = new System.Drawing.Point(18, 170);
+            label22.Name = "label22";
+            label22.Size = new System.Drawing.Size(195, 20);
+            label22.TabIndex = 17;
+            label22.Text = "Allowed Custom Procedures";
+            // 
+            // txtAllowedCustomProcs
+            // 
+            txtAllowedCustomProcs.Location = new System.Drawing.Point(247, 167);
+            txtAllowedCustomProcs.Name = "txtAllowedCustomProcs";
+            txtAllowedCustomProcs.Size = new System.Drawing.Size(370, 27);
+            txtAllowedCustomProcs.TabIndex = 16;
+            txtAllowedCustomProcs.TextChanged += AllowedCustomProcs_TextChanged;
+            // 
+            // lnkAllowNoJobs
+            // 
+            lnkAllowNoJobs.AutoSize = true;
+            lnkAllowNoJobs.Location = new System.Drawing.Point(665, 203);
+            lnkAllowNoJobs.Name = "lnkAllowNoJobs";
+            lnkAllowNoJobs.Size = new System.Drawing.Size(50, 20);
+            lnkAllowNoJobs.TabIndex = 15;
+            lnkAllowNoJobs.TabStop = true;
+            lnkAllowNoJobs.Text = "NONE";
+            lnkAllowNoJobs.LinkClicked += lnkAllowNoJobs_LinkClicked;
+            // 
+            // lnkAllowAllJobs
+            // 
+            lnkAllowAllJobs.AutoSize = true;
+            lnkAllowAllJobs.Location = new System.Drawing.Point(626, 203);
+            lnkAllowAllJobs.Name = "lnkAllowAllJobs";
+            lnkAllowAllJobs.Size = new System.Drawing.Size(33, 20);
+            lnkAllowAllJobs.TabIndex = 14;
+            lnkAllowAllJobs.TabStop = true;
+            lnkAllowAllJobs.Text = "ALL";
+            lnkAllowAllJobs.LinkClicked += lnkAllowAllJobs_LinkClicked;
+            // 
+            // txtAllowedJobs
+            // 
+            txtAllowedJobs.Location = new System.Drawing.Point(247, 200);
+            txtAllowedJobs.Name = "txtAllowedJobs";
+            txtAllowedJobs.Size = new System.Drawing.Size(370, 27);
+            txtAllowedJobs.TabIndex = 13;
+            txtAllowedJobs.TextChanged += AllowedJobs_TextChanged;
+            // 
+            // lnkAllowExplicit
+            // 
+            lnkAllowExplicit.AutoSize = true;
+            lnkAllowExplicit.Location = new System.Drawing.Point(721, 141);
+            lnkAllowExplicit.Name = "lnkAllowExplicit";
+            lnkAllowExplicit.Size = new System.Drawing.Size(95, 20);
+            lnkAllowExplicit.TabIndex = 11;
+            lnkAllowExplicit.TabStop = true;
+            lnkAllowExplicit.Text = "ALL (Explicit)";
+            lnkAllowExplicit.LinkClicked += lnkAllowExplicit_LinkClicked;
+            // 
+            // lnkAllowNone
+            // 
+            lnkAllowNone.AutoSize = true;
+            lnkAllowNone.Location = new System.Drawing.Point(665, 141);
+            lnkAllowNone.Name = "lnkAllowNone";
+            lnkAllowNone.Size = new System.Drawing.Size(50, 20);
+            lnkAllowNone.TabIndex = 10;
+            lnkAllowNone.TabStop = true;
+            lnkAllowNone.Text = "NONE";
+            lnkAllowNone.LinkClicked += lnkAllowNone_LinkClicked;
+            // 
+            // lnkAllowAll
+            // 
+            lnkAllowAll.AutoSize = true;
+            lnkAllowAll.Location = new System.Drawing.Point(626, 141);
+            lnkAllowAll.Name = "lnkAllowAll";
+            lnkAllowAll.Size = new System.Drawing.Size(33, 20);
+            lnkAllowAll.TabIndex = 9;
+            lnkAllowAll.TabStop = true;
+            lnkAllowAll.Text = "ALL";
+            lnkAllowAll.LinkClicked += lnkAllowAll_LinkClicked;
+            // 
+            // label18
+            // 
+            label18.AutoSize = true;
+            label18.Location = new System.Drawing.Point(18, 137);
+            label18.Name = "label18";
+            label18.Size = new System.Drawing.Size(221, 20);
+            label18.TabIndex = 8;
+            label18.Text = "Allowed Community Procedures";
+            // 
+            // txtAllowScripts
+            // 
+            txtAllowScripts.Location = new System.Drawing.Point(247, 134);
+            txtAllowScripts.Name = "txtAllowScripts";
+            txtAllowScripts.Size = new System.Drawing.Size(370, 27);
+            txtAllowScripts.TabIndex = 7;
+            txtAllowScripts.TextChanged += TxtAllowScripts_TextChanged;
+            // 
+            // chkAllowPlanForcing
+            // 
+            chkAllowPlanForcing.AutoSize = true;
+            chkAllowPlanForcing.Location = new System.Drawing.Point(18, 69);
+            chkAllowPlanForcing.Name = "chkAllowPlanForcing";
+            chkAllowPlanForcing.Size = new System.Drawing.Size(154, 24);
+            chkAllowPlanForcing.TabIndex = 5;
+            chkAllowPlanForcing.Text = "Allow Plan Forcing";
+            chkAllowPlanForcing.UseVisualStyleBackColor = true;
+            chkAllowPlanForcing.CheckedChanged += ChkAllowPlanForcing_CheckedChanged;
+            // 
+            // label8
+            // 
+            label8.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
+            label8.Location = new System.Drawing.Point(623, 93);
+            label8.Name = "label8";
+            label8.Size = new System.Drawing.Size(466, 45);
+            label8.TabIndex = 4;
+            label8.Text = "SQS Url only required to communicate with remote agents that connect to the repository via a S3 bucket";
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Location = new System.Drawing.Point(18, 104);
+            label6.Name = "label6";
+            label6.Size = new System.Drawing.Size(62, 20);
+            label6.TabIndex = 3;
+            label6.Text = "SQS Url:";
+            // 
+            // txtSQS
+            // 
+            txtSQS.Location = new System.Drawing.Point(247, 101);
+            txtSQS.Name = "txtSQS";
+            txtSQS.Size = new System.Drawing.Size(370, 27);
+            txtSQS.TabIndex = 2;
+            txtSQS.Validating += TxtSQS_Validating;
+            txtSQS.Validated += TxtSQS_Validated;
+            // 
+            // label4
+            // 
+            label4.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
+            label4.Location = new System.Drawing.Point(623, 39);
+            label4.Name = "label4";
+            label4.Size = new System.Drawing.Size(466, 53);
+            label4.TabIndex = 1;
+            label4.Text = "Allow the GUI to send messages to this service via the service broker.  e.g. To trigger collections to run on demand.";
+            // 
+            // chkEnableMessaging
+            // 
+            chkEnableMessaging.AutoSize = true;
+            chkEnableMessaging.Checked = true;
+            chkEnableMessaging.CheckState = System.Windows.Forms.CheckState.Checked;
+            chkEnableMessaging.Location = new System.Drawing.Point(18, 39);
+            chkEnableMessaging.Name = "chkEnableMessaging";
+            chkEnableMessaging.Size = new System.Drawing.Size(185, 24);
+            chkEnableMessaging.TabIndex = 0;
+            chkEnableMessaging.Text = "Enable Communication";
+            chkEnableMessaging.UseVisualStyleBackColor = true;
+            chkEnableMessaging.CheckedChanged += ChkEnableMessaging_CheckedChanged;
+            // 
             // tabSource
             // 
             tabSource.Controls.Add(groupBox2);
@@ -1253,7 +1275,7 @@ namespace DBADashServiceConfig
             tabRunningQueries.Controls.Add(chkCollectSessionWaits);
             tabRunningQueries.Location = new System.Drawing.Point(4, 39);
             tabRunningQueries.Name = "tabRunningQueries";
-            tabRunningQueries.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            tabRunningQueries.Padding = new System.Windows.Forms.Padding(3);
             tabRunningQueries.Size = new System.Drawing.Size(1059, 178);
             tabRunningQueries.TabIndex = 4;
             tabRunningQueries.Text = "Running Queries";
@@ -1785,6 +1807,7 @@ namespace DBADashServiceConfig
             tab1.Controls.Add(tabDest);
             tab1.Controls.Add(tabSource);
             tab1.Controls.Add(tabOther);
+            tab1.Controls.Add(tabMessaging);
             tab1.Controls.Add(tabJson);
             tab1.Dock = System.Windows.Forms.DockStyle.Fill;
             tab1.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
@@ -1795,6 +1818,17 @@ namespace DBADashServiceConfig
             tab1.SelectedIndex = 0;
             tab1.Size = new System.Drawing.Size(1137, 765);
             tab1.TabIndex = 22;
+            // 
+            // tabMessaging
+            // 
+            tabMessaging.Controls.Add(groupBox6);
+            tabMessaging.Location = new System.Drawing.Point(4, 39);
+            tabMessaging.Name = "tabMessaging";
+            tabMessaging.Padding = new System.Windows.Forms.Padding(3);
+            tabMessaging.Size = new System.Drawing.Size(1129, 722);
+            tabMessaging.TabIndex = 7;
+            tabMessaging.Text = "Messaging";
+            tabMessaging.UseVisualStyleBackColor = true;
             // 
             // ServiceConfig
             // 
@@ -1822,8 +1856,6 @@ namespace DBADashServiceConfig
             groupBox7.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numAlertStartupDelay).EndInit();
             ((System.ComponentModel.ISupportInitialize)numAlertPollingFrequency).EndInit();
-            groupBox6.ResumeLayout(false);
-            groupBox6.PerformLayout();
             groupBox3.ResumeLayout(false);
             groupBox3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numBackupRetention).EndInit();
@@ -1831,6 +1863,8 @@ namespace DBADashServiceConfig
             groupBox4.ResumeLayout(false);
             groupBox4.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numAzureScanInterval).EndInit();
+            groupBox6.ResumeLayout(false);
+            groupBox6.PerformLayout();
             tabSource.ResumeLayout(false);
             groupBox2.ResumeLayout(false);
             tabSrcOptions.ResumeLayout(false);
@@ -1854,6 +1888,7 @@ namespace DBADashServiceConfig
             grpService.ResumeLayout(false);
             grpService.PerformLayout();
             tab1.ResumeLayout(false);
+            tabMessaging.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -1994,6 +2029,9 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.LinkLabel lnkGrant;
         private System.Windows.Forms.Button bttnGrantAccessToServiceAccount;
         private System.Windows.Forms.Button bttnRestartAsAdmin;
+        private System.Windows.Forms.TabPage tabMessaging;
+        private System.Windows.Forms.Label label22;
+        private System.Windows.Forms.TextBox txtAllowedCustomProcs;
     }
 }
 

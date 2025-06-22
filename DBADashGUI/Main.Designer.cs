@@ -608,11 +608,15 @@ namespace DBADashGUI
             // tsDateRange
             // 
             tsDateRange.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsDateRange.DefaultTimeSpan = System.TimeSpan.Parse("01:00:00");
             tsDateRange.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
             tsDateRange.Font = new System.Drawing.Font("Segoe UI", 9F);
             tsDateRange.Image = (System.Drawing.Image)resources.GetObject("tsDateRange.Image");
             tsDateRange.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsDateRange.MaximumTimeSpan = System.TimeSpan.Parse("10675199.02:48:05.4775807");
+            tsDateRange.MinimumTimeSpan = System.TimeSpan.Parse("-10675199.02:48:05.4775808");
             tsDateRange.Name = "tsDateRange";
+            tsDateRange.SelectedTimeSpan = System.TimeSpan.Parse("01:00:00");
             tsDateRange.Size = new System.Drawing.Size(71, 25);
             tsDateRange.Text = "1 Hr";
             tsDateRange.DateRangeChanged += DateRangeChanged;
@@ -1112,7 +1116,6 @@ namespace DBADashGUI
             // 
             // tags1
             // 
-            tags1.AllTags = null;
             tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             tags1.Location = new System.Drawing.Point(1, 2);
             tags1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
@@ -1776,6 +1779,7 @@ namespace DBADashGUI
             objectExecutionSummary1.Size = new System.Drawing.Size(190, 53);
             objectExecutionSummary1.TabIndex = 0;
             objectExecutionSummary1.Types = "";
+            objectExecutionSummary1.UseGlobalTime = true;
             // 
             // tabWaits
             // 
@@ -1988,6 +1992,7 @@ namespace DBADashGUI
             jobStats1.Name = "jobStats1";
             jobStats1.Size = new System.Drawing.Size(190, 53);
             jobStats1.TabIndex = 0;
+            jobStats1.UseGlobalTime = true;
             // 
             // tabDBADash
             // 
@@ -2110,6 +2115,7 @@ namespace DBADashGUI
             jobTimeline1.Name = "jobTimeline1";
             jobTimeline1.Size = new System.Drawing.Size(190, 53);
             jobTimeline1.TabIndex = 0;
+            jobTimeline1.UseGlobalTime = true;
             // 
             // tabDrivePerformance
             // 

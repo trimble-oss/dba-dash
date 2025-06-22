@@ -8,6 +8,7 @@
 	@S3Path NVARCHAR(256)=NULL,
 	@MessagingEnabled BIT=0,
 	@AllowedScripts VARCHAR(MAX)=NULL,
+	@AllowedCustomProcs NVARCHAR(MAX)=NULL,
 	@DBADashAgentID INT OUT
 )
 AS
@@ -16,9 +17,9 @@ DECLARE @UpdateAgent BIT = 0
 SELECT @DBADashAgentID = DBADashAgentID,
 	@UpdateAgent = CASE WHEN 
 						EXISTS(
-								SELECT @AgentPath, @AgentVersion, @ServiceSQSQueueUrl, @AgentIdentifier,@S3Path,@MessagingEnabled,@AllowedScripts
+								SELECT @AgentPath, @AgentVersion, @ServiceSQSQueueUrl, @AgentIdentifier,@S3Path,@MessagingEnabled,@AllowedScripts, @AllowedCustomProcs
 								EXCEPT
-								SELECT AgentPath, AgentVersion, ServiceSQSQueueUrl, AgentIdentifier, S3Path, MessagingEnabled, AllowedScripts
+								SELECT AgentPath, AgentVersion, ServiceSQSQueueUrl, AgentIdentifier, S3Path, MessagingEnabled, AllowedScripts, AllowedCustomProcs
 								)
 					THEN 1 ELSE 0 END
 FROM dbo.DBADashAgent
@@ -28,8 +29,8 @@ AND AgentServiceName = @AgentServiceName
 IF @DBADashAgentID IS NULL
 BEGIN
 
-	INSERT INTO dbo.DBADashAgent(AgentHostName,AgentServiceName,AgentVersion,AgentPath,ServiceSQSQueueUrl,AgentIdentifier,S3Path,MessagingEnabled,AllowedScripts)
-	SELECT @AgentHostName,@AgentServiceName,@AgentVersion,@AgentPath,@ServiceSQSQueueUrl,ISNULL(@AgentIdentifier,LEFT(CONCAT('Temp.',REPLACE(NEWID(),'-','')),22)), @S3Path, @MessagingEnabled,@AllowedScripts
+	INSERT INTO dbo.DBADashAgent(AgentHostName,AgentServiceName,AgentVersion,AgentPath,ServiceSQSQueueUrl,AgentIdentifier,S3Path,MessagingEnabled,AllowedScripts, AllowedCustomProcs)
+	SELECT @AgentHostName,@AgentServiceName,@AgentVersion,@AgentPath,@ServiceSQSQueueUrl,ISNULL(@AgentIdentifier,LEFT(CONCAT('Temp.',REPLACE(NEWID(),'-','')),22)), @S3Path, @MessagingEnabled,@AllowedScripts,@AllowedCustomProcs
 	WHERE NOT EXISTS(SELECT 1 
 				FROM dbo.DBADashAgent WITH(UPDLOCK,HOLDLOCK) 
 				WHERE AgentHostName = @AgentHostName 
@@ -53,6 +54,7 @@ BEGIN
 			AgentIdentifier = ISNULL(@AgentIdentifier,LEFT(CONCAT('Temp.',REPLACE(NEWID(),'-','')),22)),
 			S3Path = @S3Path,
 			MessagingEnabled = @MessagingEnabled,
-			AllowedScripts = @AllowedScripts
+			AllowedScripts = @AllowedScripts,
+			AllowedCustomProcs = @AllowedCustomProcs
 	WHERE DBADashAgentID = @DBADashAgentID;
 END

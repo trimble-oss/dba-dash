@@ -9,6 +9,7 @@
 	AgentIdentifier CHAR(22) NOT NULL CONSTRAINT DF_DBADashAgent_AgentIdentifier DEFAULT (left(concat('Temp.',replace(newid(),'-','')),(22))),
 	S3Path NVARCHAR(256) NULL,
 	AllowedScripts VARCHAR(MAX) NULL,
+	AllowedCustomProcs NVARCHAR(MAX) NULL,
 	CONSTRAINT PK_DBADashAgent PRIMARY KEY(DBADashAgentID),
 	INDEX IX_DBADashAgent UNIQUE NONCLUSTERED (AgentHostName,AgentServiceName),
 	INDEX IX_DBADashAgent_AgentIdentifier UNIQUE NONCLUSTERED (AgentIdentifier)

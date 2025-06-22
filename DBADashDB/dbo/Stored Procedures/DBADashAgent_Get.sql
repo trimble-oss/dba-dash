@@ -10,6 +10,7 @@ SELECT DBADashAgentID,
        MessagingEnabled,
        ServiceSQSQueueUrl,
        S3Path,
-       AllowedScripts
+       AllowedScripts,
+       AllowedCustomProcs
 FROM dbo.DBADashAgent
 WHERE DBADashAgentID = @DBADashAgentID

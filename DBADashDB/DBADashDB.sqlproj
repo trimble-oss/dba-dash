@@ -826,6 +826,11 @@
     <Build Include="dbo\Stored Procedures\DatabaseFinder_Get.sql" />
     <Build Include="dbo\Stored Procedures\QueryPlan_Get.sql" />
     <Build Include="Security\AllowJobExecution.sql" />
+    <Build Include="dbo\Tables\AvailableProcs.sql" />
+    <Build Include="dbo\User Defined Types\AvailableProcs.sql" />
+    <Build Include="dbo\Stored Procedures\AvailableProcs_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\CustomTools_Get.sql" />
+    <Build Include="Security\CustomTools.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

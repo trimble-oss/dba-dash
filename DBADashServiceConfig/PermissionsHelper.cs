@@ -39,7 +39,7 @@ namespace DBADashServiceConfig
         private List<string> ProcedureNames =>
             Connections
                 .SelectMany(src => src.CustomCollections.Values.Select(cc => cc.ProcedureName))
-                .Concat(Config.CustomCollections.Values.Select(cc => cc.ProcedureName))
+                .Concat(Config.AllowedCustomProcs.Split(','))
                 .Distinct()
                 .ToList();
 
@@ -143,20 +143,19 @@ namespace DBADashServiceConfig
                 PermissionType = PermissionItem.PermissionTypes.ExecuteProcedure
             }));
 
-            var excluded = new string[]
+            var excluded = new[]
             {
-                ProcedureExecutionMessage.CommandNames.sp_Blitz.ToString(),
-                ProcedureExecutionMessage.CommandNames.sp_LogHunter.ToString(),
-                ProcedureExecutionMessage.CommandNames.sp_BlitzIndex.ToString()
+                ProcedureExecutionMessage.CommunityProcs.sp_Blitz,
+                ProcedureExecutionMessage.CommunityProcs.sp_LogHunter
             }; // EXECUTE permission is insufficient
-            foreach (var p in Enum.GetNames<ProcedureExecutionMessage.CommandNames>().Where(proc =>
-                        ProcedureExecutionMessage.IsScriptAllowed(proc, Config.AllowedScripts)))
+            foreach (var p in Enum.GetValues<ProcedureExecutionMessage.CommunityProcs>().Where(proc =>
+                        ProcedureExecutionMessage.IsAllowedCommunityProc(proc, Config.AllowedScripts)))
             {
                 if (excluded.Contains(p)) continue;
                 Permissions.Add(new PermissionItem()
                 {
-                    Name = p,
-                    PermissionState = PermissionItem.PermissionStates.None,
+                    Name = p.ToString(),
+                    PermissionState = PermissionItem.PermissionStates.Grant,
                     PermissionType = PermissionItem.PermissionTypes.ExecuteProcedure
                 });
             }

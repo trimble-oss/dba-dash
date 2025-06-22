@@ -418,7 +418,8 @@ namespace DBADashGUI.CustomReports
             }
             var msg = new ProcedureExecutionMessage
             {
-                CommandName = Enum.Parse<ProcedureExecutionMessage.CommandNames>(Report.ProcedureName),
+                ProcedureName = Report.ProcedureName,
+                SchemaName = Report.SchemaName,
                 Parameters = customParams,
                 ConnectionID = context.ConnectionID,
                 CollectAgent = context.CollectAgent,
@@ -993,57 +994,70 @@ namespace DBADashGUI.CustomReports
 
         public async Task SetContext(DBADashContext _context, List<CustomSqlParameter> sqlParams)
         {
-            if (_context == this.context)
+            try
             {
-                // By default refresh is skipped unless context has changed.
-                if (Report.ForceRefreshWithoutContextChange && AutoLoad)
+                if (_context == this.context)
+                {
+                    // By default refresh is skipped unless context has changed.
+                    if (Report.ForceRefreshWithoutContextChange && AutoLoad)
+                    {
+                        RefreshData();
+                    }
+
+                    return;
+                }
+
+                if (this.InvokeRequired)
+                {
+                    this.Invoke(new Action(() => _ = SetContext(_context, sqlParams)));
+                    return;
+                }
+
+                cboResults.Visible = false;
+                lblSelectResults.Visible = false;
+                ResetTimer();
+                if (IsMessageInProgress)
+                {
+                    await CancelProcessing();
+                }
+
+                ClearResults();
+                IsMessageInProgress = false;
+                CurrentMessageGroup = Guid.Empty;
+                this.context = _context;
+                Report = _context.Report ?? Report;
+                customParams = sqlParams ?? Report.GetCustomSqlParameters();
+                SetContextParametersForDirectExecutionReport();
+                tsParams.Visible = Report.UserParams.Any();
+                tsConfigure.Visible = Report.CanEditReport;
+                SetStatus(Report.Description, Report.Description, DBADashUser.SelectedTheme.ForegroundColor);
+                lblDescription.Visible = !string.IsNullOrEmpty(Report.Description);
+                if (Report.DeserializationException != null)
+                {
+                    MessageBox.Show(
+                        "An error occurred deserializing the report. Preferences have been reset.\n" +
+                        Report.DeserializationException.Message, "Warning", MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    Report.DeserializationException = null; // Display the message once
+                }
+
+                editPickersToolStripMenuItem.Enabled = Report.UserParams.Any();
+                tsRefresh.Visible = Report is not DirectExecutionReport;
+                tsExecute.Visible = Report is DirectExecutionReport;
+                tsExecute.Enabled = Report is DirectExecutionReport && _context.IsScriptAllowed(Report.SchemaName, Report.ProcedureName);
+                associateCollectionToolStripMenuItem.Visible = Report is not DirectExecutionReport;
+                lblURL.Text = Report.URL;
+                lblURL.Visible = !string.IsNullOrEmpty(Report.URL);
+                AddPickers();
+                SetTriggerCollectionVisibility();
+                if (AutoLoad)
                 {
                     RefreshData();
                 }
-                return;
             }
-            if (this.InvokeRequired)
+            catch (Exception ex)
             {
-                this.Invoke(new Action(() => _ = SetContext(_context, sqlParams)));
-                return;
-            }
-
-            cboResults.Visible = false;
-            lblSelectResults.Visible = false;
-            ResetTimer();
-            if (IsMessageInProgress)
-            {
-                await CancelProcessing();
-            }
-            ClearResults();
-            IsMessageInProgress = false;
-            CurrentMessageGroup = Guid.Empty;
-            this.context = _context;
-            Report = _context.Report ?? Report;
-            customParams = sqlParams ?? Report.GetCustomSqlParameters();
-            SetContextParametersForDirectExecutionReport();
-            tsParams.Visible = Report.UserParams.Any();
-            tsConfigure.Visible = Report.CanEditReport;
-            SetStatus(Report.Description, Report.Description, DBADashUser.SelectedTheme.ForegroundColor);
-            lblDescription.Visible = !string.IsNullOrEmpty(Report.Description);
-            if (Report.DeserializationException != null)
-            {
-                MessageBox.Show(
-                    "An error occurred deserializing the report. Preferences have been reset.\n" +
-                    Report.DeserializationException.Message, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                Report.DeserializationException = null;// Display the message once
-            }
-            editPickersToolStripMenuItem.Enabled = Report.UserParams.Any();
-            tsRefresh.Visible = Report is not DirectExecutionReport;
-            tsExecute.Visible = Report is DirectExecutionReport;
-            tsExecute.Enabled = Report is DirectExecutionReport && _context.IsScriptAllowed(Report.ProcedureName);
-            lblURL.Text = Report.URL;
-            lblURL.Visible = !string.IsNullOrEmpty(Report.URL);
-            AddPickers();
-            SetTriggerCollectionVisibility();
-            if (AutoLoad)
-            {
-                RefreshData();
+                CommonShared.ShowExceptionDialog(ex, "Error setting context");
             }
         }
 
@@ -1052,7 +1066,7 @@ namespace DBADashGUI.CustomReports
             if (Report is not DirectExecutionReport dxReport) return;
             if (string.IsNullOrEmpty(context.DatabaseName)) return;
             foreach (var p in customParams.Where(p =>
-                         p.Param.ParameterName.Equals(dxReport.DatabaseNameParameter,
+                         p.Param.ParameterName.TrimStart('@').Equals(dxReport.DatabaseNameParameter.TrimStart('@'),
                              StringComparison.InvariantCultureIgnoreCase)))
             {
                 p.Param.Value = context.DatabaseName;
@@ -1289,69 +1303,77 @@ namespace DBADashGUI.CustomReports
 
         private void ScriptReport()
         {
+            var options = new ScriptingOptions()
+            {
+                ScriptForCreateOrAlter = true,
+                ScriptBatchTerminator = true,
+                EnforceScriptingOptions = true
+            }; /* EnforceScriptingOptions = true is required to generate CREATE OR ALTER */
+
             using var cn = new SqlConnection(Common.ConnectionString);
             var serverCn = new ServerConnection(cn);
             var server = new Server(serverCn);
             var db = server.Databases[cn.Database];
 
-            var proc = db.StoredProcedures[Report.ProcedureName, Report.SchemaName];
+            var sb = new StringBuilder();
+            sb.AppendFormat("/*\n\t{0}\n\t{1}\n\n\tCustom report for DBA Dash.\n\thttp://dbadash.com\n\tGenerated: {2:yyyy-MM-dd HH:mm:ss} \n*/\n\n",
+                Report.ReportName.Replace("*/", ""), Report.Description?.Replace("*/", ""), DateTime.Now);
 
-            if (proc != null)
+            if (Report is not DirectExecutionReport)
             {
-                var options = new ScriptingOptions() { ScriptForCreateOrAlter = true, ScriptBatchTerminator = true, EnforceScriptingOptions = true }; /* EnforceScriptingOptions = true is required to generate CREATE OR ALTER */
-
-                var parts = proc.Script(options);
-                var sb = new StringBuilder();
-                sb.AppendFormat("/*\n\t{0}\n\t{1}\n\n\tCustom report for DBA Dash.\n\thttp://dbadash.com\n\tGenerated: {2:yyyy-MM-dd HH:mm:ss} \n*/\n\n",
-                    Report.ReportName.Replace("*/", ""), Report.Description?.Replace("*/", ""), DateTime.Now);
-                foreach (var part in parts)
+                var proc = db.StoredProcedures[Report.ProcedureName, Report.SchemaName];
+                if (proc != null)
                 {
-                    sb.AppendLine(part);
-                    sb.AppendLine("GO");
-                }
+                    var parts = proc.Script(options);
 
-                try
-                {
-                    foreach (var picker in Report.Pickers?.OfType<DBPicker>() ?? Enumerable.Empty<DBPicker>())
+                    foreach (var part in parts)
                     {
-                        sb.AppendLine($"/* Script picker {picker.Name.Replace("*", "")} */");
-
-                        var (ObjectId, SchemaName, ObjectName) = CommonData.GetDBObject(picker.StoredProcedureName);
-                        if (ObjectName == null || SchemaName == null)
-                        {
-                            sb.AppendLine($"/* Unable to find object {picker.StoredProcedureName.Replace("*", "")} */");
-                            continue;
-                        }
-
-                        proc = db.StoredProcedures[ObjectName, SchemaName];
-                        parts = proc.Script(options);
-                        foreach (var part in parts)
-                        {
-                            sb.AppendLine(part);
-                            sb.AppendLine("GO");
-                        }
+                        sb.AppendLine(part);
+                        sb.AppendLine("GO");
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    sb.AppendLine($"/* Error scripting pickers {ex.Message.Replace("*", "")} */");
+                    sb.AppendLine("/* WARNING: Stored Procedure not found */");
                 }
-
-                var meta = Report.Serialize();
-                sb.AppendLine();
-                sb.AppendLine("/* Report customizations in GUI */");
-                sb.AppendFormat("DELETE dbo.CustomReport\nWHERE SchemaName = '{0}'\nAND ProcedureName = '{1}'\n\n", Report.SchemaName.SqlSingleQuote(), Report.ProcedureName.SqlSingleQuote());
-                sb.AppendLine("INSERT INTO dbo.CustomReport(SchemaName,ProcedureName,MetaData)");
-                sb.AppendFormat("VALUES('{0}','{1}','{2}')", Report.SchemaName.SqlSingleQuote(),
-                    Report.ProcedureName.SqlSingleQuote(), meta.SqlSingleQuote());
-
-                var frm = new CodeViewer() { Code = sb.ToString() };
-                frm.ShowDialog();
             }
-            else
+            try
             {
-                MessageBox.Show($"Unable to find procedure {Report.QualifiedProcedureName}", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                foreach (var picker in Report.Pickers?.OfType<DBPicker>() ?? Enumerable.Empty<DBPicker>())
+                {
+                    sb.AppendLine($"/* Script picker {picker.Name.Replace("*", "")} */");
+
+                    var (ObjectId, SchemaName, ObjectName) = CommonData.GetDBObject(picker.StoredProcedureName);
+                    if (ObjectName == null || SchemaName == null)
+                    {
+                        sb.AppendLine($"/* Unable to find object {picker.StoredProcedureName.Replace("*", "")} */");
+                        continue;
+                    }
+
+                    var pickerProc = db.StoredProcedures[ObjectName, SchemaName];
+                    var pickerParts = pickerProc.Script(options);
+                    foreach (var part in pickerParts)
+                    {
+                        sb.AppendLine(part);
+                        sb.AppendLine("GO");
+                    }
+                }
             }
+            catch (Exception ex)
+            {
+                sb.AppendLine($"/* Error scripting pickers {ex.Message.Replace("*", "")} */");
+            }
+
+            var meta = Report.Serialize();
+            sb.AppendLine();
+            sb.AppendLine("/* Report customizations in GUI */");
+            sb.AppendFormat("DELETE dbo.CustomReport\nWHERE SchemaName = '{0}'\nAND ProcedureName = '{1}'\n\n", Report.SchemaName.SqlSingleQuote(), Report.ProcedureName.SqlSingleQuote());
+            sb.AppendLine("INSERT INTO dbo.CustomReport(SchemaName,ProcedureName,MetaData)");
+            sb.AppendFormat("VALUES('{0}','{1}','{2}')", Report.SchemaName.SqlSingleQuote(),
+                Report.ProcedureName.SqlSingleQuote(), meta.SqlSingleQuote());
+
+            var frm = new CodeViewer() { Code = sb.ToString() };
+            frm.ShowDialog();
         }
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)

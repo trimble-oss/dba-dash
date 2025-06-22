@@ -80,5 +80,6 @@ namespace DBADash
         public static string QueryStoreForcedPlans => GetSqlString("QueryStoreForcedPlans");
         public static string ServerServices => GetSqlString("ServerServices");
         public static string MaxJobLastModified => GetSqlString("MaxJobLastModified");
+        public static string AvailableProcs => GetSqlString("AvailableProcs");
     }
 }

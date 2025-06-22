@@ -46,21 +46,21 @@ namespace DBADashGUI.CustomReports
         /// Parameters for the stored procedure that won't be supplied automatically based on context
         /// </summary>
         [JsonIgnore]
-        public IEnumerable<Param> UserParams => Params == null ? new List<Param>() : Params.ParamList.Where(p =>
-                                                                                                                                                                                                                                                            !SystemParamNames.Contains(p.ParamName.ToUpper()));
+        public IEnumerable<Param> UserParams => Params?.ParamList == null ? new List<Param>() : Params.ParamList.Where(p =>
+                                                                                                                                                                                                                                                                                                    !SystemParamNames.Contains(p.ParamName.ToUpper()));
 
         /// <summary>
         /// Parameters for the stored procedure that are supplied automatically based on context
         /// </summary>
         [JsonIgnore]
-        public IEnumerable<Param> SystemParams => Params == null ? new List<Param>() : Params.ParamList.Where(p =>
-                                                                                                                                                            SystemParamNames.Contains(p.ParamName.ToUpper()));
+        public IEnumerable<Param> SystemParams => Params?.ParamList == null ? new List<Param>() : Params.ParamList.Where(p =>
+                                                                                                                                                                                                    SystemParamNames.Contains(p.ParamName.ToUpper()));
 
         [JsonIgnore]
         public bool IsRootLevel => Params != null && Params.ParamList.Any(p => p.ParamName.Equals("@INSTANCEIDS", StringComparison.OrdinalIgnoreCase));
 
         [JsonIgnore]
-        public bool IsDatabaseLevel => Params != null && Params.ParamList.Any(p => p.ParamName.Equals("@DATABASEID", StringComparison.OrdinalIgnoreCase));
+        public virtual bool IsDatabaseLevel => Params != null && Params.ParamList.Any(p => p.ParamName.Equals("@DATABASEID", StringComparison.OrdinalIgnoreCase));
 
         [JsonIgnore]
         public bool IsInstanceLevel => Params != null && Params.ParamList.Any(p => InstanceLevelSystemParams.Contains(p.ParamName.ToUpper()));
@@ -75,8 +75,8 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         [JsonIgnore]
         public bool TimeFilterSupported => Params != null && Params.ParamList.Any(p =>
-                                                                                                                                                                                                                                                            p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
-                                                                                                                                                                                                                                                            p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase));
+                                                                                                                                                                                                                                                                                                    p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
+                                                                                                                                                                                                                                                                                                    p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase));
 
         public bool ForceRefreshWithoutContextChange { get; set; }
 
@@ -91,6 +91,7 @@ namespace DBADashGUI.CustomReports
             cmd.Parameters.AddWithValue("ProcedureName", ProcedureName);
             cmd.Parameters.AddWithValue("SchemaName", SchemaName);
             cmd.Parameters.AddWithValue("MetaData", meta);
+            cmd.Parameters.AddWithValue("Type", GetType().Name);
             cn.Open();
             cmd.ExecuteNonQuery();
         }
@@ -103,7 +104,7 @@ namespace DBADashGUI.CustomReports
         /// Convert list of parameters for the report to list of CustomSqlParameters
         /// </summary>
         /// <returns></returns>
-        public List<CustomSqlParameter> GetCustomSqlParameters() => Params?.ParamList.Select(p => p.CreateParameter()).ToList() ?? new();
+        public List<CustomSqlParameter> GetCustomSqlParameters() => Params?.ParamList?.Select(p => p.CreateParameter())?.ToList() ?? new();
 
         public bool HasAccess()
         {
