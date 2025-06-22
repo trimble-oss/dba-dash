@@ -44,8 +44,9 @@ namespace DBADashGUI
         private readonly List<int> commandLineTags = new();
         private TabPage[] AllTabs;
         private CustomReports.CustomReports customReports = new();
-        private readonly Dictionary<ProcedureExecutionMessage.CommandNames, TabPage> CommunityToolsTabPages = new Dictionary<ProcedureExecutionMessage.CommandNames, TabPage>();
-        private TabPage tabBlitzIndex => CommunityToolsTabPages[ProcedureExecutionMessage.CommandNames.sp_BlitzIndex];
+        private readonly Dictionary<ProcedureExecutionMessage.CommunityProcs, TabPage> CommunityToolsTabPages = new Dictionary<ProcedureExecutionMessage.CommunityProcs, TabPage>();
+        private Dictionary<string, TabPage> CustomToolsTabs = new Dictionary<string, TabPage>();
+        private TabPage tabBlitzIndex => CommunityToolsTabPages[ProcedureExecutionMessage.CommunityProcs.sp_BlitzIndex];
         private TabPage tabDBADashAlerts;
         private NotifyIcon notifyIcon;
         private TabPage tabOfflineInstances;
@@ -64,7 +65,7 @@ namespace DBADashGUI
 
         private void AddTabs()
         {
-            foreach (var proc in Enum.GetValues<ProcedureExecutionMessage.CommandNames>())
+            foreach (var proc in Enum.GetValues<ProcedureExecutionMessage.CommunityProcs>())
             {
                 var tab = GetCommunityToolsTabPage(proc);
                 if (tab == null) continue;
@@ -85,7 +86,7 @@ namespace DBADashGUI
             tabs.TabPages.Add(tabJobInfo);
         }
 
-        public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommandNames proc)
+        public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommunityProcs proc)
         {
             var tab = new TabPage(proc.ToString());
             var report = CommunityTools.CommunityTools.CommunityToolsList.FirstOrDefault(report => report.ProcedureName == proc.ToString());
@@ -625,6 +626,7 @@ namespace DBADashGUI
             instanceNode.Nodes.AddRange(nodesToAdd.ToArray());
             instanceNode.AddReportsFolder(customReports.InstanceLevelReports);
             instanceNode.AddCommunityTools();
+            instanceNode.AddCustomToolsFolder();
         }
 
         private static void ExpandStorage(SQLTreeItem storage)
@@ -863,10 +865,21 @@ namespace DBADashGUI
             else if (n.Type == SQLTreeItem.TreeType.CommunityTool)
             {
                 tabCustomReport.Text = n.Text;
-                if (Enum.TryParse(n.Text, out ProcedureExecutionMessage.CommandNames proc))
+                if (Enum.TryParse(n.Text, out ProcedureExecutionMessage.CommunityProcs proc))
                 {
                     allowedTabs.Add(CommunityToolsTabPages[proc]);
                 }
+            }
+            else if (n.Type == SQLTreeItem.TreeType.CustomTool)
+            {
+                CustomToolsTabs.TryGetValue(n.ObjectName, out var tab);
+                if (tab == null)
+                {
+                    tab = new TabPage(n.Text);
+                    tab.Controls.Add(new CustomReportView() { Dock = DockStyle.Fill });
+                    CustomToolsTabs.Add(n.ObjectName, tab);
+                }
+                allowedTabs.Add(tab);
             }
 
             if (n.ObjectID > 0)
@@ -880,9 +893,9 @@ namespace DBADashGUI
 
                         foreach (var tool in CommunityTools.CommunityTools.ProcedureLevelTools)
                         {
-                            if (!Enum.TryParse<ProcedureExecutionMessage.CommandNames>(tool.ProcedureName,
+                            if (!Enum.TryParse<ProcedureExecutionMessage.CommunityProcs>(tool.ProcedureName,
                                     out var proc)) continue;
-                            if (!n.Context.IsScriptAllowed(ProcedureExecutionMessage.CommandNames.sp_QuickieStore))
+                            if (!n.Context.IsScriptAllowed(ProcedureExecutionMessage.CommunityProcs.sp_QuickieStore))
                                 continue;
 
                             allowedTabs.Add(CommunityToolsTabPages[proc]);
@@ -895,9 +908,9 @@ namespace DBADashGUI
 
                         foreach (var tool in CommunityTools.CommunityTools.TableLevelTools)
                         {
-                            if (!Enum.TryParse<ProcedureExecutionMessage.CommandNames>(tool.ProcedureName,
+                            if (!Enum.TryParse<ProcedureExecutionMessage.CommunityProcs>(tool.ProcedureName,
                                     out var proc)) continue;
-                            if (!n.Context.IsScriptAllowed(ProcedureExecutionMessage.CommandNames.sp_QuickieStore))
+                            if (!n.Context.IsScriptAllowed(ProcedureExecutionMessage.CommunityProcs.sp_QuickieStore))
                                 continue;
 
                             allowedTabs.Add(CommunityToolsTabPages[proc]);
@@ -907,9 +920,9 @@ namespace DBADashGUI
 
                     default:
                         allowedTabs.Add(tabSchema);
-                        if (n.Context.IsScriptAllowed(ProcedureExecutionMessage.CommandNames.sp_DBPermissions))
+                        if (n.Context.IsScriptAllowed(ProcedureExecutionMessage.CommunityProcs.sp_DBPermissions))
                         {
-                            allowedTabs.Add(CommunityToolsTabPages[ProcedureExecutionMessage.CommandNames.sp_DBPermissions]);
+                            allowedTabs.Add(CommunityToolsTabPages[ProcedureExecutionMessage.CommunityProcs.sp_DBPermissions]);
                         }
                         break;
                 }
@@ -957,7 +970,7 @@ namespace DBADashGUI
             LoadSelectedTab();
         }
 
-        private void Tv1_BeforeExpand(object sender, TreeViewCancelEventArgs e)
+        private async void Tv1_BeforeExpand(object sender, TreeViewCancelEventArgs e)
         {
             var n = e.Node.AsSQLTreeItem();
             if (n.Nodes.Count == 1 && n.Nodes[0].AsSQLTreeItem().Type == SQLTreeItem.TreeType.DummyNode)
@@ -986,6 +999,10 @@ namespace DBADashGUI
                 else if (n.Type == SQLTreeItem.TreeType.Storage)
                 {
                     ExpandStorage(n);
+                }
+                else if (n.Type == SQLTreeItem.TreeType.CustomToolsFolder)
+                {
+                    await n.AddCustomToolsAsync();
                 }
                 else
                 {

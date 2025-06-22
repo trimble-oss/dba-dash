@@ -325,7 +325,7 @@ namespace DBADash
             "Jobs", "JobHistory", "AvailabilityReplicas", "AvailabilityGroups", "JobSteps",
             "DatabaseQueryStoreOptions", "ResourceGovernorConfiguration", "AzureDBResourceGovernance",
             "RunningQueries", "QueryText", "QueryPlans", "InternalPerformanceCounters", "MemoryUsage",
-            "SessionWaits", "IdentityColumns", "RunningJobs", "TableSize", "ServerServices","ObjectExecutionStatsLegacy"
+            "SessionWaits", "IdentityColumns", "RunningJobs", "TableSize", "ServerServices","ObjectExecutionStatsLegacy","AvailableProcs"
         ];
 
         private async Task UpdateOfflineAsync()
@@ -617,7 +617,8 @@ namespace DBADash
                 ServiceSQSQueueUrl = row.Table.Columns.Contains("ServiceSQSQueueUrl") && row["ServiceSQSQueueUrl"] != DBNull.Value ? (string)row["ServiceSQSQueueUrl"] : null,
                 S3Path = row.Table.Columns.Contains("S3Path") && row["S3Path"] != DBNull.Value ? (string)row["S3Path"] : null,
                 MessagingEnabled = row.Table.Columns.Contains("MessagingEnabled") && row["MessagingEnabled"] != DBNull.Value && (bool)row["MessagingEnabled"],
-                AllowedScripts = row.Table.Columns.Contains("AllowedScripts") && row["AllowedScripts"] != DBNull.Value ? new HashSet<string>(((string)row["AllowedScripts"]).Split(',').Select(part => part.Trim())) : new HashSet<string>(),
+                AllowedScriptsCSV = row.Table.Columns.Contains("AllowedScripts") && row["AllowedScripts"] != DBNull.Value ? (string)row["AllowedScripts"] : string.Empty,
+                AllowedCustomProcsCSV = row.Table.Columns.Contains("AllowedCustomProcs") && row["AllowedCustomProcs"] != DBNull.Value ? (string)row["AllowedCustomProcs"] : string.Empty
             };
         }
 

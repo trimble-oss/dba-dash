@@ -76,7 +76,8 @@ namespace DBADash
         Instance,
         RunningJobs,
         TableSize,
-        ServerServices
+        ServerServices,
+        AvailableProcs
     }
 
     public enum HostPlatform
@@ -364,7 +365,8 @@ namespace DBADash
                 new DataColumn("ServiceSQSQueueUrl",typeof(string)),
                 new DataColumn("S3Path",typeof(string)),
                 new DataColumn("MessagingEnabled", typeof(bool)),
-                new DataColumn("AllowedScripts", typeof(string))
+                new DataColumn("AllowedScripts", typeof(string)),
+                new DataColumn("AllowedCustomProcs",typeof(string))
             });
             if (dt.Rows.Count == 0)
             {
@@ -379,6 +381,9 @@ namespace DBADash
             dt.Rows[0]["AllowedScripts"] = dashAgent.AllowedScripts == null || dashAgent.AllowedScripts.Count == 0
                 ? DBNull.Value
                 : string.Join(',', dashAgent.AllowedScripts);
+            dt.Rows[0]["AllowedCustomProcs"] = dashAgent.AllowedCustomProcs == null || dashAgent.AllowedCustomProcs.Count == 0
+                ? DBNull.Value
+                : string.Join(',', dashAgent.AllowedCustomProcs);
         }
 
         public async Task GetInstanceAsync()
@@ -588,6 +593,10 @@ namespace DBADash
                 return false; // Table size collection not supported on SQL 2014 and below
             }
             else if (collectionType == CollectionType.ServerServices && SQLVersion.Major < 11)
+            {
+                return false;
+            }
+            else if (collectionType == CollectionType.AvailableProcs && IsAzureDB)
             {
                 return false;
             }

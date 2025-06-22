@@ -21,6 +21,8 @@ namespace DBADashGUI
 
         public static bool IsAdmin;
 
+        public static bool CustomTools;
+
         public static bool CommunityScripts;
 
         public static bool AllowJobExecution;
@@ -100,7 +102,8 @@ namespace DBADashGUI
                 AllowPlanForcing = (bool)pAllowPlanForcing.Value && AllowMessaging;
                 AllowJobExecution = (bool)pAllowJobExecution.Value && AllowMessaging;
                 IsAdmin = (bool)pIsAdmin.Value;
-                CommunityScripts = (Roles.Contains("CommunityScripts") && AllowMessaging) || IsAdmin;
+                CommunityScripts = (IsInRole("CommunityScripts") && AllowMessaging) || IsAdmin;
+                CustomTools = (IsInRole("CustomTools") && AllowMessaging) || IsAdmin;
                 if (pTZ.Value != DBNull.Value)
                 {
                     var tzID = (string)pTZ.Value;
@@ -125,6 +128,8 @@ namespace DBADashGUI
                 throw new Exception("Invalid UserID");
             }
         }
+
+        public static bool IsInRole(string role) => Roles.Contains(role);
 
         public static void SetTheme(ThemeType type)
         {

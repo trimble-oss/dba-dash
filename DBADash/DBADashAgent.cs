@@ -19,8 +19,19 @@ namespace DBADash
         public string AgentVersion { get; set; }
         public string ServiceSQSQueueUrl { get; set; }
         public bool MessagingEnabled { get; set; }
-        public HashSet<string> AllowedScripts { get; set; }
-        public bool IsAllowAllScripts { get; set; }
+        public string AllowedScriptsCSV { get; set; }
+        public string AllowedCustomProcsCSV { get; set; }
+
+        public HashSet<string> AllowedScripts => AllowedScriptsInfo.scripts;
+        public bool IsAllowAllScripts => AllowedScriptsInfo.isAllowAll;
+        public HashSet<string> AllowedCustomProcs => _allowedCustomProcs ??= ProcessAllowedCustomProcs(AllowedCustomProcsCSV);
+
+        // Single computation for both AllowedScripts and IsAllowAllScripts
+        private (HashSet<string> scripts, bool isAllowAll) AllowedScriptsInfo =>
+            _allowedScriptsInfo ??= ProcessAllowedScripts(AllowedScriptsCSV);
+
+        private (HashSet<string> scripts, bool isAllowAll)? _allowedScriptsInfo;
+        private HashSet<string>? _allowedCustomProcs;
 
         /// <summary>
         /// This is the ConnectionString of the S3 source connection used to import data from the remote agent.  This is stored and associated with the agent in the repository.  When sending messages to the agent, this will be used for the message payload as SQS messages are limited in size.
@@ -42,7 +53,7 @@ namespace DBADash
             int agentID;
             var cacheKey =
                 // Caching takes all properties into account + connection string (as we could be writing to multiple repositories and the agent could have different IDs for each).  Base off MD5 hash which should be sufficient for this use case.
-                Convert.ToBase64String(MD5.HashData(System.Text.Encoding.UTF8.GetBytes(string.Concat(connectionString, AgentServiceName, AgentVersion, AgentHostName, AgentPath, ServiceSQSQueueUrl, MessagingEnabled, S3Path, AllowedScripts))));
+                Convert.ToBase64String(MD5.HashData(System.Text.Encoding.UTF8.GetBytes(string.Join('|', connectionString, AgentServiceName, AgentVersion, AgentHostName, AgentPath, ServiceSQSQueueUrl, MessagingEnabled, S3Path, AllowedScriptsCSV, AllowedCustomProcsCSV))));
             if (cache.Contains(cacheKey))
             {
                 agentID = (int)cache[cacheKey];
@@ -116,9 +127,8 @@ namespace DBADash
                 AgentPath = AppDomain.CurrentDomain.BaseDirectory,
                 ServiceSQSQueueUrl = cfg.ServiceSQSQueueUrl,
                 MessagingEnabled = cfg.EnableMessaging,
-                AllowedScripts = string.IsNullOrEmpty(cfg.AllowedScripts) ? new HashSet<string>() : new HashSet<string>(cfg.AllowedScripts.Split(',')
-                    .Select(part => part.Trim())),
-                IsAllowAllScripts = cfg.AllowedScripts == "*"
+                AllowedScriptsCSV = cfg.AllowedScripts,
+                AllowedCustomProcsCSV = cfg.AllowedCustomProcs
             };
         }
 
@@ -132,6 +142,7 @@ namespace DBADash
             if (rdr.Read())
             {
                 var allowedScripts = rdr["AllowedScripts"].ToString() ?? string.Empty;
+                var allowedCustomProcs = rdr["AllowedCustomProcs"].ToString() ?? string.Empty;
                 return new DBADashAgent()
                 {
                     AgentServiceName = rdr["AgentServiceName"].ToString(),
@@ -141,9 +152,8 @@ namespace DBADash
                     ServiceSQSQueueUrl = rdr["ServiceSQSQueueURL"].ToString(),
                     S3Path = rdr["S3Path"] == DBNull.Value ? null : rdr["S3Path"].ToString(),
                     MessagingEnabled = rdr["MessagingEnabled"] != DBNull.Value && (bool)rdr["MessagingEnabled"],
-                    AllowedScripts = new HashSet<string>(allowedScripts.Split(',')
-                        .Select(part => part.Trim())),
-                    IsAllowAllScripts = allowedScripts == "*"
+                    AllowedScriptsCSV = allowedScripts,
+                    AllowedCustomProcsCSV = allowedCustomProcs
                 };
             }
             else
@@ -169,11 +179,36 @@ namespace DBADash
                 cmd.Parameters.AddWithValue("S3Path", S3Path);
             }
             cmd.Parameters.AddWithValue("MessagingEnabled", MessagingEnabled);
-            cmd.Parameters.AddWithValue("AllowedScripts", AllowedScripts == null || AllowedScripts.Count == 0 ? DBNull.Value : string.Join(',', AllowedScripts));
-
+            cmd.Parameters.AddWithValue("AllowedScripts", AllowedScriptsCSV);
+            cmd.Parameters.AddWithValue("AllowedCustomProcs", AllowedCustomProcsCSV);
             pAgentID.Direction = System.Data.ParameterDirection.Output;
             cmd.ExecuteNonQuery();
             return (int)pAgentID.Value;
+        }
+
+        private static (HashSet<string> scripts, bool isAllowAll) ProcessAllowedScripts(string allowedScripts)
+        {
+            if (string.IsNullOrEmpty(allowedScripts))
+            {
+                return (new HashSet<string>(StringComparer.OrdinalIgnoreCase), false);
+            }
+
+            bool isAllowAll = allowedScripts.Trim() == "*";
+            var scripts = new HashSet<string>(
+                allowedScripts.Split(',').Select(part => part.Trim()),
+                StringComparer.OrdinalIgnoreCase);
+
+            return (scripts, isAllowAll);
+        }
+
+        // Helper method to process allowed custom procs
+        private static HashSet<string> ProcessAllowedCustomProcs(string allowedCustomProcs)
+        {
+            return string.IsNullOrEmpty(allowedCustomProcs)
+                ? new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                : new HashSet<string>(
+                    allowedCustomProcs.Split(',').Select(part => part.Trim()),
+                    StringComparer.OrdinalIgnoreCase);
         }
     }
 }

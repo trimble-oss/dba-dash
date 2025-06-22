@@ -30,6 +30,13 @@ namespace DBADashService
         private MessageProcessing messageProcessing;
         public static readonly ConcurrentDictionary<string, SemaphoreSlim> Locker = new();
 
+        // Thread-safe one-time logging using Lazy<T>
+        private static readonly Lazy<bool> _logAvailableProcsRemoval = new Lazy<bool>(() =>
+        {
+            Log.Information("Removing AvailableProcs collection. Not applicable with current messaging configuration");
+            return true;
+        });
+
         public ScheduleService()
         {
             config = SchedulerServiceConfig.Config;
@@ -319,6 +326,34 @@ namespace DBADashService
             await ScanForAzureDBsAsync();
         }
 
+        private CollectionType[] RemoveNotApplicableCollections(CollectionType[] types)
+        {
+            if (ShouldKeepAvailableProcs())
+            {
+                return types;
+            }
+
+            if (!types.Contains(CollectionType.AvailableProcs))
+            {
+                return types;
+            }
+
+            LogAvailableProcsRemovalOnce();
+            return types.Where(type => type != CollectionType.AvailableProcs).ToArray();
+        }
+
+        private static void LogAvailableProcsRemovalOnce()
+        {
+            _ = _logAvailableProcsRemoval.Value;
+        }
+
+        private bool ShouldKeepAvailableProcs()
+        {
+            return config.EnableMessaging &&
+                   (!string.IsNullOrEmpty(config.AllowedCustomProcs) ||
+                    !string.IsNullOrEmpty(config.AllowedScripts));
+        }
+
         private async Task ScheduleSourceAsync(DBADashSource src)
         {
             var cfgString = JsonConvert.SerializeObject(src);
@@ -334,14 +369,16 @@ namespace DBADashService
             }
             var customCollections = src.CustomCollections.CombineCollections(config.CustomCollections);
 
+            var onStartCollections = RemoveNotApplicableCollections(srcSchedule.OnServiceStartCollection);
+
             if (srcSchedule.OnServiceStartCollection.Length > 0)
             {
-                Log.Information("Trigger on startup collections for {source} to collect {collection}", src.SourceConnection.ConnectionForPrint, srcSchedule.OnServiceStartCollection);
+                Log.Information("Trigger on startup collections for {source} to collect {collection}", src.SourceConnection.ConnectionForPrint, onStartCollections);
                 var onStartCustom = customCollections
                     .Where(c => c.Value.RunOnServiceStart)
                     .ToDictionary(c => c.Key, c => c.Value);
 
-                var serviceStartJob = GetJob(srcSchedule.OnServiceStartCollection, src, cfgString, onStartCustom);
+                var serviceStartJob = GetJob(onStartCollections, src, cfgString, onStartCustom);
                 scheduler.AddJob(serviceStartJob, true).ConfigureAwait(false).GetAwaiter().GetResult();
                 await scheduler.TriggerJob(serviceStartJob.Key);
             }
@@ -351,9 +388,9 @@ namespace DBADashService
                     {
                         var groupedSchedule = srcSchedule.GroupedBySchedule;
                         foreach (var schedule in customCollections
-                                     .GroupBy(c => c.Value.Schedule)
-                                     .Where(c => !groupedSchedule.ContainsKey(c.Key))
-                                     .Select(c => c.Key))
+                                                    .GroupBy(c => c.Value.Schedule)
+                                                    .Where(c => !groupedSchedule.ContainsKey(c.Key))
+                                                    .Select(c => c.Key))
                         {
                             groupedSchedule.Add(schedule, Array.Empty<CollectionType>());
                         }
@@ -361,11 +398,13 @@ namespace DBADashService
                         foreach (var s in groupedSchedule)
                         {
                             if (string.IsNullOrEmpty(s.Key)) continue; /* Collection is disabled */
+                            var collections = RemoveNotApplicableCollections(s.Value);
+
                             var custom = customCollections
                                 .Where(c => c.Value.Schedule == s.Key)
                                 .ToDictionary(c => c.Key, c => c.Value);
-                            var job = GetJob(s.Value, src, cfgString, custom);
-                            Log.Information("Add schedule for {source} to collect {collection},{custom} on schedule {schedule}", src.SourceConnection.ConnectionForPrint, s.Value, custom.Keys, s.Key);
+                            var job = GetJob(collections, src, cfgString, custom);
+                            Log.Information("Add schedule for {source} to collect {collection},{custom} on schedule {schedule}", src.SourceConnection.ConnectionForPrint, collections, custom.Keys, s.Key);
                             ScheduleJob(s.Key, job);
                         }
 

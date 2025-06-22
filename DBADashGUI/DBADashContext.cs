@@ -130,9 +130,22 @@ namespace DBADashGUI
             }
         }
 
-        public bool IsScriptAllowed(ProcedureExecutionMessage.CommandNames proc) => IsScriptAllowed(proc.ToString());
+        public bool IsScriptAllowed(ProcedureExecutionMessage.CommunityProcs proc) => IsScriptAllowed("dbo", proc.ToString());
 
-        public bool IsScriptAllowed(string procName) => CanMessage && DBADashUser.CommunityScripts && (CollectAgent.IsAllowAllScripts || CollectAgent.AllowedScripts.Contains(procName));
+        public bool IsScriptAllowed(string schemaName, string procName)
+        {
+            if (!CanMessage)
+                return false;
+
+            if (Enum.TryParse(typeof(ProcedureExecutionMessage.CommunityProcs), procName, true, out _))
+            {
+                return (DBADashUser.CommunityScripts &&
+                    (CollectAgent.IsAllowAllScripts || CollectAgent.AllowedScripts.Contains(procName)));
+            }
+
+            return DBADashUser.CustomTools &&
+                   CollectAgent.AllowedCustomProcs.Contains(procName) || CollectAgent.AllowedCustomProcs.Contains(schemaName + "." + procName) || CollectAgent.AllowedCustomProcs.Contains(schemaName.SqlQuoteName() + "." + procName.SqlQuoteName());
+        }
 
         public DBADashAgent ImportAgent => ImportAgentID == null ? null : CommonData.GetDBADashAgent((int)ImportAgentID);
 

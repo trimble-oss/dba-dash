@@ -14,6 +14,6 @@ SELECT	p.name AS ProcedureName,
 		@CanEditReport AS CanEditReport
 FROM sys.procedures p
 JOIN sys.schemas s on p.schema_id = s.schema_id
-LEFT JOIN dbo.CustomReport CR ON CR.SchemaName = s.name AND CR.ProcedureName = p.name
+LEFT JOIN dbo.CustomReport CR ON CR.SchemaName = s.name AND CR.ProcedureName = p.name AND CR.Type = 'CustomReport'
 WHERE s.name = 'UserReport'
 AND HAS_PERMS_BY_NAME(QUOTENAME(SCHEMA_NAME(p.schema_id)) + '.' + QUOTENAME(p.name),'OBJECT','EXECUTE')=1

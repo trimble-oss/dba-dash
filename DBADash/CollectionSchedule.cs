@@ -64,9 +64,10 @@ namespace DBADashService
                             {CollectionType.DatabaseQueryStoreOptions, new CollectionSchedule(){ Schedule = midnight } },
                             {CollectionType.IdentityColumns, new CollectionSchedule(){ Schedule = midnight} },
                             {CollectionType.SchemaSnapshot, new CollectionSchedule(){Schedule=elevenPm} },
+                            {CollectionType.AvailableProcs, new CollectionSchedule(){Schedule = elevenPm}},
 
-                            { CollectionType.TableSize, new CollectionSchedule() {Schedule = disabled, RunOnServiceStart = false} }
-                  };
+                            { CollectionType.TableSize, new CollectionSchedule() {Schedule = disabled, RunOnServiceStart = false} },
+        };
 
         public static readonly CollectionSchedules DefaultSchedules
                = collectionSchedules;

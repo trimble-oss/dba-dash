@@ -30,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+    <EmbeddedResource Include="SQL\SQLAvailableProcs.sql" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="PerformanceCounters.xml">

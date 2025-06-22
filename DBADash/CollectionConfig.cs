@@ -39,6 +39,8 @@ namespace DBADash
 
         public string AllowedScripts { get; set; }
 
+        public string AllowedCustomProcs { get; set; }
+
         public string AllowedJobs { get; set; }
 
         public string ServiceSQSQueueUrl { get; set; }

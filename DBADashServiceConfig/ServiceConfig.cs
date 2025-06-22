@@ -876,7 +876,7 @@ namespace DBADashServiceConfig
                                              CollectionConfig.DefaultAlertProcessingStartupDelaySeconds;
                 numAlertStartupDelay.Enabled = collectionConfig.AlertProcessingStartupDelaySeconds != null && collectionConfig.ProcessAlerts;
                 chkAlertStartupDelay.Enabled = collectionConfig.ProcessAlerts;
-
+                txtAllowedCustomProcs.Text = collectionConfig.AllowedCustomProcs;
                 UpdateSummaryCron();
                 UpdateScanInterval();
                 SetDgv();
@@ -2420,7 +2420,7 @@ namespace DBADashServiceConfig
 
         private void lnkAllowExplicit_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            txtAllowScripts.Text = Enum.GetValues(typeof(ProcedureExecutionMessage.CommandNames)).Cast<DBADash.Messaging.ProcedureExecutionMessage.CommandNames>()
+            txtAllowScripts.Text = Enum.GetValues(typeof(ProcedureExecutionMessage.CommunityProcs)).Cast<DBADash.Messaging.ProcedureExecutionMessage.CommunityProcs>()
                 .Select(c => c.ToString())
                 .Aggregate((a, b) => a + "," + b);
         }
@@ -2521,6 +2521,11 @@ namespace DBADashServiceConfig
             {
                 CommonShared.ShowExceptionDialog(ex);
             }
+        }
+
+        private void AllowedCustomProcs_TextChanged(object sender, EventArgs e)
+        {
+            collectionConfig.AllowedCustomProcs = txtAllowedCustomProcs.Text;
         }
     }
 }

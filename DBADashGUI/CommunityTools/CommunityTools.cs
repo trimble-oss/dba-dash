@@ -19,8 +19,8 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_WhoIsActive = new()
         {
-            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_WhoIsActive.ToString(),
-            ReportName = ProcedureExecutionMessage.CommandNames.sp_WhoIsActive.ToString(),
+            ProcedureName = ProcedureExecutionMessage.CommunityProcs.sp_WhoIsActive.ToString(),
+            ReportName = ProcedureExecutionMessage.CommunityProcs.sp_WhoIsActive.ToString(),
             URL = "https://whoisactive.com/",
             Description = "Shows what queries are currently running",
             Params = new Params
@@ -360,8 +360,8 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_Blitz = new()
         {
-            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_Blitz.ToString(),
-            ReportName = ProcedureExecutionMessage.CommandNames.sp_Blitz.ToString(),
+            ProcedureName = ProcedureExecutionMessage.CommunityProcs.sp_Blitz.ToString(),
+            ReportName = ProcedureExecutionMessage.CommunityProcs.sp_Blitz.ToString(),
             URL = FirstResponderKitUrl,
             Description = "SQL Server Health Check Stored Procedure",
             Params = new Params
@@ -423,8 +423,8 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_BlitzWho = new()
         {
-            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_BlitzWho.ToString(),
-            ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzWho.ToString(),
+            ProcedureName = ProcedureExecutionMessage.CommunityProcs.sp_BlitzWho.ToString(),
+            ReportName = ProcedureExecutionMessage.CommunityProcs.sp_BlitzWho.ToString(),
             URL = FirstResponderKitUrl,
             Description = "Shows what queries are currently running",
             Params = new Params
@@ -595,8 +595,8 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_BlitzIndex = new()
         {
-            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_BlitzIndex.ToString(),
-            ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzIndex.ToString(),
+            ProcedureName = ProcedureExecutionMessage.CommunityProcs.sp_BlitzIndex.ToString(),
+            ReportName = ProcedureExecutionMessage.CommunityProcs.sp_BlitzIndex.ToString(),
             URL = FirstResponderKitUrl,
             Description = "SQL Server Index Analysis Stored Procedure",
             DatabaseNameParameter = "@DatabaseName",
@@ -834,8 +834,8 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_LogHunter = new()
         {
-            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_LogHunter.ToString(),
-            ReportName = ProcedureExecutionMessage.CommandNames.sp_LogHunter.ToString(),
+            ProcedureName = ProcedureExecutionMessage.CommunityProcs.sp_LogHunter.ToString(),
+            ReportName = ProcedureExecutionMessage.CommunityProcs.sp_LogHunter.ToString(),
             URL = ErikDarlingUrl,
             Description = "Search ErrorLog",
             Params = new Params
@@ -855,8 +855,8 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_BlitzCache = new()
         {
-            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_BlitzCache.ToString(),
-            ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzCache.ToString(),
+            ProcedureName = ProcedureExecutionMessage.CommunityProcs.sp_BlitzCache.ToString(),
+            ReportName = ProcedureExecutionMessage.CommunityProcs.sp_BlitzCache.ToString(),
             URL = FirstResponderKitUrl,
             Description = "List the most resource-intensive queries from the plan cache",
             DatabaseNameParameter = "@DatabaseName",
@@ -1095,8 +1095,8 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_BlitzLock = new()
         {
-            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_BlitzLock.ToString(),
-            ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzLock.ToString(),
+            ProcedureName = ProcedureExecutionMessage.CommunityProcs.sp_BlitzLock.ToString(),
+            ReportName = ProcedureExecutionMessage.CommunityProcs.sp_BlitzLock.ToString(),
             URL = FirstResponderKitUrl,
             Description = "SQL Server Deadlock Analysis Stored Procedure",
             DatabaseNameParameter = "@DatabaseName",
@@ -1216,8 +1216,8 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_BlitzFirst = new()
         {
-            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_BlitzFirst.ToString(),
-            ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzFirst.ToString(),
+            ProcedureName = ProcedureExecutionMessage.CommunityProcs.sp_BlitzFirst.ToString(),
+            ReportName = ProcedureExecutionMessage.CommunityProcs.sp_BlitzFirst.ToString(),
             URL = FirstResponderKitUrl,
             Description = "This script gives you a prioritized list of why your SQL Server is slow right now",
             Params = new Params()
@@ -1509,10 +1509,10 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_BlitzBackups = new()
         {
-            ReportName = ProcedureExecutionMessage.CommandNames.sp_BlitzBackups.ToString(),
+            ReportName = ProcedureExecutionMessage.CommunityProcs.sp_BlitzBackups.ToString(),
             URL = FirstResponderKitUrl,
             Description = "Backup Analysis",
-            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_BlitzBackups.ToString(),
+            ProcedureName = ProcedureExecutionMessage.CommunityProcs.sp_BlitzBackups.ToString(),
             Params = new Params()
             {
                 ParamList = new List<Param>
@@ -1564,8 +1564,8 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_HumanEvents = new()
         {
-            ReportName = ProcedureExecutionMessage.CommandNames.sp_HumanEvents.ToString(),
-            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_HumanEvents.ToString(),
+            ReportName = ProcedureExecutionMessage.CommunityProcs.sp_HumanEvents.ToString(),
+            ProcedureName = ProcedureExecutionMessage.CommunityProcs.sp_HumanEvents.ToString(),
             URL = ErikDarlingUrl,
             Description = "Extended events capture",
             CancellationMessageWarning =
@@ -1878,8 +1878,8 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_PressureDetector = new()
         {
-            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_PressureDetector.ToString(),
-            ReportName = ProcedureExecutionMessage.CommandNames.sp_PressureDetector.ToString(),
+            ProcedureName = ProcedureExecutionMessage.CommunityProcs.sp_PressureDetector.ToString(),
+            ReportName = ProcedureExecutionMessage.CommunityProcs.sp_PressureDetector.ToString(),
             URL = ErikDarlingUrl,
             Description = "Pressure Detector - CPU, Memory etc",
             Params = new Params()
@@ -2052,8 +2052,8 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_HealthParser = new()
         {
-            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_HealthParser.ToString(),
-            ReportName = ProcedureExecutionMessage.CommandNames.sp_HealthParser.ToString(),
+            ProcedureName = ProcedureExecutionMessage.CommunityProcs.sp_HealthParser.ToString(),
+            ReportName = ProcedureExecutionMessage.CommunityProcs.sp_HealthParser.ToString(),
             URL = ErikDarlingUrl,
             Description = "Returns data from system health extended event.",
             DatabaseNameParameter = "@database_name",
@@ -2147,8 +2147,8 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_QuickieStore = new()
         {
-            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_QuickieStore.ToString(),
-            ReportName = ProcedureExecutionMessage.CommandNames.sp_QuickieStore.ToString(),
+            ProcedureName = ProcedureExecutionMessage.CommunityProcs.sp_QuickieStore.ToString(),
+            ReportName = ProcedureExecutionMessage.CommunityProcs.sp_QuickieStore.ToString(),
             URL = ErikDarlingUrl,
             Description = "Query store analysis",
             DatabaseNameParameter = "@database_name",
@@ -2322,8 +2322,8 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_HumanEventsBlockViewer = new()
         {
-            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_HumanEventsBlockViewer.ToString(),
-            ReportName = ProcedureExecutionMessage.CommandNames.sp_HumanEventsBlockViewer.ToString(),
+            ProcedureName = ProcedureExecutionMessage.CommunityProcs.sp_HumanEventsBlockViewer.ToString(),
+            ReportName = ProcedureExecutionMessage.CommunityProcs.sp_HumanEventsBlockViewer.ToString(),
             URL = ErikDarlingUrl,
             Description = "Procedure for parsing sqlserver.blocked_process_report extended event",
             DatabaseNameParameter = "@database_name",
@@ -2411,8 +2411,8 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_SrvPermissions = new()
         {
-            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_SrvPermissions.ToString(),
-            ReportName = ProcedureExecutionMessage.CommandNames.sp_SrvPermissions.ToString(),
+            ProcedureName = ProcedureExecutionMessage.CommunityProcs.sp_SrvPermissions.ToString(),
+            ReportName = ProcedureExecutionMessage.CommunityProcs.sp_SrvPermissions.ToString(),
             URL = "https://github.com/sqlstudent144/SQL-Server-Scripts/blob/main/sp_SrvPermissions.sql",
             Description = "Server principals,role membership and permissions",
             DatabaseNameParameter = "@DBName",
@@ -2551,8 +2551,8 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_DBPermissions = new()
         {
-            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_DBPermissions.ToString(),
-            ReportName = ProcedureExecutionMessage.CommandNames.sp_DBPermissions.ToString(),
+            ProcedureName = ProcedureExecutionMessage.CommunityProcs.sp_DBPermissions.ToString(),
+            ReportName = ProcedureExecutionMessage.CommunityProcs.sp_DBPermissions.ToString(),
             URL = "https://github.com/sqlstudent144/SQL-Server-Scripts/blob/main/sp_DBPermissions.sql",
             Description = "Database principals,role membership and permissions",
             DatabaseNameParameter = "@DBName",
@@ -2703,8 +2703,8 @@ namespace DBADashGUI.CommunityTools
 
         public static DirectExecutionReport sp_IndexCleanup = new()
         {
-            ProcedureName = ProcedureExecutionMessage.CommandNames.sp_IndexCleanup.ToString(),
-            ReportName = ProcedureExecutionMessage.CommandNames.sp_IndexCleanup.ToString(),
+            ProcedureName = ProcedureExecutionMessage.CommunityProcs.sp_IndexCleanup.ToString(),
+            ReportName = ProcedureExecutionMessage.CommunityProcs.sp_IndexCleanup.ToString(),
             URL = ErikDarlingUrl,
             Description = "This stored procedure helps identify unused and duplicate indexes in your SQL Server databases that could be candidates for removal. It analyzes index usage statistics and can generate scripts for removing unnecessary indexes.",
             DatabaseNameParameter = "@database_name",

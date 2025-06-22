@@ -1,14 +1,17 @@
-﻿using DBADashGUI.Performance;
+﻿using DBADash;
+using DBADashGUI.CommunityTools;
+using DBADashGUI.CustomReports;
+using DBADashGUI.Performance;
 using Microsoft.Data.SqlClient;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Caching;
 using System.Threading.Tasks;
-using DBADash;
-using DocumentFormat.OpenXml.Office2021.DocumentTasks;
-using Microsoft.SqlServer.Management.Smo;
+using System.Xml.Linq;
 
 namespace DBADashGUI
 {
@@ -354,6 +357,74 @@ namespace DBADashGUI
             var objectName = rdr.IsDBNull(2) ? null : rdr.GetString(2);
 
             return (objectId, schemaName, objectName);
+        }
+
+        public static async Task<List<DirectExecutionReport>> GetCustomToolsAsync(int InstanceId)
+        {
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand("dbo.CustomTools_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("@InstanceID", InstanceId);
+            await cn.OpenAsync();
+            await using var rdr = await cmd.ExecuteReaderAsync();
+            var reports = new List<DirectExecutionReport>();
+            while (await rdr.ReadAsync())
+            {
+                var paramXML = await rdr.IsDBNullAsync("parameters") ? null : await rdr.GetFieldValueAsync<string>("parameters");
+                var procName = await rdr.GetFieldValueAsync<string>("object_name");
+                var schemaName = await rdr.GetFieldValueAsync<string>("schema_name");
+                var meta = await rdr.IsDBNullAsync("MetaData") ? null : await rdr.GetFieldValueAsync<string>("MetaData");
+                var report = new DirectExecutionReport() { ReportName = procName, ReportVisibilityRole = "CustomTools" };
+                if (!string.IsNullOrEmpty(meta))
+                {
+                    try
+                    {
+                        report = JsonConvert.DeserializeObject<DirectExecutionReport>(meta, new JsonSerializerSettings() { SerializationBinder = new SimpleBinder(), TypeNameHandling = TypeNameHandling.Auto });
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.ToString());
+                    }
+                }
+
+                report.CanEditReport = true;
+                report.ProcedureName = procName;
+                report.SchemaName = schemaName;
+                report.QualifiedProcedureName = schemaName.SqlQuoteName() + "." + procName.SqlQuoteName();
+                report.Params = GetParameters(paramXML);
+                report.DatabaseNameParameter = ((report.Params?.ParamList?.Select(p => p.ParamName).Where(p =>
+                    (new string[] { "@DB", "@DBName", "@DatabaseName", "@Database", "@database_name", "db_name" }).Contains(p, StringComparer.OrdinalIgnoreCase))) ?? Array.Empty<string>()).MinBy(p => p);
+                reports.Add(report);
+            }
+            return reports;
+        }
+
+        private static Params GetParameters(string xml)
+        {
+            if (string.IsNullOrEmpty(xml)) return new Params();
+            if (!xml.Trim().StartsWith("<parameters>")) return new Params();
+            var parameters = new Params() { ParamList = new() };
+            try
+            {
+                var doc = XDocument.Parse(xml);
+
+                var paramElements = doc.Descendants("parameter");
+
+                foreach (var element in paramElements)
+                {
+                    var param = new Param
+                    {
+                        ParamName = element.Attribute("name")?.Value ?? "",
+                        ParamType = element.Attribute("type")?.Value?.ToUpper() ?? ""
+                    };
+                    parameters.ParamList.Add(param);
+                }
+
+                return parameters;
+            }
+            catch (Exception ex)
+            {
+                return new Params();
+            }
         }
     }
 }
