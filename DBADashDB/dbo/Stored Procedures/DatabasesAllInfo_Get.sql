@@ -84,7 +84,14 @@ SELECT  I.InstanceGroupName AS Instance,
         D.is_ledger_on, 
         D.LastGoodCheckDbTime,
         LG.status as LastGoodCheckDBStatus,
-		D.VLFCount
+		D.VLFCount,
+        D.catalog_collation_type,
+        D.is_accelerated_database_recovery_on,
+        D.is_change_feed_enabled,
+        D.is_event_stream_enabled,
+        D.is_memory_optimized_enabled,
+        D.is_temporal_history_retention_enabled,
+        D.is_optimized_locking_on
 FROM dbo.Databases D
 JOIN dbo.InstanceInfo I ON I.InstanceID = D.InstanceID
 JOIN dbo.LastGoodCheckDB LG ON I.InstanceID = LG.InstanceID AND D.DatabaseID = LG.DatabaseID

@@ -103,6 +103,7 @@ namespace DBADashGUI.Changes
             // 
             dgv.AllowUserToAddRows = false;
             dgv.AllowUserToDeleteRows = false;
+            dgv.AllowUserToOrderColumns = true;
             dgv.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
@@ -150,10 +151,10 @@ namespace DBADashGUI.Changes
             // toolStripLabel2
             // 
             toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 2.25F, System.Drawing.FontStyle.Bold);
+            toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
             toolStripLabel2.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             toolStripLabel2.Name = "toolStripLabel2";
-            toolStripLabel2.Size = new System.Drawing.Size(57, 24);
+            toolStripLabel2.Size = new System.Drawing.Size(107, 24);
             toolStripLabel2.Text = "Database Info";
             // 
             // tsRefreshInfo
@@ -206,7 +207,7 @@ namespace DBADashGUI.Changes
             tsSummary.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsSummary.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             tsSummary.Name = "tsSummary";
-            tsSummary.Size = new System.Drawing.Size(167, 55);
+            tsSummary.Size = new System.Drawing.Size(95, 24);
             tsSummary.Text = "Summary";
             tsSummary.Visible = false;
             tsSummary.Click += TsSummary_Click;
@@ -235,6 +236,7 @@ namespace DBADashGUI.Changes
             // 
             dgvHistory.AllowUserToAddRows = false;
             dgvHistory.AllowUserToDeleteRows = false;
+            dgvHistory.AllowUserToOrderColumns = true;
             dgvHistory.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
@@ -335,10 +337,10 @@ namespace DBADashGUI.Changes
             // toolStripLabel1
             // 
             toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 2.25F, System.Drawing.FontStyle.Bold);
+            toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
             toolStripLabel1.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
             toolStripLabel1.Name = "toolStripLabel1";
-            toolStripLabel1.Size = new System.Drawing.Size(32, 24);
+            toolStripLabel1.Size = new System.Drawing.Size(61, 24);
             toolStripLabel1.Text = "History";
             // 
             // tsRefreshHistory

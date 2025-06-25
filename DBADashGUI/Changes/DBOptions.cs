@@ -48,6 +48,8 @@ namespace DBADashGUI.Changes
                     new DataGridViewLinkColumn(){ Name="None-Default Target Recovery Time", HeaderText="None-Default Target Recovery Time", DataPropertyName="None-Default Target Recovery Time", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Defaults are:\n0 - Automatic checkpoints.  Old default.\n60 - Indirect checkpoints. Default from SQL 2016.  Can improve recovery time and reduce checkpoint related I/O spiking."},
                     new DataGridViewLinkColumn(){ Name="RCSI Count", HeaderText="RCSI Count", DataPropertyName="RCSI Count", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of user databases using read committed snapshot isolation level.\nRead Committed Isolation Level (RCSI) allows read and write queries to run concurrently without blocking each other."},
                     new DataGridViewLinkColumn(){ Name="User Database Count", HeaderText="User Database Count", DataPropertyName="User Database Count", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of databases excluding system databases."},
+                    new DataGridViewLinkColumn(){ Name="ADR", HeaderText="ADR", DataPropertyName="ADR", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of databases with ADR (Accelerated Database Recovery) enabled"},
+                    new DataGridViewLinkColumn(){ Name="Optimized Locking", HeaderText="Optimized Locking", DataPropertyName="Optimized Locking", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of databases with optimized locking enabled (SQL 2025)"},
         };
 
         public bool SummaryMode
@@ -541,6 +543,14 @@ namespace DBADashGUI.Changes
             else if (e.ColumnIndex == dgv.Columns["RCSI Count"]?.Index)
             {
                 PersistFilter = "is_read_committed_snapshot_on=1";
+            }
+            else if (e.ColumnIndex == dgv.Columns["ADR"]?.Index)
+            {
+                PersistFilter = "is_accelerated_database_recovery_on=1";
+            }
+            else if (e.ColumnIndex == dgv.Columns["Optimized Locking"]?.Index)
+            {
+                PersistFilter = "is_optimized_locking_on=1";
             }
             else
             {

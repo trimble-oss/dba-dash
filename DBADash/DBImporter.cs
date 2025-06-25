@@ -160,6 +160,17 @@ namespace DBADash
                 {
                     dtDB.Columns.Add("is_ledger_on", typeof(bool));
                 }
+
+                if (!dtDB.Columns.Contains("catalog_collation_type"))
+                {
+                    dtDB.Columns.Add("catalog_collation_type", typeof(int));
+                    dtDB.Columns.Add("is_accelerated_database_recovery_on", typeof(bool));
+                    dtDB.Columns.Add("is_change_feed_enabled", typeof(bool));
+                    dtDB.Columns.Add("is_event_stream_enabled", typeof(bool));
+                    dtDB.Columns.Add("is_memory_optimized_enabled", typeof(bool));
+                    dtDB.Columns.Add("is_temporal_history_retention_enabled", typeof(bool));
+                    dtDB.Columns.Add("is_optimized_locking_on", typeof(bool));
+                }
             }
             if (data.Tables.Contains("Backups"))
             {

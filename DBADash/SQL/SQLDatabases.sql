@@ -67,7 +67,14 @@
     is_federation_member BIT NULL,
     is_remote_data_archive_enabled BIT NULL,
     is_mixed_page_allocation_on BIT NULL,
-    is_ledger_on BIT NULL
+    is_ledger_on BIT NULL,
+    catalog_collation_type INT NULL,
+    is_accelerated_database_recovery_on BIT NULL,
+    is_change_feed_enabled BIT NULL,
+    is_event_stream_enabled BIT NULL,
+    is_memory_optimized_enabled BIT NULL,
+    is_temporal_history_retention_enabled BIT NULL,
+    is_optimized_locking_on BIT NULL,
 );
 
 SELECT *
@@ -78,7 +85,7 @@ WHERE 1=2
 DECLARE @SQL NVARCHAR(MAX)
 DECLARE @cols NVARCHAR(MAX)
 SET @cols = 
-STUFF((SELECT ',' + name  
+STUFF((SELECT ',' + QUOTENAME(name)  
 FROM (
 	SELECT name  FROM tempdb.sys.columns WHERE OBJECT_ID = OBJECT_ID('tempdb..#sysdb')
 	INTERSECT
@@ -163,7 +170,14 @@ SELECT name,
        is_federation_member,
        is_remote_data_archive_enabled,
        is_mixed_page_allocation_on,
-	   is_ledger_on
+	   is_ledger_on,
+       catalog_collation_type,
+       is_accelerated_database_recovery_on,
+       is_change_feed_enabled,
+       is_event_stream_enabled,
+       is_memory_optimized_enabled,
+       is_temporal_history_retention_enabled,
+       is_optimized_locking_on
 FROM #sysdb
 
 DROP TABLE #sysdb
