@@ -5,7 +5,8 @@
 	object_name SYSNAME,
 	parameters XML
 )
-DECLARE @DB SYSNAME = DB_NAME()
+DECLARE @DB SYSNAME
+SET @DB = DB_NAME()
 WHILE 1=1
 BEGIN
 	INSERT INTO @Procs(
