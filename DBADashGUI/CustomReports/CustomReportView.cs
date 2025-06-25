@@ -43,6 +43,8 @@ namespace DBADashGUI.CustomReports
 
         private bool AutoLoad => Report is not DirectExecutionReport;
 
+        private const string ResultSetLabelControlName = "ResultLabel";
+
         public CustomReportView()
         {
             Grids = new();
@@ -605,7 +607,8 @@ namespace DBADashGUI.CustomReports
                     ts.Items.Add(new ToolStripLabel(Report.CustomReportResults[i].ResultName)
                     {
                         Alignment = ToolStripItemAlignment.Right,
-                        Font = new Font(this.Font, FontStyle.Bold)
+                        Font = new Font(this.Font, FontStyle.Bold),
+                        Name = ResultSetLabelControlName
                     });
                     ts.Items.Add(new ToolStripButton("Columns", Properties.Resources.Column_16x, Columns_Click)
                     {
@@ -775,6 +778,14 @@ namespace DBADashGUI.CustomReports
             suppressCboResultsIndexChanged = true;
             cboResults.Items[dgv.ResultSetID] = name;
             dgv.ResultSetName = name;
+
+            if (sender is ToolStripItem tsRename)
+            {
+                var tsLabel = tsRename.Owner?.Items.OfType<ToolStripLabel>().Where(lbl => lbl.Name == ResultSetLabelControlName)
+                    ?.FirstOrDefault();
+                if (tsLabel != null) tsLabel.Text = name;
+            }
+
             suppressCboResultsIndexChanged = false;
             Report.Update();
             ShowTable();
