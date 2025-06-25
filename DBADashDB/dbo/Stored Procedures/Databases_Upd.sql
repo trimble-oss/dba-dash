@@ -74,7 +74,14 @@ BEGIN
 					CAST(is_remote_data_archive_enabled AS SQL_VARIANT) AS is_remote_data_archive_enabled,
 					CAST(is_mixed_page_allocation_on AS SQL_VARIANT) AS is_mixed_page_allocation_on,
 					CAST(IsActive AS SQL_VARIANT) AS IsActive,
-					CAST(is_ledger_on AS SQL_VARIANT) AS is_ledger_on
+					CAST(is_ledger_on AS SQL_VARIANT) AS is_ledger_on,
+					CAST(catalog_collation_type AS SQL_VARIANT) AS catalog_collation_type,
+					CAST(is_accelerated_database_recovery_on AS SQL_VARIANT) AS is_accelerated_database_recovery_on,
+					CAST(is_change_feed_enabled AS SQL_VARIANT) AS is_change_feed_enabled,
+					CAST(is_event_stream_enabled AS SQL_VARIANT) AS is_event_stream_enabled,
+					CAST(is_memory_optimized_enabled AS SQL_VARIANT) AS is_memory_optimized_enabled,
+					CAST(is_temporal_history_retention_enabled AS SQL_VARIANT) AS is_temporal_history_retention_enabled,
+					CAST(is_optimized_locking_on AS SQL_VARIANT) AS is_optimized_locking_on
 			FROM dbo.Databases
 			WHERE InstanceID  = @InstanceID
 	),
@@ -143,7 +150,14 @@ BEGIN
 					CAST(is_remote_data_archive_enabled AS SQL_VARIANT) AS is_remote_data_archive_enabled,
 					CAST(is_mixed_page_allocation_on AS SQL_VARIANT) AS is_mixed_page_allocation_on,
 					CAST(IsActive AS SQL_VARIANT) AS IsActive,
-					CAST(is_ledger_on AS SQL_VARIANT) AS is_ledger_on
+					CAST(is_ledger_on AS SQL_VARIANT) AS is_ledger_on,
+					CAST(catalog_collation_type AS SQL_VARIANT) AS catalog_collation_type,
+					CAST(is_accelerated_database_recovery_on AS SQL_VARIANT) AS is_accelerated_database_recovery_on,
+					CAST(is_change_feed_enabled AS SQL_VARIANT) AS is_change_feed_enabled,
+					CAST(is_event_stream_enabled AS SQL_VARIANT) AS is_event_stream_enabled,
+					CAST(is_memory_optimized_enabled AS SQL_VARIANT) AS is_memory_optimized_enabled,
+					CAST(is_temporal_history_retention_enabled AS SQL_VARIANT) AS is_temporal_history_retention_enabled,
+					CAST(is_optimized_locking_on AS SQL_VARIANT) AS is_optimized_locking_on
 		FROM @Databases t
 		CROSS APPLY(SELECT DatabaseID,D.IsActive 
 					FROM dbo.Databases D 
@@ -217,7 +231,14 @@ BEGIN
 			   is_federation_member,
 			   is_remote_data_archive_enabled,
 			   is_mixed_page_allocation_on,
-			   is_ledger_on)
+			   is_ledger_on,
+			   catalog_collation_type,
+			   is_accelerated_database_recovery_on,
+			   is_change_feed_enabled,
+			   is_event_stream_enabled,
+			   is_memory_optimized_enabled,
+			   is_temporal_history_retention_enabled,
+			   is_optimized_locking_on)
 			   ) AS upvt
 	),
 	NewUnPvt AS (
@@ -286,7 +307,14 @@ BEGIN
 			   is_federation_member,
 			   is_remote_data_archive_enabled,
 			   is_mixed_page_allocation_on,
-			   is_ledger_on)
+			   is_ledger_on,
+			   catalog_collation_type,
+			   is_accelerated_database_recovery_on,
+			   is_change_feed_enabled,
+			   is_event_stream_enabled,
+			   is_memory_optimized_enabled,
+			   is_temporal_history_retention_enabled,
+			   is_optimized_locking_on)
 			   ) AS upvt
 	)
 	INSERT INTO dbo.DBOptionsHistory(DatabaseID,Setting,OldValue,NewValue,ChangeDate)
@@ -378,6 +406,13 @@ BEGIN
 		  ,[is_mixed_page_allocation_on] = S.is_mixed_page_allocation_on
 		  ,[IsActive] = 1
 		  ,is_ledger_on = S.is_ledger_on
+		  ,catalog_collation_type = S.catalog_collation_type
+		  ,is_accelerated_database_recovery_on=S.is_accelerated_database_recovery_on
+		  ,is_change_feed_enabled=S.is_change_feed_enabled
+		  ,is_event_stream_enabled=S.is_event_stream_enabled
+		  ,is_memory_optimized_enabled=S.is_memory_optimized_enabled
+		  ,is_temporal_history_retention_enabled=S.is_temporal_history_retention_enabled
+		  ,is_optimized_locking_on = S.is_optimized_locking_on
 	WHEN NOT MATCHED BY TARGET THEN
 	INSERT (
 			InstanceID,
@@ -450,7 +485,14 @@ BEGIN
 		   is_remote_data_archive_enabled,
 		   is_mixed_page_allocation_on ,
 		   IsActive,
-		   is_ledger_on
+		   is_ledger_on,
+		   catalog_collation_type,
+		   is_accelerated_database_recovery_on,
+		   is_change_feed_enabled,
+		   is_event_stream_enabled,
+		   is_memory_optimized_enabled,
+		   is_temporal_history_retention_enabled,
+		   is_optimized_locking_on
 	)
 	VALUES( @InstanceID,
 			name,
@@ -522,7 +564,14 @@ BEGIN
 		   is_remote_data_archive_enabled,
 		   is_mixed_page_allocation_on ,
 		   CAST(1 as BIT),
-		   is_ledger_on
+		   is_ledger_on,
+		   catalog_collation_type,
+		   is_accelerated_database_recovery_on,
+		   is_change_feed_enabled,
+		   is_event_stream_enabled,
+		   is_memory_optimized_enabled,
+		   is_temporal_history_retention_enabled,
+		   is_optimized_locking_on
 	)
 	WHEN NOT MATCHED BY SOURCE THEN 
 	UPDATE SET T.IsActive = 0;

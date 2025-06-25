@@ -68,5 +68,12 @@
     is_remote_data_archive_enabled BIT NULL,
     is_mixed_page_allocation_on BIT NULL,
     is_ledger_on BIT NULL,
+    catalog_collation_type INT NULL,
+    is_accelerated_database_recovery_on BIT NULL,
+    is_change_feed_enabled BIT NULL,
+    is_event_stream_enabled BIT NULL,
+    is_memory_optimized_enabled BIT NULL,
+    is_temporal_history_retention_enabled BIT NULL,
+    is_optimized_locking_on BIT NULL,
     PRIMARY KEY CLUSTERED (database_id ASC)
 );

@@ -83,6 +83,13 @@
     LastGoodCheckDbTime DATETIME2(3) NULL,
     VLFCount INT NULL,
     is_ledger_on BIT NULL,
+    catalog_collation_type INT NULL,
+    is_accelerated_database_recovery_on BIT NULL,
+    is_change_feed_enabled BIT NULL,
+    is_event_stream_enabled BIT NULL,
+    is_memory_optimized_enabled BIT NULL,
+    is_temporal_history_retention_enabled BIT NULL,
+    is_optimized_locking_on BIT NULL,
     CONSTRAINT PK_Databases PRIMARY KEY CLUSTERED (DatabaseID ASC),
     CONSTRAINT FK_Databases_Instances FOREIGN KEY (InstanceID) REFERENCES dbo.Instances (InstanceID)
 );
