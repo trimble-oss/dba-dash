@@ -7,7 +7,7 @@
 RETURNS TABLE
 AS
 RETURN
-SELECT I.InstanceID, I.scheduler_count
+SELECT I.InstanceID, ISNULL(I.scheduler_count,1) AS scheduler_count
 FROM dbo.Instances I
 OUTER APPLY Alert.IsBlackoutPeriod(I.InstanceID,@AlertKey) BP
 WHERE EXISTS(
