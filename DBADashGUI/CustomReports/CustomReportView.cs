@@ -1077,7 +1077,7 @@ namespace DBADashGUI.CustomReports
             if (Report is not DirectExecutionReport dxReport) return;
             if (string.IsNullOrEmpty(context.DatabaseName)) return;
             foreach (var p in customParams.Where(p =>
-                         p.Param.ParameterName.TrimStart('@').Equals(dxReport.DatabaseNameParameter.TrimStart('@'),
+                         p.Param.ParameterName.TrimStart('@').Equals(dxReport.DatabaseNameParameter?.TrimStart('@'),
                              StringComparison.InvariantCultureIgnoreCase)))
             {
                 p.Param.Value = context.DatabaseName;
