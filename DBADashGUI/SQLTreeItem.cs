@@ -1093,7 +1093,7 @@ namespace DBADashGUI
             if (tools == null) return;
             foreach (var tool in tools)
             {
-                if (!tool.IsDatabaseLevel && DatabaseID > 0) continue;
+                if (!tool.IsDatabaseLevel && DatabaseID > 0 && Context.AzureInstanceIDs.Count == 0) continue;
                 if (!DBADashUser.IsInRole(tool.ReportVisibilityRole) && !DBADashUser.IsAdmin) continue;
                 var n = new SQLTreeItem(tool.ReportName, TreeType.CustomTool) { Report = tool };
                 Nodes.Add(n);
