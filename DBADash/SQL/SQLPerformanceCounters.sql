@@ -5,6 +5,14 @@ DECLARE @counters TABLE(
 	instance_name NCHAR(128) NULL,
 	UNIQUE(object_name,counter_name,instance_name)
 )
+DECLARE @Metrics AS TABLE(
+	SnapshotDate DATETIME2(7) NOT NULL DEFAULT(SYSUTCDATETIME()),
+	object_name NVARCHAR(128) NOT NULL,
+	counter_name NVARCHAR(128) NOT NULL,
+	instance_name NVARCHAR(128) NOT NULL,
+	cntr_value DECIMAL(28,9) NOT NULL,
+	cntr_type INT NOT NULL DEFAULT(65792)
+)
 INSERT INTO @counters(object_name,counter_name,instance_name)
 SELECT	ctrs.c.value('@object_name','NCHAR(128)'),
 		ctrs.c.value('@counter_name','NCHAR(128)'),
@@ -20,6 +28,8 @@ DECLARE @AvgRunnableTasks DECIMAL(28,9)
 DECLARE @AvgCurrentTasks DECIMAL(28,9)
 DECLARE @AvgPendingDiskIO DECIMAL(28,9)
 DECLARE @AvgWorkQueueCount DECIMAL(28,9)
+DECLARE @MaxPVSSizeKB DECIMAL(28,9)
+DECLARE @SumPVSSizeKB DECIMAL(28,9)
 
 IF OBJECT_ID('sys.dm_os_sys_memory') IS NOT NULL AND EXISTS(SELECT * FROM @counters WHERE object_name='sys.dm_os_sys_memory')
 BEGIN
@@ -43,119 +53,175 @@ BEGIN
 		@AvgWorkQueueCount = AVG(work_queue_count*1.0)
 	FROM sys.dm_os_schedulers 
 	WHERE status='VISIBLE ONLINE'
-END
+END;
+IF OBJECT_ID('sys.dm_tran_persistent_version_store_stats') IS NOT NULL 
+	AND EXISTS(SELECT * 
+				FROM @counters 
+				WHERE object_name='sys.dm_tran_persistent_version_store_stats'
+				AND (counter_name = 'Max Persistent Version Store Size (KB)' 
+					OR counter_name = 'Sum Persistent Version Store Size (KB)'
+					OR counter_name= '*')
+				AND (instance_name IS NULL OR instance_name='*' OR instance_name='')
+	)
+BEGIN
+	SELECT	@MaxPVSSizeKB = MAX(pvs.persistent_version_store_size_kb),
+			@SumPVSSizeKB = SUM(pvs.persistent_version_store_size_kb)
+	FROM sys.databases d
+	JOIN sys.dm_tran_persistent_version_store_stats pvs on d.database_id = pvs.database_id
+	WHERE d.is_accelerated_database_recovery_on=1 /* Filter for where ADR is enabled.  If no DBs are enabled, values will be NULL and instance level metrics won't be tracked */
+END 
 
-SELECT SYSUTCDATETIME() AS SnapshotDate,
-		'sys.dm_os_schedulers' AS object_name,
-		'Worker threads used %' AS counter_name,
-		'' AS instance_name,
-		@PctWorkerThreadsUsed AS  cntr_value,
+IF OBJECT_ID('sys.dm_tran_persistent_version_store_stats') IS NOT NULL 
+	AND EXISTS(SELECT * 
+				FROM @counters 
+				WHERE object_name='sys.dm_tran_persistent_version_store_stats'
+				AND (counter_name = 'Persistent Version Store Size (KB)' OR counter_name = '*')
+	)
+BEGIN
+	/* Captures PVS size for databases with ADR enabled (avoiding capturing metrics for DBs where it's not applicable) */
+	INSERT @Metrics	(
+	    SnapshotDate,
+	    object_name,
+	    counter_name,
+	    instance_name,
+	    cntr_value,
+	    cntr_type
+	)
+	SELECT SYSUTCDATETIME() AS SnapshotDate,
+		N'sys.dm_tran_persistent_version_store_stats' as object_name,
+		'Persistent Version Store Size (KB)',
+		d.name AS instance_name,
+		CAST(pvs.persistent_version_store_size_kb AS DECIMAL(28,9)),
 		65792 AS cntr_type
-WHERE @PctWorkerThreadsUsed IS NOT NULL
-AND EXISTS(	SELECT 1 
+	FROM sys.databases d
+	JOIN sys.dm_tran_persistent_version_store_stats pvs on d.database_id = pvs.database_id
+	WHERE d.is_accelerated_database_recovery_on=1
+	AND EXISTS(	SELECT 1 
+				FROM @counters c 
+				WHERE c.object_name = N'sys.dm_tran_persistent_version_store_stats' 
+				AND (c.counter_name = 'Persistent Version Store Size (KB)' OR c.counter_name = '*')
+				AND (d.name = c.instance_name OR c.instance_name IS NULL OR c.instance_name='*')
+			   )
+END;
+
+WITH Metrics AS (
+	SELECT SYSUTCDATETIME() AS SnapshotDate,
+			'sys.dm_os_schedulers' AS object_name,
+			'Worker threads used %' AS counter_name,
+			'' AS instance_name,
+			@PctWorkerThreadsUsed AS  cntr_value,
+			65792 AS cntr_type
+	WHERE @PctWorkerThreadsUsed IS NOT NULL
+	UNION ALL
+	SELECT SYSUTCDATETIME() AS SnapshotDate,
+			'sys.dm_os_schedulers' AS object_name,
+			'Avg runnable tasks' AS counter_name,
+			'' AS instance_name,
+			@AvgRunnableTasks AS  cntr_value,
+			65792 AS cntr_type
+	WHERE @AvgRunnableTasks IS NOT NULL
+	UNION ALL
+	SELECT SYSUTCDATETIME() AS SnapshotDate,
+			'sys.dm_os_schedulers' AS object_name,
+			'Avg current tasks' AS counter_name,
+			'' AS instance_name,
+			@AvgCurrentTasks AS  cntr_value,
+			65792 AS cntr_type
+	WHERE @AvgCurrentTasks IS NOT NULL
+	UNION ALL
+	SELECT SYSUTCDATETIME() AS SnapshotDate,
+			'sys.dm_os_schedulers' AS object_name,
+			'Avg pending disk IO' AS counter_name,
+			'' AS instance_name,
+			@AvgPendingDiskIO AS  cntr_value,
+			65792 AS cntr_type
+	WHERE @AvgPendingDiskIO IS NOT NULL
+	UNION ALL
+	SELECT SYSUTCDATETIME() AS SnapshotDate,
+			'sys.dm_os_schedulers' AS object_name,
+			'Avg work queue count' AS counter_name,
+			'' AS instance_name,
+			@AvgWorkQueueCount AS  cntr_value,
+			65792 AS cntr_type
+	WHERE @AvgWorkQueueCount IS NOT NULL
+	UNION ALL
+	SELECT SYSUTCDATETIME() AS SnapshotDate,
+			'sys.dm_os_nodes' AS object_name,
+			'Count of Nodes reporting thread resources low' AS counter_name,
+			'' AS instance_name,
+			@CountOfNodesWithThreadResourcesLow AS  cntr_value,
+			65792 AS cntr_type
+	WHERE @CountOfNodesWithThreadResourcesLow IS NOT NULL
+	UNION ALL
+	SELECT SYSUTCDATETIME() AS SnapshotDate,
+			'sys.dm_os_sys_memory' AS object_name,
+			'Available Physical Memory (KB)' AS counter_name,
+			'' AS instance_name,
+			@AvailablePhysicalMemory AS  cntr_value,
+			65792 AS cntr_type
+	WHERE @AvailablePhysicalMemory IS NOT NULL
+	UNION ALL
+	SELECT SYSUTCDATETIME()AS SnapshotDate,
+			'sys.dm_os_sys_memory' AS object_name,
+			'System Low Memory Signal State' AS counter_name,
+			'' AS instance_name,
+			@MemoryLowSignalState AS  cntr_value,
+			65792 AS cntr_type
+	WHERE @MemoryLowSignalState IS NOT NULL
+	UNION ALL
+	SELECT SYSUTCDATETIME() AS SnapshotDate,
+			'sys.dm_os_sys_memory' AS object_name,
+			'System High Memory Signal State' AS counter_name,
+			'' AS instance_name,
+			@MemoryHighSignalState AS  cntr_value,
+			65792 AS cntr_type
+	WHERE @MemoryHighSignalState IS NOT NULL
+	UNION ALL
+	SELECT SYSUTCDATETIME() AS SnapshotDate,
+			'sys.dm_tran_persistent_version_store_stats' AS object_name,
+			'Max Persistent Version Store Size (KB)' AS counter_name,
+			'' AS instance_name,
+			@MaxPVSSizeKB AS  cntr_value,
+			65792 AS cntr_type
+	WHERE @MaxPVSSizeKB IS NOT NULL
+	UNION ALL
+	SELECT SYSUTCDATETIME() AS SnapshotDate,
+			'sys.dm_tran_persistent_version_store_stats' AS object_name,
+			'Sum Persistent Version Store Size (KB)' AS counter_name,
+			'' AS instance_name,
+			@SumPVSSizeKB AS  cntr_value,
+			65792 AS cntr_type
+	WHERE @SumPVSSizeKB IS NOT NULL
+)
+INSERT INTO @Metrics(
+    SnapshotDate,
+    object_name,
+    counter_name,
+    instance_name,
+    cntr_value,
+    cntr_type
+)
+SELECT SnapshotDate,
+    object_name,
+    counter_name,
+    instance_name,
+    cntr_value,
+    cntr_type
+FROM Metrics M
+WHERE EXISTS(SELECT 1 
 			FROM @counters c 
-			WHERE c.object_name = 'sys.dm_os_schedulers' 
-			AND (c.counter_name = 'Worker threads used %' OR c.counter_name = '*')
+			WHERE c.object_name = M.object_name
+			AND (c.counter_name = M.counter_name OR c.counter_name = '*')
+			AND (c.instance_name = M.instance_name OR c.instance_name IS NULL OR c.instance_name='*')
 		   )
-UNION ALL
-SELECT SYSUTCDATETIME() AS SnapshotDate,
-		'sys.dm_os_schedulers' AS object_name,
-		'Avg runnable tasks' AS counter_name,
-		'' AS instance_name,
-		@AvgRunnableTasks AS  cntr_value,
-		65792 AS cntr_type
-WHERE @AvgRunnableTasks IS NOT NULL
-AND EXISTS(	SELECT 1 
-			FROM @counters c 
-			WHERE c.object_name = 'sys.dm_os_schedulers' 
-			AND (c.counter_name = 'Avg runnable tasks' OR c.counter_name = '*')
-		   )
-UNION ALL
-SELECT SYSUTCDATETIME() AS SnapshotDate,
-		'sys.dm_os_schedulers' AS object_name,
-		'Avg current tasks' AS counter_name,
-		'' AS instance_name,
-		@AvgCurrentTasks AS  cntr_value,
-		65792 AS cntr_type
-WHERE @AvgCurrentTasks IS NOT NULL
-AND EXISTS(	SELECT 1 
-			FROM @counters c 
-			WHERE c.object_name = 'sys.dm_os_schedulers' 
-			AND (c.counter_name = 'Avg current tasks' OR c.counter_name = '*')
-		   )
-UNION ALL
-SELECT SYSUTCDATETIME() AS SnapshotDate,
-		'sys.dm_os_schedulers' AS object_name,
-		'Avg pending disk IO' AS counter_name,
-		'' AS instance_name,
-		@AvgPendingDiskIO AS  cntr_value,
-		65792 AS cntr_type
-WHERE @AvgPendingDiskIO IS NOT NULL
-AND EXISTS(	SELECT 1 
-			FROM @counters c 
-			WHERE c.object_name = 'sys.dm_os_schedulers' 
-			AND (c.counter_name = 'Avg pending disk IO' OR c.counter_name = '*')
-		   )
-UNION ALL
-SELECT SYSUTCDATETIME() AS SnapshotDate,
-		'sys.dm_os_schedulers' AS object_name,
-		'Avg work queue count' AS counter_name,
-		'' AS instance_name,
-		@AvgWorkQueueCount AS  cntr_value,
-		65792 AS cntr_type
-WHERE @AvgWorkQueueCount IS NOT NULL
-AND EXISTS(	SELECT 1 
-			FROM @counters c 
-			WHERE c.object_name = 'sys.dm_os_schedulers' 
-			AND (c.counter_name = 'Avg work queue count' OR c.counter_name = '*')
-		   )
-UNION ALL
-SELECT SYSUTCDATETIME() AS SnapshotDate,
-		'sys.dm_os_nodes' AS object_name,
-		'Count of Nodes reporting thread resources low' AS counter_name,
-		'' AS instance_name,
-		@CountOfNodesWithThreadResourcesLow AS  cntr_value,
-		65792 AS cntr_type
-WHERE @CountOfNodesWithThreadResourcesLow IS NOT NULL
-UNION ALL
-SELECT SYSUTCDATETIME() AS SnapshotDate,
-		'sys.dm_os_sys_memory' AS object_name,
-		'Available Physical Memory (KB)' AS counter_name,
-		'' AS instance_name,
-		@AvailablePhysicalMemory AS  cntr_value,
-		65792 AS cntr_type
-WHERE @AvailablePhysicalMemory IS NOT NULL
-AND EXISTS(	SELECT 1 
-			FROM @counters c 
-			WHERE c.object_name = 'sys.dm_os_sys_memory' 
-			AND (c.counter_name = 'Available Physical Memory (KB)' OR c.counter_name = '*')
-		   )
-UNION ALL
-SELECT SYSUTCDATETIME()AS SnapshotDate,
-		'sys.dm_os_sys_memory' AS object_name,
-		'System Low Memory Signal State' AS counter_name,
-		'' AS instance_name,
-		@MemoryLowSignalState AS  cntr_value,
-		65792 AS cntr_type
-WHERE @MemoryLowSignalState IS NOT NULL
-AND EXISTS(	SELECT 1 
-			FROM @counters c 
-			WHERE c.object_name = 'sys.dm_os_sys_memory' 
-			AND (c.counter_name = 'System Low Memory Signal State' OR c.counter_name = '*')
-		   )
-UNION ALL
-SELECT SYSUTCDATETIME() AS SnapshotDate,
-		'sys.dm_os_sys_memory' AS object_name,
-		'System High Memory Signal State' AS counter_name,
-		'' AS instance_name,
-		@MemoryHighSignalState AS  cntr_value,
-		65792 AS cntr_type
-WHERE @MemoryHighSignalState IS NOT NULL
-AND EXISTS(	SELECT 1 
-			FROM @counters c 
-			WHERE c.object_name = 'sys.dm_os_sys_memory' 
-			AND (c.counter_name = 'System High Memory Signal State' OR c.counter_name = '*')
-		   )
+
+SELECT SnapshotDate,
+    object_name,
+    counter_name,
+    instance_name,
+    cntr_value,
+    cntr_type
+FROM @Metrics
 UNION ALL
 SELECT SYSUTCDATETIME() AS SnapshotDate,
 		STUFF(pc.object_name,1,CHARINDEX(':',pc.object_name),'') AS object_name,

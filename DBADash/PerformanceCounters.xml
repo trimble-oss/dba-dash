@@ -41,4 +41,8 @@
 	<Counter object_name="sys.dm_os_nodes" counter_name="*" />
 	<Counter object_name="sys.dm_os_schedulers" counter_name="*" />
 	<Counter object_name="Databases" counter_name="Transactions/sec" instance_name="_Total" />
+	<!-- **** Uncomment to track persistent version store size. **** -->-->
+	<!--<Counter object_name="sys.dm_tran_persistent_version_store_stats" counter_name="Persistent Version Store Size (KB)"/>-->
+	<!--<Counter object_name="sys.dm_tran_persistent_version_store_stats" counter_name="Sum Persistent Version Store Size (KB)"/>-->
+	<!--<Counter object_name="sys.dm_tran_persistent_version_store_stats" counter_name="Max Persistent Version Store Size (KB)"/>-->
 </Counters>
