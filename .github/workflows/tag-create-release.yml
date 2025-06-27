@@ -56,12 +56,12 @@ jobs:
       - name: Zip
         shell: powershell
         run: | 
-          $zipPath = "DBADash_${{steps.GetVersion.outputs.BUILD_NUMBER}}.zip"
+          $zipPath = "DBADash_${{steps.GetVersion.outputs.BUILD_NUMBER}}-unsigned.zip"
           Compress-Archive -Path "DBADashBuild\CLI\*" -DestinationPath $zipPath
-          $guiZipPath = "DBADash_GUI_Only_${{steps.GetVersion.outputs.BUILD_NUMBER}}.zip"
+          $guiZipPath = "DBADash_GUI_Only_${{steps.GetVersion.outputs.BUILD_NUMBER}}-unsigned.zip"
           Compress-Archive -Path "DBADashBuild\DBADashGUIOnly\*" -DestinationPath $guiZipPath
      
       - name: Publish - GitHub CLI
-        run: gh release create ${{steps.GetVersion.outputs.BUILD_NUMBER}} "DBADash_${{steps.GetVersion.outputs.BUILD_NUMBER}}.zip" "DBADash_GUI_Only_${{steps.GetVersion.outputs.BUILD_NUMBER}}.zip" --generate-notes --notes-file ReleaseNotes.md --draft
+        run: gh release create ${{steps.GetVersion.outputs.BUILD_NUMBER}} "DBADash_${{steps.GetVersion.outputs.BUILD_NUMBER}}-unsigned.zip" "DBADash_GUI_Only_${{steps.GetVersion.outputs.BUILD_NUMBER}}-unsigned.zip" --generate-notes --notes-file ReleaseNotes.md --draft
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
