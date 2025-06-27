@@ -6,7 +6,7 @@ DECLARE @counters TABLE(
 	UNIQUE(object_name,counter_name,instance_name)
 )
 DECLARE @Metrics AS TABLE(
-	SnapshotDate DATETIME2(7) NOT NULL DEFAULT(SYSUTCDATETIME()),
+	SnapshotDate DATETIME2 NOT NULL DEFAULT(SYSUTCDATETIME()),
 	object_name NVARCHAR(128) NOT NULL,
 	counter_name NVARCHAR(128) NOT NULL,
 	instance_name NVARCHAR(128) NOT NULL,
@@ -100,7 +100,7 @@ BEGIN
 				FROM @counters c 
 				WHERE c.object_name = N'sys.dm_tran_persistent_version_store_stats' 
 				AND (c.counter_name = 'Persistent Version Store Size (KB)' OR c.counter_name = '*')
-				AND (d.name = c.instance_name OR c.instance_name IS NULL OR c.instance_name='*')
+				AND (d.name = c.instance_name COLLATE DATABASE_DEFAULT OR c.instance_name IS NULL OR c.instance_name='*')
 			   )
 END;
 
@@ -215,14 +215,14 @@ WHERE EXISTS(SELECT 1
 			AND (c.instance_name = M.instance_name OR c.instance_name IS NULL OR c.instance_name='*')
 		   )
 
-SELECT SnapshotDate,
+INSERT INTO @Metrics(
+    SnapshotDate,
     object_name,
     counter_name,
     instance_name,
     cntr_value,
     cntr_type
-FROM @Metrics
-UNION ALL
+)
 SELECT SYSUTCDATETIME() AS SnapshotDate,
 		STUFF(pc.object_name,1,CHARINDEX(':',pc.object_name),'') AS object_name,
        pc.counter_name,
@@ -283,6 +283,15 @@ AND (SERVERPROPERTY('EngineEdition')<> 5
 		AND NOT (pc.counter_name= 'Log Growths' AND pc.instance_name='_Total')
 		)
 	)
+
+SELECT SnapshotDate,
+    object_name,
+    counter_name,
+    instance_name,
+    cntr_value,
+    cntr_type
+FROM @Metrics
+
 IF (OBJECT_ID('dbo.DBADash_CustomPerformanceCounters')) IS NOT NULL
 BEGIN
 	EXEC dbo.DBADash_CustomPerformanceCounters

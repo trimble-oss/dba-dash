@@ -1083,7 +1083,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             string sql = SqlStrings.PerformanceCounters;
             if (productVersion.StartsWith("8") || productVersion.StartsWith("9"))
             {
-                sql = sql.Replace("SYSUTCDATETIME()", "GETUTCDATE()");
+                sql = sql.Replace("SYSUTCDATETIME()", "GETUTCDATE()").Replace("DATETIME2", "DATETIME");
             }
             return sql;
         }
