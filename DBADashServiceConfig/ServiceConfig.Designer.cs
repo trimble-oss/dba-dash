@@ -70,6 +70,9 @@ namespace DBADashServiceConfig
             tabJson = new System.Windows.Forms.TabPage();
             txtJson = new System.Windows.Forms.TextBox();
             tabOther = new System.Windows.Forms.TabPage();
+            groupBox5 = new System.Windows.Forms.GroupBox();
+            lblPerformanceCounters = new System.Windows.Forms.Label();
+            bttnPerformanceCounters = new System.Windows.Forms.Button();
             groupBox7 = new System.Windows.Forms.GroupBox();
             chkAlertStartupDelay = new System.Windows.Forms.CheckBox();
             label20 = new System.Windows.Forms.Label();
@@ -172,12 +175,14 @@ namespace DBADashServiceConfig
             txtDestination = new System.Windows.Forms.TextBox();
             tab1 = new ThemedTabControl();
             tabMessaging = new System.Windows.Forms.TabPage();
+            lnkCustomCountersHelp = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             panel1.SuspendLayout();
             tabJson.SuspendLayout();
             tabOther.SuspendLayout();
+            groupBox5.SuspendLayout();
             groupBox7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numAlertStartupDelay).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numAlertPollingFrequency).BeginInit();
@@ -545,7 +550,7 @@ namespace DBADashServiceConfig
             // 
             chkLogInternalPerfCounters.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             chkLogInternalPerfCounters.AutoSize = true;
-            chkLogInternalPerfCounters.Location = new System.Drawing.Point(845, 27);
+            chkLogInternalPerfCounters.Location = new System.Drawing.Point(845, 43);
             chkLogInternalPerfCounters.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             chkLogInternalPerfCounters.Name = "chkLogInternalPerfCounters";
             chkLogInternalPerfCounters.Size = new System.Drawing.Size(259, 24);
@@ -614,6 +619,7 @@ namespace DBADashServiceConfig
             // 
             // tabOther
             // 
+            tabOther.Controls.Add(groupBox5);
             tabOther.Controls.Add(groupBox7);
             tabOther.Controls.Add(groupBox3);
             tabOther.Controls.Add(groupBox4);
@@ -626,8 +632,42 @@ namespace DBADashServiceConfig
             tabOther.Text = "Options";
             tabOther.UseVisualStyleBackColor = true;
             // 
+            // groupBox5
+            // 
+            groupBox5.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBox5.Controls.Add(lnkCustomCountersHelp);
+            groupBox5.Controls.Add(lblPerformanceCounters);
+            groupBox5.Controls.Add(bttnPerformanceCounters);
+            groupBox5.Controls.Add(chkLogInternalPerfCounters);
+            groupBox5.Location = new System.Drawing.Point(9, 508);
+            groupBox5.Name = "groupBox5";
+            groupBox5.Size = new System.Drawing.Size(1112, 93);
+            groupBox5.TabIndex = 42;
+            groupBox5.TabStop = false;
+            groupBox5.Text = "Performance Counters";
+            // 
+            // lblPerformanceCounters
+            // 
+            lblPerformanceCounters.AutoSize = true;
+            lblPerformanceCounters.Location = new System.Drawing.Point(256, 43);
+            lblPerformanceCounters.Name = "lblPerformanceCounters";
+            lblPerformanceCounters.Size = new System.Drawing.Size(58, 20);
+            lblPerformanceCounters.TabIndex = 42;
+            lblPerformanceCounters.Text = "Default";
+            // 
+            // bttnPerformanceCounters
+            // 
+            bttnPerformanceCounters.Location = new System.Drawing.Point(14, 38);
+            bttnPerformanceCounters.Name = "bttnPerformanceCounters";
+            bttnPerformanceCounters.Size = new System.Drawing.Size(227, 29);
+            bttnPerformanceCounters.TabIndex = 41;
+            bttnPerformanceCounters.Text = "Performance Counters";
+            bttnPerformanceCounters.UseVisualStyleBackColor = true;
+            bttnPerformanceCounters.Click += PerformanceCounters_Click;
+            // 
             // groupBox7
             // 
+            groupBox7.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             groupBox7.Controls.Add(chkAlertStartupDelay);
             groupBox7.Controls.Add(label20);
             groupBox7.Controls.Add(numAlertStartupDelay);
@@ -645,7 +685,7 @@ namespace DBADashServiceConfig
             // chkAlertStartupDelay
             // 
             chkAlertStartupDelay.AutoSize = true;
-            chkAlertStartupDelay.Location = new System.Drawing.Point(896, 44);
+            chkAlertStartupDelay.Location = new System.Drawing.Point(896, 41);
             chkAlertStartupDelay.Name = "chkAlertStartupDelay";
             chkAlertStartupDelay.Size = new System.Drawing.Size(18, 17);
             chkAlertStartupDelay.TabIndex = 53;
@@ -655,7 +695,7 @@ namespace DBADashServiceConfig
             // label20
             // 
             label20.AutoSize = true;
-            label20.Location = new System.Drawing.Point(569, 43);
+            label20.Location = new System.Drawing.Point(569, 39);
             label20.Name = "label20";
             label20.Size = new System.Drawing.Size(201, 20);
             label20.TabIndex = 52;
@@ -664,7 +704,7 @@ namespace DBADashServiceConfig
             // numAlertStartupDelay
             // 
             numAlertStartupDelay.Enabled = false;
-            numAlertStartupDelay.Location = new System.Drawing.Point(787, 37);
+            numAlertStartupDelay.Location = new System.Drawing.Point(787, 36);
             numAlertStartupDelay.Maximum = new decimal(new int[] { 86400, 0, 0, 0 });
             numAlertStartupDelay.Minimum = new decimal(new int[] { 1, 0, 0, int.MinValue });
             numAlertStartupDelay.Name = "numAlertStartupDelay";
@@ -676,7 +716,7 @@ namespace DBADashServiceConfig
             // chkAlertPollingFrequency
             // 
             chkAlertPollingFrequency.AutoSize = true;
-            chkAlertPollingFrequency.Location = new System.Drawing.Point(526, 43);
+            chkAlertPollingFrequency.Location = new System.Drawing.Point(526, 41);
             chkAlertPollingFrequency.Name = "chkAlertPollingFrequency";
             chkAlertPollingFrequency.Size = new System.Drawing.Size(18, 17);
             chkAlertPollingFrequency.TabIndex = 50;
@@ -686,7 +726,7 @@ namespace DBADashServiceConfig
             // label19
             // 
             label19.AutoSize = true;
-            label19.Location = new System.Drawing.Point(181, 37);
+            label19.Location = new System.Drawing.Point(168, 39);
             label19.Name = "label19";
             label19.Size = new System.Drawing.Size(231, 20);
             label19.TabIndex = 49;
@@ -717,6 +757,7 @@ namespace DBADashServiceConfig
             // 
             // groupBox3
             // 
+            groupBox3.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             groupBox3.Controls.Add(bttnCustomCollections);
             groupBox3.Controls.Add(lblSummaryRefreshCron);
             groupBox3.Controls.Add(chkSummaryRefresh);
@@ -732,7 +773,6 @@ namespace DBADashServiceConfig
             groupBox3.Controls.Add(bttnAWS);
             groupBox3.Controls.Add(bttnSchedule);
             groupBox3.Controls.Add(chkDefaultIdentityCollection);
-            groupBox3.Controls.Add(chkLogInternalPerfCounters);
             groupBox3.Location = new System.Drawing.Point(8, 19);
             groupBox3.Name = "groupBox3";
             groupBox3.Size = new System.Drawing.Size(1113, 245);
@@ -1830,6 +1870,21 @@ namespace DBADashServiceConfig
             tabMessaging.Text = "Messaging";
             tabMessaging.UseVisualStyleBackColor = true;
             // 
+            // lnkCustomCountersHelp
+            // 
+            lnkCustomCountersHelp.AutoSize = true;
+            lnkCustomCountersHelp.Image = Properties.Resources.Information_blue_6227_16x16_cyan;
+            lnkCustomCountersHelp.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            lnkCustomCountersHelp.Location = new System.Drawing.Point(347, 42);
+            lnkCustomCountersHelp.Name = "lnkCustomCountersHelp";
+            lnkCustomCountersHelp.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
+            lnkCustomCountersHelp.Size = new System.Drawing.Size(207, 20);
+            lnkCustomCountersHelp.TabIndex = 43;
+            lnkCustomCountersHelp.TabStop = true;
+            lnkCustomCountersHelp.Text = "Custom SQL Counters Help";
+            lnkCustomCountersHelp.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            lnkCustomCountersHelp.LinkClicked += CustomCountersHelp_Click;
+            // 
             // ServiceConfig
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -1852,6 +1907,8 @@ namespace DBADashServiceConfig
             tabJson.ResumeLayout(false);
             tabJson.PerformLayout();
             tabOther.ResumeLayout(false);
+            groupBox5.ResumeLayout(false);
+            groupBox5.PerformLayout();
             groupBox7.ResumeLayout(false);
             groupBox7.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numAlertStartupDelay).EndInit();
@@ -2032,6 +2089,10 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.TabPage tabMessaging;
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.TextBox txtAllowedCustomProcs;
+        private System.Windows.Forms.Button bttnPerformanceCounters;
+        private System.Windows.Forms.GroupBox groupBox5;
+        private System.Windows.Forms.Label lblPerformanceCounters;
+        private System.Windows.Forms.LinkLabel lnkCustomCountersHelp;
     }
 }
 
