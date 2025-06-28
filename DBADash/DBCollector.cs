@@ -1076,11 +1076,11 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             Data.Tables.Add(dtRG);
         }
 
-        private string PerformanceCountersSQL()
+        private static string PerformanceCountersSQL(string productVersion)
         {
-            string xml = PerformanceCounters.PerformanceCountersXML;
+            var xml = PerformanceCounters.PerformanceCountersXML;
             if (xml.Length <= 0) return string.Empty;
-            string sql = SqlStrings.PerformanceCounters;
+            var sql = SqlStrings.PerformanceCounters;
             if (productVersion.StartsWith("8") || productVersion.StartsWith("9"))
             {
                 sql = sql.Replace("SYSUTCDATETIME()", "GETUTCDATE()").Replace("DATETIME2", "DATETIME");
@@ -1088,15 +1088,15 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             return sql;
         }
 
-        private async Task<DataSet> GetPerformanceCountersAsync()
+        private static async Task<DataSet> GetPerformanceCountersAsync(string connectionString, string productVersion, string countersXML)
         {
-            var sql = PerformanceCountersSQL();
+            var sql = PerformanceCountersSQL(productVersion);
             if (sql == string.Empty) return null;
-            await using var cn = new SqlConnection(ConnectionString);
+            await using var cn = new SqlConnection(connectionString);
             using var da = new SqlDataAdapter(sql, cn);
             await cn.OpenAsync();
             var ds = new DataSet();
-            SqlParameter pCountersXML = new("CountersXML", PerformanceCounters.PerformanceCountersXML)
+            SqlParameter pCountersXML = new("CountersXML", countersXML)
             {
                 SqlDbType = SqlDbType.Xml
             };
@@ -1106,31 +1106,24 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             return ds;
         }
 
-        private void MergeCustomPerformanceCounters(DataTable dt, DataTable userDT)
+        private static void MergeCustomPerformanceCounters(DataTable dt, DataTable userDT)
         {
             if (dt.Columns.Count == userDT.Columns.Count)
             {
-                try
+                for (var i = 0; i < (dt.Columns.Count - 1); i++)
                 {
-                    for (var i = 0; i < (dt.Columns.Count - 1); i++)
+                    if (dt.Columns[i].ColumnName != userDT.Columns[i].ColumnName)
                     {
-                        if (dt.Columns[i].ColumnName != userDT.Columns[i].ColumnName)
-                        {
-                            throw new Exception(
-                                $"Invalid schema for custom metrics.  Expected column '{dt.Columns[i].ColumnName}' in position {i + 1} instead of '{userDT.Columns[i].ColumnName}'");
-                        }
-                        if (dt.Columns[i].DataType != userDT.Columns[i].DataType)
-                        {
-                            throw new Exception(
-                                $"Invalid schema for custom metrics.  Column {dt.Columns[i].ColumnName} expected data type is {dt.Columns[i].DataType.Name} instead of {userDT.Columns[i].DataType.Name}");
-                        }
+                        throw new Exception(
+                            $"Invalid schema for custom metrics.  Expected column '{dt.Columns[i].ColumnName}' in position {i + 1} instead of '{userDT.Columns[i].ColumnName}'");
                     }
-                    dt.Merge(userDT);
+                    if (dt.Columns[i].DataType != userDT.Columns[i].DataType)
+                    {
+                        throw new Exception(
+                            $"Invalid schema for custom metrics.  Column {dt.Columns[i].ColumnName} expected data type is {dt.Columns[i].DataType.Name} instead of {userDT.Columns[i].DataType.Name}");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    LogError(ex, "PerformanceCounters");
-                }
+                dt.Merge(userDT);
             }
             else
             {
@@ -1138,10 +1131,24 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             }
         }
 
-        private async Task CollectPerformanceCountersAsync()
+        public async Task CollectPerformanceCountersAsync()
         {
-            var ds = await GetPerformanceCountersAsync();
-            if (ds == null) return;
+            try
+            {
+                var dt = await GetPerformanceCountersDataTableAsync(ConnectionString, productVersion, PerformanceCounters.PerformanceCountersXML);
+                if (dt == null) return;
+                Data.Tables.Add(dt);
+            }
+            catch (Exception ex)
+            {
+                LogError(ex, "PerformanceCounters");
+            }
+        }
+
+        public static async Task<DataTable> GetPerformanceCountersDataTableAsync(string connectionString, string productVersion, string countersXML)
+        {
+            var ds = await GetPerformanceCountersAsync(connectionString, productVersion, countersXML);
+            if (ds == null) return null;
             var dt = ds.Tables[0];
             if (ds.Tables.Count == 2)
             {
@@ -1150,7 +1157,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             }
             ds.Tables.Remove(dt);
             dt.TableName = "PerformanceCounters";
-            Data.Tables.Add(dt);
+            return dt;
         }
 
         private async Task<object> GetSlowQueriesAsync()

@@ -650,6 +650,7 @@ namespace DBADashServiceConfig
             RefreshEncryption();
             dgvConnections.ApplyTheme();
             _ = Task.Run(AutoRefreshServiceStatus);
+            UpdatePerformanceCountersLabel();
         }
 
         private void SubscribeActivityEvents(Control parent)
@@ -2526,6 +2527,29 @@ namespace DBADashServiceConfig
         private void AllowedCustomProcs_TextChanged(object sender, EventArgs e)
         {
             collectionConfig.AllowedCustomProcs = txtAllowedCustomProcs.Text;
+        }
+
+        private void PerformanceCounters_Click(object sender, EventArgs e)
+        {
+            var connectionString = collectionConfig.SourceConnections.Where(src => src.SourceConnection.Type == ConnectionType.SQL)
+                .Select(src => src.SourceConnection.ConnectionString).FirstOrDefault();
+
+            var frm = new PerformanceCounters() { ConnectionString = connectionString };
+            frm.ShowDialog();
+            UpdatePerformanceCountersLabel();
+        }
+
+        private void UpdatePerformanceCountersLabel()
+        {
+            var isCustom = DBADash.PerformanceCounters.HasCustomPerformanceCounters();
+            lblPerformanceCounters.Text = isCustom ? "Custom" : "Default";
+            lblPerformanceCounters.Font =
+                new Font(lblPerformanceCounters.Font, isCustom ? FontStyle.Bold : FontStyle.Regular);
+        }
+
+        private void CustomCountersHelp_Click(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            CommonShared.OpenURL("https://dbadash.com/docs/help/os-performance-counters/");
         }
     }
 }

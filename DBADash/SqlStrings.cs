@@ -1,10 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using Amazon.S3.Model.Internal.MarshallTransformations;
 
 namespace DBADash
 {
-    internal class SqlStrings
+    public class SqlStrings
     {
         public static string GetSqlString(CollectionType type)
         {
@@ -14,12 +15,7 @@ namespace DBADash
         public static string GetSqlString(string name)
         {
             var resourcePath = "DBADash.SQL.SQL" + name + ".sql";
-            var assembly = Assembly.GetExecutingAssembly();
-
-            using var stream = assembly.GetManifestResourceStream(resourcePath) ?? throw new Exception($"Resource {resourcePath} not found.");
-            using StreamReader reader = new(stream);
-
-            return reader.ReadToEnd();
+            return Utility.GetResourceString(resourcePath);
         }
 
         public static string AgentJobs => GetSqlString("AgentJobs");
@@ -81,5 +77,6 @@ namespace DBADash
         public static string ServerServices => GetSqlString("ServerServices");
         public static string MaxJobLastModified => GetSqlString("MaxJobLastModified");
         public static string AvailableProcs => GetSqlString("AvailableProcs");
+        public static string AvailableCounters => GetSqlString("AvailableCounters");
     }
 }

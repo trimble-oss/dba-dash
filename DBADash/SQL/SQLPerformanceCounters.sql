@@ -2,7 +2,7 @@
 DECLARE @counters TABLE(
 	object_name NCHAR(128) NOT NULL,
 	counter_name NVARCHAR(128) NOT NULL,
-	instance_name NCHAR(128) NULL,
+	instance_name NCHAR(128) NOT NULL,
 	UNIQUE(object_name,counter_name,instance_name)
 )
 DECLARE @Metrics AS TABLE(
@@ -16,7 +16,7 @@ DECLARE @Metrics AS TABLE(
 INSERT INTO @counters(object_name,counter_name,instance_name)
 SELECT	ctrs.c.value('@object_name','NCHAR(128)'),
 		ctrs.c.value('@counter_name','NCHAR(128)'),
-		ctrs.c.value('@instance_name','NCHAR(128)') 
+		ISNULL(ctrs.c.value('@instance_name','NCHAR(128)'),'*')
 FROM @CountersXML.nodes('Counters/Counter') ctrs(c)
 
 DECLARE @AvailablePhysicalMemory DECIMAL(28,9)
@@ -61,7 +61,7 @@ IF OBJECT_ID('sys.dm_tran_persistent_version_store_stats') IS NOT NULL
 				AND (counter_name = 'Max Persistent Version Store Size (KB)' 
 					OR counter_name = 'Sum Persistent Version Store Size (KB)'
 					OR counter_name= '*')
-				AND (instance_name IS NULL OR instance_name='*' OR instance_name='')
+				AND (instance_name= '*' OR instance_name='')
 	)
 BEGIN
 	SELECT	@MaxPVSSizeKB = MAX(pvs.persistent_version_store_size_kb),
@@ -100,7 +100,7 @@ BEGIN
 				FROM @counters c 
 				WHERE c.object_name = N'sys.dm_tran_persistent_version_store_stats' 
 				AND (c.counter_name = 'Persistent Version Store Size (KB)' OR c.counter_name = '*')
-				AND (d.name = c.instance_name COLLATE DATABASE_DEFAULT OR c.instance_name IS NULL OR c.instance_name='*')
+				AND (d.name = c.instance_name COLLATE DATABASE_DEFAULT OR c.instance_name ='*')
 			   )
 END;
 
@@ -212,7 +212,7 @@ WHERE EXISTS(SELECT 1
 			FROM @counters c 
 			WHERE c.object_name = M.object_name
 			AND (c.counter_name = M.counter_name OR c.counter_name = '*')
-			AND (c.instance_name = M.instance_name OR c.instance_name IS NULL OR c.instance_name='*')
+			AND (c.instance_name = M.instance_name OR c.instance_name = '*')
 		   )
 
 INSERT INTO @Metrics(
@@ -234,7 +234,7 @@ WHERE EXISTS(	SELECT 1
 				FROM @counters c
 				WHERE c.object_name COLLATE SQL_Latin1_General_CP1_CI_AS = STUFF(pc.object_name,1,CHARINDEX(':',pc.object_name),'') COLLATE SQL_Latin1_General_CP1_CI_AS
 				AND c.counter_name COLLATE SQL_Latin1_General_CP1_CI_AS = pc.counter_name COLLATE SQL_Latin1_General_CP1_CI_AS
-				AND (c.instance_name COLLATE SQL_Latin1_General_CP1_CI_AS = pc.instance_name COLLATE SQL_Latin1_General_CP1_CI_AS OR c.instance_name IS NULL)
+				AND (c.instance_name COLLATE SQL_Latin1_General_CP1_CI_AS = pc.instance_name COLLATE SQL_Latin1_General_CP1_CI_AS OR c.instance_name ='*')
 			)
 AND pc.instance_name NOT IN('AuditingGroup',
 							'AutoShrinkLogGroup',

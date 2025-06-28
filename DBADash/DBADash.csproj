@@ -30,12 +30,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+    <EmbeddedResource Include="SQL\SQLAvailableCounters.sql" />
     <EmbeddedResource Include="SQL\SQLAvailableProcs.sql" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="PerformanceCounters.xml">
+    <EmbeddedResource Include="PerformanceCounters.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </EmbeddedResource>
     <EmbeddedResource Include="SQL\SQLAvailabilityReplicas.sql" />
 	<EmbeddedResource Include="SQL\SQLAzureDBResourceGovernance.sql" />
 	<EmbeddedResource Include="SQL\SQLAgentJobs.sql" />
