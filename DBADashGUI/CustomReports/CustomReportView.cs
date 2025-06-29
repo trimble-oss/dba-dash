@@ -1165,7 +1165,7 @@ namespace DBADashGUI.CustomReports
                     var item = new ToolStripMenuItem(itm.Value)
                     {
                         Tag = itm.Key,
-                        Checked = (param.UseDefaultValue && string.IsNullOrEmpty(itm.Key.ToString())) || (!param.UseDefaultValue && param.Param.Value != null && param.Param.Value.Equals(itm.Key))
+                        Checked = (param.UseDefaultValue && string.IsNullOrEmpty(itm.Key.ToString())) || (!param.UseDefaultValue && param.Param.Value != null && param.Param.Value.ToString() == itm.Key.ToString())
                     };
                     item.Click += (sender, e) => PickerItem_Click(sender, itm, picker.ParameterName);
                     pickerMenu.DropDownItems.Add(item);
