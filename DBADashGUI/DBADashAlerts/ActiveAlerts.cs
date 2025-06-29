@@ -152,9 +152,12 @@ namespace DBADashGUI.DBADashAlerts
         private void Configure_Click(object sender, EventArgs e)
         {
             using var frm = new Form() { Width = this.Width / 2, Height = this.Height / 2, Text = @"Alert Configuration" };
-            using var configGrid = new AlertConfig() { Dock = DockStyle.Fill };
+            var configGrid = new AlertConfig() { Dock = DockStyle.Fill };
             frm.Controls.Add(configGrid);
-            configGrid.SetContext(CurrentContext);
+            frm.Load += (_, _) =>
+            {
+                configGrid.SetContext(CurrentContext);
+            };
             frm.ShowDialog();
         }
 
