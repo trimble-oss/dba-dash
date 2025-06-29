@@ -71,6 +71,7 @@ namespace DBADashServiceConfig
             txtJson = new System.Windows.Forms.TextBox();
             tabOther = new System.Windows.Forms.TabPage();
             groupBox5 = new System.Windows.Forms.GroupBox();
+            lnkCustomCountersHelp = new System.Windows.Forms.LinkLabel();
             lblPerformanceCounters = new System.Windows.Forms.Label();
             bttnPerformanceCounters = new System.Windows.Forms.Button();
             groupBox7 = new System.Windows.Forms.GroupBox();
@@ -82,6 +83,7 @@ namespace DBADashServiceConfig
             numAlertPollingFrequency = new System.Windows.Forms.NumericUpDown();
             chkProcessAlerts = new System.Windows.Forms.CheckBox();
             groupBox3 = new System.Windows.Forms.GroupBox();
+            lnkTimeouts = new System.Windows.Forms.LinkLabel();
             bttnCustomCollections = new System.Windows.Forms.Button();
             lblSummaryRefreshCron = new System.Windows.Forms.Label();
             chkSummaryRefresh = new System.Windows.Forms.CheckBox();
@@ -175,7 +177,6 @@ namespace DBADashServiceConfig
             txtDestination = new System.Windows.Forms.TextBox();
             tab1 = new ThemedTabControl();
             tabMessaging = new System.Windows.Forms.TabPage();
-            lnkCustomCountersHelp = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
@@ -646,6 +647,21 @@ namespace DBADashServiceConfig
             groupBox5.TabStop = false;
             groupBox5.Text = "Performance Counters";
             // 
+            // lnkCustomCountersHelp
+            // 
+            lnkCustomCountersHelp.AutoSize = true;
+            lnkCustomCountersHelp.Image = Properties.Resources.Information_blue_6227_16x16_cyan;
+            lnkCustomCountersHelp.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            lnkCustomCountersHelp.Location = new System.Drawing.Point(347, 42);
+            lnkCustomCountersHelp.Name = "lnkCustomCountersHelp";
+            lnkCustomCountersHelp.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
+            lnkCustomCountersHelp.Size = new System.Drawing.Size(207, 20);
+            lnkCustomCountersHelp.TabIndex = 43;
+            lnkCustomCountersHelp.TabStop = true;
+            lnkCustomCountersHelp.Text = "Custom SQL Counters Help";
+            lnkCustomCountersHelp.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            lnkCustomCountersHelp.LinkClicked += CustomCountersHelp_Click;
+            // 
             // lblPerformanceCounters
             // 
             lblPerformanceCounters.AutoSize = true;
@@ -758,6 +774,7 @@ namespace DBADashServiceConfig
             // groupBox3
             // 
             groupBox3.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBox3.Controls.Add(lnkTimeouts);
             groupBox3.Controls.Add(bttnCustomCollections);
             groupBox3.Controls.Add(lblSummaryRefreshCron);
             groupBox3.Controls.Add(chkSummaryRefresh);
@@ -779,6 +796,18 @@ namespace DBADashServiceConfig
             groupBox3.TabIndex = 38;
             groupBox3.TabStop = false;
             groupBox3.Text = "Miscellaneous";
+            // 
+            // lnkTimeouts
+            // 
+            lnkTimeouts.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            lnkTimeouts.AutoSize = true;
+            lnkTimeouts.Location = new System.Drawing.Point(981, 36);
+            lnkTimeouts.Name = "lnkTimeouts";
+            lnkTimeouts.Size = new System.Drawing.Size(124, 20);
+            lnkTimeouts.TabIndex = 47;
+            lnkTimeouts.TabStop = true;
+            lnkTimeouts.Text = "Custom Timeouts";
+            lnkTimeouts.LinkClicked += CollectionTimeouts_Click;
             // 
             // bttnCustomCollections
             // 
@@ -1870,21 +1899,6 @@ namespace DBADashServiceConfig
             tabMessaging.Text = "Messaging";
             tabMessaging.UseVisualStyleBackColor = true;
             // 
-            // lnkCustomCountersHelp
-            // 
-            lnkCustomCountersHelp.AutoSize = true;
-            lnkCustomCountersHelp.Image = Properties.Resources.Information_blue_6227_16x16_cyan;
-            lnkCustomCountersHelp.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            lnkCustomCountersHelp.Location = new System.Drawing.Point(347, 42);
-            lnkCustomCountersHelp.Name = "lnkCustomCountersHelp";
-            lnkCustomCountersHelp.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
-            lnkCustomCountersHelp.Size = new System.Drawing.Size(207, 20);
-            lnkCustomCountersHelp.TabIndex = 43;
-            lnkCustomCountersHelp.TabStop = true;
-            lnkCustomCountersHelp.Text = "Custom SQL Counters Help";
-            lnkCustomCountersHelp.TextAlign = System.Drawing.ContentAlignment.TopRight;
-            lnkCustomCountersHelp.LinkClicked += CustomCountersHelp_Click;
-            // 
             // ServiceConfig
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -2093,6 +2107,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.Label lblPerformanceCounters;
         private System.Windows.Forms.LinkLabel lnkCustomCountersHelp;
+        private System.Windows.Forms.LinkLabel lnkTimeouts;
     }
 }
 

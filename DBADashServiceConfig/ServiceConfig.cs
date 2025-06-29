@@ -2551,5 +2551,11 @@ namespace DBADashServiceConfig
         {
             CommonShared.OpenURL("https://dbadash.com/docs/help/os-performance-counters/");
         }
+
+        private void CollectionTimeouts_Click(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var frm = new TimeoutConfig();
+            frm.ShowDialog();
+        }
     }
 }

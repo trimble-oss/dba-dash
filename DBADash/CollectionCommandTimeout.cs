@@ -1,28 +1,42 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System;
+using System.Data;
 using Serilog;
 using Newtonsoft.Json;
 
 namespace DBADash
 {
-    internal static class CollectionCommandTimeout
+    public static class CollectionCommandTimeout
     {
-        private static CommandTimeoutSettings settings = new();
+        public static CommandTimeoutSettings Settings { get; private set; } = new();
 
-        public static int GetDefaultCommandTimeout() => settings.DefaultCommandTimeout;
+        public static int GetDefaultCommandTimeout() => Settings.DefaultCommandTimeout;
+
+        private static readonly JsonSerializerSettings serializationOpts = new JsonSerializerSettings
+        {
+            // Ignore unknown enum values
+            Error = (_, args) =>
+            {
+                if (args.CurrentObject is Dictionary<CollectionType, int> &&
+                    args.ErrorContext.Error is JsonSerializationException)
+                {
+                    args.ErrorContext.Handled = true;
+                    Log.Warning($"Invalid collection type '{args.ErrorContext.Member}' in '{FilePath}'");
+                }
+            }
+        };
 
         static CollectionCommandTimeout()
         {
             LoadCommandTimeouts();
-            Log.Debug("Timeout  settings:\n" + JsonConvert.SerializeObject(settings, Formatting.Indented));
+            Log.Debug("Timeout  Settings:\n" + Settings.ToJson());
         }
 
         private static void LoadCommandTimeouts()
         {
             // Load the default command timeouts
-            string filePath = GetFilePath();
-            if (!File.Exists(filePath))
+            if (!File.Exists(FilePath))
             {
                 Log.Information("Using default command timeouts");
                 return;
@@ -30,43 +44,41 @@ namespace DBADash
 
             try
             {
-                string json = File.ReadAllText(filePath);
+                var json = File.ReadAllText(FilePath);
 
-                var serializationOpts = new JsonSerializerSettings
-                {
-                    // Ignore unknown enum values
-                    Error = (_, args) =>
-                    {
-                        if (args.CurrentObject is Dictionary<CollectionType, int> &&
-                            args.ErrorContext.Error is JsonSerializationException)
-                        {
-                            args.ErrorContext.Handled = true;
-                            Log.Warning($"Invalid collection type '{args.ErrorContext.Member}' in '{filePath}'");
-                        }
-                    }
-                };
-                settings = JsonConvert.DeserializeObject<CommandTimeoutSettings>(json, serializationOpts);
+                Settings = JsonConvert.DeserializeObject<CommandTimeoutSettings>(json, serializationOpts);
 
-                Log.Information($"Custom command timeouts loaded from {filePath}");
+                Log.Information($"Custom command timeouts loaded from {FilePath}");
             }
             catch (JsonException ex)
             {
                 // Ignore any errors in the JSON file and use the default command timeouts
-                Log.Warning(ex, $"Error loading custom command timeouts from {filePath}");
+                Log.Warning(ex, $"Error loading custom command timeouts from {FilePath}");
+                Settings = new CommandTimeoutSettings();
             }
         }
 
-        private static string GetFilePath() => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "commandTimeouts.json");
+        public static CommandTimeoutSettingsBase GetCustomTimeouts()
+        {
+            if (!File.Exists(FilePath))
+            {
+                return new CommandTimeoutSettingsBase();
+            }
+            var json = File.ReadAllText(FilePath);
+            return JsonConvert.DeserializeObject<CommandTimeoutSettingsBase>(json, serializationOpts);
+        }
+
+        private static string FilePath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "commandTimeouts.json");
 
         public static int GetCommandTimeout(this CollectionType type)
         {
-            return settings.CollectionCommandTimeouts.TryGetValue(type, out var value) ? value : settings.DefaultCommandTimeout;
+            return Settings.CollectionCommandTimeouts.TryGetValue(type, out var value) ? value : Settings.DefaultCommandTimeout;
         }
 
-        private class CommandTimeoutSettings
+        public class CommandTimeoutSettings : CommandTimeoutSettingsBase
         {
             // Defaults supplied in this class will be used unless user supplies value in commandTimeouts.json
-            public Dictionary<CollectionType, int> CollectionCommandTimeouts { get; } = new()
+            public new Dictionary<CollectionType, int> CollectionCommandTimeouts { get; } = new()
             {
                 { CollectionType.TableSize, 900 },
                 { CollectionType.DatabasePermissions, 900 },
@@ -110,7 +122,66 @@ namespace DBADash
                 { CollectionType.MemoryUsage, 120 }
             };
 
-            public int DefaultCommandTimeout { get; } = 60;
+            public new int DefaultCommandTimeout { get; } = 60;
+        }
+
+        public class CommandTimeoutSettingsBase
+        {
+            public Dictionary<CollectionType, int> CollectionCommandTimeouts { get; set; } = new();
+
+            public int? DefaultCommandTimeout { get; set; }
+
+            public DataTable CollectionCommandTimeoutsAsDataTable()
+            {
+                var dt = new DataTable();
+                dt.Columns.Add("CollectionType", typeof(string));
+                dt.Columns.Add("Timeout", typeof(int));
+                dt.PrimaryKey = new[] { dt.Columns[0] };
+                if (CollectionCommandTimeouts == null) return dt;
+                foreach (var collectionCommandTimeout in CollectionCommandTimeouts)
+                {
+                    var row = dt.NewRow();
+                    row["CollectionType"] = collectionCommandTimeout.Key;
+                    row["Timeout"] = collectionCommandTimeout.Value;
+                    dt.Rows.Add(row);
+                }
+                return dt;
+            }
+
+            public void SetFromDataTable(DataTable dt)
+            {
+                CollectionCommandTimeouts = new();
+                foreach (DataRow row in dt.Rows)
+                {
+                    if (!Enum.TryParse<CollectionType>(row["CollectionType"].ToString(), out var collectionType)) continue;
+                    CollectionCommandTimeouts.Add(collectionType, (int)row["Timeout"]);
+                }
+            }
+
+            public string ToJson()
+            {
+                var settings = new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                    Formatting = Formatting.Indented
+                };
+                return JsonConvert.SerializeObject(this, settings);
+            }
+
+            public void Save()
+            {
+                if (DefaultCommandTimeout == null && CollectionCommandTimeouts.Count == 0)
+                {
+                    if (File.Exists(FilePath))
+                    {
+                        File.Delete(FilePath);
+                    }
+                }
+                else
+                {
+                    File.WriteAllText(FilePath, ToJson());
+                }
+            }
         }
     }
 }
