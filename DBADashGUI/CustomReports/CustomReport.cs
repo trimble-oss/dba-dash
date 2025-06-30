@@ -12,7 +12,8 @@ namespace DBADashGUI.CustomReports
     public class CustomReport
     {
         [JsonIgnore]
-        public string SchemaName { get; set; }
+        private string _schemaName;
+        public string SchemaName { get => string.IsNullOrEmpty(_schemaName) ? "dbo" : _schemaName; set => _schemaName = value; }
 
         [JsonIgnore]
         public string ProcedureName { get; set; }
