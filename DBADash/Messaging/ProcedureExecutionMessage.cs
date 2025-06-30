@@ -55,7 +55,7 @@ namespace DBADash.Messaging
         {
             if (string.IsNullOrEmpty(allowedCustomScripts))
                 return false;
-
+            schema ??= "dbo"; // Default schema if not provided
             var allowedScripts = allowedCustomScripts
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(script => script.Trim())
