@@ -42,6 +42,11 @@ namespace DBADashServiceConfig
         {
             try
             {
+                if(string.IsNullOrEmpty(ConnectionString))
+                {
+                    await PromptConnection();
+                    return;
+                }
                 var builder = new SqlConnectionStringBuilder(ConnectionString);
                 tsChangeConnection.ToolTipText = "Connected to " + builder.DataSource + "\nChange the connection to view the available counters on a different instance.";
                 dtAvailable = await GetAvailableCountersAsync();
@@ -272,6 +277,11 @@ namespace DBADashServiceConfig
         }
 
         private async void ChangeConnection_Click(object sender, EventArgs e)
+        {
+            await PromptConnection();
+        }
+
+        private async Task PromptConnection()
         {
             var connectDialog = new DBConnection() { ConnectionString = ConnectionString };
             if (connectDialog.ShowDialog() != DialogResult.OK) return;
