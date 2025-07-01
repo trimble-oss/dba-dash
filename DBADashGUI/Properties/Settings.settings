@@ -32,5 +32,8 @@
     <Setting Name="TimeFormatString" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="TestSummaryMaxHeightPct" Type="System.Decimal" Scope="User">
+      <Value Profile="(Default)">0.7</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
