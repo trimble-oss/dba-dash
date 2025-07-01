@@ -1,5 +1,6 @@
 ﻿using DBADashGUI.Checks;
 using Humanizer;
+using Humanizer.Localisation;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Humanizer.Localisation;
 using static DBADashGUI.DBADashStatus;
 using static DBADashGUI.Main;
 
@@ -32,6 +32,7 @@ namespace DBADashGUI
             dgvTests.GridFilterChanged += (s, e) => UpdateClearFilter();
             dgvSummary.GridFilterChanged += (s, e) => UpdateClearFilter();
             dgvSummary.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
+            UpdateTestSummaryMaxPctMenuItems();
         }
 
         private bool IsDefaultFilter => (string.IsNullOrEmpty(dgvTests.RowFilter) || dgvTests.RowFilter == TestRowFilter) && (string.IsNullOrEmpty(dgvSummary.RowFilter) || dgvSummary.RowFilter == SummaryRowFilter);
@@ -263,12 +264,15 @@ namespace DBADashGUI
 
         private void AutoSizeSplitter()
         {
+            var maxHeightPct = Math.Max(Math.Min(Properties.Settings.Default.TestSummaryMaxHeightPct, 0.99M), 0.01M);
             // Auto size split container
             if (dgvTests.Rows.Count > 0)
             {
                 splitContainer1.Invoke(() =>
                 {
-                    splitContainer1.SplitterDistance = ((dgvTests.Rows[0].Height + 1) * dgvTests.Rows.Count) + dgvTests.ColumnHeadersHeight;
+                    var distance = ((dgvTests.Rows[0].Height + 1) * dgvTests.Rows.Count) + dgvTests.ColumnHeadersHeight;
+                    distance = Math.Min(distance, Convert.ToInt32(splitContainer1.Height * maxHeightPct));
+                    splitContainer1.SplitterDistance = distance;
                 });
             }
         }
@@ -810,6 +814,24 @@ namespace DBADashGUI
         {
             CommonData.AcknowledgeInstanceUptime(-1);
             RefreshData(true);
+        }
+
+        private void SetTestSummaryMaxPct(object sender, EventArgs e)
+        {
+            var pct = Convert.ToDecimal((sender as ToolStripMenuItem)?.Tag);
+            Properties.Settings.Default.TestSummaryMaxHeightPct = pct;
+            Properties.Settings.Default.Save();
+            UpdateTestSummaryMaxPctMenuItems();
+            AutoSizeSplitter();
+        }
+
+        private void UpdateTestSummaryMaxPctMenuItems()
+        {
+            foreach (ToolStripMenuItem item in tsSummaryMaxHeight.DropDownItems)
+            {
+                var pct = Convert.ToDecimal(item.Tag?.ToString());
+                item.Checked = pct == Properties.Settings.Default.TestSummaryMaxHeightPct;
+            }
         }
     }
 }
