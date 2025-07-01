@@ -6,7 +6,6 @@ using Microsoft.SqlServer.Management.Common;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security;
@@ -383,6 +382,57 @@ namespace DBADashSharedGUI
             catch (Exception ex)
             {
                 throw new InvalidOperationException($"Failed to restart as administrator: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Checks if the current user has write access to a file
+        /// </summary>
+        /// <param name="filePath">Path to the file to check</param>
+        /// <returns>True if user has write access, false otherwise</returns>
+        public static bool HasWriteAccess(string filePath)
+        {
+            try
+            {
+                if (File.Exists(filePath))
+                {
+                    // Method 1: Try to open the file for writing (most reliable)
+                    using (var fs = File.OpenWrite(filePath))
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    // File doesn't exist - check if we can write to the directory
+                    var directory = Path.GetDirectoryName(filePath);
+
+                    if (!Directory.Exists(directory))
+                        return false;
+
+                    // Try to create a temporary file in the directory
+                    var tempFile = Path.Combine(directory, Path.GetRandomFileName());
+                    using (var fs = File.Create(tempFile))
+                    {
+                        // Successfully created temp file
+                    }
+                    File.Delete(tempFile); // Clean up
+                    return true;
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return false;
+            }
+            catch (IOException)
+            {
+                // File might be in use, but we have write permissions
+                return true;
+            }
+            catch (Exception)
+            {
+                // Other exceptions (file not found, invalid path, etc.)
+                return false;
             }
         }
     }

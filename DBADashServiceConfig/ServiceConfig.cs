@@ -448,22 +448,73 @@ namespace DBADashServiceConfig
             try
             {
                 collectionConfig.ValidateDestination();
-                SaveChanges();
             }
             catch (Exception ex)
             {
-                CommonShared.ShowExceptionDialog(ex);
+                if (CommonShared.ShowExceptionDialog(ex, "Error validating destination", default, TaskDialogIcon.Error, "Continue to save?", new TaskDialogButtonCollection()
+                    {
+                        TaskDialogButton.Yes,
+                        TaskDialogButton.No
+                    }) == TaskDialogButton.No) return;
             }
+            SaveChanges();
         }
 
-        private void SaveChanges()
+        private bool PromptSaveAs()
         {
-            SetJson();
-            collectionConfig.Save();
-            originalJson = txtJson.Text;
-            UpdateSaveButton();
-            MessageBox.Show("Config saved.  Restart service to apply changes.", "Save", MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+            var sfd = new System.Windows.Forms.SaveFileDialog()
+            {
+                Filter = "Json File|*.json",
+                Title = "Save As",
+                FileName = BasicConfig.JsonConfigPath,
+            };
+            if (sfd.ShowDialog() != DialogResult.OK) return false;
+            try
+            {
+                File.WriteAllText(sfd.FileName, txtJson.Text);
+                MessageBox.Show("Config saved to " + sfd.FileName, "Save", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return true;
+            }
+            catch (Exception ex2)
+            {
+                CommonShared.ShowExceptionDialog(ex2, "Error saving config file: ");
+            }
+            return false;
+        }
+
+        private bool SaveChanges()
+        {
+            try
+            {
+                SetJson();
+                collectionConfig.Save();
+                originalJson = txtJson.Text;
+                UpdateSaveButton();
+                MessageBox.Show("Config saved.  Restart service to apply changes.", "Save", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return true;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                if (CommonShared.ShowExceptionDialog(ex, "You don't have access to update the config file.",
+                        default, TaskDialogIcon.ShieldErrorRedBar, "Would you like to save the changes to an alternative location?\nNote: The config file needs to be located in the application folder.", new TaskDialogButtonCollection()
+                        {
+                            TaskDialogButton.Yes,
+                            TaskDialogButton.No
+                        }) == TaskDialogButton.No) return false;
+                return PromptSaveAs();
+            }
+            catch (Exception ex)
+            {
+                if (CommonShared.ShowExceptionDialog(ex, ex.Message,
+                        default, TaskDialogIcon.Error, "Would you like to save the changes to an alternative location?\nNote: The config file needs to be located in the application folder.", new TaskDialogButtonCollection()
+                        {
+                            TaskDialogButton.Yes,
+                            TaskDialogButton.No
+                        }) == TaskDialogButton.No) return false;
+                return PromptSaveAs();
+            }
         }
 
         private async void ServiceConfig_Load(object sender, EventArgs e)
@@ -651,6 +702,12 @@ namespace DBADashServiceConfig
             dgvConnections.ApplyTheme();
             _ = Task.Run(AutoRefreshServiceStatus);
             UpdatePerformanceCountersLabel();
+            CheckWriteAccessToConfig();
+        }
+
+        private void CheckWriteAccessToConfig()
+        {
+            pnlConfigFileAccessWarning.Visible = !CommonShared.HasWriteAccess(BasicConfig.JsonConfigPath);
         }
 
         private void SubscribeActivityEvents(Control parent)
@@ -1053,19 +1110,15 @@ namespace DBADashServiceConfig
 
         private void ServiceConfig_FromClosing(object sender, FormClosingEventArgs e)
         {
-            PromptSaveChanges();
+            e.Cancel = !PromptSaveChanges();
         }
 
-        private void PromptSaveChanges()
+        private bool PromptSaveChanges()
         {
-            if (originalJson != txtJson.Text)
-            {
-                if (MessageBox.Show("Save Changes?", "Save", MessageBoxButtons.YesNo, MessageBoxIcon.Question) ==
-                    DialogResult.Yes)
-                {
-                    SaveChanges();
-                }
-            }
+            if (originalJson == txtJson.Text) return true;
+            if (MessageBox.Show("Save Changes?", "Save", MessageBoxButtons.YesNo, MessageBoxIcon.Question) !=
+                DialogResult.Yes) return true;
+            return SaveChanges();
         }
 
         private void StartService()

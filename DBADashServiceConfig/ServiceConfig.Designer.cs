@@ -66,7 +66,10 @@ namespace DBADashServiceConfig
             chkLogInternalPerfCounters = new System.Windows.Forms.CheckBox();
             bttnCheckConnections = new System.Windows.Forms.Button();
             label21 = new System.Windows.Forms.Label();
-            panel1 = new System.Windows.Forms.Panel();
+            picConfigFileAccess = new System.Windows.Forms.PictureBox();
+            lblConfigFileAccess = new System.Windows.Forms.Label();
+            pnlBottom = new System.Windows.Forms.Panel();
+            pnlConfigFileAccessWarning = new System.Windows.Forms.Panel();
             tabJson = new System.Windows.Forms.TabPage();
             txtJson = new System.Windows.Forms.TextBox();
             tabOther = new System.Windows.Forms.TabPage();
@@ -180,7 +183,9 @@ namespace DBADashServiceConfig
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
-            panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picConfigFileAccess).BeginInit();
+            pnlBottom.SuspendLayout();
+            pnlConfigFileAccessWarning.SuspendLayout();
             tabJson.SuspendLayout();
             tabOther.SuspendLayout();
             groupBox5.SuspendLayout();
@@ -583,16 +588,46 @@ namespace DBADashServiceConfig
             label21.Text = "Allowed Job Execution";
             toolTip1.SetToolTip(label21, "Comma separated list of allowed jobs, categories or job IDs.  Prefix with - to deny.  Use * or % as wildcard characters. ");
             // 
-            // panel1
+            // picConfigFileAccess
             // 
-            panel1.Controls.Add(bttnSave);
-            panel1.Controls.Add(bttnCancel);
-            panel1.Controls.Add(lnkSourceConnections);
-            panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            panel1.Location = new System.Drawing.Point(0, 765);
-            panel1.Name = "panel1";
-            panel1.Size = new System.Drawing.Size(1137, 64);
-            panel1.TabIndex = 23;
+            picConfigFileAccess.Image = Properties.Resources.Security_Shields_Alert_32xLG_color;
+            picConfigFileAccess.Location = new System.Drawing.Point(5, 3);
+            picConfigFileAccess.Name = "picConfigFileAccess";
+            picConfigFileAccess.Size = new System.Drawing.Size(30, 30);
+            picConfigFileAccess.TabIndex = 0;
+            picConfigFileAccess.TabStop = false;
+            // 
+            // lblConfigFileAccess
+            // 
+            lblConfigFileAccess.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            lblConfigFileAccess.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            lblConfigFileAccess.Location = new System.Drawing.Point(41, 3);
+            lblConfigFileAccess.Name = "lblConfigFileAccess";
+            lblConfigFileAccess.Size = new System.Drawing.Size(287, 44);
+            lblConfigFileAccess.TabIndex = 27;
+            lblConfigFileAccess.Text = "Warning: You do not have permissions to write to the config file";
+            // 
+            // pnlBottom
+            // 
+            pnlBottom.Controls.Add(pnlConfigFileAccessWarning);
+            pnlBottom.Controls.Add(bttnSave);
+            pnlBottom.Controls.Add(bttnCancel);
+            pnlBottom.Controls.Add(lnkSourceConnections);
+            pnlBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
+            pnlBottom.Location = new System.Drawing.Point(0, 765);
+            pnlBottom.Name = "pnlBottom";
+            pnlBottom.Size = new System.Drawing.Size(1137, 64);
+            pnlBottom.TabIndex = 23;
+            // 
+            // pnlConfigFileAccessWarning
+            // 
+            pnlConfigFileAccessWarning.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            pnlConfigFileAccessWarning.Controls.Add(picConfigFileAccess);
+            pnlConfigFileAccessWarning.Controls.Add(lblConfigFileAccess);
+            pnlConfigFileAccessWarning.Location = new System.Drawing.Point(572, 5);
+            pnlConfigFileAccessWarning.Name = "pnlConfigFileAccessWarning";
+            pnlConfigFileAccessWarning.Size = new System.Drawing.Size(331, 56);
+            pnlConfigFileAccessWarning.TabIndex = 28;
             // 
             // tabJson
             // 
@@ -1906,7 +1941,7 @@ namespace DBADashServiceConfig
             ClientSize = new System.Drawing.Size(1137, 829);
             Controls.Add(tab1);
             Controls.Add(label5);
-            Controls.Add(panel1);
+            Controls.Add(pnlBottom);
             Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
             MinimumSize = new System.Drawing.Size(842, 863);
             Name = "ServiceConfig";
@@ -1916,8 +1951,10 @@ namespace DBADashServiceConfig
             ((System.ComponentModel.ISupportInitialize)errorProvider1).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
-            panel1.ResumeLayout(false);
-            panel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)picConfigFileAccess).EndInit();
+            pnlBottom.ResumeLayout(false);
+            pnlBottom.PerformLayout();
+            pnlConfigFileAccessWarning.ResumeLayout(false);
             tabJson.ResumeLayout(false);
             tabJson.PerformLayout();
             tabOther.ResumeLayout(false);
@@ -1972,7 +2009,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.LinkLabel lnkSourceConnections;
-        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel pnlBottom;
         private ThemedTabControl tab1;
         private System.Windows.Forms.TabPage tabDest;
         private System.Windows.Forms.Label lblServiceWarning;
@@ -2108,6 +2145,9 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label lblPerformanceCounters;
         private System.Windows.Forms.LinkLabel lnkCustomCountersHelp;
         private System.Windows.Forms.LinkLabel lnkTimeouts;
+        private System.Windows.Forms.Label lblConfigFileAccess;
+        private System.Windows.Forms.PictureBox picConfigFileAccess;
+        private System.Windows.Forms.Panel pnlConfigFileAccessWarning;
     }
 }
 
