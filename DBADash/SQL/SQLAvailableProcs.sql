@@ -38,11 +38,16 @@ BEGIN
 		parameters
 	)
 	' + @SelectSQL + '
-	AND (DB_NAME() = @DB OR (O.name LIKE ''sp_%'' AND S.name = ''dbo''))
+	AND (DB_NAME() COLLATE DATABASE_DEFAULT = @DB 
+			OR (
+				O.name COLLATE DATABASE_DEFAULT LIKE ''sp_%'' 
+				AND S.name COLLATE DATABASE_DEFAULT = ''dbo''
+				)
+		)
 	AND NOT EXISTS(	SELECT 1 
 					FROM @Procs T 
-					WHERE T.schema_name = S.name
-					AND T.object_name = O.name
+					WHERE T.schema_name COLLATE DATABASE_DEFAULT = S.name
+					AND T.object_name COLLATE DATABASE_DEFAULT = O.name
 					)
 
 	IF DB_NAME()=''master''
