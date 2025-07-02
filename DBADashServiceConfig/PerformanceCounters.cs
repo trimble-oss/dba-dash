@@ -136,7 +136,7 @@ namespace DBADashServiceConfig
             if (dgvAvailable.SelectedRows.Count == 0) return;
             txtObjectName.Text = dgvAvailable.SelectedRows[0].Cells["Object Name"].Value?.ToString() ?? string.Empty;
             txtCounterName.Text = dgvAvailable.SelectedRows[0].Cells["Counter Name"].Value?.ToString() ?? string.Empty;
-            cboInstance.DataSource = dtAvailable.Rows.Cast<DataRow>().Where(r => (string)r["object_name"] == txtObjectName.Text && (string)r["counter_name"] == txtCounterName.Text).Select(r => (string)r["instance_name"]).ToList();
+            cboInstance.DataSource = dtAvailable.Rows.Cast<DataRow>().Where(r => (string)r["object_name"] == txtObjectName.Text && (string)r["counter_name"] == txtCounterName.Text).Select(r => (string)r["instance_name"]).Order().ToList();
         }
 
         private void AllInstances_CheckedChanged(object sender, EventArgs e)
