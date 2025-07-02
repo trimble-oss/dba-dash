@@ -12,13 +12,13 @@ namespace DBADash
 {
     public class CollectionConfig : BasicConfig
     {
-        public Int32 ServiceThreads = -1;
+        public int ServiceThreads = -1;
         private string _secretKey;
         private bool wasEncryptionPerformed;
         private readonly string myString = "g&hAs2&mVOLwE6DqO!I5";
         public SchemaSnapshotDBOptions SchemaSnapshotOptions = null;
         public bool ScanForAzureDBs { get; set; } = true;
-        public Int32 ScanForAzureDBsInterval { get; set; } = 3600;
+        public int ScanForAzureDBsInterval { get; set; } = 3600;
         public string ServiceName { get; set; } = "DBADashService";
 
         public bool AutoUpdateDatabase { get; set; } = true;
@@ -32,6 +32,10 @@ namespace DBADash
         public int? ImportCommandTimeout { get; set; }
         public int? PurgeDataCommandTimeout { get; set; }
         public int? AddPartitionsCommandTimeout { get; set; }
+
+        public const int DefaultImportCommandTimeout = 60;
+        public const int DefaultPurgeDataCommandTimeout = 1200;
+        public const int DefaultAddPartitionsCommandTimeout = 300;
 
         public bool EnableMessaging { get; set; } = true;
 
