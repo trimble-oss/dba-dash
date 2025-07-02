@@ -93,6 +93,9 @@ Get-ChildItem $tempFolder -File | Where-Object {$_.Name -like "*-unsigned.zip"} 
     if ($LASTEXITCODE -ne 0) {
       throw "Code signing failed for $exePath with exit code $LASTEXITCODE"
     }
+    if ((Get-AuthenticodeSignature -FilePath $exePath).Status -ne 'Valid') {
+      throw "Code signing verification failed for $exePath"
+    }
   }
   Write-Host "Recompressing signed files into a new zip..."
   $newZip = $_.FullName.Replace("-unsigned.zip", ".zip")
