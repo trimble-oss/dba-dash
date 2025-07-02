@@ -19,6 +19,52 @@ namespace DBADashServiceConfig
 
         private DataTable customTimeoutsDT;
 
+        public int? ImportTimeout
+        {
+            get =>
+                chkImportTimeout.Checked && int.TryParse(txtImportCommandTimeout.Text, out var timeout)
+                    ? timeout
+                    : null;
+
+            set
+            {
+                txtImportCommandTimeout.Text = value?.ToString() ?? CollectionConfig.DefaultImportCommandTimeout.ToString();
+                chkImportTimeout.Checked = value.HasValue;
+            }
+
+        }
+
+        public int? PurgeTimeout
+        {
+            get =>
+                chkPurgeTimeout.Checked && int.TryParse(txtPurgeDataCommandTimeout.Text, out var timeout)
+                    ? timeout
+                    : null;
+
+            set
+            {
+                txtPurgeDataCommandTimeout.Text = value?.ToString() ?? CollectionConfig.DefaultPurgeDataCommandTimeout.ToString();
+                chkPurgeTimeout.Checked = value.HasValue;
+            }
+
+        }
+
+        public int? AddPartitionsTimeout
+        {
+            get =>
+              chkAddPartitionsTimeout.Checked && int.TryParse(txtAddPartitionsCommandTimeout.Text, out var timeout)
+                    ? timeout
+                    : null;
+
+            set
+            {
+                txtAddPartitionsCommandTimeout.Text = value?.ToString() ?? CollectionConfig.DefaultAddPartitionsCommandTimeout.ToString();
+                chkAddPartitionsTimeout.Checked = value.HasValue;
+            }
+
+        }
+
+
         private void TimeoutConfig_Load(object sender, EventArgs e)
         {
             var customTimeouts = CollectionCommandTimeout.GetCustomTimeouts();
@@ -176,6 +222,33 @@ namespace DBADashServiceConfig
             catch (Exception ex)
             {
                 CommonShared.ShowExceptionDialog(ex);
+            }
+        }
+
+        private void ImportTimeout_CheckChanged(object sender, EventArgs e)
+        {
+            txtImportCommandTimeout.Enabled = chkImportTimeout.Checked;
+            if (!chkImportTimeout.Checked)
+            {
+                txtImportCommandTimeout.Text = CollectionConfig.DefaultImportCommandTimeout.ToString();
+            }
+        }
+
+        private void PurgeTimeout_CheckChanged(object sender, EventArgs e)
+        {
+            txtPurgeDataCommandTimeout.Enabled = chkPurgeTimeout.Checked;
+            if (!chkPurgeTimeout.Checked)
+            {
+                txtPurgeDataCommandTimeout.Text = CollectionConfig.DefaultPurgeDataCommandTimeout.ToString();
+            }
+        }
+
+        private void AddPartitionsTimeout_CheckChanged(object sender, EventArgs e)
+        {
+            txtAddPartitionsCommandTimeout.Enabled = chkAddPartitionsTimeout.Checked;
+            if (!chkAddPartitionsTimeout.Checked)
+            {
+                txtAddPartitionsCommandTimeout.Text = CollectionConfig.DefaultAddPartitionsCommandTimeout.ToString();
             }
         }
     }

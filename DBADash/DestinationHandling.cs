@@ -13,8 +13,7 @@ namespace DBADash
 {
     public class DestinationHandling
     {
-        private const int DefaultCommandTimeout = 60;
-
+  
         public static async Task WriteAllDestinationsAsync(DataSet ds, DBADashSource src, string fileName, CollectionConfig cfg)
         {
             List<Exception> exceptions = new();
@@ -135,7 +134,7 @@ namespace DBADash
         public static async Task WriteDBAsync(DataSet ds, string destination, CollectionConfig cfg)
         {
             var importAgent = DBADashAgent.GetCurrent();
-            var importer = new DBImporter(ds, destination, importAgent, cfg.ImportCommandTimeout ?? DefaultCommandTimeout);
+            var importer = new DBImporter(ds, destination, importAgent, cfg.ImportCommandTimeout ?? CollectionConfig.DefaultImportCommandTimeout);
             // Wait until we can connect to the repository DB.  If it's down, wait for it to become available.
             await Policy.Handle<Exception>()
                 .WaitAndRetryForever(retryAttempt =>

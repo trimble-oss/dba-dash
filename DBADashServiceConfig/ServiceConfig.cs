@@ -2607,8 +2607,17 @@ namespace DBADashServiceConfig
 
         private void CollectionTimeouts_Click(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            var frm = new TimeoutConfig();
-            frm.ShowDialog();
+            var frm = new TimeoutConfig()
+            {
+                AddPartitionsTimeout = collectionConfig.AddPartitionsCommandTimeout,
+                PurgeTimeout= collectionConfig.PurgeDataCommandTimeout,
+                ImportTimeout = collectionConfig.ImportCommandTimeout
+            };
+            if(frm.ShowDialog() != DialogResult.OK) return;
+            collectionConfig.AddPartitionsCommandTimeout = frm.AddPartitionsTimeout;
+            collectionConfig.PurgeDataCommandTimeout = frm.PurgeTimeout;
+            collectionConfig.ImportCommandTimeout = frm.ImportTimeout;
+            SetJson();
         }
     }
 }
