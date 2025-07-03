@@ -2543,8 +2543,15 @@ namespace DBADashServiceConfig
 
         private void ShowPermissionsHelper(List<DBADashSource> sourceConnections)
         {
-            var frm = new PermissionsHelper() { Connections = sourceConnections, Config = collectionConfig };
-            frm.ShowDialog();
+            try
+            {
+                var frm = new PermissionsHelper() { Connections = sourceConnections, Config = collectionConfig };
+                frm.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error loading Permissions Helper");
+            }
         }
 
         private void lnkGrant_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
