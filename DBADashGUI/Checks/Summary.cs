@@ -32,7 +32,7 @@ namespace DBADashGUI
             dgvTests.GridFilterChanged += (s, e) => UpdateClearFilter();
             dgvSummary.GridFilterChanged += (s, e) => UpdateClearFilter();
             dgvSummary.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
-            UpdateTestSummaryMaxPctMenuItems();
+            InitializeTestSummaryMaxPctMenuItems();
         }
 
         private bool IsDefaultFilter => (string.IsNullOrEmpty(dgvTests.RowFilter) || dgvTests.RowFilter == TestRowFilter) && (string.IsNullOrEmpty(dgvSummary.RowFilter) || dgvSummary.RowFilter == SummaryRowFilter);
@@ -818,19 +818,37 @@ namespace DBADashGUI
 
         private void SetTestSummaryMaxPct(object sender, EventArgs e)
         {
-            var pct = Convert.ToDecimal((sender as ToolStripMenuItem)?.Tag);
+            if (sender is not ToolStripMenuItem { Tag: decimal pct })
+                return;
             Properties.Settings.Default.TestSummaryMaxHeightPct = pct;
             Properties.Settings.Default.Save();
             UpdateTestSummaryMaxPctMenuItems();
             AutoSizeSplitter();
         }
 
+        private void InitializeTestSummaryMaxPctMenuItems()
+        {
+            if (tsSummaryMaxHeight.DropDownItems.Count != 0) return;
+            for (var i = 0.1M; i <= 0.9M; i += 0.1M)
+            {
+                var item = new ToolStripMenuItem($"{i:P0}")
+                {
+                    Tag = i,
+                    Checked = i == Properties.Settings.Default.TestSummaryMaxHeightPct
+                };
+                item.Click += SetTestSummaryMaxPct;
+                tsSummaryMaxHeight.DropDownItems.Add(item);
+            }
+        }
+
         private void UpdateTestSummaryMaxPctMenuItems()
         {
             foreach (ToolStripMenuItem item in tsSummaryMaxHeight.DropDownItems)
             {
-                var pct = Convert.ToDecimal(item.Tag?.ToString());
-                item.Checked = pct == Properties.Settings.Default.TestSummaryMaxHeightPct;
+                if (item.Tag is decimal pct)
+                {
+                    item.Checked = pct == Properties.Settings.Default.TestSummaryMaxHeightPct;
+                }
             }
         }
     }
