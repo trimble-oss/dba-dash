@@ -86,6 +86,9 @@ namespace DBADashServiceConfig
             numAlertPollingFrequency = new System.Windows.Forms.NumericUpDown();
             chkProcessAlerts = new System.Windows.Forms.CheckBox();
             groupBox3 = new System.Windows.Forms.GroupBox();
+            chkThreads = new System.Windows.Forms.CheckBox();
+            numThreads = new System.Windows.Forms.NumericUpDown();
+            label23 = new System.Windows.Forms.Label();
             lnkTimeouts = new System.Windows.Forms.LinkLabel();
             bttnCustomCollections = new System.Windows.Forms.Button();
             lblSummaryRefreshCron = new System.Windows.Forms.Label();
@@ -194,6 +197,7 @@ namespace DBADashServiceConfig
             ((System.ComponentModel.ISupportInitialize)numAlertStartupDelay).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numAlertPollingFrequency).BeginInit();
             groupBox3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numThreads).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numBackupRetention).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numIdentityCollectionThreshold).BeginInit();
             groupBox4.SuspendLayout();
@@ -543,7 +547,7 @@ namespace DBADashServiceConfig
             // 
             // bttnAWS
             // 
-            bttnAWS.Location = new System.Drawing.Point(16, 149);
+            bttnAWS.Location = new System.Drawing.Point(15, 176);
             bttnAWS.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             bttnAWS.Name = "bttnAWS";
             bttnAWS.Size = new System.Drawing.Size(197, 55);
@@ -557,7 +561,7 @@ namespace DBADashServiceConfig
             // 
             chkLogInternalPerfCounters.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             chkLogInternalPerfCounters.AutoSize = true;
-            chkLogInternalPerfCounters.Location = new System.Drawing.Point(845, 43);
+            chkLogInternalPerfCounters.Location = new System.Drawing.Point(846, 43);
             chkLogInternalPerfCounters.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             chkLogInternalPerfCounters.Name = "chkLogInternalPerfCounters";
             chkLogInternalPerfCounters.Size = new System.Drawing.Size(259, 24);
@@ -676,9 +680,9 @@ namespace DBADashServiceConfig
             groupBox5.Controls.Add(lblPerformanceCounters);
             groupBox5.Controls.Add(bttnPerformanceCounters);
             groupBox5.Controls.Add(chkLogInternalPerfCounters);
-            groupBox5.Location = new System.Drawing.Point(9, 508);
+            groupBox5.Location = new System.Drawing.Point(8, 533);
             groupBox5.Name = "groupBox5";
-            groupBox5.Size = new System.Drawing.Size(1112, 93);
+            groupBox5.Size = new System.Drawing.Size(1113, 93);
             groupBox5.TabIndex = 42;
             groupBox5.TabStop = false;
             groupBox5.Text = "Performance Counters";
@@ -727,9 +731,9 @@ namespace DBADashServiceConfig
             groupBox7.Controls.Add(label19);
             groupBox7.Controls.Add(numAlertPollingFrequency);
             groupBox7.Controls.Add(chkProcessAlerts);
-            groupBox7.Location = new System.Drawing.Point(9, 418);
+            groupBox7.Location = new System.Drawing.Point(8, 443);
             groupBox7.Name = "groupBox7";
-            groupBox7.Size = new System.Drawing.Size(1112, 84);
+            groupBox7.Size = new System.Drawing.Size(1113, 84);
             groupBox7.TabIndex = 40;
             groupBox7.TabStop = false;
             groupBox7.Text = "Alerts";
@@ -810,6 +814,9 @@ namespace DBADashServiceConfig
             // groupBox3
             // 
             groupBox3.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBox3.Controls.Add(chkThreads);
+            groupBox3.Controls.Add(numThreads);
+            groupBox3.Controls.Add(label23);
             groupBox3.Controls.Add(lnkTimeouts);
             groupBox3.Controls.Add(bttnCustomCollections);
             groupBox3.Controls.Add(lblSummaryRefreshCron);
@@ -828,10 +835,40 @@ namespace DBADashServiceConfig
             groupBox3.Controls.Add(chkDefaultIdentityCollection);
             groupBox3.Location = new System.Drawing.Point(8, 19);
             groupBox3.Name = "groupBox3";
-            groupBox3.Size = new System.Drawing.Size(1113, 245);
+            groupBox3.Size = new System.Drawing.Size(1113, 271);
             groupBox3.TabIndex = 38;
             groupBox3.TabStop = false;
             groupBox3.Text = "Miscellaneous";
+            // 
+            // chkThreads
+            // 
+            chkThreads.AutoSize = true;
+            chkThreads.Location = new System.Drawing.Point(407, 142);
+            chkThreads.Name = "chkThreads";
+            chkThreads.Size = new System.Drawing.Size(18, 17);
+            chkThreads.TabIndex = 50;
+            chkThreads.UseVisualStyleBackColor = true;
+            chkThreads.CheckedChanged += Threads_CheckChanged;
+            // 
+            // numThreads
+            // 
+            numThreads.Location = new System.Drawing.Point(286, 137);
+            numThreads.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
+            numThreads.Minimum = new decimal(new int[] { 1, 0, 0, int.MinValue });
+            numThreads.Name = "numThreads";
+            numThreads.Size = new System.Drawing.Size(114, 27);
+            numThreads.TabIndex = 49;
+            numThreads.Value = new decimal(new int[] { 10, 0, 0, 0 });
+            numThreads.ValueChanged += Threads_ValueChanged;
+            // 
+            // label23
+            // 
+            label23.AutoSize = true;
+            label23.Location = new System.Drawing.Point(16, 139);
+            label23.Name = "label23";
+            label23.Size = new System.Drawing.Size(64, 20);
+            label23.TabIndex = 48;
+            label23.Text = "Threads:";
             // 
             // lnkTimeouts
             // 
@@ -847,7 +884,7 @@ namespace DBADashServiceConfig
             // 
             // bttnCustomCollections
             // 
-            bttnCustomCollections.Location = new System.Drawing.Point(624, 149);
+            bttnCustomCollections.Location = new System.Drawing.Point(623, 176);
             bttnCustomCollections.Name = "bttnCustomCollections";
             bttnCustomCollections.Size = new System.Drawing.Size(197, 55);
             bttnCustomCollections.TabIndex = 46;
@@ -907,7 +944,7 @@ namespace DBADashServiceConfig
             // 
             // lblEncryptionStatus
             // 
-            lblEncryptionStatus.Location = new System.Drawing.Point(421, 209);
+            lblEncryptionStatus.Location = new System.Drawing.Point(420, 236);
             lblEncryptionStatus.Name = "lblEncryptionStatus";
             lblEncryptionStatus.Size = new System.Drawing.Size(197, 27);
             lblEncryptionStatus.TabIndex = 38;
@@ -916,7 +953,7 @@ namespace DBADashServiceConfig
             // 
             // bttnEncryption
             // 
-            bttnEncryption.Location = new System.Drawing.Point(421, 149);
+            bttnEncryption.Location = new System.Drawing.Point(420, 176);
             bttnEncryption.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             bttnEncryption.Name = "bttnEncryption";
             bttnEncryption.Size = new System.Drawing.Size(197, 55);
@@ -936,7 +973,7 @@ namespace DBADashServiceConfig
             // 
             // bttnSchedule
             // 
-            bttnSchedule.Location = new System.Drawing.Point(218, 149);
+            bttnSchedule.Location = new System.Drawing.Point(217, 176);
             bttnSchedule.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             bttnSchedule.Name = "bttnSchedule";
             bttnSchedule.Size = new System.Drawing.Size(197, 55);
@@ -968,7 +1005,7 @@ namespace DBADashServiceConfig
             groupBox4.Controls.Add(label11);
             groupBox4.Controls.Add(chkScanEvery);
             groupBox4.Controls.Add(label10);
-            groupBox4.Location = new System.Drawing.Point(9, 272);
+            groupBox4.Location = new System.Drawing.Point(8, 297);
             groupBox4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             groupBox4.Name = "groupBox4";
             groupBox4.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -1979,6 +2016,7 @@ namespace DBADashServiceConfig
             ((System.ComponentModel.ISupportInitialize)numAlertPollingFrequency).EndInit();
             groupBox3.ResumeLayout(false);
             groupBox3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numThreads).EndInit();
             ((System.ComponentModel.ISupportInitialize)numBackupRetention).EndInit();
             ((System.ComponentModel.ISupportInitialize)numIdentityCollectionThreshold).EndInit();
             groupBox4.ResumeLayout(false);
@@ -2162,6 +2200,9 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.PictureBox picConfigFileAccess;
         private System.Windows.Forms.Panel pnlConfigFileAccessWarning;
         private System.Windows.Forms.CheckBox chkCollectTempDB;
+        private System.Windows.Forms.NumericUpDown numThreads;
+        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.CheckBox chkThreads;
     }
 }
 

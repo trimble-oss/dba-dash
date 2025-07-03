@@ -59,6 +59,35 @@ namespace DBADash
 
         public const int DefaultAlertProcessingStartupDelaySeconds = 60;
 
+        public int GetThreadCount()
+        {
+            if (ServiceThreads > 0)
+            {
+                Log.Information("Threads {threadCount} (user)", ServiceThreads);
+                return ServiceThreads;
+            }
+
+            const int minimumCalcThreads = 10; // Minimum threads we should calculate
+            const int maximumCalcThreads = 100; // Maximum threads we should calculate
+            const int sourceConnectionsAdditionalThreads = 5; // Additional threads to add on top of multiplier
+            const double sourceConnectionsMultiplier = 0.5; // 1 thread for every 2 source connections
+            const int maxThreadsPerProcessor = 4; // Max threads per processor
+
+            var connectionCount = SourceConnections.Count;
+            var processorCount = Environment.ProcessorCount;
+            var connectionThreadCalc = Convert.ToInt32((connectionCount * sourceConnectionsMultiplier)) + sourceConnectionsAdditionalThreads; // Calculate thead count based on number of source connections
+            var processorLimit = processorCount * maxThreadsPerProcessor; // Max of 4 threads per processor.  Threads will often be idle waiting for queries to complete
+            var threads = Convert.ToInt32(Math.Min(processorLimit, connectionThreadCalc)); // Use the lower of the two calculations
+            threads = int.Clamp(threads, minimumCalcThreads, maximumCalcThreads); // Clamp to minimum and maximum
+            Log.Information(
+                "Calculated thread count: {ThreadCount}. " +
+                "Based on {ConnectionCount} connections ({ConnectionThreads} threads) " +
+                "and {ProcessorCount} processors ({ProcessorLimit} max threads). " +
+                "Clamped between {MinThreads}-{MaxThreads}",
+                threads, connectionCount, connectionThreadCalc , processorCount, processorLimit, minimumCalcThreads, maximumCalcThreads);
+            return threads;
+        }
+
         public CollectionSchedules GetSchedules()
         {
             if (CollectionSchedules == null)

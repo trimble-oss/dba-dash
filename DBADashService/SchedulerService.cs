@@ -46,17 +46,8 @@ namespace DBADashService
                 Log.Information("Custom schedules set at agent level");
             }
 
-            var threads = config.ServiceThreads;
-            if (threads < 1)
-            {
-                threads = 10;
-                Log.Logger.Information("Threads {threadCount} (default)", threads);
-            }
-            else
-            {
-                Log.Logger.Information("Threads {threadCount} (user)", threads);
-            }
-
+            var threads = config.GetThreadCount();
+            
             NameValueCollection props = new()
             {
             { "quartz.serializer.type", "binary" },
