@@ -39,7 +39,7 @@ namespace DBADashServiceConfig
         private List<string> ProcedureNames =>
             Connections
                 .SelectMany(src => src.CustomCollections.Values.Select(cc => cc.ProcedureName))
-                .Concat(Config.AllowedCustomProcs.Split(','))
+                .Concat(Config.AllowedCustomProcs?.Split(',') ?? Array.Empty<string>())
                 .Distinct()
                 .ToList();
 
