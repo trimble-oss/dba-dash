@@ -36,12 +36,45 @@ namespace DacpacUtility
             };
         }
 
+        // Sets the extended property 'IsDBUpgradeInProgress' to indicate if a deployment is in progress
+        private void SetDeployInProgress(string connectionString, bool inProgress)
+        {
+            try
+            {
+                const string sql = @"IF NOT EXISTS(
+		SELECT *
+		FROM sys.extended_properties
+		WHERE name = 'IsDBUpgradeInProgress'
+		AND class = 0 /* class 0 is database */
+		)
+BEGIN
+	EXECUTE sp_addextendedproperty
+		@name = N'IsDBUpgradeInProgress',
+		@value = @InProgress;
+END
+EXECUTE sp_updateextendedproperty
+		@name = N'IsDBUpgradeInProgress',
+		@value = @InProgress;";
+                using var cn = new SqlConnection(connectionString);
+                using var cmd = new SqlCommand(sql, cn);
+                cmd.Parameters.AddWithValue("@InProgress", inProgress ? "Y" : "N");
+                cn.Open();
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error setting deploy in progress flag");
+                MessageList.Add("Error setting deploy in progress flag: " + ex.Message);
+            }
+        }
+
         public void ProcessDacPac(string connectionString,
                                     string databaseName,
                                     string dacpacName,
                                     DBVersionStatusEnum status,
                                     int retryCount = 0)
         {
+
             MessageList.Add("*** Start of processing for " +
                              databaseName);
             // For an existing DB we want to skip this option.  Some users might prefer to use SIMPLE recovery model and this option would set it back to FULL each time the dacpac is deployed
@@ -67,6 +100,10 @@ namespace DacpacUtility
 
             try
             {
+                if(status != DBVersionStatusEnum.CreateDB) // We can't set the flag if the DB doesn't exist
+                {
+                    SetDeployInProgress(connectionString, true);
+                }
                 using (var dacpac = DacPackage.Load(dacpacName))
                 {
                     if (_dacDeployOptions.SqlCommandVariableValues.ContainsKey("VersionNumber"))
@@ -94,6 +131,10 @@ namespace DacpacUtility
                 Log.Error(ex, "Error processing dacpac");
                 MessageList.Add(ex.Message);
                 throw;
+            }
+            finally
+            {
+                SetDeployInProgress(connectionString, false);
             }
         }
 
