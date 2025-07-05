@@ -30,41 +30,41 @@ namespace DBADashGUI
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle69 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle85 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle70 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle71 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle72 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle73 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle74 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle75 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle76 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle77 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle78 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle79 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle80 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle81 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle82 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle83 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle84 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SlowQueries));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle25 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle26 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle27 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle28 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle29 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle30 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle32 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle34 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle21 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle86 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle93 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle87 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle88 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle89 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle90 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle91 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle92 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle94 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle95 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle96 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle97 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle98 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle99 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle100 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle101 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle102 = new System.Windows.Forms.DataGridViewCellStyle();
             dgvSummary = new DBADashDataGridView();
             Grp = new System.Windows.Forms.DataGridViewLinkColumn();
             _lt5 = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -196,6 +196,25 @@ namespace DBADashGUI
             tsCopySummary = new System.Windows.Forms.ToolStripButton();
             tsExcel = new System.Windows.Forms.ToolStripButton();
             dgvSlow = new DBADashDataGridView();
+            Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            DatabaseName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            event_type = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            object_name = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            timestamp = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            duration = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            cpu_time = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            logical_reads = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            physical_reads = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            Writes = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colRowCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            username = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            client_hostname = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            client_app_name = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colContextInfo = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            Result = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colSessionID = new System.Windows.Forms.DataGridViewLinkColumn();
+            colText = new System.Windows.Forms.DataGridViewLinkColumn();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             tsRunning = new System.Windows.Forms.ToolStrip();
             tsRunningBack = new System.Windows.Forms.ToolStripButton();
@@ -229,25 +248,9 @@ namespace DBADashGUI
             dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn19 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            DatabaseName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            event_type = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            object_name = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            timestamp = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            duration = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            cpu_time = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            logical_reads = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            physical_reads = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            Writes = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colRowCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            username = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            client_hostname = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            client_app_name = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colContextInfo = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            Result = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colSessionID = new System.Windows.Forms.DataGridViewLinkColumn();
-            colText = new System.Windows.Forms.DataGridViewLinkColumn();
+            tsConfigureMetrics = new System.Windows.Forms.ToolStripDropDownButton();
+            tsConfigureRoot = new System.Windows.Forms.ToolStripMenuItem();
+            tsConfigureInstance = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)dgvSummary).BeginInit();
             tsSummary.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvSlow).BeginInit();
@@ -263,25 +266,26 @@ namespace DBADashGUI
             // 
             dgvSummary.AllowUserToAddRows = false;
             dgvSummary.AllowUserToDeleteRows = false;
+            dgvSummary.AllowUserToOrderColumns = true;
             dgvSummary.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvSummary.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle69.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle69.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle69.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle69.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle69.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle69.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle69.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvSummary.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle69;
             dgvSummary.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvSummary.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Grp, _lt5, _5to10, _10to20, _20to30, _30to60, _1to5min, _5to10min, _10to30min, _30to60min, _1hrPlus, Total, Failed, TotalDuration, TotalCPU, TotalIO, TotalPhysicalIO });
-            dataGridViewCellStyle17.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle17.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            dataGridViewCellStyle17.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle17.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle17.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
-            dataGridViewCellStyle17.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle17.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgvSummary.DefaultCellStyle = dataGridViewCellStyle17;
+            dataGridViewCellStyle85.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle85.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle85.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle85.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle85.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle85.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle85.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvSummary.DefaultCellStyle = dataGridViewCellStyle85;
             dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvSummary.EnableHeadersVisualStyles = false;
             dgvSummary.Location = new System.Drawing.Point(0, 0);
@@ -311,8 +315,8 @@ namespace DBADashGUI
             // _lt5
             // 
             _lt5.DataPropertyName = "<5 seconds";
-            dataGridViewCellStyle2.Format = "#,#";
-            _lt5.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle70.Format = "#,#";
+            _lt5.DefaultCellStyle = dataGridViewCellStyle70;
             _lt5.HeaderText = "<5 sec";
             _lt5.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             _lt5.MinimumWidth = 6;
@@ -324,8 +328,8 @@ namespace DBADashGUI
             // _5to10
             // 
             _5to10.DataPropertyName = "5-10 seconds";
-            dataGridViewCellStyle3.Format = "#,#";
-            _5to10.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle71.Format = "#,#";
+            _5to10.DefaultCellStyle = dataGridViewCellStyle71;
             _5to10.HeaderText = "5-10 sec";
             _5to10.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             _5to10.MinimumWidth = 6;
@@ -337,8 +341,8 @@ namespace DBADashGUI
             // _10to20
             // 
             _10to20.DataPropertyName = "10-20 seconds";
-            dataGridViewCellStyle4.Format = "#,#";
-            _10to20.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle72.Format = "#,#";
+            _10to20.DefaultCellStyle = dataGridViewCellStyle72;
             _10to20.HeaderText = "10-20 sec";
             _10to20.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             _10to20.MinimumWidth = 6;
@@ -351,8 +355,8 @@ namespace DBADashGUI
             // _20to30
             // 
             _20to30.DataPropertyName = "20-30 seconds";
-            dataGridViewCellStyle5.Format = "#,#";
-            _20to30.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle73.Format = "#,#";
+            _20to30.DefaultCellStyle = dataGridViewCellStyle73;
             _20to30.HeaderText = "20-30 sec";
             _20to30.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             _20to30.MinimumWidth = 6;
@@ -364,8 +368,8 @@ namespace DBADashGUI
             // _30to60
             // 
             _30to60.DataPropertyName = "30-60 seconds";
-            dataGridViewCellStyle6.Format = "#,#";
-            _30to60.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle74.Format = "#,#";
+            _30to60.DefaultCellStyle = dataGridViewCellStyle74;
             _30to60.HeaderText = "30-60 sec";
             _30to60.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             _30to60.MinimumWidth = 6;
@@ -377,8 +381,8 @@ namespace DBADashGUI
             // _1to5min
             // 
             _1to5min.DataPropertyName = "1-5 minutes";
-            dataGridViewCellStyle7.Format = "#,#";
-            _1to5min.DefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle75.Format = "#,#";
+            _1to5min.DefaultCellStyle = dataGridViewCellStyle75;
             _1to5min.HeaderText = "1-5 min";
             _1to5min.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             _1to5min.MinimumWidth = 6;
@@ -390,8 +394,8 @@ namespace DBADashGUI
             // _5to10min
             // 
             _5to10min.DataPropertyName = "5-10 minutes";
-            dataGridViewCellStyle8.Format = "#,#";
-            _5to10min.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle76.Format = "#,#";
+            _5to10min.DefaultCellStyle = dataGridViewCellStyle76;
             _5to10min.HeaderText = "5-10 min";
             _5to10min.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             _5to10min.MinimumWidth = 6;
@@ -403,8 +407,8 @@ namespace DBADashGUI
             // _10to30min
             // 
             _10to30min.DataPropertyName = "10-30 minutes";
-            dataGridViewCellStyle9.Format = "#,#";
-            _10to30min.DefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewCellStyle77.Format = "#,#";
+            _10to30min.DefaultCellStyle = dataGridViewCellStyle77;
             _10to30min.HeaderText = "10-30 min";
             _10to30min.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             _10to30min.MinimumWidth = 6;
@@ -416,8 +420,8 @@ namespace DBADashGUI
             // _30to60min
             // 
             _30to60min.DataPropertyName = "30-60 minutes";
-            dataGridViewCellStyle10.Format = "#,#";
-            _30to60min.DefaultCellStyle = dataGridViewCellStyle10;
+            dataGridViewCellStyle78.Format = "#,#";
+            _30to60min.DefaultCellStyle = dataGridViewCellStyle78;
             _30to60min.HeaderText = "30-60 min";
             _30to60min.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             _30to60min.MinimumWidth = 6;
@@ -429,8 +433,8 @@ namespace DBADashGUI
             // _1hrPlus
             // 
             _1hrPlus.DataPropertyName = "1hr+";
-            dataGridViewCellStyle11.Format = "#,#";
-            _1hrPlus.DefaultCellStyle = dataGridViewCellStyle11;
+            dataGridViewCellStyle79.Format = "#,#";
+            _1hrPlus.DefaultCellStyle = dataGridViewCellStyle79;
             _1hrPlus.HeaderText = "1hr+";
             _1hrPlus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             _1hrPlus.MinimumWidth = 6;
@@ -442,8 +446,8 @@ namespace DBADashGUI
             // Total
             // 
             Total.DataPropertyName = "Total";
-            dataGridViewCellStyle12.Format = "#,#";
-            Total.DefaultCellStyle = dataGridViewCellStyle12;
+            dataGridViewCellStyle80.Format = "#,#";
+            Total.DefaultCellStyle = dataGridViewCellStyle80;
             Total.HeaderText = "Total";
             Total.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             Total.MinimumWidth = 6;
@@ -468,8 +472,8 @@ namespace DBADashGUI
             // TotalDuration
             // 
             TotalDuration.DataPropertyName = "TotalDuration";
-            dataGridViewCellStyle13.Format = "#,#,,.000";
-            TotalDuration.DefaultCellStyle = dataGridViewCellStyle13;
+            dataGridViewCellStyle81.Format = "#,#,,.000";
+            TotalDuration.DefaultCellStyle = dataGridViewCellStyle81;
             TotalDuration.HeaderText = "Total Duration (sec)";
             TotalDuration.MinimumWidth = 6;
             TotalDuration.Name = "TotalDuration";
@@ -479,8 +483,8 @@ namespace DBADashGUI
             // TotalCPU
             // 
             TotalCPU.DataPropertyName = "TotalCPU";
-            dataGridViewCellStyle14.Format = "#,#,,.000";
-            TotalCPU.DefaultCellStyle = dataGridViewCellStyle14;
+            dataGridViewCellStyle82.Format = "#,#,,.000";
+            TotalCPU.DefaultCellStyle = dataGridViewCellStyle82;
             TotalCPU.HeaderText = "Total CPU (sec)";
             TotalCPU.MinimumWidth = 6;
             TotalCPU.Name = "TotalCPU";
@@ -490,8 +494,8 @@ namespace DBADashGUI
             // TotalIO
             // 
             TotalIO.DataPropertyName = "TotalIO";
-            dataGridViewCellStyle15.Format = "N0";
-            TotalIO.DefaultCellStyle = dataGridViewCellStyle15;
+            dataGridViewCellStyle83.Format = "N0";
+            TotalIO.DefaultCellStyle = dataGridViewCellStyle83;
             TotalIO.HeaderText = "Total IO";
             TotalIO.MinimumWidth = 6;
             TotalIO.Name = "TotalIO";
@@ -501,8 +505,8 @@ namespace DBADashGUI
             // TotalPhysicalIO
             // 
             TotalPhysicalIO.DataPropertyName = "TotalPhysicalIO";
-            dataGridViewCellStyle16.Format = "N0";
-            TotalPhysicalIO.DefaultCellStyle = dataGridViewCellStyle16;
+            dataGridViewCellStyle84.Format = "N0";
+            TotalPhysicalIO.DefaultCellStyle = dataGridViewCellStyle84;
             TotalPhysicalIO.HeaderText = "Total Physical IO";
             TotalPhysicalIO.MinimumWidth = 6;
             TotalPhysicalIO.Name = "TotalPhysicalIO";
@@ -512,7 +516,7 @@ namespace DBADashGUI
             // tsSummary
             // 
             tsSummary.ImageScalingSize = new System.Drawing.Size(20, 20);
-            tsSummary.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsGroup, tsMetric, tsFilter, tsTop, tsCopySummary, tsExcel });
+            tsSummary.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsGroup, tsMetric, tsFilter, tsTop, tsCopySummary, tsExcel, tsConfigureMetrics });
             tsSummary.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
             tsSummary.Location = new System.Drawing.Point(0, 0);
             tsSummary.Name = "tsSummary";
@@ -1361,24 +1365,24 @@ namespace DBADashGUI
             dgvSlow.AllowUserToDeleteRows = false;
             dgvSlow.AllowUserToOrderColumns = true;
             dgvSlow.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle18.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle18.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle18.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle18.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
-            dataGridViewCellStyle18.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle18.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle18.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvSlow.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle18;
+            dataGridViewCellStyle86.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle86.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle86.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle86.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle86.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle86.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle86.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvSlow.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle86;
             dgvSlow.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvSlow.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, DatabaseName, event_type, object_name, timestamp, colDuration, duration, cpu_time, logical_reads, physical_reads, Writes, colRowCount, username, client_hostname, client_app_name, colContextInfo, Result, colSessionID, colText });
-            dataGridViewCellStyle25.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle25.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            dataGridViewCellStyle25.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle25.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle25.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
-            dataGridViewCellStyle25.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle25.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgvSlow.DefaultCellStyle = dataGridViewCellStyle25;
+            dataGridViewCellStyle93.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle93.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle93.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle93.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle93.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle93.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle93.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvSlow.DefaultCellStyle = dataGridViewCellStyle93;
             dgvSlow.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvSlow.EnableHeadersVisualStyles = false;
             dgvSlow.Location = new System.Drawing.Point(0, 48);
@@ -1393,6 +1397,195 @@ namespace DBADashGUI
             dgvSlow.TabIndex = 4;
             dgvSlow.CellContentClick += DgvSlow_CellContentClick;
             dgvSlow.RowsAdded += DgvSlow_RowsAdded;
+            // 
+            // Instance
+            // 
+            Instance.DataPropertyName = "InstanceDisplayName";
+            Instance.HeaderText = "Instance";
+            Instance.MinimumWidth = 6;
+            Instance.Name = "Instance";
+            Instance.ReadOnly = true;
+            Instance.Width = 90;
+            // 
+            // DatabaseName
+            // 
+            DatabaseName.DataPropertyName = "DatabaseName";
+            DatabaseName.HeaderText = "Database";
+            DatabaseName.MinimumWidth = 6;
+            DatabaseName.Name = "DatabaseName";
+            DatabaseName.ReadOnly = true;
+            DatabaseName.Width = 98;
+            // 
+            // event_type
+            // 
+            event_type.DataPropertyName = "event_type";
+            event_type.HeaderText = "Event Type";
+            event_type.MinimumWidth = 6;
+            event_type.Name = "event_type";
+            event_type.ReadOnly = true;
+            event_type.Width = 125;
+            // 
+            // object_name
+            // 
+            object_name.DataPropertyName = "object_name";
+            object_name.HeaderText = "Object Name";
+            object_name.MinimumWidth = 6;
+            object_name.Name = "object_name";
+            object_name.ReadOnly = true;
+            object_name.Width = 109;
+            // 
+            // timestamp
+            // 
+            timestamp.DataPropertyName = "timestamp";
+            timestamp.HeaderText = "Time";
+            timestamp.MinimumWidth = 6;
+            timestamp.Name = "timestamp";
+            timestamp.ReadOnly = true;
+            timestamp.Width = 68;
+            // 
+            // colDuration
+            // 
+            colDuration.DataPropertyName = "Duration";
+            colDuration.HeaderText = "Duration";
+            colDuration.MinimumWidth = 6;
+            colDuration.Name = "colDuration";
+            colDuration.ReadOnly = true;
+            colDuration.Width = 125;
+            // 
+            // duration
+            // 
+            duration.DataPropertyName = "DurationSec";
+            dataGridViewCellStyle87.Format = "N3";
+            duration.DefaultCellStyle = dataGridViewCellStyle87;
+            duration.HeaderText = "Duration (sec)";
+            duration.MinimumWidth = 6;
+            duration.Name = "duration";
+            duration.ReadOnly = true;
+            duration.Width = 117;
+            // 
+            // cpu_time
+            // 
+            cpu_time.DataPropertyName = "CPUTimeSec";
+            dataGridViewCellStyle88.Format = "N3";
+            cpu_time.DefaultCellStyle = dataGridViewCellStyle88;
+            cpu_time.HeaderText = "CPU (sec)";
+            cpu_time.MinimumWidth = 6;
+            cpu_time.Name = "cpu_time";
+            cpu_time.ReadOnly = true;
+            cpu_time.Width = 93;
+            // 
+            // logical_reads
+            // 
+            logical_reads.DataPropertyName = "logical_reads";
+            dataGridViewCellStyle89.Format = "N0";
+            logical_reads.DefaultCellStyle = dataGridViewCellStyle89;
+            logical_reads.HeaderText = "Logical Reads";
+            logical_reads.MinimumWidth = 6;
+            logical_reads.Name = "logical_reads";
+            logical_reads.ReadOnly = true;
+            logical_reads.Width = 117;
+            // 
+            // physical_reads
+            // 
+            physical_reads.DataPropertyName = "physical_reads";
+            dataGridViewCellStyle90.Format = "N0";
+            physical_reads.DefaultCellStyle = dataGridViewCellStyle90;
+            physical_reads.HeaderText = "Physical Reads";
+            physical_reads.MinimumWidth = 6;
+            physical_reads.Name = "physical_reads";
+            physical_reads.ReadOnly = true;
+            physical_reads.Width = 123;
+            // 
+            // Writes
+            // 
+            Writes.DataPropertyName = "Writes";
+            dataGridViewCellStyle91.Format = "N0";
+            Writes.DefaultCellStyle = dataGridViewCellStyle91;
+            Writes.HeaderText = "Writes";
+            Writes.MinimumWidth = 6;
+            Writes.Name = "Writes";
+            Writes.ReadOnly = true;
+            Writes.Width = 77;
+            // 
+            // colRowCount
+            // 
+            colRowCount.DataPropertyName = "row_count";
+            dataGridViewCellStyle92.Format = "N0";
+            colRowCount.DefaultCellStyle = dataGridViewCellStyle92;
+            colRowCount.HeaderText = "Row Count";
+            colRowCount.MinimumWidth = 6;
+            colRowCount.Name = "colRowCount";
+            colRowCount.ReadOnly = true;
+            colRowCount.Width = 77;
+            // 
+            // username
+            // 
+            username.DataPropertyName = "username";
+            username.HeaderText = "UserName";
+            username.MinimumWidth = 6;
+            username.Name = "username";
+            username.ReadOnly = true;
+            username.Width = 104;
+            // 
+            // client_hostname
+            // 
+            client_hostname.DataPropertyName = "client_hostname";
+            client_hostname.HeaderText = "Client";
+            client_hostname.MinimumWidth = 6;
+            client_hostname.Name = "client_hostname";
+            client_hostname.ReadOnly = true;
+            client_hostname.Width = 72;
+            // 
+            // client_app_name
+            // 
+            client_app_name.DataPropertyName = "client_app_name";
+            client_app_name.HeaderText = "App";
+            client_app_name.MinimumWidth = 6;
+            client_app_name.Name = "client_app_name";
+            client_app_name.ReadOnly = true;
+            client_app_name.Width = 62;
+            // 
+            // colContextInfo
+            // 
+            colContextInfo.DataPropertyName = "context_info";
+            colContextInfo.HeaderText = "Context Info";
+            colContextInfo.MinimumWidth = 6;
+            colContextInfo.Name = "colContextInfo";
+            colContextInfo.ReadOnly = true;
+            colContextInfo.Width = 125;
+            // 
+            // Result
+            // 
+            Result.DataPropertyName = "Result";
+            Result.HeaderText = "Result";
+            Result.MinimumWidth = 6;
+            Result.Name = "Result";
+            Result.ReadOnly = true;
+            Result.Width = 77;
+            // 
+            // colSessionID
+            // 
+            colSessionID.DataPropertyName = "session_id";
+            colSessionID.HeaderText = "Session ID";
+            colSessionID.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            colSessionID.MinimumWidth = 6;
+            colSessionID.Name = "colSessionID";
+            colSessionID.ReadOnly = true;
+            colSessionID.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colSessionID.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            colSessionID.Width = 125;
+            // 
+            // colText
+            // 
+            colText.DataPropertyName = "text_trunc";
+            colText.HeaderText = "Text";
+            colText.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            colText.MinimumWidth = 150;
+            colText.Name = "colText";
+            colText.ReadOnly = true;
+            colText.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colText.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            colText.Width = 244;
             // 
             // splitContainer1
             // 
@@ -1548,8 +1741,8 @@ namespace DBADashGUI
             // dataGridViewTextBoxColumn1
             // 
             dataGridViewTextBoxColumn1.DataPropertyName = "TotalDuration";
-            dataGridViewCellStyle26.Format = "#,#,,.000";
-            dataGridViewTextBoxColumn1.DefaultCellStyle = dataGridViewCellStyle26;
+            dataGridViewCellStyle94.Format = "#,#,,.000";
+            dataGridViewTextBoxColumn1.DefaultCellStyle = dataGridViewCellStyle94;
             dataGridViewTextBoxColumn1.HeaderText = "Total Duration (sec)";
             dataGridViewTextBoxColumn1.MinimumWidth = 6;
             dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
@@ -1559,8 +1752,8 @@ namespace DBADashGUI
             // dataGridViewTextBoxColumn2
             // 
             dataGridViewTextBoxColumn2.DataPropertyName = "TotalCPU";
-            dataGridViewCellStyle27.Format = "#,#,,.000";
-            dataGridViewTextBoxColumn2.DefaultCellStyle = dataGridViewCellStyle27;
+            dataGridViewCellStyle95.Format = "#,#,,.000";
+            dataGridViewTextBoxColumn2.DefaultCellStyle = dataGridViewCellStyle95;
             dataGridViewTextBoxColumn2.HeaderText = "Total CPU (sec)";
             dataGridViewTextBoxColumn2.MinimumWidth = 6;
             dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
@@ -1570,8 +1763,8 @@ namespace DBADashGUI
             // dataGridViewTextBoxColumn3
             // 
             dataGridViewTextBoxColumn3.DataPropertyName = "TotalIO";
-            dataGridViewCellStyle28.Format = "N0";
-            dataGridViewTextBoxColumn3.DefaultCellStyle = dataGridViewCellStyle28;
+            dataGridViewCellStyle96.Format = "N0";
+            dataGridViewTextBoxColumn3.DefaultCellStyle = dataGridViewCellStyle96;
             dataGridViewTextBoxColumn3.HeaderText = "Total IO";
             dataGridViewTextBoxColumn3.MinimumWidth = 6;
             dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
@@ -1581,8 +1774,8 @@ namespace DBADashGUI
             // dataGridViewTextBoxColumn4
             // 
             dataGridViewTextBoxColumn4.DataPropertyName = "TotalPhysicalIO";
-            dataGridViewCellStyle29.Format = "N0";
-            dataGridViewTextBoxColumn4.DefaultCellStyle = dataGridViewCellStyle29;
+            dataGridViewCellStyle97.Format = "N0";
+            dataGridViewTextBoxColumn4.DefaultCellStyle = dataGridViewCellStyle97;
             dataGridViewTextBoxColumn4.HeaderText = "Total Physical IO";
             dataGridViewTextBoxColumn4.MinimumWidth = 6;
             dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
@@ -1637,8 +1830,8 @@ namespace DBADashGUI
             // dataGridViewTextBoxColumn10
             // 
             dataGridViewTextBoxColumn10.DataPropertyName = "duration";
-            dataGridViewCellStyle30.Format = "#,#,,.000";
-            dataGridViewTextBoxColumn10.DefaultCellStyle = dataGridViewCellStyle30;
+            dataGridViewCellStyle98.Format = "#,#,,.000";
+            dataGridViewTextBoxColumn10.DefaultCellStyle = dataGridViewCellStyle98;
             dataGridViewTextBoxColumn10.HeaderText = "Duration (sec)";
             dataGridViewTextBoxColumn10.MinimumWidth = 6;
             dataGridViewTextBoxColumn10.Name = "dataGridViewTextBoxColumn10";
@@ -1648,8 +1841,8 @@ namespace DBADashGUI
             // dataGridViewTextBoxColumn11
             // 
             dataGridViewTextBoxColumn11.DataPropertyName = "cpu_time";
-            dataGridViewCellStyle31.Format = "#,#,,.000";
-            dataGridViewTextBoxColumn11.DefaultCellStyle = dataGridViewCellStyle31;
+            dataGridViewCellStyle99.Format = "#,#,,.000";
+            dataGridViewTextBoxColumn11.DefaultCellStyle = dataGridViewCellStyle99;
             dataGridViewTextBoxColumn11.HeaderText = "CPU (sec)";
             dataGridViewTextBoxColumn11.MinimumWidth = 6;
             dataGridViewTextBoxColumn11.Name = "dataGridViewTextBoxColumn11";
@@ -1659,8 +1852,8 @@ namespace DBADashGUI
             // dataGridViewTextBoxColumn12
             // 
             dataGridViewTextBoxColumn12.DataPropertyName = "logical_reads";
-            dataGridViewCellStyle32.Format = "N0";
-            dataGridViewTextBoxColumn12.DefaultCellStyle = dataGridViewCellStyle32;
+            dataGridViewCellStyle100.Format = "N0";
+            dataGridViewTextBoxColumn12.DefaultCellStyle = dataGridViewCellStyle100;
             dataGridViewTextBoxColumn12.HeaderText = "Logical Reads";
             dataGridViewTextBoxColumn12.MinimumWidth = 6;
             dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
@@ -1670,8 +1863,8 @@ namespace DBADashGUI
             // dataGridViewTextBoxColumn13
             // 
             dataGridViewTextBoxColumn13.DataPropertyName = "physical_reads";
-            dataGridViewCellStyle33.Format = "N0";
-            dataGridViewTextBoxColumn13.DefaultCellStyle = dataGridViewCellStyle33;
+            dataGridViewCellStyle101.Format = "N0";
+            dataGridViewTextBoxColumn13.DefaultCellStyle = dataGridViewCellStyle101;
             dataGridViewTextBoxColumn13.HeaderText = "Physical Reads";
             dataGridViewTextBoxColumn13.MinimumWidth = 6;
             dataGridViewTextBoxColumn13.Name = "dataGridViewTextBoxColumn13";
@@ -1681,8 +1874,8 @@ namespace DBADashGUI
             // dataGridViewTextBoxColumn14
             // 
             dataGridViewTextBoxColumn14.DataPropertyName = "Writes";
-            dataGridViewCellStyle34.Format = "N0";
-            dataGridViewTextBoxColumn14.DefaultCellStyle = dataGridViewCellStyle34;
+            dataGridViewCellStyle102.Format = "N0";
+            dataGridViewTextBoxColumn14.DefaultCellStyle = dataGridViewCellStyle102;
             dataGridViewTextBoxColumn14.HeaderText = "Writes";
             dataGridViewTextBoxColumn14.MinimumWidth = 6;
             dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
@@ -1734,194 +1927,28 @@ namespace DBADashGUI
             dataGridViewTextBoxColumn19.ReadOnly = true;
             dataGridViewTextBoxColumn19.Width = 125;
             // 
-            // Instance
+            // tsConfigureMetrics
             // 
-            Instance.DataPropertyName = "InstanceDisplayName";
-            Instance.HeaderText = "Instance";
-            Instance.MinimumWidth = 6;
-            Instance.Name = "Instance";
-            Instance.ReadOnly = true;
-            Instance.Width = 90;
+            tsConfigureMetrics.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsConfigureRoot, tsConfigureInstance });
+            tsConfigureMetrics.Image = Properties.Resources.SettingsOutline_16x;
+            tsConfigureMetrics.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsConfigureMetrics.Name = "tsConfigureMetrics";
+            tsConfigureMetrics.Size = new System.Drawing.Size(160, 24);
+            tsConfigureMetrics.Text = "Configure Metrics";
             // 
-            // DatabaseName
+            // tsConfigureRoot
             // 
-            DatabaseName.DataPropertyName = "DatabaseName";
-            DatabaseName.HeaderText = "Database";
-            DatabaseName.MinimumWidth = 6;
-            DatabaseName.Name = "DatabaseName";
-            DatabaseName.ReadOnly = true;
-            DatabaseName.Width = 98;
+            tsConfigureRoot.Name = "tsConfigureRoot";
+            tsConfigureRoot.Size = new System.Drawing.Size(224, 26);
+            tsConfigureRoot.Text = "Root Level";
+            tsConfigureRoot.Click += ConfigureRoot_Click;
             // 
-            // event_type
+            // tsConfigureInstance
             // 
-            event_type.DataPropertyName = "event_type";
-            event_type.HeaderText = "Event Type";
-            event_type.MinimumWidth = 6;
-            event_type.Name = "event_type";
-            event_type.ReadOnly = true;
-            event_type.Width = 125;
-            // 
-            // object_name
-            // 
-            object_name.DataPropertyName = "object_name";
-            object_name.HeaderText = "Object Name";
-            object_name.MinimumWidth = 6;
-            object_name.Name = "object_name";
-            object_name.ReadOnly = true;
-            object_name.Width = 109;
-            // 
-            // timestamp
-            // 
-            timestamp.DataPropertyName = "timestamp";
-            timestamp.HeaderText = "Time";
-            timestamp.MinimumWidth = 6;
-            timestamp.Name = "timestamp";
-            timestamp.ReadOnly = true;
-            timestamp.Width = 68;
-            // 
-            // colDuration
-            // 
-            colDuration.DataPropertyName = "Duration";
-            colDuration.HeaderText = "Duration";
-            colDuration.MinimumWidth = 6;
-            colDuration.Name = "colDuration";
-            colDuration.ReadOnly = true;
-            colDuration.Width = 125;
-            // 
-            // duration
-            // 
-            duration.DataPropertyName = "DurationSec";
-            dataGridViewCellStyle19.Format = "N3";
-            duration.DefaultCellStyle = dataGridViewCellStyle19;
-            duration.HeaderText = "Duration (sec)";
-            duration.MinimumWidth = 6;
-            duration.Name = "duration";
-            duration.ReadOnly = true;
-            duration.Width = 117;
-            // 
-            // cpu_time
-            // 
-            cpu_time.DataPropertyName = "CPUTimeSec";
-            dataGridViewCellStyle20.Format = "N3";
-            cpu_time.DefaultCellStyle = dataGridViewCellStyle20;
-            cpu_time.HeaderText = "CPU (sec)";
-            cpu_time.MinimumWidth = 6;
-            cpu_time.Name = "cpu_time";
-            cpu_time.ReadOnly = true;
-            cpu_time.Width = 93;
-            // 
-            // logical_reads
-            // 
-            logical_reads.DataPropertyName = "logical_reads";
-            dataGridViewCellStyle21.Format = "N0";
-            logical_reads.DefaultCellStyle = dataGridViewCellStyle21;
-            logical_reads.HeaderText = "Logical Reads";
-            logical_reads.MinimumWidth = 6;
-            logical_reads.Name = "logical_reads";
-            logical_reads.ReadOnly = true;
-            logical_reads.Width = 117;
-            // 
-            // physical_reads
-            // 
-            physical_reads.DataPropertyName = "physical_reads";
-            dataGridViewCellStyle22.Format = "N0";
-            physical_reads.DefaultCellStyle = dataGridViewCellStyle22;
-            physical_reads.HeaderText = "Physical Reads";
-            physical_reads.MinimumWidth = 6;
-            physical_reads.Name = "physical_reads";
-            physical_reads.ReadOnly = true;
-            physical_reads.Width = 123;
-            // 
-            // Writes
-            // 
-            Writes.DataPropertyName = "Writes";
-            dataGridViewCellStyle23.Format = "N0";
-            Writes.DefaultCellStyle = dataGridViewCellStyle23;
-            Writes.HeaderText = "Writes";
-            Writes.MinimumWidth = 6;
-            Writes.Name = "Writes";
-            Writes.ReadOnly = true;
-            Writes.Width = 77;
-            // 
-            // colRowCount
-            // 
-            colRowCount.DataPropertyName = "row_count";
-            dataGridViewCellStyle24.Format = "N0";
-            colRowCount.DefaultCellStyle = dataGridViewCellStyle24;
-            colRowCount.HeaderText = "Row Count";
-            colRowCount.MinimumWidth = 6;
-            colRowCount.Name = "colRowCount";
-            colRowCount.ReadOnly = true;
-            colRowCount.Width = 77;
-            // 
-            // username
-            // 
-            username.DataPropertyName = "username";
-            username.HeaderText = "UserName";
-            username.MinimumWidth = 6;
-            username.Name = "username";
-            username.ReadOnly = true;
-            username.Width = 104;
-            // 
-            // client_hostname
-            // 
-            client_hostname.DataPropertyName = "client_hostname";
-            client_hostname.HeaderText = "Client";
-            client_hostname.MinimumWidth = 6;
-            client_hostname.Name = "client_hostname";
-            client_hostname.ReadOnly = true;
-            client_hostname.Width = 72;
-            // 
-            // client_app_name
-            // 
-            client_app_name.DataPropertyName = "client_app_name";
-            client_app_name.HeaderText = "App";
-            client_app_name.MinimumWidth = 6;
-            client_app_name.Name = "client_app_name";
-            client_app_name.ReadOnly = true;
-            client_app_name.Width = 62;
-            // 
-            // colContextInfo
-            // 
-            colContextInfo.DataPropertyName = "context_info";
-            colContextInfo.HeaderText = "Context Info";
-            colContextInfo.MinimumWidth = 6;
-            colContextInfo.Name = "colContextInfo";
-            colContextInfo.ReadOnly = true;
-            colContextInfo.Width = 125;
-            // 
-            // Result
-            // 
-            Result.DataPropertyName = "Result";
-            Result.HeaderText = "Result";
-            Result.MinimumWidth = 6;
-            Result.Name = "Result";
-            Result.ReadOnly = true;
-            Result.Width = 77;
-            // 
-            // colSessionID
-            // 
-            colSessionID.DataPropertyName = "session_id";
-            colSessionID.HeaderText = "Session ID";
-            colSessionID.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            colSessionID.MinimumWidth = 6;
-            colSessionID.Name = "colSessionID";
-            colSessionID.ReadOnly = true;
-            colSessionID.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colSessionID.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            colSessionID.Width = 125;
-            // 
-            // colText
-            // 
-            colText.DataPropertyName = "text_trunc";
-            colText.HeaderText = "Text";
-            colText.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            colText.MinimumWidth = 150;
-            colText.Name = "colText";
-            colText.ReadOnly = true;
-            colText.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colText.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            colText.Width = 244;
+            tsConfigureInstance.Name = "tsConfigureInstance";
+            tsConfigureInstance.Size = new System.Drawing.Size(224, 26);
+            tsConfigureInstance.Text = "Instance Level";
+            tsConfigureInstance.Click += ConfigureInstance_Click;
             // 
             // SlowQueries
             // 
@@ -2136,5 +2163,8 @@ namespace DBADashGUI
         private System.Windows.Forms.DataGridViewTextBoxColumn Result;
         private System.Windows.Forms.DataGridViewLinkColumn colSessionID;
         private System.Windows.Forms.DataGridViewLinkColumn colText;
+        private System.Windows.Forms.ToolStripDropDownButton tsConfigureMetrics;
+        private System.Windows.Forms.ToolStripMenuItem tsConfigureRoot;
+        private System.Windows.Forms.ToolStripMenuItem tsConfigureInstance;
     }
 }
