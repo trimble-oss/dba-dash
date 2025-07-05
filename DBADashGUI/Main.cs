@@ -1,9 +1,13 @@
 ﻿using DBADash;
 using DBADash.Messaging;
+using DBADashGUI.AgentJobs;
+using DBADashGUI.Checks;
 using DBADashGUI.CustomReports;
+using DBADashGUI.DBADashAlerts;
 using DBADashGUI.Options_Menu;
 using DBADashGUI.Performance;
 using DBADashGUI.Properties;
+using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
 using Humanizer;
 using Microsoft.Data.SqlClient;
@@ -12,22 +16,13 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Azure.Core;
-using DBADashGUI.CommunityTools;
-using DBADashGUI.DBADashAlerts;
-using DBADashGUI.SchemaCompare;
-using DocumentFormat.OpenXml.Vml.Office;
-using Microsoft.SqlServer.Management.XEvent;
 using Version = System.Version;
-using System.Text;
-using DBADashGUI.AgentJobs;
-using DBADashGUI.Checks;
 
 namespace DBADashGUI
 {
@@ -203,7 +198,19 @@ namespace DBADashGUI
                 }
             }
 
-            await SetConnection(repositories.GetDefaultConnection());
+            try
+            {
+                await SetConnection(repositories.GetDefaultConnection());
+            }
+            catch (OperationCanceledException)
+            {
+                return; // User cancelled
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
+
             this.ApplyTheme();
             CheckTheme();
             if (splitMain.SplitterDistance > 400)
@@ -262,6 +269,10 @@ namespace DBADashGUI
             try
             {
                 await CheckVersion(connection.ConnectionString);
+            }
+            catch (OperationCanceledException)
+            {
+                throw; // user cancelled
             }
             catch (Exception ex)
             {
@@ -337,37 +348,79 @@ namespace DBADashGUI
             return connectionCheckPassed;
         }
 
-        private static async Task CheckVersion(string connectionString)
+        private static void WaitForDBUpgrade(string connectionString)
+        {
+            var closeButton = new TaskDialogButton("Close");
+            var page = new TaskDialogPage
+            {
+                Caption = "Upgrade in progress",
+                Heading = "Repository database upgrade is in progress.  ",
+                Text = "Please wait for this to complete.  If you continue, the application might be unstable.  \n\nThis dialog will close automatically...",
+                Icon = TaskDialogIcon.Information,
+                Buttons = new TaskDialogButtonCollection() { closeButton, TaskDialogButton.Continue },
+                SizeToContent = true,
+                ProgressBar = new TaskDialogProgressBar()
+                {
+                    State = TaskDialogProgressBarState.Marquee,
+                },
+                DefaultButton = TaskDialogButton.Continue,
+                Expander = new TaskDialogExpander()
+                {
+                    Text = "If this process takes longer than expected, click the 'View Service Log' button on the service config tool to check the logs.",
+                    CollapsedButtonText = "Show Help",
+                    ExpandedButtonText = "Hide Help",
+                    Position = TaskDialogExpanderPosition.AfterFootnote
+                     
+                    
+                },
+            };
+     
+            var tmr = new Timer() { Interval = 1000, Enabled = true };
+            tmr.Tick += (s, e) =>
+            {
+                var dbVersion = DBValidations.GetDBVersion(connectionString);
+                if (dbVersion.DeployInProgress) return;
+                tmr.Stop();
+                tmr.Dispose();
+                page.BoundDialog?.Close();
+            };
+
+            if (TaskDialog.ShowDialog(page) == closeButton)
+            {
+                Application.Exit();
+                throw new OperationCanceledException();
+            }
+        }
+
+        private async Task CheckVersion(string connectionString)
         {
             var dbVersion = DBValidations.GetDBVersion(connectionString);
             var appVersion = System.Reflection.Assembly.GetEntryAssembly().GetName().Version;
-            var compare =
-                (new Version(appVersion.Major, appVersion.Minor)).CompareTo(new Version(dbVersion.Major,
-                    dbVersion.Minor));
 
+            if (dbVersion.DeployInProgress)
+            {
+                WaitForDBUpgrade(connectionString);
+                dbVersion = DBValidations.GetDBVersion(connectionString);
+            }
+            var compare = (new Version(appVersion.Major, appVersion.Minor)).CompareTo(new Version(dbVersion.Version.Major, dbVersion.Version.Minor));
             if (compare < 0)
             {
-                var promptUpgrade = MessageBox.Show(
-                    $"The version of this GUI app ({appVersion.Major}.{appVersion.Minor}) is OLDER than the repository database. Please upgrade to version {dbVersion.Major}.{dbVersion.Minor}{Environment.NewLine}Would you like to run the upgrade script now?",
-                    "Upgrade GUI", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                var promptUpgrade = MessageBox.Show($"The version of this GUI app ({appVersion.Major}.{appVersion.Minor}) is OLDER than the repository database. Please upgrade to version {dbVersion.Version.Major}.{dbVersion.Version.Minor}{Environment.NewLine}Would you like to run the upgrade script now?", "Upgrade GUI", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (promptUpgrade == DialogResult.Yes)
                 {
-                    var tag = dbVersion.ToString(3);
+                    var tag = dbVersion.Version.ToString(3);
                     await Upgrade.UpgradeDBADashAsync(tag, true);
                     Application.Exit();
+                    throw new OperationCanceledException();
                 }
                 else
                 {
-                    MessageBox.Show(
-                        "The GUI might be unstable as it's not designed to run against this version of the repository database.",
-                        "WARNING", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("The GUI might be unstable as it's not designed to run against this version of the repository database.", "WARNING", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             else if (compare > 0)
             {
-                MessageBox.Show(
-                    $"The version of this GUI app ({appVersion.Major}.{appVersion.Minor}) is NEWER than the repository database ({dbVersion.Major}.{dbVersion.Minor}). You might experience issues using the GUI.  Please upgrade the repository database.", "Upgrade Agent",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"The version of this GUI app ({appVersion.Major}.{appVersion.Minor}) is NEWER than the repository database ({dbVersion.Version.Major}.{dbVersion.Version.Minor}). You might experience issues using the GUI.  Please upgrade the repository database.", "Upgrade Agent", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
