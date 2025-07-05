@@ -1,4 +1,5 @@
-﻿using DBADashGUI.Performance;
+﻿using DBADashGUI.HA;
+using DBADashGUI.Performance;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System;
@@ -1097,6 +1098,23 @@ namespace DBADashGUI
         {
             ResetTime();
             RefreshData();
+        }
+
+        private static void ConfigureMetrics(int instanceId)
+        {
+            using var metricsConfig = new RepositoryMetricsConfig() { InstanceID = instanceId, MetricType = RepositoryMetricsConfig.RepositoryMetricTypes.SlowQueries };
+            metricsConfig.ShowDialog();
+        }
+
+        private void ConfigureRoot_Click(object sender, EventArgs e)
+        {
+            ConfigureMetrics(-1);
+        }
+
+        private void ConfigureInstance_Click(object sender, EventArgs e)
+        {
+            if (InstanceIDs.Count != 1) return;
+            ConfigureMetrics(InstanceIDs.First());
         }
     }
 }

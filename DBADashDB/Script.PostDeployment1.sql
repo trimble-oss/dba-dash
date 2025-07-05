@@ -2012,7 +2012,11 @@ FROM (VALUES -- AG aggregate
 			('Min Time Since Last (min)',1,0,'LogShipping'),
 			('Log Shipped Database Count',1,0,'LogShipping'),
 			('Warning Count',1,0,'LogShipping'),
-			('Critical Count',1,0,'LogShipping')
+			('Critical Count',1,0,'LogShipping'),
+			-- Slow Queries
+			('Abort Count',1,0,'SlowQueries'),
+			('Error Count',1,0,'SlowQueries'),
+			('Total Queries',1,0,'SlowQueries')
 		) M(MetricName,IsAggregate,IsEnabled,MetricType)
 WHERE NOT EXISTS(
 				SELECT 1 
