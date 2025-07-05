@@ -70,23 +70,61 @@ namespace DBADashService
             scheduler = factory.GetScheduler().ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
+
+        /// <summary>
+        /// Get the version status of the repository database. (Requires upgrade etc.).  If a deployment is in progress, it will wait for a period of time until the deployment is complete before returning the status.
+        /// </summary>
+        /// <param name="d">Destination connection</param>
+        /// <returns></returns>
+        private static async Task<DBValidations.DBVersionStatus> GetDBVersionStatus(DBADashConnection d)
+        {
+            DBValidations.DBVersionStatus status = null;
+            await Policy.Handle<Exception>()
+                .WaitAndRetry(new[]
+                {
+                        TimeSpan.FromSeconds(1),
+                        TimeSpan.FromSeconds(5),
+                        TimeSpan.FromSeconds(20),
+                        TimeSpan.FromSeconds(60)
+                }, (exception, _, _) =>
+                {
+                    Log.Error(exception, "Version check for repository database failed");
+                }).Execute(async () =>
+                {
+                    var timeout = TimeSpan.FromSeconds(60);
+                    var endTime = DateTime.UtcNow.Add(timeout);
+                    var count = 0;
+                    do
+                    {
+                        status = DBValidations.VersionStatus(d.ConnectionString);
+                        if (!status.DeployInProgress) break; // Exit if deployment is not in progress
+                        if (DateTime.UtcNow >= endTime) // We've waited long enough.  It's possible that a previous upgrade was interrupted.
+                        {
+                            Log.Warning("Timeout waiting for DB deployment to complete.  It's possible that a previous DB deployment was interrupted or is still running but taking longer than expected on another DBA Dash service instance.");
+                            status.VersionStatus = DBValidations.DBVersionStatusEnum.UpgradeRequired; // Force the upgrade to re-run.  It's possible that a previous upgrade was interrupted.
+                            break;
+                        }
+                        if (count == 0)
+                        {
+                            Log.Warning("Repository database deployment already appears to be in progress.");
+                        }
+                        Log.Information("Waiting {waitTime} seconds for completion before continuing", Convert.ToInt32(endTime.Subtract(DateTime.UtcNow).TotalSeconds));
+                        count++;
+                        await Task.Delay(5000); // Wait for 5 seconds before checking again
+                    } while (status.DeployInProgress);
+
+                });
+
+            return status;
+        }
+
         private async Task UpgradeDBAsync()
         {
             foreach (var d in config.AllDestinations.Where(dest => dest.Type == ConnectionType.SQL))
             {
                 Log.Logger.Information("Version check for repository database {connection}", d.ConnectionForPrint);
-                DBValidations.DBVersionStatus status = null;
-                Policy.Handle<Exception>()
-                  .WaitAndRetry(new[]
-                  {
-                    TimeSpan.FromSeconds(1),
-                    TimeSpan.FromSeconds(5),
-                    TimeSpan.FromSeconds(20),
-                    TimeSpan.FromSeconds(60)
-                  }, (exception, timeSpan, context) =>
-                  {
-                      Log.Error(exception, "Version check for repository database failed");
-                  }).Execute(() => status = DBValidations.VersionStatus(d.ConnectionString));
+                DBValidations.DBVersionStatus status=null;
+                status = await GetDBVersionStatus(d);
 
                 switch (status.VersionStatus)
                 {

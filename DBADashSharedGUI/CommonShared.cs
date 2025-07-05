@@ -86,7 +86,7 @@ namespace DBADashSharedGUI
             {
                 try
                 {
-                    dbVersion = DBValidations.GetDBVersion(connectionString);
+                    dbVersion = DBValidations.GetDBVersion(connectionString).Version;
                 }
                 catch (Exception ex)
                 {
