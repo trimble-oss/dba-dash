@@ -1,15 +1,16 @@
 ﻿using DBADash;
 using DBADashGUI.CustomReports;
+using DBADashGUI.DBADashAlerts.Rules;
 using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.DBADashAlerts.Rules;
 using static DBADashGUI.Main;
 
 namespace DBADashGUI.DBADashAlerts
@@ -29,6 +30,10 @@ namespace DBADashGUI.DBADashAlerts
 
         private void CreateMenuItems()
         {
+            var tsDefaultSort = new ToolStripMenuItem("Default Sort", Properties.Resources.SortByColumn_16x) { DisplayStyle = ToolStripItemDisplayStyle.Image, ToolTipText = "Apply default sort order" };
+            tsDefaultSort.Click += DefaultSort_Click;
+            customReportView1.ToolStrip.Items.Add(tsDefaultSort);
+
             var tsConfigure = new ToolStripButton("Configure", Properties.Resources.SettingsOutline_16x);
             tsConfigure.Click += Configure_Click;
             customReportView1.ToolStrip.Items.Add(tsConfigure);
@@ -52,6 +57,17 @@ namespace DBADashGUI.DBADashAlerts
             tsActions.DropDownItems.Add(tsAddNotes);
             tsActions.DropDownItems.Add(tsCloseResolved);
             customReportView1.ToolStrip.Items.Add(tsActions);
+        }
+
+        private void DefaultSort_Click(object sender, EventArgs e)
+        {
+            if (customReportView1.Grids.Count > 0)
+            {
+                var grid = customReportView1.Grids[0];
+                var sortCol = grid.Columns["DefaultSortOrder"];
+                if (sortCol == null) return;
+                grid.Sort(sortCol, ListSortDirection.Ascending);
+            }
         }
 
         private void TsAddNotes_Click(object sender, EventArgs e)
@@ -436,7 +452,8 @@ namespace DBADashGUI.DBADashAlerts
                             { "AlertDuration", "Alert Duration" },
                             {"Notes","Notes"},
                             {"RuleNotes","Rule Notes"},
-                            {"RuleID","Rule#"}
+                            {"RuleID","Rule#"},
+                            {"DefaultSortOrder","Default Sort Order"}
                         },
                          ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>()
                             {
@@ -467,6 +484,7 @@ namespace DBADashGUI.DBADashAlerts
                                 new("Notes", new PersistedColumnLayout { Visible = true }),
                                 new("RuleNotes", new PersistedColumnLayout { Visible = true }),
                                 new("RuleID", new PersistedColumnLayout { Visible = true }),
+                                new("DefaultSortOrder", new PersistedColumnLayout() {Visible = false})
                             },
                         LinkColumns = new()
                         {
