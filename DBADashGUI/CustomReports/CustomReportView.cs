@@ -530,7 +530,7 @@ namespace DBADashGUI.CustomReports
 
         protected void ShowTable()
         {
-            if (reportDS.Tables.Count == 0) return;
+            if (reportDS == null || reportDS.Tables.Count == 0) return;
             var currentSchema = reportDS.GetXmlSchema();
             if (currentSchema == previousSchema)
             {
@@ -1523,6 +1523,12 @@ namespace DBADashGUI.CustomReports
             frm.DataSet = reportDS;
             frm.CustomParams = customParams;
             frm.Show();
+        }
+
+        private void Reset_Click(object sender, EventArgs e)
+        {
+            previousSchema = null;
+            ShowTable();
         }
     }
 }

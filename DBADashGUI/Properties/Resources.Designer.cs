@@ -1042,5 +1042,14 @@ namespace DBADashGUI.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+
+        internal static System.Drawing.Bitmap RestoreDefaultView_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("RestoreDefaultView_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
