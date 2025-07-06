@@ -54,6 +54,7 @@
             tsClearFilter = new System.Windows.Forms.ToolStripButton();
             tsTrigger = new System.Windows.Forms.ToolStripButton();
             tsNewWindow = new System.Windows.Forms.ToolStripButton();
+            tsReset = new System.Windows.Forms.ToolStripButton();
             lnkParams = new System.Windows.Forms.LinkLabel();
             pnlParams = new System.Windows.Forms.Panel();
             splitContainer2 = new System.Windows.Forms.SplitContainer();
@@ -80,7 +81,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsExecute, tsRefresh, tsCancel, tsCopy, tsExcel, tsCols, tsConfigure, cboResults, lblSelectResults, tsParams, tsScriptResults, tsClearFilter, tsTrigger, tsNewWindow });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsExecute, tsRefresh, tsCancel, tsCopy, tsExcel, tsCols, tsConfigure, cboResults, lblSelectResults, tsParams, tsScriptResults, tsClearFilter, tsTrigger, tsReset, tsNewWindow });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
@@ -323,6 +324,17 @@
             tsNewWindow.Text = "Open in new window";
             tsNewWindow.Click += TsNewWindow_Click;
             // 
+            // tsReset
+            // 
+            tsReset.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsReset.Image = Properties.Resources.RestoreDefaultView_16x;
+            tsReset.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsReset.Name = "tsReset";
+            tsReset.Size = new System.Drawing.Size(29, 28);
+            tsReset.Text = "Restore Default View";
+            tsReset.ToolTipText = "Restore default view";
+            tsReset.Click += Reset_Click;
+            // 
             // lnkParams
             // 
             lnkParams.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -505,5 +517,6 @@
         private System.Windows.Forms.ToolStripDropDownButton tsScriptResults;
         private System.Windows.Forms.ToolStripMenuItem scriptDataTablesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem scriptGridsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton tsReset;
     }
 }
