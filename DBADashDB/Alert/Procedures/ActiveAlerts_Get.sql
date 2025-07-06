@@ -54,7 +54,13 @@ SELECT  AA.AlertID,
 			ELSE 4 END AS AlertStatus,
 		AA.Notes,
 		AA.RuleID,
-		R.Notes AS RuleNotes
+		R.Notes AS RuleNotes,
+		ROW_NUMBER() OVER(ORDER BY AA.IsResolved,
+								AA.IsBlackout,
+								AA.IsAcknowledged,
+								AA.Priority,
+								I.InstanceDisplayName,
+								AA.AlertKey) AS DefaultSortOrder
 FROM Alert.ActiveAlerts AA
 LEFT JOIN Alert.Rules R ON AA.RuleID = R.RuleID
 JOIN dbo.Instances I ON I.InstanceID = AA.InstanceID
@@ -66,8 +72,4 @@ AND (EXISTS(SELECT 1
 			FROM @InstanceIDs T 
 			WHERE I.InstanceID = T.ID
 			) OR @AllInstances=1)
-ORDER BY AA.IsResolved,
-		AA.IsBlackout,
-		AA.IsAcknowledged,
-		AA.Priority,
-		I.InstanceDisplayName
+ORDER BY DefaultSortOrder

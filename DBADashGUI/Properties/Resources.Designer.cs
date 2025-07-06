@@ -1034,6 +1034,13 @@ namespace DBADashGUI.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-
+        internal static System.Drawing.Bitmap SortByColumn_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("SortByColumn_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
