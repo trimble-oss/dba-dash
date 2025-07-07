@@ -1,7 +1,8 @@
 ﻿/*
 DECLARE @CollectSessionWaits BIT 
 DECLARE @CollectTranBeginTime BIT 
-SELECT @CollectSessionWaits =0,@CollectTranBeginTime = 1
+DECLARE @CollectTempDB BIT
+SELECT @CollectSessionWaits =0,@CollectTranBeginTime = 1, @CollectTempDB=1
 */
 
 DECLARE @HasOpenTranCount BIT
@@ -47,7 +48,9 @@ SELECT @SnapshotDateUTC as SnapshotDateUTC,
 	s.context_info,
 	' + CASE WHEN @CollectTranBeginTime=1 OR @HasOpenTranCount=0 THEN 'DATEADD(mi,@UTCOffset, t.transaction_begin_time)' ELSE 'CAST(NULL AS DATETIME)' END + ' AS transaction_begin_time_utc,
 	' + CASE WHEN @CollectTranBeginTime=1 OR @HasOpenTranCount=0 THEN 'ISNULL(t.is_implicit_transaction,CAST(0 AS BIT))' ELSE 'CAST(NULL AS BIT)' END + ' AS is_implicit_transaction,
-	r.total_elapsed_time
+	r.total_elapsed_time,
+	' + CASE WHEN @CollectTempDB=1 THEN 'tempdb_alloc.sum_tempdb_alloc_page_count' ELSE 'CAST(NULL AS BIGINT)' END + ' AS tempdb_alloc_page_count,
+	' + CASE WHEN @CollectTempDB=1 THEN 'tempdb_alloc.sum_tempdb_dealloc_page_count' ELSE 'CAST(NULL AS BIGINT)' END + ' AS tempdb_dealloc_page_count
 FROM sys.dm_exec_sessions s
 ' + CASE WHEN @CollectTranBeginTime=1 OR @HasOpenTranCount=0 THEN '
 LEFT HASH JOIN (
@@ -65,7 +68,17 @@ LEFT HASH JOIN (
 		GROUP BY ST.session_id
 	) AS t ON s.session_id = t.session_id' ELSE '' END + '
 INNER JOIN sys.dm_exec_connections c ON c.session_id= s.session_id
-LEFT JOIN sys.dm_exec_requests r on s.session_id = r.session_id
+LEFT JOIN sys.dm_exec_requests r on s.session_id = r.session_id' 
++ CASE WHEN @CollectTempDB=1 THEN '
+LEFT HASH JOIN (	SELECT	tsu.request_id,
+							tsu.session_id,
+							SUM(user_objects_alloc_page_count+internal_objects_alloc_page_count) AS sum_tempdb_alloc_page_count,
+							SUM(user_objects_dealloc_page_count+internal_objects_dealloc_page_count) AS sum_tempdb_dealloc_page_count
+					FROM sys.dm_db_task_space_usage tsu
+					GROUP BY tsu.request_id,tsu.session_id
+				) AS tempdb_alloc
+		ON r.session_id = tempdb_alloc.session_id
+		AND r.request_id = tempdb_alloc.request_id' ELSE '' END + '
 WHERE s.is_user_process=1
 ' +CASE WHEN @HasOpenTranCount = 0 
 		-- For older instances

@@ -89,7 +89,9 @@ SELECT Q.InstanceID,
     calc.transaction_duration_ms,
     TranHD.HumanDuration AS transaction_duration,
     Q.is_implicit_transaction,
-    D.is_query_store_on
+    D.is_query_store_on,
+    (Q.tempdb_alloc_page_count - Q.tempdb_dealloc_page_count) / 128.0 AS tempdb_current_mb,
+    Q.tempdb_alloc_page_count /128.0 AS tempdb_allocations_mb 
 FROM dbo.RunningQueries Q
 JOIN dbo.Instances I ON Q.InstanceID = I.InstanceID
 CROSS APPLY(SELECT ISNULL(Q.total_elapsed_time,CASE WHEN Q.start_time_utc < Q.SnapshotDateUTC OR Q.start_time_utc IS NULL  THEN DATEDIFF_BIG(ms,ISNULL(Q.start_time_utc,Q.last_request_start_time_utc),Q.SnapshotDateUTC) ELSE 0 END) AS Duration,

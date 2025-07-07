@@ -116,7 +116,8 @@ namespace DBADashServiceConfig
                 CollectSessionWaits = chkCollectSessionWaits.Checked,
                 ScriptAgentJobs = chkScriptJobs.Checked,
                 IOCollectionLevel = (DBADashSource.IOCollectionLevels)cboIOLevel.SelectedItem!,
-                WriteToSecondaryDestinations = chkWriteToSecondaryDestinations.Checked
+                WriteToSecondaryDestinations = chkWriteToSecondaryDestinations.Checked,
+                CollectTempDB = chkCollectTempDB.Checked,
             };
             src.CustomCollections = src.SourceConnection.Type == ConnectionType.SQL ? CustomCollectionsNew : null;
             return src;
@@ -575,6 +576,12 @@ namespace DBADashServiceConfig
                 DataPropertyName = "CollectSessionWaits",
                 HeaderText = "Collect Session Waits",
                 ToolTipText = "Collect Session Waits for Running Queries"
+            });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
+            {
+                DataPropertyName = "CollectTempDB",
+                HeaderText = "Collect TempDB",
+                ToolTipText = "Collect TempDB allocations"
             });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
             { DataPropertyName = "PlanCollectionEnabled", HeaderText = "Running Query Plan Collection" });
@@ -1336,6 +1343,7 @@ namespace DBADashServiceConfig
                 }
 
                 cboIOLevel.SelectedItem = src.IOCollectionLevel;
+                chkCollectTempDB.Checked = src.CollectTempDB;
             }
             else
             {
@@ -2617,10 +2625,10 @@ namespace DBADashServiceConfig
             var frm = new TimeoutConfig()
             {
                 AddPartitionsTimeout = collectionConfig.AddPartitionsCommandTimeout,
-                PurgeTimeout= collectionConfig.PurgeDataCommandTimeout,
+                PurgeTimeout = collectionConfig.PurgeDataCommandTimeout,
                 ImportTimeout = collectionConfig.ImportCommandTimeout
             };
-            if(frm.ShowDialog() != DialogResult.OK) return;
+            if (frm.ShowDialog() != DialogResult.OK) return;
             collectionConfig.AddPartitionsCommandTimeout = frm.AddPartitionsTimeout;
             collectionConfig.PurgeDataCommandTimeout = frm.PurgeTimeout;
             collectionConfig.ImportCommandTimeout = frm.ImportTimeout;

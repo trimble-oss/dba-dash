@@ -135,6 +135,7 @@ namespace DBADashServiceConfig
             lblSlow = new System.Windows.Forms.Label();
             chkPersistXESession = new System.Windows.Forms.CheckBox();
             tabRunningQueries = new System.Windows.Forms.TabPage();
+            chkCollectTempDB = new System.Windows.Forms.CheckBox();
             chkCollectPlans = new System.Windows.Forms.CheckBox();
             grpRunningQueryThreshold = new System.Windows.Forms.GroupBox();
             label15 = new System.Windows.Forms.Label();
@@ -1374,6 +1375,7 @@ namespace DBADashServiceConfig
             // 
             // tabRunningQueries
             // 
+            tabRunningQueries.Controls.Add(chkCollectTempDB);
             tabRunningQueries.Controls.Add(chkCollectPlans);
             tabRunningQueries.Controls.Add(grpRunningQueryThreshold);
             tabRunningQueries.Controls.Add(chkCollectSessionWaits);
@@ -1385,10 +1387,20 @@ namespace DBADashServiceConfig
             tabRunningQueries.Text = "Running Queries";
             tabRunningQueries.UseVisualStyleBackColor = true;
             // 
+            // chkCollectTempDB
+            // 
+            chkCollectTempDB.AutoSize = true;
+            chkCollectTempDB.Location = new System.Drawing.Point(9, 71);
+            chkCollectTempDB.Name = "chkCollectTempDB";
+            chkCollectTempDB.Size = new System.Drawing.Size(214, 24);
+            chkCollectTempDB.TabIndex = 28;
+            chkCollectTempDB.Text = "Collect TempDB allocations";
+            chkCollectTempDB.UseVisualStyleBackColor = true;
+            // 
             // chkCollectPlans
             // 
             chkCollectPlans.AutoSize = true;
-            chkCollectPlans.Location = new System.Drawing.Point(9, 43);
+            chkCollectPlans.Location = new System.Drawing.Point(9, 40);
             chkCollectPlans.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             chkCollectPlans.Name = "chkCollectPlans";
             chkCollectPlans.Size = new System.Drawing.Size(250, 24);
@@ -1756,6 +1768,7 @@ namespace DBADashServiceConfig
             // 
             // bttnViewServiceLog
             // 
+            bttnViewServiceLog.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             bttnViewServiceLog.Location = new System.Drawing.Point(10, 673);
             bttnViewServiceLog.Name = "bttnViewServiceLog";
             bttnViewServiceLog.Size = new System.Drawing.Size(187, 29);
@@ -2148,6 +2161,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label lblConfigFileAccess;
         private System.Windows.Forms.PictureBox picConfigFileAccess;
         private System.Windows.Forms.Panel pnlConfigFileAccessWarning;
+        private System.Windows.Forms.CheckBox chkCollectTempDB;
     }
 }
 

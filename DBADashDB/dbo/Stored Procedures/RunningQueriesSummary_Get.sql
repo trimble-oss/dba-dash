@@ -26,7 +26,8 @@ SELECT TOP(@MaxRows) I.InstanceID,
        S.SleepingSessionsMaxIdleTimeMs,
        MaxIdleHD.HumanDuration as MaxIdleTime,
        S.OldestTransactionMs,
-       OldestTranHD.HumanDuration AS OldestTransaction
+       OldestTranHD.HumanDuration AS OldestTransaction,
+       S.TempDBCurrentPageCount / 128.0 AS TempDBCurrentMB
 FROM dbo.RunningQueriesSummary S
 JOIN dbo.Instances I ON I.InstanceID = S.InstanceID
 CROSS APPLY dbo.MillisecondsToHumanDuration (S.LongestRunningQueryMs) LongestHD

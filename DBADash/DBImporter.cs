@@ -255,6 +255,8 @@ namespace DBADash
                 if (!dtRunningQueries.Columns.Contains("total_elapsed_time"))
                 {
                     dtRunningQueries.Columns.Add("total_elapsed_time", typeof(int));
+                    dtRunningQueries.Columns.Add("tempdb_alloc_page_count", typeof(long));
+                    dtRunningQueries.Columns.Add("tempdb_dealloc_page_count", typeof(long));
                 }
             }
 

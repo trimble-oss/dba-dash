@@ -1054,6 +1054,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             using var da = new SqlDataAdapter(cmd);
             cmd.Parameters.AddWithValue("CollectSessionWaits", Source.CollectSessionWaits);
             cmd.Parameters.AddWithValue("CollectTranBeginTime", Source.CollectTranBeginTime);
+            cmd.Parameters.AddWithValue("CollectTempDB", Source.CollectTempDB);
             await cn.OpenAsync();
             var ds = new DataSet();
             da.Fill(ds);
