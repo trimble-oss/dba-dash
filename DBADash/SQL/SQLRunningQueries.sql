@@ -46,7 +46,8 @@ SELECT @SnapshotDateUTC as SnapshotDateUTC,
 	DATEADD(mi,@UTCOffset, s.last_request_end_time) AS last_request_end_time_utc,
 	s.context_info,
 	' + CASE WHEN @CollectTranBeginTime=1 OR @HasOpenTranCount=0 THEN 'DATEADD(mi,@UTCOffset, t.transaction_begin_time)' ELSE 'CAST(NULL AS DATETIME)' END + ' AS transaction_begin_time_utc,
-	' + CASE WHEN @CollectTranBeginTime=1 OR @HasOpenTranCount=0 THEN 'ISNULL(t.is_implicit_transaction,CAST(0 AS BIT))' ELSE 'CAST(NULL AS BIT)' END + ' AS is_implicit_transaction
+	' + CASE WHEN @CollectTranBeginTime=1 OR @HasOpenTranCount=0 THEN 'ISNULL(t.is_implicit_transaction,CAST(0 AS BIT))' ELSE 'CAST(NULL AS BIT)' END + ' AS is_implicit_transaction,
+	r.total_elapsed_time
 FROM sys.dm_exec_sessions s
 ' + CASE WHEN @CollectTranBeginTime=1 OR @HasOpenTranCount=0 THEN '
 LEFT HASH JOIN (

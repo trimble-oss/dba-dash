@@ -51,6 +51,7 @@ BEGIN
 						   t.context_info,
 						   t.transaction_begin_time_utc,
 						   t.is_implicit_transaction,
+						   t.total_elapsed_time,
 						   ROW_NUMBER() OVER(PARTITION BY t.session_id ORDER BY t.cpu_time DESC) rnum
 					FROM  @RunningQueries t
 	)
@@ -89,7 +90,8 @@ BEGIN
 		last_request_end_time_utc,
 		context_info,
 		transaction_begin_time_utc,
-		is_implicit_transaction
+		is_implicit_transaction,
+		total_elapsed_time
 	)
 	SELECT  SnapshotDateUTC,
 	    session_id,
@@ -124,7 +126,8 @@ BEGIN
 		last_request_end_time_utc,
 		context_info,
 		transaction_begin_time_utc,
-		is_implicit_transaction
+		is_implicit_transaction,
+		total_elapsed_time
 	FROM deDupe
 	WHERE deDupe.rnum=1
 
@@ -166,7 +169,7 @@ BEGIN
 			MAX(CASE WHEN R.open_transaction_count>0 AND R.status='sleeping' THEN DATEDIFF_BIG(ms,R.last_request_end_time_utc,R.SnapshotDateUTC) ELSE NULL END) AS SleepingSessionsMaxIdleTimeMs,
 			MAX(CASE WHEN calc.TransactionDurationMs<0 THEN 0 ELSE calc.TransactionDurationMs END) AS OldestTransactionMs
     FROM @RunningQueriesDD R 
-    CROSS APPLY(SELECT DATEDIFF_BIG(ms,ISNULL(start_time_utc,last_request_start_time_utc),R.SnapshotDateUTC) AS Duration,
+    CROSS APPLY(SELECT ISNULL(total_elapsed_time,DATEDIFF_BIG(ms,ISNULL(start_time_utc,last_request_start_time_utc),R.SnapshotDateUTC)) AS Duration,
 						DATEDIFF_BIG(ms,R.transaction_begin_time_utc,R.SnapshotDateUTC) AS TransactionDurationMs,
                         CASE WHEN wait_resource LIKE '2:%' 
 			                    OR wait_resource LIKE 'PAGE 2:%'
@@ -255,7 +258,8 @@ BEGIN
 		last_request_end_time_utc,
 		context_info,
 		transaction_begin_time_utc,
-		is_implicit_transaction
+		is_implicit_transaction,
+		total_elapsed_time
     )
     SELECT @InstanceID as InstanceID,
         SnapshotDateUTC,
@@ -291,7 +295,8 @@ BEGIN
 		last_request_end_time_utc,
 		context_info,
 		transaction_begin_time_utc,
-		is_implicit_transaction
+		is_implicit_transaction,
+		total_elapsed_time
     FROM @RunningQueriesDD;
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
