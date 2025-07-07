@@ -32,5 +32,6 @@
     last_request_end_time_utc DATETIME NULL,
     context_info VARBINARY(128) NULL,
     transaction_begin_time_utc DATETIME NULL,
-    is_implicit_transaction BIT NULL
+    is_implicit_transaction BIT NULL,
+    total_elapsed_time INT NULL
 );

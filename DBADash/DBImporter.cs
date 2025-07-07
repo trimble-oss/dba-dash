@@ -252,6 +252,10 @@ namespace DBADash
                 {
                     dtRunningQueries.Columns.Add("is_implicit_transaction", typeof(bool));
                 }
+                if (!dtRunningQueries.Columns.Contains("total_elapsed_time"))
+                {
+                    dtRunningQueries.Columns.Add("total_elapsed_time", typeof(int));
+                }
             }
 
             if (data.Tables.Contains("IdentityColumns"))
