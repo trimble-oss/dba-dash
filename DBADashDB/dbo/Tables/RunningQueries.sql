@@ -35,6 +35,8 @@
     transaction_begin_time_utc DATETIME NULL,
     is_implicit_transaction BIT NULL,
     total_elapsed_time INT NULL,
+    tempdb_alloc_page_count BIGINT NULL,
+	tempdb_dealloc_page_count BIGINT NULL,
     CONSTRAINT PK_RunningQueries PRIMARY KEY(InstanceID,SnapshotDateUTC,session_id) WITH (DATA_COMPRESSION = PAGE) ON PS_RunningQueries(SnapshotDateUTC)
 ) ON PS_RunningQueries(SnapshotDateUTC);
 GO

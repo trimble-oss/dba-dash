@@ -42,6 +42,7 @@ WITH T AS (
 		   S.SleepingSessionsCount,
 		   S.SleepingSessionsMaxIdleTimeMs,
 		   S.OldestTransactionMs,
+		   S.TempDBCurrentPageCount / 128.0 AS TempDBCurrentMB,
 		   ROW_NUMBER() OVER(PARTITION BY S.InstanceID ORDER BY S.SnapshotDateUTC DESC) rnum
 	FROM dbo.RunningQueriesSummary S 
 	JOIN dbo.Instances I ON I.InstanceID = S.InstanceID
@@ -70,7 +71,8 @@ SELECT T.InstanceID,
        T.SleepingSessionsMaxIdleTimeMs,
        MaxIdleHD.HumanDuration as MaxIdleTime,
 	   T.OldestTransactionMs,
-	   OldestTranHD.HumanDuration AS OldestTransaction
+	   OldestTranHD.HumanDuration AS OldestTransaction,
+	   T.TempDBCurrentMB
 FROM T 
 CROSS APPLY dbo.MillisecondsToHumanDuration (T.LongestRunningQueryMs) LongestHD
 CROSS APPLY dbo.MillisecondsToHumanDuration (T.BlockedQueriesWaitMs) BlockedHD

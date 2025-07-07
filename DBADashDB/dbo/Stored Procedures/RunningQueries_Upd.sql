@@ -52,6 +52,8 @@ BEGIN
 						   t.transaction_begin_time_utc,
 						   t.is_implicit_transaction,
 						   t.total_elapsed_time,
+						   t.tempdb_alloc_page_count,
+						   t.tempdb_dealloc_page_count,
 						   ROW_NUMBER() OVER(PARTITION BY t.session_id ORDER BY t.cpu_time DESC) rnum
 					FROM  @RunningQueries t
 	)
@@ -91,7 +93,9 @@ BEGIN
 		context_info,
 		transaction_begin_time_utc,
 		is_implicit_transaction,
-		total_elapsed_time
+		total_elapsed_time,
+		tempdb_alloc_page_count,
+		tempdb_dealloc_page_count
 	)
 	SELECT  SnapshotDateUTC,
 	    session_id,
@@ -127,7 +131,9 @@ BEGIN
 		context_info,
 		transaction_begin_time_utc,
 		is_implicit_transaction,
-		total_elapsed_time
+		total_elapsed_time,
+		tempdb_alloc_page_count,
+		tempdb_dealloc_page_count
 	FROM deDupe
 	WHERE deDupe.rnum=1
 
@@ -148,7 +154,8 @@ BEGIN
 		SumMemoryGrant,
 		SleepingSessionsCount,
 		SleepingSessionsMaxIdleTimeMs,
-		OldestTransactionMs
+		OldestTransactionMs,
+		TempDBCurrentPageCount
     )
     SELECT	@InstanceID as InstanceID,
             R.SnapshotDateUTC,
@@ -167,7 +174,8 @@ BEGIN
 			ISNULL(SUM(R.granted_query_memory),0) AS SumMemoryGrant,
 			SUM(CASE WHEN R.open_transaction_count>0 AND R.status='sleeping' THEN 1 ELSE 0 END) AS SleepingSessionsCount,
 			MAX(CASE WHEN R.open_transaction_count>0 AND R.status='sleeping' THEN DATEDIFF_BIG(ms,R.last_request_end_time_utc,R.SnapshotDateUTC) ELSE NULL END) AS SleepingSessionsMaxIdleTimeMs,
-			MAX(CASE WHEN calc.TransactionDurationMs<0 THEN 0 ELSE calc.TransactionDurationMs END) AS OldestTransactionMs
+			MAX(CASE WHEN calc.TransactionDurationMs<0 THEN 0 ELSE calc.TransactionDurationMs END) AS OldestTransactionMs,
+			SUM(tempdb_alloc_page_count) - SUM(tempdb_dealloc_page_count) AS TempDBCurrentPageCount
     FROM @RunningQueriesDD R 
     CROSS APPLY(SELECT ISNULL(total_elapsed_time,DATEDIFF_BIG(ms,ISNULL(start_time_utc,last_request_start_time_utc),R.SnapshotDateUTC)) AS Duration,
 						DATEDIFF_BIG(ms,R.transaction_begin_time_utc,R.SnapshotDateUTC) AS TransactionDurationMs,
@@ -199,9 +207,10 @@ BEGIN
 			SumMemoryGrant,
 			SleepingSessionsCount,
 			SleepingSessionsMaxIdleTimeMs,
-			OldestTransactionMs
+			OldestTransactionMs,
+			TempDBCurrentPageCount
 		)
-		VALUES(@InstanceID,@SnapshotDate,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL)
+		VALUES(@InstanceID,@SnapshotDate,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,NULL)
 	END
     /* Running Queries replaces legacy blocking snapshot collection */
     INSERT INTO dbo.BlockingSnapshotSummary(
@@ -259,7 +268,9 @@ BEGIN
 		context_info,
 		transaction_begin_time_utc,
 		is_implicit_transaction,
-		total_elapsed_time
+		total_elapsed_time,
+		tempdb_alloc_page_count,
+		tempdb_dealloc_page_count
     )
     SELECT @InstanceID as InstanceID,
         SnapshotDateUTC,
@@ -296,7 +307,9 @@ BEGIN
 		context_info,
 		transaction_begin_time_utc,
 		is_implicit_transaction,
-		total_elapsed_time
+		total_elapsed_time,
+		tempdb_alloc_page_count,
+		tempdb_dealloc_page_count
     FROM @RunningQueriesDD;
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  

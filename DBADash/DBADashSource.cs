@@ -197,6 +197,14 @@ namespace DBADash
             set => _collectTranBeginTime = value;
         }
 
+        private bool _collectTempDb;
+
+        public bool CollectTempDB
+        {
+            get => SourceConnection is { Type: ConnectionType.SQL } && _collectTempDb;
+            set => _collectTempDb = value;
+        }
+
         public int? TableSizeCollectionThresholdMB { get; set; }
 
         public int? TableSizeMaxDatabaseThreshold { get; set; }

@@ -118,6 +118,7 @@ namespace DBADashGUI.Performance
         private bool IsInstanceDrillDown => CurrentContext != null && InstanceID != CurrentContext.InstanceID;
         private RunningQueriesFilters forceDetailFilters;
         private bool hasImplicitTran;
+        private bool hasTempDB;
 
         private static string IdleThresholdInfo =>
             $"Red = Sleeping session with an open transaction that has been idle for longer than {TimeSpan.FromSeconds(Config.IdleCriticalThresholdForSleepingSessionWithOpenTran).Humanize(maxUnit: TimeUnit.Year, precision: 3)}.\nYellow=Sleeping session with an open transaction that has been idle for longer than {TimeSpan.FromSeconds(Config.IdleWarningThresholdForSleepingSessionWithOpenTran).Humanize(maxUnit: TimeUnit.Year, precision: 3)}.";
@@ -298,6 +299,20 @@ namespace DBADashGUI.Performance
                     HeaderText = "Top Session Waits", DataPropertyName = "TopSessionWaits", Name = "colTopSessionWaits",
                     AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width = 50,
                     SortMode = DataGridViewColumnSortMode.Automatic
+                },
+                new DataGridViewTextBoxColumn()
+                {
+                    HeaderText = "TempDB Current (MB)", DataPropertyName = "tempdb_current_mb",
+                    ToolTipText = "Current TempDB allocations for query in MB.  Calculated by tasking the sum of the user and internal allocations and subtracting the de-allocations.  e.g. How much is used now.",
+                    SortMode = DataGridViewColumnSortMode.Automatic,
+                    DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60, Visible = hasTempDB
+                },
+                new DataGridViewTextBoxColumn()
+                {
+                    HeaderText = "TempDB Allocations (MB)", DataPropertyName = "tempdb_allocations_mb",
+                    ToolTipText = "Total TempDB allocations for current query in MB.  This is the sum of the user and internal allocations. e.g. How much has been used total rather than how much is used now.",
+                    SortMode = DataGridViewColumnSortMode.Automatic,
+                    DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60,Visible = false
                 },
                 new DataGridViewTextBoxColumn()
                 {
@@ -724,6 +739,8 @@ namespace DBADashGUI.Performance
                 tsEditLimit.Visible = true;
             }
 
+            var hasTempDbSummary = dt.Columns.Contains("TempDBCurrentMB") &&
+                                   dt.AsEnumerable().Any(r => r["TempDBCurrentMB"] != DBNull.Value);
             dgv.Columns.Clear();
             dgv.AutoGenerateColumns = false;
             dgv.Columns.AddRange(
@@ -827,6 +844,15 @@ namespace DBADashGUI.Performance
                     DataPropertyName = "TempDBWaitTime",
                     SortMode = DataGridViewColumnSortMode.Automatic,
                     DefaultCellStyle = Common.DataGridViewNumericCellStyle
+                },
+                new DataGridViewTextBoxColumn()
+                {
+                    HeaderText = "TempDB Current MB",
+                    DataPropertyName = "TempDBCurrentMB",
+                    ToolTipText = "Sum of current tempdb allocations for captured queries",
+                    SortMode = DataGridViewColumnSortMode.Automatic,
+                    DefaultCellStyle = Common.DataGridViewNumericCellStyle,
+                    Visible = hasTempDbSummary
                 },
                 new DataGridViewTextBoxColumn()
                 {
@@ -961,6 +987,7 @@ namespace DBADashGUI.Performance
             hasWaitResource = snapshotDT.AsEnumerable().Any(r =>
                 r["wait_resource"] != DBNull.Value && !string.IsNullOrEmpty((string)r["wait_resource"]));
 
+            hasTempDB = snapshotDT.Columns.Contains("tempdb_current_mb") && snapshotDT.AsEnumerable().Any(r => r["tempdb_current_mb"] != DBNull.Value);
             tsBlockingFilter.Text = $"Blocking ({blockedCount} Blocked)";
             tsBlockingFilter.Enabled = blockedCount > 0;
             var status = SessionID == 0 && JobId == Guid.Empty ?
