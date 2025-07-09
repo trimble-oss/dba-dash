@@ -90,7 +90,7 @@ SELECT Q.InstanceID,
     TranHD.HumanDuration AS transaction_duration,
     Q.is_implicit_transaction,
     D.is_query_store_on,
-    (Q.tempdb_alloc_page_count - Q.tempdb_dealloc_page_count) / 128.0 AS tempdb_current_mb,
+    CASE WHEN Q.tempdb_alloc_page_count < Q.tempdb_dealloc_page_count THEN 0 ELSE (Q.tempdb_alloc_page_count - Q.tempdb_dealloc_page_count) / 128.0 END AS tempdb_current_mb,
     Q.tempdb_alloc_page_count /128.0 AS tempdb_allocations_mb 
 FROM dbo.RunningQueries Q
 JOIN dbo.Instances I ON Q.InstanceID = I.InstanceID
