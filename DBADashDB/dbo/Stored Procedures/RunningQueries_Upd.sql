@@ -175,7 +175,7 @@ BEGIN
 			SUM(CASE WHEN R.open_transaction_count>0 AND R.status='sleeping' THEN 1 ELSE 0 END) AS SleepingSessionsCount,
 			MAX(CASE WHEN R.open_transaction_count>0 AND R.status='sleeping' THEN DATEDIFF_BIG(ms,R.last_request_end_time_utc,R.SnapshotDateUTC) ELSE NULL END) AS SleepingSessionsMaxIdleTimeMs,
 			MAX(CASE WHEN calc.TransactionDurationMs<0 THEN 0 ELSE calc.TransactionDurationMs END) AS OldestTransactionMs,
-			SUM(tempdb_alloc_page_count) - SUM(tempdb_dealloc_page_count) AS TempDBCurrentPageCount
+			SUM(CASE WHEN R.tempdb_alloc_page_count < R.tempdb_dealloc_page_count THEN 0 ELSE (R.tempdb_alloc_page_count - R.tempdb_dealloc_page_count) END) AS TempDBCurrentPageCount
     FROM @RunningQueriesDD R 
     CROSS APPLY(SELECT ISNULL(total_elapsed_time,DATEDIFF_BIG(ms,ISNULL(start_time_utc,last_request_start_time_utc),R.SnapshotDateUTC)) AS Duration,
 						DATEDIFF_BIG(ms,R.transaction_begin_time_utc,R.SnapshotDateUTC) AS TransactionDurationMs,
