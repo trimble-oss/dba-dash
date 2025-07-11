@@ -22,6 +22,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DBADashGUI.Changes;
 using Version = System.Version;
 
 namespace DBADashGUI
@@ -46,6 +47,7 @@ namespace DBADashGUI
         private NotifyIcon notifyIcon;
         private TabPage tabOfflineInstances;
         private TabPage tabJobInfo;
+        private TabPage tabCloudMetadata;
 
         public Main(CommandLineOptions opts)
         {
@@ -79,6 +81,10 @@ namespace DBADashGUI
             tabJobInfo = new TabPage("Job Info");
             tabJobInfo.Controls.Add(new JobInfo() { Dock = DockStyle.Fill });
             tabs.TabPages.Add(tabJobInfo);
+
+            tabCloudMetadata = new TabPage("Instance Metadata");
+            tabCloudMetadata.Controls.Add(new InstanceMetadata() {Dock = DockStyle.Fill});
+            tabs.TabPages.Add(tabCloudMetadata);
         }
 
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommunityProcs proc)
@@ -823,6 +829,10 @@ namespace DBADashGUI
                 if (parent.Type == SQLTreeItem.TreeType.Instance)
                 {
                     allowedTabs.Add(tabInfo);
+                }
+                if (n.Context.HasInstanceMetadata == true)
+                {
+                    allowedTabs.Add(tabCloudMetadata);
                 }
 
                 if (parent.Type != SQLTreeItem.TreeType.AzureDatabase &&

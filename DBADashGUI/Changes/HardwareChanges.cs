@@ -1,4 +1,6 @@
-﻿using DBADashGUI.CustomReports;
+﻿using DBADashGUI.Changes;
+using DBADashGUI.CustomReports;
+using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -63,6 +65,7 @@ namespace DBADashGUI
             da.Fill(dt);
             dgvHardware.AutoGenerateColumns = false;
             dgvHardware.DataSource = new DataView(dt);
+            dgvHardware.HideEmptyColumns();
             dgvHardware.AutoResizeColumnsWithMaxColumnWidth();
         }
 
@@ -235,6 +238,37 @@ namespace DBADashGUI
         private void TsHistoryCols_Click(object sender, EventArgs e)
         {
             dgvHistory.PromptColumnSelection();
+        }
+
+        private void Hardware_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= dgvHardware.Rows.Count) return;
+            var row = dgvHardware.Rows[e.RowIndex].DataBoundItem as DataRowView;
+            var instanceID = row?["InstanceID"] as int?;
+            if (instanceID is null or <= 0) return;
+            if (e.ColumnIndex == colVMSize.Index)
+            {
+                ShowInstanceMetadata(instanceID.Value);
+            }
+        }
+
+        private void ShowInstanceMetadata(int instanceId)
+        {
+            var tempContext = CommonData.GetDBADashContext(instanceId);
+            var frm = new Form() { Width = this.Width, Height = this.Height, Text = "Instance Metadata for " + tempContext.InstanceName };
+            var instanceMetadata = new InstanceMetadata()
+            {
+                Dock = DockStyle.Fill
+            };
+            frm.Controls.Add(instanceMetadata);
+
+            frm.Load += (s, e) =>
+            {
+                instanceMetadata.ApplyTheme();
+                instanceMetadata.SetContext(tempContext);
+            };
+
+            frm.Show();
         }
     }
 }

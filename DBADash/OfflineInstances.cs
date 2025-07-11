@@ -162,7 +162,7 @@ namespace DBADashService
         private static DataTable GenerateDBADashDataTable()
         {
             var dt = new DataTable("DBADash");
-            DBCollector.AddDBADashServiceMetaData(ref dt);
+            DBCollector.AddDBADashServiceMetadata(ref dt);
             return dt;
         }
 

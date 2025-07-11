@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DBADash.InstanceMetadata;
 using static DBADash.DBADashConnection;
 
 namespace DBADash
@@ -58,6 +59,8 @@ namespace DBADash
         public const int DefaultAlertProcessingFrequencySeconds = 60;
 
         public const int DefaultAlertProcessingStartupDelaySeconds = 60;
+
+        public HashSet<InstanceMetadataProviders.Providers>EnabledMetadataProviders { get; set; } = new();
 
         public int GetThreadCount()
         {

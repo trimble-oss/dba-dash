@@ -17,6 +17,7 @@ using DBADash.Messaging;
 using static DBADash.DBADashConnection;
 using Microsoft.Extensions.Hosting;
 using System.Collections.Concurrent;
+using DBADash.InstanceMetadata;
 
 namespace DBADashService
 {
@@ -175,6 +176,8 @@ namespace DBADashService
                 Program.LogFatalError(new Exception("Upgrade DB failed", ex));
                 throw;
             }
+
+            InstanceMetadataProviders.EnabledProviders = config.EnabledMetadataProviders;
             try
             {
                 Log.Information("Checking connections");
@@ -395,6 +398,11 @@ namespace DBADashService
             else
             {
                 srcSchedule = schedules;
+            }
+
+            if (config.EnabledMetadataProviders.Count == 0)
+            {
+                srcSchedule.Remove(CollectionType.InstanceMetadata);
             }
             var customCollections = src.CustomCollections.CombineCollections(config.CustomCollections);
 

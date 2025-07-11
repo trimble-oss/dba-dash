@@ -12,12 +12,14 @@ using System.Linq;
 using System.Runtime.Caching;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using DocumentFormat.OpenXml.Bibliography;
 
 namespace DBADashGUI
 {
     internal static class CommonData
     {
         public static DataTable Instances;
+        public static HashSet<int>HasInstanceMetadata;
 
         private static readonly MemoryCache cache = MemoryCache.Default;
 
@@ -25,6 +27,7 @@ namespace DBADashGUI
         {
             Instances = GetInstances(tagIDs, Active, azureDB, searchString, groupByTag);
             DBADashContext.HiddenInstanceIDs = Instances.Rows.Cast<DataRow>().Where(r => !r.Field<bool>("ShowInSummary")).Select(r => r.Field<int>("InstanceID")).ToHashSet();
+            HasInstanceMetadata = Instances.Rows.Cast<DataRow>().Where(r=>r.Field<bool>("HasInstanceMetadata")).Select(r => r.Field<int>("InstanceID")).ToHashSet();
         }
 
         public static DataTable GetInstances(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "", string groupByTag = "")

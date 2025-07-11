@@ -831,6 +831,13 @@
     <Build Include="dbo\Stored Procedures\AvailableProcs_Upd.sql" />
     <Build Include="dbo\Stored Procedures\CustomTools_Get.sql" />
     <Build Include="Security\CustomTools.sql" />
+    <Build Include="dbo\Tables\InstanceMetadata.sql" />
+    <Build Include="dbo\Stored Procedures\InstanceMetadata_Upd.sql" />
+    <Build Include="dbo\Tables\InstanceMetadataHistory.sql" />
+    <Build Include="dbo\Stored Procedures\InstanceMetadataHistory_Get.sql" />
+    <Build Include="dbo\Functions\ParseInstanceMetadata.sql" />
+    <Build Include="dbo\Functions\GetInstanceMetadataTags.sql" />
+    <Build Include="dbo\Stored Procedures\InstanceMetadata_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

@@ -48,7 +48,8 @@ namespace DBADashGUI.Options_Menu
             ("AlertMaxNotificationCount" , "Maximum number of alert notifications to send" , typeof(int) , Config.AlertMaxNotificationCount),
             ("ExcludeClosedAlertsWithNotesFromPurge","Exclude closed alerts with notes from data retention",typeof(bool),true),
             ("CollectionTriggerLimit","Maximum number of collections that can be triggered on Collection Dates tab.",typeof(int), Config.CollectionTriggerLimit),
-            ("CollectionTriggerWarningLimit","Maximum number of collections that can be triggered before warning icon is displayed on Collection Dates tab.",typeof(int), Config.CollectionTriggerWarningLimit)
+            ("CollectionTriggerWarningLimit","Maximum number of collections that can be triggered before warning icon is displayed on Collection Dates tab.",typeof(int), Config.CollectionTriggerWarningLimit),
+            ("InstanceMetadataTags","Tags to create from Instance Metadata.  Use * for ALL.",typeof(string),Config.InstanceMetadataTags)
         };
 
         private void Options_Load(object sender, EventArgs e)

@@ -10,6 +10,7 @@ namespace DBADashService
         private const string hourly = "0 0 * ? * *";
         private const string midnight = "0 0 0 1/1 * ? *";
         private const string elevenPm = "0 0 23 1/1 * ? *";
+        private const string tenPm = "0 0 22 1/1 * ? *";
         private const string disabled = "";
 
         private static readonly CollectionSchedules collectionSchedules = new() {
@@ -65,8 +66,9 @@ namespace DBADashService
                             {CollectionType.IdentityColumns, new CollectionSchedule(){ Schedule = midnight} },
                             {CollectionType.SchemaSnapshot, new CollectionSchedule(){Schedule=elevenPm} },
                             {CollectionType.AvailableProcs, new CollectionSchedule(){Schedule = elevenPm}},
+                            {CollectionType.InstanceMetadata, new CollectionSchedule(){Schedule = tenPm}},
 
-                            { CollectionType.TableSize, new CollectionSchedule() {Schedule = disabled, RunOnServiceStart = false} },
+                            {CollectionType.TableSize, new CollectionSchedule() {Schedule = disabled, RunOnServiceStart = false} },
         };
 
         public static readonly CollectionSchedules DefaultSchedules
