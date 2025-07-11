@@ -15,7 +15,7 @@ WITH T AS (
 			CAST(I.Collation AS NVARCHAR(128)) Collation,
 			CAST(I.SystemManufacturer AS NVARCHAR(128)) AS SystemManufacturer,
 			CAST(I.SystemProductName AS NVARCHAR(128)) AS SystemProductName,
-			CAST(RIGHT(REPLICATE(' ',5) +  CAST(I.cpu_count as NVARCHAR(50)),5) AS NVARCHAR(128)) AS CPUCount,
+			CAST(RIGHT(REPLICATE(' ',5) +  CAST(I.cpu_count AS NVARCHAR(50)),5) AS NVARCHAR(128)) AS CPUCount,
 			CAST(Cagt.AgentHostName AS NVARCHAR(128)) CollectAgent,
 			CAST(Cagt.AgentServiceName AS NVARCHAR(128)) CollectAgentServiceName,
 			CAST(Cagt.AgentVersion AS NVARCHAR(128)) AS CollectAgentVersion,
@@ -56,6 +56,31 @@ UNPIVOT(TagValue FOR TagName IN(PatchLevel,
 								)
 		) upvt
 
+
+DECLARE @InstanceMetadataTags VARCHAR(MAX);
+
+SELECT @InstanceMetadataTags = NULLIF(TRY_CAST(SettingValue AS VARCHAR(MAX)),'')
+FROM dbo.Settings
+WHERE SettingName = 'InstanceMetadataTags'
+
+IF @InstanceMetadataTags IS NOT NULL
+BEGIN
+	INSERT INTO @Tags
+	(
+		TagName,
+		TagValue
+	)
+	SELECT	calc.TagName,
+			T.TagValue
+	FROM dbo.GetInstanceMetadataTags(@InstanceID) T
+	OUTER APPLY (SELECT '{Meta\' + CASE WHEN Type=1 THEN T.TagName ELSE 'Tag\' + T.TagName END + '}' AS TagName) calc
+	WHERE T.Type IN(1,2)
+	AND EXISTS(SELECT 1 
+				FROM STRING_SPLIT(@InstanceMetadataTags,',')
+				WHERE RTRIM(LTRIM(value)) LIKE calc.TagName OR RTRIM(LTRIM(value)) = '*'
+				)
+			
+END
 
 IF EXISTS(SELECT 1 
 			FROM @Tags T

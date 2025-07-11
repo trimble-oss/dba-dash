@@ -17,6 +17,7 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DBADash.InstanceMetadata;
 using static DBADash.DBADashConnection;
 using Control = System.Windows.Forms.Control;
 using Font = System.Drawing.Font;
@@ -943,6 +944,12 @@ namespace DBADashServiceConfig
                 numAlertStartupDelay.Enabled = collectionConfig.AlertProcessingStartupDelaySeconds != null && collectionConfig.ProcessAlerts;
                 chkAlertStartupDelay.Enabled = collectionConfig.ProcessAlerts;
                 txtAllowedCustomProcs.Text = collectionConfig.AllowedCustomProcs;
+                chkAWS.Checked =
+                    collectionConfig.EnabledMetadataProviders.Contains(InstanceMetadataProviders.Providers.AWS);
+                chkAzure.Checked = 
+                    collectionConfig.EnabledMetadataProviders.Contains(InstanceMetadataProviders.Providers.Azure);
+                chkGeneric.Checked =
+                    collectionConfig.EnabledMetadataProviders.Contains(InstanceMetadataProviders.Providers.Generic);
                 UpdateThreadCount();
                 UpdateSummaryCron();
                 UpdateScanInterval();
@@ -2657,7 +2664,7 @@ namespace DBADashServiceConfig
                 numThreads.Enabled = chkThreads.Checked;
                 SetJson();
             }
-            if(!chkThreads.Checked)
+            if (!chkThreads.Checked)
             {
                 numThreads.Value = collectionConfig.GetThreadCount();
             }
@@ -2666,6 +2673,45 @@ namespace DBADashServiceConfig
         private void Threads_ValueChanged(object sender, EventArgs e)
         {
             UpdateThreads();
+        }
+
+        private void AWS_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkAWS.Checked)
+            {
+                collectionConfig.EnabledMetadataProviders.Add(InstanceMetadataProviders.Providers.AWS);
+            }
+            else
+            {
+                collectionConfig.EnabledMetadataProviders.Remove(InstanceMetadataProviders.Providers.AWS);
+            }
+            SetJson();
+        }
+
+        private void Azure_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkAzure.Checked)
+            {
+                collectionConfig.EnabledMetadataProviders.Add(InstanceMetadataProviders.Providers.Azure);
+            }
+            else
+            {
+                collectionConfig.EnabledMetadataProviders.Remove(InstanceMetadataProviders.Providers.Azure);
+            }
+            SetJson();
+        }
+
+        private void Generic_CheckedChanged(object sender, EventArgs e)
+        {
+            if(chkGeneric.Checked)
+            {
+                collectionConfig.EnabledMetadataProviders.Add(InstanceMetadataProviders.Providers.Generic);
+            }
+            else
+            {
+                collectionConfig.EnabledMetadataProviders.Remove(InstanceMetadataProviders.Providers.Generic);
+            }
+            SetJson();
         }
     }
 }

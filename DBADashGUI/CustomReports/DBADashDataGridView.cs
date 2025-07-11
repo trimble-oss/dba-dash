@@ -1188,5 +1188,24 @@ GO
         {
             Dispose(false);
         }
+
+
+        /// <summary>
+        /// Show/Hide columns depending on if they have any data
+        /// </summary>
+        /// <param name="toggleMode">Set to true to toggle the visibility.  Set to false to only hide columns without impacting the visibility of columns already hidden</param>
+        public void HideEmptyColumns(bool toggleMode=true)
+        {
+            if (Rows.Count == 0 || Columns.Count == 0)
+            {
+                return; 
+            }
+
+            foreach (DataGridViewColumn column in Columns)
+            {
+                var hasData = Rows.Cast<DataGridViewRow>().Where(row => !row.IsNewRow && row.Cells[column.Index].Value != null).Any(row => !string.IsNullOrEmpty(row.Cells[column.Index].Value.ToString()?.Trim()));
+                column.Visible = (hasData && column.Visible) || (toggleMode && hasData);
+            }
+        }
     }
 }

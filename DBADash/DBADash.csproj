@@ -144,6 +144,7 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.12.1" />
     <PackageReference Include="System.IO.Packaging" Version="9.0.6" />
     <PackageReference Include="System.Management" Version="9.0.6" />
+    <PackageReference Include="System.Management.Automation" Version="7.4.11" />
     <PackageReference Include="System.Memory" Version="4.6.3" />
     <PackageReference Include="System.Memory.Data" Version="9.0.6" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.6.1" />

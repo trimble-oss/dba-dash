@@ -16,8 +16,10 @@ using System.Linq;
 using System.Runtime.Caching;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using DBADash.InstanceMetadata;
 
 namespace DBADash
 {
@@ -77,7 +79,8 @@ namespace DBADash
         RunningJobs,
         TableSize,
         ServerServices,
-        AvailableProcs
+        AvailableProcs,
+        InstanceMetadata
     }
 
     public enum HostPlatform
@@ -350,9 +353,9 @@ namespace DBADash
         }
 
         /// <summary>
-        /// Add MetaData relating to the DBA Dash service used for collection.
+        /// Add Metadata relating to the DBA Dash service used for collection.
         /// </summary>
-        public static void AddDBADashServiceMetaData(ref DataTable dt)
+        public static void AddDBADashServiceMetadata(ref DataTable dt)
         {
             var dashAgent = DBADashAgent.GetCurrent();
             dt.Columns.AddRange(new[]
@@ -390,7 +393,7 @@ namespace DBADash
         {
             StartCollection(CollectionType.Instance.ToString());
             var dt = await GetDataTableAsync("DBADash", SqlStrings.Instance, CollectionCommandTimeout.GetDefaultCommandTimeout());
-            AddDBADashServiceMetaData(ref dt);
+            AddDBADashServiceMetadata(ref dt);
             var clusterOrComputerName = (string)dt.Rows[0]["MachineName"];
             computerName = (string)dt.Rows[0]["ComputerNamePhysicalNetBIOS"];
             dbName = (string)dt.Rows[0]["DBName"];
@@ -593,6 +596,10 @@ namespace DBADash
                 return false; // Table size collection not supported on SQL 2014 and below
             }
             else if (collectionType == CollectionType.ServerServices && SQLVersion.Major < 11)
+            {
+                return false;
+            }
+            else if (collectionType == CollectionType.InstanceMetadata && (IsAzureDB || IsRDS || noWMI))
             {
                 return false;
             }
@@ -939,6 +946,10 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             else if (collectionType == CollectionType.RunningJobs)
             {
                 await CollectRunningJobsAsync();
+            }
+            else if (collectionType == CollectionType.InstanceMetadata)
+            {
+                await CollectInstanceMetadataAsync();
             }
             else
             {
@@ -1317,6 +1328,29 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
         private bool? IsWindowsUpdate;
 
         #region "WMI"
+
+        private async Task CollectInstanceMetadataAsync()
+        {
+            try
+            {
+                if (noWMI) return;
+                if (InstanceMetadataProviders.EnabledProviders.Count == 0) return;
+                var meta =  await InstanceMetadataProviders.GetMetadataAsync(computerName, cancellationToken: CancellationToken.None);
+                var dt = new DataTable("InstanceMetadata");
+                dt.Columns.Add("Provider", typeof(string));
+                dt.Columns.Add("Metadata", typeof(string));
+                var row = dt.NewRow();
+                row["Provider"] = meta.ProviderName;
+                row["Metadata"] = meta.Json;
+                dt.Rows.Add(row);
+                Data.Tables.Add(dt);
+            }
+            catch(Exception ex)
+            {
+                LogError(ex, "InstanceMetadata", "Collect:InstanceMetadata");
+            }
+        }
+
 
         private void CollectIsWindowsUpdateWMI()
         {

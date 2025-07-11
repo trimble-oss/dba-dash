@@ -492,6 +492,29 @@ BEGIN
 
 	DELETE dbo.RepositoryMetricsConfig
 	WHERE InstanceID = @InstanceID
+
+	DELETE dbo.InstanceMetadata
+	WHERE InstanceID = @InstanceID
+
+	IF EXISTS(SELECT 1 
+			FROM dbo.InstanceMetadataHistory
+			WHERE InstanceID = @InstanceID)
+	BEGIN
+		/* System versioning needs to be turned off on InstanceMetadata to allow us to remove data from InstanceMetadataHistory */
+		BEGIN TRAN
+		ALTER TABLE dbo.InstanceMetadata
+		SET (SYSTEM_VERSIONING = OFF )
+
+		DECLARE @SQL NVARCHAR(MAX) = N'
+		DELETE dbo.InstanceMetadataHistory 
+		WHERE InstanceID = @InstanceID'
+		EXEC sp_executesql @SQL, N'@InstanceID INT', @InstanceID = @InstanceID
+
+		ALTER TABLE dbo.InstanceMetadata 
+		SET ( SYSTEM_VERSIONING = ON (HISTORY_TABLE = dbo.InstanceMetadataHistory))
+
+		COMMIT
+	END
 	
 	DELETE dbo.Instances
 	WHERE InstanceID = @InstanceID

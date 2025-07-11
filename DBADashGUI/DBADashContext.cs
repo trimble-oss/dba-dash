@@ -48,6 +48,17 @@ namespace DBADashGUI
         private int? _collectAgentID;
         private Version _productVersion;
         private string _connectionID;
+        private bool? _hasInstanceMetadata;
+
+        public bool? HasInstanceMetadata
+        {
+            get
+            {
+                if (_hasInstanceMetadata != null) return _hasInstanceMetadata;
+                _hasInstanceMetadata = InstanceID >0 ? CommonData.HasInstanceMetadata.Contains(InstanceID) : InstanceIDs.Any(id => CommonData.HasInstanceMetadata.Contains(id));
+                return _hasInstanceMetadata;
+            }
+        }
 
         public Version ProductVersion
         {

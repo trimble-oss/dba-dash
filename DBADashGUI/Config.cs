@@ -44,6 +44,7 @@ namespace DBADashGUI
         public static int CollectionTriggerLimit;
         public static int AlertAutoCloseThresholdMins;
         public static int AlertMaxNotificationCount;
+        public static string InstanceMetadataTags;
 
         static Config()
         {
@@ -116,6 +117,7 @@ namespace DBADashGUI
             CollectionTriggerWarningLimit = settings.GetValueAsInt("CollectionTriggerWarningLimit", 100);
             AlertAutoCloseThresholdMins = settings.GetValueAsInt("AlertAutoCloseThresholdMins", 1440);
             AlertMaxNotificationCount = settings.GetValueAsInt("AlertMaxNotificationCount", 6);
+            InstanceMetadataTags = settings.GetValueAsString("InstanceMetadataTags", string.Empty);
         }
 
         public static void ResetDefaults()
@@ -132,5 +134,7 @@ namespace DBADashGUI
         {
             return int.TryParse(value?.ToString(), out var result) ? result : defaultValue;
         }
+
+
     }
 }

@@ -139,13 +139,13 @@ Are you sure you want to delete this instance?",
                 SharedData.HardDeleteInstance(instanceID, Common.ConnectionString);
                 SetStatus($"Instance {instanceName} deleted", string.Empty,
                     DashColors.Success);
+                RefreshData();
             }
             catch (Exception ex)
             {
                 SetStatus(ex.Message, ex.ToString(), DashColors.Fail);
             }
 
-            RefreshData();
             IsDeleteInProgress = false;
         }
 

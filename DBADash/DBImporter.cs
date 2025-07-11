@@ -426,6 +426,18 @@ namespace DBADash
                 LogError("ServerExtraProperties", ex);
                 exceptions.Add(ex);
             }
+            try
+            {
+                await retryPolicy.Execute(async _ => await UpdateInstanceMetadata_Async(),
+                    new Context("InstanceMetadata")
+                );
+            }
+            catch (Exception ex)
+            {
+                LogError("InstanceMetadata", ex);
+                exceptions.Add(ex);
+            }
+
             // retry based on policy then let caller handle the exception
             await retryPolicy.Execute(async _ => await InsertErrorsAsync(),
                 new Context("InsertErrors")
@@ -434,6 +446,24 @@ namespace DBADash
             {
                 throw new AggregateException(exceptions);
             }
+        }
+
+        private async Task UpdateInstanceMetadata_Async()
+        {
+            if (!data.Tables.Contains("InstanceMetadata")) return;
+            var metadataTable = data.Tables["InstanceMetadata"];
+            if (metadataTable==null || metadataTable.Rows.Count == 0) return; // nothing to do
+            var r = metadataTable.Rows[0];
+            var metadata = r["Metadata"] as string;
+            var provider = r["Provider"] as string;
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand("dbo.InstanceMetadata_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout };
+            await cn.OpenAsync();
+            cmd.Parameters.AddWithValue("InstanceID", instanceID);
+            cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+            cmd.Parameters.AddWithValue("Metadata", metadata);
+            cmd.Parameters.AddWithValue("Provider", provider);
+            await cmd.ExecuteNonQueryAsync();
         }
 
         private async Task UpdateSnapshotAsync(string tableName, string databaseName)

@@ -86,6 +86,10 @@ namespace DBADashServiceConfig
             numAlertPollingFrequency = new System.Windows.Forms.NumericUpDown();
             chkProcessAlerts = new System.Windows.Forms.CheckBox();
             groupBox3 = new System.Windows.Forms.GroupBox();
+            grpMetadata = new System.Windows.Forms.GroupBox();
+            chkGeneric = new System.Windows.Forms.CheckBox();
+            chkAWS = new System.Windows.Forms.CheckBox();
+            chkAzure = new System.Windows.Forms.CheckBox();
             chkThreads = new System.Windows.Forms.CheckBox();
             numThreads = new System.Windows.Forms.NumericUpDown();
             label23 = new System.Windows.Forms.Label();
@@ -197,6 +201,7 @@ namespace DBADashServiceConfig
             ((System.ComponentModel.ISupportInitialize)numAlertStartupDelay).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numAlertPollingFrequency).BeginInit();
             groupBox3.SuspendLayout();
+            grpMetadata.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numThreads).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numBackupRetention).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numIdentityCollectionThreshold).BeginInit();
@@ -814,6 +819,7 @@ namespace DBADashServiceConfig
             // groupBox3
             // 
             groupBox3.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBox3.Controls.Add(grpMetadata);
             groupBox3.Controls.Add(chkThreads);
             groupBox3.Controls.Add(numThreads);
             groupBox3.Controls.Add(label23);
@@ -839,6 +845,52 @@ namespace DBADashServiceConfig
             groupBox3.TabIndex = 38;
             groupBox3.TabStop = false;
             groupBox3.Text = "Miscellaneous";
+            // 
+            // grpMetadata
+            // 
+            grpMetadata.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            grpMetadata.Controls.Add(chkGeneric);
+            grpMetadata.Controls.Add(chkAWS);
+            grpMetadata.Controls.Add(chkAzure);
+            grpMetadata.Location = new System.Drawing.Point(937, 108);
+            grpMetadata.Name = "grpMetadata";
+            grpMetadata.Size = new System.Drawing.Size(170, 123);
+            grpMetadata.TabIndex = 46;
+            grpMetadata.TabStop = false;
+            grpMetadata.Text = "Metadata Providers";
+            // 
+            // chkGeneric
+            // 
+            chkGeneric.AutoSize = true;
+            chkGeneric.Location = new System.Drawing.Point(15, 86);
+            chkGeneric.Name = "chkGeneric";
+            chkGeneric.Size = new System.Drawing.Size(148, 24);
+            chkGeneric.TabIndex = 45;
+            chkGeneric.Text = "Generic (HYPERV)";
+            chkGeneric.UseVisualStyleBackColor = true;
+            chkGeneric.CheckedChanged += Generic_CheckedChanged;
+            // 
+            // chkAWS
+            // 
+            chkAWS.AutoSize = true;
+            chkAWS.Location = new System.Drawing.Point(15, 26);
+            chkAWS.Name = "chkAWS";
+            chkAWS.Size = new System.Drawing.Size(62, 24);
+            chkAWS.TabIndex = 43;
+            chkAWS.Text = "AWS";
+            chkAWS.UseVisualStyleBackColor = true;
+            chkAWS.CheckedChanged += AWS_CheckedChanged;
+            // 
+            // chkAzure
+            // 
+            chkAzure.AutoSize = true;
+            chkAzure.Location = new System.Drawing.Point(15, 56);
+            chkAzure.Name = "chkAzure";
+            chkAzure.Size = new System.Drawing.Size(69, 24);
+            chkAzure.TabIndex = 44;
+            chkAzure.Text = "Azure";
+            chkAzure.UseVisualStyleBackColor = true;
+            chkAzure.CheckedChanged += Azure_CheckedChanged;
             // 
             // chkThreads
             // 
@@ -2016,6 +2068,8 @@ namespace DBADashServiceConfig
             ((System.ComponentModel.ISupportInitialize)numAlertPollingFrequency).EndInit();
             groupBox3.ResumeLayout(false);
             groupBox3.PerformLayout();
+            grpMetadata.ResumeLayout(false);
+            grpMetadata.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numThreads).EndInit();
             ((System.ComponentModel.ISupportInitialize)numBackupRetention).EndInit();
             ((System.ComponentModel.ISupportInitialize)numIdentityCollectionThreshold).EndInit();
@@ -2203,6 +2257,10 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.NumericUpDown numThreads;
         private System.Windows.Forms.Label label23;
         private System.Windows.Forms.CheckBox chkThreads;
+        private System.Windows.Forms.GroupBox grpMetadata;
+        private System.Windows.Forms.CheckBox chkGeneric;
+        private System.Windows.Forms.CheckBox chkAWS;
+        private System.Windows.Forms.CheckBox chkAzure;
     }
 }
 

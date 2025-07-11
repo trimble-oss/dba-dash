@@ -359,6 +359,22 @@ namespace DBADashGUI
             return defaultValue;
         }
 
+        public static string GetValueAsString(this Dictionary<string, object> dict, string key, string defaultValue)
+        {
+            // Check if the key exists
+            if (dict.TryGetValue(key, out object value))
+            {
+                // Try to cast the value to a string
+                if (value is string strValue)
+                {
+                    return strValue;
+                }
+            }
+
+            // If the key does not exist or the value is not a string, return the default value
+            return defaultValue;
+        }
+
         public static int? GetValueAsNullableInt(this Dictionary<string, object> dict, string key)
         {
             // Check if the key exists

@@ -27,12 +27,14 @@ SELECT  I.InstanceID,
 	I.CollectAgentID,
 	I.ImportAgentID,
 	IA.MessagingEnabled & CA.MessagingEnabled AS MessagingEnabled,
-	I.ProductVersion
+	I.ProductVersion,
+	CASE WHEN M.InstanceID IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS HasInstanceMetadata
 FROM dbo.InstancesMatchingTags(@TagIDs) I
 LEFT JOIN dbo.Databases D ON D.InstanceID = I.InstanceID AND I.EngineEdition = 5 AND D.IsActive=1
 LEFT JOIN dbo.AzureDBServiceObjectives SO ON I.InstanceID = SO.InstanceID
 LEFT JOIN dbo.DBADashAgent IA ON I.ImportAgentID = IA.DBADashAgentID
 LEFT JOIN dbo.DBADashAgent CA ON I.CollectAgentID = CA.DBADashAgentID
+LEFT JOIN dbo.InstanceMetadata M ON I.InstanceID = M.InstanceID
 ' + CASE WHEN @GroupByTag IS NULL THEN '' ELSE 'OUTER APPLY dbo.TagValue(I.InstanceID,@GroupByTag,I.EngineEdition) T' END + '
 WHERE (D.InstanceID IS NOT NULL OR I.EngineEdition <> 5 OR I.EngineEdition IS NULL)
 ' + CASE WHEN @IsActive IS NULL THEN '' ELSE 'AND I.IsActive=@IsActive' END + '
