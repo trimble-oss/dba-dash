@@ -104,9 +104,9 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AsyncKeyedLock" Version="7.1.6" />
-    <PackageReference Include="AWSSDK.Core" Version="4.0.0.10" />
-    <PackageReference Include="AWSSDK.S3" Version="4.0.1.6" />
-    <PackageReference Include="AWSSDK.SQS" Version="4.0.0.9" />
+    <PackageReference Include="AWSSDK.Core" Version="4.0.0.16" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.5" />
+    <PackageReference Include="AWSSDK.SQS" Version="4.0.0.15" />
     <PackageReference Include="Azure.Core" Version="1.47.1" />
     <PackageReference Include="Azure.Identity" Version="1.14.2" />
     <PackageReference Include="Humanizer.Core" Version="2.14.1" />
