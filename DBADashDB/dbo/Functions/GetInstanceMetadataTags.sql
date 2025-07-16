@@ -22,7 +22,8 @@ FROM (
 			CAST(AWSInstanceID AS NVARCHAR(MAX)) AS AWSInstanceID,
 			CAST(IAMRole AS NVARCHAR(MAX)) AS IAMRole,
 			CAST(VMHostName AS NVARCHAR(MAX)) AS VMHostName,
-			CAST(BillingProducts AS NVARCHAR(MAX)) AS BillingProducts
+			CAST(BillingProducts AS NVARCHAR(MAX)) AS BillingProducts,
+			CAST(ClusterName AS NVARCHAR(MAX)) AS ClusterName
 	FROM dbo.InstanceMetadata M
 	OUTER APPLY dbo.ParseInstanceMetadata(M.Metadata) P
 	WHERE M.InstanceID = @InstanceID
@@ -41,7 +42,8 @@ UNPIVOT(TagValue
 						[Provider],
 						[IAMRole],
 						[VMHostName],
-						[BillingProducts]
+						[BillingProducts],
+						[ClusterName]
 		)
 		) AS UNPVT
 
