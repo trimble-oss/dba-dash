@@ -18,8 +18,8 @@ namespace DBADash.InstanceMetadata
 
         protected const string GenericMetadata = """
             try{
-                $ClusterIP = Get-ClusterResource -name "Cluster IP Address" -ErrorAction Stop | Get-ClusterParameter -name Address -ErrorAction Stop | select-object -Property Value
-                $ClusterName = Get-ClusterResource -name "Cluster Name" -ErrorAction Stop | Get-ClusterParameter -name Name -ErrorAction Stop | select-object -Property Value
+                $ClusterIP = Get-ClusterResource -name "Cluster IP Address" -ErrorAction Stop | Get-ClusterParameter -name Address -ErrorAction Stop | select-object -ExpandProperty Value
+                $ClusterName = Get-ClusterResource -name "Cluster Name" -ErrorAction Stop | Get-ClusterParameter -name Name -ErrorAction Stop | select-object -ExpandProperty Value
                 $meta | Add-Member -MemberType NoteProperty -Name "ClusterIP" -Value $ClusterIP -Force
                 $meta | Add-Member -MemberType NoteProperty -Name "ClusterName" -Value $ClusterName -Force
             }
@@ -28,7 +28,7 @@ namespace DBADash.InstanceMetadata
             }
             try{
                 # Get IPs excluding loopback and link-local addresses
-                $IPs = @(Get-NetIPAddress | Where-Object {$_.AddressFamily -eq 'IPv4' -and $_.IPAddress -ne '127.0.0.1' -and $_.IPAddress -notlike '169.254.*' } -ErrorAction Stop | select-Object -ExpandProperty IPAddress) | Sort-Object
+                $IPs = @(Get-NetIPAddress | Where-Object {$_.AddressFamily -eq 'IPv4' -and $_.IPAddress -ne '127.0.0.1' -and $_.IPAddress -notlike '169.254.*' } -ErrorAction Stop | select-Object -ExpandProperty IPAddress | Sort-Object)
                 $meta | Add-Member -MemberType NoteProperty -Name "IPAddresses" -Value $IPs -Force
             }
             catch {

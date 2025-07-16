@@ -43,5 +43,7 @@ SELECT 	JSON_VALUE(@Metadata,'$.compute.name') AS Name,
 				STUFF((SELECT  ', ' + BP.value
 			FROM OPENJSON(@Metadata,'$.billingProducts') AS BP
 			FOR XML PATH(''),TYPE
-			).value('.','NVARCHAR(MAX)'),1,2,'') BillingProducts
+			).value('.','NVARCHAR(MAX)'),1,2,'') BillingProducts,
+		JSON_VALUE(@Metadata,'$.ClusterIP') AS ClusterIP,
+		JSON_VALUE(@Metadata,'$.ClusterName') AS ClusterName
 		

@@ -25,6 +25,8 @@ SELECT TOP(@Top)
 		P.SecurityGroups,
 		P.LocalHostname,
 		P.BillingProducts,
+		P.ClusterIP,
+		P.ClusterName,
 		M.SnapshotDate,
 		ISNULL(CD.SnapshotDate,LAG(M.PreviousVersionLastSnapshotDate) OVER (PARTITION BY M.InstanceID ORDER BY M.ValidFrom DESC)) AS LastSnapshotDate,
 		M.ValidFrom, 
