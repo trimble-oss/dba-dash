@@ -177,7 +177,7 @@ BEGIN
 			MAX(CASE WHEN calc.TransactionDurationMs<0 THEN 0 ELSE calc.TransactionDurationMs END) AS OldestTransactionMs,
 			SUM(CASE WHEN R.tempdb_alloc_page_count < R.tempdb_dealloc_page_count THEN 0 ELSE (R.tempdb_alloc_page_count - R.tempdb_dealloc_page_count) END) AS TempDBCurrentPageCount
     FROM @RunningQueriesDD R 
-    CROSS APPLY(SELECT ISNULL(total_elapsed_time,DATEDIFF_BIG(ms,ISNULL(start_time_utc,last_request_start_time_utc),R.SnapshotDateUTC)) AS Duration,
+    CROSS APPLY(SELECT ISNULL(CAST(total_elapsed_time AS BIGINT),DATEDIFF_BIG(ms,ISNULL(start_time_utc,last_request_start_time_utc),R.SnapshotDateUTC)) AS Duration,
 						DATEDIFF_BIG(ms,R.transaction_begin_time_utc,R.SnapshotDateUTC) AS TransactionDurationMs,
                         CASE WHEN wait_resource LIKE '2:%' 
 			                    OR wait_resource LIKE 'PAGE 2:%'
