@@ -4,7 +4,33 @@ SET TRAN ISOLATION LEVEL READ UNCOMMITTED
 DECLARE @DBName SYSNAME
 DECLARE @IdentSQL NVARCHAR(MAX)
 DECLARE @SQL NVARCHAR(MAX)
-SET @IdentSQL = N'SELECT DB_ID() AS database_id,
+SET @IdentSQL = N'
+/* Using a temp table which can help when the database has a large number of tables */
+SELECT IC.object_id,
+	IC.name,
+	IC.last_value,
+	IC.system_type_id,
+	IC.user_type_id,
+	IC.max_length,
+	IC.increment_value,
+	IC.seed_value
+INTO #IC
+FROM  sys.identity_columns IC
+OPTION(RECOMPILE)
+
+SELECT PS.object_id,
+		SUM(PS.row_count) row_count
+INTO #ICRowCount
+FROM sys.dm_db_partition_stats PS 
+WHERE PS.index_id < 2 -- HEAP/CLUSTERED
+AND EXISTS(SELECT 1 
+			FROM #IC T 
+			WHERE T.object_id = PS.object_id
+			)
+GROUP BY PS.object_id
+OPTION(RECOMPILE)
+
+SELECT DB_ID() AS database_id,
 	IC.object_id,
 	T.name AS object_name,
 	IC.name AS column_name,
@@ -16,7 +42,7 @@ SET @IdentSQL = N'SELECT DB_ID() AS database_id,
 	CAST(IC.increment_value AS BIGINT) AS increment_value,
 	CAST(IC.seed_value AS BIGINT) AS seed_value,
 	S.name AS schema_name
-FROM sys.identity_columns IC
+FROM #IC IC
 INNER JOIN sys.tables T ON IC.object_id = T.object_id
 INNER JOIN sys.schemas S ON T.schema_id = S.schema_id
 OUTER APPLY(SELECT	CASE IC.max_length
@@ -26,11 +52,7 @@ OUTER APPLY(SELECT	CASE IC.max_length
 					POWER(2.,IC.max_length*8) AS max_rows,
 					CAST(IC.last_value AS BIGINT) as last_value_big
 			) calc
-OUTER APPLY(SELECT SUM(PS.row_count) row_count
-			FROM sys.dm_db_partition_stats PS
-			WHERE PS.object_id = IC.object_id
-			AND PS.index_id < 2 -- HEAP/CLUSTERED
-			) RC
+LEFT JOIN #ICRowCount RC ON RC.object_id = IC.object_id
 WHERE (
 	/* last_value is more than threshold percent of the max identity value */
 	calc.last_value_big / CAST(calc.max_ident AS FLOAT) * 100 > @IdentityCollectionThreshold 
@@ -40,7 +62,7 @@ WHERE (
 	OR RC.row_count  / CAST(calc.max_rows AS FLOAT) * 100 > @IdentityCollectionThreshold 
 	)
 AND IC.max_length < 9 /* Exclude decimal types that would be larger than BIGINT and break calculations */
-ORDER BY object_name;'
+OPTION(RECOMPILE);'
 
 CREATE TABLE #ident(
     database_id SMALLINT NOT NULL,
