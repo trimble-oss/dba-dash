@@ -155,6 +155,8 @@ namespace DBADashConfig
                 SlowQueryTargetMaxMemoryKB = o.SlowQueryTargetMaxMemoryKB,
                 UseDualEventSession = o.UseDualEventSession ?? true,
                 PersistXESessions = o.PersistXESessions ?? false,
+                CollectTempDB = o.CollectTempDB ?? false,
+                CollectTranBeginTime = o.CollectTranBeginTime ?? true,
             };
             if (!o.SkipValidation)
             {
@@ -170,7 +172,7 @@ namespace DBADashConfig
             {
                 source.ConnectionID = await source.GetGeneratedConnectionIDAsync();
             }
-            else if(source.SourceConnection.Type == DBADashConnection.ConnectionType.SQL)
+            else if (source.SourceConnection.Type == DBADashConnection.ConnectionType.SQL)
             {
                 source.SetConnectionIDFromBuilderIfNotSet();
                 Log.Warning("Validation skipped & ConnectionID not specified. ConnectionID set to {ConnectionID} based on Data Source", source.ConnectionID);
@@ -188,7 +190,7 @@ namespace DBADashConfig
             }
             // check if connection exists before adding a new connection
             var oldSource = await config.FindSourceConnectionAsync(o.ConnectionString, source.ConnectionID);
-            if (oldSource!=null)
+            if (oldSource != null)
             {
                 if (o.Replace)
                 {
@@ -204,8 +206,6 @@ namespace DBADashConfig
             config.SourceConnections.Add(source);
             SaveConfig(config, o);
         }
-
-
 
         public static void ListConnections(CollectionConfig config)
         {
@@ -371,7 +371,7 @@ namespace DBADashConfig
                     {
                         source.SetConnectionIDFromBuilderIfNotSet();
                         succeeded++;
-                        Log.Warning(ex, "Error generating ConnectionID for {ConnectionString}.  Connection set to {ConnectionID} from connection string builder.", source.SourceConnection.ConnectionForPrint,source.ConnectionID);
+                        Log.Warning(ex, "Error generating ConnectionID for {ConnectionString}.  Connection set to {ConnectionID} from connection string builder.", source.SourceConnection.ConnectionForPrint, source.ConnectionID);
                     }
                     else
                     {

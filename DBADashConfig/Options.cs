@@ -103,6 +103,12 @@ PopulateConnectionID2 - Add ConnectionID to source connections without a Connect
             HelpText = "Use with action SetConfigFileBackupRetention.")]
         public int RetentionDays { get; set; }
 
+        [Option("CollectTranBeginTime", Default = true, Required = false, HelpText = "Running Queries - Collect transaction begin time")]
+        public bool? CollectTranBeginTime { get; set; }
+
+        [Option("CollectTempDB", Default = false, Required = false, HelpText = "Running Queries - Collect TempDB allocations")]
+        public bool? CollectTempDB { get; set; }
+
         public enum CommandLineActionOption
         {
             Add,

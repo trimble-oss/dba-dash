@@ -57,22 +57,30 @@ namespace DBADashConfig.Test
         }
 
         [TestMethod]
-        [DataRow("SQL1", "Data Source=SQL1;Integrated Security=SSPI", false, false)]
-        [DataRow("SQL2", "Data Source=SQL2;Integrated Security=SSPI", true, false)]
-        [DataRow("SQL3", "Data Source=SQL3;Integrated Security=SSPI", false, true)]
-        public void AddConnectionTest(string connectionID, string connectionString, bool persistXE, bool useDualSession)
+        [DataRow("SQL1", "Data Source=SQL1;Integrated Security=SSPI", false, false, true, false, true)]
+        [DataRow("SQL2", "Data Source=SQL2;Integrated Security=SSPI", true, false, false, true, false)]
+        [DataRow("SQL3", "Data Source=SQL3;Integrated Security=SSPI", false, true, false, false, true)]
+        public void AddConnectionTest(string connectionID, string connectionString, bool persistXE, bool useDualSession, bool tempdb, bool tranBeginTime, bool collectSessionWaits)
         {
             const bool skipValidation = true;
-            var psi = new ProcessStartInfo("DBADashConfig",
-                $"-a Add -c \"{connectionString}\" --PersistXESessions {persistXE} --UseDualEventSession {useDualSession} --SkipValidation {skipValidation} --ConnectionID {connectionID}");
+            var args =
+                $"-a Add -c \"{connectionString}\" --PersistXESessions {persistXE} --UseDualEventSession {useDualSession} --SkipValidation {skipValidation} --ConnectionID {connectionID} --CollectTranBeginTime {tranBeginTime} --CollectTempDB {tempdb}";
+            if (!collectSessionWaits)
+            {
+                args += " --NoCollectSessionWaits";
+            }
+            var psi = new ProcessStartInfo("DBADashConfig", args);
             Helper.RunProcess(psi);
             var json = Helper.GetConfigJson();
             var cfg = BasicConfig.Load<CollectionConfig>();
 
             var conn = cfg.SourceConnections.FirstOrDefault(c => c.ConnectionID == connectionID);
             Assert.IsNotNull(conn);
-            Assert.AreEqual(conn.UseDualEventSession, useDualSession);
-            Assert.AreEqual(conn.PersistXESessions, persistXE);
+            Assert.AreEqual(conn.UseDualEventSession, useDualSession, "Test UseDualEventSession");
+            Assert.AreEqual(conn.PersistXESessions, persistXE, "Test PersistXESessions");
+            Assert.AreEqual(conn.CollectTempDB, tempdb, "Test CollectTempDB");
+            Assert.AreEqual(conn.CollectTranBeginTime, tranBeginTime, "Test CollectTranBeginTime");
+            Assert.AreEqual(conn.CollectSessionWaits, collectSessionWaits, "Test CollectSessionWaits");
         }
 
         [TestMethod]
