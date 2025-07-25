@@ -26,7 +26,7 @@ namespace DBADashGUI
                 { 720, "12hrs" },
                 { 1440, "1 Day" },
                 { 2880, "2 Days" },
-                { 10880, "7 Days" },
+                { 10080, "7 Days" },
                 { 20160, "14 Days" }
             };
 

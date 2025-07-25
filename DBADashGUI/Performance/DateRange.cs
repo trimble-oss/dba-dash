@@ -16,7 +16,7 @@ namespace DBADashGUI.Performance
 
         public static bool CurrentDateRangeSupportsDayOfWeekFilter => DurationMins >= 10080;
 
-        public static string DateFormatString => DateRange.DurationMins < 1440 ? DBADashUser.TimeFormatString : DBADashUser.DateTimeFormatString;
+        public static string DateFormatString => TimeSpan.DateFormatString();
 
         public static TimeSpan? SelectedTimeSpan => _selectedTimeSpan;
 

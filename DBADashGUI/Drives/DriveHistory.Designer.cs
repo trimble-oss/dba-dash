@@ -35,14 +35,14 @@ namespace DBADashGUI.Drives
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             chart1 = new LiveCharts.WinForms.CartesianChart();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
+            tsRefresh = new System.Windows.Forms.ToolStripButton();
+            tsExcel = new System.Windows.Forms.ToolStripButton();
+            tsCopy = new System.Windows.Forms.ToolStripButton();
             toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             smoothLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             pointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsChart = new System.Windows.Forms.ToolStripButton();
             tsGrid = new System.Windows.Forms.ToolStripButton();
-            tsExcel = new System.Windows.Forms.ToolStripButton();
-            tsCopy = new System.Windows.Forms.ToolStripButton();
             tsClearFilter = new System.Windows.Forms.ToolStripButton();
             tsDateRange = new DateRangeToolStripMenuItem();
             lblInsufficientData = new System.Windows.Forms.Label();
@@ -65,12 +65,42 @@ namespace DBADashGUI.Drives
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripDropDownButton1, tsRefresh, tsChart, tsGrid, tsExcel, tsCopy, tsClearFilter, tsDateRange });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, toolStripDropDownButton1, tsChart, tsGrid, tsClearFilter, tsDateRange });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1134, 27);
             toolStrip1.TabIndex = 3;
             toolStrip1.Text = "toolStrip1";
+            // 
+            // tsRefresh
+            // 
+            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Name = "tsRefresh";
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Text = "Refresh";
+            tsRefresh.Click += TsRefresh_Click;
+            // 
+            // tsExcel
+            // 
+            tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsExcel.Image = Properties.Resources.excel16x16;
+            tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcel.Name = "tsExcel";
+            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Text = "Export to Excel";
+            tsExcel.Click += TsExcel_Click;
+            // 
+            // tsCopy
+            // 
+            tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopy.Name = "tsCopy";
+            tsCopy.Size = new System.Drawing.Size(29, 24);
+            tsCopy.Text = "Copy Data";
+            tsCopy.Click += TsCopy_Click;
             // 
             // toolStripDropDownButton1
             // 
@@ -100,16 +130,6 @@ namespace DBADashGUI.Drives
             pointsToolStripMenuItem.Text = "Points";
             pointsToolStripMenuItem.Click += PointsToolStripMenuItem_Click;
             // 
-            // tsRefresh
-            // 
-            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsRefresh.Name = "tsRefresh";
-            tsRefresh.Size = new System.Drawing.Size(29, 24);
-            tsRefresh.Text = "Refresh";
-            tsRefresh.Click += TsRefresh_Click;
-            // 
             // tsChart
             // 
             tsChart.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -131,26 +151,6 @@ namespace DBADashGUI.Drives
             tsGrid.Text = "View Grid";
             tsGrid.Click += TsGrid_Click;
             // 
-            // tsExcel
-            // 
-            tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsExcel.Image = Properties.Resources.excel16x16;
-            tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsExcel.Name = "tsExcel";
-            tsExcel.Size = new System.Drawing.Size(29, 24);
-            tsExcel.Text = "Export to Excel";
-            tsExcel.Click += TsExcel_Click;
-            // 
-            // tsCopy
-            // 
-            tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
-            tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsCopy.Name = "tsCopy";
-            tsCopy.Size = new System.Drawing.Size(29, 24);
-            tsCopy.Text = "Copy Data";
-            tsCopy.Click += TsCopy_Click;
-            // 
             // tsClearFilter
             // 
             tsClearFilter.Enabled = false;
@@ -165,14 +165,14 @@ namespace DBADashGUI.Drives
             tsDateRange.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             tsDateRange.DefaultTimeSpan = System.TimeSpan.Parse("7.00:00:00");
             tsDateRange.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
-            tsDateRange.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            tsDateRange.Font = new System.Drawing.Font("Segoe UI", 9F);
             tsDateRange.Image = (System.Drawing.Image)resources.GetObject("tsDateRange.Image");
             tsDateRange.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsDateRange.MaximumTimeSpan = System.TimeSpan.Parse("10675199.02:48:05.4775807");
             tsDateRange.MinimumTimeSpan = System.TimeSpan.Parse("1.00:00:00");
             tsDateRange.Name = "tsDateRange";
             tsDateRange.SelectedTimeSpan = System.TimeSpan.Parse("7.00:00:00");
-            tsDateRange.Size = new System.Drawing.Size(90, 24);
+            tsDateRange.Size = new System.Drawing.Size(87, 24);
             tsDateRange.Text = "7 Days";
             tsDateRange.DateRangeChanged += DateRangeChanged;
             // 
