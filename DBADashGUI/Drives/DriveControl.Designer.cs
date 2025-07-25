@@ -37,6 +37,7 @@
             lnkHistory = new System.Windows.Forms.LinkLabel();
             pbSpace = new CustomProgressBar();
             lblUpdated = new System.Windows.Forms.Label();
+            lnkFiles = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picStatus).BeginInit();
             SuspendLayout();
@@ -45,26 +46,27 @@
             // 
             pictureBox1.Image = Properties.Resources.Hard_Drive;
             pictureBox1.Location = new System.Drawing.Point(0, 0);
+            pictureBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new System.Drawing.Size(47, 52);
+            pictureBox1.Size = new System.Drawing.Size(54, 69);
             pictureBox1.TabIndex = 1;
             pictureBox1.TabStop = false;
             // 
             // lblDriveLabel
             // 
             lblDriveLabel.AutoSize = true;
-            lblDriveLabel.Location = new System.Drawing.Point(55, 0);
+            lblDriveLabel.Location = new System.Drawing.Point(63, 0);
             lblDriveLabel.Name = "lblDriveLabel";
-            lblDriveLabel.Size = new System.Drawing.Size(23, 15);
+            lblDriveLabel.Size = new System.Drawing.Size(27, 20);
             lblDriveLabel.TabIndex = 2;
             lblDriveLabel.Text = "C:\\";
             // 
             // lblFree
             // 
             lblFree.AutoSize = true;
-            lblFree.Location = new System.Drawing.Point(55, 44);
+            lblFree.Location = new System.Drawing.Point(63, 59);
             lblFree.Name = "lblFree";
-            lblFree.Size = new System.Drawing.Size(89, 15);
+            lblFree.Size = new System.Drawing.Size(115, 20);
             lblFree.TabIndex = 3;
             lblFree.Text = "0GB free of 0GB";
             // 
@@ -72,9 +74,9 @@
             // 
             lnkThreshold.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             lnkThreshold.AutoSize = true;
-            lnkThreshold.Location = new System.Drawing.Point(383, 0);
+            lnkThreshold.Location = new System.Drawing.Point(438, 0);
             lnkThreshold.Name = "lnkThreshold";
-            lnkThreshold.Size = new System.Drawing.Size(60, 15);
+            lnkThreshold.Size = new System.Drawing.Size(74, 20);
             lnkThreshold.TabIndex = 28;
             lnkThreshold.TabStop = true;
             lnkThreshold.Text = "Configure";
@@ -83,9 +85,10 @@
             // picStatus
             // 
             picStatus.Image = Properties.Resources.StatusAnnotations_Warning_32xLG_color;
-            picStatus.Location = new System.Drawing.Point(19, 46);
+            picStatus.Location = new System.Drawing.Point(22, 61);
+            picStatus.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             picStatus.Name = "picStatus";
-            picStatus.Size = new System.Drawing.Size(28, 30);
+            picStatus.Size = new System.Drawing.Size(32, 40);
             picStatus.TabIndex = 30;
             picStatus.TabStop = false;
             picStatus.Visible = false;
@@ -93,9 +96,9 @@
             // lblThresholds
             // 
             lblThresholds.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            lblThresholds.Location = new System.Drawing.Point(82, 0);
+            lblThresholds.Location = new System.Drawing.Point(94, 0);
             lblThresholds.Name = "lblThresholds";
-            lblThresholds.Size = new System.Drawing.Size(296, 16);
+            lblThresholds.Size = new System.Drawing.Size(338, 21);
             lblThresholds.TabIndex = 32;
             lblThresholds.Text = "Warning: 20%, Critical 10%";
             lblThresholds.TextAlign = System.Drawing.ContentAlignment.TopRight;
@@ -104,9 +107,9 @@
             // 
             lnkHistory.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             lnkHistory.AutoSize = true;
-            lnkHistory.Location = new System.Drawing.Point(398, 44);
+            lnkHistory.Location = new System.Drawing.Point(455, 59);
             lnkHistory.Name = "lnkHistory";
-            lnkHistory.Size = new System.Drawing.Size(45, 15);
+            lnkHistory.Size = new System.Drawing.Size(56, 20);
             lnkHistory.TabIndex = 33;
             lnkHistory.TabStop = true;
             lnkHistory.Text = "History";
@@ -117,10 +120,11 @@
             pbSpace.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             pbSpace.BackColor = System.Drawing.Color.RoyalBlue;
             pbSpace.ForeColor = System.Drawing.Color.LightBlue;
-            pbSpace.Location = new System.Drawing.Point(58, 19);
+            pbSpace.Location = new System.Drawing.Point(66, 25);
+            pbSpace.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             pbSpace.MarqueeAnimationSpeed = 100000000;
             pbSpace.Name = "pbSpace";
-            pbSpace.Size = new System.Drawing.Size(386, 22);
+            pbSpace.Size = new System.Drawing.Size(441, 29);
             pbSpace.TabIndex = 31;
             pbSpace.Value = 50;
             // 
@@ -130,16 +134,29 @@
             lblUpdated.AutoSize = true;
             lblUpdated.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, 0);
             lblUpdated.ForeColor = System.Drawing.Color.Black;
-            lblUpdated.Location = new System.Drawing.Point(55, 59);
+            lblUpdated.Location = new System.Drawing.Point(63, 79);
             lblUpdated.Name = "lblUpdated";
-            lblUpdated.Size = new System.Drawing.Size(121, 15);
+            lblUpdated.Size = new System.Drawing.Size(146, 20);
             lblUpdated.TabIndex = 34;
             lblUpdated.Text = "Updated minutes ago";
             // 
+            // lnkFiles
+            // 
+            lnkFiles.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            lnkFiles.AutoSize = true;
+            lnkFiles.Location = new System.Drawing.Point(411, 59);
+            lnkFiles.Name = "lnkFiles";
+            lnkFiles.Size = new System.Drawing.Size(38, 20);
+            lnkFiles.TabIndex = 35;
+            lnkFiles.TabStop = true;
+            lnkFiles.Text = "Files";
+            lnkFiles.LinkClicked += Files_LinkClicked;
+            // 
             // DriveControl
             // 
-            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            Controls.Add(lnkFiles);
             Controls.Add(lblUpdated);
             Controls.Add(lnkHistory);
             Controls.Add(lblThresholds);
@@ -149,8 +166,9 @@
             Controls.Add(lblFree);
             Controls.Add(lblDriveLabel);
             Controls.Add(pictureBox1);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             Name = "DriveControl";
-            Size = new System.Drawing.Size(446, 76);
+            Size = new System.Drawing.Size(510, 101);
             Load += DriveControl_Load;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ((System.ComponentModel.ISupportInitialize)picStatus).EndInit();
@@ -168,5 +186,6 @@
         private System.Windows.Forms.Label lblThresholds;
         private System.Windows.Forms.LinkLabel lnkHistory;
         private System.Windows.Forms.Label lblUpdated;
+        private System.Windows.Forms.LinkLabel lnkFiles;
     }
 }

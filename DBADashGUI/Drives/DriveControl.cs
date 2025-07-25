@@ -3,6 +3,7 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+using DBADashGUI.DBFiles;
 using DBADashGUI.Theme;
 using static DBADashGUI.DBADashStatus;
 
@@ -12,6 +13,7 @@ namespace DBADashGUI
     {
         public bool DisplayInstanceName { get; set; }
 
+ 
         public DriveControl()
         {
             InitializeComponent();
@@ -76,6 +78,7 @@ namespace DBADashGUI
             picStatus.Visible = (drive.DriveStatus != DBADashStatusEnum.NA);
 
             lblUpdated.Text = "Updated " + drive.SnapshotDate.ToString("yyyy-MM-dd HH:mm") + " (" + DateHelper.AppNow.Subtract(drive.SnapshotDate).TotalMinutes.ToString("N0") + "min ago)";
+            
             UpdateSnapshotStatus();
         }
 
@@ -126,13 +129,49 @@ namespace DBADashGUI
             DriveHistoryViewForm.Show();
         }
 
+        private void Files_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            ShowFilesForDrive(Drive.DriveLetter, Drive.DriveLabel, Drive.InstanceID, Drive.InstanceName, this);
+        }
+
+        public static void ShowFilesForDrive(string driveLetter,string driveLabel, int instanceID, string instanceName,Control ctrl)
+        {
+            var frm = new Form()
+            {
+                Width = ctrl.Parent?.Width ?? 500,
+                Height = ctrl.Parent?.Height ?? 500,
+            };
+            var context = CommonData.GetDBADashContext(instanceID);
+            var files = new DBFilesControl()
+            {
+                Dock = DockStyle.Fill,
+                FileLevel = true,
+                IncludeCritical = true,
+                IncludeWarning = true,
+                IncludeOK = true,
+                IncludeNA = true,
+            };
+            frm.Controls.Add(files);
+            frm.ApplyTheme();
+            frm.Load += (s, args) =>
+            {
+                files.SetContext(context, false, true);
+                files.GridFilter = $"[physical_name] LIKE '{driveLetter}%'";
+            };
+            frm.Text = $@"DB Files on drive {driveLetter} ({driveLabel}) on {instanceName}";
+            frm.ShowDialog();
+        }
+
         void IThemedControl.ApplyTheme(BaseTheme theme)
         {
             BackColor = theme.BackgroundColor;
             ForeColor = theme.ForegroundColor;
             lnkHistory.ApplyTheme(theme);
             lnkThreshold.ApplyTheme(theme);
+            lnkFiles.ApplyTheme(theme);
             UpdateSnapshotStatus();
         }
+
+
     }
 }
