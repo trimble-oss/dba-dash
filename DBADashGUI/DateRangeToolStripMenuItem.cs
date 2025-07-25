@@ -27,6 +27,8 @@ namespace DBADashGUI
         public DateTime DateFromUtc => DateFrom.AppTimeZoneToUtc();
         public DateTime DateToUtc => DateTo.AppTimeZoneToUtc();
 
+        public TimeSpan ActualTimeSpan => SelectedTimeSpan ?? DateTo.Subtract(DateFrom);
+
         public TimeSpan MinimumTimeSpan { get; set; } = TimeSpan.MinValue;
 
         public TimeSpan MaximumTimeSpan { get; set; } = TimeSpan.MaxValue;

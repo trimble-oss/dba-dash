@@ -8,7 +8,8 @@
 		@DBName SYSNAME=NULL,
 		@InstanceID INT=NULL,
 		@FileName SYSNAME=NULL,
-		@Debug BIT=0
+		@Debug BIT=0,
+		@DateGroupingMins INT=1440
 )
 AS
 IF @DatabaseID IS NULL AND @DBName IS NOT NULL
@@ -39,7 +40,8 @@ SET @SQL = N'
 WITH ss AS (
 	SELECT	F.DatabaseID,
 			SS.SnapshotDate,
-			SUM(SS.size)/128.0 AS SizeMB,SUM(SS.space_used) /128.0 AS UsedMB
+			SUM(SS.size)/128.0 AS SizeMB,
+			SUM(SS.space_used) /128.0 AS UsedMB
 	FROM dbo.DBFileSnapshot SS
 	JOIN dbo.DBFiles F ON F.FileID = SS.FileID
 	JOIN dbo.Databases D ON D.DatabaseID = F.DatabaseID
@@ -58,9 +60,13 @@ WITH ss AS (
 	GROUP BY SS.SnapshotDate,F.DatabaseID
 )
 , db as (
-	SELECT ' + CASE WHEN @GroupDatabaseID IS NULL THEN 'DatabaseID,' ELSE '' END + 'CAST(ss.SnapshotDate AS DATE) SnapshotDate,MAX(SS.SizeMB) AS SizeMB,MAX(SS.UsedMB) AS UsedMB
+	SELECT ' + CASE WHEN @GroupDatabaseID IS NULL THEN 'DatabaseID,' ELSE '' END + '
+			DG.DateGroup SnapshotDate,
+			MAX(SS.SizeMB) AS SizeMB,
+			MAX(SS.UsedMB) AS UsedMB
 	FROM ss
-	GROUP BY CAST(ss.SnapshotDate AS DATE)' + CASE WHEN @GroupDatabaseID IS NULL THEN ',DatabaseID' ELSE '' END + '
+	CROSS APPLY dbo.DateGroupingMins(ss.SnapshotDate,@DateGroupingMins) DG
+	GROUP BY DG.DateGroup' + CASE WHEN @GroupDatabaseID IS NULL THEN ',DatabaseID' ELSE '' END + '
 )
 SELECT	SnapshotDate,
 		SUM(SizeMB) AS SizeMB,
@@ -74,5 +80,5 @@ BEGIN
 	PRINT @SQL
 END
 
-EXEC sp_executesql @SQL,N'@DatabaseID INT,@FromDate DATETIME2(2),@ToDate DATETIME2(2),@FG SYSNAME,@GroupDatabaseID UNIQUEIDENTIFIER,@DataSpaceID INT,@InstanceGroupName SYSNAME,@DBName SYSNAME,@FileName SYSNAME,@InstanceID INT',
-						@DatabaseID,@FromDate,@ToDate,@FG,@GroupDatabaseID,@DataSpaceID,@InstanceGroupName,@DBName,@FileName,@InstanceID
+EXEC sp_executesql @SQL,N'@DatabaseID INT,@FromDate DATETIME2(2),@ToDate DATETIME2(2),@FG SYSNAME,@GroupDatabaseID UNIQUEIDENTIFIER,@DataSpaceID INT,@InstanceGroupName SYSNAME,@DBName SYSNAME,@FileName SYSNAME,@InstanceID INT,@DateGroupingMins INT',
+						@DatabaseID,@FromDate,@ToDate,@FG,@GroupDatabaseID,@DataSpaceID,@InstanceGroupName,@DBName,@FileName,@InstanceID,@DateGroupingMins

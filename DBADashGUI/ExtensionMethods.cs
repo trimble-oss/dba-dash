@@ -878,5 +878,35 @@ namespace DBADashGUI
             var reversedBytes = bytes.Reverse().ToArray();
             return BitConverter.ToInt64(reversedBytes, 0);
         }
+
+        public static string DateFormatString(this TimeSpan ts)
+        {
+            return ts.TotalMinutes < 1440 ? DBADashUser.TimeFormatString : DBADashUser.DateTimeFormatString;
+        }
+
+        /// <summary>
+        /// Cycles through panel visibility states: Both Visible -> Panel1 Hidden -> Panel2 Hidden -> Both Visible
+        /// </summary>
+        /// <param name="splitContainer">The SplitContainer to toggle</param>
+        public static void TogglePanels(this SplitContainer splitContainer)
+        {
+            if (!splitContainer.Panel1Collapsed && !splitContainer.Panel2Collapsed)
+            {
+                // Both visible -> Hide Panel1
+                splitContainer.Panel1Collapsed = true;
+            }
+            else if (splitContainer.Panel1Collapsed && !splitContainer.Panel2Collapsed)
+            {
+                // Panel1 hidden, Panel2 visible -> Hide Panel2, Show Panel1
+                splitContainer.Panel1Collapsed = false;
+                splitContainer.Panel2Collapsed = true;
+            }
+            else
+            {
+                // Panel2 hidden -> Show both panels
+                splitContainer.Panel1Collapsed = false;
+                splitContainer.Panel2Collapsed = false;
+            }
+        }
     }
 }

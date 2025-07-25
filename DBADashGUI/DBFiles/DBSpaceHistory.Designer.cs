@@ -31,11 +31,13 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DBSpaceHistory));
             chart1 = new LiveCharts.WinForms.CartesianChart();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
-            tsDateRange = new DateRangeToolStripMenuItem();
+            tsRefresh = new System.Windows.Forms.ToolStripButton();
+            tsCopy = new System.Windows.Forms.ToolStripButton();
+            tsExcel = new System.Windows.Forms.ToolStripButton();
+            tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
             toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             smoothLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             pointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsFileGroup = new System.Windows.Forms.ToolStripDropDownButton();
             tsFile = new System.Windows.Forms.ToolStripDropDownButton();
             tsUnits = new System.Windows.Forms.ToolStripDropDownButton();
@@ -43,8 +45,7 @@
             gBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsGrid = new System.Windows.Forms.ToolStripButton();
-            tsCopy = new System.Windows.Forms.ToolStripButton();
-            tsExcel = new System.Windows.Forms.ToolStripButton();
+            tsDateRange = new DateRangeToolStripMenuItem();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             dgv = new System.Windows.Forms.DataGridView();
             toolStrip1.SuspendLayout();
@@ -69,28 +70,50 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsDateRange, toolStripDropDownButton1, tsRefresh, tsFileGroup, tsFile, tsUnits, tsGrid, tsCopy, tsExcel });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsDateGroup, toolStripDropDownButton1, tsFileGroup, tsFile, tsUnits, tsGrid, tsDateRange });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1134, 27);
             toolStrip1.TabIndex = 3;
             toolStrip1.Text = "toolStrip1";
             // 
-            // tsDateRange
+            // tsRefresh
             // 
-            tsDateRange.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            tsDateRange.DefaultTimeSpan = System.TimeSpan.Parse("90.00:00:00");
-            tsDateRange.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
-            tsDateRange.Font = new System.Drawing.Font("Segoe UI", 9F);
-            tsDateRange.Image = (System.Drawing.Image)resources.GetObject("tsDateRange.Image");
-            tsDateRange.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsDateRange.MaximumTimeSpan = System.TimeSpan.Parse("10675199.02:48:05.4775807");
-            tsDateRange.MinimumTimeSpan = System.TimeSpan.Parse("1.00:00:00");
-            tsDateRange.Name = "tsDateRange";
-            tsDateRange.SelectedTimeSpan = System.TimeSpan.Parse("90.00:00:00");
-            tsDateRange.Size = new System.Drawing.Size(95, 24);
-            tsDateRange.Text = "90 Days";
-            tsDateRange.DateRangeChanged += DateRangeChanged;
+            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Name = "tsRefresh";
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Text = "Refresh";
+            tsRefresh.Click += TsRefresh_Click;
+            // 
+            // tsCopy
+            // 
+            tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopy.Name = "tsCopy";
+            tsCopy.Size = new System.Drawing.Size(29, 24);
+            tsCopy.Text = "Copy Grid";
+            tsCopy.Click += TsCopy_Click;
+            // 
+            // tsExcel
+            // 
+            tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsExcel.Image = Properties.Resources.excel16x16;
+            tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExcel.Name = "tsExcel";
+            tsExcel.Size = new System.Drawing.Size(29, 24);
+            tsExcel.Text = "Export to Excel";
+            tsExcel.Click += TsExcel_Click;
+            // 
+            // tsDateGroup
+            // 
+            tsDateGroup.Image = Properties.Resources.Time_16x;
+            tsDateGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsDateGroup.Name = "tsDateGroup";
+            tsDateGroup.Size = new System.Drawing.Size(120, 24);
+            tsDateGroup.Text = "Date Group";
             // 
             // toolStripDropDownButton1
             // 
@@ -121,16 +144,6 @@
             pointsToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             pointsToolStripMenuItem.Text = "Points";
             pointsToolStripMenuItem.Click += PointsToolStripMenuItem_Click;
-            // 
-            // tsRefresh
-            // 
-            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsRefresh.Name = "tsRefresh";
-            tsRefresh.Size = new System.Drawing.Size(29, 24);
-            tsRefresh.Text = "Refresh";
-            tsRefresh.Click += TsRefresh_Click;
             // 
             // tsFileGroup
             // 
@@ -193,28 +206,24 @@
             tsGrid.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsGrid.Name = "tsGrid";
             tsGrid.Size = new System.Drawing.Size(29, 24);
-            tsGrid.Text = "Toggle Grid";
+            tsGrid.Text = "Toggle Grid/Chart";
             tsGrid.Click += TsGrid_Click;
             // 
-            // tsCopy
+            // tsDateRange
             // 
-            tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
-            tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsCopy.Name = "tsCopy";
-            tsCopy.Size = new System.Drawing.Size(29, 24);
-            tsCopy.Text = "Copy Grid";
-            tsCopy.Click += TsCopy_Click;
-            // 
-            // tsExcel
-            // 
-            tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsExcel.Image = Properties.Resources.excel16x16;
-            tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsExcel.Name = "tsExcel";
-            tsExcel.Size = new System.Drawing.Size(29, 24);
-            tsExcel.Text = "Export to Excel";
-            tsExcel.Click += TsExcel_Click;
+            tsDateRange.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsDateRange.DefaultTimeSpan = System.TimeSpan.Parse("01:00:00");
+            tsDateRange.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
+            tsDateRange.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            tsDateRange.Image = (System.Drawing.Image)resources.GetObject("tsDateRange.Image");
+            tsDateRange.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsDateRange.MaximumTimeSpan = System.TimeSpan.Parse("10675199.02:48:05.4775807");
+            tsDateRange.MinimumTimeSpan = System.TimeSpan.Parse("01:00:00");
+            tsDateRange.Name = "tsDateRange";
+            tsDateRange.SelectedTimeSpan = System.TimeSpan.Parse("90.00:00:00");
+            tsDateRange.Size = new System.Drawing.Size(99, 24);
+            tsDateRange.Text = "90 Days";
+            tsDateRange.DateRangeChanged += DateRangeChanged;
             // 
             // splitContainer1
             // 
@@ -291,6 +300,7 @@
         private System.Windows.Forms.ToolStripMenuItem mBToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gBToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem tBToolStripMenuItem;
+        private System.Windows.Forms.ToolStripDropDownButton tsDateGroup;
         private DateRangeToolStripMenuItem tsDateRange;
     }
 }

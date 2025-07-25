@@ -1,5 +1,4 @@
-﻿using DBADashGUI.Performance;
-using LiveCharts;
+﻿using LiveCharts;
 using LiveCharts.Defaults;
 using LiveCharts.Wpf;
 using Microsoft.Data.SqlClient;
@@ -18,6 +17,21 @@ namespace DBADashGUI.DBFiles
         public DBSpaceHistory()
         {
             InitializeComponent();
+            DateHelper.AddDateGroups(tsDateGroup, DateGroup_Click);
+        }
+
+        private void DateGroup_Click(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            DateGroupingMins = Convert.ToInt32(ts.Tag);
+            tsDateGroup.Text = "Group:" + DateHelper.DateGroupString(DateGroupingMins);
+            RefreshData();
+        }
+
+        private void AutoSetDateGroup()
+        {
+            DateGroupingMins = DateHelper.DateGrouping((int)tsDateRange.ActualTimeSpan.TotalMinutes, PointSize > 0 ? 100 : 365);
+            tsDateGroup.Text = "Group:" + DateHelper.DateGroupString(DateGroupingMins);
         }
 
         private readonly string connectionString = Common.ConnectionString;
@@ -37,6 +51,8 @@ namespace DBADashGUI.DBFiles
                 }
             }
         }
+
+        private int DateGroupingMins;
 
         public string InstanceGroupName { get; set; }
         public string DBName { get; set; }
@@ -68,7 +84,7 @@ namespace DBADashGUI.DBFiles
             get => smoothLinesToolStripMenuItem.Checked; set => smoothLinesToolStripMenuItem.Checked = value;
         }
 
-        public string DateFormat = "yyyy-MM-dd";
+        public string DateFormat => tsDateRange.ActualTimeSpan.DateFormatString();
 
         private DateTime From => tsDateRange.DateFromUtc;
 
@@ -192,6 +208,7 @@ namespace DBADashGUI.DBFiles
             cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceGroupName", InstanceGroupName);
             cmd.Parameters.AddStringIfNotNullOrEmpty("DBName", DBName);
             cmd.Parameters.AddWithNullableValue("DataSpaceID", DataSpaceID);
+            cmd.Parameters.AddWithValue("DateGroupingMins", DateGroupingMins);
 
             if (!string.IsNullOrEmpty(FileName))
             {
@@ -245,6 +262,7 @@ namespace DBADashGUI.DBFiles
         private void DBSpaceHistory_Load(object sender, EventArgs e)
         {
             AddDgvColumns();
+            AutoSetDateGroup();
         }
 
         private void AddDgvColumns()
@@ -352,7 +370,8 @@ namespace DBADashGUI.DBFiles
 
         private void TsGrid_Click(object sender, EventArgs e)
         {
-            splitContainer1.Panel2Collapsed = !splitContainer1.Panel2Collapsed;
+            splitContainer1.TogglePanels();
+            tsGrid.Image = splitContainer1.Panel1Collapsed ? Properties.Resources.LineChart_16x : Properties.Resources.Table_16x;
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             SetPanelSize();
         }
@@ -395,6 +414,7 @@ namespace DBADashGUI.DBFiles
 
         private void DateRangeChanged(object sender, EventArgs e)
         {
+            AutoSetDateGroup();
             RefreshData();
         }
     }
