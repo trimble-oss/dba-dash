@@ -30,38 +30,39 @@ namespace DBADashGUI.DBFiles
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle47 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle48 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle34 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle35 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle36 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle37 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle38 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle39 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle40 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle41 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle42 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle43 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle44 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle45 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle46 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DBFilesControl));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle21 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle25 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle26 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle27 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle28 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle29 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle30 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle49 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle50 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle51 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle52 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle53 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle54 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle55 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle56 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle57 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle58 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle59 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle60 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle61 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle62 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle63 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle64 = new System.Windows.Forms.DataGridViewCellStyle();
             dgvFiles = new DBADashDataGridView();
             Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -145,6 +146,8 @@ namespace DBADashGUI.DBFiles
             dataGridViewTextBoxColumn29 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn30 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
+            lblStats = new System.Windows.Forms.ToolStripStatusLabel();
+            tsSep = new System.Windows.Forms.ToolStripStatusLabel();
             lblInfo = new System.Windows.Forms.ToolStripStatusLabel();
             ((System.ComponentModel.ISupportInitialize)dgvFiles).BeginInit();
             toolStrip1.SuspendLayout();
@@ -155,32 +158,41 @@ namespace DBADashGUI.DBFiles
             // 
             dgvFiles.AllowUserToAddRows = false;
             dgvFiles.AllowUserToDeleteRows = false;
+            dgvFiles.AllowUserToOrderColumns = true;
             dgvFiles.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvFiles.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle33.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle33.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle33.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle33.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle33.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle33.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle33.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvFiles.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle33;
             dgvFiles.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvFiles.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, Database, FileLevel_FileName, colType, FileLevel_PhysicalName, FileLevel_FileSizeMB, FileLevel_FileUsedMB, FileLevel_FileFreeMB, FileLevel_FilePctFree, FileLevel_Growth, FileLevel_GrowthPct, FileLevel_MaxSizeMB, FileGroup, SizeMB, FilegroupUsedMB, FilegroupFreeMB, FilegroupPctFree, FilegroupMaxSize, FilegroupPctMaxSize, FilegroupUsedPctMaxSize, NumberOfFiles, FilegroupAutogrow, ExcludedReason, MaxSizeExcludedReason, ReadOnly, DBReadOnly, Standby, State, ConfiguredLevel, FileSnapshotAge, History, Configure });
+            dataGridViewCellStyle47.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle47.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle47.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle47.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle47.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle47.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle47.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvFiles.DefaultCellStyle = dataGridViewCellStyle47;
             dgvFiles.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvFiles.EnableHeadersVisualStyles = false;
-            dgvFiles.Location = new System.Drawing.Point(0, 31);
+            dgvFiles.Location = new System.Drawing.Point(0, 27);
             dgvFiles.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvFiles.Name = "dgvFiles";
             dgvFiles.ReadOnly = true;
             dgvFiles.ResultSetID = 0;
             dgvFiles.ResultSetName = null;
-            dataGridViewCellStyle15.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle15.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle15.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle15.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle15.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle15.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvFiles.RowHeadersDefaultCellStyle = dataGridViewCellStyle15;
+            dataGridViewCellStyle48.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle48.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle48.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle48.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle48.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle48.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvFiles.RowHeadersDefaultCellStyle = dataGridViewCellStyle48;
             dgvFiles.RowHeadersVisible = false;
             dgvFiles.RowHeadersWidth = 51;
             dgvFiles.Size = new System.Drawing.Size(1616, 304);
@@ -238,8 +250,8 @@ namespace DBADashGUI.DBFiles
             // FileLevel_FileSizeMB
             // 
             FileLevel_FileSizeMB.DataPropertyName = "FileSizeMB";
-            dataGridViewCellStyle2.Format = "N1";
-            FileLevel_FileSizeMB.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle34.Format = "N1";
+            FileLevel_FileSizeMB.DefaultCellStyle = dataGridViewCellStyle34;
             FileLevel_FileSizeMB.HeaderText = "File Size (MB)";
             FileLevel_FileSizeMB.MinimumWidth = 6;
             FileLevel_FileSizeMB.Name = "FileLevel_FileSizeMB";
@@ -250,8 +262,8 @@ namespace DBADashGUI.DBFiles
             // FileLevel_FileUsedMB
             // 
             FileLevel_FileUsedMB.DataPropertyName = "FileUsedMB";
-            dataGridViewCellStyle3.Format = "N1";
-            FileLevel_FileUsedMB.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle35.Format = "N1";
+            FileLevel_FileUsedMB.DefaultCellStyle = dataGridViewCellStyle35;
             FileLevel_FileUsedMB.HeaderText = "File Used (MB)";
             FileLevel_FileUsedMB.MinimumWidth = 6;
             FileLevel_FileUsedMB.Name = "FileLevel_FileUsedMB";
@@ -262,8 +274,8 @@ namespace DBADashGUI.DBFiles
             // FileLevel_FileFreeMB
             // 
             FileLevel_FileFreeMB.DataPropertyName = "FileFreeMB";
-            dataGridViewCellStyle4.Format = "N1";
-            FileLevel_FileFreeMB.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle36.Format = "N1";
+            FileLevel_FileFreeMB.DefaultCellStyle = dataGridViewCellStyle36;
             FileLevel_FileFreeMB.HeaderText = "File Free (MB)";
             FileLevel_FileFreeMB.MinimumWidth = 6;
             FileLevel_FileFreeMB.Name = "FileLevel_FileFreeMB";
@@ -274,8 +286,8 @@ namespace DBADashGUI.DBFiles
             // FileLevel_FilePctFree
             // 
             FileLevel_FilePctFree.DataPropertyName = "FilePctFree";
-            dataGridViewCellStyle5.Format = "P1";
-            FileLevel_FilePctFree.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle37.Format = "P1";
+            FileLevel_FilePctFree.DefaultCellStyle = dataGridViewCellStyle37;
             FileLevel_FilePctFree.HeaderText = "File Free %";
             FileLevel_FilePctFree.MinimumWidth = 6;
             FileLevel_FilePctFree.Name = "FileLevel_FilePctFree";
@@ -286,8 +298,8 @@ namespace DBADashGUI.DBFiles
             // FileLevel_Growth
             // 
             FileLevel_Growth.DataPropertyName = "GrowthMB";
-            dataGridViewCellStyle6.Format = "#,##0.#";
-            FileLevel_Growth.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle38.Format = "#,##0.#";
+            FileLevel_Growth.DefaultCellStyle = dataGridViewCellStyle38;
             FileLevel_Growth.HeaderText = "Growth (MB)";
             FileLevel_Growth.MinimumWidth = 6;
             FileLevel_Growth.Name = "FileLevel_Growth";
@@ -308,8 +320,8 @@ namespace DBADashGUI.DBFiles
             // FileLevel_MaxSizeMB
             // 
             FileLevel_MaxSizeMB.DataPropertyName = "MaxSizeMB";
-            dataGridViewCellStyle7.Format = "#,##0.#";
-            FileLevel_MaxSizeMB.DefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle39.Format = "#,##0.#";
+            FileLevel_MaxSizeMB.DefaultCellStyle = dataGridViewCellStyle39;
             FileLevel_MaxSizeMB.HeaderText = "Max Size (MB)";
             FileLevel_MaxSizeMB.MinimumWidth = 6;
             FileLevel_MaxSizeMB.Name = "FileLevel_MaxSizeMB";
@@ -329,8 +341,8 @@ namespace DBADashGUI.DBFiles
             // SizeMB
             // 
             SizeMB.DataPropertyName = "FilegroupSizeMB";
-            dataGridViewCellStyle8.Format = "N1";
-            SizeMB.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle40.Format = "N1";
+            SizeMB.DefaultCellStyle = dataGridViewCellStyle40;
             SizeMB.HeaderText = "Filegroup Size (MB)";
             SizeMB.MinimumWidth = 6;
             SizeMB.Name = "SizeMB";
@@ -340,9 +352,9 @@ namespace DBADashGUI.DBFiles
             // FilegroupUsedMB
             // 
             FilegroupUsedMB.DataPropertyName = "FilegroupUsedMB";
-            dataGridViewCellStyle9.Format = "N1";
-            dataGridViewCellStyle9.NullValue = null;
-            FilegroupUsedMB.DefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewCellStyle41.Format = "N1";
+            dataGridViewCellStyle41.NullValue = null;
+            FilegroupUsedMB.DefaultCellStyle = dataGridViewCellStyle41;
             FilegroupUsedMB.HeaderText = "Filegroup Used (MB)";
             FilegroupUsedMB.MinimumWidth = 6;
             FilegroupUsedMB.Name = "FilegroupUsedMB";
@@ -352,8 +364,8 @@ namespace DBADashGUI.DBFiles
             // FilegroupFreeMB
             // 
             FilegroupFreeMB.DataPropertyName = "FilegroupFreeMB";
-            dataGridViewCellStyle10.Format = "N1";
-            FilegroupFreeMB.DefaultCellStyle = dataGridViewCellStyle10;
+            dataGridViewCellStyle42.Format = "N1";
+            FilegroupFreeMB.DefaultCellStyle = dataGridViewCellStyle42;
             FilegroupFreeMB.HeaderText = "Filegroup Free (MB)";
             FilegroupFreeMB.MinimumWidth = 6;
             FilegroupFreeMB.Name = "FilegroupFreeMB";
@@ -363,9 +375,9 @@ namespace DBADashGUI.DBFiles
             // FilegroupPctFree
             // 
             FilegroupPctFree.DataPropertyName = "FilegroupPctFree";
-            dataGridViewCellStyle11.Format = "P1";
-            dataGridViewCellStyle11.NullValue = null;
-            FilegroupPctFree.DefaultCellStyle = dataGridViewCellStyle11;
+            dataGridViewCellStyle43.Format = "P1";
+            dataGridViewCellStyle43.NullValue = null;
+            FilegroupPctFree.DefaultCellStyle = dataGridViewCellStyle43;
             FilegroupPctFree.HeaderText = "Filegroup Free %";
             FilegroupPctFree.MinimumWidth = 6;
             FilegroupPctFree.Name = "FilegroupPctFree";
@@ -375,8 +387,8 @@ namespace DBADashGUI.DBFiles
             // FilegroupMaxSize
             // 
             FilegroupMaxSize.DataPropertyName = "FilegroupMaxSizeMB";
-            dataGridViewCellStyle12.Format = "N0";
-            FilegroupMaxSize.DefaultCellStyle = dataGridViewCellStyle12;
+            dataGridViewCellStyle44.Format = "N0";
+            FilegroupMaxSize.DefaultCellStyle = dataGridViewCellStyle44;
             FilegroupMaxSize.HeaderText = "Filegroup Max Size (MB)";
             FilegroupMaxSize.MinimumWidth = 6;
             FilegroupMaxSize.Name = "FilegroupMaxSize";
@@ -386,8 +398,8 @@ namespace DBADashGUI.DBFiles
             // FilegroupPctMaxSize
             // 
             FilegroupPctMaxSize.DataPropertyName = "FilegroupPctOfMaxSize";
-            dataGridViewCellStyle13.Format = "P1";
-            FilegroupPctMaxSize.DefaultCellStyle = dataGridViewCellStyle13;
+            dataGridViewCellStyle45.Format = "P1";
+            FilegroupPctMaxSize.DefaultCellStyle = dataGridViewCellStyle45;
             FilegroupPctMaxSize.HeaderText = "Filegroup % Of Max Size";
             FilegroupPctMaxSize.MinimumWidth = 6;
             FilegroupPctMaxSize.Name = "FilegroupPctMaxSize";
@@ -397,8 +409,8 @@ namespace DBADashGUI.DBFiles
             // FilegroupUsedPctMaxSize
             // 
             FilegroupUsedPctMaxSize.DataPropertyName = "FilegroupUsedPctOfMaxSize";
-            dataGridViewCellStyle14.Format = "P1";
-            FilegroupUsedPctMaxSize.DefaultCellStyle = dataGridViewCellStyle14;
+            dataGridViewCellStyle46.Format = "P1";
+            FilegroupUsedPctMaxSize.DefaultCellStyle = dataGridViewCellStyle46;
             FilegroupUsedPctMaxSize.HeaderText = "Filegroup Used % Max Size";
             FilegroupUsedPctMaxSize.MinimumWidth = 6;
             FilegroupUsedPctMaxSize.Name = "FilegroupUsedPctMaxSize";
@@ -525,7 +537,7 @@ namespace DBADashGUI.DBFiles
             toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, statusFilterToolStrip1, tsConfigure, tsLevel, tsType, tsTrigger, tsClearFilter });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new System.Drawing.Size(1616, 31);
+            toolStrip1.Size = new System.Drawing.Size(1616, 27);
             toolStrip1.TabIndex = 3;
             toolStrip1.Text = "toolStrip1";
             // 
@@ -535,7 +547,7 @@ namespace DBADashGUI.DBFiles
             tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsRefresh.Name = "tsRefresh";
-            tsRefresh.Size = new System.Drawing.Size(29, 28);
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
             tsRefresh.Text = "Refresh";
             tsRefresh.Click += TsRefresh_Click;
             // 
@@ -545,7 +557,7 @@ namespace DBADashGUI.DBFiles
             tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCopy.Name = "tsCopy";
-            tsCopy.Size = new System.Drawing.Size(29, 28);
+            tsCopy.Size = new System.Drawing.Size(29, 24);
             tsCopy.Text = "Copy";
             tsCopy.Click += TsCopy_Click;
             // 
@@ -555,7 +567,7 @@ namespace DBADashGUI.DBFiles
             tsExcel.Image = Properties.Resources.excel16x16;
             tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExcel.Name = "tsExcel";
-            tsExcel.Size = new System.Drawing.Size(29, 28);
+            tsExcel.Size = new System.Drawing.Size(29, 24);
             tsExcel.Text = "Export Excel";
             tsExcel.Click += TsExcel_Click;
             // 
@@ -574,7 +586,7 @@ namespace DBADashGUI.DBFiles
             statusFilterToolStrip1.NAVisible = true;
             statusFilterToolStrip1.OK = true;
             statusFilterToolStrip1.OKVisible = true;
-            statusFilterToolStrip1.Size = new System.Drawing.Size(67, 28);
+            statusFilterToolStrip1.Size = new System.Drawing.Size(67, 24);
             statusFilterToolStrip1.Text = "ALL";
             statusFilterToolStrip1.Warning = true;
             statusFilterToolStrip1.WarningVisible = true;
@@ -587,7 +599,7 @@ namespace DBADashGUI.DBFiles
             tsConfigure.Image = Properties.Resources.SettingsOutline_16x;
             tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsConfigure.Name = "tsConfigure";
-            tsConfigure.Size = new System.Drawing.Size(34, 28);
+            tsConfigure.Size = new System.Drawing.Size(34, 24);
             tsConfigure.Text = "Configure";
             // 
             // configureDatabaseThresholdsToolStripMenuItem
@@ -618,7 +630,7 @@ namespace DBADashGUI.DBFiles
             tsLevel.Image = (System.Drawing.Image)resources.GetObject("tsLevel.Image");
             tsLevel.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsLevel.Name = "tsLevel";
-            tsLevel.Size = new System.Drawing.Size(57, 28);
+            tsLevel.Size = new System.Drawing.Size(57, 24);
             tsLevel.Text = "Level";
             // 
             // tsFilegroup
@@ -645,7 +657,7 @@ namespace DBADashGUI.DBFiles
             tsType.Image = (System.Drawing.Image)resources.GetObject("tsType.Image");
             tsType.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsType.Name = "tsType";
-            tsType.Size = new System.Drawing.Size(54, 28);
+            tsType.Size = new System.Drawing.Size(54, 24);
             tsType.Text = "Type";
             // 
             // rOWSToolStripMenuItem
@@ -698,7 +710,7 @@ namespace DBADashGUI.DBFiles
             tsTrigger.Image = Properties.Resources.ProjectSystemModelRefresh_16x;
             tsTrigger.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsTrigger.Name = "tsTrigger";
-            tsTrigger.Size = new System.Drawing.Size(151, 28);
+            tsTrigger.Size = new System.Drawing.Size(151, 24);
             tsTrigger.Text = "Trigger Collection";
             tsTrigger.Visible = false;
             tsTrigger.Click += TsTrigger_Click;
@@ -709,7 +721,7 @@ namespace DBADashGUI.DBFiles
             tsClearFilter.Image = Properties.Resources.Eraser_16x;
             tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsClearFilter.Name = "tsClearFilter";
-            tsClearFilter.Size = new System.Drawing.Size(104, 28);
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
             tsClearFilter.Text = "Clear Filter";
             // 
             // dataGridViewTextBoxColumn1
@@ -753,8 +765,8 @@ namespace DBADashGUI.DBFiles
             // dataGridViewTextBoxColumn5
             // 
             dataGridViewTextBoxColumn5.DataPropertyName = "FileSizeMB";
-            dataGridViewCellStyle16.Format = "N1";
-            dataGridViewTextBoxColumn5.DefaultCellStyle = dataGridViewCellStyle16;
+            dataGridViewCellStyle49.Format = "N1";
+            dataGridViewTextBoxColumn5.DefaultCellStyle = dataGridViewCellStyle49;
             dataGridViewTextBoxColumn5.HeaderText = "File Size (MB)";
             dataGridViewTextBoxColumn5.MinimumWidth = 6;
             dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
@@ -765,8 +777,8 @@ namespace DBADashGUI.DBFiles
             // dataGridViewTextBoxColumn6
             // 
             dataGridViewTextBoxColumn6.DataPropertyName = "FileUsedMB";
-            dataGridViewCellStyle17.Format = "N1";
-            dataGridViewTextBoxColumn6.DefaultCellStyle = dataGridViewCellStyle17;
+            dataGridViewCellStyle50.Format = "N1";
+            dataGridViewTextBoxColumn6.DefaultCellStyle = dataGridViewCellStyle50;
             dataGridViewTextBoxColumn6.HeaderText = "File Used (MB)";
             dataGridViewTextBoxColumn6.MinimumWidth = 6;
             dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
@@ -777,8 +789,8 @@ namespace DBADashGUI.DBFiles
             // dataGridViewTextBoxColumn7
             // 
             dataGridViewTextBoxColumn7.DataPropertyName = "FileFreeMB";
-            dataGridViewCellStyle18.Format = "N1";
-            dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle18;
+            dataGridViewCellStyle51.Format = "N1";
+            dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle51;
             dataGridViewTextBoxColumn7.HeaderText = "File Free (MB)";
             dataGridViewTextBoxColumn7.MinimumWidth = 6;
             dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
@@ -789,8 +801,8 @@ namespace DBADashGUI.DBFiles
             // dataGridViewTextBoxColumn8
             // 
             dataGridViewTextBoxColumn8.DataPropertyName = "FilePctFree";
-            dataGridViewCellStyle19.Format = "P1";
-            dataGridViewTextBoxColumn8.DefaultCellStyle = dataGridViewCellStyle19;
+            dataGridViewCellStyle52.Format = "P1";
+            dataGridViewTextBoxColumn8.DefaultCellStyle = dataGridViewCellStyle52;
             dataGridViewTextBoxColumn8.HeaderText = "File Free %";
             dataGridViewTextBoxColumn8.MinimumWidth = 6;
             dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
@@ -801,8 +813,8 @@ namespace DBADashGUI.DBFiles
             // dataGridViewTextBoxColumn9
             // 
             dataGridViewTextBoxColumn9.DataPropertyName = "GrowthMB";
-            dataGridViewCellStyle20.Format = "#,##0.#";
-            dataGridViewTextBoxColumn9.DefaultCellStyle = dataGridViewCellStyle20;
+            dataGridViewCellStyle53.Format = "#,##0.#";
+            dataGridViewTextBoxColumn9.DefaultCellStyle = dataGridViewCellStyle53;
             dataGridViewTextBoxColumn9.HeaderText = "Growth (MB)";
             dataGridViewTextBoxColumn9.MinimumWidth = 6;
             dataGridViewTextBoxColumn9.Name = "dataGridViewTextBoxColumn9";
@@ -813,8 +825,8 @@ namespace DBADashGUI.DBFiles
             // dataGridViewTextBoxColumn10
             // 
             dataGridViewTextBoxColumn10.DataPropertyName = "MaxSizeMB";
-            dataGridViewCellStyle21.Format = "#,##0.#";
-            dataGridViewTextBoxColumn10.DefaultCellStyle = dataGridViewCellStyle21;
+            dataGridViewCellStyle54.Format = "#,##0.#";
+            dataGridViewTextBoxColumn10.DefaultCellStyle = dataGridViewCellStyle54;
             dataGridViewTextBoxColumn10.HeaderText = "Max Size (MB)";
             dataGridViewTextBoxColumn10.MinimumWidth = 6;
             dataGridViewTextBoxColumn10.Name = "dataGridViewTextBoxColumn10";
@@ -825,8 +837,8 @@ namespace DBADashGUI.DBFiles
             // dataGridViewTextBoxColumn11
             // 
             dataGridViewTextBoxColumn11.DataPropertyName = "filegroup_name";
-            dataGridViewCellStyle22.Format = "#,##0.#";
-            dataGridViewTextBoxColumn11.DefaultCellStyle = dataGridViewCellStyle22;
+            dataGridViewCellStyle55.Format = "#,##0.#";
+            dataGridViewTextBoxColumn11.DefaultCellStyle = dataGridViewCellStyle55;
             dataGridViewTextBoxColumn11.HeaderText = "Filegroup";
             dataGridViewTextBoxColumn11.MinimumWidth = 6;
             dataGridViewTextBoxColumn11.Name = "dataGridViewTextBoxColumn11";
@@ -837,8 +849,8 @@ namespace DBADashGUI.DBFiles
             // dataGridViewTextBoxColumn12
             // 
             dataGridViewTextBoxColumn12.DataPropertyName = "FilegroupSizeMB";
-            dataGridViewCellStyle23.Format = "N1";
-            dataGridViewTextBoxColumn12.DefaultCellStyle = dataGridViewCellStyle23;
+            dataGridViewCellStyle56.Format = "N1";
+            dataGridViewTextBoxColumn12.DefaultCellStyle = dataGridViewCellStyle56;
             dataGridViewTextBoxColumn12.HeaderText = "Filegroup Size (MB)";
             dataGridViewTextBoxColumn12.MinimumWidth = 6;
             dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
@@ -849,9 +861,9 @@ namespace DBADashGUI.DBFiles
             // dataGridViewTextBoxColumn13
             // 
             dataGridViewTextBoxColumn13.DataPropertyName = "FilegroupUsedMB";
-            dataGridViewCellStyle24.Format = "N1";
-            dataGridViewCellStyle24.NullValue = null;
-            dataGridViewTextBoxColumn13.DefaultCellStyle = dataGridViewCellStyle24;
+            dataGridViewCellStyle57.Format = "N1";
+            dataGridViewCellStyle57.NullValue = null;
+            dataGridViewTextBoxColumn13.DefaultCellStyle = dataGridViewCellStyle57;
             dataGridViewTextBoxColumn13.HeaderText = "Filegroup Used (MB)";
             dataGridViewTextBoxColumn13.MinimumWidth = 6;
             dataGridViewTextBoxColumn13.Name = "dataGridViewTextBoxColumn13";
@@ -861,8 +873,8 @@ namespace DBADashGUI.DBFiles
             // dataGridViewTextBoxColumn14
             // 
             dataGridViewTextBoxColumn14.DataPropertyName = "FilegroupFreeMB";
-            dataGridViewCellStyle25.Format = "N1";
-            dataGridViewTextBoxColumn14.DefaultCellStyle = dataGridViewCellStyle25;
+            dataGridViewCellStyle58.Format = "N1";
+            dataGridViewTextBoxColumn14.DefaultCellStyle = dataGridViewCellStyle58;
             dataGridViewTextBoxColumn14.HeaderText = "Filegroup Free (MB)";
             dataGridViewTextBoxColumn14.MinimumWidth = 6;
             dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
@@ -872,9 +884,9 @@ namespace DBADashGUI.DBFiles
             // dataGridViewTextBoxColumn15
             // 
             dataGridViewTextBoxColumn15.DataPropertyName = "FilegroupPctFree";
-            dataGridViewCellStyle26.Format = "P1";
-            dataGridViewCellStyle26.NullValue = null;
-            dataGridViewTextBoxColumn15.DefaultCellStyle = dataGridViewCellStyle26;
+            dataGridViewCellStyle59.Format = "P1";
+            dataGridViewCellStyle59.NullValue = null;
+            dataGridViewTextBoxColumn15.DefaultCellStyle = dataGridViewCellStyle59;
             dataGridViewTextBoxColumn15.HeaderText = "Filegroup Free %";
             dataGridViewTextBoxColumn15.MinimumWidth = 6;
             dataGridViewTextBoxColumn15.Name = "dataGridViewTextBoxColumn15";
@@ -884,9 +896,9 @@ namespace DBADashGUI.DBFiles
             // dataGridViewTextBoxColumn16
             // 
             dataGridViewTextBoxColumn16.DataPropertyName = "FilegroupNumberOfFiles";
-            dataGridViewCellStyle27.Format = "P1";
-            dataGridViewCellStyle27.NullValue = null;
-            dataGridViewTextBoxColumn16.DefaultCellStyle = dataGridViewCellStyle27;
+            dataGridViewCellStyle60.Format = "P1";
+            dataGridViewCellStyle60.NullValue = null;
+            dataGridViewTextBoxColumn16.DefaultCellStyle = dataGridViewCellStyle60;
             dataGridViewTextBoxColumn16.HeaderText = "Filegroup Number of Files";
             dataGridViewTextBoxColumn16.MinimumWidth = 6;
             dataGridViewTextBoxColumn16.Name = "dataGridViewTextBoxColumn16";
@@ -896,8 +908,8 @@ namespace DBADashGUI.DBFiles
             // dataGridViewTextBoxColumn17
             // 
             dataGridViewTextBoxColumn17.DataPropertyName = "ExcludedReason";
-            dataGridViewCellStyle28.Format = "N0";
-            dataGridViewTextBoxColumn17.DefaultCellStyle = dataGridViewCellStyle28;
+            dataGridViewCellStyle61.Format = "N0";
+            dataGridViewTextBoxColumn17.DefaultCellStyle = dataGridViewCellStyle61;
             dataGridViewTextBoxColumn17.HeaderText = "Excluded Reason";
             dataGridViewTextBoxColumn17.MinimumWidth = 6;
             dataGridViewTextBoxColumn17.Name = "dataGridViewTextBoxColumn17";
@@ -907,8 +919,8 @@ namespace DBADashGUI.DBFiles
             // dataGridViewTextBoxColumn18
             // 
             dataGridViewTextBoxColumn18.DataPropertyName = "is_read_only";
-            dataGridViewCellStyle29.Format = "P1";
-            dataGridViewTextBoxColumn18.DefaultCellStyle = dataGridViewCellStyle29;
+            dataGridViewCellStyle62.Format = "P1";
+            dataGridViewTextBoxColumn18.DefaultCellStyle = dataGridViewCellStyle62;
             dataGridViewTextBoxColumn18.HeaderText = "Read Only";
             dataGridViewTextBoxColumn18.MinimumWidth = 6;
             dataGridViewTextBoxColumn18.Name = "dataGridViewTextBoxColumn18";
@@ -918,8 +930,8 @@ namespace DBADashGUI.DBFiles
             // dataGridViewTextBoxColumn19
             // 
             dataGridViewTextBoxColumn19.DataPropertyName = "is_db_read_only";
-            dataGridViewCellStyle30.Format = "P1";
-            dataGridViewTextBoxColumn19.DefaultCellStyle = dataGridViewCellStyle30;
+            dataGridViewCellStyle63.Format = "P1";
+            dataGridViewTextBoxColumn19.DefaultCellStyle = dataGridViewCellStyle63;
             dataGridViewTextBoxColumn19.HeaderText = "DB ReadOnly";
             dataGridViewTextBoxColumn19.MinimumWidth = 6;
             dataGridViewTextBoxColumn19.Name = "dataGridViewTextBoxColumn19";
@@ -929,8 +941,8 @@ namespace DBADashGUI.DBFiles
             // dataGridViewTextBoxColumn20
             // 
             dataGridViewTextBoxColumn20.DataPropertyName = "is_in_standby";
-            dataGridViewCellStyle31.Format = "P1";
-            dataGridViewTextBoxColumn20.DefaultCellStyle = dataGridViewCellStyle31;
+            dataGridViewCellStyle64.Format = "P1";
+            dataGridViewTextBoxColumn20.DefaultCellStyle = dataGridViewCellStyle64;
             dataGridViewTextBoxColumn20.HeaderText = "Standby";
             dataGridViewTextBoxColumn20.MinimumWidth = 6;
             dataGridViewTextBoxColumn20.Name = "dataGridViewTextBoxColumn20";
@@ -1024,18 +1036,30 @@ namespace DBADashGUI.DBFiles
             // statusStrip1
             // 
             statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { lblInfo });
-            statusStrip1.Location = new System.Drawing.Point(0, 335);
+            statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { lblStats, tsSep, lblInfo });
+            statusStrip1.Location = new System.Drawing.Point(0, 331);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 16, 0);
-            statusStrip1.Size = new System.Drawing.Size(1616, 22);
+            statusStrip1.Size = new System.Drawing.Size(1616, 26);
             statusStrip1.TabIndex = 4;
             statusStrip1.Text = "statusStrip1";
+            // 
+            // lblStats
+            // 
+            lblStats.Name = "lblStats";
+            lblStats.Size = new System.Drawing.Size(51, 20);
+            lblStats.Text = "{Stats}";
+            // 
+            // tsSep
+            // 
+            tsSep.Name = "tsSep";
+            tsSep.Size = new System.Drawing.Size(13, 20);
+            tsSep.Text = "|";
             // 
             // lblInfo
             // 
             lblInfo.Name = "lblInfo";
-            lblInfo.Size = new System.Drawing.Size(0, 16);
+            lblInfo.Size = new System.Drawing.Size(0, 20);
             // 
             // DBFilesControl
             // 
@@ -1142,5 +1166,7 @@ namespace DBADashGUI.DBFiles
         private System.Windows.Forms.ToolStripStatusLabel lblInfo;
         private System.Windows.Forms.ToolStripButton tsTrigger;
         private System.Windows.Forms.ToolStripButton tsClearFilter;
+        private System.Windows.Forms.ToolStripStatusLabel lblStats;
+        private System.Windows.Forms.ToolStripStatusLabel tsSep;
     }
 }

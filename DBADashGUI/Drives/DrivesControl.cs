@@ -132,6 +132,8 @@ namespace DBADashGUI.Drives
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ChangedDriveSize30Days", DataPropertyName = "ChangeDriveSize30Days", HeaderText = "Drive Size 30 Days Change (GB+-)", Width = 100, AutoSizeMode = DataGridViewAutoSizeColumnMode.None, DefaultCellStyle = new DataGridViewCellStyle() { Format = "+#,##0.0GB;-#,##0.0GB;-" } });
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ChangedDriveSize90Days", DataPropertyName = "ChangeDriveSize90Days", HeaderText = "Drive Size 90 Days Change (GB+-)", Width = 100, AutoSizeMode = DataGridViewAutoSizeColumnMode.None, DefaultCellStyle = new DataGridViewCellStyle() { Format = "+#,##0.0GB;-#,##0.0GB;-" } });
             }
+
+            dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "Files", HeaderText = "Files", UseColumnTextForLinkValue = true, Text = "Files", LinkColor = DashColors.LinkColor });
             dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "History", HeaderText = "History", UseColumnTextForLinkValue = true, Text = "History", LinkColor = DashColors.LinkColor });
             dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "Configure", HeaderText = "Configure", UseColumnTextForLinkValue = true, Text = "Configure", LinkColor = DashColors.LinkColor });
             dgv.CellContentClick += Dgv_CellContentClick;
@@ -178,23 +180,32 @@ namespace DBADashGUI.Drives
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex < 0) return;
+            var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+            var label = (row["Label"] == DBNull.Value ? "" : (string)row["Label"]);
+            var instanceId = (int)row["InstanceID"];
+            var driveId = (int)row["DriveID"];
+            var instanceName = (string)row["InstanceDisplayName"];
+            var driveLetter = (string)row["Name"];
+
+            switch (dgv.Columns[e.ColumnIndex].Name)
             {
-                if (dgv.Columns[e.ColumnIndex].Name == "Configure")
+                case "Configure":
+                    Configure(instanceId, driveId);
+                    break;
+                case "History":
                 {
-                    var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                    Configure((int)row["InstanceID"], (int)row["DriveID"]);
-                }
-                else if (dgv.Columns[e.ColumnIndex].Name == "History")
-                {
-                    var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
                     var frm = new DriveHistoryView
                     {
                         DriveID = (int)row["DriveID"],
-                        Text = row["Instance"] + " | " + (string)row["Name"] + " " + (row["Label"] == DBNull.Value ? "" : (string)row["Label"])
+                        Text = @$"{instanceName} | {driveLetter} {label}"
                     };
                     frm.Show();
+                    break;
                 }
+                case "Files":
+                    DriveControl.ShowFilesForDrive(driveLetter, label, instanceId, instanceName,this);
+                    break;
             }
         }
 

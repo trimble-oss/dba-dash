@@ -1,16 +1,16 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADash;
+using DBADashGUI.Interface;
+using DBADashGUI.Messaging;
+using DBADashGUI.Theme;
+using Humanizer;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using DBADash;
-using DBADashGUI.Interface;
-using DBADashGUI.Theme;
-using Humanizer;
 using static DBADashGUI.DBADashStatus;
-using DBADashGUI.Messaging;
 
 namespace DBADashGUI.DBFiles
 {
@@ -20,12 +20,25 @@ namespace DBADashGUI.DBFiles
         {
             InitializeComponent();
             dgvFiles.RegisterClearFilter(tsClearFilter);
+            dgvFiles.GridFilterChanged += (sender, e) => UpdateTotals();
         }
 
+        public bool FileLevel
+        {
+            get => tsFile.Checked;
+            set
+            {
+                tsFile.Checked = value;
+                tsFilegroup.Checked = !value;
+            }
+        }
+
+        private const int RefreshOnReloadThreshold = 20; // minutes
         private List<int> InstanceIDs => CurrentContext?.InstanceIDs.ToList();
         private int? DatabaseID => (CurrentContext?.DatabaseID > 0 ? CurrentContext?.DatabaseID : null);
         private string DriveName => CurrentContext?.DriveName;
         private DBADashContext CurrentContext;
+        private DateTime LastRefresh = DateTime.MinValue;
 
         public bool IncludeCritical
         {
@@ -51,6 +64,12 @@ namespace DBADashGUI.DBFiles
 
         public bool IsFileGroupLevel => tsFilegroup.Checked && tsLevel.Visible;
 
+        public string GridFilter
+        {
+            get => dgvFiles.RowFilter;
+            set => dgvFiles.SetFilter(value);
+        }
+
         private DataTable GetDBFiles()
         {
             var selectedTypes = FileTypes;
@@ -74,20 +93,42 @@ namespace DBADashGUI.DBFiles
             return dt;
         }
 
-        public void SetContext(DBADashContext _context)
+        public void SetContext(DBADashContext _context, bool resetFilters, bool refreshData)
         {
-            IncludeCritical = true;
-            IncludeWarning = true;
-            IncludeNA = DatabaseID != null || _context.DriveName != null;
-            IncludeOK = DatabaseID != null || _context.DriveName != null;
-            tsLevel.Visible = _context.DriveName == null;
+            SetStatus(string.Empty, string.Empty, ThemeExtensions.CurrentTheme.ForegroundColor);
+            if (resetFilters)
+            {
+                dgvFiles.SetFilter(string.Empty);
+                IncludeCritical = true;
+                IncludeWarning = true;
+                IncludeNA = DatabaseID != null || _context.DriveName != null;
+                IncludeOK = DatabaseID != null || _context.DriveName != null;
+                tsLevel.Visible = _context.DriveName == null;
+            }
             CurrentContext = _context;
             tsTrigger.Visible = _context.CanMessage;
-            RefreshData();
+            if (refreshData)
+            {
+                RefreshData();
+            }
+        }
+
+        public void SetContext(DBADashContext _context)
+        {
+            if (_context == CurrentContext)
+            {
+                if (DateTime.UtcNow.Subtract(LastRefresh).TotalMinutes > RefreshOnReloadThreshold)
+                {
+                    RefreshData();
+                }
+                return;
+            }
+            SetContext(_context, true, true);
         }
 
         public void RefreshData()
         {
+            var filter = dgvFiles.RowFilter;
             ToggleFileLevel(!IsFileGroupLevel);
             var dt = GetDBFiles();
             Invoke(() =>
@@ -99,13 +140,18 @@ namespace DBADashGUI.DBFiles
 
                 configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
                 configureDatabaseThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1 && DatabaseID > 0;
-
+                if (!string.IsNullOrEmpty(filter))
+                {
+                    dgvFiles.SetFilter(filter);
+                }
                 UpdateTotals();
+                LastRefresh = DateTime.UtcNow;
             });
         }
 
         public void SetStatus(string message, string tooltip, Color color)
         {
+            tsSep.Visible = !string.IsNullOrEmpty(message);
             lblInfo.InvokeSetStatus(message, tooltip, color);
         }
 
@@ -133,7 +179,7 @@ namespace DBADashGUI.DBFiles
                     .Where(row => !row.IsNewRow && row.Cells["FileLevel_FileSizeMB"].Value != null)
                     .Sum(row => Convert.ToDouble(row.Cells["FileLevel_FileSizeMB"].Value.ToString()));
             }
-            SetStatus($"File Count {totalFiles}. Total Size: {totalSize.Megabytes()}", "", ThemeExtensions.CurrentTheme.ForegroundColor);
+            lblStats.InvokeSetStatus($"File Count {totalFiles}. Total Size: {totalSize.Megabytes()}", "", ThemeExtensions.CurrentTheme.ForegroundColor);
         }
 
         private void Status_Selected(object sender, EventArgs e)
