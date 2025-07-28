@@ -6,13 +6,14 @@ on:
 
 jobs:
   build:
-    name: Build
+    name: Build & Test (SQL ${{ matrix.sql-version }})
     runs-on: windows-latest
 
     strategy:
       fail-fast: false
       matrix:
         language: [csharp]
+        sql-version: [2016, 2017, 2019, 2022]
 
     steps:
       - name: Checkout repository
@@ -65,10 +66,11 @@ jobs:
           $guiZipPath = "DBADash_GUI_Only_${{steps.GetVersion.outputs.BUILD_NUMBER}}.zip"
           Compress-Archive -Path "DBADashBuild\DBADashGUIOnly\*" -DestinationPath $guiZipPath
 
-      - name: Install SQL
-        uses: potatoqualitee/mssqlsuite@v1.7
+      - name: Install SQL Server ${{ matrix.sql-version }}
+        uses: potatoqualitee/mssqlsuite@v1.10
         with:
           install: sqlengine
+          version: ${{ matrix.sql-version }}
           collation: Latin1_General_BIN
 
       - name: Check SQL Install
