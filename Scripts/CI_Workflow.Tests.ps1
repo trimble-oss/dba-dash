@@ -3,6 +3,99 @@ param(
 	[string]$Server = "LOCALHOST"
 )
 
+# Get SQL Server version at the script level
+$params = @{
+    ServerInstance = $Server
+    Database = $Database
+}
+
+$versionQuery = "SELECT SERVERPROPERTY('ProductVersion') AS Version, SERVERPROPERTY('ProductMajorVersion') AS MajorVersion"
+$versionResult = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query $versionQuery
+$majorVersion = [int]$versionResult.MajorVersion
+$isSql2016OrLower = $majorVersion -le 13
+
+Write-Host "Detected SQL Server Major Version: $majorVersion" -ForegroundColor Yellow
+Write-Host "Is SQL Server 2016 or lower: $isSql2016OrLower" -ForegroundColor Yellow
+
+# Build the test cases array dynamically based on SQL version
+$TableCountGreaterThanZeroTestCases = @(
+      @{TableName="dbo.AgentJobThresholds"}
+      @{TableName="dbo.AzureDBElasticPoolStorageThresholds"}
+      @{TableName="dbo.BackupThresholds"}
+      @{TableName="dbo.CollectionDates"}
+      @{TableName="dbo.CollectionDatesThresholds"}
+      @{TableName="dbo.CounterMapping"}
+      @{TableName="dbo.Counters"}
+      @{TableName="dbo.CPU"}
+      @{TableName="dbo.CPU_60MIN"}
+      @{TableName="dbo.DatabasePermissions"}
+      @{TableName="dbo.DatabasePrincipals"}
+      @{TableName="dbo.DatabaseQueryStoreOptions"}
+      @{TableName="dbo.DatabaseRoleMembers"}
+      @{TableName="dbo.Databases"}
+      @{TableName="dbo.DataRetention"}
+      @{TableName="dbo.DBADashAgent"}
+      @{TableName="dbo.DBConfig"}
+      @{TableName="dbo.DBConfigOptions"}
+      @{TableName="dbo.DBFiles"}
+      @{TableName="dbo.DBFileSnapshot"}
+      @{TableName="dbo.DBFileThresholds"}
+      @{TableName="dbo.DBIOStats"}
+      @{TableName="dbo.DBIOStats_60MIN"}
+      @{TableName="dbo.DBObjects"}
+      @{TableName="dbo.DBVersionHistory"}
+      @{TableName="dbo.DDL"}
+	  @{TableName="dbo.DDLHistory"}
+	  @{TableName="dbo.DDLSnapshotOptions"}
+	  @{TableName="dbo.DDLSnapshots"}
+	  @{TableName="dbo.DDLSnapshotsLog"}
+      @{TableName="dbo.Drives"}
+      @{TableName="dbo.DriveThresholds"}
+      @{TableName="dbo.InstanceCounters"}
+      @{TableName="dbo.InstanceIDsTags"}
+      @{TableName="dbo.Instances"}
+      @{TableName="dbo.InstanceUptimeThresholds"}
+      @{TableName="dbo.JobDDLHistory"}
+      @{TableName="dbo.Jobs"}
+      @{TableName="dbo.JobSteps"}
+      @{TableName="dbo.LastGoodCheckDBThresholds"}
+      @{TableName="dbo.LogRestoreThresholds"}
+      @{TableName="dbo.MemoryClerkType"}
+      @{TableName="dbo.MemoryUsage"}
+      @{TableName="dbo.ObjectExecutionStats"}
+      @{TableName="dbo.ObjectExecutionStats_60MIN"}
+      @{TableName="dbo.ObjectType"}
+      @{TableName="dbo.OSLoadedModules"}
+      @{TableName="dbo.OSLoadedModulesStatus"}
+      @{TableName="dbo.PerformanceCounters"}
+      @{TableName="dbo.PerformanceCounters_60MIN"}
+      @{TableName="dbo.ResourceGovernorConfigurationHistory"}
+      @{TableName="dbo.RunningQueriesSummary"}
+      @{TableName="dbo.ServerPermissions"}
+      @{TableName="dbo.ServerPrincipals"}
+      @{TableName="dbo.ServerRoleMembers"}
+      @{TableName="dbo.SessionWaits"}
+      @{TableName="dbo.Settings"}
+      @{TableName="dbo.SysConfig"}
+      @{TableName="dbo.SysConfigOptions"}
+      @{TableName="dbo.Tags"}
+      @{TableName="dbo.Waits"}
+      @{TableName="dbo.Waits_60MIN"}
+      @{TableName="dbo.WaitType"}
+	  @{TableName="dbo.BuildReference"}
+	  @{TableName="dbo.IdentityColumns"}
+	  @{TableName="dbo.ServerServices"}
+)
+
+# Only add SQL Server 2017+ tables if not SQL Server 2016 or lower
+if (-not $isSql2016OrLower) {
+    Write-Host "Adding SQL Server 2017+ tables to test cases" -ForegroundColor Green
+    $TableCountGreaterThanZeroTestCases += @{TableName="dbo.DBTuningOptions"}
+    $TableCountGreaterThanZeroTestCases += @{TableName="dbo.DBTuningOptionsHistory"}
+} else {
+    Write-Host "Excluding SQL Server 2017+ tables (DBTuningOptions, DBTuningOptionsHistory) for SQL Server 2016 or earlier" -ForegroundColor Yellow
+}
+
 Describe 'CI Workflow checks' {
     BeforeEach {
             $params = @{
@@ -24,76 +117,6 @@ Describe 'CI Workflow checks' {
          $results.cnt  | Should -BeGreaterThan 0
     }
    
-    $TableCountGreaterThanZeroTestCases = @(
-	      @{TableName="dbo.AgentJobThresholds"}
-	      @{TableName="dbo.AzureDBElasticPoolStorageThresholds"}
-	      @{TableName="dbo.BackupThresholds"}
-	      @{TableName="dbo.CollectionDates"}
-	      @{TableName="dbo.CollectionDatesThresholds"}
-	      @{TableName="dbo.CounterMapping"}
-	      @{TableName="dbo.Counters"}
-	      @{TableName="dbo.CPU"}
-	      @{TableName="dbo.CPU_60MIN"}
-	      @{TableName="dbo.DatabasePermissions"}
-	      @{TableName="dbo.DatabasePrincipals"}
-	      @{TableName="dbo.DatabaseQueryStoreOptions"}
-	      @{TableName="dbo.DatabaseRoleMembers"}
-	      @{TableName="dbo.Databases"}
-	      @{TableName="dbo.DataRetention"}
-	      @{TableName="dbo.DBADashAgent"}
-	      @{TableName="dbo.DBConfig"}
-	      @{TableName="dbo.DBConfigOptions"}
-	      @{TableName="dbo.DBFiles"}
-	      @{TableName="dbo.DBFileSnapshot"}
-	      @{TableName="dbo.DBFileThresholds"}
-	      @{TableName="dbo.DBIOStats"}
-	      @{TableName="dbo.DBIOStats_60MIN"}
-	      @{TableName="dbo.DBObjects"}
-	      @{TableName="dbo.DBTuningOptions"}
-	      @{TableName="dbo.DBTuningOptionsHistory"}
-	      @{TableName="dbo.DBVersionHistory"}
-	      @{TableName="dbo.DDL"}
-		  @{TableName="dbo.DDLHistory"}
-		  @{TableName="dbo.DDLSnapshotOptions"}
-		  @{TableName="dbo.DDLSnapshots"}
-		  @{TableName="dbo.DDLSnapshotsLog"}
-	      @{TableName="dbo.Drives"}
-	      @{TableName="dbo.DriveThresholds"}
-	      @{TableName="dbo.InstanceCounters"}
-	      @{TableName="dbo.InstanceIDsTags"}
-	      @{TableName="dbo.Instances"}
-	      @{TableName="dbo.InstanceUptimeThresholds"}
-	      @{TableName="dbo.JobDDLHistory"}
-	      @{TableName="dbo.Jobs"}
-	      @{TableName="dbo.JobSteps"}
-	      @{TableName="dbo.LastGoodCheckDBThresholds"}
-	      @{TableName="dbo.LogRestoreThresholds"}
-	      @{TableName="dbo.MemoryClerkType"}
-	      @{TableName="dbo.MemoryUsage"}
-	      @{TableName="dbo.ObjectExecutionStats"}
-	      @{TableName="dbo.ObjectExecutionStats_60MIN"}
-	      @{TableName="dbo.ObjectType"}
-	      @{TableName="dbo.OSLoadedModules"}
-	      @{TableName="dbo.OSLoadedModulesStatus"}
-	      @{TableName="dbo.PerformanceCounters"}
-	      @{TableName="dbo.PerformanceCounters_60MIN"}
-	      @{TableName="dbo.ResourceGovernorConfigurationHistory"}
-	      @{TableName="dbo.RunningQueriesSummary"}
-	      @{TableName="dbo.ServerPermissions"}
-	      @{TableName="dbo.ServerPrincipals"}
-	      @{TableName="dbo.ServerRoleMembers"}
-	      @{TableName="dbo.SessionWaits"}
-	      @{TableName="dbo.Settings"}
-	      @{TableName="dbo.SysConfig"}
-	      @{TableName="dbo.SysConfigOptions"}
-	      @{TableName="dbo.Tags"}
-	      @{TableName="dbo.Waits"}
-	      @{TableName="dbo.Waits_60MIN"}
-	      @{TableName="dbo.WaitType"}
-		  @{TableName="dbo.BuildReference"}
-		  @{TableName="dbo.IdentityColumns"}
-		  @{TableName="dbo.ServerServices"}
-    )
     It 'Check table counts for <TableName>' -TestCases $TableCountGreaterThanZeroTestCases {
         param($tableName)
              $results= Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM $tableName"
@@ -162,4 +185,3 @@ Describe 'CI Workflow checks' {
 	
 		}
 }
-	
