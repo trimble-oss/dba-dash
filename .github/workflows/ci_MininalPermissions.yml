@@ -13,6 +13,8 @@ jobs:
       fail-fast: false
       matrix:
         language: [csharp]
+        sql-version: [2022]
+        sql-collation: [Latin1_General_BIN,SQL_1xCompat_CP850_CI_AS]
 
     steps:
       - name: Checkout repository
@@ -63,10 +65,11 @@ jobs:
           Compress-Archive -Path "DBADashBuild\DBADashGUIOnly\*" -DestinationPath $guiZipPath
 
       - name: Install SQL
-        uses: potatoqualitee/mssqlsuite@v1.7
+        uses: potatoqualitee/mssqlsuite@v1.11
         with:
           install: sqlengine
-          collation: Latin1_General_BIN
+          version: ${{ matrix.sql-version }}
+          collation: ${{ matrix.sql-collation }}
 
       - name: Check SQL Install
         run: | 
