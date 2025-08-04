@@ -1,45 +1,23 @@
-﻿DECLARE @SQL NVARCHAR(MAX);
+﻿DECLARE @SQL NVARCHAR(MAX)
 
-WITH cols AS (
-	SELECT 'softnuma_configuration' AS col,'INT' AS typ
-	UNION ALL
-	SELECT 'sql_memory_model' AS col,'INT' AS typ
-	UNION ALL
-	SELECT 'socket_count' AS col,'INT' AS typ
-	UNION ALL
-	SELECT 'cores_per_socket' AS col,'INT' AS typ
-	UNION ALL
-	SELECT 'numa_node_count' AS col,'INT' AS typ
-	UNION ALL
-	SELECT 'affinity_type' AS col,'INT' AS typ
-	UNION ALL
-	SELECT 'sqlserver_start_time' AS col,'DATETIME' AS typ
-	UNION ALL
-	SELECT 'os_priority_class' AS col,'INT' AS typ
-	UNION ALL
-	SELECT 'physical_memory_kb' AS col,'BIGINT' AS typ
-	UNION ALL
-	SELECT 'cpu_count' AS col,'INT' AS typ
-	UNION ALL
-	SELECT 'hyperthread_ratio' AS col,'INT' AS typ
-	UNION ALL
-	SELECT 'ms_ticks' AS col,'BIGINT' AS typ
-	UNION ALL
-	SELECT 'scheduler_count','INT'
-	UNION ALL
-	SELECT 'max_workers_count','INT'
-)
-SELECT @SQL ='SELECT ' + STUFF((SELECT ',' + CASE WHEN col='physical_memory_kb' 
-												AND COLUMNPROPERTY(OBJECT_ID('sys.dm_os_sys_info'),'physical_memory_kb','ColumnID') IS NULL 
-												AND COLUMNPROPERTY(OBJECT_ID('sys.dm_os_sys_info'),'physical_memory_in_bytes','ColumnID') IS NOT NULL 
-												THEN 'physical_memory_in_bytes/1024 as physical_memory_kb'
-												WHEN col='sqlserver_start_time' AND COLUMNPROPERTY(OBJECT_ID('sys.dm_os_sys_info'),col,'ColumnID') IS NULL
-												THEN '(SELECT create_date FROM sys.databases WHERE name=''tempdb'') as sqlserver_start_time'
-												WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_os_sys_info'),col,'ColumnID') IS NULL THEN 'CAST(NULL AS ' + typ + ') as ' + QUOTENAME(col) ELSE col END
-FROM cols
-ORDER BY col
-FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'') + ',DATEDIFF(mi,GETDATE(),GETUTCDATE()) AS UTCOffset
+SET @SQL = N'
+SELECT  ' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_os_sys_info'),'affinity_type','ColumnID') IS NULL THEN 'CAST(NULL AS INT) AS affinity_type,' ELSE 'affinity_type,' END + '
+		' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_os_sys_info'),'cores_per_socket','ColumnID') IS NULL THEN 'CAST(NULL AS INT) AS cores_per_socket,' ELSE 'cores_per_socket,' END + '
+		cpu_count,
+		hyperthread_ratio,
+		max_workers_count,
+		ms_ticks,
+		' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_os_sys_info'),'numa_node_count','ColumnID') IS NULL THEN 'CAST(NULL AS INT) AS numa_node_count,' ELSE 'numa_node_count,' END + '
+		os_priority_class,
+		' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_os_sys_info'),'physical_memory_kb','ColumnID') IS NOT NULL THEN 'physical_memory_kb,'
+		    WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_os_sys_info'),'physical_memory_in_bytes','ColumnID') IS NOT NULL THEN 'physical_memory_in_bytes/1024 AS physical_memory_kb,'
+			ELSE 'CAST(NULL AS BIGINT) AS AS physical_memory_kb,' END + '
+		scheduler_count,
+		' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_os_sys_info'),'socket_count','ColumnID') IS NULL THEN 'CAST(NULL AS INT) AS socket_count,' ELSE 'socket_count,' END + '
+		' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_os_sys_info'),'softnuma_configuration','ColumnID') IS NULL THEN 'CAST(NULL AS INT) AS softnuma_configuration,' ELSE 'softnuma_configuration,' END + '
+		' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_os_sys_info'),'sql_memory_model','ColumnID') IS NULL THEN 'CAST(NULL AS INT) AS sql_memory_model,' ELSE 'sql_memory_model,' END + '
+		' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_os_sys_info'),'sqlserver_start_time','ColumnID') IS NULL THEN '(SELECT create_date FROM sys.databases WHERE name=''tempdb'') as sqlserver_start_time,' ELSE 'sqlserver_start_time,' END + '
+		DATEDIFF(mi,GETDATE(),GETUTCDATE()) AS UTCOffset
 FROM sys.dm_os_sys_info'
-PRINT @SQL
 
 EXEC sp_executesql @SQL
