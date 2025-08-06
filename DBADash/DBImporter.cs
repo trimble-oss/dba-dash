@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Polly;
+using Polly.Retry;
 using Serilog;
 using System;
 using System.Collections.Frozen;
@@ -7,6 +8,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DBADash
@@ -15,11 +17,32 @@ namespace DBADash
     {
         private readonly DataSet data;
         private readonly string connectionString;
-        private readonly Policy retryPolicy;
+        private static readonly ResiliencePipeline pipeline = CreatePipeline();
         private int? instanceID;
         private DateTime snapshotDate;
         private readonly int CommandTimeout;
         private readonly DBADashAgent importAgent;
+
+        private static ResiliencePipeline CreatePipeline()
+        {
+            return new ResiliencePipelineBuilder()
+                .AddRetry(new RetryStrategyOptions
+                {
+                    ShouldHandle = new PredicateBuilder().Handle<Exception>(ShouldRetry),
+                    DelayGenerator = static args =>
+                    {
+                        var delay = args.AttemptNumber switch
+                        {
+                            0 => TimeSpan.FromSeconds(2),
+                            1 => TimeSpan.FromSeconds(5),
+                            _ => TimeSpan.FromSeconds(30)
+                        };
+                        return new ValueTask<TimeSpan?>(delay);
+                    },
+                    MaxRetryAttempts = 2,
+                })
+                .Build(); 
+        }
 
         public DBImporter(DataSet data, string connectionString, DBADashAgent importAgent, int commandTimeout = 60)
         {
@@ -28,17 +51,6 @@ namespace DBADash
             this.data = data;
             UpgradeDS();
             this.connectionString = connectionString;
-
-            retryPolicy = Policy.Handle<Exception>(ShouldRetry)
-                .WaitAndRetry(new[]
-                {
-                    TimeSpan.FromSeconds(2),
-                    TimeSpan.FromSeconds(5),
-                    TimeSpan.FromSeconds(15)
-                }, (exception, timeSpan, retryCount, context) =>
-                {
-                    LogError(context.OperationKey, exception, "Import[Retrying]");
-                });
         }
 
         private static readonly FrozenSet<int> ExcludedErrorCodes =
@@ -46,7 +58,8 @@ namespace DBADash
             2812, // Could not find stored procedure '%.*ls'.
             349,  // The procedure "%.*ls" has no parameter named "%.*ls".
             500,  // Trying to pass a table-valued parameter with %d column(s) where the corresponding user-defined table type requires %d column(s).
-            245   // Conversion failed when converting the %ls value '%.*ls' to data type %ls.
+            245,  // Conversion failed when converting the %ls value '%.*ls' to data type %ls.
+            8134  // Divide by zero error encountered.
         ];
 
         public static bool ShouldRetry(Exception ex)
@@ -377,9 +390,18 @@ namespace DBADash
             snapshotDate = (DateTime)rInstance!["SnapshotDateUTC"];
 
             // we need to get the instanceID to continue further.  retry based on policy then exception will be thrown to catch higher up
-            instanceID = await retryPolicy.Execute(async _ => await UpdateInstanceAsync(rInstance),
-                new Context("Instance")
-            );
+            instanceID = await pipeline.ExecuteAsync(async token =>
+            {
+                try
+                {
+                    return await UpdateInstanceAsync(rInstance);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error updating instance");
+                    throw;
+                }
+            });
 
             var tablesInDataSet = new HashSet<string>(data.Tables
                 .Cast<DataTable>()
@@ -403,45 +425,16 @@ namespace DBADash
             foreach (var tableName in tablesInDataSet.Where(t => t.StartsWith(snapshotPrefix)))
             {
                 var databaseName = tableName[snapshotPrefix.Length..];
-                try
-                {
-                    await retryPolicy.Execute(async _ => await UpdateSnapshotAsync(tableName, databaseName),
-                          new Context(tableName)
-                      );
-                }
-                catch (Exception ex)
-                {
-                    LogError(tableName, ex);
-                    exceptions.Add(ex);
-                }
+                await TryUpdateAsync(async _ => await UpdateSnapshotAsync(tableName, databaseName), tableName, exceptions);
             }
-            try
-            {
-                await retryPolicy.Execute(async _ => await UpdateServerExtraPropertiesAsync(),
-                    new Context("ServerExtraProperties")
-                );
-            }
-            catch (Exception ex)
-            {
-                LogError("ServerExtraProperties", ex);
-                exceptions.Add(ex);
-            }
-            try
-            {
-                await retryPolicy.Execute(async _ => await UpdateInstanceMetadata_Async(),
-                    new Context("InstanceMetadata")
-                );
-            }
-            catch (Exception ex)
-            {
-                LogError("InstanceMetadata", ex);
-                exceptions.Add(ex);
-            }
+            await TryUpdateAsync(async _ => await UpdateServerExtraPropertiesAsync(), "ServerExtraProperties",exceptions);
+            await TryUpdateAsync(async _ => await UpdateInstanceMetadata_Async(), "InstanceMetadata", exceptions);
+  
 
             // retry based on policy then let caller handle the exception
-            await retryPolicy.Execute(async _ => await InsertErrorsAsync(),
-                new Context("InsertErrors")
-            );
+
+            await TryUpdateAsync(async _ => await InsertErrorsAsync(),"InsertErrors", exceptions);
+
             if (exceptions.Count > 0)
             {
                 throw new AggregateException(exceptions);
@@ -552,41 +545,84 @@ namespace DBADash
 
         private async Task TryUpdateAsync(string tableName, List<Exception> exceptions)
         {
+            await TryUpdateAsync(async _ =>await UpdateAsync(tableName),tableName, exceptions);
+        }
+
+
+        /// <summary>
+        /// Runs action with retry logic.  Exceptions are handled and added to exceptions
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="tableName">Table associated with collection being imported</param>
+        /// <param name="exceptions">Exception list to append to</param>
+        /// <returns></returns>
+        private async Task TryUpdateAsync(Func<CancellationToken, ValueTask> action,string tableName, ICollection<Exception> exceptions)
+        {
+            List<Exception> retryErrors = new();
             try
             {
-                await retryPolicy.Execute(async _ => await UpdateAsync(tableName),
-                    new Context(tableName)
-                );
-            }
-            catch (SqlException ex) when (ex.Number == 2812 && tableName.StartsWith("UserData."))
-            {
-                var ex2 = new Exception(
-                    "Warning: The stored procedure for custom collection not found.  Please create the stored procedure. ",
-                    ex);
-                LogError(tableName, ex2);
-                exceptions.Add(ex2);
-            }
-            catch (SqlException ex) when (ex.Number == 349 && tableName.StartsWith("UserData."))
-            {
-                var ex2 = new Exception(
-                    "Warning: The stored procedure for custom collection does not have the required parameters.  Please update the stored procedure. ",
-                    ex);
-                LogError(tableName, ex2);
-                exceptions.Add(ex2);
-            }
-            catch (SqlException ex) when (ex.Number == 500 && tableName.StartsWith("UserData."))
-            {
-                var ex2 = new Exception(
-                    "Warning: The associated used defined table type for the custom collection does not have the correct number of columns. ",
-                    ex);
-                LogError(tableName, ex2);
-                exceptions.Add(ex2);
+                await pipeline.ExecuteAsync(async _ =>
+                {
+                    try
+                    {
+                        await action(CancellationToken.None);
+                    }
+                    catch (SqlException ex) when (ex.Number == 2812 && tableName.StartsWith("UserData."))
+                    {
+                        var ex2 = new Exception(
+                            "Warning: The stored procedure for custom collection not found.  Please create the stored procedure. ",
+                            ex);
+                        LogError(tableName, ex2);
+                        exceptions.Add(ex2);
+                        // Exception handled, skipping re-try logic
+                    }
+                    catch (SqlException ex) when (ex.Number == 349 && tableName.StartsWith("UserData."))
+                    {
+                        var ex2 = new Exception(
+                            "Warning: The stored procedure for custom collection does not have the required parameters.  Please update the stored procedure. ",
+                            ex);
+                        LogError(tableName, ex2);
+                        exceptions.Add(ex2);
+                        // Exception handled, skipping re-try logic
+                    }
+                    catch (SqlException ex) when (ex.Number == 500 && tableName.StartsWith("UserData."))
+                    {
+                        var ex2 = new Exception(
+                            "Warning: The associated used defined table type for the custom collection does not have the correct number of columns. ",
+                            ex);
+                        LogError(tableName, ex2);
+                        exceptions.Add(ex2);
+                        // Exception handled, skipping re-try logic
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ShouldRetry(ex))
+                        {
+                            Log.Warning(ex, "Error importing {TableName}.", tableName);
+                            retryErrors.Add(ex); // Add to retryErrors so we can capture all the errors when logging to DB (The first exception in particular could be useful)
+                            throw; // Exception is re-thrown for Polly pipeline to retry
+                        }
+                        LogError(tableName, ex);
+                        exceptions.Add(ex);
+                    }
+                });
+                if(retryErrors.Count > 0) // Import succeeded after retry.  We don't add to exceptions as this is considered a successful import if it succeeds after a retry.
+                {
+                    LogError(tableName, new AggregateException($"{tableName} collection succeeded after {retryErrors.Count} failed attempts",retryErrors), "Import[Retry]");
+                }
             }
             catch (Exception ex)
             {
-                LogError(tableName, ex);
-                exceptions.Add(ex);
+                if (!retryErrors.Contains(ex))
+                {
+                    retryErrors.Add(ex);
+                }
+                var aggEx = new AggregateException($"{tableName} collection import failed after {retryErrors.Count} attempts", retryErrors);
+                exceptions.Add(aggEx);
+                LogError(tableName, aggEx);
             }
+
+      
         }
 
         private async Task UpdateAsync(string tableName)

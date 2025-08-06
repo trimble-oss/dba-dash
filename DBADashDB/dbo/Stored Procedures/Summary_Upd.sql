@@ -85,7 +85,7 @@ WITH err AS (
 		MAX(ErrorDate) AS LastError
 	FROM dbo.CollectionErrorLog E
 	WHERE ErrorDate>=@ErrorsFrom
-	AND ErrorContext NOT LIKE '%[[]Retrying]'
+	AND ErrorContext NOT LIKE '%[[]Retry%]'
 	AND NOT (ErrorSource='TableSize' AND ErrorMessage LIKE 'Warning%')
 	GROUP BY InstanceID,ErrorSource
 )
