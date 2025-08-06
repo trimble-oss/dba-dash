@@ -28,7 +28,7 @@ namespace DBADash
             return new ResiliencePipelineBuilder()
                 .AddRetry(new RetryStrategyOptions
                 {
-                    ShouldHandle = new PredicateBuilder().Handle<Exception>(ShouldRetry),
+                    ShouldHandle = new PredicateBuilder().Handle<Exception>(Utility.ShouldRetry),
                     DelayGenerator = static args =>
                     {
                         var delay = args.AttemptNumber switch
@@ -51,24 +51,6 @@ namespace DBADash
             this.data = data;
             UpgradeDS();
             this.connectionString = connectionString;
-        }
-
-        private static readonly FrozenSet<int> ExcludedErrorCodes =
-        [
-            2812, // Could not find stored procedure '%.*ls'.
-            349,  // The procedure "%.*ls" has no parameter named "%.*ls".
-            500,  // Trying to pass a table-valued parameter with %d column(s) where the corresponding user-defined table type requires %d column(s).
-            245,  // Conversion failed when converting the %ls value '%.*ls' to data type %ls.
-            8134  // Divide by zero error encountered.
-        ];
-
-        public static bool ShouldRetry(Exception ex)
-        {
-            if (ex is SqlException sqlEx)
-            {
-                return !ExcludedErrorCodes.Contains(sqlEx.Number);
-            }
-            return true;
         }
 
         public async Task TestConnectionAsync()
@@ -596,7 +578,7 @@ namespace DBADash
                     }
                     catch (Exception ex)
                     {
-                        if (ShouldRetry(ex))
+                        if (Utility.ShouldRetry(ex))
                         {
                             Log.Warning(ex, "Error importing {TableName}.", tableName);
                             retryErrors.Add(ex); // Add to retryErrors so we can capture all the errors when logging to DB (The first exception in particular could be useful)
