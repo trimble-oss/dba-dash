@@ -49,6 +49,7 @@ namespace DBADash
             CommandTimeout = commandTimeout;
             this.importAgent = importAgent;
             this.data = data;
+            UpdatePreviousImportErrors();
             UpgradeDS();
             this.connectionString = connectionString;
         }
@@ -92,6 +93,16 @@ namespace DBADash
             rError["ErrorMessage"] = ex.ToString();
             rError["ErrorContext"] = errorContext;
             dtErrors.Rows.Add(rError);
+        }
+
+        private void UpdatePreviousImportErrors()
+        {
+            if (!data.Tables.Contains("Errors") || !data.Tables["Errors"]!.Columns.Contains("ErrorContext")) return;
+            var dtErrors = data.Tables["Errors"];
+            foreach (var row in dtErrors.Rows.Cast<DataRow>().Where(r=>r.Field<string>("ErrorContext") == "Import"))
+            {
+                row["ErrorContext"] = "Import[Existing]";
+            }
         }
 
         // handle schema changes between agent versions
