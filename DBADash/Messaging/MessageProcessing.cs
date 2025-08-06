@@ -24,13 +24,22 @@ namespace DBADash.Messaging
         private readonly int MessageThreads;
         private readonly AsyncNonKeyedLocker MessageSemaphore;
 
-        private readonly AsyncRetryPolicy AgentIDRetryPolicy = Policy.Handle<Exception>()
-            .WaitAndRetryForeverAsync(_ => TimeSpan.FromSeconds(60),
-                (exception, retryCount, calculatedWaitDuration) =>
+        private static readonly ResiliencePipeline AgentIDRetry = new ResiliencePipelineBuilder()
+            .AddRetry(new RetryStrategyOptions
+            {
+                ShouldHandle = new PredicateBuilder().Handle<Exception>(),
+                BackoffType = DelayBackoffType.Constant,
+                MaxRetryAttempts = int.MaxValue, // Forever retry
+                Delay = TimeSpan.FromSeconds(60),
+                OnRetry = args =>
                 {
-                    Log.Error(exception,
-                        $"Error getting Agent Id.  Retrying in {calculatedWaitDuration.TotalSeconds} seconds. (Retry count: {retryCount})");
-                });
+                    Log.Error(args.Outcome.Exception,
+                        $"Error getting Agent Id.  Retrying in {args.RetryDelay.TotalSeconds} seconds. (Retry count: {args.AttemptNumber})");
+                    return ValueTask.CompletedTask;
+                }
+            })
+            .Build();
+
 
         public MessageProcessing(CollectionConfig config)
         {
@@ -59,7 +68,7 @@ namespace DBADash.Messaging
         private async Task ScheduleMessagingForDestination(DBADashConnection d)
         {
             var agentID = 0;
-            await AgentIDRetryPolicy.ExecuteAsync(() =>
+            await AgentIDRetry.Execute(() =>
             {
                 agentID = Agent.GetDBADashAgentID(d.ConnectionString);
                 return Task.CompletedTask;

@@ -34,20 +34,18 @@ namespace DBADash
             builder.InitialCatalog = "";
             connectionString = builder.ConnectionString;
 
-            using (var cn = new SqlConnection(connectionString))
-            using (var cmd = new SqlCommand("SELECT CASE WHEN EXISTS(SELECT 1 FROM sys.databases WHERE name = @db) THEN CAST(1 as  BIT) ELSE CAST(0 as BIT) END as DBExists", cn))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("@db", db);
-                return (bool)cmd.ExecuteScalar();
-            }
+            using var cn = new SqlConnection(connectionString);
+            using var cmd = new SqlCommand("SELECT CASE WHEN EXISTS(SELECT 1 FROM sys.databases WHERE name = @db) THEN CAST(1 as  BIT) ELSE CAST(0 as BIT) END as DBExists",cn);
+            cn.Open();
+            cmd.Parameters.AddWithValue("@db", db);
+            return (bool)cmd.ExecuteScalar();
         }
 
         public static (Version Version, bool DeployInProgress) GetDBVersion(string connectionString)
         {
             var sql = @"
 DECLARE @DeployInProgress BIT = 0
-IF EXISTS(  SELECT 1 
+IF EXISTS(  SELECT 1
             FROM sys.extended_properties
             WHERE name = 'IsDBUpgradeInProgress'
             AND value ='Y'
@@ -148,7 +146,7 @@ END
         {
             DacpacUtility.DacpacService dac = new();
             var status = VersionStatus(connectionString);
-            if (status.VersionStatus is DBVersionStatusEnum.UpgradeRequired or DBVersionStatusEnum.CreateDB || status.DeployInProgress )
+            if (status.VersionStatus is DBVersionStatusEnum.UpgradeRequired or DBVersionStatusEnum.CreateDB || status.DeployInProgress)
             {
                 return Task.Run(() => dac.ProcessDacPac(connectionString, db, DACPackPath, status.VersionStatus));
             }

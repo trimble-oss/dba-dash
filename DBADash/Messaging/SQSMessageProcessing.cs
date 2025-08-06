@@ -24,23 +24,24 @@ namespace DBADash.Messaging
         private const int delayAfterReceivingMessageForDifferentAgent = 1000; // ms
         private const int delayBetweenMessages = 100; // ms
         private const int errorDelay = 1000; // ms
-        private readonly AsyncRetryPolicy _retryPolicy;
         private readonly ConcurrentDictionary<string, SemaphoreSlim> _semaphores = new();
         private const int MaxDegreeOfParallelism = 2;
+
+        private static readonly ResiliencePipeline pipeline = new ResiliencePipelineBuilder()
+            .AddRetry(new RetryStrategyOptions
+        {
+            ShouldHandle = new PredicateBuilder().Handle<Exception>(),
+            BackoffType = DelayBackoffType.Constant,
+            MaxRetryAttempts = 2,
+            Delay = TimeSpan.FromSeconds(1)
+        })
+        .Build();
 
         public SQSMessageProcessing(CollectionConfig config)
         {
             Config = config;
             _sqsClient = AWSTools.GetSQSClient(config.AWSProfile, config.AccessKey, config.GetSecretKey(), config.ServiceSQSQueueUrl);
-            _retryPolicy = Policy
-                .Handle<Exception>()
-                .WaitAndRetryAsync(2, retryAttempt =>
-                        TimeSpan.FromSeconds(1),
-                    onRetry: (exception, timeSpan, retryCount, context) =>
-                    {
-                        Log.Error(exception, "An error occurred on retry {RetryCount} for operation {OperationKey}. Waiting {TimeSpan} before next retry. Exception: {ExceptionMessage}", retryCount, context.OperationKey, timeSpan, exception.Message);
-                    }
-                );
+
         }
 
         /// <summary>
@@ -383,12 +384,10 @@ namespace DBADash.Messaging
             if (responseMessage.Data != null && responseMessage.Data.Tables.Contains("DBADash"))
             {
                 Log.Debug("Writing data to SQL");
-                await _retryPolicy.ExecuteAsync(async () =>
-                {
-                    await DestinationHandling.WriteDBAsync(responseMessage.Data, destination.ConnectionString,
+             
+                await DestinationHandling.WriteDBAsync(responseMessage.Data, destination.ConnectionString,
                         Config);
-                    return Task.CompletedTask;
-                });
+         
                 if (responseMessage.Exception==null && responseMessage.Data.Tables.Contains("Errors") && responseMessage.Data.Tables["Errors"]!.Rows.Count>0)
                 {
                     var dtErrors = responseMessage.Data.Tables["Errors"];
@@ -412,7 +411,7 @@ namespace DBADash.Messaging
 
             var payloadBin = responseMessage.Serialize();
 
-            await _retryPolicy.ExecuteAsync(async () =>
+            await pipeline.ExecuteAsync(async _ =>
             {
                 try
                 {
@@ -423,6 +422,11 @@ namespace DBADash.Messaging
                     Log.Warning(
                         "The conversation handle {handle} was not found.  The conversation might have ended & this message is processing out of order.",
                         handle);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex, "Error sending reply message for handle {handle}", handle);
+                    throw;
                 }
             });
 

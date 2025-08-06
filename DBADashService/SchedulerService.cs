@@ -1,10 +1,15 @@
 ﻿using DBADash;
+using DBADash.InstanceMetadata;
+using DBADash.Messaging;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Polly;
+using Polly.Retry;
 using Quartz;
 using Quartz.Impl;
 using Serilog;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
@@ -13,11 +18,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
-using DBADash.Messaging;
 using static DBADash.DBADashConnection;
-using Microsoft.Extensions.Hosting;
-using System.Collections.Concurrent;
-using DBADash.InstanceMetadata;
 
 namespace DBADashService
 {
@@ -30,6 +31,22 @@ namespace DBADashService
         private readonly CollectionSchedules schedules;
         private MessageProcessing messageProcessing;
         public static readonly ConcurrentDictionary<string, SemaphoreSlim> Locker = new();
+
+        private static readonly ResiliencePipeline pipeline = new ResiliencePipelineBuilder()
+            .AddRetry(new RetryStrategyOptions
+            {
+                ShouldHandle = new PredicateBuilder().Handle<Exception>(),
+                BackoffType = DelayBackoffType.Constant,
+                MaxRetryAttempts = 4, // Will try 5 times total (initial + 4 retries)
+                DelayGenerator = args =>
+                {
+                    var delays = new[] { 1, 5, 20, 60 };
+                    var index = args.AttemptNumber;
+                    var seconds = index < delays.Length ? delays[index] : 60;
+                    return new ValueTask<TimeSpan?>(TimeSpan.FromSeconds(seconds));
+                }
+            })
+            .Build();
 
         // Thread-safe one-time logging using Lazy<T>
         private static readonly Lazy<bool> _logAvailableProcsRemoval = new Lazy<bool>(() =>
@@ -48,7 +65,7 @@ namespace DBADashService
             }
 
             var threads = config.GetThreadCount();
-            
+
             NameValueCollection props = new()
             {
             { "quartz.serializer.type", "binary" },
@@ -62,7 +79,6 @@ namespace DBADashService
             scheduler = factory.GetScheduler().ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
-
         /// <summary>
         /// Get the version status of the repository database. (Requires upgrade etc.).  If a deployment is in progress, it will wait for a period of time until the deployment is complete before returning the status.
         /// </summary>
@@ -71,17 +87,10 @@ namespace DBADashService
         private static async Task<DBValidations.DBVersionStatus> GetDBVersionStatus(DBADashConnection d)
         {
             DBValidations.DBVersionStatus status = null;
-            await Policy.Handle<Exception>()
-                .WaitAndRetry(new[]
-                {
-                        TimeSpan.FromSeconds(1),
-                        TimeSpan.FromSeconds(5),
-                        TimeSpan.FromSeconds(20),
-                        TimeSpan.FromSeconds(60)
-                }, (exception, _, _) =>
-                {
-                    Log.Error(exception, "Version check for repository database failed");
-                }).Execute(async () =>
+
+            await pipeline.ExecuteAsync(async _ =>
+            {
+                try
                 {
                     var timeout = TimeSpan.FromSeconds(60);
                     var endTime = DateTime.UtcNow.Add(timeout);
@@ -90,22 +99,35 @@ namespace DBADashService
                     {
                         status = DBValidations.VersionStatus(d.ConnectionString);
                         if (!status.DeployInProgress) break; // Exit if deployment is not in progress
-                        if (DateTime.UtcNow >= endTime) // We've waited long enough.  It's possible that a previous upgrade was interrupted.
+                        if (DateTime.UtcNow >=
+                            endTime) // We've waited long enough.  It's possible that a previous upgrade was interrupted.
                         {
-                            Log.Warning("Timeout waiting for DB deployment to complete.  It's possible that a previous DB deployment was interrupted or is still running but taking longer than expected on another DBA Dash service instance.");
-                            status.VersionStatus = DBValidations.DBVersionStatusEnum.UpgradeRequired; // Force the upgrade to re-run.  It's possible that a previous upgrade was interrupted.
+                            Log.Warning(
+                                "Timeout waiting for DB deployment to complete.  It's possible that a previous DB deployment was interrupted or is still running but taking longer than expected on another DBA Dash service instance.");
+                            status.VersionStatus =
+                                DBValidations.DBVersionStatusEnum
+                                    .UpgradeRequired; // Force the upgrade to re-run.  It's possible that a previous upgrade was interrupted.
                             break;
                         }
+
                         if (count == 0)
                         {
                             Log.Warning("Repository database deployment already appears to be in progress.");
                         }
-                        Log.Information("Waiting {waitTime} seconds for completion before continuing", Convert.ToInt32(endTime.Subtract(DateTime.UtcNow).TotalSeconds));
-                        count++;
-                        await Task.Delay(5000); // Wait for 5 seconds before checking again
-                    } while (status.DeployInProgress);
 
-                });
+                        Log.Information("Waiting {waitTime} seconds for completion before continuing",
+                            Convert.ToInt32(endTime.Subtract(DateTime.UtcNow).TotalSeconds));
+                        count++;
+                        await Task.Delay(5000, _); // Wait for 5 seconds before checking again
+                    } while (status.DeployInProgress);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Version check for repository database failed");
+                    throw;
+                }
+                ;
+            }, CancellationToken.None);
 
             return status;
         }
@@ -115,7 +137,7 @@ namespace DBADashService
             foreach (var d in config.AllDestinations.Where(dest => dest.Type == ConnectionType.SQL))
             {
                 Log.Logger.Information("Version check for repository database {connection}", d.ConnectionForPrint);
-                DBValidations.DBVersionStatus status=null;
+                DBValidations.DBVersionStatus status = null;
                 status = await GetDBVersionStatus(d);
 
                 switch (status.VersionStatus)
