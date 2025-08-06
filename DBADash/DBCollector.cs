@@ -1,25 +1,24 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADash.InstanceMetadata;
+using Microsoft.Data.SqlClient;
 using Microsoft.Management.Infrastructure;
 using Microsoft.Management.Infrastructure.Options;
 using Microsoft.SqlServer.Management.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Polly;
+using Polly.Retry;
 using Serilog;
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Runtime.Caching;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
-using DBADash.InstanceMetadata;
 
 namespace DBADash
 {
@@ -112,7 +111,9 @@ namespace DBADash
         private HostPlatform platform;
         public DateTime JobLastModified = DateTime.MinValue;
         private bool IsHadrEnabled;
-        private Policy retryPolicy;
+        private static readonly ResiliencePipeline EnabledPipeline = CreatePipeline();
+        private static readonly ResiliencePipeline DisabledRetryPipeline = new ResiliencePipelineBuilder().Build();
+        private ResiliencePipeline pipeline => DisableRetry ? DisabledRetryPipeline : EnabledPipeline;
         private DatabaseEngineEdition engineEdition;
         public bool IsExtendedEventsNotSupportedException;
         private readonly bool DisableRetry;
@@ -159,6 +160,27 @@ namespace DBADash
         }
 
         private int job_instance_id;
+
+        private static ResiliencePipeline CreatePipeline()
+        {
+            return new ResiliencePipelineBuilder()
+                .AddRetry(new RetryStrategyOptions
+                {
+                    ShouldHandle = new PredicateBuilder().Handle<Exception>(ShouldRetry),
+                    DelayGenerator = static args =>
+                    {
+                        var delay = args.AttemptNumber switch
+                        {
+                            0 => TimeSpan.FromSeconds(2),
+                            1 => TimeSpan.FromSeconds(10),
+                            _ => TimeSpan.FromSeconds(30)
+                        };
+                        return new ValueTask<TimeSpan?>(delay);
+                    },
+                    MaxRetryAttempts = 2,
+                })
+                .Build();
+        }
 
         public async Task<DateTime> GetJobLastModifiedAsync()
         {
@@ -278,12 +300,12 @@ namespace DBADash
             349,  // The procedure "%.*ls" has no parameter named "%.*ls".
             500,  // Trying to pass a table-valued parameter with %d column(s) where the corresponding user-defined table type requires %d column(s).
             2812, // Could not find stored procedure '%.*ls'.
-            6335 // XML data type instance has too many levels of nested nodes. Maximum allowed depth is %d levels.
+            6335, // XML data type instance has too many levels of nested nodes. Maximum allowed depth is %d levels.
+            8134, // Divide by zero error encountered.
         ];
 
-        public bool ShouldRetry(Exception ex)
+        public static bool ShouldRetry(Exception ex)
         {
-            if (DisableRetry) return false;
             if (ex is SqlException sqlEx)
             {
                 return !ExcludedErrorCodes.Contains(sqlEx.Number) && sqlEx.Message != "Max databases exceeded for Table Size collection";
@@ -294,25 +316,59 @@ namespace DBADash
         private async Task StartupAsync()
         {
             noWMI = Source.NoWMI;
-
-            retryPolicy = Policy.Handle<Exception>(ShouldRetry)
-                .WaitAndRetry(new[]
-                {
-                    TimeSpan.FromSeconds(2),
-                    TimeSpan.FromSeconds(10)
-                }, (exception, _, _, context) =>
-                {
-                    LogError(exception, context.OperationKey, "Collect[Retrying]");
-                });
-
             Data = new DataSet("DBADash");
             dtErrors = GetErrorDataTableSchema();
 
             Data.Tables.Add(dtErrors);
 
-            await retryPolicy.Execute(async _ => await GetInstanceAsync(),
-                new Context("Instance")
-            );
+            await TryCollectAsync(async _ => await GetInstanceAsync(), "Instance");
+        }
+
+        /// <summary>
+        /// Runs collection action and retries on failure.  Errors are logged and collected in an AggregateException which is thrown if the action fails after all retries.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="collection"></param>
+        /// <returns></returns>
+        /// <exception cref="AggregateException"></exception>
+        private async Task TryCollectAsync(Func<CancellationToken, ValueTask> action, string collection)
+        {
+            var errors = new List<Exception>();
+            try
+            {
+                await pipeline.ExecuteAsync(async _ =>
+                {
+                    try
+                    {
+                        await action(CancellationToken.None);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ShouldRetry(ex) && !DisableRetry)
+                        {
+                            Log.Warning(ex, "Error collecting {collection}", collection);
+                        }
+                        errors.Add(ex);
+                        throw;
+                    }
+                });
+                if (errors.Count > 0)
+                {
+                    LogError(new AggregateException($"{collection} succeeded after {errors.Count} attempts", errors), collection, "Collect[Retry]");
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!errors.Contains(ex))
+                {
+                    errors.Add(ex);
+                }
+                if (errors.Count == 1)
+                {
+                    throw;
+                }
+                throw new AggregateException($"{collection} collection failed after {errors.Count} attempts", errors);
+            }
         }
 
         public static DataTable GetErrorDataTableSchema()
@@ -487,14 +543,12 @@ namespace DBADash
                 var collectionReference = "UserData." + customCollection.Key;
                 try
                 {
-                    await retryPolicy.Execute(async _ =>
-                        {
-                            StartCollection(collectionReference);
-                            await CollectAsync(customCollection);
-                            StopCollection();
-                        },
-                        new Context(collectionReference)
-                    );
+                    await TryCollectAsync(async _ =>
+                    {
+                        StartCollection(collectionReference);
+                        await CollectAsync(customCollection);
+                        StopCollection();
+                    }, collectionReference);
                 }
                 catch (SqlException ex) when (ex.Number == 2812)
                 {
@@ -620,13 +674,13 @@ namespace DBADash
 
             try
             {
-                await retryPolicy.Execute(async _ =>
+                await TryCollectAsync(async _ =>
                     {
                         StartCollection(collectionType.ToString());
                         await ExecuteCollectionAsync(collectionType);
                         StopCollection();
                     },
-                    new Context(collectionTypeString)
+                    collectionTypeString
                 );
             }
             catch (Exception ex)
@@ -1335,7 +1389,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             {
                 if (noWMI) return;
                 if (InstanceMetadataProviders.EnabledProviders.Count == 0) return;
-                var meta =  await InstanceMetadataProviders.GetMetadataAsync(computerName, cancellationToken: CancellationToken.None);
+                var meta = await InstanceMetadataProviders.GetMetadataAsync(computerName, cancellationToken: CancellationToken.None);
                 var dt = new DataTable("InstanceMetadata");
                 dt.Columns.Add("Provider", typeof(string));
                 dt.Columns.Add("Metadata", typeof(string));
@@ -1345,12 +1399,11 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                 dt.Rows.Add(row);
                 Data.Tables.Add(dt);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LogError(ex, "InstanceMetadata", "Collect:InstanceMetadata");
             }
         }
-
 
         private void CollectIsWindowsUpdateWMI()
         {
