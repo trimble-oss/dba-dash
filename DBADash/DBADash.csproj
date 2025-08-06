@@ -131,7 +131,7 @@
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="172.76.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Octokit" Version="14.0.0" />
-    <PackageReference Include="Polly" Version="8.6.2" />
+    <PackageReference Include="Polly.Core" Version="8.6.2" />
     <PackageReference Include="Serilog" Version="4.3.0" />
     <PackageReference Include="SerilogTimings" Version="3.1.0" />
     <PackageReference Include="System.Buffers" Version="4.6.1" />

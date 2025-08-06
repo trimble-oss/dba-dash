@@ -1,4 +1,5 @@
 ﻿using Polly;
+using Polly.Retry;
 using Serilog;
 using SerilogTimings;
 using System;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using static DBADash.DBADashConnection;
 
@@ -13,7 +15,23 @@ namespace DBADash
 {
     public class DestinationHandling
     {
-  
+
+        private static readonly ResiliencePipeline pipeline = new ResiliencePipelineBuilder()
+            .AddRetry(new RetryStrategyOptions
+            {
+                ShouldHandle = new PredicateBuilder().Handle<Exception>(),
+                BackoffType = DelayBackoffType.Exponential,
+                UseJitter = false,
+                MaxRetryAttempts = int.MaxValue, // Forever retry
+                Delay = TimeSpan.FromSeconds(2),
+                OnRetry = args =>
+                {
+                    Log.Error(args.Outcome.Exception, "Error connecting to repository database");
+                    return ValueTask.CompletedTask;
+                }
+            })
+            .Build();
+
         public static async Task WriteAllDestinationsAsync(DataSet ds, DBADashSource src, string fileName, CollectionConfig cfg)
         {
             List<Exception> exceptions = new();
@@ -136,15 +154,7 @@ namespace DBADash
             var importAgent = DBADashAgent.GetCurrent();
             var importer = new DBImporter(ds, destination, importAgent, cfg.ImportCommandTimeout ?? CollectionConfig.DefaultImportCommandTimeout);
             // Wait until we can connect to the repository DB.  If it's down, wait for it to become available.
-            await Policy.Handle<Exception>()
-                .WaitAndRetryForever(retryAttempt =>
-                        TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                    (exception, timespan) =>
-                    {
-                        Log.Error(exception, "Error connecting to repository database");
-                    }
-                )
-                .Execute(async () => await importer.TestConnectionAsync());
+            await pipeline.ExecuteAsync(async _ => await importer.TestConnectionAsync(), CancellationToken.None);
 
             await importer.UpdateAsync();
         }
