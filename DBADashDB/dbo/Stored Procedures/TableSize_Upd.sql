@@ -81,11 +81,24 @@ JOIN dbo.DBObjects O ON O.SchemaName = t.schema_name
 WHERE t.schema_name <> '{DBADashError}'
 AND O.IsActive = CAST(1 AS BIT);
 
-INSERT INTO dbo.CollectionErrorLog(ErrorDate,InstanceID, ErrorSource, ErrorMessage, ErrorContext)
-SELECT t.SnapshotDate,@InstanceID,'TableSize',CONCAT('Warning: [',t.DB,'] was excluded from TableSize collection due to table count threshold'),'Collect'
-FROM @TableSize t
-WHERE schema_name = '{DBADashError}'
-AND object_name = '{TableCountExceededThreshold}'
+DECLARE @ExcludedDBs NVARCHAR(MAX)
+
+SET @ExcludedDBs = STUFF(
+	(
+	SELECT ', ' + QUOTENAME(t.DB)
+	FROM @TableSize t
+	WHERE schema_name = '{DBADashError}'
+	AND object_name = '{TableCountExceededThreshold}'
+	ORDER BY t.DB
+	FOR XML PATH(''),TYPE
+	).value('.','NVARCHAR(MAX)'),
+	1,2,'')
+
+IF @ExcludedDBs IS NOT NULL
+BEGIN
+	INSERT INTO dbo.CollectionErrorLog(ErrorDate,InstanceID, ErrorSource, ErrorMessage, ErrorContext)
+	SELECT @SnapshotDate,@InstanceID,'TableSize',CONCAT('Warning: ',@ExcludedDBs,' were excluded from TableSize collection due to table count threshold'),'Collect'
+END
 
 /* Log the data collection */
 EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,
