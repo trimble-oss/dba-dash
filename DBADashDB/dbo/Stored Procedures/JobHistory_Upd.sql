@@ -123,6 +123,7 @@ GROUP BY InstanceID,
 		step_id,
 		DG.DateGroup
 
+DECLARE @MinRunDateTime DATETIME2(2) = (SELECT MIN(RunDateTime) FROM #60)
 
 UPDATE J
 SET J.FailedCount += T.FailedCount,
@@ -132,8 +133,9 @@ SET J.FailedCount += T.FailedCount,
 	J.MaxRunDurationSec = (SELECT MAX(c) FROM (VALUES (T.MaxRunDurationSec),(J.MaxRunDurationSec)) T(c)),
 	J.MinRunDurationSec = (SELECT MIN(c) FROM (VALUES (T.MinRunDurationSec),(J.MinRunDurationSec)) T(c))
 FROM dbo.JobStats_60MIN J
-JOIN #60 T ON J.job_id = T.job_id AND J.step_id = T.step_id AND J.RunDateTime = T.RunDateTime
+JOIN #60 T ON J.job_id = T.job_id AND J.step_id = T.step_id AND J.RunDateTime = T.RunDateTime AND J.InstanceID = T.InstanceID
 WHERE J.InstanceID = @InstanceID
+AND J.RunDateTime >= @MinRunDateTime
 
 INSERT INTO dbo.JobStats_60MIN(
 		InstanceID,
