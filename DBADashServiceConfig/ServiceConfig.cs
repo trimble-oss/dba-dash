@@ -317,23 +317,29 @@ namespace DBADashServiceConfig
         {
             errorProvider1.SetError(txtDestination, null);
             lblServerNameWarning.Visible = false;
-            DBADashConnection dest = new(txtDestination.Text);
-            if (!string.IsNullOrEmpty(txtDestination.Text))
-            {
-                try
+            InvokeSetStatus(lblVersionInfo, "Validating...", DashColors.TrimbleBlue, FontStyle.Regular);
+            _ = Task.Run(()=>{
+
+                DBADashConnection dest = new(txtDestination.Text);
+                if (!string.IsNullOrEmpty(txtDestination.Text))
                 {
-                    if (dest.Type == ConnectionType.Invalid)
+                    try
                     {
-                        throw new ArgumentException("Invalid connection string, directory or S3 path");
+                        if (dest.Type == ConnectionType.Invalid)
+                        {
+                            throw new ArgumentException("Invalid connection string, directory or S3 path");
+                        }
+
+                        CollectionConfig.ValidateDestination(dest);
                     }
-                    CollectionConfig.ValidateDestination(dest);
+                    catch (Exception ex)
+                    {
+                        this.Invoke(() => { errorProvider1.SetError(txtDestination, ex.Message); });
+                    }
+                    UpdateDBVersionStatus();
                 }
-                catch (Exception ex)
-                {
-                    errorProvider1.SetError(txtDestination, ex.Message);
-                }
-            }
-            UpdateDBVersionStatus();
+            });
+            
         }
 
         private static void InvokeSetStatus(Control statusControl, string status, Color color, FontStyle style)
