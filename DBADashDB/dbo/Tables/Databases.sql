@@ -90,6 +90,9 @@
     is_memory_optimized_enabled BIT NULL,
     is_temporal_history_retention_enabled BIT NULL,
     is_optimized_locking_on BIT NULL,
+    user_access_desc AS (CASE WHEN user_access = (0) THEN 'MULTI_USER'
+                               WHEN user_access = (1) THEN 'SINGLE_USER'
+                               WHEN user_access = (2) THEN 'RESTRICTED_USER' ELSE CONVERT(NVARCHAR(60), user_access) END),
     CONSTRAINT PK_Databases PRIMARY KEY CLUSTERED (DatabaseID ASC),
     CONSTRAINT FK_Databases_Instances FOREIGN KEY (InstanceID) REFERENCES dbo.Instances (InstanceID)
 );
