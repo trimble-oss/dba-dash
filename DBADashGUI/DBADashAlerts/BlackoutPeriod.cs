@@ -139,10 +139,6 @@ namespace DBADashGUI.DBADashAlerts
             {
                 yield return new ValidationResult("End Date must be greater than Start Date");
             }
-            foreach (var result in ValidateSchedule(validationContext))
-            {
-                yield return result;
-            }
         }
     }
 }

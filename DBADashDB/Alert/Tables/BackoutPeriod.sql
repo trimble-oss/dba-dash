@@ -16,9 +16,7 @@
 	Sunday BIT NOT NULL CONSTRAINT DF_Alert_BlackoutPeriod_Sunday DEFAULT(CONVERT(BIT,1)),
 	TimeZone NVARCHAR(128) NOT NULL CONSTRAINT DF_Alert_BlackoutPeriod_TimeZone DEFAULT('UTC'),
 	Notes NVARCHAR(MAX) NULL,
-	CONSTRAINT CK_Alert_BlackoutPeriod_ApplyTo CHECK(NOT (ApplyToInstanceID>0 AND ApplyToTagID>0)),
-	CONSTRAINT CK_Alert_BlackoutPeriod_TimeTo CHECK(TimeTo>TimeFrom)
-	
+	CONSTRAINT CK_Alert_BlackoutPeriod_ApplyTo CHECK(NOT (ApplyToInstanceID>0 AND ApplyToTagID>0))	
 )
 GO
 CREATE UNIQUE NONCLUSTERED INDEX IX_Alert_BlackoutPeriod_InstanceID_StartDate_EndDate_AlertKey 

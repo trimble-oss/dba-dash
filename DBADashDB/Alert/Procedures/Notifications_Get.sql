@@ -40,10 +40,19 @@ AND EXISTS(
 			SELECT 1
 			FROM Alert.NotificationChannelSchedule NCS 
 			OUTER APPLY(SELECT SYSDATETIMEOFFSET() AT TIME ZONE TimeZone AS CurrentTime) AS TZ
+			OUTER APPLY(SELECT CAST(TZ.CurrentTime AS TIME) AS CurrentTimeAsTime) AS T
 			WHERE NC.NotificationChannelID = NCS.NotificationChannelID
 			AND CHOOSE(DATEPART(dw,TZ.CurrentTime),NCS.Monday,NCS.Tuesday,NCS.Wednesday,NCS.Thursday,NCS.Friday,NCS.Saturday,NCS.Sunday) = CAST(1 AS BIT)
-			AND (CAST(TZ.CurrentTime AS TIME) >= NCS.TimeFrom OR NCS.TimeFrom IS NULL)
-			AND (CAST(TZ.CurrentTime AS TIME) < NCS.TimeTo OR NCS.TimeTo IS NULL)
+			AND (
+					(T.CurrentTimeAsTime >= NCS.TimeFrom OR NCS.TimeFrom IS NULL) 
+					AND (T.CurrentTimeAsTime <= NCS.TimeTo OR NCS.TimeTo IS NULL)
+					OR (
+						/* Configured TimeTo is less than TimeFrom, crossing midnight boundary. e.g. 22:00 to 03:00. */
+						NCS.TimeTo<NCS.TimeFrom
+						/* Either >= TimeFrom or <= TimeTo is OK when midnight boundary is crossed*/
+						AND (T.CurrentTimeAsTime >= NCS.TimeFrom OR T.CurrentTimeAsTime <= NCS.TimeTo )
+					) 
+				)
 			AND NCS.AlertNotificationLevel>=AA.Priority
 			AND (	/* Only notifiy if re-trigger threshold has passed,
 						Or we haven't notified,
