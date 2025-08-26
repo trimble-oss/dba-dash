@@ -9,13 +9,22 @@ SELECT CASE WHEN EXISTS(
 				SELECT 1 
 				FROM Alert.BlackoutPeriod BP 
 				OUTER APPLY(SELECT SYSDATETIMEOFFSET() AT TIME ZONE TimeZone AS CurrentTime) AS TZ
+				OUTER APPLY(SELECT CAST(TZ.CurrentTime AS TIME) AS CurrentTimeAsTime) AS T
 				WHERE BP.ApplyToInstanceID = -1
 				AND  (BP.StartDate < SYSUTCDATETIME() OR BP.StartDate IS NULL)
 				AND (BP.EndDate > SYSUTCDATETIME() OR BP.EndDate IS NULL)
 				AND @AlertKey LIKE BP.AlertKey
 				AND CHOOSE(DATEPART(dw,TZ.CurrentTime),BP.Monday,BP.Tuesday,BP.Wednesday,BP.Thursday,BP.Friday,BP.Saturday,BP.Sunday) = CAST(1 AS BIT)
-				AND (CAST(TZ.CurrentTime AS TIME) >= BP.TimeFrom OR BP.TimeFrom IS NULL)
-				AND (CAST(TZ.CurrentTime AS TIME) <= BP.TimeTo OR BP.TimeTo IS NULL)
+				AND (
+						(T.CurrentTimeAsTime >= BP.TimeFrom OR BP.TimeFrom IS NULL) 
+						AND (T.CurrentTimeAsTime <= BP.TimeTo OR BP.TimeTo IS NULL)
+						OR (
+							/* Configured TimeTo is less than TimeFrom, crossing midnight boundary. e.g. 22:00 to 03:00. */
+							BP.TimeTo<BP.TimeFrom
+							/* Either >= TimeFrom or <= TimeTo is OK when midnight boundary is crossed*/
+							AND (T.CurrentTimeAsTime >= BP.TimeFrom OR T.CurrentTimeAsTime <= BP.TimeTo )
+						) 
+					)		
 				AND EXISTS(
 							/* Apply to all tags/instances */
 							SELECT 1
@@ -45,15 +54,23 @@ SELECT CASE WHEN EXISTS(
 				SELECT 1 
 				FROM Alert.BlackoutPeriod BP 
 				OUTER APPLY(SELECT SYSDATETIMEOFFSET() AT TIME ZONE TimeZone AS CurrentTime) AS TZ
+				OUTER APPLY(SELECT CAST(TZ.CurrentTime AS TIME) AS CurrentTimeAsTime) AS T
 				WHERE BP.ApplyToInstanceID = @InstanceID
 				AND BP.ApplyToTagID = -1
 				AND  (BP.StartDate < SYSUTCDATETIME() OR BP.StartDate IS NULL)
 				AND (BP.EndDate > SYSUTCDATETIME() OR BP.EndDate IS NULL)
 				AND @AlertKey LIKE BP.AlertKey
 				AND CHOOSE(DATEPART(dw,TZ.CurrentTime),BP.Monday,BP.Tuesday,BP.Wednesday,BP.Thursday,BP.Friday,BP.Saturday,BP.Sunday) = CAST(1 AS BIT)
-				AND (CAST(TZ.CurrentTime AS TIME) >= BP.TimeFrom OR BP.TimeFrom IS NULL)
-				AND (CAST(TZ.CurrentTime AS TIME) <= BP.TimeTo OR BP.TimeTo IS NULL)
-				) 
-				THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsBlackout
+				AND (
+						(T.CurrentTimeAsTime >= BP.TimeFrom OR BP.TimeFrom IS NULL) 
+						AND (T.CurrentTimeAsTime <= BP.TimeTo OR BP.TimeTo IS NULL)
+						OR (
+							/* Configured TimeTo is less than TimeFrom, crossing midnight boundary. e.g. 22:00 to 03:00. */
+							BP.TimeTo<BP.TimeFrom
+							/* Either >= TimeFrom or <= TimeTo is OK when midnight boundary is crossed*/
+							AND (T.CurrentTimeAsTime >= BP.TimeFrom OR T.CurrentTimeAsTime <= BP.TimeTo )
+						) 
+					)
+			) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsBlackout
 FROM dbo.Instances I
 WHERE InstanceID = @InstanceID

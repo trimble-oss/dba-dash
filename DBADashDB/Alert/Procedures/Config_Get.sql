@@ -29,13 +29,16 @@ SELECT BP.BlackoutPeriodID,
 				WHEN CHOOSE(DATEPART(dw,TZ.CurrentTime),BP.Monday,BP.Tuesday,BP.Wednesday,BP.Thursday,BP.Friday,BP.Saturday,BP.Sunday) = CAST(0 AS BIT) 
 					THEN 'Not scheduled for ' + DATENAME(WEEKDAY,TZ.CurrentTime) + ' (' + BP.TimeZone + ')'
 				WHEN (CAST(TZ.CurrentTime AS TIME) < BP.TimeFrom OR CAST(TZ.CurrentTime AS TIME) > BP.TimeTo ) 
+						AND NOT (BP.TimeTo < BP.TimeFrom /* Crosses midnight boundary so either >= TimeFrom or < TimeTo */
+							AND (CAST(TZ.CurrentTime AS TIME) < BP.TimeTo OR CAST(TZ.CurrentTime AS TIME) >= BP.TimeFrom)
+							)
 					THEN 'Not scheduled for ' + FORMAT(TZ.CurrentTime,'HH:mm') + ' (' + BP.TimeZone + ')'
 		WHEN BP.TimeFrom IS NOT NULL OR BP.TimeTo IS NOT NULL 
 			THEN CONCAT(
 				'Active between ',
 				CONVERT(CHAR(5),ISNULL(BP.TimeFrom,'00:00'),114),
 				' and ',CONVERT(CHAR(5),ISNULL(BP.TimeTo,'00:00'),114),' (' + BP.TimeZone + ')',
-				IIF(DATEDIFF(d,GETUTCDATE(),BP.EndDate)>365,'',', (Ends in ' + HDEndsIn.HumanDuration + ')')
+				IIF(DATEDIFF(d,GETUTCDATE(),BP.EndDate)>365 OR BP.EndDate IS NULL,'',', (Ends in ' + HDEndsIn.HumanDuration + ')')
 			)
 		ELSE 'Active' + IIF(DATEDIFF(d,GETUTCDATE(),BP.EndDate)>365 OR BP.EndDate IS NULL,'',' (Ends in ' + HDEndsIn.HumanDuration + ')')  END AS CurrentStatus,
 		HDStartsIn.HumanDuration AS StartsIn,

@@ -367,11 +367,6 @@ namespace DBADashGUI.DBADashAlerts
             {
                 yield return new ValidationResult("Channel Name is required");
             }
-
-            foreach (var result in Schedules.SelectMany(schedule => schedule.ValidateSchedule(validationContext)))
-            {
-                yield return result;
-            }
         }
 
         public List<string> Placeholders => new List<string>

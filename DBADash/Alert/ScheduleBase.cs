@@ -26,14 +26,6 @@ namespace DBADash.Alert
             return sb.ToString();
         }
 
-        public IEnumerable<ValidationResult> ValidateSchedule(ValidationContext validationContext)
-        {
-            if (TimeFrom > TimeTo)
-            {
-                yield return new ValidationResult("TimeTo should be greater than TimeFrom");
-            }
-        }
-
         [Browsable(false)]
         public bool IsEveryDay => Monday && Tuesday && Wednesday && Thursday && Friday && Saturday && Sunday;
 
