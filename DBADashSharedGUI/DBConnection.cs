@@ -1,7 +1,7 @@
 ﻿using DBADashGUI.Theme;
+using DBADashSharedGUI;
 using Microsoft.Data.SqlClient;
 using System.Runtime.Versioning;
-using DBADashSharedGUI;
 
 namespace DBADash
 {
@@ -63,43 +63,45 @@ namespace DBADash
             cboEncryption.ValueMember = "Key";
         }
 
+        private string GetConnectionString()
+        {
+            var builder = new SqlConnectionStringBuilder(connectionString)
+            {
+                UserID = txtUserName.Text,
+                Password = txtPassword.Text,
+                Authentication = SelectedAuthenticationMethod,
+                DataSource = txtServerName.Text,
+                InitialCatalog = cboDatabase.Text,
+                Encrypt = SelectedEncryptionOption,
+                TrustServerCertificate = chkTrustServerCert.Checked,
+                HostNameInCertificate = txtHostNameInCertificate.Text
+            };
+            if (SelectedAuthenticationMethod == SqlAuthenticationMethod.NotSpecified)
+            {
+                builder.IntegratedSecurity = true;
+            }
+            if (!IsPasswordSupported || string.IsNullOrEmpty(txtPassword.Text))
+            {
+                builder.Remove("Password");
+                builder.Remove("PWD");
+            }
+            if (!IsUserNameSupported || string.IsNullOrEmpty(txtUserName.Text))
+            {
+                builder.Remove("UID");
+                builder.Remove("UserID");
+            }
+
+            return builder.ConnectionString;
+        }
+
         public string ConnectionString
         {
-            get
-            {
-                var builder = new SqlConnectionStringBuilder(connectionString)
-                {
-                    UserID = txtUserName.Text,
-                    Password = txtPassword.Text,
-                    Authentication = SelectedAuthenticationMethod,
-                    DataSource = txtServerName.Text,
-                    InitialCatalog = cboDatabase.Text,
-                    Encrypt = SelectedEncryptionOption,
-                    TrustServerCertificate = chkTrustServerCert.Checked,
-                    HostNameInCertificate = txtHostNameInCertificate.Text
-                };
-                if(SelectedAuthenticationMethod == SqlAuthenticationMethod.NotSpecified)
-                {
-                    builder.IntegratedSecurity = true;
-                }
-                if (!IsPasswordSupported || string.IsNullOrEmpty(txtPassword.Text))
-                {
-                    builder.Remove("Password");
-                    builder.Remove("PWD");
-                }
-                if (!IsUserNameSupported || string.IsNullOrEmpty(txtUserName.Text))
-                {
-                    builder.Remove("UID");
-                    builder.Remove("UserID");
-                }
-
-                return builder.ConnectionString;
-            }
+            get => tab.SelectedTab == tabBasic ? GetConnectionString() : ((SqlConnectionStringBuilder)propertyGrid1.SelectedObject).ConnectionString;
             set
             {
                 connectionString = value;
                 var builder = new SqlConnectionStringBuilder(connectionString);
-                if(builder.Authentication == SqlAuthenticationMethod.NotSpecified && !string.IsNullOrEmpty(builder.UserID))
+                if (builder.Authentication == SqlAuthenticationMethod.NotSpecified && !string.IsNullOrEmpty(builder.UserID))
                 {
                     builder.Authentication = SqlAuthenticationMethod.SqlPassword;
                 }
@@ -107,7 +109,7 @@ namespace DBADash
                 {
                     cboAuthType.SelectedValue = builder.Authentication;
                 }
-  
+
                 cboDatabase.Text = builder.InitialCatalog;
                 txtUserName.Text = builder.UserID ?? string.Empty;
                 txtPassword.Text = builder.Password;
@@ -116,6 +118,7 @@ namespace DBADash
                 cboEncryption.SelectedValue = builder.Encrypt;
                 txtHostNameInCertificate.Text = builder.HostNameInCertificate;
                 lnkOptions.Text = string.IsNullOrEmpty(OtherConnectionOptions) ? "{Other Options}" : OtherConnectionOptions.Truncate(40, true);
+                toolTip1.SetToolTip(lnkOptions, OtherConnectionOptions);
             }
         }
 
@@ -293,6 +296,21 @@ namespace DBADash
             }
 
             return builder.ConnectionString;
+        }
+
+        private void bttnAdvanced_Click(object sender, EventArgs e)
+        {
+            tab.SelectedTab = tab.SelectedTab == tabAdvanced ? tabBasic : tabAdvanced;
+            bttnAdvanced.Text = tab.SelectedTab == tabAdvanced ? "Basic" : "Advanced";
+            if (tab.SelectedTab == tabAdvanced)
+            {
+                var builder = new SqlConnectionStringBuilder(GetConnectionString());
+                propertyGrid1.SelectedObject = builder;
+            }
+            else
+            {
+                ConnectionString = ((SqlConnectionStringBuilder)propertyGrid1.SelectedObject).ConnectionString;
+            }
         }
     }
 }

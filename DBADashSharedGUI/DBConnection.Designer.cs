@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DBConnection));
             txtServerName = new TextBox();
             lblServer = new Label();
@@ -53,11 +54,22 @@
             txtHostNameInCertificate = new TextBox();
             label9 = new Label();
             lnkOptions = new LinkLabel();
+            bttnAdvanced = new Button();
+            tab = new TabControl();
+            tabBasic = new TabPage();
+            tabAdvanced = new TabPage();
+            propertyGrid1 = new PropertyGrid();
+            panel1 = new Panel();
+            toolTip1 = new ToolTip(components);
+            tab.SuspendLayout();
+            tabBasic.SuspendLayout();
+            tabAdvanced.SuspendLayout();
+            panel1.SuspendLayout();
             SuspendLayout();
             // 
             // txtServerName
             // 
-            txtServerName.Location = new Point(274, 34);
+            txtServerName.Location = new Point(262, 28);
             txtServerName.Margin = new Padding(3, 4, 3, 4);
             txtServerName.Name = "txtServerName";
             txtServerName.Size = new Size(279, 27);
@@ -67,7 +79,7 @@
             // lblServer
             // 
             lblServer.AutoSize = true;
-            lblServer.Location = new Point(83, 37);
+            lblServer.Location = new Point(71, 31);
             lblServer.Name = "lblServer";
             lblServer.Size = new Size(97, 20);
             lblServer.TabIndex = 1;
@@ -75,7 +87,7 @@
             // 
             // txtPassword
             // 
-            txtPassword.Location = new Point(274, 138);
+            txtPassword.Location = new Point(262, 132);
             txtPassword.Margin = new Padding(3, 4, 3, 4);
             txtPassword.Name = "txtPassword";
             txtPassword.PasswordChar = '*';
@@ -85,7 +97,7 @@
             // lblPassword
             // 
             lblPassword.AutoSize = true;
-            lblPassword.Location = new Point(113, 141);
+            lblPassword.Location = new Point(101, 135);
             lblPassword.Name = "lblPassword";
             lblPassword.Size = new Size(73, 20);
             lblPassword.TabIndex = 3;
@@ -94,7 +106,7 @@
             // lblUserName
             // 
             lblUserName.AutoSize = true;
-            lblUserName.Location = new Point(113, 106);
+            lblUserName.Location = new Point(101, 100);
             lblUserName.Name = "lblUserName";
             lblUserName.Size = new Size(82, 20);
             lblUserName.TabIndex = 2;
@@ -102,7 +114,7 @@
             // 
             // txtUserName
             // 
-            txtUserName.Location = new Point(274, 103);
+            txtUserName.Location = new Point(262, 97);
             txtUserName.Margin = new Padding(3, 4, 3, 4);
             txtUserName.Name = "txtUserName";
             txtUserName.Size = new Size(279, 27);
@@ -111,7 +123,7 @@
             // bttnConnect
             // 
             bttnConnect.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            bttnConnect.Location = new Point(355, 463);
+            bttnConnect.Location = new Point(367, 13);
             bttnConnect.Margin = new Padding(3, 4, 3, 4);
             bttnConnect.Name = "bttnConnect";
             bttnConnect.Size = new Size(94, 29);
@@ -124,7 +136,7 @@
             // 
             bttnCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             bttnCancel.DialogResult = DialogResult.Cancel;
-            bttnCancel.Location = new Point(455, 463);
+            bttnCancel.Location = new Point(467, 13);
             bttnCancel.Margin = new Padding(3, 4, 3, 4);
             bttnCancel.Name = "bttnCancel";
             bttnCancel.Size = new Size(94, 29);
@@ -136,7 +148,7 @@
             // cboDatabase
             // 
             cboDatabase.FormattingEnabled = true;
-            cboDatabase.Location = new Point(270, 375);
+            cboDatabase.Location = new Point(258, 369);
             cboDatabase.Margin = new Padding(3, 4, 3, 4);
             cboDatabase.Name = "cboDatabase";
             cboDatabase.Size = new Size(279, 28);
@@ -146,7 +158,7 @@
             // lblDatabase
             // 
             lblDatabase.AutoSize = true;
-            lblDatabase.Location = new Point(79, 383);
+            lblDatabase.Location = new Point(67, 377);
             lblDatabase.Name = "lblDatabase";
             lblDatabase.Size = new Size(75, 20);
             lblDatabase.TabIndex = 7;
@@ -155,7 +167,7 @@
             // chkTrustServerCert
             // 
             chkTrustServerCert.AutoSize = true;
-            chkTrustServerCert.Location = new Point(274, 256);
+            chkTrustServerCert.Location = new Point(262, 250);
             chkTrustServerCert.Name = "chkTrustServerCert";
             chkTrustServerCert.Size = new Size(179, 24);
             chkTrustServerCert.TabIndex = 5;
@@ -165,7 +177,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(83, 71);
+            label3.Location = new Point(71, 65);
             label3.Name = "label3";
             label3.Size = new Size(109, 20);
             label3.TabIndex = 10;
@@ -176,7 +188,7 @@
             cboAuthType.DropDownStyle = ComboBoxStyle.DropDownList;
             cboAuthType.FormattingEnabled = true;
             cboAuthType.Items.AddRange(new object[] { "Windows Authentication", "SQL Server Authentication", "Microsoft Entra MFA" });
-            cboAuthType.Location = new Point(274, 68);
+            cboAuthType.Location = new Point(262, 62);
             cboAuthType.Name = "cboAuthType";
             cboAuthType.Size = new Size(279, 28);
             cboAuthType.TabIndex = 1;
@@ -185,7 +197,7 @@
             // cboEncryption
             // 
             cboEncryption.FormattingEnabled = true;
-            cboEncryption.Location = new Point(274, 221);
+            cboEncryption.Location = new Point(262, 215);
             cboEncryption.Margin = new Padding(3, 4, 3, 4);
             cboEncryption.Name = "cboEncryption";
             cboEncryption.Size = new Size(279, 28);
@@ -195,7 +207,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(83, 224);
+            label1.Location = new Point(71, 218);
             label1.Name = "label1";
             label1.Size = new Size(82, 20);
             label1.TabIndex = 13;
@@ -204,7 +216,7 @@
             // label2
             // 
             label2.BorderStyle = BorderStyle.Fixed3D;
-            label2.Location = new Point(168, 193);
+            label2.Location = new Point(156, 187);
             label2.Name = "label2";
             label2.Size = new Size(402, 2);
             label2.TabIndex = 2;
@@ -212,7 +224,7 @@
             // label4
             // 
             label4.BorderStyle = BorderStyle.Fixed3D;
-            label4.Location = new Point(70, 352);
+            label4.Location = new Point(58, 346);
             label4.Name = "label4";
             label4.Size = new Size(500, 2);
             label4.TabIndex = 16;
@@ -220,7 +232,7 @@
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(18, 184);
+            label5.Location = new Point(6, 178);
             label5.Name = "label5";
             label5.Size = new Size(140, 20);
             label5.TabIndex = 17;
@@ -229,7 +241,7 @@
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new Point(18, 9);
+            label6.Location = new Point(6, 3);
             label6.Name = "label6";
             label6.Size = new Size(50, 20);
             label6.TabIndex = 18;
@@ -238,7 +250,7 @@
             // label7
             // 
             label7.BorderStyle = BorderStyle.Fixed3D;
-            label7.Location = new Point(74, 18);
+            label7.Location = new Point(62, 12);
             label7.Name = "label7";
             label7.Size = new Size(496, 2);
             label7.TabIndex = 19;
@@ -246,7 +258,7 @@
             // label8
             // 
             label8.AutoSize = true;
-            label8.Location = new Point(18, 343);
+            label8.Location = new Point(6, 337);
             label8.Name = "label8";
             label8.Size = new Size(46, 20);
             label8.TabIndex = 20;
@@ -254,7 +266,7 @@
             // 
             // txtHostNameInCertificate
             // 
-            txtHostNameInCertificate.Location = new Point(274, 286);
+            txtHostNameInCertificate.Location = new Point(262, 280);
             txtHostNameInCertificate.Name = "txtHostNameInCertificate";
             txtHostNameInCertificate.Size = new Size(279, 27);
             txtHostNameInCertificate.TabIndex = 6;
@@ -262,7 +274,7 @@
             // label9
             // 
             label9.AutoSize = true;
-            label9.Location = new Point(83, 289);
+            label9.Location = new Point(71, 283);
             label9.Name = "label9";
             label9.Size = new Size(170, 20);
             label9.TabIndex = 22;
@@ -271,7 +283,7 @@
             // lnkOptions
             // 
             lnkOptions.AutoSize = true;
-            lnkOptions.Location = new Point(267, 414);
+            lnkOptions.Location = new Point(255, 408);
             lnkOptions.Name = "lnkOptions";
             lnkOptions.Size = new Size(112, 20);
             lnkOptions.TabIndex = 23;
@@ -279,37 +291,101 @@
             lnkOptions.Text = "{Other Options}";
             lnkOptions.LinkClicked += lnkOptions_LinkClicked;
             // 
+            // bttnAdvanced
+            // 
+            bttnAdvanced.Location = new Point(12, 13);
+            bttnAdvanced.Name = "bttnAdvanced";
+            bttnAdvanced.Size = new Size(94, 29);
+            bttnAdvanced.TabIndex = 24;
+            bttnAdvanced.Text = "Advanced";
+            bttnAdvanced.UseVisualStyleBackColor = true;
+            bttnAdvanced.Click += bttnAdvanced_Click;
+            // 
+            // tab
+            // 
+            tab.Appearance = TabAppearance.FlatButtons;
+            tab.Controls.Add(tabBasic);
+            tab.Controls.Add(tabAdvanced);
+            tab.Dock = DockStyle.Fill;
+            tab.ItemSize = new Size(0, 1);
+            tab.Location = new Point(0, 0);
+            tab.Name = "tab";
+            tab.SelectedIndex = 0;
+            tab.Size = new Size(588, 453);
+            tab.SizeMode = TabSizeMode.Fixed;
+            tab.TabIndex = 25;
+            // 
+            // tabBasic
+            // 
+            tabBasic.Controls.Add(label6);
+            tabBasic.Controls.Add(txtServerName);
+            tabBasic.Controls.Add(lnkOptions);
+            tabBasic.Controls.Add(lblServer);
+            tabBasic.Controls.Add(label9);
+            tabBasic.Controls.Add(cboDatabase);
+            tabBasic.Controls.Add(txtHostNameInCertificate);
+            tabBasic.Controls.Add(lblDatabase);
+            tabBasic.Controls.Add(label8);
+            tabBasic.Controls.Add(lblUserName);
+            tabBasic.Controls.Add(label7);
+            tabBasic.Controls.Add(label3);
+            tabBasic.Controls.Add(lblPassword);
+            tabBasic.Controls.Add(label5);
+            tabBasic.Controls.Add(txtUserName);
+            tabBasic.Controls.Add(label4);
+            tabBasic.Controls.Add(cboAuthType);
+            tabBasic.Controls.Add(label1);
+            tabBasic.Controls.Add(txtPassword);
+            tabBasic.Controls.Add(label2);
+            tabBasic.Controls.Add(cboEncryption);
+            tabBasic.Controls.Add(chkTrustServerCert);
+            tabBasic.Location = new Point(4, 5);
+            tabBasic.Name = "tabBasic";
+            tabBasic.Padding = new Padding(3);
+            tabBasic.Size = new Size(580, 444);
+            tabBasic.TabIndex = 0;
+            tabBasic.Text = "tabPage1";
+            tabBasic.UseVisualStyleBackColor = true;
+            // 
+            // tabAdvanced
+            // 
+            tabAdvanced.Controls.Add(propertyGrid1);
+            tabAdvanced.Location = new Point(4, 5);
+            tabAdvanced.Name = "tabAdvanced";
+            tabAdvanced.Padding = new Padding(3);
+            tabAdvanced.Size = new Size(580, 444);
+            tabAdvanced.TabIndex = 1;
+            tabAdvanced.Text = "Advanced";
+            tabAdvanced.UseVisualStyleBackColor = true;
+            // 
+            // propertyGrid1
+            // 
+            propertyGrid1.Dock = DockStyle.Fill;
+            propertyGrid1.Location = new Point(3, 3);
+            propertyGrid1.Name = "propertyGrid1";
+            propertyGrid1.Size = new Size(574, 438);
+            propertyGrid1.TabIndex = 0;
+            // 
+            // panel1
+            // 
+            panel1.Controls.Add(bttnConnect);
+            panel1.Controls.Add(bttnCancel);
+            panel1.Controls.Add(bttnAdvanced);
+            panel1.Dock = DockStyle.Bottom;
+            panel1.Location = new Point(0, 453);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(588, 55);
+            panel1.TabIndex = 26;
+            // 
             // DBConnection
             // 
             AcceptButton = bttnConnect;
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = bttnCancel;
-            ClientSize = new Size(591, 508);
-            Controls.Add(lnkOptions);
-            Controls.Add(label9);
-            Controls.Add(txtHostNameInCertificate);
-            Controls.Add(label8);
-            Controls.Add(label7);
-            Controls.Add(label6);
-            Controls.Add(label5);
-            Controls.Add(label4);
-            Controls.Add(label1);
-            Controls.Add(label2);
-            Controls.Add(chkTrustServerCert);
-            Controls.Add(cboEncryption);
-            Controls.Add(txtPassword);
-            Controls.Add(cboAuthType);
-            Controls.Add(txtUserName);
-            Controls.Add(lblPassword);
-            Controls.Add(label3);
-            Controls.Add(lblUserName);
-            Controls.Add(lblDatabase);
-            Controls.Add(cboDatabase);
-            Controls.Add(bttnCancel);
-            Controls.Add(bttnConnect);
-            Controls.Add(lblServer);
-            Controls.Add(txtServerName);
+            ClientSize = new Size(588, 508);
+            Controls.Add(tab);
+            Controls.Add(panel1);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(3, 4, 3, 4);
@@ -319,8 +395,12 @@
             StartPosition = FormStartPosition.CenterParent;
             Text = "Connect";
             Load += DBConnection_Load;
+            tab.ResumeLayout(false);
+            tabBasic.ResumeLayout(false);
+            tabBasic.PerformLayout();
+            tabAdvanced.ResumeLayout(false);
+            panel1.ResumeLayout(false);
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
@@ -349,5 +429,12 @@
         private TextBox txtHostNameInCertificate;
         private Label label9;
         private LinkLabel lnkOptions;
+        private Button bttnAdvanced;
+        private TabControl tab;
+        private TabPage tabBasic;
+        private TabPage tabAdvanced;
+        private Panel panel1;
+        private PropertyGrid propertyGrid1;
+        private ToolTip toolTip1;
     }
 }
