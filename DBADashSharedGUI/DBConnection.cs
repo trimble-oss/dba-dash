@@ -35,8 +35,9 @@ namespace DBADash
         private static Dictionary<SqlAuthenticationMethod, string> AuthenticationMethods =>
             new()
             {
-                { SqlAuthenticationMethod.ActiveDirectoryIntegrated, "Windows Authentication" },
+                { SqlAuthenticationMethod.NotSpecified, "Windows Authentication"},
                 { SqlAuthenticationMethod.SqlPassword, "SQL Server Authentication" },
+                { SqlAuthenticationMethod.ActiveDirectoryIntegrated, "Microsoft Entra Integrated" },
                 { SqlAuthenticationMethod.ActiveDirectoryInteractive, "Microsoft Entra MFA" },
                 { SqlAuthenticationMethod.ActiveDirectoryPassword ,"Microsoft Entra Password"},
                 { SqlAuthenticationMethod.ActiveDirectoryServicePrincipal, "Microsoft Entra Service Principal" },
@@ -77,7 +78,10 @@ namespace DBADash
                     TrustServerCertificate = chkTrustServerCert.Checked,
                     HostNameInCertificate = txtHostNameInCertificate.Text
                 };
-
+                if(SelectedAuthenticationMethod == SqlAuthenticationMethod.NotSpecified)
+                {
+                    builder.IntegratedSecurity = true;
+                }
                 if (!IsPasswordSupported || string.IsNullOrEmpty(txtPassword.Text))
                 {
                     builder.Remove("Password");
@@ -89,26 +93,23 @@ namespace DBADash
                     builder.Remove("UserID");
                 }
 
-                builder.Remove("Integrated Security"); // Replaced with Authentication
-
                 return builder.ConnectionString;
             }
             set
             {
                 connectionString = value;
                 var builder = new SqlConnectionStringBuilder(connectionString);
-
+                if(builder.Authentication == SqlAuthenticationMethod.NotSpecified && !string.IsNullOrEmpty(builder.UserID))
+                {
+                    builder.Authentication = SqlAuthenticationMethod.SqlPassword;
+                }
                 if (AuthenticationMethods.ContainsKey(builder.Authentication))
                 {
                     cboAuthType.SelectedValue = builder.Authentication;
                 }
-                else if (builder.Authentication == SqlAuthenticationMethod.NotSpecified)
-                {
-                    cboAuthType.SelectedValue = builder.IntegratedSecurity ? SqlAuthenticationMethod.ActiveDirectoryIntegrated : SqlAuthenticationMethod.SqlPassword;
-                }
-
+  
                 cboDatabase.Text = builder.InitialCatalog;
-                txtUserName.Text = builder.UserID;
+                txtUserName.Text = builder.UserID ?? string.Empty;
                 txtPassword.Text = builder.Password;
                 txtServerName.Text = builder.DataSource;
                 chkTrustServerCert.Checked = builder.TrustServerCertificate;
