@@ -80,6 +80,10 @@ namespace DBADash
             {
                 builder.IntegratedSecurity = true;
             }
+            else
+            {
+                builder.Remove("Integrated Security");
+            }
             if (!IsPasswordSupported || string.IsNullOrEmpty(txtPassword.Text))
             {
                 builder.Remove("Password");
