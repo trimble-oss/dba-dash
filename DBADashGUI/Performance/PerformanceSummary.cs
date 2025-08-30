@@ -374,7 +374,7 @@ namespace DBADashGUI.Performance
             if (e.RowIndex >= 0 && e.ColumnIndex == 0)
             {
                 var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (int)row["InstanceID"], Tab = "tabPerformance" });
+                Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (int)row["InstanceID"], Tab = Tabs.Performance});
             }
         }
 

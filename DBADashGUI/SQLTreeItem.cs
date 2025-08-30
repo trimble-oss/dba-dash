@@ -1,18 +1,15 @@
 ﻿using DBADash;
+using DBADashGUI.AgentJobs;
 using DBADashGUI.CustomReports;
 using DBADashGUI.DBADashAlerts;
 using DBADashGUI.Properties;
-using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Windows.Forms;
-using DBADashGUI.AgentJobs;
-using DBADashGUI.CommunityTools;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace DBADashGUI
 {
@@ -683,83 +680,43 @@ namespace DBADashGUI
 
         private async void FindDatabase(object sender, EventArgs e)
         {
-            const int MaxMatches = 10;
             var dbName = string.Empty;
             if (CommonShared.ShowInputDialog(ref dbName, "Find Database", default, "Enter database name") != DialogResult.OK || string.IsNullOrEmpty(dbName)) return;
-            try
+            ShowFindDatabaseDialog(dbName);
+            //await FindDatabaseLegacy(dbName);
+        }
+
+        private static CustomReportViewer databaseFinderDialog;
+        private int? databaseFinderWidth;
+        private int? databaseFinderHeight;
+
+        private void ShowFindDatabaseDialog(string dbName)
+        {
+            databaseFinderDialog?.Close();
+            var report = SystemReports.DatabaseFinder;
+            var tempContext = (DBADashContext)Context.DeepCopy();
+            tempContext.Report = report;
+            databaseFinderWidth ??= Convert.ToInt32(Math.Max(Main.MainFormInstance.Width * 0.7, 800));
+            databaseFinderHeight ??= Convert.ToInt32(Math.Max(Main.MainFormInstance.Height * 0.7, 600));
+            var sqlParams = report.GetCustomSqlParameters();
+            var pSearchString = sqlParams.First(p => p.Param.ParameterName == "@SearchString");
+            pSearchString.UseDefaultValue = false;
+            pSearchString.Param.Value = "%" + dbName + "%";
+            databaseFinderDialog = new CustomReportViewer
             {
-                var dbs = await CommonData.GetDatabasesAsync(Context.InstanceIDs, dbName);
-
-                if (dbs.Count > 0)
-                {
-                    var foundCount = 0;
-                    foreach (var db in dbs)
-                    {
-                        var instanceNode = FindInstance(db.InstanceID);
-                        if (instanceNode == null) continue;
-                        if (!instanceNode.Parent.IsExpanded)
-                        {
-                            instanceNode.Parent.Expand();
-                        }
-                        instanceNode.Expand();
-                        SQLTreeItem dbNode;
-                        if (instanceNode.Type == TreeType.AzureDatabase)
-                        {
-                            dbNode = instanceNode;
-                        }
-                        else
-                        {
-                            var dbFolder = instanceNode.FindChildOfType(TreeType.DatabasesFolder);
-                            dbFolder.Expand();
-                            var systemDbs = dbFolder.FindChildOfType(TreeType.Folder);
-                            dbNode = dbFolder.Nodes.OfType<SQLTreeItem>().FirstOrDefault(
-                                n => n.DatabaseID == db.DatabaseID,
-                                systemDbs.Nodes.OfType<SQLTreeItem>()
-
-                                    .FirstOrDefault(n => n.DatabaseID == db.DatabaseID));
-                            if (dbNode == null) continue;
-                            if (dbNode.Parent == systemDbs)
-                            {
-                                systemDbs.Expand();
-                            }
-
-                            dbNode.Expand();
-                        }
-
-                        dbNode.NodeFont = new Font(this.TreeView.Font, FontStyle.Bold);
-                        dbNode.Text = dbNode.Text; // Fix for text truncation after applying bold font
-                        if (foundCount == 0)
-                        {
-                            this.TreeView.SelectedNode = dbNode; // Select the first match
-                        }
-                        foundCount++;
-                        if (foundCount >= MaxMatches)
-                        {
-                            MessageBox.Show(
-                                $"Search returned {dbs.Count} matches.  Highlighting the top {foundCount} databases",
-                                "Find Database", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            break;
-                        }
-                    }
-
-                    var selectedNode = (SQLTreeItem)(this.TreeView.SelectedNode);
-                    MessageBox.Show($"Found {foundCount} database(s).\nSelected {selectedNode.DatabaseName} on {selectedNode.InstanceName}", "Find Database", MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
-                }
-                else
-                {
-                    MessageBox.Show("Database not found", "Find Database", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-                }
-            }
-            catch (SqlException ex)
+                Context = tempContext,
+                Width = databaseFinderWidth.Value,
+                Height = databaseFinderHeight.Value,
+                CustomParams = sqlParams
+            };
+            databaseFinderDialog.SizeChanged += (s, e) =>
             {
-                CommonShared.ShowExceptionDialog(ex, "Error finding database");
-            }
-            catch (Exception ex)
-            {
-                CommonShared.ShowExceptionDialog(ex, "Error finding database. Try refreshing the tree");
-            }
+                if (databaseFinderDialog.WindowState is FormWindowState.Maximized or FormWindowState.Minimized) return;
+                databaseFinderWidth = databaseFinderDialog.Width;
+                databaseFinderHeight = databaseFinderDialog.Height;
+            };
+            databaseFinderDialog.FormClosed += (s, e) => databaseFinderDialog = null;
+            databaseFinderDialog.Show();
         }
 
         private void MnuRefresh_Click(object sender, EventArgs e)

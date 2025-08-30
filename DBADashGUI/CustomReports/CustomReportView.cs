@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Management.Automation;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,7 +33,9 @@ namespace DBADashGUI.CustomReports
         public static DataGridView Grid => new(); // dgv;
         public ToolStripStatusLabel StatusLabel => lblDescription;
         private DBADashContext context;
+
         public CustomReport Report { get; set; }
+
         private List<CustomSqlParameter> customParams = new();
         private CancellationTokenSource cancellationTokenSource;
         private Guid CurrentMessageGroup;
@@ -1159,19 +1163,60 @@ namespace DBADashGUI.CustomReports
                     param.Param.Value = picker.DefaultValue;
                     param.UseDefaultValue = false;
                 }
-                var pickerMenu = new ToolStripMenuItem(picker.Name);
-                foreach (var itm in picker.PickerItems)
-                {
-                    var item = new ToolStripMenuItem(itm.Value)
-                    {
-                        Tag = itm.Key,
-                        Checked = (param.UseDefaultValue && string.IsNullOrEmpty(itm.Key.ToString())) || (!param.UseDefaultValue && param.Param.Value != null && param.Param.Value.ToString() == itm.Key.ToString())
-                    };
-                    item.Click += (sender, e) => PickerItem_Click(sender, itm, picker.ParameterName);
-                    pickerMenu.DropDownItems.Add(item);
-                }
 
-                tsParams.DropDownItems.Add(pickerMenu);
+                if (picker.IsText)
+                {
+                    var txtItem = new ToolStripTextBox();
+                    txtItem.Text = param.Param.Value?.ToString() ?? picker.DefaultValue?.ToString() ?? string.Empty;
+
+                    txtItem.TextChanged += (_, _) =>
+                    {
+                        param.Param.Value = txtItem.Text;
+                        param.UseDefaultValue = false;
+                    };
+                    txtItem.KeyDown += (_, args) =>
+                    {
+                        if (args.KeyData == Keys.Enter && AutoLoad)
+                        {
+                            RefreshData();
+                        }
+                    };
+                    if (picker.MenuBar)
+                    {
+                        var lbl = new ToolStripLabel(picker.Name + ":");
+                        var baseIdx = toolStrip1.Items.IndexOf(tsParams);
+                        toolStrip1.Items.Insert(baseIdx + 1, lbl);
+                        toolStrip1.Items.Insert(baseIdx + 2, txtItem);
+                    }
+                    else
+                    {
+                        var pickerMenu = new ToolStripMenuItem(picker.Name);
+                        pickerMenu.DropDownItems.Add(txtItem);
+                        tsParams.DropDownItems.Add(pickerMenu);
+                    }
+                }
+                else
+                {
+                    var pickerMenu = new ToolStripMenuItem(picker.Name);
+                    foreach (var itm in picker.PickerItems ?? new Dictionary<object, string>())
+                    {
+                        var item = new ToolStripMenuItem(itm.Value)
+                        {
+                            Tag = itm.Key,
+                            Checked = (param.UseDefaultValue && string.IsNullOrEmpty(itm.Key.ToString())) || (!param.UseDefaultValue && param.Param.Value != null && param.Param.Value.ToString() == itm.Key.ToString())
+                        };
+                        item.Click += (sender, e) => PickerItem_Click(sender, itm, picker.ParameterName);
+                        pickerMenu.DropDownItems.Add(item);
+                    }
+                    if (picker.MenuBar)
+                    {
+                        toolStrip1.Items.Add(pickerMenu);
+                    }
+                    else
+                    {
+                        tsParams.DropDownItems.Add(pickerMenu);
+                    }
+                }
             }
 
             tsParams.DropDownItems.Add(new ToolStripSeparator());
@@ -1396,7 +1441,7 @@ namespace DBADashGUI.CustomReports
             Report.CustomReportResults[dgv.ResultSetID].LinkColumns?.TryGetValue(colName, out linkColumnInfo);
             try
             {
-                linkColumnInfo?.Navigate(GetContext(), dgv.Rows[e.RowIndex], dgv.ResultSetID);
+                linkColumnInfo?.Navigate(GetContext(), dgv.Rows[e.RowIndex], dgv.ResultSetID, this);
             }
             catch (Exception ex)
             {

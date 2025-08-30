@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,14 +10,14 @@ namespace DBADashGUI.CustomReports
 {
     public abstract class LinkColumnInfo
     {
-        public abstract void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex);
+        public abstract void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender);
     }
 
     public class UrlLinkColumnInfo : LinkColumnInfo
     {
         public string TargetColumn { get; set; }
 
-        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex)
+        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
         {
             var url = row.Cells[TargetColumn].Value.DBNullToNull().ToString() ?? string.Empty;
             try
@@ -66,7 +67,7 @@ namespace DBADashGUI.CustomReports
             }
         }
 
-        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex)
+        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
         {
             var text = row.Cells[TargetColumn].Value.DBNullToNull() as string;
             if (string.IsNullOrEmpty(text)) return;
@@ -78,7 +79,7 @@ namespace DBADashGUI.CustomReports
     {
         public string TargetColumn { get; set; }
 
-        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex)
+        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
         {
             var queryPlan = row.Cells[TargetColumn].Value.DBNullToNull() as string;
             if (!Common.IsValidExecutionPlan(queryPlan))
@@ -94,7 +95,7 @@ namespace DBADashGUI.CustomReports
     {
         public string TargetColumn { get; set; }
 
-        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex)
+        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
         {
             var dlGraph = row.Cells[TargetColumn].Value.DBNullToNull() as string;
             if (!Common.IsValidDeadlockGraph(dlGraph))
@@ -114,7 +115,7 @@ namespace DBADashGUI.CustomReports
 
         private CustomReportViewer customReportViewer;
 
-        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex)
+        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
         {
             customReportViewer?.Close();
             var report = context.Report is SystemReport ? CustomReports.SystemReports.FirstOrDefault(r => r.ProcedureName == ReportProcedureName) : CustomReports.GetCustomReports().FirstOrDefault(r => r.ProcedureName == ReportProcedureName);
@@ -142,6 +143,44 @@ namespace DBADashGUI.CustomReports
             customReportViewer = new CustomReportViewer() { Context = newContext, CustomParams = customParams };
             customReportViewer.FormClosed += (s, e) => customReportViewer = null;
             customReportViewer.Show();
+        }
+    }
+
+    public class NavigateTreeLinkColumnInfo : LinkColumnInfo
+    {
+        public string InstanceColumn { get; set; }
+        public string DatabaseColumn { get; set; }
+
+        [JsonConverter(typeof(StringEnumConverter))]
+        public Main.Tabs Tab { get; set; }
+
+        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
+        {
+            var main = Main.MainFormInstance;
+            if (main == null) return;
+            var ownerSet = false;
+            if (sender.ParentForm !=main && sender.ParentForm is { Owner: null }) // Setting the owner keeps the window on top of the main form
+            {
+                sender.ParentForm.Owner = main;
+                ownerSet = true;
+            }
+
+            var instanceId = row.Cells[InstanceColumn].Value.DBNullToNull() as int?;
+            var instanceName = row.Cells[InstanceColumn].Value.DBNullToNull() as string;
+            var args = new Main.InstanceSelectedEventArgs()
+            {
+                InstanceID = instanceId ?? 0,
+                Instance = instanceName,
+                Database = string.IsNullOrEmpty(DatabaseColumn) ? null : row.Cells[DatabaseColumn].Value.DBNullToNull() as string,
+                Tab = Tab,
+                SearchFromRoot = true
+            };
+            main.Instance_Selected(sender, args);
+            Application.DoEvents(); // Complete actions that might be triggered by Instance_Selected before we unset the owner
+            if (ownerSet) // Undo setting the owner
+            {
+                sender.ParentForm.Owner = null;
+            }
         }
     }
 }

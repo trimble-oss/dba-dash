@@ -57,7 +57,7 @@ namespace DBADashGUI
             while (rdr.Read())
             {
                 results.Add(new DatabaseInfo(rdr.GetFieldValue<int>("InstanceID"), rdr.GetFieldValue<int>("DatabaseID"),
-                    rdr.GetFieldValue<string>("InstanceGroupName"), rdr.GetFieldValue<string>("DatabaseName")));
+                    rdr.GetFieldValue<string>("InstanceGroupName"), rdr.GetFieldValue<string>("Database")));
             }
             return results;
         }

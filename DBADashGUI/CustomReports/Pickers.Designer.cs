@@ -52,6 +52,7 @@
             optStandard = new System.Windows.Forms.RadioButton();
             groupBox2 = new System.Windows.Forms.GroupBox();
             lblDataType = new System.Windows.Forms.Label();
+            optText = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
             groupBox1.SuspendLayout();
             pnlQuery.SuspendLayout();
@@ -167,6 +168,7 @@
             // groupBox1
             // 
             groupBox1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBox1.Controls.Add(optText);
             groupBox1.Controls.Add(pnlQuery);
             groupBox1.Controls.Add(label6);
             groupBox1.Controls.Add(dgv);
@@ -305,6 +307,18 @@
             lblDataType.TabIndex = 19;
             lblDataType.Text = "Data Type:";
             // 
+            // optText
+            // 
+            optText.AutoSize = true;
+            optText.Location = new System.Drawing.Point(326, 96);
+            optText.Name = "optText";
+            optText.Size = new System.Drawing.Size(57, 24);
+            optText.TabIndex = 19;
+            optText.TabStop = true;
+            optText.Text = "Text";
+            optText.UseVisualStyleBackColor = true;
+            optText.Click += Type_Change;
+            // 
             // Pickers
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -356,5 +370,6 @@
         private System.Windows.Forms.TextBox txtValueColumn;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label lblDataType;
+        private System.Windows.Forms.RadioButton optText;
     }
 }
