@@ -50,6 +50,13 @@
             label1 = new System.Windows.Forms.Label();
             tabQueryPlan = new System.Windows.Forms.TabPage();
             label10 = new System.Windows.Forms.Label();
+            tabNavigateTree = new System.Windows.Forms.TabPage();
+            label12 = new System.Windows.Forms.Label();
+            cboTab = new System.Windows.Forms.ComboBox();
+            label11 = new System.Windows.Forms.Label();
+            label4 = new System.Windows.Forms.Label();
+            cboDatabaseNameCol = new System.Windows.Forms.ComboBox();
+            cboInstanceIDCol = new System.Windows.Forms.ComboBox();
             label5 = new System.Windows.Forms.Label();
             bttnOK = new System.Windows.Forms.Button();
             bttnCancel = new System.Windows.Forms.Button();
@@ -57,6 +64,7 @@
             label9 = new System.Windows.Forms.Label();
             txtLinkColumn = new System.Windows.Forms.TextBox();
             optQueryPlan = new System.Windows.Forms.RadioButton();
+            optNavigateTree = new System.Windows.Forms.RadioButton();
             tab1.SuspendLayout();
             tabNone.SuspendLayout();
             tabURL.SuspendLayout();
@@ -64,6 +72,7 @@
             tabDrillDown.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvMapping).BeginInit();
             tabQueryPlan.SuspendLayout();
+            tabNavigateTree.SuspendLayout();
             SuspendLayout();
             // 
             // optNone
@@ -120,10 +129,11 @@
             tab1.Controls.Add(tabText);
             tab1.Controls.Add(tabDrillDown);
             tab1.Controls.Add(tabQueryPlan);
+            tab1.Controls.Add(tabNavigateTree);
             tab1.Location = new System.Drawing.Point(14, 127);
             tab1.Name = "tab1";
             tab1.SelectedIndex = 0;
-            tab1.Size = new System.Drawing.Size(453, 292);
+            tab1.Size = new System.Drawing.Size(556, 292);
             tab1.TabIndex = 7;
             // 
             // tabNone
@@ -132,7 +142,7 @@
             tabNone.Location = new System.Drawing.Point(4, 29);
             tabNone.Name = "tabNone";
             tabNone.Padding = new System.Windows.Forms.Padding(3);
-            tabNone.Size = new System.Drawing.Size(445, 259);
+            tabNone.Size = new System.Drawing.Size(548, 259);
             tabNone.TabIndex = 0;
             tabNone.Text = "None";
             tabNone.UseVisualStyleBackColor = true;
@@ -142,7 +152,7 @@
             label2.Dock = System.Windows.Forms.DockStyle.Fill;
             label2.Location = new System.Drawing.Point(3, 3);
             label2.Name = "label2";
-            label2.Size = new System.Drawing.Size(439, 253);
+            label2.Size = new System.Drawing.Size(542, 253);
             label2.TabIndex = 0;
             label2.Text = "No link column";
             // 
@@ -153,7 +163,7 @@
             tabURL.Location = new System.Drawing.Point(4, 29);
             tabURL.Name = "tabURL";
             tabURL.Padding = new System.Windows.Forms.Padding(3);
-            tabURL.Size = new System.Drawing.Size(445, 259);
+            tabURL.Size = new System.Drawing.Size(548, 259);
             tabURL.TabIndex = 1;
             tabURL.Text = "URL";
             tabURL.UseVisualStyleBackColor = true;
@@ -164,7 +174,7 @@
             lblWarning.ForeColor = System.Drawing.Color.Red;
             lblWarning.Location = new System.Drawing.Point(3, 201);
             lblWarning.Name = "lblWarning";
-            lblWarning.Size = new System.Drawing.Size(439, 55);
+            lblWarning.Size = new System.Drawing.Size(542, 55);
             lblWarning.TabIndex = 1;
             lblWarning.Text = "Warning: Please use a trusted source for the link URL.  DBA Dash provides no guarantee that links are safe.";
             // 
@@ -173,7 +183,7 @@
             label6.Dock = System.Windows.Forms.DockStyle.Top;
             label6.Location = new System.Drawing.Point(3, 3);
             label6.Name = "label6";
-            label6.Size = new System.Drawing.Size(439, 81);
+            label6.Size = new System.Drawing.Size(542, 81);
             label6.TabIndex = 2;
             label6.Text = "Link will navigate to a URL\r\nEnsure the column specified as the Target Column provides a valid URL.";
             // 
@@ -184,7 +194,7 @@
             tabText.Controls.Add(label3);
             tabText.Location = new System.Drawing.Point(4, 29);
             tabText.Name = "tabText";
-            tabText.Size = new System.Drawing.Size(445, 259);
+            tabText.Size = new System.Drawing.Size(548, 259);
             tabText.TabIndex = 2;
             tabText.Text = "Text";
             tabText.UseVisualStyleBackColor = true;
@@ -224,7 +234,7 @@
             tabDrillDown.Location = new System.Drawing.Point(4, 29);
             tabDrillDown.Name = "tabDrillDown";
             tabDrillDown.Padding = new System.Windows.Forms.Padding(3);
-            tabDrillDown.Size = new System.Drawing.Size(445, 259);
+            tabDrillDown.Size = new System.Drawing.Size(548, 259);
             tabDrillDown.TabIndex = 3;
             tabDrillDown.Text = "Drill Down";
             tabDrillDown.UseVisualStyleBackColor = true;
@@ -239,7 +249,6 @@
             dgvMapping.Name = "dgvMapping";
             dgvMapping.RowHeadersVisible = false;
             dgvMapping.RowHeadersWidth = 51;
-            dgvMapping.RowTemplate.Height = 29;
             dgvMapping.Size = new System.Drawing.Size(329, 133);
             dgvMapping.TabIndex = 14;
             // 
@@ -248,7 +257,7 @@
             label8.Dock = System.Windows.Forms.DockStyle.Bottom;
             label8.Location = new System.Drawing.Point(3, 197);
             label8.Name = "label8";
-            label8.Size = new System.Drawing.Size(439, 59);
+            label8.Size = new System.Drawing.Size(542, 59);
             label8.TabIndex = 13;
             label8.Text = "Clicking will initiate a drill down action.  Report will be loaded with parameters mapped to column values as specified";
             // 
@@ -276,7 +285,7 @@
             tabQueryPlan.Location = new System.Drawing.Point(4, 29);
             tabQueryPlan.Name = "tabQueryPlan";
             tabQueryPlan.Padding = new System.Windows.Forms.Padding(3);
-            tabQueryPlan.Size = new System.Drawing.Size(445, 259);
+            tabQueryPlan.Size = new System.Drawing.Size(548, 259);
             tabQueryPlan.TabIndex = 4;
             tabQueryPlan.Text = "Query Plan";
             tabQueryPlan.UseVisualStyleBackColor = true;
@@ -286,9 +295,77 @@
             label10.Dock = System.Windows.Forms.DockStyle.Fill;
             label10.Location = new System.Drawing.Point(3, 3);
             label10.Name = "label10";
-            label10.Size = new System.Drawing.Size(439, 253);
+            label10.Size = new System.Drawing.Size(542, 253);
             label10.TabIndex = 1;
             label10.Text = "Query plan will be loaded in default app for *.sqlplan\r\n\r\nEnsure that the Target Column selected returns an XML query plan.";
+            // 
+            // tabNavigateTree
+            // 
+            tabNavigateTree.Controls.Add(label12);
+            tabNavigateTree.Controls.Add(cboTab);
+            tabNavigateTree.Controls.Add(label11);
+            tabNavigateTree.Controls.Add(label4);
+            tabNavigateTree.Controls.Add(cboDatabaseNameCol);
+            tabNavigateTree.Controls.Add(cboInstanceIDCol);
+            tabNavigateTree.Location = new System.Drawing.Point(4, 29);
+            tabNavigateTree.Name = "tabNavigateTree";
+            tabNavigateTree.Padding = new System.Windows.Forms.Padding(3);
+            tabNavigateTree.Size = new System.Drawing.Size(548, 259);
+            tabNavigateTree.TabIndex = 5;
+            tabNavigateTree.Text = "Navigate Tree";
+            tabNavigateTree.UseVisualStyleBackColor = true;
+            // 
+            // label12
+            // 
+            label12.AutoSize = true;
+            label12.Location = new System.Drawing.Point(19, 94);
+            label12.Name = "label12";
+            label12.Size = new System.Drawing.Size(32, 20);
+            label12.TabIndex = 12;
+            label12.Text = "Tab";
+            // 
+            // cboTab
+            // 
+            cboTab.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            cboTab.FormattingEnabled = true;
+            cboTab.Location = new System.Drawing.Point(240, 91);
+            cboTab.Name = "cboTab";
+            cboTab.Size = new System.Drawing.Size(193, 28);
+            cboTab.TabIndex = 11;
+            // 
+            // label11
+            // 
+            label11.AutoSize = true;
+            label11.Location = new System.Drawing.Point(19, 60);
+            label11.Name = "label11";
+            label11.Size = new System.Drawing.Size(166, 20);
+            label11.TabIndex = 10;
+            label11.Text = "Database name column";
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new System.Drawing.Point(19, 26);
+            label4.Name = "label4";
+            label4.Size = new System.Drawing.Size(178, 20);
+            label4.TabIndex = 9;
+            label4.Text = "Instance ID/name column";
+            // 
+            // cboDatabaseNameCol
+            // 
+            cboDatabaseNameCol.FormattingEnabled = true;
+            cboDatabaseNameCol.Location = new System.Drawing.Point(240, 57);
+            cboDatabaseNameCol.Name = "cboDatabaseNameCol";
+            cboDatabaseNameCol.Size = new System.Drawing.Size(193, 28);
+            cboDatabaseNameCol.TabIndex = 8;
+            // 
+            // cboInstanceIDCol
+            // 
+            cboInstanceIDCol.FormattingEnabled = true;
+            cboInstanceIDCol.Location = new System.Drawing.Point(240, 23);
+            cboInstanceIDCol.Name = "cboInstanceIDCol";
+            cboInstanceIDCol.Size = new System.Drawing.Size(193, 28);
+            cboInstanceIDCol.TabIndex = 7;
             // 
             // label5
             // 
@@ -302,7 +379,7 @@
             // bttnOK
             // 
             bttnOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            bttnOK.Location = new System.Drawing.Point(369, 425);
+            bttnOK.Location = new System.Drawing.Point(472, 425);
             bttnOK.Name = "bttnOK";
             bttnOK.Size = new System.Drawing.Size(94, 29);
             bttnOK.TabIndex = 12;
@@ -313,7 +390,7 @@
             // bttnCancel
             // 
             bttnCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            bttnCancel.Location = new System.Drawing.Point(269, 425);
+            bttnCancel.Location = new System.Drawing.Point(372, 425);
             bttnCancel.Name = "bttnCancel";
             bttnCancel.Size = new System.Drawing.Size(94, 29);
             bttnCancel.TabIndex = 13;
@@ -357,11 +434,24 @@
             optQueryPlan.Text = "Query Plan";
             optQueryPlan.UseVisualStyleBackColor = true;
             // 
+            // optNavigateTree
+            // 
+            optNavigateTree.AutoSize = true;
+            optNavigateTree.Location = new System.Drawing.Point(457, 12);
+            optNavigateTree.Name = "optNavigateTree";
+            optNavigateTree.Size = new System.Drawing.Size(122, 24);
+            optNavigateTree.TabIndex = 16;
+            optNavigateTree.TabStop = true;
+            optNavigateTree.Text = "Navigate Tree";
+            optNavigateTree.UseVisualStyleBackColor = true;
+            optNavigateTree.CheckedChanged += Opt_CheckedChanged;
+            // 
             // LinkColumnTypeSelector
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(479, 465);
+            ClientSize = new System.Drawing.Size(582, 465);
+            Controls.Add(optNavigateTree);
             Controls.Add(optQueryPlan);
             Controls.Add(txtLinkColumn);
             Controls.Add(label9);
@@ -388,6 +478,8 @@
             tabDrillDown.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvMapping).EndInit();
             tabQueryPlan.ResumeLayout(false);
+            tabNavigateTree.ResumeLayout(false);
+            tabNavigateTree.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -422,5 +514,13 @@
         private System.Windows.Forms.TabPage tabQueryPlan;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.DataGridView dgvMapping;
+        private System.Windows.Forms.TabPage tabNavigateTree;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.ComboBox cboTab;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ComboBox cboDatabaseNameCol;
+        private System.Windows.Forms.ComboBox cboInstanceIDCol;
+        private System.Windows.Forms.RadioButton optNavigateTree;
     }
 }

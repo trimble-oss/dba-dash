@@ -265,14 +265,14 @@ namespace DBADashGUI.DBADashAlerts
                     case "InstanceDisplayName":
                         var tab = alertType switch
                         {
-                            AlertRuleBase.RuleTypes.DriveSpace => "tabDrives",
-                            AlertRuleBase.RuleTypes.AGHealth => "tabAG",
-                            AlertRuleBase.RuleTypes.Counter => "tabPC",
-                            AlertRuleBase.RuleTypes.CollectionDates => "tabCollectionDates",
-                            AlertRuleBase.RuleTypes.AgentJob => "tabJobs",
-                            AlertRuleBase.RuleTypes.SQLAgentAlert => "tabSQLAgentAlerts",
-                            AlertRuleBase.RuleTypes.Offline => "tabOfflineInstances",
-                            _ => "tabPerformance"
+                            AlertRuleBase.RuleTypes.DriveSpace => Tabs.Drives,
+                            AlertRuleBase.RuleTypes.AGHealth => Tabs.AG,
+                            AlertRuleBase.RuleTypes.Counter => Tabs.Metrics,
+                            AlertRuleBase.RuleTypes.CollectionDates => Tabs.CollectionDates,
+                            AlertRuleBase.RuleTypes.AgentJob => Tabs.Jobs,
+                            AlertRuleBase.RuleTypes.SQLAgentAlert => Tabs.SQLAgentAlerts,
+                            AlertRuleBase.RuleTypes.Offline => Tabs.OfflineInstances,
+                            _ => Tabs.Performance
                         };
                         Instance_Selected?.Invoke(this,
                             new InstanceSelectedEventArgs()

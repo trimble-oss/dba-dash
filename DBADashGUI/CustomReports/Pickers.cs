@@ -152,7 +152,7 @@ namespace DBADashGUI.CustomReports
 
         private void Save_Click(object sender, EventArgs e)
         {
-            Report.Pickers = PickerList.Where(p => p.PickerItems.Count > 0).ToList();
+            Report.Pickers = PickerList.Where(p => p.PickerItems?.Count > 0 || p.IsText).ToList();
             Report.Pickers = Report.Pickers.Count != 0 ? Report.Pickers : null;
             Report.Update();
             this.DialogResult = DialogResult.OK;
@@ -183,7 +183,7 @@ namespace DBADashGUI.CustomReports
         {
             SetMode();
             SelectedPicker = optQuery.Checked ? new DBPicker() { ParameterName = cboParams.Text, Name = txtName.Text.TrimStart('@'), DisplayColumn = txtDisplayColumn.Text, ValueColumn = txtValueColumn.Text, StoredProcedureName = txtProcedureName.Text }
-                : new Picker() { ParameterName = cboParams.Text, Name = txtName.Text.TrimStart('@'), PickerItems = PickerItems };
+                : new Picker() { ParameterName = cboParams.Text, Name = txtName.Text.TrimStart('@'), PickerItems = PickerItems, IsText = optText.Checked };
             PickerList.RemoveAll(p => string.Equals(p.ParameterName.TrimStart('@'), SelectedPicker.ParameterName.TrimStart('@'), StringComparison.OrdinalIgnoreCase));
             PickerList.Add(SelectedPicker);
         }

@@ -64,11 +64,11 @@ namespace DBADashGUI
         private CorruptionViewer CorruptionFrm;
         private bool WasRefreshed;
 
-        private readonly Dictionary<string, string> tabMapping = new() { { "FullBackupStatus", "tabBackups" }, { "LogShippingStatus", "tabLogShipping" }, { "DiffBackupStatus", "tabBackups" }, { "LogBackupStatus", "tabBackups" }, { "DriveStatus", "tabDrives" },
-                                                            { "JobStatus", "tabJobs" }, { "CollectionErrorStatus", "tabDBADashErrorLog"}, { "AGStatus", "tabAG" }, {"LastGoodCheckDBStatus","tabLastGood"}, {"SnapshotAgeStatus","tabCollectionDates"  },
-                                                            {"MemoryDumpStatus","" }, {"UptimeStatus","" }, {"CorruptionStatus","" }, {"AlertStatus","tabSQLAgentAlerts" }, {"FileFreeSpaceStatus","tabFiles" },
-                                                            {"CustomCheckStatus","tabCustomChecks"  }, {"MirroringStatus","tabMirroring" },{"ElasticPoolStorageStatus","tabAzureSummary"},{"PctMaxSizeStatus","tabFiles"}, {"QueryStoreStatus","tabQS" },
-                                                            {"LogFreeSpaceStatus","tabFiles"},{"DBMailStatus","" },{"IdentityStatus","tabIdentityColumns"  }, {"IsAgentRunningStatus","" },{"DatabaseStateStatus","tabDBOptions" }};
+        private readonly Dictionary<string, Tabs?> tabMapping = new() { { "FullBackupStatus",Tabs.Backups }, { "LogShippingStatus", Tabs.LogShipping}, { "DiffBackupStatus", Tabs.Backups }, { "LogBackupStatus", Tabs.Backups }, { "DriveStatus", Tabs.Drives },
+                                                            { "JobStatus", Tabs.Jobs }, { "CollectionErrorStatus", Tabs.DBADashErrorLog}, { "AGStatus", Tabs.AG }, {"LastGoodCheckDBStatus", Tabs.LastGood}, {"SnapshotAgeStatus",Tabs.CollectionDates  },
+                                                            {"MemoryDumpStatus", null}, {"UptimeStatus",null}, {"CorruptionStatus",null }, {"AlertStatus",Tabs.SQLAgentAlerts }, {"FileFreeSpaceStatus", Tabs.Files },
+                                                            {"CustomCheckStatus",Tabs.CustomChecks  }, {"MirroringStatus",Tabs.Mirroring },{"ElasticPoolStorageStatus",Tabs.AzureSummary},{"PctMaxSizeStatus",Tabs.Files}, {"QueryStoreStatus",Tabs.QS },
+                                                            {"LogFreeSpaceStatus",Tabs.Files},{"DBMailStatus",null },{"IdentityStatus",Tabs.IdentityColumns }, {"IsAgentRunningStatus",null },{"DatabaseStateStatus",Tabs.DBOptions }};
 
         private void ResetStatusCols()
         {
@@ -580,7 +580,7 @@ namespace DBADashGUI
         {
             if (e.RowIndex < 0) return;
             var col = dgvSummary.Columns[e.ColumnIndex].Name;
-            var tab = tabMapping.ContainsKey(col) ? tabMapping[dgvSummary.Columns[e.ColumnIndex].Name] : string.Empty;
+            var tab = tabMapping.ContainsKey(col) ? tabMapping[dgvSummary.Columns[e.ColumnIndex].Name] : null;
             var row = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
             if (e.ColumnIndex == UptimeStatus.Index)
             {
@@ -590,7 +590,7 @@ namespace DBADashGUI
             {
                 ShowCorruptionViewer((string)row["InstanceGroupName"], (int)row["InstanceID"]);
             }
-            else if (tab != string.Empty)
+            else if (tab != null)
             {
                 Instance_Selected?.Invoke(this,
                     row["InstanceID"] != DBNull.Value
@@ -706,7 +706,7 @@ namespace DBADashGUI
                     ShowCorruptionViewer(context);
                     break;
 
-                case 0 when string.IsNullOrEmpty(tab):
+                case 0 when !tab.HasValue:
                     FilterByStatus(new List<DBADashStatusEnum>() { DBADashStatusEnum.Warning, DBADashStatusEnum.Critical }, test);
                     break;
 

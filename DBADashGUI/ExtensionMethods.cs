@@ -908,5 +908,8 @@ namespace DBADashGUI
                 splitContainer.Panel2Collapsed = false;
             }
         }
+
+        public static string TabName(this Main.Tabs tab) => "tab" + tab;
+
     }
 }

@@ -14,7 +14,7 @@ namespace DBADashGUI.DBADashAlerts
 {
     internal class EditNotesLinkColumnInfo:LinkColumnInfo
     {
-        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex)
+        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
         {
             var alertID = (long)row.Cells["AlertID"].Value;
             var notes = (string)row.Cells["Notes"].Value.DBNullToNull();

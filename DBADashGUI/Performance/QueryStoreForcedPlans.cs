@@ -293,7 +293,7 @@ namespace DBADashGUI.Performance
                 report.LinkColumns?.TryGetValue(colName, out linkColumnInfo);
                 try
                 {
-                    linkColumnInfo?.Navigate(CurrentContext, _dgv.Rows[e.RowIndex], 0);
+                    linkColumnInfo?.Navigate(CurrentContext, _dgv.Rows[e.RowIndex], 0, this);
                 }
                 catch (Exception ex)
                 {
