@@ -52,6 +52,10 @@ namespace DBADashGUI.CustomReports
                 txtValueColumn.Text = dbPicker.ValueColumn;
                 txtDisplayColumn.Text = dbPicker.DisplayColumn;
             }
+            else if (SelectedPicker.IsText)
+            {
+                optText.Checked = true;
+            }
             else
             {
                 txtProcedureName.Text = string.Empty;
