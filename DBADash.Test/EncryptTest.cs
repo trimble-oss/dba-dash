@@ -70,7 +70,7 @@ namespace DBADashConfig.Test
                 EncryptionOption = BasicConfig.EncryptionOptions.Encrypt
             };
 
-            Assert.ThrowsException<ArgumentNullException>(() => cfg.Serialize(BasicConfig.EncryptionOptions.Encrypt));
+            Assert.ThrowsExactly<ArgumentNullException>(() => cfg.Serialize(BasicConfig.EncryptionOptions.Encrypt));
         }
 
         [TestMethod]

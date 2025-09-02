@@ -1,6 +1,7 @@
 ﻿using DBADash;
 using DBADash.Messaging;
 using DBADashGUI.AgentJobs;
+using DBADashGUI.Changes;
 using DBADashGUI.Checks;
 using DBADashGUI.CustomReports;
 using DBADashGUI.DBADashAlerts;
@@ -22,9 +23,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADashGUI.Changes;
-using DocumentFormat.OpenXml.Office.CustomUI;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
 using Version = System.Version;
 
 namespace DBADashGUI

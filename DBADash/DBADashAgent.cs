@@ -31,7 +31,7 @@ namespace DBADash
             _allowedScriptsInfo ??= ProcessAllowedScripts(AllowedScriptsCSV);
 
         private (HashSet<string> scripts, bool isAllowAll)? _allowedScriptsInfo;
-        private HashSet<string>? _allowedCustomProcs;
+        private HashSet<string> _allowedCustomProcs;
 
         /// <summary>
         /// This is the ConnectionString of the S3 source connection used to import data from the remote agent.  This is stored and associated with the agent in the repository.  When sending messages to the agent, this will be used for the message payload as SQS messages are limited in size.

@@ -678,12 +678,11 @@ namespace DBADashGUI
             frm.Show();
         }
 
-        private async void FindDatabase(object sender, EventArgs e)
+        private void FindDatabase(object sender, EventArgs e)
         {
             var dbName = string.Empty;
             if (CommonShared.ShowInputDialog(ref dbName, "Find Database", default, "Enter database name") != DialogResult.OK || string.IsNullOrEmpty(dbName)) return;
             ShowFindDatabaseDialog(dbName);
-            //await FindDatabaseLegacy(dbName);
         }
 
         private static CustomReportViewer databaseFinderDialog;
