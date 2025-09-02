@@ -236,6 +236,7 @@ namespace DBADashGUI
             dataGridViewTextBoxColumn23 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             autoRefreshTimer = new System.Windows.Forms.Timer(components);
             toolTip1 = new System.Windows.Forms.ToolTip(components);
+            ag1 = new DBADashGUI.HA.AG();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitMain).BeginInit();
             splitMain.Panel1.SuspendLayout();
@@ -286,6 +287,7 @@ namespace DBADashGUI
             tabWaits.SuspendLayout();
             tabMirroring.SuspendLayout();
             tabJobDDL.SuspendLayout();
+            tabAG.SuspendLayout();
             tabQS.SuspendLayout();
             tabResourceGovernor.SuspendLayout();
             tabAzureDBResourceGovernance.SuspendLayout();
@@ -1114,6 +1116,7 @@ namespace DBADashGUI
             // 
             // tags1
             // 
+            tags1.AllTags = null;
             tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             tags1.Location = new System.Drawing.Point(1, 2);
             tags1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
@@ -1847,11 +1850,12 @@ namespace DBADashGUI
             // 
             // tabAG
             // 
+            tabAG.Controls.Add(ag1);
             tabAG.Location = new System.Drawing.Point(4, 39);
             tabAG.Margin = new System.Windows.Forms.Padding(1, 2, 1, 2);
             tabAG.Name = "tabAG";
             tabAG.Padding = new System.Windows.Forms.Padding(1, 2, 1, 2);
-            tabAG.Size = new System.Drawing.Size(192, 57);
+            tabAG.Size = new System.Drawing.Size(1578, 955);
             tabAG.TabIndex = 35;
             tabAG.Text = "Availability Groups";
             tabAG.UseVisualStyleBackColor = true;
@@ -2524,6 +2528,15 @@ namespace DBADashGUI
             autoRefreshTimer.Interval = 60000;
             autoRefreshTimer.Tick += AutoRefresh;
             // 
+            // ag1
+            // 
+            ag1.Dock = System.Windows.Forms.DockStyle.Fill;
+            ag1.Location = new System.Drawing.Point(1, 2);
+            ag1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            ag1.Name = "ag1";
+            ag1.Size = new System.Drawing.Size(1576, 951);
+            ag1.TabIndex = 0;
+            // 
             // Main
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -2597,6 +2610,7 @@ namespace DBADashGUI
             tabWaits.ResumeLayout(false);
             tabMirroring.ResumeLayout(false);
             tabJobDDL.ResumeLayout(false);
+            tabAG.ResumeLayout(false);
             tabQS.ResumeLayout(false);
             tabResourceGovernor.ResumeLayout(false);
             tabAzureDBResourceGovernance.ResumeLayout(false);
@@ -2730,7 +2744,6 @@ namespace DBADashGUI
         private System.Windows.Forms.TabPage tabJobDDL;
         private Changes.JobDDLHistory jobDDLHistory1;
         private System.Windows.Forms.TabPage tabAG;
-        private HA.AG ag1;
         private System.Windows.Forms.TabPage tabQS;
         private Changes.QueryStore queryStore1;
         private System.Windows.Forms.TabPage tabResourceGovernor;
@@ -2823,5 +2836,6 @@ namespace DBADashGUI
         private System.Windows.Forms.ToolStripMenuItem setDateTimeFormatToolStripMenuItem;
         private Performance.Performance performance1;
         private DateRangeToolStripMenuItem tsDateRange;
+        private HA.AG ag1;
     }
 }
