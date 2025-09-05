@@ -45,6 +45,7 @@ namespace DBADashGUI
         public static int AlertAutoCloseThresholdMins;
         public static int AlertMaxNotificationCount;
         public static string InstanceMetadataTags;
+        public static bool LogUserDatabaseCountMetric;
 
         static Config()
         {
@@ -118,6 +119,7 @@ namespace DBADashGUI
             AlertAutoCloseThresholdMins = settings.GetValueAsInt("AlertAutoCloseThresholdMins", 1440);
             AlertMaxNotificationCount = settings.GetValueAsInt("AlertMaxNotificationCount", 6);
             InstanceMetadataTags = settings.GetValueAsString("InstanceMetadataTags", string.Empty);
+            LogUserDatabaseCountMetric = settings.GetValueAsBool("LogUserDatabaseCountMetric", true);
         }
 
         public static void ResetDefaults()
@@ -129,12 +131,6 @@ namespace DBADashGUI
             cmd.ExecuteNonQuery();
             RefreshConfig();
         }
-
-        public static int GetValueAsInt(object value, int defaultValue)
-        {
-            return int.TryParse(value?.ToString(), out var result) ? result : defaultValue;
-        }
-
 
     }
 }

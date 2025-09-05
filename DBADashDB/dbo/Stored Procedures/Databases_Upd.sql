@@ -578,6 +578,38 @@ BEGIN
 
 	COMMIT
 
+	IF EXISTS(
+		SELECT 1 
+		FROM dbo.Settings
+		WHERE SettingName = 'LogUserDatabaseCountMetric'
+		AND SettingValue = CAST(1 AS BIT)
+	)
+	-- Exclude Azure DB
+	AND NOT EXISTS(
+		SELECT 1 
+		FROM dbo.Instances 
+		WHERE EngineEdition=5 
+		AND InstanceID = @InstanceID
+	)
+	BEGIN
+		/* Log a metric for user database count */
+
+		DECLARE @UserDatabases INT
+		SELECT @UserDatabases = COUNT(*) 
+		FROM @Databases
+		WHERE database_id > 4
+
+		DECLARE @PC dbo.PerformanceCounters 
+		INSERT INTO @PC(SnapshotDate,object_name,counter_name,instance_name,cntr_value,cntr_type)
+		VALUES(@SnapshotDate,'sys.databases','Count of User Databases','',@UserDatabases,65792)
+
+		EXEC dbo.PerformanceCounters_Upd @PerformanceCounters=@PC,
+										@InstanceID = @InstanceID,
+										@SnapshotDate=@SnapshotDate,
+										@Internal=1 /* Don't clear staging table used for other metric types */
+
+	END
+
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
 									 @Reference = @Ref,
 									 @SnapshotDate = @SnapshotDate

@@ -375,6 +375,22 @@ namespace DBADashGUI
             return defaultValue;
         }
 
+        public static bool GetValueAsBool(this Dictionary<string, object> dict, string key, bool defaultValue)
+        {
+            // Check if the key exists
+            if (dict.TryGetValue(key, out object value))
+            {
+                // Try to cast the value to a bool
+                if (value is bool boolValue)
+                {
+                    return boolValue;
+                }
+            }
+
+            // If the key does not exist or the value is not a bool, return the default value
+            return defaultValue;
+        }
+
         public static int? GetValueAsNullableInt(this Dictionary<string, object> dict, string key)
         {
             // Check if the key exists
