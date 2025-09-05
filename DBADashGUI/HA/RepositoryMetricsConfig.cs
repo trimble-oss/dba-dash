@@ -34,7 +34,8 @@ namespace DBADashGUI.HA
         {
             AG,
             LogShipping,
-            SlowQueries
+            SlowQueries,
+            Databases
         }
 
         public int InstanceID { get; set; } = -1;
@@ -86,6 +87,7 @@ namespace DBADashGUI.HA
                     RepositoryMetricTypes.AG => $"Availability Group Metrics Configuration {level}",
                     RepositoryMetricTypes.LogShipping => $"Log Shipping Metrics Configuration {level}",
                     RepositoryMetricTypes.SlowQueries => $"Slow Queries Metrics Configuration {level}",
+                    RepositoryMetricTypes.Databases => $"Database Metrics Configuration {level}",
                     _ => throw new NotImplementedException()
                 };
             }

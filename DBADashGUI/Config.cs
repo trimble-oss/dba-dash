@@ -45,7 +45,6 @@ namespace DBADashGUI
         public static int AlertAutoCloseThresholdMins;
         public static int AlertMaxNotificationCount;
         public static string InstanceMetadataTags;
-
         static Config()
         {
             try
@@ -129,12 +128,6 @@ namespace DBADashGUI
             cmd.ExecuteNonQuery();
             RefreshConfig();
         }
-
-        public static int GetValueAsInt(object value, int defaultValue)
-        {
-            return int.TryParse(value?.ToString(), out var result) ? result : defaultValue;
-        }
-
 
     }
 }

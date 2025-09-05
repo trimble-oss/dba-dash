@@ -52,3 +52,22 @@ BEGIN
 	SET is_snapshot=0
 	WHERE is_snapshot IS NULL
 END
+IF OBJECT_ID('dbo.RepositoryMetricsConfig') IS NOT NULL
+BEGIN
+	IF NOT EXISTS(
+		SELECT 1 
+		FROM dbo.RepositoryMetricsConfig
+		WHERE MetricType = 'Databases'
+	)
+	BEGIN
+		UPDATE D1
+			SET D1.name = CONCAT(LEFT(D1.name,91),' ',NEWID())
+		FROM dbo.Databases D1
+		WHERE IsActive=0
+		AND EXISTS(SELECT 1 
+				FROM dbo.Databases D2 
+				WHERE D1.name = D2.name
+				AND D2.DatabaseID <> D1.DatabaseID
+				)
+	END
+END
