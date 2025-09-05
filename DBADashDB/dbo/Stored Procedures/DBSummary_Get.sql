@@ -4,6 +4,7 @@
 )
 AS
 SELECT I.InstanceGroupName AS Instance, 
+	CASE WHEN COUNT(DISTINCT D.InstanceID) = 1 THEN MAX(D.InstanceID) ELSE NULL END AS InstanceID,
 	SUM(CASE WHEN D.page_verify_option<>2 THEN 1 ELSE 0 END) as [Page Verify Not Optimal],
 	SUM(CASE WHEN D.is_auto_close_on =1 THEN 1 ELSE 0 END) as [Auto Close],
 	SUM(CASE WHEN D.is_auto_shrink_on =1 THEN 1 ELSE 0 END) as [Auto Shrink],

@@ -75,6 +75,7 @@
     is_memory_optimized_enabled BIT NULL,
     is_temporal_history_retention_enabled BIT NULL,
     is_optimized_locking_on BIT NULL,
+    service_broker_guid UNIQUEIDENTIFIER NULL
 );
 
 SELECT *
@@ -177,7 +178,8 @@ SELECT name,
        is_event_stream_enabled,
        is_memory_optimized_enabled,
        is_temporal_history_retention_enabled,
-       is_optimized_locking_on
+       is_optimized_locking_on,
+       service_broker_guid
 FROM #sysdb
 
 DROP TABLE #sysdb

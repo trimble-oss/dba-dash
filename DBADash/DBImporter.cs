@@ -177,6 +177,10 @@ namespace DBADash
                     dtDB.Columns.Add("is_temporal_history_retention_enabled", typeof(bool));
                     dtDB.Columns.Add("is_optimized_locking_on", typeof(bool));
                 }
+                if(!dtDB.Columns.Contains("service_broker_guid"))
+                {
+                    dtDB.Columns.Add("service_broker_guid", typeof(Guid));
+                }
             }
             if (data.Tables.Contains("Backups"))
             {
