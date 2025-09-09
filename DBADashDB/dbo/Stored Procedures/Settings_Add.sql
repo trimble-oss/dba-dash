@@ -32,8 +32,7 @@ VALUES	('MemoryDumpCriticalThresholdHrs',48),
 		('IdleCriticalThresholdForSleepingSessionWithOpenTran',NULL),
 		('GUICellToolTipMaxLength',NULL),
 		('ExcludeClosedAlertsWithNotesFromPurge',CAST(1 AS BIT)),
-		('InstanceMetadataTags',''),
-		('LogUserDatabaseCountMetric',CAST(1 AS BIT))
+		('InstanceMetadataTags','')
 
 /* If reset, remove any customized settings to be re-inserted with defaults */
 IF @Reset=1

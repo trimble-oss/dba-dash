@@ -45,6 +45,9 @@ namespace DBADashGUI.Changes
             tsSummary = new System.Windows.Forms.ToolStripButton();
             tsDetail = new System.Windows.Forms.ToolStripButton();
             tsClearFilter = new System.Windows.Forms.ToolStripButton();
+            tsConfigureMetrics = new System.Windows.Forms.ToolStripDropDownButton();
+            tsConfigureRoot = new System.Windows.Forms.ToolStripMenuItem();
+            tsConfigureInstance = new System.Windows.Forms.ToolStripMenuItem();
             dgvHistory = new DBADashDataGridView();
             colHInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colHDB = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -140,7 +143,7 @@ namespace DBADashGUI.Changes
             // toolStripDBInfo
             // 
             toolStripDBInfo.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStripDBInfo.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel2, tsRefreshInfo, tsCopyInfo, tsExcel, tsCols, tsSummary, tsDetail, tsClearFilter });
+            toolStripDBInfo.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel2, tsRefreshInfo, tsCopyInfo, tsExcel, tsCols, tsSummary, tsDetail, tsClearFilter, tsConfigureMetrics });
             toolStripDBInfo.Location = new System.Drawing.Point(0, 0);
             toolStripDBInfo.Name = "toolStripDBInfo";
             toolStripDBInfo.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
@@ -231,6 +234,29 @@ namespace DBADashGUI.Changes
             tsClearFilter.Name = "tsClearFilter";
             tsClearFilter.Size = new System.Drawing.Size(104, 24);
             tsClearFilter.Text = "Clear Filter";
+            // 
+            // tsConfigureMetrics
+            // 
+            tsConfigureMetrics.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsConfigureRoot, tsConfigureInstance });
+            tsConfigureMetrics.Image = Properties.Resources.SettingsOutline_16x;
+            tsConfigureMetrics.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsConfigureMetrics.Name = "tsConfigureMetrics";
+            tsConfigureMetrics.Size = new System.Drawing.Size(160, 28);
+            tsConfigureMetrics.Text = "Configure Metrics";
+            // 
+            // tsConfigureRoot
+            // 
+            tsConfigureRoot.Name = "tsConfigureRoot";
+            tsConfigureRoot.Size = new System.Drawing.Size(224, 26);
+            tsConfigureRoot.Text = "Root Level";
+            tsConfigureRoot.Click += ConfigureRoot_Click;
+            // 
+            // tsConfigureInstance
+            // 
+            tsConfigureInstance.Name = "tsConfigureInstance";
+            tsConfigureInstance.Size = new System.Drawing.Size(224, 26);
+            tsConfigureInstance.Text = "Instance Level";
+            tsConfigureInstance.Click += ConfigureInstance_Click;
             // 
             // dgvHistory
             // 
@@ -531,5 +557,8 @@ namespace DBADashGUI.Changes
         private System.Windows.Forms.ToolStripButton tsClearFilter;
         private System.Windows.Forms.ToolStripButton tsClearFilterHistory;
         private System.Windows.Forms.ToolStripButton tsHistoryCols;
+        private System.Windows.Forms.ToolStripDropDownButton tsConfigureMetrics;
+        private System.Windows.Forms.ToolStripMenuItem tsConfigureRoot;
+        private System.Windows.Forms.ToolStripMenuItem tsConfigureInstance;
     }
 }

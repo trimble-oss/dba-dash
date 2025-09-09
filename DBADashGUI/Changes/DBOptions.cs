@@ -1,11 +1,12 @@
-﻿using Humanizer;
+﻿using DBADashGUI.HA;
+using DBADashGUI.Theme;
+using Humanizer;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI.Changes
 {
@@ -15,6 +16,16 @@ namespace DBADashGUI.Changes
         private int DatabaseID;
         private string InstanceGroupName;
         private string PersistFilter;
+        private int?_drillDownInstanceID;
+        private int? DrillDownInstanceID
+        {
+            get=>_drillDownInstanceID;
+            set
+            {
+                _drillDownInstanceID = value;
+                tsConfigureInstance.Enabled = InstanceIDs.Count == 1 || _drillDownInstanceID.HasValue;
+            }
+        }
 
         private const int MAX_VLF_WARNING_THRESHOLD = 1000;
         private const int MAX_VLF_CRITICAL_THRESHOLD = 10000;
@@ -73,6 +84,7 @@ namespace DBADashGUI.Changes
             PersistFilter = null;
             InstanceGroupName = string.Empty;
             SummaryMode = true;
+            DrillDownInstanceID = null;
             RefreshData();
         }
 
@@ -88,6 +100,7 @@ namespace DBADashGUI.Changes
             {
                 RefreshDBInfo();
             }
+           
         }
 
         private void Pivot(ref DataTable dt)
@@ -254,6 +267,7 @@ namespace DBADashGUI.Changes
             var historyRefresh = !string.IsNullOrEmpty(InstanceGroupName);
             dgv.DataSource = null;
             SummaryMode = true;
+            DrillDownInstanceID = null;
             RefreshDBSummary();
             if (historyRefresh)
             {
@@ -287,7 +301,7 @@ namespace DBADashGUI.Changes
             for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var r = dgv.Rows[idx];
-                var maxCompatLevel = Convert.ToInt16(r.Cells["MaxSupportedCompatibilityLevel"].Value);
+                var maxCompatLevel = r.Cells["MaxSupportedCompatibilityLevel"].Value == DBNull.Value ? 0: Convert.ToInt16(r.Cells["MaxSupportedCompatibilityLevel"].Value);
                 r.Cells["compatibility_level"].SetStatusColor(Convert.ToInt16(r.Cells["compatibility_level"].Value) < maxCompatLevel
                     ? DBADashStatus.DBADashStatusEnum.Warning
                     : DBADashStatus.DBADashStatusEnum.OK);
@@ -459,6 +473,7 @@ namespace DBADashGUI.Changes
             if (!SummaryMode || e.RowIndex < 0) return;
             var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
             InstanceGroupName = (string)row["Instance"];
+            DrillDownInstanceID = (int?)(row["InstanceID"].DBNullToNull());
             SummaryMode = false;
             if (e.ColumnIndex == dgv.Columns["Instance"]?.Index)
             {
@@ -572,6 +587,24 @@ namespace DBADashGUI.Changes
         private void HistoryCols_Click(object sender, EventArgs e)
         {
             dgvHistory.PromptColumnSelection();
+        }
+
+        private static void ConfigureMetrics(int instanceId)
+        {
+            using var metricsConfig = new RepositoryMetricsConfig() { InstanceID = instanceId, MetricType = RepositoryMetricsConfig.RepositoryMetricTypes.Databases };
+            metricsConfig.ShowDialog();
+        }
+
+        private void ConfigureRoot_Click(object sender, EventArgs e)
+        {
+            ConfigureMetrics(-1);
+        }
+
+        private void ConfigureInstance_Click(object sender, EventArgs e)
+        {
+            if (InstanceIDs.Count != 1 && !DrillDownInstanceID.HasValue ) return;
+            var instanceId = DrillDownInstanceID ?? InstanceIDs.First();
+            ConfigureMetrics(instanceId);
         }
     }
 }

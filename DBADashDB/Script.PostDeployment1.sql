@@ -1977,7 +1977,6 @@ WHERE NOT EXISTS(
 				AND C.instance_name = VirtualCounters.instance_name
 				)
 
-
 INSERT INTO dbo.RepositoryMetricsConfig(
 	InstanceID,
 	MetricName,
@@ -2016,7 +2015,11 @@ FROM (VALUES -- AG aggregate
 			-- Slow Queries
 			('Abort Count',1,0,'SlowQueries'),
 			('Error Count',1,0,'SlowQueries'),
-			('Total Queries',1,0,'SlowQueries')
+			('Total Queries',1,0,'SlowQueries'),
+			-- Databases
+			('Count of User Databases',1,0,'Databases'),
+			('Databases Created',1,0,'Databases'),
+			('Databases Dropped',1,0,'Databases')
 		) M(MetricName,IsAggregate,IsEnabled,MetricType)
 WHERE NOT EXISTS(
 				SELECT 1 
