@@ -838,6 +838,8 @@
     <Build Include="dbo\Functions\ParseInstanceMetadata.sql" />
     <Build Include="dbo\Functions\GetInstanceMetadataTags.sql" />
     <Build Include="dbo\Stored Procedures\InstanceMetadata_Get.sql" />
+    <Build Include="dbo\Functions\DatabaseSettingsUnpivot_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DeletedDatabases_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
