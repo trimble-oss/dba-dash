@@ -5,6 +5,8 @@
 	@ExcludeSystemDatabases BIT=1
 )
 AS
+SET @SearchString = ISNULL(NULLIF(@SearchString,''),'%')
+
 SELECT TOP(@Top) I.InstanceID,
 	D.DatabaseID,
 	I.InstanceDisplayName, 
