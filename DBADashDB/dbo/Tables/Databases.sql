@@ -107,4 +107,4 @@ CREATE UNIQUE NONCLUSTERED INDEX IX_Databases_InstanceID_database_id_create_date
 GO
 CREATE UNIQUE NONCLUSTERED INDEX IX_Databases_InstanceID_name
     ON dbo.Databases(InstanceID ASC, name ASC)
-    INCLUDE(database_id,IsActive);
+    INCLUDE(database_id,IsActive,service_broker_guid);
