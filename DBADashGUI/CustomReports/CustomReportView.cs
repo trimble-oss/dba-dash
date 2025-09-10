@@ -1137,7 +1137,13 @@ namespace DBADashGUI.CustomReports
 
         private void AddPickers()
         {
+            const string pickerTag = "Picker";
             tsParams.DropDownItems.Clear();
+            foreach (var item in toolStrip1.Items.Cast<ToolStripItem>().Where(i => i.Tag?.ToString() == pickerTag).ToList())
+            {
+                toolStrip1.Items.Remove(item);
+                item.Dispose();
+            }
             tsParams.Click -= TsParameters_Click;
             if (Report.Pickers == null)
             {
@@ -1146,6 +1152,7 @@ namespace DBADashGUI.CustomReports
                 return;
             }
 
+          
             var pickers = Report.Pickers;
             if (customParams.Any(p => p.Param.ParameterName.TrimStart('@').Equals("Top", StringComparison.InvariantCultureIgnoreCase) && p.Param.SqlDbType == SqlDbType.Int) && !pickers.Any(p => p.ParameterName.TrimStart('@').Equals("Top", StringComparison.InvariantCultureIgnoreCase)))
             {
@@ -1166,7 +1173,7 @@ namespace DBADashGUI.CustomReports
 
                 if (picker.IsText)
                 {
-                    var txtItem = new ToolStripTextBox();
+                    var txtItem = new ToolStripTextBox() { Tag = pickerTag};
                     txtItem.Text = param.Param.Value?.ToString() ?? picker.DefaultValue?.ToString() ?? string.Empty;
 
                     txtItem.TextChanged += (_, _) =>
@@ -1183,21 +1190,21 @@ namespace DBADashGUI.CustomReports
                     };
                     if (picker.MenuBar)
                     {
-                        var lbl = new ToolStripLabel(picker.Name + ":");
+                        var lbl = new ToolStripLabel(picker.Name + ":") { Tag = pickerTag};
                         var baseIdx = toolStrip1.Items.IndexOf(tsParams);
                         toolStrip1.Items.Insert(baseIdx + 1, lbl);
                         toolStrip1.Items.Insert(baseIdx + 2, txtItem);
                     }
                     else
                     {
-                        var pickerMenu = new ToolStripMenuItem(picker.Name);
+                        var pickerMenu = new ToolStripMenuItem(picker.Name) {Tag = pickerTag};
                         pickerMenu.DropDownItems.Add(txtItem);
                         tsParams.DropDownItems.Add(pickerMenu);
                     }
                 }
                 else
                 {
-                    var pickerMenu = new ToolStripMenuItem(picker.Name);
+                    var pickerMenu = new ToolStripMenuItem(picker.Name) { Tag = pickerTag };
                     foreach (var itm in picker.PickerItems ?? new Dictionary<object, string>())
                     {
                         var item = new ToolStripMenuItem(itm.Value)
