@@ -76,7 +76,7 @@ SELECT	DatabaseID,
 		CAST(is_memory_optimized_enabled AS SQL_VARIANT) AS is_memory_optimized_enabled,
 		CAST(is_temporal_history_retention_enabled AS SQL_VARIANT) AS is_temporal_history_retention_enabled,
 		CAST(is_optimized_locking_on AS SQL_VARIANT) AS is_optimized_locking_on
-FROM dbo.Databases
+FROM dbo.Databases WITH(FORCESEEK)
 WHERE InstanceID  = @InstanceID
 )
 SELECT	DatabaseID,
