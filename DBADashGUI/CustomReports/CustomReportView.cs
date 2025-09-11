@@ -1158,6 +1158,7 @@ namespace DBADashGUI.CustomReports
             {
                 pickers.Add(Picker.CreateTopPicker());
             }
+            var baseIdx = toolStrip1.Items.IndexOf(tsParams);
 
             foreach (var picker in Report.Pickers.OrderBy(p => p.Name))
             {
@@ -1191,7 +1192,6 @@ namespace DBADashGUI.CustomReports
                     if (picker.MenuBar)
                     {
                         var lbl = new ToolStripLabel(picker.Name + ":") { Tag = pickerTag};
-                        var baseIdx = toolStrip1.Items.IndexOf(tsParams);
                         toolStrip1.Items.Insert(baseIdx + 1, lbl);
                         toolStrip1.Items.Insert(baseIdx + 2, txtItem);
                     }
@@ -1217,7 +1217,7 @@ namespace DBADashGUI.CustomReports
                     }
                     if (picker.MenuBar)
                     {
-                        toolStrip1.Items.Add(pickerMenu);
+                        toolStrip1.Items.Insert(baseIdx+1, pickerMenu);
                     }
                     else
                     {

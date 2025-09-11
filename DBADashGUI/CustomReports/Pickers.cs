@@ -20,7 +20,20 @@ namespace DBADashGUI.CustomReports
         public Pickers()
         {
             InitializeComponent();
+            AddColumns();
             this.ApplyTheme();
+        }
+
+        private void AddColumns()
+        {
+            dgv.Columns.Clear();
+            dgv.Columns.AddRange(
+                    new DataGridViewTextBoxColumn() { Name="Value", HeaderText = "Value", DataPropertyName = "Value", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill, DisplayIndex = 0},
+                    new DataGridViewTextBoxColumn() {Name="Display", HeaderText = "Display", DataPropertyName = "Display", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill, DisplayIndex = 1},
+                    new DataGridViewButtonColumn() { Name="Up", HeaderText = "", Text = "↑", UseColumnTextForButtonValue  = true,AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells, DisplayIndex = 2},
+                    new DataGridViewButtonColumn() { Name ="Down",HeaderText = "", Text = "↓",UseColumnTextForButtonValue = true, AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells, DisplayIndex = 3}
+                );
+            dgv.ApplyTheme();
         }
 
         private void Pickers_Load(object sender, EventArgs e)
@@ -64,6 +77,8 @@ namespace DBADashGUI.CustomReports
                 optStandard.Checked = true;
                 LoadPickerItems();
             }
+
+            chkMenuBar.Checked = SelectedPicker.MenuBar;
             lblDataType.Text = "Data Type: " + SelectedPicker.DataType.Name;
             SetMode();
             txtDefault.Text = SelectedPicker.DefaultValue?.ToString() ?? "";
@@ -83,7 +98,6 @@ namespace DBADashGUI.CustomReports
             dtPickerItems = new DataTable();
             dtPickerItems.Columns.Add("Value", SelectedPicker.DataType);
             dtPickerItems.Columns.Add("Display", typeof(string));
-
             try
             {
                 foreach (var kvp in SelectedPicker.PickerItems)
@@ -167,14 +181,15 @@ namespace DBADashGUI.CustomReports
             if (dgv.DataSource == null || IsBinding) return;
             if (dgv.Rows.Count <= e.RowIndex || e.RowIndex == -1) return;
             if (dgv.Rows[e.RowIndex].IsNewRow) return; // Check if it's the new row placeholder
+            if(e.ColumnIndex > 1) return; // Only validate the key & value columns
 
-            var keyCell = dgv.Rows[e.RowIndex].Cells[0];
+            var keyCell = dgv.Rows[e.RowIndex].Cells["Value"];
             if (keyCell.Value == null) return; // Check if the cell is initialized
 
             var keyValue = Convert.ToString(keyCell.Value);
 
             var isDuplicate = dgv.Rows.Cast<DataGridViewRow>()
-                .Any(r => !r.IsNewRow && r.Index != e.RowIndex && string.Equals(Convert.ToString(r.Cells[0].Value), keyValue, StringComparison.Ordinal));
+                .Any(r => !r.IsNewRow && r.Index != e.RowIndex && string.Equals(Convert.ToString(r.Cells["Value"].Value), keyValue, StringComparison.Ordinal));
 
             if (isDuplicate)
             {
@@ -214,5 +229,57 @@ namespace DBADashGUI.CustomReports
         {
             CommonShared.ShowExceptionDialog(e.Exception);
         }
+
+        private void MenuBar_Click(object sender, EventArgs e)
+        {
+            SelectedPicker.MenuBar = chkMenuBar.Checked;
+        }
+
+        private void CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            var columnHeader = dgv.Columns[e.ColumnIndex].Name;
+
+            switch (columnHeader)
+            {
+                case "Up":
+                    MoveDataTableRowUp(e.RowIndex);
+                    break;
+                case "Down":
+                    MoveDataTableRowDown(e.RowIndex);
+                    break;
+            }
+        }
+
+        private void MoveDataTableRowDown(int rowIndex)
+        {
+            MoveDataTableRowUp(rowIndex + 1);
+            dgv.ClearSelection();
+            dgv.Rows[rowIndex+1].Selected = true;
+        }
+
+        private void MoveDataTableRowUp(int rowIndex)
+        {
+            if (dgv.DataSource is not DataTable dataTable || rowIndex <= 0 || rowIndex >= dataTable.Rows.Count) return;
+            dgv.DataSource = null;
+            // Get the row to be moved.
+            var rowToMove = dataTable.Rows[rowIndex];
+
+            // Create a new DataRow with the same data.
+            var newRow = dataTable.NewRow();
+            newRow.ItemArray = rowToMove.ItemArray;
+
+            // Remove the original row from the table first.
+            // This frees up the primary key value.
+            dataTable.Rows.Remove(rowToMove);
+
+            // Now, insert the new row at the new position.
+            dataTable.Rows.InsertAt(newRow, rowIndex - 1);
+            AddColumns();
+            dgv.DataSource = dataTable;
+            dgv.ClearSelection();
+            dgv.Rows[rowIndex-1].Selected = true;
+        }
+
     }
 }

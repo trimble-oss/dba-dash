@@ -53,8 +53,8 @@
             scriptGridsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsClearFilter = new System.Windows.Forms.ToolStripButton();
             tsTrigger = new System.Windows.Forms.ToolStripButton();
-            tsNewWindow = new System.Windows.Forms.ToolStripButton();
             tsReset = new System.Windows.Forms.ToolStripButton();
+            tsNewWindow = new System.Windows.Forms.ToolStripButton();
             lnkParams = new System.Windows.Forms.LinkLabel();
             pnlParams = new System.Windows.Forms.Panel();
             splitContainer2 = new System.Windows.Forms.SplitContainer();
@@ -66,6 +66,8 @@
             lblDescription = new System.Windows.Forms.ToolStripStatusLabel();
             lblURL = new System.Windows.Forms.ToolStripStatusLabel();
             timer1 = new System.Windows.Forms.Timer(components);
+            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             toolStrip1.SuspendLayout();
             pnlParams.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer2).BeginInit();
@@ -81,7 +83,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsExecute, tsRefresh, tsCancel, tsCopy, tsExcel, tsCols, tsConfigure, cboResults, lblSelectResults, tsParams, tsScriptResults, tsClearFilter, tsTrigger, tsReset, tsNewWindow });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsExecute, tsRefresh, tsCancel, tsCopy, tsExcel, tsCols, tsConfigure, cboResults, lblSelectResults, toolStripSeparator2, tsParams, toolStripSeparator1, tsScriptResults, tsClearFilter, tsTrigger, tsReset, tsNewWindow });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
@@ -313,17 +315,6 @@
             tsTrigger.Visible = false;
             tsTrigger.Click += TsTrigger_Click;
             // 
-            // tsNewWindow
-            // 
-            tsNewWindow.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsNewWindow.Image = Properties.Resources.NewWindow_16x;
-            tsNewWindow.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsNewWindow.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
-            tsNewWindow.Name = "tsNewWindow";
-            tsNewWindow.Size = new System.Drawing.Size(29, 24);
-            tsNewWindow.Text = "Open in new window";
-            tsNewWindow.Click += TsNewWindow_Click;
-            // 
             // tsReset
             // 
             tsReset.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -334,6 +325,17 @@
             tsReset.Text = "Restore Default View";
             tsReset.ToolTipText = "Restore default view";
             tsReset.Click += Reset_Click;
+            // 
+            // tsNewWindow
+            // 
+            tsNewWindow.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsNewWindow.Image = Properties.Resources.NewWindow_16x;
+            tsNewWindow.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsNewWindow.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            tsNewWindow.Name = "tsNewWindow";
+            tsNewWindow.Size = new System.Drawing.Size(29, 24);
+            tsNewWindow.Text = "Open in new window";
+            tsNewWindow.Click += TsNewWindow_Click;
             // 
             // lnkParams
             // 
@@ -453,6 +455,16 @@
             timer1.Interval = 1000;
             timer1.Tick += Timer1_Tick;
             // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new System.Drawing.Size(6, 31);
+            // 
+            // toolStripSeparator2
+            // 
+            toolStripSeparator2.Name = "toolStripSeparator2";
+            toolStripSeparator2.Size = new System.Drawing.Size(6, 31);
+            // 
             // CustomReportView
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -518,5 +530,7 @@
         private System.Windows.Forms.ToolStripMenuItem scriptDataTablesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem scriptGridsToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsReset;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
     }
 }
