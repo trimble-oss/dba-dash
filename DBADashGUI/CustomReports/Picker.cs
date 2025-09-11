@@ -35,7 +35,7 @@ namespace DBADashGUI.CustomReports
 
         public Type DataType { get; set; } = typeof(string);
 
-        public static Picker CreateTopPicker()
+        public static Picker CreateTopPicker(bool menuBar=false)
         {
             return new Picker()
             {
@@ -54,11 +54,12 @@ namespace DBADashGUI.CustomReports
                         {"2000", "2000"},
                         {"5000", "5000"},
                         {"10000", "10000"}
-                    }
+                    },
+                MenuBar = menuBar
             };
         }
 
-        public static Picker CreateBooleanPicker(string paramName, string name, bool defaultValue = true, string trueString = "Yes", string falseString = "No")
+        public static Picker CreateBooleanPicker(string paramName, string name, bool defaultValue = true, string trueString = "Yes", string falseString = "No", bool menuBar=false)
         {
             return new Picker()
             {
@@ -70,7 +71,8 @@ namespace DBADashGUI.CustomReports
                     {
                         {true, trueString},
                         {false, falseString}
-                    }
+                    },
+                MenuBar = menuBar
             };
         }
     }

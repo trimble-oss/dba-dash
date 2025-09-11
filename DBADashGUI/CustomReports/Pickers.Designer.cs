@@ -28,11 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             cboParams = new System.Windows.Forms.ComboBox();
             label1 = new System.Windows.Forms.Label();
             dgv = new System.Windows.Forms.DataGridView();
-            Value = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            Display = new System.Windows.Forms.DataGridViewTextBoxColumn();
             bttnSave = new System.Windows.Forms.Button();
             bttnCancel = new System.Windows.Forms.Button();
             txtName = new System.Windows.Forms.TextBox();
@@ -40,6 +39,8 @@
             label2 = new System.Windows.Forms.Label();
             txtDefault = new System.Windows.Forms.TextBox();
             groupBox1 = new System.Windows.Forms.GroupBox();
+            chkMenuBar = new System.Windows.Forms.CheckBox();
+            optText = new System.Windows.Forms.RadioButton();
             pnlQuery = new System.Windows.Forms.Panel();
             label3 = new System.Windows.Forms.Label();
             label5 = new System.Windows.Forms.Label();
@@ -52,7 +53,7 @@
             optStandard = new System.Windows.Forms.RadioButton();
             groupBox2 = new System.Windows.Forms.GroupBox();
             lblDataType = new System.Windows.Forms.Label();
-            optText = new System.Windows.Forms.RadioButton();
+            toolTip1 = new System.Windows.Forms.ToolTip(components);
             ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
             groupBox1.SuspendLayout();
             pnlQuery.SuspendLayout();
@@ -82,31 +83,15 @@
             // 
             dgv.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Value, Display });
-            dgv.Location = new System.Drawing.Point(16, 129);
+            dgv.Location = new System.Drawing.Point(16, 162);
             dgv.Name = "dgv";
             dgv.RowHeadersWidth = 51;
-            dgv.Size = new System.Drawing.Size(434, 182);
+            dgv.Size = new System.Drawing.Size(434, 168);
             dgv.TabIndex = 16;
+            dgv.CellContentClick += CellContentClick;
             dgv.DataError += DataError;
             dgv.RowValidated += RowValidated;
             dgv.RowValidating += RowValidating;
-            // 
-            // Value
-            // 
-            Value.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            Value.DataPropertyName = "Value";
-            Value.HeaderText = "Value";
-            Value.MinimumWidth = 6;
-            Value.Name = "Value";
-            // 
-            // Display
-            // 
-            Display.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            Display.DataPropertyName = "Display";
-            Display.HeaderText = "Display";
-            Display.MinimumWidth = 6;
-            Display.Name = "Display";
             // 
             // bttnSave
             // 
@@ -168,6 +153,7 @@
             // groupBox1
             // 
             groupBox1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBox1.Controls.Add(chkMenuBar);
             groupBox1.Controls.Add(optText);
             groupBox1.Controls.Add(pnlQuery);
             groupBox1.Controls.Add(label6);
@@ -180,10 +166,34 @@
             groupBox1.Controls.Add(lblName);
             groupBox1.Location = new System.Drawing.Point(12, 114);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new System.Drawing.Size(469, 317);
+            groupBox1.Size = new System.Drawing.Size(469, 336);
             groupBox1.TabIndex = 9;
             groupBox1.TabStop = false;
             groupBox1.Text = "Picker Options";
+            // 
+            // chkMenuBar
+            // 
+            chkMenuBar.AutoSize = true;
+            chkMenuBar.Location = new System.Drawing.Point(155, 132);
+            chkMenuBar.Name = "chkMenuBar";
+            chkMenuBar.Size = new System.Drawing.Size(94, 24);
+            chkMenuBar.TabIndex = 19;
+            chkMenuBar.Tag = "Display picker directly on the menu";
+            chkMenuBar.Text = "Menu Bar";
+            chkMenuBar.UseVisualStyleBackColor = true;
+            chkMenuBar.Click += MenuBar_Click;
+            // 
+            // optText
+            // 
+            optText.AutoSize = true;
+            optText.Location = new System.Drawing.Point(326, 96);
+            optText.Name = "optText";
+            optText.Size = new System.Drawing.Size(57, 24);
+            optText.TabIndex = 19;
+            optText.TabStop = true;
+            optText.Text = "Text";
+            optText.UseVisualStyleBackColor = true;
+            optText.Click += Type_Change;
             // 
             // pnlQuery
             // 
@@ -193,7 +203,7 @@
             pnlQuery.Controls.Add(txtDisplayColumn);
             pnlQuery.Controls.Add(txtValueColumn);
             pnlQuery.Controls.Add(label4);
-            pnlQuery.Location = new System.Drawing.Point(6, 121);
+            pnlQuery.Location = new System.Drawing.Point(6, 162);
             pnlQuery.Name = "pnlQuery";
             pnlQuery.Size = new System.Drawing.Size(457, 111);
             pnlQuery.TabIndex = 17;
@@ -307,18 +317,6 @@
             lblDataType.TabIndex = 19;
             lblDataType.Text = "Data Type:";
             // 
-            // optText
-            // 
-            optText.AutoSize = true;
-            optText.Location = new System.Drawing.Point(326, 96);
-            optText.Name = "optText";
-            optText.Size = new System.Drawing.Size(57, 24);
-            optText.TabIndex = 19;
-            optText.TabStop = true;
-            optText.Text = "Text";
-            optText.UseVisualStyleBackColor = true;
-            optText.Click += Type_Change;
-            // 
             // Pickers
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -356,8 +354,6 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox txtDefault;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Value;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Display;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.RadioButton optQuery;
         private System.Windows.Forms.RadioButton optStandard;
@@ -371,5 +367,7 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label lblDataType;
         private System.Windows.Forms.RadioButton optText;
+        private System.Windows.Forms.CheckBox chkMenuBar;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }
