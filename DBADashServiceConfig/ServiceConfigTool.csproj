@@ -51,22 +51,22 @@
     <EmbeddedResource Include="CreateMSA.ps1" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="4.0.0.25" />
-    <PackageReference Include="AWSSDK.S3" Version="4.0.6.9" />
-    <PackageReference Include="Azure.Core" Version="1.47.3" />
-    <PackageReference Include="Azure.Identity" Version="1.15.0" />
+    <PackageReference Include="AWSSDK.Core" Version="4.0.0.26" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.7" />
+    <PackageReference Include="Azure.Core" Version="1.48.0" />
+    <PackageReference Include="Azure.Identity" Version="1.16.0" />
     <PackageReference Include="Common.Logging" Version="3.4.1" />
     <PackageReference Include="Common.Logging.Core" Version="3.4.1" />
     <PackageReference Include="CronExpressionDescriptor" Version="2.44.0" />
     <PackageReference Include="Humanizer" Version="2.14.1" />
-    <PackageReference Include="Meziantou.Framework.Win32.CredentialManager" Version="1.7.4" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.8" />
+    <PackageReference Include="Meziantou.Framework.Win32.CredentialManager" Version="1.7.5" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.9" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.8" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.76.0" />
-    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.76.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.77.0" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.77.0" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.14.0" />
     <PackageReference Include="Microsoft.IdentityModel.Logging" Version="8.14.0" />
     <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="8.14.0" />
@@ -79,26 +79,26 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Quartz" Version="3.15.0" />
     <PackageReference Include="System.Buffers" Version="4.6.1" />
-    <PackageReference Include="System.Collections.Immutable" Version="9.0.8" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.8" />
+    <PackageReference Include="System.Collections.Immutable" Version="9.0.9" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.9" />
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="9.0.8" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="9.0.9" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
-    <PackageReference Include="System.IO.Packaging" Version="9.0.8" />
+    <PackageReference Include="System.IO.Packaging" Version="9.0.9" />
     <PackageReference Include="System.Management.Automation" Version="7.4.11" />
     <PackageReference Include="System.Memory" Version="4.6.3" />
-    <PackageReference Include="System.Memory.Data" Version="9.0.8" />
+    <PackageReference Include="System.Memory.Data" Version="9.0.9" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.6.1" />
-    <PackageReference Include="System.Reflection.Metadata" Version="9.0.8" />
+    <PackageReference Include="System.Reflection.Metadata" Version="9.0.9" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
     <PackageReference Include="System.Security.AccessControl" Version="6.0.1" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="9.0.8" />
-    <PackageReference Include="System.Security.Permissions" Version="9.0.8" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="9.0.9" />
+    <PackageReference Include="System.Security.Permissions" Version="9.0.9" />
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
-    <PackageReference Include="System.ServiceProcess.ServiceController" Version="9.0.8" />
-    <PackageReference Include="System.Text.Encodings.Web" Version="9.0.8" />
-    <PackageReference Include="System.Text.Json" Version="9.0.8" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="9.0.9" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="9.0.9" />
+    <PackageReference Include="System.Text.Json" Version="9.0.9" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
   </ItemGroup>
