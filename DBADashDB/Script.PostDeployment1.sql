@@ -2069,3 +2069,9 @@ BEGIN
 					)
 	DROP TABLE dbo.LogRestoresTemp
 END
+/* 
+	Update extended property to indicate that a DB deployment is no longer in progress, allowing the GUI to continue loading.
+*/
+EXECUTE sp_updateextendedproperty
+		@name = N'IsDBUpgradeInProgress',
+		@value = 'N';

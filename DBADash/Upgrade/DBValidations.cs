@@ -73,7 +73,7 @@ ELSE IF NOT EXISTS(SELECT *
             )
         AND DB_ID()>4
 BEGIN
-	SELECT '0.0.0.0' AS Version,@DeployInProgress AS DeployInProgress
+	SELECT '0.0.0.0' AS Version,1 AS DeployInProgress
 END
 ELSE
 BEGIN
@@ -92,8 +92,11 @@ END
                 version = (string)rdr["Version"];
                 deployInProgress = (bool)rdr["DeployInProgress"];
             }
-            version ??= "0.0.0.1";
-
+            else // First time deployment is likely in progress
+            {
+                deployInProgress = true;
+                version = "0.0.0.1";
+            }
             return (Version.Parse(version), deployInProgress);
         }
 
