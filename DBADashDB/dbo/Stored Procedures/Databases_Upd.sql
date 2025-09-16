@@ -4,6 +4,8 @@
 	@SnapshotDate DATETIME2(2)
 )
 AS
+SET XACT_ABORT ON
+SET NOCOUNT ON
 DECLARE @Ref VARCHAR(30)='Databases'
 IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
 BEGIN
@@ -20,14 +22,14 @@ BEGIN
 		NewValue SQL_VARIANT NULL,
 		ChangeDate DATETIME2(2) NOT NULL
 	);
-	CREATE TABLE #OldSettings(
+	DECLARE @OldSettings TABLE(
 		DatabaseID INT NOT NULL,
 		Setting sysname NOT NULL,
 		Value SQL_VARIANT NULL,
 		is_in_standby BIT NULL
 	);
 	/* Capture old settings before update */
-	INSERT INTO #OldSettings
+	INSERT INTO @OldSettings
 	(
 	    DatabaseID,
 	    Setting,
@@ -316,15 +318,15 @@ BEGIN
 	IF @@ROWCOUNT>0
 	BEGIN
 		INSERT INTO #History(DatabaseID,Setting,OldValue,NewValue,ChangeDate)
-		SELECT o.DatabaseID,o.Setting,o.value,n.value,@SnapshotDate AS ChangeDate 
-		FROM #OldSettings o
+		SELECT o.DatabaseID,o.Setting,o.Value,n.Value,@SnapshotDate AS ChangeDate 
+		FROM @OldSettings o
 		JOIN dbo.DatabaseSettingsUnpivot_Get(@InstanceID) n ON o.DatabaseID = n.DatabaseID AND o.Setting = n.Setting
-		WHERE NOT EXISTS(SELECT o.value 
+		WHERE NOT EXISTS(SELECT o.Value 
 						INTERSECT
 						SELECT n.Value)
 		AND NOT (o.Setting<>'is_read_only' AND n.is_in_standby=1 AND n.Value=1)
 		AND NOT (o.Setting<>'is_read_only' AND o.is_in_standby=1 AND o.Value=1)
-		AND NOT (o.Setting='state' AND n.value IN(0,1,2,3) AND o.value IN(0,1,2,3));
+		AND NOT (o.Setting='state' AND n.Value IN(0,1,2,3) AND o.Value IN(0,1,2,3));
 	END
 
 	/* Handle databases being re-created or restored */
