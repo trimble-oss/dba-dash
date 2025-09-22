@@ -1320,14 +1320,10 @@ BEGIN
 	VALUES
 	( -1, 0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855, 0x )
 	SET IDENTITY_INSERT dbo.DDL OFF
-END
-IF NOT EXISTS(SELECT 1 FROM dbo.ObjectType)
-BEGIN
-	INSERT INTO dbo.ObjectType
-	(
-		ObjectType,
-		TypeDescription
-	)
+END;
+
+MERGE INTO dbo.ObjectType AS T
+USING(
 	VALUES( 'P','Stored Procedure'),
 	('V','View'),
 	('IF','Inline Function'),
@@ -1355,8 +1351,20 @@ BEGIN
 	('SBB','Service Broker Binding'),
 	('SBP','Service Broker Priorities'),
 	('SQ','Service Broker Queue'),
-	('SBR','Service Broker Route')
-END
+	('SBR','Service Broker Route'),
+	('TR','Trigger')
+	) AS S (ObjectType,TypeDescription)
+ON S.ObjectType = T.ObjectType
+WHEN MATCHED 
+AND EXISTS (SELECT T.TypeDescription
+			EXCEPT
+			SELECT S.TypeDescription
+			)
+THEN UPDATE
+SET T.TypeDescription = S.TypeDescription
+WHEN NOT MATCHED BY TARGET THEN
+INSERT(ObjectType,TypeDescription)
+VALUES(S.ObjectType,S.TypeDescription);
 
 INSERT INTO dbo.CollectionDatesThresholds
 (
