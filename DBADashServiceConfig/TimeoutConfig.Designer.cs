@@ -47,15 +47,15 @@
             txtDefaultTimeout = new System.Windows.Forms.TextBox();
             panel2 = new System.Windows.Forms.Panel();
             toolTip1 = new System.Windows.Forms.ToolTip(components);
+            chkAddPartitionsTimeout = new System.Windows.Forms.CheckBox();
+            chkPurgeTimeout = new System.Windows.Forms.CheckBox();
+            chkImportTimeout = new System.Windows.Forms.CheckBox();
             themedTabControl1 = new DBADashGUI.Theme.ThemedTabControl();
             tabPage1 = new System.Windows.Forms.TabPage();
             panel3 = new System.Windows.Forms.Panel();
             tabPage2 = new System.Windows.Forms.TabPage();
             pictureBox1 = new System.Windows.Forms.PictureBox();
             label3 = new System.Windows.Forms.Label();
-            chkAddPartitionsTimeout = new System.Windows.Forms.CheckBox();
-            chkPurgeTimeout = new System.Windows.Forms.CheckBox();
-            chkImportTimeout = new System.Windows.Forms.CheckBox();
             txtAddPartitionsCommandTimeout = new System.Windows.Forms.TextBox();
             txtPurgeDataCommandTimeout = new System.Windows.Forms.TextBox();
             txtImportCommandTimeout = new System.Windows.Forms.TextBox();
@@ -75,10 +75,10 @@
             dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colCollectionType, colTimeout, colDelete });
             dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            dgv.Location = new System.Drawing.Point(3, 3);
+            dgv.Location = new System.Drawing.Point(3, 68);
             dgv.Name = "dgv";
             dgv.RowHeadersWidth = 51;
-            dgv.Size = new System.Drawing.Size(788, 366);
+            dgv.Size = new System.Drawing.Size(788, 301);
             dgv.TabIndex = 0;
             dgv.CellContentClick += CustomTimeouts_CellContentClick;
             // 
@@ -234,6 +234,42 @@
             panel2.Size = new System.Drawing.Size(788, 65);
             panel2.TabIndex = 7;
             // 
+            // chkAddPartitionsTimeout
+            // 
+            chkAddPartitionsTimeout.AutoSize = true;
+            chkAddPartitionsTimeout.Location = new System.Drawing.Point(31, 86);
+            chkAddPartitionsTimeout.Name = "chkAddPartitionsTimeout";
+            chkAddPartitionsTimeout.Size = new System.Drawing.Size(185, 24);
+            chkAddPartitionsTimeout.TabIndex = 8;
+            chkAddPartitionsTimeout.Text = "Add partitions timeout:";
+            toolTip1.SetToolTip(chkAddPartitionsTimeout, "Timeout for adding new partitions.  Most data in DBA Dash is partitioned which makes it efficient to remove data older than the configured retention");
+            chkAddPartitionsTimeout.UseVisualStyleBackColor = true;
+            chkAddPartitionsTimeout.CheckedChanged += AddPartitionsTimeout_CheckChanged;
+            // 
+            // chkPurgeTimeout
+            // 
+            chkPurgeTimeout.AutoSize = true;
+            chkPurgeTimeout.Location = new System.Drawing.Point(31, 54);
+            chkPurgeTimeout.Name = "chkPurgeTimeout";
+            chkPurgeTimeout.Size = new System.Drawing.Size(128, 24);
+            chkPurgeTimeout.TabIndex = 7;
+            chkPurgeTimeout.Text = "Purge timeout:";
+            toolTip1.SetToolTip(chkPurgeTimeout, "Timeout for running 'dbo.PurgeData' to remove old data based on data retention settings.");
+            chkPurgeTimeout.UseVisualStyleBackColor = true;
+            chkPurgeTimeout.CheckedChanged += PurgeTimeout_CheckChanged;
+            // 
+            // chkImportTimeout
+            // 
+            chkImportTimeout.AutoSize = true;
+            chkImportTimeout.Location = new System.Drawing.Point(31, 20);
+            chkImportTimeout.Name = "chkImportTimeout";
+            chkImportTimeout.Size = new System.Drawing.Size(135, 24);
+            chkImportTimeout.TabIndex = 6;
+            chkImportTimeout.Text = "Import timeout:";
+            toolTip1.SetToolTip(chkImportTimeout, "Timeout for writing data to the repository database");
+            chkImportTimeout.UseVisualStyleBackColor = true;
+            chkImportTimeout.CheckedChanged += ImportTimeout_CheckChanged;
+            // 
             // themedTabControl1
             // 
             themedTabControl1.Controls.Add(tabPage1);
@@ -249,9 +285,9 @@
             // 
             // tabPage1
             // 
-            tabPage1.Controls.Add(panel2);
             tabPage1.Controls.Add(dgv);
             tabPage1.Controls.Add(panel3);
+            tabPage1.Controls.Add(panel2);
             tabPage1.Location = new System.Drawing.Point(4, 39);
             tabPage1.Name = "tabPage1";
             tabPage1.Padding = new System.Windows.Forms.Padding(3);
@@ -309,42 +345,6 @@
             label3.Size = new System.Drawing.Size(672, 20);
             label3.TabIndex = 9;
             label3.Text = "Additional timeouts relating to the GUI are available in the Options\\Repository Settings menu of the GUI";
-            // 
-            // chkAddPartitionsTimeout
-            // 
-            chkAddPartitionsTimeout.AutoSize = true;
-            chkAddPartitionsTimeout.Location = new System.Drawing.Point(31, 86);
-            chkAddPartitionsTimeout.Name = "chkAddPartitionsTimeout";
-            chkAddPartitionsTimeout.Size = new System.Drawing.Size(185, 24);
-            chkAddPartitionsTimeout.TabIndex = 8;
-            chkAddPartitionsTimeout.Text = "Add partitions timeout:";
-            toolTip1.SetToolTip(chkAddPartitionsTimeout, "Timeout for adding new partitions.  Most data in DBA Dash is partitioned which makes it efficient to remove data older than the configured retention");
-            chkAddPartitionsTimeout.UseVisualStyleBackColor = true;
-            chkAddPartitionsTimeout.CheckedChanged += AddPartitionsTimeout_CheckChanged;
-            // 
-            // chkPurgeTimeout
-            // 
-            chkPurgeTimeout.AutoSize = true;
-            chkPurgeTimeout.Location = new System.Drawing.Point(31, 54);
-            chkPurgeTimeout.Name = "chkPurgeTimeout";
-            chkPurgeTimeout.Size = new System.Drawing.Size(128, 24);
-            chkPurgeTimeout.TabIndex = 7;
-            chkPurgeTimeout.Text = "Purge timeout:";
-            toolTip1.SetToolTip(chkPurgeTimeout, "Timeout for running 'dbo.PurgeData' to remove old data based on data retention settings.");
-            chkPurgeTimeout.UseVisualStyleBackColor = true;
-            chkPurgeTimeout.CheckedChanged += PurgeTimeout_CheckChanged;
-            // 
-            // chkImportTimeout
-            // 
-            chkImportTimeout.AutoSize = true;
-            chkImportTimeout.Location = new System.Drawing.Point(31, 20);
-            chkImportTimeout.Name = "chkImportTimeout";
-            chkImportTimeout.Size = new System.Drawing.Size(135, 24);
-            chkImportTimeout.TabIndex = 6;
-            chkImportTimeout.Text = "Import timeout:";
-            toolTip1.SetToolTip(chkImportTimeout, "Timeout for writing data to the repository database");
-            chkImportTimeout.UseVisualStyleBackColor = true;
-            chkImportTimeout.CheckedChanged += ImportTimeout_CheckChanged;
             // 
             // txtAddPartitionsCommandTimeout
             // 
