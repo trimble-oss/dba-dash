@@ -55,6 +55,7 @@ BEGIN
 			S3Path = @S3Path,
 			MessagingEnabled = @MessagingEnabled,
 			AllowedScripts = @AllowedScripts,
-			AllowedCustomProcs = @AllowedCustomProcs
+			AllowedCustomProcs = @AllowedCustomProcs,
+			ModifiedDate = SYSUTCDATETIME()
 	WHERE DBADashAgentID = @DBADashAgentID;
 END
