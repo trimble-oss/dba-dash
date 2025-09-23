@@ -414,22 +414,22 @@ namespace DBADashGUI
             return connectionCheckPassed;
         }
 
-        private static void WaitForDBUpgrade(string connectionString)
+        private static void WaitForDBUpgrade(string connectionString, string caption = "Upgrade in progress", string heading = "Repository database upgrade is in progress.  ", string text = "Please wait for this to complete.  If you continue, the application might be unstable.  \n\nThis dialog will close automatically...", bool allowContinue = true)
         {
             var closeButton = new TaskDialogButton("Close");
             var page = new TaskDialogPage
             {
-                Caption = "Upgrade in progress",
-                Heading = "Repository database upgrade is in progress.  ",
-                Text = "Please wait for this to complete.  If you continue, the application might be unstable.  \n\nThis dialog will close automatically...",
+                Caption = caption,
+                Heading = heading,
+                Text = text,
                 Icon = TaskDialogIcon.Information,
-                Buttons = new TaskDialogButtonCollection() { closeButton, TaskDialogButton.Continue },
+                Buttons = new TaskDialogButtonCollection() { closeButton },
                 SizeToContent = true,
                 ProgressBar = new TaskDialogProgressBar()
                 {
                     State = TaskDialogProgressBarState.Marquee,
                 },
-                DefaultButton = TaskDialogButton.Continue,
+                DefaultButton = closeButton,
                 Expander = new TaskDialogExpander()
                 {
                     Text = "If this process takes longer than expected, click the 'View Service Log' button on the service config tool to check the logs.",
@@ -438,12 +438,25 @@ namespace DBADashGUI
                     Position = TaskDialogExpanderPosition.AfterFootnote
                 },
             };
+            if (allowContinue)
+            {
+                page.Buttons.Add(TaskDialogButton.Continue);
+                page.DefaultButton = TaskDialogButton.Continue;
+            }
 
             var tmr = new Timer() { Interval = 1000, Enabled = true };
             tmr.Tick += (s, e) =>
             {
-                var dbVersion = DBValidations.GetDBVersion(connectionString);
-                if (dbVersion.DeployInProgress) return;
+                try
+                {
+                    var dbVersion = DBValidations.GetDBVersion(connectionString);
+                    if (dbVersion.DeployInProgress || dbVersion.Version == Version.Parse("0.0.0.0")) return;
+                }
+                catch (Exception ex)
+                {
+                    Task.Delay(1000);
+                    return;
+                }
                 tmr.Stop();
                 tmr.Dispose();
                 page.BoundDialog?.Close();
@@ -464,6 +477,11 @@ namespace DBADashGUI
             if (dbVersion.DeployInProgress)
             {
                 WaitForDBUpgrade(connectionString);
+                dbVersion = DBValidations.GetDBVersion(connectionString);
+            }
+            if (dbVersion.Version == Version.Parse("0.0.0.0"))
+            {
+                WaitForDBUpgrade(connectionString, "Database Deployment", "Waiting for first time database deployment to complete. ", "Please wait for the deployment to complete.  \nIf this doesn't occur within a few minutes, check that the service is started.  Check the log file for errors.", false);
                 dbVersion = DBValidations.GetDBVersion(connectionString);
             }
             var compare = (new Version(appVersion.Major, appVersion.Minor)).CompareTo(new Version(dbVersion.Version.Major, dbVersion.Version.Minor));

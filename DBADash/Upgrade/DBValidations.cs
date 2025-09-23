@@ -35,7 +35,7 @@ namespace DBADash
             connectionString = builder.ConnectionString;
 
             using var cn = new SqlConnection(connectionString);
-            using var cmd = new SqlCommand("SELECT CASE WHEN EXISTS(SELECT 1 FROM sys.databases WHERE name = @db) THEN CAST(1 as  BIT) ELSE CAST(0 as BIT) END as DBExists",cn);
+            using var cmd = new SqlCommand("SELECT CASE WHEN EXISTS(SELECT 1 FROM sys.databases WHERE name = @db) THEN CAST(1 as  BIT) ELSE CAST(0 as BIT) END as DBExists", cn);
             cn.Open();
             cmd.Parameters.AddWithValue("@db", db);
             return (bool)cmd.ExecuteScalar();
@@ -73,7 +73,7 @@ ELSE IF NOT EXISTS(SELECT *
             )
         AND DB_ID()>4
 BEGIN
-	SELECT '0.0.0.0' AS Version,1 AS DeployInProgress
+	SELECT '0.0.0.0' AS Version,CAST(0 AS BIT) AS DeployInProgress
 END
 ELSE
 BEGIN
