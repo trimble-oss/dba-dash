@@ -217,6 +217,19 @@ BEGIN
 	EXEC dbo.Instances_HardDelete @HardDeleteThresholdDays=@HardDeleteThresholdDays
 END
 
+/* DBADashAgent table cleanup */
+DELETE A
+FROM dbo.DBADashAgent A
+WHERE NOT EXISTS(SELECT 1 
+				FROM dbo.Instances I
+				WHERE I.CollectAgentID = A.DBADashAgentID
+				UNION ALL
+				SELECT 1 
+				FROM dbo.Instances I
+				WHERE I.ImportAgentID = A.DBADashAgentID
+				)
+AND A.ModifiedDate < DATEADD(d,-14,SYSUTCDATETIME())
+
 IF @Errors <> ''
 BEGIN;
 	THROW 51000,@Errors,1;
