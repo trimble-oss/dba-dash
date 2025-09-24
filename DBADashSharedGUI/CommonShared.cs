@@ -228,6 +228,11 @@ namespace DBADashSharedGUI
 
         public static void ShowCodeViewer(string sql, string title = "", CodeEditor.CodeEditorModes Language = CodeEditor.CodeEditorModes.SQL)
         {
+            if (Language != CodeEditor.CodeEditorModes.None && ShouldDisableSyntaxHighlighting(sql)) // Turn off syntax highlighting if it's likely to be problematic
+            {
+                Language = CodeEditor.CodeEditorModes.None;
+            }
+
             FrmCodeViewer?.Close();
             FrmCodeViewer = new CodeViewer
             {
@@ -241,6 +246,18 @@ namespace DBADashSharedGUI
             }
             FrmCodeViewer.FormClosed += (s, e) => FrmCodeViewer = null;
             FrmCodeViewer.Show();
+        }
+
+        private static bool ShouldDisableSyntaxHighlighting(string txt)
+        {
+            if (string.IsNullOrEmpty(txt))
+                return false;
+
+            // Split on newline
+            var lines = txt.Split(new[] { '\r', '\n' }, StringSplitOptions.None);
+            // Disable syntax highlighting if any line of code is longer than 50K.
+            // Long single lines of code with additional factors like a large number of punctuation or whitespace can cause the app to hang. #1561
+            return lines.Any(line => line.Length > 50000);
         }
 
         public static string GetTempFilePath(string extension)
