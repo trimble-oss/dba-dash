@@ -130,7 +130,7 @@ LEFT JOIN B ON d.DatabaseID = B.DatabaseID
 OUTER APPLY dbo.SecondsToHumanDuration(DATEDIFF(s,SSD.SnapshotDate,GETUTCDATE())) HD
 OUTER APPLY(SELECT TOP(1) T.*,
 				CASE WHEN EXISTS(SELECT * FROM STRING_SPLIT(T.ExcludedDatabases,',') SS WHERE d.name LIKE SS.value) THEN CAST(1 AS BIT) ELSE CAST(0 as BIT) END as IsExcludedByName,
-				CASE WHEN DATEADD(mi,I.UTCOffset,d.create_date) > DATEADD(mi,-T.MinimumAge,GETUTCDATE()) THEN CAST(1 AS BIT) ELSE CAST(0 as BIT) END IsExcludedByDate
+				CASE WHEN T.MinimumAge > DATEDIFF(mi,0,GETUTCDATE()) THEN CAST(1 AS BIT) WHEN DATEADD(mi,I.UTCOffset,d.create_date) > DATEADD(mi,-T.MinimumAge,GETUTCDATE()) THEN CAST(1 AS BIT) ELSE CAST(0 as BIT) END IsExcludedByDate
 			FROM dbo.BackupThresholds T 
 			WHERE (D.InstanceID = T.InstanceID OR T.InstanceID = -1)
 			AND (D.DatabaseID = T.DatabaseID  OR T.DatabaseID = -1)
