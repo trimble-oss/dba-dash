@@ -1,12 +1,8 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Frozen;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
 
 namespace DBADash
 {
@@ -43,11 +39,14 @@ namespace DBADash
 
         public static bool ShouldRetry(Exception ex)
         {
-            if (ex is SqlException sqlEx)
+            return ex switch
             {
-                return !ExcludedErrorCodes.Contains(sqlEx.Number) && sqlEx.Message != "Max databases exceeded for Table Size collection" && !sqlEx.Message.Contains("denied", StringComparison.OrdinalIgnoreCase);
-            }
-            return true;
+                DatabaseConnectionException => false, // Skip retries for faster offline instance detection
+                SqlException sqlEx => !ExcludedErrorCodes.Contains(sqlEx.Number) &&
+                                      sqlEx.Message != "Max databases exceeded for Table Size collection" &&
+                                      !sqlEx.Message.Contains("denied", StringComparison.OrdinalIgnoreCase),
+                _ => true
+            };
         }
     }
 }

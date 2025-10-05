@@ -9,7 +9,6 @@ using Polly;
 using Polly.Retry;
 using Serilog;
 using System;
-using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -286,8 +285,6 @@ namespace DBADash
             LogInternalPerformanceCounter("DBADash", "Collection Duration (ms)", currentCollection, Convert.ToDecimal(swatch.Elapsed.TotalMilliseconds));
         }
 
- 
-
         private async Task StartupAsync()
         {
             noWMI = Source.NoWMI;
@@ -323,14 +320,20 @@ namespace DBADash
                         {
                             Log.Warning(ex, "Error collecting {collection}", collection);
                         }
+
                         errors.Add(ex);
                         throw;
                     }
                 });
                 if (errors.Count > 0)
                 {
-                    LogError(new AggregateException($"{collection} succeeded after {errors.Count} attempts", errors), collection, "Collect[Retry]");
+                    LogError(new AggregateException($"{collection} succeeded after {errors.Count} attempts", errors),
+                        collection, "Collect[Retry]");
                 }
+            }
+            catch (DatabaseConnectionException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
