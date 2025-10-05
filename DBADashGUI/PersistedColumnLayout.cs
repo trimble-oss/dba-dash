@@ -4,7 +4,7 @@
     public class PersistedColumnLayout
     {
         public int Width;
-        public bool Visible;
+        public bool Visible = true;
         public int DisplayIndex = -1;
     }
 }
