@@ -48,5 +48,14 @@ namespace DBADashGUI.CustomReports
                 }
             }
         }
+
+        public CellHighlightingRuleSetCollection() : base()
+        {
+        }
+
+        public CellHighlightingRuleSetCollection(IDictionary<string, CellHighlightingRuleSet> dictionary)
+            : base(dictionary)
+        {
+        }
     }
 }
