@@ -4,6 +4,7 @@ using DBADashGUI.CommunityTools;
 using DBADashGUI.Interface;
 using DBADashGUI.Messaging;
 using DBADashGUI.Performance;
+using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
@@ -13,13 +14,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Management.Automation;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADashGUI.SchemaCompare;
 using DataTable = System.Data.DataTable;
 
 namespace DBADashGUI.CustomReports
@@ -244,6 +242,32 @@ namespace DBADashGUI.CustomReports
             catch (Exception ex)
             {
                 CommonShared.ShowExceptionDialog(ex, "Error saving alias");
+            }
+        }
+
+        private void SetColumnTooltip_Click(DBADashDataGridView dgv)
+        {
+            if (dgv.ClickedColumnIndex < 0) return;
+            // Show a dialog for renaming
+            var columnName = dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName;
+            var description = dgv.Columns[dgv.ClickedColumnIndex].ToolTipText;
+            if (CommonShared.ShowInputDialog(ref description, "Enter Tooltip:") != DialogResult.OK) return;
+
+            dgv.Columns[dgv.ClickedColumnIndex].ToolTipText = description;
+            try
+            {
+                if (!Report.CustomReportResults[dgv.ResultSetID].Columns.TryGetValue(columnName, out var colInfo))
+                {
+                    colInfo = new ColumnMetadata();
+                    Report.CustomReportResults[dgv.ResultSetID].Columns.Add(columnName, colInfo);
+                }
+                colInfo ??= new ColumnMetadata();
+                colInfo.Description = description;
+                Report.Update();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error saving tooltip");
             }
         }
 
@@ -700,12 +724,14 @@ namespace DBADashGUI.CustomReports
             var editReport = new ToolStripMenuItem("Edit Report", Properties.Resources.VBReport_16x) { Name = "EditReport" };
 
             var renameColumnMenuItem = new ToolStripMenuItem("Rename Column", Properties.Resources.Rename_16x);
+            var setTooltipMenuItem = new ToolStripMenuItem("Set Column Tooltip", Properties.Resources.EditTooltip_16x);
             var setFormatStringMenuItem =
                 new ToolStripMenuItem("Set Format String", Properties.Resources.Percentage_16x);
             var addLink = new ToolStripMenuItem("Add Link", Properties.Resources.WebURL_16x);
             var rules = new ToolStripMenuItem("Highlighting Rules", Properties.Resources.HighlightHS);
             var convertLocalMenuItem = new ToolStripMenuItem("Convert to local timezone") { Checked = true, CheckOnClick = true, Name = "ConvertLocal" };
             renameColumnMenuItem.Click += (sender, e) => RenameColumnMenuItem_Click(dgv);
+            setTooltipMenuItem.Click += (sender, e) => SetColumnTooltip_Click(dgv);
             convertLocalMenuItem.Click += (sender, e) => ConvertLocalMenuItem_Click(sender, dgv);
             setFormatStringMenuItem.Click += (sender, e) => SetFormatStringMenuItem_Click(dgv);
             addLink.Click += (sender, e) => AddLink_Click(dgv);
@@ -714,6 +740,7 @@ namespace DBADashGUI.CustomReports
             editReport.DropDownItems.AddRange(new ToolStripItem[]
             {
                 renameColumnMenuItem,
+                setTooltipMenuItem,
                 convertLocalMenuItem,
                 setFormatStringMenuItem,
                 addLink,
@@ -1152,7 +1179,6 @@ namespace DBADashGUI.CustomReports
                 return;
             }
 
-          
             var pickers = Report.Pickers;
             if (customParams.Any(p => p.Param.ParameterName.TrimStart('@').Equals("Top", StringComparison.InvariantCultureIgnoreCase) && p.Param.SqlDbType == SqlDbType.Int) && !pickers.Any(p => p.ParameterName.TrimStart('@').Equals("Top", StringComparison.InvariantCultureIgnoreCase)))
             {
@@ -1174,7 +1200,7 @@ namespace DBADashGUI.CustomReports
 
                 if (picker.IsText)
                 {
-                    var txtItem = new ToolStripTextBox() { Tag = pickerTag};
+                    var txtItem = new ToolStripTextBox() { Tag = pickerTag };
                     txtItem.Text = param.Param.Value?.ToString() ?? picker.DefaultValue?.ToString() ?? string.Empty;
 
                     txtItem.TextChanged += (_, _) =>
@@ -1191,13 +1217,13 @@ namespace DBADashGUI.CustomReports
                     };
                     if (picker.MenuBar)
                     {
-                        var lbl = new ToolStripLabel(picker.Name + ":") { Tag = pickerTag};
+                        var lbl = new ToolStripLabel(picker.Name + ":") { Tag = pickerTag };
                         toolStrip1.Items.Insert(baseIdx + 1, lbl);
                         toolStrip1.Items.Insert(baseIdx + 2, txtItem);
                     }
                     else
                     {
-                        var pickerMenu = new ToolStripMenuItem(picker.Name) {Tag = pickerTag};
+                        var pickerMenu = new ToolStripMenuItem(picker.Name) { Tag = pickerTag };
                         pickerMenu.DropDownItems.Add(txtItem);
                         tsParams.DropDownItems.Add(pickerMenu);
                     }
@@ -1217,7 +1243,7 @@ namespace DBADashGUI.CustomReports
                     }
                     if (picker.MenuBar)
                     {
-                        toolStrip1.Items.Insert(baseIdx+1, pickerMenu);
+                        toolStrip1.Items.Insert(baseIdx + 1, pickerMenu);
                     }
                     else
                     {
