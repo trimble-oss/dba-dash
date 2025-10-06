@@ -692,7 +692,7 @@ namespace DBADashGUI
         private void ShowFindDatabaseDialog(string dbName)
         {
             databaseFinderDialog?.Close();
-            var report = SystemReports.DatabaseFinder;
+            var report = DatabaseFinderReport.Instance;
             var tempContext = (DBADashContext)Context.DeepCopy();
             tempContext.Report = report;
             databaseFinderWidth ??= Convert.ToInt32(Math.Max(Main.MainFormInstance.Width * 0.7, 800));

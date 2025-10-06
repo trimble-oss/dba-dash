@@ -11,7 +11,7 @@ namespace DBADashGUI.CustomReports
 
         public void SetContext(DBADashContext _context)
         {
-            _context.Report = SystemReports.ServerServices;
+            _context.Report = ServerServicesReport.Instance;
             customReportView1.SetContext(_context);
         }
     }
