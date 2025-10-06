@@ -103,21 +103,21 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AsyncKeyedLock" Version="7.1.6" />
-    <PackageReference Include="AWSSDK.Core" Version="4.0.0.26" />
-    <PackageReference Include="AWSSDK.S3" Version="4.0.7" />
-    <PackageReference Include="AWSSDK.SQS" Version="4.0.1.2" />
-    <PackageReference Include="Azure.Core" Version="1.48.0" />
+    <PackageReference Include="AsyncKeyedLock" Version="7.1.7" />
+    <PackageReference Include="AWSSDK.Core" Version="4.0.0.32" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.7.7" />
+    <PackageReference Include="AWSSDK.SQS" Version="4.0.1.8" />
+    <PackageReference Include="Azure.Core" Version="1.49.0" />
     <PackageReference Include="Azure.Identity" Version="1.16.0" />
     <PackageReference Include="Humanizer.Core" Version="2.14.1" />
-    <PackageReference Include="MailKit" Version="4.13.0" />
+    <PackageReference Include="MailKit" Version="4.14.0" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.9" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.9" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.9" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.77.0" />
-    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.77.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.77.1" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.77.1" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.14.0" />
     <PackageReference Include="Microsoft.IdentityModel.Logging" Version="8.14.0" />
     <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="8.14.0" />
@@ -129,9 +129,9 @@
     <PackageReference Include="Microsoft.SqlServer.DacFx" Version="170.1.61" />
     <PackageReference Include="Microsoft.SqlServer.Management.SqlParser" Version="172.20.0" />
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="172.76.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Octokit" Version="14.0.0" />
-    <PackageReference Include="Polly.Core" Version="8.6.3" />
+    <PackageReference Include="Polly.Core" Version="8.6.4" />
     <PackageReference Include="Serilog" Version="4.3.0" />
     <PackageReference Include="SerilogTimings" Version="3.1.0" />
     <PackageReference Include="System.Buffers" Version="4.6.1" />
@@ -144,7 +144,7 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
     <PackageReference Include="System.IO.Packaging" Version="9.0.9" />
     <PackageReference Include="System.Management" Version="9.0.9" />
-    <PackageReference Include="System.Management.Automation" Version="7.4.11" />
+    <PackageReference Include="System.Management.Automation" Version="7.4.12" />
     <PackageReference Include="System.Memory" Version="4.6.3" />
     <PackageReference Include="System.Memory.Data" Version="9.0.9" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.6.1" />
