@@ -658,8 +658,9 @@ namespace DBADashGUI
             foreach (DataColumn dataColumn in dt.Columns)
             {
                 DataGridViewColumn column;
+                customReportResult.Columns.TryGetValue(dataColumn.ColumnName, out var colInfo);
 
-                if (customReportResult.LinkColumns.ContainsKey(dataColumn.ColumnName))
+                if (colInfo?.Link != null)
                 {
                     column = new DataGridViewLinkColumn();
                 }
@@ -672,21 +673,13 @@ namespace DBADashGUI
                     column = new DataGridViewTextBoxColumn();
                 }
 
-                column.SortMode = DataGridViewColumnSortMode.Automatic;
-                column.DefaultCellStyle.Format =
-                    customReportResult.CellFormatString.TryGetValue(dataColumn.ColumnName, out var value)
-                        ? value
-                        : "";
-                column.DefaultCellStyle.NullValue = customReportResult.CellNullValue.TryGetValue(dataColumn.ColumnName, out var nullValue)
-                    ? nullValue
-                    : string.Empty;
+                column.DefaultCellStyle.Format = colInfo?.FormatString ?? string.Empty;
+                column.DefaultCellStyle.NullValue = colInfo?.NullValue ?? string.Empty;
                 column.DataPropertyName = dataColumn.ColumnName;
                 column.Name = dataColumn.ColumnName;
-                column.HeaderText =
-                    customReportResult.ColumnAlias.TryGetValue(column.DataPropertyName, out var alias)
-                        ? alias
-                        : dataColumn.Caption;
+                column.HeaderText = string.IsNullOrEmpty(colInfo?.Alias) ? dataColumn.Caption : colInfo.Alias;
                 column.ValueType = dataColumn.DataType;
+                column.ToolTipText = colInfo?.Description;
                 dgv.Columns.Add(column);
             }
         }
@@ -926,6 +919,5 @@ namespace DBADashGUI
         }
 
         public static string TabName(this Main.Tabs tab) => "tab" + tab;
-
     }
 }

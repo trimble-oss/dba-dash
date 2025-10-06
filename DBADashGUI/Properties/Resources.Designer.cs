@@ -1051,5 +1051,15 @@ namespace DBADashGUI.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+
+        internal static System.Drawing.Bitmap EditTooltip_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("EditTooltip_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
     }
 }
