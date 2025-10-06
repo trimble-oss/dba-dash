@@ -13,7 +13,7 @@ namespace DBADashGUI.DBFiles
 
         public void SetContext(DBADashContext _context)
         {
-            customReportView1.Report = _context.Type == SQLTreeItem.TreeType.Table ? SystemReports.TableSizeHistory : SystemReports.TableSizeReport;
+            customReportView1.Report = _context.Type == SQLTreeItem.TreeType.Table ? TableSizeHistoryReport.Instance : TableSizeReport.Instance;
             customReportView1.SetContext(_context);
         }
 
