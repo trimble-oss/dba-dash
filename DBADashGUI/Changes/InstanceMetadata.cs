@@ -69,7 +69,7 @@ namespace DBADashGUI.Changes
 
         private void GridSelectionChanged(object sender, EventArgs e)
         {
-            if(splitContainer1.Panel1Collapsed) return; // Don't do anything if the panel is collapsed
+            if (splitContainer1.Panel1Collapsed) return; // Don't do anything if the panel is collapsed
             var grid = (DBADashDataGridView)sender;
             if (grid.SelectedRows.Count == 1)
             {
@@ -144,10 +144,12 @@ namespace DBADashGUI.Changes
                     // the `property.Name` becomes the `nodeName` and `property.Value` is passed.
                     // We'll never directly call CreateTreeNode with a JTokenType.Property itself.
                     break;
+
                 case JTokenType.Null:
                 case JTokenType.None:
                     node.Text += " (null)";
                     break;
+
                 case JTokenType.String:
                 case JTokenType.Integer:
                 case JTokenType.Float:
@@ -171,7 +173,7 @@ namespace DBADashGUI.Changes
         public void SetContext(DBADashContext _context)
         {
             if (_context.Clone() is not DBADashContext context) return;
-            context.Report = context.InstanceID >0 ? InstanceMetadataHistoryReport : InstanceMetadataReport;
+            context.Report = context.InstanceID > 0 ? InstanceMetadataHistoryReport : InstanceMetadataReport;
             splitContainer1.Panel1Collapsed = context.InstanceID == 0;
             customReportView1.SetContext(context);
         }
@@ -181,14 +183,13 @@ namespace DBADashGUI.Changes
             customReportView1.RefreshData();
         }
 
-
         private SystemReport _instanceMetadataReport;
 
         private SystemReport InstanceMetadataReport
         {
             get
             {
-                if(_instanceMetadataReport != null) return _instanceMetadataReport;
+                if (_instanceMetadataReport != null) return _instanceMetadataReport;
                 _instanceMetadataReport = InstanceMetadataHistoryReport.DeepCopy() as SystemReport;
                 _instanceMetadataReport.ProcedureName = "InstanceMetadata_Get";
                 _instanceMetadataReport.QualifiedProcedureName = "dbo.InstanceMetadata_Get";
@@ -249,89 +250,53 @@ namespace DBADashGUI.Changes
                 },
             },
             CustomReportResults = new Dictionary<int, CustomReportResult>
+            {
                 {
+                    0, new CustomReportResult
                     {
-                        0, new CustomReportResult
+                        ResultName = "History",
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
-                            ColumnAlias = new Dictionary<string, string>
-                            {
-                                { "InstanceID", "InstanceID" },
-                                {"InstanceDisplayName","Instance"},
-                                { "Provider", "Provider" },
-                                { "Metadata", "Metadata" },
-                                {"Name", "Name"},
-                                {"VMSize", "VM Size"},
-                                {"SKU","SKU"},
-                                {"ResourceGroup","Resource Group"},
-                                {"PrivateIPs","Private IPs"},
-                                {"PublicIPs","Public IPs"},
-                                {"IPAddresses","IPs"},
-                                {"Location","Location"},
-                                {"AvailabilityZone","Availability Zone"},
-                                {"SubscriptionID","Subscription ID"},
-                                {"Tags","Tags"},
-                                {"AccountID","Account Id"},
-                                {"ImageId","Image Id"},
-                                {"InstanceId","InstanceId"},
-                                {"VMHostName","VM Host Name"},
-                                {"IAMRole","IAM Role"},
-                                {"SecurityGroups","Security Groups"},
-                                {"LocalHostname","Local Hostname"},
-                                {"BillingProducts", "Billing Products"},
-                                {"ClusterIP","Cluster IP"},
-                                {"ClusterName", "Cluster Name"},
-                                { "SnapshotDate", "First Snapshot Date" },
-                                { "LastSnapshotDate", "Last Snapshot Date" },
-                                { "ValidFrom", "Valid From" },
-                                { "ValidTo", "Valid To" },
-                            },
-                            ResultName = "History",
-                            ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>()
-                            {
-                                new("InstanceID", new PersistedColumnLayout {  Visible = false }),
-                                new("InstanceDisplayName", new PersistedColumnLayout {  Visible = false }),
-                                new("Provider", new PersistedColumnLayout {  Visible = true }),
-                                new("Metadata", new PersistedColumnLayout {  Visible = true }),
-                                new("Name", new PersistedColumnLayout {  Visible = true }),
-                                new("VMSize", new PersistedColumnLayout {  Visible = true }),
-                                new("SKU", new PersistedColumnLayout {  Visible = true }),
-                                new("ResourceGroup", new PersistedColumnLayout {  Visible = true }),
-                                new("PrivateIPs", new PersistedColumnLayout {  Visible = true }),
-                                new("PublicIPs", new PersistedColumnLayout {  Visible = true }),
-                                new("IPAddresses", new PersistedColumnLayout {  Visible = true }),
-                                new("Location", new PersistedColumnLayout {  Visible = true }),
-                                new("AvailabilityZone", new PersistedColumnLayout {  Visible = true }),
-                                new("SubscriptionID", new PersistedColumnLayout {  Visible = true }),
-                                new("Tags", new PersistedColumnLayout {  Visible = true }),
-                                new ("AccountID", new PersistedColumnLayout {  Visible = true }),
-                                new ("ImageId", new PersistedColumnLayout {  Visible = true }),
-                                new ("InstanceId", new PersistedColumnLayout {  Visible = true }),
-                                new ("VMHostName", new PersistedColumnLayout {  Visible = true }),
-                                new ("IAMRole", new PersistedColumnLayout {  Visible = true }),
-                                new ("SecurityGroups", new PersistedColumnLayout {  Visible = true }),
-                                new ("LocalHostname", new PersistedColumnLayout {  Visible = true }),
-                                new ("BillingProducts", new PersistedColumnLayout {  Visible = true }),
-                                new ("ClusterIP", new PersistedColumnLayout {  Visible = true }),
-                                new ("ClusterName", new PersistedColumnLayout {  Visible = true }),
-                                new("SnapshotDate", new PersistedColumnLayout {  Visible = true }),
-                                new("LastSnapshotDate", new PersistedColumnLayout {  Visible = true }),
-                                new("ValidFrom", new PersistedColumnLayout {  Visible = true }),
-                                new("ValidTo", new PersistedColumnLayout {  Visible = true }),
-                            },
-                            LinkColumns = new Dictionary<string, LinkColumnInfo>
-                            {
+                            { "InstanceID", new ColumnMetadata { Alias = "InstanceID", Visible = false } },
+                            { "InstanceDisplayName", new ColumnMetadata { Alias = "Instance", Visible = false } },
+                            { "Provider", new ColumnMetadata { Alias = "Provider" } },
+                            { "Metadata", new ColumnMetadata {
+                                Alias = "Metadata",
+                                Link = new TextLinkColumnInfo
                                 {
-                                    "Metadata",
-                                    new TextLinkColumnInfo()
-                                    {
-                                        TargetColumn = "Metadata",
-                                        TextHandling = CodeEditor.CodeEditorModes.Json
-                                    }
+                                    TargetColumn = "Metadata",
+                                    TextHandling = CodeEditor.CodeEditorModes.Json
                                 }
-                            }
+                            } },
+                            { "Name", new ColumnMetadata { Alias = "Name" } },
+                            { "VMSize", new ColumnMetadata { Alias = "VM Size" } },
+                            { "SKU", new ColumnMetadata { Alias = "SKU" } },
+                            { "ResourceGroup", new ColumnMetadata { Alias = "Resource Group" } },
+                            { "PrivateIPs", new ColumnMetadata { Alias = "Private IPs" } },
+                            { "PublicIPs", new ColumnMetadata { Alias = "Public IPs" } },
+                            { "IPAddresses", new ColumnMetadata { Alias = "IPs" } },
+                            { "Location", new ColumnMetadata { Alias = "Location" } },
+                            { "AvailabilityZone", new ColumnMetadata { Alias = "Availability Zone" } },
+                            { "SubscriptionID", new ColumnMetadata { Alias = "Subscription ID" } },
+                            { "Tags", new ColumnMetadata { Alias = "Tags" } },
+                            { "AccountID", new ColumnMetadata { Alias = "Account Id" } },
+                            { "ImageId", new ColumnMetadata { Alias = "Image Id" } },
+                            { "InstanceId", new ColumnMetadata { Alias = "InstanceId" } },
+                            { "VMHostName", new ColumnMetadata { Alias = "VM Host Name" } },
+                            { "IAMRole", new ColumnMetadata { Alias = "IAM Role" } },
+                            { "SecurityGroups", new ColumnMetadata { Alias = "Security Groups" } },
+                            { "LocalHostname", new ColumnMetadata { Alias = "Local Hostname" } },
+                            { "BillingProducts", new ColumnMetadata { Alias = "Billing Products" } },
+                            { "ClusterIP", new ColumnMetadata { Alias = "Cluster IP" } },
+                            { "ClusterName", new ColumnMetadata { Alias = "Cluster Name" } },
+                            { "SnapshotDate", new ColumnMetadata { Alias = "First Snapshot Date" } },
+                            { "LastSnapshotDate", new ColumnMetadata { Alias = "Last Snapshot Date" } },
+                            { "ValidFrom", new ColumnMetadata { Alias = "Valid From" } },
+                            { "ValidTo", new ColumnMetadata { Alias = "Valid To" } }
                         }
                     }
-                },
+                }
+            }
         };
 
         private void NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)

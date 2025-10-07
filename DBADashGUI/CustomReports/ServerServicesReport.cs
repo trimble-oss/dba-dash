@@ -55,76 +55,37 @@ namespace DBADashGUI.CustomReports
                 {
                     0, new CustomReportResult
                     {
-                        ColumnAlias = new Dictionary<string, string>
-                        {
-                            { "InstanceID", "Instance ID" },
-                            { "InstanceDisplayName", "Instance" },
-                            { "service_type", "Service Type" },
-                            { "servicename", "Service Name" },
-                            { "startup_type", "Startup Type (ID)" },
-                            { "startup_type_desc", "Startup Type" },
-                            { "status", "Status (ID)" },
-                            { "status_desc", "Status" },
-                            { "process_id", "Process ID" },
-                            { "last_startup_time", "Last Startup Time" },
-                            { "service_account", "Service Account" },
-                            { "is_managed_service_account", "Managed Service Account?" },
-                            { "filename", "FileName" },
-                            { "is_clustered", "Is Clustered" },
-                            { "cluster_nodename", "Cluster Node Name" },
-                            { "instant_file_initialization_enabled", "Instant File Initialization Enabled" },
-                            { "instant_file_initialization_enabled_status", "Instant File Initialization Status" },
-                            { "SnapshotDate", "Snapshot Date" },
-                            { "SnapshotStatus", "Snapshot Status" }
-                        },
                         ResultName = "Server Services",
-                        ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>()
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
-                            new("InstanceID", new PersistedColumnLayout { Visible = false }),
-                            new("InstanceDisplayName", new PersistedColumnLayout {  Visible = true }),
-                            new("service_type", new PersistedColumnLayout {  Visible = true }),
-                            new("servicename", new PersistedColumnLayout {  Visible = true }),
-                            new("startup_type", new PersistedColumnLayout {  Visible = false }),
-                            new("startup_type_desc", new PersistedColumnLayout {  Visible = true }),
-                            new("status", new PersistedColumnLayout {  Visible = false }),
-                            new("status_desc", new PersistedColumnLayout {  Visible = true }),
-                            new("process_id", new PersistedColumnLayout {  Visible = true }),
-                            new("last_startup_time", new PersistedColumnLayout {  Visible = true }),
-                            new("service_account", new PersistedColumnLayout {  Visible = true }),
-                            new("is_managed_service_account", new PersistedColumnLayout {  Visible = true }),
-                            new("filename", new PersistedColumnLayout {  Visible = true }),
-                            new("is_clustered", new PersistedColumnLayout {  Visible = true }),
-                            new("cluster_nodename", new PersistedColumnLayout {  Visible = true }),
-                            new("instant_file_initialization_enabled",
-                                new PersistedColumnLayout {  Visible = true }),
-                            new("instant_file_initialization_enabled_status",
-                                new PersistedColumnLayout {  Visible = false }),
-                            new("SnapshotDate", new PersistedColumnLayout {  Visible = true }),
-                            new("SnapshotStatus", new PersistedColumnLayout {  Visible = false }),
-                        },
-                        CellHighlightingRules =
-                        {
-                            {
-                                "SnapshotDate",
-                                new CellHighlightingRuleSet("SnapshotStatus") { IsStatusColumn = true }
-                            },
-                            {
-                                "SnapshotStatus",
-                                new CellHighlightingRuleSet("SnapshotStatus") { IsStatusColumn = true }
-                            },
-                            {
-                                "instant_file_initialization_enabled",
-                                new CellHighlightingRuleSet("instant_file_initialization_enabled_status")
-                                    { IsStatusColumn = true }
-                            },
-                            {
-                                "instant_file_initialization_enabled_status",
-                                new CellHighlightingRuleSet("instant_file_initialization_enabled_status")
-                                    { IsStatusColumn = true }
-                            },
-                            {
-                                "startup_type_desc",
-                                new CellHighlightingRuleSet("startup_type_desc")
+                            { "InstanceID", new ColumnMetadata {
+                                Alias = "Instance ID",
+                                Visible = false
+                            }},
+                            { "InstanceDisplayName", new ColumnMetadata {
+                                Alias = "Instance",
+                                Link = new DrillDownLinkColumnInfo {
+                                    ReportProcedureName = "ServerServices_Get",
+                                    ColumnToParameterMap = new Dictionary<string, string> { { "@InstanceIDs", "InstanceID" } }
+                                }
+                            }},
+                            { "service_type", new ColumnMetadata {
+                                Alias = "Service Type",
+                                Link = new DrillDownLinkColumnInfo {
+                                    ReportProcedureName = "ServerServices_Get",
+                                    ColumnToParameterMap = new Dictionary<string, string> { { "@ServiceType", "service_type" } }
+                                }
+                            }},
+                            { "servicename", new ColumnMetadata {
+                                Alias = "Service Name"
+                            }},
+                            { "startup_type", new ColumnMetadata {
+                                Alias = "Startup Type (ID)",
+                                Visible = false
+                            }},
+                            { "startup_type_desc", new ColumnMetadata {
+                                Alias = "Startup Type",
+                                Highlighting = new CellHighlightingRuleSet("startup_type_desc")
                                 {
                                     Rules = new List<CellHighlightingRule>
                                     {
@@ -147,10 +108,14 @@ namespace DBADashGUI.CustomReports
                                         }
                                     }
                                 }
-                            },
-                            {
-                                "status_desc",
-                                new CellHighlightingRuleSet("status_desc")
+                            }},
+                            { "status", new ColumnMetadata {
+                                Alias = "Status (ID)",
+                                Visible = false
+                            }},
+                            { "status_desc", new ColumnMetadata {
+                                Alias = "Status",
+                                Highlighting = new CellHighlightingRuleSet("status_desc")
                                 {
                                     Rules = new List<CellHighlightingRule>
                                     {
@@ -167,37 +132,50 @@ namespace DBADashGUI.CustomReports
                                         }
                                     }
                                 }
-                            }
-                        },
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
-                        {
-                            {
-                                "service_type",
-                                new DrillDownLinkColumnInfo
-                                {
+                            }},
+                            { "process_id", new ColumnMetadata {
+                                Alias = "Process ID"
+                            }},
+                            { "last_startup_time", new ColumnMetadata {
+                                Alias = "Last Startup Time"
+                            }},
+                            { "service_account", new ColumnMetadata {
+                                Alias = "Service Account",
+                                Link = new DrillDownLinkColumnInfo {
                                     ReportProcedureName = "ServerServices_Get",
-                                    ColumnToParameterMap = new Dictionary<string, string>
-                                        { { "@ServiceType", "service_type" } }
+                                    ColumnToParameterMap = new Dictionary<string, string> { { "@ServiceAccount", "service_account" } }
                                 }
-                            },
-                            {
-                                "service_account",
-                                new DrillDownLinkColumnInfo
-                                {
-                                    ReportProcedureName = "ServerServices_Get",
-                                    ColumnToParameterMap = new Dictionary<string, string>
-                                        { { "@ServiceAccount", "service_account" } }
-                                }
-                            },
-                            {
-                                "InstanceDisplayName",
-                                new DrillDownLinkColumnInfo
-                                {
-                                    ReportProcedureName = "ServerServices_Get",
-                                    ColumnToParameterMap = new Dictionary<string, string>
-                                        { { "@InstanceIDs", "InstanceID" } }
-                                }
-                            }
+                            }},
+                            { "is_managed_service_account", new ColumnMetadata {
+                                Alias = "Managed Service Account?"
+                            }},
+                            { "filename", new ColumnMetadata {
+                                Alias = "FileName"
+                            }},
+                            { "is_clustered", new ColumnMetadata {
+                                Alias = "Is Clustered"
+                            }},
+                            { "cluster_nodename", new ColumnMetadata {
+                                Alias = "Cluster Node Name"
+                            }},
+                            { "instant_file_initialization_enabled", new ColumnMetadata {
+                                Alias = "Instant File Initialization Enabled",
+                                Highlighting = new CellHighlightingRuleSet("instant_file_initialization_enabled_status") { IsStatusColumn = true }
+                            }},
+                            { "instant_file_initialization_enabled_status", new ColumnMetadata {
+                                Alias = "Instant File Initialization Status",
+                                Visible = false,
+                                Highlighting = new CellHighlightingRuleSet("instant_file_initialization_enabled_status") { IsStatusColumn = true }
+                            }},
+                            { "SnapshotDate", new ColumnMetadata {
+                                Alias = "Snapshot Date",
+                                Highlighting = new CellHighlightingRuleSet("SnapshotStatus") { IsStatusColumn = true }
+                            }},
+                            { "SnapshotStatus", new ColumnMetadata {
+                                Alias = "Snapshot Status",
+                                Visible = false,
+                                Highlighting = new CellHighlightingRuleSet("SnapshotStatus") { IsStatusColumn = true }
+                            }}
                         }
                     }
                 }

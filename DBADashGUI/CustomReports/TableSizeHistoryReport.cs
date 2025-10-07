@@ -12,55 +12,76 @@ namespace DBADashGUI.CustomReports
             QualifiedProcedureName = "dbo.TableSizeHistory_Get",
             CanEditReport = false,
             CustomReportResults = new Dictionary<int, CustomReportResult>
-        {
+            {
+                {
+                    0, new CustomReportResult
                     {
-                        0, new CustomReportResult
+                        ResultName = "Table Size History",
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
-                            ColumnAlias = new Dictionary<string, string>
-                            {
-                                { "SnapshotDate", "Snapshot Date" },
-                                { "ObjectName", "Object Name" },
-                                { "SchemaName", "Schema Name" },
-                                { "Reserved_KB", "Reserved KB" },
-                                { "Used_KB", "Used KB" },
-                                { "Data_KB", "Data KB" },
-                                { "Index_KB", "Index KB" },
-                                { "New_Rows", "New Rows" },
-                                { "New_KB", "New KB" },
-                                { "Rows_Per_Hour", "Rows Per Hour" },
-                                { "KB_Per_Hour", "KB Per Hour" }
-                            },
-                            CellFormatString = new Dictionary<string, string>
-                            {
-                                { "Rows", "N0" },
-                                { "Reserved_KB", "N0" },
-                                { "Used_KB", "N0" },
-                                { "Data_KB", "N0" },
-                                { "Index_KB", "N0" },
-                                { "New_Rows", "N0" },
-                                { "New_KB", "N0" },
-                                { "Rows_Per_Hour", "N1" },
-                                { "KB_Per_Hour", "N1" }
-                            },
-                            ResultName = "Table Size History",
+                            { "SnapshotDate", new ColumnMetadata {
+                                Alias = "Snapshot Date"
+                            }},
+                            { "ObjectName", new ColumnMetadata {
+                                Alias = "Object Name"
+                            }},
+                            { "SchemaName", new ColumnMetadata {
+                                Alias = "Schema Name"
+                            }},
+                            { "Reserved_KB", new ColumnMetadata {
+                                Alias = "Reserved KB",
+                                FormatString = "N0"
+                            }},
+                            { "Used_KB", new ColumnMetadata {
+                                Alias = "Used KB",
+                                FormatString = "N0"
+                            }},
+                            { "Data_KB", new ColumnMetadata {
+                                Alias = "Data KB",
+                                FormatString = "N0"
+                            }},
+                            { "Index_KB", new ColumnMetadata {
+                                Alias = "Index KB",
+                                FormatString = "N0"
+                            }},
+                            { "New_Rows", new ColumnMetadata {
+                                Alias = "New Rows",
+                                FormatString = "N0"
+                            }},
+                            { "New_KB", new ColumnMetadata {
+                                Alias = "New KB",
+                                FormatString = "N0"
+                            }},
+                            { "Rows_Per_Hour", new ColumnMetadata {
+                                Alias = "Rows Per Hour",
+                                FormatString = "N1"
+                            }},
+                            { "KB_Per_Hour", new ColumnMetadata {
+                                Alias = "KB Per Hour",
+                                FormatString = "N1"
+                            }},
+                            { "Rows", new ColumnMetadata {
+                                FormatString = "N0"
+                            }}
                         }
                     }
-        },
+                }
+            },
             Params = new Params
             {
                 ParamList = new List<Param>
-            {
-                        new()
-                        {
-                            ParamName = "@ObjectID",
-                            ParamType = "INT"
-                        },
-                        new()
-                        {
-                            ParamName = "@Top",
-                            ParamType = "INT"
-                        }
-            },
+                {
+                    new()
+                    {
+                        ParamName = "@ObjectID",
+                        ParamType = "INT"
+                    },
+                    new()
+                    {
+                        ParamName = "@Top",
+                        ParamType = "INT"
+                    }
+                },
             }
         };
     }

@@ -60,17 +60,13 @@ namespace DBADashGUI.CustomReports
                 {
                     0, new CustomReportResult
                     {
-                        ColumnAlias = new Dictionary<string, string>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
-                            { "InstanceGroupName", "Instance" },
-                            { "DB", "DB" },
-                            { "CreatedDate", "Created Date" },
-                            { "DeletedDate", "~Deleted Date" },
-                            {"SizeMB", "Size MB" }
-                        },
-                        CellFormatString = new Dictionary<string, string>
-                        {
-                            { "SizeMB", "N0" }
+                            { "InstanceGroupName", new ColumnMetadata { Alias = "Instance" } },
+                            { "DB", new ColumnMetadata { Alias = "DB" } },
+                            { "CreatedDate", new ColumnMetadata { Alias = "Created Date" } },
+                            { "DeletedDate", new ColumnMetadata { Alias = "~Deleted Date" } },
+                            { "SizeMB", new ColumnMetadata { Alias = "Size MB", FormatString = "N0" } }
                         },
                         ResultName = "Deleted Databases",
                     }

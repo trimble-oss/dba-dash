@@ -60,54 +60,43 @@ namespace DBADashGUI.CustomReports
                         0, new CustomReportResult
                         {
                             ResultName = "Normal",
-                            ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>()
+                            Columns = new Dictionary<string, ColumnMetadata>
                             {
-                                new("Instance", new PersistedColumnLayout {  Visible = true }),
-                                new("Login", new PersistedColumnLayout {  Visible = true }),
-                                new("Type", new PersistedColumnLayout {  Visible = true }),
-                                new("Type Description", new PersistedColumnLayout { Visible = true }),
-                                new("Is Disabled", new PersistedColumnLayout {  Visible = true }),
-                                new("Created Date", new PersistedColumnLayout {  Visible = true }),
-                                new("Modified Date", new PersistedColumnLayout {  Visible = true })
-                            },
-                            LinkColumns = new Dictionary<string, LinkColumnInfo>
-                            {
-                                {
-                                    "Type Description",
-                                    new DrillDownLinkColumnInfo
+                                { "Instance", new ColumnMetadata {
+                                    Link = new DrillDownLinkColumnInfo
                                     {
                                         ReportProcedureName = "ServerRoleMembers_Get",
                                         ColumnToParameterMap = new Dictionary<string, string>
-                                            { { "@Type", "Type" } }
+                                        { { "@InstanceDisplayName", "Instance" } }
                                     }
-                                },
-                                {
-                                    "Type",
-                                    new DrillDownLinkColumnInfo
+                                } },
+                                { "Login", new ColumnMetadata {
+                                    Link = new DrillDownLinkColumnInfo
                                     {
                                         ReportProcedureName = "ServerRoleMembers_Get",
                                         ColumnToParameterMap = new Dictionary<string, string>
-                                            { { "@Type", "Type" } }
+                                        { { "@Login", "Login" } }
                                     }
-                                },
-                                {
-                                    "Login",
-                                    new DrillDownLinkColumnInfo
+                                } },
+                                { "Type", new ColumnMetadata {
+                                    Link = new DrillDownLinkColumnInfo
                                     {
                                         ReportProcedureName = "ServerRoleMembers_Get",
                                         ColumnToParameterMap = new Dictionary<string, string>
-                                            { { "@Login", "Login" } }
+                                        { { "@Type", "Type" } }
                                     }
-                                },
-                                {
-                                    "Instance",
-                                    new DrillDownLinkColumnInfo
+                                } },
+                                { "Type Description", new ColumnMetadata {
+                                    Link = new DrillDownLinkColumnInfo
                                     {
                                         ReportProcedureName = "ServerRoleMembers_Get",
                                         ColumnToParameterMap = new Dictionary<string, string>
-                                            { { "@InstanceDisplayName", "Instance" } }
+                                        { { "@Type", "Type" } }
                                     }
-                                }
+                                } },
+                                { "Is Disabled", new ColumnMetadata() },
+                                { "Created Date", new ColumnMetadata() },
+                                { "Modified Date", new ColumnMetadata() }
                             }
                         }
                     },

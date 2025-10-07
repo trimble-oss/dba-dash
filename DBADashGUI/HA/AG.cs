@@ -37,160 +37,31 @@ namespace DBADashGUI.HA
                     0,
                     new CustomReportResult
                     {
-                        ColumnAlias = new Dictionary<string, string>
-                        {
-                            {
-                                "Primary Replicas",
-                                "Primary\nReplicas"
-                            },
-                            {
-                                "Secondary Replicas",
-                                "Secondary\nReplicas"
-                            },
-                            {
-                                "Readable Secondaries",
-                                "Readable\nSecondaries"
-                            },
-                            {
-                                "Async Commit",
-                                "Async\nCommit"
-                            },
-                            {
-                                "Sync Commit",
-                                "Sync\nCommit"
-                            },
-                            {
-                                "Not Synchronizing",
-                                "Not\nSynchronizing"
-                            },
-                            {
-                                "Remote Not Synchronizing",
-                                "Remote\nNot\nSynchronizing"
-                            },
-                            {
-                                "Remote Synchronizing",
-                                "Remote\nSynchronizing"
-                            },
-                            {
-                                "Remote Synchronized",
-                                "Remote\nSynchronized"
-                            },
-                            {
-                                "Remote Reverting",
-                                "Remote\nReverting"
-                            },
-                            {
-                                "Remote Initializing",
-                                "Remote\nInitializing"
-                            },
-                            {
-                                "Sync Health",
-                                "Sync\nHealth"
-                            },
-                            {
-                                "Max Secondary Lag (sec)",
-                                "Max\nSecondary\nLag\n(sec)"
-                            },
-                            {
-                                "Max Secondary Lag",
-                                "Max\nSecondary\nLag"
-                            },
-                            {
-                                "Max Estimated Data Loss (sec)",
-                                "Max\nEstimated\nData\nLoss\n(sec)"
-                            },
-                            {
-                                "Max Estimated Data Loss",
-                                "Max\nEstimated\nData\nLoss"
-                            },
-                            {
-                                "Max Estimated Recovery Time (sec)",
-                                "Max\nEstimated\nRecovery\nTime (sec)"
-                            },
-                            {
-                                "Max Estimated Recovery Time",
-                                "Max\nEstimated\nRecovery\nTime"
-                            },
-                            {
-                                "Total Redo Queue Size (KB)",
-                                "Total\nRedo\nQueue\nSize\n(KB)"
-                            },
-                            {
-                                "Avg Redo Queue Size (KB)",
-                                "Avg\nRedo\nQueue\nSize\n(KB)"
-                            },
-                            {
-                                "Total Log Send Queue Size (KB)",
-                                "Total\nLog\nSend\nQueue\nSize\n(KB)"
-                            },
-                            {
-                                "Avg Log Send Queue Size (KB)",
-                                "Avg\nLog\nSend\nQueue\nSize\n(KB)"
-                            },
-                            {
-                                "Snapshot Date",
-                                "Snapshot\nDate"
-                            },
-                            {
-                                "Snapshot Age",
-                                "Snapshot\nAge"
-                            },
-                            {
-                                "Synchronized Status",
-                                "Synchronized\nStatus"
-                            }
-                        },
-                        ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>
-                        {
-                            new("InstanceID", new PersistedColumnLayout(){Visible = false}),
-                            new("Instance", new PersistedColumnLayout() { Visible = true }) ,
-                            new("Primary Replicas", new PersistedColumnLayout(){ Visible = true }),
-                            new("Secondary Replicas", new PersistedColumnLayout(){ Visible = true }),
-                            new("Readable Secondaries", new PersistedColumnLayout(){ Visible = true }),
-                            new("Async Commit", new PersistedColumnLayout(){ Visible = true }),
-                            new("Sync Commit", new PersistedColumnLayout(){ Visible = true }),
-                            new("Not Synchronizing", new PersistedColumnLayout(){ Visible = true }),
-                            new("Synchronizing", new PersistedColumnLayout(){ Visible = true }),
-                            new("Synchronized", new PersistedColumnLayout() { Visible = true }),
-                            new("Reverting", new PersistedColumnLayout() { Visible = true }),
-                            new("Initializing", new PersistedColumnLayout() { Visible = true }),
-                            new("Remote Not Synchronizing", new PersistedColumnLayout() { Visible = true }),
-                            new("Remote Synchronizing", new PersistedColumnLayout() { Visible = true }),
-                            new("Remote Synchronized", new PersistedColumnLayout() { Visible = true }),
-                            new("Remote Reverting", new PersistedColumnLayout() { Visible = true }),
-                            new("Remote Initializing", new PersistedColumnLayout() { Visible = true }),
-                            new("Sync Health", new PersistedColumnLayout() { Visible = true }),
-                            new("Snapshot Date", new PersistedColumnLayout() { Visible = true }),
-                            new("Snapshot Status", new PersistedColumnLayout() {Visible = false}),
-                            new("Snapshot Age", new PersistedColumnLayout() { Visible = true }),
-                            new("Synchronized Status", new PersistedColumnLayout() { Visible = false }),
-                            new("Max Secondary Lag (sec)", new PersistedColumnLayout() { Visible = false }),
-                            new("Max Estimated Data Loss (sec)", new PersistedColumnLayout() { Visible = false }),
-                            new("Max Estimated Recovery Time (sec)", new PersistedColumnLayout() { Visible = false }),
-                            new("Max Secondary Lag", new PersistedColumnLayout() { Visible = true }),
-                            new("Max Estimated Data Loss", new PersistedColumnLayout() { Visible = true }),
-                            new("Max Estimated Recovery Time", new PersistedColumnLayout() { Visible = true }),
-                            new("Total Redo Queue Size (KB)", new PersistedColumnLayout() { Visible = false }),
-                            new("Avg Redo Queue Size (KB)", new PersistedColumnLayout() { Visible = true }),
-                            new("Total Log Send Queue Size (KB)", new PersistedColumnLayout() { Visible = false }),
-                            new("Avg Log Send Queue Size (KB)", new PersistedColumnLayout() { Visible = true }),
-                        },
-                        CellFormatString = new Dictionary<string, string>(),
-                        CellNullValue = new Dictionary<string, string>(),
-                        DoNotConvertToLocalTimeZone = new List<string>(),
                         ResultName = "Availability Group Summary",
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
-                            {
-                                "Instance",
-                                new DrillDownLinkColumnInfo()
-                            }
-                        },
-                        CellHighlightingRules = new CellHighlightingRuleSetCollection
-                        {
-                            {
-                                "Not Synchronizing",
-                                new CellHighlightingRuleSet
+                            { "InstanceID", new ColumnMetadata { Visible = false } },
+                            { "Instance", new ColumnMetadata {
+                                Link = new DrillDownLinkColumnInfo()
+                            }},
+                            { "Primary Replicas", new ColumnMetadata {
+                                Alias = "Primary\nReplicas"
+                            }},
+                            { "Secondary Replicas", new ColumnMetadata {
+                                Alias = "Secondary\nReplicas"
+                            }},
+                            { "Readable Secondaries", new ColumnMetadata {
+                                Alias = "Readable\nSecondaries"
+                            }},
+                            { "Async Commit", new ColumnMetadata {
+                                Alias = "Async\nCommit"
+                            }},
+                            { "Sync Commit", new ColumnMetadata {
+                                Alias = "Sync\nCommit"
+                            }},
+                            { "Not Synchronizing", new ColumnMetadata {
+                                Alias = "Not\nSynchronizing",
+                                Highlighting = new CellHighlightingRuleSet
                                 {
                                     Rules = new List<CellHighlightingRule>
                                     {
@@ -208,31 +79,17 @@ namespace DBADashGUI.HA
                                     },
                                     TargetColumn = "Not Synchronizing"
                                 }
-                            },
-                            {
-                                "Remote Not Synchronizing",
-                                new CellHighlightingRuleSet
+                            }},
+                            { "Synchronizing", new ColumnMetadata() },
+                            { "Synchronized", new ColumnMetadata {
+                                Highlighting = new CellHighlightingRuleSet
                                 {
-                                    Rules = new List<CellHighlightingRule>
-                                    {
-                                        new()
-                                        {
-                                            Status = DBADashStatusEnum.Critical,
-                                            Value1 = "0",
-                                            ConditionType = ConditionTypes.GreaterThan
-                                        },
-                                        new()
-                                        {
-                                            Status = DBADashStatusEnum.OK,
-                                            Value1 = "0"
-                                        }
-                                    },
-                                    TargetColumn = "Remote Not Synchronizing"
+                                    IsStatusColumn = true,
+                                    TargetColumn = "Synchronized Status"
                                 }
-                            },
-                            {
-                                "Reverting",
-                                new CellHighlightingRuleSet
+                            }},
+                            { "Reverting", new ColumnMetadata {
+                                Highlighting = new CellHighlightingRuleSet
                                 {
                                     Rules = new List<CellHighlightingRule>
                                     {
@@ -250,31 +107,9 @@ namespace DBADashGUI.HA
                                     },
                                     TargetColumn = "Reverting"
                                 }
-                            },
-                            {
-                                "Remote Reverting",
-                                new CellHighlightingRuleSet
-                                {
-                                    Rules = new List<CellHighlightingRule>
-                                    {
-                                        new()
-                                        {
-                                            Status = DBADashStatusEnum.Critical,
-                                            Value1 = "0",
-                                            ConditionType = ConditionTypes.GreaterThan
-                                        },
-                                        new()
-                                        {
-                                            Status = DBADashStatusEnum.OK,
-                                            Value1 = "0"
-                                        }
-                                    },
-                                    TargetColumn = "Remote Reverting"
-                                }
-                            },
-                            {
-                                "Initializing",
-                                new CellHighlightingRuleSet
+                            }},
+                            { "Initializing", new ColumnMetadata {
+                                Highlighting = new CellHighlightingRuleSet
                                 {
                                     Rules = new List<CellHighlightingRule>
                                     {
@@ -292,10 +127,58 @@ namespace DBADashGUI.HA
                                     },
                                     TargetColumn = "Initializing"
                                 }
-                            },
-                            {
-                                "Remote Initializing",
-                                new CellHighlightingRuleSet
+                            }},
+                            { "Remote Not Synchronizing", new ColumnMetadata {
+                                Alias = "Remote\nNot\nSynchronizing",
+                                Highlighting = new CellHighlightingRuleSet
+                                {
+                                    Rules = new List<CellHighlightingRule>
+                                    {
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.Critical,
+                                            Value1 = "0",
+                                            ConditionType = ConditionTypes.GreaterThan
+                                        },
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.OK,
+                                            Value1 = "0"
+                                        }
+                                    },
+                                    TargetColumn = "Remote Not Synchronizing"
+                                }
+                            }},
+                            { "Remote Synchronizing", new ColumnMetadata {
+                                Alias = "Remote\nSynchronizing"
+                            }},
+                            { "Remote Synchronized", new ColumnMetadata {
+                                Alias = "Remote\nSynchronized"
+                            }},
+                            { "Remote Reverting", new ColumnMetadata {
+                                Alias = "Remote\nReverting",
+                                Highlighting = new CellHighlightingRuleSet
+                                {
+                                    Rules = new List<CellHighlightingRule>
+                                    {
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.Critical,
+                                            Value1 = "0",
+                                            ConditionType = ConditionTypes.GreaterThan
+                                        },
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.OK,
+                                            Value1 = "0"
+                                        }
+                                    },
+                                    TargetColumn = "Remote Reverting"
+                                }
+                            }},
+                            { "Remote Initializing", new ColumnMetadata {
+                                Alias = "Remote\nInitializing",
+                                Highlighting = new CellHighlightingRuleSet
                                 {
                                     Rules = new List<CellHighlightingRule>
                                     {
@@ -313,10 +196,10 @@ namespace DBADashGUI.HA
                                     },
                                     TargetColumn = "Remote Initializing"
                                 }
-                            },
-                            {
-                                "Sync Health",
-                                new CellHighlightingRuleSet
+                            }},
+                            { "Sync Health", new ColumnMetadata {
+                                Alias = "Sync\nHealth",
+                                Highlighting = new CellHighlightingRuleSet
                                 {
                                     Rules = new List<CellHighlightingRule>
                                     {
@@ -338,47 +221,75 @@ namespace DBADashGUI.HA
                                     },
                                     TargetColumn = "Sync Health"
                                 }
-                            },
-                            {
-                                "Snapshot Date",
-                                new CellHighlightingRuleSet
+                            }},
+                            { "Snapshot Date", new ColumnMetadata {
+                                Alias = "Snapshot\nDate",
+                                Highlighting = new CellHighlightingRuleSet
                                 {
                                     IsStatusColumn = true,
                                     TargetColumn = "Snapshot Status"
                                 }
-                            },
-                            {
-                                "Snapshot Age",
-                                new CellHighlightingRuleSet
+                            }},
+                            { "Snapshot Status", new ColumnMetadata {
+                                Visible = false,
+                                Highlighting = new CellHighlightingRuleSet
                                 {
-                                    TargetColumn = "Snapshot Status",
-                                    IsStatusColumn = true
+                                    IsStatusColumn = true,
+                                    TargetColumn = "Snapshot Status"
                                 }
-                            },
-                            {
-                                "Snapshot Status",
-                                new CellHighlightingRuleSet
+                            }},
+                            { "Snapshot Age", new ColumnMetadata {
+                                Alias = "Snapshot\nAge",
+                                Highlighting = new CellHighlightingRuleSet
                                 {
-                                    TargetColumn = "Snapshot Status",
-                                    IsStatusColumn = true
+                                    IsStatusColumn = true,
+                                    TargetColumn = "Snapshot Status"
                                 }
-                            },
-                            {
-                                "Synchronized",
-                                new CellHighlightingRuleSet
+                            }},
+                            { "Synchronized Status", new ColumnMetadata {
+                                Alias = "Synchronized\nStatus",
+                                Visible = false,
+                                Highlighting = new CellHighlightingRuleSet
                                 {
                                     IsStatusColumn = true,
                                     TargetColumn = "Synchronized Status"
                                 }
-                            },
-                            {
-                                "Synchronized Status",
-                                new CellHighlightingRuleSet
-                                {
-                                    IsStatusColumn = true,
-                                    TargetColumn = "Synchronized Status"
-                                }
-                            },
+                            }},
+                            { "Max Secondary Lag (sec)", new ColumnMetadata {
+                                Alias = "Max\nSecondary\nLag\n(sec)",
+                                Visible = false
+                            }},
+                            { "Max Estimated Data Loss (sec)", new ColumnMetadata {
+                                Alias = "Max\nEstimated\nData\nLoss\n(sec)",
+                                Visible = false
+                            }},
+                            { "Max Estimated Recovery Time (sec)", new ColumnMetadata {
+                                Alias = "Max\nEstimated\nRecovery\nTime (sec)",
+                                Visible = false
+                            }},
+                            { "Max Secondary Lag", new ColumnMetadata {
+                                Alias = "Max\nSecondary\nLag"
+                            }},
+                            { "Max Estimated Data Loss", new ColumnMetadata {
+                                Alias = "Max\nEstimated\nData\nLoss"
+                            }},
+                            { "Max Estimated Recovery Time", new ColumnMetadata {
+                                Alias = "Max\nEstimated\nRecovery\nTime"
+                            }},
+                            { "Total Redo Queue Size (KB)", new ColumnMetadata {
+                                Alias = "Total\nRedo\nQueue\nSize\n(KB)",
+                                Visible = false
+                            }},
+                            { "Avg Redo Queue Size (KB)", new ColumnMetadata {
+                                Alias = "Avg\nRedo\nQueue\nSize\n(KB)"
+                            }},
+                            { "Total Log Send Queue Size (KB)", new ColumnMetadata {
+                                Alias = "Total\nLog\nSend\nQueue\nSize\n(KB)",
+                                Visible = false
+                            }},
+                            { "Avg Log Send Queue Size (KB)", new ColumnMetadata {
+                                Alias = "Avg\nLog\nSend\nQueue\nSize\n(KB)"
+                            }}
                         }
                     }
                 }
@@ -404,184 +315,153 @@ namespace DBADashGUI.HA
                 }
             },
             CustomReportResults = new Dictionary<int, CustomReportResult>
+            {
                 {
+                    0,
+                    new CustomReportResult
                     {
-                        0,
-                        new CustomReportResult
+                        ResultName = "Availability Group Detail",
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
-                            ColumnAlias = new Dictionary<string, string>(),
-                            CellFormatString = new Dictionary<string, string>
-                            {
+                            { "Database", new ColumnMetadata() },
+                            { "Availability Group", new ColumnMetadata() },
+                            { "Replica Server", new ColumnMetadata() },
+                            { "Sync State", new ColumnMetadata {
+                                Highlighting = new CellHighlightingRuleSet
                                 {
-                                    "Log Redo Rate (KB/s)",
-                                    "N0"
-                                },
-                                {
-                                    "Log Redo Queue Size (KB)",
-                                    "N0"
-                                },
-                                {
-                                    "Log Send Rate (KB/s)",
-                                    "N0"
-                                },
-                                {
-                                    "Log Send Queue Size (KB)",
-                                    "N0"
-                                },
-                                {
-                                    "Estimated Recovery Time",
-                                    "N0"
-                                },
-                                {
-                                    "Estimated Data Loss (sec)",
-                                    "N0"
-                                },
-                                {
-                                    "Secondary Lag (sec)",
-                                    "N0"
-                                },
-                                {
-                                    "Last Sent Time",
-                                    "G"
-                                },
-                                {
-                                    "Last Received Time",
-                                    "G"
-                                },
-                                {
-                                    "Last Hardened Time",
-                                    "G"
-                                },
-                                {
-                                    "Last Redone Time",
-                                    "G"
-                                },
-                                {
-                                    "Last Commit Time",
-                                    "G"
-                                }
-                            },
-                            CellNullValue = new Dictionary<string, string>(),
-                            DoNotConvertToLocalTimeZone = new List<string>(),
-                            ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>
-                            {
-                                new("Database", new PersistedColumnLayout() { Visible = true }),
-                                new("Availability Group", new PersistedColumnLayout(){ Visible = true }),
-                                new("Replica Server", new PersistedColumnLayout(){ Visible = true }),
-                                new("Sync State", new PersistedColumnLayout(){ Visible = true }),
-                                new("Sync Health", new PersistedColumnLayout(){ Visible = true }),
-                                new("Suspend Reason", new PersistedColumnLayout(){ Visible = true }),
-                                new("Database State", new PersistedColumnLayout(){ Visible = true }),
-                                new("Is Local", new PersistedColumnLayout(){ Visible = true }),
-                                new("Availability Mode", new PersistedColumnLayout(){ Visible = true }),
-                                new("Failover Mode", new PersistedColumnLayout(){ Visible = true }),
-                                new("Is Primary", new PersistedColumnLayout(){ Visible = true }),
-                                new("Primary Connections", new PersistedColumnLayout(){ Visible = true }),
-                                new("Secondary Connections", new PersistedColumnLayout(){ Visible = true }),
-                                new("Snapshot Status", new PersistedColumnLayout(){ Visible = false }),
-                                new("Snapshot Age", new PersistedColumnLayout(){ Visible = true }),
-                                new("Estimated Data Loss (sec)", new PersistedColumnLayout(){ Visible = false }),
-                                new("Estimated Recovery Time (sec)", new PersistedColumnLayout(){ Visible = false }),
-                                new("Secondary Lag (sec)", new PersistedColumnLayout(){ Visible = false }),
-                                new("Estimated Data Loss", new PersistedColumnLayout(){ Visible = true }),
-                                new("Estimated Recovery Time", new PersistedColumnLayout(){ Visible = true }),
-                                new("Secondary Lag", new PersistedColumnLayout(){ Visible = true }),
-                                new("Log Send Queue Size (KB)", new PersistedColumnLayout(){ Visible = true }),
-                                new("Log Send Rate (KB/s)", new PersistedColumnLayout(){ Visible = false }),
-                                new("Log Redo Queue Size (KB)", new PersistedColumnLayout(){ Visible = true }),
-                                new("Log Redo Rate (KB/s)", new PersistedColumnLayout(){ Visible = false }),
-                                new("Last Sent Time", new PersistedColumnLayout(){ Visible = false }),
-                                new("Last Received Time", new PersistedColumnLayout(){ Visible = false }),
-                                new("Last Hardened Time", new PersistedColumnLayout(){ Visible = false }),
-                                new("Last Redone Time", new PersistedColumnLayout(){ Visible = false }),
-                                new("Last Commit Time", new PersistedColumnLayout(){ Visible = false }),
-                                new("Snapshot Date", new PersistedColumnLayout(){ Visible = true }),
-                            },
-                            ResultName = "Availability Group Detail",
-                            LinkColumns = new Dictionary<string, LinkColumnInfo>(),
-                            CellHighlightingRules = new CellHighlightingRuleSetCollection
-                            {
-                                {
-                                    "Sync Health",
-                                    new CellHighlightingRuleSet
+                                    Rules = new List<CellHighlightingRule>
                                     {
-                                        Rules = new List<CellHighlightingRule>
+                                        new()
                                         {
-                                            new()
-                                            {
-                                                Status = DBADashStatusEnum.OK,
-                                                Value1 = "HEALTHY"
-                                            },
-                                            new()
-                                            {
-                                                Status = DBADashStatusEnum.Warning,
-                                                Value1 = "PARTIALLY_HEALTHY"
-                                            },
-                                            new()
-                                            {
-                                                Status = DBADashStatusEnum.Critical,
-                                                ConditionType = ConditionTypes.All
-                                            }
+                                            Status = DBADashStatusEnum.OK,
+                                            Value1 = "HEALTHY"
                                         },
-                                        TargetColumn = "Sync Health"
-                                    }
-                                },
-                                {
-                                    "Sync State",
-                                    new CellHighlightingRuleSet
-                                    {
-                                        Rules = new List<CellHighlightingRule>
+                                        new()
                                         {
-                                            new()
-                                            {
-                                                Status = DBADashStatusEnum.OK,
-                                                Value1 = "HEALTHY"
-                                            },
-                                            new()
-                                            {
-                                                Status = DBADashStatusEnum.Warning,
-                                                Value1 = "PARTIALLY_HEALTHY"
-                                            },
-                                            new()
-                                            {
-                                                Status = DBADashStatusEnum.Critical,
-                                                ConditionType = ConditionTypes.All
-                                            }
+                                            Status = DBADashStatusEnum.Warning,
+                                            Value1 = "PARTIALLY_HEALTHY"
                                         },
-                                        TargetColumn = "Sync Health"
-                                    }
-                                },
-                                {
-                                    "Snapshot Date",
-                                    new CellHighlightingRuleSet
-                                    {
-                                        Rules = new List<CellHighlightingRule>(),
-                                        TargetColumn = "Snapshot Status",
-                                        IsStatusColumn = true
-                                    }
-                                },
-                                {
-                                    "Snapshot Age",
-                                    new CellHighlightingRuleSet
-                                    {
-                                        Rules = new List<CellHighlightingRule>(),
-                                        TargetColumn = "Snapshot Status",
-                                        IsStatusColumn = true
-                                    }
-                                },
-                                {
-                                    "Snapshot Status",
-                                    new CellHighlightingRuleSet
-                                    {
-                                        Rules = new List<CellHighlightingRule>(),
-                                        TargetColumn = "Snapshot Status",
-                                        IsStatusColumn = true
-                                    }
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.Critical,
+                                            ConditionType = ConditionTypes.All
+                                        }
+                                    },
+                                    TargetColumn = "Sync Health"
                                 }
-                            }
+                            }},
+                            { "Sync Health", new ColumnMetadata {
+                                Highlighting = new CellHighlightingRuleSet
+                                {
+                                    Rules = new List<CellHighlightingRule>
+                                    {
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.OK,
+                                            Value1 = "HEALTHY"
+                                        },
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.Warning,
+                                            Value1 = "PARTIALLY_HEALTHY"
+                                        },
+                                        new()
+                                        {
+                                            Status = DBADashStatusEnum.Critical,
+                                            ConditionType = ConditionTypes.All
+                                        }
+                                    },
+                                    TargetColumn = "Sync Health"
+                                }
+                            }},
+                            { "Suspend Reason", new ColumnMetadata() },
+                            { "Database State", new ColumnMetadata() },
+                            { "Is Local", new ColumnMetadata() },
+                            { "Availability Mode", new ColumnMetadata() },
+                            { "Failover Mode", new ColumnMetadata() },
+                            { "Is Primary", new ColumnMetadata() },
+                            { "Primary Connections", new ColumnMetadata() },
+                            { "Secondary Connections", new ColumnMetadata() },
+                            { "Snapshot Status", new ColumnMetadata {
+                                Visible = false,
+                                Highlighting = new CellHighlightingRuleSet
+                                {
+                                    TargetColumn = "Snapshot Status",
+                                    IsStatusColumn = true
+                                }
+                            }},
+                            { "Snapshot Age", new ColumnMetadata {
+                                Highlighting = new CellHighlightingRuleSet
+                                {
+                                    TargetColumn = "Snapshot Status",
+                                    IsStatusColumn = true
+                                }
+                            }},
+                            { "Estimated Data Loss (sec)", new ColumnMetadata {
+                                Visible = false,
+                                FormatString = "N0"
+                            }},
+                            { "Estimated Recovery Time (sec)", new ColumnMetadata {
+                                Visible = false
+                            }},
+                            { "Secondary Lag (sec)", new ColumnMetadata {
+                                Visible = false,
+                                FormatString = "N0"
+                            }},
+                            { "Estimated Data Loss", new ColumnMetadata {
+                                FormatString = "N0"
+                            }},
+                            { "Estimated Recovery Time", new ColumnMetadata {
+                                FormatString = "N0"
+                            }},
+                            { "Secondary Lag", new ColumnMetadata {
+                                FormatString = "N0"
+                            }},
+                            { "Log Send Queue Size (KB)", new ColumnMetadata {
+                                FormatString = "N0"
+                            }},
+                            { "Log Send Rate (KB/s)", new ColumnMetadata {
+                                Visible = false,
+                                FormatString = "N0"
+                            }},
+                            { "Log Redo Queue Size (KB)", new ColumnMetadata {
+                                FormatString = "N0"
+                            }},
+                            { "Log Redo Rate (KB/s)", new ColumnMetadata {
+                                Visible = false,
+                                FormatString = "N0"
+                            }},
+                            { "Last Sent Time", new ColumnMetadata {
+                                Visible = false,
+                                FormatString = "G"
+                            }},
+                            { "Last Received Time", new ColumnMetadata {
+                                Visible = false,
+                                FormatString = "G"
+                            }},
+                            { "Last Hardened Time", new ColumnMetadata {
+                                Visible = false,
+                                FormatString = "G"
+                            }},
+                            { "Last Redone Time", new ColumnMetadata {
+                                Visible = false,
+                                FormatString = "G"
+                            }},
+                            { "Last Commit Time", new ColumnMetadata {
+                                Visible = false,
+                                FormatString = "G"
+                            }},
+                            { "Snapshot Date", new ColumnMetadata {
+                                Highlighting = new CellHighlightingRuleSet
+                                {
+                                    TargetColumn = "Snapshot Status",
+                                    IsStatusColumn = true
+                                }
+                            }}
                         }
                     }
                 }
+            }
         };
 
         #endregion "Report Definitions"
