@@ -43,35 +43,44 @@ namespace DBADashGUI.Checks
                 {
                     0, new CustomReportResult
                     {
-                        ColumnAlias = new Dictionary<string, string>
-                        {
-                            { "InstanceID", "Instance ID" },
-                            { "InstanceDisplayName", "Instance" },
-                            { "FirstFail", "First Fail" },
-                            { "LastFail", "Last Fail" },
-                            {"TimeSinceLastFail","Time Since Last Fail"},
-                            { "LastCollection", "Last Collection" },
-                            { "Duration", "Duration"},
-                            { "TimeSinceLastCollection", "Time Since Last Collection" },
-                            { "FailCount", "Fail Count" },
-                            { "FirstMessage", "First Message" },
-                            { "LastMessage", "Last Message" },
-                        },
                         ResultName = "Server Services",
-                        ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>()
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
-                            new("InstanceID", new PersistedColumnLayout { Visible = false }),
-                            new("InstanceDisplayName", new PersistedColumnLayout {  Visible = true }),
-                            new("FirstFail", new PersistedColumnLayout {  Visible = true }),
-                            new("LastFail", new PersistedColumnLayout {  Visible = true }),
-                            new("TimeSinceLastFail", new PersistedColumnLayout {  Visible = true }),
-                            new("LastCollection", new PersistedColumnLayout {  Visible = true }),
-                            new ("Duration", new PersistedColumnLayout {  Visible = true }),
-                            new ("TimeSinceLastCollection", new PersistedColumnLayout {  Visible = true }),
-                            new("FailCount", new PersistedColumnLayout {  Visible =  true }),
-                            new("FirstMessage", new PersistedColumnLayout {  Visible = true }),
-                            new("LastMessage", new PersistedColumnLayout {  Visible = true })
-                        },
+                            { "InstanceID", new ColumnMetadata {
+                                Alias = "Instance ID",
+                                Visible = false
+                            }},
+                            { "InstanceDisplayName", new ColumnMetadata {
+                                Alias = "Instance"
+                            }},
+                            { "FirstFail", new ColumnMetadata {
+                                Alias = "First Fail"
+                            }},
+                            { "LastFail", new ColumnMetadata {
+                                Alias = "Last Fail"
+                            }},
+                            { "TimeSinceLastFail", new ColumnMetadata {
+                                Alias = "Time Since Last Fail"
+                            }},
+                            { "LastCollection", new ColumnMetadata {
+                                Alias = "Last Collection"
+                            }},
+                            { "Duration", new ColumnMetadata {
+                                Alias = "Duration"
+                            }},
+                            { "TimeSinceLastCollection", new ColumnMetadata {
+                                Alias = "Time Since Last Collection"
+                            }},
+                            { "FailCount", new ColumnMetadata {
+                                Alias = "Fail Count"
+                            }},
+                            { "FirstMessage", new ColumnMetadata {
+                                Alias = "First Message"
+                            }},
+                            { "LastMessage", new ColumnMetadata {
+                                Alias = "Last Message"
+                            }}
+                        }
                     }
                 }
             },

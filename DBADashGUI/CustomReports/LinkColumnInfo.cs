@@ -13,6 +13,14 @@ namespace DBADashGUI.CustomReports
         public abstract void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender);
     }
 
+    public class PlaceholderLinkInfo : LinkColumnInfo
+    {
+        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
+        {
+            // Do nothing. The link click is handled elsewhere
+        }
+    }
+
     public class UrlLinkColumnInfo : LinkColumnInfo
     {
         public string TargetColumn { get; set; }
@@ -159,7 +167,7 @@ namespace DBADashGUI.CustomReports
             var main = Main.MainFormInstance;
             if (main == null) return;
             var ownerSet = false;
-            if (sender.ParentForm !=main && sender.ParentForm is { Owner: null }) // Setting the owner keeps the window on top of the main form
+            if (sender.ParentForm != main && sender.ParentForm is { Owner: null }) // Setting the owner keeps the window on top of the main form
             {
                 sender.ParentForm.Owner = main;
                 ownerSet = true;

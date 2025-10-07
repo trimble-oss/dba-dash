@@ -60,31 +60,30 @@ namespace DBADashGUI.CustomReports
                 {
                     0, new CustomReportResult
                     {
-                        ColumnAlias = new Dictionary<string, string>
-                        {
-                            { "InstanceGroupName", "Instance" },
-                            { "CreatedDate", "Created Date" },
-                            { "SizeMB", "Size (MB)" }
-                        },
-                        CellFormatString = new Dictionary<string, string>
-                        {
-                            { "SizeMB", "N0" }
-                        },
-                        ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>
-                        {
-                            new("InstanceID", new PersistedColumnLayout()),
-                            new("InstanceGroupName", new PersistedColumnLayout { Visible = true, DisplayIndex = 1 }),
-                            new("DB", new PersistedColumnLayout { Visible = true, DisplayIndex = 2 }),
-                            new("CreatedDate", new PersistedColumnLayout {  Visible = true, DisplayIndex = 3 }),
-                            new("SizeMB", new PersistedColumnLayout { Visible = true, DisplayIndex = 4 })
-                        },
                         ResultName = "New Databases",
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
-                            { "DB", new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "DB" } },
-                            { "SizeMB", new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "DB", Tab = Main.Tabs.DBSpace } },
-                            { "InstanceGroupName", new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "" } }
-                        },
+                            { "InstanceID", new ColumnMetadata() },
+                            { "InstanceGroupName", new ColumnMetadata {
+                                Alias = "Instance",
+                                DisplayIndex = 1,
+                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "" }
+                            }},
+                            { "DB", new ColumnMetadata {
+                                DisplayIndex = 2,
+                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "DB" }
+                            }},
+                            { "CreatedDate", new ColumnMetadata {
+                                Alias = "Created Date",
+                                DisplayIndex = 3
+                            }},
+                            { "SizeMB", new ColumnMetadata {
+                                Alias = "Size (MB)",
+                                FormatString = "N0",
+                                DisplayIndex = 4,
+                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "DB", Tab = Main.Tabs.DBSpace }
+                            }}
+                        }
                     }
                 }
             }

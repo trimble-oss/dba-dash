@@ -366,20 +366,14 @@ namespace DBADashGUI.DBADashAlerts
                 {
                     0, new CustomReportResult
                     {
-                        ColumnAlias = new Dictionary<string, string>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
-                            { "NotificationDate", "Date/Time" },
-                            { "NotificationChannelType", "Channel Type" },
-                            { "ChannelName", "Channel Name" },
-                            { "Status", "Status" },
-                            { "ErrorMessage", "Error Message" },
-                            { "NotificationMessage","Notification Message"}
-                        },
-                        CellHighlightingRules =
-                        {
-                            {
-                                "Status",
-                                new CellHighlightingRuleSet("Status")
+                            { "NotificationDate", new ColumnMetadata { Alias = "Date/Time" } },
+                            { "NotificationChannelType", new ColumnMetadata { Alias = "Channel Type" } },
+                            { "ChannelName", new ColumnMetadata { Alias = "Channel Name" } },
+                            { "Status", new ColumnMetadata {
+                                Alias = "Status",
+                                Highlighting = new CellHighlightingRuleSet("Status")
                                 {
                                     Rules = new List<CellHighlightingRule>
                                     {
@@ -397,7 +391,9 @@ namespace DBADashGUI.DBADashAlerts
                                         }
                                     }
                                 }
-                            },
+                            } },
+                            { "ErrorMessage", new ColumnMetadata { Alias = "Error Message" } },
+                            { "NotificationMessage", new ColumnMetadata { Alias = "Notification Message" } }
                         }
                     }
                 }
@@ -424,112 +420,34 @@ namespace DBADashGUI.DBADashAlerts
                 {
                     0, new CustomReportResult
                     {
-                        ColumnAlias = new Dictionary<string, string>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
-                            { "InstanceID", "Instance ID" },
-                            { "AlertID", "Alert ID" },
-                            { "InstanceDisplayName", "Instance" },
-                            { "Priority", "Priority ID" },
-                            { "PriorityDescription", "Priority" },
-                            { "AlertType", "Alert Type" },
-                            { "AlertKey", "Alert Key" },
-                            { "FirstMessage", "First Message" },
-                            { "LastMessage", "Last Message" },
-                            { "TriggerDate", "Trigger Date" },
-                            { "UpdatedDate", "Updated Date" },
-                            { "TimeSinceLastUpdate", "Time since last update" },
-                            { "FirstNotification", "First Notification" },
-                            { "LastNotification", "Last Notification" },
-                            { "TimeSinceLastNotification", "Time since last notification" },
-                            { "UpdateCount", "Update Count" },
-                            { "ResolvedCount", "Resolved Count" },
-                            { "NotificationCount", "Notification Count" },
-                            { "FailedNotificationCount", "Failed Notification Count" },
-                            { "IsAcknowledged", "Acknowledged?" },
-                            { "IsResolved", "Resolved?" },
-                            { "ResolvedDate", "Resolved Date" },
-                            { "IsBlackout", "Is Blackout" },
-                            { "AlertDuration", "Alert Duration" },
-                            {"Notes","Notes"},
-                            {"RuleNotes","Rule Notes"},
-                            {"RuleID","Rule#"},
-                            {"DefaultSortOrder","Default Sort Order"}
-                        },
-                         ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>()
-                            {
-                                new("AlertID", new PersistedColumnLayout { Visible = false }),
-                                new("InstanceID", new PersistedColumnLayout { Visible = false }),
-                                new("InstanceDisplayName", new PersistedColumnLayout { Visible = true }),
-                                new("Priority", new PersistedColumnLayout { Visible = false }),
-                                new("PriorityDescription", new PersistedColumnLayout { Visible = true}),
-                                new("AlertType", new PersistedColumnLayout { Visible = true }),
-                                new("AlertKey", new PersistedColumnLayout { Visible = true }),
-                                new("FirstMessage", new PersistedColumnLayout { Visible = true }),
-                                new("LastMessage", new PersistedColumnLayout { Visible = true }),
-                                new("TriggerDate", new PersistedColumnLayout { Visible = true }),
-                                new("AlertDuration", new PersistedColumnLayout { Visible = true }),
-                                new("UpdatedDate", new PersistedColumnLayout { Visible = false }),
-                                new("TimeSinceLastUpdate", new PersistedColumnLayout { Visible = true }),
-                                new("FirstNotification", new PersistedColumnLayout { Visible = false }),
-                                new("LastNotification", new PersistedColumnLayout { Visible = false }),
-                                new("TimeSinceLastNotification", new PersistedColumnLayout { Visible = true }),
-                                new("UpdateCount", new PersistedColumnLayout { Visible = true }),
-                                new("ResolvedCount", new PersistedColumnLayout { Visible = true }),
-                                new("NotificationCount", new PersistedColumnLayout { Visible = true }),
-                                new("FailedNotificationCount", new PersistedColumnLayout { Visible = true }),
-                                new("IsAcknowledged", new PersistedColumnLayout { Visible = true }),
-                                new("IsResolved", new PersistedColumnLayout { Visible = true }),
-                                new("ResolvedDate", new PersistedColumnLayout { Visible = true }),
-                                new("IsBlackout", new PersistedColumnLayout { Visible = true }),
-                                new("Notes", new PersistedColumnLayout { Visible = true }),
-                                new("RuleNotes", new PersistedColumnLayout { Visible = true }),
-                                new("RuleID", new PersistedColumnLayout { Visible = true }),
-                                new("DefaultSortOrder", new PersistedColumnLayout() {Visible = false})
-                            },
-                        LinkColumns = new()
-                        {
-                            {
-                                "InstanceDisplayName",
-                                null
-                            },
-                            {
-                                "Notes",
-                                new EditNotesLinkColumnInfo()
-                            },
-                            {
-                                "RuleID",
-                                null
-                            },
-                            {
-                                "NotificationCount",
-                                null
-                            },
-                            {
-                                "FailedNotificationCount",
-                                null
-                            },
-                            {
-                                "RuleNotes",
-                                new TextLinkColumnInfo()
-                                {
-                                    TextHandling = CodeEditor.CodeEditorModes.Markdown,
-                                    TargetColumn = "RuleNotes"
-                                }
-                            },
-                        },
-                        CellNullValue = new Dictionary<string, string>()
-                        {
-                            {"Notes","Add Notes..."}
-                        },
-                        CellHighlightingRules =
-                        {
-                            {
-                                "PriorityDescription",
-                                new CellHighlightingRuleSet("AlertStatus") {IsStatusColumn = true }
-                            },
-                            {
-                                "FailedNotificationCount",
-                                new CellHighlightingRuleSet("FailedNotificationCount")
+                            { "AlertID", new ColumnMetadata { Alias = "Alert ID", Visible = false } },
+                            { "InstanceID", new ColumnMetadata { Alias = "Instance ID", Visible = false } },
+                            { "InstanceDisplayName", new ColumnMetadata { Alias = "Instance", Link = new PlaceholderLinkInfo() } },
+                            { "Priority", new ColumnMetadata { Alias = "Priority ID", Visible = false } },
+                            { "PriorityDescription", new ColumnMetadata {
+                                Alias = "Priority",
+                                Highlighting = new CellHighlightingRuleSet("AlertStatus") { IsStatusColumn = true }
+                            }},
+                            { "AlertType", new ColumnMetadata { Alias = "Alert Type" } },
+                            { "AlertKey", new ColumnMetadata { Alias = "Alert Key" } },
+                            { "FirstMessage", new ColumnMetadata { Alias = "First Message" } },
+                            { "LastMessage", new ColumnMetadata { Alias = "Last Message" } },
+                            { "TriggerDate", new ColumnMetadata { Alias = "Trigger Date" } },
+                            { "AlertDuration", new ColumnMetadata { Alias = "Alert Duration" } },
+                            { "UpdatedDate", new ColumnMetadata { Alias = "Updated Date", Visible = false } },
+                            { "TimeSinceLastUpdate", new ColumnMetadata { Alias = "Time since last update" } },
+                            { "FirstNotification", new ColumnMetadata { Alias = "First Notification", Visible = false } },
+                            { "LastNotification", new ColumnMetadata { Alias = "Last Notification", Visible = false } },
+                            { "TimeSinceLastNotification", new ColumnMetadata { Alias = "Time since last notification" } },
+                            { "UpdateCount", new ColumnMetadata { Alias = "Update Count" } },
+                            { "ResolvedCount", new ColumnMetadata { Alias = "Resolved Count" } },
+                            { "NotificationCount", new ColumnMetadata { Alias = "Notification Count", Link = new PlaceholderLinkInfo() } },
+                            { "FailedNotificationCount", new ColumnMetadata {
+                                Alias = "Failed Notification Count",
+                                Link = new PlaceholderLinkInfo(),
+                                Highlighting = new CellHighlightingRuleSet("FailedNotificationCount")
                                 {
                                     Rules = new List<CellHighlightingRule>
                                     {
@@ -547,7 +465,26 @@ namespace DBADashGUI.DBADashAlerts
                                         }
                                     }
                                 }
-                            }
+                            } },
+                            { "IsAcknowledged", new ColumnMetadata { Alias = "Acknowledged?" } },
+                            { "IsResolved", new ColumnMetadata { Alias = "Resolved?" } },
+                            { "ResolvedDate", new ColumnMetadata { Alias = "Resolved Date" } },
+                            { "IsBlackout", new ColumnMetadata { Alias = "Is Blackout" } },
+                            { "Notes", new ColumnMetadata {
+                                Alias = "Notes",
+                                NullValue = "Add Notes...",
+                                Link = new EditNotesLinkColumnInfo()
+                            } },
+                            { "RuleNotes", new ColumnMetadata {
+                                Alias = "Rule Notes",
+                                Link = new TextLinkColumnInfo()
+                                {
+                                    TextHandling = CodeEditor.CodeEditorModes.Markdown,
+                                    TargetColumn = "RuleNotes"
+                                }
+                            } },
+                            { "RuleID", new ColumnMetadata { Alias = "Rule#", Link = new PlaceholderLinkInfo() } },
+                            { "DefaultSortOrder", new ColumnMetadata { Alias = "Default Sort Order", Visible = false } }
                         }
                     }
                 }
@@ -575,93 +512,30 @@ namespace DBADashGUI.DBADashAlerts
                 {
                     0, new CustomReportResult
                     {
-                        ColumnAlias = new Dictionary<string, string>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
-                            { "InstanceID", "Instance ID" },
-                            { "AlertID", "Alert ID" },
-                            { "InstanceDisplayName", "Instance" },
-                            { "Priority", "Priority ID" },
-                            { "PriorityDescription", "Priority" },
-                            { "AlertType", "Alert Type" },
-                            { "AlertKey", "Alert Key" },
-                            { "FirstMessage", "First Message" },
-                            { "LastMessage", "Last Message" },
-                            { "TriggerDate", "Trigger Date" },
-                            { "UpdatedDate", "Updated Date" },
-                            { "TimeSinceLastUpdate", "Time since last update" },
-                            { "FirstNotification", "First Notification" },
-                            { "LastNotification", "Last Notification" },
-                            { "TimeSinceLastNotification", "Time since last notification" },
-                            { "UpdateCount", "Update Count" },
-                            { "ResolvedCount", "Resolved Count" },
-                            { "NotificationCount", "Notification Count" },
-                            { "FailedNotificationCount", "Failed Notification Count" },
-                            { "IsAcknowledged", "Acknowledged?" },
-                            { "IsResolved", "Resolved?" },
-                            { "ResolvedDate", "Resolved Date" },
-                            { "IsBlackout", "IsBlackout" },
-                            { "AlertDuration", "Alert Duration" },
-                            {"Notes","Notes"},
-                            {"RuleNotes","Rule Notes"},
-                            {"RuleID","Rule#"}
-                        },
-                         ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>()
-                            {
-                                new("AlertID", new PersistedColumnLayout { Visible = false }),
-                                new("InstanceID", new PersistedColumnLayout { Visible = false }),
-                                new("InstanceDisplayName", new PersistedColumnLayout { Visible = true }),
-                                new("Priority", new PersistedColumnLayout { Visible = false }),
-                                new("PriorityDescription", new PersistedColumnLayout { Visible = true}),
-                                new("AlertType", new PersistedColumnLayout { Visible = true }),
-                                new("AlertKey", new PersistedColumnLayout { Visible = true }),
-                                new("FirstMessage", new PersistedColumnLayout { Visible = true }),
-                                new("LastMessage", new PersistedColumnLayout { Visible = true }),
-                                new("TriggerDate", new PersistedColumnLayout { Visible = true }),
-                                new("AlertDuration", new PersistedColumnLayout { Visible = true }),
-                                new("UpdatedDate", new PersistedColumnLayout { Visible = false }),
-                                new("TimeSinceLastUpdate", new PersistedColumnLayout { Visible = true }),
-                                new("FirstNotification", new PersistedColumnLayout { Visible = false }),
-                                new("LastNotification", new PersistedColumnLayout { Visible = false }),
-                                new("TimeSinceLastNotification", new PersistedColumnLayout { Visible = true }),
-                                new("UpdateCount", new PersistedColumnLayout { Visible = true }),
-                                new("ResolvedCount", new PersistedColumnLayout { Visible = true }),
-                                new("NotificationCount", new PersistedColumnLayout { Visible = true }),
-                                new("FailedNotificationCount", new PersistedColumnLayout { Visible = true }),
-                                new("IsAcknowledged", new PersistedColumnLayout { Visible = true }),
-                                new("IsResolved", new PersistedColumnLayout { Visible = true }),
-                                new("ResolvedDate", new PersistedColumnLayout { Visible = true }),
-                                new("Notes", new PersistedColumnLayout { Visible = true }),
-                                new("RuleNotes", new PersistedColumnLayout { Visible = true }),
-                                new("RuleID", new PersistedColumnLayout { Visible = true }),
-                            },
-                        LinkColumns = new()
-                        {
-                            {
-                                "InstanceDisplayName",
-                                null
-                            },
-                            {
-                                "Notes",
-                                new EditNotesLinkColumnInfo()
-                            },
-                            {
-                                "RuleNotes",
-                                new TextLinkColumnInfo()
-                                {
-                                    TextHandling = CodeEditor.CodeEditorModes.Markdown,
-                                    TargetColumn = "RuleNotes"
-                                }
-                            },
-                        },
-                        CellNullValue = new Dictionary<string, string>()
-                        {
-                            {"Notes","Add Notes..."}
-                        },
-                        CellHighlightingRules =
-                        {
-                            {
-                                "FailedNotificationCount",
-                                new CellHighlightingRuleSet("FailedNotificationCount")
+                            { "AlertID", new ColumnMetadata { Alias = "Alert ID", Visible = false } },
+                            { "InstanceID", new ColumnMetadata { Alias = "Instance ID", Visible = false } },
+                            { "InstanceDisplayName", new ColumnMetadata { Alias = "Instance", Link = new PlaceholderLinkInfo() } },
+                            { "Priority", new ColumnMetadata { Alias = "Priority ID", Visible = false } },
+                            { "PriorityDescription", new ColumnMetadata { Alias = "Priority" } },
+                            { "AlertType", new ColumnMetadata { Alias = "Alert Type" } },
+                            { "AlertKey", new ColumnMetadata { Alias = "Alert Key" } },
+                            { "FirstMessage", new ColumnMetadata { Alias = "First Message" } },
+                            { "LastMessage", new ColumnMetadata { Alias = "Last Message" } },
+                            { "TriggerDate", new ColumnMetadata { Alias = "Trigger Date" } },
+                            { "AlertDuration", new ColumnMetadata { Alias = "Alert Duration" } },
+                            { "UpdatedDate", new ColumnMetadata { Alias = "Updated Date", Visible = false } },
+                            { "TimeSinceLastUpdate", new ColumnMetadata { Alias = "Time since last update" } },
+                            { "FirstNotification", new ColumnMetadata { Alias = "First Notification", Visible = false } },
+                            { "LastNotification", new ColumnMetadata { Alias = "Last Notification", Visible = false } },
+                            { "TimeSinceLastNotification", new ColumnMetadata { Alias = "Time since last notification" } },
+                            { "UpdateCount", new ColumnMetadata { Alias = "Update Count" } },
+                            { "ResolvedCount", new ColumnMetadata { Alias = "Resolved Count" } },
+                            { "NotificationCount", new ColumnMetadata { Alias = "Notification Count" } },
+                            { "FailedNotificationCount", new ColumnMetadata {
+                                Alias = "Failed Notification Count",
+                                Highlighting = new CellHighlightingRuleSet("FailedNotificationCount")
                                 {
                                     Rules = new List<CellHighlightingRule>
                                     {
@@ -679,7 +553,25 @@ namespace DBADashGUI.DBADashAlerts
                                         }
                                     }
                                 }
-                            }
+                            } },
+                            { "IsAcknowledged", new ColumnMetadata { Alias = "Acknowledged?" } },
+                            { "IsResolved", new ColumnMetadata { Alias = "Resolved?" } },
+                            { "ResolvedDate", new ColumnMetadata { Alias = "Resolved Date" } },
+                            { "IsBlackout", new ColumnMetadata { Alias = "IsBlackout" } },
+                            { "Notes", new ColumnMetadata {
+                                Alias = "Notes",
+                                NullValue = "Add Notes...",
+                                Link = new EditNotesLinkColumnInfo()
+                            } },
+                            { "RuleNotes", new ColumnMetadata {
+                                Alias = "Rule Notes",
+                                Link = new TextLinkColumnInfo()
+                                {
+                                    TextHandling = CodeEditor.CodeEditorModes.Markdown,
+                                    TargetColumn = "RuleNotes"
+                                }
+                            } },
+                            { "RuleID", new ColumnMetadata { Alias = "Rule#" } }
                         }
                     }
                 }
