@@ -60,43 +60,56 @@ namespace DBADashGUI.CustomReports
                             { "InstanceID", new ColumnMetadata { Visible = false } },
                             { "InstanceDisplayName", new ColumnMetadata {
                                 Alias = "Instance",
-                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", Tab = Main.Tabs.Performance }
+                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", Tab = Main.Tabs.Performance },
+                                Description="Click cell to navigate to instance & load Performance tab"
                             }},
                             { "Database", new ColumnMetadata {
-                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database" }
+                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database" },
+                                 Description="Click cell to navigate to database & load Performance tab"
                             }},
                             { "Performance", new ColumnMetadata {
-                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database" }
+                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database" },
+                                Description="Click cell to navigate to database & load Performance tab"
                             }},
                             { "Object Execution", new ColumnMetadata {
-                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.ObjectExecutionSummary }
+                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.ObjectExecutionSummary },
+                                Description="Click cell to navigate to database & load Object Execution tab"
                             }},
                             { "Slow Queries", new ColumnMetadata {
-                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.SlowQueries }
+                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.SlowQueries },
+                                Description="Click cell to navigate to database & load Slow Queries tab"
                             }},
                             { "Files", new ColumnMetadata {
-                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.Files }
+                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.Files },
+                                Description="Click cell to navigate to database & load Files tab"
                             }},
                             { "Snapshot Summary", new ColumnMetadata {
-                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.SnapshotSummary }
+                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.SnapshotSummary },
+                                Description="Click cell to navigate to database & load Snapshot Summary tab"
                             }},
                             { "DB Space", new ColumnMetadata {
-                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.DBSpace }
+                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.DBSpace },
+                                Description="Click cell to navigate to database & load DB Space tab"
                             }},
                             { "DB Configuration", new ColumnMetadata {
-                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.DBConfiguration }
+                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.DBConfiguration },
+                                Description="Click cell to navigate to database & load DB Configuration tab"
                             }},
                             { "DB Options", new ColumnMetadata {
-                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.DBOptions }
+                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.DBOptions },
+                                Description="Click cell to navigate to database & load DB Options tab"
                             }},
                             { "QS", new ColumnMetadata {
-                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.QS }
+                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.QS },
+                                Description="Click cell to navigate to database & load Query Store tab"
                             }},
                             { "Top Queries (Query Store)", new ColumnMetadata {
-                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.TopQueries }
+                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.TopQueries },
+                                Description="Click cell to navigate to database & load Top Queries tab"
                             }},
                             { "Forced Plans (Query Store)", new ColumnMetadata {
-                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.QueryStoreForcedPlans }
+                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "Database", Tab = Main.Tabs.QueryStoreForcedPlans },
+                                Description="Click cell to navigate to database & load Forced Plans tab"
                             }}
                         }
                     }

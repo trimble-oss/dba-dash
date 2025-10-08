@@ -67,21 +67,25 @@ namespace DBADashGUI.CustomReports
                             { "InstanceGroupName", new ColumnMetadata {
                                 Alias = "Instance",
                                 DisplayIndex = 1,
-                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "" }
+                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "" },
+                                Description="Instance name.  Click cell to navigate to instance & load Performance tab"
                             }},
                             { "DB", new ColumnMetadata {
                                 DisplayIndex = 2,
-                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "DB" }
+                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "DB" },
+                                Description="Database name.  Click cell to navigate to database & load Performance tab"
                             }},
                             { "CreatedDate", new ColumnMetadata {
                                 Alias = "Created Date",
-                                DisplayIndex = 3
+                                DisplayIndex = 3,
+                                Description="create_date from sys.databases"
                             }},
                             { "SizeMB", new ColumnMetadata {
                                 Alias = "Size (MB)",
                                 FormatString = "N0",
                                 DisplayIndex = 4,
-                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "DB", Tab = Main.Tabs.DBSpace }
+                                Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", DatabaseColumn = "DB", Tab = Main.Tabs.DBSpace },
+                                Description = "Size of the database in megabytes. Click cell to navigate to database & load DB Space tab"
                             }}
                         }
                     }

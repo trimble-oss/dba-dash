@@ -63,40 +63,40 @@ namespace DBADashGUI.Changes
         private void SetCols()
         {
             dgv.Columns.Clear();
-            dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colDB", HeaderText = "DB", DataPropertyName = "name", LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn, SortMode = DataGridViewColumnSortMode.Automatic });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Desired State", DataPropertyName = "desired_state_desc" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Actual State", DataPropertyName = "actual_state_desc" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "col_ReadOnlyReason", HeaderText = "Read Only Reason", DataPropertyName = "readonly_reason_desc" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Query Capture Mode", DataPropertyName = "query_capture_mode_desc" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Sized Based Cleanup", DataPropertyName = "size_based_cleanup_mode_desc" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Wait Stats Capture", DataPropertyName = "wait_stats_capture_mode_desc" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Stale Query Threshold (Days)", DataPropertyName = "stale_query_threshold_days" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Max Plans Per Query", DataPropertyName = "max_plans_per_query" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Current Size MB", DataPropertyName = "current_storage_size_mb", DefaultCellStyle = new DataGridViewCellStyle { Format = "N1" } });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Max Size MB", DataPropertyName = "max_storage_size_mb", DefaultCellStyle = new DataGridViewCellStyle { Format = "N1" } });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Actual State Additional Info", DataPropertyName = "actual_state_additional_info" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Flush Interval (Sec)", DataPropertyName = "flush_interval_seconds" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Policy Execution Count", DataPropertyName = "capture_policy_execution_count" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Policy Stale Threshold (Hrs)", DataPropertyName = "capture_policy_stale_threshold_hours" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Policy Total Compile Time (ms)", DataPropertyName = "capture_policy_total_compile_cpu_time_ms" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Policy Total Execution Time (ms)", DataPropertyName = "capture_policy_total_execution_cpu_time_ms" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "col_SnapshotDate", HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate" });
+            dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colDB", HeaderText = "DB", DataPropertyName = "name", LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Database name" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Desired State", DataPropertyName = "desired_state_desc", ToolTipText = "The desired operation mode of query store, explicitly set by user" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Actual State", DataPropertyName = "actual_state_desc", ToolTipText = "The actual operation mode of query store.  \nThis can be different from the actual state as it can be put into a READ_ONLY or ERROR state in certain situations." });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "col_ReadOnlyReason", HeaderText = "Read Only Reason", DataPropertyName = "readonly_reason_desc", ToolTipText = "Returns the reason query store is READ_ONLY when the desired state is READ_WRITE." });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Query Capture Mode", DataPropertyName = "query_capture_mode_desc", ToolTipText = "Query Store capture mode.  \ne.g. ALL, AUTO, NONE, CUSTOM" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Sized Based Cleanup", DataPropertyName = "size_based_cleanup_mode_desc", ToolTipText = "Controls whether cleanup is automatically triggered when query store is close to it's maximum size" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Wait Stats Capture", DataPropertyName = "wait_stats_capture_mode_desc", ToolTipText = "Controls if wait stats are captured by query store. \nApplies to SQL 2017 and later" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Stale Query Threshold (Days)", DataPropertyName = "stale_query_threshold_days", ToolTipText = "Query store retention policy in days. \nA value of 0 disables the retention policy. " });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Max Plans Per Query", DataPropertyName = "max_plans_per_query", ToolTipText = "Limit on the maximum number of plans stored per query.  \nIf the maximum is reached, query store stops collecting new plans for the query. \nA value of 0 disables this limit." });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Current Size MB", DataPropertyName = "current_storage_size_mb", DefaultCellStyle = new DataGridViewCellStyle { Format = "N1" }, ToolTipText = "Current size of query store in megabytes" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Max Size MB", DataPropertyName = "max_storage_size_mb", DefaultCellStyle = new DataGridViewCellStyle { Format = "N1" }, ToolTipText = "Maximum size of query store in megabytes." });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Actual State Additional Info", DataPropertyName = "actual_state_additional_info", ToolTipText = "Not currently used", Visible = false });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Flush Interval (Sec)", DataPropertyName = "flush_interval_seconds", ToolTipText = "The frequency query store data is flushed to disk in seconds.  Default is 900 (15min)" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Policy Execution Count", DataPropertyName = "capture_policy_execution_count", ToolTipText = "The execution count threshold a query must reach within the stale threshold of the custom capture policy.\nApplies to SQL 2019 and later" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Policy Stale Threshold (Hrs)", DataPropertyName = "capture_policy_stale_threshold_hours", ToolTipText = "The interval used for custom capture policy.\nApplies to SQL 2019 and later" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Policy Total Compile Time (ms)", DataPropertyName = "capture_policy_total_compile_cpu_time_ms", ToolTipText = "The total compile time a query must acumulate within the stale threshold of the custom capture policy.\nApplies to SQL 2019 and later" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Policy Total Execution CPU Time (ms)", DataPropertyName = "capture_policy_total_execution_cpu_time_ms", ToolTipText = "The total execution CPU time a query must acumulate within the stale threshold of the custom capture policy.\nApplies to SQL 2019 and later" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "col_SnapshotDate", HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", ToolTipText = "Date of last collection for DatabaseQueryStoreOptions (sys.database_query_store_options)" });
         }
 
         private void SetSummaryCols()
         {
             dgv.Columns.Clear();
             dgv.Columns.Add(new DataGridViewLinkColumn { Name = "colInstance", HeaderText = "Instance", DataPropertyName = "InstanceGroupName", LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn, SortMode = DataGridViewColumnSortMode.Automatic });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "OFF", DataPropertyName = "QS_OFF" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "col_READ_ONLY", HeaderText = "READ_ONLY", DataPropertyName = "QS_READ_ONLY" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "READ_WRITE", DataPropertyName = "QS_READ_WRITE" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "col_ERROR", HeaderText = "ERROR", DataPropertyName = "QS_ERROR" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Total Size (MB)", DataPropertyName = "TotalCurrentStorageSizeMB", DefaultCellStyle = new DataGridViewCellStyle { Format = "N1" } });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Avg Size (MB)", DataPropertyName = "AvgCurrentStorageSizeMB", DefaultCellStyle = new DataGridViewCellStyle { Format = "N1" } });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Max Size (MB)", DataPropertyName = "MaxCurrentStorageSizeMB", DefaultCellStyle = new DataGridViewCellStyle { Format = "N1" } });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Max Limit (MB)", DataPropertyName = "MaxSizeLimitMB", DefaultCellStyle = new DataGridViewCellStyle { Format = "N1" } });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Min Limit (MB)", DataPropertyName = "MinSizeLimitMB", DefaultCellStyle = new DataGridViewCellStyle { Format = "N1" } });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "col_SnapshotDate", HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "OFF", DataPropertyName = "QS_OFF", ToolTipText = "Count of databases where actual state (from sys.database_query_store_options) is 0 (OFF)" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "col_READ_ONLY", HeaderText = "READ_ONLY", DataPropertyName = "QS_READ_ONLY", ToolTipText = "Count of databases where actual state (from sys.database_query_store_options) is 1 (READ_ONLY)" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "READ_WRITE", DataPropertyName = "QS_READ_WRITE", ToolTipText = "Count of databases where actual state (from sys.database_query_store_options) is 2 (READ_WRITE)" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "col_ERROR", HeaderText = "ERROR", DataPropertyName = "QS_ERROR", ToolTipText = "Count of databases where actual state (from sys.database_query_store_options) is 3 (ERROR)" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Total Size (MB)", DataPropertyName = "TotalCurrentStorageSizeMB", DefaultCellStyle = new DataGridViewCellStyle { Format = "N1" }, ToolTipText = "SUM of current_storage_size_mb from sys.database_query_store_options" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Avg Size (MB)", DataPropertyName = "AvgCurrentStorageSizeMB", DefaultCellStyle = new DataGridViewCellStyle { Format = "N1" }, ToolTipText = "AVG of current_storage_size_mb from sys.database_query_store_options" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Max Size (MB)", DataPropertyName = "MaxCurrentStorageSizeMB", DefaultCellStyle = new DataGridViewCellStyle { Format = "N1" }, ToolTipText = "MAX of current_storage_size_mb from sys.database_query_store_options" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Max Limit (MB)", DataPropertyName = "MaxSizeLimitMB", DefaultCellStyle = new DataGridViewCellStyle { Format = "N1" }, ToolTipText = "MAX of max_storage_size_mb from sys.database_query_store_options" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Min Limit (MB)", DataPropertyName = "MinSizeLimitMB", DefaultCellStyle = new DataGridViewCellStyle { Format = "N1" }, ToolTipText = "MIN of max_storage_size_mb from sys.database_query_store_options" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "col_SnapshotDate", HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", ToolTipText = "Date of last collection for DatabaseQueryStoreOptions (sys.database_query_store_options)" });
         }
 
         private DataTable GetDatabaseQueryStoreOptions()
