@@ -62,11 +62,11 @@ namespace DBADashGUI.CustomReports
                     {
                         Columns = new Dictionary<string, ColumnMetadata>
                         {
-                            { "InstanceGroupName", new ColumnMetadata { Alias = "Instance" } },
-                            { "DB", new ColumnMetadata { Alias = "DB" } },
-                            { "CreatedDate", new ColumnMetadata { Alias = "Created Date" } },
-                            { "DeletedDate", new ColumnMetadata { Alias = "~Deleted Date" } },
-                            { "SizeMB", new ColumnMetadata { Alias = "Size MB", FormatString = "N0" } }
+                            { "InstanceGroupName", new ColumnMetadata { Alias = "Instance" , Description = "Instance Name" } },
+                            { "DB", new ColumnMetadata { Alias = "DB", Description = "Database name" } },
+                            { "CreatedDate", new ColumnMetadata { Alias = "Created Date", Description="create_date from sys.databases" } },
+                            { "DeletedDate", new ColumnMetadata { Alias = "~Deleted Date", Description="Approximate date database was deleted.  Date the Databases collection ran and no longer included the database." } },
+                            { "SizeMB", new ColumnMetadata { Alias = "Size MB", FormatString = "N0", Description="Size of the database in megabytes at the time of deletion." } }
                         },
                         ResultName = "Deleted Databases",
                     }
