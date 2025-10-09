@@ -680,6 +680,7 @@ namespace DBADashGUI
                 column.HeaderText = string.IsNullOrEmpty(colInfo?.Alias) ? dataColumn.Caption : colInfo.Alias;
                 column.ValueType = dataColumn.DataType;
                 column.ToolTipText = colInfo?.Description;
+                column.SortMode = DataGridViewColumnSortMode.Automatic;
                 dgv.Columns.Add(column);
             }
         }
