@@ -40,6 +40,16 @@ namespace DBADashGUI.CustomReports
         private ToolStripMenuItem GetExportToExcelMenuItem() => new("Export Excel", Properties.Resources.excel16x16,
             (_, _) => ExportToExcel());
 
+        private ToolStripMenuItem GetCopyAsMarkdownMenuItem()
+        {
+            var menuItem = new ToolStripMenuItem("As Markdown", Properties.Resources.MarkdownFile);
+            menuItem.DropDownItems.AddRange(new ToolStripItem[] {
+                new ToolStripMenuItem("Standard", Properties.Resources.TextLeft, (_, _) => CopyAsMarkdown()),
+                new ToolStripMenuItem("Prettified", Properties.Resources.PrettyCode, (_, _) => CopyAsMarkdown(true))
+            });
+            return menuItem;
+        }
+
         private ToolStripMenuItem GetSaveTableMenuItem()
         {
             var tsSave = new ToolStripMenuItem("Save Table", Properties.Resources.SaveTable_16x) { ToolTipText = "Save to table in SQL Server database" };
@@ -159,7 +169,8 @@ namespace DBADashGUI.CustomReports
             {
                 GetCopyGridMenuItem(),
                 GetCopyColumnMenuItem(),
-                GetCopySelectedMenuItem()
+                GetCopySelectedMenuItem(),
+                GetCopyAsMarkdownMenuItem()
             });
             ColumnContextMenu.Items.AddRange(
                 new ToolStripItem[]
@@ -255,7 +266,8 @@ namespace DBADashGUI.CustomReports
                 GetCopyColumnMenuItem(),
                 copyCell,
                 copyRow,
-                GetCopySelectedMenuItem()
+                GetCopySelectedMenuItem(),
+                GetCopyAsMarkdownMenuItem()
             });
 
             CellContextMenu.Items.AddRange(
@@ -1189,22 +1201,170 @@ GO
             Dispose(false);
         }
 
-
         /// <summary>
         /// Show/Hide columns depending on if they have any data
         /// </summary>
         /// <param name="toggleMode">Set to true to toggle the visibility.  Set to false to only hide columns without impacting the visibility of columns already hidden</param>
-        public void HideEmptyColumns(bool toggleMode=true)
+        public void HideEmptyColumns(bool toggleMode = true)
         {
             if (Rows.Count == 0 || Columns.Count == 0)
             {
-                return; 
+                return;
             }
 
             foreach (DataGridViewColumn column in Columns)
             {
                 var hasData = Rows.Cast<DataGridViewRow>().Where(row => !row.IsNewRow && row.Cells[column.Index].Value != null).Any(row => !string.IsNullOrEmpty(row.Cells[column.Index].Value.ToString()?.Trim()));
                 column.Visible = (hasData && column.Visible) || (toggleMode && hasData);
+            }
+        }
+
+        /// <summary>
+        /// Copy the DataGridView as a markdown table to the clipboard
+        /// </summary>
+        /// <param name="prettify">Option to pad text so it looks like a grid when viewing markdown</param>
+        public void CopyAsMarkdown(bool prettify = false)
+        {
+            if (Columns.Cast<DataGridViewColumn>().Count(c => c.Visible) == 0)
+            {
+                MessageBox.Show("No data to copy", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var markdownText = ConvertToMarkdown(prettify);
+            Clipboard.SetText(markdownText);
+        }
+
+        /// <summary>
+        /// Convert the DataGridView to a markdown table
+        /// </summary>
+        /// <param name="prettify">Option to pad text so it looks like a grid when viewing markdown</param>
+        /// <returns>Markdown text</returns>
+        public string ConvertToMarkdown(bool prettify = false)
+        {
+            var visibleColumns = Columns.Cast<DataGridViewColumn>().Where(c => c.Visible).ToList();
+            var sb = new StringBuilder();
+
+            // Calculate column widths if prettifying
+            int[] columnWidths = null;
+            if (prettify)
+            {
+                columnWidths = CalculateColumnWidths(visibleColumns);
+            }
+
+            // Add header row
+            AppendMarkdownHeader(sb, visibleColumns, columnWidths);
+
+            // Add separator row
+            AppendMarkdownSeparator(sb, visibleColumns, columnWidths);
+
+            // Add data rows
+            AppendMarkdownData(sb, visibleColumns, columnWidths);
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Gets a clean cell value properly formatted for Markdown
+        /// </summary>
+        /// <param name="cell">The DataGridViewCell to get the value from</param>
+        /// <returns>A string representing the cell value, cleaned for Markdown</returns>
+        private static string GetCleanCellValue(DataGridViewCell cell)
+        {
+            var value = cell.FormattedValue?.ToString() ?? string.Empty;
+            return CleanMarkdownText(value);
+        }
+
+        /// <summary>
+        /// Cleans text for markdown by replacing pipe characters and newlines
+        /// </summary>
+        private static string CleanMarkdownText(string text)
+        {
+            return text?.Replace("|", "&#124;")
+              .Replace("\n", " ")
+              .Replace("\r", "") ?? string.Empty;
+        }
+
+        /// <summary>
+        /// Returns an array of integers representing the maximum width for each column passed in.
+        /// </summary>
+        /// <param name="columns">Array of columns (e.g. filter for visible columns)</param>
+        /// <returns>Array of int representing the maximum width for each column passed in</returns>
+        private int[] CalculateColumnWidths(IReadOnlyList<DataGridViewColumn> columns)
+        {
+            var columnWidths = new int[columns.Count];
+
+            // Calculate width for headers
+            for (var i = 0; i < columns.Count; i++)
+            {
+                var headerText = CleanMarkdownText(columns[i].HeaderText);
+                columnWidths[i] = Math.Max(columnWidths[i], headerText.Length);
+            }
+
+            // Calculate width for data cells
+            foreach (DataGridViewRow row in Rows)
+            {
+                if (row.IsNewRow || !row.Visible) continue;
+
+                for (var i = 0; i < columns.Count; i++)
+                {
+                    var value = GetCleanCellValue(row.Cells[columns[i].Index]);
+                    columnWidths[i] = Math.Max(columnWidths[i], value.Length);
+                }
+            }
+
+            return columnWidths;
+        }
+
+        /// <summary>
+        /// Append the markdown header row to the StringBuilder
+        /// </summary>
+        private static void AppendMarkdownHeader(StringBuilder sb, IReadOnlyList<DataGridViewColumn> visibleColumns, IReadOnlyList<int> columnWidths)
+        {
+            sb.Append('|');
+            for (var i = 0; i < visibleColumns.Count; i++)
+            {
+                var headerText = CleanMarkdownText(visibleColumns[i].HeaderText);
+                sb.Append(' ');
+                sb.Append(columnWidths != null ? headerText.PadRight(columnWidths[i]) : headerText);
+                sb.Append(" |");
+            }
+            sb.AppendLine();
+        }
+
+        /// <summary>
+        /// Append the markdown separator row to the StringBuilder
+        /// </summary>
+        private static void AppendMarkdownSeparator(StringBuilder sb, IReadOnlyList<DataGridViewColumn> visibleColumns, IReadOnlyList<int> columnWidths)
+        {
+            sb.Append('|');
+            for (var i = 0; i < visibleColumns.Count; i++)
+            {
+                sb.Append(' ');
+                sb.Append(columnWidths != null ? new string('-', columnWidths[i]) : "---");
+                sb.Append(" |");
+            }
+            sb.AppendLine();
+        }
+
+        /// <summary>
+        /// Append the markdown data rows to the StringBuilder
+        /// </summary>
+        private void AppendMarkdownData(StringBuilder sb, IReadOnlyList<DataGridViewColumn> visibleColumns, IReadOnlyList<int> columnWidths)
+        {
+            foreach (DataGridViewRow row in Rows)
+            {
+                if (row.IsNewRow || !row.Visible) continue;
+
+                sb.Append('|');
+                for (var i = 0; i < visibleColumns.Count; i++)
+                {
+                    var value = GetCleanCellValue(row.Cells[visibleColumns[i].Index]);
+                    sb.Append(' ');
+                    sb.Append(columnWidths != null ? value.PadRight(columnWidths[i]) : value);
+                    sb.Append(" |");
+                }
+                sb.AppendLine();
             }
         }
     }

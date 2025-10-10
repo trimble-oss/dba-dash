@@ -1061,5 +1061,30 @@ namespace DBADashGUI.Properties {
             }
         }
 
+        internal static System.Drawing.Bitmap MarkdownFile
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("MarkdownFile", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        internal static System.Drawing.Bitmap PrettyCode
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("PrettyCode", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap TextLeft
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("TextLeft", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
