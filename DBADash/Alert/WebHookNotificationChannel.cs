@@ -15,7 +15,7 @@ namespace DBADash.Alert
         public override NotificationChannelTypes NotificationChannelType => NotificationChannelTypes.Webhook;
 
         [DisplayName("Message Template")]
-        [Description("Json message template (Leave blank to use default template).  Available parameters to replace: {title}, {text}, {instance}, {threadkey}, {icon}, {emoji}")]
+        [Description("Json message template (Leave blank to use default template).  Available parameters to replace: {title}, {text}, {instance}, {connectionid}, {instanceandconnectionid}, {threadkey}, {icon}, {emoji}")]
         [Category("Webhook Config")]
         public JsonString MessageTemplate { get; set; }
 
@@ -196,7 +196,5 @@ namespace DBADash.Alert
             }
             foreach (var validationResult in ValidateBase(validationContext)) yield return validationResult;
         }
-
-
     }
 }

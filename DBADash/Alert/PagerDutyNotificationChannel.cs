@@ -2,13 +2,11 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
-using System.Linq;
+using System.ComponentModel.DataAnnotations;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using static DBADashGUI.DBADashAlerts.NotificationChannelBase;
 
 namespace DBADash.Alert
 {
@@ -102,7 +100,7 @@ namespace DBADash.Alert
                 {
                     component = "SQL Server",
                     @class = alert.AlertType,
-                    summary = alert.AlertName + " on " + alert.ConnectionID,
+                    summary = $"{alert.AlertName} on {alert.InstanceDisplayNameAndConnectionID}",
                     source = alert.ConnectionID,
                     severity = PagerDutySeverity(alert.Priority),
                     timestamp = alert.TriggerDate,
