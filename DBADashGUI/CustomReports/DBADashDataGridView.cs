@@ -1280,9 +1280,21 @@ GO
         /// </summary>
         private static string CleanMarkdownText(string text)
         {
-            return text?.Replace("|", "&#124;")
-              .Replace("\n", " ")
-              .Replace("\r", "") ?? string.Empty;
+            // Escape backslashes first to avoid double-escaping
+            return text?
+                .Replace("\\", "\\\\")
+                .Replace("|", "&#124;")
+                .Replace("*", "\\*")
+                .Replace("_", "\\_")
+                .Replace("[", "\\[")
+                .Replace("]", "\\]")
+                .Replace("(", "\\(")
+                .Replace(")", "\\)")
+                .Replace("#", "\\#")
+                .Replace(">", "\\>")
+                .Replace("`", "\\`")
+                .Replace("\n", " ")
+                .Replace("\r", "") ?? string.Empty;
         }
 
         /// <summary>
@@ -1341,7 +1353,14 @@ GO
             for (var i = 0; i < visibleColumns.Count; i++)
             {
                 sb.Append(' ');
-                sb.Append(columnWidths != null ? new string('-', columnWidths[i]) : "---");
+                if (columnWidths != null)
+                {
+                    sb.Append('-', columnWidths[i]);
+                }
+                else
+                {
+                    sb.Append("---");
+                }
                 sb.Append(" |");
             }
             sb.AppendLine();
