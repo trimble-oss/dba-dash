@@ -56,6 +56,10 @@ namespace DBADash.Alert
         public long AlertID { get; set; }
         public string ConnectionID { get; set; }
 
+        public string InstanceDisplayName { get; set; }
+
+        public string InstanceDisplayNameAndConnectionID => InstanceDisplayName == ConnectionID ? ConnectionID : $"{InstanceDisplayName} ({ConnectionID})";
+
         public Priorities Priority { get; set; }
 
         public string Message { get; set; }

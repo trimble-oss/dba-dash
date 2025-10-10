@@ -12,6 +12,7 @@ WHERE SettingName = 'AlertMaxNotificationCount'
 
 SELECT AA.AlertID,
 		I.ConnectionID,
+		I.InstanceDisplayName,
 		AA.AlertKey,
 		AA.LastMessage AS AlertDetails,
 		AA.ResolvedDate,

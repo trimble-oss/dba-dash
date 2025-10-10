@@ -109,6 +109,7 @@ namespace DBADashService
                 {
                     AlertID = (long)rdr["AlertID"],
                     ConnectionID = (string)rdr["ConnectionID"],
+                    InstanceDisplayName = (string)rdr["InstanceDisplayName"],
                     Priority = (Alert.Priorities)Convert.ToInt16(rdr["Priority"]),
                     Message = (string)rdr["AlertDetails"],
                     AlertName = (string)rdr["AlertKey"],
@@ -187,16 +188,18 @@ namespace DBADashService
 
         private async Task SendConsolidatedAlertNotification(NotificationChannelBase channel, List<Alert> alerts)
         {
+            var distinctConnectionCount = alerts.Select(a => a.ConnectionID).Distinct().Count();
             var consolidatedAlert = new Alert()
             {
                 AlertName = $"{alerts.Count} alert notifications for your attention",
                 Priority = alerts.Min(a => a.Priority),
                 IsResolved = alerts.All(a => a.IsResolved),
-                ConnectionID = alerts.Select(a => a.ConnectionID).Distinct().Count() == 1 ? alerts.First().ConnectionID : alerts.Select(a => a.ConnectionID).Distinct().Count().ToString() + " Instances",
+                InstanceDisplayName = distinctConnectionCount == 1 ? alerts.First().InstanceDisplayName : distinctConnectionCount + " Instances",
+                ConnectionID = distinctConnectionCount == 1 ? alerts.First().ConnectionID : distinctConnectionCount + " Instances",
                 TriggerDate = DateTime.UtcNow
             };
             var sb = new StringBuilder();
-            foreach (var group in alerts.GroupBy(a => a.ConnectionID).OrderBy(a => a.Key))
+            foreach (var group in alerts.GroupBy(a => a.InstanceDisplayName).OrderBy(a => a.Key))
             {
                 sb.AppendLine(group.Key);
                 foreach (var alert in group.OrderBy(a => a.Priority))

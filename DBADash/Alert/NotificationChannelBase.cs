@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
-using System.Linq;
 using System.Runtime.Caching;
 using System.Threading.Tasks;
 using Alert = DBADash.Alert.Alert;
@@ -373,6 +372,8 @@ namespace DBADashGUI.DBADashAlerts
         {
             "{Title}",
             "{Instance}",
+            "{ConnectionID}",
+            "{InstanceAndConnectionID}",
             "{AlertKey}",
             "{Action}",
             "{Text}",
@@ -386,7 +387,9 @@ namespace DBADashGUI.DBADashAlerts
         public string ReplacePlaceholders(Alert alert, string template)
         {
             return template.Replace("{Title}", EscapeText($"{alert.AlertName}[{alert.Status}]"), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{Instance}", EscapeText(alert.ConnectionID), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{ConnectionID}", EscapeText(alert.ConnectionID), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{Instance}", EscapeText(alert.InstanceDisplayName), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{InstanceAndConnectionID}", EscapeText(alert.InstanceDisplayNameAndConnectionID), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{AlertKey}", EscapeText(alert.AlertName), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{Action}", EscapeText(alert.Action), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{Text}", EscapeText(alert.Message), StringComparison.InvariantCultureIgnoreCase)
