@@ -13,7 +13,7 @@
   <PropertyGroup>
     <ApplicationIcon>DatabaseUnknown_16x.ico</ApplicationIcon>
     <BaseOutputPath>..\DBADashBuild</BaseOutputPath>
-    <TargetFramework>net10.0-windows7.0</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug2|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -251,7 +251,7 @@
     <PackageReference Include="LiveCharts" Version="0.9.7" />
     <PackageReference Include="LiveCharts.WinForms" Version="0.9.7.1" />
     <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
-    <PackageReference Include="LiveChartsCore.SkiaSharpView.WinForms" Version="2.0.0-rc4.5" />
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WinForms" Version="2.0.0-rc6.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.2" />
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="180.10.0" />
