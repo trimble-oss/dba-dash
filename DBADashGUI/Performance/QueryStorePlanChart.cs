@@ -4,22 +4,20 @@ using DBADashGUI.Theme;
 using LiveChartsCore;
 using LiveChartsCore.Drawing;
 using LiveChartsCore.Kernel;
-using LiveChartsCore.Kernel.Sketches;
 using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
-using LiveChartsCore.SkiaSharpView.Drawing;
 using LiveChartsCore.SkiaSharpView.Drawing.Geometries;
 using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.VisualElements;
-using LiveChartsCore.VisualElements;
-using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Drawing;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static DBADashGUI.Messaging.MessagingHelper;
@@ -27,23 +25,104 @@ using Padding = LiveChartsCore.Drawing.Padding;
 
 namespace DBADashGUI.Performance
 {
+    /// <summary>
+    /// A Panel with double buffering enabled to reduce flicker during custom painting
+    /// </summary>
+    internal class DoubleBufferedPanel : Panel
+    {
+        public DoubleBufferedPanel()
+        {
+            DoubleBuffered = true;
+        }
+    }
+
     public partial class QueryStorePlanChart : UserControl
     {
+        // Tooltip layout constants
+        private const int TooltipLabelWidth = 25;
+
+        private const int TooltipValueWidth = 20;
+        private const int TooltipSeparatorWidth = 47;
+        private const int TooltipIndicatorLeft = 35;
+        private const int TooltipIndicatorTop = 5;
+        private const int TooltipMouseOffset = 15;
+
+        // Indicator drawing constants
+        private const float IndicatorCenterX = 18f;
+
+        private const float IndicatorCenterY = 15f;
+        private const float IndicatorOuterRadius = 8f;
+        private const float IndicatorInnerRadius = 3.5f;
+        private const int IndicatorCircleSize = 16;
+        private const int IndicatorCircleX = 10;
+        private const int IndicatorCircleY = 7;
+
+        private Panel tooltipPanel;
+        private Label tooltipLabel;
+
+        private DataTable chartData;
+        private string MetricName => tsMeasure.Tag?.ToString();
+
         public QueryStorePlanChart()
         {
             InitializeComponent();
+            InitializeCustomTooltip();
+
+            // Setup custom tooltip events
+            planChart.MouseMove += PlanChart_MouseMove;
+            planChart.MouseLeave += PlanChart_MouseLeave;
         }
 
-        private DateTimeOffset From;
-        private DateTimeOffset To;
-        private long QueryId;
+        private DateTimeOffset from;
+        private DateTimeOffset to;
+        private long queryId;
 
-        public async Task ShowChart(DBADashContext context, string db, long queryId, bool nearestInterval,
-            DateTimeOffset from, DateTimeOffset to)
+        private void InitializeCustomTooltip()
         {
-            QueryId = queryId;
-            From = from;
-            To = to;
+            // Create custom tooltip panel with double buffering to reduce flicker
+            tooltipPanel = new DoubleBufferedPanel
+            {
+                Visible = false,
+                BackColor = Color.FromArgb(33, 66, 99),
+                BorderStyle = BorderStyle.FixedSingle,
+                Padding = new System.Windows.Forms.Padding(10),
+                AutoSize = true,
+                MaximumSize = new Size(500, 500)
+            };
+
+            tooltipLabel = new Label
+            {
+                AutoSize = true,
+                ForeColor = Color.White,
+                Font = new Font("Consolas", 10f), // Monospace for alignment
+                BackColor = Color.Transparent,
+                MaximumSize = new Size(480, 0),
+                Location = new Point(TooltipIndicatorLeft, TooltipIndicatorTop) // Leave room for indicator
+            };
+
+            tooltipPanel.Controls.Add(tooltipLabel);
+            Controls.Add(tooltipPanel);
+            tooltipPanel.BringToFront();
+
+            // Set up paint handler once during initialization
+            tooltipPanel.Paint += TooltipPanel_Paint;
+        }
+
+        /// <summary>
+        /// Displays the query store plan chart for the specified query.
+        /// </summary>
+        /// <param name="context">The database context</param>
+        /// <param name="db">Database name</param>
+        /// <param name="queryStoreQueryId">Query store query id</param>
+        /// <param name="nearestInterval">Whether to use nearest interval</param>
+        /// <param name="fromDate">Start date</param>
+        /// <param name="toDate">End date</param>
+        public async Task ShowChart(DBADashContext context, string db, long queryStoreQueryId, bool nearestInterval,
+            DateTimeOffset fromDate, DateTimeOffset toDate)
+        {
+            queryId = queryStoreQueryId;
+            from = fromDate;
+            to = toDate;
             Invoke(() =>
             {
                 refresh1.ShowRefresh();
@@ -69,7 +148,7 @@ namespace DBADashGUI.Performance
                     Lifetime = Config.DefaultCommandTimeout
                 };
                 await MessagingHelper.SendMessageAndProcessReply(message, context, (s, details, color) => { },
-                    ProcessChart, Guid.NewGuid());
+                    ProcessChartResponse, Guid.NewGuid());
             }
             catch (Exception ex)
             {
@@ -77,21 +156,18 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private DataTable ChartData;
-        private string MetricName => tsMeasure.Tag?.ToString();
-
-        private Task ProcessChart(ResponseMessage reply, Guid messageGroup, SetStatusDelegate setStatus)
+        private Task ProcessChartResponse(ResponseMessage reply, Guid messageGroup, SetStatusDelegate setStatus)
         {
             if (InvokeRequired)
             {
-                Invoke(new Action(() => ProcessChart(reply, messageGroup, setStatus)));
+                Invoke(new Action(() => ProcessChartResponse(reply, messageGroup, setStatus)));
                 return Task.CompletedTask;
             }
 
             if (reply.Type == ResponseMessage.ResponseTypes.Success)
             {
-                ChartData = reply.Data.Tables.Count == 0 ? new DataTable() : reply.Data.Tables[0];
-                ProcessChart();
+                chartData = reply.Data.Tables.Count == 0 ? new DataTable() : reply.Data.Tables[0];
+                RenderChart();
             }
             else
             {
@@ -101,58 +177,228 @@ namespace DBADashGUI.Performance
             return Task.CompletedTask;
         }
 
-        private void ProcessChart()
+        private void RenderChart()
         {
             refresh1.HideRefresh();
             planChart.Visible = true;
 
-            var series = GetSeries(ChartData, MetricName);
+            var series = GetSeries(chartData, MetricName);
             var labelPaint = DBADashUser.SelectedTheme.ThemeIdentifier == ThemeType.Dark
                 ? new SolidColorPaint(DashColors.White.ToSKColor())
                 : new SolidColorPaint(DashColors.TrimbleBlueDark.ToSKColor());
-            planChart.Title = new LabelVisual { Text = $"Query {QueryId} {tsMeasure.Text}", TextSize = 20, Paint = labelPaint };
 
-            var formatString = To.Subtract(From).TotalMinutes < 1440 ? "HH:mm" : "MM/dd HH:mm";
-            var unit = TimeSpan.FromMinutes(Convert.ToInt64(To.DateTime.RoundDownToPreviousHour().AddHours(1)
-                .Subtract(From.DateTime.RoundDownToPreviousHour()).TotalMinutes / 20));
-            planChart.XAxes = new Axis[]
+            var title = new DrawnLabelVisual(
+            new LabelGeometry
             {
-                new DateTimeAxis(unit, date => FormatDateForChartLabel(date, To.Subtract(From)))
+                Text = $"Query {queryId} {tsMeasure.Text}",
+                Paint = labelPaint,
+                TextSize = 20,
+                Padding = new Padding(0, 30, 0, 0)
+            });
+            planChart.Title = title;
+
+            var unit = TimeSpan.FromMinutes(Convert.ToInt64(to.DateTime.RoundDownToPreviousHour().AddHours(1)
+                .Subtract(from.DateTime.RoundDownToPreviousHour()).TotalMinutes / 20));
+            planChart.XAxes =
+            [
+                new DateTimeAxis(unit, date => FormatDateForChartLabel(date, to.Subtract(from)))
                 {
                     LabelsPaint = labelPaint,
-                    MinLimit = To.Subtract(From).TotalMinutes > 60
-                        ? From.ToAppTimeZone().DateTime.RoundDownToPreviousHour().Ticks
-                        : From.ToAppTimeZone().Ticks,
+                    MinLimit = to.Subtract(from).TotalMinutes > 60
+                        ? from.ToAppTimeZone().DateTime.RoundDownToPreviousHour().Ticks
+                        : from.ToAppTimeZone().Ticks,
                 }
-            };
+            ];
             planChart.YAxes = new Axis[]
             {
                 new() { LabelsPaint = labelPaint, MinLimit = 0, }
             };
-            planChart.TooltipFindingStrategy = TooltipFindingStrategy.CompareAllTakeClosest;
             planChart.LegendPosition = LegendPosition.Right;
             planChart.LegendTextPaint = labelPaint;
-            planChart.Tooltip = new CustomTooltip();
+            // Disable default tooltip - we'll use our custom one
+            planChart.TooltipPosition = TooltipPosition.Hidden;
             planChart.Series = series;
         }
 
-        //public event EventHandler<PlanSelectedEventArgs>PlanSelected;
+        private void PlanChart_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (planChart.Series == null) return;
 
-        // Note: Selecting points doesn't work well when there are multiple points sharing the same x-axis value.  Removed.
-        //private void OnPointerDown(IChartView chart, ChartPoint<PlanMetrics, SVGPathGeometry, LabelGeometry>? point)
-        //{
-        //    if (point?.Visual is null) return;
+            var chartPoint = planChart.GetPointsAt(new LvcPointD(e.X, e.Y), FindingStrategy.CompareAllTakeClosest).FirstOrDefault();
 
-        //    foreach (var s in planChart.Series)
-        //    {
-        //        s.GeometrySvg = s.Name != null && s.Name.Contains("forced") ? SVGPoints.Star : SVGPoints.Circle;
-        //    }
+            if (chartPoint != null)
+            {
+                if (chartPoint.Context.DataSource is PlanMetrics metric)
+                {
+                    var series = chartPoint.Context.Series;
+                    var seriesColor = GetSeriesColor(series);
+                    var isStarSeries = series?.Name?.Contains("(Forced)") ?? false;
+                    // Convert mouse location from planChart coordinates to UserControl coordinates
+                    var locationInUserControl = planChart.PointToScreen(e.Location);
+                    locationInUserControl = PointToClient(locationInUserControl);
+                    ShowCustomTooltip(metric, locationInUserControl, seriesColor, isStarSeries);
+                    return;
+                }
+            }
 
-        //    point.Context.Series.GeometrySvg = SVGPoints.Pin;
-        //    chart.Invalidate();
-        //    tsViewPlan.Text = $@"View Plan {point.Model.PlanID}";
-        //    tsViewPlan.Visible = true;
-        //}
+            HideCustomTooltip();
+        }
+
+        private static Color GetSeriesColor(ISeries series)
+        {
+            SolidColorPaint paint = series switch
+            {
+                ScatterSeries<PlanMetrics, CircleGeometry> circleSeries => circleSeries.Fill as SolidColorPaint,
+                ScatterSeries<PlanMetrics, StarGeometry> starSeries => starSeries.Fill as SolidColorPaint,
+                _ => null
+            };
+
+            if (paint != null)
+            {
+                var skColor = paint.Color;
+                return Color.FromArgb(skColor.Alpha, skColor.Red, skColor.Green, skColor.Blue);
+            }
+
+            return Color.DeepSkyBlue;
+        }
+
+        private void PlanChart_MouseLeave(object sender, EventArgs e) => HideCustomTooltip();
+
+        private Color currentSeriesColor = Color.DeepSkyBlue;
+        private bool currentIsStarSeries = false;
+        private PlanMetrics currentMetric = null;
+        private Point lastTooltipPosition;
+
+        private void ShowCustomTooltip(PlanMetrics metric, Point mouseLocation, Color seriesColor, bool isStarSeries)
+        {
+            if (metric == null || tooltipPanel == null || tooltipLabel == null) return;
+
+            // Check if we're hovering over the same data point (hot path optimization)
+            // Use Ticks comparison for DateTime values - faster than DateTime comparison
+            var metricChanged = currentMetric == null ||
+                                currentMetric.PlanID != metric.PlanID ||
+                                currentMetric.BucketStart.Ticks != metric.BucketStart.Ticks ||
+                                currentMetric.BucketEnd.Ticks != metric.BucketEnd.Ticks;
+
+            // Cache color and star status for paint handler
+            var colorChanged = currentSeriesColor != seriesColor || currentIsStarSeries != isStarSeries;
+
+            // Only rebuild tooltip content if the data point changed
+            if (metricChanged)
+            {
+                currentMetric = metric;
+                currentSeriesColor = seriesColor;
+                currentIsStarSeries = isStarSeries;
+
+                // Format with proper alignment using composite formatting
+                // Use consistent widths: 25 chars for labels, 20 chars right-aligned for values
+                var startDate = metric.BucketStart.ToString("yyyy-MM-dd HH:mm:ss");
+                var endDate = metric.BucketEnd.ToString("yyyy-MM-dd HH:mm:ss");
+
+                // Use StringBuilder for performance in this hot path (MouseMove event)
+                var sb = new StringBuilder(600);
+                sb.AppendLine($"{"Plan ID:",-TooltipLabelWidth} {metric.PlanID,TooltipValueWidth}");
+                sb.AppendLine(new string('─', TooltipSeparatorWidth));
+                sb.AppendLine($"{"Total Duration:",-TooltipLabelWidth} {$"{metric.TotalDuration:N0} ms",TooltipValueWidth}");
+                sb.AppendLine($"{"Total CPU:",-TooltipLabelWidth} {$"{metric.TotalCPU:N0} ms",TooltipValueWidth}");
+                sb.AppendLine($"{"Avg CPU:",-TooltipLabelWidth} {$"{metric.AverageCPU:N1} ms",TooltipValueWidth}");
+                sb.AppendLine($"{"Avg Duration:",-TooltipLabelWidth} {$"{metric.AverageDuration:N1} ms",TooltipValueWidth}");
+                sb.AppendLine($"{"Executions:",-TooltipLabelWidth} {metric.ExecutionCount,TooltipValueWidth:N0}");
+                sb.AppendLine($"{"Start:",-TooltipLabelWidth} {startDate,TooltipValueWidth}");
+                sb.AppendLine($"{"End:",-TooltipLabelWidth} {endDate,TooltipValueWidth}");
+                sb.AppendLine($"{"Plan Forcing:",-TooltipLabelWidth} {metric.PlanForcingType,TooltipValueWidth}");
+                sb.AppendLine($"{"Total Physical Reads:",-TooltipLabelWidth} {$"{metric.TotalPhysicalReadsKB:N0} KB",TooltipValueWidth}");
+                sb.AppendLine($"{"Avg Physical Reads:",-TooltipLabelWidth} {$"{metric.AveragePhysicalReadsKB:N1} KB",TooltipValueWidth}");
+                sb.AppendLine($"{"Max Memory Grant:",-TooltipLabelWidth} {$"{metric.MaxMemoryGrantKB:N0} KB",TooltipValueWidth}");
+                sb.AppendLine($"{"Aborts:",-TooltipLabelWidth} {$"{metric.AbortCount:N0} ({metric.AbortPct:P1})",TooltipValueWidth}");
+                sb.Append($"{"Exceptions:",-TooltipLabelWidth} {$"{metric.ExceptionCount:N0} ({metric.ExceptionPct:P1})",TooltipValueWidth}");
+
+                tooltipLabel.Text = sb.ToString();
+            }
+            else if (colorChanged)
+            {
+                // Update color tracking even if metric didn't change
+                currentSeriesColor = seriesColor;
+                currentIsStarSeries = isStarSeries;
+            }
+
+            // Update position only when switching to a new data point
+            // This keeps the tooltip stable while hovering over the same point
+            if (metricChanged)
+            {
+                var newPosition = CalculateTooltipPosition(mouseLocation, tooltipPanel.Size, ClientRectangle);
+                tooltipPanel.Location = newPosition;
+                lastTooltipPosition = newPosition;
+            }
+
+            if (!tooltipPanel.Visible)
+            {
+                tooltipPanel.Visible = true;
+            }
+            else if (colorChanged)
+            {
+                // Only invalidate the indicator area if the color changed
+                tooltipPanel.Invalidate(new Rectangle(0, 0, 35, 30));
+            }
+        }
+
+        private void TooltipPanel_Paint(object sender, PaintEventArgs e) =>
+            DrawColorIndicator(e.Graphics, currentSeriesColor, currentIsStarSeries);
+
+        /// <summary>
+        /// Calculates the optimal tooltip position ensuring it stays within chart bounds
+        /// </summary>
+        private Point CalculateTooltipPosition(Point mouseLocation, Size tooltipSize, Rectangle chartBounds)
+        {
+            var x = mouseLocation.X + TooltipMouseOffset;
+            var y = mouseLocation.Y + TooltipMouseOffset;
+
+            // Adjust for right/bottom edges - position on opposite side of cursor if needed
+            if (x + tooltipSize.Width > chartBounds.Width)
+                x = mouseLocation.X - tooltipSize.Width - TooltipMouseOffset;
+            if (y + tooltipSize.Height > chartBounds.Height)
+                y = mouseLocation.Y - tooltipSize.Height - TooltipMouseOffset;
+
+            // Clamp to bounds to ensure tooltip never goes off screen
+            return new Point(
+                Math.Clamp(x, 0, Math.Max(0, chartBounds.Width - tooltipSize.Width)),
+                Math.Clamp(y, 0, Math.Max(0, chartBounds.Height - tooltipSize.Height))
+            );
+        }
+
+        private static void DrawColorIndicator(Graphics g, Color seriesColor, bool isStarSeries)
+        {
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            using (var brush = new SolidBrush(seriesColor))
+            {
+                if (isStarSeries)
+                {
+                    // Draw star
+                    var points = new PointF[10];
+                    for (int i = 0; i < 10; i++)
+                    {
+                        var angle = (float)(Math.PI / 5 * i - Math.PI / 2);
+                        var radius = i % 2 == 0 ? IndicatorOuterRadius : IndicatorInnerRadius;
+                        points[i] = new PointF(
+                            IndicatorCenterX + radius * (float)Math.Cos(angle),
+                            IndicatorCenterY + radius * (float)Math.Sin(angle)
+                        );
+                    }
+                    g.FillPolygon(brush, points);
+                }
+                else
+                {
+                    // Draw circle
+                    g.FillEllipse(brush, IndicatorCircleX, IndicatorCircleY, IndicatorCircleSize, IndicatorCircleSize);
+                }
+            }
+        }
+
+        private void HideCustomTooltip()
+        {
+            tooltipPanel.Visible = false;
+            currentMetric = null; // Clear cached metric when hiding tooltip
+        }
 
         public static string FormatDateForChartLabel(DateTime date, TimeSpan duration, CultureInfo cultureInfo = null)
         {
@@ -188,7 +434,7 @@ namespace DBADashGUI.Performance
         {
             if (dt.Rows.Count == 0)
             {
-                return Array.Empty<ISeries>();
+                return [];
             }
 
             var series = new List<ISeries>();
@@ -207,20 +453,12 @@ namespace DBADashGUI.Performance
                         currentSeries.Values = points;
                         series.Add(currentSeries);
                     }
+
                     points = new();
 
-                    currentSeries = new ScatterSeries<PlanMetrics, SVGPathGeometry>
-                    {
-                        Values = new ObservableCollection<PlanMetrics>(),
-                        Mapping = (metric, value) => new(metric.BucketMidpoint.Ticks, metric.MetricValue(metricName), metric.ExecutionCount),
-                        Name = $"Plan {planId}" + (planForcingType == "NONE" ? "" : " (Forced)"),
-                        GeometrySvg = planForcingType == "NONE" ? SVGPoints.Circle : SVGPoints.Star,
-                        MinGeometrySize = 5,
-                        GeometrySize = 30,
-                        StackGroup = 1 // Ensures weight is shared between series
-                    };
+                    // Choose the appropriate series type based on the forcing type
+                    currentSeries = CreatePlanSeries(planId, planForcingType, metricName);
 
-                    // ((ScatterSeries< PlanMetrics, SVGPathGeometry> )currentSeries).ChartPointPointerDown  += OnPointerDown;
                     lastPlanId = planId;
                 }
 
@@ -233,14 +471,52 @@ namespace DBADashGUI.Performance
                 series.Add(currentSeries);
             }
 
-            return series.ToArray();
+            return [.. series];
+        }
+
+        /// <summary>
+        /// Creates a scatter series for plan metrics with appropriate geometry based on forcing type
+        /// </summary>
+        private static ISeries CreatePlanSeries(long planId, string planForcingType, string metricName)
+        {
+            var isForced = planForcingType != "NONE";
+
+            if (isForced)
+            {
+                return CreateScatterSeries<StarGeometry>($"Plan {planId} (Forced)", metricName);
+            }
+            else
+            {
+                return CreateScatterSeries<CircleGeometry>($"Plan {planId}", metricName);
+            }
+        }
+
+        /// <summary>
+        /// Creates a scatter series with the specified geometry type and common configuration
+        /// </summary>
+        private static ScatterSeries<PlanMetrics, TGeometry> CreateScatterSeries<TGeometry>(string seriesName, string metricName)
+            where TGeometry : BoundedDrawnGeometry, new()
+        {
+            return new ScatterSeries<PlanMetrics, TGeometry>
+            {
+                Values = new ObservableCollection<PlanMetrics>(),
+                Mapping = (metric, value) => new Coordinate(
+                    metric.BucketMidpoint.Ticks,
+                    metric.MetricValue(metricName),
+                    metric.ExecutionCount
+                ),
+                Name = seriesName,
+                MinGeometrySize = 5,
+                GeometrySize = 30,
+                StackGroup = 1,
+            };
         }
 
         private void Select_Measure(object sender, EventArgs e)
         {
             tsMeasure.Tag = ((ToolStripMenuItem)sender).Tag;
             tsMeasure.Text = ((ToolStripMenuItem)sender).Text;
-            ProcessChart();
+            RenderChart();
         }
 
         private void SetYAxisMaxToolStripMenuItem_Click(object sender, EventArgs e)
@@ -267,7 +543,7 @@ namespace DBADashGUI.Performance
 
         private void SaveChart(object sender, EventArgs e)
         {
-            planChart.SaveChartAs($"Query_{QueryId}_Plans.png");
+            planChart.SaveChartAs($"Query_{queryId}_Plans.png");
         }
 
         private void CopyImage(object sender, EventArgs e)
@@ -278,7 +554,7 @@ namespace DBADashGUI.Performance
         private void CopyData(object sender, EventArgs e)
         {
             using var dgv = new DataGridView() { AutoGenerateColumns = true, AllowUserToAddRows = false };
-            dgv.DataSource = ChartData;
+            dgv.DataSource = chartData;
             // Force the DataGridView to create columns and bind the data immediately
             dgv.BindingContext = new BindingContext();
             dgv.Refresh();
@@ -287,25 +563,13 @@ namespace DBADashGUI.Performance
         }
     }
 
-    //public class PlanSelectedEventArgs : EventArgs
-    //{
-    //    public long PlanID { get; }
-
-    //    public string DB { get; }
-
-    //    public PlanSelectedEventArgs(long planID,string db)
-    //    {
-    //        PlanID = planID;
-    //        DB = db;
-    //    }
-    //}
-
-    public class PlanMetrics
+    /// <summary>
+    /// Represents query store plan metrics mapped from a single <see cref="DataRow"/>.
+    /// Used as a data model for charting and analyzing query store plan performance.
+    /// </summary>
+    /// <param name="row">The data row containing query store plan metric values.</param>
+    public class PlanMetrics(DataRow row)
     {
-        private readonly DataRow row;
-
-        public PlanMetrics(DataRow _row) => row = _row;
-
         public DateTime BucketStart => ((DateTime)row["bucket_start"]).ToAppTimeZone();
         public DateTime BucketEnd => ((DateTime)row["bucket_end"]).ToAppTimeZone();
 
@@ -349,139 +613,6 @@ namespace DBADashGUI.Performance
             }
 
             return start.AddTicks((end.Ticks - start.Ticks) / 2);
-        }
-    }
-
-    //public class PlanMetrics
-    //{
-    //    public DateTime BucketStart { get; set; }
-    //    public DateTime BucketEnd { get; set; }
-
-    //    public long PlanID { get; set; }
-    //    public double TotalDuration { get; set; }
-    //    public double TotalCPU { get; set; }
-
-    //    public double AverageCPU { get; set; }
-
-    //    public double AverageDuration { get; set; }
-
-    //    public double ExecutionCount { get; set; }
-
-    //    public string PlanForcingType { get; set; }
-    //}
-
-    // Custom Tooltip to show plan metrics
-    public class CustomTooltip : IChartTooltip<SkiaSharpDrawingContext>
-    {
-        private StackPanel<RoundedRectangleGeometry, SkiaSharpDrawingContext> _stackPanel;
-        private static readonly int s_zIndex = 10100;
-        private readonly SolidColorPaint _backgroundPaint = new(DashColors.TrimbleBlueDark.ToSKColor());
-        private readonly SolidColorPaint _fontPaint = new(new SKColor(230, 230, 230)) { ZIndex = s_zIndex + 1 };
-
-        public void Show(IEnumerable<ChartPoint> foundPoints, Chart<SkiaSharpDrawingContext> chart)
-        {
-            _stackPanel ??= new StackPanel<RoundedRectangleGeometry, SkiaSharpDrawingContext>
-            {
-                Padding = new Padding(25),
-                Orientation = ContainerOrientation.Horizontal,
-                HorizontalAlignment = Align.Start,
-                VerticalAlignment = Align.Middle,
-                BackgroundPaint = _backgroundPaint
-            };
-
-            // clear the previous elements.
-
-            foreach (var child in _stackPanel.Children.ToArray())
-            {
-                _ = _stackPanel.Children.Remove(child);
-                chart.RemoveVisual(child);
-            }
-
-            var chartPoints = foundPoints.ToList();
-            foreach (var point in chartPoints)
-            {
-                var sketch = ((IChartSeries<SkiaSharpDrawingContext>)point.Context.Series).GetMiniaturesSketch();
-                var relativePanel = sketch.AsDrawnControl(s_zIndex);
-                var planMetrics = point.Context.DataSource as PlanMetrics;
-
-                var table =
-                    new TableLayout<RoundedRectangleGeometry, SkiaSharpDrawingContext>();
-
-                table.AddChild(CreateLabel("Plan ID:"), 0, 0, Align.Start);
-                table.AddChild(CreateLabel(planMetrics?.PlanID.ToString()), 0, 1, Align.End);
-                table.AddChild(CreateLabel("Total Duration:"), 1, 0, Align.Start);
-                table.AddChild(CreateLabel($"{planMetrics?.TotalDuration:N0}ms"), 1, 1, Align.End);
-                table.AddChild(CreateLabel("Total CPU:"), 2, 0, Align.Start);
-                table.AddChild(CreateLabel($"{planMetrics?.TotalCPU:N0}ms"), 2, 1, Align.End);
-                table.AddChild(CreateLabel("Avg CPU:"), 3, 0, Align.Start);
-                table.AddChild(CreateLabel($"{planMetrics?.AverageCPU:N1}ms"), 3, 1, Align.End);
-                table.AddChild(CreateLabel("Avg Duration:"), 4, 0, Align.Start);
-                table.AddChild(CreateLabel($"{planMetrics?.AverageDuration:N1}ms"), 4, 1, Align.End);
-                table.AddChild(CreateLabel("Executions:"), 5, 0, Align.Start);
-                table.AddChild(CreateLabel($"{planMetrics?.ExecutionCount:N0}"), 5, 1, Align.End);
-
-                table.AddChild(CreateLabel("Start:"), 6, 0, Align.Start);
-                table.AddChild(CreateLabel($"{planMetrics?.BucketStart}"), 6, 1, Align.End);
-                table.AddChild(CreateLabel("End:"), 7, 0, Align.Start);
-                table.AddChild(CreateLabel($"{planMetrics?.BucketEnd}"), 7, 1, Align.End);
-                table.AddChild(CreateLabel("Plan Forcing:"), 8, 0, Align.Start);
-                table.AddChild(CreateLabel($"{planMetrics?.PlanForcingType}"), 8, 1, Align.End);
-                table.AddChild(CreateLabel("Total Physical Reads:"), 9, 0, Align.Start);
-                table.AddChild(CreateLabel($"{planMetrics?.TotalPhysicalReadsKB:N0}KB"), 9, 1, Align.End);
-                table.AddChild(CreateLabel("Avg Physical Reads:"), 10, 0, Align.Start);
-                table.AddChild(CreateLabel($"{planMetrics?.AveragePhysicalReadsKB:N1}KB"), 10, 1, Align.End);
-                table.AddChild(CreateLabel("Max Memory Grant:"), 11, 0, Align.Start);
-                table.AddChild(CreateLabel($"{planMetrics?.MaxMemoryGrantKB:N0}KB"), 11, 1, Align.End);
-                table.AddChild(CreateLabel("Aborts:"), 12, 0, Align.Start);
-                table.AddChild(CreateLabel($"{planMetrics?.AbortCount:N0} ({planMetrics?.AbortPct:P1})"), 12, 1,
-                    Align.End);
-                table.AddChild(CreateLabel("Exceptions:"), 13, 0, Align.Start);
-                table.AddChild(CreateLabel($"{planMetrics?.ExceptionCount:N0} ({planMetrics?.ExceptionPct:P1})"), 13, 1,
-                    Align.End);
-
-                var sp = new StackPanel<RoundedRectangleGeometry, SkiaSharpDrawingContext>
-                {
-                    Padding = new Padding(0, 4),
-                    VerticalAlignment = Align.Middle,
-                    HorizontalAlignment = Align.Middle,
-                    Children =
-                    {
-                        relativePanel,
-                        table
-                    }
-                };
-
-                _stackPanel?.Children.Add(sp);
-            }
-
-            var size = _stackPanel!.Measure(chart);
-
-            var location = chartPoints.GetTooltipLocation(size, chart);
-
-            _stackPanel.X = location.X;
-            _stackPanel.Y = location.Y;
-
-            chart.AddVisual(_stackPanel);
-        }
-
-        private LabelVisual CreateLabel(string text)
-        {
-            return new LabelVisual
-            {
-                Text = text,
-                Paint = _fontPaint,
-                TextSize = 15,
-                Padding = new Padding(8, 0, 0, 0),
-                ClippingMode = ClipMode.None, // required on tooltips
-                VerticalAlignment = Align.Start,
-                HorizontalAlignment = Align.Start
-            };
-        }
-
-        public void Hide(Chart<SkiaSharpDrawingContext> chart)
-        {
-            if (chart is null || _stackPanel is null) return;
-            chart.RemoveVisual(_stackPanel);
         }
     }
 }

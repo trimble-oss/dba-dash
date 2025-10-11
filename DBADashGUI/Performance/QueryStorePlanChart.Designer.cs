@@ -29,6 +29,11 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultLegend skDefaultLegend1 = new LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultLegend();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(QueryStorePlanChart));
+            LiveChartsCore.Drawing.Padding padding1 = new LiveChartsCore.Drawing.Padding();
+            LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultTooltip skDefaultTooltip1 = new LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultTooltip();
+            LiveChartsCore.Drawing.Padding padding2 = new LiveChartsCore.Drawing.Padding();
             planChart = new LiveChartsCore.SkiaSharpView.WinForms.CartesianChart();
             contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(components);
             tsCopyImage = new System.Windows.Forms.ToolStripMenuItem();
@@ -36,6 +41,8 @@
             tsSave = new System.Windows.Forms.ToolStripMenuItem();
             refresh1 = new Refresh();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
+            tsCopyImage2 = new System.Windows.Forms.ToolStripButton();
+            tsCopyData2 = new System.Windows.Forms.ToolStripButton();
             tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
             setYAxisMaxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             setYAxisMinToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -49,20 +56,52 @@
             totalPhysicalReadsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             avgPhysicalReadsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            tsCopyImage2 = new System.Windows.Forms.ToolStripButton();
-            tsCopyData2 = new System.Windows.Forms.ToolStripButton();
             contextMenuStrip1.SuspendLayout();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // planChart
             // 
+            planChart.AutoUpdateEnabled = true;
+            planChart.ChartTheme = null;
             planChart.ContextMenuStrip = contextMenuStrip1;
             planChart.Dock = System.Windows.Forms.DockStyle.Fill;
+            planChart.ForceGPU = false;
+            skDefaultLegend1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
+            skDefaultLegend1.Content = null;
+            skDefaultLegend1.IsValid = true;
+            skDefaultLegend1.Opacity = 1F;
+            padding1.Bottom = 0F;
+            padding1.Left = 0F;
+            padding1.Right = 0F;
+            padding1.Top = 0F;
+            skDefaultLegend1.Padding = padding1;
+            skDefaultLegend1.RemoveOnCompleted = false;
+            skDefaultLegend1.RotateTransform = 0F;
+            skDefaultLegend1.X = 0F;
+            skDefaultLegend1.Y = 0F;
+            planChart.Legend = skDefaultLegend1;
             planChart.Location = new System.Drawing.Point(0, 27);
+            planChart.MatchAxesScreenDataRatio = false;
             planChart.Name = "planChart";
             planChart.Size = new System.Drawing.Size(1189, 530);
             planChart.TabIndex = 0;
+            skDefaultTooltip1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
+            skDefaultTooltip1.Content = null;
+            skDefaultTooltip1.IsValid = true;
+            skDefaultTooltip1.Opacity = 1F;
+            padding2.Bottom = 0F;
+            padding2.Left = 0F;
+            padding2.Right = 0F;
+            padding2.Top = 0F;
+            skDefaultTooltip1.Padding = padding2;
+            skDefaultTooltip1.RemoveOnCompleted = false;
+            skDefaultTooltip1.RotateTransform = 0F;
+            skDefaultTooltip1.Wedge = 10;
+            skDefaultTooltip1.X = 0F;
+            skDefaultTooltip1.Y = 0F;
+            planChart.Tooltip = skDefaultTooltip1;
+            planChart.UpdaterThrottler = System.TimeSpan.Parse("00:00:00.0500000");
             // 
             // contextMenuStrip1
             // 
@@ -114,6 +153,26 @@
             toolStrip1.Size = new System.Drawing.Size(1189, 27);
             toolStrip1.TabIndex = 2;
             toolStrip1.Text = "toolStrip1";
+            // 
+            // tsCopyImage2
+            // 
+            tsCopyImage2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopyImage2.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsCopyImage2.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopyImage2.Name = "tsCopyImage2";
+            tsCopyImage2.Size = new System.Drawing.Size(29, 24);
+            tsCopyImage2.Text = "Copy Image";
+            tsCopyImage2.Click += CopyImage;
+            // 
+            // tsCopyData2
+            // 
+            tsCopyData2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopyData2.Image = Properties.Resources.ASX_Copy_grey_16x;
+            tsCopyData2.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopyData2.Name = "tsCopyData2";
+            tsCopyData2.Size = new System.Drawing.Size(29, 24);
+            tsCopyData2.Text = "Copy Data";
+            tsCopyData2.Click += CopyData;
             // 
             // tsConfigure
             // 
@@ -218,32 +277,12 @@
             toolStripLabel1.Name = "toolStripLabel1";
             toolStripLabel1.Size = new System.Drawing.Size(0, 24);
             // 
-            // tsCopyImage2
-            // 
-            tsCopyImage2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsCopyImage2.Image = Properties.Resources.ASX_Copy_blue_16x;
-            tsCopyImage2.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsCopyImage2.Name = "tsCopyImage2";
-            tsCopyImage2.Size = new System.Drawing.Size(29, 24);
-            tsCopyImage2.Text = "Copy Image";
-            tsCopyImage2.Click += CopyImage;
-            // 
-            // tsCopyData2
-            // 
-            tsCopyData2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsCopyData2.Image = Properties.Resources.ASX_Copy_grey_16x;
-            tsCopyData2.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsCopyData2.Name = "tsCopyData2";
-            tsCopyData2.Size = new System.Drawing.Size(29, 24);
-            tsCopyData2.Text = "Copy Data";
-            tsCopyData2.Click += CopyData;
-            // 
             // QueryStorePlanChart
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            Controls.Add(planChart);
             Controls.Add(refresh1);
+            Controls.Add(planChart);
             Controls.Add(toolStrip1);
             Name = "QueryStorePlanChart";
             Size = new System.Drawing.Size(1189, 557);
