@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using DBADash;
+﻿using DBADash;
 using DBADash.Messaging;
 using DBADashGUI.CustomReports;
+using Microsoft.SqlServer.Management.Common;
 using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DBADashGUI
 {
@@ -49,6 +50,7 @@ namespace DBADashGUI
         private Version _productVersion;
         private string _connectionID;
         private bool? _hasInstanceMetadata;
+        private DatabaseEngineEdition? _engineEdition;
 
         public bool? HasInstanceMetadata
         {
@@ -100,6 +102,16 @@ namespace DBADashGUI
             }
         }
 
+        public DatabaseEngineEdition EngineEdition
+        {
+            get
+            {
+                if (_engineEdition != null) return _engineEdition.Value;
+                GetAdditionalInfo();
+                return _engineEdition.Value;
+            }
+        }
+
         private bool? _canMessage;
 
         private void GetAdditionalInfo()
@@ -118,6 +130,26 @@ namespace DBADashGUI
             {
                 _productVersion = new Version(0, 0);
                 Log.Debug(ex, "Error parsing product version");
+            }
+
+            try
+            { 
+                var engineEditionValue = (int)row["EngineEdition"];
+            
+                if (Enum.IsDefined(typeof(DatabaseEngineEdition), engineEditionValue))
+                {
+                    _engineEdition = (DatabaseEngineEdition)engineEditionValue;
+                }
+                else
+                {
+                    _engineEdition = DatabaseEngineEdition.Unknown;
+                    Log.Debug($"Unknown database engine edition: {engineEditionValue}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _engineEdition = DatabaseEngineEdition.Unknown;
+                Log.Debug(ex, "EngineEdition value is not a valid integer.");
             }
         }
 

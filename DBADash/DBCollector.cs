@@ -192,7 +192,7 @@ namespace DBADash
 
         public bool IsXESupported => !IsExtendedEventsNotSupportedException && DBADashConnection.IsXESupported(productVersion);
 
-        public bool IsQueryStoreSupported => IsAzureDB || (!productVersion.StartsWith("8.") && !productVersion.StartsWith("9.") && !productVersion.StartsWith("10.") && !productVersion.StartsWith("11.") && !productVersion.StartsWith("12."));
+        public bool IsQueryStoreSupported => IsAzureDB || engineEdition == DatabaseEngineEdition.SqlManagedInstance || (!productVersion.StartsWith("8.") && !productVersion.StartsWith("9.") && !productVersion.StartsWith("10.") && !productVersion.StartsWith("11.") && !productVersion.StartsWith("12."));
 
         private DBCollector(DBADashSource source, string serviceName, bool disableRetry, bool logInternalPerformanceCounters)
         {
@@ -623,7 +623,8 @@ namespace DBADash
             {
                 return false; // Required & collected by default
             }
-            else if (collectionType == CollectionType.TableSize && SQLVersion.Major <= 12 && !IsAzureDB)
+            else if (collectionType == CollectionType.TableSize && SQLVersion.Major <= 12 && !IsAzureDB
+                && engineEdition != DatabaseEngineEdition.SqlManagedInstance)
             {
                 return false; // Table size collection not supported on SQL 2014 and below
             }
