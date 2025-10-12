@@ -1071,7 +1071,9 @@ namespace DBADashGUI
             {
                 allowedTabs.Remove(tabSlowQueries);
             }
-            if (!n.Context.CanMessage || (n.Context.ProductVersion?.Major < 13 && n.Context.AzureInstanceIDs.Count == 0))
+            if (!n.Context.CanMessage
+                || ((n.Context.ProductVersion?.Major < 13 && n.Context.AzureInstanceIDs.Count == 0)
+                    && n.Context.EngineEdition != DatabaseEngineEdition.SqlManagedInstance))
             {
                 allowedTabs.Remove(tabTopQueries);
                 allowedTabs.Remove(tabQueryStoreForcedPlans);
