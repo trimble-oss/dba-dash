@@ -108,7 +108,7 @@ namespace DBADashGUI
             {
                 if (_engineEdition != null) return _engineEdition.Value;
                 GetAdditionalInfo();
-                return _engineEdition.Value;
+                return _engineEdition ?? DatabaseEngineEdition.Unknown;
             }
         }
 
@@ -149,7 +149,7 @@ namespace DBADashGUI
             catch (Exception ex)
             {
                 _engineEdition = DatabaseEngineEdition.Unknown;
-                Log.Debug(ex, "EngineEdition value is not a valid integer.");
+                Log.Debug(ex, "Error retrieving EngineEdition value.");
             }
         }
 
