@@ -905,7 +905,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             else if (collectionType == CollectionType.TableSize)
             {
                 param = new[] { new SqlParameter("SizeThresholdMB", Source.TableSizeCollectionThresholdMB ?? TableSizeCollectionThresholdMBDefault),
-                    new SqlParameter("TableSizeDatabases", Source.TableSizeDatabases ?? TableSizeDatabasesDefault),
+                    new SqlParameter("TableSizeDatabases", SqlDbType.NVarChar,-1) { Value =  Source.TableSizeDatabases ?? TableSizeDatabasesDefault},
                     new SqlParameter("MaxTables", Source.TableSizeMaxTableThreshold ?? TableSizeMaxTableThresholdDefault ),
                     new SqlParameter("MaxDatabases", Source.TableSizeMaxDatabaseThreshold ?? TableSizeMaxDatabaseThreshold)
                 };
