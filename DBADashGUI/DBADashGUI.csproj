@@ -59,6 +59,9 @@
     <Compile Update="Changes\ResourceGovernor.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="CustomReports\Pickers.cs">
+      <Generator></Generator>
+    </Compile>
     <Compile Update="DBFiles\FileThresholdConfigControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -91,6 +94,11 @@
     </Compile>
     <Compile Update="Performance\MemoryUsage.cs">
       <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Update="Properties\Settings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -258,6 +266,12 @@
     <PackageReference Include="System.Reflection.Metadata" Version="9.0.9" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageReference Include="System.Windows.Forms.DataVisualization" Version="1.0.0-prerelease.20110.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Update="Properties\Settings.settings">
