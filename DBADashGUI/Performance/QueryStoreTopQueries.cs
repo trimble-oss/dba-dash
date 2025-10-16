@@ -35,7 +35,7 @@ namespace DBADashGUI.Performance
             if (_context != CurrentContext)
             {
                 dgv.DataSource = null;
-                txtObjectName.Text = string.Empty;
+                txtObjectName.Text = _context.ObjectName;
                 txtPlan.Text = string.Empty;
                 splitContainer1.Panel2Collapsed = true;
                 dgvDrillDown.DataSource = null;
@@ -66,8 +66,8 @@ namespace DBADashGUI.Performance
 
         public async void RefreshData()
         {
-            txtObjectName.Enabled = QueryHash == null && PlanHash == null;
-            txtPlan.Enabled = QueryHash == null && PlanHash == null;
+            txtObjectName.Enabled = QueryHash == null && PlanHash == null && string.IsNullOrEmpty(CurrentContext.ObjectName);
+            txtPlan.Enabled = QueryHash == null && PlanHash == null && string.IsNullOrEmpty(CurrentContext.ObjectName);
             txtPlan.Text = PlanHash != null ? PlanHash.ToHexString(true) : txtPlan.Text;
             txtObjectName.Text = QueryHash != null ? QueryHash.ToHexString(true) : txtObjectName.Text;
 

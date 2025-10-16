@@ -1,4 +1,5 @@
-﻿using DBADashGUI.Theme;
+﻿using DBADash;
+using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,6 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using DBADash;
 
 namespace DBADashGUI.Performance
 {
@@ -122,6 +122,7 @@ namespace DBADashGUI.Performance
                                                                         new DataGridViewTextBoxColumn()  { Name = "Total Writes", Visible=false,DataPropertyName = "total_writes", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0" } },
                                                                         new DataGridViewTextBoxColumn()  { Name = "Avg Writes",Visible=false, DataPropertyName = "avg_writes", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0" } },
                                                                         new DataGridViewTextBoxColumn()  { Name = "Period Time (sec)",Visible=false, DataPropertyName = "period_time_sec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.###" } },
+                                                                        new DataGridViewLinkColumn() { Name = "Query Store", Text = "Query Store", UseColumnTextForLinkValue = true }
         };
 
         private void TsColumn_Click(object sender, EventArgs e)
@@ -210,6 +211,7 @@ namespace DBADashGUI.Performance
                 tsCompare.Font = new Font(tsCompare.Font, HasCompare ? FontStyle.Bold : FontStyle.Regular);
                 dgv.DataSource = new DataView(dt, filter, "total_duration_sec DESC", DataViewRowState.CurrentRows);
                 dgv.Columns.AddRange(Columns.ToArray());
+                dgv.Columns["Query Store"].Visible = CurrentContext.CanMessage && CurrentContext.InstanceSupportsQueryStore;
                 dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
                 dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 dgv.ApplyTheme();
@@ -416,10 +418,20 @@ namespace DBADashGUI.Performance
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
+            var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
             if (dgv.Columns[e.ColumnIndex].Name == "Name")
             {
-                var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
                 RefreshChart((long)row["ObjectID"], (string)row["ObjectName"]);
+            }
+            else if (dgv.Columns[e.ColumnIndex].Name == "Query Store")
+            {
+                var qs = new QueryStoreViewer();
+                var context = CurrentContext.DeepCopy();
+                context.ObjectName = (string)row["ObjectName"];
+                context.ObjectID = (long)row["ObjectID"];
+                context.DatabaseName = (string)row["DB"];
+                qs.Context = context;
+                qs.Show();
             }
         }
 
