@@ -27,8 +27,12 @@ namespace DBADashGUI.Performance
         private void QueryStoreViewer_Load(object sender, EventArgs e)
         {
             this.ApplyTheme();
+            if (!string.IsNullOrEmpty(Context.ObjectName))
+            {
+                this.Text += " - " + Context.ObjectName;
+            }
             queryStoreTopQueries1.SetContext(Context);
-            if (PlanHash != null || QueryHash != null)
+            if (PlanHash != null || QueryHash != null || !string.IsNullOrEmpty(Context.ObjectName))
             {
                 queryStoreTopQueries1.RefreshData();
             }

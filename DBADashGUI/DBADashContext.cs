@@ -57,7 +57,7 @@ namespace DBADashGUI
             get
             {
                 if (_hasInstanceMetadata != null) return _hasInstanceMetadata;
-                _hasInstanceMetadata = InstanceID >0 ? CommonData.HasInstanceMetadata.Contains(InstanceID) : InstanceIDs.Any(id => CommonData.HasInstanceMetadata.Contains(id));
+                _hasInstanceMetadata = InstanceID > 0 ? CommonData.HasInstanceMetadata.Contains(InstanceID) : InstanceIDs.Any(id => CommonData.HasInstanceMetadata.Contains(id));
                 return _hasInstanceMetadata;
             }
         }
@@ -133,9 +133,9 @@ namespace DBADashGUI
             }
 
             try
-            { 
+            {
                 var engineEditionValue = (int)row["EngineEdition"];
-            
+
                 if (Enum.IsDefined(typeof(DatabaseEngineEdition), engineEditionValue))
                 {
                     _engineEdition = (DatabaseEngineEdition)engineEditionValue;
@@ -152,6 +152,10 @@ namespace DBADashGUI
                 Log.Debug(ex, "Error retrieving EngineEdition value.");
             }
         }
+
+        public bool IsAzure => EngineEdition == DatabaseEngineEdition.SqlDatabase || EngineEdition == DatabaseEngineEdition.SqlManagedInstance;
+
+        public bool InstanceSupportsQueryStore => ProductVersion != null && (ProductVersion.Major >= 13 || IsAzure);
 
         public bool CanMessage
         {
