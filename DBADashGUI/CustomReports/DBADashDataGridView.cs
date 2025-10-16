@@ -10,6 +10,9 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Windows.Forms;
 using Font = System.Drawing.Font;
 
@@ -170,7 +173,8 @@ namespace DBADashGUI.CustomReports
                 GetCopyGridMenuItem(),
                 GetCopyColumnMenuItem(),
                 GetCopySelectedMenuItem(),
-                GetCopyAsMarkdownMenuItem()
+                GetCopyAsMarkdownMenuItem(),
+                GetCopyAsJsonMenuItem()
             });
             ColumnContextMenu.Items.AddRange(
                 new ToolStripItem[]
@@ -267,7 +271,8 @@ namespace DBADashGUI.CustomReports
                 copyCell,
                 copyRow,
                 GetCopySelectedMenuItem(),
-                GetCopyAsMarkdownMenuItem()
+                GetCopyAsMarkdownMenuItem(),
+                GetCopyAsJsonMenuItem()
             });
 
             CellContextMenu.Items.AddRange(
@@ -1385,6 +1390,111 @@ GO
                 }
                 sb.AppendLine();
             }
+        }
+
+        /// <summary>
+        /// Copy the DataGridView as JSON to the clipboard using System.Text.Json
+        /// </summary>
+        /// <param name="prettify">Option to format JSON with indentation for readability</param>
+        public void CopyAsJson(bool prettify = false)
+        {
+            if (Columns.Cast<DataGridViewColumn>().Count(c => c.Visible) == 0)
+            {
+                MessageBox.Show("No data to copy", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            // UnsafeRelaxedJsonEscaping results in more human readable JSON by not escaping characters like <, >, &
+            // Potentially less secure if JSON is being embedded in HTML, but we are copying to clipboard.
+            var jsonText = ConvertToJson(prettify, JavaScriptEncoder.UnsafeRelaxedJsonEscaping);
+            Clipboard.SetText(jsonText);
+        }
+
+        /// <summary>
+        /// Convert the DataGridView to JSON using System.Text.Json
+        /// </summary>
+        /// <param name="prettify">Option to format JSON with indentation for readability</param>
+        /// <param name="encoder">JavaScriptEncoder to use for encoding special characters</param>
+        /// <returns>JSON text</returns>
+        public string ConvertToJson(bool prettify, JavaScriptEncoder encoder)
+        {
+            encoder ??= JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+            var visibleColumns = Columns.Cast<DataGridViewColumn>().Where(c => c.Visible).ToList();
+            var rows = new List<Dictionary<string, object>>();
+
+            foreach (DataGridViewRow row in Rows)
+            {
+                if (row.IsNewRow || !row.Visible) continue;
+
+                var rowData = new Dictionary<string, object>();
+                var usedColumnNames = new HashSet<string>();
+                foreach (var column in visibleColumns)
+                {
+                    var baseColumnName = column.HeaderText.Replace("\n", " ");
+                    var columnName = baseColumnName;
+                    int suffix = 1;
+                    // Ensure unique column names in case of duplicates
+                    while (usedColumnNames.Contains(columnName))
+                    {
+                        columnName = $"{baseColumnName}_{suffix}";
+                        suffix++;
+                    }
+                    usedColumnNames.Add(columnName);
+
+                    var value = row.Cells[column.Index].Value;
+
+                    // Convert value to appropriate JSON-serializable type
+                    rowData[columnName] = ConvertToJsonCompatibleValue(value, column);
+                }
+                rows.Add(rowData);
+            }
+
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = prettify,
+                DefaultIgnoreCondition = JsonIgnoreCondition.Never,
+                Encoder = encoder
+            };
+
+            return JsonSerializer.Serialize(rows, options);
+        }
+
+        /// <summary>
+        /// Converts a cell value to a JSON-compatible type
+        /// </summary>
+        private static object ConvertToJsonCompatibleValue(object value, DataGridViewColumn column)
+        {
+            if (value == null || value == DBNull.Value)
+            {
+                return null;
+            }
+
+            var columnType = column.ValueType ?? value.GetType();
+
+            // Handle specific types that need conversion
+            if (columnType == typeof(byte[]))
+            {
+                // Convert byte array to Base64 string for JSON compatibility
+                return Convert.ToBase64String((byte[])value);
+            }
+
+            if (columnType == typeof(DateTime) || columnType == typeof(DateTimeOffset))
+            {
+                // DateTime and DateTimeOffset are automatically serialized to ISO 8601 format
+                return value;
+            }
+
+            // All other types (string, int, bool, decimal, etc.) are handled natively by System.Text.Json
+            return value;
+        }
+
+        private ToolStripMenuItem GetCopyAsJsonMenuItem()
+        {
+            var menuItem = new ToolStripMenuItem("As JSON", Properties.Resources.JsonFile);
+            menuItem.DropDownItems.AddRange([
+                new ToolStripMenuItem("Compact", Properties.Resources.JsonFile, (_, _) => CopyAsJson(false)),
+                new ToolStripMenuItem("Prettified", Properties.Resources.PrettyCode, (_, _) => CopyAsJson(true))
+            ]);
+            return menuItem;
         }
     }
 }
