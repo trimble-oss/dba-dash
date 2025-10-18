@@ -563,6 +563,8 @@ namespace DBADashGUI.Performance
             ShowLatestOnNextExecution = false;
             CurrentContext = _context;
             currentSnapshotDate = DateTime.MinValue;
+            SnapshotDateFrom = DateTime.MinValue;
+            SnapshotDateTo = DateTime.MinValue;
             dgv.DataSource = null;
             InstanceID = _context.InstanceID;
             IsForceDetail = false;
