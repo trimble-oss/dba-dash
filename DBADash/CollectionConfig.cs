@@ -37,6 +37,7 @@ namespace DBADash
         public const int DefaultImportCommandTimeout = 60;
         public const int DefaultPurgeDataCommandTimeout = 1200;
         public const int DefaultAddPartitionsCommandTimeout = 300;
+        public const int DefaultFailedLoginsBackfillMinutes = 1440;
 
         public bool EnableMessaging { get; set; } = true;
 
@@ -55,6 +56,8 @@ namespace DBADash
         public int? AlertProcessingFrequencySeconds { get; set; }
 
         public int? AlertProcessingStartupDelaySeconds { get; set; }
+
+        public int? FailedLoginsBackfillMinutes { get; set; }
 
         public const int DefaultAlertProcessingFrequencySeconds = 60;
 

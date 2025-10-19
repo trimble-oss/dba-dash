@@ -78,7 +78,8 @@ namespace DBADash
         TableSize,
         ServerServices,
         AvailableProcs,
-        InstanceMetadata
+        InstanceMetadata,
+        FailedLogins
     }
 
     public enum HostPlatform
@@ -117,6 +118,7 @@ namespace DBADash
         public bool IsExtendedEventsNotSupportedException;
         private readonly bool DisableRetry;
         public List<Exception> Exceptions = new();
+        public int FailedLoginsBackfillMinutes { get; set; } = CollectionConfig.DefaultFailedLoginsBackfillMinutes;
 
         public const int DefaultIdentityCollectionThreshold = 5;
 
@@ -909,6 +911,10 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                     new SqlParameter("MaxTables", Source.TableSizeMaxTableThreshold ?? TableSizeMaxTableThresholdDefault ),
                     new SqlParameter("MaxDatabases", Source.TableSizeMaxDatabaseThreshold ?? TableSizeMaxDatabaseThreshold)
                 };
+            }
+            else if (collectionType == CollectionType.FailedLogins)
+            {
+                param = new[] { new SqlParameter("FailedLoginsBackfillMinutes", FailedLoginsBackfillMinutes) };
             }
 
             if (collectionType == CollectionType.Drives)

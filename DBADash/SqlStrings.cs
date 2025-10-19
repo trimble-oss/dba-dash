@@ -78,5 +78,7 @@ namespace DBADash
         public static string MaxJobLastModified => GetSqlString("MaxJobLastModified");
         public static string AvailableProcs => GetSqlString("AvailableProcs");
         public static string AvailableCounters => GetSqlString("AvailableCounters");
+        public static string FailedLogins => GetSqlString("FailedLogins");
+
     }
 }

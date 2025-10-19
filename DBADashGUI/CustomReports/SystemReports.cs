@@ -8,6 +8,7 @@ namespace DBADashGUI.CustomReports
         {
             Add(DatabaseFinderReport.Instance);
             Add(DeletedDatabasesReport.Instance);
+            Add(FailedLoginsReport.Instance);
             Add(NewDatabasesReport.Instance);
             Add(ServerRoleMembersReport.Instance);
             Add(ServerServicesReport.Instance);
