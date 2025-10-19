@@ -58,6 +58,7 @@ namespace DBADashGUI.CustomReports
                         Columns = new Dictionary<string, ColumnMetadata>
                         {
                             { "InstanceID", new ColumnMetadata { Visible = false } },
+                            { "DatabaseID", new ColumnMetadata { Visible = false } },
                             { "InstanceDisplayName", new ColumnMetadata {
                                 Alias = "Instance",
                                 Link = new NavigateTreeLinkColumnInfo { InstanceColumn = "InstanceID", Tab = Main.Tabs.Performance },

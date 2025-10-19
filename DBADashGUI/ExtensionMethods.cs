@@ -153,10 +153,6 @@ namespace DBADashGUI
                         col.DisplayIndex = savedCol.Value.DisplayIndex;
                     }
                 }
-                else
-                {
-                    col.Visible = false;
-                }
             }
         }
 

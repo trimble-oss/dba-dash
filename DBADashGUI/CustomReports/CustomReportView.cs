@@ -95,15 +95,13 @@ namespace DBADashGUI.CustomReports
             {
                 var customReportResult = Report.CustomReportResults[dgv.ResultSetID];
                 var columnName = dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName;
-                customReportResult.CellHighlightingRules.TryGetValue(
-                    dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName,
-                    out var ruleSet);
+                var colInfo = GetColumnMetadata(customReportResult, columnName);
 
                 var frm = new CellHighlightingRulesConfig()
                 {
                     ColumnList = dgv.Columns,
                     CellHighlightingRules = new KeyValuePair<string, CellHighlightingRuleSet>(columnName,
-                        ruleSet.DeepCopy() ?? new CellHighlightingRuleSet() { TargetColumn = columnName }),
+                          colInfo.Highlighting.DeepCopy() ?? new CellHighlightingRuleSet() { TargetColumn = columnName }),
                     CellValue = dgv.ClickedRowIndex >= 0
                         ? dgv.Rows[dgv.ClickedRowIndex].Cells[dgv.ClickedColumnIndex].Value
                         : null,
@@ -114,12 +112,8 @@ namespace DBADashGUI.CustomReports
 
                 frm.ShowDialog();
                 if (frm.DialogResult != DialogResult.OK) return;
-                Report.CustomReportResults[dgv.ResultSetID].CellHighlightingRules.Remove(columnName);
-                if (frm.CellHighlightingRules.Value is { HasRules: true })
-                {
-                    Report.CustomReportResults[dgv.ResultSetID].CellHighlightingRules
-                        .Add(columnName, frm.CellHighlightingRules.Value);
-                }
+
+                colInfo.Highlighting = frm.CellHighlightingRules.Value;
 
                 Report.Update();
                 ShowTable();
@@ -136,29 +130,15 @@ namespace DBADashGUI.CustomReports
             try
             {
                 var customReportResult = Report.CustomReportResults[tableIndex];
-                var col = dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName;
-                var linkColumnInfo = customReportResult.LinkColumns?.TryGetValue(col, out var column) is true
-                    ? column
-                    : null;
+                var col = dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName;     
+                var colInfo = GetColumnMetadata(customReportResult, col);
                 var colList = dgv.Columns.Cast<DataGridViewColumn>().Select(c => c.DataPropertyName).ToList();
                 var frm = new LinkColumnTypeSelector()
-                { LinkColumnInfo = linkColumnInfo, ColumnList = colList, Context = context, LinkColumn = col };
+                { LinkColumnInfo = colInfo.Link, ColumnList = colList, Context = context, LinkColumn = col };
                 frm.ShowDialog();
                 if (frm.DialogResult != DialogResult.OK) return;
-                customReportResult.LinkColumns ??= new();
-                if (frm.LinkColumnInfo == null)
-                {
-                    customReportResult.LinkColumns.Remove(col);
-                }
-                else if (customReportResult.LinkColumns.ContainsKey(col))
-                {
-                    customReportResult.LinkColumns[col] = frm.LinkColumnInfo;
-                }
-                else
-                {
-                    customReportResult.LinkColumns.Add(col, frm.LinkColumnInfo);
-                }
 
+                colInfo.Link = frm.LinkColumnInfo;
                 previousSchema = null; // Force grids to be re-generated
                 dgv.Columns.Clear();
                 Report.Update();
@@ -173,18 +153,25 @@ namespace DBADashGUI.CustomReports
         private void SetFormatStringMenuItem_Click(DBADashDataGridView dgv)
         {
             var formatString = dgv.Columns[dgv.ClickedColumnIndex].DefaultCellStyle.Format;
-            var key = dgv.Columns[dgv.ClickedColumnIndex].Name;
+            var colName = dgv.Columns[dgv.ClickedColumnIndex].Name;
+            var result = Report.CustomReportResults[dgv.ResultSetID];
             if (CommonShared.ShowInputDialog(ref formatString, "Enter format string (e.g. N1, P1, yyyy-MM-dd)") !=
                 DialogResult.OK) return;
             dgv.Columns[dgv.ClickedColumnIndex].DefaultCellStyle.Format = formatString;
-            Report.CustomReportResults[dgv.ResultSetID].CellFormatString.Remove(key);
 
-            if (!string.IsNullOrEmpty(formatString))
-            {
-                Report.CustomReportResults[dgv.ResultSetID].CellFormatString.Add(key, formatString);
-            }
+            var colInfo = GetColumnMetadata(result, colName);
+            colInfo.FormatString = formatString;
 
             Report.Update();
+        }
+
+        private ColumnMetadata GetColumnMetadata(CustomReportResult result, string colName)
+        {
+            var colInfo = result.Columns?.TryGetValue(colName, out var column) is true
+                ? column
+                : new ColumnMetadata();
+            result.Columns.TryAdd(colName, colInfo);
+            return colInfo;
         }
 
         private void ConvertLocalMenuItem_Click(object sender, DBADashDataGridView dgv)
@@ -192,18 +179,19 @@ namespace DBADashGUI.CustomReports
             var convertLocalMenuItem = (ToolStripMenuItem)sender;
             if (dgv.ClickedColumnIndex < 0) return;
             var name = dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName;
+            var colInfo = GetColumnMetadata(Report.CustomReportResults[dgv.ResultSetID], name);
             switch (convertLocalMenuItem.Checked)
             {
                 case true when Report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Contains(name):
                     if (MessageBox.Show("Convert column from UTC to local time?", "Convert?", MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question) == DialogResult.No) return;
-                    Report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Remove(name);
+                    colInfo.ConvertToLocalTimeZone = true;
                     break;
 
                 case false when !Report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Contains(name):
                     if (MessageBox.Show("Remove UTC to local time zone conversion for this column?", "Convert?",
                             MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No) return;
-                    Report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Add(name);
+                    colInfo.ConvertToLocalTimeZone = false;
                     break;
             }
 
@@ -256,12 +244,7 @@ namespace DBADashGUI.CustomReports
             dgv.Columns[dgv.ClickedColumnIndex].ToolTipText = description;
             try
             {
-                if (!Report.CustomReportResults[dgv.ResultSetID].Columns.TryGetValue(columnName, out var colInfo))
-                {
-                    colInfo = new ColumnMetadata();
-                    Report.CustomReportResults[dgv.ResultSetID].Columns.Add(columnName, colInfo);
-                }
-                colInfo ??= new ColumnMetadata();
+                var colInfo = GetColumnMetadata(Report.CustomReportResults[dgv.ResultSetID], columnName);
                 colInfo.Description = description;
                 Report.Update();
             }

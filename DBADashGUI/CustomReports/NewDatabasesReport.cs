@@ -63,7 +63,7 @@ namespace DBADashGUI.CustomReports
                         ResultName = "New Databases",
                         Columns = new Dictionary<string, ColumnMetadata>
                         {
-                            { "InstanceID", new ColumnMetadata() },
+                            { "InstanceID", new ColumnMetadata() { Visible=false } },
                             { "InstanceGroupName", new ColumnMetadata {
                                 Alias = "Instance",
                                 DisplayIndex = 1,
