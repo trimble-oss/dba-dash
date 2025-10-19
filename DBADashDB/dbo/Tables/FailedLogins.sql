@@ -1,0 +1,9 @@
+CREATE TABLE dbo.FailedLogins (
+	InstanceID INT NOT NULL,
+	LogDate DATETIME2 NOT NULL,
+	Uniqueifier SMALLINT NOT NULL,
+	Text NVARCHAR(MAX) NULL,
+	CONSTRAINT PK_FailedLogins PRIMARY KEY CLUSTERED(InstanceID,LogDate,Uniqueifier)
+) ON PS_FailedLogins(LogDate)
+WITH(DATA_COMPRESSION=PAGE);
+GO

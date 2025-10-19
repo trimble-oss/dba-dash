@@ -135,6 +135,7 @@ namespace DBADashService
                     var collector = await DBCollector.CreateAsync(cfg, config.ServiceName);
                     collector.Job_instance_id = dataMap.GetInt("Job_instance_id");
                     collector.IsExtendedEventsNotSupportedException = dataMapExtendedEventsNotSupported;
+                    collector.FailedLoginsBackfillMinutes = config.FailedLoginsBackfillMinutes ?? CollectionConfig.DefaultFailedLoginsBackfillMinutes;
                     if (SchedulerServiceConfig.Config.IdentityCollectionThreshold.HasValue)
                     {
                         collector.IdentityCollectionThreshold =

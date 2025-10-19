@@ -1,0 +1,4 @@
+CREATE TYPE dbo.FailedLogins AS TABLE (
+	LogDate DATETIME2 NULL,
+	Text NVARCHAR(MAX) NULL
+);

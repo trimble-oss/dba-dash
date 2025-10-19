@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Serilog;
+using SerilogTimings;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Serilog;
-using SerilogTimings;
 
 namespace DBADash.Messaging
 {
@@ -55,6 +55,7 @@ namespace DBADash.Messaging
             var (standardCollections, customCollections) = ParseCollectionTypes(src, cfg);
 
             var collector = await DBCollector.CreateAsync(src, cfg.ServiceName, true);
+            collector.FailedLoginsBackfillMinutes = cfg.FailedLoginsBackfillMinutes ?? CollectionConfig.DefaultFailedLoginsBackfillMinutes;
             await collector.CollectAsync(standardCollections.ToArray());
             await collector.CollectAsync(customCollections);
 

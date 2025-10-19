@@ -842,6 +842,11 @@
     <Build Include="dbo\Stored Procedures\DeletedDatabases_Get.sql" />
     <Build Include="dbo\Stored Procedures\NewDatabases_Get.sql" />
     <Build Include="Database.sql" />
+    <Build Include="Storage\PF_FailedLogins.sql" />
+    <Build Include="dbo\User Defined Types\FailedLogins.sql" />
+    <Build Include="dbo\Tables\FailedLogins.sql" />
+    <Build Include="dbo\Stored Procedures\FailedLogins_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\FailedLogins_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
@@ -851,6 +856,7 @@
     <None Include="..\.editorconfig">
       <Link>.editorconfig</Link>
     </None>
+    <Build Include="Storage\PS_FailedLogins.sql" />
   </ItemGroup>
   <ItemGroup>
     <SqlCmdVariable Include="VersionNumber">
