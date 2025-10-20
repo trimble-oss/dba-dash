@@ -6,7 +6,7 @@ namespace DBADashSharedGUI
     {
         public static System.Windows.Media.Color ToMediaColor(this Color color) => System.Windows.Media.Color.FromArgb(color.A, color.R, color.G, color.B);
 
-        private const float DefaultMaxColumnWidthPercent = 0.15f;
+        private const float DefaultColumnWidthCapRatio = 0.15f;
 
         public static Color AdjustBasedOnLuminance(this Color color)
         {
@@ -54,12 +54,53 @@ namespace DBADashSharedGUI
             return $"{dataTypeName}{typeDetails}{nullability}";
         }
 
-        public static void AutoResizeColumnsWithMaxColumnWidth(this DataGridView dgv, DataGridViewAutoSizeColumnsMode mode = DataGridViewAutoSizeColumnsMode.DisplayedCells, float maxPercentWidth = DefaultMaxColumnWidthPercent)
+
+        /// <summary>
+        /// Performs an auto-resize of DataGridView columns, but ensures that no column exceeds columnWidthCapRatio, unless there is sufficient space to accommodate all columns at their auto-sized widths.
+        /// </summary>
+        /// <param name="dgv">Grid</param>
+        /// <param name="mode">Auto size mode used to get ideal sizing which is adjusted to ensure columns are not too large</param>
+        /// <param name="columnWidthCapRatio">Defines the initial cap on column widths. e.g. 0.15f caps columns at 15% of the grid width, but allows them to grow larger if sufficient space is available</param>
+        public static void AutoResizeColumnsWithMaxColumnWidth(this DataGridView dgv, DataGridViewAutoSizeColumnsMode mode = DataGridViewAutoSizeColumnsMode.DisplayedCells, float? columnWidthCapRatio = null)
         {
+            var visibleColumns = dgv.Columns.Cast<DataGridViewColumn>().Where(c => c.Visible).ToList();
+            if (visibleColumns.Count == 0) return;
+
+            var colCount = visibleColumns.Count;
+            var capRatio = Math.Max(columnWidthCapRatio ?? DefaultColumnWidthCapRatio, 1f / colCount);
+
+            // First pass: get preferred widths
             dgv.AutoResizeColumns(mode);
-            foreach (var col in dgv.Columns.Cast<DataGridViewColumn>().Where(c => c.Width > maxPercentWidth * dgv.Width))
+
+            var availableWidth = dgv.ClientSize.Width;
+            var capWidth = Convert.ToInt32(capRatio * availableWidth);
+            var totalUsedWidth = 0;
+            var columnWidths = new Dictionary<DataGridViewColumn, int>();
+
+            // Store auto-sized widths and cap if needed
+            foreach (var col in visibleColumns)
             {
-                col.Width = Convert.ToInt32(maxPercentWidth * dgv.Width);
+                var autoWidth = col.Width;
+                columnWidths[col] = autoWidth;
+                col.Width = Math.Min(autoWidth, capWidth);
+                totalUsedWidth += col.Width;
+            }
+
+            // Redistribute unused space only to columns that were capped and can still grow
+            var unusedSpace = availableWidth - totalUsedWidth;
+            if (unusedSpace > 0)
+            {
+                var cappedColumns = visibleColumns.Where(col => columnWidths[col] > capWidth).ToList();
+                if (cappedColumns.Count > 0)
+                {
+                    var extraPerColumn = unusedSpace / cappedColumns.Count;
+                    foreach (var col in cappedColumns)
+                    {
+                        // Only grow up to the original auto-sized width
+                        var newWidth = Math.Min(col.Width + extraPerColumn, columnWidths[col]);
+                        col.Width = newWidth;
+                    }
+                }
             }
         }
 
