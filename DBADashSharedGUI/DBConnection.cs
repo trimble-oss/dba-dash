@@ -147,12 +147,12 @@ namespace DBADash
             }
         }
 
-        public string ConnectionStringWithoutInitialCatalog
+        public string ConnectionStringToMaster
         {
             get
             {
                 var builder = new SqlConnectionStringBuilder(ConnectionString);
-                builder.Remove("Initial Catalog");
+                builder.InitialCatalog = "master";
                 return builder.ConnectionString;
             }
         }
@@ -162,42 +162,78 @@ namespace DBADash
             DialogResult = DialogResult.Cancel;
         }
 
-        public static void TestConnection(string connectionString)
+        public static async Task TestConnectionAsync(string connectionString, CancellationToken ct = default)
         {
             using var cn = new SqlConnection(connectionString);
-            cn.Open();
+            await cn.OpenAsync(ct);
         }
 
-        private void BttnConnect_Click(object sender, EventArgs e)
+        private async void BttnConnect_Click(object sender, EventArgs e)
         {
-            if (InitialCatalogRequired && string.IsNullOrEmpty(cboDatabase.Text))
+            if (InitialCatalogRequired && string.IsNullOrWhiteSpace(cboDatabase.Text))
             {
                 MessageBox.Show("Please select a database", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            Cursor = Cursors.WaitCursor;
+
             try
             {
-                Cursor = Cursors.WaitCursor;
-                TestConnection(ValidateInitialCatalog ? ConnectionString : ConnectionStringWithoutInitialCatalog); // Try without initial catalog as DB might not have been created yet
+                var dbTask = TestConnectionAsync(ConnectionString, cts.Token);
+                var masterTask = ValidateInitialCatalog
+                    ? Task.CompletedTask
+                    : TestConnectionAsync(ConnectionStringToMaster, cts.Token);
+
+                if (ValidateInitialCatalog)
+                {
+                    await dbTask; // throws if invalid
+                    DialogResult = DialogResult.OK;
+                    return;
+                }
+
+                var first = await Task.WhenAny(dbTask, masterTask);
+
+                if (first.IsCompletedSuccessfully)
+                {
+                    // Success on first completed (either DB or master)
+                    DialogResult = DialogResult.OK;
+                    cts.Cancel(); // cancel other pending attempt if still running
+                    return;
+                }
+
+                // First faulted: check the other
+                var other = first == dbTask ? masterTask : dbTask;
+                try
+                {
+                    await other; // succeeds -> OK
+                    DialogResult = DialogResult.OK;
+                    return;
+                }
+                catch
+                {
+                    // Both failed: await DB task (if not first) to surface its exception (primary target)
+                    if (first != dbTask)
+                    {
+                        await dbTask; // throws original DB exception
+                    }
+                    throw; // rethrow (master was first and both failed)
+                }
             }
             catch (SqlException ex) when (ex.Number == -2146893019)
             {
-                Cursor = Cursors.Default;
                 CommonShared.ShowExceptionDialog(ex,
                     "Deploy a trusted certificate or use the 'Trust Server Certificate' connection option.");
-                return;
             }
             catch (Exception ex)
             {
-                Cursor = Cursors.Default;
                 CommonShared.ShowExceptionDialog(ex, "Error connecting to data source.");
-                return;
             }
             finally
             {
                 Cursor = Cursors.Default;
             }
-            DialogResult = DialogResult.OK;
         }
 
         private void DBConnection_Load(object sender, EventArgs e)
@@ -208,31 +244,55 @@ namespace DBADash
             }
         }
 
-        private void CboDatabase_Dropdown(object sender, EventArgs e)
+        private async void CboDatabase_Dropdown(object sender, EventArgs e)
         {
             try
             {
+                cboDatabase.BeginUpdate();
                 cboDatabase.Items.Clear();
-                var DBs = GetDatabases(ConnectionStringWithoutInitialCatalog);
-                foreach (var db in DBs)
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                // Fire task to get databases from master & user specified DBs concurrently
+                var masterTask = GetDatabasesAsync(ConnectionStringToMaster, cts.Token);
+                var dbTask = GetDatabasesAsync(ConnectionString, cts.Token);
+
+                // Prefer whichever completes successfully first
+                var firstCompleted = await Task.WhenAny(masterTask, dbTask);
+                List<string> dbs;
+                if (!firstCompleted.IsFaulted)
                 {
-                    cboDatabase.Items.Add(db);
+                    cts.Cancel(); // Cancel the other task if still running
+                    dbs = firstCompleted.Result; // Already completed
+                }
+                else
+                {
+                    // First failed; try the other. If that also fails, its await will throw and be caught.
+                    var other = firstCompleted == masterTask ? dbTask : masterTask;
+                    dbs = await other;
+                }
+
+                if (dbs.Count > 0)
+                {
+                    cboDatabase.Items.AddRange([.. dbs]);
                 }
             }
             catch (Exception ex)
             {
-                CommonShared.ShowExceptionDialog(ex);
+                CommonShared.ShowExceptionDialog(ex, "Unable to list databases");
+            }
+            finally
+            {
+                cboDatabase.EndUpdate();
             }
         }
 
-        public static List<string> GetDatabases(string ConnectionString)
+        public static async Task<List<string>> GetDatabasesAsync(string ConnectionString, CancellationToken ct)
         {
             using var cn = new SqlConnection(ConnectionString);
             using SqlCommand cmd = new("SELECT name FROM sys.databases WHERE state=0", cn);
-            cn.Open();
+            await cn.OpenAsync(ct);
             var DBs = new List<string>();
-            using var rdr = cmd.ExecuteReader();
-            while (rdr.Read())
+            using var rdr = await cmd.ExecuteReaderAsync(ct);
+            while (await rdr.ReadAsync(ct))
             {
                 DBs.Add((string)rdr[0]);
             }

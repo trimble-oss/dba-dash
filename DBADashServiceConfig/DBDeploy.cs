@@ -103,18 +103,18 @@ AND database_id > 4 ";
             set => txtDeployScript.Text = value;
         }
 
-        private void DBDeploy_Load(object sender, EventArgs e)
+        private async void DBDeploy_Load(object sender, EventArgs e)
         {
             try
             {
-                CollectionConfig.ValidateDestination(new DBADashConnection(ConnectionString));
+                await CollectionConfig.ValidateDestinationAsync(new DBADashConnection(ConnectionString));
             }
             catch (Exception ex)
             {
                 CommonShared.ShowExceptionDialog(ex);
                 DialogResult = DialogResult.Abort;
             }
-            DbChanged();
+            await DbChangedAsync();
         }
 
         private void BttnGenerate_Click(object sender, EventArgs e)
@@ -283,16 +283,16 @@ AND database_id > 4 ";
             bttnCopy.Enabled = txtDeployScript.Text.Length > 0;
         }
 
-        private void CboDatabase_SelectedIndexChanged(object sender, EventArgs e)
+        private async void CboDatabase_SelectedIndexChanged(object sender, EventArgs e)
         {
-            DbChanged();
+            await DbChangedAsync();
         }
 
-        private void DbChanged()
+        private async Task DbChangedAsync()
         {
             try
             {
-                dbVersionStatus = DBValidations.VersionStatus(ConnectionString);
+                dbVersionStatus = await DBValidations.VersionStatusAsync(ConnectionString);
                 bttnGenerate.Enabled = true;
                 bttnDeploy.Enabled = true;
                 if (dbVersionStatus.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB)
@@ -328,9 +328,9 @@ AND database_id > 4 ";
             }
         }
 
-        private void CboDatabase_Validated(object sender, EventArgs e)
+        private async void CboDatabase_Validated(object sender, EventArgs e)
         {
-            DbChanged();
+            await DbChangedAsync();
         }
 
         private void BttnDeploy_Click(object sender, EventArgs e)

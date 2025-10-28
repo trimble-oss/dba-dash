@@ -104,6 +104,24 @@ namespace DBADashSharedGUI
             }
         }
 
+        public static Task InvokeAsync(this Control control, Func<Task> func)
+        {
+            var tcs = new TaskCompletionSource<object?>();
+            control.BeginInvoke(new Action(async () =>
+            {
+                try
+                {
+                    await func();
+                    tcs.SetResult(null);
+                }
+                catch (Exception ex)
+                {
+                    tcs.SetException(ex);
+                }
+            }));
+            return tcs.Task;
+        }
+
         public static string ToHexString(this Color c) => $"#{c.R:X2}{c.G:X2}{c.B:X2}";
     }
 }

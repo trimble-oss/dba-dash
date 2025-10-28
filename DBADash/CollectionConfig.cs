@@ -227,12 +227,12 @@ namespace DBADash
 
         public int? MessageThreads { get; set; }
 
-        public void ValidateDestination()
+        public async Task ValidateDestinationAsync()
         {
-            ValidateDestination(DestinationConnection);
+            await ValidateDestinationAsync(DestinationConnection);
         }
 
-        public static void ValidateDestination(DBADashConnection destination)
+        public static async Task ValidateDestinationAsync(DBADashConnection destination)
         {
             if (destination.Type == ConnectionType.Invalid)
             {
@@ -245,7 +245,7 @@ namespace DBADash
                     throw new Exception("Provide a name for the DBADash repository database through the Initial Catalog property of the connection string");
                 }
                 // VersionStatus check will throw an error if there is an issue connecting to the DB or the DB isn't valid.
-                var status = DBValidations.VersionStatus(destination.ConnectionString);
+                var status = await DBValidations.VersionStatusAsync(destination.ConnectionString);
                 if (status.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB)
                 {
                     ValidateDestinationVersion(destination);

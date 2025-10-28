@@ -97,7 +97,7 @@ namespace DBADashService
                     var count = 0;
                     do
                     {
-                        status = DBValidations.VersionStatus(d.ConnectionString);
+                        status = await DBValidations.VersionStatusAsync(d.ConnectionString);
                         if (!status.DeployInProgress) break; // Exit if deployment is not in progress
                         if (DateTime.UtcNow >=
                             endTime) // We've waited long enough.  It's possible that a previous upgrade was interrupted.
@@ -148,7 +148,7 @@ namespace DBADashService
 
                     case DBValidations.DBVersionStatusEnum.CreateDB when config.AutoUpdateDatabase:
                         Log.Information("Validating destination");
-                        CollectionConfig.ValidateDestination(d);
+                        await CollectionConfig.ValidateDestinationAsync(d);
                         Log.Information("Create repository database");
                         await DBValidations.UpgradeDBAsync(d.ConnectionString);
                         Log.Information("Repository database created");
@@ -159,10 +159,10 @@ namespace DBADashService
                     case DBValidations.DBVersionStatusEnum.UpgradeRequired when config.AutoUpdateDatabase:
                         {
                             Log.Information("Validating destination");
-                            CollectionConfig.ValidateDestination(d);
+                            await CollectionConfig.ValidateDestinationAsync(d);
                             Log.Information("Upgrade DB from {oldVersion} to {newVersion}", status.DBVersion.ToString(), status.DACVersion.ToString());
                             await DBValidations.UpgradeDBAsync(d.ConnectionString);
-                            status = DBValidations.VersionStatus(d.ConnectionString);
+                            status = await DBValidations.VersionStatusAsync(d.ConnectionString);
                             if (status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
                             {
                                 Log.Information("Repository DB upgrade completed");

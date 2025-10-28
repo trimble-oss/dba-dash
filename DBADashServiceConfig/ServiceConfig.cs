@@ -313,13 +313,13 @@ namespace DBADashServiceConfig
 
         private DBValidations.DBVersionStatus RepoDbVersionStatus;
 
-        private void ValidateDestination()
+        private async Task ValidateDestinationAsync()
         {
             errorProvider1.SetError(txtDestination, null);
             lblServerNameWarning.Visible = false;
             InvokeSetStatus(lblVersionInfo, "Validating...", DashColors.TrimbleBlue, FontStyle.Regular);
-            _ = Task.Run(() =>
-            {
+            _ = Task.Run(async ()=>{
+
                 DBADashConnection dest = new(txtDestination.Text);
                 if (!string.IsNullOrEmpty(txtDestination.Text))
                 {
@@ -330,13 +330,13 @@ namespace DBADashServiceConfig
                             throw new ArgumentException("Invalid connection string, directory or S3 path");
                         }
 
-                        CollectionConfig.ValidateDestination(dest);
+                        await CollectionConfig.ValidateDestinationAsync(dest);
                     }
                     catch (Exception ex)
                     {
                         this.Invoke(() => { errorProvider1.SetError(txtDestination, ex.Message); });
                     }
-                    UpdateDBVersionStatus();
+                    await UpdateDBVersionStatusAsync();
                 }
             });
         }
@@ -373,7 +373,7 @@ namespace DBADashServiceConfig
             control.Enabled = isEnabled;
         }
 
-        private void UpdateDBVersionStatus()
+        private async Task UpdateDBVersionStatusAsync()
         {
             var dest = collectionConfig.DestinationConnection;
 
@@ -398,13 +398,20 @@ namespace DBADashServiceConfig
 
             try
             {
-                if (string.IsNullOrEmpty(dest.MasterConnection().ConnectionInfo.ServerName))
+                try
                 {
-                    InvokeSetStatus(lblServerNameWarning, lblServerNameWarning.Text, lblServerNameWarning.ForeColor, lblServerNameWarning.Font.Style);
-                    InvokeSetVisible(lblServerNameWarning, true);
+                    if (string.IsNullOrEmpty(dest.MasterConnection().ConnectionInfo.ServerName))
+                    {
+                        InvokeSetStatus(lblServerNameWarning, lblServerNameWarning.Text, lblServerNameWarning.ForeColor, lblServerNameWarning.Font.Style);
+                        InvokeSetVisible(lblServerNameWarning, true);
+                    }
+                }
+                catch
+                {
+                    // Ignore error.  We might not be able to connect to master database
                 }
 
-                RepoDbVersionStatus = DBValidations.VersionStatus(dest.ConnectionString);
+                RepoDbVersionStatus = await DBValidations.VersionStatusAsync(dest.ConnectionString);
 
                 switch (RepoDbVersionStatus?.VersionStatus)
                 {
@@ -450,11 +457,11 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void BttnSave_Click(object sender, EventArgs e)
+        private async void BttnSave_Click(object sender, EventArgs e)
         {
             try
             {
-                collectionConfig.ValidateDestination();
+                await collectionConfig.ValidateDestinationAsync();
             }
             catch (Exception ex)
             {
@@ -710,7 +717,7 @@ namespace DBADashServiceConfig
 
             SetConnectionCount();
             SubscribeActivityEvents(this);
-            ValidateDestination();
+            await ValidateDestinationAsync();
             RefreshEncryption();
             dgvConnections.ApplyTheme();
             _ = Task.Run(AutoRefreshServiceStatus);
@@ -1010,13 +1017,13 @@ namespace DBADashServiceConfig
                 var isDestTabSelected = tab1.Invoke(new Func<bool>(() => tab1.SelectedTab == tabDest));
                 if (DateTime.Now.Subtract(lastUserActivity).TotalMinutes < 5 && isDestTabSelected)
                 {
-                    RefreshServiceStatus();
+                    await RefreshServiceStatusAsync();
                     if (RepoDbVersionStatus?.VersionStatus is DBValidations.DBVersionStatusEnum.CreateDB
                         or DBValidations.DBVersionStatusEnum.UpgradeRequired)
                     {
                         try
                         {
-                            UpdateDBVersionStatus();
+                            await UpdateDBVersionStatusAsync();
                         }
                         catch (Exception ex)
                         {
@@ -1031,7 +1038,7 @@ namespace DBADashServiceConfig
             // ReSharper disable once FunctionNeverReturns
         }
 
-        private void RefreshServiceStatus()
+        private async Task RefreshServiceStatusAsync()
         {
             try
             {
@@ -1078,7 +1085,7 @@ namespace DBADashServiceConfig
                         lastStatus = status.ToString();
                     });
                 }
-                ProcessFatalError();
+                await ProcessFatalErrorAsync();
             }
             catch (Exception ex)
             {
@@ -1149,7 +1156,7 @@ namespace DBADashServiceConfig
             return SaveChanges();
         }
 
-        private void StartService()
+        private async Task StartServiceAsync()
         {
             PromptSaveChanges();
             try
@@ -1167,18 +1174,18 @@ namespace DBADashServiceConfig
             {
                 if (File.Exists(FatalErrorFilePath))
                 {
-                    ProcessFatalError();
+                    await ProcessFatalErrorAsync();
                 }
                 else
                 {
                     PromptError(ex);
                 }
             }
-            RefreshServiceStatus();
-            ValidateDestination();
+            await RefreshServiceStatusAsync();
+            await ValidateDestinationAsync();
         }
 
-        private void ProcessFatalError()
+        private async Task ProcessFatalErrorAsync()
         {
             if (!File.Exists(FatalErrorFilePath)) return;
 
@@ -1186,7 +1193,7 @@ namespace DBADashServiceConfig
             if (lastFatalErrorPrompt >= lastWrite) return;
             if (this.InvokeRequired)
             {
-                Invoke(ProcessFatalError);
+                await this.InvokeAsync(ProcessFatalErrorAsync);
                 return;
             }
             lastFatalErrorPrompt = lastWrite;
@@ -1205,7 +1212,7 @@ namespace DBADashServiceConfig
                     CommonShared.ShowExceptionDialog(ex, "Error creating temporary key");
                     return;
                 }
-                StartService();
+                await StartServiceAsync();
             }
             else
             {
@@ -1232,12 +1239,12 @@ namespace DBADashServiceConfig
             CommonShared.ShowExceptionDialog(ex, message);
         }
 
-        private void BttnStop_Click(object sender, EventArgs e)
+        private async void BttnStop_Click(object sender, EventArgs e)
         {
-            StopService();
+            await StopServiceAsync();
         }
 
-        private void StopService()
+        private async Task StopServiceAsync()
         {
             try
             {
@@ -1253,21 +1260,21 @@ namespace DBADashServiceConfig
             {
                 PromptError(ex);
             }
-            RefreshServiceStatus();
+            await RefreshServiceStatusAsync();
         }
 
-        private void BttnRefresh_Click(object sender, EventArgs e)
+        private async void BttnRefresh_Click(object sender, EventArgs e)
         {
-            RefreshServiceStatus();
-            ValidateDestination();
+            await RefreshServiceStatusAsync();
+            await ValidateDestinationAsync();
         }
 
-        private void BttnUninstall_Click(object sender, EventArgs e)
+        private async void BttnUninstall_Click(object sender, EventArgs e)
         {
-            UninstallService();
+            await UninstallServiceAsync();
         }
 
-        private void UninstallService()
+        private async Task UninstallServiceAsync()
         {
             if (MessageBox.Show("Are you sure you want to remove the DBA Dash Windows service?", "Uninstall",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.Yes)
@@ -1285,7 +1292,7 @@ namespace DBADashServiceConfig
                 }
 
                 System.Threading.Thread.Sleep(500);
-                RefreshServiceStatus();
+                await RefreshServiceStatusAsync();
             }
         }
 
@@ -1294,12 +1301,12 @@ namespace DBADashServiceConfig
             Close();
         }
 
-        private void TxtDestination_Validated(object sender, EventArgs e)
+        private async void TxtDestination_Validated(object sender, EventArgs e)
         {
-            DestinationChanged();
+            await DestinationChangedAsync();
         }
 
-        private void DestinationChanged()
+        private async Task DestinationChangedAsync()
         {
             if (collectionConfig.Destination != txtDestination.Text)
             {
@@ -1314,7 +1321,7 @@ namespace DBADashServiceConfig
                 }
 
                 SetJson();
-                ValidateDestination();
+                await ValidateDestinationAsync();
                 RefreshEncryption();
             }
         }
@@ -1375,7 +1382,7 @@ namespace DBADashServiceConfig
             SetAvailableOptionsForSource();
         }
 
-        private void BttnDeployDatabase_Click(object sender, EventArgs e)
+        private async void BttnDeployDatabase_Click(object sender, EventArgs e)
         {
             var frm = new DBDeploy();
             var cn = new DBADashConnection(txtDestination.Text);
@@ -1385,7 +1392,7 @@ namespace DBADashServiceConfig
             }
             else
             {
-                if (SetDestination())
+                if (await SetDestinationAsync())
                 {
                     cn = new DBADashConnection(txtDestination.Text);
                     frm.ConnectionString = cn.ConnectionString;
@@ -1407,14 +1414,14 @@ namespace DBADashServiceConfig
                         InitialCatalog = frm.DatabaseName
                     };
                     txtDestination.Text = builder.ConnectionString;
-                    DestinationChanged();
+                    await DestinationChangedAsync();
                 }
             }
 
-            ValidateDestination();
+            await ValidateDestinationAsync();
         }
 
-        private bool SetDestination()
+        private async Task<bool> SetDestinationAsync()
         {
             var frm = new DBConnection();
             var cn = new DBADashConnection(txtDestination.Text);
@@ -1447,16 +1454,16 @@ namespace DBADashServiceConfig
                 cn = new DBADashConnection(builder.ConnectionString);
 
                 txtDestination.Text = cn.EncryptedConnectionString;
-                DestinationChanged();
+                await DestinationChangedAsync();
                 return true;
             }
 
             return false;
         }
 
-        private void BttnConnect_Click(object sender, EventArgs e)
+        private async void BttnConnect_Click(object sender, EventArgs e)
         {
-            SetDestination();
+            await SetDestinationAsync();
         }
 
         private void BttnConnectSource_Click(object sender, EventArgs e)
@@ -1549,13 +1556,13 @@ namespace DBADashServiceConfig
             Process.Start(psi);
         }
 
-        private void BttnDestFolder_Click(object sender, EventArgs e)
+        private async void BttnDestFolder_Click(object sender, EventArgs e)
         {
             using var fbd = new FolderBrowserDialog();
             if (fbd.ShowDialog() == DialogResult.OK)
             {
                 txtDestination.Text = fbd.SelectedPath;
-                DestinationChanged();
+                await DestinationChangedAsync();
             }
         }
 
@@ -1572,7 +1579,7 @@ namespace DBADashServiceConfig
             SetAvailableOptionsForSource();
         }
 
-        private void BttnS3_Click(object sender, EventArgs e)
+        private async void BttnS3_Click(object sender, EventArgs e)
         {
             var cfg = new CollectionConfig
             {
@@ -1591,7 +1598,7 @@ namespace DBADashServiceConfig
             if (frm.DialogResult == DialogResult.OK)
             {
                 txtDestination.Text = frm.AWSURL;
-                DestinationChanged();
+                await DestinationChangedAsync();
             }
         }
 
@@ -2012,27 +2019,27 @@ namespace DBADashServiceConfig
                 : new Font(bttnSave.Font, FontStyle.Regular);
         }
 
-        private void LnkStart_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private async void LnkStart_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            StartService();
+            await StartServiceAsync();
         }
 
-        private void LnkStop_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private async void LnkStop_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            StopService();
+            await StopServiceAsync();
         }
 
-        private void LnkRefresh_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private async void LnkRefresh_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            RefreshServiceStatus();
-            ValidateDestination(); // DB could be upgraded on service start so refresh destination
+            await RefreshServiceStatusAsync();
+            await ValidateDestinationAsync(); // DB could be upgraded on service start so refresh destination
         }
 
-        private void LnkInstall_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private async void LnkInstall_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (isInstalled)
             {
-                UninstallService();
+                await UninstallServiceAsync();
             }
             else
             {
@@ -2058,8 +2065,8 @@ namespace DBADashServiceConfig
                 };
                 frm.ShowDialog();
                 lastServiceActivity = DateTime.Now;
-                RefreshServiceStatus();
-                ValidateDestination(); // DB could be upgraded on service start so refresh destination
+                await RefreshServiceStatusAsync();
+                await ValidateDestinationAsync(); // DB could be upgraded on service start so refresh destination
             }
         }
 
