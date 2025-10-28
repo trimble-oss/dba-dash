@@ -230,7 +230,7 @@ namespace DBADashConfig
             }
         }
 
-        public static void AddDestination(CollectionConfig config, Options o)
+        public static async Task AddDestination(CollectionConfig config, Options o)
         {
             if (string.IsNullOrEmpty(o.ConnectionString))
             {
@@ -245,7 +245,7 @@ namespace DBADashConfig
                 if (!o.SkipValidation)
                 {
                     Log.Information("Validating connection...");
-                    config.ValidateDestination();
+                    await config.ValidateDestinationAsync();
                     Log.Information("Validated");
                 }
             }
@@ -262,7 +262,7 @@ namespace DBADashConfig
                 {
                     Log.Information("Validating connection...");
 
-                    CollectionConfig.ValidateDestination(con);
+                    await CollectionConfig.ValidateDestinationAsync(con);
                     Log.Information("Validated");
                 }
 
