@@ -75,12 +75,22 @@ namespace DBADashConfig.Test
             var cfg = BasicConfig.Load<CollectionConfig>();
 
             var conn = cfg.SourceConnections.FirstOrDefault(c => c.ConnectionID == connectionID);
+            Assert.IsTrue(cfg.SourceConnections.Any(c => c.ConnectionID == connectionID),"Test Connection exists");
             Assert.IsNotNull(conn);
             Assert.AreEqual(conn.UseDualEventSession, useDualSession, "Test UseDualEventSession");
             Assert.AreEqual(conn.PersistXESessions, persistXE, "Test PersistXESessions");
             Assert.AreEqual(conn.CollectTempDB, tempdb, "Test CollectTempDB");
             Assert.AreEqual(conn.CollectTranBeginTime, tranBeginTime, "Test CollectTranBeginTime");
             Assert.AreEqual(conn.CollectSessionWaits, collectSessionWaits, "Test CollectSessionWaits");
+
+            // test removal
+            args = $"-a Remove --ConnectionID {connectionID}";
+            psi = new ProcessStartInfo("DBADashConfig", args);
+            Helper.RunProcess(psi);
+            json = Helper.GetConfigJson();
+            cfg = BasicConfig.Load<CollectionConfig>();
+            Assert.IsFalse(cfg.SourceConnections.Any(c => c.ConnectionID == connectionID), "Test connection doesn't exist after removal");
+
         }
 
         [TestMethod]
