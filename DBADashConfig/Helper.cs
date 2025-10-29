@@ -157,6 +157,8 @@ namespace DBADashConfig
                 PersistXESessions = o.PersistXESessions ?? false,
                 CollectTempDB = o.CollectTempDB ?? false,
                 CollectTranBeginTime = o.CollectTranBeginTime ?? true,
+                WriteToSecondaryDestinations = o.WriteToSecondaryDestinations ?? true,
+                ScriptAgentJobs = o.ScriptAgentJobs ?? true,
             };
             if (!o.SkipValidation)
             {

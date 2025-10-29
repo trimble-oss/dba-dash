@@ -109,6 +109,12 @@ PopulateConnectionID2 - Add ConnectionID to source connections without a Connect
         [Option("CollectTempDB", Default = false, Required = false, HelpText = "Running Queries - Collect TempDB allocations")]
         public bool? CollectTempDB { get; set; }
 
+        [Option("WriteToSecondaryDestinations", Default = true, Required = false, HelpText = "Write to secondary destinations.  Use with -a Add")]
+        public bool? WriteToSecondaryDestinations { get; set; }
+
+        [Option("ScriptAgentJobs", Default = true, Required = false, HelpText = "Option to script agent jobs.  Use with -a Add")]
+        public bool? ScriptAgentJobs { get; set; }
+
         public enum CommandLineActionOption
         {
             Add,
