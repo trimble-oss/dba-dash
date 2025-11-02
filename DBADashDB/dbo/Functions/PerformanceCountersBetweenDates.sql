@@ -19,6 +19,7 @@ AND PC.SnapshotDate < CAST(@ToDate AS DATETIME2(2)) /* Important that date type 
 AND PC.InstanceID = @InstanceID
 AND PC.CounterID = @CounterID
 UNION ALL
+/* Running Queries performance counters. No 60 MIN aggregation available so fake schema. */
 SELECT	RQPC.InstanceID,
 		RQPC.CounterID,
 		RQPC.SnapshotDate,
@@ -29,3 +30,27 @@ AND RQPC.SnapshotDate >= @FromDate
 AND RQPC.SnapshotDate < @ToDate
 AND RQPC.InstanceID = @InstanceID
 AND RQPC.CounterID = @CounterID
+UNION ALL
+/* Azure DB Elastic Pool Resource Stats performance counters. */
+SELECT	PC.InstanceID,
+		PC.CounterID,
+		PC.SnapshotDate,
+		PC.value
+FROM dbo.AzureDBElasticPoolResourceStatsCounters PC
+WHERE @CounterType = 3
+AND PC.SnapshotDate >= @FromDate
+AND PC.SnapshotDate < @ToDate
+AND PC.InstanceID = @InstanceID
+AND PC.CounterID = @CounterID
+UNION ALL
+/* Azure DB Resource Stats performance counters. */
+SELECT	PC.InstanceID,
+		PC.CounterID,
+		PC.SnapshotDate,
+		PC.value
+FROM dbo.AzureDBResourceStatsCounters PC
+WHERE @CounterType = 4
+AND PC.SnapshotDate >= CAST(@FromDate AS DATETIME2(3))
+AND PC.SnapshotDate < CAST(@ToDate AS DATETIME2(3))
+AND PC.InstanceID = @InstanceID
+AND PC.CounterID = @CounterID

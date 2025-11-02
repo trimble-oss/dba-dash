@@ -847,6 +847,11 @@
     <Build Include="dbo\Tables\FailedLogins.sql" />
     <Build Include="dbo\Stored Procedures\FailedLogins_Upd.sql" />
     <Build Include="dbo\Stored Procedures\FailedLogins_Get.sql" />
+    <Build Include="dbo\Views\AzureDBElasticPoolResourceStatsCounters.sql" />
+    <Build Include="dbo\Views\AzureDBElasticPoolResourceStatsCounters_60MIN.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBCounters_Upd.sql" />
+    <Build Include="dbo\Views\AzureDBResourceStatsCounters.sql" />
+    <Build Include="dbo\Views\AzureDBResourceStatsCounters_60MIN.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

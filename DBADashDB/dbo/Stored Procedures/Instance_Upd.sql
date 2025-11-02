@@ -86,7 +86,10 @@ BEGIN
 										 @Reference = @Ref,
 										 @SnapshotDate = @SnapshotDate
 		COMMIT
-
+		IF @EngineEdition = 5 /* Azure SQL DB */
+		BEGIN
+			EXEC dbo.AzureDBCounters_Upd @InstanceID = @InstanceID
+		END
 	END
 	ELSE
 	BEGIN

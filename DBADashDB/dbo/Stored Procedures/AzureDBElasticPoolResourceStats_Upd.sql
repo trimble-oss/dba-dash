@@ -1,5 +1,8 @@
-﻿
-CREATE PROC [dbo].[AzureDBElasticPoolResourceStats_Upd](@AzureDBElasticPoolResourceStats dbo.AzureDBElasticPoolResourceStats READONLY,@InstanceID INT,@SnapshotDate DATETIME2(3))
+﻿CREATE PROC dbo.AzureDBElasticPoolResourceStats_Upd(
+	@AzureDBElasticPoolResourceStats dbo.AzureDBElasticPoolResourceStats READONLY,
+	@InstanceID INT,
+	@SnapshotDate DATETIME2(3)
+)
 AS
 SET XACT_ABORT ON
 DECLARE @Ref VARCHAR(100)='AzureDBElasticPoolResourceStats'
@@ -27,6 +30,11 @@ BEGIN
 	VALUES(@InstanceID,S.elastic_pool_name,S.elastic_pool_dtu_limit ,S.elastic_pool_cpu_limit,GETUTCDATE())
 	OUTPUT Inserted.PoolID, DELETED.elastic_pool_dtu_limit,DELETED.elastic_pool_cpu_limit,INSERTED.elastic_pool_dtu_limit,Inserted.elastic_pool_cpu_limit,ISNULL(Deleted.ValidFrom,'19000101'),Inserted.ValidFrom
 	INTO dbo.AzureDBElasticPoolHistory(PoolID,elastic_pool_dtu_limit_old,elastic_pool_cpu_limit_old,elastic_pool_dtu_limit_new,elastic_pool_cpu_limit_new,ValidFrom,ValidTo);
+
+	IF @@ROWCOUNT>0
+	BEGIN
+		EXEC dbo.AzureDBCounters_Upd @InstanceID = @InstanceID
+	END
 
 	SELECT @MaxDate=ISNULL(MAX(end_time),'19000101')
 	FROM dbo.AzureDBElasticPoolResourceStats RS 
@@ -70,7 +78,6 @@ BEGIN
 
 	IF @@ROWCOUNT>0
 	BEGIN
-
 
 		DELETE agg
 		FROM dbo.AzureDBElasticPoolResourceStats_60MIN agg
