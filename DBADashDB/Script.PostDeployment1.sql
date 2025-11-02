@@ -1977,7 +1977,18 @@ FROM (VALUES('Running Queries','Running Query Count','',2),
 	('Running Queries','TempDB Wait Count','',2),
 	('Running Queries','TempDB Wait Time (ms)','',2),
 	('Running Queries','Sleeping Sessions Count','',2),
-	('Running Queries','Sleeping Sessions Max Idle Time (ms)','',2)
+	('Running Queries','Sleeping Sessions Max Idle Time (ms)','',2),
+	('sys.dm_db_resource_stats', 'avg_cpu_percent','',4),
+	('sys.dm_db_resource_stats', 'avg_data_io_percent','',4),
+	('sys.dm_db_resource_stats', 'avg_log_write_percent','',4),
+	('sys.dm_db_resource_stats', 'avg_memory_usage_percent','',4),
+	('sys.dm_db_resource_stats', 'xtp_storage_percent','',4),
+	('sys.dm_db_resource_stats', 'max_worker_percent','',4),
+	('sys.dm_db_resource_stats', 'max_session_percent','',4),
+	('sys.dm_db_resource_stats', 'dtu_limit','',4),
+	('sys.dm_db_resource_stats', 'avg_instance_cpu_percent','',4),
+	('sys.dm_db_resource_stats', 'avg_instance_memory_percent','',4),
+	('sys.dm_db_resource_stats', 'cpu_limit','',4)
 	) VirtualCounters(object_name,counter_name,instance_name,CounterType)
 WHERE NOT EXISTS(
 				SELECT 1 
@@ -2079,6 +2090,7 @@ BEGIN
 					)
 	DROP TABLE dbo.LogRestoresTemp
 END
+EXEC dbo.AzureDBCounters_Upd
 /* 
 	Update extended property to indicate that a DB deployment is no longer in progress, allowing the GUI to continue loading.
 */

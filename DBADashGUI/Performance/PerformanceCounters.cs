@@ -100,7 +100,10 @@ namespace DBADashGUI.Performance
             foreach (DataRow r in dt.Rows)
             {
                 string aggColName = "Value_" + Enum.GetName(Metric.AggregateType);
-
+                if (r[aggColName] == DBNull.Value)
+                {
+                    continue;
+                }
                 var value = Convert.ToDouble(r[aggColName]);
                 maxValue = value > maxValue ? value : maxValue;
                 minValue = value < minValue ? value : minValue;
