@@ -318,8 +318,8 @@ namespace DBADashServiceConfig
             errorProvider1.SetError(txtDestination, null);
             lblServerNameWarning.Visible = false;
             InvokeSetStatus(lblVersionInfo, "Validating...", DashColors.TrimbleBlue, FontStyle.Regular);
-            _ = Task.Run(()=>{
-
+            _ = Task.Run(() =>
+            {
                 DBADashConnection dest = new(txtDestination.Text);
                 if (!string.IsNullOrEmpty(txtDestination.Text))
                 {
@@ -339,7 +339,6 @@ namespace DBADashServiceConfig
                     UpdateDBVersionStatus();
                 }
             });
-            
         }
 
         private static void InvokeSetStatus(Control statusControl, string status, Color color, FontStyle style)
@@ -952,7 +951,7 @@ namespace DBADashServiceConfig
                 txtAllowedCustomProcs.Text = collectionConfig.AllowedCustomProcs;
                 chkAWS.Checked =
                     collectionConfig.EnabledMetadataProviders.Contains(InstanceMetadataProviders.Providers.AWS);
-                chkAzure.Checked = 
+                chkAzure.Checked =
                     collectionConfig.EnabledMetadataProviders.Contains(InstanceMetadataProviders.Providers.Azure);
                 chkGeneric.Checked =
                     collectionConfig.EnabledMetadataProviders.Contains(InstanceMetadataProviders.Providers.Generic);
@@ -1844,11 +1843,17 @@ namespace DBADashServiceConfig
         private void DeleteInstance(DBADashSource src)
         {
             var exceptions = new List<Exception>();
+            var warnings = new List<string>();
             foreach (var dest in collectionConfig.SQLDestinations)
             {
                 try
                 {
                     SharedData.MarkInstanceDeleted(src.ConnectionID, dest.ConnectionString);
+                }
+                catch (SqlException ex) when (ex.Message == "Instance not found")
+                {
+                    warnings.Add(
+                        $"Warning: Instance '{src.ConnectionID}' was not found in repository database '{dest.ConnectionForPrint}'.");
                 }
                 catch (Exception ex)
                 {
@@ -1859,6 +1864,11 @@ namespace DBADashServiceConfig
             {
                 CommonShared.ShowExceptionDialog(new AggregateException(exceptions),
                     string.Join(Environment.NewLine, exceptions.Select(ex => ex.Message)).Truncate(500));
+            }
+            else if (warnings.Count > 0)
+            {
+                CommonShared.ShowExceptionDialog(null,
+                    string.Join(Environment.NewLine, warnings).Truncate(500), "Warning", TaskDialogIcon.Warning);
             }
         }
 
@@ -2709,7 +2719,7 @@ namespace DBADashServiceConfig
 
         private void Generic_CheckedChanged(object sender, EventArgs e)
         {
-            if(chkGeneric.Checked)
+            if (chkGeneric.Checked)
             {
                 collectionConfig.EnabledMetadataProviders.Add(InstanceMetadataProviders.Providers.Generic);
             }

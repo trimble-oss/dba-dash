@@ -1,4 +1,5 @@
 ﻿using DBADash;
+using Microsoft.Data.SqlClient;
 using Serilog;
 using System.Runtime.InteropServices;
 
@@ -112,6 +113,10 @@ namespace DBADashConfig
                     {
                         SharedData.MarkInstanceDeleted(connectionId, dest.ConnectionString);
                     }
+                }
+                catch (SqlException ex) when (ex.Message == "Instance not found")
+                {
+                    Log.Warning("Instance with ConnectionID {ConnectionID} not found in {Destination}", connectionId, dest.ConnectionForPrint);
                 }
                 catch (Exception ex)
                 {

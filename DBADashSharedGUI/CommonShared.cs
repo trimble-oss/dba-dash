@@ -291,9 +291,9 @@ namespace DBADashSharedGUI
         /// <returns></returns>
         public static TaskDialogButton ShowExceptionDialog(Exception ex, string heading = null, string caption = "Error", TaskDialogIcon icon = null, string text = null, TaskDialogButtonCollection buttons = null)
         {
-            heading ??= ex.Message;
-            text ??= heading == ex.Message ? null : ex.Message;
-            return ShowExceptionDialog(heading, text, ex.ToString(), caption, icon, buttons);
+            heading ??= ex?.Message;
+            text ??= heading == ex?.Message ? null : ex?.Message;
+            return ShowExceptionDialog(heading, text, ex?.ToString(), caption, icon, buttons);
         }
 
         /// <summary>
