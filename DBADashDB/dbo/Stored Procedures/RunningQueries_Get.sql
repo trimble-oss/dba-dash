@@ -168,7 +168,8 @@ SELECT ' + CASE WHEN @Top IS NULL THEN '' ELSE 'TOP(@Top)' END + '
        is_implicit_transaction,
        is_query_store_on,
        tempdb_current_mb,
-       tempdb_allocations_mb 
+       tempdb_allocations_mb,
+       total_elapsed_time
 FROM dbo.RunningQueriesInfo Q
 WHERE Q.InstanceID = @InstanceID
 ' + CASE WHEN @SnapshotDateFrom = @SnapshotDateTo THEN 'AND Q.SnapshotDateUTC = @SnapshotDateFrom' ELSE 'AND Q.SnapshotDateUTC >= @SnapshotDateFrom AND Q.SnapshotDateUTC < @SnapshotDateTo' END + '
