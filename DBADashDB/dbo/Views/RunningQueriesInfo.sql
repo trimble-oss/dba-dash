@@ -91,7 +91,8 @@ SELECT Q.InstanceID,
     Q.is_implicit_transaction,
     D.is_query_store_on,
     CASE WHEN Q.tempdb_alloc_page_count < Q.tempdb_dealloc_page_count THEN 0 ELSE (Q.tempdb_alloc_page_count - Q.tempdb_dealloc_page_count) / 128.0 END AS tempdb_current_mb,
-    Q.tempdb_alloc_page_count /128.0 AS tempdb_allocations_mb 
+    Q.tempdb_alloc_page_count /128.0 AS tempdb_allocations_mb,
+    Q.total_elapsed_time
 FROM dbo.RunningQueries Q
 JOIN dbo.Instances I ON Q.InstanceID = I.InstanceID
 CROSS APPLY(SELECT 	/* 

@@ -214,6 +214,14 @@ namespace DBADashGUI.Performance
                 },
                 new DataGridViewTextBoxColumn()
                 {
+                    HeaderText = "Total Elapsed Time (ms)", DataPropertyName = "total_elapsed_time",
+                    ToolTipText = "Total elapsed time (duration) of the query in milliseconds.\nThis is the raw value of total_elapsed_time from sys.dm_exec_requests, where the Duration column might be calculated",
+                    Visible = false,
+                    SortMode = DataGridViewColumnSortMode.Automatic,
+                    DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60
+                },
+                new DataGridViewTextBoxColumn()
+                {
                     HeaderText = "Transaction Duration", DataPropertyName = "transaction_duration", Name = "colTranDuration",
                     SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60
                 },
