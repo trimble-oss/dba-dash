@@ -179,8 +179,8 @@ BEGIN
     FROM @RunningQueriesDD R 
     CROSS APPLY(SELECT 	/* 
 						If the total_elapsed_time and calculated duration are within 500ms or the calculated duration is negative and total_elapsed_time is less than 30 seconds, use total_elapsed_time.  
-						total_elapsed_time might offer better precision, but if it differs too mucg from the calculated duration, it might contain an error. #1491.  
-						For sleeping sesions, start_time will be NULL and the calculated duration will be based on last request start time
+						total_elapsed_time might offer better precision, but if it differs too much from the calculated duration, it might contain an error. #1491.  
+						For sleeping sessions, start_time will be NULL and the calculated duration will be based on last request start time
 						*/
 					   CASE WHEN (R.start_time_utc > R.SnapshotDateUTC AND R.total_elapsed_time < 30000) 
 									OR ABS(DATEDIFF_BIG(ms,R.start_time_utc,R.SnapshotDateUTC)-CAST(R.total_elapsed_time AS BIGINT)) < CAST(500 AS BIGINT) THEN CAST(R.total_elapsed_time AS BIGINT) 
