@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace DBADash
 {
@@ -145,5 +146,21 @@ namespace DBADash
         /// <param name="value"></param>
         /// <returns></returns>
         public static string SqlQuoteName(this string value) => $"[{value.Truncate(128).Replace("]", "]]")}]";
+
+        /// <summary>
+        /// Attach a continuation that runs only if the task faults. Success or cancellation adds virtually no overhead.
+        /// </summary>
+        /// <param name="task">The task to observe.</param>
+        /// <param name="onError">Optional error handler (log, trace, etc).</param>
+        public static void ObserveFault(this Task task, Action<Exception> onError = null)
+        {
+            if (task == null) return;
+            _ = task.ContinueWith(t =>
+            {
+                onError?.Invoke(t.Exception!.Flatten());
+                _ = t.Exception; // mark observed
+            },
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
+        }
     }
 }
