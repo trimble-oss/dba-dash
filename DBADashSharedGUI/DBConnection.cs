@@ -194,17 +194,19 @@ namespace DBADash
                 }
 
                 var first = await Task.WhenAny(dbTask, masterTask);
+             
+                var other = first == dbTask ? masterTask : dbTask;
 
                 if (first.IsCompletedSuccessfully)
                 {
                     // Success on first completed (either DB or master)
                     DialogResult = DialogResult.OK;
                     cts.Cancel(); // cancel other pending attempt if still running
+                    other.ObserveFault(); // observe any exception to prevent unobserved task exceptions
                     return;
                 }
 
                 // First faulted: check the other
-                var other = first == dbTask ? masterTask : dbTask;
                 try
                 {
                     await other; // succeeds -> OK
@@ -257,16 +259,17 @@ namespace DBADash
 
                 // Prefer whichever completes successfully first
                 var firstCompleted = await Task.WhenAny(masterTask, dbTask);
+                var other = firstCompleted == masterTask ? dbTask : masterTask;
                 List<string> dbs;
                 if (!firstCompleted.IsFaulted)
                 {
                     cts.Cancel(); // Cancel the other task if still running
+                    other.ObserveFault(); // Observe any exception to prevent unobserved task exceptions
                     dbs = firstCompleted.Result; // Already completed
                 }
                 else
                 {
-                    // First failed; try the other. If that also fails, its await will throw and be caught.
-                    var other = firstCompleted == masterTask ? dbTask : masterTask;
+                    // First failed; try the other. If that also fails, its await will throw and be caught.         
                     dbs = await other;
                 }
 

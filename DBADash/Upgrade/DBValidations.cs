@@ -93,6 +93,7 @@ namespace DBADash
                 {
                     await first;
                     linkedCts.Cancel();
+                    dbExistsTask.ObserveFault(); // Avoid unobserved task exception
                     return true;
                 }
                 // Connection failed -> rely on catalog existence (may throw).
@@ -104,6 +105,7 @@ namespace DBADash
                 {
                     var exists = await dbExistsTask;
                     linkedCts.Cancel();
+                    connectionTask.ObserveFault(); // Avoid unobserved task exception
                     return exists;
                 }
                 catch
