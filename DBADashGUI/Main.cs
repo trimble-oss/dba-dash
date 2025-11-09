@@ -619,6 +619,7 @@ namespace DBADashGUI
                     parentNode.Nodes.AddRange(new TreeNode[] { changes, checks, hadr, storage, jobs });
                     root.Nodes.Add(parentNode);
                     currentTagGroup = tagGroup;
+                    AzureNode = null;
                 }
 
                 DatabaseEngineEdition edition;

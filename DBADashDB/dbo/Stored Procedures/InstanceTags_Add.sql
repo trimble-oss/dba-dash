@@ -18,29 +18,44 @@ BEGIN
 		TagName,
 		TagValue
 	)
-	VALUES
-	(@TagName,
-	@TagValue
-		)
+	VALUES(@TagName,@TagValue)
 	SET @TagID = SCOPE_IDENTITY()
 END
-IF NOT EXISTS(SELECT 1 FROM dbo.InstanceTags WHERE TagID=@TagID AND Instance=@Instance)
-	AND EXISTS(SELECT 1 FROM dbo.Instances WHERE EngineEdition=5 AND Instance=@Instance)
+IF -- tag doesn't exist
+	NOT EXISTS(	SELECT 1 
+				FROM dbo.InstanceTags 
+				WHERE TagID=@TagID 
+				AND Instance=@Instance
+				)
+	-- dbo.InstanceTags apply to Azure DB (server level tags)
+	AND EXISTS(SELECT 1 
+				FROM dbo.Instances 
+				WHERE EngineEdition=5 
+				AND Instance=@Instance 
+				AND @InstanceID IS NULL
+				)
 BEGIN
-	-- Azure DB tag
+	-- Azure DB server level tags
 	INSERT INTO dbo.InstanceTags
 	(
 		Instance,
 		TagID
 	)
-	VALUES
-	(   @Instance,
-		@TagID
-		)
+	VALUES(@Instance,@TagID)
 END
-IF EXISTS(SELECT 1 FROM dbo.Instances WHERE InstanceID = @InstanceID AND EngineEdition<>5)
+IF -- dbo.InstanceIDsTags apply to SQL Server instances and individual Azure DBs
+	EXISTS(	SELECT 1 
+			FROM dbo.Instances 
+			WHERE InstanceID = @InstanceID
+			)
+	AND NOT EXISTS(
+					SELECT 1 
+					FROM dbo.InstanceIDsTags 
+					WHERE TagID=@TagID 
+					AND InstanceID=@InstanceID
+					)
 BEGIN
-	-- Tags for other instances associated with InstanceID
+	-- InstanceID associated tags - regular instances and individual Azure DBs
 	INSERT INTO dbo.InstanceIDsTags(
 			InstanceID,
 			TagID

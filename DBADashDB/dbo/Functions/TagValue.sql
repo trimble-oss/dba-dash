@@ -17,8 +17,7 @@ FROM dbo.InstanceIDsTags IT
 JOIN dbo.Tags T ON IT.TagID = T.TagID
 WHERE InstanceID = @InstanceID
 AND T.TagName = @TagName
-AND (@EngineEdition <> 5 OR @TagName LIKE '{%') /* System tags only for AzureDB */
-UNION ALL
+UNION /* There could be duplicate tags to remove for Azure DB, so use UNION */
 /* 
 Tags associated with the Instance name.  These are user defined tags for AzureDB.
 System tags for AzureDB are associated with InstanceID. (Some tags like CPU count can vary by database)
