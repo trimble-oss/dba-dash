@@ -31,12 +31,12 @@ namespace DBADashGUI.Tagging
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             panel1 = new System.Windows.Forms.Panel();
             toolStrip2 = new System.Windows.Forms.ToolStrip();
             tsBack = new System.Windows.Forms.ToolStripButton();
@@ -51,10 +51,6 @@ namespace DBADashGUI.Tagging
             colTagValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             splitAddSystem = new System.Windows.Forms.SplitContainer();
             dgvTags = new DBADashDataGridView();
-            colTagID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colCheck = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            colTagName1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            ColTagValue1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             label4 = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             pnlTagEdit = new System.Windows.Forms.Panel();
@@ -71,6 +67,11 @@ namespace DBADashGUI.Tagging
             dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colTagID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colCheck = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            colTagName1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ColTagValue1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colInherited = new System.Windows.Forms.DataGridViewTextBoxColumn();
             panel1.SuspendLayout();
             toolStrip2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
@@ -111,7 +112,7 @@ namespace DBADashGUI.Tagging
             toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsBack, lblInstance });
             toolStrip2.Location = new System.Drawing.Point(0, 0);
             toolStrip2.Name = "toolStrip2";
-            toolStrip2.Size = new System.Drawing.Size(917, 31);
+            toolStrip2.Size = new System.Drawing.Size(917, 27);
             toolStrip2.TabIndex = 6;
             toolStrip2.Text = "toolStrip2";
             // 
@@ -121,7 +122,7 @@ namespace DBADashGUI.Tagging
             tsBack.Image = Properties.Resources.Previous_grey_16x;
             tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsBack.Name = "tsBack";
-            tsBack.Size = new System.Drawing.Size(29, 28);
+            tsBack.Size = new System.Drawing.Size(29, 24);
             tsBack.Text = "Back";
             tsBack.Click += TsBack_Click;
             // 
@@ -130,7 +131,7 @@ namespace DBADashGUI.Tagging
             lblInstance.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             lblInstance.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             lblInstance.Name = "lblInstance";
-            lblInstance.Size = new System.Drawing.Size(76, 28);
+            lblInstance.Size = new System.Drawing.Size(76, 24);
             lblInstance.Text = "Instance: ";
             // 
             // label2
@@ -186,25 +187,26 @@ namespace DBADashGUI.Tagging
             // 
             dgv.AllowUserToAddRows = false;
             dgv.AllowUserToDeleteRows = false;
+            dgv.AllowUserToOrderColumns = true;
             dgv.BackgroundColor = System.Drawing.Color.FromArgb(255, 245, 228);
-            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle7.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle7.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle7.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
-            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colTagName, colTagValue });
-            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle8.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            dataGridViewCellStyle8.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle8.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle8.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
-            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgv.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgv.DefaultCellStyle = dataGridViewCellStyle2;
             dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             dgv.EnableHeadersVisualStyles = false;
             dgv.Location = new System.Drawing.Point(0, 29);
@@ -260,25 +262,26 @@ namespace DBADashGUI.Tagging
             // 
             dgvTags.AllowUserToAddRows = false;
             dgvTags.AllowUserToDeleteRows = false;
+            dgvTags.AllowUserToOrderColumns = true;
             dgvTags.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle9.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle9.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle9.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
-            dataGridViewCellStyle9.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle9.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle9.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvTags.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle3.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvTags.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
             dgvTags.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvTags.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colTagID, colCheck, colTagName1, ColTagValue1 });
-            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle10.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            dataGridViewCellStyle10.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle10.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle10.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
-            dataGridViewCellStyle10.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle10.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgvTags.DefaultCellStyle = dataGridViewCellStyle10;
+            dgvTags.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colTagID, colCheck, colTagName1, ColTagValue1, colInherited });
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvTags.DefaultCellStyle = dataGridViewCellStyle4;
             dgvTags.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvTags.EnableHeadersVisualStyles = false;
             dgvTags.Location = new System.Drawing.Point(0, 29);
@@ -293,38 +296,6 @@ namespace DBADashGUI.Tagging
             dgvTags.CellMouseDoubleClick += DgvTags_CellMouseDoubleClick;
             dgvTags.CellMouseUp += DgvTags_CellMouseUp;
             dgvTags.CellValueChanged += DgvTags_CellValueChanged;
-            // 
-            // colTagID
-            // 
-            colTagID.HeaderText = "TagID";
-            colTagID.MinimumWidth = 6;
-            colTagID.Name = "colTagID";
-            colTagID.ReadOnly = true;
-            colTagID.Visible = false;
-            colTagID.Width = 125;
-            // 
-            // colCheck
-            // 
-            colCheck.HeaderText = "";
-            colCheck.MinimumWidth = 6;
-            colCheck.Name = "colCheck";
-            colCheck.Width = 125;
-            // 
-            // colTagName1
-            // 
-            colTagName1.HeaderText = "Tag Name";
-            colTagName1.MinimumWidth = 6;
-            colTagName1.Name = "colTagName1";
-            colTagName1.ReadOnly = true;
-            colTagName1.Width = 125;
-            // 
-            // ColTagValue1
-            // 
-            ColTagValue1.HeaderText = "Tag Value";
-            ColTagValue1.MinimumWidth = 6;
-            ColTagValue1.Name = "ColTagValue1";
-            ColTagValue1.ReadOnly = true;
-            ColTagValue1.Width = 125;
             // 
             // label4
             // 
@@ -378,27 +349,28 @@ namespace DBADashGUI.Tagging
             // 
             dgvReport.AllowUserToAddRows = false;
             dgvReport.AllowUserToDeleteRows = false;
+            dgvReport.AllowUserToOrderColumns = true;
             dgvReport.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle11.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle11.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle11.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
-            dataGridViewCellStyle11.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle11.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvReport.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle11;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvReport.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
             dgvReport.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle12.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            dataGridViewCellStyle12.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle12.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle12.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
-            dataGridViewCellStyle12.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle12.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgvReport.DefaultCellStyle = dataGridViewCellStyle12;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle6.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvReport.DefaultCellStyle = dataGridViewCellStyle6;
             dgvReport.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvReport.EnableHeadersVisualStyles = false;
-            dgvReport.Location = new System.Drawing.Point(0, 31);
+            dgvReport.Location = new System.Drawing.Point(0, 27);
             dgvReport.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvReport.Name = "dgvReport";
             dgvReport.ReadOnly = true;
@@ -406,7 +378,7 @@ namespace DBADashGUI.Tagging
             dgvReport.ResultSetName = null;
             dgvReport.RowHeadersVisible = false;
             dgvReport.RowHeadersWidth = 51;
-            dgvReport.Size = new System.Drawing.Size(917, 462);
+            dgvReport.Size = new System.Drawing.Size(917, 466);
             dgvReport.TabIndex = 0;
             dgvReport.CellContentClick += DgvReport_CellContentClick;
             // 
@@ -416,7 +388,7 @@ namespace DBADashGUI.Tagging
             toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsClearFilterReport });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new System.Drawing.Size(917, 31);
+            toolStrip1.Size = new System.Drawing.Size(917, 27);
             toolStrip1.TabIndex = 1;
             toolStrip1.Text = "toolStrip1";
             // 
@@ -426,7 +398,7 @@ namespace DBADashGUI.Tagging
             tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
             tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsRefresh.Name = "tsRefresh";
-            tsRefresh.Size = new System.Drawing.Size(29, 28);
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
             tsRefresh.Text = "Refresh";
             tsRefresh.Click += TsRefresh_Click;
             // 
@@ -436,7 +408,7 @@ namespace DBADashGUI.Tagging
             tsCopy.Image = Properties.Resources.ASX_Copy_blue_16x;
             tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCopy.Name = "tsCopy";
-            tsCopy.Size = new System.Drawing.Size(29, 28);
+            tsCopy.Size = new System.Drawing.Size(29, 24);
             tsCopy.Text = "Copy";
             tsCopy.Click += TsCopy_Click;
             // 
@@ -446,7 +418,7 @@ namespace DBADashGUI.Tagging
             tsExcel.Image = Properties.Resources.excel16x16;
             tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsExcel.Name = "tsExcel";
-            tsExcel.Size = new System.Drawing.Size(29, 28);
+            tsExcel.Size = new System.Drawing.Size(29, 24);
             tsExcel.Text = "Excel";
             tsExcel.Click += TsExcel_Click;
             // 
@@ -456,7 +428,7 @@ namespace DBADashGUI.Tagging
             tsClearFilterReport.Image = Properties.Resources.Filter_16x;
             tsClearFilterReport.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsClearFilterReport.Name = "tsClearFilterReport";
-            tsClearFilterReport.Size = new System.Drawing.Size(104, 28);
+            tsClearFilterReport.Size = new System.Drawing.Size(104, 24);
             tsClearFilterReport.Text = "Clear Filter";
             // 
             // splitEditReport
@@ -520,6 +492,45 @@ namespace DBADashGUI.Tagging
             dataGridViewTextBoxColumn5.ReadOnly = true;
             dataGridViewTextBoxColumn5.Width = 125;
             // 
+            // colTagID
+            // 
+            colTagID.HeaderText = "TagID";
+            colTagID.MinimumWidth = 6;
+            colTagID.Name = "colTagID";
+            colTagID.ReadOnly = true;
+            colTagID.Visible = false;
+            colTagID.Width = 125;
+            // 
+            // colCheck
+            // 
+            colCheck.HeaderText = "";
+            colCheck.MinimumWidth = 6;
+            colCheck.Name = "colCheck";
+            colCheck.Width = 125;
+            // 
+            // colTagName1
+            // 
+            colTagName1.HeaderText = "Tag Name";
+            colTagName1.MinimumWidth = 6;
+            colTagName1.Name = "colTagName1";
+            colTagName1.ReadOnly = true;
+            colTagName1.Width = 125;
+            // 
+            // ColTagValue1
+            // 
+            ColTagValue1.HeaderText = "Tag Value";
+            ColTagValue1.MinimumWidth = 6;
+            ColTagValue1.Name = "ColTagValue1";
+            ColTagValue1.ReadOnly = true;
+            ColTagValue1.Width = 125;
+            // 
+            // colInherited
+            // 
+            colInherited.HeaderText = "Inherited";
+            colInherited.MinimumWidth = 6;
+            colInherited.Name = "colInherited";
+            colInherited.Width = 125;
+            // 
             // Tags
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -580,12 +591,13 @@ namespace DBADashGUI.Tagging
         private DBADashDataGridView dgvTags;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
+        private System.Windows.Forms.ToolStripLabel lblInstance;
+        private System.Windows.Forms.ToolStripButton tsClearFilterReport;
         private System.Windows.Forms.DataGridViewTextBoxColumn colTagID;
         private System.Windows.Forms.DataGridViewCheckBoxColumn colCheck;
         private System.Windows.Forms.DataGridViewTextBoxColumn colTagName1;
         private System.Windows.Forms.DataGridViewTextBoxColumn ColTagValue1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
-        private System.Windows.Forms.ToolStripLabel lblInstance;
-        private System.Windows.Forms.ToolStripButton tsClearFilterReport;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colInherited;
     }
 }
