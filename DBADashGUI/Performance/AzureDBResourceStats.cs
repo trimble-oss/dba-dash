@@ -13,6 +13,7 @@ namespace DBADashGUI.Performance
     public partial class AzureDBResourceStats : UserControl, ISetContext, IRefreshData
     {
         public int InstanceID;
+        public int MasterInstanceID;
         public string ElasticPoolName = string.Empty;
 
         public AzureDBResourceStats()
@@ -46,8 +47,6 @@ namespace DBADashGUI.Performance
                 tsDateGrouping.Text = DateHelper.DateGroupString(_dateGrouping);
             }
         }
-
-        private Dictionary<string, ColumnMetaData> columns;
 
         private readonly Dictionary<string, ColumnMetaData> DBColumns = new()
         {
@@ -94,8 +93,13 @@ namespace DBADashGUI.Performance
 
         public void SetContext(DBADashContext _context)
         {
-            InstanceID = string.IsNullOrEmpty(_context.ElasticPoolName) ? _context.InstanceID : _context.MasterInstanceID;
+            InstanceID = _context.InstanceID;
+            MasterInstanceID = _context.MasterInstanceID;
             ElasticPoolName = _context.ElasticPoolName;
+            tsPool.Text = $"Elastic Pool: {ElasticPoolName}";
+            tsDB.Text = $"DB: {_context.DatabaseName}";
+            splitContainer1.Panel1Collapsed = InstanceID <= 0;
+            splitContainer1.Panel2Collapsed = string.IsNullOrEmpty(ElasticPoolName);
             RefreshData();
         }
 
@@ -107,22 +111,60 @@ namespace DBADashGUI.Performance
 
         private void RefreshDataLocal()
         {
-            dt = string.IsNullOrEmpty(ElasticPoolName) ? GetAzureDBResourceStats() : GetAzurePoolResourceStats();
-
-            UpdateChart();
+            try
+            {
+                UpdateDBChart();
+                UpdatePoolChart();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error refreshing Azure DB Resource Stats");
+            }
         }
 
-        private void UpdateChart()
+        private void UpdateDBChart()
+        {
+            if (splitContainer1.Panel1Collapsed)
+            {
+                return;
+            }
+            UpdateChart(GetAzureDBResourceStats(), chartDB, DBColumns, SmoothLines, PointSize, DateFormat);
+        }
+
+        private void UpdatePoolChart()
+        {
+            if (splitContainer1.Panel2Collapsed)
+            {
+                return;
+            }
+            UpdateChart(GetAzurePoolResourceStats(), chartPool, PoolColumns, SmoothLines, PointSize, DateFormat, ElasticPoolName);
+            if (!splitContainer1.Panel1Collapsed
+                 && !splitContainer1.Panel2Collapsed
+                 && chartDB.Visible && chartPool.Visible
+                 && chartDB.AxisX.Count > 0
+                 && chartPool.AxisX.Count > 0)
+            {
+                // Align X axes
+                var minTicks = DateRange.FromUTC.ToAppTimeZone().Ticks;
+                var maxTicks = DateRange.ToUTC.ToAppTimeZone().Ticks;
+                chartDB.AxisX[0].MinValue = minTicks;
+                chartDB.AxisX[0].MaxValue = maxTicks;
+                chartPool.AxisX[0].MinValue = minTicks;
+                chartPool.AxisX[0].MaxValue = maxTicks;
+            }
+        }
+
+        private static void UpdateChart(DataTable dt, LiveCharts.WinForms.CartesianChart chart, Dictionary<string, ColumnMetaData> columns, bool smoothLines, int pointSize, string dateFormat, string elasticPoolName = null)
         {
             var cnt = dt.Rows.Count;
             if (cnt < 2)
             {
-                chart1.Visible = false;
+                chart.Visible = false;
                 return;
             }
             else
             {
-                chart1.Visible = true;
+                chart.Visible = true;
             }
             foreach (var s in columns.Keys)
             {
@@ -134,7 +176,7 @@ namespace DBADashGUI.Performance
             foreach (DataRow r in dt.Rows)
             {
                 var dtuLimit = r["dtu_limit"] == DBNull.Value ? 0 : (int)r["dtu_limit"];
-                if (ElasticPoolName == string.Empty)
+                if (string.IsNullOrEmpty(elasticPoolName))
                 {
                     var cpuLimit = r["cpu_Limit"] == DBNull.Value ? 0 : Convert.ToInt32(r["cpu_limit"]);
                     y1Max = cpuLimit > y1Max ? cpuLimit : y1Max;
@@ -152,7 +194,7 @@ namespace DBADashGUI.Performance
             }
 
             var sc = new SeriesCollection();
-            chart1.Series = sc;
+            chart.Series = sc;
             foreach (var kv in columns)
             {
                 if (kv.Value.IsVisible)
@@ -164,22 +206,22 @@ namespace DBADashGUI.Performance
                         Title = columns[kv.Key].Name,
                         Tag = kv.Key,
                         ScalesYAt = columns[kv.Key].axis,
-                        LineSmoothness = SmoothLines ? 1 : 0,
-                        PointGeometrySize = PointSize,
+                        LineSmoothness = smoothLines ? 1 : 0,
+                        PointGeometrySize = pointSize,
                         Values = v
                     }
                     );
                 }
             }
-            chart1.AxisX.Clear();
-            chart1.AxisY.Clear();
-            chart1.AxisX.Add(new Axis
+            chart.AxisX.Clear();
+            chart.AxisY.Clear();
+            chart.AxisX.Add(new Axis
             {
                 Title = "Time",
-                LabelFormatter = val => new DateTime((long)val).ToString(DateFormat)
+                LabelFormatter = val => new DateTime((long)val).ToString(dateFormat)
             });
             var y0visible = columns.Values.Any(c => c.IsVisible && c.axis == 0);
-            chart1.AxisY.Add(new Axis
+            chart.AxisY.Add(new Axis
             {
                 Title = "%",
                 LabelFormatter = val => val.ToString("0.0"),
@@ -190,7 +232,7 @@ namespace DBADashGUI.Performance
             var y1visible = columns.Values.Any(c => c.IsVisible && c.axis == 1);
             if (y1visible)
             {
-                chart1.AxisY.Add(new Axis
+                chart.AxisY.Add(new Axis
                 {
                     Title = "DTU",
                     LabelFormatter = val => val.ToString("0"),
@@ -199,70 +241,71 @@ namespace DBADashGUI.Performance
                     MaxValue = y1Max
                 });
             }
-            chart1.LegendLocation = LegendLocation.Bottom;
+            chart.LegendLocation = LegendLocation.Bottom;
         }
 
         private void AddMeasures()
+        {
+            PopulateMeasureMenu(DBColumns, tsMeasures);
+            PopulateMeasureMenu(PoolColumns, tsPoolMeasures);
+        }
+
+        private void PopulateMeasureMenu(Dictionary<string, ColumnMetaData> columns, ToolStripDropDownButton menu)
         {
             foreach (var k in columns)
             {
                 var dd = new ToolStripMenuItem(k.Value.Name)
                 {
                     Name = k.Key,
-                    CheckOnClick = true
+                    CheckOnClick = true,
+                    Checked = k.Value.IsVisible
                 };
-                dd.Checked = dd.Enabled && k.Value.IsVisible;
-                dd.Click += MeasureDropDown_Click;
-                tsMeasures.DropDownItems.Add(dd);
+                dd.Click += (sender, e) =>
+                {
+                    var mnu = (ToolStripMenuItem)sender;
+                    if (!string.IsNullOrEmpty(mnu.Name))
+                    {
+                        columns[mnu.Name].IsVisible = mnu.Checked;
+                        RefreshDataLocal();
+                    }
+                };
+                menu.DropDownItems.Add(dd);
             }
-        }
-
-        private void MeasureDropDown_Click(object sender, EventArgs e)
-        {
-            var mnu = (ToolStripMenuItem)sender;
-            columns[mnu.Name!].IsVisible = mnu.Checked;
-            UpdateChart();
         }
 
         private DataTable GetAzurePoolResourceStats()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            {
-                using (SqlCommand cmd = new("dbo.AzureDBElasticPoolResourceStats_Get", cn) { CommandType = CommandType.StoredProcedure })
-                {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                    cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                    cmd.Parameters.AddWithValue("elastic_pool_name", ElasticPoolName);
-                    cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
-                    cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
-                    SqlDataAdapter da = new(cmd);
-                    DataTable dt = new();
-                    da.Fill(dt);
-                    return dt;
-                }
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using SqlCommand cmd = new("dbo.AzureDBElasticPoolResourceStats_Get", cn) { CommandType = CommandType.StoredProcedure };
+
+            cn.Open();
+            cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+            cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+            cmd.Parameters.AddWithValue("InstanceID", MasterInstanceID);
+            cmd.Parameters.AddWithValue("elastic_pool_name", ElasticPoolName);
+            cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
+            cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
+            SqlDataAdapter da = new(cmd);
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
         }
 
         private DataTable GetAzureDBResourceStats()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            {
-                using (SqlCommand cmd = new("dbo.AzureDBResourceStats_Get", cn) { CommandType = CommandType.StoredProcedure })
-                {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                    cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                    cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
-                    cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
-                    SqlDataAdapter da = new(cmd);
-                    DataTable dt = new();
-                    da.Fill(dt);
-                    return dt;
-                }
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using SqlCommand cmd = new("dbo.AzureDBResourceStats_Get", cn) { CommandType = CommandType.StoredProcedure };
+
+            cn.Open();
+            cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+            cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
+            cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
+            SqlDataAdapter da = new(cmd);
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -272,7 +315,6 @@ namespace DBADashGUI.Performance
 
         private void AzureDBResourceStats_Load(object sender, EventArgs e)
         {
-            columns = ElasticPoolName == string.Empty ? DBColumns : PoolColumns;
             AddMeasures();
             DateHelper.AddDateGroups(tsDateGrouping, TsDateGrouping_Click);
         }
@@ -286,14 +328,20 @@ namespace DBADashGUI.Performance
 
         private void SmoothLinesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            UpdateChart();
+            RefreshDataLocal();
         }
 
         private void PointsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (var s in chart1.Series.Cast<LineSeries>())
+            UpdatePointSize(chartDB, PointSize);
+            UpdatePointSize(chartPool, PointSize);
+        }
+
+        private static void UpdatePointSize(LiveCharts.WinForms.CartesianChart chart, int pointSize)
+        {
+            foreach (var s in chart.Series.Cast<LineSeries>())
             {
-                s.PointGeometrySize = PointSize;
+                s.PointGeometrySize = pointSize;
             }
         }
     }

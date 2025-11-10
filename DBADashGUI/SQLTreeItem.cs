@@ -194,7 +194,7 @@ namespace DBADashGUI
                     TreeType.DBADashRoot => string.Empty,
                     _ => Parent?.AsSQLTreeItem().Context.InstanceName ?? string.Empty
                 };
-                if (Type is TreeType.ElasticPool or TreeType.AzureInstance)
+                if (Type is TreeType.ElasticPool or TreeType.AzureInstance or TreeType.AzureDatabase)
                 {
                     InternalContext.MasterInstanceID = CommonData.Instances.Rows.Cast<DataRow>()
                         .Where(r => string.Equals((string)r["Instance"], InstanceName, StringComparison.InvariantCultureIgnoreCase) && string.Equals((string)r["AzureDBName"].DBNullToNull(), "master", StringComparison.InvariantCultureIgnoreCase))

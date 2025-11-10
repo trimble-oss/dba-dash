@@ -29,123 +29,225 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AzureDBResourceStats));
-            this.chart1 = new LiveCharts.WinForms.CartesianChart();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.tsOptions = new System.Windows.Forms.ToolStripDropDownButton();
-            this.smoothLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsMeasures = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsDateGrouping = new System.Windows.Forms.ToolStripDropDownButton();
-            this.toolStrip1.SuspendLayout();
-            this.SuspendLayout();
+            chartDB = new LiveCharts.WinForms.CartesianChart();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            tsRefresh = new System.Windows.Forms.ToolStripButton();
+            tsOptions = new System.Windows.Forms.ToolStripDropDownButton();
+            smoothLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            pointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsDateGrouping = new System.Windows.Forms.ToolStripDropDownButton();
+            chartPool = new LiveCharts.WinForms.CartesianChart();
+            splitContainer1 = new System.Windows.Forms.SplitContainer();
+            toolStrip2 = new System.Windows.Forms.ToolStrip();
+            tsPool = new System.Windows.Forms.ToolStripLabel();
+            tsPoolMeasures = new System.Windows.Forms.ToolStripDropDownButton();
+            toolStrip3 = new System.Windows.Forms.ToolStrip();
+            tsMeasures = new System.Windows.Forms.ToolStripDropDownButton();
+            tsDB = new System.Windows.Forms.ToolStripLabel();
+            toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
+            splitContainer1.Panel1.SuspendLayout();
+            splitContainer1.Panel2.SuspendLayout();
+            splitContainer1.SuspendLayout();
+            toolStrip2.SuspendLayout();
+            toolStrip3.SuspendLayout();
+            SuspendLayout();
             // 
-            // chart1
+            // chartDB
             // 
-            this.chart1.BackColor = System.Drawing.Color.White;
-            this.chart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chart1.Location = new System.Drawing.Point(0, 31);
-            this.chart1.Name = "chart1";
-            this.chart1.Size = new System.Drawing.Size(882, 494);
-            this.chart1.TabIndex = 0;
-            this.chart1.Text = "cartesianChart1";
+            chartDB.BackColor = System.Drawing.Color.White;
+            chartDB.Dock = System.Windows.Forms.DockStyle.Fill;
+            chartDB.Location = new System.Drawing.Point(0, 27);
+            chartDB.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            chartDB.Name = "chartDB";
+            chartDB.Size = new System.Drawing.Size(882, 284);
+            chartDB.TabIndex = 0;
+            chartDB.Text = "cartesianChart1";
             // 
             // toolStrip1
             // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsRefresh,
-            this.tsOptions,
-            this.tsMeasures,
-            this.tsDateGrouping});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(882, 31);
-            this.toolStrip1.TabIndex = 4;
-            this.toolStrip1.Text = "toolStrip1";
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsOptions, tsDateGrouping });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new System.Drawing.Size(882, 27);
+            toolStrip1.TabIndex = 4;
+            toolStrip1.Text = "toolStrip1";
             // 
             // tsRefresh
             // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
+            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Name = "tsRefresh";
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Text = "Refresh";
+            tsRefresh.Click += TsRefresh_Click;
             // 
             // tsOptions
             // 
-            this.tsOptions.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.smoothLinesToolStripMenuItem,
-            this.pointsToolStripMenuItem});
-            this.tsOptions.Image = global::DBADashGUI.Properties.Resources.LineChart_16x;
-            this.tsOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsOptions.Name = "tsOptions";
-            this.tsOptions.Size = new System.Drawing.Size(34, 28);
-            this.tsOptions.Text = "Chart Options";
+            tsOptions.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { smoothLinesToolStripMenuItem, pointsToolStripMenuItem });
+            tsOptions.Image = Properties.Resources.LineChart_16x;
+            tsOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsOptions.Name = "tsOptions";
+            tsOptions.Size = new System.Drawing.Size(34, 24);
+            tsOptions.Text = "Chart Options";
             // 
             // smoothLinesToolStripMenuItem
             // 
-            this.smoothLinesToolStripMenuItem.CheckOnClick = true;
-            this.smoothLinesToolStripMenuItem.Name = "smoothLinesToolStripMenuItem";
-            this.smoothLinesToolStripMenuItem.Size = new System.Drawing.Size(178, 26);
-            this.smoothLinesToolStripMenuItem.Text = "Smooth lines";
-            this.smoothLinesToolStripMenuItem.Click += new System.EventHandler(this.SmoothLinesToolStripMenuItem_Click);
+            smoothLinesToolStripMenuItem.CheckOnClick = true;
+            smoothLinesToolStripMenuItem.Name = "smoothLinesToolStripMenuItem";
+            smoothLinesToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            smoothLinesToolStripMenuItem.Text = "Smooth lines";
+            smoothLinesToolStripMenuItem.Click += SmoothLinesToolStripMenuItem_Click;
             // 
             // pointsToolStripMenuItem
             // 
-            this.pointsToolStripMenuItem.CheckOnClick = true;
-            this.pointsToolStripMenuItem.Name = "pointsToolStripMenuItem";
-            this.pointsToolStripMenuItem.Size = new System.Drawing.Size(178, 26);
-            this.pointsToolStripMenuItem.Text = "Points";
-            this.pointsToolStripMenuItem.Click += new System.EventHandler(this.PointsToolStripMenuItem_Click);
-            // 
-            // tsMeasures
-            // 
-            this.tsMeasures.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsMeasures.Image = global::DBADashGUI.Properties.Resources.AddComputedField_16x;
-            this.tsMeasures.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsMeasures.Name = "tsMeasures";
-            this.tsMeasures.Size = new System.Drawing.Size(34, 28);
-            this.tsMeasures.Text = "Columns";
+            pointsToolStripMenuItem.CheckOnClick = true;
+            pointsToolStripMenuItem.Name = "pointsToolStripMenuItem";
+            pointsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            pointsToolStripMenuItem.Text = "Points";
+            pointsToolStripMenuItem.Click += PointsToolStripMenuItem_Click;
             // 
             // tsDateGrouping
             // 
-            this.tsDateGrouping.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsDateGrouping.Image = ((System.Drawing.Image)(resources.GetObject("tsDateGrouping.Image")));
-            this.tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsDateGrouping.Name = "tsDateGrouping";
-            this.tsDateGrouping.Size = new System.Drawing.Size(59, 28);
-            this.tsDateGrouping.Text = "None";
-            this.tsDateGrouping.ToolTipText = "Date Grouping";
+            tsDateGrouping.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            tsDateGrouping.Image = (System.Drawing.Image)resources.GetObject("tsDateGrouping.Image");
+            tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsDateGrouping.Name = "tsDateGrouping";
+            tsDateGrouping.Size = new System.Drawing.Size(59, 24);
+            tsDateGrouping.Text = "None";
+            tsDateGrouping.ToolTipText = "Date Grouping";
+            // 
+            // chartPool
+            // 
+            chartPool.BackColor = System.Drawing.Color.White;
+            chartPool.Dock = System.Windows.Forms.DockStyle.Fill;
+            chartPool.Location = new System.Drawing.Point(0, 27);
+            chartPool.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            chartPool.Name = "chartPool";
+            chartPool.Size = new System.Drawing.Size(882, 287);
+            chartPool.TabIndex = 5;
+            chartPool.Text = "cartesianChart1";
+            // 
+            // splitContainer1
+            // 
+            splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitContainer1.Location = new System.Drawing.Point(0, 27);
+            splitContainer1.Name = "splitContainer1";
+            splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            splitContainer1.Panel1.Controls.Add(chartDB);
+            splitContainer1.Panel1.Controls.Add(toolStrip3);
+            // 
+            // splitContainer1.Panel2
+            // 
+            splitContainer1.Panel2.Controls.Add(chartPool);
+            splitContainer1.Panel2.Controls.Add(toolStrip2);
+            splitContainer1.Size = new System.Drawing.Size(882, 629);
+            splitContainer1.SplitterDistance = 311;
+            splitContainer1.TabIndex = 6;
+            // 
+            // toolStrip2
+            // 
+            toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsPool, tsPoolMeasures });
+            toolStrip2.Location = new System.Drawing.Point(0, 0);
+            toolStrip2.Name = "toolStrip2";
+            toolStrip2.Size = new System.Drawing.Size(882, 27);
+            toolStrip2.TabIndex = 6;
+            toolStrip2.Text = "toolStrip2";
+            // 
+            // tsPool
+            // 
+            tsPool.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsPool.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            tsPool.Name = "tsPool";
+            tsPool.Size = new System.Drawing.Size(88, 24);
+            tsPool.Text = "Elastic Pool";
+            // 
+            // tsPoolMeasures
+            // 
+            tsPoolMeasures.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsPoolMeasures.Image = Properties.Resources.AddComputedField_16x;
+            tsPoolMeasures.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsPoolMeasures.Name = "tsPoolMeasures";
+            tsPoolMeasures.Size = new System.Drawing.Size(34, 24);
+            tsPoolMeasures.Text = "Columns";
+            // 
+            // toolStrip3
+            // 
+            toolStrip3.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip3.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsMeasures, tsDB });
+            toolStrip3.Location = new System.Drawing.Point(0, 0);
+            toolStrip3.Name = "toolStrip3";
+            toolStrip3.Size = new System.Drawing.Size(882, 27);
+            toolStrip3.TabIndex = 1;
+            toolStrip3.Text = "toolStrip3";
+            // 
+            // tsMeasures
+            // 
+            tsMeasures.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsMeasures.Image = Properties.Resources.AddComputedField_16x;
+            tsMeasures.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsMeasures.Name = "tsMeasures";
+            tsMeasures.Size = new System.Drawing.Size(34, 24);
+            tsMeasures.Text = "Columns";
+            // 
+            // tsDB
+            // 
+            tsDB.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsDB.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            tsDB.Name = "tsDB";
+            tsDB.Size = new System.Drawing.Size(38, 24);
+            tsDB.Text = "DB: ";
             // 
             // AzureDBResourceStats
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.chart1);
-            this.Controls.Add(this.toolStrip1);
-            this.Name = "AzureDBResourceStats";
-            this.Size = new System.Drawing.Size(882, 525);
-            this.Load += new System.EventHandler(this.AzureDBResourceStats_Load);
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            Controls.Add(splitContainer1);
+            Controls.Add(toolStrip1);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "AzureDBResourceStats";
+            Size = new System.Drawing.Size(882, 656);
+            Load += AzureDBResourceStats_Load;
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            splitContainer1.Panel1.ResumeLayout(false);
+            splitContainer1.Panel1.PerformLayout();
+            splitContainer1.Panel2.ResumeLayout(false);
+            splitContainer1.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
+            splitContainer1.ResumeLayout(false);
+            toolStrip2.ResumeLayout(false);
+            toolStrip2.PerformLayout();
+            toolStrip3.ResumeLayout(false);
+            toolStrip3.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
 
         }
 
         #endregion
 
-        private LiveCharts.WinForms.CartesianChart chart1;
+        private LiveCharts.WinForms.CartesianChart chartDB;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsRefresh;
-        private System.Windows.Forms.ToolStripDropDownButton tsMeasures;
         private System.Windows.Forms.ToolStripDropDownButton tsOptions;
         private System.Windows.Forms.ToolStripMenuItem smoothLinesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pointsToolStripMenuItem;
         private System.Windows.Forms.ToolStripDropDownButton tsDateGrouping;
+        private LiveCharts.WinForms.CartesianChart chartPool;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.ToolStrip toolStrip2;
+        private System.Windows.Forms.ToolStripLabel tsPool;
+        private System.Windows.Forms.ToolStripDropDownButton tsPoolMeasures;
+        private System.Windows.Forms.ToolStrip toolStrip3;
+        private System.Windows.Forms.ToolStripDropDownButton tsMeasures;
+        private System.Windows.Forms.ToolStripLabel tsDB;
     }
 }
