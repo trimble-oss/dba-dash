@@ -276,6 +276,7 @@ namespace DBADash
                     dtRunningQueries.Columns.Add("task_wait_time_2", typeof(long));
                     dtRunningQueries.Columns.Add("task_wait_type_3", typeof(string));
                     dtRunningQueries.Columns.Add("task_wait_time_3", typeof(long));
+                    dtRunningQueries.Columns.Add("dop", typeof(int));
                 }
             }
 

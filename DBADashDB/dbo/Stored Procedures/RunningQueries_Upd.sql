@@ -60,6 +60,7 @@ BEGIN
 						   t.task_wait_time_2,
 						   t.task_wait_type_3,
 						   t.task_wait_time_3,
+						   t.dop,
 						   ROW_NUMBER() OVER(PARTITION BY t.session_id ORDER BY t.cpu_time DESC) rnum
 					FROM  @RunningQueries t
 	)
@@ -107,7 +108,8 @@ BEGIN
 		task_wait_type_2,
 		task_wait_time_2,
 		task_wait_type_3,
-		task_wait_time_3
+		task_wait_time_3,
+		dop
 	)
 	SELECT  SnapshotDateUTC,
 	    session_id,
@@ -151,7 +153,8 @@ BEGIN
 		task_wait_type_2,
 		task_wait_time_2,
 		task_wait_type_3,
-		task_wait_time_3
+		task_wait_time_3,
+		dop
 	FROM deDupe
 	WHERE deDupe.rnum=1
 
@@ -302,7 +305,8 @@ BEGIN
 		task_wait_type_2,
 		task_wait_time_2,
 		task_wait_type_3,
-		task_wait_time_3
+		task_wait_time_3,
+		dop
     )
     SELECT @InstanceID as InstanceID,
         SnapshotDateUTC,
@@ -347,7 +351,8 @@ BEGIN
 		task_wait_type_2,
 		task_wait_time_2,
 		task_wait_type_3,
-		task_wait_time_3
+		task_wait_time_3,
+		dop
     FROM @RunningQueriesDD;
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  

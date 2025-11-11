@@ -41,5 +41,6 @@
     task_wait_type_2 NVARCHAR(60) NULL,
     task_wait_time_2 BIGINT NULL,
     task_wait_type_3 NVARCHAR(60) NULL,
-    task_wait_time_3 BIGINT NULL
+    task_wait_time_3 BIGINT NULL,
+    dop INT NULL
 );

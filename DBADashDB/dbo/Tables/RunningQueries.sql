@@ -43,6 +43,7 @@
     task_wait_time_2 BIGINT NULL,
     task_wait_type_3 NVARCHAR(60) NULL,
     task_wait_time_3 BIGINT NULL,
+    dop INT NULL,
     CONSTRAINT PK_RunningQueries PRIMARY KEY(InstanceID,SnapshotDateUTC,session_id) WITH (DATA_COMPRESSION = PAGE) ON PS_RunningQueries(SnapshotDateUTC)
 ) ON PS_RunningQueries(SnapshotDateUTC);
 GO
