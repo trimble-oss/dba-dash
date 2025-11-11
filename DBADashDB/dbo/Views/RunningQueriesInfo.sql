@@ -101,7 +101,8 @@ SELECT Q.InstanceID,
     Q.task_wait_type_2,
     Q.task_wait_time_2,
     Q.task_wait_type_3,
-    Q.task_wait_time_3
+    Q.task_wait_time_3,
+    Q.dop
 FROM dbo.RunningQueries Q
 JOIN dbo.Instances I ON Q.InstanceID = I.InstanceID
 CROSS APPLY(SELECT 	/* 

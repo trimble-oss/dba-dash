@@ -267,6 +267,13 @@ namespace DBADashGUI.Performance
                 },
                 new DataGridViewTextBoxColumn()
                 {
+                    HeaderText = "DOP", DataPropertyName = "dop",
+                    SortMode = DataGridViewColumnSortMode.Automatic,
+                    DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60,
+                    ToolTipText = "Degree of Parallelism"
+                },
+                new DataGridViewTextBoxColumn()
+                {
                     HeaderText = "Command", DataPropertyName = "Command", Name = "colCommand",
                     SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40
                 },
