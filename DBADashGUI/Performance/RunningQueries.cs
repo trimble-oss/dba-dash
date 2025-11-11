@@ -108,6 +108,7 @@ namespace DBADashGUI.Performance
         public int SessionID = 0;
         public Guid JobId = Guid.Empty;
         private int blockedCount;
+        private bool hasTaskWaits;
         private int idleCount;
         private int runningJobCount;
         private bool hasWaitResource;
@@ -295,18 +296,28 @@ namespace DBADashGUI.Performance
                 {
                     HeaderText = "Wait Time (ms)", DataPropertyName = "wait_time", Name = "colWaitTime",
                     SortMode = DataGridViewColumnSortMode.Automatic,
-                    DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60
+                    DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60,
+                    ToolTipText = "Wait time from sys.dm_exec_requests.wait_time"
                 },
                 new DataGridViewTextBoxColumn()
                 {
                     HeaderText = "Wait Type", DataPropertyName = "wait_type",
-                    SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40
+                    SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40,
+                    ToolTipText = "Wait type from sys.dm_exec_requests.wait_type"
+                },
+                new DataGridViewTextBoxColumn()
+                {
+                    HeaderText = "Task Waits", DataPropertyName = "TaskWaits",
+                    SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40,
+                    Visible = hasTaskWaits,
+                    ToolTipText = "Top task waits from sys.dm_os_waiting_tasks"
                 },
                 new DataGridViewLinkColumn()
                 {
                     HeaderText = "Top Session Waits", DataPropertyName = "TopSessionWaits", Name = "colTopSessionWaits",
                     AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width = 50,
-                    SortMode = DataGridViewColumnSortMode.Automatic
+                    SortMode = DataGridViewColumnSortMode.Automatic,
+                    ToolTipText = "Top session waits from sys.dm_exec_session_wait_stats.  Shows cumulative wait stats for the session (reset when the session is closed/reset).  Doesn't include waits that are still in progress."
                 },
                 new DataGridViewTextBoxColumn()
                 {
@@ -989,6 +1000,7 @@ namespace DBADashGUI.Performance
         {
             runningJobCount = snapshotDT.AsEnumerable().Count(r => r["job_id"] != DBNull.Value);
             blockedCount = snapshotDT.AsEnumerable().Count(r => Convert.ToInt16(r["blocking_session_id"]) != 0);
+            hasTaskWaits = snapshotDT.AsEnumerable().Any(r => !string.IsNullOrEmpty((string)(r["TaskWaits"].DBNullToNull())));
             idleCount = snapshotDT.AsEnumerable()
                 .Count(r => Convert.ToInt64(r["sleeping_session_idle_time_sec"].DBNullToNull()) > 0);
             blockedWait = snapshotDT.AsEnumerable()

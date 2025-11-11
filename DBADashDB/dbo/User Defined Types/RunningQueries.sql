@@ -35,5 +35,11 @@
     is_implicit_transaction BIT NULL,
     total_elapsed_time INT NULL,
     tempdb_alloc_page_count BIGINT NULL,
-	tempdb_dealloc_page_count BIGINT NULL
+	tempdb_dealloc_page_count BIGINT NULL,
+    task_wait_type_1 NVARCHAR(60) NULL,
+    task_wait_time_1 BIGINT NULL,
+    task_wait_type_2 NVARCHAR(60) NULL,
+    task_wait_time_2 BIGINT NULL,
+    task_wait_type_3 NVARCHAR(60) NULL,
+    task_wait_time_3 BIGINT NULL
 );

@@ -115,6 +115,7 @@ namespace DBADashServiceConfig
                     : null,
                 SchemaSnapshotDBs = schemaSnapshotDBs,
                 CollectSessionWaits = chkCollectSessionWaits.Checked,
+                CollectTaskWaits = chkCollectTaskWaits.Checked,
                 ScriptAgentJobs = chkScriptJobs.Checked,
                 IOCollectionLevel = (DBADashSource.IOCollectionLevels)cboIOLevel.SelectedItem!,
                 WriteToSecondaryDestinations = chkWriteToSecondaryDestinations.Checked,
@@ -318,8 +319,8 @@ namespace DBADashServiceConfig
             errorProvider1.SetError(txtDestination, null);
             lblServerNameWarning.Visible = false;
             InvokeSetStatus(lblVersionInfo, "Validating...", DashColors.TrimbleBlue, FontStyle.Regular);
-            _ = Task.Run(async ()=>{
-
+            _ = Task.Run(async () =>
+            {
                 DBADashConnection dest = new(txtDestination.Text);
                 if (!string.IsNullOrEmpty(txtDestination.Text))
                 {
@@ -588,7 +589,13 @@ namespace DBADashServiceConfig
             {
                 DataPropertyName = "CollectSessionWaits",
                 HeaderText = "Collect Session Waits",
-                ToolTipText = "Collect Session Waits for Running Queries"
+                ToolTipText = "Collect Session Waits for Running Queries (sys.dm_exec_session_wait_stats)"
+            });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
+            {
+                DataPropertyName = "CollectTaskWaits",
+                HeaderText = "Collect Task Waits",
+                ToolTipText = "Collect Task Waits for Running Queries (sys.dm_os_waiting_tasks)"
             });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
             {
@@ -1369,7 +1376,8 @@ namespace DBADashServiceConfig
                 {
                     chkCollectPlans.Checked = false;
                 }
-
+                chkCollectTaskWaits.Checked = src.CollectTaskWaits;
+                chkCollectSessionWaits.Checked = src.CollectSessionWaits;
                 cboIOLevel.SelectedItem = src.IOCollectionLevel;
                 chkCollectTempDB.Checked = src.CollectTempDB;
             }
@@ -1655,6 +1663,7 @@ namespace DBADashServiceConfig
             lblIOCollectionLevel.Enabled = isSql;
             lblSchemaSnapshotDBs.Enabled = isSql;
             chkCollectSessionWaits.Enabled = isSql;
+            chkCollectTaskWaits.Enabled = isSql;
             lnkALL.Enabled = isSql;
             lnkExample.Enabled = isSql;
             lnkNone.Enabled = isSql;

@@ -31,9 +31,9 @@ namespace DBADashServiceConfig
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ServiceConfig));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             errorProvider1 = new System.Windows.Forms.ErrorProvider(components);
             bttnSave = new System.Windows.Forms.Button();
             label5 = new System.Windows.Forms.Label();
@@ -188,6 +188,7 @@ namespace DBADashServiceConfig
             txtDestination = new System.Windows.Forms.TextBox();
             tab1 = new ThemedTabControl();
             tabMessaging = new System.Windows.Forms.TabPage();
+            chkCollectTaskWaits = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
@@ -357,7 +358,7 @@ namespace DBADashServiceConfig
             chkCollectSessionWaits.Size = new System.Drawing.Size(170, 24);
             chkCollectSessionWaits.TabIndex = 27;
             chkCollectSessionWaits.Text = "Collect Session Waits";
-            toolTip1.SetToolTip(chkCollectSessionWaits, "Collect Session Waits for Running Queries");
+            toolTip1.SetToolTip(chkCollectSessionWaits, "Collect Session Waits for Running Queries (sys.dm_exec_session_wait_stats)");
             chkCollectSessionWaits.UseVisualStyleBackColor = true;
             // 
             // chkDualSession
@@ -1464,6 +1465,7 @@ namespace DBADashServiceConfig
             // 
             // tabRunningQueries
             // 
+            tabRunningQueries.Controls.Add(chkCollectTaskWaits);
             tabRunningQueries.Controls.Add(chkCollectTempDB);
             tabRunningQueries.Controls.Add(chkCollectPlans);
             tabRunningQueries.Controls.Add(grpRunningQueryThreshold);
@@ -1479,7 +1481,7 @@ namespace DBADashServiceConfig
             // chkCollectTempDB
             // 
             chkCollectTempDB.AutoSize = true;
-            chkCollectTempDB.Location = new System.Drawing.Point(9, 71);
+            chkCollectTempDB.Location = new System.Drawing.Point(9, 103);
             chkCollectTempDB.Name = "chkCollectTempDB";
             chkCollectTempDB.Size = new System.Drawing.Size(214, 24);
             chkCollectTempDB.TabIndex = 28;
@@ -1489,7 +1491,7 @@ namespace DBADashServiceConfig
             // chkCollectPlans
             // 
             chkCollectPlans.AutoSize = true;
-            chkCollectPlans.Location = new System.Drawing.Point(9, 40);
+            chkCollectPlans.Location = new System.Drawing.Point(9, 72);
             chkCollectPlans.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             chkCollectPlans.Name = "chkCollectPlans";
             chkCollectPlans.Size = new System.Drawing.Size(250, 24);
@@ -1779,23 +1781,23 @@ namespace DBADashServiceConfig
             dgvConnections.AllowUserToAddRows = false;
             dgvConnections.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             dgvConnections.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvConnections.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvConnections.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
             dgvConnections.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgvConnections.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvConnections.DefaultCellStyle = dataGridViewCellStyle4;
             dgvConnections.Location = new System.Drawing.Point(16, 27);
             dgvConnections.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvConnections.Name = "dgvConnections";
@@ -2036,6 +2038,18 @@ namespace DBADashServiceConfig
             tabMessaging.Text = "Messaging";
             tabMessaging.UseVisualStyleBackColor = true;
             // 
+            // chkCollectTaskWaits
+            // 
+            chkCollectTaskWaits.AutoSize = true;
+            chkCollectTaskWaits.Location = new System.Drawing.Point(9, 40);
+            chkCollectTaskWaits.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            chkCollectTaskWaits.Name = "chkCollectTaskWaits";
+            chkCollectTaskWaits.Size = new System.Drawing.Size(148, 24);
+            chkCollectTaskWaits.TabIndex = 29;
+            chkCollectTaskWaits.Text = "Collect Task Waits";
+            toolTip1.SetToolTip(chkCollectTaskWaits, "Collect Task Waits for Running Queries (sys.dm_os_waiting_tasks)\r\nUseful for parallel queries that can have several tasks waiting on different things");
+            chkCollectTaskWaits.UseVisualStyleBackColor = true;
+            // 
             // ServiceConfig
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -2261,6 +2275,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.CheckBox chkGeneric;
         private System.Windows.Forms.CheckBox chkAWS;
         private System.Windows.Forms.CheckBox chkAzure;
+        private System.Windows.Forms.CheckBox chkCollectTaskWaits;
     }
 }
 

@@ -109,6 +109,9 @@ PopulateConnectionID2 - Add ConnectionID to source connections without a Connect
         [Option("CollectTempDB", Default = false, Required = false, HelpText = "Running Queries - Collect TempDB allocations")]
         public bool? CollectTempDB { get; set; }
 
+        [Option("CollectTaskWaits", Default = false, Required = false, HelpText = "Running Queries - Collect Task Waits")]
+        public bool? CollectTaskWaits { get; set; }
+
         [Option("WriteToSecondaryDestinations", Default = true, Required = false, HelpText = "Write to secondary destinations.  Use with -a Add")]
         public bool? WriteToSecondaryDestinations { get; set; }
 

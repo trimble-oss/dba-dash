@@ -1105,6 +1105,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             cmd.Parameters.AddWithValue("CollectSessionWaits", Source.CollectSessionWaits);
             cmd.Parameters.AddWithValue("CollectTranBeginTime", Source.CollectTranBeginTime);
             cmd.Parameters.AddWithValue("CollectTempDB", Source.CollectTempDB);
+            cmd.Parameters.AddWithValue("CollectTaskWaits", Source.CollectTaskWaits);
             await cn.OpenAsync();
             var ds = new DataSet();
             da.Fill(ds);

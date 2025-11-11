@@ -2,7 +2,8 @@
 DECLARE @CollectSessionWaits BIT 
 DECLARE @CollectTranBeginTime BIT 
 DECLARE @CollectTempDB BIT
-SELECT @CollectSessionWaits =0,@CollectTranBeginTime = 1, @CollectTempDB=1
+DECLARE @CollectTaskWaits BIT
+SELECT @CollectSessionWaits =0,@CollectTranBeginTime = 1, @CollectTempDB=1, @CollectTaskWaits=1
 */
 
 DECLARE @HasOpenTranCount BIT
@@ -13,7 +14,7 @@ SELECT	@HasOpenTranCount =CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_sessio
 		@SnapshotDateUTC = GETUTCDATE()
 
 DECLARE @SQL NVARCHAR(MAX) 
-SET @SQL = N'
+SET @SQL = CAST(N'
 SELECT @SnapshotDateUTC as SnapshotDateUTC,
 	s.session_id,
 	r.statement_start_offset,
@@ -30,7 +31,7 @@ SELECT @SnapshotDateUTC as SnapshotDateUTC,
 	ISNULL(r.writes,s.writes) writes,
 	r.granted_query_memory,
 	r.percent_complete,
-	' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_sessions'),'open_transaction_count','ColumnId') IS NULL THEN 'r.open_transaction_count,' ELSE 's.open_transaction_count,' END + '
+	' AS NVARCHAR(MAX)) + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_sessions'),'open_transaction_count','ColumnId') IS NULL THEN 'r.open_transaction_count,' ELSE 's.open_transaction_count,' END + '
 	s.transaction_isolation_level,
 	s.login_name,
 	s.host_name,
@@ -50,7 +51,13 @@ SELECT @SnapshotDateUTC as SnapshotDateUTC,
 	' + CASE WHEN @CollectTranBeginTime=1 OR @HasOpenTranCount=0 THEN 'ISNULL(t.is_implicit_transaction,CAST(0 AS BIT))' ELSE 'CAST(NULL AS BIT)' END + ' AS is_implicit_transaction,
 	r.total_elapsed_time,
 	' + CASE WHEN @CollectTempDB=1 THEN 'tempdb_alloc.sum_tempdb_alloc_page_count' ELSE 'CAST(NULL AS BIGINT)' END + ' AS tempdb_alloc_page_count,
-	' + CASE WHEN @CollectTempDB=1 THEN 'tempdb_alloc.sum_tempdb_dealloc_page_count' ELSE 'CAST(NULL AS BIGINT)' END + ' AS tempdb_dealloc_page_count
+	' + CASE WHEN @CollectTempDB=1 THEN 'tempdb_alloc.sum_tempdb_dealloc_page_count' ELSE 'CAST(NULL AS BIGINT)' END + ' AS tempdb_dealloc_page_count,
+	' + CASE WHEN @CollectTaskWaits=1 THEN 'oswt_pivot.task_wait_type_1' ELSE 'CAST(NULL AS NVARCHAR(60))' END + ' AS task_wait_type_1,
+	' + CASE WHEN @CollectTaskWaits=1 THEN 'oswt_pivot.task_wait_time_1' ELSE 'CAST(NULL AS BIGINT)' END + ' AS task_wait_time_1,
+	' + CASE WHEN @CollectTaskWaits=1 THEN 'oswt_pivot.task_wait_type_2' ELSE 'CAST(NULL AS NVARCHAR(60))' END + ' AS task_wait_type_2,
+	' + CASE WHEN @CollectTaskWaits=1 THEN 'oswt_pivot.task_wait_time_2' ELSE 'CAST(NULL AS BIGINT)' END + ' AS task_wait_time_2,
+	' + CASE WHEN @CollectTaskWaits=1 THEN 'oswt_pivot.task_wait_type_3' ELSE 'CAST(NULL AS NVARCHAR(60))' END + ' AS task_wait_type_3,
+	' + CASE WHEN @CollectTaskWaits=1 THEN 'oswt_pivot.task_wait_time_3' ELSE 'CAST(NULL AS BIGINT)' END + ' AS task_wait_time_3
 FROM sys.dm_exec_sessions s
 ' + CASE WHEN @CollectTranBeginTime=1 OR @HasOpenTranCount=0 THEN '
 LEFT HASH JOIN (
@@ -79,6 +86,38 @@ LEFT HASH JOIN (	SELECT	tsu.request_id,
 				) AS tempdb_alloc
 		ON r.session_id = tempdb_alloc.session_id
 		AND r.request_id = tempdb_alloc.request_id' ELSE '' END + '
+' + CASE WHEN @CollectTaskWaits=1 THEN N'
+LEFT HASH JOIN(
+			/* Pivot top 3 wait types by total wait time for each session */	
+			SELECT	oswt_ranked.session_id,
+					MAX(CASE WHEN rnum=1 THEN oswt_ranked.wait_type ELSE NULL END) AS task_wait_type_1,
+					MAX(CASE WHEN rnum=1 THEN oswt_ranked.wait_duration_ms ELSE NULL END) AS task_wait_time_1,
+					MAX(CASE WHEN rnum=2 THEN oswt_ranked.wait_type ELSE NULL END) AS task_wait_type_2,
+					MAX(CASE WHEN rnum=2 THEN oswt_ranked.wait_duration_ms ELSE NULL END) AS task_wait_time_2,
+					MAX(CASE WHEN rnum=3 THEN oswt_ranked.wait_type ELSE NULL END) AS task_wait_type_3,
+					MAX(CASE WHEN rnum=3 THEN oswt_ranked.wait_duration_ms ELSE NULL END) AS task_wait_time_3
+			FROM (		/* Rank wait types by total wait time for each session */
+						SELECT	oswt_group.session_id,
+								oswt_group.wait_type,
+								oswt_group.wait_duration_ms,
+								ROW_NUMBER() OVER(PARTITION BY oswt_group.session_id ORDER BY oswt_group.wait_duration_ms DESC) rnum
+						FROM ( /* Aggregate task wait times by wait type for each session */
+								SELECT		oswt.session_id,
+											oswt.wait_type,
+											SUM(oswt.wait_duration_ms) wait_duration_ms		
+								FROM sys.dm_os_waiting_tasks AS oswt
+								WHERE oswt.session_id IS NOT NULL
+								/* Should be safe to filter out, potentially reducing the amount of work */
+								AND wait_type NOT IN(''DISPATCHER_QUEUE_SEMAPHORE'',''HADR_WORK_QUEUE'',''LOGMGR_QUEUE'',''BROKER_TASK_STOP'')
+								GROUP BY	oswt.session_id,
+											oswt.wait_type
+							) oswt_group
+					) oswt_ranked
+			WHERE oswt_ranked.rnum <= 3
+			GROUP BY oswt_ranked.session_id
+			) AS oswt_pivot
+			ON oswt_pivot.session_id = r.session_id
+' ELSE N'' END + N'
 WHERE s.is_user_process=1
 ' +CASE WHEN @HasOpenTranCount = 0 
 		-- For older instances
