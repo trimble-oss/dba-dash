@@ -41,7 +41,7 @@ namespace DBADash
                     },
                     MaxRetryAttempts = 2,
                 })
-                .Build(); 
+                .Build();
         }
 
         public DBImporter(DataSet data, string connectionString, DBADashAgent importAgent, int commandTimeout = 60)
@@ -99,7 +99,7 @@ namespace DBADash
         {
             if (!data.Tables.Contains("Errors") || !data.Tables["Errors"]!.Columns.Contains("ErrorContext")) return;
             var dtErrors = data.Tables["Errors"];
-            foreach (var row in dtErrors.Rows.Cast<DataRow>().Where(r=>r.Field<string>("ErrorContext") == "Import"))
+            foreach (var row in dtErrors.Rows.Cast<DataRow>().Where(r => r.Field<string>("ErrorContext") == "Import"))
             {
                 row["ErrorContext"] = "Import[Existing]";
             }
@@ -177,7 +177,7 @@ namespace DBADash
                     dtDB.Columns.Add("is_temporal_history_retention_enabled", typeof(bool));
                     dtDB.Columns.Add("is_optimized_locking_on", typeof(bool));
                 }
-                if(!dtDB.Columns.Contains("service_broker_guid"))
+                if (!dtDB.Columns.Contains("service_broker_guid"))
                 {
                     dtDB.Columns.Add("service_broker_guid", typeof(Guid));
                 }
@@ -267,6 +267,15 @@ namespace DBADash
                     dtRunningQueries.Columns.Add("total_elapsed_time", typeof(int));
                     dtRunningQueries.Columns.Add("tempdb_alloc_page_count", typeof(long));
                     dtRunningQueries.Columns.Add("tempdb_dealloc_page_count", typeof(long));
+                }
+                if (!dtRunningQueries.Columns.Contains("task_wait_type_1"))
+                {
+                    dtRunningQueries.Columns.Add("task_wait_type_1", typeof(string));
+                    dtRunningQueries.Columns.Add("task_wait_time_1", typeof(long));
+                    dtRunningQueries.Columns.Add("task_wait_type_2", typeof(string));
+                    dtRunningQueries.Columns.Add("task_wait_time_2", typeof(long));
+                    dtRunningQueries.Columns.Add("task_wait_type_3", typeof(string));
+                    dtRunningQueries.Columns.Add("task_wait_time_3", typeof(long));
                 }
             }
 
@@ -424,13 +433,12 @@ namespace DBADash
                 var databaseName = tableName[snapshotPrefix.Length..];
                 await TryUpdateAsync(async _ => await UpdateSnapshotAsync(tableName, databaseName), tableName, exceptions);
             }
-            await TryUpdateAsync(async _ => await UpdateServerExtraPropertiesAsync(), "ServerExtraProperties",exceptions);
+            await TryUpdateAsync(async _ => await UpdateServerExtraPropertiesAsync(), "ServerExtraProperties", exceptions);
             await TryUpdateAsync(async _ => await UpdateInstanceMetadata_Async(), "InstanceMetadata", exceptions);
-  
 
             // retry based on policy then let caller handle the exception
 
-            await TryUpdateAsync(async _ => await InsertErrorsAsync(),"InsertErrors", exceptions);
+            await TryUpdateAsync(async _ => await InsertErrorsAsync(), "InsertErrors", exceptions);
 
             if (exceptions.Count > 0)
             {
@@ -442,7 +450,7 @@ namespace DBADash
         {
             if (!data.Tables.Contains("InstanceMetadata")) return;
             var metadataTable = data.Tables["InstanceMetadata"];
-            if (metadataTable==null || metadataTable.Rows.Count == 0) return; // nothing to do
+            if (metadataTable == null || metadataTable.Rows.Count == 0) return; // nothing to do
             var r = metadataTable.Rows[0];
             var metadata = r["Metadata"] as string;
             var provider = r["Provider"] as string;
@@ -542,9 +550,8 @@ namespace DBADash
 
         private async Task TryUpdateAsync(string tableName, List<Exception> exceptions)
         {
-            await TryUpdateAsync(async _ =>await UpdateAsync(tableName),tableName, exceptions);
+            await TryUpdateAsync(async _ => await UpdateAsync(tableName), tableName, exceptions);
         }
-
 
         /// <summary>
         /// Runs action with retry logic.  Exceptions are handled and added to exceptions
@@ -553,7 +560,7 @@ namespace DBADash
         /// <param name="tableName">Table associated with collection being imported</param>
         /// <param name="exceptions">Exception list to append to</param>
         /// <returns></returns>
-        private async Task TryUpdateAsync(Func<CancellationToken, ValueTask> action,string tableName, ICollection<Exception> exceptions)
+        private async Task TryUpdateAsync(Func<CancellationToken, ValueTask> action, string tableName, ICollection<Exception> exceptions)
         {
             List<Exception> retryErrors = new();
             try
@@ -603,9 +610,9 @@ namespace DBADash
                         exceptions.Add(ex);
                     }
                 });
-                if(retryErrors.Count > 0) // Import succeeded after retry.  We don't add to exceptions as this is considered a successful import if it succeeds after a retry.
+                if (retryErrors.Count > 0) // Import succeeded after retry.  We don't add to exceptions as this is considered a successful import if it succeeds after a retry.
                 {
-                    LogError(tableName, new AggregateException($"{tableName} collection succeeded after {retryErrors.Count} failed attempts",retryErrors), "Import[Retry]");
+                    LogError(tableName, new AggregateException($"{tableName} collection succeeded after {retryErrors.Count} failed attempts", retryErrors), "Import[Retry]");
                 }
             }
             catch (Exception ex)
@@ -618,8 +625,6 @@ namespace DBADash
                 exceptions.Add(aggEx);
                 LogError(tableName, aggEx);
             }
-
-      
         }
 
         private async Task UpdateAsync(string tableName)

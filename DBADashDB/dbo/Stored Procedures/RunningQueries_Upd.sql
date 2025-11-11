@@ -54,6 +54,12 @@ BEGIN
 						   t.total_elapsed_time,
 						   t.tempdb_alloc_page_count,
 						   t.tempdb_dealloc_page_count,
+						   t.task_wait_type_1,
+						   t.task_wait_time_1,
+						   t.task_wait_type_2,
+						   t.task_wait_time_2,
+						   t.task_wait_type_3,
+						   t.task_wait_time_3,
 						   ROW_NUMBER() OVER(PARTITION BY t.session_id ORDER BY t.cpu_time DESC) rnum
 					FROM  @RunningQueries t
 	)
@@ -95,7 +101,13 @@ BEGIN
 		is_implicit_transaction,
 		total_elapsed_time,
 		tempdb_alloc_page_count,
-		tempdb_dealloc_page_count
+		tempdb_dealloc_page_count,
+		task_wait_type_1,
+		task_wait_time_1,
+		task_wait_type_2,
+		task_wait_time_2,
+		task_wait_type_3,
+		task_wait_time_3
 	)
 	SELECT  SnapshotDateUTC,
 	    session_id,
@@ -133,7 +145,13 @@ BEGIN
 		is_implicit_transaction,
 		total_elapsed_time,
 		tempdb_alloc_page_count,
-		tempdb_dealloc_page_count
+		tempdb_dealloc_page_count,
+		task_wait_type_1,
+		task_wait_time_1,
+		task_wait_type_2,
+		task_wait_time_2,
+		task_wait_type_3,
+		task_wait_time_3
 	FROM deDupe
 	WHERE deDupe.rnum=1
 
@@ -278,7 +296,13 @@ BEGIN
 		is_implicit_transaction,
 		total_elapsed_time,
 		tempdb_alloc_page_count,
-		tempdb_dealloc_page_count
+		tempdb_dealloc_page_count,
+		task_wait_type_1,
+		task_wait_time_1,
+		task_wait_type_2,
+		task_wait_time_2,
+		task_wait_type_3,
+		task_wait_time_3
     )
     SELECT @InstanceID as InstanceID,
         SnapshotDateUTC,
@@ -317,7 +341,13 @@ BEGIN
 		is_implicit_transaction,
 		total_elapsed_time,
 		tempdb_alloc_page_count,
-		tempdb_dealloc_page_count
+		tempdb_dealloc_page_count,
+		task_wait_type_1,
+		task_wait_time_1,
+		task_wait_type_2,
+		task_wait_time_2,
+		task_wait_type_3,
+		task_wait_time_3
     FROM @RunningQueriesDD;
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  

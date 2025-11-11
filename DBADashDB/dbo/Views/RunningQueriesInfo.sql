@@ -92,7 +92,16 @@ SELECT Q.InstanceID,
     D.is_query_store_on,
     CASE WHEN Q.tempdb_alloc_page_count < Q.tempdb_dealloc_page_count THEN 0 ELSE (Q.tempdb_alloc_page_count - Q.tempdb_dealloc_page_count) / 128.0 END AS tempdb_current_mb,
     Q.tempdb_alloc_page_count /128.0 AS tempdb_allocations_mb,
-    Q.total_elapsed_time
+    Q.total_elapsed_time,
+    CONCAT(Q.task_wait_type_1 + ' (' + CAST(Q.task_wait_time_1 AS NVARCHAR(260)) + 'ms)',
+            ', ' + Q.task_wait_type_2 + ' (' + CAST(Q.task_wait_time_2 AS NVARCHAR(260)) + 'ms)',
+            ', ' + Q.task_wait_type_3 + ' (' + CAST(Q.task_wait_time_3 AS NVARCHAR(260)) + 'ms)') AS TaskWaits,
+    Q.task_wait_type_1,
+    Q.task_wait_time_1,
+    Q.task_wait_type_2,
+    Q.task_wait_time_2,
+    Q.task_wait_type_3,
+    Q.task_wait_time_3
 FROM dbo.RunningQueries Q
 JOIN dbo.Instances I ON Q.InstanceID = I.InstanceID
 CROSS APPLY(SELECT 	/* 

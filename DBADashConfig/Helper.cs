@@ -164,6 +164,7 @@ namespace DBADashConfig
                 CollectTranBeginTime = o.CollectTranBeginTime ?? true,
                 WriteToSecondaryDestinations = o.WriteToSecondaryDestinations ?? true,
                 ScriptAgentJobs = o.ScriptAgentJobs ?? true,
+                CollectTaskWaits = o.CollectTaskWaits ?? false,
             };
             if (!o.SkipValidation)
             {

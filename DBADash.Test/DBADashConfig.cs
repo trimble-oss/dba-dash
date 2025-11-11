@@ -57,14 +57,14 @@ namespace DBADashConfig.Test
         }
 
         [TestMethod]
-        [DataRow("SQL1", "Data Source=SQL1;Integrated Security=SSPI", false, false, true, false, true, false, true)]
-        [DataRow("SQL2", "Data Source=SQL2;Integrated Security=SSPI", true, false, false, true, false, true, false)]
-        [DataRow("SQL3", "Data Source=SQL3;Integrated Security=SSPI", false, true, false, false, true, true, false)]
-        public void AddConnectionTest(string connectionID, string connectionString, bool persistXE, bool useDualSession, bool tempdb, bool tranBeginTime, bool collectSessionWaits, bool writeToSecondaryDest, bool scriptAgentJobs)
+        [DataRow("SQL1", "Data Source=SQL1;Integrated Security=SSPI", false, false, true, false, true, false, true, false)]
+        [DataRow("SQL2", "Data Source=SQL2;Integrated Security=SSPI", true, false, false, true, false, true, false, true)]
+        [DataRow("SQL3", "Data Source=SQL3;Integrated Security=SSPI", false, true, false, false, true, true, false, true)]
+        public void AddConnectionTest(string connectionID, string connectionString, bool persistXE, bool useDualSession, bool tempdb, bool tranBeginTime, bool collectSessionWaits, bool writeToSecondaryDest, bool scriptAgentJobs, bool taskWaits)
         {
             const bool skipValidation = true;
             var args =
-                $"-a Add -c \"{connectionString}\" --PersistXESessions {persistXE} --UseDualEventSession {useDualSession} --SkipValidation {skipValidation} --ConnectionID {connectionID} --CollectTranBeginTime {tranBeginTime} --CollectTempDB {tempdb} --WriteToSecondaryDestinations {writeToSecondaryDest} --ScriptAgentJobs {scriptAgentJobs}";
+                $"-a Add -c \"{connectionString}\" --PersistXESessions {persistXE} --UseDualEventSession {useDualSession} --SkipValidation {skipValidation} --ConnectionID {connectionID} --CollectTranBeginTime {tranBeginTime} --CollectTempDB {tempdb} --WriteToSecondaryDestinations {writeToSecondaryDest} --ScriptAgentJobs {scriptAgentJobs} --CollectTaskWaits {taskWaits}";
             if (!collectSessionWaits)
             {
                 args += " --NoCollectSessionWaits";
@@ -84,6 +84,7 @@ namespace DBADashConfig.Test
             Assert.AreEqual(conn.CollectSessionWaits, collectSessionWaits, "Test CollectSessionWaits");
             Assert.AreEqual(conn.WriteToSecondaryDestinations, writeToSecondaryDest, "Test WriteToSecondaryDestinations");
             Assert.AreEqual(conn.ScriptAgentJobs, scriptAgentJobs, "Test ScriptAgentJobs");
+            Assert.AreEqual(conn.CollectTaskWaits, taskWaits, "Test CollectTaskWaits");
 
             // test removal
             args = $"-a Remove --ConnectionID {connectionID}";
