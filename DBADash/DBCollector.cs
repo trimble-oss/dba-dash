@@ -868,14 +868,29 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
         }
 
         ///<summary>
-        ///Get a distinct list of sql_handle for running queries.  The handles are later used to capture query text
+        ///Get a distinct list of sql_handle from RunningQueries and RunningQueriesCursors tables (if they exist).  The handles are later used to capture query text
         ///</summary>
         private List<string> RunningQueriesHandles()
         {
-            var handles = (from r in Data.Tables["RunningQueries"]!.AsEnumerable()
-                           where r["sql_handle"] != DBNull.Value
-                           select ((byte[])r["sql_handle"]).ToHexString()).Distinct().ToList();
-            return handles;
+            var handles = new List<string>();
+
+            if (Data.Tables.Contains("RunningQueries"))
+            {
+                var runningQueriesHandles = from r in Data.Tables["RunningQueries"]!.AsEnumerable()
+                                            where r["sql_handle"] != DBNull.Value
+                                            select ((byte[])r["sql_handle"]).ToHexString();
+                handles.AddRange(runningQueriesHandles);
+            }
+
+            if (Data.Tables.Contains("RunningQueriesCursors"))
+            {
+                var cursorsHandles = from r in Data.Tables["RunningQueriesCursors"]!.AsEnumerable()
+                                     where r["sql_handle"] != DBNull.Value
+                                     select ((byte[])r["sql_handle"]).ToHexString();
+                handles.AddRange(cursorsHandles);
+            }
+
+            return handles.Distinct().ToList();
         }
 
         private async Task ExecuteCollectionAsync(CollectionType collectionType)
@@ -1106,6 +1121,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             cmd.Parameters.AddWithValue("CollectTranBeginTime", Source.CollectTranBeginTime);
             cmd.Parameters.AddWithValue("CollectTempDB", Source.CollectTempDB);
             cmd.Parameters.AddWithValue("CollectTaskWaits", Source.CollectTaskWaits);
+            cmd.Parameters.AddWithValue("CollectCursors", Source.CollectCursors);
             await cn.OpenAsync();
             var ds = new DataSet();
             da.Fill(ds);
@@ -1113,12 +1129,20 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             dtRunningQueries.TableName = "RunningQueries";
             ds.Tables.Remove(dtRunningQueries);
             Data.Tables.Add(dtRunningQueries);
-            // We might have a second table if we are collecting session waits
-            if (ds.Tables.Count != 1) return;
-            var dtSessionWaits = ds.Tables[0];
-            dtSessionWaits.TableName = "SessionWaits";
-            ds.Tables.Remove(dtSessionWaits);
-            Data.Tables.Add(dtSessionWaits);
+            while (ds.Tables.Count > 0)
+            {
+                var dt = ds.Tables[0];
+                if (dt.Columns.Contains("waiting_tasks_count"))
+                {
+                    dt.TableName = "SessionWaits";
+                }
+                else if (dt.Columns.Contains("fetch_status"))
+                {
+                    dt.TableName = "RunningQueriesCursors";
+                }
+                ds.Tables.Remove(dt);
+                Data.Tables.Add(dt);
+            }
         }
 
         private void CollectResourceGovernor()

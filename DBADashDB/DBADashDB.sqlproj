@@ -852,6 +852,12 @@
     <Build Include="dbo\Stored Procedures\AzureDBCounters_Upd.sql" />
     <Build Include="dbo\Views\AzureDBResourceStatsCounters.sql" />
     <Build Include="dbo\Views\AzureDBResourceStatsCounters_60MIN.sql" />
+    <Build Include="dbo\User Defined Types\RunningQueriesCursors.sql" />
+    <Build Include="dbo\Tables\RunningQueriesCursors.sql" />
+    <Build Include="Storage\PF_RunningQueriesCursors.sql" />
+    <Build Include="Storage\PS_RunningQueriesCursors.sql" />
+    <Build Include="dbo\Stored Procedures\RunningQueriesCursors_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\RunningQueriesCursors_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

@@ -13,6 +13,8 @@ namespace DBADashGUI.CustomReports
             InitializeComponent();
         }
 
+        public CustomReportView CustomReportView => customReportView1;
+
         public DBADashContext Context { get; set; }
 
         public List<CustomSqlParameter> CustomParams { get; set; }
@@ -23,7 +25,7 @@ namespace DBADashGUI.CustomReports
         {
             Text = Context.Report.ReportName;
             await customReportView1.SetContext(Context, CustomParams);
-            if(DataSet != null)
+            if (DataSet != null)
             {
                 customReportView1.ShowData(DataSet);
             }

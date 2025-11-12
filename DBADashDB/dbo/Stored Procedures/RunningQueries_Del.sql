@@ -32,11 +32,19 @@ BEGIN
 	WHERE InstanceID = @InstanceID
 	AND SnapshotDateUTC < @MaxDate
 	OPTION(RECOMPILE)
+
+	DELETE TOP(@BatchSize)  
+	FROM dbo.RunningQueriesCursors
+	OUTPUT DELETED.sql_handle INTO @deleted(sql_handle)
+	WHERE InstanceID = @InstanceID
+	AND SnapshotDateUTC < @MaxDate
+	OPTION(RECOMPILE)
 	
-	DELETE QT 
+	DELETE TOP(@BatchSize) QT 
 	FROM dbo.QueryText QT
 	WHERE EXISTS(SELECT 1 FROM @deleted H WHERE H.sql_handle =QT.sql_handle)
 	AND NOT EXISTS(SELECT 1 FROM dbo.RunningQueries RQ WHERE RQ.sql_handle = QT.sql_handle)
+	AND NOT EXISTS(SELECT 1 FROM dbo.RunningQueriesCursors RQC WHERE RQC.sql_handle = QT.sql_handle)
 
 	DELETE QP
 	FROM dbo.QueryPlans QP

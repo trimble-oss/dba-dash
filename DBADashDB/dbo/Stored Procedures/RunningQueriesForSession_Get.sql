@@ -87,7 +87,8 @@ SELECT InstanceID,
        tempdb_allocations_mb,
        total_elapsed_time,
        TaskWaits,
-       dop
+       dop,
+       cursor_text
 FROM dbo.RunningQueriesInfo Q
 WHERE Q.SnapshotDateUTC >= @SnapshotDateFrom 
 AND Q.SnapshotDateUTC < @SnapshotDateTo

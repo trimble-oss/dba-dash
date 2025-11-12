@@ -31,7 +31,8 @@
     @SQLHandle VARBINARY(64)=NULL, /* SQL Handle to filter for */
     @PlanHandle VARBINARY(64)=NULL, /* Plan Handle to filter for */
     @Top INT=NULL, /* Limit the number of rows returned */
-    @Debug BIT=0 /* Print dynamic SQL for debugging purposes */
+    @Debug BIT=0, /* Print dynamic SQL for debugging purposes */
+    @HasCursors BIT= 0 OUTPUT /* Output parameter indicating if we have any cursors associated with this snapshot */
 )
 AS
 IF @SnapshotDate IS NOT NULL
@@ -84,6 +85,16 @@ BEGIN
     /* Get app name to filter on for agent job if job id is specified */
     SET @AppName = 'SQLAgent - TSQL JobStep (Job ' + CONVERT(VARCHAR,CAST(@JobID AS BINARY(16)),1) + '%'
 END
+/* Used to display the cursors button in the UI */
+SELECT @HasCursors = CASE WHEN EXISTS(
+                                    SELECT 1
+                                    FROM dbo.RunningQueriesCursors
+                                    WHERE InstanceID = @InstanceID
+                                    AND SnapshotDateUTC = @SnapshotDateFrom
+                                    AND SnapshotDateUTC = @SnapshotDateTo /* HasCursors returns true for a specific snapshot only (both dates the same) */
+                    )
+                    THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+
 
 DECLARE @SQL NVARCHAR(MAX)
 
@@ -171,7 +182,8 @@ SELECT ' + CASE WHEN @Top IS NULL THEN '' ELSE 'TOP(@Top)' END + '
        tempdb_allocations_mb,
        total_elapsed_time,
        TaskWaits,
-       dop
+       dop,
+       cursor_text
 FROM dbo.RunningQueriesInfo Q
 WHERE Q.InstanceID = @InstanceID
 ' + CASE WHEN @SnapshotDateFrom = @SnapshotDateTo THEN 'AND Q.SnapshotDateUTC = @SnapshotDateFrom' ELSE 'AND Q.SnapshotDateUTC >= @SnapshotDateFrom AND Q.SnapshotDateUTC < @SnapshotDateTo' END + '
