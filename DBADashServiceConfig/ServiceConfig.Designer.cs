@@ -66,6 +66,7 @@ namespace DBADashServiceConfig
             chkLogInternalPerfCounters = new System.Windows.Forms.CheckBox();
             bttnCheckConnections = new System.Windows.Forms.Button();
             label21 = new System.Windows.Forms.Label();
+            chkCollectTaskWaits = new System.Windows.Forms.CheckBox();
             picConfigFileAccess = new System.Windows.Forms.PictureBox();
             lblConfigFileAccess = new System.Windows.Forms.Label();
             pnlBottom = new System.Windows.Forms.Panel();
@@ -188,7 +189,7 @@ namespace DBADashServiceConfig
             txtDestination = new System.Windows.Forms.TextBox();
             tab1 = new ThemedTabControl();
             tabMessaging = new System.Windows.Forms.TabPage();
-            chkCollectTaskWaits = new System.Windows.Forms.CheckBox();
+            chkCollectCursors = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
@@ -598,6 +599,18 @@ namespace DBADashServiceConfig
             label21.TabIndex = 12;
             label21.Text = "Allowed Job Execution";
             toolTip1.SetToolTip(label21, "Comma separated list of allowed jobs, categories or job IDs.  Prefix with - to deny.  Use * or % as wildcard characters. ");
+            // 
+            // chkCollectTaskWaits
+            // 
+            chkCollectTaskWaits.AutoSize = true;
+            chkCollectTaskWaits.Location = new System.Drawing.Point(9, 40);
+            chkCollectTaskWaits.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            chkCollectTaskWaits.Name = "chkCollectTaskWaits";
+            chkCollectTaskWaits.Size = new System.Drawing.Size(148, 24);
+            chkCollectTaskWaits.TabIndex = 29;
+            chkCollectTaskWaits.Text = "Collect Task Waits";
+            toolTip1.SetToolTip(chkCollectTaskWaits, "Collect Task Waits for Running Queries (sys.dm_os_waiting_tasks)\r\nUseful for parallel queries that can have several tasks waiting on different things");
+            chkCollectTaskWaits.UseVisualStyleBackColor = true;
             // 
             // picConfigFileAccess
             // 
@@ -1465,6 +1478,7 @@ namespace DBADashServiceConfig
             // 
             // tabRunningQueries
             // 
+            tabRunningQueries.Controls.Add(chkCollectCursors);
             tabRunningQueries.Controls.Add(chkCollectTaskWaits);
             tabRunningQueries.Controls.Add(chkCollectTempDB);
             tabRunningQueries.Controls.Add(chkCollectPlans);
@@ -2038,17 +2052,18 @@ namespace DBADashServiceConfig
             tabMessaging.Text = "Messaging";
             tabMessaging.UseVisualStyleBackColor = true;
             // 
-            // chkCollectTaskWaits
+            // chkCollectCursors
             // 
-            chkCollectTaskWaits.AutoSize = true;
-            chkCollectTaskWaits.Location = new System.Drawing.Point(9, 40);
-            chkCollectTaskWaits.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            chkCollectTaskWaits.Name = "chkCollectTaskWaits";
-            chkCollectTaskWaits.Size = new System.Drawing.Size(148, 24);
-            chkCollectTaskWaits.TabIndex = 29;
-            chkCollectTaskWaits.Text = "Collect Task Waits";
-            toolTip1.SetToolTip(chkCollectTaskWaits, "Collect Task Waits for Running Queries (sys.dm_os_waiting_tasks)\r\nUseful for parallel queries that can have several tasks waiting on different things");
-            chkCollectTaskWaits.UseVisualStyleBackColor = true;
+            chkCollectCursors.AutoSize = true;
+            chkCollectCursors.Location = new System.Drawing.Point(9, 134);
+            chkCollectCursors.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            chkCollectCursors.Name = "chkCollectCursors";
+            chkCollectCursors.Size = new System.Drawing.Size(129, 24);
+            chkCollectCursors.TabIndex = 30;
+            chkCollectCursors.Text = "Collect Cursors";
+            chkCollectCursors.ThreeState = true;
+            toolTip1.SetToolTip(chkCollectCursors, "sys.dm_exec_cursors capture for Running Queries.  Enable if your application uses cursors and you need to identify the SQL query associated with the cursor.");
+            chkCollectCursors.UseVisualStyleBackColor = true;
             // 
             // ServiceConfig
             // 
@@ -2276,6 +2291,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.CheckBox chkAWS;
         private System.Windows.Forms.CheckBox chkAzure;
         private System.Windows.Forms.CheckBox chkCollectTaskWaits;
+        private System.Windows.Forms.CheckBox chkCollectCursors;
     }
 }
 

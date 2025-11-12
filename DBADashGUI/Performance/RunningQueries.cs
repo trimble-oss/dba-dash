@@ -1,6 +1,7 @@
 ﻿using DBADash;
 using DBADash.Messaging;
 using DBADashGUI.AgentJobs;
+using DBADashGUI.CustomReports;
 using DBADashGUI.Interface;
 using DBADashGUI.Messaging;
 using DBADashGUI.Theme;
@@ -109,6 +110,7 @@ namespace DBADashGUI.Performance
         public Guid JobId = Guid.Empty;
         private int blockedCount;
         private bool hasTaskWaits;
+        private bool hasCursorColumn;
         private int idleCount;
         private int runningJobCount;
         private bool hasWaitResource;
@@ -146,6 +148,12 @@ namespace DBADashGUI.Performance
                 {
                     HeaderText = "Text", DataPropertyName = "text", Name = "colText",
                     SortMode = DataGridViewColumnSortMode.Automatic
+                },
+                new DataGridViewLinkColumn()
+                {
+                    HeaderText = "Cursor", DataPropertyName = "cursor_text", Name = "colCursor",
+                    SortMode = DataGridViewColumnSortMode.Automatic,
+                    Visible = hasCursorColumn
                 },
                 new DataGridViewLinkColumn()
                 {
@@ -667,7 +675,7 @@ namespace DBADashGUI.Performance
                 SnapshotDateTo = DateTime.MaxValue;
                 ShowLatestOnNextExecution = false;
             }
-
+            tsCursors.Visible = false;
             SetHighlightBeforeRefresh(out var highlightSnapshot, out var highlight);
             dgv.DataSource = null;
             snapshotDT = null;
@@ -693,7 +701,9 @@ namespace DBADashGUI.Performance
                             SessionID = SessionID,
                             JobID = JobId
                         };
-                    snapshotDT = RunningQueriesSnapshot(ref filters);
+                    var hasAnyCursors = false;
+                    snapshotDT = RunningQueriesSnapshot(ref filters, ref hasAnyCursors);
+                    tsCursors.Visible = hasAnyCursors;
                     SnapshotDateFrom = filters.From;
                     skip = 0;
                     GetCounts();
@@ -959,7 +969,7 @@ namespace DBADashGUI.Performance
         }
 
         /// <summary>Get running queries snapshot data for the specified snapshot date. skip parameter is used to return next snapshot (1) or previous snapshot (-1)</summary>
-        private static DataTable RunningQueriesSnapshot(ref RunningQueriesFilters filters)
+        private static DataTable RunningQueriesSnapshot(ref RunningQueriesFilters filters, ref bool hasAnyCursors)
         {
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("dbo.RunningQueries_Get", cn) { CommandType = CommandType.StoredProcedure };
@@ -967,6 +977,7 @@ namespace DBADashGUI.Performance
             var dt = new DataTable();
             var parameters = filters.GetNonDefaultParameters();
             cmd.Parameters.AddRange(parameters);
+            var pHasCursors = parameters.FirstOrDefault(p => p.ParameterName == "HasCursors");
             var pSnapshotDateFrom = parameters.First(p => p.ParameterName == "SnapshotDateFrom");
             da.Fill(dt);
 
@@ -974,6 +985,7 @@ namespace DBADashGUI.Performance
             dt.Columns.Add("query_plan_text");
 
             filters.From = Convert.ToDateTime(pSnapshotDateFrom.Value);
+            hasAnyCursors = (bool)pHasCursors.Value;
             ApplyTableModifications(dt);
             return dt;
         }
@@ -1008,6 +1020,7 @@ namespace DBADashGUI.Performance
             runningJobCount = snapshotDT.AsEnumerable().Count(r => r["job_id"] != DBNull.Value);
             blockedCount = snapshotDT.AsEnumerable().Count(r => Convert.ToInt16(r["blocking_session_id"]) != 0);
             hasTaskWaits = snapshotDT.AsEnumerable().Any(r => !string.IsNullOrEmpty((string)(r["TaskWaits"].DBNullToNull())));
+            hasCursorColumn = snapshotDT.AsEnumerable().Any(r => !string.IsNullOrEmpty((string)(r["cursor_text"].DBNullToNull())));
             idleCount = snapshotDT.AsEnumerable()
                 .Count(r => Convert.ToInt64(r["sleeping_session_idle_time_sec"].DBNullToNull()) > 0);
             blockedWait = snapshotDT.AsEnumerable()
@@ -1322,6 +1335,73 @@ namespace DBADashGUI.Performance
                 case "colObjectName":
                     ShowObject(row);
                     break;
+
+                case "colCursor":
+                    ShowCursors(row);
+                    break;
+            }
+        }
+
+        private void ShowCursors(DataRowView row)
+        {
+            var instanceId = (int)row["InstanceID"];
+            var snapshotDate = ((DateTime)row["SnapshotDate"]).AppTimeZoneToUtc();
+            var sessionId = (short)row["session_id"];
+            ShowCursors(instanceId, snapshotDate, sessionId);
+        }
+
+        private CustomReportViewer cursorDialog;
+        private FormState cursorDialogState = new();
+
+        private void ShowCursors(int instanceId, DateTime snapshotDate, short? sessionId = null)
+        {
+            try
+            {
+                cursorDialog?.Close();
+
+                // Report setup
+                var cursorReport = RunningQueriesCursorsReport.Instance;
+                var context = CommonData.GetDBADashContext(instanceId);
+                context.Report = cursorReport;
+                var sqlParams = cursorReport.GetCustomSqlParameters();
+
+                var pSessionID = sqlParams.First(p => p.Param.ParameterName == "@SessionID");
+                pSessionID.UseDefaultValue = false;
+                pSessionID.Param.Value = sessionId.HasValue ? sessionId.Value : DBNull.Value;
+
+                var pSnapshotDate = sqlParams.First(p => p.Param.ParameterName == "@SnapshotDateUTC");
+                pSnapshotDate.UseDefaultValue = false;
+                pSnapshotDate.Param.Value = snapshotDate;
+
+                cursorDialog = new CustomReportViewer
+                {
+                    Context = context,
+                    CustomParams = sqlParams,
+                    Width = dgv.Width,
+                    Height = dgv.Height / 2
+                };
+                if (sessionId.HasValue)
+                {
+                    // Add button to show all sessions
+                    var showAll = new ToolStripButton("Show All");
+                    showAll.Click += (s, e) =>
+                    {
+                        pSessionID.UseDefaultValue = false;
+                        pSessionID.Param.Value = DBNull.Value;
+                        cursorDialog.CustomReportView.RefreshData();
+                        showAll.Enabled = false;
+                    };
+                    cursorDialog.CustomReportView.ToolStrip.Items.Add(showAll);
+                }
+
+                cursorDialog.FormClosed += (s, e) => cursorDialog = null;
+                FormState.ApplyFormState(cursorDialog, cursorDialogState);
+                FormState.TrackFormState(cursorDialog, cursorDialogState);
+                cursorDialog.Show();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
             }
         }
 
@@ -2040,6 +2120,11 @@ namespace DBADashGUI.Performance
             forceDetailFilters = filters;
             IsForceDetail = true;
             RefreshData();
+        }
+
+        private void tsCursors_Click(object sender, EventArgs e)
+        {
+            ShowCursors(InstanceID, currentSnapshotDate);
         }
     }
 }

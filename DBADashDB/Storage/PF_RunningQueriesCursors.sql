@@ -1,0 +1,3 @@
+﻿CREATE PARTITION FUNCTION [PF_RunningQueriesCursors](DATETIME2 (7))
+    AS RANGE RIGHT
+    FOR VALUES ()

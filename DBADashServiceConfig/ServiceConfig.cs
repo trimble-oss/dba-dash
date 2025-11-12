@@ -116,6 +116,7 @@ namespace DBADashServiceConfig
                 SchemaSnapshotDBs = schemaSnapshotDBs,
                 CollectSessionWaits = chkCollectSessionWaits.Checked,
                 CollectTaskWaits = chkCollectTaskWaits.Checked,
+                CollectCursors = chkCollectCursors.Checked,
                 ScriptAgentJobs = chkScriptJobs.Checked,
                 IOCollectionLevel = (DBADashSource.IOCollectionLevels)cboIOLevel.SelectedItem!,
                 WriteToSecondaryDestinations = chkWriteToSecondaryDestinations.Checked,
@@ -596,6 +597,12 @@ namespace DBADashServiceConfig
                 DataPropertyName = "CollectTaskWaits",
                 HeaderText = "Collect Task Waits",
                 ToolTipText = "Collect Task Waits for Running Queries (sys.dm_os_waiting_tasks)"
+            });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
+            {
+                DataPropertyName = "CollectCursors",
+                HeaderText = "Cursors",
+                ToolTipText = "sys.dm_exec_cursors capture for Running Queries.  Enable if your application uses cursors and you need to identify the SQL query associated with the cursor."
             });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
             {
@@ -1377,6 +1384,7 @@ namespace DBADashServiceConfig
                     chkCollectPlans.Checked = false;
                 }
                 chkCollectTaskWaits.Checked = src.CollectTaskWaits;
+                chkCollectCursors.Checked = src.CollectCursors;
                 chkCollectSessionWaits.Checked = src.CollectSessionWaits;
                 cboIOLevel.SelectedItem = src.IOCollectionLevel;
                 chkCollectTempDB.Checked = src.CollectTempDB;
@@ -1664,6 +1672,7 @@ namespace DBADashServiceConfig
             lblSchemaSnapshotDBs.Enabled = isSql;
             chkCollectSessionWaits.Enabled = isSql;
             chkCollectTaskWaits.Enabled = isSql;
+            chkCollectCursors.Enabled = isSql;
             lnkALL.Enabled = isSql;
             lnkExample.Enabled = isSql;
             lnkNone.Enabled = isSql;

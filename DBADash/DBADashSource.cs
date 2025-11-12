@@ -197,6 +197,14 @@ namespace DBADash
             set => _collectTaskWaits = value;
         }
 
+        private bool _collectCursors;
+
+        public bool CollectCursors
+        {
+            get => SourceConnection is { Type: ConnectionType.SQL } && _collectCursors;
+            set => _collectCursors = value;
+        }
+
         private bool _collectTranBeginTime = true;
 
         public bool CollectTranBeginTime

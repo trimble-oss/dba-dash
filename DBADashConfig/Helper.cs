@@ -165,6 +165,7 @@ namespace DBADashConfig
                 WriteToSecondaryDestinations = o.WriteToSecondaryDestinations ?? true,
                 ScriptAgentJobs = o.ScriptAgentJobs ?? true,
                 CollectTaskWaits = o.CollectTaskWaits ?? false,
+                CollectCursors = o.CollectCursors ?? false
             };
             if (!o.SkipValidation)
             {

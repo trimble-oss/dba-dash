@@ -206,6 +206,7 @@ namespace DBADashGUI.Performance
                 new SqlParameter("SQLHandle", SqlDbType.VarBinary){Value = SQLHandle==null || SQLHandle.Length==0 ? DBNull.Value :SQLHandle},
                 new SqlParameter("PlanHandle", SqlDbType.VarBinary){Value = PlanHandle == null || PlanHandle.Length == 0 ? DBNull.Value :PlanHandle},
                 new SqlParameter("Top", SqlDbType.Int){ Value = Top==null ? DBNull.Value : Top},
+                new SqlParameter("HasCursors", SqlDbType.Bit) { Value = 0, Direction= ParameterDirection.Output }
             };
         }
 

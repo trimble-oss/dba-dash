@@ -19,6 +19,10 @@ AND NOT EXISTS(SELECT 1
 				FROM dbo.RunningQueries Q 
 				WHERE QT.sql_handle = Q.sql_handle
 				)
+AND NOT EXISTS(SELECT 1 
+				FROM dbo.RunningQueriesCursors RQC 
+				WHERE QT.sql_handle = RQC.sql_handle
+				)
 
 DECLARE @From INT =1
 DECLARE @To INT

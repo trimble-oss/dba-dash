@@ -3,6 +3,7 @@ DECLARE @CollectSessionWaits BIT
 DECLARE @CollectTranBeginTime BIT 
 DECLARE @CollectTempDB BIT
 DECLARE @CollectTaskWaits BIT
+DECLARE @CollectCursors BIT
 SELECT @CollectSessionWaits =0,@CollectTranBeginTime = 1, @CollectTempDB=1, @CollectTaskWaits=1
 */
 
@@ -150,4 +151,28 @@ BEGIN
 					 WHERE r.session_id = s.session_id
 					 )
 		  )
+END
+IF @CollectCursors=1
+BEGIN
+	SELECT	@SnapshotDateUTC AS SnapshotDateUTC,
+			session_id,
+			name,
+			properties,
+			sql_handle,
+			statement_start_offset,
+			statement_end_offset,
+			plan_generation_num,
+			DATEADD(mi,@UTCOffset,creation_time) AS creation_time_utc,
+			is_open,
+			is_async_population,
+			is_close_on_commit,
+			fetch_status,
+			fetch_buffer_size,
+			fetch_buffer_start,
+			ansi_position,
+			worker_time,
+			reads,
+			writes,
+			dormant_duration
+	FROM sys.dm_exec_cursors (0) c
 END
