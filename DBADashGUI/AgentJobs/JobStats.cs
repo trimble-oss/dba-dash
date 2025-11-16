@@ -5,6 +5,7 @@ using LiveCharts.Wpf;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Windows.Forms;
 
@@ -22,6 +23,7 @@ namespace DBADashGUI.AgentJobs
         private Guid JobID { get; set; }
         private int StepID { get; set; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool UseGlobalTime
         {
             get => !dateRangeToolStripMenuItem1.Visible;

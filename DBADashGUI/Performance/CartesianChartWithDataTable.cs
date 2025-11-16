@@ -3,6 +3,7 @@ using LiveCharts.Defaults;
 using LiveCharts.Wpf;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 
@@ -13,6 +14,7 @@ namespace DBADashGUI.Performance
         public int DefaultPointSize = 10;
         private double _defaultLineSmoothness = 0.5;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public double DefaultLineSmoothness
         {
             get => _defaultLineSmoothness;

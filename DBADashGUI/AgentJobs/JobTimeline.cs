@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Text;
@@ -142,11 +143,14 @@ namespace DBADashGUI.AgentJobs
         private int categoryInstanceID;
         private string selectedCategory;
         private int mins = -1;
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public bool IsActive { get; set; }
 
         private bool IncludeSteps => stepsToolStripMenuItem.Checked || bothToolStripMenuItem.Checked || context.JobID != Guid.Empty;
         private bool IncludeOutcome => outcomeToolStripMenuItem.Checked || bothToolStripMenuItem.Checked || context.JobID != Guid.Empty;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool UseGlobalTime
         {
             get => !dateRangeToolStripMenuItem1.Visible;

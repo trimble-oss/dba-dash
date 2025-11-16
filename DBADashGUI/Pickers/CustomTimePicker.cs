@@ -1,6 +1,7 @@
-﻿using System;
+﻿using DBADashGUI.Theme;
+using System;
+using System.ComponentModel;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI.Performance
 {
@@ -12,11 +13,13 @@ namespace DBADashGUI.Performance
             this.ApplyTheme();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DateTime FromDate
         {
             get => time1.Value; set => time1.Value = new DateTime(value.Year, value.Month, value.Day, value.Hour, value.Minute, 0);
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DateTime ToDate
         {
             get => time2.Value; set => time2.Value = new DateTime(value.Year, value.Month, value.Day, value.Hour, value.Minute, 0);
@@ -33,6 +36,5 @@ namespace DBADashGUI.Performance
             DialogResult = DialogResult.Cancel;
             Close();
         }
-
     }
 }

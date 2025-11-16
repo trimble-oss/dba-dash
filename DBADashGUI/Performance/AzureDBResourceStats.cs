@@ -4,6 +4,7 @@ using LiveCharts.Wpf;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
@@ -38,6 +39,7 @@ namespace DBADashGUI.Performance
 
         private int _dateGrouping;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public int DateGrouping
         {
             get => _dateGrouping;

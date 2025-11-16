@@ -2,6 +2,7 @@
 using DBADashGUI.Messaging;
 using DBADashGUI.Theme;
 using System;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Threading;
@@ -25,9 +26,13 @@ namespace DBADashGUI.AgentJobs
 
         private static int ReceiveMessageTimeoutMs => (MessageLifetime * 1000) + 1000;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Guid JobId { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int InstanceId { get; set; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string JobName { get => lnkJobName.Text; set => lnkJobName.Text = value; }
 
         private string StartStep

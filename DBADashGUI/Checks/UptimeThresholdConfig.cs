@@ -5,6 +5,7 @@ using System.Data;
 using System.Globalization;
 using System.Windows.Forms;
 using DBADashGUI.Theme;
+using System.ComponentModel;
 
 namespace DBADashGUI.Checks
 {
@@ -16,8 +17,8 @@ namespace DBADashGUI.Checks
             this.ApplyTheme();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int InstanceID { get; set; }
-
 
         private void GetThreshold()
         {

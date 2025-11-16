@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms.Design;
-using System.Windows.Forms;
+using System.ComponentModel;
 using System.Drawing;
-using Microsoft.Data.SqlClient;
+using System.Linq;
+using System.Windows.Forms;
+using System.Windows.Forms.Design;
 
 namespace DBADashGUI
 {
@@ -25,10 +26,19 @@ namespace DBADashGUI
         public override ToolStripItemDisplayStyle DisplayStyle { get => base.DisplayStyle; set => base.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText; }
         public override Image Image { get => base.Image; set => base.Image = Properties.Resources.FilterCircle_16x_Colors; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool OK { get => (MenuOK.Checked && OKVisible) || AllUnchecked; set => MenuOK.Checked = value; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Warning { get => (MenuWarning.Checked && WarningVisible) || AllUnchecked; set => MenuWarning.Checked = value; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Critical { get => (MenuCritical.Checked && CriticalVisible) || AllUnchecked; set => MenuCritical.Checked = value; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool NA { get => (MenuNA.Checked && NAVisible) || AllUnchecked; set => MenuNA.Checked = value; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Acknowledged { get => (MenuAcknowledged.Checked && AcknowledgedVisible) || AllUnchecked; set => MenuAcknowledged.Checked = value; }
 
         public bool AllChecked => (MenuOK.Checked || !OKVisible) && (MenuWarning.Checked || !WarningVisible) && (MenuCritical.Checked || !CriticalVisible) && (MenuNA.Checked | !NAVisible) && (MenuAcknowledged.Checked || !AcknowledgedVisible);
@@ -42,10 +52,19 @@ namespace DBADashGUI
         private readonly ToolStripMenuItem MenuAcknowledged = new() { Text = "Acknowledged", BackColor = DBADashStatus.DBADashStatusEnum.Acknowledged.GetBackColor(), ForeColor = DBADashStatus.DBADashStatusEnum.Acknowledged.GetBackColor().ContrastColor(), CheckOnClick = true };
         private readonly ToolStripMenuItem MenuCheckAll = new() { Text = "Check ALL" };
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool AcknowledgedVisible { get => MenuAcknowledged.Available; set => MenuAcknowledged.Available = value; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool CriticalVisible { get => MenuCritical.Available; set => MenuCritical.Available = value; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool WarningVisible { get => MenuWarning.Available; set => MenuWarning.Available = value; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool NAVisible { get => MenuNA.Available; set => MenuNA.Available = value; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool OKVisible { get => MenuOK.Available; set => MenuOK.Available = value; }
 
         public SqlParameter[] GetSQLParams()

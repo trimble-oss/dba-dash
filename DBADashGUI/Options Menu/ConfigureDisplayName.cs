@@ -15,7 +15,10 @@ namespace DBADashGUI
             InitializeComponent();
         }
 
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public string TagIDs { get; set; }
+
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public string SearchString { get; set; }
 
         public int EditCount => _editCount;

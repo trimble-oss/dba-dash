@@ -1,6 +1,7 @@
 ﻿using DBADashGUI.Performance;
 using DBADashGUI.Theme;
 using System;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
@@ -15,6 +16,7 @@ namespace DBADashGUI.DBADashAlerts
             this.ApplyTheme();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public AlertCounter SelectedCounter { get; set; }
 
         private bool SuppressSelectionChanged = true;

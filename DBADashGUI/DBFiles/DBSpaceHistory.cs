@@ -38,6 +38,7 @@ namespace DBADashGUI.DBFiles
 
         private int _databaseID;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int DatabaseID
         {
             get => _databaseID;
@@ -54,21 +55,28 @@ namespace DBADashGUI.DBFiles
 
         private int DateGroupingMins;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string InstanceGroupName { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string DBName { get; set; }
+
         private string _fileName;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string FileName
         {
             get => _fileName;
             set { _fileName = value; SetFileChecked(); }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public string NumberFormat { get; set; } = "N1";
 
         private int? _dataSpaceId;
         private DataTable HistoryDT;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public int? DataSpaceID
         {
             get => _dataSpaceId;
@@ -79,6 +87,7 @@ namespace DBADashGUI.DBFiles
             }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool SmoothLines
         {
             get => smoothLinesToolStripMenuItem.Checked; set => smoothLinesToolStripMenuItem.Checked = value;
@@ -94,6 +103,7 @@ namespace DBADashGUI.DBFiles
 
         private string _unit = "MB";
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public string Unit
         {
             get => _unit;

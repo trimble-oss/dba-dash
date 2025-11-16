@@ -4,6 +4,7 @@ using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Globalization;
@@ -27,8 +28,10 @@ namespace DBADashGUI.CustomReports
         public EventHandler<DataGridViewCellEventArgs> ColumnContextMenuOpening;
         public EventHandler GridFilterChanged;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int ResultSetID { get; set; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string ResultSetName { get; set; }
 
         private ToolStripMenuItem GetCopyGridMenuItem() =>

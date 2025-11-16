@@ -1,8 +1,9 @@
-﻿using System;
+﻿using DBADash;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Windows.Forms;
-using DBADash;
 
 namespace DBADashGUI.CustomReports
 {
@@ -15,8 +16,10 @@ namespace DBADashGUI.CustomReports
 
         public CustomReportView CustomReportView => customReportView1;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DBADashContext Context { get; set; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public List<CustomSqlParameter> CustomParams { get; set; }
 
         public DataSet DataSet;

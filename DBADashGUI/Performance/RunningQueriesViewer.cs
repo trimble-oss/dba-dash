@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Amazon.S3.Model.Internal.MarshallTransformations;
+using DBADashGUI.Theme;
+using DocumentFormat.OpenXml.Office2010.ExcelAc;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Windows.Forms;
-using Amazon.S3.Model.Internal.MarshallTransformations;
-using DBADashGUI.Theme;
-using DocumentFormat.OpenXml.Office2010.ExcelAc;
 
 namespace DBADashGUI.Performance
 {
@@ -17,23 +18,28 @@ namespace DBADashGUI.Performance
             InitializeComponent();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public bool ShowRootBlockers { get; set; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DateTime SnapshotDateFrom
         {
             get => runningQueries1.SnapshotDateFrom; set => runningQueries1.SnapshotDateFrom = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DateTime SnapshotDateTo
         {
             get => runningQueries1.SnapshotDateTo; set => runningQueries1.SnapshotDateTo = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int InstanceID
         {
             get => runningQueries1.InstanceID; set => runningQueries1.InstanceID = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Guid JobId
         {
             get => runningQueries1.JobId; set => runningQueries1.JobId = value;

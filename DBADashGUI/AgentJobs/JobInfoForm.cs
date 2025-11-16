@@ -21,6 +21,7 @@ namespace DBADashGUI.AgentJobs
             this.ApplyTheme();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DBADashContext DBADashContext { get; set; }
 
         public HashSet<int> LoadedTabs = new();

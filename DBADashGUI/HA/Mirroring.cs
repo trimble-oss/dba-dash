@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
@@ -18,6 +19,7 @@ namespace DBADashGUI.HA
 
         private List<int> InstanceIDs;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool SummaryMode
         {
             get => tsDetailSummary.Text != "Summary";

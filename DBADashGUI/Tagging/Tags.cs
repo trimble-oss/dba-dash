@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -21,6 +22,7 @@ namespace DBADashGUI.Tagging
 
         private List<DBADashTag> _allTags;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public List<DBADashTag> AllTags
         {
             get => _allTags;

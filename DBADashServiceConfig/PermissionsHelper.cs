@@ -28,8 +28,10 @@ namespace DBADashServiceConfig
             this.ApplyTheme();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public CollectionConfig Config { get; set; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public List<DBADashSource> Connections
         {
             get => _connections;

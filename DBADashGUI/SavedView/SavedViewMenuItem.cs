@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
@@ -27,6 +28,7 @@ namespace DBADashGUI
         private static readonly string noneText = "{None}";
         private Guid connectionGUID;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public SavedView.ViewTypes Type { get; set; }
 
         public event EventHandler<SavedViewSelectedEventArgs> SavedViewSelected;
@@ -41,9 +43,8 @@ namespace DBADashGUI
             base.Text = text;
         }
 
-
         /// <summary>
-        /// Selects the default view from the menu and raises the SavedViewSelected event for it.  
+        /// Selects the default view from the menu and raises the SavedViewSelected event for it.
         /// </summary>
         public bool SelectDefault()
         {
@@ -77,7 +78,6 @@ namespace DBADashGUI
             return _globalSavedViews.ContainsKey(name);
         }
 
-
         /// <summary>
         /// Load saved view menu items.  Only runs if items haven't already been loaded.
         /// </summary>
@@ -106,7 +106,6 @@ namespace DBADashGUI
             }
             return loaded;
         }
-
 
         /// <summary>
         /// Load saved view menu items - replaces any existing items with new ones from the DB.
@@ -188,7 +187,6 @@ namespace DBADashGUI
 
         public string SelectedSavedView { get; private set; }
         public bool SelectedSavedViewIsGlobal { get; private set; }
-
 
         private void SavedView_Click(object sender, EventArgs e)
         {

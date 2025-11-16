@@ -1,15 +1,16 @@
-﻿using DBADash.Messaging;
+﻿using DBADash;
+using DBADash.Messaging;
 using DBADashGUI.CustomReports;
+using DBADashGUI.Messaging;
 using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADash;
-using DBADashGUI.Messaging;
 
 namespace DBADashGUI.Performance
 {
@@ -25,9 +26,13 @@ namespace DBADashGUI.Performance
             dgvDrillDown.RowsAdded += (sender, args) => topQueriesResult.CellHighlightingRules.FormatRowsAdded((DataGridView)sender, args);
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public byte[] QueryHash { get; set; } = null;
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public byte[] PlanHash { get; set; } = null;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool UseGlobalTime { get => !tsDateRange.Visible; set => tsDateRange.Visible = !value; }
 
         public void SetContext(DBADashContext _context)

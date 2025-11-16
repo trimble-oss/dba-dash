@@ -17,13 +17,18 @@ namespace DBADashGUI.CustomReports
             InitializeComponent();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public KeyValuePair<string, CellHighlightingRuleSet> CellHighlightingRules { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public DataGridViewColumnCollection ColumnList { get; set; }
 
         public DataGridViewColumn FormattedColumn => ColumnList.Cast<DataGridViewColumn>().FirstOrDefault(c => c.Name == CellHighlightingRules.Key);
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public object CellValue { get; set; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public bool CellValueIsNull { get; set; }
 
         private void CellHighlightingRulesConfig_Load(object sender, EventArgs e)

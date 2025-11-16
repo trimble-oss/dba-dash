@@ -1,10 +1,11 @@
-﻿using System;
+﻿using DBADashGUI.SchemaCompare;
+using DBADashGUI.Theme;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.SchemaCompare;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI.CustomReports
 {
@@ -26,11 +27,16 @@ namespace DBADashGUI.CustomReports
             lblWarning.ForeColor = DashColors.Fail;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public LinkColumnInfo LinkColumnInfo { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public List<string> ColumnList { get; set; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DBADashContext Context { get; set; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string LinkColumn { get; set; }
 
         private void Opt_CheckedChanged(object sender, EventArgs e)
@@ -55,7 +61,7 @@ namespace DBADashGUI.CustomReports
             cboTargetColumn.Items.AddRange(ColumnList.ToArray<object>());
             cboInstanceIDCol.Items.AddRange(ColumnList.ToArray<object>());
             cboDatabaseNameCol.Items.AddRange(ColumnList.ToArray<object>());
-            cboTab.Items.AddRange( Enum.GetValues<Main.Tabs>().Cast<object>().OrderBy(t=>t.ToString()).ToArray());
+            cboTab.Items.AddRange(Enum.GetValues<Main.Tabs>().Cast<object>().OrderBy(t => t.ToString()).ToArray());
             cboReport.Text = Context.Report.ProcedureName;
             cboTargetColumn.Text = LinkColumn;
             txtLinkColumn.Text = LinkColumn;
@@ -89,6 +95,7 @@ namespace DBADashGUI.CustomReports
                     cboTargetColumn.Text = queryPlan.TargetColumn;
                     SetTab();
                     break;
+
                 case NavigateTreeLinkColumnInfo navigateTree:
                     optNavigateTree.Checked = true;
                     cboDatabaseNameCol.Text = navigateTree.DatabaseColumn;
@@ -198,6 +205,5 @@ namespace DBADashGUI.CustomReports
                 dgvMapping.Rows.Add(row);
             }
         }
-        
     }
 }

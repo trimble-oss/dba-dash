@@ -1,9 +1,10 @@
-﻿using System;
+﻿using DBADashGUI.Theme;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI.Performance
 {
@@ -18,27 +19,28 @@ namespace DBADashGUI.Performance
 
         private Dictionary<int, Counter> selectedCounters;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Dictionary<int, Counter> SelectedCounters
         {
             get
             {
                 return (from DataRow row in Counters.Rows
-                    select new Counter()
-                    {
-                        CounterID = (int)row["CounterID"],
-                        Avg = (bool)row["Avg"],
-                        Max = (bool)row["Max"],
-                        Min = (bool)row["Min"],
-                        SampleCount = (bool)row["SampleCount"],
-                        Current = (bool)row["Current"],
-                        Total = (bool)row["Total"],
-                        CounterName = (string)row["counter_name"],
-                        ObjectName = (string)row["object_name"],
-                        InstanceName = (string)row["instance_name"]
-                    }
+                        select new Counter()
+                        {
+                            CounterID = (int)row["CounterID"],
+                            Avg = (bool)row["Avg"],
+                            Max = (bool)row["Max"],
+                            Min = (bool)row["Min"],
+                            SampleCount = (bool)row["SampleCount"],
+                            Current = (bool)row["Current"],
+                            Total = (bool)row["Total"],
+                            CounterName = (string)row["counter_name"],
+                            ObjectName = (string)row["object_name"],
+                            InstanceName = (string)row["instance_name"]
+                        }
                     into ctr
-                    where ctr.GetAggColumns().Count > 0
-                    select ctr).ToDictionary(ctr => ctr.CounterID);
+                        where ctr.GetAggColumns().Count > 0
+                        select ctr).ToDictionary(ctr => ctr.CounterID);
             }
             set => selectedCounters = value;
         }

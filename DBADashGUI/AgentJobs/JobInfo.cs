@@ -1,5 +1,6 @@
 ﻿using DBADashGUI.CustomReports;
 using System;
+using System.ComponentModel;
 using System.Data;
 using System.Windows.Forms;
 
@@ -17,6 +18,7 @@ namespace DBADashGUI.AgentJobs
         {
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public string CustomTitle { get; set; }
 
         public DBADashDataGridView InfoGrid => dgvInfo;

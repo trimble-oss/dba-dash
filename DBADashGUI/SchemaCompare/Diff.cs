@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Windows.Forms;
 using static DBADashGUI.DiffControl;
 
@@ -13,6 +14,7 @@ namespace DBADashGUI
             InitializeComponent();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public ViewMode Mode
         {
             get => diff1.Mode; set => diff1.Mode = value;

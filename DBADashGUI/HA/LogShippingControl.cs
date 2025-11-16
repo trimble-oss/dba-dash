@@ -4,15 +4,16 @@ using DBADashGUI.Interface;
 using DBADashGUI.Messaging;
 using DBADashGUI.Performance;
 using DBADashGUI.Theme;
+using DocumentFormat.OpenXml.InkML;
 using Microsoft.Data.SqlClient;
+using Microsoft.Web.WebView2.Core.Raw;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using DocumentFormat.OpenXml.InkML;
-using Microsoft.Web.WebView2.Core.Raw;
 
 namespace DBADashGUI.LogShipping
 {
@@ -21,21 +22,25 @@ namespace DBADashGUI.LogShipping
         private List<int> InstanceIDs;
         private DBADashContext context;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeCritical
         {
             get => statusFilterToolStrip1.Critical; set => statusFilterToolStrip1.Critical = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeWarning
         {
             get => statusFilterToolStrip1.Warning; set => statusFilterToolStrip1.Warning = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeNA
         {
             get => statusFilterToolStrip1.NA; set => statusFilterToolStrip1.NA = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeOK
         {
             get => statusFilterToolStrip1.OK; set => statusFilterToolStrip1.OK = value;

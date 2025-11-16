@@ -1,8 +1,9 @@
-﻿using System;
+﻿using DBADashGUI.Theme;
+using Microsoft.Data.SqlClient;
+using System;
+using System.ComponentModel;
 using System.Data;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
-using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI.Checks
 {
@@ -14,8 +15,13 @@ namespace DBADashGUI.Checks
             this.ApplyTheme();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int InstanceID { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int DatabaseID { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string ObjectName { get; set; }
 
         private void GetThresholds()

@@ -20,21 +20,25 @@ namespace DBADashGUI.Checks
         private List<int> InstanceIDs { get; set; }
         private int DatabaseID { get; set; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeCritical
         {
             get => statusFilterToolStrip1.Critical; set => statusFilterToolStrip1.Critical = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeWarning
         {
             get => statusFilterToolStrip1.Warning; set => statusFilterToolStrip1.Warning = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeNA
         {
             get => statusFilterToolStrip1.NA; set => statusFilterToolStrip1.NA = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeOK
         {
             get => statusFilterToolStrip1.OK; set => statusFilterToolStrip1.OK = value;

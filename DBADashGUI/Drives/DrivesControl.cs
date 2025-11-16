@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Windows.Forms;
-using DBADash;
+﻿using DBADash;
 using DBADashGUI.CustomReports;
 using DBADashGUI.Interface;
 using DBADashGUI.Messaging;
 using DBADashGUI.Theme;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
 using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.Drives
@@ -23,21 +24,25 @@ namespace DBADashGUI.Drives
         public int DrivesViewMaxRows = 30;
         private DBADashContext context;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeCritical
         {
             get => statusFilterToolStrip1.Critical; set => statusFilterToolStrip1.Critical = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeWarning
         {
             get => statusFilterToolStrip1.Warning; set => statusFilterToolStrip1.Warning = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeNA
         {
             get => statusFilterToolStrip1.NA; set => statusFilterToolStrip1.NA = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeOK
         {
             get => statusFilterToolStrip1.OK; set => statusFilterToolStrip1.OK = value;
@@ -87,7 +92,7 @@ namespace DBADashGUI.Drives
 
         public void SetStatus(string message, string tooltip, Color color)
         {
-            lblStatus.InvokeSetStatus(message,tooltip,color);
+            lblStatus.InvokeSetStatus(message, tooltip, color);
         }
 
         private DataGridView dgv;
@@ -193,18 +198,19 @@ namespace DBADashGUI.Drives
                 case "Configure":
                     Configure(instanceId, driveId);
                     break;
+
                 case "History":
-                {
-                    var frm = new DriveHistoryView
                     {
-                        DriveID = (int)row["DriveID"],
-                        Text = @$"{instanceName} | {driveLetter} {label}"
-                    };
-                    frm.Show();
-                    break;
-                }
+                        var frm = new DriveHistoryView
+                        {
+                            DriveID = (int)row["DriveID"],
+                            Text = @$"{instanceName} | {driveLetter} {label}"
+                        };
+                        frm.Show();
+                        break;
+                    }
                 case "Files":
-                    DriveControl.ShowFilesForDrive(driveLetter, label, instanceId, instanceName,this);
+                    DriveControl.ShowFilesForDrive(driveLetter, label, instanceId, instanceName, this);
                     break;
             }
         }

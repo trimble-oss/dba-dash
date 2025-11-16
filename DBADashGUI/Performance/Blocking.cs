@@ -4,6 +4,7 @@ using LiveCharts.Configurations;
 using LiveCharts.Wpf;
 using Microsoft.Data.SqlClient;
 using System;
+using System.ComponentModel;
 using System.Data;
 using System.Globalization;
 using System.Windows.Forms;
@@ -21,6 +22,7 @@ namespace DBADashGUI.Performance
         private double maxBlockedTime;
         private int databaseID;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool CloseVisible
         {
             get => tsClose.Visible; set => tsClose.Visible = value;
@@ -76,11 +78,13 @@ namespace DBADashGUI.Performance
             _ => 5
         };
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool MoveUpVisible
         {
             get => tsUp.Visible; set => tsUp.Visible = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public BlockingMetric Metric { get; set; } = new();
 
         IMetric IMetricChart.Metric => Metric;

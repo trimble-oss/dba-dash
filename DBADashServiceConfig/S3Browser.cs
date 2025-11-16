@@ -1,7 +1,8 @@
-﻿using System;
+﻿using DBADashGUI.Theme;
+using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashServiceConfig
 {
@@ -17,6 +18,7 @@ namespace DBADashServiceConfig
         public string SecretKey;
         public string AWSProfile;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Folder
         {
             get => txtFolder.Text; set => txtFolder.Text = value;

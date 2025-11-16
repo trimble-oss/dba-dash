@@ -5,6 +5,7 @@ using LiveCharts.Wpf;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -34,8 +35,10 @@ namespace DBADashGUI.Drives
 
         private readonly string connectionString = Common.ConnectionString;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int DriveID { get; set; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public bool SmoothLines
         {
             get => smoothLinesToolStripMenuItem.Checked; set => smoothLinesToolStripMenuItem.Checked = value;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Windows.Forms;
 
 namespace DBADashGUI.DBFiles
@@ -11,6 +12,8 @@ namespace DBADashGUI.DBFiles
         }
 
         private FileThreshold fileThres = new();
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public FileThreshold FileThreshold
         {
             get
@@ -45,7 +48,6 @@ namespace DBADashGUI.DBFiles
 
                 chkInherit.Enabled = fileThres.InstanceID != -1;
 
-
                 if (fileThres.Inherited)
                 {
                     chkInherit.Checked = true;
@@ -56,7 +58,6 @@ namespace DBADashGUI.DBFiles
                 {
                     chkInherit.Checked = false;
                 }
-
 
                 optMB.Checked = setValueByThres.FileCheckType == FileThreshold.FileCheckTypeEnum.MB;
                 optPercent.Checked = setValueByThres.FileCheckType == FileThreshold.FileCheckTypeEnum.Percent;
@@ -75,14 +76,12 @@ namespace DBADashGUI.DBFiles
             }
         }
 
-
         private void OptDisabled_CheckedChanged(object sender, EventArgs e)
         {
             numWarning.Enabled = !OptDisabled.Checked;
             numCritical.Enabled = !OptDisabled.Checked;
             chkZeroAutogrowthOnly.Enabled = !OptDisabled.Checked;
         }
-
 
         private void SetThresholdType()
         {
@@ -101,7 +100,6 @@ namespace DBADashGUI.DBFiles
                 numWarning.Maximum = 100;
             }
         }
-
 
         private void ChkInherit_CheckedChanged(object sender, EventArgs e)
         {

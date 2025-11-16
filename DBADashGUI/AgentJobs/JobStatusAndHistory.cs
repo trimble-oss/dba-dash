@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System.ComponentModel;
+using System.Windows.Forms;
 
 namespace DBADashGUI.AgentJobs
 {
@@ -9,6 +10,7 @@ namespace DBADashGUI.AgentJobs
             InitializeComponent();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool ShowSteps
         {
             get => agentJobsControl1.ShowSteps; set => agentJobsControl1.ShowSteps = value;

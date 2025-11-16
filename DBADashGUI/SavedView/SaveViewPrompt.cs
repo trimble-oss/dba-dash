@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Windows.Forms;
 
 namespace DBADashGUI
@@ -10,8 +11,10 @@ namespace DBADashGUI
             InitializeComponent();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string ViewName { get => txtName.Text; set => txtName.Text = value; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IsGlobal { get => optEveryone.Checked; set => optEveryone.Checked = value; }
 
         private void TxtName_TextChanged(object sender, EventArgs e)

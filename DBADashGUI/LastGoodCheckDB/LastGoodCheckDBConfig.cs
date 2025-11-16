@@ -6,21 +6,19 @@ namespace DBADashGUI.LastGoodCheckDB
 {
     public partial class LastGoodCheckDBConfig : Form
     {
+        private LastGoodCheckDBThreshold threshold;
 
-        LastGoodCheckDBThreshold threshold;
-
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public LastGoodCheckDBThreshold Threshold
         {
             get
             {
-
                 threshold.Inherit = chkInherit.Visible && chkInherit.Checked;
                 threshold.WarningThreshold = chkEnabled.Checked ? (int?)numWarning.Value : null;
                 threshold.CriticalThreshold = chkEnabled.Checked ? (int?)numCritical.Value : null;
                 threshold.MinimumAge = chkEnabled.Checked ? (int)numMinimumAge.Value : 0;
                 threshold.ExcludedDatabases = chkEnabled.Checked ? txtExcluded.Text : string.Empty;
                 return threshold;
-
             }
             set
             {

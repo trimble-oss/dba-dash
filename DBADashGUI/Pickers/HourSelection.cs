@@ -1,8 +1,9 @@
-﻿using System;
+﻿using DBADashGUI.Theme;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI
 {
@@ -14,6 +15,7 @@ namespace DBADashGUI
             this.ApplyTheme();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public List<int> SelectedHours
         {
             get => chkHours.CheckedIndices.Cast<int>().ToList();

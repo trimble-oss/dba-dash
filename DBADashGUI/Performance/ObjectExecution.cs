@@ -5,6 +5,7 @@ using LiveCharts.Defaults;
 using LiveCharts.Wpf;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
@@ -42,18 +43,21 @@ namespace DBADashGUI.Performance
 
         public event EventHandler<EventArgs> MoveUp;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool CloseVisible
         {
             get => tsClose.Visible;
             set => tsClose.Visible = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool MoveUpVisible
         {
             get => tsUp.Visible;
             set => tsUp.Visible = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public ObjectExecutionMetric Metric { get; set; } = new();
 
         IMetric IMetricChart.Metric => Metric;

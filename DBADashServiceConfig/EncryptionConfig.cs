@@ -1,7 +1,8 @@
 ﻿using DBADash;
-using System;
-using System.Windows.Forms;
 using DBADashGUI.Theme;
+using System;
+using System.ComponentModel;
+using System.Windows.Forms;
 
 namespace DBADashServiceConfig
 {
@@ -13,12 +14,14 @@ namespace DBADashServiceConfig
             this.ApplyTheme();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public BasicConfig.EncryptionOptions EncryptionOption
         {
             get => chkEncrypt.Checked ? BasicConfig.EncryptionOptions.Encrypt : BasicConfig.EncryptionOptions.Basic;
             set => chkEncrypt.Checked = value == BasicConfig.EncryptionOptions.Encrypt;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string EncryptionPassword
         {
             get => txtPassword.Text.Trim();

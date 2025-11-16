@@ -17,13 +17,14 @@ namespace DBADashGUI.Tagging
             InitializeComponent();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DBADashTag SelectedTag { get; set; }
 
         private void TagPicker_Load(object sender, EventArgs e)
         {
             var tags = DBADashTag.GetTags(Common.ConnectionString);
             cboName.DataSource = tags.Select(t => t.TagName).Distinct().ToList();
-            if(SelectedTag==null || SelectedTag.TagID == -1)
+            if (SelectedTag == null || SelectedTag.TagID == -1)
             {
                 chkAll.Checked = true;
                 return;
@@ -39,7 +40,7 @@ namespace DBADashGUI.Tagging
 
         private void bttnOK_Click(object sender, EventArgs e)
         {
-            SelectedTag = chkAll.Checked ? new DBADashTag() { TagID = -1, TagName = string.Empty, TagValue = string.Empty } : 
+            SelectedTag = chkAll.Checked ? new DBADashTag() { TagID = -1, TagName = string.Empty, TagValue = string.Empty } :
                 DBADashTag.GetTags(Common.ConnectionString).FirstOrDefault(t => t.TagName == cboName.Text && t.TagValue == cboValue.Text);
             this.DialogResult = DialogResult.OK;
         }
@@ -51,7 +52,7 @@ namespace DBADashGUI.Tagging
 
         private void All_CheckChanged(object sender, EventArgs e)
         {
-            cboValue.Enabled=!chkAll.Checked;
+            cboValue.Enabled = !chkAll.Checked;
             cboName.Enabled = !chkAll.Checked;
         }
     }

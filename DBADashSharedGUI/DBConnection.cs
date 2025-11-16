@@ -1,6 +1,7 @@
 ﻿using DBADashGUI.Theme;
 using DBADashSharedGUI;
 using Microsoft.Data.SqlClient;
+using System.ComponentModel;
 using System.Runtime.Versioning;
 
 namespace DBADash
@@ -98,6 +99,7 @@ namespace DBADash
             return builder.ConnectionString;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string ConnectionString
         {
             get => tab.SelectedTab == tabBasic ? GetConnectionString() : ((SqlConnectionStringBuilder)propertyGrid1.SelectedObject).ConnectionString;
@@ -194,7 +196,7 @@ namespace DBADash
                 }
 
                 var first = await Task.WhenAny(dbTask, masterTask);
-             
+
                 var other = first == dbTask ? masterTask : dbTask;
 
                 if (first.IsCompletedSuccessfully)
@@ -269,7 +271,7 @@ namespace DBADash
                 }
                 else
                 {
-                    // First failed; try the other. If that also fails, its await will throw and be caught.         
+                    // First failed; try the other. If that also fails, its await will throw and be caught.
                     dbs = await other;
                 }
 

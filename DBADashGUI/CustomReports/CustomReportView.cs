@@ -11,6 +11,7 @@ using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -32,6 +33,7 @@ namespace DBADashGUI.CustomReports
         public ToolStripStatusLabel StatusLabel => lblDescription;
         private DBADashContext context;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public CustomReport Report { get; set; }
 
         private List<CustomSqlParameter> customParams = new();
@@ -130,7 +132,7 @@ namespace DBADashGUI.CustomReports
             try
             {
                 var customReportResult = Report.CustomReportResults[tableIndex];
-                var col = dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName;     
+                var col = dgv.Columns[dgv.ClickedColumnIndex].DataPropertyName;
                 var colInfo = GetColumnMetadata(customReportResult, col);
                 var colList = dgv.Columns.Cast<DataGridViewColumn>().Select(c => c.DataPropertyName).ToList();
                 var frm = new LinkColumnTypeSelector()

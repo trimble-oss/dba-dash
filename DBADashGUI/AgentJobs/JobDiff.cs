@@ -1,8 +1,9 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADashGUI.Theme;
+using Microsoft.Data.SqlClient;
 using System;
+using System.ComponentModel;
 using System.Data;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI
 {
@@ -13,7 +14,10 @@ namespace DBADashGUI
             InitializeComponent();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int InstanceID_A { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int InstanceID_B { get; set; }
 
         private DataTable GetJobDiff()

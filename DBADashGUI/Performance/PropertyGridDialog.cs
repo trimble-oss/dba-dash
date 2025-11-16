@@ -14,12 +14,14 @@ namespace DBADashGUI.Performance
 {
     public partial class PropertyGridDialog : Form
     {
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Title
         {
             get => this.Text;
             set => this.Text = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public object SelectedObject
         {
             get => propertyGrid1.SelectedObject;
