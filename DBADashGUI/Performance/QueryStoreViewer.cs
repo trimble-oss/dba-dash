@@ -14,9 +14,13 @@ namespace DBADashGUI.Performance
 {
     public partial class QueryStoreViewer : Form
     {
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public byte[] QueryHash { get => queryStoreTopQueries1.QueryHash; set => queryStoreTopQueries1.QueryHash = value; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public byte[] PlanHash { get => queryStoreTopQueries1.PlanHash; set => queryStoreTopQueries1.PlanHash = value; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DBADashContext Context { get; set; }
 
         public QueryStoreViewer()

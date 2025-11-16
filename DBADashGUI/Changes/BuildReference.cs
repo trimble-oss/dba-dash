@@ -1,11 +1,12 @@
-﻿using System;
+﻿using DBADashGUI.Theme;
+using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
-using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI.Changes
 {
@@ -37,6 +38,7 @@ namespace DBADashGUI.Changes
             new DataGridViewCheckBoxColumn() { DataPropertyName = "IsCurrentBuild", HeaderText = "Is Current Build", ReadOnly = true, Name = "colIsCurrentBuild", DefaultCellStyle = new DataGridViewCellStyle() { Font = new Font(DefaultFont, FontStyle.Italic)  },Width=70, SortMode  = DataGridViewColumnSortMode.Automatic   }
         };
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string SelectedVersion
         {
             get

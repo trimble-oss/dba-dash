@@ -18,6 +18,7 @@ namespace DBADashServiceConfig
     {
         private Dictionary<string, CustomCollection> _customCollections;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public Dictionary<string, CustomCollection> CustomCollections
         {
             get => _customCollections;
@@ -26,7 +27,9 @@ namespace DBADashServiceConfig
 
         private static KeyValuePair<string, CustomCollection> CustomCollectionClipboard;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string ConnectionString { get; set; }
+
         private bool IsScheduleValid = true;
 
         private readonly List<DataGridViewColumn> CustomCols = new()
@@ -727,7 +730,7 @@ ORDER BY ProcName", cn);
             dgv.AutoResizeColumns();
             PreviewForm.ApplyTheme();
             PreviewForm.Show();
-            PreviewForm.Closed += (sender, args) => PreviewForm = null;
+            PreviewForm.FormClosed += (sender, args) => PreviewForm = null;
         }
 
         private DataTable ExecuteProcedure(string procedureName, int timeOut)

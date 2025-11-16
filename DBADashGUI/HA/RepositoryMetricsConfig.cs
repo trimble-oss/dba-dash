@@ -38,7 +38,10 @@ namespace DBADashGUI.HA
             Databases
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int InstanceID { get; set; } = -1;
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public RepositoryMetricTypes MetricType { get; set; } = RepositoryMetricTypes.AG;
 
         private static async Task<DataTable> GetAGMetricsConfig(int instanceId, RepositoryMetricTypes metricType)

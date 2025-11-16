@@ -1,15 +1,16 @@
-﻿using LiveCharts;
+﻿using DBADashGUI.Pickers;
+using DBADashGUI.Theme;
+using LiveCharts;
 using LiveCharts.Defaults;
 using LiveCharts.Wpf;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.Pickers;
-using DBADashGUI.Theme;
 using Font = System.Drawing.Font;
 
 namespace DBADashGUI.Performance
@@ -36,12 +37,14 @@ namespace DBADashGUI.Performance
 
         private Dictionary<string, string> drives = new();
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool CloseVisible
         {
             get => tsClose.Visible;
             set => tsClose.Visible = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public int DateGrouping
         {
             get => dateGrouping;
@@ -53,6 +56,7 @@ namespace DBADashGUI.Performance
             }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public string FileGroup
         {
             get => filegroup;
@@ -71,6 +75,7 @@ namespace DBADashGUI.Performance
             }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Drive
         {
             get => Metric.Drive;
@@ -85,6 +90,7 @@ namespace DBADashGUI.Performance
             }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public bool SmoothLines
         {
             get => smoothLines;
@@ -98,6 +104,7 @@ namespace DBADashGUI.Performance
             }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool MoveUpVisible
         {
             get => tsUp.Visible; set => tsUp.Visible = value;
@@ -105,34 +112,41 @@ namespace DBADashGUI.Performance
 
         private IOMetric _metric = new();
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public IOMetric Metric
         { get => _metric; set { _metric = value; SetMetric(); } }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool DateGroupingVisible
         {
             get => tsDateGroup.Visible; set => tsDateGroup.Visible = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool DriveVisible
         {
             get => tsDrives.Visible; set => tsDrives.Visible = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool MeasuresVisible
         {
             get => tsMeasures.Visible; set => tsMeasures.Visible = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool SummaryVisible
         {
             get => tsIOSummary.Visible; set => tsIOSummary.Visible = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool FileGroupVisible
         {
             get => tsFileGroup.Visible; set => tsFileGroup.Visible = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool OptionsVisible
         {
             get => tsOptions.Visible; set => tsOptions.Visible = value;
@@ -164,6 +178,7 @@ namespace DBADashGUI.Performance
 
         private Dictionary<string, ColumnMetaData> _columns = DefaultColumns;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Dictionary<string, ColumnMetaData> Columns
         {
             get => _columns;

@@ -1,19 +1,25 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADashGUI.CustomReports;
+using DBADashGUI.Theme;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using DBADashGUI.CustomReports;
-using DBADashGUI.Theme;
 using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.Performance
 {
     public class PerformanceCounterSummaryGrid : DBADashDataGridView
     {
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int InstanceID { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string SearchText { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public List<int> Counters { get; set; }
 
         public event EventHandler<CounterSelectedEventArgs> CounterSelected;

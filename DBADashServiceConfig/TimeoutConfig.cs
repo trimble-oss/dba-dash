@@ -1,6 +1,7 @@
 ﻿using DBADash;
 using DBADashGUI.Theme;
 using System;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
@@ -19,6 +20,7 @@ namespace DBADashServiceConfig
 
         private DataTable customTimeoutsDT;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int? ImportTimeout
         {
             get =>
@@ -31,9 +33,9 @@ namespace DBADashServiceConfig
                 txtImportCommandTimeout.Text = value?.ToString() ?? CollectionConfig.DefaultImportCommandTimeout.ToString();
                 chkImportTimeout.Checked = value.HasValue;
             }
-
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int? PurgeTimeout
         {
             get =>
@@ -46,9 +48,9 @@ namespace DBADashServiceConfig
                 txtPurgeDataCommandTimeout.Text = value?.ToString() ?? CollectionConfig.DefaultPurgeDataCommandTimeout.ToString();
                 chkPurgeTimeout.Checked = value.HasValue;
             }
-
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int? AddPartitionsTimeout
         {
             get =>
@@ -61,9 +63,7 @@ namespace DBADashServiceConfig
                 txtAddPartitionsCommandTimeout.Text = value?.ToString() ?? CollectionConfig.DefaultAddPartitionsCommandTimeout.ToString();
                 chkAddPartitionsTimeout.Checked = value.HasValue;
             }
-
         }
-
 
         private void TimeoutConfig_Load(object sender, EventArgs e)
         {

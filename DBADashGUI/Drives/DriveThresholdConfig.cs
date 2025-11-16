@@ -1,6 +1,7 @@
-﻿using System;
+﻿using DBADashGUI.Theme;
+using System;
+using System.ComponentModel;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI
 {
@@ -13,6 +14,8 @@ namespace DBADashGUI
         }
 
         private DriveThreshold driveThres;
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DriveThreshold DriveThreshold
         {
             get
@@ -108,7 +111,6 @@ namespace DBADashGUI
 
         private void DriveThresholdConfig_Load(object sender, EventArgs e)
         {
-
         }
     }
 }

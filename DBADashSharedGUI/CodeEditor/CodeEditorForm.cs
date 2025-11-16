@@ -20,8 +20,11 @@ namespace DBADashGUI.SchemaCompare
         private readonly CodeEditor codeEditor1 = new();
         private readonly ElementHost elHost = new();
         private bool isWebViewInit;
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public bool DisposeOnClose { get; set; } = true;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool EditEnabled
         {
             get => !codeEditor1.IsReadOnly;
@@ -33,6 +36,7 @@ namespace DBADashGUI.SchemaCompare
             }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public CodeEditor.CodeEditorModes Syntax
         {
             get => codeEditor1.Mode;
@@ -71,6 +75,7 @@ namespace DBADashGUI.SchemaCompare
             }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Code
         {
             get => codeEditor1.txtCode.Text;

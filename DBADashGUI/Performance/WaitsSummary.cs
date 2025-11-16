@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Windows.Forms;
@@ -22,6 +23,7 @@ namespace DBADashGUI.Performance
         private int dateGrouping = 1;
         private int mins;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public int DateGrouping
         {
             get => dateGrouping;

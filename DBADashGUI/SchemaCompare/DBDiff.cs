@@ -1,10 +1,11 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADashGUI.Theme;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Text;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI
 {
@@ -20,6 +21,7 @@ namespace DBADashGUI
             InitializeComponent();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string SelectedInstanceA
         {
             get => cboInstanceA.Text;
@@ -30,11 +32,13 @@ namespace DBADashGUI
             }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string SelectedInstanceB
         {
             get => cboInstanceB.Text; set => cboInstanceB.Text = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DatabaseItem SelectedDatabaseA
         {
             get => (DatabaseItem)cboDatabaseA.SelectedItem;

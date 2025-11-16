@@ -1,6 +1,7 @@
-﻿using System;
+﻿using DBADashGUI.Theme;
+using System;
+using System.ComponentModel;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI.LogShipping
 {
@@ -38,6 +39,7 @@ namespace DBADashGUI.LogShipping
             Threshold = threshold;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public LogShippingThreshold Threshold
         {
             get

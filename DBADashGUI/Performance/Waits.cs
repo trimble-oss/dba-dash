@@ -1,15 +1,16 @@
-﻿using LiveCharts;
+﻿using Humanizer;
+using LiveCharts;
 using LiveCharts.Configurations;
 using LiveCharts.Defaults;
 using LiveCharts.Wpf;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using Humanizer;
 
 namespace DBADashGUI.Performance
 {
@@ -37,12 +38,14 @@ namespace DBADashGUI.Performance
 
         public event EventHandler<EventArgs> MoveUp;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool CloseVisible
         {
             get => tsClose.Visible;
             set => tsClose.Visible = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string WaitType
         {
             get => Metric.WaitType;
@@ -53,6 +56,7 @@ namespace DBADashGUI.Performance
             }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool MoveUpVisible
         {
             get => tsUp.Visible; set => tsUp.Visible = value;
@@ -60,6 +64,7 @@ namespace DBADashGUI.Performance
 
         private WaitMetric _metric = new();
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public WaitMetric Metric
         {
             get => _metric; set { _metric = value; SetMetric(); }

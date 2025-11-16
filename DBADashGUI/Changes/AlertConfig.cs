@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
+using System.ComponentModel;
 using System.Data;
 using System.Windows.Forms;
 
@@ -14,6 +15,7 @@ namespace DBADashGUI.Changes
 
         private DataRow row;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DataRow AlertRow
         {
             set
@@ -26,17 +28,19 @@ namespace DBADashGUI.Changes
                     optDefault.Checked = true;
                 }
                 else switch (Convert.ToInt16(value["AlertLevel"]))
-                {
-                    case 1:
-                        optCritical.Checked = true;
-                        break;
-                    case 2:
-                        optWarning.Checked = true;
-                        break;
-                    default:
-                        optNA.Checked = true;
-                        break;
-                }
+                    {
+                        case 1:
+                            optCritical.Checked = true;
+                            break;
+
+                        case 2:
+                            optWarning.Checked = true;
+                            break;
+
+                        default:
+                            optNA.Checked = true;
+                            break;
+                    }
                 optDefault.Text = Convert.ToInt16(value["DefaultAlertLevel"]) == 1 ? "Default (Critical)" : "Default (Warning)";
             }
         }

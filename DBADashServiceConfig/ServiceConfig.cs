@@ -2136,14 +2136,14 @@ namespace DBADashServiceConfig
             var frm = new AWSCreds()
             {
                 AWSAccessKey = collectionConfig.AccessKey,
-                AWSSecretKet = collectionConfig.SecretKey,
+                AWSSecretKey = collectionConfig.SecretKey,
                 AWSProfile = collectionConfig.AWSProfile
             };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
                 collectionConfig.AWSProfile = frm.AWSProfile;
-                collectionConfig.SecretKey = frm.AWSSecretKet;
+                collectionConfig.SecretKey = frm.AWSSecretKey;
                 collectionConfig.AccessKey = frm.AWSAccessKey;
             }
 

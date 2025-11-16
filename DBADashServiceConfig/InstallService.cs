@@ -11,6 +11,7 @@ using System.ServiceProcess;
 using System.Windows.Forms;
 using DBADashGUI;
 using DBADashGUI.SchemaCompare;
+using System.ComponentModel;
 
 namespace DBADashServiceConfig
 {
@@ -22,6 +23,7 @@ namespace DBADashServiceConfig
             this.ApplyTheme();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public string ServiceName { get; set; }
 
         private bool InstallDBADashService()

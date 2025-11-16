@@ -3,6 +3,7 @@ using LiveCharts.Defaults;
 using LiveCharts.Wpf;
 using Microsoft.Data.SqlClient;
 using System;
+using System.ComponentModel;
 using System.Data;
 using System.Windows.Forms;
 using static DBADashGUI.Performance.IMetric;
@@ -20,27 +21,38 @@ namespace DBADashGUI.Performance
 
         public event EventHandler<EventArgs> MoveUp;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool CloseVisible
         {
             get => tsClose.Visible;
             set => tsClose.Visible = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool MoveUpVisible
         {
             get => tsUp.Visible;
             set => tsUp.Visible = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int InstanceID { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DateTime FromDate { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DateTime ToDate { get; set; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int CounterID { get => Metric.CounterID; set => Metric.CounterID = value; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string CounterName { get => Metric.CounterName; set => Metric.CounterName = value; }
 
         private PerformanceCounterMetric _metric = new();
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public PerformanceCounterMetric Metric
         { get => _metric; set { _metric = value; SelectAggregate(); } }
 

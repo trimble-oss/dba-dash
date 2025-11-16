@@ -2,6 +2,7 @@
 using LiveCharts.Wpf;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
@@ -21,6 +22,7 @@ namespace DBADashGUI.Performance
         public DateTime FromDate;
         public DateTime ToDate;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Title
         {
             get => tsTitle.Text; set => tsTitle.Text = value;

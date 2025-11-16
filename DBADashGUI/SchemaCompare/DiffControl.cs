@@ -26,6 +26,7 @@ namespace DBADashGUI
         }
 
         [Description("How to view the diff. e.g. inline, side by side"), Category("Diff")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public ViewMode Mode
         {
             get => mode;
@@ -51,6 +52,7 @@ namespace DBADashGUI
         }
 
         [Description("Old text to compare"), Category("Diff")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string OldText
         {
             get => oldText;
@@ -63,6 +65,7 @@ namespace DBADashGUI
         }
 
         [Description("New text to compare"), Category("Diff")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string NewText
         {
             get => newText;

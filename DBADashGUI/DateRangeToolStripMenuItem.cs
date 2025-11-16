@@ -1,12 +1,13 @@
 ﻿using DBADashGUI.Performance;
+using DocumentFormat.OpenXml.Office2013.PowerPoint.Roaming;
+using Octokit;
 using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
-using DocumentFormat.OpenXml.Office2013.PowerPoint.Roaming;
-using Octokit;
 using DateRange = DBADashGUI.Performance.DateRange;
 
 namespace DBADashGUI
@@ -14,10 +15,14 @@ namespace DBADashGUI
     [ToolStripItemDesignerAvailability(ToolStripItemDesignerAvailability.All)]
     public class DateRangeToolStripMenuItem : ToolStripDropDownButton
     {
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public TimeSpan DefaultTimeSpan { get; set; } = TimeSpan.FromMinutes(60);
 
         private TimeSpan? _selectedTimeSpan;
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public TimeSpan? SelectedTimeSpan { get => _selectedTimeSpan; set => SetTimeSpan(value); }
+
         public DateTime? SelectedDateFrom { get; private set; }
         public DateTime? SelectedDateTo { get; private set; }
 
@@ -29,8 +34,10 @@ namespace DBADashGUI
 
         public TimeSpan ActualTimeSpan => SelectedTimeSpan ?? DateTo.Subtract(DateFrom);
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public TimeSpan MinimumTimeSpan { get; set; } = TimeSpan.MinValue;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public TimeSpan MaximumTimeSpan { get; set; } = TimeSpan.MaxValue;
 
         private string selectedText;

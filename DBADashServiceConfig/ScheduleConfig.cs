@@ -1,12 +1,13 @@
 ﻿using DBADash;
+using DBADashGUI.Theme;
 using DBADashService;
 using Humanizer;
 using Quartz;
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashServiceConfig
 {
@@ -27,6 +28,7 @@ namespace DBADashServiceConfig
         private bool copyRunOnStart;
         private bool hasCopy;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public CollectionSchedules ConfiguredSchedule
         {
             get

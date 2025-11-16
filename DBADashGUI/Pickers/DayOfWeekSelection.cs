@@ -1,8 +1,9 @@
-﻿using System;
+﻿using DBADashGUI.Theme;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI
 {
@@ -14,6 +15,7 @@ namespace DBADashGUI
             this.ApplyTheme();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public List<int> DaysOfWeekSelected
         {
             get
@@ -40,7 +42,6 @@ namespace DBADashGUI
                 }
             }
         }
-
 
         private void ClearChecks()
         {

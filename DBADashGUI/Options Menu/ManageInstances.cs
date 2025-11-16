@@ -1,6 +1,7 @@
 ﻿using DBADash;
 using DBADashGUI.Theme;
 using System;
+using System.ComponentModel;
 using System.Data;
 using System.Text;
 using System.Windows.Forms;
@@ -16,7 +17,9 @@ namespace DBADashGUI
             tsFilterError.ForeColor = DashColors.Fail;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Tags { get; set; } = null;
+
         private bool activeFlagChanged;
         private bool summaryVisibleChanged;
         public bool InstanceActiveFlagChanged => activeFlagChanged;

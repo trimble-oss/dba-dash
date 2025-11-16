@@ -4,6 +4,7 @@ using Humanizer;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
@@ -16,10 +17,11 @@ namespace DBADashGUI.Changes
         private int DatabaseID;
         private string InstanceGroupName;
         private string PersistFilter;
-        private int?_drillDownInstanceID;
+        private int? _drillDownInstanceID;
+
         private int? DrillDownInstanceID
         {
-            get=>_drillDownInstanceID;
+            get => _drillDownInstanceID;
             set
             {
                 _drillDownInstanceID = value;
@@ -63,6 +65,7 @@ namespace DBADashGUI.Changes
                     new DataGridViewLinkColumn(){ Name="Optimized Locking", HeaderText="Optimized Locking", DataPropertyName="Optimized Locking", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of databases with optimized locking enabled (SQL 2025)"},
         };
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool SummaryMode
         {
             get => DatabaseID <= 0 && tsDetail.Visible;
@@ -100,7 +103,6 @@ namespace DBADashGUI.Changes
             {
                 RefreshDBInfo();
             }
-           
         }
 
         private void Pivot(ref DataTable dt)
@@ -301,7 +303,7 @@ namespace DBADashGUI.Changes
             for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var r = dgv.Rows[idx];
-                var maxCompatLevel = r.Cells["MaxSupportedCompatibilityLevel"].Value == DBNull.Value ? 0: Convert.ToInt16(r.Cells["MaxSupportedCompatibilityLevel"].Value);
+                var maxCompatLevel = r.Cells["MaxSupportedCompatibilityLevel"].Value == DBNull.Value ? 0 : Convert.ToInt16(r.Cells["MaxSupportedCompatibilityLevel"].Value);
                 r.Cells["compatibility_level"].SetStatusColor(Convert.ToInt16(r.Cells["compatibility_level"].Value) < maxCompatLevel
                     ? DBADashStatus.DBADashStatusEnum.Warning
                     : DBADashStatus.DBADashStatusEnum.OK);
@@ -602,7 +604,7 @@ namespace DBADashGUI.Changes
 
         private void ConfigureInstance_Click(object sender, EventArgs e)
         {
-            if (InstanceIDs.Count != 1 && !DrillDownInstanceID.HasValue ) return;
+            if (InstanceIDs.Count != 1 && !DrillDownInstanceID.HasValue) return;
             var instanceId = DrillDownInstanceID ?? InstanceIDs.First();
             ConfigureMetrics(instanceId);
         }

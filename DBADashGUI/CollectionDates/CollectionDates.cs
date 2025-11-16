@@ -1,14 +1,15 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADash;
+using DBADashGUI.Interface;
+using DBADashGUI.Messaging;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADash;
-using DBADashGUI.Interface;
-using DBADashGUI.Messaging;
 
 namespace DBADashGUI.CollectionDates
 {
@@ -26,21 +27,25 @@ namespace DBADashGUI.CollectionDates
 
         private List<int> InstanceIDs { get; set; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeCritical
         {
             get => statusFilterToolStrip1.Critical; set => statusFilterToolStrip1.Critical = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeWarning
         {
             get => statusFilterToolStrip1.Warning; set => statusFilterToolStrip1.Warning = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeNA
         {
             get => statusFilterToolStrip1.NA; set => statusFilterToolStrip1.NA = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeOK
         {
             get => statusFilterToolStrip1.OK; set => statusFilterToolStrip1.OK = value;

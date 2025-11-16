@@ -23,14 +23,21 @@ namespace DBADashGUI.Performance
             Filegroup
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int InstanceID { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int? DatabaseID { get; set; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DateTime FromDate { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DateTime ToDate { get; set; }
 
         private readonly IOSummaryGroupByOptions defaultGroupBy = IOSummaryGroupByOptions.Database;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public IOSummaryGroupByOptions GroupBy
         {
             get

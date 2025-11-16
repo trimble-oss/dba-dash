@@ -2,6 +2,7 @@
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
@@ -17,8 +18,10 @@ namespace DBADashGUI.DBADashAlerts
             this.ApplyTheme();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string ConnectionID { get; set; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public AlertRuleBase AlertRule { get; set; }
 
         private void EditRule_Load(object sender, EventArgs e)

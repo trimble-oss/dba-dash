@@ -1,8 +1,9 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADashGUI.Theme;
+using Microsoft.Data.SqlClient;
 using System;
+using System.ComponentModel;
 using System.Data;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI.CollectionDates
 {
@@ -14,30 +15,37 @@ namespace DBADashGUI.CollectionDates
             this.ApplyTheme();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int InstanceID { get; set; }
 
         private string _reference;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Reference
-        { get => _reference;
+        {
+            get => _reference;
             set => _reference = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Inherit
         {
             get => optInherit.Checked; set => optInherit.Checked = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int WarningThreshold
         {
             get => (int)numWarning.Value; set => numWarning.Value = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int CriticalThreshold
         {
             get => (int)numCritical.Value; set => numCritical.Value = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Disabled
         {
             get => OptDisabled.Checked; set => OptDisabled.Checked = value;

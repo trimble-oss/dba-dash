@@ -1,10 +1,11 @@
 ﻿using DBADash;
+using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System;
+using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashServiceConfig
 {
@@ -20,12 +21,14 @@ namespace DBADashServiceConfig
 
         private string _connectionString;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string DatabaseName
         {
             get => cboDatabase.Text;
             set => cboDatabase.Text = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string ConnectionString
         {
             get
@@ -91,12 +94,14 @@ AND database_id > 4 ";
             }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string DB
         {
             get => cboDatabase.Text;
             set => cboDatabase.Text = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string DeployScript
         {
             get => txtDeployScript.Text;

@@ -4,6 +4,7 @@ using DBADashGUI.Messaging;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -20,21 +21,25 @@ namespace DBADashGUI.Checks
 
         private List<int> InstanceIDs;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeCritical
         {
             get => statusFilterToolStrip1.Critical; set => statusFilterToolStrip1.Critical = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeWarning
         {
             get => statusFilterToolStrip1.Warning; set => statusFilterToolStrip1.Warning = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeNA
         {
             get => statusFilterToolStrip1.NA; set => statusFilterToolStrip1.NA = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeOK
         {
             get => statusFilterToolStrip1.OK; set => statusFilterToolStrip1.OK = value;
@@ -42,6 +47,7 @@ namespace DBADashGUI.Checks
 
         private DBADashContext CurrentContext;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string CheckContext
         {
             get => _checkContext;
@@ -70,6 +76,7 @@ namespace DBADashGUI.Checks
             }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public string Test
         {
             get => test;

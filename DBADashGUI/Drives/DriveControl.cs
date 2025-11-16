@@ -11,9 +11,9 @@ namespace DBADashGUI
 {
     public partial class DriveControl : UserControl, IThemedControl
     {
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public bool DisplayInstanceName { get; set; }
 
- 
         public DriveControl()
         {
             InitializeComponent();
@@ -78,7 +78,7 @@ namespace DBADashGUI
             picStatus.Visible = (drive.DriveStatus != DBADashStatusEnum.NA);
 
             lblUpdated.Text = "Updated " + drive.SnapshotDate.ToString("yyyy-MM-dd HH:mm") + " (" + DateHelper.AppNow.Subtract(drive.SnapshotDate).TotalMinutes.ToString("N0") + "min ago)";
-            
+
             UpdateSnapshotStatus();
         }
 
@@ -134,7 +134,7 @@ namespace DBADashGUI
             ShowFilesForDrive(Drive.DriveLetter, Drive.DriveLabel, Drive.InstanceID, Drive.InstanceName, this);
         }
 
-        public static void ShowFilesForDrive(string driveLetter,string driveLabel, int instanceID, string instanceName,Control ctrl)
+        public static void ShowFilesForDrive(string driveLetter, string driveLabel, int instanceID, string instanceName, Control ctrl)
         {
             var frm = new Form()
             {
@@ -171,7 +171,5 @@ namespace DBADashGUI
             lnkFiles.ApplyTheme(theme);
             UpdateSnapshotStatus();
         }
-
-
     }
 }

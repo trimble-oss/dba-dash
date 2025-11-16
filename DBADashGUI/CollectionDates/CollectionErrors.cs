@@ -1,10 +1,11 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADashGUI.Theme;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI.CollectionDates
 {
@@ -29,6 +30,7 @@ namespace DBADashGUI.CollectionDates
         private string InstanceGroupName => Context.InstanceName;
         private int _days;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public int Days
         {
             get => _days;
@@ -42,6 +44,7 @@ namespace DBADashGUI.CollectionDates
             }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool AckErrors
         {
             get => tsAckErrors.Visible;

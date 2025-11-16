@@ -3,6 +3,7 @@ using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -31,6 +32,7 @@ namespace DBADashGUI.Performance
         private int DatabaseID => CurrentContext.DatabaseID;
         private long ObjectID => (CurrentContext.Type is SQLTreeItem.TreeType.Database or SQLTreeItem.TreeType.AzureDatabase) ? -1 : CurrentContext.ObjectID;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool UseGlobalTime { get => !tsDateRange.Visible; set => tsDateRange.Visible = !value; }
 
         private DateTime FromUTC => UseGlobalTime
@@ -47,6 +49,7 @@ namespace DBADashGUI.Performance
 
         private DBADashContext CurrentContext;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Types
         {
             get => tsType.DropDownItems.Cast<ToolStripMenuItem>().Where(mnu => mnu.Checked).Aggregate("", (current, mnu) => current + ((current.Length > 0 ? "," : "") + mnu.Tag));

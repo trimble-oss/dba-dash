@@ -3,6 +3,7 @@ using LiveCharts.Defaults;
 using LiveCharts.Wpf;
 using Microsoft.Data.SqlClient;
 using System;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,6 +19,7 @@ namespace DBADashGUI.Performance
             InitializeComponent();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool CloseVisible
         {
             get => tsClose.Visible; set => tsClose.Visible = value;
@@ -27,13 +29,16 @@ namespace DBADashGUI.Performance
 
         public event EventHandler<EventArgs> MoveUp;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int InstanceID { get; set; }
+
         private int DateGrouping;
         private bool smoothLines = true;
         private int durationMins;
 
         public int PointSize;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public bool SmoothLines
         {
             get => smoothLines;
@@ -54,6 +59,7 @@ namespace DBADashGUI.Performance
             }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool MoveUpVisible
         {
             get => tsUp.Visible; set => tsUp.Visible = value;
@@ -61,6 +67,7 @@ namespace DBADashGUI.Performance
 
         private CPUMetric _metric = new() { AggregateType = IMetric.AggregateTypes.Avg };
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public CPUMetric Metric
         { get => _metric; set { _metric = value; SelectAggregate(); } }
 

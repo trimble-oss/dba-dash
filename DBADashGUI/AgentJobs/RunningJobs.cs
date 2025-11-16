@@ -6,6 +6,7 @@ using Humanizer;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -241,6 +242,7 @@ namespace DBADashGUI.AgentJobs
             await CollectionMessaging.TriggerCollection(triggerContext.ConnectionID, types, triggerContext.CollectAgentID.Value, triggerContext.ImportAgentID.Value, this);
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public int MinimumDuration
         {
             get => _minimumDuration;
