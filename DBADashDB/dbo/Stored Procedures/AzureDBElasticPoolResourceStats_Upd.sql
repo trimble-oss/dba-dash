@@ -8,30 +8,98 @@ SET XACT_ABORT ON
 DECLARE @Ref VARCHAR(100)='AzureDBElasticPoolResourceStats'
 IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
 BEGIN
-	DECLARE @MaxDate DATETIME2(7);
-	DECLARE @AggFrom DATETIME2(7);
-	SELECT @AggFrom = DG.DateGroup
-	FROM dbo.DateGroupingMins((SELECT MIN(end_time)
-										FROM @AzureDBElasticPoolResourceStats S)
-	,60) DG;
+	CREATE TABLE #Pools(
+		elastic_pool_name NVARCHAR(128) PRIMARY KEY,
+		elastic_pool_dtu_limit INT,
+		elastic_pool_cpu_limit DECIMAL (5, 2),
+		first_end_time DATETIME2(7)
+	)
 
-	WITH poolUpd AS (
-		SELECT elastic_pool_name,elastic_pool_dtu_limit,elastic_pool_cpu_limit,end_time,ROW_NUMBER() OVER(PARTITION BY elastic_pool_name ORDER BY end_time DESC) rnum
+
+	DECLARE @MaxDate DATETIME2(7);
+	DECLARE @MinDate DATETIME2(7);
+	DECLARE @AggFrom DATETIME2(7);
+	DECLARE @PoolUpdates INT=0;
+
+	SELECT @MinDate = MIN(end_time)
+	FROM @AzureDBElasticPoolResourceStats S
+
+	SELECT @AggFrom = DG.DateGroup
+	FROM dbo.DateGroupingMins(@MinDate,60) DG;
+
+	WITH pools AS (
+		SELECT	elastic_pool_name,
+				elastic_pool_dtu_limit,
+				elastic_pool_cpu_limit,
+				FIRST_VALUE(end_time) OVER(PARTITION BY elastic_pool_name,elastic_pool_dtu_limit,elastic_pool_cpu_limit ORDER BY end_time) first_end_time, /* First occurrence of this config */
+				ROW_NUMBER() OVER(PARTITION BY elastic_pool_name ORDER BY end_time DESC) rnum
 		FROM @AzureDBElasticPoolResourceStats
 	)
-	MERGE dbo.AzureDBElasticPool AS T
-	USING(SELECT * FROM poolUpd WHERE rnum=1) AS S ON s.elastic_pool_name = T.elastic_pool_name AND T.InstanceID = @InstanceID
-	WHEN MATCHED AND EXISTS(SELECT S.elastic_pool_dtu_limit EXCEPT SELECT T.elastic_pool_dtu_limit)
-				OR EXISTS(SELECT S.elastic_pool_cpu_limit EXCEPT SELECT T.elastic_pool_cpu_limit) 
-	THEN UPDATE SET T.elastic_pool_dtu_limit = S.elastic_pool_dtu_limit,
-			T.elastic_pool_cpu_limit = S.elastic_pool_cpu_limit,
-			T.ValidFrom=S.end_time
-	WHEN NOT MATCHED THEN INSERT(InstanceID,elastic_pool_name,elastic_pool_dtu_limit ,elastic_pool_cpu_limit,ValidFrom )
-	VALUES(@InstanceID,S.elastic_pool_name,S.elastic_pool_dtu_limit ,S.elastic_pool_cpu_limit,GETUTCDATE())
-	OUTPUT Inserted.PoolID, DELETED.elastic_pool_dtu_limit,DELETED.elastic_pool_cpu_limit,INSERTED.elastic_pool_dtu_limit,Inserted.elastic_pool_cpu_limit,ISNULL(Deleted.ValidFrom,'19000101'),Inserted.ValidFrom
-	INTO dbo.AzureDBElasticPoolHistory(PoolID,elastic_pool_dtu_limit_old,elastic_pool_cpu_limit_old,elastic_pool_dtu_limit_new,elastic_pool_cpu_limit_new,ValidFrom,ValidTo);
+	INSERT INTO #Pools(elastic_pool_name,elastic_pool_dtu_limit,elastic_pool_cpu_limit,first_end_time)
+	SELECT	p.elastic_pool_name,
+			p.elastic_pool_dtu_limit,
+			p.elastic_pool_cpu_limit,
+			p.first_end_time
+	FROM pools p
+	WHERE p.rnum=1
 
-	IF @@ROWCOUNT>0
+	/* Update existing pools */
+	UPDATE EP
+		 SET EP.elastic_pool_dtu_limit = T.elastic_pool_dtu_limit,
+			EP.elastic_pool_cpu_limit = T.elastic_pool_cpu_limit,
+			EP.ValidFrom = T.first_end_time,
+			EP.ValidTo = NULL /* The pool is active as it's contained in #Pools, so set ValidTo to NULL just in case it was previously 'deleted' */
+	/* Track updates */
+	OUTPUT Inserted.PoolID, DELETED.elastic_pool_dtu_limit,DELETED.elastic_pool_cpu_limit,INSERTED.elastic_pool_dtu_limit,Inserted.elastic_pool_cpu_limit,ISNULL(Deleted.ValidFrom,'19000101'),Inserted.ValidFrom
+		INTO dbo.AzureDBElasticPoolHistory(PoolID,elastic_pool_dtu_limit_old,elastic_pool_cpu_limit_old,elastic_pool_dtu_limit_new,elastic_pool_cpu_limit_new,ValidFrom,ValidTo)
+	FROM dbo.AzureDBElasticPool EP
+	JOIN #Pools T ON EP.elastic_pool_name = T.elastic_pool_name
+	WHERE EP.InstanceID = @InstanceID
+	AND (	
+			/* Limits have changed */
+			EXISTS(
+				SELECT	T.elastic_pool_dtu_limit,
+						T.elastic_pool_cpu_limit
+				EXCEPT 
+				SELECT	EP.elastic_pool_dtu_limit,
+						EP.elastic_pool_cpu_limit
+				)
+			/* or pool was previously deactivated */
+			OR EP.ValidTo IS NOT NULL 
+		)
+	SET @PoolUpdates += @@ROWCOUNT
+
+	/* Insert new pools */
+	INSERT INTO dbo.AzureDBElasticPool(InstanceID,elastic_pool_name,elastic_pool_dtu_limit ,elastic_pool_cpu_limit,ValidFrom )
+	SELECT	@InstanceID,
+			P.elastic_pool_name,
+			P.elastic_pool_dtu_limit ,
+			P.elastic_pool_cpu_limit,
+			P.first_end_time
+	FROM #Pools P
+	WHERE NOT EXISTS(
+					SELECT 1 
+					FROM dbo.AzureDBElasticPool EP
+					WHERE EP.elastic_pool_name = P.elastic_pool_name
+					AND EP.InstanceID = @InstanceID
+					)
+	SET @PoolUpdates += @@ROWCOUNT
+
+	/* Deactivate pools that no longer exist */
+	UPDATE EP
+		SET EP.ValidTo = SYSUTCDATETIME()
+	FROM dbo.AzureDBElasticPool EP
+	WHERE EP.InstanceID = @InstanceID
+	AND NOT EXISTS(
+					SELECT 1 
+					FROM #Pools P
+					WHERE EP.elastic_pool_name = P.elastic_pool_name
+					)
+	AND EP.ValidTo IS NULL
+
+	SET @PoolUpdates += @@ROWCOUNT
+
+	IF @PoolUpdates>0
 	BEGIN
 		EXEC dbo.AzureDBCounters_Upd @InstanceID = @InstanceID
 	END
