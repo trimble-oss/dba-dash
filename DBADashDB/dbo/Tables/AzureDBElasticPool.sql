@@ -5,6 +5,7 @@
     [elastic_pool_dtu_limit] INT            NULL,
     [elastic_pool_cpu_limit] DECIMAL (5, 2) NULL,
     [ValidFrom]              DATETIME2 (2)  NULL,
+    [ValidTo]                DATETIME2(2) NULL,
     CONSTRAINT [PK_AzureDBElasticPool] PRIMARY KEY CLUSTERED ([PoolID] ASC),
     CONSTRAINT [IX_InstanceID_elastic_pool_name] UNIQUE NONCLUSTERED ([InstanceID] ASC, [elastic_pool_name] ASC)
 );
