@@ -30,6 +30,16 @@ namespace DBADashGUI
             HasInstanceMetadata = Instances.Rows.Cast<DataRow>().Where(r => r.Field<bool>("HasInstanceMetadata")).Select(r => r.Field<int>("InstanceID")).ToHashSet();
         }
 
+        public static DataTable GetElasticPools()
+        {
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand(@"dbo.AzureDBElasticPool_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
+        }
+
         public static DataTable GetInstances(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "", string groupByTag = "")
         {
             using var cn = new SqlConnection(Common.ConnectionString);

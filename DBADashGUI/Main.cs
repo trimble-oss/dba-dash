@@ -597,6 +597,7 @@ namespace DBADashGUI
             var tags = string.Join(",", SelectedTags());
 
             CommonData.UpdateInstancesList(tagIDs: tags, searchString: SearchString, groupByTag: GroupByTag);
+            var pools = CommonData.GetElasticPools();
 
             SQLTreeItem AzureNode = null;
             var currentTagGroup = string.Empty;
@@ -653,8 +654,8 @@ namespace DBADashGUI
                         );
 
                         AzureNode.AddReportsFolder(customReports.InstanceLevelReports);
-                        var poolNodes = CommonData.Instances.Rows.Cast<DataRow>()
-                            .Where(r => (string)r["Instance"] == instance && r["elastic_pool_name"] != DBNull.Value)
+                        var poolNodes = pools.Rows.Cast<DataRow>()
+                            .Where(r => (string)r["InstanceGroupName"] == instance && r["elastic_pool_name"] != DBNull.Value)
                             .Select(r => (string)r["elastic_pool_name"])
                             .Distinct()
                             .OrderBy(r => r)

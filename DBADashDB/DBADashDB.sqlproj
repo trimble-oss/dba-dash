@@ -858,6 +858,7 @@
     <Build Include="Storage\PS_RunningQueriesCursors.sql" />
     <Build Include="dbo\Stored Procedures\RunningQueriesCursors_Upd.sql" />
     <Build Include="dbo\Stored Procedures\RunningQueriesCursors_Get.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBElasticPool_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
