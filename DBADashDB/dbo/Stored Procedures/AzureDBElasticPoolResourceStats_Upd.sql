@@ -47,8 +47,7 @@ BEGIN
 	UPDATE EP
 		 SET EP.elastic_pool_dtu_limit = T.elastic_pool_dtu_limit,
 			EP.elastic_pool_cpu_limit = T.elastic_pool_cpu_limit,
-			EP.ValidFrom = T.first_end_time,
-			EP.ValidTo = NULL /* The pool is active as it's contained in #Pools, so set ValidTo to NULL just in case it was previously 'deleted' */
+			EP.ValidFrom = T.first_end_time
 	/* Track updates */
 	OUTPUT Inserted.PoolID, DELETED.elastic_pool_dtu_limit,DELETED.elastic_pool_cpu_limit,INSERTED.elastic_pool_dtu_limit,Inserted.elastic_pool_cpu_limit,ISNULL(Deleted.ValidFrom,'19000101'),Inserted.ValidFrom
 		INTO dbo.AzureDBElasticPoolHistory(PoolID,elastic_pool_dtu_limit_old,elastic_pool_cpu_limit_old,elastic_pool_dtu_limit_new,elastic_pool_cpu_limit_new,ValidFrom,ValidTo)
@@ -64,8 +63,6 @@ BEGIN
 				SELECT	EP.elastic_pool_dtu_limit,
 						EP.elastic_pool_cpu_limit
 				)
-			/* or pool was previously deactivated */
-			OR EP.ValidTo IS NOT NULL 
 		)
 	SET @PoolUpdates += @@ROWCOUNT
 
@@ -96,6 +93,20 @@ BEGIN
 					WHERE EP.elastic_pool_name = P.elastic_pool_name
 					)
 	AND EP.ValidTo IS NULL
+
+	SET @PoolUpdates += @@ROWCOUNT
+
+	/* Re-activate pools */
+	UPDATE EP
+		SET EP.ValidTo = NULL
+	FROM dbo.AzureDBElasticPool EP
+	WHERE EP.InstanceID = @InstanceID
+	AND EXISTS(
+				SELECT 1 
+				FROM #Pools P
+				WHERE EP.elastic_pool_name = P.elastic_pool_name
+				)
+	AND EP.ValidTo IS NOT NULL
 
 	SET @PoolUpdates += @@ROWCOUNT
 
