@@ -10,18 +10,14 @@ namespace DBADashGUI.Performance
             InitializeComponent();
         }
 
-
         public DateTime FromDate;
         public DateTime ToDate;
-        public string ElasticPoolName { get => azureDBResourceStats1.ElasticPoolName;
-            set => azureDBResourceStats1.ElasticPoolName = value;
-        }
-        public int InstanceID { get => azureDBResourceStats1.InstanceID;
-            set => azureDBResourceStats1.InstanceID = value;
-        }
+
+        public DBADashContext CurrentContext;
 
         private void AzureDBResourceStatsView_Load(object sender, EventArgs e)
         {
+            azureDBResourceStats1.SetContext(CurrentContext);
             azureDBResourceStats1.RefreshData();
         }
     }

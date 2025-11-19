@@ -141,6 +141,11 @@ AND EXISTS(SELECT 1
 			WHERE SOI.Instance = I.Instance
 			AND SO.elastic_pool_name = EP.elastic_pool_name
 			' + CASE WHEN @DatabaseName IS NULL THEN '' ELSE 'AND SOD.Name = @DatabaseName' END + '
+			UNION ALL
+			SELECT 1
+			FROM @Instances ids
+			JOIN dbo.AzureDBElasticPool EP2 ON EP2.InstanceID = ids.ID
+			WHERE EP2.PoolID = EP.PoolID
 			) 
 GROUP BY I.InstanceID,
 	I.ConnectionID,
