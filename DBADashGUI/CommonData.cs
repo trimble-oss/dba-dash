@@ -343,6 +343,7 @@ namespace DBADashGUI
                 AzureInstanceIDsWithHidden = isAzureDB ? new HashSet<int>() { instanceID } : new HashSet<int>(),
                 InstanceID = instanceID,
                 InstanceName = (string)row["Instance"],
+                MasterInstanceID = row.Field<int?>("MasterInstanceID") ?? 0,
                 Type = isAzureDB ? SQLTreeItem.TreeType.AzureDatabase : SQLTreeItem.TreeType.Instance,
             };
             return context;

@@ -12,9 +12,9 @@ namespace DBADashGUI.Performance
 {
     public partial class AzureDBResourceStats : UserControl, ISetContext, IRefreshData
     {
-        public int InstanceID;
-        public int MasterInstanceID;
-        public string ElasticPoolName = string.Empty;
+        private int InstanceID;
+        private int MasterInstanceID;
+        private string ElasticPoolName = string.Empty;
 
         public AzureDBResourceStats()
         {
@@ -98,7 +98,7 @@ namespace DBADashGUI.Performance
             ElasticPoolName = _context.ElasticPoolName;
             tsPool.Text = $"Elastic Pool: {ElasticPoolName}";
             tsDB.Text = $"DB: {_context.DatabaseName}";
-            splitContainer1.Panel1Collapsed = InstanceID <= 0;
+            splitContainer1.Panel1Collapsed = _context.Type == SQLTreeItem.TreeType.ElasticPool;
             splitContainer1.Panel2Collapsed = string.IsNullOrEmpty(ElasticPoolName);
             RefreshData();
         }

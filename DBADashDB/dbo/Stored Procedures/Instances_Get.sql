@@ -28,7 +28,8 @@ SELECT  I.InstanceID,
 	I.ImportAgentID,
 	IA.MessagingEnabled & CA.MessagingEnabled AS MessagingEnabled,
 	I.ProductVersion,
-	CASE WHEN M.InstanceID IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS HasInstanceMetadata
+	CASE WHEN M.InstanceID IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS HasInstanceMetadata,
+	FIRST_VALUE(CASE WHEN D.name = ''master'' THEN D.InstanceID ELSE NULL END) OVER(PARTITION BY Instance ORDER BY CASE WHEN D.name = ''master'' THEN 0 ELSE 1 END) AS MasterInstanceID
 FROM dbo.InstancesMatchingTags(@TagIDs) I
 LEFT JOIN dbo.Databases D ON D.InstanceID = I.InstanceID AND I.EngineEdition = 5 AND D.IsActive=1
 LEFT JOIN dbo.AzureDBServiceObjectives SO ON I.InstanceID = SO.InstanceID
