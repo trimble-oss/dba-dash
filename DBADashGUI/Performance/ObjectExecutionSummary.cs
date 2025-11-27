@@ -433,6 +433,7 @@ namespace DBADashGUI.Performance
                 context.ObjectName = (string)row["ObjectName"];
                 context.ObjectID = (long)row["ObjectID"];
                 context.DatabaseName = (string)row["DB"];
+                context.Type = SQLTreeItem.TreeType.StoredProcedure;
                 qs.Context = context;
                 qs.Show();
             }
