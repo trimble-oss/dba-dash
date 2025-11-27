@@ -1030,7 +1030,7 @@ namespace DBADashGUI
                     case SQLTreeItem.TreeType.StoredProcedure or SQLTreeItem.TreeType.CLRProcedure
                         or SQLTreeItem.TreeType.ScalarFunction or SQLTreeItem.TreeType.CLRScalarFunction
                         or SQLTreeItem.TreeType.Trigger or SQLTreeItem.TreeType.CLRTrigger:
-                        allowedTabs.AddRange(new[] { tabObjectExecutionSummary, tabPerformance, tabSchema });
+                        allowedTabs.AddRange(new[] { tabObjectExecutionSummary, tabPerformance, tabSchema, tabTopQueries });
 
                         foreach (var tool in CommunityTools.CommunityTools.ProcedureLevelTools)
                         {
