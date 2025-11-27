@@ -1025,25 +1025,22 @@ namespace DBADashGUI
 
             if (n.ObjectID > 0)
             {
+                if (n.Type.IsQueryStoreObjectType())
+                {
+                    allowedTabs.AddRange(new[] { tabObjectExecutionSummary, tabPerformance, tabSchema, tabTopQueries });
+
+                    foreach (var tool in CommunityTools.CommunityTools.ProcedureLevelTools)
+                    {
+                        if (!Enum.TryParse<ProcedureExecutionMessage.CommunityProcs>(tool.ProcedureName,
+                                out var proc)) continue;
+                        if (!n.Context.IsScriptAllowed(ProcedureExecutionMessage.CommunityProcs.sp_QuickieStore))
+                            continue;
+
+                        allowedTabs.Add(CommunityToolsTabPages[proc]);
+                    }
+                }
                 switch (n.Type)
                 {
-                    case SQLTreeItem.TreeType.StoredProcedure or SQLTreeItem.TreeType.CLRProcedure
-                        or SQLTreeItem.TreeType.ScalarFunction or SQLTreeItem.TreeType.CLRScalarFunction
-                        or SQLTreeItem.TreeType.Trigger or SQLTreeItem.TreeType.CLRTrigger:
-                        allowedTabs.AddRange(new[] { tabObjectExecutionSummary, tabPerformance, tabSchema, tabTopQueries });
-
-                        foreach (var tool in CommunityTools.CommunityTools.ProcedureLevelTools)
-                        {
-                            if (!Enum.TryParse<ProcedureExecutionMessage.CommunityProcs>(tool.ProcedureName,
-                                    out var proc)) continue;
-                            if (!n.Context.IsScriptAllowed(ProcedureExecutionMessage.CommunityProcs.sp_QuickieStore))
-                                continue;
-
-                            allowedTabs.Add(CommunityToolsTabPages[proc]);
-                        }
-
-                        break;
-
                     case SQLTreeItem.TreeType.Table:
                         allowedTabs.AddRange(new[] { tabTableSize, tabSchema });
 

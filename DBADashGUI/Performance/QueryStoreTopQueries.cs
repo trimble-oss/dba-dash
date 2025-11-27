@@ -47,10 +47,7 @@ namespace DBADashGUI.Performance
         private void SetContext()
         {
             if (CurrentContext == null) return;
-            var isQueryStoreObject = CurrentContext.Type is SQLTreeItem.TreeType.StoredProcedure or SQLTreeItem.TreeType.CLRProcedure
-                        or SQLTreeItem.TreeType.ScalarFunction or SQLTreeItem.TreeType.CLRScalarFunction
-                        or SQLTreeItem.TreeType.Trigger or SQLTreeItem.TreeType.CLRTrigger;
-            var objectName = QueryHash != null ? QueryHash.ToHexString(true) : isQueryStoreObject ? CurrentContext.ObjectName : string.Empty;
+            var objectName = QueryHash != null ? QueryHash.ToHexString(true) : CurrentContext.Type.IsQueryStoreObjectType() ? CurrentContext.ObjectName : string.Empty;
             var plan = PlanHash != null ? PlanHash.ToHexString(true) : string.Empty;
             dgv.DataSource = null;
             txtObjectName.Text = objectName;

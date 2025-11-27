@@ -916,5 +916,9 @@ namespace DBADashGUI
         }
 
         public static string TabName(this Main.Tabs tab) => "tab" + tab;
+
+        public static bool IsQueryStoreObjectType(this SQLTreeItem.TreeType treeType) => treeType is SQLTreeItem.TreeType.StoredProcedure or SQLTreeItem.TreeType.CLRProcedure
+                or SQLTreeItem.TreeType.ScalarFunction or SQLTreeItem.TreeType.CLRScalarFunction
+                or SQLTreeItem.TreeType.Trigger or SQLTreeItem.TreeType.CLRTrigger;
     }
 }
