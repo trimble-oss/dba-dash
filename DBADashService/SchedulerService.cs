@@ -1,4 +1,5 @@
-﻿using DBADash;
+﻿using AsyncKeyedLock;
+using DBADash;
 using DBADash.InstanceMetadata;
 using DBADash.Messaging;
 using Microsoft.Extensions.Hosting;
@@ -30,7 +31,7 @@ namespace DBADashService
         private System.Timers.Timer folderCleanupTimer;
         private readonly CollectionSchedules schedules;
         private MessageProcessing messageProcessing;
-        public static readonly ConcurrentDictionary<string, SemaphoreSlim> Locker = new();
+        public static readonly AsyncKeyedLocker<string> Locker = new();
 
         private static readonly ResiliencePipeline pipeline = new ResiliencePipelineBuilder()
             .AddRetry(new RetryStrategyOptions

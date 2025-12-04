@@ -1,17 +1,17 @@
 ﻿using Amazon.SQS;
 using Amazon.SQS.Model;
+using AsyncKeyedLock;
+using Microsoft.Data.SqlClient;
+using Polly;
+using Polly.Retry;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
-using Polly.Retry;
-using Polly;
-using System.Collections.Concurrent;
 using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace DBADash.Messaging
 {
@@ -24,17 +24,17 @@ namespace DBADash.Messaging
         private const int delayAfterReceivingMessageForDifferentAgent = 1000; // ms
         private const int delayBetweenMessages = 100; // ms
         private const int errorDelay = 1000; // ms
-        private readonly ConcurrentDictionary<string, SemaphoreSlim> _semaphores = new();
         private const int MaxDegreeOfParallelism = 2;
+        private readonly AsyncKeyedLocker<string> _semaphores = new(o => o.MaxCount = MaxDegreeOfParallelism);
 
         private static readonly ResiliencePipeline pipeline = new ResiliencePipelineBuilder()
             .AddRetry(new RetryStrategyOptions
-        {
-            ShouldHandle = new PredicateBuilder().Handle<Exception>(),
-            BackoffType = DelayBackoffType.Constant,
-            MaxRetryAttempts = 2,
-            Delay = TimeSpan.FromSeconds(1)
-        })
+            {
+                ShouldHandle = new PredicateBuilder().Handle<Exception>(),
+                BackoffType = DelayBackoffType.Constant,
+                MaxRetryAttempts = 2,
+                Delay = TimeSpan.FromSeconds(1)
+            })
         .Build();
 
         public SQSMessageProcessing(CollectionConfig config)
@@ -227,9 +227,6 @@ namespace DBADash.Messaging
             if (msg == null) return;
 
             // Implementations of MessageBase will process the message and return a DataSet or null
-            var semaphore =
-                _semaphores.GetOrAdd(destinationConnectionHash,
-                    _ => new SemaphoreSlim(MaxDegreeOfParallelism));
             try
             {
                 if (msg is CancellationMessage cancellationMessage) // Process cancellation message immediately without waiting for semaphore
@@ -239,7 +236,8 @@ namespace DBADash.Messaging
                         ResponseMessage.ResponseTypes.Failure, "Message Cancelled").ConfigureAwait(false);
                     return;
                 }
-                if (!await semaphore.WaitAsync(msg.SemaphoreTimeout)) // Semaphore used to limit concurrent processing per connection
+                using var semaphore = await _semaphores.LockOrNullAsync(destinationConnectionHash, msg.SemaphoreTimeout);
+                if (semaphore is null) // Semaphore used to limit concurrent processing per connection
                 {
                     Log.Warning("Semaphore timeout for message {id} of type {type} with handle {handle}.  Service is busy.", msg.Id, msg.GetType().ToString(), handle);
                     // Semaphore timed out, service is busy
@@ -248,17 +246,9 @@ namespace DBADash.Messaging
 
                     return;
                 }
-
-                try
-                {
-                    await DoProcessMessageAsync(msg, DBADashAgentIdentifier, handle, destinationConnectionHash,
-                        replySQS,
-                        replyAgent);
-                }
-                finally
-                {
-                    semaphore.Release();
-                }
+                await DoProcessMessageAsync(msg, DBADashAgentIdentifier, handle, destinationConnectionHash,
+                    replySQS,
+                    replyAgent);
             }
             catch (Exception ex)
             {
@@ -384,11 +374,11 @@ namespace DBADash.Messaging
             if (responseMessage.Data != null && responseMessage.Data.Tables.Contains("DBADash"))
             {
                 Log.Debug("Writing data to SQL");
-             
+
                 await DestinationHandling.WriteDBAsync(responseMessage.Data, destination.ConnectionString,
                         Config);
-         
-                if (responseMessage.Exception==null && responseMessage.Data.Tables.Contains("Errors") && responseMessage.Data.Tables["Errors"]!.Rows.Count>0)
+
+                if (responseMessage.Exception == null && responseMessage.Data.Tables.Contains("Errors") && responseMessage.Data.Tables["Errors"]!.Rows.Count > 0)
                 {
                     var dtErrors = responseMessage.Data.Tables["Errors"];
                     var sbErrors = new StringBuilder();

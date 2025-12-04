@@ -80,18 +80,11 @@ namespace DBADashService
                             Log.Debug("Wait for lock {0}", context.JobDetail.Key);
                             // Ensures that S3 folder can only be processed by 1 job instance at a time.
                             // Note: DisallowConcurrentExecution didn't prevent triggered at startup job from overlapping with the scheduled one
-                            var semaphore = ScheduleService.Locker.GetOrAdd(cfg.ConnectionString, _ => new SemaphoreSlim(1, 1));
-                            await semaphore.WaitAsync();
-                            try
+                            using (await ScheduleService.Locker.LockAsync(cfg.ConnectionString))
                             {
                                 Log.Debug("Lock acquired {0}", context.JobDetail.Key);
                                 await CollectS3(cfg);
                             }
-                            finally
-                            {
-                                semaphore.Release();
-                            }
-
                             break;
                         }
                     case ConnectionType.SQL:
