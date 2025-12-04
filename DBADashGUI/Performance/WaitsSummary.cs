@@ -15,6 +15,8 @@ namespace DBADashGUI.Performance
         {
             InitializeComponent();
             dgv.RegisterClearFilter(tsClearFilter);
+            waits1.CloseVisible = true;
+            splitGrid.Panel1Collapsed = true;
         }
 
         private int InstanceID { get; set; }
@@ -146,14 +148,20 @@ namespace DBADashGUI.Performance
 
         private void RefreshChart()
         {
-            if (string.IsNullOrEmpty(selectedWaitType))
+            if (splitGrid.Panel1Collapsed && string.IsNullOrEmpty(selectedWaitType))
             {
-                splitContainer1.Panel1Collapsed = true;
+                return;
             }
-            else
+            splitChart.Panel1Collapsed = string.IsNullOrEmpty(selectedWaitType);
+
+            if (!splitChart.Panel2Collapsed)
+            {
+                waits1.RefreshData(InstanceID);
+            }
+            if (!splitChart.Panel1Collapsed)
             {
                 tsWaitType.Text = selectedWaitType;
-                splitContainer1.Panel1Collapsed = false;
+                splitGrid.Panel1Collapsed = false;
                 var dt = GetWaitsDT(selectedWaitType);
                 WaitChart1.LegendLocation = LiveCharts.LegendLocation.Bottom;
                 WaitChart1.Series.Clear();
@@ -224,6 +232,20 @@ namespace DBADashGUI.Performance
         private void TsExcel_Click(object sender, EventArgs e)
         {
             dgv.ExportToExcel();
+        }
+
+        private void ToggleBarChart_Click(object sender, EventArgs e)
+        {
+            splitChart.Panel2Collapsed = !splitChart.Panel2Collapsed;
+            splitGrid.Panel1Collapsed = splitChart.Panel2Collapsed && string.IsNullOrEmpty(selectedWaitType);
+            RefreshChart();
+        }
+
+        private void CloseLineChart_Click(object sender, EventArgs e)
+        {
+            selectedWaitType = string.Empty;
+            splitGrid.Panel1Collapsed = splitChart.Panel2Collapsed;
+            RefreshChart();
         }
     }
 }
