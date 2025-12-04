@@ -243,6 +243,16 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Close_12x_16x {
+            get {
+                object obj = ResourceManager.GetObject("Close_12x_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Close_red_16x {
             get {
                 object obj = ResourceManager.GetObject("Close_red_16x", resourceCulture);
@@ -845,6 +855,16 @@ namespace DBADashGUI.Properties {
         internal static System.Drawing.Bitmap SQLScript_16x {
             get {
                 object obj = ResourceManager.GetObject("SQLScript_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StackedColumnChart_24x {
+            get {
+                object obj = ResourceManager.GetObject("StackedColumnChart_24x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

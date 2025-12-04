@@ -40,6 +40,7 @@ namespace DBADashGUI.Performance
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            WaitMetric waitMetric1 = new WaitMetric();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -61,13 +62,17 @@ namespace DBADashGUI.Performance
             colHelp = new System.Windows.Forms.DataGridViewLinkColumn();
             colDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
+            tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
             tsExcel = new System.Windows.Forms.ToolStripButton();
             tsColumns = new System.Windows.Forms.ToolStripDropDownButton();
-            tsRefresh = new System.Windows.Forms.ToolStripButton();
-            splitContainer1 = new System.Windows.Forms.SplitContainer();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
+            tsBar2 = new System.Windows.Forms.ToolStripButton();
+            splitGrid = new System.Windows.Forms.SplitContainer();
+            splitChart = new System.Windows.Forms.SplitContainer();
             WaitChart1 = new CartesianChartWithDataTable();
             toolStrip2 = new System.Windows.Forms.ToolStrip();
+            tsCloseLineChart = new System.Windows.Forms.ToolStripButton();
             tsWaitType = new System.Windows.Forms.ToolStripLabel();
             tsOptions = new System.Windows.Forms.ToolStripDropDownButton();
             lineSmoothnesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -83,6 +88,7 @@ namespace DBADashGUI.Performance
             largeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
             tsMetrics = new System.Windows.Forms.ToolStripDropDownButton();
+            waits1 = new Waits();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -90,13 +96,16 @@ namespace DBADashGUI.Performance
             dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            tsClearFilter = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
             toolStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
-            splitContainer1.Panel1.SuspendLayout();
-            splitContainer1.Panel2.SuspendLayout();
-            splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitGrid).BeginInit();
+            splitGrid.Panel1.SuspendLayout();
+            splitGrid.Panel2.SuspendLayout();
+            splitGrid.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitChart).BeginInit();
+            splitChart.Panel1.SuspendLayout();
+            splitChart.Panel2.SuspendLayout();
+            splitChart.SuspendLayout();
             toolStrip2.SuspendLayout();
             SuspendLayout();
             // 
@@ -104,6 +113,7 @@ namespace DBADashGUI.Performance
             // 
             dgv.AllowUserToAddRows = false;
             dgv.AllowUserToDeleteRows = false;
+            dgv.AllowUserToOrderColumns = true;
             dgv.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             dgv.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -130,11 +140,9 @@ namespace DBADashGUI.Performance
             dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgv.Name = "dgv";
             dgv.ReadOnly = true;
-            dgv.ResultSetID = 0;
-            dgv.ResultSetName = null;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
-            dgv.Size = new System.Drawing.Size(708, 318);
+            dgv.Size = new System.Drawing.Size(1423, 395);
             dgv.TabIndex = 0;
             dgv.CellContentClick += Dgv_CellContentClick;
             // 
@@ -142,6 +150,7 @@ namespace DBADashGUI.Performance
             // 
             colWaitType.DataPropertyName = "WaitType";
             colWaitType.HeaderText = "Wait Type";
+            colWaitType.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             colWaitType.MinimumWidth = 100;
             colWaitType.Name = "colWaitType";
             colWaitType.ReadOnly = true;
@@ -249,6 +258,7 @@ namespace DBADashGUI.Performance
             // colHelp
             // 
             colHelp.HeaderText = "Help";
+            colHelp.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             colHelp.MinimumWidth = 50;
             colHelp.Name = "colHelp";
             colHelp.ReadOnly = true;
@@ -270,12 +280,22 @@ namespace DBADashGUI.Performance
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsColumns, tsClearFilter });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsColumns, tsClearFilter, tsBar2 });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new System.Drawing.Size(708, 27);
+            toolStrip1.Size = new System.Drawing.Size(1423, 27);
             toolStrip1.TabIndex = 1;
             toolStrip1.Text = "toolStrip1";
+            // 
+            // tsRefresh
+            // 
+            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Name = "tsRefresh";
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Text = "Refresh";
+            tsRefresh.Click += TsRefresh_Click;
             // 
             // tsCopy
             // 
@@ -306,37 +326,65 @@ namespace DBADashGUI.Performance
             tsColumns.Size = new System.Drawing.Size(34, 24);
             tsColumns.Text = "Columns";
             // 
-            // tsRefresh
+            // tsClearFilter
             // 
-            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsRefresh.Name = "tsRefresh";
-            tsRefresh.Size = new System.Drawing.Size(29, 24);
-            tsRefresh.Text = "Refresh";
-            tsRefresh.Click += TsRefresh_Click;
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Image = Properties.Resources.Eraser_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            tsClearFilter.Text = "Clear Filter";
             // 
-            // splitContainer1
+            // tsBar2
             // 
-            splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            splitContainer1.Location = new System.Drawing.Point(0, 0);
-            splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            splitContainer1.Name = "splitContainer1";
-            splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            tsBar2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsBar2.Image = Properties.Resources.StackedColumnChart_24x;
+            tsBar2.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsBar2.Name = "tsBar2";
+            tsBar2.Size = new System.Drawing.Size(29, 24);
+            tsBar2.Text = "Waits bar chart";
+            tsBar2.Click += ToggleBarChart_Click;
             // 
-            // splitContainer1.Panel1
+            // splitGrid
             // 
-            splitContainer1.Panel1.Controls.Add(WaitChart1);
-            splitContainer1.Panel1.Controls.Add(toolStrip2);
+            splitGrid.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitGrid.Location = new System.Drawing.Point(0, 0);
+            splitGrid.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            splitGrid.Name = "splitGrid";
+            splitGrid.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
-            // splitContainer1.Panel2
+            // splitGrid.Panel1
             // 
-            splitContainer1.Panel2.Controls.Add(dgv);
-            splitContainer1.Panel2.Controls.Add(toolStrip1);
-            splitContainer1.Size = new System.Drawing.Size(708, 656);
-            splitContainer1.SplitterDistance = 306;
-            splitContainer1.SplitterWidth = 5;
-            splitContainer1.TabIndex = 2;
+            splitGrid.Panel1.Controls.Add(splitChart);
+            // 
+            // splitGrid.Panel2
+            // 
+            splitGrid.Panel2.Controls.Add(dgv);
+            splitGrid.Panel2.Controls.Add(toolStrip1);
+            splitGrid.Size = new System.Drawing.Size(1423, 800);
+            splitGrid.SplitterDistance = 373;
+            splitGrid.SplitterWidth = 5;
+            splitGrid.TabIndex = 2;
+            // 
+            // splitChart
+            // 
+            splitChart.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitChart.Location = new System.Drawing.Point(0, 0);
+            splitChart.Name = "splitChart";
+            splitChart.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitChart.Panel1
+            // 
+            splitChart.Panel1.Controls.Add(WaitChart1);
+            splitChart.Panel1.Controls.Add(toolStrip2);
+            // 
+            // splitChart.Panel2
+            // 
+            splitChart.Panel2.Controls.Add(waits1);
+            splitChart.Panel2Collapsed = true;
+            splitChart.Size = new System.Drawing.Size(1423, 373);
+            splitChart.SplitterDistance = 185;
+            splitChart.TabIndex = 3;
             // 
             // WaitChart1
             // 
@@ -345,19 +393,30 @@ namespace DBADashGUI.Performance
             WaitChart1.Location = new System.Drawing.Point(0, 27);
             WaitChart1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             WaitChart1.Name = "WaitChart1";
-            WaitChart1.Size = new System.Drawing.Size(708, 279);
+            WaitChart1.Size = new System.Drawing.Size(1423, 346);
             WaitChart1.TabIndex = 0;
             WaitChart1.Text = "cartesianChartWithDataTable1";
             // 
             // toolStrip2
             // 
             toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsWaitType, tsOptions, tsDateGroup, tsMetrics });
+            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsCloseLineChart, tsWaitType, tsOptions, tsDateGroup, tsMetrics });
             toolStrip2.Location = new System.Drawing.Point(0, 0);
             toolStrip2.Name = "toolStrip2";
-            toolStrip2.Size = new System.Drawing.Size(708, 27);
+            toolStrip2.Size = new System.Drawing.Size(1423, 27);
             toolStrip2.TabIndex = 1;
             toolStrip2.Text = "toolStrip2";
+            // 
+            // tsCloseLineChart
+            // 
+            tsCloseLineChart.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsCloseLineChart.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCloseLineChart.Image = Properties.Resources.Close_red_16x;
+            tsCloseLineChart.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCloseLineChart.Name = "tsCloseLineChart";
+            tsCloseLineChart.Size = new System.Drawing.Size(29, 24);
+            tsCloseLineChart.Text = "toolStripButton1";
+            tsCloseLineChart.Click += CloseLineChart_Click;
             // 
             // tsWaitType
             // 
@@ -482,6 +541,19 @@ namespace DBADashGUI.Performance
             tsMetrics.Size = new System.Drawing.Size(34, 24);
             tsMetrics.Text = "Metrics";
             // 
+            // waits1
+            // 
+            waits1.Dock = System.Windows.Forms.DockStyle.Fill;
+            waits1.Location = new System.Drawing.Point(0, 0);
+            waits1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            waitMetric1.CriticalWaitsOnly = false;
+            waitMetric1.WaitType = null;
+            waits1.Metric = waitMetric1;
+            waits1.Name = "waits1";
+            waits1.Size = new System.Drawing.Size(1423, 184);
+            waits1.TabIndex = 2;
+            waits1.Close += ToggleBarChart_Click;
+            // 
             // dataGridViewTextBoxColumn1
             // 
             dataGridViewTextBoxColumn1.DataPropertyName = "WaitType";
@@ -561,33 +633,28 @@ namespace DBADashGUI.Performance
             dataGridViewTextBoxColumn7.ReadOnly = true;
             dataGridViewTextBoxColumn7.Width = 134;
             // 
-            // tsClearFilter
-            // 
-            tsClearFilter.Enabled = false;
-            tsClearFilter.Image = Properties.Resources.Eraser_16x;
-            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsClearFilter.Name = "tsClearFilter";
-            tsClearFilter.Size = new System.Drawing.Size(104, 24);
-            tsClearFilter.Text = "Clear Filter";
-            // 
             // WaitsSummary
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            Controls.Add(splitContainer1);
+            Controls.Add(splitGrid);
             Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             Name = "WaitsSummary";
-            Size = new System.Drawing.Size(708, 656);
+            Size = new System.Drawing.Size(1423, 800);
             Load += WaitsSummary_Load;
             ((System.ComponentModel.ISupportInitialize)dgv).EndInit();
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
-            splitContainer1.Panel1.ResumeLayout(false);
-            splitContainer1.Panel1.PerformLayout();
-            splitContainer1.Panel2.ResumeLayout(false);
-            splitContainer1.Panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
-            splitContainer1.ResumeLayout(false);
+            splitGrid.Panel1.ResumeLayout(false);
+            splitGrid.Panel2.ResumeLayout(false);
+            splitGrid.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)splitGrid).EndInit();
+            splitGrid.ResumeLayout(false);
+            splitChart.Panel1.ResumeLayout(false);
+            splitChart.Panel1.PerformLayout();
+            splitChart.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitChart).EndInit();
+            splitChart.ResumeLayout(false);
             toolStrip2.ResumeLayout(false);
             toolStrip2.PerformLayout();
             ResumeLayout(false);
@@ -606,7 +673,7 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.ToolStripButton tsRefresh;
-        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.SplitContainer splitGrid;
         private CartesianChartWithDataTable WaitChart1;
         private System.Windows.Forms.ToolStrip toolStrip2;
         private System.Windows.Forms.ToolStripLabel tsWaitType;
@@ -639,5 +706,9 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.DataGridViewLinkColumn colHelp;
         private System.Windows.Forms.DataGridViewTextBoxColumn colDescription;
         private System.Windows.Forms.ToolStripButton tsClearFilter;
+        private System.Windows.Forms.SplitContainer splitChart;
+        private Waits waits1;
+        private System.Windows.Forms.ToolStripButton tsBar2;
+        private System.Windows.Forms.ToolStripButton tsCloseLineChart;
     }
 }
