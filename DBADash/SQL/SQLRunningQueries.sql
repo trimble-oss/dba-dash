@@ -76,8 +76,8 @@ LEFT HASH JOIN (
 		INNER HASH JOIN sys.dm_tran_active_transactions AT ON ST.transaction_id = AT.transaction_id
 		GROUP BY ST.session_id
 	) AS t ON s.session_id = t.session_id' ELSE '' END + '
-INNER JOIN sys.dm_exec_connections c ON c.session_id= s.session_id
-LEFT JOIN sys.dm_exec_requests r on s.session_id = r.session_id' 
+INNER HASH JOIN sys.dm_exec_connections c ON c.session_id= s.session_id
+LEFT HASH JOIN sys.dm_exec_requests r on s.session_id = r.session_id' 
 + CASE WHEN @CollectTempDB=1 THEN '
 LEFT HASH JOIN (	SELECT	tsu.request_id,
 							tsu.session_id,
