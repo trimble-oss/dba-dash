@@ -28,13 +28,19 @@ FROM @JobHistory T
 WHERE NOT EXISTS(SELECT 1 FROM dbo.Jobs J WHERE J.job_id = T.job_id AND J.InstanceID = @InstanceID)
 GROUP BY job_id
 
+/* 		
+	 	Performance optimization:
+	 	The goal is for the query optimizer to seek on InstanceID within each partition, then perform a backward ordered scan to get the MAX instance_id for each partition very efficiently.
+	 	We then return the MAX across partitions.  Older partitions could probably be skipped, but the cost of including them is small.
+*/
 DECLARE @max_instance_id INT=-1
 SELECT TOP(1) @max_instance_id = ISNULL(MAX(m.instance_id),-1)
 FROM sys.partitions p
-OUTER APPLY(SELECT MAX(instance_id) AS instance_id
-			FROM dbo.JobHistory 
+OUTER APPLY(SELECT TOP(1) instance_id
+			FROM dbo.JobHistory
 			WHERE InstanceID = @InstanceID
 			AND $PARTITION.PF_JobHistory(RunDateTime) = p.partition_number
+			ORDER BY instance_id DESC
 			) m
 WHERE p.object_id = OBJECT_ID('dbo.JobHistory')
 AND p.index_id=1
