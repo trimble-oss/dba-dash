@@ -1412,18 +1412,7 @@ namespace DBADashGUI.Performance
             context.ObjectName = row.Row.Field<string>("ObjectName");
             context.InstanceID = row.Row.Field<int>("InstanceID");
             context.Type = SQLTreeItem.TreeType.StoredProcedure;
-            var frm = new Form()
-            {
-                Text = context.ObjectName,
-                WindowState = FormWindowState.Maximized,
-                Width = this.Width / 2,
-                Height = this.Height / 2,
-            };
-            var oes = new ObjectExecutionSummary() { Dock = DockStyle.Fill, UseGlobalTime = false };
-            oes.SetContext(context);
-            frm.Controls.Add(oes);
-
-            frm.Show();
+            Common.ShowObjectExecutionSummary(context, ParentForm);
         }
 
         private static void ShowJob(DataRowView row)

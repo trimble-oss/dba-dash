@@ -28,6 +28,7 @@ namespace DBADashGUI
             };
             form.LocationChanged += (s, e) =>
             {
+                if (form.WindowState == FormWindowState.Minimized) return; // Don't persist minimized state
                 state.Location = form.Location;
             };
         }

@@ -1,4 +1,5 @@
-﻿using DBADashGUI.HA;
+﻿using DBADash;
+using DBADashGUI.HA;
 using DBADashGUI.Performance;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
@@ -870,6 +871,21 @@ namespace DBADashGUI
                 runningQueries1.InstanceID = instanceID;
                 runningQueries1.RefreshData();
             }
+            else if (dgvSlow.Columns[e.ColumnIndex] == object_name)
+            {
+                ShowObject(row);
+            }
+        }
+
+        private void ShowObject(DataRowView row)
+        {
+            var context = CurrentContext.DeepCopy();
+            context.DatabaseID = row.Row.Field<int>("DatabaseID");
+            context.ObjectName = row.Row.Field<string>("object_name");
+            context.InstanceID = row.Row.Field<int>("InstanceID");
+            context.Type = SQLTreeItem.TreeType.StoredProcedure;
+
+            Common.ShowObjectExecutionSummary(context, ParentForm);
         }
 
         private void Filter_KeyPress(object sender, KeyPressEventArgs e)
