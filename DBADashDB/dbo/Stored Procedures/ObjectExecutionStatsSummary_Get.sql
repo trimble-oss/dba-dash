@@ -11,6 +11,7 @@
 		@Use60MIN BIT=NULL,
 		@Use60MINCompare BIT=NULL,
 		@ObjectID BIGINT=NULL,
+		@ObjectName SYSNAME=NULL,
 		@Debug BIT=0,
 		@DaysOfWeek IDs READONLY, /* e.g. exclude weekends:  Monday,Tuesday,Wednesday,Thursday,Friday. Filter applied in local timezone (@UTCOffset) */
 		@Hours IDs READONLY, /* e.g. 9 to 5 :  9,10,11,12,13,14,15,16. Filter applied in local timezone (@UTCOffset)  */
@@ -93,6 +94,7 @@ WITH base AS (
 	' + CASE WHEN @Types IS NULL THEN '' ELSE 'AND EXISTS(SELECT 1 FROM STRING_SPLIT(@Types,'','') ss WHERE ss.Value =  O.ObjectType)' END + '
 	' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND D.DatabaseID = @DatabaseID' END + '
 	' + CASE WHEN @ObjectID IS NULL THEN '' ELSE 'AND OES.ObjectID = @ObjectID' END + '
+	' + CASE WHEN @ObjectName IS NULL THEN '' ELSE 'AND O.ObjectName = @ObjectName' END + '
 	' + CASE WHEN @DaysOfWeekCsv IS NULL THEN N'' ELSE 'AND DATEPART(dw,DATEADD(mi, @UTCOffset, OES.SnapshotDate)) IN (' + @DaysOfWeekCsv + ')' END + '
 	' + CASE WHEN @HoursCsv IS NULL THEN N'' ELSE 'AND DATEPART(hh,DATEADD(mi, @UTCOffset, OES.SnapshotDate)) IN(' + @HoursCsv + ')' END + '
 	GROUP BY OES.InstanceID,OES.ObjectID,I.ConnectionID,D.name,O.SchemaName,O.ObjectName,O.ObjectType,OT.TypeDescription
@@ -136,6 +138,7 @@ compare as(
 	' + CASE WHEN @Types IS NULL THEN '' ELSE 'AND EXISTS(SELECT 1 FROM STRING_SPLIT(@Types,'','') ss WHERE ss.Value =  O.ObjectType)' END + '
 	' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND D.DatabaseID = @DatabaseID' END + '
 	' + CASE WHEN @ObjectID IS NULL THEN '' ELSE 'AND OES.ObjectID = @ObjectID' END + '
+	' + CASE WHEN @ObjectName IS NULL THEN '' ELSE 'AND O.ObjectName = @ObjectName' END + '
 	' + CASE WHEN @DaysOfWeekCsv IS NULL THEN N'' ELSE 'AND DATEPART(dw,DATEADD(mi, @UTCOffset, OES.SnapshotDate)) IN (' + @DaysOfWeekCsv + ')' END + '
 	' + CASE WHEN @HoursCsv IS NULL THEN N'' ELSE 'AND DATEPART(hh,DATEADD(mi, @UTCOffset, OES.SnapshotDate)) IN(' + @HoursCsv + ')' END + '
 	GROUP BY OES.InstanceID,OES.ObjectID,I.ConnectionID,D.name,O.SchemaName,O.ObjectName,O.ObjectType,OT.TypeDescription
@@ -198,6 +201,7 @@ EXEC sp_executesql @SQL,N'@InstanceID INT,
 						@Types VARCHAR(200),
 						@DatabaseID INT,
 						@ObjectID BIGINT,
+						@ObjectName SYSNAME,
 						@UTCOffset INT,
 						@InstanceIDs IDs READONLY',
 						@InstanceID,
@@ -210,6 +214,7 @@ EXEC sp_executesql @SQL,N'@InstanceID INT,
 						@Types,
 						@DatabaseID,
 						@ObjectID,
+						@ObjectName,
 						@UTCOffset,
 						@InstanceIDs
 ;

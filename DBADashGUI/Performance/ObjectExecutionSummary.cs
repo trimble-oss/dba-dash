@@ -258,6 +258,7 @@ namespace DBADashGUI.Performance
             }
 
             cmd.Parameters.AddIfGreaterThanZero("ObjectID", ObjectID);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("ObjectName", CurrentContext.ObjectName);
             cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
 
             if (HasCompare)
