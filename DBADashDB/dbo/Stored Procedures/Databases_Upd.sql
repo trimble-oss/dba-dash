@@ -317,10 +317,28 @@ BEGIN
 	/* Capture history if settings have been updated */
 	IF @@ROWCOUNT>0
 	BEGIN
+		DECLARE @NewSettings TABLE(
+			DatabaseID INT NOT NULL,
+			Setting sysname NOT NULL,
+			Value SQL_VARIANT NULL,
+			is_in_standby BIT NULL
+		);
+		INSERT INTO @NewSettings(
+			DatabaseID,
+			Setting,
+			Value,
+			is_in_standby
+		)
+		SELECT 	DatabaseID,
+			Setting,
+			Value,
+			is_in_standby   
+		FROM dbo.DatabaseSettingsUnpivot_Get(@InstanceID)
+
 		INSERT INTO #History(DatabaseID,Setting,OldValue,NewValue,ChangeDate)
 		SELECT o.DatabaseID,o.Setting,o.Value,n.Value,@SnapshotDate AS ChangeDate 
 		FROM @OldSettings o
-		JOIN dbo.DatabaseSettingsUnpivot_Get(@InstanceID) n ON o.DatabaseID = n.DatabaseID AND o.Setting = n.Setting
+		JOIN @NewSettings n ON o.DatabaseID = n.DatabaseID AND o.Setting = n.Setting
 		WHERE NOT EXISTS(SELECT o.Value 
 						INTERSECT
 						SELECT n.Value)
