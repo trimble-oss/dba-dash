@@ -134,15 +134,30 @@ namespace DBADashGUI.Performance
             dgv.AutoGenerateColumns = false;
             if (dgv.Columns.Count == 0)
             {
-                dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colMemoryClerkType", HeaderText = "Memory Clerk Type", DataPropertyName = "MemoryClerkType" });
-                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colPages", HeaderText = "Pages KB", DataPropertyName = "pages_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor });
-                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colVirtualMemoryCommitted", HeaderText = "Virtual Memory Committed KB", DataPropertyName = "virtual_memory_committed_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor });
-                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colAWEAllocated", HeaderText = "AWE Allocated KB", DataPropertyName = "awe_allocated_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor });
-                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colSharedMemoryReserved", HeaderText = "Shared Memory Reserved KB", DataPropertyName = "shared_memory_reserved_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor });
-                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colSharedMemoryCommitted", HeaderText = "Shared Memory Committed KB", DataPropertyName = "shared_memory_committed_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor });
-                dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate" });
-                dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colPagesPct", HeaderText = "Pages %", DataPropertyName = "Pct", DefaultCellStyle = new DataGridViewCellStyle() { Format = "P1" } });
-                dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colDescription", HeaderText = "Description", DataPropertyName = "MemoryClerkDescription" });
+                dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colMemoryClerkType", HeaderText = "Memory Clerk Type", DataPropertyName = "MemoryClerkType", ToolTipText = "Memory clerk type. Usage is captured from sys.dm_os_memory_clerks" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colPages", HeaderText = "Pages KB (Current)", DataPropertyName = "pages_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Memory usage in KB for each memory clerk from the latest snapshot within the selected date range" });
+                dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colPagesPct", HeaderText = "Pages % (Current)", DataPropertyName = "Pct", DefaultCellStyle = new DataGridViewCellStyle() { Format = "P1" } });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Pages KB (Max)", DataPropertyName = "max_pages_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Max memory usage in KB for each memory clerk within the selected date range" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Pages KB (Avg)", DataPropertyName = "avg_pages_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Average memory usage in KB for each memory clerk within the selected date range" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Pages KB (Min)", DataPropertyName = "min_pages_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Minimum memory usage in KB for each memory clerk within the selected date range" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colVirtualMemoryCommitted", HeaderText = "Virtual Memory Committed KB (Current)", DataPropertyName = "virtual_memory_committed_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Virtual memory committed in KB for each memory clerk from the latest snapshot within the selected date range" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Virtual Memory Committed KB (Max)", DataPropertyName = "max_virtual_memory_committed_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, Visible = false, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Max virtual memory committed in KB for each memory clerk within the selected date range" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Virtual Memory Committed KB (Avg)", DataPropertyName = "avg_virtual_memory_committed_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, Visible = false, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Avg virtual memory committed in KB for each memory clerk within the selected date range" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Virtual Memory Committed KB (Min)", DataPropertyName = "min_virtual_memory_committed_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, Visible = false, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Min virtual memory committed in KB for each memory clerk within the selected date range" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colAWEAllocated", HeaderText = "AWE Allocated KB (Current)", DataPropertyName = "awe_allocated_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "AWE memory allocated in KB for each memory clerk from the latest snapshot within the selected date range" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "AWE Allocated KB (Max)", DataPropertyName = "max_awe_allocated_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, Visible = false, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Max AWE memory allocated in KB for each memory clerk within the selected date range" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "AWE Allocated KB (Avg)", DataPropertyName = "avg_awe_allocated_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, Visible = false, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Average AWE memory allocated in KB for each memory clerk within the selected date range" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "AWE Allocated KB (Min)", DataPropertyName = "min_awe_allocated_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, Visible = false, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Minimum AWE memory allocated in KB for each memory clerk within the selected date range" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colSharedMemoryReserved", HeaderText = "Shared Memory Reserved KB (Current)", DataPropertyName = "shared_memory_reserved_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Shared memory reserved in KB for each memory clerk from the latest snapshot within the selected date range" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Shared Memory Reserved KB (Max)", DataPropertyName = "max_shared_memory_reserved_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, Visible = false, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Max shared memory reserved in KB for each memory clerk within the selected date range" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Shared Memory Reserved KB (Avg)", DataPropertyName = "avg_shared_memory_reserved_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, Visible = false, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Average shared memory reserved in KB for each memory clerk within the selected date range" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Shared Memory Reserved KB (Min)", DataPropertyName = "min_shared_memory_reserved_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, Visible = false, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Minimum shared memory reserved in KB for each memory clerk within the selected date range" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colSharedMemoryCommitted", HeaderText = "Shared Memory Committed KB (Current)", DataPropertyName = "shared_memory_committed_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Shared memory committed in KB for each memory clerk from the latest snapshot within the selected date range" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Shared Memory Committed KB (Max)", DataPropertyName = "max_shared_memory_committed_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, Visible = false, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Max shared memory committed in KB for each memory clerk within the selected date range" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Shared Memory Committed KB (Avg)", DataPropertyName = "avg_shared_memory_committed_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, Visible = false, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Average shared memory committed in KB for each memory clerk within the selected date range" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Shared Memory Committed KB (Min)", DataPropertyName = "min_shared_memory_committed_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor, Visible = false, SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Minimum shared memory committed in KB for each memory clerk within the selected date range" });
+                dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", ToolTipText = "Date/Time of the last memory usage collection (within the selected date range)" });
+                dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colDescription", HeaderText = "Description", DataPropertyName = "MemoryClerkDescription", ToolTipText = "Description of the memory clerk" });
                 dgv.ApplyTheme();
             }
             dgv.DataSource = new DataView(dt);
@@ -207,34 +222,65 @@ namespace DBADashGUI.Performance
             if (e.RowIndex < 0) return;
             var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
             selectedClerk = (string)row["MemoryClerkType"];
-            if (e.ColumnIndex == dgv.Columns["colPages"].Index)
+            var dataProperty = dgv.Columns[e.ColumnIndex].DataPropertyName.ToLower();
+            switch (dataProperty)
             {
-                selectedCounter = "pages_kb";
-                selectedCounterAlias = selectedClerk + " - Pages KB";
+                case "pages_kb":
+                case "max_pages_kb":
+                case "avg_pages_kb":
+                case "min_pages_kb":
+                    selectedCounter = "pages_kb";
+                    selectedCounterAlias = selectedClerk + " - Pages KB";
+                    break;
+
+                case "virtual_memory_committed_kb":
+                case "max_virtual_memory_committed_kb":
+                case "avg_virtual_memory_committed_kb":
+                case "min_virtual_memory_committed_kb":
+                    selectedCounter = "virtual_memory_committed_kb";
+                    selectedCounterAlias = selectedClerk + " - Virtual Memory Committed KB";
+                    break;
+
+                case "awe_allocated_kb":
+                case "max_awe_allocated_kb":
+                case "avg_awe_allocated_kb":
+                case "min_awe_allocated_kb":
+                    selectedCounter = "awe_allocated_kb";
+                    selectedCounterAlias = selectedClerk + " - AWE Allocated KB";
+                    break;
+
+                case "shared_memory_reserved_kb":
+                case "max_shared_memory_reserved_kb":
+                case "avg_shared_memory_reserved_kb":
+                case "min_shared_memory_reserved_kb":
+                    selectedCounter = "shared_memory_reserved_kb";
+                    selectedCounterAlias = selectedClerk + " - Shared Memory Reserved KB";
+                    break;
+
+                case "shared_memory_committed_kb":
+                case "max_shared_memory_committed_kb":
+                case "avg_shared_memory_committed_kb":
+                case "min_shared_memory_committed_kb":
+                    selectedCounter = "shared_memory_committed_kb";
+                    selectedCounterAlias = selectedClerk + " - Shared Memory Committed KB";
+                    break;
+
+                default:
+                    return;
             }
-            else if (e.ColumnIndex == dgv.Columns["colVirtualMemoryCommitted"].Index)
+            switch (dataProperty)
             {
-                selectedCounter = "virtual_memory_committed_kb";
-                selectedCounterAlias = selectedClerk + " - Virtual Memory Committed KB";
-            }
-            else if (e.ColumnIndex == dgv.Columns["colAWEAllocated"].Index)
-            {
-                selectedCounter = "awe_allocated_kb";
-                selectedCounterAlias = selectedClerk + " - AWE Allocated KB";
-            }
-            else if (e.ColumnIndex == dgv.Columns["colSharedMemoryReserved"].Index)
-            {
-                selectedCounter = "shared_memory_reserved_kb";
-                selectedCounterAlias = selectedClerk + " - Shared Memory Reserved KB";
-            }
-            else if (e.ColumnIndex == dgv.Columns["colSharedMemoryCommitted"].Index)
-            {
-                selectedCounter = "shared_memory_committed_kb";
-                selectedCounterAlias = selectedClerk + " - Shared Memory Committed KB";
-            }
-            else
-            {
-                return;
+                case var _ when dataProperty.StartsWith("avg_"):
+                    SetAggregation(avgToolStripMenuItem);
+                    break;
+
+                case var _ when dataProperty.StartsWith("min_"):
+                    SetAggregation(minToolStripMenuItem);
+                    break;
+
+                default:
+                    SetAggregation(maxToolStripMenuItem);
+                    break;
             }
             ShowMemoryUsageForClerk();
         }
@@ -338,15 +384,13 @@ namespace DBADashGUI.Performance
             var Counters = new List<int>();
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("dbo.MemoryCounters_Get", cn) { CommandType = CommandType.StoredProcedure };
-            using var da = new SqlDataAdapter(cmd);
             cn.Open();
             cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-            using (var rdr = cmd.ExecuteReader())
+            using var rdr = cmd.ExecuteReader();
+
+            while (rdr.Read())
             {
-                while (rdr.Read())
-                {
-                    Counters.Add(rdr.GetInt32(0));
-                }
+                Counters.Add(rdr.GetInt32(0));
             }
 
             return Counters;
@@ -394,11 +438,16 @@ namespace DBADashGUI.Performance
 
         private void TsAGG_Click(object sender, EventArgs e)
         {
-            avgToolStripMenuItem.Checked = avgToolStripMenuItem == sender;
-            maxToolStripMenuItem.Checked = maxToolStripMenuItem == sender;
-            minToolStripMenuItem.Checked = minToolStripMenuItem == sender;
-            tsAgg.Text = ((ToolStripMenuItem)sender).Text;
+            SetAggregation(sender as ToolStripMenuItem);
             ShowMemoryUsageForClerk();
+        }
+
+        private void SetAggregation(ToolStripMenuItem menuItem)
+        {
+            avgToolStripMenuItem.Checked = avgToolStripMenuItem == menuItem;
+            maxToolStripMenuItem.Checked = maxToolStripMenuItem == menuItem;
+            minToolStripMenuItem.Checked = minToolStripMenuItem == menuItem;
+            tsAgg.Text = menuItem.Text;
         }
 
         private void TsPieChart_Click(object sender, EventArgs e)
