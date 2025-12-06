@@ -30,7 +30,9 @@ namespace DBADashGUI.Performance
         private string Instance => CurrentContext.InstanceName;
         private int InstanceID => CurrentContext.InstanceID;
         private int DatabaseID => CurrentContext.DatabaseID;
-        private long ObjectID => (CurrentContext.Type is SQLTreeItem.TreeType.Database or SQLTreeItem.TreeType.AzureDatabase) ? -1 : CurrentContext.ObjectID;
+        private long ObjectID => CurrentContext.Type.IsQueryStoreObjectType() ? CurrentContext.ObjectID : -1;
+
+        private string ObjectName => CurrentContext.Type.IsQueryStoreObjectType() ? CurrentContext.ObjectName : string.Empty;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool UseGlobalTime { get => !tsDateRange.Visible; set => tsDateRange.Visible = !value; }
@@ -258,7 +260,7 @@ namespace DBADashGUI.Performance
             }
 
             cmd.Parameters.AddIfGreaterThanZero("ObjectID", ObjectID);
-            cmd.Parameters.AddStringIfNotNullOrEmpty("ObjectName", CurrentContext.ObjectName);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("ObjectName", ObjectName);
             cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
 
             if (HasCompare)
