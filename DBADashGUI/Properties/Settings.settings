@@ -35,5 +35,8 @@
     <Setting Name="TestSummaryMaxHeightPct" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">0.7</Value>
     </Setting>
+    <Setting Name="ChildFormSingleInstance" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

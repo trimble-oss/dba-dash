@@ -154,5 +154,17 @@ namespace DBADashGUI.Properties {
                 this["TestSummaryMaxHeightPct"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ChildFormSingleInstance {
+            get {
+                return ((bool)(this["ChildFormSingleInstance"]));
+            }
+            set {
+                this["ChildFormSingleInstance"] = value;
+            }
+        }
     }
 }

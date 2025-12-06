@@ -33,6 +33,12 @@ namespace DBADashGUI.Performance
         public byte[] PlanHash { get; set; } = null;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public long? QueryId { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public long? PlanId { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool UseGlobalTime { get => !tsDateRange.Visible; set => tsDateRange.Visible = !value; }
 
         public void SetContext(DBADashContext _context)
@@ -47,8 +53,8 @@ namespace DBADashGUI.Performance
         private void SetContext()
         {
             if (CurrentContext == null) return;
-            var objectName = QueryHash != null ? QueryHash.ToHexString(true) : CurrentContext.Type.IsQueryStoreObjectType() ? CurrentContext.ObjectName : string.Empty;
-            var plan = PlanHash != null ? PlanHash.ToHexString(true) : string.Empty;
+            var objectName = QueryHash != null ? QueryHash.ToHexString(true) : QueryId.HasValue ? QueryId.ToString() : CurrentContext.Type.IsQueryStoreObjectType() ? CurrentContext.ObjectName : string.Empty;
+            var plan = PlanHash != null ? PlanHash.ToHexString(true) : PlanId.HasValue ? PlanId.ToString() : string.Empty;
             dgv.DataSource = null;
             txtObjectName.Text = objectName;
             txtObjectName.Enabled = objectName == string.Empty;

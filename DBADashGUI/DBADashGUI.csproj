@@ -242,6 +242,7 @@
     <ProjectReference Include="..\DBADash\DBADash.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AsyncKeyedLock" Version="7.1.8" />
     <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="DiffPlex" Version="1.9.0" />
