@@ -1,26 +1,27 @@
-﻿using DBADashGUI.CustomReports;
+﻿using AsyncKeyedLock;
+using DBADashGUI.CustomReports;
 using DBADashGUI.Pickers;
+using DBADashGUI.Theme;
+using LiveChartsCore.SkiaSharpView.SKCharts;
+using LiveChartsCore.SkiaSharpView.WinForms;
 using Microsoft.Data.SqlClient;
+using SkiaSharp;
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
-using DBADashGUI.Theme;
-using static DBADashGUI.DBADashStatus;
-using LiveChartsCore.SkiaSharpView.SKCharts;
-using SkiaSharp;
-using System.IO;
-using DocumentFormat.OpenXml.Drawing.Charts;
-using DocumentFormat.OpenXml.Office.PowerPoint.Y2021.M06.Main;
-using LiveChartsCore.SkiaSharpView.WinForms;
-using DataTable = System.Data.DataTable;
+using System.Collections.Concurrent;
 using static DBADashGUI.DBADashAlerts.Rules.AlertRuleBase;
-using System.Collections.Frozen;
+using static DBADashGUI.DBADashStatus;
+using DataTable = System.Data.DataTable;
+using System.Threading.Tasks;
 
 namespace DBADashGUI
 {
@@ -920,5 +921,62 @@ namespace DBADashGUI
         public static bool IsQueryStoreObjectType(this SQLTreeItem.TreeType treeType) => treeType is SQLTreeItem.TreeType.StoredProcedure or SQLTreeItem.TreeType.CLRProcedure
                 or SQLTreeItem.TreeType.ScalarFunction or SQLTreeItem.TreeType.CLRScalarFunction
                 or SQLTreeItem.TreeType.Trigger or SQLTreeItem.TreeType.CLRTrigger;
+
+        private static readonly ConcurrentDictionary<string, FormState> SingleInstanceFormStates = new();
+        private static readonly ConcurrentDictionary<string, Form> SingleInstanceForm = new();
+        private static AsyncNonKeyedLocker SingleInstanceLocker = new AsyncNonKeyedLocker();
+
+        /// <summary>
+        /// Shows a single instance of the form, closing any existing instance.
+        /// </summary>
+        /// <param name="form"></param>
+        public static void ShowSingleInstance(this Form form, bool trackFormState = true)
+        {
+            if (form.InvokeRequired)
+            {
+                form.BeginInvoke(new Action(async () => await ShowSingleInstanceAsync(form, trackFormState)));
+            }
+            else
+            {
+                _ = ShowSingleInstanceAsync(form, trackFormState);
+            }
+        }
+
+        public static async Task ShowSingleInstanceAsync(this Form form, bool trackFormState = true)
+        {
+            if (!Properties.Settings.Default.ChildFormSingleInstance)
+            {
+                form.Show();
+                return;
+            }
+            using var locker = await SingleInstanceLocker.LockAsync();
+
+            var key = form.GetType().FullName;
+            SingleInstanceForm.TryGetValue(key, out var inst);
+            try
+            {
+                inst?.Close();
+            }
+            catch
+            {
+                // Ignore exceptions when closing existing form
+            }
+            SingleInstanceForm[key] = form;
+            form.FormClosed += (s, e) =>
+            {
+                SingleInstanceForm.TryRemove(key, out _);
+            };
+
+            if (trackFormState)
+            {
+                SingleInstanceFormStates.TryGetValue(key, out var formState);
+                formState ??= new FormState();
+                FormState.ApplyFormState(form, formState);
+                FormState.TrackFormState(form, formState);
+                SingleInstanceFormStates[key] = formState;
+            }
+
+            form.Show();
+        }
     }
 }

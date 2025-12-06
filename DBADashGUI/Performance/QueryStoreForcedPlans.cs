@@ -30,172 +30,144 @@ namespace DBADashGUI.Performance
 
         private readonly CustomReportResult logReport = new()
         {
-            ColumnAlias = new Dictionary<string, string>
+            Columns = new Dictionary<string, ColumnMetadata>
             {
-                { "DB", "DB" },
-                { "log_date", "Date" },
-                { "log_type", "Type" },
-                { "query_id", "Query ID" },
-                { "plan_id", "Plan ID" },
-                { "object_name", "Object Name" },
-                { "query_sql_text", "Text" },
-                { "query_hash", "Query Hash" },
-                { "query_plan_hash", "Plan Hash" },
-                { "user_name", "User" },
-                { "notes", "Notes" },
-                { "status", "Status" }
-            },
-            ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>()
-            {
-                new("DB", new PersistedColumnLayout() { Visible = true }),
-                new("log_date", new PersistedColumnLayout() {  Visible = true }),
-                new("log_type", new PersistedColumnLayout() {  Visible = true }),
-                new("query_id", new PersistedColumnLayout() { Visible = true }),
-                new("plan_id", new PersistedColumnLayout() {  Visible = true }),
-                new("object_name", new PersistedColumnLayout() {  Visible = true }),
-                new("query_sql_text", new PersistedColumnLayout() {  Visible = true }),
-                new("query_hash", new PersistedColumnLayout() { Visible = true }),
-                new("query_plan_hash", new PersistedColumnLayout() { Visible = true }),
-                new("user_name", new PersistedColumnLayout() { Visible = true }),
-                new("notes", new PersistedColumnLayout() {  Visible = true }),
-                new("status", new PersistedColumnLayout() {  Visible = true }),
-                new("Undo", new PersistedColumnLayout() {  Visible = true })
-            },
-            LinkColumns = new Dictionary<string, LinkColumnInfo>
-            {
+                ["DB"] = new ColumnMetadata { Alias = "DB", Visible = true },
+                ["log_date"] = new ColumnMetadata { Alias = "Date", Visible = true },
+                ["log_type"] = new ColumnMetadata { Alias = "Type", Visible = true },
+                ["query_id"] = new ColumnMetadata
                 {
-                    "query_sql_text",
-                    new TextLinkColumnInfo()
-                    {
-                        TargetColumn = "query_sql_text",
-                        TextHandling = CodeEditor.CodeEditorModes.SQL
-                    }
-                }
-            },
-            CellHighlightingRules =
-            {
+                    Alias = "Query ID",
+                    Visible = true,
+                    Link = new QueryStoreLinkColumnInfo { TargetColumn = "query_id", TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.QueryID, DatabaseNameColumn = "DB" }
+                },
+                ["plan_id"] = new ColumnMetadata
                 {
-                    "status",
-                    new CellHighlightingRuleSet("status")
+                    Alias = "Plan ID",
+                    Visible = true,
+                    Link = new QueryStoreLinkColumnInfo { TargetColumn = "plan_id", TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.PlanID, DatabaseNameColumn = "DB" }
+                },
+                ["object_name"] = new ColumnMetadata
+                {
+                    Alias = "Object Name",
+                    Visible = true,
+                    Link = new QueryStoreLinkColumnInfo { TargetColumn = "object_name", TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.ObjectName, DatabaseNameColumn = "DB" }
+                },
+                ["query_sql_text"] = new ColumnMetadata
+                {
+                    Alias = "Text",
+                    Visible = true,
+                    Link = new TextLinkColumnInfo { TargetColumn = "query_sql_text", TextHandling = CodeEditor.CodeEditorModes.SQL }
+                },
+                ["query_hash"] = new ColumnMetadata
+                {
+                    Alias = "Query Hash",
+                    Visible = true,
+                    Link = new QueryStoreLinkColumnInfo { TargetColumn = "query_hash", TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.QueryHash, DatabaseNameColumn = "DB" }
+                },
+                ["query_plan_hash"] = new ColumnMetadata
+                {
+                    Alias = "Plan Hash",
+                    Visible = true,
+                    Link = new QueryStoreLinkColumnInfo { TargetColumn = "query_plan_hash", TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.PlanHash, DatabaseNameColumn = "DB" }
+                },
+                ["user_name"] = new ColumnMetadata { Alias = "User", Visible = true },
+                ["notes"] = new ColumnMetadata { Alias = "Notes", Visible = true },
+                ["status"] = new ColumnMetadata
+                {
+                    Alias = "Status",
+                    Visible = true,
+                    Highlighting = new CellHighlightingRuleSet("status")
                     {
-                        Rules = new List<CellHighlightingRule>()
+                        Rules = new List<CellHighlightingRule>
                         {
-                            new()
-                            {
-                                ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "REQUEST",
-                                Status = DBADashStatus.DBADashStatusEnum.Information
-                            },
-                            new()
-                            {
-                                ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "SUCCEEDED",
-                                Status = DBADashStatus.DBADashStatusEnum.OK
-                            },
-                            new()
-                            {
-                                ConditionType = CellHighlightingRule.ConditionTypes.All,
-                                Status = DBADashStatus.DBADashStatusEnum.Warning
-                            }
+                            new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "REQUEST", Status = DBADashStatus.DBADashStatusEnum.Information },
+                            new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "SUCCEEDED", Status = DBADashStatus.DBADashStatusEnum.OK },
+                            new() { ConditionType = CellHighlightingRule.ConditionTypes.All, Status = DBADashStatus.DBADashStatusEnum.Warning }
                         }
                     }
-                }
+                },
+                ["Undo"] = new ColumnMetadata { Visible = true }
             }
         };
 
         private readonly CustomReportResult forcedPlansResult = new()
         {
-            ColumnAlias = new Dictionary<string, string>
+            Columns = new Dictionary<string, ColumnMetadata>
             {
-                { "DB", "DB" },
-                { "query_id", "Query ID" },
-                { "object_id", "Object ID" },
-                { "plan_id", "Plan ID" },
-                { "query_hash", "Query Hash" },
-                { "query_plan_hash", "Plan Hash" },
-                { "object_name", "Object Name" },
-                { "query_sql_text", "Text" },
-                { "total_cpu_time_ms", "Total CPU (ms)" },
-                { "plan_forcing_type_desc", "Plan Forcing" },
-                { "force_failure_count", "Force Failure count" },
-                { "last_force_failure_reason_desc", "Last Forced Failure" },
-                { "is_parallel_plan", "Parallel" },
-                { "last_execution_time_plan", "Last Execution Time (Plan)" },
-                { "last_execution_time_query", "Last Execution Time (Query)" },
-                { "last_compile_start_time", "Last Compile Time" },
-                { "num_plans", "Plan Count" },
-                { "query_parameterization_type_desc", "Parameterization type" },
-            },
-            ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>()
-            {
-                new("DB", new PersistedColumnLayout() {  Visible = true }),
-                new("query_hash", new PersistedColumnLayout() {  Visible = true }),
-                new("query_plan_hash", new PersistedColumnLayout() {  Visible = true }),
-                new("query_id", new PersistedColumnLayout() {  Visible = true }),
-                new("plan_id", new PersistedColumnLayout() {  Visible = true }),
-                new("object_id", new PersistedColumnLayout() {  Visible = false }),
-                new("object_name", new PersistedColumnLayout() { Visible = true }),
-                new("query_sql_text", new PersistedColumnLayout() {  Visible = true }),
-                new("num_plans", new PersistedColumnLayout() {  Visible = true }),
-                new("plan_forcing_type_desc", new PersistedColumnLayout() {  Visible = true }),
-                new("force_failure_count", new PersistedColumnLayout() { Visible = true }),
-                new("last_force_failure_reason_desc", new PersistedColumnLayout() { Visible = true }),
-                new("last_execution_time_plan", new PersistedColumnLayout() {  Visible = true }),
-                new("last_execution_time_query", new PersistedColumnLayout() {  Visible = true }),
-                new("last_compile_start_time", new PersistedColumnLayout() {  Visible = true }),
-                new("is_parallel_plan", new PersistedColumnLayout() {  Visible = true }),
-                new("query_parameterization_type_desc", new PersistedColumnLayout() {  Visible = false })
-            },
-            CellHighlightingRules =
-            {
+                ["DB"] = new ColumnMetadata { Alias = "DB", Visible = true },
+                ["query_id"] = new ColumnMetadata
                 {
-                    "force_failure_count",
-                    new CellHighlightingRuleSet("force_failure_count")
+                    Alias = "Query ID",
+                    Visible = true,
+                    Link = new QueryStoreLinkColumnInfo { TargetColumn = "query_id", TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.QueryID, DatabaseNameColumn = "DB" }
+                },
+                ["object_id"] = new ColumnMetadata { Alias = "Object ID", Visible = false },
+                ["plan_id"] = new ColumnMetadata
+                {
+                    Alias = "Plan ID",
+                    Visible = true,
+                    Link = new QueryStoreLinkColumnInfo { TargetColumn = "plan_id", TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.PlanID, DatabaseNameColumn = "DB" }
+                },
+                ["query_hash"] = new ColumnMetadata
+                {
+                    Alias = "Query Hash",
+                    Visible = true,
+                    Link = new QueryStoreLinkColumnInfo { TargetColumn = "query_hash", TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.QueryHash, DatabaseNameColumn = "DB" }
+                },
+                ["query_plan_hash"] = new ColumnMetadata
+                {
+                    Alias = "Plan Hash",
+                    Visible = true,
+                    Link = new QueryStoreLinkColumnInfo { TargetColumn = "query_plan_hash", TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.PlanHash, DatabaseNameColumn = "DB" }
+                },
+                ["object_name"] = new ColumnMetadata
+                {
+                    Alias = "Object Name",
+                    Visible = true,
+                    Link = new QueryStoreLinkColumnInfo { TargetColumn = "object_name", TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.ObjectName, DatabaseNameColumn = "DB" }
+                },
+                ["query_sql_text"] = new ColumnMetadata
+                {
+                    Alias = "Text",
+                    Visible = true,
+                    Link = new TextLinkColumnInfo { TargetColumn = "query_sql_text", TextHandling = CodeEditor.CodeEditorModes.SQL }
+                },
+                ["total_cpu_time_ms"] = new ColumnMetadata { Alias = "Total CPU (ms)" },
+                ["plan_forcing_type_desc"] = new ColumnMetadata { Alias = "Plan Forcing", Visible = true },
+                ["force_failure_count"] = new ColumnMetadata
+                {
+                    Alias = "Force Failure count",
+                    Visible = true,
+                    Highlighting = new CellHighlightingRuleSet("force_failure_count")
                     {
-                        Rules = new List<CellHighlightingRule>()
+                        Rules = new List<CellHighlightingRule>
                         {
-                            new()
-                            {
-                                ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "0",
-                                Status = DBADashStatus.DBADashStatusEnum.OK
-                            },
-                            new()
-                            {
-                                ConditionType = CellHighlightingRule.ConditionTypes.All,
-                                Status = DBADashStatus.DBADashStatusEnum.Warning
-                            }
+                            new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "0", Status = DBADashStatus.DBADashStatusEnum.OK },
+                            new() { ConditionType = CellHighlightingRule.ConditionTypes.All, Status = DBADashStatus.DBADashStatusEnum.Warning }
                         }
                     }
                 },
+                ["last_force_failure_reason_desc"] = new ColumnMetadata
                 {
-                    "last_force_failure_reason_desc",
-                    new CellHighlightingRuleSet("last_force_failure_reason_desc")
+                    Alias = "Last Forced Failure",
+                    Visible = true,
+                    Highlighting = new CellHighlightingRuleSet("last_force_failure_reason_desc")
                     {
-                        Rules = new List<CellHighlightingRule>()
+                        Rules = new List<CellHighlightingRule>
                         {
-                            new()
-                            {
-                                ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "NONE",
-                                Status = DBADashStatus.DBADashStatusEnum.OK
-                            },
-                            new()
-                            {
-                                ConditionType = CellHighlightingRule.ConditionTypes.All,
-                                Status = DBADashStatus.DBADashStatusEnum.Warning
-                            }
+                            new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "NONE", Status = DBADashStatus.DBADashStatusEnum.OK },
+                            new() { ConditionType = CellHighlightingRule.ConditionTypes.All, Status = DBADashStatus.DBADashStatusEnum.Warning }
                         }
                     }
-                }
-            },
-            LinkColumns = new Dictionary<string, LinkColumnInfo>
-            {
-                {
-                    "query_sql_text",
-                    new TextLinkColumnInfo()
-                    {
-                        TargetColumn = "query_sql_text",
-                        TextHandling = CodeEditor.CodeEditorModes.SQL
-                    }
                 },
-            },
+                ["is_parallel_plan"] = new ColumnMetadata { Alias = "Parallel", Visible = true },
+                ["last_execution_time_plan"] = new ColumnMetadata { Alias = "Last Execution Time (Plan)", Visible = true },
+                ["last_execution_time_query"] = new ColumnMetadata { Alias = "Last Execution Time (Query)", Visible = true },
+                ["last_compile_start_time"] = new ColumnMetadata { Alias = "Last Compile Time", Visible = true },
+                ["num_plans"] = new ColumnMetadata { Alias = "Plan Count", Visible = true },
+                ["query_parameterization_type_desc"] = new ColumnMetadata { Alias = "Parameterization type", Visible = false }
+            }
         };
 
         public void SetContext(DBADashContext _context)
