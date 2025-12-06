@@ -165,7 +165,7 @@ namespace DBADashGUI
         {
             try
             {
-                await DBADash.BuildReference.Update(Common.ConnectionString);
+                await DBADash.BuildReference.UpdateAsync(Common.ConnectionString);
                 RefreshVersion();
                 MessageBox.Show("Build reference updated", "Updated", MessageBoxButtons.OK,
                     MessageBoxIcon.Information);

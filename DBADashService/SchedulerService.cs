@@ -248,7 +248,7 @@ namespace DBADashService
             {
                 Log.Information("Updating BuildReference {connection}", d.ConnectionForPrint);
                 var jsonBuildReference = await File.ReadAllTextAsync(filePath);
-                await BuildReference.UpdateBuildReference(d.ConnectionString, jsonBuildReference);
+                await BuildReference.UpdateBuildReferenceAsync(d.ConnectionString, jsonBuildReference);
             }
             Log.Debug("Remove {filePath}", filePath);
             File.Delete(filePath);
