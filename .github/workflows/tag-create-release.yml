@@ -51,7 +51,7 @@ jobs:
         id: GetBuildReference
         shell: powershell
         run: | 
-          Invoke-WebRequest -Uri 'https://dataplat.github.io/assets/dbatools-buildref-index.json' -OutFile 'DBADashBuild\CLI\BuildReference.json'
+          Invoke-WebRequest -Uri 'https://dataplat.dbatools.io/assets/dbatools-buildref-index.json' -OutFile 'DBADashBuild\CLI\BuildReference.json'
 
       - name: Zip
         shell: powershell
