@@ -102,7 +102,7 @@ SELECT F.FileID,
 	   cfg.ConfiguredLevel,
 	   F.FileSnapshotDate,
 	   F.FileSnapshotAge,
-	   CASE WHEN cdt.WarningThreshold IS NULL AND cdt.CriticalThreshold IS NULL THEN 3 WHEN F.FileSnapshotAge > cdt.CriticalThreshold THEN 1 WHEN F.FileSnapshotAge>cdt.WarningThreshold THEN 2 ELSE 4 END AS FileSnapshotAgeStatus,
+	   CASE WHEN CDT.WarningThreshold IS NULL AND CDT.CriticalThreshold IS NULL THEN 3 WHEN F.FileSnapshotAge > CDT.CriticalThreshold THEN 1 WHEN F.FileSnapshotAge>CDT.WarningThreshold THEN 2 ELSE 4 END AS FileSnapshotAgeStatus,
 	   F.max_size,
 	   F.MaxSizeMB,
 	   F.GrowthMB,
@@ -131,26 +131,61 @@ SELECT F.FileID,
 	  CASE WHEN F.type =0 THEN N'ROWS' WHEN F.type = 1 THEN N'LOG' WHEN F.type=2 THEN N'FILESTREAM' WHEN F.type = 4 THEN N'FULLTEXT' ELSE CAST(f.type as NVARCHAR(60)) END as type_desc,
 	  F.ShowInSummary
 FROM F
-OUTER APPLY(SELECT TOP(1) T.FreeSpaceWarningThreshold,
-                    T.FreeSpaceCriticalThreshold,
-                    T.FreeSpaceCheckType,
-					CASE WHEN T.data_space_id NOT IN(0,-1) THEN 'FG'
-					WHEN T.DatabaseID <>-1 THEN 'DB'
-					WHEN T.InstanceID<>-1 THEN 'Instance'
-					WHEN T.InstanceID=-1 THEN 'Root'
-					ELSE 'N/A' END AS ConfiguredLevel,
-					T.PctMaxSizeWarningThreshold,
-					T.PctMaxSizeCriticalThreshold,
-					T.FreeSpaceCheckZeroAutogrowthOnly
-			FROM dbo.DBFileThresholds T 
-			WHERE (T.InstanceID = F.InstanceID OR T.InstanceID=-1)
-			AND (T.DatabaseID = F.DatabaseID OR T.DatabaseID=-1)
-			AND (T.data_space_id = F.data_space_id OR (T.data_space_id=-1 AND F.type=0))
-			ORDER BY T.InstanceID DESC,T.DatabaseID DESC,T.data_space_id DESC
+/* Filegroup level threshold */
+LEFT OUTER JOIN dbo.DBFileThresholds T_FG ON T_FG.InstanceID = F.InstanceID 
+									AND T_FG.DatabaseID = F.DatabaseID 
+									AND T_FG.data_space_id = F.data_space_id 
+									AND T_FG.data_space_id <> 0 /* Exclude log as this is considered a DB threshold */
+/* DB level threshold */
+LEFT OUTER JOIN dbo.DBFileThresholds T_DB ON T_DB.InstanceID = F.InstanceID 
+									AND T_DB.DatabaseID = F.DatabaseID 
+									AND (
+											(T_DB.data_space_id = -1 AND F.type=0) /* Row threshold */
+											OR 
+											(T_DB.data_space_id=0 AND F.type=1) /* Log Threshold */
+										)
+									AND T_FG.InstanceID IS NULL /* Only JOIN if we don't have a Filegroup level threshold (so COALESCE works with NULL thresholds) */
+/* Instance level threshold */
+LEFT OUTER JOIN dbo.DBFileThresholds T_Inst ON T_Inst.InstanceID = F.InstanceID 
+									AND T_Inst.DatabaseID = -1 
+									AND (
+											(T_Inst.data_space_id = -1 AND F.type=0) /* Row threshold */
+											OR 
+											(T_Inst.data_space_id=0 AND F.type=1) /* Log Threshold */
+										) 
+									AND T_DB.InstanceID IS NULL /* Only JOIN if we don't have a DB level threshold (so COALESCE works with NULL thresholds) */
+/* Root level threshold */
+LEFT OUTER JOIN dbo.DBFileThresholds T_Root ON T_Root.InstanceID = -1 
+									AND T_Root.DatabaseID = -1 
+									AND (
+											(T_Root.data_space_id = -1 AND F.type=0) /* Row threshold */
+											OR 
+											(T_Root.data_space_id=0 AND F.type=1) /* Log Threshold */
+										)
+									AND T_Inst.InstanceID IS NULL /* Only JOIN if we don't have an instance threshold (so COALESCE works with NULL thresholds) */
+/* Calculate the threshold we need to apply. */
+OUTER APPLY(
+			SELECT	COALESCE(T_FG.FreeSpaceWarningThreshold, T_DB.FreeSpaceWarningThreshold, T_Inst.FreeSpaceWarningThreshold, T_Root.FreeSpaceWarningThreshold) AS FreeSpaceWarningThreshold,
+					COALESCE(T_FG.FreeSpaceCriticalThreshold, T_DB.FreeSpaceCriticalThreshold, T_Inst.FreeSpaceCriticalThreshold, T_Root.FreeSpaceCriticalThreshold) AS FreeSpaceCriticalThreshold,
+					COALESCE(T_FG.FreeSpaceCheckType, T_DB.FreeSpaceCheckType, T_Inst.FreeSpaceCheckType, T_Root.FreeSpaceCheckType) AS FreeSpaceCheckType,
+					COALESCE(T_FG.PctMaxSizeWarningThreshold, T_DB.PctMaxSizeWarningThreshold, T_Inst.PctMaxSizeWarningThreshold, T_Root.PctMaxSizeWarningThreshold) AS PctMaxSizeWarningThreshold,
+					COALESCE(T_FG.PctMaxSizeCriticalThreshold, T_DB.PctMaxSizeCriticalThreshold, T_Inst.PctMaxSizeCriticalThreshold, T_Root.PctMaxSizeCriticalThreshold) AS PctMaxSizeCriticalThreshold,
+					COALESCE(T_FG.FreeSpaceCheckZeroAutogrowthOnly, T_DB.FreeSpaceCheckZeroAutogrowthOnly, T_Inst.FreeSpaceCheckZeroAutogrowthOnly, T_Root.FreeSpaceCheckZeroAutogrowthOnly) AS FreeSpaceCheckZeroAutogrowthOnly,
+					CASE 
+						WHEN T_FG.InstanceID IS NOT NULL THEN 'FG'
+						WHEN T_DB.InstanceID IS NOT NULL THEN 'DB'
+						WHEN T_Inst.InstanceID IS NOT NULL THEN 'Instance'
+						WHEN T_Root.InstanceID IS NOT NULL THEN 'Root'
+						ELSE 'N/A' 
+					END AS ConfiguredLevel
 			) cfg
-OUTER APPLY(SELECT TOP(1) t.WarningThreshold,
-						t.CriticalThreshold
-			FROM [dbo].[CollectionDatesThresholds] t
-			WHERE (t.InstanceID = F.InstanceID OR t.InstanceID=-1)
-			AND t.Reference='DBFiles'
-			ORDER BY t.InstanceID DESC) cdt
+-- Join for Collection Date Thresholds (Instance Specific)
+LEFT JOIN dbo.CollectionDatesThresholds CDT_Inst ON CDT_Inst.InstanceID = F.InstanceID AND CDT_Inst.Reference = 'DBFiles'
+-- Join for Collection Date Thresholds (Global)
+LEFT JOIN dbo.CollectionDatesThresholds CDT_Root ON CDT_Root.InstanceID = -1 AND CDT_Root.Reference = 'DBFiles'
+											AND CDT_Inst.InstanceID IS NULL /* Only JOIN if we don't have an instance level threshold. (so COALESCE works with NULL thresholds) */ 
+-- Calculate Effective Date Thresholds
+CROSS APPLY (
+    SELECT 	COALESCE(CDT_Inst.WarningThreshold, CDT_Root.WarningThreshold) AS WarningThreshold,
+			COALESCE(CDT_Inst.CriticalThreshold, CDT_Root.CriticalThreshold) AS CriticalThreshold
+	) AS CDT;
