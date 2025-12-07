@@ -57,8 +57,6 @@ namespace DBADashGUI.AgentJobs
 
         private DateTime JobStart;
 
-        private JobInfoForm _jobInfoForm;
-
         #endregion Fields
 
         #region Event Handlers & Initialization
@@ -135,16 +133,12 @@ namespace DBADashGUI.AgentJobs
 
         private void JobLink_Clicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (_jobInfoForm == null)
+            JobInfoForm jobInfoForm = new JobInfoForm()
             {
-                _jobInfoForm = new JobInfoForm()
-                {
-                    DBADashContext = _currentContext
-                };
-                _jobInfoForm.FormClosed += (_, _) => { _jobInfoForm = null; };
-            }
-            _jobInfoForm.Show();
-            _jobInfoForm.Focus();
+                DBADashContext = _currentContext
+            };
+
+            jobInfoForm.ShowSingleInstance();
         }
 
         #endregion Event Handlers & Initialization

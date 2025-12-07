@@ -268,7 +268,7 @@ namespace DBADashGUI
                 instanceMetadata.SetContext(tempContext);
             };
 
-            frm.Show();
+            frm.ShowSingleInstance();
         }
     }
 }

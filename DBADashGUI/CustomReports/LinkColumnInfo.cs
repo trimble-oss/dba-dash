@@ -121,11 +121,8 @@ namespace DBADashGUI.CustomReports
 
         public Dictionary<string, string> ColumnToParameterMap { get; set; } = new();
 
-        private CustomReportViewer customReportViewer;
-
         public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
         {
-            customReportViewer?.Close();
             var report = context.Report is SystemReport ? CustomReports.SystemReports.FirstOrDefault(r => r.ProcedureName == ReportProcedureName) : CustomReports.GetCustomReports().FirstOrDefault(r => r.ProcedureName == ReportProcedureName);
 
             if (report == null) return;
@@ -148,9 +145,8 @@ namespace DBADashGUI.CustomReports
                 }
                 param.Param.Value = value;
             }
-            customReportViewer = new CustomReportViewer() { Context = newContext, CustomParams = customParams };
-            customReportViewer.FormClosed += (s, e) => customReportViewer = null;
-            customReportViewer.Show();
+            CustomReportViewer customReportViewer = new() { Context = newContext, CustomParams = customParams };
+            customReportViewer.ShowSingleInstance();
         }
     }
 

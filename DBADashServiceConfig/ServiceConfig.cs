@@ -2090,16 +2090,10 @@ namespace DBADashServiceConfig
 
         private static ServiceLog ServiceLogForm;
 
-        private void BttnViewServiceLog_Click(object sender, EventArgs e)
+        private async void BttnViewServiceLog_Click(object sender, EventArgs e)
         {
-            if (ServiceLogForm == null)
-            {
-                ServiceLogForm = new();
-                ServiceLogForm.FormClosed += delegate { ServiceLogForm = null; };
-            }
-
-            ServiceLogForm.Show();
-            ServiceLogForm.Focus();
+            ServiceLog serviceLogForm = new();
+            await serviceLogForm.ShowSingleInstanceAsync();
         }
 
         private void BttnAbout_Click(object sender, EventArgs e)

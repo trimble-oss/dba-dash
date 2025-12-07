@@ -39,7 +39,7 @@
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(331, 17);
             this.label7.TabIndex = 1;
-            this.label7.Text = "Diff (Loaded programatically due to designer issue)";
+            this.label7.Text = "Diff (Loaded programmatically due to designer issue)";
             this.label7.Visible = false;
             // 
             // Diff

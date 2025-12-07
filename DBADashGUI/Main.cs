@@ -116,6 +116,7 @@ namespace DBADashGUI
             Disposed += OnDispose;
             AddTabs();
             MainFormInstance = this;
+            SetSingleInstance(Settings.Default.ChildFormSingleInstance);
         }
 
         private void AddTabs()
@@ -1514,18 +1515,10 @@ namespace DBADashGUI
 
         #endregion Tagging
 
-        private DataRetention DataRetentionForm;
-
         private void DataRetentionToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (DataRetentionForm == null)
-            {
-                DataRetentionForm = new();
-                DataRetentionForm.FormClosed += delegate { DataRetentionForm = null; };
-            }
-
-            DataRetentionForm.Show();
-            DataRetentionForm?.Focus();
+            DataRetention dataRetentionForm = new();
+            dataRetentionForm.ShowSingleInstance();
         }
 
         public void Instance_Selected(object sender, InstanceSelectedEventArgs e)
@@ -1679,18 +1672,15 @@ namespace DBADashGUI
             }
         }
 
-        private static ManageInstances ManageInstancesForm;
-
         private void ManageInstancesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            ManageInstancesForm?.Close();
-            ManageInstancesForm = new ManageInstances
+            ManageInstances manageInstancesForm = new()
             {
                 Tags = string.Join(",", SelectedTags())
             };
-            ManageInstancesForm.FormClosing += delegate
+            manageInstancesForm.FormClosing += delegate
             {
-                if (ManageInstancesForm.InstanceActiveFlagChanged || ManageInstancesForm.InstanceSummaryVisibleChanged)
+                if (manageInstancesForm.InstanceActiveFlagChanged || manageInstancesForm.InstanceSummaryVisibleChanged)
                 {
                     AddInstances(); // refresh the tree if instances deleted/restored
                     if (tabs.SelectedTab == tabSummary)
@@ -1698,10 +1688,8 @@ namespace DBADashGUI
                         summary1.RefreshData();
                     }
                 }
-
-                ManageInstancesForm = null;
             };
-            ManageInstancesForm.Show();
+            manageInstancesForm.ShowSingleInstance();
         }
 
         private void GvHistory_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -1739,36 +1727,28 @@ namespace DBADashGUI
             AddInstances();
         }
 
-        private static DBDiff DBDiffForm;
-
         private void DatabaseSchemaDiffToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DBDiffForm?.Close();
             var n = tv1.SelectedSQLTreeItem();
-            DBDiffForm = new DBDiff
+            DBDiff dbDiffForm = new DBDiff
             {
                 SelectedTags = SelectedTags(),
                 SelectedInstanceA = n.InstanceName,
                 SelectedDatabaseA = new DatabaseItem() { DatabaseID = n.DatabaseID, DatabaseName = n.DatabaseName }
             };
-            DBDiffForm.ApplyTheme();
-            DBDiffForm.FormClosed += delegate { DBDiffForm = null; };
-            DBDiffForm.Show();
+            dbDiffForm.ApplyTheme();
+            dbDiffForm.ShowSingleInstance();
         }
-
-        private static JobDiff JobDiffForm;
 
         private void AgentJobDiffToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            JobDiffForm?.Close();
             var selected = tv1.SelectedSQLTreeItem();
-            JobDiffForm = new()
+            JobDiff jobDiffForm = new()
             {
                 InstanceID_A = selected.InstanceID
             };
-            JobDiffForm.FormClosed += delegate { JobDiffForm = null; };
-            JobDiffForm.ApplyTheme();
-            JobDiffForm.Show();
+            jobDiffForm.ApplyTheme();
+            jobDiffForm.ShowSingleInstance();
         }
 
         private void TxtSearch_KeyUp(object sender, KeyEventArgs e)
@@ -1798,7 +1778,7 @@ namespace DBADashGUI
 
                 ConfigureDisplayNameForm = null;
             };
-            ConfigureDisplayNameForm.Show();
+            ConfigureDisplayNameForm.ShowSingleInstance();
         }
 
         private void FreezeKeyColumnsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2468,6 +2448,42 @@ namespace DBADashGUI
             DBADashUser.DateTimeFormatString = format;
             MessageBox.Show(
                 $"The date/time format has been set.\n\nThe current time is {DateHelper.AppNow.ToString(DBADashUser.DateTimeFormatString)}.\n\nThe new format will be used when the chart is refreshed.", "Time Format", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void ToggleSingleInstancePreference(object sender, EventArgs e)
+        {
+            bool singleInstance = !Settings.Default.ChildFormSingleInstance;
+            SetSingleInstance(singleInstance);
+            Settings.Default.ChildFormSingleInstance = singleInstance;
+            Settings.Default.Save();
+        }
+
+        private void SetSingleInstance(bool singleInstance)
+        {
+            DBADashSharedGUI.ExtensionMethods.ChildFormSingleInstance = singleInstance;
+            tsToggleSingleInstance.Image = singleInstance ? Resources.AppWindow : Resources.CascadeWindowsHS;
+            tsToggleSingleInstance.ToolTipText = singleInstance ? "Single instance child form mode.  Click to change to multiple instance mode." : "Multiple instance child form mode.  Click to change to single instance mode.";
+        }
+
+        private void CloseChildWindows_Click(object sender, EventArgs e)
+        {
+            // Snapshot to avoid collection modification issues during iteration
+            var otherForms = Application.OpenForms.Cast<Form>()
+                .Where(f => f != this)
+                .ToList();
+
+            foreach (var frm in otherForms)
+            {
+                try
+                {
+                    // Attempt to close the form; parent may not be set, so close unconditionally
+                    frm.Close();
+                }
+                catch
+                {
+                    // Ignore exceptions to ensure all windows are processed
+                }
+            }
         }
 
         void IThemedControl.ApplyTheme(BaseTheme theme)

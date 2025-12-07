@@ -83,7 +83,7 @@ namespace DBADashGUI.Performance
             {
                 var viewer = new RunningQueriesViewer();
                 viewer.LoadSnapshots(snapshots);
-                viewer.Show();
+                viewer.ShowSingleInstance();
             }
         }
 
@@ -1227,7 +1227,7 @@ namespace DBADashGUI.Performance
                 SnapshotDateFrom = snapshotDate,
                 SnapshotDateTo = snapshotDate
             };
-            viewer.Show();
+            viewer.ShowSingleInstance();
         }
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -1350,15 +1350,10 @@ namespace DBADashGUI.Performance
             ShowCursors(instanceId, snapshotDate, sessionId);
         }
 
-        private CustomReportViewer cursorDialog;
-        private FormState cursorDialogState = new();
-
         private void ShowCursors(int instanceId, DateTime snapshotDate, short? sessionId = null)
         {
             try
             {
-                cursorDialog?.Close();
-
                 // Report setup
                 var cursorReport = RunningQueriesCursorsReport.Instance;
                 var context = CommonData.GetDBADashContext(instanceId);
@@ -1373,7 +1368,7 @@ namespace DBADashGUI.Performance
                 pSnapshotDate.UseDefaultValue = false;
                 pSnapshotDate.Param.Value = snapshotDate;
 
-                cursorDialog = new CustomReportViewer
+                CustomReportViewer cursorDialog = new()
                 {
                     Context = context,
                     CustomParams = sqlParams,
@@ -1393,11 +1388,7 @@ namespace DBADashGUI.Performance
                     };
                     cursorDialog.CustomReportView.ToolStrip.Items.Add(showAll);
                 }
-
-                cursorDialog.FormClosed += (s, e) => cursorDialog = null;
-                FormState.ApplyFormState(cursorDialog, cursorDialogState);
-                FormState.TrackFormState(cursorDialog, cursorDialogState);
-                cursorDialog.Show();
+                cursorDialog.ShowSingleInstance();
             }
             catch (Exception ex)
             {
@@ -1432,7 +1423,7 @@ namespace DBADashGUI.Performance
                 jobContext.JobID = jobId;
                 jobContext.ObjectName = jobName;
                 var frm = new JobInfoForm() { DBADashContext = jobContext };
-                frm.Show();
+                frm.ShowSingleInstance();
             }
             catch (Exception ex)
             {
@@ -1469,7 +1460,7 @@ namespace DBADashGUI.Performance
                 QueryHash = isQueryHash ? queryHash : null,
                 Context = context
             };
-            planViewer.Show();
+            planViewer.ShowSingleInstance();
         }
 
         private static void DecipherWaitResource(DataRowView row)

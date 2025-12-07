@@ -15,7 +15,6 @@ namespace DBADashSharedGUI
 {
     public class CommonShared
     {
-        private static CodeViewer FrmCodeViewer;
         public static readonly string TempFilePrefix = "DBADashGUITemp_";
 
         public static void OpenURL(string url)
@@ -233,19 +232,17 @@ namespace DBADashSharedGUI
                 Language = CodeEditor.CodeEditorModes.None;
             }
 
-            FrmCodeViewer?.Close();
-            FrmCodeViewer = new CodeViewer
+            CodeViewer frmCodeViewer = new()
             {
                 Language = Language,
                 Code = sql,
                 Text = "Code Viewer" + (string.IsNullOrEmpty(title) ? "" : " - " + title)
             };
-            if (FrmCodeViewer.WindowState == FormWindowState.Minimized)
+            if (frmCodeViewer.WindowState == FormWindowState.Minimized)
             {
-                FrmCodeViewer.WindowState = FormWindowState.Normal;
+                frmCodeViewer.WindowState = FormWindowState.Normal;
             }
-            FrmCodeViewer.FormClosed += (s, e) => FrmCodeViewer = null;
-            FrmCodeViewer.Show();
+            frmCodeViewer.ShowSingleInstance();
         }
 
         private static bool ShouldDisableSyntaxHighlighting(string txt)

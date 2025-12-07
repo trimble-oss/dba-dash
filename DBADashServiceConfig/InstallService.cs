@@ -197,7 +197,7 @@ namespace DBADashServiceConfig
         {
             var script = ReadResourceString("CreateMSA.ps1");
             var frm = new CodeViewer() { Language = CodeEditor.CodeEditorModes.PowerShell, Code = script };
-            frm.Show();
+            frm.ShowSingleInstance();
         }
 
         public string ReadResourceString(string name)

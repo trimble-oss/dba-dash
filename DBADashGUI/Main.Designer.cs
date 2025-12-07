@@ -45,13 +45,13 @@ namespace DBADashGUI
             configureDisplayNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             externalDiffToolToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             dataRetentionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            dateTimeFormatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            setTimeFormatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            setDateTimeFormatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             desktopNotificationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             freezeKeyColumnsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             manageInstancesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             repoSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            dateTimeFormatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            setTimeFormatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            setDateTimeFormatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             saveTimeZonePreferenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             setAutoRefreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             secondsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -72,6 +72,8 @@ namespace DBADashGUI
             tsTimeFilter = new System.Windows.Forms.ToolStripMenuItem();
             tsDayOfWeek = new System.Windows.Forms.ToolStripMenuItem();
             cboTimeZone = new System.Windows.Forms.ToolStripComboBox();
+            tsToggleSingleInstance = new System.Windows.Forms.ToolStripMenuItem();
+            closeChildWindowsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             splitMain = new System.Windows.Forms.SplitContainer();
             tv1 = new System.Windows.Forms.TreeView();
             pnlSearch = new System.Windows.Forms.Panel();
@@ -172,6 +174,7 @@ namespace DBADashGUI
             tabJobDDL = new System.Windows.Forms.TabPage();
             jobDDLHistory1 = new DBADashGUI.Changes.JobDDLHistory();
             tabAG = new System.Windows.Forms.TabPage();
+            ag1 = new DBADashGUI.HA.AG();
             tabQS = new System.Windows.Forms.TabPage();
             queryStore1 = new DBADashGUI.Changes.QueryStore();
             tabResourceGovernor = new System.Windows.Forms.TabPage();
@@ -236,7 +239,6 @@ namespace DBADashGUI
             dataGridViewTextBoxColumn23 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             autoRefreshTimer = new System.Windows.Forms.Timer(components);
             toolTip1 = new System.Windows.Forms.ToolTip(components);
-            ag1 = new DBADashGUI.HA.AG();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitMain).BeginInit();
             splitMain.Panel1.SuspendLayout();
@@ -349,10 +351,11 @@ namespace DBADashGUI
             // 
             menuStrip1.GripMargin = new System.Windows.Forms.Padding(2);
             menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsConnect, diffToolStripMenuItem, optionsToolStripMenuItem, tsAlert, helpToolStripMenuItem, tsDateRange, tsTimeFilter, tsDayOfWeek, cboTimeZone });
+            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsConnect, diffToolStripMenuItem, optionsToolStripMenuItem, tsAlert, helpToolStripMenuItem, tsDateRange, tsTimeFilter, tsDayOfWeek, cboTimeZone, tsToggleSingleInstance, closeChildWindowsToolStripMenuItem });
             menuStrip1.Location = new System.Drawing.Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Padding = new System.Windows.Forms.Padding(3, 1, 0, 1);
+            menuStrip1.ShowItemToolTips = true;
             menuStrip1.Size = new System.Drawing.Size(1955, 30);
             menuStrip1.TabIndex = 1;
             menuStrip1.Text = "menuStrip1";
@@ -390,7 +393,7 @@ namespace DBADashGUI
             // 
             // optionsToolStripMenuItem
             // 
-            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { configureDisplayNameToolStripMenuItem, externalDiffToolToolStripMenuItem, dataRetentionToolStripMenuItem, desktopNotificationsToolStripMenuItem, freezeKeyColumnsToolStripMenuItem, manageInstancesToolStripMenuItem, repoSettingsToolStripMenuItem, dateTimeFormatToolStripMenuItem, saveTimeZonePreferenceToolStripMenuItem, setAutoRefreshToolStripMenuItem, showHiddenToolStripMenuItem, themeToolStripMenuItem });
+            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { configureDisplayNameToolStripMenuItem, externalDiffToolToolStripMenuItem, dataRetentionToolStripMenuItem, dateTimeFormatToolStripMenuItem, desktopNotificationsToolStripMenuItem, freezeKeyColumnsToolStripMenuItem, manageInstancesToolStripMenuItem, repoSettingsToolStripMenuItem, saveTimeZonePreferenceToolStripMenuItem, setAutoRefreshToolStripMenuItem, showHiddenToolStripMenuItem, themeToolStripMenuItem });
             optionsToolStripMenuItem.Enabled = false;
             optionsToolStripMenuItem.Image = Properties.Resources.SettingsOutline_16x;
             optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
@@ -418,6 +421,27 @@ namespace DBADashGUI
             dataRetentionToolStripMenuItem.Size = new System.Drawing.Size(276, 26);
             dataRetentionToolStripMenuItem.Text = "Data Retention";
             dataRetentionToolStripMenuItem.Click += DataRetentionToolStripMenuItem_Click;
+            // 
+            // dateTimeFormatToolStripMenuItem
+            // 
+            dateTimeFormatToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { setTimeFormatToolStripMenuItem, setDateTimeFormatToolStripMenuItem });
+            dateTimeFormatToolStripMenuItem.Name = "dateTimeFormatToolStripMenuItem";
+            dateTimeFormatToolStripMenuItem.Size = new System.Drawing.Size(276, 26);
+            dateTimeFormatToolStripMenuItem.Text = "Date/Time Format";
+            // 
+            // setTimeFormatToolStripMenuItem
+            // 
+            setTimeFormatToolStripMenuItem.Name = "setTimeFormatToolStripMenuItem";
+            setTimeFormatToolStripMenuItem.Size = new System.Drawing.Size(253, 26);
+            setTimeFormatToolStripMenuItem.Text = "Set Time Format";
+            setTimeFormatToolStripMenuItem.Click += setTimeFormatToolStripMenuItem_Click;
+            // 
+            // setDateTimeFormatToolStripMenuItem
+            // 
+            setDateTimeFormatToolStripMenuItem.Name = "setDateTimeFormatToolStripMenuItem";
+            setDateTimeFormatToolStripMenuItem.Size = new System.Drawing.Size(253, 26);
+            setDateTimeFormatToolStripMenuItem.Text = "Set Date && Time Format";
+            setDateTimeFormatToolStripMenuItem.Click += setDateTimeFormatToolStripMenuItem_Click;
             // 
             // desktopNotificationsToolStripMenuItem
             // 
@@ -453,27 +477,6 @@ namespace DBADashGUI
             repoSettingsToolStripMenuItem.Size = new System.Drawing.Size(276, 26);
             repoSettingsToolStripMenuItem.Text = "Repository Settings";
             repoSettingsToolStripMenuItem.Click += RepositorySettings_Click;
-            // 
-            // dateTimeFormatToolStripMenuItem
-            // 
-            dateTimeFormatToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { setTimeFormatToolStripMenuItem, setDateTimeFormatToolStripMenuItem });
-            dateTimeFormatToolStripMenuItem.Name = "dateTimeFormatToolStripMenuItem";
-            dateTimeFormatToolStripMenuItem.Size = new System.Drawing.Size(276, 26);
-            dateTimeFormatToolStripMenuItem.Text = "Date/Time Format";
-            // 
-            // setTimeFormatToolStripMenuItem
-            // 
-            setTimeFormatToolStripMenuItem.Name = "setTimeFormatToolStripMenuItem";
-            setTimeFormatToolStripMenuItem.Size = new System.Drawing.Size(253, 26);
-            setTimeFormatToolStripMenuItem.Text = "Set Time Format";
-            setTimeFormatToolStripMenuItem.Click += setTimeFormatToolStripMenuItem_Click;
-            // 
-            // setDateTimeFormatToolStripMenuItem
-            // 
-            setDateTimeFormatToolStripMenuItem.Name = "setDateTimeFormatToolStripMenuItem";
-            setDateTimeFormatToolStripMenuItem.Size = new System.Drawing.Size(253, 26);
-            setDateTimeFormatToolStripMenuItem.Text = "Set Date && Time Format";
-            setDateTimeFormatToolStripMenuItem.Click += setDateTimeFormatToolStripMenuItem_Click;
             // 
             // saveTimeZonePreferenceToolStripMenuItem
             // 
@@ -651,6 +654,28 @@ namespace DBADashGUI
             cboTimeZone.Name = "cboTimeZone";
             cboTimeZone.Size = new System.Drawing.Size(221, 28);
             cboTimeZone.SelectedIndexChanged += TimeZone_Selected;
+            // 
+            // tsToggleSingleInstance
+            // 
+            tsToggleSingleInstance.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsToggleSingleInstance.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsToggleSingleInstance.Image = Properties.Resources.AppWindow;
+            tsToggleSingleInstance.Name = "tsToggleSingleInstance";
+            tsToggleSingleInstance.Size = new System.Drawing.Size(34, 28);
+            tsToggleSingleInstance.Text = "Toggle single instance child window";
+            tsToggleSingleInstance.ToolTipText = "Toggle single instance child window";
+            tsToggleSingleInstance.Click += ToggleSingleInstancePreference;
+            // 
+            // closeChildWindowsToolStripMenuItem
+            // 
+            closeChildWindowsToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            closeChildWindowsToolStripMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            closeChildWindowsToolStripMenuItem.Image = Properties.Resources.CloseGroup_32x;
+            closeChildWindowsToolStripMenuItem.Name = "closeChildWindowsToolStripMenuItem";
+            closeChildWindowsToolStripMenuItem.Size = new System.Drawing.Size(34, 28);
+            closeChildWindowsToolStripMenuItem.Text = "Close all Windows";
+            closeChildWindowsToolStripMenuItem.ToolTipText = "Close all Windows";
+            closeChildWindowsToolStripMenuItem.Click += CloseChildWindows_Click;
             // 
             // splitMain
             // 
@@ -934,7 +959,7 @@ namespace DBADashGUI
             label7.Name = "label7";
             label7.Size = new System.Drawing.Size(351, 20);
             label7.TabIndex = 1;
-            label7.Text = "Diff (Loaded programatically due to designer issue)";
+            label7.Text = "Diff (Loaded programmatically due to designer issue)";
             label7.Visible = false;
             // 
             // toolStrip1
@@ -1116,7 +1141,6 @@ namespace DBADashGUI
             // 
             // tags1
             // 
-            tags1.AllTags = null;
             tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             tags1.Location = new System.Drawing.Point(1, 2);
             tags1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
@@ -1141,10 +1165,6 @@ namespace DBADashGUI
             // drivesControl1
             // 
             drivesControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            drivesControl1.IncludeCritical = true;
-            drivesControl1.IncludeNA = true;
-            drivesControl1.IncludeOK = true;
-            drivesControl1.IncludeWarning = true;
             drivesControl1.Location = new System.Drawing.Point(1, 2);
             drivesControl1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
             drivesControl1.Name = "drivesControl1";
@@ -1167,10 +1187,6 @@ namespace DBADashGUI
             // backupsControl1
             // 
             backupsControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            backupsControl1.IncludeCritical = true;
-            backupsControl1.IncludeNA = true;
-            backupsControl1.IncludeOK = true;
-            backupsControl1.IncludeWarning = true;
             backupsControl1.Location = new System.Drawing.Point(1, 2);
             backupsControl1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
             backupsControl1.Name = "backupsControl1";
@@ -1192,10 +1208,6 @@ namespace DBADashGUI
             // logShippingControl1
             // 
             logShippingControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            logShippingControl1.IncludeCritical = true;
-            logShippingControl1.IncludeNA = true;
-            logShippingControl1.IncludeOK = true;
-            logShippingControl1.IncludeWarning = true;
             logShippingControl1.Location = new System.Drawing.Point(1, 2);
             logShippingControl1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
             logShippingControl1.Name = "logShippingControl1";
@@ -1217,15 +1229,9 @@ namespace DBADashGUI
             // agentJobsControl1
             // 
             agentJobsControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            agentJobsControl1.IncludeAcknowledged = true;
-            agentJobsControl1.IncludeCritical = false;
-            agentJobsControl1.IncludeNA = false;
-            agentJobsControl1.IncludeOK = false;
-            agentJobsControl1.IncludeWarning = false;
             agentJobsControl1.Location = new System.Drawing.Point(1, 2);
             agentJobsControl1.Margin = new System.Windows.Forms.Padding(1, 2, 1, 2);
             agentJobsControl1.Name = "agentJobsControl1";
-            agentJobsControl1.ShowSteps = false;
             agentJobsControl1.Size = new System.Drawing.Size(190, 53);
             agentJobsControl1.TabIndex = 0;
             // 
@@ -1266,11 +1272,6 @@ namespace DBADashGUI
             // dbFilesControl1
             // 
             dbFilesControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            dbFilesControl1.FileLevel = false;
-            dbFilesControl1.IncludeCritical = true;
-            dbFilesControl1.IncludeNA = true;
-            dbFilesControl1.IncludeOK = true;
-            dbFilesControl1.IncludeWarning = true;
             dbFilesControl1.Location = new System.Drawing.Point(1, 2);
             dbFilesControl1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
             dbFilesControl1.Name = "dbFilesControl1";
@@ -1292,10 +1293,6 @@ namespace DBADashGUI
             // lastGoodCheckDBControl1
             // 
             lastGoodCheckDBControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            lastGoodCheckDBControl1.IncludeCritical = true;
-            lastGoodCheckDBControl1.IncludeNA = true;
-            lastGoodCheckDBControl1.IncludeOK = true;
-            lastGoodCheckDBControl1.IncludeWarning = true;
             lastGoodCheckDBControl1.Location = new System.Drawing.Point(1, 2);
             lastGoodCheckDBControl1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
             lastGoodCheckDBControl1.Name = "lastGoodCheckDBControl1";
@@ -1338,7 +1335,6 @@ namespace DBADashGUI
             // 
             // collectionErrors1
             // 
-            collectionErrors1.AckErrors = false;
             collectionErrors1.Days = 0;
             collectionErrors1.Dock = System.Windows.Forms.DockStyle.Fill;
             collectionErrors1.Location = new System.Drawing.Point(1, 2);
@@ -1362,10 +1358,6 @@ namespace DBADashGUI
             // collectionDates1
             // 
             collectionDates1.Dock = System.Windows.Forms.DockStyle.Fill;
-            collectionDates1.IncludeCritical = true;
-            collectionDates1.IncludeNA = true;
-            collectionDates1.IncludeOK = true;
-            collectionDates1.IncludeWarning = true;
             collectionDates1.Location = new System.Drawing.Point(1, 2);
             collectionDates1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
             collectionDates1.Name = "collectionDates1";
@@ -1540,7 +1532,6 @@ namespace DBADashGUI
             alerts1.Name = "alerts1";
             alerts1.Size = new System.Drawing.Size(190, 53);
             alerts1.TabIndex = 0;
-            alerts1.UseAlertName = false;
             // 
             // tabDrivers
             // 
@@ -1688,7 +1679,6 @@ namespace DBADashGUI
             dbOptions1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
             dbOptions1.Name = "dbOptions1";
             dbOptions1.Size = new System.Drawing.Size(190, 53);
-            dbOptions1.SummaryMode = false;
             dbOptions1.TabIndex = 0;
             // 
             // tabTempDB
@@ -1726,12 +1716,7 @@ namespace DBADashGUI
             // 
             // customChecks1
             // 
-            customChecks1.CheckContext = null;
             customChecks1.Dock = System.Windows.Forms.DockStyle.Fill;
-            customChecks1.IncludeCritical = true;
-            customChecks1.IncludeNA = false;
-            customChecks1.IncludeOK = false;
-            customChecks1.IncludeWarning = true;
             customChecks1.Location = new System.Drawing.Point(1, 2);
             customChecks1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
             customChecks1.Name = "customChecks1";
@@ -1780,8 +1765,6 @@ namespace DBADashGUI
             objectExecutionSummary1.Name = "objectExecutionSummary1";
             objectExecutionSummary1.Size = new System.Drawing.Size(190, 53);
             objectExecutionSummary1.TabIndex = 0;
-            objectExecutionSummary1.Types = "";
-            objectExecutionSummary1.UseGlobalTime = true;
             // 
             // tabWaits
             // 
@@ -1824,7 +1807,6 @@ namespace DBADashGUI
             mirroring1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
             mirroring1.Name = "mirroring1";
             mirroring1.Size = new System.Drawing.Size(190, 53);
-            mirroring1.SummaryMode = true;
             mirroring1.TabIndex = 0;
             // 
             // tabJobDDL
@@ -1855,10 +1837,19 @@ namespace DBADashGUI
             tabAG.Margin = new System.Windows.Forms.Padding(1, 2, 1, 2);
             tabAG.Name = "tabAG";
             tabAG.Padding = new System.Windows.Forms.Padding(1, 2, 1, 2);
-            tabAG.Size = new System.Drawing.Size(1578, 955);
+            tabAG.Size = new System.Drawing.Size(192, 57);
             tabAG.TabIndex = 35;
             tabAG.Text = "Availability Groups";
             tabAG.UseVisualStyleBackColor = true;
+            // 
+            // ag1
+            // 
+            ag1.Dock = System.Windows.Forms.DockStyle.Fill;
+            ag1.Location = new System.Drawing.Point(1, 2);
+            ag1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            ag1.Name = "ag1";
+            ag1.Size = new System.Drawing.Size(190, 53);
+            ag1.TabIndex = 0;
             // 
             // tabQS
             // 
@@ -1985,7 +1976,6 @@ namespace DBADashGUI
             jobStats1.Name = "jobStats1";
             jobStats1.Size = new System.Drawing.Size(190, 53);
             jobStats1.TabIndex = 0;
-            jobStats1.UseGlobalTime = true;
             // 
             // tabDBADash
             // 
@@ -2056,10 +2046,6 @@ namespace DBADashGUI
             // identityColumns1
             // 
             identityColumns1.Dock = System.Windows.Forms.DockStyle.Fill;
-            identityColumns1.IncludeCritical = true;
-            identityColumns1.IncludeNA = false;
-            identityColumns1.IncludeOK = false;
-            identityColumns1.IncludeWarning = true;
             identityColumns1.Location = new System.Drawing.Point(1, 2);
             identityColumns1.Margin = new System.Windows.Forms.Padding(1);
             identityColumns1.Name = "identityColumns1";
@@ -2108,7 +2094,6 @@ namespace DBADashGUI
             jobTimeline1.Name = "jobTimeline1";
             jobTimeline1.Size = new System.Drawing.Size(190, 53);
             jobTimeline1.TabIndex = 0;
-            jobTimeline1.UseGlobalTime = true;
             // 
             // tabDrivePerformance
             // 
@@ -2174,7 +2159,6 @@ namespace DBADashGUI
             customReportView1.Location = new System.Drawing.Point(1, 2);
             customReportView1.Margin = new System.Windows.Forms.Padding(1);
             customReportView1.Name = "customReportView1";
-            customReportView1.Report = null;
             customReportView1.Size = new System.Drawing.Size(190, 53);
             customReportView1.TabIndex = 0;
             // 
@@ -2217,11 +2201,8 @@ namespace DBADashGUI
             queryStoreTop.Location = new System.Drawing.Point(1, 2);
             queryStoreTop.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             queryStoreTop.Name = "queryStoreTop";
-            queryStoreTop.PlanHash = null;
-            queryStoreTop.QueryHash = null;
             queryStoreTop.Size = new System.Drawing.Size(190, 53);
             queryStoreTop.TabIndex = 0;
-            queryStoreTop.UseGlobalTime = true;
             // 
             // tabQueryStoreForcedPlans
             // 
@@ -2528,15 +2509,6 @@ namespace DBADashGUI
             autoRefreshTimer.Interval = 60000;
             autoRefreshTimer.Tick += AutoRefresh;
             // 
-            // ag1
-            // 
-            ag1.Dock = System.Windows.Forms.DockStyle.Fill;
-            ag1.Location = new System.Drawing.Point(1, 2);
-            ag1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            ag1.Name = "ag1";
-            ag1.Size = new System.Drawing.Size(1576, 951);
-            ag1.TabIndex = 0;
-            // 
             // Main
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -2837,5 +2809,7 @@ namespace DBADashGUI
         private Performance.Performance performance1;
         private DateRangeToolStripMenuItem tsDateRange;
         private HA.AG ag1;
+        private System.Windows.Forms.ToolStripMenuItem tsToggleSingleInstance;
+        private System.Windows.Forms.ToolStripMenuItem closeChildWindowsToolStripMenuItem;
     }
 }

@@ -444,21 +444,16 @@ namespace DBADashGUI.Performance
             RefreshData();
         }
 
-        private static IOSummaryForm SummaryForm;
-
         private void TsIOSummary_Click(object sender, EventArgs e)
         {
-            SummaryForm?.Close();
-            SummaryForm = new IOSummaryForm()
+            IOSummaryForm summaryForm = new()
             {
                 InstanceID = instanceID,
                 DatabaseID = databaseID,
                 FromDate = DateRange.FromUTC,
                 ToDate = DateRange.ToUTC
             };
-            SummaryForm.FormClosed += delegate { SummaryForm = null; };
-
-            SummaryForm.Show();
+            summaryForm.ShowSingleInstance();
         }
 
         private void TsClose_Click(object sender, EventArgs e)

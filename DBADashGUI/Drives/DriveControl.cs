@@ -115,18 +115,14 @@ namespace DBADashGUI
             }
         }
 
-        private static DriveHistoryView DriveHistoryViewForm;
-
         private void LnkHistory_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            DriveHistoryViewForm?.Close();
-            DriveHistoryViewForm = new()
+            DriveHistoryView driveHistoryViewForm = new()
             {
                 DriveID = Drive.DriveID,
                 Text = Drive.InstanceName + " | " + Drive.DriveLetter + " " + Drive.DriveLabel
             };
-            DriveHistoryViewForm.FormClosed += delegate { DriveHistoryViewForm = null; };
-            DriveHistoryViewForm.Show();
+            driveHistoryViewForm.ShowSingleInstance();
         }
 
         private void Files_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -159,7 +155,7 @@ namespace DBADashGUI
                 files.GridFilter = $"[physical_name] LIKE '{driveLetter}%'";
             };
             frm.Text = $@"DB Files on drive {driveLetter} ({driveLabel}) on {instanceName}";
-            frm.ShowDialog();
+            frm.ShowSingleInstance();
         }
 
         void IThemedControl.ApplyTheme(BaseTheme theme)

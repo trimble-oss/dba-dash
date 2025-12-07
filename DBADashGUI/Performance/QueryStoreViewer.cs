@@ -1,16 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Amazon.Runtime.SharedInterfaces;
-using DBADash;
+﻿using DBADash;
 using DBADashGUI.Theme;
-using OpenTK.Graphics;
+using System;
+using System.ComponentModel;
+using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
 {
@@ -41,32 +33,32 @@ namespace DBADashGUI.Performance
             this.ApplyTheme();
             if (!string.IsNullOrEmpty(Context.ObjectName))
             {
-                var text = this.Text + " - " + Context.InstanceName;
+                var text = Text + " - " + Context.InstanceName;
                 if (!string.IsNullOrEmpty(Context.DatabaseName))
                 {
-                    text += '\\' + Context.DatabaseName;
+                    text += $" - {Context.DatabaseName}";
                 }
                 if (QueryHash != null)
                 {
-                    text += " - Query " + QueryHash.ToHexString(true);
+                    text += $" - Query {QueryHash.ToHexString(true)}";
                 }
                 else if (PlanHash != null)
                 {
-                    text += " - Plan " + PlanHash.ToHexString(true);
+                    text += $" - Plan {PlanHash.ToHexString(true)}";
                 }
                 else if (QueryId.HasValue)
                 {
-                    text += " - Query " + QueryId.ToString();
+                    text += $" - Query {QueryId}";
                 }
                 else if (PlanId.HasValue)
                 {
-                    text += " - Plan " + PlanId.Value.ToString();
+                    text += $" - Plan {PlanId}";
                 }
                 else if (Context.Type.IsQueryStoreObjectType())
                 {
-                    text += " - " + Context.ObjectName;
+                    text += $" - {Context.ObjectName}";
                 }
-                this.Text = text;
+                Text = text;
             }
             queryStoreTopQueries1.SetContext(Context);
             if (PlanHash != null || QueryHash != null || !string.IsNullOrEmpty(Context.ObjectName))

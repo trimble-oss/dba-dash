@@ -259,17 +259,10 @@ namespace DBADashGUI
             }
         }
 
-        private static BuildReferenceViewer BuildViewer;
-
         private void TsViewBuildReference_Click(object sender, EventArgs e)
         {
-            if (BuildViewer == null)
-            {
-                BuildViewer = new();
-                BuildViewer.FormClosed += delegate { BuildViewer = null; };
-            }
-            BuildViewer.Show();
-            BuildViewer.Focus();
+            BuildReferenceViewer buildViewer = new();
+            buildViewer.ShowSingleInstance();
         }
 
         private void PromptUpdateThreshold(string setting, string currentValue, string title)

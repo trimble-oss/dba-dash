@@ -655,7 +655,7 @@ namespace DBADashGUI
                 JobID = Context.JobID,
                 connectionString = Common.ConnectionString
             };
-            frm.Show();
+            frm.ShowSingleInstance();
         }
 
         private void JobInfo_Click(object sender, EventArgs e)
@@ -664,7 +664,7 @@ namespace DBADashGUI
             {
                 DBADashContext = Context
             };
-            frm.Show();
+            frm.ShowSingleInstance();
         }
 
         private void StartStopJob_Click(object sender, EventArgs e)
@@ -685,37 +685,25 @@ namespace DBADashGUI
             ShowFindDatabaseDialog(dbName);
         }
 
-        private static CustomReportViewer databaseFinderDialog;
-        private int? databaseFinderWidth;
-        private int? databaseFinderHeight;
-
         private void ShowFindDatabaseDialog(string dbName)
         {
-            databaseFinderDialog?.Close();
             var report = DatabaseFinderReport.Instance;
-            var tempContext = (DBADashContext)Context.DeepCopy();
+            var tempContext = Context.DeepCopy();
             tempContext.Report = report;
-            databaseFinderWidth ??= Convert.ToInt32(Math.Max(Main.MainFormInstance.Width * 0.7, 800));
-            databaseFinderHeight ??= Convert.ToInt32(Math.Max(Main.MainFormInstance.Height * 0.7, 600));
+            var databaseFinderWidth = Convert.ToInt32(Math.Max(Main.MainFormInstance.Width * 0.7, 800));
+            var databaseFinderHeight = Convert.ToInt32(Math.Max(Main.MainFormInstance.Height * 0.7, 600));
             var sqlParams = report.GetCustomSqlParameters();
             var pSearchString = sqlParams.First(p => p.Param.ParameterName == "@SearchString");
             pSearchString.UseDefaultValue = false;
             pSearchString.Param.Value = "%" + dbName + "%";
-            databaseFinderDialog = new CustomReportViewer
+            CustomReportViewer databaseFinderDialog = new()
             {
                 Context = tempContext,
-                Width = databaseFinderWidth.Value,
-                Height = databaseFinderHeight.Value,
+                Width = databaseFinderWidth,
+                Height = databaseFinderHeight,
                 CustomParams = sqlParams
             };
-            databaseFinderDialog.SizeChanged += (s, e) =>
-            {
-                if (databaseFinderDialog.WindowState is FormWindowState.Maximized or FormWindowState.Minimized) return;
-                databaseFinderWidth = databaseFinderDialog.Width;
-                databaseFinderHeight = databaseFinderDialog.Height;
-            };
-            databaseFinderDialog.FormClosed += (s, e) => databaseFinderDialog = null;
-            databaseFinderDialog.Show();
+            databaseFinderDialog.ShowSingleInstance();
         }
 
         private void MnuRefresh_Click(object sender, EventArgs e)

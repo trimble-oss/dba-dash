@@ -206,7 +206,7 @@ namespace DBADashGUI.Drives
                             DriveID = (int)row["DriveID"],
                             Text = @$"{instanceName} | {driveLetter} {label}"
                         };
-                        frm.Show();
+                        frm.ShowSingleInstance();
                         break;
                     }
                 case "Files":
