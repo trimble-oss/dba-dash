@@ -1,4 +1,8 @@
-﻿using System.Data.Common;
+﻿using AsyncKeyedLock;
+using System.Collections.Concurrent;
+using System.Data.Common;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace DBADashSharedGUI
 {
@@ -53,7 +57,6 @@ namespace DBADashSharedGUI
 
             return $"{dataTypeName}{typeDetails}{nullability}";
         }
-
 
         /// <summary>
         /// Performs an auto-resize of DataGridView columns, but ensures that no column exceeds columnWidthCapRatio, unless there is sufficient space to accommodate all columns at their auto-sized widths.
@@ -123,5 +126,140 @@ namespace DBADashSharedGUI
         }
 
         public static string ToHexString(this Color c) => $"#{c.R:X2}{c.G:X2}{c.B:X2}";
+
+        private static readonly ConcurrentDictionary<string, FormState> SingleInstanceFormStates = new();
+        private static readonly ConcurrentDictionary<string, Form> SingleInstanceForm = new();
+        private static readonly AsyncNonKeyedLocker SingleInstanceLocker = new();
+        public static bool ChildFormSingleInstance { get; set; } = true;
+
+        /// <summary>
+        /// Get a key to identity the type of form.  Uses the type name of the form, unless the type is "Form" in which case it computes a hash of the controls.
+        /// </summary>
+        /// <param name="form"></param>
+        /// <returns>A unique string</returns>
+        private static string GetSingleInstanceKey(Form form)
+        {
+            var type = form.GetType();
+            var typeName = type.FullName ?? typeof(Form).FullName;
+
+            // If it's a plain Form type, use title and a hash of the control tree to distinguish instances
+            if (typeName == typeof(Form).FullName)
+            {
+                var controlsHash = ComputeControlsHash(form);
+                return $"{typeName}|{controlsHash}";
+            }
+
+            return typeName;
+        }
+
+        /// <summary>
+        /// Creates a hash of controls based on type, name, size and position.  For forms defined programmatically, this provides a way to distinguish between them
+        /// </summary>
+        /// <param name="root"></param>
+        /// <returns></returns>
+        private static string ComputeControlsHash(Control root)
+        {
+            // Create a deterministic string representation of the control hierarchy
+            var sb = new StringBuilder();
+            void Visit(Control c)
+            {
+                sb.Append(c.GetType().FullName);
+                sb.Append('|');
+                sb.Append(c.Name);
+                sb.Append('|');
+                sb.Append(c.Bounds.X);
+                sb.Append(',');
+                sb.Append(c.Bounds.Y);
+                sb.Append(',');
+                sb.Append(c.Bounds.Width);
+                sb.Append(',');
+                sb.Append(c.Bounds.Height);
+                sb.Append(';');
+
+                // Sort children by name/type to get stable order
+                foreach (Control child in c.Controls.Cast<Control>().OrderBy(x => x.GetType().FullName).ThenBy(x => x.Name))
+                {
+                    Visit(child);
+                }
+            }
+
+            Visit(root);
+            using var sha = SHA256.Create();
+            var bytes = Encoding.UTF8.GetBytes(sb.ToString());
+            var hash = sha.ComputeHash(bytes);
+            return Convert.ToHexString(hash);
+        }
+
+        /// <summary>
+        /// Shows a single instance of the form, closing any existing instance.
+        /// </summary>
+        /// <param name="form"></param>
+        public static void ShowSingleInstance(this Form form, bool trackFormState = true)
+        {
+            if (form.InvokeRequired)
+            {
+                form.BeginInvoke(new Action(() =>
+                {
+                    var task = ShowSingleInstanceAsync(form, trackFormState);
+                    task.ContinueWith(t =>
+                    {
+                        try
+                        {
+                            // Observe exception to avoid crashing due to async void behavior
+                            _ = t.Exception;
+                        }
+                        catch
+                        {
+                            // Swallow if AggregateException is not present
+                        }
+                    }, TaskContinuationOptions.OnlyOnFaulted);
+                }));
+            }
+            else
+            {
+                _ = ShowSingleInstanceAsync(form, trackFormState);
+            }
+        }
+
+        /// <summary>
+        /// Shows a single instance of the form, closing any existing instance.
+        /// </summary>
+        /// <param name="form"></param>
+        public static async Task ShowSingleInstanceAsync(this Form form, bool trackFormState = true)
+        {
+            if (!ChildFormSingleInstance)
+            {
+                form.Show();
+                return;
+            }
+            using var locker = await SingleInstanceLocker.LockAsync();
+
+            var key = GetSingleInstanceKey(form);
+            SingleInstanceForm.TryGetValue(key, out var inst);
+            try
+            {
+                inst?.Close();
+            }
+            catch
+            {
+                // Ignore exceptions when closing existing form
+            }
+            SingleInstanceForm[key] = form;
+            form.FormClosed += (s, e) =>
+            {
+                SingleInstanceForm.TryRemove(key, out _);
+            };
+
+            if (trackFormState)
+            {
+                SingleInstanceFormStates.TryGetValue(key, out var formState);
+                formState ??= new FormState();
+                FormState.ApplyFormState(form, formState);
+                FormState.TrackFormState(form, formState);
+                SingleInstanceFormStates[key] = formState;
+            }
+
+            form.Show();
+        }
     }
 }

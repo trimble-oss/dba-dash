@@ -204,8 +204,6 @@ namespace DBADashGUI
             }
         }
 
-        private static DBSpaceHistoryView DBSpaceHistoryViewForm;
-
         private void TsHistory_Click(object sender, EventArgs e)
         {
             var dbid = DatabaseID < 1 ? CommonData.GetDatabaseID(InstanceGroupName, DBName) : DatabaseID;
@@ -214,8 +212,7 @@ namespace DBADashGUI
 
         private void LoadDBSpaceHistoryView(int databaseID, string dbName, string instanceGroupName, string fileName)
         {
-            DBSpaceHistoryViewForm?.Close();
-            DBSpaceHistoryViewForm = new DBSpaceHistoryView
+            DBSpaceHistoryView dbSpaceHistoryViewForm = new()
             {
                 DatabaseID = databaseID,
                 InstanceGroupName = instanceGroupName,
@@ -224,8 +221,7 @@ namespace DBADashGUI
                 Unit = Unit,
                 FileName = fileName
             };
-            DBSpaceHistoryViewForm.FormClosed += delegate { DBSpaceHistoryViewForm = null; };
-            DBSpaceHistoryViewForm.Show();
+            dbSpaceHistoryViewForm.ShowSingleInstance();
         }
 
         private void TsExcel_Click(object sender, EventArgs e)

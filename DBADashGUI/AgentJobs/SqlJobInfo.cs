@@ -95,7 +95,7 @@ namespace DBADashGUI.AgentJobs
             {
                 ctrl.LoadJobInfo(jobInfo);
             };
-            frm.Show();
+            frm.ShowSingleInstance();
         }
 
         public void ShowForm(string title = "") => ShowForm(this, title);
@@ -121,7 +121,7 @@ namespace DBADashGUI.AgentJobs
                 Common.HighlightGridDifferences(ctrl1.StepsGrid, ctrl2.StepsGrid);
                 Common.HighlightGridDifferences(ctrl1.ScheduleGrid, ctrl2.ScheduleGrid);
             };
-            frm.Show();
+            frm.ShowSingleInstance();
         }
     }
 }

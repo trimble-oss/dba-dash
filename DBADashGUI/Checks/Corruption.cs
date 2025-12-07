@@ -17,7 +17,7 @@ namespace DBADashGUI
 
         private DBADashContext context;
 
-        private static readonly DataGridViewColumn[] Cols =
+        private readonly DataGridViewColumn[] Cols =
 {           new DataGridViewTextBoxColumn(){ Name="Instance", HeaderText="Instance", DataPropertyName="InstanceGroupName", SortMode = DataGridViewColumnSortMode.Automatic},
             new DataGridViewTextBoxColumn(){ Name="name", HeaderText="Database Name", DataPropertyName="name", SortMode = DataGridViewColumnSortMode.Automatic},
             new DataGridViewTextBoxColumn(){ Name="Source Table", HeaderText="Source Table", DataPropertyName="SourceTable", SortMode = DataGridViewColumnSortMode.Automatic, ToolTipText = "Table where corruption was detected."},

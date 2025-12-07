@@ -323,8 +323,6 @@ namespace DBADashGUI.AgentJobs
             colHistory.Visible = true;
         }
 
-        private RunningQueriesViewer RunningViewer;
-
         private void DgvJobHistory_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
@@ -345,11 +343,8 @@ namespace DBADashGUI.AgentJobs
                     Convert.ToDouble(dgvJobHistory.Rows[e.RowIndex].Cells[colRunDurationSec.Index].Value));
                 var jobId = (Guid)row["job_id"];
                 var id = (int)row["InstanceID"];
-                RunningViewer?.Close();
-                RunningViewer = new() { SnapshotDateFrom = from, SnapshotDateTo = to, InstanceID = id, JobId = jobId };
-
-                RunningViewer.FormClosed += delegate { RunningViewer = null; };
-                RunningViewer.Show();
+                RunningQueriesViewer runningQueriesViewer = new() { SnapshotDateFrom = from, SnapshotDateTo = to, InstanceID = id, JobId = jobId };
+                runningQueriesViewer.ShowSingleInstance();
             }
         }
 
@@ -535,7 +530,7 @@ namespace DBADashGUI.AgentJobs
                 jobContext.JobID = GetJobId(row);
                 jobContext.ObjectName = GetJobName(row);
                 var frm = new JobInfoForm() { DBADashContext = jobContext };
-                frm.Show();
+                frm.ShowSingleInstance();
             }
             catch (Exception ex)
             {

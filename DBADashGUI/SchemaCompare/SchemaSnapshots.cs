@@ -107,7 +107,7 @@ namespace DBADashGUI.Changes
                 var mode = e.ColumnIndex == colDiff.Index ? ViewMode.Diff : ViewMode.Code;
                 var frm = new Diff();
                 frm.SetText(ddlOld, ddl, mode);
-                frm.Show();
+                frm.ShowSingleInstance();
             }
         }
 

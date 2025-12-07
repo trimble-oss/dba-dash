@@ -33,8 +33,8 @@ namespace DBADashGUI.CustomReports
             var newContext = context.DeepCopy();
             if (!string.IsNullOrEmpty(InstanceIdColumn))
             {
-                var InstanceId = row.Cells[InstanceIdColumn].Value;
-                newContext.InstanceID = (int)InstanceId;
+                var instanceId = row.Cells[InstanceIdColumn].Value;
+                newContext.InstanceID = (int)instanceId;
             }
             if (!string.IsNullOrEmpty(DatabaseNameColumn))
             {

@@ -235,14 +235,14 @@ namespace DBADashGUI.Performance
                     Text = text
                 };
                 frm.ApplyTheme();
-                frm.Show();
+                frm.ShowSingleInstance();
             }
             else if (e.RowIndex >= 0 && col == colServiceObjective)
             {
                 var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
                 var frm = new ResourceGovernanceViewer() { InstanceID = (int)row["InstanceID"], DatabaseName = (string)row["DB"] };
                 frm.ApplyTheme();
-                frm.Show();
+                frm.ShowSingleInstance();
             }
         }
 
@@ -264,7 +264,7 @@ namespace DBADashGUI.Performance
                     Text = poolContext.InstanceName + " | " + pool
                 };
                 frm.ApplyTheme();
-                frm.Show();
+                frm.ShowSingleInstance();
             }
         }
 

@@ -143,6 +143,16 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AppWindow {
+            get {
+                object obj = ResourceManager.GetObject("AppWindow", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap arrow_back_16xLG {
             get {
                 object obj = ResourceManager.GetObject("arrow_back_16xLG", resourceCulture);
@@ -243,6 +253,16 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap CascadeWindowsHS {
+            get {
+                object obj = ResourceManager.GetObject("CascadeWindowsHS", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Close_12x_16x {
             get {
                 object obj = ResourceManager.GetObject("Close_12x_16x", resourceCulture);
@@ -256,6 +276,26 @@ namespace DBADashGUI.Properties {
         internal static System.Drawing.Bitmap Close_red_16x {
             get {
                 object obj = ResourceManager.GetObject("Close_red_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap CloseGroup_16x {
+            get {
+                object obj = ResourceManager.GetObject("CloseGroup_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap CloseGroup_32x {
+            get {
+                object obj = ResourceManager.GetObject("CloseGroup_32x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

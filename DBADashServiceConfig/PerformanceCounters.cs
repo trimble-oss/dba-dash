@@ -270,7 +270,7 @@ namespace DBADashServiceConfig
                 };
                 frm.Controls.Add(dgvPreview);
                 frm.ApplyTheme();
-                frm.Show();
+                frm.ShowSingleInstance();
             }
             catch (Exception ex)
             {

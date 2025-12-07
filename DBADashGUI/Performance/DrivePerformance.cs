@@ -201,17 +201,12 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private static IOSummaryForm SummaryForm;
-
         private void TsSummary_Click(object sender, EventArgs e)
         {
-            SummaryForm?.Close();
-            SummaryForm = new IOSummaryForm()
+            IOSummaryForm summaryForm = new IOSummaryForm()
             { InstanceID = Context.InstanceID, FromDate = DateRange.FromUTC, ToDate = DateRange.ToUTC, GroupBy = IOSummary.IOSummaryGroupByOptions.Drive };
-            SummaryForm.ApplyTheme();
-            SummaryForm.Show();
-            SummaryForm.FormClosed += delegate { SummaryForm = null; };
-            SummaryForm.Show();
+            summaryForm.ApplyTheme();
+            summaryForm.ShowSingleInstance();
         }
 
         private void SmoothLinesToolStripMenuItem_Click(object sender, EventArgs e)

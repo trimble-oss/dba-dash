@@ -399,7 +399,7 @@
             label7.Name = "label7";
             label7.Size = new System.Drawing.Size(351, 20);
             label7.TabIndex = 0;
-            label7.Text = "Diff (Loaded programatically due to designer issue)";
+            label7.Text = "Diff (Loaded programmatically due to designer issue)";
             label7.Visible = false;
             // 
             // dataGridViewTextBoxColumn1

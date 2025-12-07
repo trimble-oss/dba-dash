@@ -322,18 +322,11 @@ namespace DBADashGUI.Performance
             RefreshChart();
         }
 
-        private static WaitSummaryDialog WaitSummaryForm;
-
-        private void TsTopWaits_Click(object sender, EventArgs e)
+        private async void TsTopWaits_Click(object sender, EventArgs e)
         {
-            if (WaitSummaryForm == null)
-            {
-                WaitSummaryForm = new WaitSummaryDialog();
-                WaitSummaryForm.FormClosed += delegate { WaitSummaryForm = null; };
-            }
-            WaitSummaryForm.SetContext(new DBADashContext() { InstanceID = instanceID });
-            WaitSummaryForm.Show();
-            WaitSummaryForm.Focus();
+            WaitSummaryDialog waitSummaryForm = new();
+            waitSummaryForm.SetContext(new DBADashContext() { InstanceID = instanceID });
+            await waitSummaryForm.ShowSingleInstanceAsync();
         }
     }
 }

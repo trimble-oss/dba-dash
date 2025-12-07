@@ -194,12 +194,9 @@ namespace DBADashGUI.DBFiles
             RefreshData();
         }
 
-        private static DBSpaceHistoryView DBSpaceHistoryViewForm;
-
         private static void LoadDBSpaceHistory(int dbid, int? dbSpaceID, string instance, string dbName, string fileName)
         {
-            DBSpaceHistoryViewForm?.Close();
-            DBSpaceHistoryViewForm = new()
+            DBSpaceHistoryView dbSpaceHistoryViewForm = new()
             {
                 DatabaseID = dbid,
                 DataSpaceID = dbSpaceID,
@@ -207,8 +204,7 @@ namespace DBADashGUI.DBFiles
                 DBName = dbName,
                 FileName = fileName
             };
-            DBSpaceHistoryViewForm.FormClosed += delegate { DBSpaceHistoryViewForm = null; };
-            DBSpaceHistoryViewForm.Show();
+            dbSpaceHistoryViewForm.ShowSingleInstance();
         }
 
         private void DgvFiles_CellContentClick(object sender, DataGridViewCellEventArgs e)

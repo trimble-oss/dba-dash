@@ -851,31 +851,20 @@ namespace DBADashGUI
             }
         }
 
-        private static FormState ObjectExecutionFormState;
-        private static Form ObjectExecutionForm;
-
         public static void ShowObjectExecutionSummary(DBADashContext context, Form parent)
         {
-            ObjectExecutionFormState ??= new FormState()
+            Form objectExecutionForm;
+            objectExecutionForm = new Form()
             {
+                Text = context.ObjectName,
                 Width = parent.Width / 2,
-                Height = parent.Height / 2,
-            };
-            ObjectExecutionForm?.Close();
-            ObjectExecutionForm = new Form()
-            {
-                Text = context.ObjectName
+                Height = parent.Height / 2
             };
             var oes = new ObjectExecutionSummary() { Dock = DockStyle.Fill, UseGlobalTime = false };
             oes.SetContext(context);
-            ObjectExecutionForm.Controls.Add(oes);
-            ObjectExecutionForm.FormClosed += (s, e) =>
-            {
-                ObjectExecutionForm = null;
-            };
-            FormState.ApplyFormState(ObjectExecutionForm, ObjectExecutionFormState);
-            FormState.TrackFormState(ObjectExecutionForm, ObjectExecutionFormState);
-            ObjectExecutionForm.Show();
+            objectExecutionForm.Controls.Add(oes);
+
+            objectExecutionForm.ShowSingleInstance();
         }
     }
 }

@@ -61,7 +61,6 @@ namespace DBADashGUI
         private DBADashContext context;
         private bool ShowHidden => context.InstanceIDs.Count == 1 || Common.ShowHidden;
 
-        private CorruptionViewer CorruptionFrm;
         private bool WasRefreshed;
 
         private readonly Dictionary<string, Tabs?> tabMapping = new() { { "FullBackupStatus",Tabs.Backups }, { "LogShippingStatus", Tabs.LogShipping}, { "DiffBackupStatus", Tabs.Backups }, { "LogBackupStatus", Tabs.Backups }, { "DriveStatus", Tabs.Drives },
@@ -617,14 +616,9 @@ namespace DBADashGUI
 
         private void ShowCorruptionViewer(DBADashContext ctx)
         {
-            if (CorruptionFrm == null)
-            {
-                CorruptionFrm = new();
-                CorruptionFrm.FormClosed += delegate { CorruptionFrm = null; };
-            }
-            CorruptionFrm.SetContext(ctx);
-            CorruptionFrm.Show();
-            CorruptionFrm.Focus();
+            CorruptionViewer corruptionFrm = new();
+            corruptionFrm.SetContext(ctx);
+            corruptionFrm.ShowSingleInstance();
         }
 
         private void FocusedViewToolStripMenuItem_Click(object sender, EventArgs e)

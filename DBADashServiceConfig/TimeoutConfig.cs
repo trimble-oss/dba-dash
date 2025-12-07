@@ -217,7 +217,7 @@ namespace DBADashServiceConfig
                 frm.Controls.Add(grid);
                 frm.ApplyTheme();
                 frm.Load += (_, _) => { grid.AutoResizeColumns(); };
-                frm.Show();
+                frm.ShowSingleInstance();
             }
             catch (Exception ex)
             {
