@@ -1009,7 +1009,7 @@ namespace DBADashGUI.Performance
             dgv.DataSource = source;
             dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
             dgv.AutoResizeColumnsWithMaxColumnWidth();
-            tsGroupBy.Enabled = dgv.Rows.Count > 1;
+            tsGroupBy.Enabled = true;
             tsBlockingFilter.Visible = SessionID == 0 && JobId == Guid.Empty;
         }
 
@@ -1472,9 +1472,12 @@ namespace DBADashGUI.Performance
 
         private void GroupByFilter(DataGridViewCellEventArgs e, DataRowView row)
         {
-            var filter = dgv.Columns[e.ColumnIndex].DataPropertyName + "='" +
-                         Convert.ToString(row[dgv.Columns[e.ColumnIndex].DataPropertyName]).Replace("'", "''") + "'";
-            tsGroupByFilter.Text = filter;
+            var colName = dgv.Columns[e.ColumnIndex].DataPropertyName;
+            var value = Convert.ToString(row[colName]);
+
+            var filter = $"{colName} = '{value.Replace("'", "''")}'";
+
+            tsGroupByFilter.Text = filter.Replace("\n", "").Replace("\r", "").Truncate(100, true);
             tsGroupByFilter.Visible = true;
             DataView dv;
             try
@@ -1727,7 +1730,7 @@ namespace DBADashGUI.Performance
                 }
             );
             groupedDT = snapshotDT.AsEnumerable()
-                .GroupBy(r => r.Field<string>(group))
+                .GroupBy(r => r[group])
                 .Select(g =>
                 {
                     var row = groupedDT.NewRow();
@@ -1823,7 +1826,7 @@ namespace DBADashGUI.Performance
                 }
             );
             dgv.DataSource = new DataView(groupedDT);
-            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgv.AutoResizeColumnsWithMaxColumnWidth();
             dgv.ApplyTheme();
             tsBlockingFilter.Visible = false;
         }
