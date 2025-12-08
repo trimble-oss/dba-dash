@@ -32,10 +32,10 @@ namespace DBADashGUI.Performance
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RunningQueries));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
@@ -47,9 +47,11 @@ namespace DBADashGUI.Performance
             tsNext = new System.Windows.Forms.ToolStripButton();
             lblSnapshotDate = new System.Windows.Forms.ToolStripLabel();
             tsGroupBy = new System.Windows.Forms.ToolStripDropDownButton();
+            batchTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             contextInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             databaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            dOPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             hostNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             loginNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             objectNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -59,6 +61,7 @@ namespace DBADashGUI.Performance
             queryPlanHashToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             sQLHandleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             statusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            textToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             waitResourceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             waitTypeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -74,6 +77,7 @@ namespace DBADashGUI.Performance
             tsGroupByFilter = new System.Windows.Forms.ToolStripLabel();
             tsClearFilter = new System.Windows.Forms.ToolStripButton();
             tsViewALL = new System.Windows.Forms.ToolStripButton();
+            tsCursors = new System.Windows.Forms.ToolStripButton();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             dgv = new DBADashDataGridView();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
@@ -89,7 +93,7 @@ namespace DBADashGUI.Performance
             allSessionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             summaryViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             sessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            tsCursors = new System.Windows.Forms.ToolStripButton();
+            commandToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
@@ -206,13 +210,21 @@ namespace DBADashGUI.Performance
             // tsGroupBy
             // 
             tsGroupBy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            tsGroupBy.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripMenuItem1, contextInfoToolStripMenuItem, databaseToolStripMenuItem, hostNameToolStripMenuItem, loginNameToolStripMenuItem, objectNameToolStripMenuItem, planHandleToolStripMenuItem, programToolStripMenuItem, queryHashToolStripMenuItem, queryPlanHashToolStripMenuItem, sQLHandleToolStripMenuItem, statusToolStripMenuItem, waitResourceToolStripMenuItem, waitTypeToolStripMenuItem, toolStripSeparator1, noneToolStripMenuItem });
+            tsGroupBy.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { batchTextToolStripMenuItem, toolStripMenuItem1, commandToolStripMenuItem, contextInfoToolStripMenuItem, databaseToolStripMenuItem, dOPToolStripMenuItem, hostNameToolStripMenuItem, loginNameToolStripMenuItem, objectNameToolStripMenuItem, planHandleToolStripMenuItem, programToolStripMenuItem, queryHashToolStripMenuItem, queryPlanHashToolStripMenuItem, sQLHandleToolStripMenuItem, statusToolStripMenuItem, textToolStripMenuItem, waitResourceToolStripMenuItem, waitTypeToolStripMenuItem, toolStripSeparator1, noneToolStripMenuItem });
             tsGroupBy.Enabled = false;
             tsGroupBy.Image = (System.Drawing.Image)resources.GetObject("tsGroupBy.Image");
             tsGroupBy.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsGroupBy.Name = "tsGroupBy";
             tsGroupBy.Size = new System.Drawing.Size(84, 24);
             tsGroupBy.Text = "Group By";
+            // 
+            // batchTextToolStripMenuItem
+            // 
+            batchTextToolStripMenuItem.Name = "batchTextToolStripMenuItem";
+            batchTextToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            batchTextToolStripMenuItem.Tag = "batch_text";
+            batchTextToolStripMenuItem.Text = "Batch Text";
+            batchTextToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // toolStripMenuItem1
             // 
@@ -237,6 +249,14 @@ namespace DBADashGUI.Performance
             databaseToolStripMenuItem.Tag = "database_name";
             databaseToolStripMenuItem.Text = "Database";
             databaseToolStripMenuItem.Click += TsGroupBy_Click;
+            // 
+            // dOPToolStripMenuItem
+            // 
+            dOPToolStripMenuItem.Name = "dOPToolStripMenuItem";
+            dOPToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            dOPToolStripMenuItem.Tag = "dop";
+            dOPToolStripMenuItem.Text = "DOP";
+            dOPToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // hostNameToolStripMenuItem
             // 
@@ -309,6 +329,14 @@ namespace DBADashGUI.Performance
             statusToolStripMenuItem.Tag = "status";
             statusToolStripMenuItem.Text = "Status";
             statusToolStripMenuItem.Click += TsGroupBy_Click;
+            // 
+            // textToolStripMenuItem
+            // 
+            textToolStripMenuItem.Name = "textToolStripMenuItem";
+            textToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            textToolStripMenuItem.Tag = "text";
+            textToolStripMenuItem.Text = "Text";
+            textToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // waitResourceToolStripMenuItem
             // 
@@ -434,6 +462,16 @@ namespace DBADashGUI.Performance
             tsViewALL.Text = "View ALL";
             tsViewALL.Click += tsViewALL_Click;
             // 
+            // tsCursors
+            // 
+            tsCursors.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            tsCursors.Image = (System.Drawing.Image)resources.GetObject("tsCursors.Image");
+            tsCursors.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCursors.Name = "tsCursors";
+            tsCursors.Size = new System.Drawing.Size(61, 24);
+            tsCursors.Text = "Cursors";
+            tsCursors.Click += tsCursors_Click;
+            // 
             // splitContainer1
             // 
             splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -462,30 +500,28 @@ namespace DBADashGUI.Performance
             dgv.AllowUserToDeleteRows = false;
             dgv.AllowUserToOrderColumns = true;
             dgv.BackgroundColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle6.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            dataGridViewCellStyle6.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle6.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
-            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgv.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgv.DefaultCellStyle = dataGridViewCellStyle2;
             dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             dgv.EnableHeadersVisualStyles = false;
             dgv.Location = new System.Drawing.Point(0, 0);
             dgv.Name = "dgv";
             dgv.ReadOnly = true;
-            dgv.ResultSetID = 0;
-            dgv.ResultSetName = null;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
             dgv.Size = new System.Drawing.Size(1271, 440);
@@ -532,31 +568,29 @@ namespace DBADashGUI.Performance
             dgvSessionWaits.AllowUserToDeleteRows = false;
             dgvSessionWaits.AllowUserToOrderColumns = true;
             dgvSessionWaits.BackgroundColor = System.Drawing.Color.AliceBlue;
-            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle7.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle7.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle7.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
-            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvSessionWaits.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle3.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvSessionWaits.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
             dgvSessionWaits.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle8.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            dataGridViewCellStyle8.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle8.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle8.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
-            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgvSessionWaits.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvSessionWaits.DefaultCellStyle = dataGridViewCellStyle4;
             dgvSessionWaits.Dock = System.Windows.Forms.DockStyle.Fill;
             dgvSessionWaits.EnableHeadersVisualStyles = false;
             dgvSessionWaits.Location = new System.Drawing.Point(0, 27);
             dgvSessionWaits.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvSessionWaits.Name = "dgvSessionWaits";
             dgvSessionWaits.ReadOnly = true;
-            dgvSessionWaits.ResultSetID = 0;
-            dgvSessionWaits.ResultSetName = null;
             dgvSessionWaits.RowHeadersVisible = false;
             dgvSessionWaits.RowHeadersWidth = 51;
             dgvSessionWaits.Size = new System.Drawing.Size(1271, 162);
@@ -632,15 +666,13 @@ namespace DBADashGUI.Performance
             sessionToolStripMenuItem.Text = "Session ";
             sessionToolStripMenuItem.Click += SessionToolStripMenuItem_Click;
             // 
-            // tsCursors
+            // commandToolStripMenuItem
             // 
-            tsCursors.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            tsCursors.Image = (System.Drawing.Image)resources.GetObject("tsCursors.Image");
-            tsCursors.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsCursors.Name = "tsCursors";
-            tsCursors.Size = new System.Drawing.Size(61, 24);
-            tsCursors.Text = "Cursors";
-            tsCursors.Click += tsCursors_Click;
+            commandToolStripMenuItem.Name = "commandToolStripMenuItem";
+            commandToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            commandToolStripMenuItem.Tag = "command";
+            commandToolStripMenuItem.Text = "Command";
+            commandToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // RunningQueries
             // 
@@ -725,5 +757,9 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripButton tsViewALL;
         private DBADashDataGridView dgv;
         private System.Windows.Forms.ToolStripButton tsCursors;
+        private System.Windows.Forms.ToolStripMenuItem batchTextToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem textToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dOPToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem commandToolStripMenuItem;
     }
 }
