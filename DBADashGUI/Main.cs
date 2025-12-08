@@ -566,7 +566,7 @@ namespace DBADashGUI
         private void AddRootRefreshContextMenu(SQLTreeItem rootNode)
         {
             rootNode.ContextMenuStrip ??= new ContextMenuStrip();
-            var mnuRootRefresh = new ToolStripMenuItem("Refresh") { Image = Resources._112_RefreshArrow_Green_16x16_72 };
+            var mnuRootRefresh = new ToolStripMenuItem("Refresh") { Image = Properties.Resources._112_RefreshArrow_Green_16x16_72 };
             rootNode.ContextMenuStrip.Items.Insert(0, mnuRootRefresh);
             mnuRootRefresh.Click += MnuRootRefresh_Click;
         }
@@ -2333,8 +2333,8 @@ namespace DBADashGUI
                             <= 20 => Properties.Resources.Alert_Warning,
                             <= 30 => Properties.Resources.Alert_Warning,
                             <= 40 => Properties.Resources.Alert_Information,
-                            41 => Resources.Alert_OK,
-                            _ => Resources.Alert_Information
+                            41 => Properties.Resources.Alert_OK,
+                            _ => Properties.Resources.Alert_Information
                         };
                     });
                 }
@@ -2461,7 +2461,7 @@ namespace DBADashGUI
         private void SetSingleInstance(bool singleInstance)
         {
             DBADashSharedGUI.ExtensionMethods.ChildFormSingleInstance = singleInstance;
-            tsToggleSingleInstance.Image = singleInstance ? Resources.AppWindow : Resources.CascadeWindowsHS;
+            tsToggleSingleInstance.Image = singleInstance ? Properties.Resources.AppWindow : Properties.Resources.CascadeWindowsHS;
             tsToggleSingleInstance.ToolTipText = singleInstance ? "Single instance child form mode.  Click to change to multiple instance mode." : "Multiple instance child form mode.  Click to change to single instance mode.";
         }
 
