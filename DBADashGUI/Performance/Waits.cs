@@ -148,7 +148,7 @@ namespace DBADashGUI.Performance
             // Tooltip with wait times
             tsTopWaits.ToolTipText = string.Join(Environment.NewLine,
                 topWaits.Select(x => x.WaitType + " - "
-                + TimeSpan.FromSeconds(Convert.ToDouble(x.WaitTime)).Humanize(2, minUnit: Humanizer.Localisation.TimeUnit.Second)
+                + TimeSpan.FromSeconds(Convert.ToDouble(x.WaitTime)).Humanize(2, minUnit: TimeUnit.Second)
                 + " (" + x.WaitTimeMsPerSecond.ToString("N1") + "ms/sec" + ")"
                 ));
             double threshold = 100; // To avoid highlighting with very small amounts of wait
