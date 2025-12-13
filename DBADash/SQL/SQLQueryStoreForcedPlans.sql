@@ -1,4 +1,7 @@
-﻿WITH agg AS (
+﻿DECLARE @SQL NVARCHAR(MAX)
+
+SET @SQL = CONCAT(N'
+WITH agg AS (
 	SELECT P.query_id,
 			COUNT(DISTINCT P.plan_id) AS num_plans,
 			MAX(P.last_execution_time) AS last_execution_time_query
@@ -10,9 +13,9 @@ SELECT	DB_NAME() AS DB,
 		P.query_id,
 		P.plan_id,
 		Q.object_id,
-		ISNULL(OBJECT_NAME(Q.object_id),'') object_name,
+		ISNULL(OBJECT_NAME(Q.object_id),'''') object_name,
 		QT.query_sql_text,	
-		P.plan_forcing_type_desc,
+		', CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.query_store_plan'),'plan_forcing_type_desc','ColumnId') IS NULL THEN '''MANUAL'' AS plan_forcing_type_desc,' ELSE 'P.plan_forcing_type_desc,' END,'
 		P.force_failure_count,
 		P.last_force_failure_reason_desc,
 		agg.num_plans,
@@ -27,4 +30,6 @@ FROM sys.query_store_plan P
 JOIN sys.query_store_query Q ON Q.query_id = P.query_id
 JOIN sys.query_store_query_text QT ON Q.query_text_id = QT.query_text_id
 JOIN agg ON P.query_id = agg.query_id
-WHERE P.is_forced_plan = 1
+WHERE P.is_forced_plan = 1')
+
+EXEC sp_executesql @SQL
