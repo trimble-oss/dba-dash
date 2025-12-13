@@ -36,7 +36,7 @@ namespace DBADashGUI.CustomReports
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public CustomReport Report { get; set; }
 
-        private List<CustomSqlParameter> customParams = new();
+        protected List<CustomSqlParameter> customParams = new();
         private CancellationTokenSource cancellationTokenSource;
         private Guid CurrentMessageGroup;
         public EventHandler PostGridRefresh;
