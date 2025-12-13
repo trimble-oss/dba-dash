@@ -1075,15 +1075,13 @@ namespace DBADashGUI
                 allowedTabs.Remove(tabSlowQueries);
             }
             if (!n.Context.CanMessage
-                || ((n.Context.ProductVersion?.Major < 13 && n.Context.AzureInstanceIDs.Count == 0)
-                    && n.Context.EngineEdition != DatabaseEngineEdition.SqlManagedInstance))
+                || !n.Context.IsQueryStoreSupported())
             {
                 allowedTabs.Remove(tabTopQueries);
                 allowedTabs.Remove(tabQueryStoreForcedPlans);
             }
             if (!n.Context.CanMessage
-                || (n.Context.ProductVersion?.Major < 14 && n.Context.EngineEdition is not (DatabaseEngineEdition.SqlManagedInstance or DatabaseEngineEdition.SqlDatabase or DatabaseEngineEdition.SqlAzureArcManagedInstance))
-                || n.EngineEdition is not (DatabaseEngineEdition.Enterprise or DatabaseEngineEdition.SqlManagedInstance or DatabaseEngineEdition.SqlAzureArcManagedInstance or DatabaseEngineEdition.SqlDatabase))
+                || !n.Context.IsQueryTuningRecommendationsSupported())
             {
                 allowedTabs.Remove(tabTuningRecommendations);
             }

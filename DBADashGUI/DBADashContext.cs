@@ -154,7 +154,7 @@ namespace DBADashGUI
             }
         }
 
-        public bool IsAzure => EngineEdition == DatabaseEngineEdition.SqlDatabase || EngineEdition == DatabaseEngineEdition.SqlManagedInstance;
+        public bool IsAzure => EngineEdition == DatabaseEngineEdition.SqlDatabase || EngineEdition == DatabaseEngineEdition.SqlManagedInstance || EngineEdition == DatabaseEngineEdition.SqlAzureArcManagedInstance;
 
         public bool InstanceSupportsQueryStore => ProductVersion != null && (ProductVersion.Major >= 13 || IsAzure);
 
@@ -207,6 +207,36 @@ namespace DBADashGUI
         public DBADashAgent ImportAgent => ImportAgentID == null ? null : CommonData.GetDBADashAgent((int)ImportAgentID);
 
         public DBADashAgent CollectAgent => CollectAgentID == null ? null : CommonData.GetDBADashAgent((int)CollectAgentID);
+
+        /// <summary>
+        /// Check if the instance's product version is greater than or equal to the specified minimum version.  Version check always succeeds for Azure DB and managed instance.
+        /// </summary>
+        /// <param name="minVersion"></param>
+        /// <returns>True if version is greater than or equal to minVersion</returns>
+        public bool IsMinimumCompatibleVersion(Version minVersion) => ProductVersion?.CompareTo(minVersion) >= 0 || IsAzure;
+
+        /// <summary>
+        /// Check if the instance's product version is greater than or equal to the specified minimum version.  Version check always succeeds for Azure DB and managed instance.
+        /// </summary>
+        /// <param name="minVersion"></param>
+        /// <returns>True if version is greater than or equal to minVersion</returns>
+        public bool IsMinimumCompatibleVersion(int major, int minor = 0, int build = 0)
+        {
+            var minVersion = new Version(major, minor, build);
+            return IsMinimumCompatibleVersion(minVersion);
+        }
+
+        /// <summary>
+        /// Checks version and database engine edition to determine if Query Tuning Recommendations are supported
+        /// </summary>
+        /// <returns>True if sys.dm_db_tuning_recommendations is available engine edition supports it</returns>
+        public bool IsQueryTuningRecommendationsSupported() => IsMinimumCompatibleVersion(14) && EngineEdition is DatabaseEngineEdition.Enterprise or DatabaseEngineEdition.SqlManagedInstance or DatabaseEngineEdition.SqlAzureArcManagedInstance or DatabaseEngineEdition.SqlDatabase;
+
+        /// <summary>
+        /// Checks version to determine if Query Store is supported
+        /// </summary>
+        /// <returns>True if query store is supported</returns>
+        public bool IsQueryStoreSupported() => IsMinimumCompatibleVersion(13);
 
         public object Clone()
         {
