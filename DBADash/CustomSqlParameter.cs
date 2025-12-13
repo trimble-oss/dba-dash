@@ -24,7 +24,8 @@ namespace DBADash
                 {
                     { "ParameterName", Param.ParameterName },
                     { "DbType", Param.DbType.ToString() },
-                    { "Value", JToken.FromObject(Param.Value) },
+                    { "Value", Param.Value == DBNull.Value ? null : JToken.FromObject(Param.Value) },
+                    { "IsNull", Param.Value == DBNull.Value },
                     { "Direction", Param.Direction.ToString() },
                 };
                 return jObject.ToString();
@@ -37,7 +38,7 @@ namespace DBADash
                     ParameterName = jObject["ParameterName"]?.ToString(),
                     DbType = (DbType)Enum.Parse(typeof(DbType),
                         jObject["DbType"]?.ToString() ?? string.Empty),
-                    Value = jObject["Value"]?.ToObject<object>(),
+                    Value = jObject["IsNull"]?.ToObject<bool>() == true ? DBNull.Value : jObject["Value"]?.ToObject<object>(),
                     Direction = (ParameterDirection)Enum.Parse(typeof(ParameterDirection), jObject["Direction"]?.ToString() ?? ParameterDirection.Input.ToString()),
                 };
             }
