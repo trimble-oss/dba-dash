@@ -86,7 +86,8 @@ namespace DBADashGUI
             AzureServiceObjectives,
             AzureDBResourceGovernance,
             Tags,
-            TableSize
+            TableSize,
+            TuningRecommendations,
         }
 
         private static readonly List<Main.Tabs> InstanceOnlyTabs = new() { Main.Tabs.PerformanceSummary, Tabs.Metrics, Tabs.Waits, Tabs.Memory, Tabs.RunningQueries };
@@ -105,6 +106,7 @@ namespace DBADashGUI
         private TabPage tabOfflineInstances;
         private TabPage tabJobInfo;
         private TabPage tabCloudMetadata;
+        private TabPage tabTuningRecommendations;
 
         public Main(CommandLineOptions opts)
         {
@@ -139,11 +141,12 @@ namespace DBADashGUI
 
             tabJobInfo = new TabPage("Job Info");
             tabJobInfo.Controls.Add(new JobInfo() { Dock = DockStyle.Fill });
-            tabs.TabPages.Add(tabJobInfo);
 
             tabCloudMetadata = new TabPage("Instance Metadata") { Name = Tabs.InstanceMetadata.TabName() };
             tabCloudMetadata.Controls.Add(new InstanceMetadata() { Dock = DockStyle.Fill });
-            tabs.TabPages.Add(tabCloudMetadata);
+
+            tabTuningRecommendations = new TabPage("Tuning Recommendations") { Name = Tabs.TuningRecommendations.TabName() };
+            tabTuningRecommendations.Controls.Add(new TuningRecommendationsReport() { Dock = DockStyle.Fill });
         }
 
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommunityProcs proc)
@@ -870,7 +873,7 @@ namespace DBADashGUI
                 allowedTabs.AddRange(new[]
                 {
                     tabPerformance, tabObjectExecutionSummary, tabSlowQueries, tabFiles, tabSnapshotSummary,
-                    tabDBSpace, tabDBConfiguration, tabDBOptions,  tabQS,tabTopQueries, tabQueryStoreForcedPlans
+                    tabDBSpace, tabDBConfiguration, tabDBOptions,  tabQS,tabTopQueries, tabQueryStoreForcedPlans, tabTuningRecommendations
                 });
             }
             else if (n.Type == SQLTreeItem.TreeType.AzureDatabase)
@@ -878,7 +881,7 @@ namespace DBADashGUI
                 allowedTabs.AddRange(new[]
                 {
                     tabPerformance, tabAzureSummary, tabAzureDB, tabMetrics,tabDBADashAlerts, tabSlowQueries, tabObjectExecutionSummary,
-                    tabWaits, tabRunningQueries, tabFiles, tabTopQueries, tabQueryStoreForcedPlans
+                    tabWaits, tabRunningQueries, tabFiles, tabTopQueries, tabQueryStoreForcedPlans, tabTuningRecommendations
                 });
             }
             else if (n.Type == SQLTreeItem.TreeType.Instance)
@@ -886,7 +889,7 @@ namespace DBADashGUI
                 allowedTabs.AddRange(new[]
                 {
                     tabPerformanceSummary, tabPerformance, tabMetrics,tabDBADashAlerts, tabObjectExecutionSummary, tabSlowQueries, tabWaits,
-                    tabRunningQueries, tabMemory,tabTopQueries, tabQueryStoreForcedPlans
+                    tabRunningQueries, tabMemory,tabTopQueries, tabQueryStoreForcedPlans, tabTuningRecommendations
                 });
             }
             else if (n.Type == SQLTreeItem.TreeType.AzureInstance)
@@ -991,7 +994,7 @@ namespace DBADashGUI
             {
                 allowedTabs.AddRange(new[] { tabDrives, tabFiles, tabDrivePerformance });
             }
-            else if (n.Type is SQLTreeItem.TreeType.CustomReport or SQLTreeItem.TreeType.SystemReport)
+            else if (n.Type is SQLTreeItem.TreeType.CustomReport or SQLTreeItem.TreeType.SystemReport or SQLTreeItem.TreeType.DirectSystemReport)
             {
                 tabCustomReport.Text = n.Report.ReportName;
                 allowedTabs.Add(tabCustomReport);
@@ -1077,6 +1080,12 @@ namespace DBADashGUI
             {
                 allowedTabs.Remove(tabTopQueries);
                 allowedTabs.Remove(tabQueryStoreForcedPlans);
+            }
+            if (!n.Context.CanMessage
+                || (n.Context.ProductVersion?.Major < 14 && n.Context.EngineEdition is not (DatabaseEngineEdition.SqlManagedInstance or DatabaseEngineEdition.SqlDatabase or DatabaseEngineEdition.SqlAzureArcManagedInstance))
+                || n.EngineEdition is not (DatabaseEngineEdition.Enterprise or DatabaseEngineEdition.SqlManagedInstance or DatabaseEngineEdition.SqlAzureArcManagedInstance or DatabaseEngineEdition.SqlDatabase))
+            {
+                allowedTabs.Remove(tabTuningRecommendations);
             }
 
             if (allowedTabs.Count == 0) // Display default tab if no tabs are applicable

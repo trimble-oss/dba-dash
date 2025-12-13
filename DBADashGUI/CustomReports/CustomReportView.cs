@@ -31,7 +31,7 @@ namespace DBADashGUI.CustomReports
         private bool suppressCboResultsIndexChanged;
         public static DataGridView Grid => new(); // dgv;
         public ToolStripStatusLabel StatusLabel => lblDescription;
-        private DBADashContext context;
+        protected DBADashContext context;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public CustomReport Report { get; set; }
@@ -431,8 +431,15 @@ namespace DBADashGUI.CustomReports
                 SetStatus("A message is already in progress.  Please wait for the current message to complete before running another.", "Warning", DashColors.Warning);
                 return;
             }
+            var rpt = Report as DirectExecutionReport;
+            if (rpt == null)
+            {
+                SetStatus("Invalid report type.  Expected a DirectExecutionReport", tooltip: null, DashColors.Fail);
+                return;
+            }
             var msg = new ProcedureExecutionMessage
             {
+                EmbeddedScript = rpt is SystemDirectExecutionReport srpt ? srpt.EmbeddedScript : null,
                 ProcedureName = Report.ProcedureName,
                 SchemaName = Report.SchemaName,
                 Parameters = customParams,
@@ -508,6 +515,7 @@ namespace DBADashGUI.CustomReports
                 lblDescription.ForeColor = color;
                 lblDescription.ToolTipText = tooltip;
                 lblDescription.Visible = true;
+                statusStrip1.Visible = true;
             });
         }
 
@@ -1071,7 +1079,7 @@ namespace DBADashGUI.CustomReports
                 editPickersToolStripMenuItem.Enabled = Report.UserParams.Any();
                 tsRefresh.Visible = Report is not DirectExecutionReport;
                 tsExecute.Visible = Report is DirectExecutionReport;
-                tsExecute.Enabled = Report is DirectExecutionReport && _context.IsScriptAllowed(Report.SchemaName, Report.ProcedureName);
+                tsExecute.Enabled = Report is DirectExecutionReport rpt && _context.IsReportAllowed(rpt);
                 associateCollectionToolStripMenuItem.Visible = Report is not DirectExecutionReport;
                 lblURL.Text = Report.URL;
                 lblURL.Visible = !string.IsNullOrEmpty(Report.URL);
@@ -1091,13 +1099,12 @@ namespace DBADashGUI.CustomReports
         private void SetContextParametersForDirectExecutionReport() // Set DatabaseName
         {
             if (Report is not DirectExecutionReport dxReport) return;
-            if (string.IsNullOrEmpty(context.DatabaseName)) return;
             foreach (var p in customParams.Where(p =>
                          p.Param.ParameterName.TrimStart('@').Equals(dxReport.DatabaseNameParameter?.TrimStart('@'),
                              StringComparison.InvariantCultureIgnoreCase)))
             {
-                p.Param.Value = context.DatabaseName;
-                p.UseDefaultValue = false;
+                p.Param.Value = string.IsNullOrEmpty(context.DatabaseName) ? DBNull.Value : context.DatabaseName;
+                p.UseDefaultValue = string.IsNullOrEmpty(context.DatabaseName) && Report is not SystemDirectExecutionReport; // SystemDirectExecutionReport are scripts with no parameter default value
             }
 
             if (context.ObjectID > 0)
@@ -1177,7 +1184,12 @@ namespace DBADashGUI.CustomReports
                         p.Param.ParameterName.TrimStart('@').Equals(picker.ParameterName.TrimStart('@'),
                             StringComparison.InvariantCultureIgnoreCase));
                 if (param == null) continue;
-                if (param.UseDefaultValue && !string.IsNullOrEmpty(picker.DefaultValue?.ToString()))
+                if (picker.DefaultValue == DBNull.Value)
+                {
+                    param.UseDefaultValue = false;
+                    param.Param.Value = DBNull.Value;
+                }
+                else if (param.UseDefaultValue && !string.IsNullOrEmpty(picker.DefaultValue?.ToString()))
                 {
                     param.Param.Value = picker.DefaultValue;
                     param.UseDefaultValue = false;
@@ -1248,7 +1260,7 @@ namespace DBADashGUI.CustomReports
         {
             var menu = (ToolStripMenuItem)sender;
             var param = customParams.First(p => p.Param.ParameterName.TrimStart('@').Equals(paramName.TrimStart('@'), StringComparison.InvariantCultureIgnoreCase));
-            if (itm.Key == null || string.IsNullOrEmpty(itm.Key.ToString()))
+            if (itm.Key != DBNull.Value && (itm.Key == null || string.IsNullOrEmpty(itm.Key.ToString())))
             {
                 param.UseDefaultValue = true;
             }
