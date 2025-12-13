@@ -4,6 +4,7 @@ using DBADashGUI.Messaging;
 using DBADashGUI.SchemaCompare;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -21,23 +22,38 @@ namespace DBADashGUI.CustomReports
 
         private void TuningRecommendationsReport_PostGridRefresh(object sender, EventArgs e)
         {
-            if (Grids.Count > 0)
-            {
-                if (Grids[0].Columns[FIX_PLAN_COLUMN_NAME] != null) return;
-                if (DBADashUser.AllowPlanForcing == false) return;
+            SetGridSortOrderToMatchParam();
+            AddPlanForcingColumn();
+        }
 
-                Grids[0].Columns.Insert(0,
-                    new DataGridViewLinkColumn()
-                    {
-                        Name = FIX_PLAN_COLUMN_NAME,
-                        HeaderText = "Force Plan",
-                        ToolTipText = "Click link to force or unforce recommended query plan",
-                        Text = "Force Plan",
-                        UseColumnTextForLinkValue = false
-                    });
-                Grids[0].CellFormatting += TuningRecommendationsReport_CellFormatting;
-                Grids[0].CellContentClick += TuningRecommendationsReport_CellContentClick;
+        private void SetGridSortOrderToMatchParam()
+        {
+            if (Grids.Count == 0) return;
+            var sort = Convert.ToString(customParams.FirstOrDefault(p => p.Param.ParameterName == "@Sort")?.Param?.Value);
+            var sortDesc = Convert.ToBoolean(customParams.FirstOrDefault(p => p.Param.ParameterName == "@SortDesc")?.Param?.Value);
+            var sortCol = Grids[0].Columns.Cast<DataGridViewColumn>().FirstOrDefault(c => c.DataPropertyName == sort);
+            if (sortCol != null)
+            {
+                Grids[0].Sort(sortCol, sortDesc ? System.ComponentModel.ListSortDirection.Descending : System.ComponentModel.ListSortDirection.Ascending);
             }
+        }
+
+        private void AddPlanForcingColumn()
+        {
+            if (Grids.Count == 0) return;
+            if (Grids[0].Columns[FIX_PLAN_COLUMN_NAME] != null) return;
+            if (DBADashUser.AllowPlanForcing == false) return;
+            Grids[0].Columns.Insert(0,
+                new DataGridViewLinkColumn()
+                {
+                    Name = FIX_PLAN_COLUMN_NAME,
+                    HeaderText = "Force Plan",
+                    ToolTipText = "Click link to force or unforce recommended query plan",
+                    Text = "Force Plan",
+                    UseColumnTextForLinkValue = false
+                });
+            Grids[0].CellFormatting += TuningRecommendationsReport_CellFormatting;
+            Grids[0].CellContentClick += TuningRecommendationsReport_CellContentClick;
         }
 
         private async void TuningRecommendationsReport_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -144,7 +160,7 @@ namespace DBADashGUI.CustomReports
                                 {
                                     Visible = true,
                                     Alias = "Query\nID",
-                                    Description="Query store Query ID",
+                                    Description = "Query store Query ID",
                                     Link = new QueryStoreLinkColumnInfo()
                                     {
                                         TargetColumn = "query_id",
@@ -220,16 +236,16 @@ namespace DBADashGUI.CustomReports
                                     Link = new TextLinkColumnInfo { TargetColumn = "script", TextHandling = CodeEditor.CodeEditorModes.SQL }
                                 }
                             },
-                            { "estimated_gain", new ColumnMetadata { Visible = true, Alias = "Estimated\nGain", FormatString = "N3", Description="The difference in execution times between the regressed plan and recommended plan, multiplied by the sum of executions and converted to seconds" } },
-                            { "error_prone", new ColumnMetadata { Visible = true, Alias = "Error\nProne", Description="'Yes' if regressed_plan_error_count > recommended_plan_error_count" } },
-                            { "regressed_plan_execution_count", new ColumnMetadata { Visible = true, Alias = "Regressed\nPlan\nExecution\nCount", Description="Number of executions of the query with regressed plan before the regression is detected" } },
+                            { "estimated_gain", new ColumnMetadata { Visible = true, Alias = "Estimated\nGain", FormatString = "N3", Description = "The difference in execution times between the regressed plan and recommended plan, multiplied by the sum of executions and converted to seconds" } },
+                            { "error_prone", new ColumnMetadata { Visible = true, Alias = "Error\nProne", Description = "'Yes' if regressed_plan_error_count > recommended_plan_error_count" } },
+                            { "regressed_plan_execution_count", new ColumnMetadata { Visible = true, Alias = "Regressed\nPlan\nExecution\nCount", Description = "Number of executions of the query with regressed plan before the regression is detected" } },
                             { "recommended_plan_execution_count", new ColumnMetadata { Visible = true, Alias = "Recommended\nPlan\nExecution\nCount", Description = "Number of executions of the query with the recommended plan before the regression is detected." } },
                             { "regressed_plan_cpu_time_average", new ColumnMetadata { Visible = true, Alias = "Regressed\nPlan\nAvg\nCPU\nTime", Description = "Average CPU time (in microseconds µs) consumed by the regressed query plan (calculated before the regression is detected)" } },
                             { "recommended_plan_cpu_time_average", new ColumnMetadata { Visible = true, Alias = "Recommended\nPlan\nAvg\nCPU\nTime", Description = "Average CPU time (in microseconds µs) consumed by the recommended query plan (calculated before the regression is detected)."  } },
                             { "is_executable_action", new ColumnMetadata { Visible = true, Alias = "Is\nExecutable\nAction", Description = "Indicates if the recommendation can be executed via a T-SQL script" } },
                             { "is_revertable_action", new ColumnMetadata { Visible = true, Alias = "Is\nRevertable\nAction", Description = "Indicates if the recommendation can be automatically monitored and reverted by the DB engine." } },
                             { "valid_since", new ColumnMetadata { Visible = true, Alias = "Valid\nSince", Description = "The first time this recommendation was generated" } },
-                            { "last_refresh", new ColumnMetadata { Visible = true, Alias = "Last\nRefresh", Description= "The last time this recommendation was generated" } },
+                            { "last_refresh", new ColumnMetadata { Visible = true, Alias = "Last\nRefresh", Description = "The last time this recommendation was generated" } },
                             { "execute_action_start_time", new ColumnMetadata { Visible = true, Alias = "Execute\nAction\nStart\nTime", Description = "Date the recommendation is applied" } },
                             { "execute_action_duration", new ColumnMetadata { Visible = true, Alias = "Execute\nAction\nDuration", Description = "Duration of the execute action." } },
                             { "execute_action_initiated_by", new ColumnMetadata { Visible = true, Alias = "Execute\nAction\nInitiated\nBy", Description = "User = User manually applied the recommendation.\nSystem = System automatically applied the recommendation" } },
