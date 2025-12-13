@@ -346,6 +346,7 @@ namespace DBADashGUI
             TreeViewImageList.Images.SetKeyName(28, "Report_16x.png");
             TreeViewImageList.Images.SetKeyName(29, "VSO_TeamProjectRepositoryFolder_hoverblue_16x.png");
             TreeViewImageList.Images.SetKeyName(30, "VSO_TeamProject_16x.png");
+            TreeViewImageList.Images.SetKeyName(31, "ServerReport-yellow.png");
             // 
             // menuStrip1
             // 
@@ -957,7 +958,7 @@ namespace DBADashGUI
             label7.Location = new System.Drawing.Point(101, 281);
             label7.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             label7.Name = "label7";
-            label7.Size = new System.Drawing.Size(351, 20);
+            label7.Size = new System.Drawing.Size(364, 20);
             label7.TabIndex = 1;
             label7.Text = "Diff (Loaded programmatically due to designer issue)";
             label7.Visible = false;

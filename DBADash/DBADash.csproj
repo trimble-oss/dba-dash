@@ -27,6 +27,7 @@
     <None Remove="SQL\SQLRunningJobs.sql" />
     <None Remove="SQL\SQLServerServices.sql" />
     <None Remove="SQL\SQLTableSize.sql" />
+    <None Remove="SQL\SQLTuningRecommendations.sql" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
@@ -95,6 +96,7 @@
 	<EmbeddedResource Include="SQL\SQLSysConfig.sql" />
 	<EmbeddedResource Include="SQL\SQLTableSize.sql" />
 	<EmbeddedResource Include="SQL\SQLTraceFlags.sql" />
+	<EmbeddedResource Include="SQL\SQLTuningRecommendations.sql" />
 	<EmbeddedResource Include="SQL\SQLVLF.sql" />
 	<EmbeddedResource Include="SQL\SQLWaits.sql" />
   </ItemGroup>

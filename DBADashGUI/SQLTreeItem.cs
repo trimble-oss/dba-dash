@@ -1,5 +1,6 @@
 ﻿using DBADash;
 using DBADashGUI.AgentJobs;
+using DBADashGUI.CommunityTools;
 using DBADashGUI.CustomReports;
 using DBADashGUI.DBADashAlerts;
 using DBADashGUI.Properties;
@@ -76,7 +77,8 @@ namespace DBADashGUI
             CommunityToolsFolder,
             CommunityTool,
             CustomToolsFolder,
-            CustomTool
+            CustomTool,
+            DirectSystemReport
         }
 
         private DatabaseEngineEdition _engineEdition = DatabaseEngineEdition.Unknown;
@@ -510,6 +512,10 @@ namespace DBADashGUI
                     ImageIndex = 30;
                     break;
 
+                case TreeType.DirectSystemReport:
+                    ImageIndex = 31;
+                    break;
+
                 default:
                     ImageIndex = 5;
                     break;
@@ -543,7 +549,9 @@ namespace DBADashGUI
             foreach (var report in reports)
             {
                 if (!report.HasAccess()) continue;
-                var reportNode = new SQLTreeItem(report.ReportName, report is SystemReport ? TreeType.SystemReport : TreeType.CustomReport) { Report = report };
+                var treeType = report is SystemReport ? TreeType.SystemReport :
+                                                                    report is SystemDirectExecutionReport ? TreeType.DirectSystemReport : TreeType.CustomReport;
+                var reportNode = new SQLTreeItem(report.ReportName, treeType) { Report = report };
                 reportsNode.Nodes.Add(reportNode);
             }
 

@@ -1,5 +1,6 @@
 ﻿using DBADash;
 using DBADash.Messaging;
+using DBADashGUI.CommunityTools;
 using DBADashGUI.CustomReports;
 using Microsoft.SqlServer.Management.Common;
 using Serilog;
@@ -175,6 +176,15 @@ namespace DBADashGUI
 
                 return (bool)_canMessage;
             }
+        }
+
+        public bool IsReportAllowed(DirectExecutionReport rpt)
+        {
+            if (rpt is SystemDirectExecutionReport srpt)
+            {
+                return DBADashUser.AllowMessaging;
+            }
+            return IsScriptAllowed(rpt.SchemaName, rpt.ProcedureName);
         }
 
         public bool IsScriptAllowed(ProcedureExecutionMessage.CommunityProcs proc) => IsScriptAllowed("dbo", proc.ToString());

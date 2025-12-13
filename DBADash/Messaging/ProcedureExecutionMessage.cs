@@ -22,9 +22,23 @@ namespace DBADash.Messaging
 
         public List<CustomSqlParameter> Parameters { get; set; }
 
-        public string ProcedureName { get; set; }
+        public string ProcedureName
+        {
+            get => EmbeddedScript == null ? field : string.Empty;
+            set;
+        }
 
-        public string SchemaName { get; set; } = "dbo";
+        public string SchemaName
+        {
+            get => EmbeddedScript == null ? field : string.Empty;
+            set;
+        } = "dbo";
+
+        public EmbeddedScripts? EmbeddedScript
+        {
+            get;
+            set;
+        }
 
         private string QualifiedProcedureName => SchemaName.SqlQuoteName() + '.' + ProcedureName.SqlQuoteName();
 
@@ -49,7 +63,14 @@ namespace DBADash.Messaging
             sp_IndexCleanup
         }
 
+        public enum EmbeddedScripts
+        {
+            TuningRecommendations
+        }
+
         public static bool IsAllowedCommunityProc(CommunityProcs? proc, string allowedCommunityProcs) => proc != null && allowedCommunityProcs != null && (allowedCommunityProcs.Split(",").Contains(proc.ToString(), StringComparer.OrdinalIgnoreCase) || allowedCommunityProcs == "*");
+
+        public bool IsEmbeddedScript() => EmbeddedScript != null;
 
         public static bool IsAllowedCustomProc(string schema, string proc, string allowedCustomScripts)
         {
@@ -67,8 +88,14 @@ namespace DBADash.Messaging
         }
 
         public bool IsAllowedProc(CollectionConfig cfg) =>
+            IsEmbeddedScript() ||
             IsAllowedCustomProc(SchemaName, ProcedureName, cfg.AllowedCustomProcs) ||
             IsAllowedCommunityProc(CommunityProc, cfg.AllowedScripts);
+
+        private string GetEmbeddedScript()
+        {
+            return EmbeddedScript == null ? null : SqlStrings.GetSqlString(EmbeddedScript.ToString());
+        }
 
         public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
@@ -86,9 +113,13 @@ namespace DBADash.Messaging
                     Id,
                     handle);
                 var src = await cfg.GetSourceConnectionAsync(ConnectionID);
+                var isEmbedded = IsEmbeddedScript();
+                var sql = isEmbedded
+                    ? GetEmbeddedScript()
+                    : QualifiedProcedureName;
 
                 await using var cn = new SqlConnection(src.SourceConnection.ConnectionString);
-                await using var cmd = new SqlCommand(QualifiedProcedureName, cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Lifetime };
+                await using var cmd = new SqlCommand(sql, cn) { CommandType = isEmbedded ? CommandType.Text : CommandType.StoredProcedure, CommandTimeout = Lifetime };
                 if (Parameters != null)
                     cmd.Parameters.AddRange(Parameters.GetParameters());
                 var da = new SqlDataAdapter(cmd);
@@ -110,7 +141,7 @@ namespace DBADash.Messaging
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error running {CommunityProc} on {instance} from message {id} with handle {handle}", CommunityProc, ConnectionID, Id, handle);
+                Log.Error(ex, "Error running {Proc} on {instance} from message {id} with handle {handle}", QualifiedProcedureName, ConnectionID, Id, handle);
                 throw;
             }
         }

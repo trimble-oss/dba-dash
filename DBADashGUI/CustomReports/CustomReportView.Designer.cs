@@ -47,7 +47,9 @@
             scriptReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             cboResults = new System.Windows.Forms.ToolStripComboBox();
             lblSelectResults = new System.Windows.Forms.ToolStripLabel();
+            toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             tsParams = new System.Windows.Forms.ToolStripDropDownButton();
+            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             tsScriptResults = new System.Windows.Forms.ToolStripDropDownButton();
             scriptDataTablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             scriptGridsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -63,11 +65,9 @@
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblTimer = new System.Windows.Forms.ToolStripStatusLabel();
             tsSep = new System.Windows.Forms.ToolStripStatusLabel();
-            lblDescription = new System.Windows.Forms.ToolStripStatusLabel();
             lblURL = new System.Windows.Forms.ToolStripStatusLabel();
             timer1 = new System.Windows.Forms.Timer(components);
-            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            lblDescription = new System.Windows.Forms.ToolStripStatusLabel();
             toolStrip1.SuspendLayout();
             pnlParams.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer2).BeginInit();
@@ -257,6 +257,11 @@
             lblSelectResults.Text = "Select Results:";
             lblSelectResults.Visible = false;
             // 
+            // toolStripSeparator2
+            // 
+            toolStripSeparator2.Name = "toolStripSeparator2";
+            toolStripSeparator2.Size = new System.Drawing.Size(6, 31);
+            // 
             // tsParams
             // 
             tsParams.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -266,6 +271,11 @@
             tsParams.Name = "tsParams";
             tsParams.Size = new System.Drawing.Size(34, 24);
             tsParams.Text = "Parameters";
+            // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new System.Drawing.Size(6, 31);
             // 
             // tsScriptResults
             // 
@@ -411,7 +421,7 @@
             // statusStrip1
             // 
             statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { lblTimer, tsSep, lblDescription, lblURL });
+            statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { lblTimer, tsSep, lblURL, lblDescription });
             statusStrip1.Location = new System.Drawing.Point(0, 586);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.ShowItemToolTips = true;
@@ -431,16 +441,6 @@
             tsSep.Size = new System.Drawing.Size(13, 20);
             tsSep.Text = "|";
             // 
-            // lblDescription
-            // 
-            lblDescription.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            lblDescription.Name = "lblDescription";
-            lblDescription.Size = new System.Drawing.Size(1151, 20);
-            lblDescription.Spring = true;
-            lblDescription.Text = "Description...";
-            lblDescription.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            lblDescription.Visible = false;
-            // 
             // lblURL
             // 
             lblURL.IsLink = true;
@@ -455,15 +455,12 @@
             timer1.Interval = 1000;
             timer1.Tick += Timer1_Tick;
             // 
-            // toolStripSeparator1
+            // lblDescription
             // 
-            toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(6, 31);
-            // 
-            // toolStripSeparator2
-            // 
-            toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new System.Drawing.Size(6, 31);
+            lblDescription.Name = "lblDescription";
+            lblDescription.Size = new System.Drawing.Size(94, 20);
+            lblDescription.Text = "Description...";
+            lblDescription.Visible = false;
             // 
             // CustomReportView
             // 
@@ -511,7 +508,6 @@
         private System.Windows.Forms.ToolStripLabel lblSelectResults;
         private System.Windows.Forms.ToolStripMenuItem renameResultSetToolStripMenuItem;
         private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.ToolStripStatusLabel lblDescription;
         private System.Windows.Forms.ToolStripMenuItem setDescriptionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem scriptReportToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsClearFilter;
@@ -532,5 +528,6 @@
         private System.Windows.Forms.ToolStripButton tsReset;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripStatusLabel lblDescription;
     }
 }

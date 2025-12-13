@@ -2,7 +2,7 @@
 
 namespace DBADashGUI.CustomReports
 {
-    public class SystemReports : List<SystemReport>
+    public class SystemReports : List<CustomReport>
     {
         public SystemReports()
         {
