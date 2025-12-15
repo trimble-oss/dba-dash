@@ -457,7 +457,7 @@ namespace DBADashGUI.CustomReports
                 CurrentMessageGroup));
         }
 
-        private Task ProcessCompletedMessage(ResponseMessage reply, Guid messageGroup)
+        private Task ProcessCompletedMessage(ResponseMessage reply, Guid messageGroup, MessagingHelper.SetStatusDelegate setStatus)
         {
             if (CurrentMessageGroup != messageGroup) // Context has changed.  Ignore
             {

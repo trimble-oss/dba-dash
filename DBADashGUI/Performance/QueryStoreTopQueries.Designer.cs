@@ -125,11 +125,9 @@ namespace DBADashGUI.Performance
             dgv.Location = new System.Drawing.Point(0, 0);
             dgv.Name = "dgv";
             dgv.ReadOnly = true;
-            dgv.ResultSetID = 0;
-            dgv.ResultSetName = null;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
-            dgv.Size = new System.Drawing.Size(1408, 267);
+            dgv.Size = new System.Drawing.Size(1408, 266);
             dgv.TabIndex = 0;
             dgv.CellContentClick += Dgv_CellContentClick;
             dgv.CellFormatting += Dgv_CellFormatting;
@@ -457,11 +455,15 @@ namespace DBADashGUI.Performance
             // tsDateRange
             // 
             tsDateRange.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsDateRange.DefaultTimeSpan = System.TimeSpan.Parse("01:00:00");
             tsDateRange.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
             tsDateRange.Font = new System.Drawing.Font("Segoe UI", 9F);
             tsDateRange.Image = (System.Drawing.Image)resources.GetObject("tsDateRange.Image");
             tsDateRange.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsDateRange.MaximumTimeSpan = System.TimeSpan.Parse("10675199.02:48:05.4775807");
+            tsDateRange.MinimumTimeSpan = System.TimeSpan.Parse("-10675199.02:48:05.4775808");
             tsDateRange.Name = "tsDateRange";
+            tsDateRange.SelectedTimeSpan = System.TimeSpan.Parse("01:00:00");
             tsDateRange.Size = new System.Drawing.Size(71, 24);
             tsDateRange.Text = "1 Hr";
             tsDateRange.Visible = false;
@@ -471,16 +473,16 @@ namespace DBADashGUI.Performance
             // 
             statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { lblStatus });
-            statusStrip1.Location = new System.Drawing.Point(0, 640);
+            statusStrip1.Location = new System.Drawing.Point(0, 638);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new System.Drawing.Size(1408, 22);
+            statusStrip1.Size = new System.Drawing.Size(1408, 24);
             statusStrip1.TabIndex = 2;
             statusStrip1.Text = "statusStrip1";
             // 
             // lblStatus
             // 
             lblStatus.Name = "lblStatus";
-            lblStatus.Size = new System.Drawing.Size(0, 16);
+            lblStatus.Size = new System.Drawing.Size(0, 18);
             // 
             // splitContainer1
             // 
@@ -496,8 +498,8 @@ namespace DBADashGUI.Performance
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(tabDrillDown);
-            splitContainer1.Size = new System.Drawing.Size(1408, 613);
-            splitContainer1.SplitterDistance = 267;
+            splitContainer1.Size = new System.Drawing.Size(1408, 611);
+            splitContainer1.SplitterDistance = 266;
             splitContainer1.TabIndex = 3;
             // 
             // tabDrillDown
@@ -511,7 +513,7 @@ namespace DBADashGUI.Performance
             tabDrillDown.Name = "tabDrillDown";
             tabDrillDown.Padding = new System.Drawing.Point(20, 8);
             tabDrillDown.SelectedIndex = 0;
-            tabDrillDown.Size = new System.Drawing.Size(1408, 342);
+            tabDrillDown.Size = new System.Drawing.Size(1408, 341);
             tabDrillDown.TabIndex = 1;
             tabDrillDown.SelectedIndexChanged += DrillDownTabIndexChanged;
             // 
@@ -521,7 +523,7 @@ namespace DBADashGUI.Performance
             tabSummary.Location = new System.Drawing.Point(4, 4);
             tabSummary.Name = "tabSummary";
             tabSummary.Padding = new System.Windows.Forms.Padding(3);
-            tabSummary.Size = new System.Drawing.Size(1400, 299);
+            tabSummary.Size = new System.Drawing.Size(1400, 298);
             tabSummary.TabIndex = 0;
             tabSummary.Text = "Summary";
             tabSummary.UseVisualStyleBackColor = true;
@@ -553,11 +555,9 @@ namespace DBADashGUI.Performance
             dgvDrillDown.EnableHeadersVisualStyles = false;
             dgvDrillDown.Location = new System.Drawing.Point(3, 3);
             dgvDrillDown.Name = "dgvDrillDown";
-            dgvDrillDown.ResultSetID = 0;
-            dgvDrillDown.ResultSetName = null;
             dgvDrillDown.RowHeadersVisible = false;
             dgvDrillDown.RowHeadersWidth = 51;
-            dgvDrillDown.Size = new System.Drawing.Size(1394, 293);
+            dgvDrillDown.Size = new System.Drawing.Size(1394, 292);
             dgvDrillDown.TabIndex = 0;
             dgvDrillDown.CellContentClick += Dgv_CellContentClick;
             dgvDrillDown.CellFormatting += Dgv_CellFormatting;

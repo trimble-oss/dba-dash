@@ -1,6 +1,7 @@
 ﻿using DBADash;
 using DBADash.Messaging;
 using DBADashGUI.CustomReports;
+using DBADashGUI.Interface;
 using DBADashGUI.Messaging;
 using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
@@ -8,13 +9,15 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static DBADashGUI.Messaging.MessagingHelper;
 
 namespace DBADashGUI.Performance
 {
-    public partial class QueryStoreTopQueries : UserControl, ISetContext, IRefreshData
+    public partial class QueryStoreTopQueries : UserControl, ISetContext, IRefreshData, ISetStatus
     {
         private DBADashContext CurrentContext;
 
@@ -161,26 +164,12 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private Task ProcessCompletedPlanCollectionMessage(ResponseMessage reply, Guid messageGroup)
-        {
-            var ds = reply.Data;
-            if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Columns.Count == 0)
-            {
-                MessageBox.Show(@"No data returned");
-                return Task.CompletedTask;
-            }
-
-            var dt = ds.Tables[0];
-            LoadQueryPlan(dt);
-            return Task.CompletedTask;
-        }
-
-        private async Task ProcessCompletedDrillDownTask(ResponseMessage reply, Guid messageGroup)
+        private async Task ProcessCompletedDrillDownTask(ResponseMessage reply, Guid messageGroup, SetStatusDelegate setStatus)
         {
             await ProcessCompletedTopQueriesOrDrillDownMessage(reply, dgvDrillDown, null);
         }
 
-        private async Task ProcessCompletedTopQueriesMessage(ResponseMessage reply, Guid messageGroup)
+        private async Task ProcessCompletedTopQueriesMessage(ResponseMessage reply, Guid messageGroup, SetStatusDelegate setStatus)
         {
             await ProcessCompletedTopQueriesOrDrillDownMessage(reply, dgv, UserColumnLayout);
             if ((QueryHash != null || PlanHash != null) && dgv.Rows.Count == 1 && !string.IsNullOrEmpty(CurrentContext.DatabaseName))
@@ -238,237 +227,188 @@ namespace DBADashGUI.Performance
             return Task.CompletedTask;
         }
 
-        private void LoadQueryPlan(DataTable dt)
-        {
-            if (dt.Rows.Count == 0)
-            {
-                lblStatus.InvokeSetStatus("No query plan", string.Empty, DashColors.Fail);
-                return;
-            }
-            var plan = dt.Rows[0]["query_plan"].ToString();
-            string fileName = null;
-            if (dt.Columns.Contains("plan_id"))
-            {
-                fileName = $"Plan_{dt.Rows[0]["plan_id"]}_{DateTime.Now:yyyyMMddHHmmss}.sqlplan";
-            }
-            lblStatus.InvokeSetStatus("Loading Query Plan...", string.Empty, DashColors.Success);
-            Common.ShowQueryPlan(plan, fileName);
-            lblStatus.InvokeSetStatus("Query plan loaded in associated app", string.Empty, DashColors.Success);
-        }
-
         private readonly CustomReportResult topQueriesResult = new()
         {
-            ColumnAlias = new Dictionary<string, string>
-            {
-                { "DB", "DB" },
-                { "query_id", "Query ID" },
-                { "query_parameterization_type_desc","Parameterization type"},
-                { "object_id", "Object ID" },
-                { "plan_id", "Plan ID" },
-                { "query_hash", "Query Hash" },
-                { "query_plan_hash", "Plan Hash" },
-                { "object_name", "Object Name" },
-                { "query_sql_text", "Text" },
-                { "total_cpu_time_ms", "Total CPU (ms)" },
-                { "avg_cpu_time_ms", "Avg CPU (ms)" },
-                { "max_cpu_time_ms", "Max CPU (ms)" },
-                { "total_duration_ms", "Total Duration (ms)" },
-                { "avg_duration_ms", "Avg Duration (ms)" },
-                { "max_duration_ms", "Max Duration (ms)" },
-                { "count_executions", "Execs" },
-                { "abort_count", "Abort" },
-                { "exception_count", "Fail" },
-                { "executions_per_min", "Execs/min" },
-                { "avg_memory_grant_kb", "Avg Memory Grant KB" },
-                { "max_memory_grant_kb", "Max Memory Grant KB" },
-                { "total_physical_io_reads_kb", "Total Physical Reads KB" },
-                { "avg_physical_io_reads_kb", "Avg Physical Reads KB" },
-                { "avg_rowcount","Avg Rows"},
-                { "max_rowcount","Max Rows"},
-                { "max_dop","Max DOP"},
-                { "avg_tempdb_space_used_kb","Avg TempDB KB"},
-                { "max_tempdb_space_used_kb","Max TempDB KB"},
-                { "num_plans", "Plan Count" },
-                { "num_queries", "Query Count" },
-                { "top_waits", "Top Waits" },
-                { "plan_forcing_type_desc","Plan Forcing"},
-                { "force_failure_count","Force Failure count"},
-                { "last_force_failure_reason_desc", "Last Forced Failure"},
-                 {"is_parallel_plan","Parallel"},
-                 {"interval_start","Interval Start"},
-                 {"interval_end","Interval End"}
-            },
-            CellFormatString = new Dictionary<string, string>
-            {
-                { "total_cpu_time_ms", "N0" },
-                { "avg_cpu_time_ms", "N1" },
-                { "max_cpu_time_ms", "N1" },
-                { "total_duration_ms", "N0" },
-                { "avg_duration_ms", "N1" },
-                { "max_duration_ms", "N1" },
-                { "count_executions", "N0" },
-                { "executions_per_min", "N2" },
-                { "max_memory_grant_kb", "N0" },
-                { "avg_memory_grant_kb", "N0" },
-                { "total_physical_io_reads_kb", "N0" },
-                { "avg_physical_io_reads_kb", "N0" },
-                { "num_plans","N0"},
-                { "avg_rowcount","N0"},
-                { "max_rowcount","N0"},
-                { "abort_count", "N0" },
-                { "exception_count", "N0" },
-                { "avg_tempdb_space_used_kb","N0"},
-                { "max_tempdb_space_used_kb","N0"},
-            },
             ResultName = "Top Queries",
-            LinkColumns = new Dictionary<string, LinkColumnInfo>
+            Columns = new Dictionary<string, ColumnMetadata>
             {
-                {
-                    "query_sql_text",
-                    new TextLinkColumnInfo()
+                { "DB", new ColumnMetadata { Alias = "DB", Width = 170, Visible = true } },
+                { "query_id", new ColumnMetadata
                     {
-                        TargetColumn = "query_sql_text",
-                        TextHandling = CodeEditor.CodeEditorModes.SQL
-                    }
-                }
-                ,
-                {
-                    "query_id",
-                    new DrillDownLinkColumnInfo()
-                    {
+                        Alias = "Query ID",
+                        Width = 80,
+                        Visible = true,
+                        Link = new DrillDownLinkColumnInfo()
                     }
                 },
-                {
-                    "plan_id",
-                    new DrillDownLinkColumnInfo()
+                { "query_parameterization_type_desc", new ColumnMetadata { Alias = "Parameterization type", Width = 100, Visible = true } },
+                { "object_id", new ColumnMetadata { Alias = "Object ID", Width = 100, Visible = false } },
+                { "plan_id", new ColumnMetadata
                     {
-                    }
-                }
-                ,
-                {
-                    "query_hash",
-                    new DrillDownLinkColumnInfo()
-                    {
-                    }
-                },
-                {
-                    "query_plan_hash",
-                    new DrillDownLinkColumnInfo()
-                    {
-                    }
-                },
-                {
-                    "plan_forcing_type_desc",
-                    new DrillDownLinkColumnInfo()
-                    {
-                    }
-                },
-                {
-                    "object_name",
-                    new DrillDownLinkColumnInfo()
-                    {
-                    }
-                }
-            },
-            ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>()
-            {
-                new("DB", new PersistedColumnLayout() { Width = 170, Visible = true }),
-                new("query_hash", new PersistedColumnLayout() { Width = 160, Visible = true}),
-                new("query_plan_hash", new PersistedColumnLayout() { Width = 160, Visible = true }),
-                new("query_id", new PersistedColumnLayout() { Width = 80, Visible = true }),
-                new("plan_id", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("object_id", new PersistedColumnLayout() { Width = 100, Visible = false }),
-                new("object_name", new PersistedColumnLayout() { Width = 180, Visible = true }),
-                new("query_sql_text", new PersistedColumnLayout() { Width = 250, Visible = true }),
-                new("total_cpu_time_ms", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("avg_cpu_time_ms", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("max_cpu_time_ms", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("total_duration_ms", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("avg_duration_ms", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("max_duration_ms", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("count_executions", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("abort_count", new PersistedColumnLayout() { Width = 60, Visible = true }),
-                new("exception_count", new PersistedColumnLayout() { Width = 60, Visible = true }),
-                new("executions_per_min", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("avg_memory_grant_kb", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("max_memory_grant_kb", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("total_physical_io_reads_kb", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("avg_physical_io_reads_kb", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("avg_rowcount", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("max_rowcount", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("max_dop", new PersistedColumnLayout() { Width = 60, Visible = true }),
-                new("avg_tempdb_space_used_kb", new PersistedColumnLayout() { Width = 80, Visible = true }),
-                new("max_tempdb_space_used_kb", new PersistedColumnLayout() { Width = 80, Visible = true }),
-                new("num_plans", new PersistedColumnLayout() { Width = 60, Visible = true }),
-                new("num_queries", new PersistedColumnLayout() { Width = 60, Visible = true }),
-                new("top_waits", new PersistedColumnLayout() { Width = 200, Visible = true }),
-                new("plan_forcing_type_desc", new PersistedColumnLayout() { Width = 100, Visible = true }),
-                new("force_failure_count", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("last_force_failure_reason_desc", new PersistedColumnLayout() { Width = 100, Visible = true }),
-                new("is_parallel_plan", new PersistedColumnLayout() { Width = 70, Visible = true }),
-                new("query_parameterization_type_desc", new PersistedColumnLayout() { Width = 100, Visible = true}),
-                new("interval_start", new PersistedColumnLayout() { Width = 150, Visible = false}),
-                new("interval_end", new PersistedColumnLayout() { Width = 150, Visible = false})
-            },
-            CellHighlightingRules =
-            {
-                {
-                    "abort_count",
-                    new CellHighlightingRuleSet("abort_count")
-                    {
-                        Rules = new List<CellHighlightingRule>()
+                        Alias = "Plan ID",
+                        Width = 70,
+                        Visible = true,
+                        Link = new PlanIdLinkColumnInfo
                         {
-                            new(){ ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "0", Status =  DBADashStatus.DBADashStatusEnum.OK},
-                            new(){ ConditionType = CellHighlightingRule.ConditionTypes.GreaterThan, Value1 = "0", Status =  DBADashStatus.DBADashStatusEnum.Warning}
+                            DatabaseNameColumn = "DB",
+                            PlanIdColumn = "plan_id"
                         }
                     }
                 },
-                {
-                    "exception_count",
-                    new CellHighlightingRuleSet("exception_count")
+                { "query_hash", new ColumnMetadata
                     {
-                        Rules = new List<CellHighlightingRule>()
+                        Alias = "Query Hash",
+                        Width = 160,
+                        Visible = true,
+                        Link = new QueryStoreLinkColumnInfo()
                         {
-                            new(){ ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "0", Status =  DBADashStatus.DBADashStatusEnum.OK},
-                            new(){ ConditionType = CellHighlightingRule.ConditionTypes.GreaterThan, Value1 = "0", Status =  DBADashStatus.DBADashStatusEnum.Warning}
+                            TargetColumn = "query_hash",
+                            DatabaseNameColumn = "DB",
+                            TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.QueryHash
                         }
                     }
                 },
-                {
-                    "plan_forcing_type_desc",
-                    new CellHighlightingRuleSet("plan_forcing_type_desc")
+                { "query_plan_hash", new ColumnMetadata
                     {
-                        Rules = new List<CellHighlightingRule>()
+                        Alias = "Plan Hash",
+                        Width = 160,
+                        Visible = true,
+                        Link = new QueryStoreLinkColumnInfo()
                         {
-                            new(){ ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "NONE", Status =  DBADashStatus.DBADashStatusEnum.NA},
-                            new(){ ConditionType = CellHighlightingRule.ConditionTypes.GreaterThan, Value1 = "MANUAL", Status = DBADashStatus.DBADashStatusEnum.Information},
-                            new(){ ConditionType = CellHighlightingRule.ConditionTypes.GreaterThan, Value1 = "AUTO", Status = DBADashStatus.DBADashStatusEnum.Information}
+                            TargetColumn = "query_plan_hash",
+                            DatabaseNameColumn = "DB",
+                            TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.PlanHash
                         }
                     }
                 },
-                {
-                    "force_failure_count",
-                    new CellHighlightingRuleSet("force_failure_count")
+                { "object_name", new ColumnMetadata
                     {
-                        Rules = new List<CellHighlightingRule>()
+                        Alias = "Object Name",
+                        Width = 180,
+                        Visible = true,
+                        Link = new QueryStoreLinkColumnInfo()
                         {
-                            new(){ ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "0", Status =  DBADashStatus.DBADashStatusEnum.OK},
-                            new(){ ConditionType = CellHighlightingRule.ConditionTypes.All, Status = DBADashStatus.DBADashStatusEnum.Warning}
+                            TargetColumn = "object_name",
+                            DatabaseNameColumn = "DB",
+                            TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.ObjectName
                         }
                     }
                 },
-                {
-                    "last_force_failure_reason_desc",
-                    new CellHighlightingRuleSet("last_force_failure_reason_desc")
+                { "query_sql_text", new ColumnMetadata
                     {
-                        Rules = new List<CellHighlightingRule>()
+                        Alias = "Text",
+                        Width = 250,
+                        Visible = true,
+                        Link = new TextLinkColumnInfo()
                         {
-                            new(){ ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "NONE", Status =  DBADashStatus.DBADashStatusEnum.OK},
-                            new(){ ConditionType = CellHighlightingRule.ConditionTypes.All, Status = DBADashStatus.DBADashStatusEnum.Warning}
+                            TargetColumn = "query_sql_text",
+                            TextHandling = CodeEditor.CodeEditorModes.SQL
                         }
                     }
-                }
-            },
+                },
+                { "total_cpu_time_ms", new ColumnMetadata { Alias = "Total CPU (ms)", FormatString = "N0", Width = 70, Visible = true } },
+                { "avg_cpu_time_ms", new ColumnMetadata { Alias = "Avg CPU (ms)", FormatString = "N1", Width = 70, Visible = true } },
+                { "max_cpu_time_ms", new ColumnMetadata { Alias = "Max CPU (ms)", FormatString = "N1", Width = 70, Visible = true } },
+                { "total_duration_ms", new ColumnMetadata { Alias = "Total Duration (ms)", FormatString = "N0", Width = 70, Visible = true } },
+                { "avg_duration_ms", new ColumnMetadata { Alias = "Avg Duration (ms)", FormatString = "N1", Width = 70, Visible = true } },
+                { "max_duration_ms", new ColumnMetadata { Alias = "Max Duration (ms)", FormatString = "N1", Width = 70, Visible = true } },
+                { "count_executions", new ColumnMetadata { Alias = "Execs", FormatString = "N0", Width = 70, Visible = true } },
+                { "abort_count", new ColumnMetadata
+                    {
+                        Alias = "Abort",
+                        FormatString = "N0",
+                        Width = 60,
+                        Visible = true,
+                        Highlighting = new CellHighlightingRuleSet("abort_count")
+                        {
+                            Rules = new List<CellHighlightingRule>
+                            {
+                                new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "0", Status = DBADashStatus.DBADashStatusEnum.OK },
+                                new() { ConditionType = CellHighlightingRule.ConditionTypes.GreaterThan, Value1 = "0", Status = DBADashStatus.DBADashStatusEnum.Warning }
+                            }
+                        }
+                    }
+                },
+                { "exception_count", new ColumnMetadata
+                    {
+                        Alias = "Fail",
+                        FormatString = "N0",
+                        Width = 60,
+                        Visible = true,
+                        Highlighting = new CellHighlightingRuleSet("exception_count")
+                        {
+                            Rules = new List<CellHighlightingRule>
+                            {
+                                new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "0", Status = DBADashStatus.DBADashStatusEnum.OK },
+                                new() { ConditionType = CellHighlightingRule.ConditionTypes.GreaterThan, Value1 = "0", Status = DBADashStatus.DBADashStatusEnum.Warning }
+                            }
+                        }
+                    }
+                },
+                { "executions_per_min", new ColumnMetadata { Alias = "Execs/min", FormatString = "N2", Width = 70, Visible = true } },
+                { "avg_memory_grant_kb", new ColumnMetadata { Alias = "Avg Memory Grant KB", FormatString = "N0", Width = 70, Visible = true } },
+                { "max_memory_grant_kb", new ColumnMetadata { Alias = "Max Memory Grant KB", FormatString = "N0", Width = 70, Visible = true } },
+                { "total_physical_io_reads_kb", new ColumnMetadata { Alias = "Total Physical Reads KB", FormatString = "N0", Width = 70, Visible = true } },
+                { "avg_physical_io_reads_kb", new ColumnMetadata { Alias = "Avg Physical Reads KB", FormatString = "N0", Width = 70, Visible = true } },
+                { "avg_rowcount", new ColumnMetadata { Alias = "Avg Rows", FormatString = "N0", Width = 70, Visible = true } },
+                { "max_rowcount", new ColumnMetadata { Alias = "Max Rows", FormatString = "N0", Width = 70, Visible = true } },
+                { "max_dop", new ColumnMetadata { Alias = "Max DOP", Width = 60, Visible = true } },
+                { "avg_tempdb_space_used_kb", new ColumnMetadata { Alias = "Avg TempDB KB", FormatString = "N0", Width = 80, Visible = true } },
+                { "max_tempdb_space_used_kb", new ColumnMetadata { Alias = "Max TempDB KB", FormatString = "N0", Width = 80, Visible = true } },
+                { "num_plans", new ColumnMetadata { Alias = "Plan Count", FormatString = "N0", Width = 60, Visible = true } },
+                { "num_queries", new ColumnMetadata { Alias = "Query Count", FormatString = "N0", Width = 60, Visible = true } },
+                { "top_waits", new ColumnMetadata { Alias = "Top Waits", Width = 200, Visible = true } },
+                { "plan_forcing_type_desc", new ColumnMetadata
+                    {
+                        Alias = "Plan Forcing",
+                        Width = 100,
+                        Visible = true,
+                        Link = new DrillDownLinkColumnInfo(),
+                        Highlighting = new CellHighlightingRuleSet("plan_forcing_type_desc")
+                        {
+                            Rules = new List<CellHighlightingRule>
+                            {
+                                new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "NONE", Status = DBADashStatus.DBADashStatusEnum.NA },
+                                new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "MANUAL", Status = DBADashStatus.DBADashStatusEnum.Information },
+                                new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "AUTO", Status = DBADashStatus.DBADashStatusEnum.Information }
+                            }
+                        }
+                    }
+                },
+                { "force_failure_count", new ColumnMetadata
+                    {
+                        Alias = "Force Failure count",
+                        Width = 70,
+                        Visible = true,
+                        Highlighting = new CellHighlightingRuleSet("force_failure_count")
+                        {
+                            Rules = new List<CellHighlightingRule>
+                            {
+                                new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "0", Status = DBADashStatus.DBADashStatusEnum.OK },
+                                new() { ConditionType = CellHighlightingRule.ConditionTypes.All, Status = DBADashStatus.DBADashStatusEnum.Warning }
+                            }
+                        }
+                    }
+                },
+                { "last_force_failure_reason_desc", new ColumnMetadata
+                    {
+                        Alias = "Last Forced Failure",
+                        Width = 100,
+                        Visible = true,
+                        Highlighting = new CellHighlightingRuleSet("last_force_failure_reason_desc")
+                        {
+                            Rules = new List<CellHighlightingRule>
+                            {
+                                new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "NONE", Status = DBADashStatus.DBADashStatusEnum.OK },
+                                new() { ConditionType = CellHighlightingRule.ConditionTypes.All, Status = DBADashStatus.DBADashStatusEnum.Warning }
+                            }
+                        }
+                    }
+                },
+                { "is_parallel_plan", new ColumnMetadata { Alias = "Parallel", Width = 70, Visible = true } },
+                { "interval_start", new ColumnMetadata { Alias = "Interval Start", Width = 150, Visible = false } },
+                { "interval_end", new ColumnMetadata { Alias = "Interval End", Width = 150, Visible = false } }
+            }
         };
 
         private void TsRefresh(object sender, EventArgs e)
@@ -529,50 +469,6 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void PlanDrillDown(DataGridView _dgv, DataGridViewCellEventArgs e)
-        {
-            var planId = (long)_dgv.Rows[e.RowIndex].Cells["plan_id"].Value;
-            var db = _dgv.Rows[e.RowIndex].Cells["DB"].Value.ToString();
-            PlanDrillDown(planId, db);
-        }
-
-        private void PlanDrillDown(long planId, string db)
-        {
-            var message = new PlanCollectionMessage()
-            {
-                CollectAgent = CurrentContext.CollectAgent,
-                ImportAgent = CurrentContext.ImportAgent,
-                ConnectionID = CurrentContext.ConnectionID,
-                DatabaseName = db,
-                PlanID = planId,
-            };
-            Task.Run(() => MessagingHelper.SendMessageAndProcessReply(message, CurrentContext, lblStatus, ProcessCompletedPlanCollectionMessage, Guid.NewGuid()));
-        }
-
-        private void QueryHashDrillDown(DataGridView _dgv, DataGridViewCellEventArgs e)
-        {
-            var hash = (string)_dgv.Rows[e.RowIndex].Cells["query_hash"].FormattedValue;
-            txtObjectName.Text = hash ?? string.Empty;
-            SetGroupBy(QueryStoreTopQueriesMessage.QueryStoreGroupByEnum.query_id);
-            RefreshData();
-        }
-
-        private void ObjectDrillDown(DataGridView _dgv, DataGridViewCellEventArgs e)
-        {
-            var objectName = Convert.ToString(_dgv.Rows[e.RowIndex].Cells["object_name"].Value);
-            txtObjectName.Text = objectName ?? string.Empty;
-            SetGroupBy(QueryStoreTopQueriesMessage.QueryStoreGroupByEnum.query_id);
-            RefreshData();
-        }
-
-        private void PlanHashDrillDown(DataGridView _dgv, DataGridViewCellEventArgs e)
-        {
-            var hash = (string)_dgv.Rows[e.RowIndex].Cells["query_plan_hash"].FormattedValue;
-            txtPlan.Text = hash ?? string.Empty;
-            SetGroupBy(QueryStoreTopQueriesMessage.QueryStoreGroupByEnum.query_id);
-            RefreshData();
-        }
-
         private void DefaultDrillDown(DataGridView _dgv, DataGridViewCellEventArgs e)
         {
             var colName = _dgv.Columns[e.ColumnIndex].DataPropertyName;
@@ -598,24 +494,8 @@ namespace DBADashGUI.Performance
                     QueryDrillDown(_dgv, e);
                     break;
 
-                case "plan_id":
-                    PlanDrillDown(_dgv, e);
-                    break;
-
-                case "query_hash":
-                    QueryHashDrillDown(_dgv, e);
-                    break;
-
-                case "query_plan_hash":
-                    PlanHashDrillDown(_dgv, e);
-                    break;
-
                 case "plan_forcing_type_desc":
                     PlanForcingDrillDown(_dgv, e);
-                    break;
-
-                case "object_name":
-                    ObjectDrillDown(_dgv, e);
                     break;
 
                 case "" when _dgv.Columns[e.ColumnIndex].Name == "ForceUnforce":
@@ -628,7 +508,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private async Task ProcessPlanForcingMessage(ResponseMessage reply, Guid messageGroup)
+        private async Task ProcessPlanForcingMessage(ResponseMessage reply, Guid messageGroup, SetStatusDelegate setStatus)
         {
             if (reply.Type == ResponseMessage.ResponseTypes.Success)
             {
@@ -847,6 +727,11 @@ namespace DBADashGUI.Performance
         private void DateRangeChanged(object sender, EventArgs e)
         {
             RefreshData();
+        }
+
+        public void SetStatus(string message, string tooltip, Color color)
+        {
+            lblStatus.InvokeSetStatus(message, tooltip, color);
         }
     }
 }

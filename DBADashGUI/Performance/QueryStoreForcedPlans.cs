@@ -10,10 +10,13 @@ using DBADashGUI.CustomReports;
 using DBADashGUI.Messaging;
 using Microsoft.Data.SqlClient;
 using DBADashGUI.SchemaCompare;
+using static DBADashGUI.Messaging.MessagingHelper;
+using DBADashGUI.Interface;
+using System.Drawing;
 
 namespace DBADashGUI.Performance
 {
-    public partial class QueryStoreForcedPlans : UserControl, ISetContext, IRefreshData
+    public partial class QueryStoreForcedPlans : UserControl, ISetContext, IRefreshData, ISetStatus
     {
         private DBADashContext CurrentContext;
 
@@ -202,11 +205,11 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private Task ProcessCompletedMessage(ResponseMessage reply, Guid messageGroup)
+        private Task ProcessCompletedMessage(ResponseMessage reply, Guid messageGroup, SetStatusDelegate setStatus)
         {
             if (reply.Data == null || reply.Data.Tables.Count == 0)
             {
-                lblStatus.InvokeSetStatus("No data returned", string.Empty, DashColors.Fail);
+                setStatus.Invoke("No data returned", string.Empty, DashColors.Fail);
                 return Task.CompletedTask;
             }
 
@@ -224,7 +227,7 @@ namespace DBADashGUI.Performance
             dgv.LoadColumnLayout(forcedPlansResult.ColumnLayout);
             dgv.AutoResizeColumnsWithMaxColumnWidth();
             dgv.Columns["Unforce"]!.Visible = true;
-            lblStatus.InvokeSetStatus("Completed", string.Empty, DashColors.Success);
+            setStatus.Invoke("Completed", string.Empty, DashColors.Success);
             return Task.CompletedTask;
         }
 
@@ -274,17 +277,17 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private async Task ProcessPlanForcingMessage(ResponseMessage reply, Guid messageGroup)
+        private async Task ProcessPlanForcingMessage(ResponseMessage reply, Guid messageGroup, SetStatusDelegate setStatus)
         {
             if (reply.Type == ResponseMessage.ResponseTypes.Success)
             {
-                lblStatus.InvokeSetStatus("Plan Forcing Operation Completed", string.Empty, DashColors.Success);
+                setStatus.Invoke("Plan Forcing Operation Completed", string.Empty, DashColors.Success);
                 await MessagingHelper.UpdatePlanForcingLog(messageGroup, "SUCCEEDED");
                 RefreshData();
             }
             else
             {
-                lblStatus.InvokeSetStatus("Plan Forcing Operation Failed", reply.Message, DashColors.Fail);
+                setStatus.Invoke("Plan Forcing Operation Failed", reply.Message, DashColors.Fail);
                 await MessagingHelper.UpdatePlanForcingLog(messageGroup, "FAIL:" + reply.Message);
                 await RefreshLog();
             }
@@ -358,6 +361,11 @@ namespace DBADashGUI.Performance
         private void TsExportHistoryExcel_Click(object sender, EventArgs e)
         {
             dgvLog.ExportToExcel();
+        }
+
+        public void SetStatus(string message, string tooltip, Color color)
+        {
+            lblStatus.InvokeSetStatus(message, tooltip, color);
         }
     }
 }
