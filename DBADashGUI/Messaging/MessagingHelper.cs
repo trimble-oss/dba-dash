@@ -1,16 +1,17 @@
 ﻿using DBADash.Messaging;
+using DBADashGUI.Interface;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
+using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
-using System.Drawing;
 
 namespace DBADashGUI.Messaging
 {
     public class MessagingHelper
     {
-        public delegate Task MessageCompletedDelegate(ResponseMessage reply, Guid messageGroup);
+        public delegate Task MessageCompletedDelegate(ResponseMessage reply, Guid messageGroup, SetStatusDelegate setStatus);
 
         public delegate Task MessageResponseDelegate(ResponseMessage reply, Guid messageGroup);
 
@@ -50,7 +51,7 @@ namespace DBADashGUI.Messaging
                 ResponseMessage reply;
                 try
                 {
-                    reply = await Messaging.CollectionMessaging.ReceiveReply(messageGroup, message.Lifetime * 1000);
+                    reply = await CollectionMessaging.ReceiveReply(messageGroup, message.Lifetime * 1000);
                 }
                 catch (Exception ex)
                 {
@@ -69,12 +70,12 @@ namespace DBADashGUI.Messaging
                     case ResponseMessage.ResponseTypes.Failure:
                         completed = true;
                         setStatus(reply.Message, reply.Exception?.ToString(), DashColors.Fail);
-                        await processCompleted(reply, messageGroup);
+                        await processCompleted(reply, messageGroup, setStatus);
                         break;
 
                     case ResponseMessage.ResponseTypes.Success:
                         completed = false; // It's done but wait for end dialog
-                        await processCompleted(reply, messageGroup);
+                        await processCompleted(reply, messageGroup, setStatus);
                         break;
 
                     case ResponseMessage.ResponseTypes.EndConversation:

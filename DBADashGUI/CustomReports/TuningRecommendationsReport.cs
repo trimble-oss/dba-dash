@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static DBADashGUI.Messaging.MessagingHelper;
 
 namespace DBADashGUI.CustomReports
 {
@@ -97,12 +98,12 @@ namespace DBADashGUI.CustomReports
             }
         }
 
-        private async Task ForcePlanReply(ResponseMessage reply, Guid messageGroup)
+        private async Task ForcePlanReply(ResponseMessage reply, Guid messageGroup, SetStatusDelegate setStatus)
         {
             if (reply.Type == ResponseMessage.ResponseTypes.Success)
             {
                 await MessagingHelper.UpdatePlanForcingLog(messageGroup, "SUCCEEDED");
-                StatusLabel.InvokeSetStatus("Plan Forcing Operation Completed", string.Empty, DashColors.Success);
+                setStatus.Invoke("Plan Forcing Operation Completed", string.Empty, DashColors.Success);
                 if (MessageBox.Show("Plan forcing operation succeeded. Do you want to refresh the report now?", "Refresh Report", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     RefreshData();
@@ -110,7 +111,7 @@ namespace DBADashGUI.CustomReports
             }
             else
             {
-                StatusLabel.InvokeSetStatus("Plan Forcing Operation Failed", reply.Message, DashColors.Fail);
+                setStatus.Invoke("Plan Forcing Operation Failed", reply.Message, DashColors.Fail);
                 await MessagingHelper.UpdatePlanForcingLog(messageGroup, "FAIL:" + reply.Message);
             }
         }
@@ -203,10 +204,9 @@ namespace DBADashGUI.CustomReports
                                     Visible = true,
                                     Alias = "Regressed\nPlan\nID",
                                     Description = "Query store plan ID for the regressed plan",
-                                    Link = new QueryStoreLinkColumnInfo()
+                                    Link = new PlanIdLinkColumnInfo
                                     {
-                                        TargetColumn = "regressed_plan_id",
-                                        TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.PlanID,
+                                        PlanIdColumn = "regressed_plan_id",
                                         DatabaseNameColumn = "DB"
                                     }
                                 }
@@ -216,10 +216,9 @@ namespace DBADashGUI.CustomReports
                                     Visible = true,
                                     Alias = "Recommended\nPlan\nID",
                                     Description = "Query store plan ID for the recommended plan",
-                                    Link = new QueryStoreLinkColumnInfo()
+                                    Link = new PlanIdLinkColumnInfo
                                     {
-                                        TargetColumn = "recommended_plan_id",
-                                        TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.PlanID,
+                                        PlanIdColumn = "recommended_plan_id",
                                         DatabaseNameColumn = "DB"
                                     }
                                 }

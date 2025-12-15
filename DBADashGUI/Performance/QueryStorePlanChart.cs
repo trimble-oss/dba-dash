@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Data;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using DBADash.Messaging;
+﻿using DBADash.Messaging;
 using DBADashGUI.Messaging;
 using DBADashGUI.Theme;
 using LiveChartsCore;
@@ -22,6 +14,15 @@ using LiveChartsCore.SkiaSharpView.VisualElements;
 using LiveChartsCore.VisualElements;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Data;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using static DBADashGUI.Messaging.MessagingHelper;
 using Padding = LiveChartsCore.Drawing.Padding;
 
 namespace DBADashGUI.Performance
@@ -79,11 +80,11 @@ namespace DBADashGUI.Performance
         private DataTable ChartData;
         private string MetricName => tsMeasure.Tag?.ToString();
 
-        private Task ProcessChart(ResponseMessage reply, Guid messageGroup)
+        private Task ProcessChart(ResponseMessage reply, Guid messageGroup, SetStatusDelegate setStatus)
         {
             if (InvokeRequired)
             {
-                Invoke(new Action(() => ProcessChart(reply, messageGroup)));
+                Invoke(new Action(() => ProcessChart(reply, messageGroup, setStatus)));
                 return Task.CompletedTask;
             }
 

@@ -17,6 +17,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static DBADashGUI.Messaging.MessagingHelper;
 
 namespace DBADashGUI.Performance
 {
@@ -1107,7 +1108,7 @@ namespace DBADashGUI.Performance
             };
         }
 
-        private async Task ProcessPlanCollectionMessageReply(ResponseMessage reply, Guid messageGroup)
+        private async Task ProcessPlanCollectionMessageReply(ResponseMessage reply, Guid messageGroup, SetStatusDelegate setStatus)
         {
             try
             {
