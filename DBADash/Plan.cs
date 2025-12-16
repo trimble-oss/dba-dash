@@ -78,6 +78,11 @@ namespace DBADash
                 {
                     var strPlan = r["query_plan"] == DBNull.Value ? string.Empty : (string)r["query_plan"];
                     r["query_plan_compressed"] = SMOBaseClass.Zip(strPlan);
+                    if (string.IsNullOrEmpty(strPlan))
+                    {
+                        Log.Warning("No query plan retrieved from sys.dm_exec_text_query_plan({0}, {1}, {2})", r["plan_handle"] == DBNull.Value ? null : ((byte[])(r["plan_handle"])).ToHexString(), r["statement_start_offset"], r["statement_end_offset"]);
+                        continue;
+                    }
                     var hash = GetPlanHash(strPlan);
                     r["query_plan_hash"] = hash;
                 }
