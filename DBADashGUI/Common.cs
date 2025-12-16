@@ -251,8 +251,6 @@ namespace DBADashGUI
             var sheetIndex = 1;
             foreach (var dgv in Grids)
             {
-                var colIndex = 1;
-                var rowIndex = 1;
                 var sheetName = $"Sheet{sheetIndex}";
                 if (dgv is DBADashDataGridView dbadashDgv)
                 {
@@ -261,21 +259,31 @@ namespace DBADashGUI
 
                 var sheet = workbook.Worksheets.Add(sheetName);
 
-                foreach (DataGridViewColumn col in dgv.Columns)
+                // Respect display order and visibility
+                var orderedVisibleColumns = dgv.Columns
+                    .Cast<DataGridViewColumn>()
+                    .Where(c => c.Visible)
+                    .OrderBy(c => c.DisplayIndex)
+                    .ToList();
+
+                // Headers
+                var headerColIndex = 1;
+                foreach (var col in orderedVisibleColumns)
                 {
-                    if (!col.Visible) continue;
-                    sheet.Cell(1, colIndex).SetValue(col.HeaderText.Replace("\n", " "));
-                    colIndex++;
+                    sheet.Cell(1, headerColIndex).SetValue(col.HeaderText.Replace("\n", " "));
+                    headerColIndex++;
                 }
+
+                // Rows
+                var rowIndex = 1;
                 foreach (DataGridViewRow row in dgv.Rows)
                 {
-                    colIndex = 0;
                     rowIndex += 1;
-                    foreach (DataGridViewCell cell in row.Cells)
-                    {
-                        if (!cell.Visible) continue;
-                        colIndex += 1;
+                    var colIndex = 1;
 
+                    foreach (var col in orderedVisibleColumns)
+                    {
+                        var cell = row.Cells[col.Index];
                         var cellType = cell.ValueType;
 
                         var format = string.IsNullOrEmpty(cell.Style.Format)
@@ -340,17 +348,21 @@ namespace DBADashGUI
                         {
                             Debug.WriteLine(ex.ToString());
                         }
+
+                        colIndex += 1;
                     }
                 }
-                var table = sheet.Range(sheet.Cell(1, 1).Address, sheet.Cell(rowIndex, colIndex).Address).CreateTable();
+
+                var finalColCount = orderedVisibleColumns.Count;
+                var table = sheet.Range(sheet.Cell(1, 1).Address, sheet.Cell(rowIndex, finalColCount).Address).CreateTable();
                 table.Theme = XLTableTheme.None;
-                var header = sheet.Range(1, 1, 1, colIndex);
+                var header = sheet.Range(1, 1, 1, finalColCount);
                 header.Style.Fill.SetBackgroundColor(XLColor.FromColor(DashColors.TrimbleBlue));
                 header.Style.Font.SetFontColor(XLColor.White);
                 header.Style.Font.SetBold();
                 var maxColumnWidth = 150;
                 sheet.Columns().AdjustToContents();
-                for (var i = 1; i <= colIndex; i++)
+                for (var i = 1; i <= finalColCount; i++)
                 {
                     sheet.Column(i).Width = Math.Min(sheet.Column(i).Width, maxColumnWidth);
                 }
