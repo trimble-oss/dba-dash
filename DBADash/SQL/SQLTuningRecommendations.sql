@@ -51,8 +51,8 @@ CREATE TABLE #tuning (
 	error_prone VARCHAR(3) NOT NULL,
     regressed_plan_execution_count INT NULL,
 	recommended_plan_execution_count INT NULL,
-	regressed_plan_cpu_time_average INT NULL,
-	recommended_plan_cpu_time_average INT NULL,
+	regressed_plan_cpu_time_average_ms FLOAT NULL,
+	recommended_plan_cpu_time_average_ms FLOAT NULL,
 	is_executable_action BIT NULL,
 	is_revertable_action BIT NULL,
 	execute_action_start_time DATETIME2(7) NULL,
@@ -74,6 +74,7 @@ DECLARE DBs CURSOR FAST_FORWARD READ_ONLY LOCAL FOR
 	AND HAS_DBACCESS(name)=1
 	AND is_query_store_on=1
 	AND (name = @DB OR @DB IS NULL)
+	AND compatibility_level >= 130 /* 2016 or later compatibility level is required */
 
 OPEN DBs
 DECLARE @SQL NVARCHAR(MAX)
@@ -108,8 +109,8 @@ BEGIN
 			IIF(regressed_plan_error_count > recommended_plan_error_count, ''YES'', ''NO'') error_prone,
 			regressed_plan_execution_count,
 			recommended_plan_execution_count,
-			regressed_plan_cpu_time_average,
-			recommended_plan_cpu_time_average,
+			regressed_plan_cpu_time_average / 1000.0 AS regressed_plan_cpu_time_average_ms,
+			recommended_plan_cpu_time_average / 1000.0 AS recommended_plan_cpu_time_average_ms,
 			dtr.is_executable_action,
 			dtr.is_revertable_action,
 			dtr.execute_action_start_time,
@@ -171,8 +172,8 @@ BEGIN
 						error_prone,
 						regressed_plan_execution_count,
 						recommended_plan_execution_count,
-						regressed_plan_cpu_time_average,
-						recommended_plan_cpu_time_average,
+						regressed_plan_cpu_time_average_ms,
+						recommended_plan_cpu_time_average_ms,
 						is_executable_action,
 						is_revertable_action,
 						execute_action_start_time,
@@ -213,8 +214,8 @@ SELECT	TOP(@TOP)
 		error_prone,
 		regressed_plan_execution_count,
 		recommended_plan_execution_count,
-		regressed_plan_cpu_time_average,
-		recommended_plan_cpu_time_average,
+		regressed_plan_cpu_time_average_ms,
+		recommended_plan_cpu_time_average_ms,
 		is_executable_action,
 		is_revertable_action,
 		valid_since,
@@ -234,7 +235,3 @@ FROM #tuning
 ',@SortSQL)
 
 EXEC sp_executesql @SQL,N'@TOP INT',@TOP
-
-
-
-

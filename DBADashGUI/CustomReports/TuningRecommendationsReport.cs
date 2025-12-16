@@ -156,7 +156,7 @@ namespace DBADashGUI.CustomReports
                         ResultName = "Result1",
                         Columns = new Dictionary<string, ColumnMetadata>
                         {
-                            { "DB", new ColumnMetadata() { Alias = "DB", Description = "Database name", Visible = true } },
+                            { "DB", new ColumnMetadata() { Alias = "DB", Description = "Database name", Visible = true, DisplayIndex = 0 } },
                             { "query_id", new ColumnMetadata
                                 {
                                     Visible = true,
@@ -167,7 +167,8 @@ namespace DBADashGUI.CustomReports
                                         TargetColumn = "query_id",
                                         TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.QueryID,
                                         DatabaseNameColumn = "DB"
-                                    }
+                                    },
+                                    DisplayIndex = 1
                                 }
                             },
                             { "query_sql_text", new ColumnMetadata
@@ -180,10 +181,11 @@ namespace DBADashGUI.CustomReports
                                         TargetColumn = "query_sql_text",
                                         TextHandling = CodeEditor.CodeEditorModes.SQL
                                     },
+                                    DisplayIndex = 2
                                 }
                             },
-                            { "name", new ColumnMetadata { Visible = true, Alias = "Name", Description = "Unique name of recommendation" } },
-                            { "type", new ColumnMetadata { Visible = true, Alias = "Type", Description = "The name of the automatic tuning option that produced the recommendation. e.g. FORCE_LAST_GOOD_PLAN" } },
+                            { "name", new ColumnMetadata { Visible = true, Alias = "Name", Description = "Unique name of recommendation", DisplayIndex = 35 } },
+                            { "type", new ColumnMetadata { Visible = true, Alias = "Type", Description = "The name of the automatic tuning option that produced the recommendation. e.g. FORCE_LAST_GOOD_PLAN", DisplayIndex=36 } },
                             { "object_name", new ColumnMetadata
                                 {
                                     Visible = true,
@@ -194,11 +196,12 @@ namespace DBADashGUI.CustomReports
                                         TargetColumn = "object_name",
                                         TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.ObjectName,
                                         DatabaseNameColumn = "DB"
-                                    }
+                                    },
+                                    DisplayIndex = 3
                                 }
                             },
-                            { "reason", new ColumnMetadata { Visible = true, Alias = "Reason", Description = "Reason why this recommendation was provided" } },
-                            { "score", new ColumnMetadata { Visible = true, Alias = "Score", Description = "Estimated value for this recommendation. (0-100 scale)" } },
+                            { "reason", new ColumnMetadata { Visible = true, Alias = "Reason", Description = "Reason why this recommendation was provided", DisplayIndex = 10 } },
+                            { "score", new ColumnMetadata { Visible = true, Alias = "Score", Description = "Estimated value for this recommendation. (0-100 scale)", DisplayIndex = 4 } },
                             { "regressed_plan_id", new ColumnMetadata
                                 {
                                     Visible = true,
@@ -208,7 +211,8 @@ namespace DBADashGUI.CustomReports
                                     {
                                         PlanIdColumn = "regressed_plan_id",
                                         DatabaseNameColumn = "DB"
-                                    }
+                                    },
+                                    DisplayIndex = 11
                                 }
                             },
                             { "recommended_plan_id", new ColumnMetadata
@@ -220,39 +224,41 @@ namespace DBADashGUI.CustomReports
                                     {
                                         PlanIdColumn = "recommended_plan_id",
                                         DatabaseNameColumn = "DB"
-                                    }
+                                    },
+                                    DisplayIndex = 12
                                 }
                             },
-                            { "last_execution_time", new ColumnMetadata { Visible = true, Alias = "Last\nExecution\nTime", Description = "Last execution time for the query (from sys.query_store_query)" } },
-                            { "regressed_plan_last_execution_time", new ColumnMetadata { Visible = true, Alias = "Regressed\nPlan\nLast\nExecution\nTime", Description = "Last execution time for the regressed plan (from sys.query_store_plan)" }  },
-                            { "recommended_plan_last_execution_time", new ColumnMetadata { Visible = true, Alias = "Recommended\nPlan\nLast\nExecution\nTime", Description = "Last execution time for the recommended plan (from sys.query_store_plan)" } },
-                            { "current_state", new ColumnMetadata { Visible = true, Alias = "Current\nState", Description = "Current state of the recommendation" } },
-                            { "current_state_reason", new ColumnMetadata { Visible = true, Alias = "Current\nState\nReason", Description = "Description of why the recommendation is in the current state" } },
+                            { "last_execution_time", new ColumnMetadata { Visible = true, Alias = "Last\nExecution\nTime", Description = "Last execution time for the query (from sys.query_store_query)", DisplayIndex = 13 } },
+                            { "regressed_plan_last_execution_time", new ColumnMetadata { Visible = true, Alias = "Regressed\nPlan\nLast\nExecution\nTime", Description = "Last execution time for the regressed plan (from sys.query_store_plan)", DisplayIndex = 14 }  },
+                            { "recommended_plan_last_execution_time", new ColumnMetadata { Visible = true, Alias = "Recommended\nPlan\nLast\nExecution\nTime", Description = "Last execution time for the recommended plan (from sys.query_store_plan)", DisplayIndex = 15 } },
+                            { "current_state", new ColumnMetadata { Visible = true, Alias = "Current\nState", Description = "Current state of the recommendation", DisplayIndex = 16 } },
+                            { "current_state_reason", new ColumnMetadata { Visible = true, Alias = "Current\nState\nReason", Description = "Description of why the recommendation is in the current state", DisplayIndex = 17 } },
                             { "script", new ColumnMetadata
                                 {
                                     Visible = true,
                                     Alias = "Script",
-                                    Link = new TextLinkColumnInfo { TargetColumn = "script", TextHandling = CodeEditor.CodeEditorModes.SQL }
+                                    Link = new TextLinkColumnInfo { TargetColumn = "script", TextHandling = CodeEditor.CodeEditorModes.SQL },
+                                    DisplayIndex = 18
                                 }
                             },
-                            { "estimated_gain", new ColumnMetadata { Visible = true, Alias = "Estimated\nGain", FormatString = "N3", Description = "The difference in execution times between the regressed plan and recommended plan, multiplied by the sum of executions and converted to seconds" } },
-                            { "error_prone", new ColumnMetadata { Visible = true, Alias = "Error\nProne", Description = "'Yes' if regressed_plan_error_count > recommended_plan_error_count" } },
-                            { "regressed_plan_execution_count", new ColumnMetadata { Visible = true, Alias = "Regressed\nPlan\nExecution\nCount", Description = "Number of executions of the query with regressed plan before the regression is detected" } },
-                            { "recommended_plan_execution_count", new ColumnMetadata { Visible = true, Alias = "Recommended\nPlan\nExecution\nCount", Description = "Number of executions of the query with the recommended plan before the regression is detected." } },
-                            { "regressed_plan_cpu_time_average", new ColumnMetadata { Visible = true, Alias = "Regressed\nPlan\nAvg\nCPU\nTime", Description = "Average CPU time (in microseconds µs) consumed by the regressed query plan (calculated before the regression is detected)" } },
-                            { "recommended_plan_cpu_time_average", new ColumnMetadata { Visible = true, Alias = "Recommended\nPlan\nAvg\nCPU\nTime", Description = "Average CPU time (in microseconds µs) consumed by the recommended query plan (calculated before the regression is detected)."  } },
-                            { "is_executable_action", new ColumnMetadata { Visible = true, Alias = "Is\nExecutable\nAction", Description = "Indicates if the recommendation can be executed via a T-SQL script" } },
-                            { "is_revertable_action", new ColumnMetadata { Visible = true, Alias = "Is\nRevertable\nAction", Description = "Indicates if the recommendation can be automatically monitored and reverted by the DB engine." } },
-                            { "valid_since", new ColumnMetadata { Visible = true, Alias = "Valid\nSince", Description = "The first time this recommendation was generated" } },
-                            { "last_refresh", new ColumnMetadata { Visible = true, Alias = "Last\nRefresh", Description = "The last time this recommendation was generated" } },
-                            { "execute_action_start_time", new ColumnMetadata { Visible = true, Alias = "Execute\nAction\nStart\nTime", Description = "Date the recommendation is applied" } },
-                            { "execute_action_duration", new ColumnMetadata { Visible = true, Alias = "Execute\nAction\nDuration", Description = "Duration of the execute action." } },
-                            { "execute_action_initiated_by", new ColumnMetadata { Visible = true, Alias = "Execute\nAction\nInitiated\nBy", Description = "User = User manually applied the recommendation.\nSystem = System automatically applied the recommendation" } },
-                            { "execute_action_initiated_time", new ColumnMetadata { Visible = true, Alias = "Execute\nAction\nInitiated\nTime", Description = "Date the recommendation was applied" } },
-                            { "revert_action_start_time", new ColumnMetadata { Visible = true, Alias = "Revert\nAction\nStart\nTime", Description = "Date the recommendation was reverted" } },
-                            { "revert_action_duration", new ColumnMetadata { Visible = true, Alias = "Revert\nAction\nDuration", Description = "Duration of the revert action" } },
-                            { "revert_action_initiated_by", new ColumnMetadata { Visible = true, Alias = "Revert\nAction\nInitiated\nBy",Description = "User = User manually reverted the recommendation.\nSystem = System automatically reverted the recommendation" } },
-                            { "revert_action_initiated_time", new ColumnMetadata { Visible = true, Alias = "Revert\nAction\nInitiated\nTime", Description ="Date the recommendation was reverted" } },
+                            { "estimated_gain", new ColumnMetadata { Visible = true, Alias = "Estimated\nGain", FormatString = "N3", Description = "The difference in execution times between the regressed plan and recommended plan, multiplied by the sum of executions and converted to seconds", DisplayIndex=5 } },
+                            { "error_prone", new ColumnMetadata { Visible = true, Alias = "Error\nProne", Description = "'Yes' if regressed_plan_error_count > recommended_plan_error_count", DisplayIndex = 19 } },
+                            { "regressed_plan_execution_count", new ColumnMetadata { Visible = true, Alias = "Regressed\nPlan\nExecution\nCount", Description = "Number of executions of the query with regressed plan before the regression is detected", FormatString = "N0", DisplayIndex = 6 } },
+                            { "recommended_plan_execution_count", new ColumnMetadata { Visible = true, Alias = "Recommended\nPlan\nExecution\nCount", Description = "Number of executions of the query with the recommended plan before the regression is detected.", FormatString = "N0", DisplayIndex = 7 } },
+                            { "regressed_plan_cpu_time_average_ms", new ColumnMetadata { Visible = true, Alias = "Regressed\nPlan\nAvg\nCPU\nTime (ms)", Description = "Average CPU time (in milliseconds) consumed by the regressed query plan (calculated before the regression is detected)", FormatString = "N3", DisplayIndex = 8 } },
+                            { "recommended_plan_cpu_time_average_ms", new ColumnMetadata { Visible = true, Alias = "Recommended\nPlan\nAvg\nCPU\nTime (ms)", Description = "Average CPU time (in milliseconds) consumed by the recommended query plan (calculated before the regression is detected).", FormatString = "N3", DisplayIndex = 9  } },
+                            { "is_executable_action", new ColumnMetadata { Visible = true, Alias = "Is\nExecutable\nAction", Description = "Indicates if the recommendation can be executed via a T-SQL script", DisplayIndex = 20 } },
+                            { "is_revertable_action", new ColumnMetadata { Visible = true, Alias = "Is\nRevertable\nAction", Description = "Indicates if the recommendation can be automatically monitored and reverted by the DB engine.", DisplayIndex = 21 } },
+                            { "valid_since", new ColumnMetadata { Visible = true, Alias = "Valid\nSince", Description = "The first time this recommendation was generated", DisplayIndex = 22 } },
+                            { "last_refresh", new ColumnMetadata { Visible = true, Alias = "Last\nRefresh", Description = "The last time this recommendation was generated", DisplayIndex = 23 } },
+                            { "execute_action_start_time", new ColumnMetadata { Visible = true, Alias = "Execute\nAction\nStart\nTime", Description = "Date the recommendation is applied", DisplayIndex = 24 } },
+                            { "execute_action_duration", new ColumnMetadata { Visible = true, Alias = "Execute\nAction\nDuration", Description = "Duration of the execute action.", DisplayIndex = 25 } },
+                            { "execute_action_initiated_by", new ColumnMetadata { Visible = true, Alias = "Execute\nAction\nInitiated\nBy", Description = "User = User manually applied the recommendation.\nSystem = System automatically applied the recommendation", DisplayIndex = 26 } },
+                            { "execute_action_initiated_time", new ColumnMetadata { Visible = true, Alias = "Execute\nAction\nInitiated\nTime", Description = "Date the recommendation was applied", DisplayIndex = 27 } },
+                            { "revert_action_start_time", new ColumnMetadata { Visible = true, Alias = "Revert\nAction\nStart\nTime", Description = "Date the recommendation was reverted", DisplayIndex = 28 } },
+                            { "revert_action_duration", new ColumnMetadata { Visible = true, Alias = "Revert\nAction\nDuration", Description = "Duration of the revert action", DisplayIndex = 29 } },
+                            { "revert_action_initiated_by", new ColumnMetadata { Visible = true, Alias = "Revert\nAction\nInitiated\nBy",Description = "User = User manually reverted the recommendation.\nSystem = System automatically reverted the recommendation", DisplayIndex = 30 } },
+                            { "revert_action_initiated_time", new ColumnMetadata { Visible = true, Alias = "Revert\nAction\nInitiated\nTime", Description ="Date the recommendation was reverted", DisplayIndex = 31 } },
                             { "query_hash", new ColumnMetadata
                                 {
                                     Visible=true,
@@ -263,7 +269,8 @@ namespace DBADashGUI.CustomReports
                                         TargetColumn = "query_hash",
                                         TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.QueryHash,
                                         DatabaseNameColumn = "DB"
-                                    }
+                                    },
+                                    DisplayIndex = 32
                                 }
                             },
                             { "recommended_plan_hash", new ColumnMetadata
@@ -276,7 +283,8 @@ namespace DBADashGUI.CustomReports
                                         TargetColumn = "recommended_plan_hash",
                                         TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.PlanHash,
                                         DatabaseNameColumn = "DB"
-                                    }
+                                    },
+                                    DisplayIndex = 33
                                 }
                             },
                             { "regressed_plan_hash", new ColumnMetadata
@@ -289,7 +297,8 @@ namespace DBADashGUI.CustomReports
                                         TargetColumn = "regressed_plan_hash",
                                         TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.PlanHash,
                                         DatabaseNameColumn = "DB"
-                                    }
+                                    },
+                                    DisplayIndex = 34
                                 }
                             }
                         }
