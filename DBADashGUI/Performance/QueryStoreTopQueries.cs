@@ -407,7 +407,11 @@ namespace DBADashGUI.Performance
                 },
                 { "is_parallel_plan", new ColumnMetadata { Alias = "Parallel", Width = 70, Visible = true } },
                 { "interval_start", new ColumnMetadata { Alias = "Interval Start", Width = 150, Visible = false } },
-                { "interval_end", new ColumnMetadata { Alias = "Interval End", Width = 150, Visible = false } }
+                { "interval_end", new ColumnMetadata { Alias = "Interval End", Width = 150, Visible = false } },
+                { "has_regressed_plan", new ColumnMetadata { Alias = "Has Regressed Plan", Width = 70, Visible = true, Description = "Indicates if there is a regressed plan from sys.dm_db_tuning_recommendations." }  },
+                { "has_recommended_plan", new ColumnMetadata { Alias = "Has Recommended Plan", Width = 70, Visible = true, Description = "Indicates if there is a recommended plan from sys.dm_db_tuning_recommendations." } },
+                { "is_regressed_plan", new ColumnMetadata { Alias = "Is Regressed Plan", Width = 70, Visible = true, Description = "Indicates if the plan is marked as regressed from sys.dm_db_tuning_recommendations." }  },
+                { "is_recommended_plan", new ColumnMetadata { Alias = "Is Recommended Plan", Width = 70, Visible = true, Description = "Indicates if the plan is the recommended plan from sys.dm_db_tuning_recommendations." } },
             }
         };
 
