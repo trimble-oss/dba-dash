@@ -87,7 +87,7 @@ namespace DBADashGUI.CustomReports
                         notes = $"Apply tuning recommendation {name}. Regressed Plan: {regressedPlanID}.  Recommended plan {planID}. {reason}";
                         forceOp = QueryStorePlanForcingMessage.PlanForcingOperations.Force;
                     }
-                    CommonShared.ShowInputDialog(ref notes, "Enter notes");
+                    if (CommonShared.ShowInputDialog(ref notes, "Enter notes") != DialogResult.OK) return;
                     await MessagingHelper.ForceQueryPlan(context, db, forceOp, queryID, planID, objectName, text, queryHash, planHash,
                         notes, StatusLabel, ForcePlanReply);
                 }
