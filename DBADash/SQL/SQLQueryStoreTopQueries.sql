@@ -17,6 +17,7 @@ DECLARE @IncludeWaits BIT=1
 DECLARE @MinimumPlanCount INT=1
 */
 SET NUMERIC_ROUNDABORT OFF
+
 IF NOT EXISTS(
 	SELECT 1 
 	FROM sys.databases 
@@ -65,9 +66,65 @@ BEGIN
 	RAISERROR('Invalid sort',11,1)
 	RETURN
 END
+DECLARE @SupportsTuningRecommendations BIT
+/* 
+	Requires 130 compatibility level or later for OPENJSON
+	EngineEdition should be Enterprise, AzureDB or managed instance
+	2017 or later (14) compatibility level if EngineEdition is Enterprise (regular SQL instance)
+*/
+SELECT @SupportsTuningRecommendations = CASE	WHEN EXISTS(SELECT 1 
+															FROM sys.databases 
+															WHERE compatibility_level >= 130 
+															AND name = @Database
+														) 	
+												AND SERVERPROPERTY('EngineEdition') IN(3,5,8) 
+												AND (
+													CAST(SERVERPROPERTY('ProductMajorVersion') AS INT) >= 14 
+													OR SERVERPROPERTY('EngineEdition') <> 3
+													)		
+												THEN CAST(1 AS BIT)
+												ELSE CAST(0 AS BIT) END
+
+IF @SupportsTuningRecommendations=1
+BEGIN
+	CREATE TABLE #DTR(
+		query_id BIGINT,
+		recommended_plan_id BIGINT,
+		regressed_plan_id BIGINT,
+		PRIMARY KEY(query_id,recommended_plan_id,regressed_plan_id)
+	)
+END
+
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = CONCAT(N'
 USE ', QUOTENAME(@Database),'
+
+' + CASE WHEN @SupportsTuningRecommendations = 0 THEN '' ELSE '
+INSERT INTO #DTR(
+		query_id,
+		recommended_plan_id,
+		regressed_plan_id
+)
+SELECT	DISTINCT /* To guarantee we don''t have duplicates */
+		d.query_id,
+		d.recommended_plan_id,
+		d.regressed_plan_id
+FROM sys.dm_db_tuning_recommendations dtr
+CROSS APPLY OPENJSON(Details, ''$.planForceDetails'') WITH (
+		query_id INT ''$.queryId'',
+		regressed_plan_id INT ''$.regressedPlanId'',
+		recommended_plan_id INT ''$.recommendedPlanId'',
+		regressed_plan_error_count INT ''$.regressedPlanErrorCount'',
+		recommended_plan_error_count INT ''$.recommendedPlanErrorCount'',
+		regressed_plan_execution_count INT ''$.regressedPlanExecutionCount'',
+		regressed_plan_cpu_time_average FLOAT ''$.regressedPlanCpuTimeAverage'',
+		recommended_plan_execution_count INT ''$.recommendedPlanExecutionCount'',
+		recommended_plan_cpu_time_average FLOAT ''$.recommendedPlanCpuTimeAverage''
+		)
+	d
+WHERE dtr.type =''FORCE_LAST_GOOD_PLAN''
+' END + '
+
 DECLARE @interval_from BIGINT
 DECLARE @interval_to BIGINT
 
@@ -89,7 +146,6 @@ IF @interval_to IS NULL
 BEGIN
 	SET @interval_to = 9223372036854775807
 END
-
 
 SELECT TOP (@Top)
 		DB_NAME() AS DB,
@@ -148,10 +204,16 @@ SELECT TOP (@Top)
 		ELSE 'MIN(MIN(RS.first_execution_time)) OVER() interval_start,
 		MAX(MAX(RS.last_execution_time)) OVER() interval_end' 
 		END + '
+		' + CASE WHEN @SupportsTuningRecommendations=1 AND @GroupBy <> 'plan_id' THEN ',CAST(MAX(CASE WHEN Reg.regressed_plan_id IS NOT NULL THEN 1 ELSE 0 END) AS BIT) AS has_regressed_plan' ELSE '' END + '
+		' + CASE WHEN @SupportsTuningRecommendations=1 AND @GroupBy <> 'plan_id' THEN ',CAST(MAX(CASE WHEN Rec.recommended_plan_id IS NOT NULL THEN 1 ELSE 0 END) AS BIT) AS has_recommended_plan' ELSE '' END + '
+		' + CASE WHEN @GroupBy = 'plan_id' AND @SupportsTuningRecommendations=1 THEN ',CASE WHEN Reg.regressed_plan_id IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END as is_regressed_plan' ELSE '' END + '
+		' + CASE WHEN @GroupBy = 'plan_id' AND @SupportsTuningRecommendations=1 THEN ',CASE WHEN Rec.recommended_plan_id IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END as is_recommended_plan' ELSE '' END + '
 FROM sys.query_store_runtime_stats AS RS
 JOIN sys.query_store_plan AS P ON P.plan_id = RS.plan_id
 JOIN sys.query_store_query AS Q  ON Q.query_id = P.query_id
 JOIN sys.query_store_query_text AS QT ON Q.query_text_id = QT.query_text_id
+' + CASE WHEN @SupportsTuningRecommendations=1 THEN 'LEFT JOIN #DTR Rec ON P.query_id = Rec.query_id AND P.plan_id = Rec.recommended_plan_id
+LEFT JOIN #DTR Reg ON P.query_id = Reg.query_id AND P.plan_id = Reg.regressed_plan_id' ELSE '' END + '
 WHERE RS.runtime_stats_interval_id >= @interval_from
 AND RS.runtime_stats_interval_id <= @interval_to
 ', CASE WHEN @NearestInterval = 1 THEN '' ELSE 'AND NOT (RS.first_execution_time > @ToDate OR RS.last_execution_time < @FromDate)' END,'
@@ -167,12 +229,13 @@ GROUP BY ',CASE WHEN @GroupBy = 'query_id' THEN 'P.query_id, QT.query_sql_text, 
 			WHEN @GroupBy = 'query_plan_hash' THEN 'P.query_plan_hash'
 			WHEN @GroupBy = 'query_hash' THEN 'Q.query_hash'
 			WHEN @GroupBy = 'object_id' THEN 'Q.object_id'
-			WHEN @GroupBy = 'plan_id' THEN 'P.query_id, QT.query_sql_text, Q.object_id,Q.query_hash,Q.query_parameterization_type_desc,RS.plan_id,P.query_plan_hash,P.plan_forcing_type_desc,P.force_failure_count,P.last_force_failure_reason_desc,P.is_parallel_plan' 
+			WHEN @GroupBy = 'plan_id' THEN 'P.query_id, QT.query_sql_text, Q.object_id,Q.query_hash,Q.query_parameterization_type_desc,RS.plan_id,P.query_plan_hash,P.plan_forcing_type_desc,P.force_failure_count,P.last_force_failure_reason_desc,P.is_parallel_plan,Rec.recommended_plan_id,Reg.regressed_plan_id' 
 			WHEN @GroupBy = 'date_bucket' THEN CONCAT(@BucketStart,',',@BucketEnd,',RS.plan_id,P.plan_forcing_type_desc')
 			ELSE NULL END, '
 ', CASE WHEN @MinimumPlanCount >1 THEN 'HAVING COUNT(DISTINCT RS.plan_id)>=@MinimumPlanCount' ELSE '' END,'
 ORDER BY ',@SortSQL,' DESC
 OPTION(HASH JOIN, LOOP JOIN)')
-PRINT @SQL
+
 EXEC sp_executesql @SQL,N'@Top INT,@FromDate DATETIMEOFFSET(7),@ToDate DATETIMEOFFSET(7), @ObjectName NVARCHAR(128),@ObjectID INT,@QueryID BIGINT,@PlanID BIGINT,@QueryHash BINARY(8),@QueryPlanHash BINARY(8),@MinimumPlanCount INT',
 					@Top,@FromDate,@ToDate,@ObjectName,@ObjectID,@QueryID,@PlanID,@QueryHash,@QueryPlanHash,@MinimumPlanCount
+
