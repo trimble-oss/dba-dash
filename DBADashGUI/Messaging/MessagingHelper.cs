@@ -176,7 +176,7 @@ namespace DBADashGUI.Messaging
             }
 
             if (MessageBox.Show(@$"Are you sure you want to {forceOp} this plan?", @$"{forceOp} Plan", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
-            CommonShared.ShowInputDialog(ref notes, "Enter notes");
+            if (CommonShared.ShowInputDialog(ref notes, "Enter notes") != DialogResult.OK) return;
 
             await MessagingHelper.ForceQueryPlan(context, db, forceOp, queryID, planID, objectName, text, queryHash, planHash,
                 notes, lbl, dCompletedDelegate);
