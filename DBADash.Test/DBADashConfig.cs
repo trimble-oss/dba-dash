@@ -114,6 +114,22 @@ namespace DBADashConfig.Test
         }
 
         [TestMethod]
+        [DataRow(null, "TestAccessKey", "TestSecretKey")]
+        [DataRow("default", null, null)]
+        public void SetAWS(string profile, string accessKey, string secretKey)
+        {
+            var psi = new ProcessStartInfo("DBADashConfig",
+                $"-a SetAWS --AWSProfile \"{profile}\" --AWSAccessKey \"{accessKey}\" --AWSSecretKey \"{secretKey}\"");
+            Helper.RunProcess(psi);
+            var json = Helper.GetConfigJson();
+            var cfg = BasicConfig.Load<CollectionConfig>();
+
+            Assert.AreEqual(cfg.AWSProfile, profile);
+            Assert.AreEqual(cfg.AccessKey, accessKey);
+            Assert.AreEqual(cfg.GetSecretKey(), secretKey);
+        }
+
+        [TestMethod]
         [DataRow("DBADashUnitTest")]
         public void ServiceNameTest(string serviceName)
         {

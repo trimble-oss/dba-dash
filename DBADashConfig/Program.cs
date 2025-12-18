@@ -140,6 +140,10 @@ public class Program
             case CommandLineActionOption.PopulateConnectionID2:
                 await Helper.PopulateConnectionIDAsync(config, o, true);
                 break;
+
+            case CommandLineActionOption.SetAWS:
+                Helper.SetAWS(config, o);
+                break;
         }
     }
 }

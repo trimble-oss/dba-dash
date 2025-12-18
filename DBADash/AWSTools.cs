@@ -10,6 +10,7 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Amazon.SQS.Model;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DBADash
 {
@@ -52,7 +53,7 @@ namespace DBADash
             return cred;
         }
 
-        public static async Task<AmazonS3Client> GetAWSClientAsync(string profile, string accessKey, string secretKey, AmazonS3Uri uri)
+        public static async Task<AmazonS3Client> GetAmazonAWSClientAsync(string profile, string accessKey, string secretKey, AmazonS3Uri uri)
         {
             var cred = GetCredentials(profile, accessKey, secretKey);
             if (!RegionCache.TryGetValue(uri.Bucket, out var AWSRegion))
@@ -71,7 +72,7 @@ namespace DBADash
                 catch (Exception ex)
                 {
                     AWSRegion = uri.Region ?? RegionEndpoint.USEast1;
-                    Log.Warning(ex, "Unable to get bucket location using GetBucketLocationAsync for {bucket}.  Region set to {region} (Uri parsing or default)", uri.Bucket,AWSRegion.SystemName);
+                    Log.Warning(ex, "Unable to get bucket location using GetBucketLocationAsync for {bucket}.  Region set to {region} (Uri parsing or default)", uri.Bucket, AWSRegion.SystemName);
                 }
 
                 RegionCache.TryAdd(uri.Bucket, AWSRegion);
@@ -80,7 +81,73 @@ namespace DBADash
             return new AmazonS3Client(cred, AWSRegion);
         }
 
-        public static AmazonSQSClient GetSQSClient(string profile,string accessKey, string secretKey, string queueUrl)
+        public static async Task<AmazonS3Client> GetS3ClientForEndpointAsync(string profile, string accessKey, string secretKey, string destination)
+        {
+            var cred = GetCredentials(profile, accessKey, secretKey);
+
+            var endpointUri = new Uri(destination);
+            var host = endpointUri.Host;
+            var s3Scheme = string.Equals(endpointUri.Scheme, "s3", StringComparison.OrdinalIgnoreCase);
+            var isAwsHost = !string.IsNullOrEmpty(host) && host.EndsWith("amazonaws.com", StringComparison.OrdinalIgnoreCase);
+            // If scheme is s3:// it's AWS-style; otherwise defer AmazonS3Uri parsing until confirmed AWS
+            var isAws = isAwsHost || s3Scheme;
+
+            if (!isAws)
+            {
+                var authRegion = GetAuthRegionFromHost(host);
+
+                var cfg = new AmazonS3Config
+                {
+                    ServiceURL = endpointUri.GetLeftPart(UriPartial.Authority),
+                    ForcePathStyle = true,
+                    UseHttp = string.Equals(endpointUri.Scheme, "http", StringComparison.OrdinalIgnoreCase),
+                    AuthenticationRegion = authRegion.SystemName
+                };
+
+                return new AmazonS3Client(cred, cfg);
+            }
+
+            // AWS path: reuse region-discovery + caching
+            var s3Uri = new AmazonS3Uri(endpointUri);
+            return await GetAmazonAWSClientAsync(profile, accessKey, secretKey, s3Uri);
+        }
+
+        private static RegionEndpoint GetAuthRegionFromHost(string host)
+        {
+            RegionCache.TryGetValue(host, out var authRegion);
+            if (authRegion != null)
+                return authRegion;
+            string? authRegionCandidate = null;
+            var parts = host.Split('.');
+            if (parts.Length >= 3 && parts[0].Equals("s3", StringComparison.OrdinalIgnoreCase))
+            {
+                authRegionCandidate = parts[1]; // e.g., "us-west-2"
+            }
+
+            // Provider-specific override: Cloudflare R2 expects "auto"
+            if (host.EndsWith("r2.cloudflarestorage.com", StringComparison.OrdinalIgnoreCase))
+            {
+                authRegionCandidate = "auto";
+            }
+
+            // Validate candidate region: letters/digits/dashes, length 2–32 (covers most providers)
+            static bool IsValidRegion(string r)
+                => !string.IsNullOrWhiteSpace(r) && r.Length >= 2 && r.Length <= 32 && r.All(c => char.IsLetterOrDigit(c) || c == '-');
+
+            if (!string.IsNullOrEmpty(authRegionCandidate) && IsValidRegion(authRegionCandidate))
+            {
+                authRegion = RegionEndpoint.GetBySystemName(authRegionCandidate);
+            }
+            else
+            {
+                authRegion = RegionEndpoint.USEast1;
+                Log.Warning("Unrecognized or invalid auth region \"{authRegionCandidate}\" for host {host}. Defaulting to {region}.", authRegionCandidate, host, authRegion);
+            }
+            RegionCache.TryAdd(host, authRegion);
+            return authRegion;
+        }
+
+        public static AmazonSQSClient GetSQSClient(string profile, string accessKey, string secretKey, string queueUrl)
         {
             if (!RegionCache.TryGetValue(queueUrl, out var region))
             {
@@ -93,7 +160,6 @@ namespace DBADash
 
         public static AmazonSQSClient GetSQSClient(string profile, string accessKey, string secretKey, RegionEndpoint region)
         {
-
             var cred = GetCredentials(profile, accessKey, secretKey);
 
             return new AmazonSQSClient(cred, region);
@@ -143,17 +209,16 @@ namespace DBADash
 
         private static readonly ConcurrentDictionary<RegionEndpoint, IAmazonSQS> _clients = new();
 
-        public static IAmazonSQS GetOrCreateClient(RegionEndpoint region,CollectionConfig cfg)
+        public static IAmazonSQS GetOrCreateClient(RegionEndpoint region, CollectionConfig cfg)
         {
-            var client =GetSQSClient(cfg.AWSProfile, cfg.AccessKey, cfg.GetSecretKey(), region);
-            return _clients.GetOrAdd(region,client);
+            var client = GetSQSClient(cfg.AWSProfile, cfg.AccessKey, cfg.GetSecretKey(), region);
+            return _clients.GetOrAdd(region, client);
         }
 
-
-        public static async Task SendSQSMessageAsync(CollectionConfig cfg,string messageBody, string fromIdentifier, string toIdentifier, Guid handle, string toQueue,string messageType,string destinationConnectionHash)
+        public static async Task SendSQSMessageAsync(CollectionConfig cfg, string messageBody, string fromIdentifier, string toIdentifier, Guid handle, string toQueue, string messageType, string destinationConnectionHash)
         {
             var region = GetRegionForQueue(toQueue);
-            var client = GetOrCreateClient(region,cfg);
+            var client = GetOrCreateClient(region, cfg);
 
             var sendMessageRequest = new SendMessageRequest
             {
@@ -163,15 +228,14 @@ namespace DBADash
                 {
                     { "DBADashFromIdentifier", new MessageAttributeValue { DataType = "String", StringValue = fromIdentifier } },
                     { "DBADashToIdentifier", new MessageAttributeValue { DataType = "String", StringValue = toIdentifier } },
-                    { "ReplySQSQueue", new MessageAttributeValue { DataType = "String", StringValue = cfg.ServiceSQSQueueUrl }},
-                    { "DestinationConnectionHash", new MessageAttributeValue {DataType = "String", StringValue = destinationConnectionHash }},
+                    { "ReplySQSQueue", new MessageAttributeValue { DataType = "String", StringValue = cfg.ServiceSQSQueueUrl } },
+                    { "DestinationConnectionHash", new MessageAttributeValue { DataType = "String", StringValue = destinationConnectionHash } },
                     { "Handle", new MessageAttributeValue { DataType = "String", StringValue = handle.ToString() } },
-                    { "MessageType", new MessageAttributeValue { DataType = "String", StringValue = messageType} },
+                    { "MessageType", new MessageAttributeValue { DataType = "String", StringValue = messageType } },
                 }
             };
 
             await client.SendMessageAsync(sendMessageRequest);
         }
-
     }
 }

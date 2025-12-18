@@ -306,7 +306,9 @@ namespace DBADashService
             {
                 try
                 {
-                    var files = Directory.EnumerateFiles(folder, "DBADash_*", SearchOption.TopDirectoryOnly).Where(f => f.EndsWith(".xml")).ToList();
+                    var files = Directory.EnumerateFiles(folder, DestinationHandling.FileSearchPattern, SearchOption.TopDirectoryOnly)
+                        .Where(f => f.EndsWith(DestinationHandling.FileExtension))
+                        .ToList();
 
                     var filesToProcessByInstance = GetFilesToProcessByInstance(files);
                     // Parallel processing of files for each instance, but process the files for a given instance in order
@@ -392,29 +394,56 @@ namespace DBADashService
             Log.Information("Import from S3 {connection}", cfg.ConnectionString);
             try
             {
-                var uri = new Amazon.S3.Util.AmazonS3Uri(cfg.ConnectionString);
-                using var s3Cli = await AWSTools.GetAWSClientAsync(config.AWSProfile, config.AccessKey, config.GetSecretKey(), uri);
-                ListObjectsRequest request = new() { BucketName = uri.Bucket, Prefix = (uri.Key + "/DBADash_").Replace("//", "/") };
+                // Support AWS and S3-compatible providers (e.g., MinIO) by flexible parsing
+                string bucket;
+                string keyPrefix;
+                if (Amazon.S3.Util.AmazonS3Uri.TryParseAmazonS3Uri(cfg.ConnectionString, out var s3Uri))
+                {
+                    bucket = s3Uri.Bucket;
+                    keyPrefix = s3Uri.Key ?? string.Empty;
+                }
+                else
+                {
+                    var endpointUri = new Uri(cfg.ConnectionString, UriKind.Absolute);
+                    var segments = endpointUri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                    if (segments.Length == 0)
+                    {
+                        throw new ArgumentException("S3 source must include bucket name in path", nameof(cfg.ConnectionString));
+                    }
+                    bucket = segments[0];
+                    keyPrefix = string.Join('/', segments.Skip(1));
+                }
+
+                using var s3Cli = await AWSTools.GetS3ClientForEndpointAsync(config.AWSProfile, config.AccessKey, config.GetSecretKey(), cfg.ConnectionString);
+                // Build prefix correctly for root or subfolder without leading slash
+                var normalizedPrefix = string.IsNullOrEmpty(keyPrefix)
+                    ? DestinationHandling.FileNamePrefix
+                    : string.Join('/', new[] { keyPrefix.TrimEnd('/'), DestinationHandling.FileNamePrefix });
+                ListObjectsRequest request = new()
+                {
+                    BucketName = bucket,
+                    Prefix = normalizedPrefix
+                };
 
                 do
                 {
                     var resp = await s3Cli.ListObjectsAsync(request);
                     if (resp is { S3Objects: not null })
                     {
-                        var fileList = resp.S3Objects.Where(f => f.Key.EndsWith(".xml")).Select(f => f.Key).ToList();
+                        var fileList = resp.S3Objects.Where(f => f.Key.EndsWith(DestinationHandling.FileExtension)).Select(f => f.Key).ToList();
                         var filesToProcessByInstance = GetFilesToProcessByInstance(fileList);
 
-                        Log.Information("Processing {0} files from {1}. Instance Count: {2}", resp.S3Objects.Count, uri.Key, filesToProcessByInstance.Count);
+                        Log.Information("Processing {0} files from {1}. Instance Count: {2}", fileList.Count, string.IsNullOrEmpty(keyPrefix) ? "(root)" : keyPrefix, filesToProcessByInstance.Count);
 
                         // Start a thread to process the files associated with each instance.  Each instance will have it's files processed sequentially in the order they were collected.
-                        var tasks = filesToProcessByInstance.Select(instanceItem => instanceItem.Value).Select(instanceFiles => ProcessS3FileListForCollectS3Async(instanceFiles, s3Cli, uri, cfg)).ToList();
+                        var tasks = filesToProcessByInstance.Select(instanceItem => instanceItem.Value).Select(instanceFiles => ProcessS3FileListForCollectS3Async(instanceFiles, s3Cli, bucket, cfg)).ToList();
 
                         await Task.WhenAll(tasks);
                     }
 
                     if (resp?.IsTruncated == true)
                     {
-                        Log.Debug("Response truncated.  Processing next marker for {0}", uri.Key);
+                        Log.Debug("Response truncated.  Processing next marker for {0}", keyPrefix);
                         request.Marker = resp.NextMarker;
                     }
                     else
@@ -433,12 +462,12 @@ namespace DBADashService
         /// <summary>
         /// Process a given list of S3 files for a specific instance in order, writing collected data to DBA Dash repository database
         /// </summary>
-        private static async Task ProcessS3FileListForCollectS3Async(List<string> instanceFiles, Amazon.S3.AmazonS3Client s3Cli, Amazon.S3.Util.AmazonS3Uri uri, DBADashSource cfg)
+        private static async Task ProcessS3FileListForCollectS3Async(List<string> instanceFiles, Amazon.S3.AmazonS3Client s3Cli, string bucket, DBADashSource cfg)
         {
             instanceFiles.Sort(); // Ensure files are processed in order
             foreach (var s3Path in instanceFiles)
             {
-                using var response = await s3Cli.GetObjectAsync(uri.Bucket, s3Path);
+                using var response = await s3Cli.GetObjectAsync(bucket, s3Path);
                 await using var responseStream = response.ResponseStream;
 
                 var ds = new DataSet();
@@ -461,7 +490,7 @@ namespace DBADashService
                     }
                     finally
                     {
-                        await s3Cli.DeleteObjectAsync(uri.Bucket, s3Path);
+                        await s3Cli.DeleteObjectAsync(bucket, s3Path);
                     }
                 }
 

@@ -404,5 +404,39 @@ namespace DBADashConfig
                 Environment.Exit(1);
             }
         }
+
+        public static void SetAWS(CollectionConfig config, Options o)
+        {
+            if (!string.IsNullOrEmpty(o.AWSAccessKey))
+            {
+                if (string.IsNullOrEmpty(o.AWSSecretKey))
+                {
+                    Log.Error("AWSSecretKey is required when setting AWSAccessKey");
+                    Environment.Exit(1);
+                }
+                else if (!string.IsNullOrEmpty(o.AWSProfile))
+                {
+                    Log.Error("Please set either using --AWSProfile or both --AWSAccessKey and --AWSSecretKey");
+                    Environment.Exit(1);
+                }
+                config.AccessKey = o.AWSAccessKey;
+                config.SecretKey = o.AWSSecretKey;
+                config.AWSProfile = null;
+            }
+            else if (!string.IsNullOrEmpty(o.AWSProfile))
+            {
+                config.AWSProfile = o.AWSProfile;
+                config.AccessKey = null;
+                config.SecretKey = null;
+            }
+            else
+            {
+                Log.Information("Clearing AWS configuration.  Use --AWSAccessKey and --AWSSecretKey or --AWSProfile with -a SetAWS to configure.");
+                config.AWSProfile = null;
+                config.AccessKey = null;
+                config.SecretKey = null;
+            }
+            SaveConfig(config, o);
+        }
     }
 }

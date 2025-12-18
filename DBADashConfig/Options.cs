@@ -26,7 +26,8 @@ Encrypt - Encrypt the config file with a password (--EncryptionPassword)
 Decrypt - Decrypt the config file. --DecryptionPassword can be used if required.
 SetConfigFileBackupRetention - Specify how long to keep config file backups. --RetentionDays
 PopulateConnectionID - Add ConnectionID to source connections without a ConnectionID
-PopulateConnectionID2 - Add ConnectionID to source connections without a ConnectionID.  If connection fails, set ConnectionID based on Data Source in connection string.")]
+PopulateConnectionID2 - Add ConnectionID to source connections without a ConnectionID.  If connection fails, set ConnectionID based on Data Source in connection string.
+SetAWS - Set AWS Credentials")]
         public CommandLineActionOption Option { get; set; }
 
         [Option('r', "Replace", Required = false, HelpText = "Option to replace the existing connection if it already exists", Default = false)]
@@ -121,6 +122,15 @@ PopulateConnectionID2 - Add ConnectionID to source connections without a Connect
         [Option("ScriptAgentJobs", Default = true, Required = false, HelpText = "Option to script agent jobs.  Use with -a Add")]
         public bool? ScriptAgentJobs { get; set; }
 
+        [Option("AWSAccessKey", Required = false, HelpText = "Use with -a SetAWS to set AWS Access Key for S3 storage")]
+        public string? AWSAccessKey { get; set; }
+
+        [Option("AWSSecretKey", Required = false, HelpText = "Use with -a SetAWS to set AWS Secret Key for S3 storage")]
+        public string? AWSSecretKey { get; set; }
+
+        [Option("AWSProfile", Required = false, HelpText = "Use with -a SetAWS to set AWS Profile for S3 storage")]
+        public string? AWSProfile { get; set; }
+
         public enum CommandLineActionOption
         {
             Add,
@@ -143,7 +153,8 @@ PopulateConnectionID2 - Add ConnectionID to source connections without a Connect
             Delete,
             Restore,
             PopulateConnectionID,
-            PopulateConnectionID2
+            PopulateConnectionID2,
+            SetAWS
         }
     }
 }

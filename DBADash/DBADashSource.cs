@@ -139,7 +139,7 @@ namespace DBADash
 
         public static string GenerateFileName(string connection)
         {
-            return "DBADash_" + DateTime.UtcNow.ToString("yyyyMMdd_HHmm_ss") + "_" + connection + "_" + Convert.ToBase64String(Guid.NewGuid().ToByteArray()).Replace("=", "").Replace("/", "-") + ".xml";
+            return DestinationHandling.FileNamePrefix + DateTime.UtcNow.ToString("yyyyMMdd_HHmm_ss") + "_" + connection + "_" + Convert.ToBase64String(Guid.NewGuid().ToByteArray()).Replace("=", "").Replace("/", "-") + DestinationHandling.FileExtension;
         }
 
         [DefaultValue(false)]
