@@ -197,7 +197,7 @@ namespace DBADash
             {
                 return ConnectionType.Invalid;
             }
-            else if (connectionString.StartsWith("s3://") || connectionString.StartsWith("https://"))
+            else if (connectionString.StartsWith("s3://") || connectionString.StartsWith("https://") || connectionString.StartsWith("http://"))
             {
                 return ConnectionType.AWSS3;
             }

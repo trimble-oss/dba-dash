@@ -15,6 +15,9 @@ namespace DBADash
 {
     public class DestinationHandling
     {
+        public const string FileNamePrefix = "DBADash_";
+        public const string FileExtension = ".xml";
+        public const string FileSearchPattern = FileNamePrefix + "*";
 
         private static readonly ResiliencePipeline pipeline = new ResiliencePipelineBuilder()
             .AddRetry(new RetryStrategyOptions
@@ -110,14 +113,36 @@ namespace DBADash
 
             DataSetSerialization.SetDateTimeKind(ds); // Required to prevent timezone conversion
 
-            var uri = new Amazon.S3.Util.AmazonS3Uri(destination);
+            // Try to parse using AmazonS3Uri first; fallback to generic Uri for MinIO etc
+            string bucket;
+            string keyPrefix;
+            if (Amazon.S3.Util.AmazonS3Uri.TryParseAmazonS3Uri(destination, out var s3Uri))
+            {
+                bucket = s3Uri.Bucket;
+                keyPrefix = s3Uri.Key ?? string.Empty;
+            }
+            else
+            {
+                // Fallback parsing: assume     format like https://host:port/bucket[/prefix]
+                var genericUri = new Uri(destination, UriKind.Absolute);
+                // Split path segments, ignore leading slash
+                var segments = genericUri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                if (segments.Length == 0)
+                {
+                    throw new ArgumentException("S3 destination must include bucket name in path", nameof(destination));
+                }
+                bucket = segments[0];
+                keyPrefix = string.Join('/', segments.Skip(1));
+            }
 
-            using var s3Cli = await AWSTools.GetAWSClientAsync(cfg.AWSProfile, cfg.AccessKey, cfg.GetSecretKey(), uri);
+            using var s3Cli = await AWSTools.GetS3ClientForEndpointAsync(cfg.AWSProfile, cfg.AccessKey, cfg.GetSecretKey(), destination);
 
             var r = new Amazon.S3.Model.PutObjectRequest()
             {
-                BucketName = uri.Bucket,
-                Key = (uri.Key + "/" + fileName).Replace("//", "/")
+                BucketName = bucket,
+                Key = string.IsNullOrEmpty(keyPrefix)
+                    ? fileName
+                    : string.Join('/', new[] { keyPrefix.TrimEnd('/'), fileName })
             };
 
             using var ms = new MemoryStream();
