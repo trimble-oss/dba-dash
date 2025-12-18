@@ -393,7 +393,7 @@ namespace DBADashService
             try
             {
                 var uri = new Amazon.S3.Util.AmazonS3Uri(cfg.ConnectionString);
-                using var s3Cli = await AWSTools.GetAWSClientAsync(config.AWSProfile, config.AccessKey, config.GetSecretKey(), uri);
+                using var s3Cli = await AWSTools.GetS3ClientForEndpointAsync(config.AWSProfile, config.AccessKey, config.GetSecretKey(), cfg.ConnectionString);
                 ListObjectsRequest request = new() { BucketName = uri.Bucket, Prefix = (uri.Key + "/DBADash_").Replace("//", "/") };
 
                 do

@@ -81,7 +81,7 @@ namespace DBADash.Messaging
             {
                 Log.Information("Downloading message data from {path}", MessageDataPath);
                 var uri = new Amazon.S3.Util.AmazonS3Uri(MessageDataPath);
-                using var s3Cli = await AWSTools.GetAWSClientAsync(Config.AWSProfile, Config.AccessKey, Config.GetSecretKey(), uri);
+                using var s3Cli = await AWSTools.GetS3ClientForEndpointAsync(Config.AWSProfile, Config.AccessKey, Config.GetSecretKey(), MessageDataPath);
 
                 using var s3Obj = await s3Cli.GetObjectAsync(uri.Bucket, uri.Key);
 

@@ -15,7 +15,6 @@ namespace DBADash
 {
     public class DestinationHandling
     {
-
         private static readonly ResiliencePipeline pipeline = new ResiliencePipelineBuilder()
             .AddRetry(new RetryStrategyOptions
             {
@@ -112,7 +111,7 @@ namespace DBADash
 
             var uri = new Amazon.S3.Util.AmazonS3Uri(destination);
 
-            using var s3Cli = await AWSTools.GetAWSClientAsync(cfg.AWSProfile, cfg.AccessKey, cfg.GetSecretKey(), uri);
+            using var s3Cli = await AWSTools.GetS3ClientForEndpointAsync(cfg.AWSProfile, cfg.AccessKey, cfg.GetSecretKey(), destination);
 
             var r = new Amazon.S3.Model.PutObjectRequest()
             {
