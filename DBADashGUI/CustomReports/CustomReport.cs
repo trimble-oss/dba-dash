@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using DBADash;
+﻿using DBADash;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 
 namespace DBADashGUI.CustomReports
 {
@@ -49,14 +49,14 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         [JsonIgnore]
         public IEnumerable<Param> UserParams => Params?.ParamList == null ? new List<Param>() : Params.ParamList.Where(p =>
-                                                                                                                                                                                                                                                                                                                    !SystemParamNames.Contains(p.ParamName.ToUpper()));
+                                                                                                                                                                                                                                                                                                                                                            !SystemParamNames.Contains(p.ParamName.ToUpper()));
 
         /// <summary>
         /// Parameters for the stored procedure that are supplied automatically based on context
         /// </summary>
         [JsonIgnore]
         public IEnumerable<Param> SystemParams => Params?.ParamList == null ? new List<Param>() : Params.ParamList.Where(p =>
-                                                                                                                                                                                                                    SystemParamNames.Contains(p.ParamName.ToUpper()));
+                                                                                                                                                                                                                                                            SystemParamNames.Contains(p.ParamName.ToUpper()));
 
         [JsonIgnore]
         public virtual bool IsRootLevel => Params != null && Params.ParamList.Any(p => p.ParamName.Equals("@INSTANCEIDS", StringComparison.OrdinalIgnoreCase));
@@ -77,10 +77,29 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         [JsonIgnore]
         public bool TimeFilterSupported => Params != null && Params.ParamList.Any(p =>
-                                                                                                                                                                                                                                                                                                                    p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
-                                                                                                                                                                                                                                                                                                                    p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase));
+                                                                                                                                                                                                                                                                                                                                                            p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
+                                                                                                                                                                                                                                                                                                                                                            p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase));
 
         public bool ForceRefreshWithoutContextChange { get; set; }
+
+        /// <summary>
+        /// Associate report with a view type for rendering.  Most reports will use CustomReportView, but specialized views can be created by deriving from CustomReportView.
+        /// Not serialized as user custom reports will all use CustomReportView.
+        /// </summary>
+        [JsonIgnore]
+        public Type ViewType
+        {
+            get => field;
+            set
+            {
+                var t = value ?? typeof(CustomReportView);
+                if (!typeof(CustomReportView).IsAssignableFrom(t))
+                {
+                    throw new ArgumentException($"ViewType must derive from {nameof(CustomReportView)}. Provided: {t.FullName}");
+                }
+                field = t;
+            }
+        }
 
         /// <summary>
         /// Save customizations

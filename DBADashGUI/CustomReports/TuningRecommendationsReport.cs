@@ -143,6 +143,7 @@ namespace DBADashGUI.CustomReports
 
         public static SystemDirectExecutionReport Instance => new()
         {
+            ViewType = typeof(TuningRecommendationsReport),
             EmbeddedScript = ProcedureExecutionMessage.EmbeddedScripts.TuningRecommendations,
             ReportName = "Tuning Recommendations",
             ProcedureName = ProcedureExecutionMessage.EmbeddedScripts.TuningRecommendations.ToString(),
