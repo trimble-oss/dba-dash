@@ -889,6 +889,12 @@ namespace DBADashGUI.CommunityTools
                     new() { ParamName = "@BringThePain", ParamType = "BIT" },
                     new() { ParamName = "@MinimumExecutionCount", ParamType = "INT" },
                     new() { ParamName = "@MinutesBack", ParamType = "INT" },
+                    new() { ParamName = "@AI", ParamType = "TINYINT" },
+                    new() { ParamName = "@AIModel", ParamType = "VARCHAR" },
+                    new() { ParamName = "@AIURL", ParamType = "VARCHAR" },
+                    new() { ParamName = "@AIConfig", ParamType = "VARCHAR" },
+                    new() { ParamName = "@AICredential", ParamType = "VARCHAR" },
+                    new() { ParamName = "@KeepCRLF", ParamType = "BIT" },
                 }
             },
             Pickers = new List<Picker>
@@ -900,6 +906,10 @@ namespace DBADashGUI.CommunityTools
                     DefaultValue = null,
                     PickerItems = new()
                     {
+                        { 1, "1" },
+                        { 2, "2" },
+                        { 3, "3" },
+                        { 4, "4" },
                         { 5, "5" },
                         { 10, "10" },
                         { 15, "15" },
@@ -1007,6 +1017,46 @@ namespace DBADashGUI.CommunityTools
                         { false, "No" },
                     }
                 },
+                new()
+                {
+                    ParameterName = "@AI",
+                    Name = "AI",
+                    DefaultValue = null,
+                    PickerItems = new()
+                    {
+                        { 0, "None"  },
+                        { 1, "AI Analysis" },
+                        { 2, "Generate prompt" },
+                    }
+                },
+                new()
+                {
+                    ParameterName = "@KeepCRLF",
+                    Name = "Keep CR/LF in text columns",
+                    DefaultValue = null,
+                    PickerItems = new()
+                    {
+                        { true, "Yes" },
+                        { false, "No" },
+                    }
+                },
+                new()
+                {
+                    ParameterName = "@AIModel",
+                    Name = "AI Model",
+                    DefaultValue = null,
+                    PickerItems = new()
+                    {
+                        { "gemini-2.5-flash","gemini-2.5-flash" },
+                        { "gemini-2.5-flash-lite","gemini-2.5-flash-lite" },
+                        { "gemini-2.5-pro","gemini-2.5-pro" },
+                        { "gemini-3-flash-preview","gemini-3-flash-preview" },
+                        { "gemini-3-pro-preview","gemini-3-pro-preview" },
+                        { "gpt-5-mini", "gpt-5-mini" },
+                        { "gpt-5-nano", "gpt-5-nano" },
+                        { "gpt-5.1", "gpt-5.1" },
+                    }
+                }
             },
             CustomReportResults = new Dictionary<int, CustomReportResult>
             {
@@ -1069,6 +1119,22 @@ namespace DBADashGUI.CommunityTools
                                 new QueryPlanLinkColumnInfo()
                                 {
                                     TargetColumn = "Query Plan",
+                                }
+                            },
+                            {
+                                "AI Prompt",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "AI Prompt",
+                                    TextHandling = CodeEditor.CodeEditorModes.XML
+                                }
+                            },
+                            {
+                                "AI Advice",
+                                new TextLinkColumnInfo()
+                                {
+                                    TargetColumn = "AI Advice",
+                                    TextHandling = CodeEditor.CodeEditorModes.XML
                                 }
                             },
                         }
