@@ -52,14 +52,14 @@ namespace DBADashGUI.CommunityTools
                 },
                 new()
                 {
-                    ParameterName = "IncludeMSShipped",
+                    ParameterName = "@IncludeMSShipped",
                     Name = "Include MS Shipped",
                     DefaultValue = true,
                     PickerItems = CommunityTools.BooleanPickerItems
                 },
                 new()
                 {
-                    ParameterName = "ShowOrphans",
+                    ParameterName = "@ShowOrphans",
                     Name = "Show Orphans",
                     DefaultValue = false,
                     PickerItems = CommunityTools.BooleanPickerItems
@@ -85,22 +85,28 @@ namespace DBADashGUI.CommunityTools
                     0, new CustomReportResult
                     {
                         ResultName = "1",
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
                             {
                                 "DropScript",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "DropScript",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "DropScript",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "CreateScript",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "CreateScript",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "CreateScript",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             }
                         }
@@ -110,22 +116,28 @@ namespace DBADashGUI.CommunityTools
                     1, new CustomReportResult
                     {
                         ResultName = "2",
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
                             {
                                 "DropScript",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "DropScript",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "DropScript",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "AddScript",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "AddScript",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "AddScript",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             }
                         }
@@ -135,22 +147,28 @@ namespace DBADashGUI.CommunityTools
                     2, new CustomReportResult
                     {
                         ResultName = "3",
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
                             {
                                 "RevokeScript",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "RevokeScript",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "RevokeScript",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "GrantScript",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "GrantScript",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "GrantScript",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             }
                         }

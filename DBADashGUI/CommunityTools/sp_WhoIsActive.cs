@@ -45,53 +45,71 @@ namespace DBADashGUI.CommunityTools
                 {
                     0, new CustomReportResult
                     {
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
                             {
                                 "query_plan",
-                                new QueryPlanLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "query_plan"
+                                    Link = new QueryPlanLinkColumnInfo
+                                    {
+                                        TargetColumn = "query_plan"
+                                    }
                                 }
                             },
                             {
                                 "sql_text",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "sql_text",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "sql_text",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "sql_command",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "sql_command",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "sql_command",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "additional_info",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "additional_info",
-                                    TextHandling = CodeEditor.CodeEditorModes.XML
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "additional_info",
+                                        TextHandling = CodeEditor.CodeEditorModes.XML
+                                    }
                                 }
                             },
                             {
                                 "locks",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "locks",
-                                    TextHandling = CodeEditor.CodeEditorModes.XML
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "locks",
+                                        TextHandling = CodeEditor.CodeEditorModes.XML
+                                    }
                                 }
                             },
                             {
                                 "memory_info",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "memory_info",
-                                    TextHandling = CodeEditor.CodeEditorModes.XML
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "memory_info",
+                                        TextHandling = CodeEditor.CodeEditorModes.XML
+                                    }
                                 }
                             },
                         }
@@ -124,7 +142,7 @@ namespace DBADashGUI.CommunityTools
                 },
                 new()
                 {
-                    ParameterName = "@show_sleeping_spids ",
+                    ParameterName = "@show_sleeping_spids",
                     Name = "Show Sleeping SPIDs",
                     DefaultValue = 1,
                     PickerItems = new()
@@ -159,7 +177,7 @@ namespace DBADashGUI.CommunityTools
                 },
                 new()
                 {
-                    ParameterName = "@get_outer_command ",
+                    ParameterName = "@get_outer_command",
                     Name = "Get Outer Command",
                     DefaultValue = false,
                     PickerItems = new()

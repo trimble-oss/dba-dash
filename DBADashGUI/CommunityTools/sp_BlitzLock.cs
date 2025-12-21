@@ -64,21 +64,27 @@ namespace DBADashGUI.CommunityTools
                     0, new CustomReportResult
                     {
                         ResultName = "Main",
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
                             {
                                 "query",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "query",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "query",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "deadlock_graph",
-                                new DeadlockGraphLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "deadlock_graph",
+                                    Link = new DeadlockGraphLinkColumnInfo
+                                    {
+                                        TargetColumn = "deadlock_graph",
+                                    }
                                 }
                             },
                         }
@@ -88,21 +94,27 @@ namespace DBADashGUI.CommunityTools
                     1, new CustomReportResult
                     {
                         ResultName = "Plans",
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
                             {
                                 "query_text",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "query_text",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "query_text",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "query_plan",
-                                new QueryPlanLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "query_plan",
+                                    Link = new QueryPlanLinkColumnInfo
+                                    {
+                                        TargetColumn = "query_plan",
+                                    }
                                 }
                             },
                         }
@@ -112,14 +124,17 @@ namespace DBADashGUI.CommunityTools
                     2, new CustomReportResult
                     {
                         ResultName = "Findings",
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
                             {
                                 "finding",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "finding",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "finding",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                         }

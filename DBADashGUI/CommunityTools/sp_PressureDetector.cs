@@ -11,52 +11,104 @@ namespace DBADashGUI.CommunityTools
         private static CustomReportResult GetPressureDetectorResult(string name) => new()
         {
             ResultName = name,
-            LinkColumns = new Dictionary<string, LinkColumnInfo>
+            Columns = new Dictionary<string, ColumnMetadata>
             {
                 {
                     "tempdb_info",
-                    new TextLinkColumnInfo()
-                        { TargetColumn = "tempdb_info", TextHandling = CodeEditor.CodeEditorModes.XML }
+                    new ColumnMetadata
+                    {
+                        Link = new TextLinkColumnInfo
+                        {
+                            TargetColumn = "tempdb_info",
+                            TextHandling = CodeEditor.CodeEditorModes.XML
+                        }
+                    }
                 },
                 {
                     "low_memory",
-                    new TextLinkColumnInfo()
-                        { TargetColumn = "low_memory", TextHandling = CodeEditor.CodeEditorModes.XML }
+                    new ColumnMetadata
+                    {
+                        Link = new TextLinkColumnInfo
+                        {
+                            TargetColumn = "low_memory",
+                            TextHandling = CodeEditor.CodeEditorModes.XML
+                        }
+                    }
                 },
                 {
                     "cache_memory",
-                    new TextLinkColumnInfo()
-                        { TargetColumn = "cache_memory", TextHandling = CodeEditor.CodeEditorModes.XML }
+                    new ColumnMetadata
+                    {
+                        Link = new TextLinkColumnInfo
+                        {
+                            TargetColumn = "cache_memory",
+                            TextHandling = CodeEditor.CodeEditorModes.XML
+                        }
+                    }
                 },
                 {
                     "max_memory_grant_cap",
-                    new TextLinkColumnInfo()
-                        { TargetColumn = "max_memory_grant_cap", TextHandling = CodeEditor.CodeEditorModes.XML }
+                    new ColumnMetadata
+                    {
+                        Link = new TextLinkColumnInfo
+                        {
+                            TargetColumn = "max_memory_grant_cap",
+                            TextHandling = CodeEditor.CodeEditorModes.XML
+                        }
+                    }
                 },
                 {
                     "cpu_details_output",
-                    new TextLinkColumnInfo()
-                        { TargetColumn = "cpu_details_output", TextHandling = CodeEditor.CodeEditorModes.XML }
+                    new ColumnMetadata
+                    {
+                        Link = new TextLinkColumnInfo
+                        {
+                            TargetColumn = "cpu_details_output",
+                            TextHandling = CodeEditor.CodeEditorModes.XML
+                        }
+                    }
                 },
                 {
                     "cpu_utilization_over_threshold",
-                    new TextLinkColumnInfo()
+                    new ColumnMetadata
                     {
-                        TargetColumn = "cpu_utilization_over_threshold", TextHandling = CodeEditor.CodeEditorModes.XML
+                        Link = new TextLinkColumnInfo
+                        {
+                            TargetColumn = "cpu_utilization_over_threshold",
+                            TextHandling = CodeEditor.CodeEditorModes.XML
+                        }
                     }
                 },
                 {
                     "query_text",
-                    new TextLinkColumnInfo()
-                        { TargetColumn = "query_text", TextHandling = CodeEditor.CodeEditorModes.SQL }
+                    new ColumnMetadata
+                    {
+                        Link = new TextLinkColumnInfo
+                        {
+                            TargetColumn = "query_text",
+                            TextHandling = CodeEditor.CodeEditorModes.SQL
+                        }
+                    }
                 },
                 {
                     "query_plan",
-                    new QueryPlanLinkColumnInfo() { TargetColumn = "query_plan" }
+                    new ColumnMetadata
+                    {
+                        Link = new QueryPlanLinkColumnInfo
+                        {
+                            TargetColumn = "query_plan"
+                        }
+                    }
                 },
                 {
                     "live_query_plan",
-                    new QueryPlanLinkColumnInfo() { TargetColumn = "live_query_plan" }
+                    new ColumnMetadata
+                    {
+                        Link = new QueryPlanLinkColumnInfo
+                        {
+                            TargetColumn = "live_query_plan"
+                        }
+                    }
                 },
             }
         };
