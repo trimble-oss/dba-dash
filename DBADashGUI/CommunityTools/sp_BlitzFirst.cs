@@ -120,66 +120,90 @@ namespace DBADashGUI.CommunityTools
                     0, new CustomReportResult
                     {
                         ResultName = "Running Queries / Findings",
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
                             {
                                 "URL",
-                                new UrlLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "URL",
+                                    Link = new UrlLinkColumnInfo
+                                    {
+                                        TargetColumn = "URL",
+                                    }
                                 }
                             },
                             {
                                 "Details",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "Details",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "Details",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "HowToStopIt",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "HowToStopIt",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "HowToStopIt",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "QueryText",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "QueryText",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "QueryText",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "query_text",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "query_text",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "query_text",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "QueryPlan",
-                                new QueryPlanLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "QueryPlan",
+                                    Link = new QueryPlanLinkColumnInfo
+                                    {
+                                        TargetColumn = "QueryPlan",
+                                    }
                                 }
                             },
                             {
                                 "query_plan",
-                                new QueryPlanLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "query_plan",
+                                    Link = new QueryPlanLinkColumnInfo
+                                    {
+                                        TargetColumn = "query_plan",
+                                    }
                                 }
                             },
                             {
                                 "live_query_plan",
-                                new QueryPlanLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "live_query_plan",
+                                    Link = new QueryPlanLinkColumnInfo
+                                    {
+                                        TargetColumn = "live_query_plan",
+                                    }
                                 }
                             },
                         }
@@ -189,44 +213,59 @@ namespace DBADashGUI.CommunityTools
                     1, new CustomReportResult
                     {
                         ResultName = "Findings",
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
                             {
                                 "URL",
-                                new UrlLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "URL",
+                                    Link = new UrlLinkColumnInfo
+                                    {
+                                        TargetColumn = "URL",
+                                    }
                                 }
                             },
                             {
                                 "Details",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "Details",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "Details",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "HowToStopIt",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "HowToStopIt",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "HowToStopIt",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "QueryText",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "QueryText",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "QueryText",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "QueryPlan",
-                                new QueryPlanLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "QueryPlan",
+                                    Link = new QueryPlanLinkColumnInfo
+                                    {
+                                        TargetColumn = "QueryPlan",
+                                    }
                                 }
                             },
                         }
@@ -236,13 +275,16 @@ namespace DBADashGUI.CommunityTools
                     2, new CustomReportResult
                     {
                         ResultName = "Waits",
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
                             {
                                 "URL",
-                                new UrlLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "URL",
+                                    Link = new UrlLinkColumnInfo
+                                    {
+                                        TargetColumn = "URL",
+                                    }
                                 }
                             }
                         }
@@ -270,28 +312,37 @@ namespace DBADashGUI.CommunityTools
                     6, new CustomReportResult
                     {
                         ResultName = "Running Queries",
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
                             {
                                 "query_text",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "query_text",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "query_text",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "query_plan",
-                                new QueryPlanLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "query_plan",
+                                    Link = new QueryPlanLinkColumnInfo
+                                    {
+                                        TargetColumn = "query_plan",
+                                    }
                                 }
                             },
                             {
                                 "live_query_plan",
-                                new QueryPlanLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "live_query_plan",
+                                    Link = new QueryPlanLinkColumnInfo
+                                    {
+                                        TargetColumn = "live_query_plan",
+                                    }
                                 }
                             },
                         }

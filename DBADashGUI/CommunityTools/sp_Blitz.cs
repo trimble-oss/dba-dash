@@ -40,27 +40,36 @@ namespace DBADashGUI.CommunityTools
                 {
                     0, new CustomReportResult
                     {
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
                             {
                                 "QueryPlan",
-                                new QueryPlanLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "QueryPlan"
+                                    Link = new QueryPlanLinkColumnInfo
+                                    {
+                                        TargetColumn = "QueryPlan"
+                                    }
                                 }
                             },
                             {
                                 "QueryPlanFiltered",
-                                new QueryPlanLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "QueryPlanFiltered"
+                                    Link = new QueryPlanLinkColumnInfo
+                                    {
+                                        TargetColumn = "QueryPlanFiltered"
+                                    }
                                 }
                             },
                             {
                                 "URL",
-                                new UrlLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "URL"
+                                    Link = new UrlLinkColumnInfo
+                                    {
+                                        TargetColumn = "URL"
+                                    }
                                 }
                             },
                         }

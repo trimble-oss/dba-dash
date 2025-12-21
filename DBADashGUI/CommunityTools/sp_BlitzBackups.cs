@@ -34,14 +34,17 @@ namespace DBADashGUI.CommunityTools
                     0, new CustomReportResult
                     {
                         ResultName = "RPO/RTO",
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
                             {
                                 "RPOWorstCaseMoreInfoQuery",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "RPOWorstCaseMoreInfoQuery",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "RPOWorstCaseMoreInfoQuery",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                         }

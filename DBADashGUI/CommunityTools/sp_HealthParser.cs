@@ -11,30 +11,60 @@ namespace DBADashGUI.CommunityTools
         private static CustomReportResult GetHealthParserResult(string name) => new()
         {
             ResultName = name,
-            LinkColumns = new Dictionary<string, LinkColumnInfo>
+            Columns = new Dictionary<string, ColumnMetadata>
             {
                 {
                     "query_text",
-                    new TextLinkColumnInfo()
-                        { TargetColumn = "query_text", TextHandling = CodeEditor.CodeEditorModes.SQL }
+                    new ColumnMetadata
+                    {
+                        Link = new TextLinkColumnInfo
+                        {
+                            TargetColumn = "query_text",
+                            TextHandling = CodeEditor.CodeEditorModes.SQL
+                        }
+                    }
                 },
                 {
                     "query_plan",
-                    new QueryPlanLinkColumnInfo() { TargetColumn = "query_plan" }
+                    new ColumnMetadata
+                    {
+                        Link = new QueryPlanLinkColumnInfo
+                        {
+                            TargetColumn = "query_plan"
+                        }
+                    }
                 },
                 {
                     "blocked_process_report",
-                    new TextLinkColumnInfo()
-                        { TargetColumn = "blocked_process_report", TextHandling = CodeEditor.CodeEditorModes.XML }
+                    new ColumnMetadata
+                    {
+                        Link = new TextLinkColumnInfo
+                        {
+                            TargetColumn = "blocked_process_report",
+                            TextHandling = CodeEditor.CodeEditorModes.XML
+                        }
+                    }
                 },
                 {
                     "deadlock_resources",
-                    new TextLinkColumnInfo()
-                        { TargetColumn = "deadlock_resources", TextHandling = CodeEditor.CodeEditorModes.XML }
+                    new ColumnMetadata
+                    {
+                        Link = new TextLinkColumnInfo
+                        {
+                            TargetColumn = "deadlock_resources",
+                            TextHandling = CodeEditor.CodeEditorModes.XML
+                        }
+                    }
                 },
                 {
                     "deadlock_graph",
-                    new DeadlockGraphLinkColumnInfo() { TargetColumn = "deadlock_graph" }
+                    new ColumnMetadata
+                    {
+                        Link = new DeadlockGraphLinkColumnInfo
+                        {
+                            TargetColumn = "deadlock_graph"
+                        }
+                    }
                 },
             }
         };

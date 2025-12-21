@@ -218,77 +218,104 @@ namespace DBADashGUI.CommunityTools
                     0, new CustomReportResult
                     {
                         ResultName = "Main",
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
                             {
                                 "Query Text",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "Query Text",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "Query Text",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "SET Options",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "SET Options",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "SET Options",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "Missing Indexes",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "Missing Indexes",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "Missing Indexes",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "Implicit Conversion Info",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "Implicit Conversion Info",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "Implicit Conversion Info",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "Cached Execution Parameters",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "Cached Execution Parameters",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "Cached Execution Parameters",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "Remove Plan Handle From Cache",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "Remove Plan Handle From Cache",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "Remove Plan Handle From Cache",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "Query Plan",
-                                new QueryPlanLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "Query Plan",
+                                    Link = new QueryPlanLinkColumnInfo
+                                    {
+                                        TargetColumn = "Query Plan",
+                                    }
                                 }
                             },
                             {
                                 "AI Prompt",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "AI Prompt",
-                                    TextHandling = CodeEditor.CodeEditorModes.XML
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "AI Prompt",
+                                        TextHandling = CodeEditor.CodeEditorModes.XML
+                                    }
                                 }
                             },
                             {
                                 "AI Advice",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "AI Advice",
-                                    TextHandling = CodeEditor.CodeEditorModes.XML
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "AI Advice",
+                                        TextHandling = CodeEditor.CodeEditorModes.XML
+                                    }
                                 }
                             },
                         }
@@ -298,13 +325,16 @@ namespace DBADashGUI.CommunityTools
                     1, new CustomReportResult()
                     {
                         ResultName = "Summary",
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
                             {
                                 "URL",
-                                new UrlLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "URL",
+                                    Link = new UrlLinkColumnInfo
+                                    {
+                                        TargetColumn = "URL",
+                                    }
                                 }
                             },
                         }

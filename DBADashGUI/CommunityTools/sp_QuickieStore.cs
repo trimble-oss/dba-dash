@@ -159,21 +159,27 @@ namespace DBADashGUI.CommunityTools
                 {
                     0, new CustomReportResult
                     {
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
                             {
                                 "query_plan",
-                                new QueryPlanLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "query_plan"
+                                    Link = new QueryPlanLinkColumnInfo
+                                    {
+                                        TargetColumn = "query_plan"
+                                    }
                                 }
                             },
                             {
                                 "query_sql_text",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "query_sql_text",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "query_sql_text",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                         }

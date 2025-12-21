@@ -34,30 +34,39 @@ namespace DBADashGUI.CommunityTools
                     0, new CustomReportResult
                     {
                         ResultName = "Blocked Process Report",
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
                             {
                                 "query_text",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "query_text",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "query_text",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "blocked_process_report1",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "blocked_process_report1",
-                                    TextHandling = CodeEditor.CodeEditorModes.XML
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "blocked_process_report1",
+                                        TextHandling = CodeEditor.CodeEditorModes.XML
+                                    }
                                 }
                             },
                             {
                                 "blocked_process_report",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "blocked_process_report1",
-                                    TextHandling = CodeEditor.CodeEditorModes.XML
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "blocked_process_report1",
+                                        TextHandling = CodeEditor.CodeEditorModes.XML
+                                    }
                                 }
                             },
                         }
@@ -67,21 +76,27 @@ namespace DBADashGUI.CommunityTools
                     1, new CustomReportResult
                     {
                         ResultName = "Plans",
-                        LinkColumns = new Dictionary<string, LinkColumnInfo>
+                        Columns = new Dictionary<string, ColumnMetadata>
                         {
                             {
                                 "query_text",
-                                new TextLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "query_text",
-                                    TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    Link = new TextLinkColumnInfo
+                                    {
+                                        TargetColumn = "query_text",
+                                        TextHandling = CodeEditor.CodeEditorModes.SQL
+                                    }
                                 }
                             },
                             {
                                 "query_plan",
-                                new QueryPlanLinkColumnInfo()
+                                new ColumnMetadata
                                 {
-                                    TargetColumn = "query_plan"
+                                    Link = new QueryPlanLinkColumnInfo
+                                    {
+                                        TargetColumn = "query_plan"
+                                    }
                                 }
                             },
                         }
