@@ -123,7 +123,7 @@ namespace DBADash
             }
             else
             {
-                // Fallback parsing: assume     format like https://host:port/bucket[/prefix]
+                // Fallback parsing: assume format like https://host:port/bucket[/prefix]
                 var genericUri = new Uri(destination, UriKind.Absolute);
                 // Split path segments, ignore leading slash
                 var segments = genericUri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
