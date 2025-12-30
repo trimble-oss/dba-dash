@@ -141,7 +141,7 @@ namespace DBADash
             else
             {
                 authRegion = RegionEndpoint.USEast1;
-                Log.Warning("Unrecognized or invalid auth region \"{authRegionCandidate}\" for host {host}. Defaulting to {region}.", authRegionCandidate, host, authRegion);
+                Log.Warning("Unrecognized or invalid auth region '{authRegionCandidate}' for host {host}. Defaulting to {region}.", authRegionCandidate, host, authRegion);
             }
             RegionCache.TryAdd(host, authRegion);
             return authRegion;
