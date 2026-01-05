@@ -32,32 +32,32 @@
     <ProjectReference Include="..\DBADash\DBADash.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="4.0.3.4" />
-    <PackageReference Include="AWSSDK.S3" Version="4.0.14.1" />
+    <PackageReference Include="AWSSDK.Core" Version="4.0.3.6" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.16.2" />
     <PackageReference Include="Azure.Core" Version="1.50.0" />
     <PackageReference Include="Azure.Identity" Version="1.17.1" />
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="Common.Logging" Version="3.4.1" />
     <PackageReference Include="Common.Logging.Core" Version="3.4.1" />
     <PackageReference Include="Humanizer" Version="3.0.1" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.1" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.3" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="3.1.6" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Primitives" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="10.0.1" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.79.2" />
     <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.79.2" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.15.0" />
@@ -67,7 +67,7 @@
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.15.0" />
     <PackageReference Include="Microsoft.SqlServer.Assessment" Version="1.1.17" />
     <PackageReference Include="Microsoft.SqlServer.Assessment.Authoring" Version="1.1.0" />
-    <PackageReference Include="Microsoft.SqlServer.Management.SqlParser" Version="173.6.0" />
+    <PackageReference Include="Microsoft.SqlServer.Management.SqlParser" Version="173.8.0" />
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="180.10.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Quartz" Version="3.15.1" />
@@ -80,14 +80,14 @@
     <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="5.0.0" />
     <PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
     <PackageReference Include="SerilogTimings" Version="3.1.0" />
-    <PackageReference Include="System.ComponentModel.Composition" Version="10.0.0" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.0" />
+    <PackageReference Include="System.ComponentModel.Composition" Version="10.0.1" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.1" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
-    <PackageReference Include="System.IO.Packaging" Version="10.0.0" />
-    <PackageReference Include="System.Memory.Data" Version="10.0.0" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.0" />
-    <PackageReference Include="System.Security.Permissions" Version="10.0.0" />
+    <PackageReference Include="System.IO.Packaging" Version="10.0.1" />
+    <PackageReference Include="System.Memory.Data" Version="10.0.1" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.1" />
+    <PackageReference Include="System.Security.Permissions" Version="10.0.1" />
   </ItemGroup>
   <Import Project="..\packages\Microsoft.Data.SqlClient.SNI.3.0.0\build\net46\Microsoft.Data.SqlClient.SNI.targets" Condition="Exists('..\packages\Microsoft.Data.SqlClient.SNI.3.0.0\build\net46\Microsoft.Data.SqlClient.SNI.targets')" />
 </Project>
