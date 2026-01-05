@@ -111,9 +111,9 @@ SELECT	DISTINCT /* To guarantee we don''t have duplicates */
 		d.regressed_plan_id
 FROM sys.dm_db_tuning_recommendations dtr
 CROSS APPLY OPENJSON(Details, ''$.planForceDetails'') WITH (
-		query_id INT ''$.queryId'',
-		regressed_plan_id INT ''$.regressedPlanId'',
-		recommended_plan_id INT ''$.recommendedPlanId'',
+		query_id BIGINT ''$.queryId'',
+		regressed_plan_id BIGINT ''$.regressedPlanId'',
+		recommended_plan_id BIGINT ''$.recommendedPlanId'',
 		regressed_plan_error_count INT ''$.regressedPlanErrorCount'',
 		recommended_plan_error_count INT ''$.recommendedPlanErrorCount'',
 		regressed_plan_execution_count INT ''$.regressedPlanExecutionCount'',
