@@ -171,7 +171,7 @@ jobs:
           Write-Output "All MinIO tests passed"
 
       - name: Install SQL
-        uses: potatoqualitee/mssqlsuite@v1.11
+        uses: potatoqualitee/mssqlsuite@v1.12
         with:
           install: sqlengine
           version: ${{ matrix.sql-version }}
