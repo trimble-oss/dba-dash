@@ -1091,7 +1091,7 @@ namespace DBADashGUI
                 allowedTabs.Add(tabDBADash);
             }
 
-            return allowedTabs;
+            return allowedTabs.Distinct().ToList();
         }
 
         private void Tv1_AfterSelect(object sender, TreeViewEventArgs e)
