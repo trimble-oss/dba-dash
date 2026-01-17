@@ -34,10 +34,32 @@ namespace DBADash
         public int? PurgeDataCommandTimeout { get; set; }
         public int? AddPartitionsCommandTimeout { get; set; }
 
+        public bool? UseQueueBasedScheduling { get; set; }
+
         public const int DefaultImportCommandTimeout = 60;
         public const int DefaultPurgeDataCommandTimeout = 1200;
         public const int DefaultAddPartitionsCommandTimeout = 300;
         public const int DefaultFailedLoginsBackfillMinutes = 1440;
+        private const bool DefaultUseQueueBasedScheduling = true;
+        private const double DefaultLowPriorityQueueMaxThreadPercentage = 0.25;
+
+        public double? LowPriorityQueueMaxThreadPercentage
+        {
+            get => field;
+            set
+            {
+                if (value == null || (value > 0 && value <= 1))
+                {
+                    field = value;
+                }
+                else
+                {
+                    throw new ArgumentException("LowPriorityQueueMaxThreadPercentage must be null (to use the default) or greater than 0 and less than or equal to 1.");
+                }
+            }
+        }
+
+        public double GetLowPriorityQueueMaxThreadPercentage() => LowPriorityQueueMaxThreadPercentage ?? DefaultLowPriorityQueueMaxThreadPercentage;
 
         public bool EnableMessaging { get; set; } = true;
 
@@ -63,7 +85,9 @@ namespace DBADash
 
         public const int DefaultAlertProcessingStartupDelaySeconds = 60;
 
-        public HashSet<InstanceMetadataProviders.Providers>EnabledMetadataProviders { get; set; } = new();
+        public HashSet<InstanceMetadataProviders.Providers> EnabledMetadataProviders { get; set; } = new();
+
+        public bool IsUseQueueBasedScheduling() => UseQueueBasedScheduling ?? DefaultUseQueueBasedScheduling;
 
         public int GetThreadCount()
         {
@@ -90,7 +114,7 @@ namespace DBADash
                 "Based on {ConnectionCount} connections ({ConnectionThreads} threads) " +
                 "and {ProcessorCount} processors ({ProcessorLimit} max threads). " +
                 "Clamped between {MinThreads}-{MaxThreads}",
-                threads, connectionCount, connectionThreadCalc , processorCount, processorLimit, minimumCalcThreads, maximumCalcThreads);
+                threads, connectionCount, connectionThreadCalc, processorCount, processorLimit, minimumCalcThreads, maximumCalcThreads);
             return threads;
         }
 
@@ -361,7 +385,7 @@ namespace DBADash
         {
             var newConnections = new List<DBADashSource>();
             using (var cn = new SqlConnection(masterConnection.SourceConnection.ConnectionString))
-            using (var cmd = new SqlCommand("SELECT name from sys.databases WHERE name <> 'master'", cn))
+            using (var cmd = new SqlCommand("SELECT name AS DB, @@SERVERNAME + '|' + name AS ConnectionID from sys.databases WHERE name <> 'master'", cn))
             {
                 cn.Open();
                 using var rdr = cmd.ExecuteReader();
@@ -372,7 +396,7 @@ namespace DBADash
                     builder.InitialCatalog = rdr.GetString(0);
                     var dbCn = masterConnection.DeepCopy();
                     dbCn.SourceConnection.ConnectionString = builder.ConnectionString;
-                    dbCn.ConnectionID = string.Empty;
+                    dbCn.ConnectionID = rdr.GetString(1);
 
                     if (!SourceExists(dbCn.SourceConnection.ConnectionString, true))
                     {

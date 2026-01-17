@@ -128,6 +128,11 @@ jobs:
         run: | 
           ./Scripts/Get-TableCounts -ServerInstance "LOCALHOST" -Database "DBADashDB_GitHubAction" 
 
+      - name: Output Log and Check for Errors
+        shell: powershell
+        run: | 
+          ./Scripts/Get-LogContent -LogPath  "C:\DBADashTest\Logs" -ThrowError
+
       - name: Run Pester Tests
         shell: powershell
         run: |     
@@ -140,7 +145,3 @@ jobs:
         run: | 
             ./Scripts/Get-TableCounts -ServerInstance "LOCALHOST" -Database "DBADashDB_GitHubAction" 
 
-      - name: Output Log and Check for Errors
-        shell: powershell
-        run: | 
-          ./Scripts/Get-LogContent -LogPath  "C:\DBADashTest\Logs" -ThrowError

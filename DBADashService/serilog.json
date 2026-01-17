@@ -2,24 +2,36 @@
   "Serilog": {
     "Using": [
       "Serilog.Sinks.Console",
-      "Serilog.Sinks.File"
+      "Serilog.Sinks.File",
+      "Serilog.Sinks.Async"
     ],
     "MinimumLevel": "Information",
-    "Enrich": [ "WithThreadId"],
+    "Enrich": [ "WithThreadId" ],
     "WriteTo": [
       {
-        "Name": "Console",
+        "Name": "Async",
         "Args": {
-          "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} <{ThreadId}>{NewLine}{Exception}"
-        }
-      },
-      {
-        "Name": "File",
-        "Args": {
-          "path": "Logs/log-.txt",
-          "rollingInterval": "Hour",
-          "retainedFileCountLimit": 24,
-          "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} <{ThreadId}>{NewLine}{Exception}"
+          "bufferSize": 65536,
+          "blockWhenFull": false,
+          "configure": [
+            {
+              "Name": "Console",
+              "Args": {
+                "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} <{ThreadId}>{NewLine}{Exception}"
+              }
+            },
+            {
+              "Name": "File",
+              "Args": {
+                "path": "Logs/log-.txt",
+                "rollingInterval": "Hour",
+                "retainedFileCountLimit": 24,
+                "buffered": true,
+                "flushToDiskInterval": "00:00:02",
+                "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} <{ThreadId}>{NewLine}{Exception}"
+              }
+            }
+          ]
         }
       }
     ]
