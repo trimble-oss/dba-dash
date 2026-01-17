@@ -114,12 +114,9 @@ namespace DBADashService
             }
         }
 
-        public CollectionType[] OnServiceStartCollection
+        public IEnumerable<CollectionType> OnServiceStartCollection
         {
-            get
-            {
-                return this.Where(s => s.Key != CollectionType.SchemaSnapshot && s.Value.RunOnServiceStart).Select(s => s.Key).ToArray();
-            }
+            get => this.Where(s => s.Value.RunOnServiceStart).Select(s => s.Key);
         }
     }
 

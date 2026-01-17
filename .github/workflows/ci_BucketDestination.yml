@@ -292,6 +292,16 @@ jobs:
         run: | 
             ./Scripts/Get-TableCounts -ServerInstance "LOCALHOST" -Database "DBADashDB_Direct" 
 
+      - name: Output Log and Check for Errors (DBADashWriteToBucket)
+        shell: powershell
+        run: | 
+          ./Scripts/Get-LogContent -LogPath  "C:\DBADashWriteToBucket\Logs" -ThrowError
+
+      - name: Output Log and Check for Errors (DBADashReadFromBucket)
+        shell: powershell
+        run: | 
+          ./Scripts/Get-LogContent -LogPath  "C:\DBADashReadFromBucket\Logs" -ThrowError
+
       - name: Run Pester Tests FromBucket
         shell: powershell
         run: |     
@@ -305,13 +315,4 @@ jobs:
         run: |     
             $container = New-PesterContainer -Path 'Scripts\CI_Workflow.Tests.ps1' -Data @{ Database = "DBADashDB_Direct" }
             Invoke-Pester -Container $container -Output Detailed
-      
-      - name: Output Log and Check for Errors (DBADashWriteToBucket)
-        shell: powershell
-        run: | 
-          ./Scripts/Get-LogContent -LogPath  "C:\DBADashWriteToBucket\Logs" -ThrowError
-
-      - name: Output Log and Check for Errors (DBADashReadFromBucket)
-        shell: powershell
-        run: | 
-          ./Scripts/Get-LogContent -LogPath  "C:\DBADashReadFromBucket\Logs" -ThrowError
+    

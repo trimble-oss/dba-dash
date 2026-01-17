@@ -188,6 +188,16 @@ jobs:
         run: | 
             ./Scripts/Get-TableCounts -ServerInstance "LOCALHOST" -Database "DBADashDB_Direct" 
 
+      - name: Output Log and Check for Errors (DBADashWriteToFolder)
+        shell: powershell
+        run: | 
+          ./Scripts/Get-LogContent -LogPath  "C:\DBADashWriteToFolder\Logs" -ThrowError
+
+      - name: Output Log and Check for Errors (DBADashReadFromFolder)
+        shell: powershell
+        run: | 
+          ./Scripts/Get-LogContent -LogPath  "C:\DBADashReadFromFolder\Logs" -ThrowError
+
       - name: Run Pester Tests FromFolder
         shell: powershell
         run: |     
@@ -202,12 +212,3 @@ jobs:
             $container = New-PesterContainer -Path 'Scripts\CI_Workflow.Tests.ps1' -Data @{ Database = "DBADashDB_Direct" }
             Invoke-Pester -Container $container -Output Detailed
       
-      - name: Output Log and Check for Errors (DBADashWriteToFolder)
-        shell: powershell
-        run: | 
-          ./Scripts/Get-LogContent -LogPath  "C:\DBADashWriteToFolder\Logs" -ThrowError
-
-      - name: Output Log and Check for Errors (DBADashReadFromFolder)
-        shell: powershell
-        run: | 
-          ./Scripts/Get-LogContent -LogPath  "C:\DBADashReadFromFolder\Logs" -ThrowError

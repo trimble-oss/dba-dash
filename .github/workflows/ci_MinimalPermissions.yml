@@ -144,6 +144,11 @@ jobs:
         run: | 
           ./Scripts/Get-TableCounts -ServerInstance "LOCALHOST" -Database "DBADashDB_GitHubAction" 
 
+      - name: Output Log and Check for Errors
+        shell: powershell
+        run: | 
+          ./Scripts/Get-LogContent -LogPath  "C:\DBADashTest\Logs" -ThrowError
+
       - name: Run Pester Tests
         shell: powershell
         run: |     
@@ -151,8 +156,3 @@ jobs:
           Import-Module Pester -PassThru
           $NoWMI=$true
           Invoke-Pester -Output Detailed Scripts\CI_Workflow.Tests.ps1
-      
-      - name: Output Log and Check for Errors
-        shell: powershell
-        run: | 
-          ./Scripts/Get-LogContent -LogPath  "C:\DBADashTest\Logs" -ThrowError
