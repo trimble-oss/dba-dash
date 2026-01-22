@@ -513,7 +513,7 @@ namespace DBADashGUI
         private void GetCommandLineTags()
         {
             if (string.IsNullOrEmpty(commandLine.TagFilters)) return;
-            foreach (var t in DBADashTag.GetTags(commandLine.TagFilters))
+            foreach (var t in DBADashTag.GetTags(Common.ConnectionString, commandLine.TagFilters))
             {
                 commandLineTags.Add(t.TagID);
             }
