@@ -19,7 +19,7 @@
     CONSTRAINT [FK_DBFiles_Databases] FOREIGN KEY ([DatabaseID]) REFERENCES [dbo].[Databases] ([DatabaseID])
 );
 GO
-CREATE NONCLUSTERED INDEX IX_DBFiles_DatabaseID_IsActive ON dbo.DBFiles(DatabaseID,IsActive) INCLUDE(file_id);
+CREATE NONCLUSTERED INDEX IX_DBFiles_DatabaseID_file_id ON dbo.DBFiles(DatabaseID,file_id) INCLUDE(IsActive);
 
 
 
