@@ -15,12 +15,14 @@
     [is_read_only]      BIT            NULL,
     [IsActive]          BIT            NULL,
     [state]             TINYINT        NULL,
-    CONSTRAINT [PK_DBFiles] PRIMARY KEY CLUSTERED ([FileID] ASC),
+    InstanceID          INT            NOT NULL CONSTRAINT DF_DBFiles_InstanceID DEFAULT (-1),
+    CONSTRAINT [PK_DBFiles] PRIMARY KEY NONCLUSTERED ([FileID] ASC),
     CONSTRAINT [FK_DBFiles_Databases] FOREIGN KEY ([DatabaseID]) REFERENCES [dbo].[Databases] ([DatabaseID])
 );
 GO
-CREATE NONCLUSTERED INDEX IX_DBFiles_DatabaseID_file_id ON dbo.DBFiles(DatabaseID,file_id) INCLUDE(IsActive);
-
+CREATE UNIQUE NONCLUSTERED INDEX IX_DBFiles_DatabaseID_file_id ON dbo.DBFiles(DatabaseID,file_id) INCLUDE(IsActive);
+GO
+CREATE UNIQUE CLUSTERED INDEX IX_DBFiles_InstanceID_DatabaseID_file_id ON dbo.DBFiles(InstanceID,DatabaseID,file_id);
 
 
 

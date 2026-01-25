@@ -65,6 +65,7 @@ BEGIN
 	BEGIN TRAN
 
 	INSERT INTO dbo.DBFiles(
+		InstanceID,
 		DatabaseID,
 		file_id,
 		data_space_id,
@@ -81,7 +82,8 @@ BEGIN
 		IsActive,
 		state
 	)
-	SELECT T.DatabaseID,
+	SELECT @InstanceID AS InstanceID,
+		   T.DatabaseID,
 		   T.file_id,
 		   T.data_space_id,
 		   T.name,
@@ -103,6 +105,7 @@ BEGIN
 		FROM dbo.DBFiles F WITH (UPDLOCK)
 		WHERE F.file_id = T.file_id
 		AND F.DatabaseID = T.DatabaseID
+		AND F.InstanceID = @InstanceID
 	);
 
 	UPDATE F
@@ -121,19 +124,19 @@ BEGIN
 			F.state = T.state
 	FROM dbo.DBFiles F
 	JOIN #DBFiles T ON F.file_id = T.file_id
-						AND F.DatabaseID = T.DatabaseID;
+						AND F.DatabaseID = T.DatabaseID
+	WHERE F.InstanceID = @InstanceID;
 
 
 	UPDATE F
 	SET F.IsActive=0
 	FROM dbo.DBFiles F
-	JOIN dbo.Databases D ON F.DatabaseID = D.DatabaseID
 	WHERE NOT EXISTS(	SELECT 1
 						FROM #DBFiles T
 						WHERE T.DatabaseID = F.DatabaseID
 						AND T.file_id = F.file_id
 					)
-	AND D.InstanceID = @InstanceID
+	AND F.InstanceID = @InstanceID
 
 	INSERT INTO dbo.DBFileSnapshot(SnapshotDate,FileID,Size,space_used)
 	SELECT @SnapshotDate,
@@ -143,6 +146,7 @@ BEGIN
 	FROM #DBFiles T 
 	JOIN dbo.DBFiles F ON T.file_id = F.file_id AND T.DatabaseID = F.DatabaseID
 	WHERE F.IsActive=1
+	AND F.InstanceID = @InstanceID
 
 	COMMIT
 
