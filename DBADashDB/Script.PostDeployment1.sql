@@ -2100,8 +2100,9 @@ BEGIN
 	JOIN dbo.Databases D ON F.DatabaseID = D.DatabaseID
 	WHERE F.InstanceID=-1
 END
-
-
+-- Disable lock escalation to improve concurrency.  In most cases we will be below the lock escalation threshold, but we could be slightly over it in some edge cases.
+ALTER TABLE dbo.DBFiles SET (LOCK_ESCALATION = DISABLE);
+ALTER TABLE dbo.DBFileSnapshot SET (LOCK_ESCALATION = DISABLE);
 /* 
 	Update extended property to indicate that a DB deployment is no longer in progress, allowing the GUI to continue loading.
 */

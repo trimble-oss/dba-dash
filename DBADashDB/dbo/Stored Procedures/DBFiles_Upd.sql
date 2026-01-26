@@ -9,6 +9,9 @@ SET NOCOUNT ON
 DECLARE @Ref VARCHAR(30)='DBFiles'
 IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
 BEGIN
+	DECLARE @DBFileCount INT
+	DECLARE @UpdateCount INT
+
 	CREATE TABLE #DBFiles(
 		DatabaseID INT NOT NULL,
 		file_id INT NOT NULL,
@@ -61,54 +64,11 @@ BEGIN
 	AND D.InstanceID = @InstanceID
 	AND file_id IS NOT NULL
 
+	SET @DBFileCount = @@ROWCOUNT
 
 	BEGIN TRAN
 
-	INSERT INTO dbo.DBFiles(
-		InstanceID,
-		DatabaseID,
-		file_id,
-		data_space_id,
-		name,
-		filegroup_name,
-		physical_name,
-		type,
-		size,
-		space_used,
-		max_size,
-		growth,
-		is_percent_growth,
-		is_read_only,
-		IsActive,
-		state
-	)
-	SELECT @InstanceID AS InstanceID,
-		   T.DatabaseID,
-		   T.file_id,
-		   T.data_space_id,
-		   T.name,
-		   T.filegroup_name,
-		   T.physical_name,
-		   T.type,
-		   T.size,
-		   T.space_used,
-		   T.max_size,
-		   T.growth,
-		   T.is_percent_growth,
-		   T.is_read_only,
-		   CAST(1 AS BIT) AS IsActive,
-		   T.state
-	FROM #DBFiles T
-	WHERE NOT EXISTS
-	(
-		SELECT 1
-		FROM dbo.DBFiles F WITH (UPDLOCK)
-		WHERE F.file_id = T.file_id
-		AND F.DatabaseID = T.DatabaseID
-		AND F.InstanceID = @InstanceID
-	);
-
-	UPDATE F
+	UPDATE F WITH (ROWLOCK)
 		SET F.data_space_id = T.data_space_id,
 			F.name = T.name,
 			F.filegroup_name = ISNULL(T.filegroup_name, F.filegroup_name),
@@ -127,8 +87,57 @@ BEGIN
 						AND F.DatabaseID = T.DatabaseID
 	WHERE F.InstanceID = @InstanceID;
 
+	SET @UpdateCount = @@ROWCOUNT
 
-	UPDATE F
+	/* If there are more rows in temp table than were updated, then there are new rows to insert */
+	IF @DBFileCount > @UpdateCount 
+	BEGIN
+		INSERT INTO dbo.DBFiles WITH(ROWLOCK)(
+			InstanceID,
+			DatabaseID,
+			file_id,
+			data_space_id,
+			name,
+			filegroup_name,
+			physical_name,
+			type,
+			size,
+			space_used,
+			max_size,
+			growth,
+			is_percent_growth,
+			is_read_only,
+			IsActive,
+			state
+		)
+		SELECT @InstanceID AS InstanceID,
+			   T.DatabaseID,
+			   T.file_id,
+			   T.data_space_id,
+			   T.name,
+			   T.filegroup_name,
+			   T.physical_name,
+			   T.type,
+			   T.size,
+			   T.space_used,
+			   T.max_size,
+			   T.growth,
+			   T.is_percent_growth,
+			   T.is_read_only,
+			   CAST(1 AS BIT) AS IsActive,
+			   T.state
+		FROM #DBFiles T
+		WHERE NOT EXISTS
+		(
+			SELECT 1
+			FROM dbo.DBFiles F WITH (UPDLOCK, ROWLOCK)
+			WHERE F.file_id = T.file_id
+			AND F.DatabaseID = T.DatabaseID
+			AND F.InstanceID = @InstanceID
+		);
+	END
+
+	UPDATE F WITH (ROWLOCK)
 	SET F.IsActive=0
 	FROM dbo.DBFiles F
 	WHERE NOT EXISTS(	SELECT 1
@@ -138,13 +147,13 @@ BEGIN
 					)
 	AND F.InstanceID = @InstanceID
 
-	INSERT INTO dbo.DBFileSnapshot(SnapshotDate,FileID,Size,space_used)
+	INSERT INTO dbo.DBFileSnapshot WITH(ROWLOCK) (SnapshotDate,FileID,Size,space_used)
 	SELECT @SnapshotDate,
 		  F.FileID,
 		  T.size,
 		  T.space_used
 	FROM #DBFiles T 
-	JOIN dbo.DBFiles F ON T.file_id = F.file_id AND T.DatabaseID = F.DatabaseID
+	JOIN dbo.DBFiles F WITH(ROWLOCK) ON T.file_id = F.file_id AND T.DatabaseID = F.DatabaseID
 	WHERE F.IsActive=1
 	AND F.InstanceID = @InstanceID
 
