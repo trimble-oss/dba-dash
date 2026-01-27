@@ -71,3 +71,27 @@ BEGIN
 				)
 	END
 END
+/* 
+	We shouldn't have duplicates, but just in case, deactivate duplicates by setting IsActive to 0 and file_id to negative FileID (ensuring uniqueness)
+	This is added to prevent possible deployment issues caused by adding a unique index on (DatabaseID,file_id)
+*/
+IF OBJECT_ID('dbo.DBFiles') IS NOT NULL
+BEGIN
+	IF EXISTS(
+		SELECT 1
+		FROM DBFiles
+		GROUP BY DatabaseID,file_id
+		HAVING COUNT(*)>1
+	)
+	BEGIN
+		WITH T AS (
+			SELECT *,ROW_NUMBER() OVER(PARTITION BY DatabaseID,file_id ORDER BY FileID) rnum
+			FROM dbo.DBFiles
+		)
+		UPDATE T
+			SET file_id = -FileID,
+			IsActive = 0
+		WHERE rnum>1
+
+	END
+END

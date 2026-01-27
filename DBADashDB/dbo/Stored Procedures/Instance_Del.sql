@@ -214,13 +214,7 @@ BEGIN
 
 	DELETE F
 	FROM dbo.DBFiles F
-	WHERE EXISTS(
-				SELECT 1 
-				FROM dbo.Databases D
-				WHERE D.InstanceID = @InstanceID
-				AND D.DatabaseID = F.DatabaseID
-				)
-
+	WHERE F.InstanceID = @InstanceID
 
 	DELETE DOH
 	FROM dbo.DBOptionsHistory DOH

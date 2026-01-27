@@ -2092,6 +2092,16 @@ BEGIN
 	DROP TABLE dbo.LogRestoresTemp
 END
 EXEC dbo.AzureDBCounters_Upd
+IF EXISTS(SELECT 1 FROM dbo.DBFiles WHERE InstanceID=-1)
+BEGIN
+	UPDATE F
+		SET F.InstanceID = D.InstanceID
+	FROM dbo.DBFiles F
+	JOIN dbo.Databases D ON F.DatabaseID = D.DatabaseID
+	WHERE F.InstanceID=-1
+END
+
+
 /* 
 	Update extended property to indicate that a DB deployment is no longer in progress, allowing the GUI to continue loading.
 */
