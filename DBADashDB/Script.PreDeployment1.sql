@@ -79,7 +79,7 @@ IF OBJECT_ID('dbo.DBFiles') IS NOT NULL
 BEGIN
 	IF EXISTS(
 		SELECT 1
-		FROM DBFiles
+		FROM dbo.DBFiles
 		GROUP BY DatabaseID,file_id
 		HAVING COUNT(*)>1
 	)

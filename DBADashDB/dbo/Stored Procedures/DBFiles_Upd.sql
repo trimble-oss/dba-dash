@@ -62,7 +62,7 @@ BEGIN
 	JOIN dbo.Databases D ON F.database_id = D.database_id
 	WHERE D.IsActive=1
 	AND D.InstanceID = @InstanceID
-	AND file_id IS NOT NULL
+	AND F.file_id IS NOT NULL
 
 	SET @DBFileCount = @@ROWCOUNT
 
