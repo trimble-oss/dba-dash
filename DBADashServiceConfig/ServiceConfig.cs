@@ -2778,6 +2778,8 @@ namespace DBADashServiceConfig
 
                 case CheckState.Unchecked:
                     collectionConfig.UseQueueBasedScheduling = false;
+                    chkSchedulerThreads.Checked = false;
+                    chkLowPriorityMaxThreadPct.Checked = false;
                     break;
 
                 default:
@@ -2788,6 +2790,7 @@ namespace DBADashServiceConfig
             chkSchedulerThreads.Enabled = chkQueueBasedScheduling.CheckState != CheckState.Unchecked;
             numLowMaxThreadPct.Enabled = collectionConfig.LowPriorityQueueMaxThreadPercentage.HasValue && chkQueueBasedScheduling.CheckState != CheckState.Unchecked;
             chkLowPriorityMaxThreadPct.Enabled = chkQueueBasedScheduling.CheckState != CheckState.Unchecked;
+            numSchedulerThreads.Value = collectionConfig.GetSchedulerThreadCount();
             SetJson();
         }
 
