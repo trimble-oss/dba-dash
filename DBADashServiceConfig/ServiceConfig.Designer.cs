@@ -31,9 +31,9 @@ namespace DBADashServiceConfig
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ServiceConfig));
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             errorProvider1 = new System.Windows.Forms.ErrorProvider(components);
             bttnSave = new System.Windows.Forms.Button();
             label5 = new System.Windows.Forms.Label();
@@ -67,6 +67,11 @@ namespace DBADashServiceConfig
             bttnCheckConnections = new System.Windows.Forms.Button();
             label21 = new System.Windows.Forms.Label();
             chkCollectTaskWaits = new System.Windows.Forms.CheckBox();
+            chkCollectCursors = new System.Windows.Forms.CheckBox();
+            label23 = new System.Windows.Forms.Label();
+            lblSchedulerThreads = new System.Windows.Forms.Label();
+            chkQueueBasedScheduling = new System.Windows.Forms.CheckBox();
+            label24 = new System.Windows.Forms.Label();
             picConfigFileAccess = new System.Windows.Forms.PictureBox();
             lblConfigFileAccess = new System.Windows.Forms.Label();
             pnlBottom = new System.Windows.Forms.Panel();
@@ -87,13 +92,16 @@ namespace DBADashServiceConfig
             numAlertPollingFrequency = new System.Windows.Forms.NumericUpDown();
             chkProcessAlerts = new System.Windows.Forms.CheckBox();
             groupBox3 = new System.Windows.Forms.GroupBox();
+            chkLowPriorityMaxThreadPct = new System.Windows.Forms.CheckBox();
+            numLowMaxThreadPct = new System.Windows.Forms.NumericUpDown();
+            chkSchedulerThreads = new System.Windows.Forms.CheckBox();
+            numSchedulerThreads = new System.Windows.Forms.NumericUpDown();
             grpMetadata = new System.Windows.Forms.GroupBox();
             chkGeneric = new System.Windows.Forms.CheckBox();
             chkAWS = new System.Windows.Forms.CheckBox();
             chkAzure = new System.Windows.Forms.CheckBox();
             chkThreads = new System.Windows.Forms.CheckBox();
             numThreads = new System.Windows.Forms.NumericUpDown();
-            label23 = new System.Windows.Forms.Label();
             lnkTimeouts = new System.Windows.Forms.LinkLabel();
             bttnCustomCollections = new System.Windows.Forms.Button();
             lblSummaryRefreshCron = new System.Windows.Forms.Label();
@@ -189,7 +197,6 @@ namespace DBADashServiceConfig
             txtDestination = new System.Windows.Forms.TextBox();
             tab1 = new ThemedTabControl();
             tabMessaging = new System.Windows.Forms.TabPage();
-            chkCollectCursors = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
@@ -203,6 +210,8 @@ namespace DBADashServiceConfig
             ((System.ComponentModel.ISupportInitialize)numAlertStartupDelay).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numAlertPollingFrequency).BeginInit();
             groupBox3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numLowMaxThreadPct).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numSchedulerThreads).BeginInit();
             grpMetadata.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numThreads).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numBackupRetention).BeginInit();
@@ -525,7 +534,7 @@ namespace DBADashServiceConfig
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new System.Drawing.Point(16, 108);
+            label3.Location = new System.Drawing.Point(16, 102);
             label3.Name = "label3";
             label3.Size = new System.Drawing.Size(156, 20);
             label3.TabIndex = 43;
@@ -535,7 +544,7 @@ namespace DBADashServiceConfig
             // lblConfigFileRetention
             // 
             lblConfigFileRetention.AutoSize = true;
-            lblConfigFileRetention.Location = new System.Drawing.Point(16, 72);
+            lblConfigFileRetention.Location = new System.Drawing.Point(16, 69);
             lblConfigFileRetention.Name = "lblConfigFileRetention";
             lblConfigFileRetention.Size = new System.Drawing.Size(197, 20);
             lblConfigFileRetention.TabIndex = 40;
@@ -554,7 +563,7 @@ namespace DBADashServiceConfig
             // 
             // bttnAWS
             // 
-            bttnAWS.Location = new System.Drawing.Point(15, 176);
+            bttnAWS.Location = new System.Drawing.Point(14, 240);
             bttnAWS.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             bttnAWS.Name = "bttnAWS";
             bttnAWS.Size = new System.Drawing.Size(197, 55);
@@ -611,6 +620,62 @@ namespace DBADashServiceConfig
             chkCollectTaskWaits.Text = "Collect Task Waits";
             toolTip1.SetToolTip(chkCollectTaskWaits, "Collect Task Waits for Running Queries (sys.dm_os_waiting_tasks)\r\nUseful for parallel queries that can have several tasks waiting on different things");
             chkCollectTaskWaits.UseVisualStyleBackColor = true;
+            // 
+            // chkCollectCursors
+            // 
+            chkCollectCursors.AutoSize = true;
+            chkCollectCursors.Location = new System.Drawing.Point(9, 134);
+            chkCollectCursors.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            chkCollectCursors.Name = "chkCollectCursors";
+            chkCollectCursors.Size = new System.Drawing.Size(129, 24);
+            chkCollectCursors.TabIndex = 30;
+            chkCollectCursors.Text = "Collect Cursors";
+            chkCollectCursors.ThreeState = true;
+            toolTip1.SetToolTip(chkCollectCursors, "sys.dm_exec_cursors capture for Running Queries.  Enable if your application uses cursors and you need to identify the SQL query associated with the cursor.");
+            chkCollectCursors.UseVisualStyleBackColor = true;
+            // 
+            // label23
+            // 
+            label23.AutoSize = true;
+            label23.Location = new System.Drawing.Point(16, 135);
+            label23.Name = "label23";
+            label23.Size = new System.Drawing.Size(115, 20);
+            label23.TabIndex = 48;
+            label23.Text = "Worker Threads:";
+            toolTip1.SetToolTip(label23, "Number of threads used to perform collections");
+            // 
+            // lblSchedulerThreads
+            // 
+            lblSchedulerThreads.AutoSize = true;
+            lblSchedulerThreads.Location = new System.Drawing.Point(16, 168);
+            lblSchedulerThreads.Name = "lblSchedulerThreads";
+            lblSchedulerThreads.Size = new System.Drawing.Size(133, 20);
+            lblSchedulerThreads.TabIndex = 52;
+            lblSchedulerThreads.Text = "Scheduler Threads:";
+            toolTip1.SetToolTip(lblSchedulerThreads, "Number of threads used for scheduling.");
+            // 
+            // chkQueueBasedScheduling
+            // 
+            chkQueueBasedScheduling.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            chkQueueBasedScheduling.Location = new System.Drawing.Point(16, 201);
+            chkQueueBasedScheduling.Name = "chkQueueBasedScheduling";
+            chkQueueBasedScheduling.Size = new System.Drawing.Size(409, 30);
+            chkQueueBasedScheduling.TabIndex = 54;
+            chkQueueBasedScheduling.Text = "Queue Based Scheduling";
+            chkQueueBasedScheduling.ThreeState = true;
+            toolTip1.SetToolTip(chkQueueBasedScheduling, "Queue based scheduling is recommended (Leave checked or default.).  Traditional scheduling will be removed in a future version.");
+            chkQueueBasedScheduling.UseVisualStyleBackColor = true;
+            chkQueueBasedScheduling.CheckStateChanged += QueueBasedScheduling_CheckStateChanged;
+            // 
+            // label24
+            // 
+            label24.AutoSize = true;
+            label24.Location = new System.Drawing.Point(433, 139);
+            label24.Name = "label24";
+            label24.Size = new System.Drawing.Size(183, 20);
+            label24.TabIndex = 56;
+            label24.Text = "Low priority max thread %";
+            toolTip1.SetToolTip(label24, "Maximum % of worker threads to use for Low priority queue.  Used to prevent slower, less frequently run collections from consuming all the available worker threads.");
             // 
             // picConfigFileAccess
             // 
@@ -699,7 +764,7 @@ namespace DBADashServiceConfig
             groupBox5.Controls.Add(lblPerformanceCounters);
             groupBox5.Controls.Add(bttnPerformanceCounters);
             groupBox5.Controls.Add(chkLogInternalPerfCounters);
-            groupBox5.Location = new System.Drawing.Point(8, 533);
+            groupBox5.Location = new System.Drawing.Point(10, 597);
             groupBox5.Name = "groupBox5";
             groupBox5.Size = new System.Drawing.Size(1113, 93);
             groupBox5.TabIndex = 42;
@@ -750,7 +815,7 @@ namespace DBADashServiceConfig
             groupBox7.Controls.Add(label19);
             groupBox7.Controls.Add(numAlertPollingFrequency);
             groupBox7.Controls.Add(chkProcessAlerts);
-            groupBox7.Location = new System.Drawing.Point(8, 443);
+            groupBox7.Location = new System.Drawing.Point(13, 507);
             groupBox7.Name = "groupBox7";
             groupBox7.Size = new System.Drawing.Size(1113, 84);
             groupBox7.TabIndex = 40;
@@ -833,6 +898,13 @@ namespace DBADashServiceConfig
             // groupBox3
             // 
             groupBox3.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBox3.Controls.Add(chkLowPriorityMaxThreadPct);
+            groupBox3.Controls.Add(label24);
+            groupBox3.Controls.Add(numLowMaxThreadPct);
+            groupBox3.Controls.Add(chkQueueBasedScheduling);
+            groupBox3.Controls.Add(chkSchedulerThreads);
+            groupBox3.Controls.Add(lblSchedulerThreads);
+            groupBox3.Controls.Add(numSchedulerThreads);
             groupBox3.Controls.Add(grpMetadata);
             groupBox3.Controls.Add(chkThreads);
             groupBox3.Controls.Add(numThreads);
@@ -855,10 +927,51 @@ namespace DBADashServiceConfig
             groupBox3.Controls.Add(chkDefaultIdentityCollection);
             groupBox3.Location = new System.Drawing.Point(8, 19);
             groupBox3.Name = "groupBox3";
-            groupBox3.Size = new System.Drawing.Size(1113, 271);
+            groupBox3.Size = new System.Drawing.Size(1113, 335);
             groupBox3.TabIndex = 38;
             groupBox3.TabStop = false;
             groupBox3.Text = "Miscellaneous";
+            // 
+            // chkLowPriorityMaxThreadPct
+            // 
+            chkLowPriorityMaxThreadPct.AutoSize = true;
+            chkLowPriorityMaxThreadPct.Location = new System.Drawing.Point(724, 142);
+            chkLowPriorityMaxThreadPct.Name = "chkLowPriorityMaxThreadPct";
+            chkLowPriorityMaxThreadPct.Size = new System.Drawing.Size(18, 17);
+            chkLowPriorityMaxThreadPct.TabIndex = 57;
+            chkLowPriorityMaxThreadPct.UseVisualStyleBackColor = true;
+            chkLowPriorityMaxThreadPct.CheckedChanged += LowPriorityMaxThreadPct_CheckChanged;
+            // 
+            // numLowMaxThreadPct
+            // 
+            numLowMaxThreadPct.Location = new System.Drawing.Point(623, 137);
+            numLowMaxThreadPct.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numLowMaxThreadPct.Name = "numLowMaxThreadPct";
+            numLowMaxThreadPct.Size = new System.Drawing.Size(95, 27);
+            numLowMaxThreadPct.TabIndex = 55;
+            numLowMaxThreadPct.Value = new decimal(new int[] { 1, 0, 0, 0 });
+            numLowMaxThreadPct.ValueChanged += LowMaxThreadPct_ValueChanged;
+            // 
+            // chkSchedulerThreads
+            // 
+            chkSchedulerThreads.AutoSize = true;
+            chkSchedulerThreads.Location = new System.Drawing.Point(407, 175);
+            chkSchedulerThreads.Name = "chkSchedulerThreads";
+            chkSchedulerThreads.Size = new System.Drawing.Size(18, 17);
+            chkSchedulerThreads.TabIndex = 53;
+            chkSchedulerThreads.UseVisualStyleBackColor = true;
+            chkSchedulerThreads.CheckedChanged += SchedulerThreads_CheckChanged;
+            // 
+            // numSchedulerThreads
+            // 
+            numSchedulerThreads.Location = new System.Drawing.Point(287, 170);
+            numSchedulerThreads.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
+            numSchedulerThreads.Minimum = new decimal(new int[] { 1, 0, 0, int.MinValue });
+            numSchedulerThreads.Name = "numSchedulerThreads";
+            numSchedulerThreads.Size = new System.Drawing.Size(114, 27);
+            numSchedulerThreads.TabIndex = 51;
+            numSchedulerThreads.Value = new decimal(new int[] { 10, 0, 0, 0 });
+            numSchedulerThreads.ValueChanged += SchedulerThreads_ValueChanged;
             // 
             // grpMetadata
             // 
@@ -866,7 +979,7 @@ namespace DBADashServiceConfig
             grpMetadata.Controls.Add(chkGeneric);
             grpMetadata.Controls.Add(chkAWS);
             grpMetadata.Controls.Add(chkAzure);
-            grpMetadata.Location = new System.Drawing.Point(937, 108);
+            grpMetadata.Location = new System.Drawing.Point(937, 172);
             grpMetadata.Name = "grpMetadata";
             grpMetadata.Size = new System.Drawing.Size(170, 123);
             grpMetadata.TabIndex = 46;
@@ -927,15 +1040,6 @@ namespace DBADashServiceConfig
             numThreads.Value = new decimal(new int[] { 10, 0, 0, 0 });
             numThreads.ValueChanged += Threads_ValueChanged;
             // 
-            // label23
-            // 
-            label23.AutoSize = true;
-            label23.Location = new System.Drawing.Point(16, 139);
-            label23.Name = "label23";
-            label23.Size = new System.Drawing.Size(64, 20);
-            label23.TabIndex = 48;
-            label23.Text = "Threads:";
-            // 
             // lnkTimeouts
             // 
             lnkTimeouts.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
@@ -950,7 +1054,7 @@ namespace DBADashServiceConfig
             // 
             // bttnCustomCollections
             // 
-            bttnCustomCollections.Location = new System.Drawing.Point(623, 176);
+            bttnCustomCollections.Location = new System.Drawing.Point(622, 240);
             bttnCustomCollections.Name = "bttnCustomCollections";
             bttnCustomCollections.Size = new System.Drawing.Size(197, 55);
             bttnCustomCollections.TabIndex = 46;
@@ -961,7 +1065,7 @@ namespace DBADashServiceConfig
             // lblSummaryRefreshCron
             // 
             lblSummaryRefreshCron.AutoSize = true;
-            lblSummaryRefreshCron.Location = new System.Drawing.Point(441, 111);
+            lblSummaryRefreshCron.Location = new System.Drawing.Point(431, 106);
             lblSummaryRefreshCron.Name = "lblSummaryRefreshCron";
             lblSummaryRefreshCron.Size = new System.Drawing.Size(0, 20);
             lblSummaryRefreshCron.TabIndex = 45;
@@ -1010,7 +1114,7 @@ namespace DBADashServiceConfig
             // 
             // lblEncryptionStatus
             // 
-            lblEncryptionStatus.Location = new System.Drawing.Point(420, 236);
+            lblEncryptionStatus.Location = new System.Drawing.Point(419, 300);
             lblEncryptionStatus.Name = "lblEncryptionStatus";
             lblEncryptionStatus.Size = new System.Drawing.Size(197, 27);
             lblEncryptionStatus.TabIndex = 38;
@@ -1019,7 +1123,7 @@ namespace DBADashServiceConfig
             // 
             // bttnEncryption
             // 
-            bttnEncryption.Location = new System.Drawing.Point(420, 176);
+            bttnEncryption.Location = new System.Drawing.Point(419, 240);
             bttnEncryption.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             bttnEncryption.Name = "bttnEncryption";
             bttnEncryption.Size = new System.Drawing.Size(197, 55);
@@ -1039,7 +1143,7 @@ namespace DBADashServiceConfig
             // 
             // bttnSchedule
             // 
-            bttnSchedule.Location = new System.Drawing.Point(217, 176);
+            bttnSchedule.Location = new System.Drawing.Point(216, 240);
             bttnSchedule.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             bttnSchedule.Name = "bttnSchedule";
             bttnSchedule.Size = new System.Drawing.Size(197, 55);
@@ -1071,7 +1175,7 @@ namespace DBADashServiceConfig
             groupBox4.Controls.Add(label11);
             groupBox4.Controls.Add(chkScanEvery);
             groupBox4.Controls.Add(label10);
-            groupBox4.Location = new System.Drawing.Point(8, 297);
+            groupBox4.Location = new System.Drawing.Point(8, 361);
             groupBox4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             groupBox4.Name = "groupBox4";
             groupBox4.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -1795,23 +1899,23 @@ namespace DBADashServiceConfig
             dgvConnections.AllowUserToAddRows = false;
             dgvConnections.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             dgvConnections.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvConnections.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvConnections.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgvConnections.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgvConnections.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvConnections.DefaultCellStyle = dataGridViewCellStyle2;
             dgvConnections.Location = new System.Drawing.Point(16, 27);
             dgvConnections.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvConnections.Name = "dgvConnections";
@@ -2052,19 +2156,6 @@ namespace DBADashServiceConfig
             tabMessaging.Text = "Messaging";
             tabMessaging.UseVisualStyleBackColor = true;
             // 
-            // chkCollectCursors
-            // 
-            chkCollectCursors.AutoSize = true;
-            chkCollectCursors.Location = new System.Drawing.Point(9, 134);
-            chkCollectCursors.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            chkCollectCursors.Name = "chkCollectCursors";
-            chkCollectCursors.Size = new System.Drawing.Size(129, 24);
-            chkCollectCursors.TabIndex = 30;
-            chkCollectCursors.Text = "Collect Cursors";
-            chkCollectCursors.ThreeState = true;
-            toolTip1.SetToolTip(chkCollectCursors, "sys.dm_exec_cursors capture for Running Queries.  Enable if your application uses cursors and you need to identify the SQL query associated with the cursor.");
-            chkCollectCursors.UseVisualStyleBackColor = true;
-            // 
             // ServiceConfig
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -2097,6 +2188,8 @@ namespace DBADashServiceConfig
             ((System.ComponentModel.ISupportInitialize)numAlertPollingFrequency).EndInit();
             groupBox3.ResumeLayout(false);
             groupBox3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numLowMaxThreadPct).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numSchedulerThreads).EndInit();
             grpMetadata.ResumeLayout(false);
             grpMetadata.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numThreads).EndInit();
@@ -2292,6 +2385,13 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.CheckBox chkAzure;
         private System.Windows.Forms.CheckBox chkCollectTaskWaits;
         private System.Windows.Forms.CheckBox chkCollectCursors;
+        private System.Windows.Forms.CheckBox chkQueueBasedScheduling;
+        private System.Windows.Forms.CheckBox chkSchedulerThreads;
+        private System.Windows.Forms.Label lblSchedulerThreads;
+        private System.Windows.Forms.NumericUpDown numSchedulerThreads;
+        private System.Windows.Forms.CheckBox chkLowPriorityMaxThreadPct;
+        private System.Windows.Forms.Label label24;
+        private System.Windows.Forms.NumericUpDown numLowMaxThreadPct;
     }
 }
 

@@ -1,4 +1,5 @@
 ﻿using DBADash;
+using DBADash.InstanceMetadata;
 using DBADash.Messaging;
 using DBADashGUI.Theme;
 using Humanizer;
@@ -17,7 +18,6 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADash.InstanceMetadata;
 using static DBADash.DBADashConnection;
 using Control = System.Windows.Forms.Control;
 using Font = System.Drawing.Font;
@@ -976,6 +976,15 @@ namespace DBADashServiceConfig
                     collectionConfig.EnabledMetadataProviders.Contains(InstanceMetadataProviders.Providers.Azure);
                 chkGeneric.Checked =
                     collectionConfig.EnabledMetadataProviders.Contains(InstanceMetadataProviders.Providers.Generic);
+                chkSchedulerThreads.Checked = collectionConfig.SchedulerThreads > 0;
+                numSchedulerThreads.Value = collectionConfig.GetSchedulerThreadCount();
+                chkQueueBasedScheduling.CheckState = !collectionConfig.UseQueueBasedScheduling.HasValue ? CheckState.Indeterminate : collectionConfig.UseQueueBasedScheduling.Value ? CheckState.Checked : CheckState.Unchecked;
+                numSchedulerThreads.Enabled = chkSchedulerThreads.Checked && chkQueueBasedScheduling.CheckState != CheckState.Unchecked;
+                chkSchedulerThreads.Enabled = chkQueueBasedScheduling.CheckState != CheckState.Unchecked;
+                numLowMaxThreadPct.Enabled = collectionConfig.LowPriorityQueueMaxThreadPercentage.HasValue && chkQueueBasedScheduling.CheckState != CheckState.Unchecked;
+                chkLowPriorityMaxThreadPct.Enabled = chkQueueBasedScheduling.CheckState != CheckState.Unchecked;
+                chkLowPriorityMaxThreadPct.Checked = collectionConfig.LowPriorityQueueMaxThreadPercentage.HasValue;
+                numLowMaxThreadPct.Value = Convert.ToInt32(collectionConfig.GetLowPriorityQueueMaxThreadPercentage() * 100);
                 UpdateThreadCount();
                 UpdateSummaryCron();
                 UpdateScanInterval();
@@ -2691,6 +2700,15 @@ namespace DBADashServiceConfig
             UpdateThreads();
         }
 
+        private void SchedulerThreads_CheckChanged(object sender, EventArgs e)
+        {
+            if (IsSetFromJson) return;
+            collectionConfig.SchedulerThreads = chkSchedulerThreads.Checked ? (int)numSchedulerThreads.Value : -1;
+            numSchedulerThreads.Enabled = chkSchedulerThreads.Checked;
+            numSchedulerThreads.Value = collectionConfig.GetSchedulerThreadCount();
+            SetJson();
+        }
+
         private void UpdateThreads()
         {
             if (!IsSetFromJson)
@@ -2746,6 +2764,53 @@ namespace DBADashServiceConfig
             {
                 collectionConfig.EnabledMetadataProviders.Remove(InstanceMetadataProviders.Providers.Generic);
             }
+            SetJson();
+        }
+
+        private void QueueBasedScheduling_CheckStateChanged(object sender, EventArgs e)
+        {
+            if (IsSetFromJson) return;
+            switch (chkQueueBasedScheduling.CheckState)
+            {
+                case CheckState.Checked:
+                    collectionConfig.UseQueueBasedScheduling = true;
+                    break;
+
+                case CheckState.Unchecked:
+                    collectionConfig.UseQueueBasedScheduling = false;
+                    break;
+
+                default:
+                    collectionConfig.UseQueueBasedScheduling = null;
+                    break;
+            }
+            numSchedulerThreads.Enabled = chkQueueBasedScheduling.CheckState != CheckState.Unchecked && chkSchedulerThreads.Checked;
+            chkSchedulerThreads.Enabled = chkQueueBasedScheduling.CheckState != CheckState.Unchecked;
+            numLowMaxThreadPct.Enabled = collectionConfig.LowPriorityQueueMaxThreadPercentage.HasValue && chkQueueBasedScheduling.CheckState != CheckState.Unchecked;
+            chkLowPriorityMaxThreadPct.Enabled = chkQueueBasedScheduling.CheckState != CheckState.Unchecked;
+            SetJson();
+        }
+
+        private void SchedulerThreads_ValueChanged(object sender, EventArgs e)
+        {
+            if (IsSetFromJson) return;
+            collectionConfig.SchedulerThreads = chkSchedulerThreads.Checked ? (int)numSchedulerThreads.Value : -1;
+            SetJson();
+        }
+
+        private void LowPriorityMaxThreadPct_CheckChanged(object sender, EventArgs e)
+        {
+            if (IsSetFromJson) return;
+            numLowMaxThreadPct.Enabled = chkLowPriorityMaxThreadPct.Checked && chkQueueBasedScheduling.CheckState != CheckState.Unchecked;
+            collectionConfig.LowPriorityQueueMaxThreadPercentage = chkLowPriorityMaxThreadPct.Checked ? (double?)numLowMaxThreadPct.Value / 100 : null;
+            numLowMaxThreadPct.Value = Convert.ToInt32(collectionConfig.GetLowPriorityQueueMaxThreadPercentage() * 100);
+            SetJson();
+        }
+
+        private void LowMaxThreadPct_ValueChanged(object sender, EventArgs e)
+        {
+            if (IsSetFromJson) return;
+            collectionConfig.LowPriorityQueueMaxThreadPercentage = chkLowPriorityMaxThreadPct.Checked ? (double?)numLowMaxThreadPct.Value / 100 : null;
             SetJson();
         }
     }
