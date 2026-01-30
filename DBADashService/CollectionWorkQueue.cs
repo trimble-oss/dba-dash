@@ -29,6 +29,10 @@ namespace DBADashService
         private const int MIN_LOW_PRIORITY_POLL_MS = 10;
         private const int MAX_LOW_PRIORITY_POLL_MS = 40;
 
+        // Default channel capacity per priority.  This can be overridden via CollectionConfig.
+        // This should be large enough to avoid any backpressure in most deployments, with minimal memory usage.
+        private const int DEFAULT_CHANNEL_CAPACITY = 5000;
+
         // Limit the number of concurrently running Low-priority items (to avoid starving higher priorities)
         private readonly int _lowMaxConcurrent;
 
@@ -54,7 +58,7 @@ namespace DBADashService
         public CollectionWorkQueue(CollectionConfig config, int? maxConcurrentCollectionsPerInstance = null)
         {
             _config = config;
-            _workerCount = config.GetThreadCount();
+            _workerCount = config.GetWorkerThreadCount();
             _maxConcurrentCollectionsPerInstance = maxConcurrentCollectionsPerInstance ?? DEFAULT_MAX_CONCURRENT_COLLECTIONS_PER_INSTANCE; // Default: allow up to 3 concurrent collections per instance
             _instanceStates = new ConcurrentDictionary<string, WorkItemState>();
             _instanceLocker = new AsyncKeyedLocker<string>(new AsyncKeyedLockOptions
@@ -66,8 +70,7 @@ namespace DBADashService
             Log.Information("Low-priority queue max concurrency set to {lowMaxConcurrent} ({percentage:P0} of total workers)", _lowMaxConcurrent, config.GetLowPriorityQueueMaxThreadPercentage());
             _lowGate = new SemaphoreSlim(_lowMaxConcurrent, _lowMaxConcurrent);
 
-            // Bounded channel with backpressure - capacity based on worker count
-            var capacity = Math.Max(_workerCount * 10, 100);
+            var capacity = config.ChannelCapacity ?? DEFAULT_CHANNEL_CAPACITY;
             var options = new BoundedChannelOptions(capacity)
             {
                 FullMode = BoundedChannelFullMode.Wait,
@@ -78,8 +81,8 @@ namespace DBADashService
             _normalChannel = Channel.CreateBounded<IWorkItem>(options);
             _lowChannel = Channel.CreateBounded<IWorkItem>(options);
 
-            Log.Information("CollectionWorkQueue initialized with {workerCount} workers, channel capacity {capacity}, max {maxConcurrency} concurrent collections per instance",
-                _workerCount, capacity, _maxConcurrentCollectionsPerInstance);
+            Log.Information("CollectionWorkQueue initialized with {workerCount} workers, channel capacity {capacity} ({default}) per priority, max {maxConcurrency} concurrent collections per instance",
+                _workerCount, capacity, config.ChannelCapacity.HasValue ? "User configured" : "Default", config.SourceConnections.Count, _maxConcurrentCollectionsPerInstance);
         }
 
         public void Start(CancellationToken cancellationToken)

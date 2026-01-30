@@ -73,15 +73,16 @@ namespace DBADashService
             {
                 Log.Information("Using traditional per-instance scheduling");
             }
-            var threads = config.GetThreadCount();
+
+            var schedulerThreads = config.GetSchedulerThreadCount();
 
             NameValueCollection props = new()
             {
             { "quartz.serializer.type", "binary" },
             { "quartz.scheduler.instanceName", "DBADashScheduler" },
             { "quartz.jobStore.type", "Quartz.Simpl.RAMJobStore, Quartz" },
-            { "quartz.threadPool.threadCount", threads.ToString() },
-            { "quartz.threadPool.maxConcurrency", threads.ToString() }
+            { "quartz.threadPool.threadCount", schedulerThreads.ToString() },
+            { "quartz.threadPool.maxConcurrency", schedulerThreads.ToString() }
             };
 
             StdSchedulerFactory factory = new(props);
