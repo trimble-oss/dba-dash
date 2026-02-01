@@ -200,7 +200,7 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
     # Check if we already have the zip downloaded
     if(!(Test-Path -Path $zip)){
         Write-Host "Download latest release:$download"
-        Invoke-WebRequest $download -Out $zip
+        Invoke-WebRequest $download -OutFile $zip
     }
     else{
         "Latest version already downloaded: $zip"
