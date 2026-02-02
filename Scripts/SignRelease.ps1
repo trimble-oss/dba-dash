@@ -75,9 +75,45 @@ if(@($UnsignedAssets).Count -eq 0) {
 # Download all assets from the draft release
 Write-Host "Downloading assets from draft release..." -ForegroundColor Cyan
 $UnsignedAssets | ForEach-Object {
-    $Path = [IO.Path]::Combine($tempFolder,$_.name)
-    Write-Host "Downloading asset: $($_.name) to $Path" -ForegroundColor Cyan
-    gh api $_.url --header "Accept: application/octet-stream" > $Path
+    $fileName = $_.name
+    Write-Host "Downloading asset: $fileName" -ForegroundColor Cyan
+    
+    # Retry logic for download with exponential backoff
+    $maxRetries = 3
+    $retryDelay = 5
+    $downloaded = $false
+    
+    for ($retry = 1; $retry -le $maxRetries; $retry++) {
+        Write-Host "Download attempt $retry of $maxRetries..." -ForegroundColor Yellow
+        
+        Push-Location $tempFolder
+        try {
+            gh release download $DraftRelease.tag_name --pattern "$fileName" --repo $repo
+            
+            # Check if the command succeeded by examining the exit code
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "Download successful!" -ForegroundColor Green
+                $downloaded = $true
+                break
+            } else {
+                Write-Host "Download attempt $retry failed with exit code: $LASTEXITCODE" -ForegroundColor Red
+            }
+        }
+        finally {
+            Pop-Location
+        }
+        
+        if (-not $downloaded -and $retry -lt $maxRetries) {
+            Write-Host "Waiting $retryDelay seconds before retry..." -ForegroundColor Yellow
+            Start-Sleep -Seconds $retryDelay
+            $retryDelay *= 2  # Exponential backoff
+        }
+    }
+    
+    if (-not $downloaded) {
+        Write-Host "Failed to download $fileName after $maxRetries attempts" -ForegroundColor Red
+        throw "Download failed for $fileName"
+    }
 }
 
 # Extract and sign each .exe file in the downloaded assets, then re-upload to GitHub
@@ -101,9 +137,8 @@ Get-ChildItem $tempFolder -File | Where-Object {$_.Name -like "*-unsigned.zip"} 
   $newZip = $_.FullName.Replace("-unsigned.zip", ".zip")
   $compressPath = [IO.Path]::Combine($extractPath, "*")
   Compress-Archive -Path $compressPath -DestinationPath $newZip -Force
-  $uploadUrl = $DraftRelease.upload_url -replace '\{\?.*\}', "?name=$(Split-Path $newZip -Leaf)"
   Write-Host "Uploading signed zip to draft release: $newZip" -ForegroundColor Cyan
-  gh api $uploadUrl --method POST --input $newZip --header "Content-Type: application/zip" | Out-Null
+  gh release upload $DraftRelease.tag_name $newZip --repo $repo --clobber
 }
 # Check if the number of assets in the draft release matches the expected count
 if (@(gh api $DraftRelease.assets_url | ConvertFrom-Json).Count -ne (@($Assets).Count + @($UnsignedAssets).Count)) {
