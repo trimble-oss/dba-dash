@@ -1190,7 +1190,8 @@ FROM (VALUES('dbo','ObjectExecutionStats',120),
 				('Alert','ClosedAlerts',180),
 				('dbo','OfflineInstances',730),
 				('dbo','FailedLogins',90 ),
-				('dbo','RunningQueriesCursors',30)
+				('dbo','RunningQueriesCursors',30),
+				('dbo','ResourceGovernorWorkloadGroupsMetrics',90)
 				) AS t(SchemaName,TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1 
 				FROM dbo.DataRetention DR
@@ -1431,7 +1432,8 @@ FROM
 (-1,'RunningJobs',5,10),
 (-1,'TableSize',4320,11520),
 (-1,'ServerServices',1445,2880),
-(-1,'FailedLogins',1445,2880)
+(-1,'FailedLogins',1445,2880),
+(-1,'ResourceGovernorWorkloadGroups',5,10)
 ) T(InstanceID,Reference,WarningThreshold,CriticalThreshold)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.CollectionDatesThresholds CDT WHERE CDT.InstanceID = T.InstanceID AND CDT.Reference = T.Reference)
 

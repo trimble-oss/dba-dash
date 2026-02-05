@@ -3,6 +3,7 @@ using DBADash;
 using DBADashGUI.CustomReports;
 using DBADashGUI.Performance;
 using Microsoft.Data.SqlClient;
+using Microsoft.SqlServer.Management.Smo;
 using System;
 using System.Data;
 using System.Diagnostics;
@@ -485,6 +486,12 @@ namespace DBADashGUI
         public static readonly DataGridViewCellStyle DataGridViewNumericCellStyle = DataGridViewCellStyle("#,##0.###");
         public static readonly DataGridViewCellStyle DataGridViewNumericCellStyleNoDigits = DataGridViewCellStyle("#,##0");
         public static readonly DataGridViewCellStyle DataGridViewPercentCellStyle = DataGridViewCellStyle("P1");
+        public static readonly DataGridViewCellStyle DataGridViewDateCellStyle = DataGridViewCellStyle("g");
+
+        /// <summary>
+        /// 25 = 25.0% instead of 0.25 = 25.0% - used for cases where percentage is stored as whole number rather than fraction
+        /// </summary>
+        public static readonly DataGridViewCellStyle DataGridViewWholeNumberPercentCellStyle = DataGridViewCellStyle("#,##0.0'%'");
 
         public static DataGridViewCellStyle DataGridViewCellStyle(string format)
         {

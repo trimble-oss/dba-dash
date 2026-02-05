@@ -363,7 +363,7 @@ namespace DBADash
             "DatabaseQueryStoreOptions", "ResourceGovernorConfiguration", "AzureDBResourceGovernance",
             "RunningQueries", "QueryText", "QueryPlans", "InternalPerformanceCounters", "MemoryUsage",
             "SessionWaits", "IdentityColumns", "RunningJobs", "TableSize", "ServerServices","ObjectExecutionStatsLegacy",
-            "AvailableProcs", "FailedLogins", "RunningQueriesCursors"
+            "AvailableProcs", "FailedLogins", "RunningQueriesCursors","ResourceGovernorWorkloadGroups"
         ];
 
         private async Task UpdateOfflineAsync()

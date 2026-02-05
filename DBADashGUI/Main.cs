@@ -88,6 +88,7 @@ namespace DBADashGUI
             Tags,
             TableSize,
             TuningRecommendations,
+            WorkloadGroups
         }
 
         private static readonly List<Main.Tabs> InstanceOnlyTabs = new() { Main.Tabs.PerformanceSummary, Tabs.Metrics, Tabs.Waits, Tabs.Memory, Tabs.RunningQueries };
@@ -107,6 +108,7 @@ namespace DBADashGUI
         private TabPage tabJobInfo;
         private TabPage tabCloudMetadata;
         private TabPage tabTuningRecommendations;
+        private TabPage tabWorkloadGroup;
 
         public Main(CommandLineOptions opts)
         {
@@ -147,6 +149,9 @@ namespace DBADashGUI
 
             tabTuningRecommendations = new TabPage("Tuning Recommendations") { Name = Tabs.TuningRecommendations.TabName() };
             tabTuningRecommendations.Controls.Add(new TuningRecommendationsReport() { Dock = DockStyle.Fill });
+
+            tabWorkloadGroup = new TabPage("Workload Group Analysis") { Name = Tabs.WorkloadGroups.TabName() };
+            tabWorkloadGroup.Controls.Add(new ResourceGovernorWorkloadGroupsMetrics { Dock = DockStyle.Fill, CloseVisible = false, MoveUpVisible = false });
         }
 
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommunityProcs proc)
@@ -183,7 +188,7 @@ namespace DBADashGUI
             (new List<TabPage>()
             {
                 tabPerformanceSummary, tabPerformance, tabSlowQueries, tabAzureDB, tabAzureSummary, tabMetrics,
-                tabObjectExecutionSummary, tabWaits, tabRunningQueries, tabMemory, tabJobStats, tabJobTimeline, tabDrivePerformance, tabTopQueries, tabOfflineInstances
+                tabObjectExecutionSummary, tabWaits, tabRunningQueries, tabMemory, tabJobStats, tabJobTimeline, tabDrivePerformance, tabTopQueries, tabOfflineInstances, tabWorkloadGroup
             }).Contains(tabs.SelectedTab) || (tabs.SelectedTab == tabCustomReport && ((SQLTreeItem)tv1.SelectedNode).Report.TimeFilterSupported);
 
         private bool IsAzureOnly;
@@ -891,6 +896,10 @@ namespace DBADashGUI
                     tabPerformanceSummary, tabPerformance, tabMetrics,tabDBADashAlerts, tabObjectExecutionSummary, tabSlowQueries, tabWaits,
                     tabRunningQueries, tabMemory,tabTopQueries, tabQueryStoreForcedPlans, tabTuningRecommendations
                 });
+                if (n.Context.HasResourceGovernorWorkloadGroups)
+                {
+                    allowedTabs.Add(tabWorkloadGroup);
+                }
             }
             else if (n.Type == SQLTreeItem.TreeType.AzureInstance)
             {
