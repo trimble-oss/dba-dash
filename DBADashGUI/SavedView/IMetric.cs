@@ -1,6 +1,8 @@
-﻿namespace DBADashGUI.Performance
-{
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
+namespace DBADashGUI.Performance
+{
     /// <summary>
     /// User controls all implement IMetricChart which has a IMetric Metric property.  When serialized a class that implements IMetric should contain all the data needed to re-create the state of the chart.
     /// </summary>
@@ -13,7 +15,8 @@
             IO,
             Blocking,
             ObjectExecution,
-            Waits
+            Waits,
+            ResourceGovernorWorkloadGroups
         }
 
         public enum AggregateTypes
@@ -27,15 +30,12 @@
             None
         }
 
+        [JsonConverter(typeof(StringEnumConverter))]
         public MetricTypes MetricType { get; }
-
 
         /// <summary>
         /// Create the associated chart control
         /// </summary>
         public IMetricChart GetChart();
-
     }
-
 }
-

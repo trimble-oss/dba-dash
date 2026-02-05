@@ -52,6 +52,7 @@ namespace DBADashGUI
         private string _connectionID;
         private bool? _hasInstanceMetadata;
         private DatabaseEngineEdition? _engineEdition;
+        private bool? _hasResourceGovernorWorkloadGroups;
 
         public bool? HasInstanceMetadata
         {
@@ -113,6 +114,16 @@ namespace DBADashGUI
             }
         }
 
+        public bool HasResourceGovernorWorkloadGroups
+        {
+            get
+            {
+                if (_hasResourceGovernorWorkloadGroups != null) return _hasResourceGovernorWorkloadGroups.Value;
+                GetAdditionalInfo();
+                return _hasResourceGovernorWorkloadGroups.Value;
+            }
+        }
+
         private bool? _canMessage;
 
         private void GetAdditionalInfo()
@@ -123,6 +134,7 @@ namespace DBADashGUI
             _collectAgentID = (int)row["CollectAgentID"];
             _importAgentID = (int)row["ImportAgentID"];
             _connectionID = (string)row["ConnectionID"];
+            _hasResourceGovernorWorkloadGroups = (bool)row["HasResourceGovernorWorkloadGroups"];
             try
             {
                 _productVersion = new Version((string)row["ProductVersion"]);

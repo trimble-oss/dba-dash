@@ -30,6 +30,8 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PerformanceCounterSummary));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
@@ -58,6 +60,7 @@
             dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn13 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            workloadGroupAnalysisToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
@@ -131,7 +134,7 @@
             // toolStripDropDownButton1
             // 
             toolStripDropDownButton1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { blockingToolStripMenuItem, CPUToolStripMenuItem, IOToolStripMenuItem, ObjectExecutionToolStripMenuItem, WaitsToolStripMenuItem });
+            toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { blockingToolStripMenuItem, CPUToolStripMenuItem, IOToolStripMenuItem, ObjectExecutionToolStripMenuItem, WaitsToolStripMenuItem, workloadGroupAnalysisToolStripMenuItem });
             toolStripDropDownButton1.Image = (System.Drawing.Image)resources.GetObject("toolStripDropDownButton1.Image");
             toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             toolStripDropDownButton1.Name = "toolStripDropDownButton1";
@@ -141,35 +144,35 @@
             // blockingToolStripMenuItem
             // 
             blockingToolStripMenuItem.Name = "blockingToolStripMenuItem";
-            blockingToolStripMenuItem.Size = new System.Drawing.Size(204, 26);
+            blockingToolStripMenuItem.Size = new System.Drawing.Size(258, 26);
             blockingToolStripMenuItem.Text = "Blocking";
             blockingToolStripMenuItem.Click += BlockingToolStripMenuItem_Click;
             // 
             // CPUToolStripMenuItem
             // 
             CPUToolStripMenuItem.Name = "CPUToolStripMenuItem";
-            CPUToolStripMenuItem.Size = new System.Drawing.Size(204, 26);
+            CPUToolStripMenuItem.Size = new System.Drawing.Size(258, 26);
             CPUToolStripMenuItem.Text = "CPU";
             CPUToolStripMenuItem.Click += CPUToolStripMenuItem_Click;
             // 
             // IOToolStripMenuItem
             // 
             IOToolStripMenuItem.Name = "IOToolStripMenuItem";
-            IOToolStripMenuItem.Size = new System.Drawing.Size(204, 26);
+            IOToolStripMenuItem.Size = new System.Drawing.Size(258, 26);
             IOToolStripMenuItem.Text = "IO ";
             IOToolStripMenuItem.Click += IOToolStripMenuItem_Click;
             // 
             // ObjectExecutionToolStripMenuItem
             // 
             ObjectExecutionToolStripMenuItem.Name = "ObjectExecutionToolStripMenuItem";
-            ObjectExecutionToolStripMenuItem.Size = new System.Drawing.Size(204, 26);
+            ObjectExecutionToolStripMenuItem.Size = new System.Drawing.Size(258, 26);
             ObjectExecutionToolStripMenuItem.Text = "Object Execution";
             ObjectExecutionToolStripMenuItem.Click += ObjectExecutionToolStripMenuItem_Click;
             // 
             // WaitsToolStripMenuItem
             // 
             WaitsToolStripMenuItem.Name = "WaitsToolStripMenuItem";
-            WaitsToolStripMenuItem.Size = new System.Drawing.Size(204, 26);
+            WaitsToolStripMenuItem.Size = new System.Drawing.Size(258, 26);
             WaitsToolStripMenuItem.Text = "Waits";
             WaitsToolStripMenuItem.Click += WaitsToolStripMenuItem_Click;
             // 
@@ -259,25 +262,40 @@
             // 
             performanceCounterSummaryGrid1.AllowUserToAddRows = false;
             performanceCounterSummaryGrid1.AllowUserToDeleteRows = false;
+            performanceCounterSummaryGrid1.AllowUserToOrderColumns = true;
             performanceCounterSummaryGrid1.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            performanceCounterSummaryGrid1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             performanceCounterSummaryGrid1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            performanceCounterSummaryGrid1.Counters = null;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            performanceCounterSummaryGrid1.DefaultCellStyle = dataGridViewCellStyle2;
             performanceCounterSummaryGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
-            performanceCounterSummaryGrid1.InstanceID = 0;
+            performanceCounterSummaryGrid1.EnableHeadersVisualStyles = false;
             performanceCounterSummaryGrid1.Location = new System.Drawing.Point(0, 0);
             performanceCounterSummaryGrid1.Name = "performanceCounterSummaryGrid1";
             performanceCounterSummaryGrid1.ReadOnly = true;
             performanceCounterSummaryGrid1.RowHeadersVisible = false;
             performanceCounterSummaryGrid1.RowHeadersWidth = 51;
-            performanceCounterSummaryGrid1.SearchText = null;
             performanceCounterSummaryGrid1.Size = new System.Drawing.Size(978, 438);
             performanceCounterSummaryGrid1.TabIndex = 0;
             // 
             // dataGridViewTextBoxColumn8
             // 
             dataGridViewTextBoxColumn8.DataPropertyName = "MaxValue";
-            dataGridViewCellStyle1.Format = "#,##0.########";
-            dataGridViewTextBoxColumn8.DefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle3.Format = "#,##0.########";
+            dataGridViewTextBoxColumn8.DefaultCellStyle = dataGridViewCellStyle3;
             dataGridViewTextBoxColumn8.HeaderText = "MaxValue";
             dataGridViewTextBoxColumn8.MinimumWidth = 6;
             dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
@@ -332,6 +350,13 @@
             dataGridViewTextBoxColumn7.ReadOnly = true;
             dataGridViewTextBoxColumn7.Width = 124;
             // 
+            // workloadGroupAnalysisToolStripMenuItem
+            // 
+            workloadGroupAnalysisToolStripMenuItem.Name = "workloadGroupAnalysisToolStripMenuItem";
+            workloadGroupAnalysisToolStripMenuItem.Size = new System.Drawing.Size(258, 26);
+            workloadGroupAnalysisToolStripMenuItem.Text = "Workload Group Analysis";
+            workloadGroupAnalysisToolStripMenuItem.Click += WorkloadGroupAnalysis_Click;
+            // 
             // PerformanceCounterSummary
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -382,5 +407,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripButton tsDeleteView;
         private SavedViewMenuItem savedViewMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem workloadGroupAnalysisToolStripMenuItem;
     }
 }

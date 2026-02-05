@@ -1,7 +1,8 @@
 ﻿using Microsoft.Data.SqlClient;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace DBADashGUI
 {
@@ -22,6 +23,7 @@ namespace DBADashGUI
         [JsonIgnore]
         public string Name { get; set; }
 
+        [JsonConverter(typeof(StringEnumConverter))]
         public abstract ViewTypes Type { get; }
 
         [JsonIgnore]
@@ -29,7 +31,7 @@ namespace DBADashGUI
 
         public virtual string Serialize()
         {
-            var json = Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+            var json = JsonConvert.SerializeObject(this, Formatting.Indented);
             return json;
         }
 

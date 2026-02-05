@@ -1,9 +1,9 @@
-﻿using System;
+﻿using DBADashGUI.Theme;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI.Performance
 {
@@ -336,6 +336,11 @@ namespace DBADashGUI.Performance
         private void SavedViewSelected(object sender, SavedViewSelectedEventArgs e)
         {
             LoadSelectedView(e.Name, e.IsGlobal, e.SerializedObject);
+        }
+
+        private void WorkloadGroupAnalysis_Click(object sender, EventArgs e)
+        {
+            AddChartControl(new ResourceGovernorWorkloadGroupsMetrics() { Metric = new ResourceGovernorWorkloadGroupsMetric() { ShowTable = false, MetricsToDisplay = [.. ResourceGovernorWorkloadGroupsMetric.DefaultMetrics.Take<string>(1)] } });
         }
     }
 }

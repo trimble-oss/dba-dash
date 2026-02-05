@@ -79,7 +79,8 @@ namespace DBADash
         ServerServices,
         AvailableProcs,
         InstanceMetadata,
-        FailedLogins
+        FailedLogins,
+        ResourceGovernorWorkloadGroups
     }
 
     public enum HostPlatform
@@ -136,6 +137,11 @@ namespace DBADash
         private readonly Stopwatch swatch = new();
         private string currentCollection;
         private Version SQLVersion = new();
+
+        /// <summary>
+        /// Cache lifetime in minutes for Resource Governor Workload Groups applicability check
+        /// </summary>
+        public const int ResourceGovernorWorkloadGroupsCacheMinutes = 60;
 
         private bool IsTableValuedConstructorsSupported => SQLVersion.Major > 9;
 
@@ -253,6 +259,51 @@ namespace DBADash
                 }
             };
             Data.Tables.Add(dtInternalPerfCounters);
+        }
+
+        private bool IsResourceGovernorWorkloadGroupsApplicable()
+        {
+            if (engineEdition != DatabaseEngineEdition.Enterprise) return false;
+
+            var cacheKey = $"ResourceGovernorWorkloadGroupsApplicable_{ConnectionID}";
+
+            // Check cache first to avoid quering the DB each time
+            if (cache.Get(cacheKey) is bool cachedResult)
+            {
+                return cachedResult;
+            }
+            bool hasWorkloadGroups;
+            try
+            {
+                // Not in cache, query the database
+                hasWorkloadGroups = HasWorkloadGroups();
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error checking if Resource Governor Workload Groups are applicable for instance {instanceName}. Assuming not applicable. Error: {errorMessage}", ConnectionID, ex.Message);
+                return false;
+            }
+
+            // Cache the result
+            var cachePolicy = new CacheItemPolicy
+            {
+                AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(ResourceGovernorWorkloadGroupsCacheMinutes)
+            };
+            cache.Set(cacheKey, hasWorkloadGroups, cachePolicy);
+            if (!hasWorkloadGroups)
+            {
+                Log.Information("ResourceGovernorWorkloadGroups for instance {instanceName} is disabled as no workload groups have been defined.", ConnectionID);
+            }
+
+            return hasWorkloadGroups;
+        }
+
+        private bool HasWorkloadGroups()
+        {
+            using var cn = new SqlConnection(ConnectionString);
+            using var cmd = new SqlCommand(SqlStrings.HasWorkloadGroups, cn);
+            cn.Open();
+            return (bool)cmd.ExecuteScalar();
         }
 
         private void LogInternalPerformanceCounter(string objectName, string counterName, string instance, decimal counterValue)
@@ -637,6 +688,10 @@ namespace DBADash
             else if (collectionType == CollectionType.InstanceMetadata && (IsAzureDB || IsRDS || noWMI))
             {
                 return false;
+            }
+            if (collectionType == CollectionType.ResourceGovernorWorkloadGroups)
+            {
+                return IsResourceGovernorWorkloadGroupsApplicable();
             }
             else
             {

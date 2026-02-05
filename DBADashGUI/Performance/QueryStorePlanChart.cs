@@ -201,7 +201,7 @@ namespace DBADashGUI.Performance
                 .Subtract(from.DateTime.RoundDownToPreviousHour()).TotalMinutes / 20));
             planChart.XAxes =
             [
-                new DateTimeAxis(unit, date => FormatDateForChartLabel(date, to.Subtract(from)))
+                new DateTimeAxis(unit, date => Charts.ChartHelper.FormatDateForChartLabel(date, to.Subtract(from)))
                 {
                     LabelsPaint = labelPaint,
                     MinLimit = to.Subtract(from).TotalMinutes > 60
@@ -398,36 +398,6 @@ namespace DBADashGUI.Performance
         {
             tooltipPanel.Visible = false;
             currentMetric = null; // Clear cached metric when hiding tooltip
-        }
-
-        public static string FormatDateForChartLabel(DateTime date, TimeSpan duration, CultureInfo cultureInfo = null)
-        {
-            cultureInfo ??= CultureInfo.CurrentCulture;
-
-            switch (duration.TotalDays)
-            {
-                case < 1:
-                    // Less than 1 day: Show time only
-                    return date.ToString(cultureInfo.DateTimeFormat.ShortTimePattern, cultureInfo);
-
-                case < 7:
-                    {
-                        // Less than 7 days: Show day and time
-                        var dayName = date.ToString("ddd", cultureInfo); // Short day name
-                        return $"{dayName} {date.ToString(cultureInfo.DateTimeFormat.ShortTimePattern, cultureInfo)}";
-                    }
-                default:
-                    {
-                        // More than 7 days but within the current year: Show day and month
-                        var dateFormat = duration.TotalDays <= 365
-                            ? cultureInfo.DateTimeFormat.ShortDatePattern.Replace("yyyy", "").Replace("yy", "")
-                                .Trim(',', '/', '-', '.')
-                            :
-                            // Different years: Show the full date
-                            cultureInfo.DateTimeFormat.ShortDatePattern;
-                        return date.ToString(dateFormat, cultureInfo).Trim();
-                    }
-            }
         }
 
         private static ISeries[] GetSeries(DataTable dt, string metricName)

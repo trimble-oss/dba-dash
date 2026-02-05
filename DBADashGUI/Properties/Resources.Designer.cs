@@ -902,6 +902,16 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap StackedAreaChart {
+            get {
+                object obj = ResourceManager.GetObject("StackedAreaChart", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap StackedColumnChart_24x {
             get {
                 object obj = ResourceManager.GetObject("StackedColumnChart_24x", resourceCulture);

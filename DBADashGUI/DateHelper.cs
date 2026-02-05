@@ -112,7 +112,7 @@ namespace DBADashGUI
         /// <param name="Mins">Duration in minutes</param>
         /// <param name="MaxPoints">Max points for chart</param>
         /// <returns>Int value for the date grouping in minutes</returns>
-        public static int DateGrouping(int Mins, int MaxPoints)
+        public static int DateGrouping(int Mins, int MaxPoints, int minGrouping = 0)
         {
             int lastMins = 0;
 
@@ -123,9 +123,14 @@ namespace DBADashGUI
                 double div = mins == 0 ? 0.2 : mins; // Use a fractional value for 0 (None).  0.2 = Assume 5 points per min.
                 if (Mins / div < MaxPoints)
                 {
-                    return mins;
+                    lastMins = mins;
+                    break;
                 }
                 lastMins = mins;
+            }
+            if (lastMins < minGrouping)
+            {
+                return minGrouping; // If the optimal grouping is less than the minimum grouping specified, return the minimum grouping.
             }
             return lastMins; // We are over MaxPoints but have ran out of date groups so return the last date group.
         }

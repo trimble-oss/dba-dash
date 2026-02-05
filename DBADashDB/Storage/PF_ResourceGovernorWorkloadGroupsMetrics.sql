@@ -1,0 +1,3 @@
+﻿CREATE PARTITION FUNCTION PF_ResourceGovernorWorkloadGroupsMetrics(DATETIME2)
+    AS RANGE RIGHT
+    FOR VALUES ();

@@ -1,5 +1,6 @@
 ﻿using DBADashGUI.Performance;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System.Collections.Generic;
 
 namespace DBADashGUI
@@ -9,11 +10,11 @@ namespace DBADashGUI
     /// </summary>
     internal class MetricsSavedView : SavedView
     {
-
         public List<IMetric> Metrics { get; set; }
 
         public bool ShowGrid { get; set; }
 
+        [JsonConverter(typeof(StringEnumConverter))]
         public override ViewTypes Type => ViewTypes.Metric;
 
         public override string Serialize()
@@ -31,7 +32,8 @@ namespace DBADashGUI
         {
             return JsonConvert.DeserializeObject<MetricsSavedView>(json, new JsonSerializerSettings
             {
-                TypeNameHandling = TypeNameHandling.Objects
+                TypeNameHandling = TypeNameHandling.Objects,
+                ObjectCreationHandling = ObjectCreationHandling.Replace
             });
         }
 
@@ -39,9 +41,5 @@ namespace DBADashGUI
         {
             return SavedView.GetSavedViews(ViewTypes.Metric, UserID);
         }
-
-
     }
-
-
 }

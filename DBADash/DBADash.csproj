@@ -24,6 +24,7 @@
     <None Remove="SQL\SQLJobSteps.sql" />
     <None Remove="SQL\SQLQueryStoreForcedPlans.sql" />
     <None Remove="SQL\SQLQueryStoreTopQueries.sql" />
+    <None Remove="SQL\SQLResourceGovernorWorkloadGroups.sql" />
     <None Remove="SQL\SQLRunningJobs.sql" />
     <None Remove="SQL\SQLServerServices.sql" />
     <None Remove="SQL\SQLTableSize.sql" />
@@ -31,6 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+    <EmbeddedResource Include="SQL\SQLHasWorkloadGroups.sql" />
     <EmbeddedResource Include="SQL\SQLFailedLogins.sql" />
     <EmbeddedResource Include="SQL\SQLAvailableCounters.sql" />
     <EmbeddedResource Include="SQL\SQLAvailableProcs.sql" />
@@ -81,6 +83,7 @@
 	<EmbeddedResource Include="SQL\SQLQueryStoreTopQueries.sql" />
 	<EmbeddedResource Include="SQL\SQLRemoveEventSessions.sql" />
 	<EmbeddedResource Include="SQL\SQLRemoveEventSessionsAzure.sql" />
+	<EmbeddedResource Include="SQL\SQLResourceGovernorWorkloadGroups.sql" />
 	<EmbeddedResource Include="SQL\SQLRunningJobs.sql" />
 	<EmbeddedResource Include="SQL\SQLRunningQueries.sql" />
 	<EmbeddedResource Include="SQL\SQLServerExtraProperties.sql" />
