@@ -29,9 +29,14 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            chartCPU = new LiveCharts.WinForms.CartesianChart();
+            LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultLegend skDefaultLegend1 = new LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultLegend();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CPU));
+            LiveChartsCore.Drawing.Padding padding1 = new LiveChartsCore.Drawing.Padding();
+            LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultTooltip skDefaultTooltip1 = new LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultTooltip();
+            LiveChartsCore.Drawing.Padding padding2 = new LiveChartsCore.Drawing.Padding();
             contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(components);
             tsCopyData = new System.Windows.Forms.ToolStripMenuItem();
+            exportDataToExcelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsClose = new System.Windows.Forms.ToolStripButton();
             tsUp = new System.Windows.Forms.ToolStripButton();
@@ -40,28 +45,17 @@
             tsAgg = new System.Windows.Forms.ToolStripDropDownButton();
             AVGToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             MAXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            exportDataToExcelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            chartCPU = new LiveChartsCore.SkiaSharpView.WinForms.CartesianChart();
             contextMenuStrip1.SuspendLayout();
             toolStrip1.SuspendLayout();
             SuspendLayout();
-            // 
-            // chartCPU
-            // 
-            chartCPU.ContextMenuStrip = contextMenuStrip1;
-            chartCPU.Dock = System.Windows.Forms.DockStyle.Fill;
-            chartCPU.Location = new System.Drawing.Point(0, 27);
-            chartCPU.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            chartCPU.Name = "chartCPU";
-            chartCPU.Size = new System.Drawing.Size(878, 303);
-            chartCPU.TabIndex = 1;
-            chartCPU.Text = "CPU";
             // 
             // contextMenuStrip1
             // 
             contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsCopyData, exportDataToExcelToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new System.Drawing.Size(218, 84);
+            contextMenuStrip1.Size = new System.Drawing.Size(218, 56);
             // 
             // tsCopyData
             // 
@@ -70,6 +64,14 @@
             tsCopyData.Size = new System.Drawing.Size(217, 26);
             tsCopyData.Text = "Copy Data";
             tsCopyData.Click += CopyData_Click;
+            // 
+            // exportDataToExcelToolStripMenuItem
+            // 
+            exportDataToExcelToolStripMenuItem.Image = Properties.Resources.excel16x16;
+            exportDataToExcelToolStripMenuItem.Name = "exportDataToExcelToolStripMenuItem";
+            exportDataToExcelToolStripMenuItem.Size = new System.Drawing.Size(217, 26);
+            exportDataToExcelToolStripMenuItem.Text = "Export Data to Excel";
+            exportDataToExcelToolStripMenuItem.Click += ExportDataToExcel_Click;
             // 
             // toolStrip1
             // 
@@ -149,13 +151,48 @@
             MAXToolStripMenuItem.Text = "Max";
             MAXToolStripMenuItem.Click += MAXToolStripMenuItem_Click;
             // 
-            // exportDataToExcelToolStripMenuItem
+            // cartesianChart1
             // 
-            exportDataToExcelToolStripMenuItem.Image = Properties.Resources.excel16x16;
-            exportDataToExcelToolStripMenuItem.Name = "exportDataToExcelToolStripMenuItem";
-            exportDataToExcelToolStripMenuItem.Size = new System.Drawing.Size(217, 26);
-            exportDataToExcelToolStripMenuItem.Text = "Export Data to Excel";
-            exportDataToExcelToolStripMenuItem.Click += ExportDataToExcel_Click;
+            chartCPU.AutoUpdateEnabled = true;
+            chartCPU.ChartTheme = null;
+            chartCPU.Dock = System.Windows.Forms.DockStyle.Fill;
+            chartCPU.ForceGPU = false;
+            skDefaultLegend1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
+            skDefaultLegend1.Content = null;
+            skDefaultLegend1.IsValid = true;
+            skDefaultLegend1.Opacity = 1F;
+            padding1.Bottom = 0F;
+            padding1.Left = 0F;
+            padding1.Right = 0F;
+            padding1.Top = 0F;
+            skDefaultLegend1.Padding = padding1;
+            skDefaultLegend1.RemoveOnCompleted = false;
+            skDefaultLegend1.RotateTransform = 0F;
+            skDefaultLegend1.X = 0F;
+            skDefaultLegend1.Y = 0F;
+            chartCPU.Legend = skDefaultLegend1;
+            chartCPU.Location = new System.Drawing.Point(0, 27);
+            chartCPU.MatchAxesScreenDataRatio = false;
+            chartCPU.Name = "cartesianChart1";
+            chartCPU.Size = new System.Drawing.Size(878, 303);
+            chartCPU.TabIndex = 3;
+            skDefaultTooltip1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
+            skDefaultTooltip1.Content = null;
+            skDefaultTooltip1.IsValid = true;
+            skDefaultTooltip1.Opacity = 1F;
+            padding2.Bottom = 0F;
+            padding2.Left = 0F;
+            padding2.Right = 0F;
+            padding2.Top = 0F;
+            skDefaultTooltip1.Padding = padding2;
+            skDefaultTooltip1.RemoveOnCompleted = false;
+            skDefaultTooltip1.RotateTransform = 0F;
+            skDefaultTooltip1.Wedge = 10;
+            skDefaultTooltip1.X = 0F;
+            skDefaultTooltip1.Y = 0F;
+            chartCPU.Tooltip = skDefaultTooltip1;
+            chartCPU.TooltipFindingStrategy = LiveChartsCore.Measure.TooltipFindingStrategy.Automatic;
+            chartCPU.UpdaterThrottler = System.TimeSpan.Parse("00:00:00.0500000");
             // 
             // CPU
             // 
@@ -176,8 +213,6 @@
         }
 
         #endregion
-
-        private LiveCharts.WinForms.CartesianChart chartCPU;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripLabel lblCPU;
         private System.Windows.Forms.ToolStripDropDownButton tsAgg;
@@ -189,5 +224,6 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem tsCopyData;
         private System.Windows.Forms.ToolStripMenuItem exportDataToExcelToolStripMenuItem;
+        private LiveChartsCore.SkiaSharpView.WinForms.CartesianChart chartCPU;
     }
 }
