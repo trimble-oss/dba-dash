@@ -32,18 +32,22 @@ namespace DBADashGUI
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SpaceTracking));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultLegend skDefaultLegend1 = new LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultLegend();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SpaceTracking));
+            LiveChartsCore.Drawing.Padding padding1 = new LiveChartsCore.Drawing.Padding();
+            LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultTooltip skDefaultTooltip1 = new LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultTooltip();
+            LiveChartsCore.Drawing.Padding padding2 = new LiveChartsCore.Drawing.Padding();
             elementHost1 = new System.Windows.Forms.Integration.ElementHost();
             dgv = new DBADashDataGridView();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
-            pieChart1 = new LiveCharts.WinForms.PieChart();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
             tsExcel = new System.Windows.Forms.ToolStripButton();
             tsBack = new System.Windows.Forms.ToolStripButton();
+            tsClearFilter = new System.Windows.Forms.ToolStripButton();
             tsHistory = new System.Windows.Forms.ToolStripButton();
             tsContext = new System.Windows.Forms.ToolStripLabel();
             tsUnits = new System.Windows.Forms.ToolStripDropDownButton();
@@ -57,7 +61,7 @@ namespace DBADashGUI
             toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            tsClearFilter = new System.Windows.Forms.ToolStripButton();
+            pieChart1 = new LiveChartsCore.SkiaSharpView.WinForms.PieChart();
             ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
@@ -80,6 +84,7 @@ namespace DBADashGUI
             // 
             dgv.AllowUserToAddRows = false;
             dgv.AllowUserToDeleteRows = false;
+            dgv.AllowUserToOrderColumns = true;
             dgv.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
@@ -104,8 +109,6 @@ namespace DBADashGUI
             dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgv.Name = "dgv";
             dgv.ReadOnly = true;
-            dgv.ResultSetID = 0;
-            dgv.ResultSetName = null;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
             dgv.Size = new System.Drawing.Size(516, 939);
@@ -131,15 +134,6 @@ namespace DBADashGUI
             splitContainer1.Size = new System.Drawing.Size(1002, 939);
             splitContainer1.SplitterDistance = 516;
             splitContainer1.TabIndex = 2;
-            // 
-            // pieChart1
-            // 
-            pieChart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            pieChart1.Location = new System.Drawing.Point(0, 0);
-            pieChart1.Name = "pieChart1";
-            pieChart1.Size = new System.Drawing.Size(482, 939);
-            pieChart1.TabIndex = 1;
-            pieChart1.Text = "pieChart1";
             // 
             // toolStrip1
             // 
@@ -191,6 +185,15 @@ namespace DBADashGUI
             tsBack.Size = new System.Drawing.Size(29, 24);
             tsBack.Text = "Back";
             tsBack.Click += TsBack_Click;
+            // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Image = Properties.Resources.Eraser_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            tsClearFilter.Text = "Clear Filter";
             // 
             // tsHistory
             // 
@@ -311,14 +314,46 @@ namespace DBADashGUI
             dataGridViewTextBoxColumn2.ReadOnly = true;
             dataGridViewTextBoxColumn2.Width = 94;
             // 
-            // tsClearFilter
+            // pieChart1
             // 
-            tsClearFilter.Enabled = false;
-            tsClearFilter.Image = Properties.Resources.Eraser_16x;
-            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsClearFilter.Name = "tsClearFilter";
-            tsClearFilter.Size = new System.Drawing.Size(104, 24);
-            tsClearFilter.Text = "Clear Filter";
+            pieChart1.AutoUpdateEnabled = true;
+            pieChart1.ChartTheme = null;
+            pieChart1.Dock = System.Windows.Forms.DockStyle.Fill;
+            pieChart1.ForceGPU = false;
+            skDefaultLegend1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
+            skDefaultLegend1.Content = null;
+            skDefaultLegend1.IsValid = true;
+            skDefaultLegend1.Opacity = 1F;
+            padding1.Bottom = 0F;
+            padding1.Left = 0F;
+            padding1.Right = 0F;
+            padding1.Top = 0F;
+            skDefaultLegend1.Padding = padding1;
+            skDefaultLegend1.RemoveOnCompleted = false;
+            skDefaultLegend1.RotateTransform = 0F;
+            skDefaultLegend1.X = 0F;
+            skDefaultLegend1.Y = 0F;
+            pieChart1.Legend = skDefaultLegend1;
+            pieChart1.Location = new System.Drawing.Point(0, 0);
+            pieChart1.Name = "pieChart1";
+            pieChart1.Size = new System.Drawing.Size(482, 939);
+            pieChart1.TabIndex = 1;
+            skDefaultTooltip1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
+            skDefaultTooltip1.Content = null;
+            skDefaultTooltip1.IsValid = true;
+            skDefaultTooltip1.Opacity = 1F;
+            padding2.Bottom = 0F;
+            padding2.Left = 0F;
+            padding2.Right = 0F;
+            padding2.Top = 0F;
+            skDefaultTooltip1.Padding = padding2;
+            skDefaultTooltip1.RemoveOnCompleted = false;
+            skDefaultTooltip1.RotateTransform = 0F;
+            skDefaultTooltip1.Wedge = 10;
+            skDefaultTooltip1.X = 0F;
+            skDefaultTooltip1.Y = 0F;
+            pieChart1.Tooltip = skDefaultTooltip1;
+            pieChart1.UpdaterThrottler = System.TimeSpan.Parse("00:00:00.0500000");
             // 
             // SpaceTracking
             // 
@@ -354,7 +389,6 @@ namespace DBADashGUI
         private System.Windows.Forms.ToolStripButton tsExcel;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
-        private LiveCharts.WinForms.PieChart pieChart1;
         private System.Windows.Forms.ToolStripLabel tsContext;
         private System.Windows.Forms.ToolStripDropDownButton tsUnits;
         private System.Windows.Forms.ToolStripMenuItem mBToolStripMenuItem;
@@ -366,5 +400,6 @@ namespace DBADashGUI
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem5;
         private System.Windows.Forms.ToolStripButton tsClearFilter;
+        private LiveChartsCore.SkiaSharpView.WinForms.PieChart pieChart1;
     }
 }
