@@ -1,7 +1,7 @@
 ﻿using DBADashGUI.Theme;
 using LiveCharts;
-using LiveCharts.Wpf;
 using Microsoft.Data.SqlClient;
+using SkiaSharp.Views.Desktop;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -172,35 +172,57 @@ namespace DBADashGUI.Performance
 
         private void ShowPie(ref DataTable dt)
         {
-            pieChart1.Series.Clear();
+            var series = new List<LiveChartsCore.ISeries>();
+            double other = 0d;
 
-            static string labelPoint(ChartPoint chartPoint) =>
-                $"{chartPoint.SeriesView.Title} ({chartPoint.Participation:P})";
-            SeriesCollection sc = new();
-            double other = 0;
             foreach (DataRow r in dt.Rows)
             {
                 var pages = Convert.ToDouble(r["pages_kb"]);
                 var pct = Convert.ToDouble(r["Pct"]);
-                var dataLabels = pct > 0.05;
+                var name = (string)r["MemoryClerkType"];
+                var showDataLabels = pct > 0.05;
+
                 if (pct > 0.02)
                 {
-                    var s = new PieSeries() { Title = (string)r["MemoryClerkType"], Values = new ChartValues<double> { pages }, LabelPoint = labelPoint, DataLabels = dataLabels, ToolTip = true };
-                    sc.Add(s);
+                    var s = new LiveChartsCore.SkiaSharpView.PieSeries<double>
+                    {
+                        Name = name,
+                        Values = new[] { pages },
+                        DataLabelsPaint = showDataLabels
+                            ? new LiveChartsCore.SkiaSharpView.Painting.SolidColorPaint(DashColors.White.ToSKColor()) { StrokeThickness = 2 }
+                            : null,
+                        DataLabelsFormatter = point =>
+                            showDataLabels
+                                ? $"{point.Context.Series.Name} ({point.StackedValue?.Share:P2})"
+                                : string.Empty,
+                        DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
+                        ToolTipLabelFormatter = point => $"{point.StackedValue?.Share:P2}"
+                    };
+                    series.Add(s);
                 }
                 else
                 {
                     other += pages;
                 }
             }
+
             if (other > 0)
             {
-                var s = new PieSeries() { Title = "{Other}", Values = new ChartValues<double> { other }, LabelPoint = labelPoint, DataLabels = true, ToolTip = true };
-                sc.Add(s);
+                var s = new LiveChartsCore.SkiaSharpView.PieSeries<double>
+                {
+                    Name = "{Other}",
+                    Values = new[] { other },
+                    DataLabelsPaint = new LiveChartsCore.SkiaSharpView.Painting.SolidColorPaint(DashColors.White.ToSKColor()) { StrokeThickness = 2 },
+                    DataLabelsFormatter = point => $"{point.Context.Series.Name} ({point.StackedValue?.Share:P2})",
+                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
+                    ToolTipLabelFormatter = point => $"{point.StackedValue?.Share:P2}"
+                };
+                series.Add(s);
             }
 
-            pieChart1.Series = sc;
-            pieChart1.LegendLocation = LegendLocation.Bottom;
+            pieChart1.Series = series;
+            pieChart1.LegendTextPaint = new LiveChartsCore.SkiaSharpView.Painting.SolidColorPaint(DBADashUser.SelectedTheme.ForegroundColor.ToSKColor());
+            pieChart1.LegendPosition = LiveChartsCore.Measure.LegendPosition.Bottom;
         }
 
         public DataTable GetMemoryUsage()
@@ -307,7 +329,7 @@ namespace DBADashGUI.Performance
             chartClerk.LegendLocation = LegendLocation.Top;
             chartClerk.AddDataTable(dt, columns, "SnapshotDate", false);
             chartClerk.AxisY.Clear();
-            chartClerk.AxisY.Add(new Axis()
+            chartClerk.AxisY.Add(new LiveCharts.Wpf.Axis()
             {
                 MinValue = 0,
                 LabelFormatter = val => val.ToString(format)
