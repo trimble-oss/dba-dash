@@ -34,16 +34,19 @@ namespace DBADashGUI.Performance
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            PerformanceCounterMetric performanceCounterMetric1 = new PerformanceCounterMetric();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultLegend skDefaultLegend1 = new LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultLegend();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MemoryUsage));
+            LiveChartsCore.Drawing.Padding padding1 = new LiveChartsCore.Drawing.Padding();
+            LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultTooltip skDefaultTooltip1 = new LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultTooltip();
+            LiveChartsCore.Drawing.Padding padding2 = new LiveChartsCore.Drawing.Padding();
             dgv = new DBADashDataGridView();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             chartClerk = new CartesianChartWithDataTable();
             performanceCounters1 = new PerformanceCounters();
-            pieChart1 = new LiveCharts.WinForms.PieChart();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
@@ -60,6 +63,7 @@ namespace DBADashGUI.Performance
             dgvConfig = new DBADashDataGridView();
             tabCounters = new System.Windows.Forms.TabPage();
             performanceCounterSummaryGrid1 = new PerformanceCounterSummaryGrid();
+            pieChart1 = new LiveChartsCore.SkiaSharpView.WinForms.PieChart();
             ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
@@ -78,6 +82,7 @@ namespace DBADashGUI.Performance
             // 
             dgv.AllowUserToAddRows = false;
             dgv.AllowUserToDeleteRows = false;
+            dgv.AllowUserToOrderColumns = true;
             dgv.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
@@ -102,8 +107,6 @@ namespace DBADashGUI.Performance
             dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgv.Name = "dgv";
             dgv.ReadOnly = true;
-            dgv.ResultSetID = 0;
-            dgv.ResultSetName = null;
             dgv.RowHeadersVisible = false;
             dgv.RowHeadersWidth = 51;
             dgv.ShowCellToolTips = false;
@@ -122,9 +125,9 @@ namespace DBADashGUI.Performance
             // 
             // splitContainer1.Panel1
             // 
+            splitContainer1.Panel1.Controls.Add(pieChart1);
             splitContainer1.Panel1.Controls.Add(chartClerk);
             splitContainer1.Panel1.Controls.Add(performanceCounters1);
-            splitContainer1.Panel1.Controls.Add(pieChart1);
             splitContainer1.Panel1.Controls.Add(toolStrip1);
             // 
             // splitContainer1.Panel2
@@ -149,34 +152,13 @@ namespace DBADashGUI.Performance
             // 
             // performanceCounters1
             // 
-            performanceCounters1.CloseVisible = false;
-            performanceCounters1.CounterID = 0;
-            performanceCounters1.CounterName = null;
             performanceCounters1.Dock = System.Windows.Forms.DockStyle.Fill;
-            performanceCounters1.FromDate = new System.DateTime(0L);
-            performanceCounters1.InstanceID = 0;
             performanceCounters1.Location = new System.Drawing.Point(0, 31);
             performanceCounters1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
-            performanceCounterMetric1.AggregateType = IMetric.AggregateTypes.Avg;
-            performanceCounterMetric1.CounterID = 0;
-            performanceCounterMetric1.CounterName = null;
-            performanceCounters1.Metric = performanceCounterMetric1;
-            performanceCounters1.MoveUpVisible = false;
             performanceCounters1.Name = "performanceCounters1";
             performanceCounters1.Size = new System.Drawing.Size(884, 416);
             performanceCounters1.TabIndex = 3;
-            performanceCounters1.ToDate = new System.DateTime(0L);
             performanceCounters1.Visible = false;
-            // 
-            // pieChart1
-            // 
-            pieChart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            pieChart1.Location = new System.Drawing.Point(0, 31);
-            pieChart1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            pieChart1.Name = "pieChart1";
-            pieChart1.Size = new System.Drawing.Size(884, 416);
-            pieChart1.TabIndex = 0;
-            pieChart1.Text = "pieChart1";
             // 
             // toolStrip1
             // 
@@ -321,6 +303,7 @@ namespace DBADashGUI.Performance
             // 
             dgvConfig.AllowUserToAddRows = false;
             dgvConfig.AllowUserToDeleteRows = false;
+            dgvConfig.AllowUserToOrderColumns = true;
             dgvConfig.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
@@ -345,8 +328,6 @@ namespace DBADashGUI.Performance
             dgvConfig.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvConfig.Name = "dgvConfig";
             dgvConfig.ReadOnly = true;
-            dgvConfig.ResultSetID = 0;
-            dgvConfig.ResultSetName = null;
             dgvConfig.RowHeadersVisible = false;
             dgvConfig.RowHeadersWidth = 51;
             dgvConfig.Size = new System.Drawing.Size(870, 392);
@@ -368,6 +349,7 @@ namespace DBADashGUI.Performance
             // 
             performanceCounterSummaryGrid1.AllowUserToAddRows = false;
             performanceCounterSummaryGrid1.AllowUserToDeleteRows = false;
+            performanceCounterSummaryGrid1.AllowUserToOrderColumns = true;
             performanceCounterSummaryGrid1.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             performanceCounterSummaryGrid1.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -379,7 +361,6 @@ namespace DBADashGUI.Performance
             dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             performanceCounterSummaryGrid1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
             performanceCounterSummaryGrid1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            performanceCounterSummaryGrid1.Counters = null;
             dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle6.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
             dataGridViewCellStyle6.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -390,17 +371,54 @@ namespace DBADashGUI.Performance
             performanceCounterSummaryGrid1.DefaultCellStyle = dataGridViewCellStyle6;
             performanceCounterSummaryGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
             performanceCounterSummaryGrid1.EnableHeadersVisualStyles = false;
-            performanceCounterSummaryGrid1.InstanceID = 0;
             performanceCounterSummaryGrid1.Location = new System.Drawing.Point(3, 4);
             performanceCounterSummaryGrid1.Name = "performanceCounterSummaryGrid1";
             performanceCounterSummaryGrid1.ReadOnly = true;
-            performanceCounterSummaryGrid1.ResultSetID = 0;
-            performanceCounterSummaryGrid1.ResultSetName = null;
             performanceCounterSummaryGrid1.RowHeadersVisible = false;
             performanceCounterSummaryGrid1.RowHeadersWidth = 51;
-            performanceCounterSummaryGrid1.SearchText = null;
             performanceCounterSummaryGrid1.Size = new System.Drawing.Size(870, 392);
             performanceCounterSummaryGrid1.TabIndex = 0;
+            // 
+            // pieChart1
+            // 
+            pieChart1.AutoUpdateEnabled = true;
+            pieChart1.ChartTheme = null;
+            pieChart1.Dock = System.Windows.Forms.DockStyle.Fill;
+            pieChart1.ForceGPU = false;
+            skDefaultLegend1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
+            skDefaultLegend1.Content = null;
+            skDefaultLegend1.IsValid = true;
+            skDefaultLegend1.Opacity = 1F;
+            padding1.Bottom = 0F;
+            padding1.Left = 0F;
+            padding1.Right = 0F;
+            padding1.Top = 0F;
+            skDefaultLegend1.Padding = padding1;
+            skDefaultLegend1.RemoveOnCompleted = false;
+            skDefaultLegend1.RotateTransform = 0F;
+            skDefaultLegend1.X = 0F;
+            skDefaultLegend1.Y = 0F;
+            pieChart1.Legend = skDefaultLegend1;
+            pieChart1.Location = new System.Drawing.Point(0, 31);
+            pieChart1.Name = "pieChart1";
+            pieChart1.Size = new System.Drawing.Size(884, 416);
+            pieChart1.TabIndex = 4;
+            skDefaultTooltip1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
+            skDefaultTooltip1.Content = null;
+            skDefaultTooltip1.IsValid = true;
+            skDefaultTooltip1.Opacity = 1F;
+            padding2.Bottom = 0F;
+            padding2.Left = 0F;
+            padding2.Right = 0F;
+            padding2.Top = 0F;
+            skDefaultTooltip1.Padding = padding2;
+            skDefaultTooltip1.RemoveOnCompleted = false;
+            skDefaultTooltip1.RotateTransform = 0F;
+            skDefaultTooltip1.Wedge = 10;
+            skDefaultTooltip1.X = 0F;
+            skDefaultTooltip1.Y = 0F;
+            pieChart1.Tooltip = skDefaultTooltip1;
+            pieChart1.UpdaterThrottler = System.TimeSpan.Parse("00:00:00.0500000");
             // 
             // MemoryUsage
             // 
@@ -432,7 +450,6 @@ namespace DBADashGUI.Performance
 
         private DBADashDataGridView dgv;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private LiveCharts.WinForms.PieChart pieChart1;
         private CartesianChartWithDataTable chartClerk;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsRefresh;
@@ -451,5 +468,6 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripMenuItem minToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem maxToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsPieChart;
+        private LiveChartsCore.SkiaSharpView.WinForms.PieChart pieChart1;
     }
 }
