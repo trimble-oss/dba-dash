@@ -1,13 +1,15 @@
 ﻿using DBADashGUI.DBFiles;
-using LiveCharts;
-using LiveCharts.Wpf;
+using DBADashGUI.Theme;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
 using Microsoft.Data.SqlClient;
+using SkiaSharp.Views.Desktop;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
-using DBADashGUI.Theme;
 
 namespace DBADashGUI
 {
@@ -24,6 +26,7 @@ namespace DBADashGUI
         private string DBName = "";
         private string InstanceGroupName = "";
         public bool CanNavigateBack => tsBack.Enabled;
+        private static readonly string[] Units = { "MB", "GB", "TB" };
 
         public void SetContext(DBADashContext _context)
         {
@@ -66,34 +69,53 @@ namespace DBADashGUI
             dgv.AutoGenerateColumns = false;
             dgv.DataSource = new DataView(dt);
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            pieChart1.Series.Clear();
 
-            static string labelPoint(ChartPoint chartPoint) =>
-                $"{chartPoint.SeriesView.Title} ({chartPoint.Participation:P})";
-            SeriesCollection sc = new();
-            var other = (double)0;
+            var series = new List<ISeries>();
+            var other = 0d;
+
             foreach (DataRow r in dt.Rows)
             {
                 var pct = (double)(decimal)r["Pct"];
                 var allocated = (double)(decimal)r["AllocatedGB"];
+                var name = (string)r["Grp"];
+
                 if (pct > 0.02)
                 {
-                    var s = new PieSeries() { Title = (string)r["Grp"], Values = new ChartValues<double> { allocated }, LabelPoint = labelPoint, DataLabels = true, ToolTip = false };
-                    sc.Add(s);
+                    var s = CreatePieSeries(name, allocated);
+                    series.Add(s);
                 }
                 else
                 {
                     other += allocated;
                 }
             }
+
             if (other > 0)
             {
-                var s = new PieSeries() { Title = "{Other}", Values = new ChartValues<double> { other }, LabelPoint = labelPoint, DataLabels = true, ToolTip = false };
-                sc.Add(s);
+                var s = CreatePieSeries("{Other}", other);
+                series.Add(s);
             }
 
-            pieChart1.Series = sc;
-            pieChart1.LegendLocation = LegendLocation.Bottom;
+            pieChart1.Series = series;
+            pieChart1.LegendTextPaint = new SolidColorPaint(DBADashUser.SelectedTheme.ForegroundColor.ToSKColor());
+            pieChart1.LegendPosition = LiveChartsCore.Measure.LegendPosition.Bottom;
+        }
+
+        private static PieSeries<double> CreatePieSeries(string name, double value)
+        {
+            return new PieSeries<double>
+            {
+                Name = name,
+                Values = new[] { value },
+
+                DataLabelsPaint = new SolidColorPaint(DashColors.White.ToSKColor()) { StrokeThickness = 2 },
+                DataLabelsFormatter = point =>
+                    $"{point.Context.Series.Name} ({point.StackedValue?.Share:P2})",
+                DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
+
+                ToolTipLabelFormatter = point =>
+                    $"{point.StackedValue!.Share:P2}"
+            };
         }
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -254,7 +276,7 @@ namespace DBADashGUI
             {
                 itm.Checked = itm == selectedItem;
             }
-            foreach (var unit in new[] { "MB", "GB", "TB" })
+            foreach (var unit in Units)
             {
                 dgv.Columns["colAllocated" + unit].Visible = Convert.ToString(selectedItem.Tag) == unit;
                 dgv.Columns["colUsed" + unit].Visible = Convert.ToString(selectedItem.Tag) == unit;
@@ -283,7 +305,7 @@ namespace DBADashGUI
             {
                 itm.Checked = itm == selectedItem;
             }
-            foreach (var unit in new[] { "MB", "GB", "TB" })
+            foreach (var unit in Units)
             {
                 dgv.Columns["colAllocated" + unit].DefaultCellStyle = Common.DataGridViewCellStyle(Convert.ToString(selectedItem.Tag));
                 dgv.Columns["colUsed" + unit].DefaultCellStyle = Common.DataGridViewCellStyle(Convert.ToString(selectedItem.Tag));
