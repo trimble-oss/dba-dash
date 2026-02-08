@@ -1,5 +1,7 @@
-﻿using LiveCharts;
-using LiveCharts.Wpf;
+﻿using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -57,33 +59,47 @@ namespace DBADashGUI.Performance
                 durationMins = newDurationMins;
             }
             var dt = CommonData.ObjectExecutionStats(InstanceID, -1, ObjectID, dateGrouping, "AvgDuration", FromDate, ToDate, Instance);
-            chart1.Series.Clear();
-            chart1.DefaultFill = System.Windows.Media.Brushes.Transparent;
+            chart1.Series = Array.Empty<ISeries>();
+            chart1.DefaultFill = SKColors.Transparent;
 
             chart1.AddDataTable(dt, columns, "SnapshotDate", false);
-            chart1.AxisY.Clear();
 
-            chart1.AxisY.Add(new Axis
+            chart1.YAxes = new[]
             {
-                Title = "",
-                LabelFormatter = val => val.ToString("0.000"),
-                MinValue = 0
-            });
-            chart1.AxisY.Add(new Axis
-            {
-                Title = "Executions",
-                LabelFormatter = val => val.ToString("0.0"),
-                Position = AxisPosition.RightTop,
-                MinValue = 0
-            });
-            chart1.AxisY.Add(new Axis
-            {
-                Title = "Pages",
-                LabelFormatter = val => val.ToString("0.0"),
-                Position = AxisPosition.RightTop,
-                MinValue = 0
-            });
-            chart1.LegendLocation = LegendLocation.Bottom;
+                new Axis
+                {
+                    Name = string.Empty,
+                    Labeler = val => val.ToString("0.000"),
+                    MinLimit = 0,
+                    LabelsPaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
+                    NamePaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
+                    TicksPaint = new SolidColorPaint(new SKColor(0xCC, 0xCC, 0xCC)),
+                    SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0)),
+                    TextSize = 14
+                },
+                new Axis
+                {
+                    Name = "Executions",
+                    Labeler = val => val.ToString("0.0"),
+                    MinLimit = 0,
+                    LabelsPaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
+                    NamePaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
+                    TicksPaint = new SolidColorPaint(new SKColor(0xCC, 0xCC, 0xCC)),
+                    SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0)),
+                    TextSize = 14
+                },
+                new Axis
+                {
+                    Name = "Pages",
+                    Labeler = val => val.ToString("0.0"),
+                    MinLimit = 0,
+                    LabelsPaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
+                    NamePaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
+                    TicksPaint = new SolidColorPaint(new SKColor(0xCC, 0xCC, 0xCC)),
+                    SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0)),
+                    TextSize = 14
+                }
+            };
         }
 
         private void TsLineSmoothness_Click(object sender, EventArgs e)

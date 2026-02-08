@@ -1,7 +1,9 @@
 ﻿using DBADashGUI.Performance;
 using DBADashGUI.Theme;
-using LiveCharts;
-using LiveCharts.Wpf;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
+using SkiaSharp;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -149,23 +151,37 @@ namespace DBADashGUI.AgentJobs
                 MessageBox.Show($"Too many data points({rowCount}) to display in chart", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            chart1.Series.Clear();
-            chart1.AxisX.Clear();
-            chart1.AxisY.Clear();
-            chart1.AxisY.Add(new Axis
+
+            chart1.Series = Array.Empty<ISeries>();
+            chart1.XAxes = Array.Empty<Axis>();
+            chart1.YAxes = Array.Empty<Axis>();
+
+            chart1.YAxes = new[]
             {
-                Title = "Duration",
-                LabelFormatter = val => TimeSpan.FromSeconds(val).ToString(),
-                MinValue = 0
-            });
-            chart1.AxisY.Add(new Axis
-            {
-                Title = "Count",
-                LabelFormatter = val => val.ToString("N0"),
-                Position = AxisPosition.RightTop,
-                MinValue = 0
-            });
-            chart1.LegendLocation = LegendLocation.Bottom;
+                new Axis
+                {
+                    Name = "Duration",
+                    Labeler = val => TimeSpan.FromSeconds(val).ToString(),
+                    MinLimit = 0,
+                    LabelsPaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
+                    NamePaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
+                    TicksPaint = new SolidColorPaint(new SKColor(0xCC, 0xCC, 0xCC)),
+                    SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0)),
+                    TextSize = 14
+                },
+                new Axis
+                {
+                    Name = "Count",
+                    Labeler = val => val.ToString("N0"),
+                    MinLimit = 0,
+                    LabelsPaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
+                    NamePaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
+                    TicksPaint = new SolidColorPaint(new SKColor(0xCC, 0xCC, 0xCC)),
+                    SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0)),
+                    TextSize = 14
+                }
+            };
+
             chart1.AddDataTable(dt, columns, "DateGroup");
         }
 

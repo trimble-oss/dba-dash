@@ -1,5 +1,9 @@
 ﻿using DBADashGUI.Theme;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
 using Microsoft.Data.SqlClient;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -163,15 +167,39 @@ namespace DBADashGUI.Performance
                 tsWaitType.Text = selectedWaitType;
                 splitGrid.Panel1Collapsed = false;
                 var dt = GetWaitsDT(selectedWaitType);
-                WaitChart1.LegendLocation = LiveCharts.LegendLocation.Bottom;
-                WaitChart1.Series.Clear();
-                WaitChart1.AddDataTable(dt, columns, "time");
-                WaitChart1.AxisX[0].MinValue = DateRange.FromUTC.ToAppTimeZone().Ticks;
-                WaitChart1.AxisX[0].MaxValue = DateRange.ToUTC.ToAppTimeZone().Ticks;
-                if (WaitChart1.AxisY.Count == 1)
+                // configure WaitChart1 as LiveCharts2 CartesianChartWithDataTable
+                WaitChart1.Series = Array.Empty<ISeries>();
+
+                WaitChart1.XAxes = new[]
                 {
-                    WaitChart1.AxisY[0].MinValue = 0;
-                }
+                    new Axis
+                    {
+                        Name = "Time",
+                        Labeler = val => new DateTime((long)val).ToString(DateRange.DateFormatString),
+                        MinLimit = DateRange.FromUTC.ToAppTimeZone().Ticks,
+                        MaxLimit = DateRange.ToUTC.ToAppTimeZone().Ticks,
+                        LabelsPaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
+                        NamePaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
+                        TicksPaint = new SolidColorPaint(new SKColor(0xCC, 0xCC, 0xCC)),
+                        SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0)),
+                        TextSize = 14
+                    }
+                };
+
+                WaitChart1.YAxes = new[]
+                {
+                    new Axis
+                    {
+                        MinLimit = 0,
+                        LabelsPaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
+                        NamePaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
+                        TicksPaint = new SolidColorPaint(new SKColor(0xCC, 0xCC, 0xCC)),
+                        SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0)),
+                        TextSize = 14
+                    }
+                };
+
+                WaitChart1.AddDataTable(dt, columns, "time");
             }
         }
 
