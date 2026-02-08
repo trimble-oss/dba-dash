@@ -1,7 +1,10 @@
 ﻿using DBADashGUI.Theme;
-using LiveCharts;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
 using Microsoft.Data.SqlClient;
 using SkiaSharp.Views.Desktop;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -172,7 +175,7 @@ namespace DBADashGUI.Performance
 
         private void ShowPie(ref DataTable dt)
         {
-            var series = new List<LiveChartsCore.ISeries>();
+            var series = new List<ISeries>();
             double other = 0d;
 
             foreach (DataRow r in dt.Rows)
@@ -184,12 +187,12 @@ namespace DBADashGUI.Performance
 
                 if (pct > 0.02)
                 {
-                    var s = new LiveChartsCore.SkiaSharpView.PieSeries<double>
+                    var s = new PieSeries<double>
                     {
                         Name = name,
                         Values = new[] { pages },
                         DataLabelsPaint = showDataLabels
-                            ? new LiveChartsCore.SkiaSharpView.Painting.SolidColorPaint(DashColors.White.ToSKColor()) { StrokeThickness = 2 }
+                            ? new SolidColorPaint(DashColors.White.ToSKColor()) { StrokeThickness = 2 }
                             : null,
                         DataLabelsFormatter = point =>
                             showDataLabels
@@ -208,11 +211,11 @@ namespace DBADashGUI.Performance
 
             if (other > 0)
             {
-                var s = new LiveChartsCore.SkiaSharpView.PieSeries<double>
+                var s = new PieSeries<double>
                 {
                     Name = "{Other}",
                     Values = new[] { other },
-                    DataLabelsPaint = new LiveChartsCore.SkiaSharpView.Painting.SolidColorPaint(DashColors.White.ToSKColor()) { StrokeThickness = 2 },
+                    DataLabelsPaint = new SolidColorPaint(DashColors.White.ToSKColor()) { StrokeThickness = 2 },
                     DataLabelsFormatter = point => $"{point.Context.Series.Name} ({point.StackedValue?.Share:P2})",
                     DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
                     ToolTipLabelFormatter = point => $"{point.StackedValue?.Share:P2}"
@@ -221,7 +224,7 @@ namespace DBADashGUI.Performance
             }
 
             pieChart1.Series = series;
-            pieChart1.LegendTextPaint = new LiveChartsCore.SkiaSharpView.Painting.SolidColorPaint(DBADashUser.SelectedTheme.ForegroundColor.ToSKColor());
+            pieChart1.LegendTextPaint = new SolidColorPaint(DBADashUser.SelectedTheme.ForegroundColor.ToSKColor());
             pieChart1.LegendPosition = LiveChartsCore.Measure.LegendPosition.Bottom;
         }
 
@@ -315,7 +318,7 @@ namespace DBADashGUI.Performance
                 return;
             }
             ChartView = ChartViews.MemoryClerk;
-            chartClerk.Series.Clear();
+
             var dt = GetMemoryClerkUsage(selectedClerk, dateGrouping, tsAgg.Text, selectedCounter);
             if (dt.Rows.Count > MaxChartPoints)
             {
@@ -326,14 +329,23 @@ namespace DBADashGUI.Performance
             {
                 {selectedCounter, new ColumnMetaData{Name=selectedCounterAlias,IsVisible=true } }
             };
-            chartClerk.LegendLocation = LegendLocation.Top;
-            chartClerk.AddDataTable(dt, columns, "SnapshotDate", false);
-            chartClerk.AxisY.Clear();
-            chartClerk.AxisY.Add(new LiveCharts.Wpf.Axis()
+            chartClerk.Series = Array.Empty<ISeries>();
+            chartClerk.XAxes = Array.Empty<Axis>();
+            chartClerk.YAxes = new[]
             {
-                MinValue = 0,
-                LabelFormatter = val => val.ToString(format)
-            });
+                new Axis
+                {
+                    MinLimit = 0,
+                    Labeler = val => val.ToString(format),
+                    LabelsPaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
+                    NamePaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
+                    TicksPaint = new SolidColorPaint(new SKColor(0xCC, 0xCC, 0xCC)),
+                    SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0)),
+                    TextSize = 14
+                }
+            };
+
+            chartClerk.AddDataTable(dt, columns, "SnapshotDate", false);
             tsAgg.Enabled = dateGrouping > 0;
         }
 
