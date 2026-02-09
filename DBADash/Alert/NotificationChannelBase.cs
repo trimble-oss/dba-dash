@@ -381,7 +381,8 @@ namespace DBADashGUI.DBADashAlerts
             "{IconUrl}",
             "{Emoji}",
             "{ThreadKey}",
-            "{Priority}"
+            "{Priority}",
+            "{TriggerDate}"
         };
 
         public string ReplacePlaceholders(Alert alert, string template)
@@ -397,7 +398,8 @@ namespace DBADashGUI.DBADashAlerts
                 .Replace("{IconUrl}", alert.GetIconUrl(), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{Emoji}", alert.GetEmoji(), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{ThreadKey}", EscapeText(alert.ThreadKey), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{Priority}", EscapeText(alert.Priority.ToString()), StringComparison.InvariantCultureIgnoreCase);
+                .Replace("{Priority}", EscapeText(alert.Priority.ToString()), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{TriggerDate}", EscapeText(alert.TriggerDate.ToString("yyyy-MM-dd HH:mm:ss")), StringComparison.InvariantCultureIgnoreCase);
         }
 
         public virtual string EscapeText(string text) => text;

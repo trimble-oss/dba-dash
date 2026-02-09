@@ -52,11 +52,11 @@ namespace DBADash.Alert
         [Category("Email Config")]
         public string To { get; set; }
 
-        [Description($"Optional.  Default: {DefaultEmailSubjectTemplate}.\nPlaceholders: {{Emoji}}, {{AlertKey}}, {{Action}}, {{Instance}}, {{ConnectionID}}, {{InstanceAndConnectionID}}, {{Priority}}, {{Title}}.")]
+        [Description($"Optional.  Default: {DefaultEmailSubjectTemplate}.\nPlaceholders: {{Emoji}}, {{AlertKey}}, {{Action}}, {{Instance}}, {{ConnectionID}}, {{InstanceAndConnectionID}}, {{Priority}}, {{Title}}, {{TriggerDate}}.")]
         [Category("Email Message"), DisplayName("Email Subject Template")]
         public string EmailSubjectTemplate { get; set; }
 
-        [Description($"Optional.  Default: {DefaultEmailMessageTemplate}\nPlaceholders: {{Emoji}}, {{AlertKey}}, {{Action}}, {{Instance}}, {{ConnectionID}}, {{InstanceAndConnectionID}}, {{Priority}}, {{Title}}, {{Text}}.\nHTML Default:{DefaultHTMLMessageTemplate}")]
+        [Description($"Optional.  Default: {DefaultEmailMessageTemplate}\nPlaceholders: {{Emoji}}, {{AlertKey}}, {{Action}}, {{Instance}}, {{ConnectionID}}, {{InstanceAndConnectionID}}, {{Priority}}, {{Title}}, {{Text}}, {{TriggerDate}}.\nHTML Default:{DefaultHTMLMessageTemplate}")]
         [Category("Email Message"), DisplayName("Email Message Template")]
         public string EmailMessageTemplate { get; set; }
 
