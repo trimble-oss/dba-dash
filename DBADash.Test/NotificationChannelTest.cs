@@ -34,7 +34,7 @@ namespace DBADashConfig.Test
             var result = emailChannel.ReplacePlaceholders(testAlert, template);
 
             // Assert
-            Assert.AreEqual("Alert triggered at 2026-02-09 14:30:45 on TestServer", result);
+            Assert.AreEqual("Alert triggered at 2026-02-09T14:30:45Z on TestServer", result);
         }
 
         [TestMethod]
@@ -71,7 +71,7 @@ namespace DBADashConfig.Test
             foreach (var template in templates)
             {
                 var result = emailChannel.ReplacePlaceholders(testAlert, template);
-                Assert.AreEqual("2026-02-09 10:15:30", result, $"Failed for template: {template}");
+                Assert.AreEqual("2026-02-09T10:15:30Z", result, $"Failed for template: {template}");
             }
         }
 
@@ -102,7 +102,7 @@ namespace DBADashConfig.Test
             var result = emailChannel.ReplacePlaceholders(testAlert, template);
 
             // Assert
-            Assert.IsTrue(result.Contains("2026-02-09 16:45:00"), "Result should contain formatted trigger date");
+            Assert.IsTrue(result.Contains("2026-02-09T16:45:00Z"), "Result should contain formatted trigger date");
             Assert.IsTrue(result.Contains("CPU_HIGH"), "Result should contain alert key");
             Assert.IsTrue(result.Contains("Production SQL Server"), "Result should contain instance name");
             Assert.IsTrue(result.Contains("CPU usage is 95%"), "Result should contain message text");
