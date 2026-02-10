@@ -399,7 +399,7 @@ namespace DBADashGUI.DBADashAlerts
                 .Replace("{Emoji}", alert.GetEmoji(), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{ThreadKey}", EscapeText(alert.ThreadKey), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{Priority}", EscapeText(alert.Priority.ToString()), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{TriggerDate}", EscapeText(alert.TriggerDate.ToString("yyyy-MM-dd HH:mm:ss")), StringComparison.InvariantCultureIgnoreCase);
+                .Replace("{TriggerDate}", EscapeText(alert.TriggerDate.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'")), StringComparison.InvariantCultureIgnoreCase);
         }
 
         public virtual string EscapeText(string text) => text;
