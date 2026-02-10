@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
+using System.Globalization;
 using System.Runtime.Caching;
 using System.Threading.Tasks;
 using Alert = DBADash.Alert.Alert;
@@ -399,7 +400,7 @@ namespace DBADashGUI.DBADashAlerts
                 .Replace("{Emoji}", alert.GetEmoji(), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{ThreadKey}", EscapeText(alert.ThreadKey), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{Priority}", EscapeText(alert.Priority.ToString()), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{TriggerDate}", EscapeText(alert.TriggerDate.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'")), StringComparison.InvariantCultureIgnoreCase);
+                .Replace("{TriggerDate}", EscapeText(alert.TriggerDate.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture)), StringComparison.InvariantCultureIgnoreCase);
         }
 
         public virtual string EscapeText(string text) => text;
