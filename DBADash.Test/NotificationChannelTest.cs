@@ -7,6 +7,9 @@ namespace DBADashConfig.Test
     [TestClass]
     public class NotificationChannelTest
     {
+        private const string dateformat = "yyyy-MM-dd'T'HH:mm:ssXXX";
+        private const string utcDateformat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+
         [TestMethod]
         public void TestTriggerDatePlaceholder()
         {
@@ -34,7 +37,38 @@ namespace DBADashConfig.Test
             var result = emailChannel.ReplacePlaceholders(testAlert, template);
 
             // Assert
-            Assert.AreEqual("Alert triggered at 2026-02-09T14:30:45Z on TestServer", result);
+            Assert.AreEqual($"Alert triggered at {testAlert.TriggerDate.ToString(utcDateformat)} on TestServer", result);
+        }
+
+        [TestMethod]
+        public void TestTriggerDatePlaceholderWithTimeZone()
+        {
+            const int newYorkOffsetHours = -5; // New York is UTC-5 during standard time
+            // Arrange
+            var testAlert = new Alert
+            {
+                AlertID = 1,
+                AlertName = "TEST_ALERT",
+                Priority = Alert.Priorities.High1,
+                TriggerDate = new DateTime(2026, 2, 9, 14, 30, 45),
+                Message = "Test alert message",
+                ConnectionID = "TestServer",
+                InstanceDisplayName = "TestServer",
+                AlertType = "Test"
+            };
+
+            var emailChannel = new EmailNotificationChannel
+            {
+                ChannelName = "TestChannel"
+            };
+
+            var template = "Alert triggered at {TriggerDate:America/New_York} on {Instance}";
+
+            // Act
+            var result = emailChannel.ReplacePlaceholders(testAlert, template);
+
+            // Assert
+            Assert.AreEqual($"Alert triggered at {testAlert.TriggerDate.AddHours(newYorkOffsetHours).ToString(dateformat)} on TestServer", result);
         }
 
         [TestMethod]
@@ -66,12 +100,12 @@ namespace DBADashConfig.Test
                 "{TriggerDate}",
                 "{TrIgGeRdAtE}"
             };
-
+            var formattedDate = testAlert.TriggerDate.ToString(utcDateformat);
             // Act & Assert
             foreach (var template in templates)
             {
                 var result = emailChannel.ReplacePlaceholders(testAlert, template);
-                Assert.AreEqual("2026-02-09T10:15:30Z", result, $"Failed for template: {template}");
+                Assert.AreEqual(formattedDate, result, $"Failed for template: {template}");
             }
         }
 
@@ -100,12 +134,13 @@ namespace DBADashConfig.Test
 
             // Act
             var result = emailChannel.ReplacePlaceholders(testAlert, template);
+            var formattedDate = testAlert.TriggerDate.ToString(utcDateformat);
 
             // Assert
-            Assert.IsTrue(result.Contains("2026-02-09T16:45:00Z"), "Result should contain formatted trigger date");
-            Assert.IsTrue(result.Contains("CPU_HIGH"), "Result should contain alert key");
-            Assert.IsTrue(result.Contains("Production SQL Server"), "Result should contain instance name");
-            Assert.IsTrue(result.Contains("CPU usage is 95%"), "Result should contain message text");
+            Assert.Contains(formattedDate, result, "Result should contain formatted trigger date");
+            Assert.Contains("CPU_HIGH", result, "Result should contain alert key");
+            Assert.Contains("Production SQL Server", result, "Result should contain instance name");
+            Assert.Contains("CPU usage is 95%", result, "Result should contain message text");
         }
 
         [TestMethod]
@@ -121,7 +156,7 @@ namespace DBADashConfig.Test
             var placeholders = emailChannel.Placeholders;
 
             // Assert
-            Assert.IsTrue(placeholders.Contains("{TriggerDate}"), "Placeholders list should contain {TriggerDate}");
+            Assert.Contains("{TriggerDate}", placeholders, "Placeholders list should contain {TriggerDate}");
         }
     }
 }
