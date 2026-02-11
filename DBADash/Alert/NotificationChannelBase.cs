@@ -10,6 +10,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Globalization;
 using System.Runtime.Caching;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Alert = DBADash.Alert.Alert;
 
@@ -388,7 +389,7 @@ namespace DBADashGUI.DBADashAlerts
 
         public string ReplacePlaceholders(Alert alert, string template)
         {
-            return template.Replace("{Title}", EscapeText($"{alert.AlertName}[{alert.Status}]"), StringComparison.InvariantCultureIgnoreCase)
+            var result = template.Replace("{Title}", EscapeText($"{alert.AlertName}[{alert.Status}]"), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{ConnectionID}", EscapeText(alert.ConnectionID), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{Instance}", EscapeText(alert.InstanceDisplayName), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{InstanceAndConnectionID}", EscapeText(alert.InstanceDisplayNameAndConnectionID), StringComparison.InvariantCultureIgnoreCase)
@@ -399,8 +400,50 @@ namespace DBADashGUI.DBADashAlerts
                 .Replace("{IconUrl}", alert.GetIconUrl(), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{Emoji}", alert.GetEmoji(), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{ThreadKey}", EscapeText(alert.ThreadKey), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{Priority}", EscapeText(alert.Priority.ToString()), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{TriggerDate}", EscapeText(alert.TriggerDate.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture)), StringComparison.InvariantCultureIgnoreCase);
+                .Replace("{Priority}", EscapeText(alert.Priority.ToString()), StringComparison.InvariantCultureIgnoreCase);
+
+            result = ReplaceDate(alert.TriggerDate, result, "{TriggerDate}");
+            return result;
+        }
+
+        private string ReplaceDate(DateTime utcDate, string text, string placeholder)
+        {
+            const string format = "yyyy-MM-dd'T'HH:mm:ssXXX";
+            const string utcformat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+            var offsetDate = new DateTimeOffset(utcDate, TimeSpan.Zero);
+
+            // Extract placeholder name without braces (e.g., "TriggerDate" from "{TriggerDate}")
+            var placeholderName = placeholder.Trim('{', '}');
+
+            // Escape the placeholder name for use in regex to handle special characters
+            var escapedPlaceholderName = Regex.Escape(placeholderName);
+
+            // Build regex pattern to match {PlaceholderName:TimeZoneId}
+            // Pattern matches: opening brace, placeholder name, colon, timezone id (any chars except closing brace), closing brace
+            var pattern = $@"\{{{escapedPlaceholderName}:([^}}]+)\}}";
+
+            // Handle date with timezone conversion {PlaceholderName:TimeZoneId}
+            var result = Regex.Replace(text, pattern, match =>
+            {
+                var timeZoneId = match.Groups[1].Value;
+                try
+                {
+                    var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+                    var convertedTime = TimeZoneInfo.ConvertTime(offsetDate, timeZone);
+                    return EscapeText(convertedTime.ToString(format, CultureInfo.InvariantCulture));
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex, "Failed to convert {Placeholder} to timezone {TimeZoneId}", placeholder, timeZoneId);
+                    // Return the original placeholder to make the error visible
+                    return match.Value;
+                }
+            }, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+            // Handle default date (UTC)
+            result = result.Replace(placeholder, EscapeText(offsetDate.ToString(utcformat, CultureInfo.InvariantCulture)), StringComparison.InvariantCultureIgnoreCase);
+
+            return result;
         }
 
         public virtual string EscapeText(string text) => text;
