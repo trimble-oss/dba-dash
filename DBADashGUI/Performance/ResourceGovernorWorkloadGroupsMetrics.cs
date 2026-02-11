@@ -1,4 +1,5 @@
-﻿using DBADashGUI.Charts;
+﻿using DBADashGUI.Changes;
+using DBADashGUI.Charts;
 using DBADashGUI.CustomReports;
 using DBADashGUI.Theme;
 using Humanizer;
@@ -84,6 +85,7 @@ namespace DBADashGUI.Performance
         private Dictionary<string, SKColor> groupColors = new Dictionary<string, SKColor>();
         private bool isRefreshing = false;
         private CancellationTokenSource colorExtractionCts;
+        private CustomReportResult reportResult = ResourceGovernorWorkloadGroupsReport.GetReportResult();
 
         public ResourceGovernorWorkloadGroupsMetrics()
         {
@@ -187,74 +189,24 @@ namespace DBADashGUI.Performance
                     var dgv = new DBADashDataGridView()
                     {
                         Dock = DockStyle.Fill,
-                        AutoGenerateColumns = false,
                         AllowUserToAddRows = false,
                         ReadOnly = true,
                         RowHeadersVisible = false,
                     };
 
-                    // Add columns explicitly
-                    dgv.Columns.AddRange(
-                        new DataGridViewTextBoxColumn() { Name = "ColorColumn", HeaderText = "", Width = 30, ReadOnly = true },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Instance ID", DataPropertyName = "InstanceID", Visible = false },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Name", DataPropertyName = "name", ToolTipText = "Resource governor workload group name" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Pool", DataPropertyName = "pool_name", ToolTipText = "Associated resource governor resource pool" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Group ID", DataPropertyName = "group_id", Visible = false, ToolTipText = "ID of the workload group" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Pool ID", DataPropertyName = "pool_id", Visible = false, ToolTipText = "ID of the resource pool" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "External Pool ID", DataPropertyName = "external_pool_id", Visible = false, ToolTipText = "ID of the external resource pool" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Period CPU Usage (ms)", DataPropertyName = "period_cpu_usage_ms", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Total CPU consumption in ms within the selected date range" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Period CPU Cores", DataPropertyName = "period_cpu_cores", DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "Average CPU cores used within the selected date range" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Period CPU Percent", DataPropertyName = "period_cpu_percent", DefaultCellStyle = Common.DataGridViewPercentCellStyle, ToolTipText = "Percent of total CPU capacity used within the selected date range" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Period CPU Share Percent", DataPropertyName = "period_cpu_share_percent", DefaultCellStyle = Common.DataGridViewPercentCellStyle, ToolTipText = "Percent of CPU used in relation to other workload groups within the selected date range" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Period Requests Per Min", DataPropertyName = "period_requests_per_min", DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "Count of requests completed per minute within the selected date range" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Period Queued Request Count Per Min", DataPropertyName = "period_queued_request_count_per_min", DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "Count of queued requests per minute within the selected date range. A non-zero value means the GROUP_MAX_REQUESTS limit was reached." },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Period CPU Limit Violations Per Min", DataPropertyName = "period_cpu_limit_violations_per_min", DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "Count of requests exceeding the CPU limit per minute within the selected date range." },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Period Lock Waits Per Min", DataPropertyName = "period_lock_waits_per_min", DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "Count of lock waits that occurred per minute within the selected date range" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Period Lock Wait Time MS Per Sec", DataPropertyName = "period_lock_wait_time_ms_per_sec", DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "Lock wait time in milliseconds per second within the selected date range" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Period Query Optimizations Per Min", DataPropertyName = "period_query_optimizations_per_min", DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "Count of query optimizations within the selected date range" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Period Suboptimal Plan Generation Count Per Min", DataPropertyName = "period_suboptimal_plan_generation_count_per_min", DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "Count of suboptimal plan generations that occurred due to memory pressure within the selected date range." },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Period Reduced Memgrant Count Per Min", DataPropertyName = "period_reduced_memgrant_count_per_min", DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "Count of memory grants that reached the per-request memory grant size within the selected date range." },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Period CPU Usage Preemptive MS Per Min", DataPropertyName = "period_cpu_usage_preemptive_ms_per_min", DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "Period CPU time used while in preemptive mode scheduling in milliseconds per minute (e.g. extended stored procedures, distributed queries)" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Period Tempdb Data Limit Violations Per Min", DataPropertyName = "period_tempdb_data_limit_violations_per_min", DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "The number of queries aborted per minute because they exceeded the limit on tempdb space for the workload group" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Period Avg Active Request Count", DataPropertyName = "period_avg_active_request_count", DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "Average 'active_request_count' for the selected date range." },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Period Avg Queued Request Count", DataPropertyName = "period_avg_queued_request_count", DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "Average 'queued_request_count' for the selected date range." },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Period Avg Blocked Task Count", DataPropertyName = "period_avg_blocked_task_count", DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "Average 'blocked_task_count' for the selected date range." },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Period Avg Active Parallel Thread Count", DataPropertyName = "period_avg_active_parallel_thread_count", DefaultCellStyle = Common.DataGridViewNumericCellStyle, ToolTipText = "Average 'avg_active_parallel_thread_count' for the selected date range." },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Period Avg Tempdb Data Space KB", DataPropertyName = "period_avg_tempdb_data_space_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Average 'avg_tempdb_data_space_kb' for the selected date range." },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Statistics Start Time", DataPropertyName = "statistics_start_time", DefaultCellStyle = Common.DataGridViewDateCellStyle, ToolTipText = "The time when statistics collection for the workload group started" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", DefaultCellStyle = Common.DataGridViewDateCellStyle, ToolTipText = "Date/Time of last collection from sys.dm_resource_governor_workload_groups" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Total Request Count", DataPropertyName = "total_request_count", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Cumulative count of completed requests in the workload group" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Total Queued Request Count", DataPropertyName = "total_queued_request_count", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Cumulative count of requests queued after the GROUP_MAX_REQUESTS limit was reached" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Active Request Count", DataPropertyName = "active_request_count", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Current request count" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Queued Request Count", DataPropertyName = "queued_request_count", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Current queued request count" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Total CPU Limit Violation Count", DataPropertyName = "total_cpu_limit_violation_count", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Cumulative count of requests exceeding the CPU limit" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Total CPU Usage (ms)", DataPropertyName = "total_cpu_usage_ms", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Cumulative CPU usage in milliseconds by this workload group" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Max Request CPU Time MS", DataPropertyName = "max_request_cpu_time_ms", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Maximum CPU usage in milliseconds for a single request. This is a measured value, unlike request_max_cpu_time_sec which is a configurable setting." },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Blocked Task Count", DataPropertyName = "blocked_task_count", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Current count of blocked tasks" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Total Lock Wait Count", DataPropertyName = "total_lock_wait_count", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Cumulative count of lock waits that occurred" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Total Lock Wait Time MS", DataPropertyName = "total_lock_wait_time_ms", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Cumulative sum of elapsed time in milliseconds that a lock is held" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Total Query Optimization Count", DataPropertyName = "total_query_optimization_count", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Cumulative count of query optimizations in this workload group" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Total Suboptimal Plan Generation Count", DataPropertyName = "total_suboptimal_plan_generation_count", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Cumulative count of suboptimal plan generations that occurred in this workload group due to memory pressure" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Total Reduced Memgrant Count", DataPropertyName = "total_reduced_memgrant_count", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Cumulative count of memory grants that reached the maximum limit on the per-request memory grant size" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Max Request Grant Memory KB", DataPropertyName = "max_request_grant_memory_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Maximum memory grant size in kilobytes of a single request since the statistics were reset" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Active Parallel Thread Count", DataPropertyName = "active_parallel_thread_count", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Current count of parallel thread usage" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Importance", DataPropertyName = "importance", ToolTipText = "Current configuration value for the relative importance of a request in this workload group. Importance is one of the following: Low, Medium, or High (default is Medium)" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Request Max Memory Grant Percent", DataPropertyName = "request_max_memory_grant_percent", DefaultCellStyle = Common.DataGridViewWholeNumberPercentCellStyle, ToolTipText = "Current setting for the maximum memory grant as a percentage for a single request" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Request Max CPU Time Sec", DataPropertyName = "request_max_cpu_time_sec", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Current setting for maximum CPU use limit in seconds for a single request" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Request Memory Grant Timeout Sec", DataPropertyName = "request_memory_grant_timeout_sec", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Current setting for memory grant timeout in seconds for a single request" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Group Max Requests", DataPropertyName = "group_max_requests", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Current setting for the maximum number of concurrent requests in the workload group" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Max DOP", DataPropertyName = "max_dop", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Configured maximum degree of parallelism for the workload group. The default value 0 uses global settings." },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Effective Max DOP", DataPropertyName = "effective_max_dop", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Effective maximum degree of parallelism for the workload group" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Total CPU Usage Preemptive MS", DataPropertyName = "total_cpu_usage_preemptive_ms", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Total CPU time used while in preemptive mode scheduling in milliseconds for the workload group (e.g. extended stored procedures and distributed queries)" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Request Max Memory Grant Percent Numeric", DataPropertyName = "request_max_memory_grant_percent_numeric", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, Visible = false, ToolTipText = "Current setting for the maximum memory grant as a percentage for a single request (float value). Supports decimal values from 0-100." },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Tempdb Data Space KB", DataPropertyName = "tempdb_data_space_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Current data space consumed in the tempdb data files by all sessions in the workload group in kilobytes" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Peak Tempdb Data Space KB", DataPropertyName = "peak_tempdb_data_space_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Peak data space consumed in the tempdb data files by all sessions in the workload group since server startup or since resource governor statistics were reset, in kilobytes" },
-                        new DataGridViewTextBoxColumn() { HeaderText = "Total Tempdb Data Limit Violation Count", DataPropertyName = "total_tempdb_data_limit_violation_count", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, ToolTipText = "Number of times a request was aborted because it would exceed the limit on tempdb data space consumption for the workload group" }
+                    dgv.Columns.Add(new DataGridViewTextBoxColumn()
+                    {
+                        Name = "Color",
+                        HeaderText = "",
+                        Width = 30,
+                        ReadOnly = true,
+                        SortMode = DataGridViewColumnSortMode.NotSortable,
+                        DisplayIndex = 0,
+                    });
+                    dgv.AddColumns(dt, reportResult);
 
-                    );
-
-                    dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
                     dgv.DataSource = dt;
+                    dgv.RowsAdded += Dgv_RowsAdded;
                     dgv.CellFormatting += DataGridView_CellFormatting;
                     dgv.DataBindingComplete += DataGridView_DataBindingComplete;
                     dgv.ApplyTheme();
@@ -363,6 +315,12 @@ namespace DBADashGUI.Performance
             }
         }
 
+        private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+            if (sender is not DBADashDataGridView dgv) return;
+            reportResult?.CellHighlightingRules.FormatRowsAdded(dgv, e);
+        }
+
         private void DataGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             // Only format the Color column (first column, index 0)
@@ -393,6 +351,8 @@ namespace DBADashGUI.Performance
                 // Delay the resize to allow the DataGridView to fully render
                 dgv.BeginInvoke(new Action(() =>
                 {
+                    dgv.LoadColumnLayout(reportResult.ColumnLayout);
+                    dgv.Columns["Color"].DisplayIndex = 0;
                     dgv.AutoResizeColumnsWithMaxColumnWidth();
                     dgv.AutoResizeColumnHeadersHeight();
                 }));
@@ -470,6 +430,7 @@ namespace DBADashGUI.Performance
                         if (childControl is DataGridView dgv)
                         {
                             // Remove event handlers to prevent memory leaks
+                            dgv.RowsAdded -= Dgv_RowsAdded;
                             dgv.CellFormatting -= DataGridView_CellFormatting;
                             dgv.DataBindingComplete -= DataGridView_DataBindingComplete;
                         }
@@ -539,6 +500,24 @@ namespace DBADashGUI.Performance
         {
             ShowTable = !ShowTable;
             RefreshData();
+        }
+
+        private async void ViewConfig_Click(object sender, EventArgs e)
+        {
+            var frm = new Form()
+            {
+                Text = "Resource Governor Configuration",
+                Width = 1300,
+                Height = 600,
+                StartPosition = FormStartPosition.CenterParent
+            };
+            var rg = new ResourceGovernor()
+            {
+                Dock = DockStyle.Fill,
+            };
+            rg.SetContext(CurrentContext);
+            frm.Controls.Add(rg);
+            await frm.ShowSingleInstanceAsync();
         }
     }
 }
