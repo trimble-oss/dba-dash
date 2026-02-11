@@ -136,6 +136,7 @@ namespace DBADashGUI
                 return;
             }
 
+            // First pass: Set width and visibility
             foreach (DataGridViewColumn col in dgv.Columns)
             {
                 if (savedCols.Count(savedCol => savedCol.Key == col.Name) == 1)
@@ -146,11 +147,23 @@ namespace DBADashGUI
                     {
                         col.Width = savedCol.Value.Width;
                     }
-                    if (savedCol.Value.DisplayIndex >= 0 && savedCol.Value.DisplayIndex < dgv.Columns.Count)
-                    {
-                        col.DisplayIndex = savedCol.Value.DisplayIndex;
-                    }
                 }
+            }
+
+            // Second pass: Set DisplayIndex in order from lowest to highest to avoid conflicts
+            var columnsWithDisplayIndex = dgv.Columns.Cast<DataGridViewColumn>()
+                .Select(col => new
+                {
+                    Column = col,
+                    SavedLayout = savedCols.FirstOrDefault(savedCol => savedCol.Key == col.Name)
+                })
+                .Where(x => x.SavedLayout.Key != null && x.SavedLayout.Value.DisplayIndex >= 0 && x.SavedLayout.Value.DisplayIndex < dgv.Columns.Count)
+                .OrderBy(x => x.SavedLayout.Value.DisplayIndex)
+                .ToList();
+
+            foreach (var item in columnsWithDisplayIndex)
+            {
+                item.Column.DisplayIndex = item.SavedLayout.Value.DisplayIndex;
             }
         }
 
@@ -918,5 +931,33 @@ namespace DBADashGUI
         public static bool IsQueryStoreObjectType(this SQLTreeItem.TreeType treeType) => treeType is SQLTreeItem.TreeType.StoredProcedure or SQLTreeItem.TreeType.CLRProcedure
                 or SQLTreeItem.TreeType.ScalarFunction or SQLTreeItem.TreeType.CLRScalarFunction
                 or SQLTreeItem.TreeType.Trigger or SQLTreeItem.TreeType.CLRTrigger;
+
+        public static void ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing(this DataGridView dgv, params string[] columnNames)
+        {
+            foreach (var col in dgv.Columns.Cast<DataGridViewColumn>().Where(c => columnNames.Contains(c.Name)))
+            {
+                col.HeaderText = col.HeaderText.Replace(" ", "\n");
+            }
+        }
+
+        public static CustomReportResult ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing(this CustomReportResult result)
+        {
+            foreach (var col in result.Columns.Values)
+            {
+                col.Alias = col.Alias.Replace(" ", "\n");
+            }
+            return result;
+        }
+
+        public static CustomReportResult SetDisplayIndexBasedOnColumnOrder(this CustomReportResult result)
+        {
+            for (int i = 0; i < result.Columns.Count; i++)
+            {
+                var columnName = result.Columns.Keys.ElementAt(i);
+                var column = result.Columns[columnName];
+                column.DisplayIndex = i;
+            }
+            return result;
+        }
     }
 }

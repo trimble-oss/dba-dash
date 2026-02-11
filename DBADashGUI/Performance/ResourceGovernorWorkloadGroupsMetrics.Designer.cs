@@ -43,15 +43,16 @@
             tsClose = new System.Windows.Forms.ToolStripButton();
             tsUp = new System.Windows.Forms.ToolStripButton();
             tsHideTable = new System.Windows.Forms.ToolStripButton();
-            pnlCharts = new System.Windows.Forms.Panel();
             toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            pnlCharts = new System.Windows.Forms.Panel();
+            tsViewConfig = new System.Windows.Forms.ToolStripButton();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsMetrics, tsChartType, tsClose, tsUp, tsHideTable, toolStripLabel1 });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsMetrics, tsChartType, tsClose, tsUp, tsHideTable, toolStripLabel1, tsViewConfig });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1009, 27);
@@ -145,6 +146,14 @@
             tsHideTable.Text = "Show/Hide Table";
             tsHideTable.Click += ShowHideTable_Click;
             // 
+            // toolStripLabel1
+            // 
+            toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            toolStripLabel1.Name = "toolStripLabel1";
+            toolStripLabel1.Size = new System.Drawing.Size(132, 24);
+            toolStripLabel1.Text = "Workload Groups";
+            // 
             // pnlCharts
             // 
             pnlCharts.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -153,13 +162,14 @@
             pnlCharts.Size = new System.Drawing.Size(1009, 488);
             pnlCharts.TabIndex = 1;
             // 
-            // toolStripLabel1
+            // tsViewConfig
             // 
-            toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            toolStripLabel1.Name = "toolStripLabel1";
-            toolStripLabel1.Size = new System.Drawing.Size(132, 24);
-            toolStripLabel1.Text = "Workload Groups";
+            tsViewConfig.Image = Properties.Resources.SettingsOutline_16x;
+            tsViewConfig.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsViewConfig.Name = "tsViewConfig";
+            tsViewConfig.Size = new System.Drawing.Size(113, 24);
+            tsViewConfig.Text = "View Conifg";
+            tsViewConfig.Click += ViewConfig_Click;
             // 
             // ResourceGovernorWorkloadGroupsMetrics
             // 
@@ -189,5 +199,6 @@
         private System.Windows.Forms.ToolStripButton tsUp;
         private System.Windows.Forms.ToolStripButton tsHideTable;
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
+        private System.Windows.Forms.ToolStripButton tsViewConfig;
     }
 }
