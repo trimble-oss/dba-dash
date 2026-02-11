@@ -1,3 +1,4 @@
+using DBADash;
 using DBADash.Alert;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -7,9 +8,6 @@ namespace DBADashConfig.Test
     [TestClass]
     public class NotificationChannelTest
     {
-        private const string dateformat = "yyyy-MM-dd'T'HH:mm:ssXXX";
-        private const string utcDateformat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-
         [TestMethod]
         public void TestTriggerDatePlaceholder()
         {
@@ -37,13 +35,12 @@ namespace DBADashConfig.Test
             var result = emailChannel.ReplacePlaceholders(testAlert, template);
 
             // Assert
-            Assert.AreEqual($"Alert triggered at {testAlert.TriggerDate.ToString(utcDateformat)} on TestServer", result);
+            Assert.AreEqual($"Alert triggered at {testAlert.TriggerDate.ToUtcDateTimeOffset().ToStandardString()} on TestServer", result);
         }
 
         [TestMethod]
         public void TestTriggerDatePlaceholderWithTimeZone()
         {
-            const int newYorkOffsetHours = -5; // New York is UTC-5 during standard time
             // Arrange
             var testAlert = new Alert
             {
@@ -67,8 +64,9 @@ namespace DBADashConfig.Test
             // Act
             var result = emailChannel.ReplacePlaceholders(testAlert, template);
 
+            var convertedDate = TimeZoneInfo.ConvertTime(testAlert.TriggerDate.ToUtcDateTimeOffset(), TimeZoneInfo.FindSystemTimeZoneById("America/New_York"));
             // Assert
-            Assert.AreEqual($"Alert triggered at {testAlert.TriggerDate.AddHours(newYorkOffsetHours).ToString(dateformat)} on TestServer", result);
+            Assert.AreEqual($"Alert triggered at {convertedDate.ToStandardString()} on TestServer", result);
         }
 
         [TestMethod]
@@ -100,7 +98,7 @@ namespace DBADashConfig.Test
                 "{TriggerDate}",
                 "{TrIgGeRdAtE}"
             };
-            var formattedDate = testAlert.TriggerDate.ToString(utcDateformat);
+            var formattedDate = testAlert.TriggerDate.ToUtcDateTimeOffset().ToStandardString();
             // Act & Assert
             foreach (var template in templates)
             {
@@ -134,7 +132,7 @@ namespace DBADashConfig.Test
 
             // Act
             var result = emailChannel.ReplacePlaceholders(testAlert, template);
-            var formattedDate = testAlert.TriggerDate.ToString(utcDateformat);
+            var formattedDate = testAlert.TriggerDate.ToUtcDateTimeOffset().ToStandardString();
 
             // Assert
             Assert.Contains(formattedDate, result, "Result should contain formatted trigger date");
