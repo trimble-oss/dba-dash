@@ -402,16 +402,12 @@ namespace DBADashGUI.DBADashAlerts
                 .Replace("{ThreadKey}", EscapeText(alert.ThreadKey), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{Priority}", EscapeText(alert.Priority.ToString()), StringComparison.InvariantCultureIgnoreCase);
 
-            result = ReplaceDate(alert.TriggerDate, result, "{TriggerDate}");
+            result = ReplaceDate(alert.TriggerDate.ToUtcDateTimeOffset(), result, "{TriggerDate}");
             return result;
         }
 
-        private string ReplaceDate(DateTime utcDate, string text, string placeholder)
+        private string ReplaceDate(DateTimeOffset offsetDate, string text, string placeholder)
         {
-            const string format = "yyyy-MM-dd'T'HH:mm:ssXXX";
-            const string utcformat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-            var offsetDate = new DateTimeOffset(utcDate, TimeSpan.Zero);
-
             // Extract placeholder name without braces (e.g., "TriggerDate" from "{TriggerDate}")
             var placeholderName = placeholder.Trim('{', '}');
 
@@ -430,7 +426,7 @@ namespace DBADashGUI.DBADashAlerts
                 {
                     var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
                     var convertedTime = TimeZoneInfo.ConvertTime(offsetDate, timeZone);
-                    return EscapeText(convertedTime.ToString(format, CultureInfo.InvariantCulture));
+                    return EscapeText(convertedTime.ToStandardString());
                 }
                 catch (Exception ex)
                 {
@@ -441,7 +437,7 @@ namespace DBADashGUI.DBADashAlerts
             }, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
             // Handle default date (UTC)
-            result = result.Replace(placeholder, EscapeText(offsetDate.ToString(utcformat, CultureInfo.InvariantCulture)), StringComparison.InvariantCultureIgnoreCase);
+            result = result.Replace(placeholder, EscapeText(offsetDate.ToStandardString()), StringComparison.InvariantCultureIgnoreCase);
 
             return result;
         }

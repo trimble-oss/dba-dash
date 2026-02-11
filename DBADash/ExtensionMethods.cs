@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -161,6 +162,25 @@ namespace DBADash
                 _ = t.Exception; // mark observed
             },
                 TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
+        }
+
+        /// <summary>
+        /// Convert DateTime to DateTimeOffset treating it as UTC time (offset zero).
+        /// </summary>
+        /// <param name="dateTime">DateTime to convert (treated as UTC regardless of Kind)</param>
+        /// <returns>DateTimeOffset with UTC offset</returns>
+        public static DateTimeOffset ToUtcDateTimeOffset(this DateTime dateTime) => new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc));
+
+        /// <summary>
+        /// Formats a DateTimeOffset to a string in ISO 8601 format. If the offset is zero (UTC), it appends 'Z' to indicate UTC time. Otherwise, it includes the offset in the format ±hh:mm.
+        /// </summary>
+        /// <param name="date">The DateTimeOffset to format</param>
+        /// <returns>ISO 8601 formatted string: yyyy-MM-dd'T'HH:mm:ss'Z' for UTC (zero offset), or yyyy-MM-dd'T'HH:mm:sszzz for non-UTC offsets</returns>
+        public static string ToStandardString(this DateTimeOffset date)
+        {
+            return date.Offset == TimeSpan.Zero
+                ? date.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture)
+                : date.ToString("yyyy-MM-dd'T'HH:mm:sszzz", CultureInfo.InvariantCulture);
         }
     }
 }
