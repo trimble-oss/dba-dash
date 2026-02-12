@@ -30,6 +30,8 @@ namespace DBADashService
         private readonly CollectionSchedules schedules;
         private MessageProcessing messageProcessing;
         private CollectionWorkQueue workQueue;
+        private readonly List<Task> backgroundTasks = new();
+        private CancellationTokenSource backgroundTasksCts;
 
         private static readonly ResiliencePipeline pipeline = new ResiliencePipelineBuilder()
             .AddRetry(new RetryStrategyOptions
@@ -196,7 +198,9 @@ namespace DBADashService
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            stoppingToken.Register(Stop);
+            // Create linked cancellation token for all background tasks (can be cancelled early during shutdown)
+            backgroundTasksCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+
             var offlineCheckTask = OfflineInstances.AddIfOffline(config.SourceConnections, stoppingToken);
             await scheduler.Start(stoppingToken);
 
@@ -229,7 +233,7 @@ namespace DBADashService
                 {
                     Log.Information("All source connections are online");
                 }
-                _ = Task.Run(() => OfflineInstances.ManageOfflineInstances(config, stoppingToken), stoppingToken);
+                backgroundTasks.Add(Task.Run(() => OfflineInstances.ManageOfflineInstances(config, backgroundTasksCts.Token), backgroundTasksCts.Token));
             }
             catch (Exception ex)
             {
@@ -237,7 +241,7 @@ namespace DBADashService
             }
             try
             {
-                await ScheduleJobsAsync().WaitAsync(stoppingToken);
+                await ScheduleJobsAsync(stoppingToken).WaitAsync(stoppingToken);
             }
             catch (Exception ex)
             {
@@ -269,15 +273,25 @@ namespace DBADashService
             File.Delete(filePath);
         }
 
-        public async void Stop()
+        public override async Task StopAsync(CancellationToken cancellationToken)
         {
+            const int workQueueTimeout = 20;
+            const int backgroundTaskTimeout = 20;
+
+            // Cancel all background tasks immediately so they can start shutting down
+            if (backgroundTasksCts != null)
+            {
+                Log.Information("Cancelling background tasks...");
+                backgroundTasksCts.Cancel();
+            }
+
             Log.Information("Pause schedules...");
             await scheduler.Standby();
             Log.Information("Wait for jobs to complete...");
             var waitCount = 0;
             while ((await scheduler.GetCurrentlyExecutingJobs()).Count > 0)
             {
-                Thread.Sleep(500);
+                await Task.Delay(500, cancellationToken);
                 waitCount++;
                 if (waitCount > 60)
                 {
@@ -289,13 +303,62 @@ namespace DBADashService
             if (config.IsUseQueueBasedScheduling())
             {
                 Log.Information("Stopping collection work queue...");
-                await workQueue.StopAsync();
+                try
+                {
+                    using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(workQueueTimeout));
+                    using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+                    await workQueue.StopAsync().WaitAsync(linkedCts.Token);
+                    Log.Information("Collection work queue stopped");
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    Log.Warning("Collection work queue stop was cancelled by shutdown token");
+                }
+                catch (OperationCanceledException)
+                {
+                    Log.Warning("Collection work queue stop timed out after {timeout} seconds", (workQueueTimeout));
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error stopping collection work queue");
+                }
             }
-            Log.Information("Remove Event Sessions");
+
             await RemoveEventSessionsAsync();
+
+            // Wait for background tasks to complete (alert processing, offline instances, Azure scan, SQS)
+            if (backgroundTasks.Count > 0)
+            {
+                Log.Information("Waiting for {count} background task(s) to complete...", backgroundTasks.Count);
+                try
+                {
+                    var timeout = TimeSpan.FromSeconds(backgroundTaskTimeout);
+                    await Task.WhenAll(backgroundTasks).WaitAsync(timeout);
+                    Log.Information("Background tasks completed");
+                }
+                catch (TimeoutException)
+                {
+                    Log.Warning("Background tasks did not complete within {timeout} seconds", backgroundTaskTimeout);
+                }
+                catch (OperationCanceledException)
+                {
+                    Log.Information("Background tasks cancelled");
+                }
+                catch (Exception ex)
+                {
+                    Log.Debug(ex, "Background tasks completed with exceptions (expected during shutdown)");
+                }
+                finally
+                {
+                    backgroundTasksCts?.Dispose();
+                }
+            }
+
             Log.Information("Shutdown Scheduler");
             await scheduler.Shutdown();
             Log.Information("Shutdown complete");
+
+            await base.StopAsync(cancellationToken);
         }
 
         private async Task ScheduleAndRunMaintenanceJobAsync()
@@ -541,7 +604,7 @@ namespace DBADashService
 
         private SQSMessageProcessing sqsMessageProcessing;
 
-        private async Task ScheduleJobsAsync()
+        private async Task ScheduleJobsAsync(CancellationToken stoppingToken)
         {
             Log.Information("Agent Version {version}", Assembly.GetEntryAssembly().GetName().Version);
             messageProcessing = new MessageProcessing(config);
@@ -563,7 +626,7 @@ namespace DBADashService
                 await ScheduleCollectionsAsync(config.SourceConnections.ToList());
             }
 
-            _ = ScheduleAndRunAzureScanAsync();
+            backgroundTasks.Add(ScheduleAndRunAzureScanAsync());
 
             FolderCleanup();
             folderCleanupTimer = new System.Timers.Timer
@@ -573,10 +636,11 @@ namespace DBADashService
             };
             folderCleanupTimer.Elapsed += FolderCleanup;
             await messageTask;
+
             if (!string.IsNullOrEmpty(config.ServiceSQSQueueUrl))
             {
                 sqsMessageProcessing = new SQSMessageProcessing(config);
-                _ = sqsMessageProcessing.ProcessSQSQueue(DBADashAgent.GetCurrent().AgentIdentifier);
+                backgroundTasks.Add(sqsMessageProcessing.ProcessSQSQueue(DBADashAgent.GetCurrent().AgentIdentifier, backgroundTasksCts.Token));
             }
 
             Log.Information("Alert processing is {IsEnabled}", config.ProcessAlerts ? "enabled" : "disabled");
@@ -588,7 +652,8 @@ namespace DBADashService
                     NotificationProcessingFrequencySeconds = config.AlertProcessingFrequencySeconds ?? CollectionConfig.DefaultAlertProcessingFrequencySeconds
                 }))
                 {
-                    _ = Task.Run(() => alertProcessing.ProcessAlerts());
+                    var task = Task.Run(() => alertProcessing.ProcessAlerts(backgroundTasksCts.Token), backgroundTasksCts.Token);
+                    backgroundTasks.Add(task);
                 }
             }
         }
@@ -876,6 +941,7 @@ namespace DBADashService
 
         private async Task RemoveEventSessionsAsync()
         {
+            Log.Information("Remove event sessions started");
             var options = new ParallelOptions()
             {
                 MaxDegreeOfParallelism = 30
@@ -884,6 +950,7 @@ namespace DBADashService
             {
                 await RemoveEventSessionAsync(src);
             });
+            Log.Information("Remove event sessions completed");
         }
 
         private async Task RemoveEventSessionAsync(DBADashSource src)

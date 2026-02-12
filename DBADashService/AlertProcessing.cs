@@ -7,7 +7,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 using Alert = DBADash.Alert.Alert;
 
 namespace DBADashService
@@ -53,29 +55,37 @@ namespace DBADashService
             return (bool)(await cmd.ExecuteScalarAsync())!;
         }
 
-        public async Task ProcessAlerts()
+        public async Task ProcessAlerts(CancellationToken stoppingToken)
         {
-            await Task.Delay(NotificationProcessingStartupDelaySeconds * 1000);
-            Log.Information("Alert processing started");
-            while (true)
+            try
             {
-                try
+                await Task.Delay(NotificationProcessingStartupDelaySeconds * 1000, stoppingToken);
+                if (stoppingToken.IsCancellationRequested) return;
+                Log.Information("Alert processing started");
+                while (!stoppingToken.IsCancellationRequested)
                 {
-                    if (await AcquireLock()) // Ensure only a single instance of DBA Dash service is processing alerts
+                    try
                     {
-                        await AlertsUpdate();
-                        await ProcessNotifications();
+                        if (await AcquireLock()) // Ensure only a single instance of DBA Dash service is processing alerts
+                        {
+                            await AlertsUpdate();
+                            await ProcessNotifications();
+                        }
+                        else
+                        {
+                            Log.Debug("Lock for alert processing not acquired");
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        Log.Debug("Lock for alert processing not acquired");
+                        await LogErrorAsync(ex, "Error processing alerts");
                     }
+                    await Task.Delay(NotificationProcessingFrequencySeconds * 1000, stoppingToken);
                 }
-                catch (Exception ex)
-                {
-                    await LogErrorAsync(ex, "Error processing alerts");
-                }
-                await Task.Delay(NotificationProcessingFrequencySeconds * 1000);
+            }
+            catch (OperationCanceledException)
+            {
+                Log.Debug("Alert processing cancelled");
             }
             // ReSharper disable once FunctionNeverReturns
         }
