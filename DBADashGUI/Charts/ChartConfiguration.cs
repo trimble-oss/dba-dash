@@ -26,6 +26,43 @@ namespace DBADashGUI.Charts
     }
 
     /// <summary>
+    /// Configuration for a Y-axis
+    /// </summary>
+    internal record YAxisConfiguration
+    {
+        /// <summary>
+        /// Unique name for this axis (e.g., "MBsec", "IOPs", "Latency").
+        /// Used to match with ColumnMetaData.AxisName.
+        /// </summary>
+        public string Name { get; init; }
+
+        /// <summary>
+        /// Label text for the Y-axis
+        /// </summary>
+        public string Label { get; init; }
+
+        /// <summary>
+        /// Format string for Y-axis values (e.g., "0.0", "N0", "P2")
+        /// </summary>
+        public string Format { get; init; }
+
+        /// <summary>
+        /// Maximum value for the Y-axis. If not specified, auto-calculated.
+        /// </summary>
+        public double? MaxLimit { get; init; }
+
+        /// <summary>
+        /// Minimum value for the Y-axis. If not specified, defaults to 0.
+        /// </summary>
+        public double? MinLimit { get; init; }
+
+        /// <summary>
+        /// Position of the Y-axis. Default is Start (left).
+        /// </summary>
+        public AxisPosition Position { get; init; } = AxisPosition.Start;
+    }
+
+    /// <summary>
     /// Configuration for creating charts from DataTable
     /// </summary>
     internal record ChartConfiguration
@@ -118,5 +155,29 @@ namespace DBADashGUI.Charts
         /// If not specified, column names will be converted to friendly names automatically.
         /// </summary>
         public Dictionary<string, string> SeriesNames { get; init; }
+
+        /// <summary>
+        /// Configuration for multiple Y-axes. When specified, overrides YAxisLabel, YAxisFormat, YAxisMin, and YAxisMax.
+        /// Each axis configuration should have a unique Name that matches ColumnMetaData.AxisName.
+        /// The order of axes determines their rendering order and visual positioning.
+        /// </summary>
+        public YAxisConfiguration[] YAxes { get; init; }
+
+        /// <summary>
+        /// Maps metric column names to Y-axis indices (0-based).
+        /// Only used when YAxes is specified and MetricColumns is used.
+        /// Key = column name, Value = axis index (corresponding to YAxes array index).
+        /// If a column is not in the map, it defaults to axis 0.
+        /// OBSOLETE: This is auto-generated from ColumnMetaData.AxisName when using name-based axis mapping.
+        /// </summary>
+        public Dictionary<string, int> MetricColumnAxisMap { get; init; }
+
+        /// <summary>
+        /// Maps column names to their axis names for name-based axis assignment.
+        /// Key = column name, Value = axis name (matching YAxisConfiguration.Name).
+        /// When specified, this is used instead of MetricColumnAxisMap for more intuitive axis assignment.
+        /// Typically populated from ColumnMetaData.AxisName.
+        /// </summary>
+        public Dictionary<string, string> ColumnAxisNames { get; init; }
     }
 }

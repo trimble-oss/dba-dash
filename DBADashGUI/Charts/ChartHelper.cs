@@ -219,6 +219,17 @@ namespace DBADashGUI.Charts
             chart.XAxes = xAxes;
             chart.YAxes = yAxes;
 
+            // Assign series to Y-axes
+            // Priority: ColumnAxisNames (name-based) > MetricColumnAxisMap (index-based)
+            if (config.ColumnAxisNames != null && config.MetricColumns != null)
+            {
+                AssignSeriesToYAxesByName(series, config, yAxes);
+            }
+            else if (config.MetricColumnAxisMap != null && config.MetricColumns != null)
+            {
+                AssignSeriesToYAxes(series, config);
+            }
+
             if (config.ShowLegend)
             {
                 chart.LegendPosition = config.LegendPosition;
@@ -397,6 +408,34 @@ namespace DBADashGUI.Charts
 
         private static Axis[] CreateYAxes(ChartConfiguration config, SolidColorPaint labelPaint)
         {
+            // If multiple Y-axes are configured, use them
+            if (config.YAxes != null && config.YAxes.Length > 0)
+            {
+                var axes = new Axis[config.YAxes.Length];
+                for (int i = 0; i < config.YAxes.Length; i++)
+                {
+                    var axisConfig = config.YAxes[i];
+                    var axis = new Axis
+                    {
+                        LabelsPaint = labelPaint,
+                        MinLimit = axisConfig.MinLimit ?? 0,
+                        Name = axisConfig.Label,
+                        NamePaint = labelPaint,
+                        Position = axisConfig.Position
+                    };
+
+                    if (axisConfig.MaxLimit.HasValue)
+                        axis.MaxLimit = axisConfig.MaxLimit.Value;
+
+                    if (!string.IsNullOrEmpty(axisConfig.Format))
+                        axis.Labeler = value => value.ToString(axisConfig.Format);
+
+                    axes[i] = axis;
+                }
+                return axes;
+            }
+
+            // Otherwise, create a single Y-axis using legacy properties
             var yAxis = new Axis
             {
                 LabelsPaint = labelPaint,
@@ -415,6 +454,92 @@ namespace DBADashGUI.Charts
                 yAxis.Labeler = value => value.ToString(config.YAxisFormat);
 
             return new Axis[] { yAxis };
+        }
+
+        /// <summary>
+        /// Assigns series to the correct Y-axis based on MetricColumnAxisMap
+        /// </summary>
+        private static void AssignSeriesToYAxes(List<ISeries> series, ChartConfiguration config)
+        {
+            foreach (var s in series)
+            {
+                if (s.Name == null) continue;
+
+                // Find the metric column name by looking up in SeriesNames (reverse lookup)
+                string metricColumn = null;
+                if (config.SeriesNames != null)
+                {
+                    // Series name might be a friendly name, find the original column name
+                    metricColumn = config.SeriesNames.FirstOrDefault(kvp => kvp.Value == s.Name).Key;
+                }
+
+                // If not found in SeriesNames, the series name might be the column name itself
+                if (string.IsNullOrEmpty(metricColumn))
+                {
+                    metricColumn = s.Name;
+                }
+
+                // Look up the axis index for this metric column
+                if (config.MetricColumnAxisMap.TryGetValue(metricColumn, out var axisIndex))
+                {
+                    // In LiveChartsCore, assign using the ScalesYAt property
+                    // Set the property via reflection
+                    var seriesType = s.GetType();
+                    var property = seriesType.GetProperty("ScalesYAt");
+                    if (property != null && property.CanWrite)
+                    {
+                        property.SetValue(s, axisIndex);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Assigns series to Y-axes using name-based mapping (more intuitive than index-based)
+        /// </summary>
+        private static void AssignSeriesToYAxesByName(List<ISeries> series, ChartConfiguration config, Axis[] yAxes)
+        {
+            // Build a map from axis name to physical index
+            var axisNameToIndex = new Dictionary<string, int>();
+            for (int i = 0; i < config.YAxes.Length; i++)
+            {
+                if (!string.IsNullOrEmpty(config.YAxes[i].Name))
+                {
+                    axisNameToIndex[config.YAxes[i].Name] = i;
+                }
+            }
+
+            foreach (var s in series)
+            {
+                if (s.Name == null) continue;
+
+                // Find the metric column name
+                string metricColumn = null;
+                if (config.SeriesNames != null)
+                {
+                    metricColumn = config.SeriesNames.FirstOrDefault(kvp => kvp.Value == s.Name).Key;
+                }
+                if (string.IsNullOrEmpty(metricColumn))
+                {
+                    metricColumn = s.Name;
+                }
+
+                // Look up the axis name for this column
+                if (config.ColumnAxisNames.TryGetValue(metricColumn, out var axisName))
+                {
+                    // Convert axis name to physical index
+                    if (axisNameToIndex.TryGetValue(axisName, out var axisIndex))
+                    {
+                        // Assign the series to the axis
+                        var seriesType = s.GetType();
+                        var property = seriesType.GetProperty("ScalesYAt");
+                        if (property != null && property.CanWrite)
+                        {
+                            property.SetValue(s, axisIndex);
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
