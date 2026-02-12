@@ -1,7 +1,9 @@
-﻿using DBADashGUI.Performance;
-using LiveCharts;
-using LiveCharts.Defaults;
-using LiveCharts.Wpf;
+﻿using DBADashGUI.Charts;
+using DBADashGUI.Performance;
+using LiveChartsCore;
+using LiveChartsCore.Defaults;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.WinForms;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -50,7 +52,7 @@ namespace DBADashGUI.Drives
 
         private DateTime To => tsDateRange.DateToUtc;
 
-        private int PointSize => pointsToolStripMenuItem.Checked ? 10 : 0;
+        private double PointSize => pointsToolStripMenuItem.Checked ? ChartConfiguration.DefaultGeometrySize : 0;
 
         private int DateGroupingMins
         {
@@ -81,60 +83,40 @@ namespace DBADashGUI.Drives
                 DisplayInsufficientData();
                 return;
             }
-            var columns = new Dictionary<string, ColumnMetaData>
+
+            // Configure chart using ChartHelper with MetricColumns
+            // Order matters: Size first (larger values), then Used (smaller values) to minimize visual overlap
+            var config = new ChartConfiguration
             {
-                {"SizeGB", new ColumnMetaData{Name="Size (GB)",IsVisible=true } },
-                {"UsedGB", new ColumnMetaData{Name="Used (GB)",IsVisible=true } }
+                DateColumn = "SnapshotDate",
+                MetricColumns = new[] { "SizeGB", "UsedGB" }, // Size first to draw behind
+                YAxisLabel = "GB",
+                YAxisFormat = "0.0",
+                ChartType = ChartTypes.Line,
+                ShowLegend = true,
+                LegendPosition = LiveChartsCore.Measure.LegendPosition.Bottom,
+                XAxisMin = From,
+                XAxisMax = To
             };
 
-            foreach (var s in columns.Keys)
-            {
-                columns[s].Points = new DateTimePoint[cnt];
-            }
+            ChartHelper.UpdateChart(chart1, driveSnapshotDT, config);
 
-            var i = 0;
-            foreach (DataRow r in driveSnapshotDT.Rows)
-            {
-                foreach (var s in columns.Keys)
-                {
-                    var v = r[s] == DBNull.Value ? 0 : (double)(decimal)r[s];
-                    var ssDate = (DateTime)r["SnapshotDate"];
-                    columns[s].Points[i] = new DateTimePoint(ssDate, v);
-                }
-                i++;
-            }
+            // Apply customizations after ChartHelper creates the chart
+            ApplyChartCustomizations();
+        }
 
-            var sc = new SeriesCollection();
-            chart1.Series = sc;
-            foreach (var s in columns.Keys)
+        /// <summary>
+        /// Apply customizations to the chart after ChartHelper has configured it
+        /// </summary>
+        private void ApplyChartCustomizations()
+        {
+            if (chart1.Series == null) return;
+
+            foreach (var series in chart1.Series.OfType<LineSeries<DateTimePoint>>())
             {
-                var v = new ChartValues<DateTimePoint>();
-                v.AddRange(columns[s].Points);
-                sc.Add(new LineSeries
-                {
-                    Title = columns[s].Name,
-                    Tag = s,
-                    ScalesYAt = columns[s].axis,
-                    LineSmoothness = SmoothLines ? 1 : 0,
-                    PointGeometrySize = PointSize,
-                    Values = v
-                }
-                );
+                series.LineSmoothness = SmoothLines ? ChartConfiguration.DefaultLineSmoothness : 0;
+                series.GeometrySize = PointSize;
             }
-            chart1.AxisX.Clear();
-            chart1.AxisY.Clear();
-            chart1.AxisX.Add(new Axis
-            {
-                Title = "Time",
-                LabelFormatter = val => new DateTime((long)val).ToString(DateFormat)
-            });
-            chart1.AxisY.Add(new Axis
-            {
-                Title = "GB",
-                LabelFormatter = val => val.ToString("0.0 GB"),
-                MinValue = 0
-            });
-            chart1.LegendLocation = LegendLocation.Bottom;
         }
 
         public DataTable DriveSnapshot()
@@ -160,18 +142,12 @@ namespace DBADashGUI.Drives
 
         private void SmoothLinesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (var s in chart1.Series.Cast<LineSeries>())
-            {
-                s.LineSmoothness = SmoothLines ? 1 : 0;
-            }
+            ApplyChartCustomizations();
         }
 
         private void PointsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (var s in chart1.Series.Cast<LineSeries>())
-            {
-                s.PointGeometrySize = PointSize;
-            }
+            ApplyChartCustomizations();
         }
 
         private void TsChart_Click(object sender, EventArgs e)
