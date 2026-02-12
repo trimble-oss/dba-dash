@@ -41,7 +41,6 @@ namespace DBADash.Messaging
         {
             Config = config;
             _sqsClient = AWSTools.GetSQSClient(config.AWSProfile, config.AccessKey, config.GetSecretKey(), config.ServiceSQSQueueUrl);
-
         }
 
         /// <summary>
@@ -49,7 +48,7 @@ namespace DBADash.Messaging
         /// </summary>
         /// <param name="DBADashAgentIdentifier">Identifier for this service.  Allows multiple services to share the same SQS queue - messages not intended for this agent are ignored.  A separate queue for each service is advised.</param>
         /// <returns></returns>
-        public async Task ProcessSQSQueue(string DBADashAgentIdentifier)
+        public async Task ProcessSQSQueue(string DBADashAgentIdentifier, CancellationToken cancellationToken)
         {
             Log.Information("Listening to messages from SQS Queue sent to {identifier}", DBADashAgentIdentifier);
             if (string.IsNullOrEmpty(Config.ServiceSQSQueueUrl)) return;
@@ -61,7 +60,7 @@ namespace DBADash.Messaging
                 MessageAttributeNames = new List<string> { "All" },
                 MessageSystemAttributeNames = new List<string> { MessageSystemAttributeName.SentTimestamp }
             };
-            while (true)
+            while (!cancellationToken.IsCancellationRequested)
             {
                 try
                 {
@@ -113,7 +112,7 @@ namespace DBADash.Messaging
                             {
                                 // Handle any exceptions that occurred during processing
                                 Log.Error(ex, $"Error processing message: {message.Body}");
-                                await Task.Delay(errorDelay); // Extra delay if error occurs to avoid burning CPU cycles
+                                await Task.Delay(errorDelay, cancellationToken); // Extra delay if error occurs to avoid burning CPU cycles
                             }
                         }
                     }
@@ -121,10 +120,10 @@ namespace DBADash.Messaging
                 catch (Exception ex)
                 {
                     Log.Error(ex, "Error receiving messages from SQS Queue");
-                    await Task.Delay(errorDelay); // Extra delay if error occurs to avoid burning CPU cycles
+                    await Task.Delay(errorDelay, cancellationToken); // Extra delay if error occurs to avoid burning CPU cycles
                 }
 
-                await Task.Delay(delayBetweenMessages); // Wait a small amount of time before checking for more messages to avoid burning CPU cycles (shouldn't be required)
+                await Task.Delay(delayBetweenMessages, cancellationToken); // Wait a small amount of time before checking for more messages to avoid burning CPU cycles (shouldn't be required)
             }
         }
 

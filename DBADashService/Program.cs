@@ -1,16 +1,14 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using CommandLine;
+using CommandLine.Text;
+using DBADash;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 using System;
 using System.IO;
 using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System.Threading;
-using CommandLine;
-using DBADash;
 using System.Runtime.Versioning;
-using CommandLine.Text;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace DBADashService
 {
@@ -29,6 +27,10 @@ namespace DBADashService
             {
                 LogFatalError(ex);
                 throw;
+            }
+            finally
+            {
+                Log.CloseAndFlush();
             }
         }
 
@@ -72,9 +74,11 @@ namespace DBADashService
 
             var builder = Host.CreateApplicationBuilder();
 
-            // Configure the ShutdownTimeout to infinite
+            const int shutdownTimeout = 60;
             builder.Services.Configure<HostOptions>(options =>
-                options.ShutdownTimeout = Timeout.InfiniteTimeSpan);
+            {
+                options.ShutdownTimeout = TimeSpan.FromSeconds(shutdownTimeout);
+            });
             builder.Services.AddWindowsService(options => { options.ServiceName = cfg.ServiceName; });
             builder.Services.AddHostedService<ScheduleService>();
 
