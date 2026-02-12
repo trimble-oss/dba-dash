@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DBSpaceHistory));
-            chart1 = new LiveCharts.WinForms.CartesianChart();
+            chart1 = new LiveChartsCore.SkiaSharpView.WinForms.CartesianChart();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
@@ -283,7 +283,7 @@
 
         #endregion
 
-        private LiveCharts.WinForms.CartesianChart chart1;
+        private LiveChartsCore.SkiaSharpView.WinForms.CartesianChart chart1;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
         private System.Windows.Forms.ToolStripMenuItem smoothLinesToolStripMenuItem;
