@@ -1,9 +1,13 @@
-﻿using DBADashGUI.Pickers;
+﻿using DBADashGUI.Charts;
+using DBADashGUI.Pickers;
 using DBADashGUI.Theme;
-using LiveCharts;
-using LiveCharts.Defaults;
-using LiveCharts.Wpf;
+using LiveChartsCore;
+using LiveChartsCore.Defaults;
+using LiveChartsCore.Measure;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
 using Microsoft.Data.SqlClient;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -30,6 +34,15 @@ namespace DBADashGUI.Performance
         private int databaseID;
         public int PointSize;
         private string filegroup = "";
+        private double LatencyLimit = 200;
+
+        public Axis TimeAxis;
+        public Axis MBsecAxis;
+        public Axis IOPsAxis;
+        public Axis LatencyAxis;
+
+        public double IOPsAxisMaxValue { get; private set; }
+        public double MBAxisMaxValue { get; private set; }
 
         public event EventHandler<EventArgs> Close;
 
@@ -97,9 +110,10 @@ namespace DBADashGUI.Performance
             set
             {
                 smoothLines = value;
-                foreach (var s in chartIO.Series.Cast<LineSeries>())
+                // Refresh data to apply smoothness changes
+                if (chartIO.Series != null && chartIO.Series.Any())
                 {
-                    s.LineSmoothness = smoothLines ? 1 : 0;
+                    RefreshData();
                 }
             }
         }
@@ -156,24 +170,24 @@ namespace DBADashGUI.Performance
 
         public static readonly Dictionary<string, ColumnMetaData> DefaultColumns = new()
         {
-            { "MBsec", new ColumnMetaData { Name = "MB/sec", IsVisible = true } },
-            { "ReadMBsec", new ColumnMetaData { Name = "Read MB/sec", IsVisible = false } },
-            { "WriteMBsec", new ColumnMetaData { Name = "Write MB/sec", IsVisible = false } },
-            { "IOPs", new ColumnMetaData { Name = "IOPs", IsVisible = true, axis = 1 } },
-            { "ReadIOPs", new ColumnMetaData { Name = "Read IOPs", IsVisible = false, axis = 1 } },
-            { "WriteIOPs", new ColumnMetaData { Name = "Write IOPs", IsVisible = false, axis = 1 } },
-            { "Latency", new ColumnMetaData { Name = "Latency", IsVisible = true, axis = 2 } },
-            { "ReadLatency", new ColumnMetaData { Name = "Read Latency", IsVisible = false, axis = 2 } },
-            { "WriteLatency", new ColumnMetaData { Name = "Write Latency", IsVisible = false, axis = 2 } },
-            { "MaxMBsec", new ColumnMetaData { Name = "Max MB/sec", IsVisible = false } },
-            { "MaxReadMBsec", new ColumnMetaData { Name = "Max Read MB/sec", IsVisible = false } },
-            { "MaxWriteMBsec", new ColumnMetaData { Name = "Max Write MB/sec", IsVisible = false } },
-            { "MaxIOPs", new ColumnMetaData { Name = "Max IOPs", IsVisible = false, axis = 1 } },
-            { "MaxReadIOPs", new ColumnMetaData { Name = "Max Read IOPs", IsVisible = false, axis = 1 } },
-            { "MaxWriteIOPs", new ColumnMetaData { Name = "Max Write IOPs", IsVisible = false, axis = 1 } },
-            { "MaxLatency", new ColumnMetaData { Name = "Max Latency", IsVisible = false, axis = 2 } },
-            { "MaxReadLatency", new ColumnMetaData { Name = "Max Read Latency", IsVisible = false, axis = 2 } },
-            { "MaxWriteLatency", new ColumnMetaData { Name = "Max Write Latency", IsVisible = false, axis = 2 } }
+            { "MBsec", new ColumnMetaData { Name = "MB/sec", IsVisible = true, AxisName = "MBsec" } },
+            { "ReadMBsec", new ColumnMetaData { Name = "Read MB/sec", IsVisible = false, AxisName = "MBsec" } },
+            { "WriteMBsec", new ColumnMetaData { Name = "Write MB/sec", IsVisible = false, AxisName = "MBsec" } },
+            { "IOPs", new ColumnMetaData { Name = "IOPs", IsVisible = true, AxisName = "IOPs" } },
+            { "ReadIOPs", new ColumnMetaData { Name = "Read IOPs", IsVisible = false, AxisName = "IOPs" } },
+            { "WriteIOPs", new ColumnMetaData { Name = "Write IOPs", IsVisible = false, AxisName = "IOPs" } },
+            { "Latency", new ColumnMetaData { Name = "Latency", IsVisible = true, AxisName = "Latency" } },
+            { "ReadLatency", new ColumnMetaData { Name = "Read Latency", IsVisible = false, AxisName = "Latency" } },
+            { "WriteLatency", new ColumnMetaData { Name = "Write Latency", IsVisible = false, AxisName = "Latency" } },
+            { "MaxMBsec", new ColumnMetaData { Name = "Max MB/sec", IsVisible = false, AxisName = "MBsec" } },
+            { "MaxReadMBsec", new ColumnMetaData { Name = "Max Read MB/sec", IsVisible = false, AxisName = "MBsec" } },
+            { "MaxWriteMBsec", new ColumnMetaData { Name = "Max Write MB/sec", IsVisible = false, AxisName = "MBsec" } },
+            { "MaxIOPs", new ColumnMetaData { Name = "Max IOPs", IsVisible = false, AxisName = "IOPs" } },
+            { "MaxReadIOPs", new ColumnMetaData { Name = "Max Read IOPs", IsVisible = false, AxisName = "IOPs" } },
+            { "MaxWriteIOPs", new ColumnMetaData { Name = "Max Write IOPs", IsVisible = false, AxisName = "IOPs" } },
+            { "MaxLatency", new ColumnMetaData { Name = "Max Latency", IsVisible = false, AxisName = "Latency" } },
+            { "MaxReadLatency", new ColumnMetaData { Name = "Max Read Latency", IsVisible = false, AxisName = "Latency" } },
+            { "MaxWriteLatency", new ColumnMetaData { Name = "Max Write Latency", IsVisible = false, AxisName = "Latency" } }
         };
 
         private Dictionary<string, ColumnMetaData> _columns = DefaultColumns;
@@ -300,39 +314,6 @@ namespace DBADashGUI.Performance
             RefreshData(InstanceID, -1);
         }
 
-        public Axis TimeAxis = new()
-        {
-            Title = "Time"
-        };
-
-        public Axis MBsecAxis = new()
-        {
-            Title = "MB/sec",
-            LabelFormatter = val => val.ToString("0.0 MB"),
-            MinValue = 0
-        };
-
-        public Axis IOPsAxis = new()
-        {
-            Title = "IOPs",
-            LabelFormatter = val => val.ToString("0.0 IOPs"),
-            Position = AxisPosition.RightTop,
-            MinValue = 0
-        };
-
-        public Axis LatencyAxis = new()
-        {
-            Title = "Latency",
-            LabelFormatter = val => val.ToString("0.0ms"),
-            Position = AxisPosition.RightTop,
-            MinValue = 0,
-            MaxValue = 200
-        };
-
-        public double IOPsAxisMaxValue { get; private set; }
-
-        public double MBAxisMaxValue { get; private set; }
-
         public void RefreshData()
         {
             if (mins != DateRange.DurationMins)
@@ -340,72 +321,104 @@ namespace DBADashGUI.Performance
                 DateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 200);
             }
 
-            TimeAxis.LabelFormatter = val => new DateTime((long)val).ToString(DateRange.DateFormatString);
-
             var dt = IOStats(instanceID, DateRange.FromUTC, DateRange.ToUTC, databaseID, Metric.Drive);
             var cnt = dt.Rows.Count;
 
-            foreach (var s in Columns.Keys)
-            {
-                Columns[s].Points = new DateTimePoint[cnt];
-            }
+            // Group visible columns by axis name
+            var columnsByAxis = Columns
+                .Where(c => c.Value.IsVisible)
+                .GroupBy(c => c.Value.AxisName)
+                .ToDictionary(g => g.Key, g => g.Select(c => c.Key).ToArray());
 
-            var i = 0;
+            // Calculate max values for axis synchronization (for specific axes only)
             IOPsAxisMaxValue = 0;
             MBAxisMaxValue = 0;
             foreach (DataRow r in dt.Rows)
             {
-                foreach (var s in Columns.Keys)
+                foreach (var kvp in Columns.Where(c => c.Value.IsVisible))
                 {
-                    var v = r[s] == DBNull.Value ? 0 : (double)(decimal)r[s];
-                    ioTime = (DateTime)r["SnapshotDate"];
-                    Columns[s].Points[i] = new DateTimePoint(ioTime.ToAppTimeZone(), v);
-                    if (Columns[s].IsVisible && Columns[s].axis == 1)
+                    var v = r[kvp.Key] == DBNull.Value ? 0 : (double)(decimal)r[kvp.Key];
+                    if (kvp.Value.AxisName == "IOPs")
                     {
                         IOPsAxisMaxValue = Math.Max(IOPsAxisMaxValue, v);
                     }
-                    else if (Columns[s].IsVisible && Columns[s].axis == 0)
+                    else if (kvp.Value.AxisName == "MBsec")
                     {
                         MBAxisMaxValue = Math.Max(MBAxisMaxValue, v);
                     }
                 }
-                i++;
             }
 
-            var sc = new SeriesCollection();
-            chartIO.Series = sc;
-            foreach (var s in Columns.Keys)
+            // Get all visible columns
+            var allVisibleColumns = Columns.Where(c => c.Value.IsVisible).Select(c => c.Key).ToArray();
+
+            if (allVisibleColumns.Length > 0)
             {
-                sc.Add(new LineSeries
+                // Create series names dictionary for friendly names
+                var seriesNames = Columns.ToDictionary(c => c.Key, c => c.Value.Name);
+
+                // Create column-to-axis-name mapping from ColumnMetaData
+                var columnAxisNames = Columns
+                    .Where(c => c.Value.IsVisible)
+                    .ToDictionary(c => c.Key, c => c.Value.AxisName);
+
+                // Setup Y-axes configurations with names - order determines rendering
+                var yAxes = new List<YAxisConfiguration>();
+                var axisNameToIndexMap = new Dictionary<string, int>();
+
+                // Define axis order and properties
+                var axisDefinitions = new[]
                 {
-                    Title = Columns[s].Name,
-                    Tag = s,
-                    ScalesYAt = Columns[s].axis,
-                    PointGeometrySize = cnt <= 200 ? PointSize : 0,
-                    LineSmoothness = SmoothLines ? 1 : 0
+                    new { Name = "MBsec", Label = "MB/sec", Position = AxisPosition.Start, MaxLimit = (double?)null },
+                    new { Name = "IOPs", Label = "IOPs", Position = AxisPosition.End, MaxLimit = (double?)null },
+                    new { Name = "Latency", Label = "Latency (ms)", Position = AxisPosition.End, MaxLimit = (double?)LatencyLimit }
+                };
+
+                // Add axes only if they have visible columns
+                foreach (var axisDef in axisDefinitions)
+                {
+                    if (columnsByAxis.ContainsKey(axisDef.Name))
+                    {
+                        axisNameToIndexMap[axisDef.Name] = yAxes.Count;
+                        yAxes.Add(new YAxisConfiguration
+                        {
+                            Name = axisDef.Name,  // Add axis name for name-based mapping
+                            Label = axisDef.Label,
+                            Format = "0.0",
+                            MinLimit = 0,
+                            MaxLimit = axisDef.MaxLimit,
+                            Position = axisDef.Position
+                        });
+                    }
                 }
-                );
+
+                // Update chart using ChartHelper with name-based axis mapping
+                var config = new ChartConfiguration
+                {
+                    DateColumn = "SnapshotDate",
+                    MetricColumns = allVisibleColumns,
+                    ChartType = ChartTypes.Line,
+                    ShowLegend = true,
+                    LegendPosition = LegendPosition.Bottom,
+                    LineSmoothness = SmoothLines ? 1 : 0,
+                    GeometrySize = cnt <= 200 ? PointSize : 0,
+                    XAxisMin = DateRange.FromUTC.ToAppTimeZone(),
+                    XAxisMax = DateRange.ToUTC.ToAppTimeZone(),
+                    SeriesNames = seriesNames,
+                    YAxes = yAxes.ToArray(),
+                    ColumnAxisNames = columnAxisNames
+                };
+
+                ChartHelper.UpdateChart(chartIO, dt, config);
+
+                // Store references to the axes for external access (e.g., DrivePerformance synchronization)
+                var yAxesArray = chartIO.YAxes.ToArray();
+                TimeAxis = chartIO.XAxes.FirstOrDefault() as DateTimeAxis;
+                MBsecAxis = axisNameToIndexMap.TryGetValue("MBsec", out var mbIdx) && mbIdx < yAxesArray.Length ? yAxesArray[mbIdx] as Axis : null;
+                IOPsAxis = axisNameToIndexMap.TryGetValue("IOPs", out var iopsIdx) && iopsIdx < yAxesArray.Length ? yAxesArray[iopsIdx] as Axis : null;
+                LatencyAxis = axisNameToIndexMap.TryGetValue("Latency", out var latIdx) && latIdx < yAxesArray.Length ? yAxesArray[latIdx] as Axis : null;
             }
 
-            foreach (var s in chartIO.Series.Cast<LineSeries>())
-            {
-                var c = Columns[(string)s.Tag];
-                if (s.Values == null)
-                {
-                    var v = new ChartValues<DateTimePoint>();
-                    v.AddRange(c.Points);
-                    s.Values = v;
-                }
-                else
-                {
-                    s.Values.AddRange(c.Points);
-                }
-                s.Visibility = c.IsVisible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
-            }
-            if (chartIO.Series[0].Values.Count == 1)
-            {
-                chartIO.Series.Clear(); // fix tends to zero error
-            }
             lblIOPerformance.Text = databaseID > 0 ? "IO Performance: Database" : (string.IsNullOrEmpty(Drive) ? "IO Performance: Instance" : "IO Performance: " + DriveLabel(Drive));
             toolStrip1.Tag = databaseID > 0 ? "ALT" : null; // set tag to ALT to use the alternate menu renderer
             toolStrip1.ApplyTheme(DBADashUser.SelectedTheme);
@@ -418,22 +431,12 @@ namespace DBADashGUI.Performance
 
         private void UpdateMetricVisibility()
         {
-            foreach (var s in chartIO.Series.Cast<LineSeries>())
-            {
-                var metricName = (string)s.Tag;
-                s.Visibility = Columns[metricName].IsVisible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
-            }
+            RefreshData();
         }
 
         private void IOPerformance_Load(object sender, EventArgs e)
         {
             DateHelper.AddDateGroups(tsDateGroup, TsDateGroup_Click);
-            chartIO.AxisX.Clear();
-            chartIO.AxisY.Clear();
-            chartIO.AxisX.Add(TimeAxis);
-            chartIO.AxisY.Add(MBsecAxis);
-            chartIO.AxisY.Add(IOPsAxis);
-            chartIO.AxisY.Add(LatencyAxis);
         }
 
         private void TsDateGroup_Click(object sender, EventArgs e)
@@ -474,7 +477,11 @@ namespace DBADashGUI.Performance
 
         public void SetLatencyLimit(double latencyLimit)
         {
-            LatencyAxis.MaxValue = latencyLimit;
+            LatencyLimit = latencyLimit;
+            if (LatencyAxis != null)
+            {
+                LatencyAxis.MaxLimit = latencyLimit;
+            }
             foreach (ToolStripMenuItem itm in latencyLimitToolStripMenuItem.DropDownItems)
             {
                 itm.Checked = Convert.ToInt64(itm.Text) == Convert.ToInt64(latencyLimit);

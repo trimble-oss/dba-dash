@@ -28,7 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
-            chartIO = new LiveCharts.WinForms.CartesianChart();
+            LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultLegend skDefaultLegend1 = new LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultLegend();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(IOPerformance));
+            LiveChartsCore.Drawing.Padding padding1 = new LiveChartsCore.Drawing.Padding();
+            LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultTooltip skDefaultTooltip1 = new LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultTooltip();
+            LiveChartsCore.Drawing.Padding padding2 = new LiveChartsCore.Drawing.Padding();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
             tsClose = new System.Windows.Forms.ToolStripButton();
@@ -48,18 +52,9 @@
             tsLatency5000 = new System.Windows.Forms.ToolStripMenuItem();
             tsFileGroup = new System.Windows.Forms.ToolStripDropDownButton();
             tsIOSummary = new System.Windows.Forms.ToolStripButton();
+            chartIO = new LiveChartsCore.SkiaSharpView.WinForms.CartesianChart();
             toolStrip1.SuspendLayout();
             SuspendLayout();
-            // 
-            // chartIO
-            // 
-            chartIO.Dock = System.Windows.Forms.DockStyle.Fill;
-            chartIO.Location = new System.Drawing.Point(0, 27);
-            chartIO.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            chartIO.Name = "chartIO";
-            chartIO.Size = new System.Drawing.Size(773, 341);
-            chartIO.TabIndex = 4;
-            chartIO.Text = "cartesianChart1";
             // 
             // toolStrip1
             // 
@@ -105,7 +100,7 @@
             // lblIOPerformance
             // 
             lblIOPerformance.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            lblIOPerformance.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            lblIOPerformance.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             lblIOPerformance.Name = "lblIOPerformance";
             lblIOPerformance.Size = new System.Drawing.Size(119, 24);
             lblIOPerformance.Text = "IO Performance";
@@ -221,6 +216,49 @@
             tsIOSummary.Text = "View Table Summary";
             tsIOSummary.Click += TsIOSummary_Click;
             // 
+            // cartesianChart1
+            // 
+            chartIO.AutoUpdateEnabled = true;
+            chartIO.ChartTheme = null;
+            chartIO.Dock = System.Windows.Forms.DockStyle.Fill;
+            chartIO.ForceGPU = false;
+            skDefaultLegend1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
+            skDefaultLegend1.Content = null;
+            skDefaultLegend1.IsValid = true;
+            skDefaultLegend1.Opacity = 1F;
+            padding1.Bottom = 0F;
+            padding1.Left = 0F;
+            padding1.Right = 0F;
+            padding1.Top = 0F;
+            skDefaultLegend1.Padding = padding1;
+            skDefaultLegend1.RemoveOnCompleted = false;
+            skDefaultLegend1.RotateTransform = 0F;
+            skDefaultLegend1.X = 0F;
+            skDefaultLegend1.Y = 0F;
+            chartIO.Legend = skDefaultLegend1;
+            chartIO.Location = new System.Drawing.Point(0, 27);
+            chartIO.MatchAxesScreenDataRatio = false;
+            chartIO.Name = "cartesianChart1";
+            chartIO.Size = new System.Drawing.Size(773, 341);
+            chartIO.TabIndex = 6;
+            skDefaultTooltip1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
+            skDefaultTooltip1.Content = null;
+            skDefaultTooltip1.IsValid = true;
+            skDefaultTooltip1.Opacity = 1F;
+            padding2.Bottom = 0F;
+            padding2.Left = 0F;
+            padding2.Right = 0F;
+            padding2.Top = 0F;
+            skDefaultTooltip1.Padding = padding2;
+            skDefaultTooltip1.RemoveOnCompleted = false;
+            skDefaultTooltip1.RotateTransform = 0F;
+            skDefaultTooltip1.Wedge = 10;
+            skDefaultTooltip1.X = 0F;
+            skDefaultTooltip1.Y = 0F;
+            chartIO.Tooltip = skDefaultTooltip1;
+            chartIO.TooltipFindingStrategy = LiveChartsCore.Measure.TooltipFindingStrategy.Automatic;
+            chartIO.UpdaterThrottler = System.TimeSpan.Parse("00:00:00.0500000");
+            // 
             // IOPerformance
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -238,8 +276,6 @@
         }
 
         #endregion
-
-        private LiveCharts.WinForms.CartesianChart chartIO;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripLabel lblIOPerformance;
         private System.Windows.Forms.ToolStripDropDownButton tsDrives;
@@ -259,5 +295,6 @@
         private System.Windows.Forms.ToolStripMenuItem tsLatency2000;
         private System.Windows.Forms.ToolStripMenuItem tsLatency5000;
         private System.Windows.Forms.ToolStripButton tsMeasures;
+        private LiveChartsCore.SkiaSharpView.WinForms.CartesianChart chartIO;
     }
 }
