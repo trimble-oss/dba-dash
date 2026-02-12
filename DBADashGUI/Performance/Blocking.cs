@@ -101,11 +101,43 @@ namespace DBADashGUI.Performance
         {
             var dt = GetDT();
 
+            var fromTicks = DateRange.FromUTC.ToAppTimeZone().Ticks;
+            var toTicks = Math.Min(DateHelper.AppNow.Ticks, DateRange.ToUTC.ToAppTimeZone().Ticks);
+
+            // Create theme-aware paint for labels
+            var labelPaint = CreateLabelPaint();
+
+            // Configure axes first (even if no data) to show proper date labels
+            chartBlocking.XAxes = new[]
+            {
+                new Axis
+                {
+                    Labeler = value => new DateTime((long)value).ToString(DateRange.DateFormatString),
+                    MinLimit = fromTicks,
+                    MaxLimit = toTicks,
+                    LabelsPaint = labelPaint,
+                    NamePaint = labelPaint
+                }
+            };
+
+            chartBlocking.YAxes = new[]
+            {
+                new Axis
+                {
+                    Labeler = value => value.ToString("0"),
+                    MinLimit = 0,
+                    LabelsPaint = labelPaint,
+                    NamePaint = labelPaint,
+                    Name = "Blocked Sessions"
+                }
+            };
+
             if (dt.Rows.Count == 0)
             {
                 chartBlocking.Series = Array.Empty<ISeries>();
-                chartBlocking.XAxes = Array.Empty<Axis>();
-                chartBlocking.YAxes = Array.Empty<Axis>();
+                lblBlocking.Text = databaseID > 0 ? "Blocking: Database" : "Blocking: Instance";
+                toolStrip1.Tag = databaseID > 0 ? "ALT" : null;
+                toolStrip1.ApplyTheme(DBADashUser.SelectedTheme);
                 return;
             }
 
@@ -166,46 +198,22 @@ namespace DBADashGUI.Performance
 
             chartBlocking.Series = new ISeries[] { scatter };
 
-            var fromTicks = DateRange.FromUTC.ToAppTimeZone().Ticks;
-            var toTicks = Math.Min(DateHelper.AppNow.Ticks, DateRange.ToUTC.ToAppTimeZone().Ticks);
-
-            chartBlocking.XAxes = new[]
-            {
-                new Axis
-                {
-                    Labels = Array.Empty<string>(),
-                    Labeler = value => new DateTime((long)value).ToString(DateRange.DateFormatString),
-                    MinLimit = fromTicks,
-                    MaxLimit = toTicks,
-                    LabelsPaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
-                    NamePaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
-                    TicksPaint = new SolidColorPaint(new SKColor(0xCC, 0xCC, 0xCC)),
-                    SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0)),
-                    TextSize = 14,
-                }
-            };
-
+            // Update Y axis max based on actual data
             var yMax = Math.Max(100, rows.Max(r => (int)r["BlockedSessionCount"]));
-
-            chartBlocking.YAxes = new[]
-            {
-                new Axis
-                {
-                    Labeler = value => value.ToString("0"),
-                    MinLimit = 0,
-                    MaxLimit = yMax,
-                    LabelsPaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
-                    NamePaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
-                    TicksPaint = new SolidColorPaint(new SKColor(0xCC, 0xCC, 0xCC)),
-                    SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0)),
-                    TextSize = 14,
-                    Name = "Blocked Sessions"
-                }
-            };
+            var yAxes = chartBlocking.YAxes.ToArray();
+            yAxes[0].MaxLimit = yMax;
+            chartBlocking.YAxes = yAxes;
 
             lblBlocking.Text = databaseID > 0 ? "Blocking: Database" : "Blocking: Instance";
             toolStrip1.Tag = databaseID > 0 ? "ALT" : null; // set tag to ALT to use the alternate menu renderer
             toolStrip1.ApplyTheme(DBADashUser.SelectedTheme);
+        }
+
+        private SolidColorPaint CreateLabelPaint()
+        {
+            return DBADashUser.SelectedTheme.ThemeIdentifier == ThemeType.Dark
+                ? new SolidColorPaint(DashColors.White.ToSKColor())
+                : new SolidColorPaint(DashColors.TrimbleBlueDark.ToSKColor());
         }
 
         private void Blocking_Load(object sender, EventArgs e)
