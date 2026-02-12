@@ -1,6 +1,8 @@
-﻿using LiveCharts;
-using LiveCharts.Defaults;
-using LiveCharts.Wpf;
+﻿using DBADashGUI.Charts;
+using DBADashGUI.Theme;
+using LiveChartsCore;
+using LiveChartsCore.Measure;
+using LiveChartsCore.SkiaSharpView;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -54,6 +56,8 @@ namespace DBADashGUI.DBFiles
         }
 
         private int DateGroupingMins;
+        private double lineSmoothness = ChartConfiguration.DefaultLineSmoothness;
+        private double geometrySize = ChartConfiguration.DefaultGeometrySize;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string InstanceGroupName { get; set; }
@@ -90,7 +94,12 @@ namespace DBADashGUI.DBFiles
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool SmoothLines
         {
-            get => smoothLinesToolStripMenuItem.Checked; set => smoothLinesToolStripMenuItem.Checked = value;
+            get => smoothLinesToolStripMenuItem.Checked;
+            set
+            {
+                smoothLinesToolStripMenuItem.Checked = value;
+                lineSmoothness = value ? 1 : 0;
+            }
         }
 
         public string DateFormat => tsDateRange.ActualTimeSpan.DateFormatString();
@@ -99,7 +108,15 @@ namespace DBADashGUI.DBFiles
 
         private DateTime To => tsDateRange.DateToUtc;
 
-        private int PointSize => pointsToolStripMenuItem.Checked ? 10 : 0;
+        private double PointSize
+        {
+            get => pointsToolStripMenuItem.Checked ? 10 : 0;
+            set
+            {
+                geometrySize = value;
+                pointsToolStripMenuItem.Checked = value > 0;
+            }
+        }
 
         private string _unit = "MB";
 
@@ -147,63 +164,54 @@ namespace DBADashGUI.DBFiles
             var cnt = HistoryDT.Rows.Count;
             if (cnt < 2)
             {
-                chart1.Series = null;
+                chart1.Series = Array.Empty<ISeries>();
                 return;
             }
+
             var columns = new Dictionary<string, ColumnMetaData>
             {
-                {"Size" + Unit, new ColumnMetaData{Name="Size (" + Unit + ")",IsVisible=true } },
-                {"Used" + Unit, new ColumnMetaData{Name="Used (" + Unit + ")",IsVisible=true } }
+                {"Size" + Unit, new ColumnMetaData{Name="Size (" + Unit + ")",IsVisible=true, AxisName="Primary" } },
+                {"Used" + Unit, new ColumnMetaData{Name="Used (" + Unit + ")",IsVisible=true, AxisName="Primary" } }
             };
 
-            foreach (var s in columns.Keys)
+            // Get visible columns
+            var visibleColumns = columns.Where(c => c.Value.IsVisible).Select(c => c.Key).ToArray();
+
+            if (visibleColumns.Length == 0)
             {
-                columns[s].Points = new DateTimePoint[cnt];
+                chart1.Series = Array.Empty<ISeries>();
+                return;
             }
 
-            var i = 0;
-            foreach (DataRow r in HistoryDT.Rows)
-            {
-                foreach (var s in columns.Keys)
-                {
-                    var v = r[s] == DBNull.Value ? 0 : (double)(decimal)r[s];
-                    var ssDate = (DateTime)r["SnapshotDate"];
-                    columns[s].Points[i] = new DateTimePoint(ssDate.ToAppTimeZone(), v);
-                }
-                i++;
-            }
+            // Create series names dictionary
+            var seriesNames = columns.ToDictionary(c => c.Key, c => c.Value.Name);
 
-            var sc = new SeriesCollection();
-            chart1.Series = sc;
-            foreach (var s in columns.Keys)
+            // Get date range from data
+            var dates = HistoryDT.Rows.Cast<DataRow>()
+                .Select(r => ((DateTime)r["SnapshotDate"]).ToAppTimeZone())
+                .ToList();
+            var minDate = dates.Min();
+            var maxDate = dates.Max();
+
+            // Update chart using ChartHelper
+            var config = new ChartConfiguration
             {
-                var v = new ChartValues<DateTimePoint>();
-                v.AddRange(columns[s].Points);
-                sc.Add(new LineSeries
-                {
-                    Title = columns[s].Name,
-                    Tag = s,
-                    ScalesYAt = columns[s].axis,
-                    LineSmoothness = SmoothLines ? 1 : 0,
-                    PointGeometrySize = PointSize,
-                    Values = v
-                }
-                );
-            }
-            chart1.AxisX.Clear();
-            chart1.AxisY.Clear();
-            chart1.AxisX.Add(new Axis
-            {
-                Title = "Time",
-                LabelFormatter = val => new DateTime((long)val).ToString(DateFormat)
-            });
-            chart1.AxisY.Add(new Axis
-            {
-                Title = Unit,
-                LabelFormatter = val => val.ToString("#,##0.0 " + Unit),
-                MinValue = 0
-            });
-            chart1.LegendLocation = LegendLocation.Bottom;
+                DateColumn = "SnapshotDate",
+                MetricColumns = visibleColumns,
+                ChartType = ChartTypes.Line,
+                ShowLegend = true,
+                LegendPosition = LegendPosition.Bottom,
+                LineSmoothness = lineSmoothness,
+                GeometrySize = geometrySize,
+                XAxisMin = minDate,
+                XAxisMax = maxDate,
+                SeriesNames = seriesNames,
+                YAxisLabel = Unit,
+                YAxisFormat = "#,##0.0",
+                YAxisMin = 0
+            };
+
+            ChartHelper.UpdateChart(chart1, HistoryDT, config);
         }
 
         public DataTable DBFileSnapshot()
@@ -255,18 +263,14 @@ namespace DBADashGUI.DBFiles
 
         private void SmoothLinesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (var s in chart1.Series.Cast<LineSeries>())
-            {
-                s.LineSmoothness = SmoothLines ? 1 : 0;
-            }
+            lineSmoothness = SmoothLines ? 1 : 0;
+            RefreshChart();
         }
 
         private void PointsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (var s in chart1.Series.Cast<LineSeries>())
-            {
-                s.PointGeometrySize = PointSize;
-            }
+            geometrySize = pointsToolStripMenuItem.Checked ? 10 : 0;
+            RefreshChart();
         }
 
         private void DBSpaceHistory_Load(object sender, EventArgs e)
