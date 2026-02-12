@@ -87,7 +87,6 @@ namespace DBADashService
             {
                 Log.Debug("Alert processing cancelled");
             }
-            // ReSharper disable once FunctionNeverReturns
         }
 
         private async Task LogErrorAsync(Exception exception, string message)
