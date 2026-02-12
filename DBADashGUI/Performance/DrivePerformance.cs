@@ -134,8 +134,14 @@ namespace DBADashGUI.Performance
 
             foreach (var io in layout1.Controls.OfType<IOPerformance>())
             {
-                io.IOPsAxis.MaxValue = synchronizeAxisToolStripMenuItem.Checked ? (1 + iopsMax * 1.05).RoundUpToSignificantFigures(2) : double.NaN;
-                io.MBsecAxis.MaxValue = synchronizeAxisToolStripMenuItem.Checked ? (1 + mbMax * 1.05).RoundUpToSignificantFigures(2) : double.NaN;
+                if (io.IOPsAxis != null)
+                {
+                    io.IOPsAxis.MaxLimit = synchronizeAxisToolStripMenuItem.Checked ? (1 + iopsMax * 1.05).RoundUpToSignificantFigures(2) : null;
+                }
+                if (io.MBsecAxis != null)
+                {
+                    io.MBsecAxis.MaxLimit = synchronizeAxisToolStripMenuItem.Checked ? (1 + mbMax * 1.05).RoundUpToSignificantFigures(2) : null;
+                }
             }
         }
 
