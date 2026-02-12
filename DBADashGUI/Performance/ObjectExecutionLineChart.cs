@@ -1,10 +1,14 @@
-﻿using LiveChartsCore;
+﻿using DBADashGUI.Charts;
+using DBADashGUI.Theme;
+using LiveChartsCore;
+using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
@@ -23,6 +27,8 @@ namespace DBADashGUI.Performance
         private int durationMins;
         public DateTime FromDate;
         public DateTime ToDate;
+        private double lineSmoothness = ChartConfiguration.DefaultLineSmoothness;
+        private double geometrySize = ChartConfiguration.DefaultGeometrySize;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Title
@@ -32,21 +38,21 @@ namespace DBADashGUI.Performance
 
         private readonly Dictionary<string, ColumnMetaData> columns = new()
         {
-                {"AvgCPU", new ColumnMetaData{Name="Avg CPU (sec)",IsVisible=true } },
-                {"TotalCPU", new ColumnMetaData{Name="Total CPU (sec)",IsVisible=false } },
-                {"cpu_ms_per_sec", new ColumnMetaData{Name="CPU (ms/sec)",IsVisible=false } },
-                {"ExecutionsPerMin", new ColumnMetaData{Name="Executions/min",IsVisible=true, axis=1 } },
-                {"MaxExecutionsPerMin", new ColumnMetaData{Name="Max Executions/min",IsVisible=false, axis=1 } },
-                {"ExecutionCount", new ColumnMetaData{Name="Execution Count",IsVisible=false, axis=1 } },
-                {"AvgDuration", new ColumnMetaData{Name="Avg Duration (sec)",IsVisible=true} },
-                {"TotalDuration", new ColumnMetaData{Name="Total Duration (sec)",IsVisible=false } },
-                {"duration_ms_per_sec", new ColumnMetaData{Name="Duration (ms/sec)",IsVisible=false } },
-                {"AvgLogicalReads", new ColumnMetaData{Name="Avg Logical Reads",IsVisible=false,axis=2} },
-                {"TotalLogicalReads", new ColumnMetaData{Name="Total Logical Reads",IsVisible=false,axis=2} },
-                {"AvgPhysicalReads", new ColumnMetaData{Name="Avg Physical Reads",IsVisible=false,axis=2} },
-                {"TotalPhysicalReads", new ColumnMetaData{Name="Total Physical Reads",IsVisible=false,axis=2} },
-                {"AvgWrites", new ColumnMetaData{Name="Avg Writes",IsVisible=false,axis=2} },
-                {"TotalWrites", new ColumnMetaData{Name="Total Writes",IsVisible=false,axis=2} },
+                {"AvgCPU", new ColumnMetaData{Name="Avg CPU (sec)",IsVisible=true, AxisName="Primary" } },
+                {"TotalCPU", new ColumnMetaData{Name="Total CPU (sec)",IsVisible=false, AxisName="Primary" } },
+                {"cpu_ms_per_sec", new ColumnMetaData{Name="CPU (ms/sec)",IsVisible=false, AxisName="Primary" } },
+                {"ExecutionsPerMin", new ColumnMetaData{Name="Executions/min",IsVisible=true, AxisName="Executions" } },
+                {"MaxExecutionsPerMin", new ColumnMetaData{Name="Max Executions/min",IsVisible=false, AxisName="Executions" } },
+                {"ExecutionCount", new ColumnMetaData{Name="Execution Count",IsVisible=false, AxisName="Executions" } },
+                {"AvgDuration", new ColumnMetaData{Name="Avg Duration (sec)",IsVisible=true, AxisName="Primary" } },
+                {"TotalDuration", new ColumnMetaData{Name="Total Duration (sec)",IsVisible=false, AxisName="Primary" } },
+                {"duration_ms_per_sec", new ColumnMetaData{Name="Duration (ms/sec)",IsVisible=false, AxisName="Primary" } },
+                {"AvgLogicalReads", new ColumnMetaData{Name="Avg Logical Reads",IsVisible=false, AxisName="Pages" } },
+                {"TotalLogicalReads", new ColumnMetaData{Name="Total Logical Reads",IsVisible=false, AxisName="Pages" } },
+                {"AvgPhysicalReads", new ColumnMetaData{Name="Avg Physical Reads",IsVisible=false, AxisName="Pages" } },
+                {"TotalPhysicalReads", new ColumnMetaData{Name="Total Physical Reads",IsVisible=false, AxisName="Pages" } },
+                {"AvgWrites", new ColumnMetaData{Name="Avg Writes",IsVisible=false, AxisName="Pages" } },
+                {"TotalWrites", new ColumnMetaData{Name="Total Writes",IsVisible=false, AxisName="Pages" } },
             };
 
         public void RefreshData()
@@ -58,53 +64,107 @@ namespace DBADashGUI.Performance
                 tsGroup.Text = DateHelper.DateGroupString(dateGrouping);
                 durationMins = newDurationMins;
             }
+
             var dt = CommonData.ObjectExecutionStats(InstanceID, -1, ObjectID, dateGrouping, "AvgDuration", FromDate, ToDate, Instance);
-            chart1.Series = Array.Empty<ISeries>();
-            chart1.DefaultFill = SKColors.Transparent;
 
-            chart1.AddDataTable(dt, columns, "SnapshotDate", false);
-
-            chart1.YAxes = new[]
+            if (dt == null || dt.Rows.Count == 0)
             {
-                new Axis
+                chart1.Series = Array.Empty<ISeries>();
+                return;
+            }
+
+            // Get visible columns
+            var visibleColumns = columns.Where(c => c.Value.IsVisible).Select(c => c.Key).ToArray();
+
+            if (visibleColumns.Length == 0)
+            {
+                chart1.Series = Array.Empty<ISeries>();
+                return;
+            }
+
+            // Create series names dictionary
+            var seriesNames = columns.ToDictionary(c => c.Key, c => c.Value.Name);
+
+            // Create column-to-axis-name mapping
+            var columnAxisNames = columns
+                .Where(c => c.Value.IsVisible)
+                .ToDictionary(c => c.Key, c => c.Value.AxisName);
+
+            // Setup Y-axes configurations
+            var yAxes = new List<YAxisConfiguration>();
+            var axisNameToIndexMap = new Dictionary<string, int>();
+
+            // Determine which axes to include based on visible columns
+            var hasPrimaryMetrics = columnAxisNames.Values.Any(a => a == "Primary");
+            var hasExecutionMetrics = columnAxisNames.Values.Any(a => a == "Executions");
+            var hasPagesMetrics = columnAxisNames.Values.Any(a => a == "Pages");
+
+            // Axis 0: Primary (CPU/Duration) - always include if has primary metrics
+            if (hasPrimaryMetrics)
+            {
+                axisNameToIndexMap["Primary"] = yAxes.Count;
+                yAxes.Add(new YAxisConfiguration
                 {
-                    Name = string.Empty,
-                    Labeler = val => val.ToString("0.000"),
+                    Name = "Primary",
+                    Label = string.Empty,
+                    Format = "0.000",
                     MinLimit = 0,
-                    LabelsPaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
-                    NamePaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
-                    TicksPaint = new SolidColorPaint(new SKColor(0xCC, 0xCC, 0xCC)),
-                    SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0)),
-                    TextSize = 14
-                },
-                new Axis
+                    Position = AxisPosition.Start
+                });
+            }
+
+            // Axis 1: Executions - include if has execution metrics
+            if (hasExecutionMetrics)
+            {
+                axisNameToIndexMap["Executions"] = yAxes.Count;
+                yAxes.Add(new YAxisConfiguration
                 {
                     Name = "Executions",
-                    Labeler = val => val.ToString("0.0"),
+                    Label = "Executions",
+                    Format = "0.0",
                     MinLimit = 0,
-                    LabelsPaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
-                    NamePaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
-                    TicksPaint = new SolidColorPaint(new SKColor(0xCC, 0xCC, 0xCC)),
-                    SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0)),
-                    TextSize = 14
-                },
-                new Axis
+                    Position = AxisPosition.End
+                });
+            }
+
+            // Axis 2: Pages - only include if has reads/writes metrics
+            if (hasPagesMetrics)
+            {
+                axisNameToIndexMap["Pages"] = yAxes.Count;
+                yAxes.Add(new YAxisConfiguration
                 {
                     Name = "Pages",
-                    Labeler = val => val.ToString("0.0"),
+                    Label = "Pages",
+                    Format = "0.0",
                     MinLimit = 0,
-                    LabelsPaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
-                    NamePaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
-                    TicksPaint = new SolidColorPaint(new SKColor(0xCC, 0xCC, 0xCC)),
-                    SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0)),
-                    TextSize = 14
-                }
+                    Position = AxisPosition.End
+                });
+            }
+
+            // Update chart using ChartHelper with name-based axis mapping
+            var config = new ChartConfiguration
+            {
+                DateColumn = "SnapshotDate",
+                MetricColumns = visibleColumns,
+                ChartType = ChartTypes.Line,
+                ShowLegend = true,
+                LegendPosition = LegendPosition.Bottom,
+                LineSmoothness = lineSmoothness,
+                GeometrySize = geometrySize,
+                XAxisMin = FromDate.ToAppTimeZone(),
+                XAxisMax = ToDate.ToAppTimeZone(),
+                SeriesNames = seriesNames,
+                YAxes = yAxes.ToArray(),
+                ColumnAxisNames = columnAxisNames
             };
+
+            ChartHelper.UpdateChart(chart1, dt, config);
         }
 
         private void TsLineSmoothness_Click(object sender, EventArgs e)
         {
-            chart1.DefaultLineSmoothness = Convert.ToDouble(((ToolStripMenuItem)sender).Tag);
+            lineSmoothness = Convert.ToDouble(((ToolStripMenuItem)sender).Tag);
+            RefreshData();
         }
 
         private void ObjectExecutionLineChart_Load(object sender, EventArgs e)
@@ -134,13 +194,14 @@ namespace DBADashGUI.Performance
         {
             var ts = (ToolStripMenuItem)sender;
             columns[((string)ts.Tag)!].IsVisible = ts.Checked;
-            chart1.UpdateColumnVisibility(columns);
+            RefreshData();  // Refresh chart to apply visibility changes
         }
 
         private void TsPointSize_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
-            chart1.SetPointSize(Convert.ToInt32(ts.Tag));
+            geometrySize = Convert.ToInt32(ts.Tag);
+            RefreshData();
         }
     }
 }

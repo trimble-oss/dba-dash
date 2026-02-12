@@ -117,7 +117,7 @@ namespace DBADashGUI.Charts
             return true;
         }
 
-        private static ISeries CreateSeriesForGroup(string groupName, DateTimePoint[] values, ChartTypes chartType, double lineSmoothness = 0, double geometrySize = 0)
+        private static ISeries CreateSeriesForGroup(string groupName, DateTimePoint[] values, ChartTypes chartType, double lineSmoothness = 0, double geometrySize = 0, bool lineFill = false)
         {
             ArgumentNullException.ThrowIfNull(values);
             if (values.Length == 0)
@@ -144,13 +144,21 @@ namespace DBADashGUI.Charts
                     };
 
                 case ChartTypes.Line:
-                    return new LineSeries<DateTimePoint>()
+                    var lineSeries = new LineSeries<DateTimePoint>()
                     {
                         Name = groupName,
                         Values = values,
                         GeometrySize = geometrySize,
                         LineSmoothness = lineSmoothness
                     };
+
+                    // Only set Fill to null if lineFill is false (default behavior)
+                    if (!lineFill)
+                    {
+                        lineSeries.Fill = null;
+                    }
+
+                    return lineSeries;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(chartType), $"Unsupported chart type: {chartType}");
@@ -305,7 +313,7 @@ namespace DBADashGUI.Charts
                     {
                         // Use column name as series name (with optional override from config)
                         var seriesName = GetFriendlyColumnName(metricColumn, config);
-                        series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, config.LineSmoothness, config.GeometrySize));
+                        series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
                     }
                 }
             }
@@ -314,7 +322,7 @@ namespace DBADashGUI.Charts
                 // Single series logic
                 var values = ExtractDataPoints(dt.AsEnumerable(), config.DateColumn, config.MetricColumn);
                 if (values.Length > 0)
-                    series.Add(CreateSeriesForGroup("Data", values, config.ChartType, config.LineSmoothness, config.GeometrySize));
+                    series.Add(CreateSeriesForGroup("Data", values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
             }
             else
             {
@@ -327,7 +335,7 @@ namespace DBADashGUI.Charts
                 {
                     var values = ExtractDataPoints(group, config.DateColumn, config.MetricColumn);
                     if (values.Length > 0)
-                        series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType, config.LineSmoothness, config.GeometrySize));
+                        series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
                 }
             }
 
