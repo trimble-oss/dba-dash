@@ -150,6 +150,12 @@ namespace DBADashGUI.Charts
         public double GeometrySize { get; init; } = DefaultGeometrySize;
 
         /// <summary>
+        /// Whether line charts should have fill under the line. Default is false (no fill).
+        /// Only applies to ChartTypes.Line.
+        /// </summary>
+        public bool LineFill { get; init; } = false;
+
+        /// <summary>
         /// Optional dictionary to override series names for metric columns.
         /// Key = column name, Value = display name.
         /// If not specified, column names will be converted to friendly names automatically.
