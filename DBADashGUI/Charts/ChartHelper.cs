@@ -117,7 +117,7 @@ namespace DBADashGUI.Charts
             return true;
         }
 
-        private static ISeries CreateSeriesForGroup(string groupName, DateTimePoint[] values, ChartTypes chartType)
+        private static ISeries CreateSeriesForGroup(string groupName, DateTimePoint[] values, ChartTypes chartType, double lineSmoothness = 0, double geometrySize = 0)
         {
             ArgumentNullException.ThrowIfNull(values);
             if (values.Length == 0)
@@ -133,7 +133,7 @@ namespace DBADashGUI.Charts
                     {
                         Name = groupName,
                         Values = values,
-                        GeometrySize = 0 // Hide points for cleaner area chart
+                        GeometrySize = geometrySize
                     };
 
                 case ChartTypes.StackedColumn:
@@ -148,7 +148,8 @@ namespace DBADashGUI.Charts
                     {
                         Name = groupName,
                         Values = values,
-                        GeometrySize = 0 // Hide points for cleaner line chart
+                        GeometrySize = geometrySize,
+                        LineSmoothness = lineSmoothness
                     };
 
                 default:
@@ -163,6 +164,33 @@ namespace DBADashGUI.Charts
         /// <param name="config">Chart configuration settings</param>
         /// <returns>A configured CartesianChart control</returns>
         internal static CartesianChart GetChartFromDataTable(DataTable dt, ChartConfiguration config)
+        {
+            var chart = new CartesianChart
+            {
+                Location = new System.Drawing.Point(0, 0),
+                Dock = DockStyle.Fill
+            };
+
+            ConfigureChart(chart, dt, config);
+            return chart;
+        }
+
+        /// <summary>
+        /// Updates an existing CartesianChart with new data from a DataTable
+        /// </summary>
+        /// <param name="chart">The existing CartesianChart to update</param>
+        /// <param name="dt">DataTable containing the chart data</param>
+        /// <param name="config">Chart configuration settings</param>
+        internal static void UpdateChart(CartesianChart chart, DataTable dt, ChartConfiguration config)
+        {
+            ArgumentNullException.ThrowIfNull(chart);
+            ConfigureChart(chart, dt, config);
+        }
+
+        /// <summary>
+        /// Configures a CartesianChart with data and settings
+        /// </summary>
+        private static void ConfigureChart(CartesianChart chart, DataTable dt, ChartConfiguration config)
         {
             ValidateConfiguration(dt, config);
 
@@ -187,14 +215,9 @@ namespace DBADashGUI.Charts
             var xAxes = CreateXAxes(unit, labelPaint, minDate, maxDate);
             var yAxes = CreateYAxes(config, labelPaint);
 
-            var chart = new CartesianChart
-            {
-                Series = series,
-                XAxes = xAxes,
-                YAxes = yAxes,
-                Location = new System.Drawing.Point(0, 0),
-                Dock = DockStyle.Fill
-            };
+            chart.Series = series;
+            chart.XAxes = xAxes;
+            chart.YAxes = yAxes;
 
             if (config.ShowLegend)
             {
@@ -205,8 +228,6 @@ namespace DBADashGUI.Charts
             {
                 chart.LegendPosition = LiveChartsCore.Measure.LegendPosition.Hidden;
             }
-
-            return chart;
         }
 
         private static void ValidateConfiguration(DataTable dt, ChartConfiguration config)
@@ -218,15 +239,35 @@ namespace DBADashGUI.Charts
             if (string.IsNullOrWhiteSpace(config.DateColumn))
                 throw new ArgumentException("Date column name cannot be null or empty", nameof(config.DateColumn));
 
-            if (string.IsNullOrWhiteSpace(config.MetricColumn))
-                throw new ArgumentException("Metric column name cannot be null or empty", nameof(config.MetricColumn));
+            // Validate that either MetricColumn or MetricColumns is specified, but not both
+            var hasMetricColumn = !string.IsNullOrWhiteSpace(config.MetricColumn);
+            var hasMetricColumns = config.MetricColumns != null && config.MetricColumns.Length > 0;
+
+            if (!hasMetricColumn && !hasMetricColumns)
+                throw new ArgumentException("Either MetricColumn or MetricColumns must be specified", nameof(config.MetricColumn));
+
+            if (hasMetricColumn && hasMetricColumns)
+                throw new ArgumentException("Cannot specify both MetricColumn and MetricColumns", nameof(config.MetricColumn));
+
+            // Validate that SeriesColumn is only used with MetricColumn
+            if (hasMetricColumns && !string.IsNullOrWhiteSpace(config.SeriesColumn))
+                throw new ArgumentException("SeriesColumn cannot be used with MetricColumns", nameof(config.SeriesColumn));
 
             // Validate required columns exist
             if (!dt.Columns.Contains(config.DateColumn))
                 throw new ArgumentException($"Column '{config.DateColumn}' not found in DataTable", nameof(config.DateColumn));
 
-            if (!dt.Columns.Contains(config.MetricColumn))
+            if (hasMetricColumn && !dt.Columns.Contains(config.MetricColumn))
                 throw new ArgumentException($"Column '{config.MetricColumn}' not found in DataTable", nameof(config.MetricColumn));
+
+            if (hasMetricColumns)
+            {
+                foreach (var metricCol in config.MetricColumns)
+                {
+                    if (!dt.Columns.Contains(metricCol))
+                        throw new ArgumentException($"Column '{metricCol}' not found in DataTable", nameof(config.MetricColumns));
+                }
+            }
 
             // Validate series column if specified
             if (!string.IsNullOrWhiteSpace(config.SeriesColumn) && !dt.Columns.Contains(config.SeriesColumn))
@@ -241,16 +282,31 @@ namespace DBADashGUI.Charts
         {
             var series = new List<ISeries>();
 
-            if (string.IsNullOrWhiteSpace(config.SeriesColumn))
+            // Check if using MetricColumns (multiple columns as series)
+            if (config.MetricColumns != null && config.MetricColumns.Length > 0)
+            {
+                // Each metric column becomes its own series
+                foreach (var metricColumn in config.MetricColumns)
+                {
+                    var values = ExtractDataPoints(dt.AsEnumerable(), config.DateColumn, metricColumn);
+                    if (values.Length > 0)
+                    {
+                        // Use column name as series name (with optional override from config)
+                        var seriesName = GetFriendlyColumnName(metricColumn, config);
+                        series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, config.LineSmoothness, config.GeometrySize));
+                    }
+                }
+            }
+            else if (string.IsNullOrWhiteSpace(config.SeriesColumn))
             {
                 // Single series logic
                 var values = ExtractDataPoints(dt.AsEnumerable(), config.DateColumn, config.MetricColumn);
                 if (values.Length > 0)
-                    series.Add(CreateSeriesForGroup("Data", values, config.ChartType));
+                    series.Add(CreateSeriesForGroup("Data", values, config.ChartType, config.LineSmoothness, config.GeometrySize));
             }
             else
             {
-                // Multi-series logic
+                // Multi-series logic using SeriesColumn
                 var groupedData = dt.Rows.Cast<DataRow>()
                     .Where(row => row[config.SeriesColumn] != null && row[config.SeriesColumn] != DBNull.Value)
                     .GroupBy(row => row[config.SeriesColumn].ToString());
@@ -259,11 +315,53 @@ namespace DBADashGUI.Charts
                 {
                     var values = ExtractDataPoints(group, config.DateColumn, config.MetricColumn);
                     if (values.Length > 0)
-                        series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType));
+                        series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType, config.LineSmoothness, config.GeometrySize));
                 }
             }
 
             return series;
+        }
+
+        /// <summary>
+        /// Converts a column name to a friendly display name by adding spaces before capitals
+        /// and handling common abbreviations (e.g., "SizeGB" -> "Size (GB)", "UsedMB" -> "Used (MB)")
+        /// </summary>
+        private static string GetFriendlyColumnName(string columnName, ChartConfiguration config)
+        {
+            if (string.IsNullOrWhiteSpace(columnName))
+                return columnName;
+
+            // Check if there's an override in the configuration
+            if (config.SeriesNames != null && config.SeriesNames.TryGetValue(columnName, out var customName))
+                return customName;
+
+            var result = columnName;
+
+            // Add space before capital letter that is followed by a lowercase letter (word boundary)
+            // This prevents splitting "GB" into "G B"
+            // Pattern explanation: 
+            // (?<!^) = not at start
+            // (?<=[a-z]) = preceded by lowercase (or)
+            // ([A-Z]) = capital letter
+            // (?=[A-Z][a-z]|[^A-Z]) = followed by capital+lowercase OR followed by non-capital
+            result = System.Text.RegularExpressions.Regex.Replace(result, "(?<!^)(?<=[a-z])([A-Z])", " $1");
+
+            // Also add space before a capital that follows multiple capitals and precedes lowercase
+            // e.g., "IOPerformance" -> "IO Performance"
+            result = System.Text.RegularExpressions.Regex.Replace(result, "(?<!^)([A-Z])(?=[a-z])", " $1");
+
+            // Now handle common unit patterns - wrap in parentheses
+            result = result.Replace(" GB", " (GB)")
+                          .Replace(" MB", " (MB)")
+                          .Replace(" KB", " (KB)")
+                          .Replace(" TB", " (TB)")
+                          .Replace(" Pct", " (%)")
+                          .Replace(" Gb", " (Gb)")
+                          .Replace(" Mb", " (Mb)")
+                          .Replace(" Kb", " (Kb)")
+                          .Replace(" Tb", " (Tb)");
+
+            return result.Trim();
         }
 
         private static DateTimePoint[] ExtractDataPoints(IEnumerable<DataRow> rows, string dateColumn, string metricColumn)
