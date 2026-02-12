@@ -1,13 +1,12 @@
-﻿using LiveChartsCore;
-using LiveChartsCore.Defaults;
+﻿using DBADashGUI.Charts;
+using LiveChartsCore;
+using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
-using LiveChartsCore.SkiaSharpView.Painting;
 using Microsoft.Data.SqlClient;
-using SkiaSharp;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using UserControl = System.Windows.Forms.UserControl;
@@ -125,90 +124,60 @@ namespace DBADashGUI.Performance
                 return;
             }
 
-            var rows = CpuDataTable.Rows.Cast<DataRow>().ToList();
-
-            // Build DateTimePoint collections so X uses a DateTime scale
-            DateTimePoint[] CreatePoints(string columnName) =>
-                [.. rows.Select(r => new DateTimePoint(
-                        ((DateTime)r["EventTime"]).ToLocalTime(),
-                        Convert.ToDouble(r[columnName])))];
-
-            var sqlPoints = CreatePoints("SQLProcessCPU");
-            var otherPoints = CreatePoints("OtherCPU");
-            var maxPoints = CreatePoints("MaxCPU");
-
-            ISeries[] series;
+            // Prepare configuration based on aggregate type
+            ChartConfiguration config;
 
             if (Metric.AggregateType == IMetric.AggregateTypes.Avg)
             {
-                // AVG -> stacked area for SQLProcessCPU and OtherCPU
-                var areaSeriesSql = new StackedAreaSeries<DateTimePoint>
+                // AVG mode: Stacked area chart for SQL Server and Other CPU
+                config = new ChartConfiguration
                 {
-                    Values = sqlPoints,
-                    Name = "SQL Server",
+                    DateColumn = "EventTime",
+                    MetricColumns = new[] { "SQLProcessCPU", "OtherCPU" },
+                    SeriesNames = new Dictionary<string, string>
+                    {
+                        { "SQLProcessCPU", "SQL Server" },
+                        { "OtherCPU", "Other" }
+                    },
+                    ChartType = ChartTypes.StackedArea,
+                    ShowLegend = true,
+                    LegendPosition = LegendPosition.Bottom,
                     GeometrySize = PointSize,
-                    LineSmoothness = SmoothLines ? 1 : 0,
-                    ScalesYAt = 0
+                    LineSmoothness = SmoothLines ? ChartConfiguration.DefaultLineSmoothness : 0,
+                    XAxisMin = DateRange.FromUTC.ToAppTimeZone(),
+                    XAxisMax = DateRange.ToUTC.ToAppTimeZone(),
+                    YAxisLabel = "CPU %",
+                    YAxisFormat = "0",
+                    YAxisMin = 0,
+                    YAxisMax = 100
                 };
-
-                var areaSeriesOther = new StackedAreaSeries<DateTimePoint>
-                {
-                    Values = otherPoints,
-                    Name = "Other",
-                    GeometrySize = PointSize,
-                    LineSmoothness = SmoothLines ? 1 : 0,
-                    ScalesYAt = 0
-                };
-
-                series = [areaSeriesSql, areaSeriesOther];
             }
             else
             {
-                // MAX -> line series for MaxCPU
-                var maxLine = new LineSeries<DateTimePoint>
+                // MAX mode: Line chart for Max CPU
+                config = new ChartConfiguration
                 {
-                    Values = maxPoints,
-                    Name = "Max CPU",
+                    DateColumn = "EventTime",
+                    MetricColumns = new[] { "MaxCPU" },
+                    SeriesNames = new Dictionary<string, string>
+                    {
+                        { "MaxCPU", "Max CPU" }
+                    },
+                    ChartType = ChartTypes.Line,
+                    ShowLegend = true,
+                    LegendPosition = LegendPosition.Bottom,
                     GeometrySize = PointSize,
-                    LineSmoothness = SmoothLines ? 1 : 0,
-                    ScalesYAt = 0
+                    LineSmoothness = SmoothLines ? ChartConfiguration.DefaultLineSmoothness : 0,
+                    XAxisMin = DateRange.FromUTC.ToAppTimeZone(),
+                    XAxisMax = DateRange.ToUTC.ToAppTimeZone(),
+                    YAxisLabel = "CPU %",
+                    YAxisFormat = "0",
+                    YAxisMin = 0,
+                    YAxisMax = 100
                 };
-
-                series = [maxLine];
             }
 
-            chartCPU.Series = series;
-
-            chartCPU.XAxes = new[]
-            {
-                new DateTimeAxis(
-                    TimeSpan.FromMinutes(DateGrouping == 0 ? 1 : DateGrouping),
-                    date => date.ToString(DateRange.DateFormatString))
-                {
-                    LabelsRotation = 15,
-                    LabelsPaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
-                    NamePaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
-                    TextSize = 14,
-                    TicksPaint = new SolidColorPaint(new SKColor(0xCC, 0xCC, 0xCC)),
-                    SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0)),
-                    Padding = new LiveChartsCore.Drawing.Padding(0, 0, 0, 0),
-                }
-            };
-
-            chartCPU.YAxes = new[]
-            {
-                new Axis
-                {
-                    Labeler = value => $"{value:0}%",
-                    MinLimit = 0,
-                    MaxLimit = 100,
-                    LabelsPaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
-                    NamePaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
-                    TicksPaint = new SolidColorPaint(new SKColor(0xCC, 0xCC, 0xCC)),
-                    SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0)),
-                    TextSize = 14,
-                }
-            };
+            ChartHelper.UpdateChart(chartCPU, CpuDataTable, config);
         }
 
         private void AVGToolStripMenuItem_Click(object sender, EventArgs e)
