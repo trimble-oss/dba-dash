@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ObjectExecution));
-            objectExecChart = new LiveCharts.WinForms.CartesianChart();
+            objectExecChart = new LiveChartsCore.SkiaSharpView.WinForms.CartesianChart();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsClose = new System.Windows.Forms.ToolStripButton();
             tsUp = new System.Windows.Forms.ToolStripButton();
@@ -191,7 +191,7 @@
 
         #endregion
 
-        private LiveCharts.WinForms.CartesianChart objectExecChart;
+        private LiveChartsCore.SkiaSharpView.WinForms.CartesianChart objectExecChart;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripLabel lblExecution;
         private System.Windows.Forms.ToolStripDropDownButton tsMeasures;

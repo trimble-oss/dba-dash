@@ -1,8 +1,9 @@
-﻿using DBADashGUI.Theme;
-using LiveCharts;
-using LiveCharts.Configurations;
-using LiveCharts.Defaults;
-using LiveCharts.Wpf;
+﻿using DBADashGUI.Charts;
+using DBADashGUI.Theme;
+using LiveChartsCore;
+using LiveChartsCore.Defaults;
+using LiveChartsCore.Measure;
+using LiveChartsCore.SkiaSharpView;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -27,9 +28,6 @@ namespace DBADashGUI.Performance
 
         private int TopRows => tsTop.Tag == null ? 10 : Convert.ToInt32(tsTop.Tag);
         private bool IncludeOther => includeOtherToolStripMenuItem.Checked;
-
-        //public string measure = "TotalDuration";
-        public DateTimePoint x;
 
         private int instanceID;
         private DateTime chartMaxDate = DateTime.MinValue;
@@ -88,68 +86,47 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-            objectExecChart.Series.Clear();
-            objectExecChart.AxisX.Clear();
-            objectExecChart.AxisY.Clear();
-            chartMaxDate = DateTime.MinValue;
             lblExecution.Text = databaseid > 0 ? "Execution Stats: Database" : "Execution Stats: Instance";
             toolStrip1.Tag = databaseid > 0 ? "ALT" : null; // set tag to ALT to use the alternate menu renderer
             toolStrip1.ApplyTheme(DBADashUser.SelectedTheme);
+
             var dt = CommonData.ObjectExecutionStats(instanceID, databaseid, objectID, dateGrouping, Metric.Measure, DateRange.FromUTC, DateRange.ToUTC, default, TopRows, IncludeOther);
 
-            if (dt.Rows.Count == 0)
+            if (dt == null || dt.Rows.Count == 0)
             {
+                objectExecChart.Series = Array.Empty<ISeries>();
+                objectExecChart.XAxes = Array.Empty<Axis>();
+                objectExecChart.YAxes = Array.Empty<Axis>();
                 return;
             }
-            var dPoints = new Dictionary<string, ChartValues<DateTimePoint>>();
-            var current = string.Empty;
-            ChartValues<DateTimePoint> values = new();
-            foreach (DataRow r in dt.Rows)
+
+            // Add a computed column for ObjectName (combination of DatabaseName and object_name)
+            if (!dt.Columns.Contains("ObjectName"))
             {
-                var objectName = (string)r["DatabaseName"] + " | " + (string)r["object_name"];
-                var time = (DateTime)r["SnapshotDate"];
-                if (time > chartMaxDate)
+                dt.Columns.Add("ObjectName", typeof(string));
+                foreach (DataRow row in dt.Rows)
                 {
-                    chartMaxDate = time;
+                    row["ObjectName"] = row["DatabaseName"] + " | " + row["object_name"];
                 }
-                if (current != objectName)
-                {
-                    if (values.Count > 0) { dPoints.Add(current, values); }
-                    values = new ChartValues<DateTimePoint>();
-                    current = objectName;
-                }
-                values.Add(new DateTimePoint(((DateTime)r["SnapshotDate"]), Convert.ToDouble(r["Measure"])));
-            }
-            if (values.Count > 0)
-            {
-                dPoints.Add(current, values);
-                values = new ChartValues<DateTimePoint>();
             }
 
-            var dayConfig = Mappers.Xy<DateTimePoint>()
-.X(dateModel => dateModel.DateTime.Ticks / TimeSpan.FromMinutes(dateGrouping == 0 ? 1 : dateGrouping).Ticks)
-.Y(dateModel => dateModel.Value);
-
-            SeriesCollection s1 = new(dayConfig);
-            foreach (var x in dPoints)
+            // Use ChartHelper with SeriesColumn to group by ObjectName
+            var config = new ChartConfiguration
             {
-                s1.Add(new StackedColumnSeries
-                {
-                    Title = x.Key,
-                    Values = x.Value
-                });
-            }
-            objectExecChart.Series = s1;
+                DateColumn = "SnapshotDate",
+                MetricColumn = "Measure",
+                SeriesColumn = "ObjectName",  // Group data by ObjectName - each becomes a series
+                ChartType = ChartTypes.StackedColumn,
+                ShowLegend = true,
+                LegendPosition = LegendPosition.Hidden,
+                XAxisMin = DateRange.FromUTC.ToAppTimeZone(),
+                XAxisMax = DateRange.ToUTC.ToAppTimeZone(),
+                YAxisLabel = measures[Metric.Measure].DisplayName,
+                YAxisFormat = "0.0",
+                YAxisMin = 0
+            };
 
-            objectExecChart.AxisX.Add(new Axis
-            {
-                LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(dateGrouping == 0 ? 1 : dateGrouping).Ticks)).ToString(DateRange.DateFormatString)
-            });
-
-            objectExecChart.AxisY.Add(new Axis
-            {
-                LabelFormatter = val => val.ToString(measures[Metric.Measure].LabelFormat)
-            });
+            ChartHelper.UpdateChart(objectExecChart, dt, config);
         }
 
         private class Measure
