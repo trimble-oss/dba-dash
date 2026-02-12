@@ -9,6 +9,7 @@ using Quartz;
 using Quartz.Impl;
 using Serilog;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
@@ -30,7 +31,7 @@ namespace DBADashService
         private readonly CollectionSchedules schedules;
         private MessageProcessing messageProcessing;
         private CollectionWorkQueue workQueue;
-        private readonly List<Task> backgroundTasks = new();
+        private readonly ConcurrentBag<Task> backgroundTasks = new();
         private CancellationTokenSource backgroundTasksCts;
 
         private static readonly ResiliencePipeline pipeline = new ResiliencePipelineBuilder()
@@ -327,31 +328,36 @@ namespace DBADashService
             await RemoveEventSessionsAsync();
 
             // Wait for background tasks to complete (alert processing, offline instances, Azure scan, SQS)
-            if (backgroundTasks.Count > 0)
+            var tasksSnapshot = backgroundTasks.ToArray();
+
+            try
             {
-                Log.Information("Waiting for {count} background task(s) to complete...", backgroundTasks.Count);
-                try
+                if (tasksSnapshot.Length > 0)
                 {
-                    var timeout = TimeSpan.FromSeconds(backgroundTaskTimeout);
-                    await Task.WhenAll(backgroundTasks).WaitAsync(timeout);
-                    Log.Information("Background tasks completed");
+                    Log.Information("Waiting for {count} background task(s) to complete...", tasksSnapshot.Length);
+                    try
+                    {
+                        var timeout = TimeSpan.FromSeconds(backgroundTaskTimeout);
+                        await Task.WhenAll(tasksSnapshot).WaitAsync(timeout);
+                        Log.Information("Background tasks completed");
+                    }
+                    catch (TimeoutException)
+                    {
+                        Log.Warning("Background tasks did not complete within {timeout} seconds", backgroundTaskTimeout);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        Log.Information("Background tasks cancelled");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Debug(ex, "Background tasks completed with exceptions (expected during shutdown)");
+                    }
                 }
-                catch (TimeoutException)
-                {
-                    Log.Warning("Background tasks did not complete within {timeout} seconds", backgroundTaskTimeout);
-                }
-                catch (OperationCanceledException)
-                {
-                    Log.Information("Background tasks cancelled");
-                }
-                catch (Exception ex)
-                {
-                    Log.Debug(ex, "Background tasks completed with exceptions (expected during shutdown)");
-                }
-                finally
-                {
-                    backgroundTasksCts?.Dispose();
-                }
+            }
+            finally
+            {
+                backgroundTasksCts?.Dispose();
             }
 
             Log.Information("Shutdown Scheduler");
