@@ -234,6 +234,7 @@ namespace DBADashGUI.Charts
             {
                 chart.LegendPosition = config.LegendPosition;
                 chart.LegendTextPaint = labelPaint;
+                chart.LegendTextSize = 11; // Smaller text size for legend
             }
             else
             {

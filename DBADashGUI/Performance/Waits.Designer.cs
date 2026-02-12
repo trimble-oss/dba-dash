@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Waits));
-            this.waitChart = new LiveCharts.WinForms.CartesianChart();
+            this.waitChart = new LiveChartsCore.SkiaSharpView.WinForms.CartesianChart();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsClose = new System.Windows.Forms.ToolStripButton();
             this.tsUp = new System.Windows.Forms.ToolStripButton();
@@ -259,7 +259,7 @@
 
         #endregion
 
-        private LiveCharts.WinForms.CartesianChart waitChart;
+        private LiveChartsCore.SkiaSharpView.WinForms.CartesianChart waitChart;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripLabel lblWaits;
         private System.Windows.Forms.ToolStripDropDownButton tsDateGrouping;
