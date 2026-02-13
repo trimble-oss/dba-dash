@@ -197,7 +197,6 @@
             skDefaultTooltip2.X = 0F;
             skDefaultTooltip2.Y = 0F;
             chartCPU.Tooltip = skDefaultTooltip2;
-            chartCPU.TooltipFindingStrategy = LiveChartsCore.Measure.TooltipFindingStrategy.Automatic;
             chartCPU.UpdaterThrottler = System.TimeSpan.Parse("00:00:00.0500000");
             // 
             // tsLegend

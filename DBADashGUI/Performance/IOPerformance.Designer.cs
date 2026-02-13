@@ -314,7 +314,6 @@
             skDefaultTooltip1.X = 0F;
             skDefaultTooltip1.Y = 0F;
             chartIO.Tooltip = skDefaultTooltip1;
-            chartIO.TooltipFindingStrategy = LiveChartsCore.Measure.TooltipFindingStrategy.Automatic;
             chartIO.UpdaterThrottler = System.TimeSpan.Parse("00:00:00.0500000");
             // 
             // IOPerformance

@@ -102,7 +102,6 @@
             skDefaultTooltip1.X = 0F;
             skDefaultTooltip1.Y = 0F;
             waitChart.Tooltip = skDefaultTooltip1;
-            waitChart.TooltipFindingStrategy = LiveChartsCore.Measure.TooltipFindingStrategy.Automatic;
             waitChart.UpdaterThrottler = System.TimeSpan.Parse("00:00:00.0500000");
             // 
             // toolStrip1

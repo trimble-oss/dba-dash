@@ -123,7 +123,6 @@
             skDefaultTooltip1.X = 0F;
             skDefaultTooltip1.Y = 0F;
             chartBlocking.Tooltip = skDefaultTooltip1;
-            chartBlocking.TooltipFindingStrategy = LiveChartsCore.Measure.TooltipFindingStrategy.Automatic;
             chartBlocking.UpdaterThrottler = System.TimeSpan.Parse("00:00:00.0500000");
             // 
             // Blocking

@@ -181,7 +181,6 @@
             skDefaultTooltip1.X = 0F;
             skDefaultTooltip1.Y = 0F;
             chartDB.Tooltip = skDefaultTooltip1;
-            chartDB.TooltipFindingStrategy = LiveChartsCore.Measure.TooltipFindingStrategy.Automatic;
             chartDB.UpdaterThrottler = System.TimeSpan.Parse("00:00:00.0500000");
             // 
             // toolStrip3
@@ -251,7 +250,6 @@
             skDefaultTooltip2.X = 0F;
             skDefaultTooltip2.Y = 0F;
             chartPool.Tooltip = skDefaultTooltip2;
-            chartPool.TooltipFindingStrategy = LiveChartsCore.Measure.TooltipFindingStrategy.Automatic;
             chartPool.UpdaterThrottler = System.TimeSpan.Parse("00:00:00.0500000");
             // 
             // toolStrip2
