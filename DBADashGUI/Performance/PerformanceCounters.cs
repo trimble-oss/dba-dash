@@ -1,10 +1,13 @@
-﻿using LiveCharts;
-using LiveCharts.Defaults;
-using LiveCharts.Wpf;
+﻿using DBADashGUI.Charts;
+using DBADashGUI.Theme;
+using LiveChartsCore;
+using LiveChartsCore.Measure;
+using LiveChartsCore.SkiaSharpView;
 using Microsoft.Data.SqlClient;
 using System;
 using System.ComponentModel;
 using System.Data;
+using System.Linq;
 using System.Windows.Forms;
 using static DBADashGUI.Performance.IMetric;
 
@@ -58,11 +61,29 @@ namespace DBADashGUI.Performance
 
         IMetric IMetricChart.Metric => Metric;
 
-        public bool SmoothLines = false;
-        public int PointSize = 5;
+        private bool smoothLines = false;
+        private double geometrySize = ChartConfiguration.DefaultGeometrySize;
+        private double lineSmoothness = 0;
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool SmoothLines
+        {
+            get => smoothLines;
+            set
+            {
+                smoothLines = value;
+                lineSmoothness = value ? ChartConfiguration.DefaultLineSmoothness : 0;
+            }
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public double PointSize
+        {
+            get => geometrySize;
+            set => geometrySize = value;
+        }
 
         private int durationMins;
-
         private int DateGrouping;
         private DataTable dt;
 
@@ -98,34 +119,41 @@ namespace DBADashGUI.Performance
 
         private void RefreshChart()
         {
-            chart1.AxisX.Clear();
-            chart1.AxisY.Clear();
-            chart1.Series = null;
-
-            var values = new ChartValues<DateTimePoint>();
-            double maxValue = 0;
-            double minValue = 0;
-            if (dt.Rows.Count < 2)
+            tsTitle.Text = Metric.CounterName;
+            if (dt == null || dt.Rows.Count < 2)
             {
+                chart1.Series = Array.Empty<ISeries>();
+                chart1.XAxes = Array.Empty<Axis>();
+                chart1.YAxes = Array.Empty<Axis>();
                 return;
             }
+
+            // Add computed column for the selected aggregate
+            string aggColName = "Value_" + Enum.GetName(Metric.AggregateType);
+            if (!dt.Columns.Contains("SelectedValue"))
+            {
+                dt.Columns.Add("SelectedValue", typeof(double));
+            }
+
+            // Calculate min/max for Y-axis scaling
+            double maxValue = 0;
+            double minValue = 0;
             foreach (DataRow r in dt.Rows)
             {
-                string aggColName = "Value_" + Enum.GetName(Metric.AggregateType);
-                if (r[aggColName] == DBNull.Value)
+                if (r[aggColName] != DBNull.Value)
                 {
-                    continue;
+                    var value = Convert.ToDouble(r[aggColName]);
+                    r["SelectedValue"] = value;
+                    maxValue = value > maxValue ? value : maxValue;
+                    minValue = value < minValue ? value : minValue;
                 }
-                var value = Convert.ToDouble(r[aggColName]);
-                maxValue = value > maxValue ? value : maxValue;
-                minValue = value < minValue ? value : minValue;
-                values.Add(new DateTimePoint((DateTime)r["SnapshotDate"], value));
+                else
+                {
+                    r["SelectedValue"] = DBNull.Value;
+                }
             }
-            int pointSize = PointSize;
-            if (dt.Rows.Count > 500)
-            {
-                pointSize = 0;
-            }
+
+            // Adjust Y-axis limits
             if (maxValue == 0 && minValue == 0)
             {
                 maxValue = 1;
@@ -136,30 +164,33 @@ namespace DBADashGUI.Performance
             }
             maxValue *= 1.1;
 
-            SeriesCollection s1 = new()
-            {
-                        new LineSeries
-                        {
-                        Title = Metric.CounterName,
-                        Values =values,
-                        LineSmoothness = SmoothLines ? 1 : 0,
-                        PointGeometrySize = pointSize,
-                        }
-                    };
+            // Auto-adjust point size based on data count
+            var effectiveGeometrySize = dt.Rows.Count > 500 ? 0 : geometrySize;
 
-            chart1.AxisX.Add(new Axis
+            // Update chart using ChartHelper
+            var config = new ChartConfiguration
             {
-                LabelFormatter = val => new DateTime((long)val).ToString(DateRange.DateFormatString)
-            });
-            chart1.AxisY.Add(new Axis
-            {
-                LabelFormatter = val => val.ToString("#,##0.######"),
-                MaxValue = maxValue,
-                MinValue = minValue
-            });
-            chart1.Series = s1;
-            chart1.LegendLocation = LegendLocation.Top;
-            chart1.Text = Metric.CounterName;
+                DateColumn = "SnapshotDate",
+                MetricColumn = "SelectedValue",
+                ChartType = ChartTypes.Line,
+                ShowLegend = true,
+                LegendPosition = LegendPosition.Hidden,
+                LineSmoothness = lineSmoothness,
+                LineFill = true,
+                GeometrySize = effectiveGeometrySize,
+                XAxisMin = (FromDate == DateTime.MinValue ? DateRange.FromUTC : FromDate).ToAppTimeZone(),
+                XAxisMax = (ToDate == DateTime.MinValue ? DateRange.ToUTC : ToDate).ToAppTimeZone(),
+                YAxisLabel = string.Empty,
+                YAxisFormat = "#,##0.######",
+                YAxisMin = minValue,
+                YAxisMax = maxValue,
+                SeriesNames = new System.Collections.Generic.Dictionary<string, string>
+                {
+                    { "SelectedValue", Metric.CounterName }
+                }
+            };
+
+            ChartHelper.UpdateChart(chart1, dt, config);
         }
 
         private DataTable GetPerformanceCounter()
