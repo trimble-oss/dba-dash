@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Linq;
+using DBADashGUI.Charts;
 
 namespace DBADashGUI.Performance
 {
@@ -15,6 +16,38 @@ namespace DBADashGUI.Performance
     {
         public int DefaultPointSize = 8;
         private double _defaultLineSmoothness = 0.2;
+        private bool _enableCustomTooltips = true;
+
+        public CartesianChartWithDataTable()
+        {
+            // Enable custom tooltips by default to avoid truncation issues
+            if (_enableCustomTooltips)
+            {
+                this.EnableCustomTooltips();
+            }
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        [DefaultValue(true)]
+        public bool EnableCustomTooltips
+        {
+            get => _enableCustomTooltips;
+            set
+            {
+                if (_enableCustomTooltips != value)
+                {
+                    _enableCustomTooltips = value;
+                    if (value)
+                    {
+                        this.EnableCustomTooltips();
+                    }
+                    else
+                    {
+                        this.DisableCustomTooltips();
+                    }
+                }
+            }
+        }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public double DefaultLineSmoothness

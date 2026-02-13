@@ -179,6 +179,10 @@ namespace DBADashGUI.Charts
             };
 
             ConfigureChart(chart, dt, config);
+
+            // Enable custom tooltips to prevent truncation at chart boundaries
+            chart.EnableCustomTooltips();
+
             return chart;
         }
 
@@ -192,6 +196,9 @@ namespace DBADashGUI.Charts
         {
             ArgumentNullException.ThrowIfNull(chart);
             ConfigureChart(chart, dt, config);
+
+            // Ensure custom tooltips are enabled
+            chart.EnableCustomTooltips();
         }
 
         /// <summary>

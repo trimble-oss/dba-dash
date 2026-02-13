@@ -1,4 +1,5 @@
-﻿using DBADashGUI.Theme;
+﻿using DBADashGUI.Charts;
+using DBADashGUI.Theme;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
@@ -79,7 +80,7 @@ namespace DBADashGUI.Performance
             > 3600000 => 60,
             > 600000 => 30,
             > 60000 => 10,
-            _ => 5
+            _ => 8  // Increased from 5 to 8 for better tooltip hit detection
         };
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -148,47 +149,22 @@ namespace DBADashGUI.Performance
                     var dtm = ((DateTime)r["SnapshotDateUTC"]).ToAppTimeZone();
                     var blockedCnt = (int)r["BlockedSessionCount"];
                     var blockedTime = (long)r["BlockedWaitTime"];
-                    var snapshotID = (int)r["BlockingSnapshotID"];
 
                     if (blockedTime > maxBlockedTime)
                     {
                         maxBlockedTime = blockedTime;
                     }
 
-                    // chart model only holds X/Y; context goes on ChartPoint later
-                    return new ObservablePoint
-                    {
-                        X = dtm.Ticks,
-                        Y = blockedCnt
-                    };
+                    // Use DateTimePoint instead of ObservablePoint
+                    return new DateTimePoint(dtm, blockedCnt);
                 })
                 .ToArray();
 
-            var scatter = new ScatterSeries<ObservablePoint>
+            var scatter = new ScatterSeries<DateTimePoint>
             {
                 Values = points,
                 GeometrySize = MaxPointShapeDiameter,
-                // Use YToolTipLabelFormatter and XToolTipLabelFormatter like in the docs
-                XToolTipLabelFormatter = point =>
-                {
-                    // point.Model is ObservablePoint
-                    var model = point.Model;
-                    if (model == null || model.X == null) return string.Empty;
-
-                    var snapshotDate = new DateTime((long)model.X).ToAppTimeZone();
-                    return snapshotDate.ToString(DateRange.DateFormatString);
-                },
-                YToolTipLabelFormatter = point =>
-                {
-                    var index = point.Index;
-                    if (index < 0 || index >= rows.Count) return string.Empty;
-
-                    var row = rows[index];
-                    var blockedCnt = (int)row["BlockedSessionCount"];
-                    var blockedTime = (long)row["BlockedWaitTime"];
-
-                    return $"{blockedCnt} sessions | {blockedTime}ms";
-                }
+                Name = "Blocked Sessions"
             };
 
             chartBlocking.Series = new ISeries[] { scatter };
@@ -202,6 +178,26 @@ namespace DBADashGUI.Performance
             lblBlocking.Text = databaseID > 0 ? "Blocking: Database" : "Blocking: Instance";
             toolStrip1.Tag = databaseID > 0 ? "ALT" : null; // set tag to ALT to use the alternate menu renderer
             toolStrip1.ApplyTheme(DBADashUser.SelectedTheme);
+
+            // Enable custom tooltips with custom formatter to show blocked time
+            chartBlocking.EnableCustomTooltips(point =>
+            {
+                var index = point.Index;
+                if (index < 0 || index >= rows.Count) 
+                    return point.Coordinate.PrimaryValue.ToString("N0");
+
+                var row = rows[index];
+                var blockedCnt = (int)row["BlockedSessionCount"];
+                var blockedTime = (long)row["BlockedWaitTime"];
+                var timeSpan = TimeSpan.FromMilliseconds(blockedTime);
+
+                // Show days if >= 1 day, otherwise just hh:mm:ss
+                var timeFormat = timeSpan.TotalDays >= 1 
+                    ? $"{(int)timeSpan.TotalDays}d {timeSpan:hh\\:mm\\:ss}"
+                    : $"{timeSpan:hh\\:mm\\:ss}";
+
+                return $"{blockedCnt:N0} ({timeFormat})";
+            });
         }
 
         private SolidColorPaint CreateLabelPaint()
