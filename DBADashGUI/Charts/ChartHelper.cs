@@ -242,7 +242,6 @@ namespace DBADashGUI.Charts
             {
                 chart.LegendPosition = config.LegendPosition;
                 chart.LegendTextPaint = labelPaint;
-                chart.LegendTextSize = 11; // Smaller text size for legend
             }
             else
             {
@@ -322,7 +321,10 @@ namespace DBADashGUI.Charts
                 // Single series logic
                 var values = ExtractDataPoints(dt.AsEnumerable(), config.DateColumn, config.MetricColumn);
                 if (values.Length > 0)
-                    series.Add(CreateSeriesForGroup("Data", values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                {
+                    var seriesName = GetFriendlyColumnName(config.MetricColumn, config);
+                    series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                }
             }
             else
             {
@@ -359,7 +361,7 @@ namespace DBADashGUI.Charts
 
             // Add space before capital letter that is followed by a lowercase letter (word boundary)
             // This prevents splitting "GB" into "G B"
-            // Pattern explanation: 
+            // Pattern explanation:
             // (?<!^) = not at start
             // (?<=[a-z]) = preceded by lowercase (or)
             // ([A-Z]) = capital letter
