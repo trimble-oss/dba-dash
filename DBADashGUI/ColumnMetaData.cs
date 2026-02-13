@@ -1,5 +1,4 @@
 ﻿using DBADashGUI.Pickers;
-using LiveCharts.Defaults;
 
 namespace DBADashGUI
 {
@@ -7,7 +6,6 @@ namespace DBADashGUI
     {
         public string Name { get; set; }
         public bool IsVisible { get; set; }
-        public DateTimePoint[] Points;
 
         /// <summary>
         /// Axis name for name-based axis mapping (preferred). E.g., "MBsec", "IOPs", "Latency"
