@@ -224,7 +224,6 @@ namespace DBADashGUI.AgentJobs
             skDefaultTooltip1.X = 0F;
             skDefaultTooltip1.Y = 0F;
             chart1.Tooltip = skDefaultTooltip1;
-            chart1.TooltipFindingStrategy = LiveChartsCore.Measure.TooltipFindingStrategy.Automatic;
             chart1.UpdaterThrottler = System.TimeSpan.Parse("00:00:00.0500000");
             // 
             // dgv
