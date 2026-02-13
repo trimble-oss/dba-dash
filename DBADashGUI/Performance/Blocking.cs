@@ -1,13 +1,9 @@
 ﻿using DBADashGUI.Theme;
-using DocumentFormat.OpenXml.Spreadsheet;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
-using LiveChartsCore.Kernel;
-using LiveChartsCore.Kernel.Sketches;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using Microsoft.Data.SqlClient;
-using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

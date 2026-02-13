@@ -1,12 +1,10 @@
 ﻿using DBADashGUI.Charts;
 using Humanizer;
 using LiveChartsCore;
-using LiveChartsCore.Defaults;
 using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
 using Microsoft.Data.SqlClient;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Linq;
@@ -33,6 +31,7 @@ namespace DBADashGUI.Performance
         private int dateGrouping;
         private int mins;
         private DataTable dt;
+        private LegendPosition legendPosition = LegendPosition.Hidden;
 
         public event EventHandler<EventArgs> Close;
 
@@ -84,7 +83,7 @@ namespace DBADashGUI.Performance
 
             if (mins != DateRange.DurationMins)
             {
-                dateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 35);
+                dateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 65);
                 if (dateGrouping < 1)
                 {
                     dateGrouping = 1;
@@ -197,7 +196,7 @@ namespace DBADashGUI.Performance
                 SeriesColumn = "WaitType",  // Group data by WaitType - each becomes a series
                 ChartType = ChartTypes.StackedColumn,
                 ShowLegend = true,
-                LegendPosition = LegendPosition.Right,
+                LegendPosition = legendPosition,
                 XAxisMin = DateRange.FromUTC.ToAppTimeZone(),
                 XAxisMax = DateRange.ToUTC.ToAppTimeZone(),
                 YAxisLabel = Units,
@@ -297,6 +296,17 @@ namespace DBADashGUI.Performance
             WaitSummaryDialog waitSummaryForm = new();
             waitSummaryForm.SetContext(new DBADashContext() { InstanceID = instanceID });
             await waitSummaryForm.ShowSingleInstanceAsync();
+        }
+
+        private void SetLegendPosition(object sender, EventArgs e)
+        {
+            var item = (ToolStripMenuItem)sender;
+            Enum.TryParse(item.Tag.ToString(), out legendPosition);
+            foreach (ToolStripMenuItem menuItem in tsLegend.DropDownItems.OfType<ToolStripMenuItem>())
+            {
+                menuItem.Checked = menuItem == item;
+            }
+            waitChart.LegendPosition = legendPosition;
         }
     }
 }

@@ -50,6 +50,12 @@
             tsLatency1000 = new System.Windows.Forms.ToolStripMenuItem();
             tsLatency2000 = new System.Windows.Forms.ToolStripMenuItem();
             tsLatency5000 = new System.Windows.Forms.ToolStripMenuItem();
+            tsLegend = new System.Windows.Forms.ToolStripDropDownButton();
+            leftToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            rightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            topToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            bottomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            hiddenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsFileGroup = new System.Windows.Forms.ToolStripDropDownButton();
             tsIOSummary = new System.Windows.Forms.ToolStripButton();
             chartIO = new LiveChartsCore.SkiaSharpView.WinForms.CartesianChart();
@@ -59,7 +65,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsDateGroup, tsClose, tsUp, lblIOPerformance, tsMeasures, tsDrives, tsOptions, tsFileGroup, tsIOSummary });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsDateGroup, tsClose, tsUp, lblIOPerformance, tsMeasures, tsDrives, tsOptions, tsLegend, tsFileGroup, tsIOSummary });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(773, 27);
@@ -197,6 +203,58 @@
             tsLatency5000.Text = "5000";
             tsLatency5000.Click += SetLatencyLimit;
             // 
+            // tsLegend
+            // 
+            tsLegend.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsLegend.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { leftToolStripMenuItem, rightToolStripMenuItem, topToolStripMenuItem, bottomToolStripMenuItem, hiddenToolStripMenuItem });
+            tsLegend.Image = Properties.Resources.LegendHS;
+            tsLegend.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsLegend.Name = "tsLegend";
+            tsLegend.Size = new System.Drawing.Size(34, 24);
+            tsLegend.Text = "Legend Position";
+            // 
+            // leftToolStripMenuItem
+            // 
+            leftToolStripMenuItem.Name = "leftToolStripMenuItem";
+            leftToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            leftToolStripMenuItem.Tag = "Left";
+            leftToolStripMenuItem.Text = "Left";
+            leftToolStripMenuItem.Click += SetLegendPosition;
+            // 
+            // rightToolStripMenuItem
+            // 
+            rightToolStripMenuItem.Name = "rightToolStripMenuItem";
+            rightToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            rightToolStripMenuItem.Tag = "Right";
+            rightToolStripMenuItem.Text = "Right";
+            rightToolStripMenuItem.Click += SetLegendPosition;
+            // 
+            // topToolStripMenuItem
+            // 
+            topToolStripMenuItem.Name = "topToolStripMenuItem";
+            topToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            topToolStripMenuItem.Tag = "Top";
+            topToolStripMenuItem.Text = "Top";
+            topToolStripMenuItem.Click += SetLegendPosition;
+            // 
+            // bottomToolStripMenuItem
+            // 
+            bottomToolStripMenuItem.Name = "bottomToolStripMenuItem";
+            bottomToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            bottomToolStripMenuItem.Tag = "Bottom";
+            bottomToolStripMenuItem.Text = "Bottom";
+            bottomToolStripMenuItem.Click += SetLegendPosition;
+            // 
+            // hiddenToolStripMenuItem
+            // 
+            hiddenToolStripMenuItem.Checked = true;
+            hiddenToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            hiddenToolStripMenuItem.Name = "hiddenToolStripMenuItem";
+            hiddenToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            hiddenToolStripMenuItem.Tag = "Hidden";
+            hiddenToolStripMenuItem.Text = "Hidden";
+            hiddenToolStripMenuItem.Click += SetLegendPosition;
+            // 
             // tsFileGroup
             // 
             tsFileGroup.Image = Properties.Resources.FilterDropdown_16x;
@@ -216,7 +274,7 @@
             tsIOSummary.Text = "View Table Summary";
             tsIOSummary.Click += TsIOSummary_Click;
             // 
-            // cartesianChart1
+            // chartIO
             // 
             chartIO.AutoUpdateEnabled = true;
             chartIO.ChartTheme = null;
@@ -224,7 +282,7 @@
             chartIO.ForceGPU = false;
             skDefaultLegend1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
             skDefaultLegend1.Content = null;
-            skDefaultLegend1.IsValid = true;
+            skDefaultLegend1.IsValid = false;
             skDefaultLegend1.Opacity = 1F;
             padding1.Bottom = 0F;
             padding1.Left = 0F;
@@ -238,12 +296,12 @@
             chartIO.Legend = skDefaultLegend1;
             chartIO.Location = new System.Drawing.Point(0, 27);
             chartIO.MatchAxesScreenDataRatio = false;
-            chartIO.Name = "cartesianChart1";
+            chartIO.Name = "chartIO";
             chartIO.Size = new System.Drawing.Size(773, 341);
             chartIO.TabIndex = 6;
             skDefaultTooltip1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
             skDefaultTooltip1.Content = null;
-            skDefaultTooltip1.IsValid = true;
+            skDefaultTooltip1.IsValid = false;
             skDefaultTooltip1.Opacity = 1F;
             padding2.Bottom = 0F;
             padding2.Left = 0F;
@@ -296,5 +354,11 @@
         private System.Windows.Forms.ToolStripMenuItem tsLatency5000;
         private System.Windows.Forms.ToolStripButton tsMeasures;
         private LiveChartsCore.SkiaSharpView.WinForms.CartesianChart chartIO;
+        private System.Windows.Forms.ToolStripDropDownButton tsLegend;
+        private System.Windows.Forms.ToolStripMenuItem leftToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem rightToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem topToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem bottomToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem hiddenToolStripMenuItem;
     }
 }

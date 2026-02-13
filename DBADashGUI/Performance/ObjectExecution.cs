@@ -1,7 +1,6 @@
 ﻿using DBADashGUI.Charts;
 using DBADashGUI.Theme;
 using LiveChartsCore;
-using LiveChartsCore.Defaults;
 using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
 using System;
@@ -36,6 +35,7 @@ namespace DBADashGUI.Performance
         private long objectID;
         private int databaseid;
         private int dateGrouping;
+        private LegendPosition legendPosition = LegendPosition.Hidden;
 
         public event EventHandler<EventArgs> Close;
 
@@ -65,7 +65,7 @@ namespace DBADashGUI.Performance
             this.instanceID = instanceID;
             if (mins != DateRange.DurationMins)
             {
-                dateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 35);
+                dateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 65);
                 if (dateGrouping < 1)
                 {
                     dateGrouping = 1;
@@ -118,7 +118,7 @@ namespace DBADashGUI.Performance
                 SeriesColumn = "ObjectName",  // Group data by ObjectName - each becomes a series
                 ChartType = ChartTypes.StackedColumn,
                 ShowLegend = true,
-                LegendPosition = LegendPosition.Hidden,
+                LegendPosition = legendPosition,
                 XAxisMin = DateRange.FromUTC.ToAppTimeZone(),
                 XAxisMax = DateRange.ToUTC.ToAppTimeZone(),
                 YAxisLabel = measures[Metric.Measure].DisplayName,
@@ -231,6 +231,17 @@ namespace DBADashGUI.Performance
         private void includeOtherToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshData();
+        }
+
+        private void SetLegendPosition(object sender, EventArgs e)
+        {
+            var item = (ToolStripMenuItem)sender;
+            Enum.TryParse(item.Tag.ToString(), out legendPosition);
+            foreach (ToolStripMenuItem menuItem in tsLegend.DropDownItems.OfType<ToolStripMenuItem>())
+            {
+                menuItem.Checked = menuItem == item;
+            }
+            objectExecChart.LegendPosition = legendPosition;
         }
     }
 }

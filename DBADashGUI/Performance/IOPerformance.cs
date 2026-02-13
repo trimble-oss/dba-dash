@@ -1,13 +1,9 @@
 ﻿using DBADashGUI.Charts;
 using DBADashGUI.Pickers;
 using DBADashGUI.Theme;
-using LiveChartsCore;
-using LiveChartsCore.Defaults;
 using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
-using LiveChartsCore.SkiaSharpView.Painting;
 using Microsoft.Data.SqlClient;
-using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -27,7 +23,6 @@ namespace DBADashGUI.Performance
         }
 
         private int mins;
-        private DateTime ioTime = DateTime.MinValue;
         private int instanceID;
         private int dateGrouping;
         private bool smoothLines = true;
@@ -49,6 +44,7 @@ namespace DBADashGUI.Performance
         public event EventHandler<EventArgs> MoveUp;
 
         private Dictionary<string, string> drives = new();
+        private LegendPosition legendPosition = LegendPosition.Hidden;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool CloseVisible
@@ -399,7 +395,7 @@ namespace DBADashGUI.Performance
                     MetricColumns = allVisibleColumns,
                     ChartType = ChartTypes.Line,
                     ShowLegend = true,
-                    LegendPosition = LegendPosition.Bottom,
+                    LegendPosition = legendPosition,
                     LineSmoothness = SmoothLines ? 1 : 0,
                     GeometrySize = cnt <= 200 ? PointSize : 0,
                     XAxisMin = DateRange.FromUTC.ToAppTimeZone(),
@@ -502,6 +498,17 @@ namespace DBADashGUI.Performance
                 Columns.ApplyVisibility(colSelection.Items);
             }
             RefreshData();
+        }
+
+        private void SetLegendPosition(object sender, EventArgs e)
+        {
+            var item = (ToolStripMenuItem)sender;
+            Enum.TryParse(item.Tag.ToString(), out legendPosition);
+            foreach (ToolStripMenuItem menuItem in tsLegend.DropDownItems.OfType<ToolStripMenuItem>())
+            {
+                menuItem.Checked = menuItem == item;
+            }
+            chartIO.LegendPosition = legendPosition;
         }
     }
 }
