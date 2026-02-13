@@ -1,7 +1,5 @@
 ﻿using DBADashSharedGUI;
-using LiveCharts.WinForms;
 using System.Runtime.Versioning;
-using System.Windows.Controls;
 using System.Windows.Media;
 using Button = System.Windows.Forms.Button;
 using ComboBox = System.Windows.Forms.ComboBox;
@@ -40,14 +38,6 @@ namespace DBADashGUI.Theme
 
                 case TreeView tv:
                     tv.ApplyTheme(theme);
-                    break;
-
-                case CartesianChart chart:
-                    chart.ApplyTheme(theme);
-                    break;
-
-                case PieChart pie:
-                    pie.ApplyTheme(theme);
                     break;
 
                 case LinkLabel link:
@@ -178,12 +168,6 @@ namespace DBADashGUI.Theme
             diff.Foreground = new SolidColorBrush(theme.ForegroundColor.ToMediaColor());
         }
 
-        public static void ApplyTheme(this PieChart chart, BaseTheme theme)
-        {
-            chart.BackColor = theme.BackgroundColor;
-            chart.ForeColor = theme.ForegroundColor;
-        }
-
         public static void ApplyTheme(this LinkLabel link, BaseTheme theme)
         {
             link.LinkColor = theme.LinkColor;
@@ -230,13 +214,6 @@ namespace DBADashGUI.Theme
         {
             tv.BackColor = theme.TreeViewBackColor;
             tv.ForeColor = theme.TreeViewForeColor;
-        }
-
-        public static void ApplyTheme(this CartesianChart chart, BaseTheme theme)
-        {
-            chart.BackColor = theme.BackgroundColor;
-            chart.ForeColor = theme.ForegroundColor;
-            chart.DefaultLegend.Foreground = new SolidColorBrush(theme.ForegroundColor.ToMediaColor());
         }
 
         public static void TruncateTooltipTextHandler(object sender, DataGridViewCellFormattingEventArgs e)

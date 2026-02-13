@@ -248,9 +248,6 @@
     <PackageReference Include="DiffPlex" Version="1.9.0" />
     <PackageReference Include="DiffPlex.Wpf" Version="1.9.1" />
     <PackageReference Include="Humanizer" Version="3.0.1" />
-    <PackageReference Include="LiveCharts" Version="0.9.7" />
-    <PackageReference Include="LiveCharts.WinForms" Version="0.9.7.1" />
-    <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WinForms" Version="2.0.0-rc6.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.2" />
