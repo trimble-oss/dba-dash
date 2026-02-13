@@ -47,7 +47,7 @@ namespace DBADashGUI.Performance
             foreach (var s in Series.OfType<LineSeries<DateTimePoint>>())
             {
                 var key = (string)s.Tag;
-                s.IsVisible = columns.ContainsKey(key) && columns[key].IsVisible;
+                s.IsVisible = columns.TryGetValue(key, out var meta) && meta.IsVisible;
             }
         }
 
@@ -91,22 +91,12 @@ namespace DBADashGUI.Performance
                 var meta = columns[key];
                 var v = columnPoints[key];
 
-                // Base color: DefaultFill or a neutral default; LC2 will still differentiate series by fill/stroke instance
-                // var baseColor = DefaultFill ?? new SKColor(0x33, 0x99, 0xFF); // light blue default
-
-                // Semi-transparent area under the line
-                // var fillColor = baseColor.WithAlpha(60);   // ~24% opacity
-                //  var fillPaint = new SolidColorPaint();
-
-                // Line stroke (same hue, full alpha, thin)
-
                 var lineSeries = new LineSeries<DateTimePoint>
                 {
                     Name = meta.Name,
                     Tag = key,
                     ScalesYAt = meta.axis,
-                    //   GeometrySize = cnt <= 100 ? DefaultPointSize : 0,    // points
-                    LineSmoothness = DefaultLineSmoothness,              // small but non-zero
+                    LineSmoothness = DefaultLineSmoothness,
                     Values = v,
                     GeometrySize = 10,
                 };
@@ -135,23 +125,12 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private static SKColor GetSeriesColor(int index)
-        {
-            // golden ratio for nice spreading
-            const double goldenRatioConjugate = 0.618033988749895;
-            var h = (index * goldenRatioConjugate) % 1.0;
-            const double s = 0.7;
-            const double l = 0.5;
-
-            return FromHsl(h, s, l);
-        }
-
         // Very small HSL → SKColor helper
         private static SKColor FromHsl(double h, double s, double l)
         {
             double r, g, b;
 
-            if (s == 0)
+            if (Math.Abs(s) <= double.Epsilon)
             {
                 r = g = b = l;
             }
