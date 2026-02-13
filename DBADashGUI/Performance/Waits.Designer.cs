@@ -28,232 +28,310 @@
         /// </summary>
         private void InitializeComponent()
         {
+            LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultLegend skDefaultLegend1 = new LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultLegend();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Waits));
-            this.waitChart = new LiveChartsCore.SkiaSharpView.WinForms.CartesianChart();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsClose = new System.Windows.Forms.ToolStripButton();
-            this.tsUp = new System.Windows.Forms.ToolStripButton();
-            this.lblWaits = new System.Windows.Forms.ToolStripLabel();
-            this.tsDateGrouping = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsMetric = new System.Windows.Forms.ToolStripDropDownButton();
-            this.avgWaitTimemsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.signalWaitsecToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.signalWaitMssecToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.signalWaitMsseccoreToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.totalWaitsecToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.waitmssecToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.msseccoreToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.waitingTasksCountToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsFilter = new System.Windows.Forms.ToolStripDropDownButton();
-            this.criticalWaitsOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.stringFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsTopWaits = new System.Windows.Forms.ToolStripButton();
-            this.toolStrip1.SuspendLayout();
-            this.SuspendLayout();
+            LiveChartsCore.Drawing.Padding padding1 = new LiveChartsCore.Drawing.Padding();
+            LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultTooltip skDefaultTooltip1 = new LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultTooltip();
+            LiveChartsCore.Drawing.Padding padding2 = new LiveChartsCore.Drawing.Padding();
+            waitChart = new LiveChartsCore.SkiaSharpView.WinForms.CartesianChart();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            tsClose = new System.Windows.Forms.ToolStripButton();
+            tsUp = new System.Windows.Forms.ToolStripButton();
+            lblWaits = new System.Windows.Forms.ToolStripLabel();
+            tsDateGrouping = new System.Windows.Forms.ToolStripDropDownButton();
+            tsMetric = new System.Windows.Forms.ToolStripDropDownButton();
+            avgWaitTimemsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            signalWaitsecToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            signalWaitMssecToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            signalWaitMsseccoreToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            totalWaitsecToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            waitmssecToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            msseccoreToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            waitingTasksCountToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsFilter = new System.Windows.Forms.ToolStripDropDownButton();
+            criticalWaitsOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            stringFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsTopWaits = new System.Windows.Forms.ToolStripButton();
+            tsLegend = new System.Windows.Forms.ToolStripDropDownButton();
+            leftToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            rightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            topToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            bottomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            hiddenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            toolStrip1.SuspendLayout();
+            SuspendLayout();
             // 
             // waitChart
             // 
-            this.waitChart.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.waitChart.Location = new System.Drawing.Point(0, 27);
-            this.waitChart.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.waitChart.Name = "waitChart";
-            this.waitChart.Size = new System.Drawing.Size(623, 350);
-            this.waitChart.TabIndex = 0;
-            this.waitChart.Text = "cartesianChart1";
+            waitChart.AutoUpdateEnabled = true;
+            waitChart.ChartTheme = null;
+            waitChart.Dock = System.Windows.Forms.DockStyle.Fill;
+            waitChart.ForceGPU = false;
+            skDefaultLegend1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
+            skDefaultLegend1.Content = null;
+            skDefaultLegend1.IsValid = false;
+            skDefaultLegend1.Opacity = 1F;
+            padding1.Bottom = 0F;
+            padding1.Left = 0F;
+            padding1.Right = 0F;
+            padding1.Top = 0F;
+            skDefaultLegend1.Padding = padding1;
+            skDefaultLegend1.RemoveOnCompleted = false;
+            skDefaultLegend1.RotateTransform = 0F;
+            skDefaultLegend1.X = 0F;
+            skDefaultLegend1.Y = 0F;
+            waitChart.Legend = skDefaultLegend1;
+            waitChart.Location = new System.Drawing.Point(0, 27);
+            waitChart.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            waitChart.MatchAxesScreenDataRatio = false;
+            waitChart.Name = "waitChart";
+            waitChart.Size = new System.Drawing.Size(623, 350);
+            waitChart.TabIndex = 0;
+            skDefaultTooltip1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
+            skDefaultTooltip1.Content = null;
+            skDefaultTooltip1.IsValid = false;
+            skDefaultTooltip1.Opacity = 1F;
+            padding2.Bottom = 0F;
+            padding2.Left = 0F;
+            padding2.Right = 0F;
+            padding2.Top = 0F;
+            skDefaultTooltip1.Padding = padding2;
+            skDefaultTooltip1.RemoveOnCompleted = false;
+            skDefaultTooltip1.RotateTransform = 0F;
+            skDefaultTooltip1.Wedge = 10;
+            skDefaultTooltip1.X = 0F;
+            skDefaultTooltip1.Y = 0F;
+            waitChart.Tooltip = skDefaultTooltip1;
+            waitChart.TooltipFindingStrategy = LiveChartsCore.Measure.TooltipFindingStrategy.Automatic;
+            waitChart.UpdaterThrottler = System.TimeSpan.Parse("00:00:00.0500000");
             // 
             // toolStrip1
             // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsClose,
-            this.tsUp,
-            this.lblWaits,
-            this.tsDateGrouping,
-            this.tsMetric,
-            this.tsFilter,
-            this.tsTopWaits});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(623, 27);
-            this.toolStrip1.TabIndex = 1;
-            this.toolStrip1.Text = "toolStrip1";
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsClose, tsUp, lblWaits, tsDateGrouping, tsMetric, tsLegend, tsFilter, tsTopWaits });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new System.Drawing.Size(623, 27);
+            toolStrip1.TabIndex = 1;
+            toolStrip1.Text = "toolStrip1";
             // 
             // tsClose
             // 
-            this.tsClose.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsClose.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsClose.Image = global::DBADashGUI.Properties.Resources.Close_red_16x;
-            this.tsClose.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsClose.Name = "tsClose";
-            this.tsClose.Size = new System.Drawing.Size(29, 24);
-            this.tsClose.Text = "Close";
-            this.tsClose.Visible = false;
-            this.tsClose.Click += new System.EventHandler(this.TsClose_Click);
+            tsClose.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsClose.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsClose.Image = Properties.Resources.Close_red_16x;
+            tsClose.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClose.Name = "tsClose";
+            tsClose.Size = new System.Drawing.Size(29, 24);
+            tsClose.Text = "Close";
+            tsClose.Visible = false;
+            tsClose.Click += TsClose_Click;
             // 
             // tsUp
             // 
-            this.tsUp.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsUp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsUp.Image = global::DBADashGUI.Properties.Resources.arrow_Up_16xLG;
-            this.tsUp.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsUp.Name = "tsUp";
-            this.tsUp.Size = new System.Drawing.Size(29, 24);
-            this.tsUp.Text = "Move Up";
-            this.tsUp.Visible = false;
-            this.tsUp.Click += new System.EventHandler(this.TsUp_Click);
+            tsUp.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsUp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsUp.Image = Properties.Resources.arrow_Up_16xLG;
+            tsUp.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsUp.Name = "tsUp";
+            tsUp.Size = new System.Drawing.Size(29, 24);
+            tsUp.Text = "Move Up";
+            tsUp.Visible = false;
+            tsUp.Click += TsUp_Click;
             // 
             // lblWaits
             // 
-            this.lblWaits.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.lblWaits.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblWaits.Name = "lblWaits";
-            this.lblWaits.Size = new System.Drawing.Size(119, 24);
-            this.lblWaits.Text = "Waits : Instance";
+            lblWaits.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            lblWaits.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            lblWaits.Name = "lblWaits";
+            lblWaits.Size = new System.Drawing.Size(119, 24);
+            lblWaits.Text = "Waits : Instance";
             // 
             // tsDateGrouping
             // 
-            this.tsDateGrouping.Image = global::DBADashGUI.Properties.Resources.Time_16x;
-            this.tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsDateGrouping.Name = "tsDateGrouping";
-            this.tsDateGrouping.Size = new System.Drawing.Size(76, 24);
-            this.tsDateGrouping.Text = "1min";
+            tsDateGrouping.Image = Properties.Resources.Time_16x;
+            tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsDateGrouping.Name = "tsDateGrouping";
+            tsDateGrouping.Size = new System.Drawing.Size(76, 24);
+            tsDateGrouping.Text = "1min";
             // 
             // tsMetric
             // 
-            this.tsMetric.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.avgWaitTimemsToolStripMenuItem,
-            this.signalWaitsecToolStripMenuItem,
-            this.signalWaitMssecToolStripMenuItem,
-            this.signalWaitMsseccoreToolStripMenuItem,
-            this.totalWaitsecToolStripMenuItem,
-            this.waitmssecToolStripMenuItem,
-            this.msseccoreToolStripMenuItem,
-            this.waitingTasksCountToolStripMenuItem});
-            this.tsMetric.Image = global::DBADashGUI.Properties.Resources.AddComputedField_16x;
-            this.tsMetric.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsMetric.Name = "tsMetric";
-            this.tsMetric.Size = new System.Drawing.Size(133, 24);
-            this.tsMetric.Tag = "WaitTimeMsPerSec";
-            this.tsMetric.Text = "Wait (ms/sec)";
+            tsMetric.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { avgWaitTimemsToolStripMenuItem, signalWaitsecToolStripMenuItem, signalWaitMssecToolStripMenuItem, signalWaitMsseccoreToolStripMenuItem, totalWaitsecToolStripMenuItem, waitmssecToolStripMenuItem, msseccoreToolStripMenuItem, waitingTasksCountToolStripMenuItem });
+            tsMetric.Image = Properties.Resources.AddComputedField_16x;
+            tsMetric.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsMetric.Name = "tsMetric";
+            tsMetric.Size = new System.Drawing.Size(133, 24);
+            tsMetric.Tag = "WaitTimeMsPerSec";
+            tsMetric.Text = "Wait (ms/sec)";
             // 
             // avgWaitTimemsToolStripMenuItem
             // 
-            this.avgWaitTimemsToolStripMenuItem.Name = "avgWaitTimemsToolStripMenuItem";
-            this.avgWaitTimemsToolStripMenuItem.Size = new System.Drawing.Size(252, 26);
-            this.avgWaitTimemsToolStripMenuItem.Tag = "AvgWaitTimeMs";
-            this.avgWaitTimemsToolStripMenuItem.Text = "Avg Wait Time (ms)";
-            this.avgWaitTimemsToolStripMenuItem.Click += new System.EventHandler(this.SelectMetric);
+            avgWaitTimemsToolStripMenuItem.Name = "avgWaitTimemsToolStripMenuItem";
+            avgWaitTimemsToolStripMenuItem.Size = new System.Drawing.Size(252, 26);
+            avgWaitTimemsToolStripMenuItem.Tag = "AvgWaitTimeMs";
+            avgWaitTimemsToolStripMenuItem.Text = "Avg Wait Time (ms)";
+            avgWaitTimemsToolStripMenuItem.Click += SelectMetric;
             // 
             // signalWaitsecToolStripMenuItem
             // 
-            this.signalWaitsecToolStripMenuItem.Name = "signalWaitsecToolStripMenuItem";
-            this.signalWaitsecToolStripMenuItem.Size = new System.Drawing.Size(252, 26);
-            this.signalWaitsecToolStripMenuItem.Tag = "SignalWaitSec";
-            this.signalWaitsecToolStripMenuItem.Text = "Signal Wait (sec)";
-            this.signalWaitsecToolStripMenuItem.Click += new System.EventHandler(this.SelectMetric);
+            signalWaitsecToolStripMenuItem.Name = "signalWaitsecToolStripMenuItem";
+            signalWaitsecToolStripMenuItem.Size = new System.Drawing.Size(252, 26);
+            signalWaitsecToolStripMenuItem.Tag = "SignalWaitSec";
+            signalWaitsecToolStripMenuItem.Text = "Signal Wait (sec)";
+            signalWaitsecToolStripMenuItem.Click += SelectMetric;
             // 
             // signalWaitMssecToolStripMenuItem
             // 
-            this.signalWaitMssecToolStripMenuItem.Name = "signalWaitMssecToolStripMenuItem";
-            this.signalWaitMssecToolStripMenuItem.Size = new System.Drawing.Size(252, 26);
-            this.signalWaitMssecToolStripMenuItem.Tag = "SignalWaitMsPerSec";
-            this.signalWaitMssecToolStripMenuItem.Text = "Signal Wait ms/sec";
-            this.signalWaitMssecToolStripMenuItem.Click += new System.EventHandler(this.SelectMetric);
+            signalWaitMssecToolStripMenuItem.Name = "signalWaitMssecToolStripMenuItem";
+            signalWaitMssecToolStripMenuItem.Size = new System.Drawing.Size(252, 26);
+            signalWaitMssecToolStripMenuItem.Tag = "SignalWaitMsPerSec";
+            signalWaitMssecToolStripMenuItem.Text = "Signal Wait ms/sec";
+            signalWaitMssecToolStripMenuItem.Click += SelectMetric;
             // 
             // signalWaitMsseccoreToolStripMenuItem
             // 
-            this.signalWaitMsseccoreToolStripMenuItem.Name = "signalWaitMsseccoreToolStripMenuItem";
-            this.signalWaitMsseccoreToolStripMenuItem.Size = new System.Drawing.Size(252, 26);
-            this.signalWaitMsseccoreToolStripMenuItem.Tag = "SignalWaitMsPerCorePerSec";
-            this.signalWaitMsseccoreToolStripMenuItem.Text = "Signal Wait ms/sec/core";
-            this.signalWaitMsseccoreToolStripMenuItem.Click += new System.EventHandler(this.SelectMetric);
+            signalWaitMsseccoreToolStripMenuItem.Name = "signalWaitMsseccoreToolStripMenuItem";
+            signalWaitMsseccoreToolStripMenuItem.Size = new System.Drawing.Size(252, 26);
+            signalWaitMsseccoreToolStripMenuItem.Tag = "SignalWaitMsPerCorePerSec";
+            signalWaitMsseccoreToolStripMenuItem.Text = "Signal Wait ms/sec/core";
+            signalWaitMsseccoreToolStripMenuItem.Click += SelectMetric;
             // 
             // totalWaitsecToolStripMenuItem
             // 
-            this.totalWaitsecToolStripMenuItem.Name = "totalWaitsecToolStripMenuItem";
-            this.totalWaitsecToolStripMenuItem.Size = new System.Drawing.Size(252, 26);
-            this.totalWaitsecToolStripMenuItem.Tag = "TotalWaitSec";
-            this.totalWaitsecToolStripMenuItem.Text = "Total Wait (sec)";
-            this.totalWaitsecToolStripMenuItem.Click += new System.EventHandler(this.SelectMetric);
+            totalWaitsecToolStripMenuItem.Name = "totalWaitsecToolStripMenuItem";
+            totalWaitsecToolStripMenuItem.Size = new System.Drawing.Size(252, 26);
+            totalWaitsecToolStripMenuItem.Tag = "TotalWaitSec";
+            totalWaitsecToolStripMenuItem.Text = "Total Wait (sec)";
+            totalWaitsecToolStripMenuItem.Click += SelectMetric;
             // 
             // waitmssecToolStripMenuItem
             // 
-            this.waitmssecToolStripMenuItem.Checked = true;
-            this.waitmssecToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.waitmssecToolStripMenuItem.Name = "waitmssecToolStripMenuItem";
-            this.waitmssecToolStripMenuItem.Size = new System.Drawing.Size(252, 26);
-            this.waitmssecToolStripMenuItem.Tag = "WaitTimeMsPerSec";
-            this.waitmssecToolStripMenuItem.Text = "Wait (ms/sec)";
-            this.waitmssecToolStripMenuItem.Click += new System.EventHandler(this.SelectMetric);
+            waitmssecToolStripMenuItem.Checked = true;
+            waitmssecToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            waitmssecToolStripMenuItem.Name = "waitmssecToolStripMenuItem";
+            waitmssecToolStripMenuItem.Size = new System.Drawing.Size(252, 26);
+            waitmssecToolStripMenuItem.Tag = "WaitTimeMsPerSec";
+            waitmssecToolStripMenuItem.Text = "Wait (ms/sec)";
+            waitmssecToolStripMenuItem.Click += SelectMetric;
             // 
             // msseccoreToolStripMenuItem
             // 
-            this.msseccoreToolStripMenuItem.Name = "msseccoreToolStripMenuItem";
-            this.msseccoreToolStripMenuItem.Size = new System.Drawing.Size(252, 26);
-            this.msseccoreToolStripMenuItem.Tag = "WaitTimeMsPerCorePerSec";
-            this.msseccoreToolStripMenuItem.Text = "Wait (ms/sec/core)";
-            this.msseccoreToolStripMenuItem.Click += new System.EventHandler(this.SelectMetric);
+            msseccoreToolStripMenuItem.Name = "msseccoreToolStripMenuItem";
+            msseccoreToolStripMenuItem.Size = new System.Drawing.Size(252, 26);
+            msseccoreToolStripMenuItem.Tag = "WaitTimeMsPerCorePerSec";
+            msseccoreToolStripMenuItem.Text = "Wait (ms/sec/core)";
+            msseccoreToolStripMenuItem.Click += SelectMetric;
             // 
             // waitingTasksCountToolStripMenuItem
             // 
-            this.waitingTasksCountToolStripMenuItem.Name = "waitingTasksCountToolStripMenuItem";
-            this.waitingTasksCountToolStripMenuItem.Size = new System.Drawing.Size(252, 26);
-            this.waitingTasksCountToolStripMenuItem.Tag = "WaitingTasksCount";
-            this.waitingTasksCountToolStripMenuItem.Text = "Waiting Tasks Count";
-            this.waitingTasksCountToolStripMenuItem.Click += new System.EventHandler(this.SelectMetric);
+            waitingTasksCountToolStripMenuItem.Name = "waitingTasksCountToolStripMenuItem";
+            waitingTasksCountToolStripMenuItem.Size = new System.Drawing.Size(252, 26);
+            waitingTasksCountToolStripMenuItem.Tag = "WaitingTasksCount";
+            waitingTasksCountToolStripMenuItem.Text = "Waiting Tasks Count";
+            waitingTasksCountToolStripMenuItem.Click += SelectMetric;
             // 
             // tsFilter
             // 
-            this.tsFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.criticalWaitsOnlyToolStripMenuItem,
-            this.stringFilterToolStripMenuItem});
-            this.tsFilter.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
-            this.tsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsFilter.Name = "tsFilter";
-            this.tsFilter.Size = new System.Drawing.Size(34, 24);
+            tsFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { criticalWaitsOnlyToolStripMenuItem, stringFilterToolStripMenuItem });
+            tsFilter.Image = Properties.Resources.FilterDropdown_16x;
+            tsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsFilter.Name = "tsFilter";
+            tsFilter.Size = new System.Drawing.Size(34, 24);
             // 
             // criticalWaitsOnlyToolStripMenuItem
             // 
-            this.criticalWaitsOnlyToolStripMenuItem.CheckOnClick = true;
-            this.criticalWaitsOnlyToolStripMenuItem.Name = "criticalWaitsOnlyToolStripMenuItem";
-            this.criticalWaitsOnlyToolStripMenuItem.Size = new System.Drawing.Size(212, 26);
-            this.criticalWaitsOnlyToolStripMenuItem.Text = "Critical Waits Only";
-            this.criticalWaitsOnlyToolStripMenuItem.ToolTipText = "Wait types that can indicate serious performance problems. e.g. RESOURCE_SEMAPHOR" +
-    "E, THREADPOOL";
-            this.criticalWaitsOnlyToolStripMenuItem.Click += new System.EventHandler(this.CriticalWaitsOnlyToolStripMenuItem_Click);
+            criticalWaitsOnlyToolStripMenuItem.CheckOnClick = true;
+            criticalWaitsOnlyToolStripMenuItem.Name = "criticalWaitsOnlyToolStripMenuItem";
+            criticalWaitsOnlyToolStripMenuItem.Size = new System.Drawing.Size(212, 26);
+            criticalWaitsOnlyToolStripMenuItem.Text = "Critical Waits Only";
+            criticalWaitsOnlyToolStripMenuItem.ToolTipText = "Wait types that can indicate serious performance problems. e.g. RESOURCE_SEMAPHORE, THREADPOOL";
+            criticalWaitsOnlyToolStripMenuItem.Click += CriticalWaitsOnlyToolStripMenuItem_Click;
             // 
             // stringFilterToolStripMenuItem
             // 
-            this.stringFilterToolStripMenuItem.Name = "stringFilterToolStripMenuItem";
-            this.stringFilterToolStripMenuItem.Size = new System.Drawing.Size(212, 26);
-            this.stringFilterToolStripMenuItem.Text = "String Filter";
-            this.stringFilterToolStripMenuItem.Click += new System.EventHandler(this.StringFilterToolStripMenuItem_Click);
+            stringFilterToolStripMenuItem.Name = "stringFilterToolStripMenuItem";
+            stringFilterToolStripMenuItem.Size = new System.Drawing.Size(212, 26);
+            stringFilterToolStripMenuItem.Text = "String Filter";
+            stringFilterToolStripMenuItem.Click += StringFilterToolStripMenuItem_Click;
             // 
             // tsTopWaits
             // 
-            this.tsTopWaits.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsTopWaits.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
-            this.tsTopWaits.Image = ((System.Drawing.Image)(resources.GetObject("tsTopWaits.Image")));
-            this.tsTopWaits.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsTopWaits.Name = "tsTopWaits";
-            this.tsTopWaits.Size = new System.Drawing.Size(78, 24);
-            this.tsTopWaits.Text = "Top Waits";
-            this.tsTopWaits.Click += new System.EventHandler(this.TsTopWaits_Click);
+            tsTopWaits.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            tsTopWaits.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
+            tsTopWaits.Image = (System.Drawing.Image)resources.GetObject("tsTopWaits.Image");
+            tsTopWaits.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsTopWaits.Name = "tsTopWaits";
+            tsTopWaits.Size = new System.Drawing.Size(78, 24);
+            tsTopWaits.Text = "Top Waits";
+            tsTopWaits.Click += TsTopWaits_Click;
+            // 
+            // tsLegend
+            // 
+            tsLegend.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsLegend.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { leftToolStripMenuItem, rightToolStripMenuItem, topToolStripMenuItem, bottomToolStripMenuItem, hiddenToolStripMenuItem });
+            tsLegend.Image = Properties.Resources.LegendHS;
+            tsLegend.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsLegend.Name = "tsLegend";
+            tsLegend.Size = new System.Drawing.Size(34, 24);
+            tsLegend.Text = "Legend Position";
+            // 
+            // leftToolStripMenuItem
+            // 
+            leftToolStripMenuItem.Name = "leftToolStripMenuItem";
+            leftToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            leftToolStripMenuItem.Tag = "Left";
+            leftToolStripMenuItem.Text = "Left";
+            leftToolStripMenuItem.Click += SetLegendPosition;
+            // 
+            // rightToolStripMenuItem
+            // 
+            rightToolStripMenuItem.Name = "rightToolStripMenuItem";
+            rightToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            rightToolStripMenuItem.Tag = "Right";
+            rightToolStripMenuItem.Text = "Right";
+            rightToolStripMenuItem.Click += SetLegendPosition;
+            // 
+            // topToolStripMenuItem
+            // 
+            topToolStripMenuItem.Name = "topToolStripMenuItem";
+            topToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            topToolStripMenuItem.Tag = "Top";
+            topToolStripMenuItem.Text = "Top";
+            topToolStripMenuItem.Click += SetLegendPosition;
+            // 
+            // bottomToolStripMenuItem
+            // 
+            bottomToolStripMenuItem.Name = "bottomToolStripMenuItem";
+            bottomToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            bottomToolStripMenuItem.Tag = "Bottom";
+            bottomToolStripMenuItem.Text = "Bottom";
+            bottomToolStripMenuItem.Click += SetLegendPosition;
+            // 
+            // hiddenToolStripMenuItem
+            // 
+            hiddenToolStripMenuItem.Checked = true;
+            hiddenToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            hiddenToolStripMenuItem.Name = "hiddenToolStripMenuItem";
+            hiddenToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            hiddenToolStripMenuItem.Tag = "Hidden";
+            hiddenToolStripMenuItem.Text = "Hidden";
+            hiddenToolStripMenuItem.Click += SetLegendPosition;
             // 
             // Waits
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.waitChart);
-            this.Controls.Add(this.toolStrip1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "Waits";
-            this.Size = new System.Drawing.Size(623, 377);
-            this.Load += new System.EventHandler(this.Waits_Load);
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            Controls.Add(waitChart);
+            Controls.Add(toolStrip1);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "Waits";
+            Size = new System.Drawing.Size(623, 377);
+            Load += Waits_Load;
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
 
         }
 
@@ -278,5 +356,11 @@
         private System.Windows.Forms.ToolStripMenuItem waitingTasksCountToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsTopWaits;
         private System.Windows.Forms.ToolStripMenuItem waitmssecToolStripMenuItem;
+        private System.Windows.Forms.ToolStripDropDownButton tsLegend;
+        private System.Windows.Forms.ToolStripMenuItem leftToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem rightToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem topToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem bottomToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem hiddenToolStripMenuItem;
     }
 }

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using UserControl = System.Windows.Forms.UserControl;
@@ -64,6 +65,8 @@ namespace DBADashGUI.Performance
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool SmoothLines { get; set; } = true;
+
+        private LegendPosition legendPosition = LegendPosition.Hidden;
 
         public void RefreshData(int InstanceID)
         {
@@ -141,7 +144,7 @@ namespace DBADashGUI.Performance
                     },
                     ChartType = ChartTypes.StackedArea,
                     ShowLegend = true,
-                    LegendPosition = LegendPosition.Right,
+                    LegendPosition = legendPosition,
                     GeometrySize = PointSize,
                     LineSmoothness = SmoothLines ? ChartConfiguration.DefaultLineSmoothness : 0,
                     XAxisMin = DateRange.FromUTC.ToAppTimeZone(),
@@ -167,6 +170,7 @@ namespace DBADashGUI.Performance
                     ShowLegend = true,
                     LegendPosition = LegendPosition.Hidden,
                     GeometrySize = PointSize,
+                    LineFill = true,
                     LineSmoothness = SmoothLines ? ChartConfiguration.DefaultLineSmoothness : 0,
                     XAxisMin = DateRange.FromUTC.ToAppTimeZone(),
                     XAxisMax = DateRange.ToUTC.ToAppTimeZone(),
@@ -241,6 +245,17 @@ namespace DBADashGUI.Performance
                 return;
             }
             Common.PromptSaveDataTableToXLSX(CpuDataTable);
+        }
+
+        private void SetLegendPosition(object sender, EventArgs e)
+        {
+            var item = (ToolStripMenuItem)sender;
+            Enum.TryParse(item.Tag.ToString(), out legendPosition);
+            foreach (ToolStripMenuItem menuItem in tsLegend.DropDownItems.OfType<ToolStripMenuItem>())
+            {
+                menuItem.Checked = menuItem == item;
+            }
+            chartCPU.LegendPosition = legendPosition;
         }
     }
 }

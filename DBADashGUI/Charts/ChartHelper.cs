@@ -5,7 +5,6 @@ using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.WinForms;
 using SkiaSharp;
-using SkiaSharp.Views.Desktop;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -219,7 +218,7 @@ namespace DBADashGUI.Charts
                 maxDate = config.XAxisMax ?? maxDate;
             }
 
-            var unit = CalculateDateUnit(minDate, maxDate);
+            var unit = CalculateDateUnit(minDate, maxDate, config.ChartType, series);
             var xAxes = CreateXAxes(unit, labelPaint, minDate, maxDate);
             var yAxes = CreateYAxes(config, labelPaint);
 
@@ -575,14 +574,82 @@ namespace DBADashGUI.Charts
         /// <summary>
         /// Calculate date unit for x-axis based on the range of dates in the series and a target number of points to display
         /// </summary>
-        /// <param name="series"></param>
+        /// <param name="minDate">Minimum date in the range</param>
+        /// <param name="maxDate">Maximum date in the range</param>
+        /// <param name="dateGroupingMinutes">Optional actual data grouping interval in minutes. When specified, uses this for better bar rendering.</param>
         /// <returns></returns>
-        private static TimeSpan CalculateDateUnit(DateTime minDate, DateTime maxDate)
+        private static TimeSpan CalculateDateUnit(DateTime minDate, DateTime maxDate, ChartTypes chartType, List<ISeries> series)
         {
+            if (chartType == ChartTypes.StackedColumn)
+            {
+                return CalculateDateUnitForStackedColumn(series);
+            }
+
+            // Otherwise, calculate based on target number of points
             const int points = 200;
             const int chartMinGrouping = 1; // Minimum grouping of 1 minute
             var durationMins = (int)(maxDate - minDate).TotalMinutes;
             return TimeSpan.FromMinutes(DateHelper.DateGrouping(durationMins, points, chartMinGrouping));
+        }
+
+        /// <summary>
+        /// Automatically detect the date unit from the series data by analyzing
+        /// the time intervals between consecutive data points.  Impacts the width of the bars
+        /// </summary>
+        /// <param name="series">The chart series containing DateTimePoint data</param>
+        /// <returns>The detected interval as a TimeSpan, or a default of 1 minute if it cannot be determined</returns>
+        private static TimeSpan CalculateDateUnitForStackedColumn(List<ISeries> series)
+        {
+            const int defaultIntervalMinutes = 1;
+
+            if (series == null || series.Count == 0)
+                return TimeSpan.FromMinutes(defaultIntervalMinutes);
+
+            // Collect all date intervals from all series
+            var intervals = new List<TimeSpan>();
+
+            foreach (var s in series)
+            {
+                IEnumerable<DateTimePoint> points = null;
+
+                // Extract DateTimePoint values based on series type
+                if (s is StackedColumnSeries<DateTimePoint> columnSeries)
+                    points = columnSeries.Values?.Cast<DateTimePoint>();
+                else if (s is StackedAreaSeries<DateTimePoint> areaSeries)
+                    points = areaSeries.Values?.Cast<DateTimePoint>();
+                else if (s is LineSeries<DateTimePoint> lineSeries)
+                    points = lineSeries.Values?.Cast<DateTimePoint>();
+
+                if (points == null)
+                    continue;
+
+                // Sort by date and calculate intervals
+                var sortedPoints = points.OrderBy(p => p.DateTime).ToList();
+                for (int i = 1; i < sortedPoints.Count && i < 10; i++) // Sample first 10 intervals
+                {
+                    var interval = (sortedPoints[i].DateTime - sortedPoints[i - 1].DateTime);
+                    if (interval > TimeSpan.Zero) // Ignore zero or negative intervals
+                        intervals.Add(interval);
+                }
+
+                // If we found intervals, no need to check other series (they should have same interval)
+                if (intervals.Count > 0)
+                    break;
+            }
+
+            if (intervals.Count == 0)
+                return TimeSpan.FromMinutes(defaultIntervalMinutes);
+
+            // Use the most common interval (mode) to handle any irregularities
+            var groupedIntervals = intervals
+                .GroupBy(i => Math.Round(i.TotalMinutes, 1)) // Round to 0.1 minute precision
+                .OrderByDescending(g => g.Count())
+                .First();
+
+            var detectedIntervalMinutes = (int)Math.Round(groupedIntervals.Key);
+            return detectedIntervalMinutes > 0
+                ? TimeSpan.FromMinutes(detectedIntervalMinutes)
+                : TimeSpan.FromMinutes(defaultIntervalMinutes);
         }
 
         internal static bool IsColorsReady(CartesianChart chart)

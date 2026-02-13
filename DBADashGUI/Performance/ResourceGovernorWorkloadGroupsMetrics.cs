@@ -173,7 +173,7 @@ namespace DBADashGUI.Performance
                             XAxisMax = DateRange.ToUTC
                         }
                      );
-
+                    chart.ApplyTheme();
                     tableLayout.Controls.Add(chart, 0, i);
 
                     // Keep reference to first chart for color extraction
