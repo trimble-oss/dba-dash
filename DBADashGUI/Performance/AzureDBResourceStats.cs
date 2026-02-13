@@ -21,9 +21,38 @@ namespace DBADashGUI.Performance
         private double lineSmoothness = ChartConfiguration.DefaultLineSmoothness;
         private double geometrySize = ChartConfiguration.DefaultGeometrySize;
 
+        // Cache DataTables for re-rendering on panel visibility changes
+        // This is a workaround for LiveCharts2 + WinForms issue where charts don't properly
+        // resize when their container panel becomes visible from a collapsed state.
+        // The chart needs to be fully re-rendered after the panel layout completes.
+        private DataTable _cachedDBData;
+        private DataTable _cachedPoolData;
+
         public AzureDBResourceStats()
         {
             InitializeComponent();
+
+            // Re-render charts when panels become visible to ensure proper sizing
+            splitContainer1.Panel1.VisibleChanged += Panel1_VisibleChanged;
+            splitContainer1.Panel2.VisibleChanged += Panel2_VisibleChanged;
+        }
+
+        private void Panel1_VisibleChanged(object sender, EventArgs e)
+        {
+            if (splitContainer1.Panel1.Visible && !splitContainer1.Panel1Collapsed && _cachedDBData != null)
+            {
+                // Defer re-render until after panel layout completes (similar to clicking refresh)
+                BeginInvoke(new Action(() => UpdateChart(_cachedDBData, chartDB, DBColumns)));
+            }
+        }
+
+        private void Panel2_VisibleChanged(object sender, EventArgs e)
+        {
+            if (splitContainer1.Panel2.Visible && !splitContainer1.Panel2Collapsed && _cachedPoolData != null)
+            {
+                // Defer re-render until after panel layout completes (similar to clicking refresh)
+                BeginInvoke(new Action(() => UpdateChart(_cachedPoolData, chartPool, PoolColumns)));
+            }
         }
 
         private int _dateGrouping;
@@ -119,7 +148,8 @@ namespace DBADashGUI.Performance
             {
                 return;
             }
-            UpdateChart(GetAzureDBResourceStats(), chartDB, DBColumns);
+            _cachedDBData = GetAzureDBResourceStats();
+            UpdateChart(_cachedDBData, chartDB, DBColumns);
         }
 
         private void UpdatePoolChart()
@@ -128,7 +158,8 @@ namespace DBADashGUI.Performance
             {
                 return;
             }
-            UpdateChart(GetAzurePoolResourceStats(), chartPool, PoolColumns);
+            _cachedPoolData = GetAzurePoolResourceStats();
+            UpdateChart(_cachedPoolData, chartPool, PoolColumns);
 
             // Align X axes between the two charts
             if (!splitContainer1.Panel1Collapsed
