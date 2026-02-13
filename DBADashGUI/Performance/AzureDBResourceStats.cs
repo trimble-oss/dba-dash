@@ -1,6 +1,8 @@
-﻿using LiveCharts;
-using LiveCharts.Defaults;
-using LiveCharts.Wpf;
+﻿using DBADashGUI.Charts;
+using DBADashGUI.Theme;
+using LiveChartsCore;
+using LiveChartsCore.Measure;
+using LiveChartsCore.SkiaSharpView;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -16,26 +18,13 @@ namespace DBADashGUI.Performance
         private int InstanceID;
         private int MasterInstanceID;
         private string ElasticPoolName = string.Empty;
+        private double lineSmoothness = ChartConfiguration.DefaultLineSmoothness;
+        private double geometrySize = ChartConfiguration.DefaultGeometrySize;
 
         public AzureDBResourceStats()
         {
             InitializeComponent();
         }
-
-        private bool SmoothLines
-        {
-            get => smoothLinesToolStripMenuItem.Checked;
-            set => smoothLinesToolStripMenuItem.Checked = value;
-        }
-
-        private int PointSize => pointsToolStripMenuItem.Checked ? 10 : 0;
-
-        private string DateFormat => DateGrouping switch
-        {
-            0 => "yyyy-MM-dd HH:mm:ss",
-            >= 1440 => "yyyy-MM-dd",
-            _ => "yyyy-MM-dd HH:mm"
-        };
 
         private int _dateGrouping;
 
@@ -52,43 +41,43 @@ namespace DBADashGUI.Performance
 
         private readonly Dictionary<string, ColumnMetaData> DBColumns = new()
         {
-                {"avg_cpu_percent", new ColumnMetaData{Name="Avg CPU %",IsVisible=false } },
-                {"avg_data_io_percent", new ColumnMetaData{Name="Avg Data %",IsVisible=false } },
-                {"avg_log_write_percent", new ColumnMetaData{Name="Avg Log Write %",IsVisible=false } },
-                {"AvgDTUPercent", new ColumnMetaData{Name="Avg DTU %",IsVisible=false } },
-                {"avg_memory_usage_percent", new ColumnMetaData{Name="Avg Memory %",IsVisible=false } },
-                {"xtp_storage_percent", new ColumnMetaData{Name="XTP Storage %",IsVisible=false } },
-                {"avg_instance_cpu_percent", new ColumnMetaData{Name="Avg CPU % (Instance)",IsVisible=false } },
-                {"avg_instance_memory_percent", new ColumnMetaData{Name="Avg Memory % (Instance)",IsVisible=false } },
-                {"max_worker_percent", new ColumnMetaData{Name="Max Worker %",IsVisible=false } },
-                {"max_session_percent", new ColumnMetaData{Name="Max Session %",IsVisible=false } },
-                {"max_cpu_percent", new ColumnMetaData{Name="Max CPU %",IsVisible=true } },
-                {"max_data_io_percent", new ColumnMetaData{Name="Max Data %",IsVisible=true } },
-                {"max_log_write_percent", new ColumnMetaData{Name="Max Log Write %",IsVisible=true } },
-                {"max_instance_cpu_percent", new ColumnMetaData{Name="Max CPU % (Instance)",IsVisible=false } },
-                {"max_instance_memory_percent", new ColumnMetaData{Name="Max Memory % (Instance)",IsVisible=false } },
-                {"MaxDTUPercent", new ColumnMetaData{Name="Max DTU %",IsVisible=false} },
-                {"AvgDTUsUsed", new ColumnMetaData{Name="Avg DTU",IsVisible=false,axis=1} },
-                {"MaxDTUsUsed", new ColumnMetaData{Name="Max DTU",IsVisible=false,axis=1} },
-                {"dtu_limit", new ColumnMetaData{Name="DTU Limit",IsVisible=false,axis=1} },
-                {"cpu_limit", new ColumnMetaData{Name="CPU Limit",IsVisible=false,axis=1} },
+                {"avg_cpu_percent", new ColumnMetaData{Name="Avg CPU %",IsVisible=false, AxisName="Percent" } },
+                {"avg_data_io_percent", new ColumnMetaData{Name="Avg Data %",IsVisible=false, AxisName="Percent" } },
+                {"avg_log_write_percent", new ColumnMetaData{Name="Avg Log Write %",IsVisible=false, AxisName="Percent" } },
+                {"AvgDTUPercent", new ColumnMetaData{Name="Avg DTU %",IsVisible=false, AxisName="Percent" } },
+                {"avg_memory_usage_percent", new ColumnMetaData{Name="Avg Memory %",IsVisible=false, AxisName="Percent" } },
+                {"xtp_storage_percent", new ColumnMetaData{Name="XTP Storage %",IsVisible=false, AxisName="Percent" } },
+                {"avg_instance_cpu_percent", new ColumnMetaData{Name="Avg CPU % (Instance)",IsVisible=false, AxisName="Percent" } },
+                {"avg_instance_memory_percent", new ColumnMetaData{Name="Avg Memory % (Instance)",IsVisible=false, AxisName="Percent" } },
+                {"max_worker_percent", new ColumnMetaData{Name="Max Worker %",IsVisible=false, AxisName="Percent" } },
+                {"max_session_percent", new ColumnMetaData{Name="Max Session %",IsVisible=false, AxisName="Percent" } },
+                {"max_cpu_percent", new ColumnMetaData{Name="Max CPU %",IsVisible=true, AxisName="Percent" } },
+                {"max_data_io_percent", new ColumnMetaData{Name="Max Data %",IsVisible=true, AxisName="Percent" } },
+                {"max_log_write_percent", new ColumnMetaData{Name="Max Log Write %",IsVisible=true, AxisName="Percent" } },
+                {"max_instance_cpu_percent", new ColumnMetaData{Name="Max CPU % (Instance)",IsVisible=false, AxisName="Percent" } },
+                {"max_instance_memory_percent", new ColumnMetaData{Name="Max Memory % (Instance)",IsVisible=false, AxisName="Percent" } },
+                {"MaxDTUPercent", new ColumnMetaData{Name="Max DTU %",IsVisible=false, AxisName="Percent"} },
+                {"AvgDTUsUsed", new ColumnMetaData{Name="Avg DTU",IsVisible=false, AxisName="DTU"} },
+                {"MaxDTUsUsed", new ColumnMetaData{Name="Max DTU",IsVisible=false, AxisName="DTU"} },
+                {"dtu_limit", new ColumnMetaData{Name="DTU Limit",IsVisible=false, AxisName="DTU"} },
+                {"cpu_limit", new ColumnMetaData{Name="CPU Limit",IsVisible=false, AxisName="DTU"} },
             };
 
         private readonly Dictionary<string, ColumnMetaData> PoolColumns = new()
         {
-                {"avg_cpu_percent", new ColumnMetaData{Name="Avg CPU %",IsVisible=false } },
-                {"avg_data_io_percent", new ColumnMetaData{Name="Avg Data %",IsVisible=false } },
-                {"avg_log_write_percent", new ColumnMetaData{Name="Avg Log Write %",IsVisible=false } },
-                {"AvgDTUPercent", new ColumnMetaData{Name="Avg DTU %",IsVisible=false } },
-                {"max_worker_percent", new ColumnMetaData{Name="Max Worker %",IsVisible=false } },
-                {"max_session_percent", new ColumnMetaData{Name="Max Session %",IsVisible=false } },
-                {"max_cpu_percent", new ColumnMetaData{Name="Max CPU %",IsVisible=true } },
-                {"max_data_io_percent", new ColumnMetaData{Name="Max Data %",IsVisible=true } },
-                {"max_log_write_percent", new ColumnMetaData{Name="Max Log Write %",IsVisible=true } },
-                {"MaxDTUPercent", new ColumnMetaData{Name="Max DTU %",IsVisible=false} },
-                {"AvgDTUsUsed", new ColumnMetaData{Name="Avg DTU",IsVisible=false,axis=1} },
-                {"MaxDTUsUsed", new ColumnMetaData{Name="Max DTU",IsVisible=false,axis=1} },
-                {"dtu_limit", new ColumnMetaData{Name="DTU Limit",IsVisible=false,axis=1} }
+                {"avg_cpu_percent", new ColumnMetaData{Name="Avg CPU %",IsVisible=false, AxisName="Percent" } },
+                {"avg_data_io_percent", new ColumnMetaData{Name="Avg Data %",IsVisible=false, AxisName="Percent" } },
+                {"avg_log_write_percent", new ColumnMetaData{Name="Avg Log Write %",IsVisible=false, AxisName="Percent" } },
+                {"AvgDTUPercent", new ColumnMetaData{Name="Avg DTU %",IsVisible=false, AxisName="Percent" } },
+                {"max_worker_percent", new ColumnMetaData{Name="Max Worker %",IsVisible=false, AxisName="Percent" } },
+                {"max_session_percent", new ColumnMetaData{Name="Max Session %",IsVisible=false, AxisName="Percent" } },
+                {"max_cpu_percent", new ColumnMetaData{Name="Max CPU %",IsVisible=true, AxisName="Percent" } },
+                {"max_data_io_percent", new ColumnMetaData{Name="Max Data %",IsVisible=true, AxisName="Percent" } },
+                {"max_log_write_percent", new ColumnMetaData{Name="Max Log Write %",IsVisible=true, AxisName="Percent" } },
+                {"MaxDTUPercent", new ColumnMetaData{Name="Max DTU %",IsVisible=false, AxisName="Percent"} },
+                {"AvgDTUsUsed", new ColumnMetaData{Name="Avg DTU",IsVisible=false, AxisName="DTU"} },
+                {"MaxDTUsUsed", new ColumnMetaData{Name="Max DTU",IsVisible=false, AxisName="DTU"} },
+                {"dtu_limit", new ColumnMetaData{Name="DTU Limit",IsVisible=false, AxisName="DTU"} }
             };
 
         private DataTable dt;
@@ -130,7 +119,7 @@ namespace DBADashGUI.Performance
             {
                 return;
             }
-            UpdateChart(GetAzureDBResourceStats(), chartDB, DBColumns, SmoothLines, PointSize, DateFormat);
+            UpdateChart(GetAzureDBResourceStats(), chartDB, DBColumns);
         }
 
         private void UpdatePoolChart()
@@ -139,111 +128,137 @@ namespace DBADashGUI.Performance
             {
                 return;
             }
-            UpdateChart(GetAzurePoolResourceStats(), chartPool, PoolColumns, SmoothLines, PointSize, DateFormat, ElasticPoolName);
+            UpdateChart(GetAzurePoolResourceStats(), chartPool, PoolColumns);
+
+            // Align X axes between the two charts
             if (!splitContainer1.Panel1Collapsed
                  && !splitContainer1.Panel2Collapsed
-                 && chartDB.Visible && chartPool.Visible
-                 && chartDB.AxisX.Count > 0
-                 && chartPool.AxisX.Count > 0)
+                 && chartDB.XAxes != null
+                 && chartPool.XAxes != null)
             {
-                // Align X axes
                 var minTicks = DateRange.FromUTC.ToAppTimeZone().Ticks;
                 var maxTicks = DateRange.ToUTC.ToAppTimeZone().Ticks;
-                chartDB.AxisX[0].MinValue = minTicks;
-                chartDB.AxisX[0].MaxValue = maxTicks;
-                chartPool.AxisX[0].MinValue = minTicks;
-                chartPool.AxisX[0].MaxValue = maxTicks;
+
+                var dbXAxes = chartDB.XAxes.ToArray();
+                var poolXAxes = chartPool.XAxes.ToArray();
+
+                if (dbXAxes.Length > 0)
+                {
+                    dbXAxes[0].MinLimit = minTicks;
+                    dbXAxes[0].MaxLimit = maxTicks;
+                    chartDB.XAxes = dbXAxes;
+                }
+
+                if (poolXAxes.Length > 0)
+                {
+                    poolXAxes[0].MinLimit = minTicks;
+                    poolXAxes[0].MaxLimit = maxTicks;
+                    chartPool.XAxes = poolXAxes;
+                }
             }
         }
 
-        private static void UpdateChart(DataTable dt, LiveCharts.WinForms.CartesianChart chart, Dictionary<string, ColumnMetaData> columns, bool smoothLines, int pointSize, string dateFormat, string elasticPoolName = null)
+        private void UpdateChart(DataTable dt, LiveChartsCore.SkiaSharpView.WinForms.CartesianChart chart, Dictionary<string, ColumnMetaData> columns)
         {
             var cnt = dt.Rows.Count;
             if (cnt < 2)
             {
+                chart.Series = Array.Empty<ISeries>();
                 chart.Visible = false;
                 return;
             }
-            else
+
+            chart.Visible = true;
+
+            // Get visible columns
+            var visibleColumns = columns.Where(c => c.Value.IsVisible).Select(c => c.Key).ToArray();
+
+            if (visibleColumns.Length == 0)
             {
-                chart.Visible = true;
-            }
-            foreach (var s in columns.Keys)
-            {
-                columns[s].Points = new DateTimePoint[cnt];
+                chart.Series = Array.Empty<ISeries>();
+                return;
             }
 
-            var i = 0;
-            var y1Max = 1;
+            // Create series names dictionary
+            var seriesNames = columns.ToDictionary(c => c.Key, c => c.Value.Name);
+
+            // Create column-to-axis-name mapping
+            var columnAxisNames = columns
+                .Where(c => c.Value.IsVisible)
+                .ToDictionary(c => c.Key, c => c.Value.AxisName);
+
+            // Calculate DTU max value for Y-axis scaling
+            var dtuMax = 1.0;
             foreach (DataRow r in dt.Rows)
             {
-                var dtuLimit = r["dtu_limit"] == DBNull.Value ? 0 : (int)r["dtu_limit"];
-                if (string.IsNullOrEmpty(elasticPoolName))
+                if (r["dtu_limit"] != DBNull.Value)
                 {
-                    var cpuLimit = r["cpu_Limit"] == DBNull.Value ? 0 : Convert.ToInt32(r["cpu_limit"]);
-                    y1Max = cpuLimit > y1Max ? cpuLimit : y1Max;
+                    var dtuLimit = Convert.ToDouble(r["dtu_limit"]);
+                    dtuMax = Math.Max(dtuMax, dtuLimit);
                 }
-
-                y1Max = dtuLimit > y1Max ? dtuLimit : y1Max;
-                foreach (var kv in columns)
+                if (dt.Columns.Contains("cpu_limit") && r["cpu_limit"] != DBNull.Value)
                 {
-                    if (!kv.Value.IsVisible) continue;
-                    var v = r[kv.Key] == DBNull.Value ? 0 : Convert.ToDouble(r[kv.Key]);
-                    var endTime = (DateTime)r["end_time"];
-                    columns[kv.Key].Points[i] = new DateTimePoint(endTime, v);
-                }
-                i++;
-            }
-
-            var sc = new SeriesCollection();
-            chart.Series = sc;
-            foreach (var kv in columns)
-            {
-                if (kv.Value.IsVisible)
-                {
-                    var v = new ChartValues<DateTimePoint>();
-                    v.AddRange(columns[kv.Key].Points);
-                    sc.Add(new LineSeries
-                    {
-                        Title = columns[kv.Key].Name,
-                        Tag = kv.Key,
-                        ScalesYAt = columns[kv.Key].axis,
-                        LineSmoothness = smoothLines ? 1 : 0,
-                        PointGeometrySize = pointSize,
-                        Values = v
-                    }
-                    );
+                    var cpuLimit = Convert.ToDouble(r["cpu_limit"]);
+                    dtuMax = Math.Max(dtuMax, cpuLimit);
                 }
             }
-            chart.AxisX.Clear();
-            chart.AxisY.Clear();
-            chart.AxisX.Add(new Axis
+
+            // Setup Y-axes configurations
+            var yAxes = new List<YAxisConfiguration>();
+            var axisNameToIndexMap = new Dictionary<string, int>();
+
+            // Determine which axes to include based on visible columns
+            var hasPercentMetrics = columnAxisNames.Values.Any(a => a == "Percent");
+            var hasDTUMetrics = columnAxisNames.Values.Any(a => a == "DTU");
+
+            // Axis 0: Percent - include if has percent metrics
+            if (hasPercentMetrics)
             {
-                Title = "Time",
-                LabelFormatter = val => new DateTime((long)val).ToString(dateFormat)
-            });
-            var y0visible = columns.Values.Any(c => c.IsVisible && c.axis == 0);
-            chart.AxisY.Add(new Axis
-            {
-                Title = "%",
-                LabelFormatter = val => val.ToString("0.0"),
-                MinValue = 0,
-                MaxValue = 100,
-                Visibility = y0visible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden
-            });
-            var y1visible = columns.Values.Any(c => c.IsVisible && c.axis == 1);
-            if (y1visible)
-            {
-                chart.AxisY.Add(new Axis
+                axisNameToIndexMap["Percent"] = yAxes.Count;
+                yAxes.Add(new YAxisConfiguration
                 {
-                    Title = "DTU",
-                    LabelFormatter = val => val.ToString("0"),
-                    Position = AxisPosition.RightTop,
-                    MinValue = 0,
-                    MaxValue = y1Max
+                    Name = "Percent",
+                    Label = "%",
+                    Format = "0.0",
+                    MinLimit = 0,
+                    MaxLimit = 100,
+                    Position = AxisPosition.Start
                 });
             }
-            chart.LegendLocation = LegendLocation.Bottom;
+
+            // Axis 1: DTU - include if has DTU metrics
+            if (hasDTUMetrics)
+            {
+                axisNameToIndexMap["DTU"] = yAxes.Count;
+                yAxes.Add(new YAxisConfiguration
+                {
+                    Name = "DTU",
+                    Label = "DTU",
+                    Format = "0",
+                    MinLimit = 0,
+                    MaxLimit = dtuMax,
+                    Position = AxisPosition.End
+                });
+            }
+
+            // Update chart using ChartHelper with name-based axis mapping
+            var config = new ChartConfiguration
+            {
+                DateColumn = "end_time",
+                MetricColumns = visibleColumns,
+                ChartType = ChartTypes.Line,
+                ShowLegend = true,
+                LegendPosition = LegendPosition.Bottom,
+                LineSmoothness = lineSmoothness,
+                GeometrySize = geometrySize,
+                XAxisMin = DateRange.FromUTC.ToAppTimeZone(),
+                XAxisMax = DateRange.ToUTC.ToAppTimeZone(),
+                SeriesNames = seriesNames,
+                YAxes = yAxes.ToArray(),
+                ColumnAxisNames = columnAxisNames
+            };
+
+            ChartHelper.UpdateChart(chart, dt, config);
         }
 
         private void AddMeasures()
@@ -330,21 +345,14 @@ namespace DBADashGUI.Performance
 
         private void SmoothLinesToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            lineSmoothness = smoothLinesToolStripMenuItem.Checked ? ChartConfiguration.DefaultLineSmoothness : 0;
             RefreshDataLocal();
         }
 
         private void PointsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            UpdatePointSize(chartDB, PointSize);
-            UpdatePointSize(chartPool, PointSize);
-        }
-
-        private static void UpdatePointSize(LiveCharts.WinForms.CartesianChart chart, int pointSize)
-        {
-            foreach (var s in chart.Series.Cast<LineSeries>())
-            {
-                s.PointGeometrySize = pointSize;
-            }
+            geometrySize = pointsToolStripMenuItem.Checked ? ChartConfiguration.DefaultGeometrySize : 0;
+            RefreshDataLocal();
         }
     }
 }
