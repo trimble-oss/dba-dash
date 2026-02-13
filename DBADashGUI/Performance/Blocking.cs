@@ -184,7 +184,6 @@ namespace DBADashGUI.Performance
                     if (index < 0 || index >= rows.Count) return string.Empty;
 
                     var row = rows[index];
-                    var snapshotDate = ((DateTime)row["SnapshotDateUTC"]).ToAppTimeZone();
                     var blockedCnt = (int)row["BlockedSessionCount"];
                     var blockedTime = (long)row["BlockedWaitTime"];
 

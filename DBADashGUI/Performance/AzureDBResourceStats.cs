@@ -109,8 +109,6 @@ namespace DBADashGUI.Performance
                 {"dtu_limit", new ColumnMetaData{Name="DTU Limit",IsVisible=false, AxisName="DTU"} }
             };
 
-        private DataTable dt;
-
         public void SetContext(DBADashContext _context)
         {
             InstanceID = _context.InstanceID;
