@@ -190,7 +190,7 @@ namespace DBADashGUI.Performance
             AVGToolStripMenuItem.Checked = true;
             MAXToolStripMenuItem.Checked = false;
             Metric.AggregateType = IMetric.AggregateTypes.Avg;
-            tsAgg.Text = "Area";
+            tsAgg.Text = "Avg";
             RenderCpuChart();
         }
 
@@ -200,7 +200,7 @@ namespace DBADashGUI.Performance
             MAXToolStripMenuItem.Checked = true;
             AVGToolStripMenuItem.Checked = false;
             Metric.AggregateType = IMetric.AggregateTypes.Max;
-            tsAgg.Text = "Line";
+            tsAgg.Text = "Max";
             RenderCpuChart();
         }
 
