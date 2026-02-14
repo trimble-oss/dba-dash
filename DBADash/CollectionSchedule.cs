@@ -52,6 +52,7 @@ namespace DBADashService
                             {CollectionType.RunningJobs, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },
                             {CollectionType.OSInfo, new CollectionSchedule(){ Schedule = every1min } },
                             {CollectionType.ResourceGovernorWorkloadGroups, new CollectionSchedule(){ Schedule = every1min, RunOnServiceStart=false }  },
+                            {CollectionType.ResourceGovernorResourcePools, new CollectionSchedule(){ Schedule = every1min, RunOnServiceStart=false }  },
 
                             {CollectionType.ServerPrincipals, new CollectionSchedule(){ Schedule = midnight } },
                             {CollectionType.ServerRoleMembers, new CollectionSchedule(){ Schedule = midnight } },

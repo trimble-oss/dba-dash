@@ -867,6 +867,10 @@
     <Build Include="dbo\Stored Procedures\ResourceGovernorWorkloadGroups_Get.sql" />
     <Build Include="Storage\PF_ResourceGovernorWorkloadGroupsMetrics.sql" />
     <Build Include="Storage\PS_ResourceGovernorWorkloadGroupsMetrics.sql" />
+    <Build Include="dbo\Tables\ResourceGovernorResourcePoolsMetrics.sql" />
+    <Build Include="Storage\PF_ResourceGovernorResourcePoolsMetrics.sql" />
+    <Build Include="Storage\PS_ResourceGovernorResourcePoolsMetrics.sql" />
+    <Build Include="dbo\Stored Procedures\ResourceGovernorResourcePools_Upd.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
@@ -877,6 +881,8 @@
       <Link>.editorconfig</Link>
     </None>
     <Build Include="Storage\PS_FailedLogins.sql" />
+    <Build Include="dbo\User Defined Types\ResourceGovernorResourcePools.sql" />
+    <Build Include="dbo\Tables\ResourceGovernorResourcePools.sql" />
   </ItemGroup>
   <ItemGroup>
     <SqlCmdVariable Include="VersionNumber">

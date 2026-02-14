@@ -23,6 +23,7 @@ VALUES -- Daily Partitions
 	('dbo','SessionWaits','d',14,CAST(1 AS BIT)),
 	('dbo','FailedLogins','d',14,CAST(1 AS BIT)),
 	('dbo','ResourceGovernorWorkloadGroupsMetrics','d',14,CAST(1 AS BIT)),
+	('dbo','ResourceGovernorResourcePoolsMetrics','d',14,CAST(1 AS BIT)),
 	-- Monthly Partitions
 	('dbo','AzureDBElasticPoolResourceStats_60MIN','m',3,CAST(1 AS BIT)),
 	('dbo','AzureDBResourceStats_60MIN','m',3,CAST(1 AS BIT)),

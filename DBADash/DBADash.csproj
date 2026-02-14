@@ -24,6 +24,7 @@
     <None Remove="SQL\SQLJobSteps.sql" />
     <None Remove="SQL\SQLQueryStoreForcedPlans.sql" />
     <None Remove="SQL\SQLQueryStoreTopQueries.sql" />
+    <None Remove="SQL\SQLResourceGovernorResourcePools.sql" />
     <None Remove="SQL\SQLResourceGovernorWorkloadGroups.sql" />
     <None Remove="SQL\SQLRunningJobs.sql" />
     <None Remove="SQL\SQLServerServices.sql" />
@@ -83,6 +84,7 @@
 	<EmbeddedResource Include="SQL\SQLQueryStoreTopQueries.sql" />
 	<EmbeddedResource Include="SQL\SQLRemoveEventSessions.sql" />
 	<EmbeddedResource Include="SQL\SQLRemoveEventSessionsAzure.sql" />
+	<EmbeddedResource Include="SQL\SQLResourceGovernorResourcePools.sql" />
 	<EmbeddedResource Include="SQL\SQLResourceGovernorWorkloadGroups.sql" />
 	<EmbeddedResource Include="SQL\SQLRunningJobs.sql" />
 	<EmbeddedResource Include="SQL\SQLRunningQueries.sql" />

@@ -80,7 +80,8 @@ namespace DBADash
         AvailableProcs,
         InstanceMetadata,
         FailedLogins,
-        ResourceGovernorWorkloadGroups
+        ResourceGovernorWorkloadGroups,
+        ResourceGovernorResourcePools
     }
 
     public enum HostPlatform
@@ -261,11 +262,12 @@ namespace DBADash
             Data.Tables.Add(dtInternalPerfCounters);
         }
 
-        private bool IsResourceGovernorWorkloadGroupsApplicable()
+        private bool IsResourceGovernorInUse()
         {
             if (engineEdition != DatabaseEngineEdition.Enterprise) return false;
+            if (SQLVersion.Major < 10) return false; // Resource Governor not supported before SQL 2008
 
-            var cacheKey = $"ResourceGovernorWorkloadGroupsApplicable_{ConnectionID}";
+            var cacheKey = $"ResourceGovernorInUse_{ConnectionID}";
 
             // Check cache first to avoid quering the DB each time
             if (cache.Get(cacheKey) is bool cachedResult)
@@ -280,7 +282,7 @@ namespace DBADash
             }
             catch (Exception ex)
             {
-                Log.Error("Error checking if Resource Governor Workload Groups are applicable for instance {instanceName}. Assuming not applicable. Error: {errorMessage}", ConnectionID, ex.Message);
+                Log.Error("Error checking if Resource Governor is in use for instance {instanceName}. Assuming not applicable. Error: {errorMessage}", ConnectionID, ex.Message);
                 return false;
             }
 
@@ -292,7 +294,7 @@ namespace DBADash
             cache.Set(cacheKey, hasWorkloadGroups, cachePolicy);
             if (!hasWorkloadGroups)
             {
-                Log.Information("ResourceGovernorWorkloadGroups for instance {instanceName} is disabled as no workload groups have been defined.", ConnectionID);
+                Log.Information("ResourceGovernorWorkloadGroups/ResourceGovernorResourcePools for instance {instanceName} are disabled as no workload groups have been defined.", ConnectionID);
             }
 
             return hasWorkloadGroups;
@@ -689,9 +691,9 @@ namespace DBADash
             {
                 return false;
             }
-            if (collectionType == CollectionType.ResourceGovernorWorkloadGroups)
+            if (collectionType == CollectionType.ResourceGovernorWorkloadGroups || collectionType == CollectionType.ResourceGovernorResourcePools)
             {
-                return IsResourceGovernorWorkloadGroupsApplicable();
+                return IsResourceGovernorInUse();
             }
             else
             {
