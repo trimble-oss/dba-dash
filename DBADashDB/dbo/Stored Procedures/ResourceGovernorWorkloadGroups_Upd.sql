@@ -60,7 +60,7 @@ BEGIN
 	FROM dbo.ResourceGovernorWorkloadGroups WG
 	JOIN dbo.Instances I ON WG.InstanceID = I.InstanceID
 	JOIN @ResourceGovernorWorkloadGroups T ON WG.name = T.name 
-												AND T.statistics_start_time >= WG.statistics_start_time 
+												AND T.statistics_start_time = WG.statistics_start_time 
 	WHERE DATEDIFF_BIG(ms,WG.SnapshotDate,T.SnapshotDate) BETWEEN 0 AND 14400000 /* 4 hours in ms.  Skip recording if the gap between collections is too large. */
 	AND I.InstanceID = @InstanceID
 	

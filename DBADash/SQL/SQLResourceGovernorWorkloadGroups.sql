@@ -5,7 +5,7 @@ SELECT  SYSUTCDATETIME() AS SnapshotDate,
         WG.name,
         WG.pool_id,
         P.name as pool_name,
-        WG.external_pool_id,
+        ' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_resource_governor_workload_groups'),'external_pool_id','ColumnID') IS NULL THEN 'CAST(NULL AS INT) AS external_pool_id,' ELSE 'WG.external_pool_id,' END + '
         TODATETIMEOFFSET(WG.statistics_start_time, DATENAME(TzOffset, SYSDATETIMEOFFSET())) AS statistics_start_time,
         WG.total_request_count,
         WG.total_queued_request_count,
