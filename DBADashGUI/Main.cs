@@ -88,7 +88,7 @@ namespace DBADashGUI
             Tags,
             TableSize,
             TuningRecommendations,
-            WorkloadGroups
+            PoolsAndGroups
         }
 
         private static readonly List<Main.Tabs> InstanceOnlyTabs = new() { Main.Tabs.PerformanceSummary, Tabs.Metrics, Tabs.Waits, Tabs.Memory, Tabs.RunningQueries };
@@ -108,7 +108,7 @@ namespace DBADashGUI
         private TabPage tabJobInfo;
         private TabPage tabCloudMetadata;
         private TabPage tabTuningRecommendations;
-        private TabPage tabWorkloadGroup;
+        private TabPage tabPoolsAndGroups;
 
         public Main(CommandLineOptions opts)
         {
@@ -150,8 +150,10 @@ namespace DBADashGUI
             tabTuningRecommendations = new TabPage("Tuning Recommendations") { Name = Tabs.TuningRecommendations.TabName() };
             tabTuningRecommendations.Controls.Add(new TuningRecommendationsReport() { Dock = DockStyle.Fill });
 
-            tabWorkloadGroup = new TabPage("Workload Group Analysis") { Name = Tabs.WorkloadGroups.TabName() };
-            tabWorkloadGroup.Controls.Add(new ResourceGovernorWorkloadGroupsMetrics { Dock = DockStyle.Fill, CloseVisible = false, MoveUpVisible = false });
+            tabPoolsAndGroups = new TabPage("Resource Governor") { Name = Tabs.PoolsAndGroups.TabName() };
+            var tabRGTabs = new ThemedTabControl() { Dock = DockStyle.Fill, Alignment = TabAlignment.Bottom };
+
+            tabPoolsAndGroups.Controls.Add(new ResourceGovernorPerformance { Dock = DockStyle.Fill });
         }
 
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommunityProcs proc)
@@ -188,7 +190,7 @@ namespace DBADashGUI
             (new List<TabPage>()
             {
                 tabPerformanceSummary, tabPerformance, tabSlowQueries, tabAzureDB, tabAzureSummary, tabMetrics,
-                tabObjectExecutionSummary, tabWaits, tabRunningQueries, tabMemory, tabJobStats, tabJobTimeline, tabDrivePerformance, tabTopQueries, tabOfflineInstances, tabWorkloadGroup
+                tabObjectExecutionSummary, tabWaits, tabRunningQueries, tabMemory, tabJobStats, tabJobTimeline, tabDrivePerformance, tabTopQueries, tabOfflineInstances, tabPoolsAndGroups
             }).Contains(tabs.SelectedTab) || (tabs.SelectedTab == tabCustomReport && ((SQLTreeItem)tv1.SelectedNode).Report.TimeFilterSupported);
 
         private bool IsAzureOnly;
@@ -898,7 +900,7 @@ namespace DBADashGUI
                 });
                 if (n.Context.HasResourceGovernorWorkloadGroups)
                 {
-                    allowedTabs.Add(tabWorkloadGroup);
+                    allowedTabs.Add(tabPoolsAndGroups);
                 }
             }
             else if (n.Type == SQLTreeItem.TreeType.AzureInstance)

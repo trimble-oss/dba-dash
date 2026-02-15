@@ -17,7 +17,7 @@ using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
 {
-    public partial class ResourceGovernorWorkloadGroupsMetrics : UserControl, IRefreshData, ISetContext, IMetricChart
+    public partial class ResourceGovernorResourcePools : UserControl, IRefreshData, ISetContext, IMetricChart
     {
         private DBADashContext CurrentContext;
         private int DateGrouping => DateHelper.DateGrouping(DateRange.DurationMins, 200);
@@ -34,10 +34,10 @@ namespace DBADashGUI.Performance
             get => tsUp.Visible; set => tsUp.Visible = value;
         }
 
-        private ResourceGovernorWorkloadGroupsMetric _metric = new();
+        private ResourceGovernorResourcePoolMetric _metric = new();
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public ResourceGovernorWorkloadGroupsMetric Metric
+        public ResourceGovernorResourcePoolMetric Metric
         {
             get => _metric;
             set
@@ -85,9 +85,9 @@ namespace DBADashGUI.Performance
         private Dictionary<string, SKColor> groupColors = new Dictionary<string, SKColor>();
         private bool isRefreshing = false;
         private CancellationTokenSource colorExtractionCts;
-        private CustomReportResult reportResult = ResourceGovernorWorkloadGroupsReport.GetReportResult();
+        private CustomReportResult reportResult = ResourceGovernorResourcePoolsReport.GetReportResult();
 
-        public ResourceGovernorWorkloadGroupsMetrics()
+        public ResourceGovernorResourcePools()
         {
             InitializeComponent();
             InitializeMetricsMenu();
@@ -96,24 +96,36 @@ namespace DBADashGUI.Performance
 
         private List<string> MetricsToLoad = new List<string>()
         {
+            "cpu_usage_ms",
             "cpu_cores",
             "cpu_percent",
             "cpu_share_percent",
-            "requests_per_min",
-            "queued_request_count_per_min",
-            "cpu_limit_violations_per_min",
-            "lock_waits_per_min",
-            "lock_wait_time_ms_per_sec",
-            "query_optimizations_per_min",
-            "suboptimal_plan_generation_count_per_min",
-            "reduced_memgrant_count_per_min",
-            "cpu_usage_preemptive_ms_per_min",
-            "tempdb_data_limit_violations_per_min",
-            "avg_active_request_count",
-            "avg_queued_request_count",
-            "avg_blocked_task_count",
-            "avg_active_parallel_thread_count",
-            "avg_tempdb_data_space_kb"
+            "cpu_cap_utilization_percent",
+            "cpu_cap_near_threshold_percent",
+            "memgrant_count_per_min",
+            "memgrant_timeout_count_per_min",
+            "out_of_memory_count_per_min",
+            "read_io_queued_per_min",
+            "read_io_issued_per_min",
+            "read_io_completed_per_min",
+            "read_io_throttled_per_min",
+            "read_mb_per_sec",
+            "read_io_stall_ms_per_min",
+            "read_io_stall_queued_ms_per_min",
+            "write_io_queued_per_min",
+            "write_io_issued_per_min",
+            "write_io_completed_per_min",
+            "write_io_throttled_per_min",
+            "write_mb_per_sec",
+            "write_io_stall_ms_per_min",
+            "write_io_stall_queued_ms_per_min",
+            "io_issue_delay_ms_per_min",
+            "io_issue_delay_non_throttled_ms_per_min",
+            "cpu_delayed_ms_per_min",
+            "cpu_active_ms_per_min",
+            "cpu_violation_delay_ms_per_min",
+            "cpu_violation_sec_per_min",
+            "cpu_usage_preemptive_ms_per_min"
         };
 
         public event EventHandler<EventArgs> Close;
@@ -131,7 +143,7 @@ namespace DBADashGUI.Performance
                 // Properly dispose existing controls before clearing
                 DisposeExistingControls();
 
-                var metricsDT = await GetResourceGovernorWorkloadGroupsMetrics();
+                var metricsDT = await GetResourceGovernorResourcePoolsMetrics();
                 // Determine total number of rows (charts + optional table)
                 var rowCount = MetricsToDisplay.Count + (ShowTable ? 1 : 0);
                 if (rowCount == 0)
@@ -157,7 +169,9 @@ namespace DBADashGUI.Performance
                     tableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, rowPercent));
                     var metric = MetricsToDisplay[i];
                     var y_format = metric.Contains("percent", StringComparison.OrdinalIgnoreCase) ? "P1" : "N1";
-                    var y_max = metric.Contains("percent", StringComparison.OrdinalIgnoreCase) ? 1 : (double?)null;
+                    // Add 5% padding at top for percentage charts (1.05 = 105% instead of 100%)
+                    var y_max = metric.Contains("percent", StringComparison.OrdinalIgnoreCase) ? 1.05 : (double?)null;
+                    var chartType = metric == "cpu_cap_utilization_percent" ? ChartTypes.Line : ChartType;
                     // Create chart for each metric
                     var chart = ChartHelper.GetChartFromDataTable(metricsDT,
                         new ChartConfiguration()
@@ -165,7 +179,7 @@ namespace DBADashGUI.Performance
                             DateColumn = "SnapshotDate",
                             YAxisFormat = y_format,
                             YAxisMax = y_max,
-                            ChartType = ChartType,
+                            ChartType = chartType,
                             YAxisLabel = FormatMetricName(metric),
                             SeriesColumn = "name",
                             MetricColumn = metric,
@@ -184,7 +198,7 @@ namespace DBADashGUI.Performance
                 }
                 if (ShowTable)
                 {
-                    var dt = await GetResourceGovernorWorkloadGroups();
+                    var dt = await GetResourceGovernorResourcePools();
                     tableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, rowPercent));
                     var dgv = new DBADashDataGridView()
                     {
@@ -361,10 +375,10 @@ namespace DBADashGUI.Performance
             }
         }
 
-        public async Task<DataTable> GetResourceGovernorWorkloadGroups()
+        public async Task<DataTable> GetResourceGovernorResourcePools()
         {
             using var cn = new SqlConnection(Common.ConnectionString);
-            using var cmd = new SqlCommand("dbo.ResourceGovernorWorkloadGroups_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
+            using var cmd = new SqlCommand("dbo.ResourceGovernorResourcePools_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
             cmd.Parameters.AddWithValue("@InstanceID", CurrentContext.InstanceID);
             cmd.Parameters.AddWithValue("@FromDate", DateRange.FromUTC);
             cmd.Parameters.AddWithValue("@ToDate", DateRange.ToUTC);
@@ -376,10 +390,10 @@ namespace DBADashGUI.Performance
             return dt;
         }
 
-        public async Task<DataTable> GetResourceGovernorWorkloadGroupsMetrics()
+        public async Task<DataTable> GetResourceGovernorResourcePoolsMetrics()
         {
             using var cn = new SqlConnection(Common.ConnectionString);
-            using var cmd = new SqlCommand("dbo.ResourceGovernorWorkloadGroupsMetrics_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
+            using var cmd = new SqlCommand("dbo.ResourceGovernorResourcePoolsMetrics_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
             cmd.Parameters.AddWithValue("@InstanceID", CurrentContext.InstanceID);
             cmd.Parameters.AddWithValue("@FromDate", DateRange.FromUTC);
             cmd.Parameters.AddWithValue("@ToDate", DateRange.ToUTC);

@@ -38,5 +38,8 @@ CREATE TABLE dbo.ResourceGovernorResourcePoolsMetrics (
 	max_memory_kb BIGINT NOT NULL,
 	used_memory_kb BIGINT NOT NULL,
 	target_memory_kb BIGINT NOT NULL,
+	cpu_count INT NULL,
+	max_cpu_percent INT NULL,
+	cap_cpu_percent INT NULL,
     CONSTRAINT PK_ResourceGovernorResourcePoolsMetrics PRIMARY KEY CLUSTERED (InstanceID, SnapshotDate, ResourcePoolID) WITH(DATA_COMPRESSION=PAGE) ON PS_ResourceGovernorResourcePoolsMetrics(SnapshotDate)
 )

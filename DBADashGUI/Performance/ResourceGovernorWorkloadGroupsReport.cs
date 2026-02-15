@@ -147,11 +147,13 @@ namespace DBADashGUI.Performance
                     } },
                     { "statistics_start_time", new ColumnMetadata {
                         Alias = "Statistics Start Time",
-                        Description = "The time when statistics collection for the workload group started"
+                        Description = "The time when statistics collection for the workload group started",
+                        FormatString= "G"
                     } },
                     { "SnapshotDate", new ColumnMetadata {
                         Alias = "Snapshot Date",
-                        Description = "Date/Time of last collection from sys.dm_resource_governor_workload_groups"
+                        Description = "Date/Time of last collection from sys.dm_resource_governor_workload_groups",
+                        FormatString= "G"
                     } },
                     { "total_request_count", new ColumnMetadata {
                         Alias = "Total Request Count",
@@ -250,7 +252,7 @@ namespace DBADashGUI.Performance
                     } },
                     { "request_max_memory_grant_percent", new ColumnMetadata {
                         Alias = "Request Max Memory Grant Percent",
-                        FormatString = "P0",
+                        FormatString = "#,##0'%'",
                         Description = "Current setting for the maximum memory grant as a percentage for a single request"
                     } },
                     { "request_max_cpu_time_sec", new ColumnMetadata {

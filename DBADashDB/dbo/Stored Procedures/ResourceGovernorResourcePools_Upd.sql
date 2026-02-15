@@ -59,7 +59,10 @@ BEGIN
 			memgrant_waiter_count,
 			max_memory_kb,
 			used_memory_kb,
-			target_memory_kb
+			target_memory_kb,
+			cpu_count,
+			max_cpu_percent,
+			cap_cpu_percent
 	)
 	SELECT	@InstanceID,
 			RP.ResourcePoolID,
@@ -99,9 +102,13 @@ BEGIN
 			T.memgrant_waiter_count,
 			T.max_memory_kb,
 			T.used_memory_kb,
-			T.target_memory_kb
+			T.target_memory_kb,
+			I.cpu_count,
+			T.max_cpu_percent,
+			T.cap_cpu_percent
 	FROM dbo.ResourceGovernorResourcePools RP
 	JOIN @ResourceGovernorResourcePools T ON RP.name = T.name
+	JOIN dbo.Instances I ON RP.InstanceID = I.InstanceID
 	WHERE DATEDIFF_BIG(ms, RP.SnapshotDate, T.SnapshotDate) BETWEEN 0 AND 14400000 /* 4 hours in ms.  Skip recording if the gap between collections is too large. */
 	AND RP.InstanceID = @InstanceID
 	AND RP.statistics_start_time = T.statistics_start_time;
