@@ -132,7 +132,8 @@ namespace DBADashGUI.Charts
                     {
                         Name = groupName,
                         Values = values,
-                        GeometrySize = geometrySize
+                        GeometrySize = geometrySize,
+                        LineSmoothness = lineSmoothness
                     };
 
                 case ChartTypes.StackedColumn:

@@ -95,6 +95,9 @@
     <Compile Update="Performance\MemoryUsage.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="Performance\ResourceGovernorResourcePools.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
