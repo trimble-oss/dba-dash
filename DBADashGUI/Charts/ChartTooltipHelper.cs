@@ -476,10 +476,16 @@ namespace DBADashGUI.Charts
                         {
                             var seriesName = point.Context.Series.Name ?? "Value";
 
-                            // Use custom formatter if provided, otherwise use default
-                            var formattedValue = state.ValueFormatter != null 
-                                ? state.ValueFormatter(point) 
-                                : point.Coordinate.PrimaryValue.ToString("N2");
+                            // Use custom formatter if provided, otherwise try to use Y-axis formatter, then default to N2
+                            string formattedValue;
+                            if (state.ValueFormatter != null)
+                            {
+                                formattedValue = state.ValueFormatter(point);
+                            }
+                            else
+                            {
+                                formattedValue = GetFormattedValue(chart, point);
+                            }
 
                             var color = GetSeriesColor(point.Context.Series);
                             seriesData.Add((seriesName, formattedValue, color));
@@ -644,6 +650,55 @@ namespace DBADashGUI.Charts
 
             // Default to TrimbleBlue if color can't be determined
             return DashColors.TrimbleBlue;
+        }
+
+        /// <summary>
+        /// Gets the formatted value for a chart point using the Y-axis labeler if available
+        /// </summary>
+        private static string GetFormattedValue(CartesianChart chart, LiveChartsCore.Kernel.ChartPoint point)
+        {
+            try
+            {
+                // Try to get the Y-axis index using pattern matching (fast path for common types)
+                int? yAxisIndex = point.Context.Series switch
+                {
+                    LineSeries<DateTimePoint> ls => ls.ScalesYAt,
+                    StackedAreaSeries<DateTimePoint> sas => sas.ScalesYAt,
+                    StackedColumnSeries<DateTimePoint> scs => scs.ScalesYAt,
+                    ScatterSeries<DateTimePoint> ss => ss.ScalesYAt,
+                    _ => null
+                };
+
+                // If pattern matching didn't match, try reflection as fallback (slow path for other types)
+                if (!yAxisIndex.HasValue)
+                {
+                    var seriesType = point.Context.Series.GetType();
+                    var property = seriesType.GetProperty("ScalesYAt");
+                    if (property != null && property.CanRead)
+                    {
+                        yAxisIndex = (int)property.GetValue(point.Context.Series);
+                    }
+                }
+
+                // Get the Y-axes from the chart
+                if (yAxisIndex.HasValue && chart.YAxes != null && yAxisIndex.Value < chart.YAxes.Count())
+                {
+                    var yAxis = chart.YAxes.ElementAt(yAxisIndex.Value);
+
+                    // Use the axis labeler if available
+                    if (yAxis?.Labeler != null)
+                    {
+                        return yAxis.Labeler(point.Coordinate.PrimaryValue);
+                    }
+                }
+            }
+            catch
+            {
+                // Fall through to default formatting on any error
+            }
+
+            // Default to N2 format if no axis labeler found
+            return point.Coordinate.PrimaryValue.ToString("N2");
         }
 
         private static void Chart_MouseLeave(object sender, EventArgs e)
