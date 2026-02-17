@@ -262,11 +262,26 @@ namespace DBADash
             Data.Tables.Add(dtInternalPerfCounters);
         }
 
+        private bool IsResourceGovernorApplicable()
+        {
+            // Always true for SQL MI
+            if (engineEdition == DatabaseEngineEdition.SqlManagedInstance) return true;
+
+            // Feature didn't exist before SQL 2008 (v10)
+            if (SQLVersion.Major < 10) return false;
+
+            if (SQLVersion.Major >= 16)
+            {
+                // SQL 2025+ supports both Enterprise and Standard (Including Enterprise Developer & Standard Developer)
+                return engineEdition is DatabaseEngineEdition.Enterprise or DatabaseEngineEdition.Standard;
+            }
+
+            // 2008 - 2022: Enterprise Edition Only (Including Developer)
+            return engineEdition == DatabaseEngineEdition.Enterprise;
+        }
+
         private bool IsResourceGovernorInUse()
         {
-            if (engineEdition != DatabaseEngineEdition.Enterprise) return false;
-            if (SQLVersion.Major < 10) return false; // Resource Governor not supported before SQL 2008
-
             var cacheKey = $"ResourceGovernorInUse_{ConnectionID}";
 
             // Check cache first to avoid quering the DB each time
@@ -653,7 +668,7 @@ namespace DBADash
             }
             else if (collectionType == CollectionType.ResourceGovernorConfiguration)
             {
-                return SQLVersion.Major > 9 && engineEdition == DatabaseEngineEdition.Enterprise && !IsAzureDB; // Must be enterprise edition and not AzureDB, SQL 2005
+                return IsResourceGovernorApplicable();
             }
             else if ((new[] { CollectionType.Backups, CollectionType.DatabaseMirroring, CollectionType.LogRestores, CollectionType.AvailabilityGroups, CollectionType.AvailabilityReplicas, CollectionType.DatabasesHADR }).Contains(collectionType)
                         && engineEdition == DatabaseEngineEdition.SqlManagedInstance)
@@ -693,7 +708,7 @@ namespace DBADash
             }
             if (collectionType == CollectionType.ResourceGovernorWorkloadGroups || collectionType == CollectionType.ResourceGovernorResourcePools)
             {
-                return IsResourceGovernorInUse();
+                return IsResourceGovernorApplicable() && IsResourceGovernorInUse();
             }
             else
             {
