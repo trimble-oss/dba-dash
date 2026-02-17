@@ -45,6 +45,7 @@
             IOToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ObjectExecutionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             WaitsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            workloadGroupAnalysisToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsToggleGrid = new System.Windows.Forms.ToolStripButton();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             tsSaveView = new System.Windows.Forms.ToolStripButton();
@@ -60,7 +61,7 @@
             dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn13 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            workloadGroupAnalysisToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            resourcePoolAnalysisToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
@@ -134,7 +135,7 @@
             // toolStripDropDownButton1
             // 
             toolStripDropDownButton1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { blockingToolStripMenuItem, CPUToolStripMenuItem, IOToolStripMenuItem, ObjectExecutionToolStripMenuItem, WaitsToolStripMenuItem, workloadGroupAnalysisToolStripMenuItem });
+            toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { blockingToolStripMenuItem, CPUToolStripMenuItem, IOToolStripMenuItem, ObjectExecutionToolStripMenuItem, resourcePoolAnalysisToolStripMenuItem, WaitsToolStripMenuItem, workloadGroupAnalysisToolStripMenuItem });
             toolStripDropDownButton1.Image = (System.Drawing.Image)resources.GetObject("toolStripDropDownButton1.Image");
             toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             toolStripDropDownButton1.Name = "toolStripDropDownButton1";
@@ -175,6 +176,13 @@
             WaitsToolStripMenuItem.Size = new System.Drawing.Size(258, 26);
             WaitsToolStripMenuItem.Text = "Waits";
             WaitsToolStripMenuItem.Click += WaitsToolStripMenuItem_Click;
+            // 
+            // workloadGroupAnalysisToolStripMenuItem
+            // 
+            workloadGroupAnalysisToolStripMenuItem.Name = "workloadGroupAnalysisToolStripMenuItem";
+            workloadGroupAnalysisToolStripMenuItem.Size = new System.Drawing.Size(258, 26);
+            workloadGroupAnalysisToolStripMenuItem.Text = "Workload Group Analysis";
+            workloadGroupAnalysisToolStripMenuItem.Click += WorkloadGroupAnalysis_Click;
             // 
             // tsToggleGrid
             // 
@@ -350,12 +358,12 @@
             dataGridViewTextBoxColumn7.ReadOnly = true;
             dataGridViewTextBoxColumn7.Width = 124;
             // 
-            // workloadGroupAnalysisToolStripMenuItem
+            // resourcePoolAnalysisToolStripMenuItem
             // 
-            workloadGroupAnalysisToolStripMenuItem.Name = "workloadGroupAnalysisToolStripMenuItem";
-            workloadGroupAnalysisToolStripMenuItem.Size = new System.Drawing.Size(258, 26);
-            workloadGroupAnalysisToolStripMenuItem.Text = "Workload Group Analysis";
-            workloadGroupAnalysisToolStripMenuItem.Click += WorkloadGroupAnalysis_Click;
+            resourcePoolAnalysisToolStripMenuItem.Name = "resourcePoolAnalysisToolStripMenuItem";
+            resourcePoolAnalysisToolStripMenuItem.Size = new System.Drawing.Size(258, 26);
+            resourcePoolAnalysisToolStripMenuItem.Text = "Resource Pool Analysis";
+            resourcePoolAnalysisToolStripMenuItem.Click += ResourcePoolAnalysis_Click;
             // 
             // PerformanceCounterSummary
             // 
@@ -408,5 +416,6 @@
         private System.Windows.Forms.ToolStripButton tsDeleteView;
         private SavedViewMenuItem savedViewMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem workloadGroupAnalysisToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem resourcePoolAnalysisToolStripMenuItem;
     }
 }
