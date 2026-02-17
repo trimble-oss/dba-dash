@@ -5,7 +5,7 @@ namespace DBADashGUI.Performance
 {
     public class ResourceGovernorWorkloadGroupsReport
     {
-        private static List<CellHighlightingRule> WarningIfCreaterThanZeroGreenIfZero => new List<CellHighlightingRule>
+        private static List<CellHighlightingRule> WarningIfGreaterThanZeroGreenIfZero => new List<CellHighlightingRule>
                             {
                                 new()
                                 {
@@ -64,7 +64,7 @@ namespace DBADashGUI.Performance
                         FormatString = "N2",
                         Highlighting = new CellHighlightingRuleSet("period_queued_request_count_per_min")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },
                         Description = "Count of queued requests per minute within the selected date range. A non-zero value means the GROUP_MAX_REQUESTS limit was reached."
                     } },
@@ -73,7 +73,7 @@ namespace DBADashGUI.Performance
                         FormatString = "N2",
                         Highlighting = new CellHighlightingRuleSet("period_cpu_limit_violations_per_min")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },
                         Description = "Count of requests exceeding the CPU limit per minute within the selected date range."
                     } },
@@ -103,7 +103,7 @@ namespace DBADashGUI.Performance
                         Description = "Count of memory grants that reached the per-request memory grant size within the selected date range.",
                         Highlighting = new CellHighlightingRuleSet("period_reduced_memgrant_count_per_min")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },
                     } },
                     { "period_cpu_usage_preemptive_ms_per_min", new ColumnMetadata {
@@ -116,7 +116,7 @@ namespace DBADashGUI.Performance
                         FormatString = "N2",
                         Highlighting = new CellHighlightingRuleSet("period_tempdb_data_limit_violations_per_min")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },
                         Description = "The number of queries aborted per minute because they exceeded the limit on tempdb space for the workload group"
                     } },
@@ -166,7 +166,7 @@ namespace DBADashGUI.Performance
                         Description = "Cumulative count of requests queued after the GROUP_MAX_REQUESTS limit was reached",
                         Highlighting = new CellHighlightingRuleSet("total_queued_request_count")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },
                     } },
                     { "active_request_count", new ColumnMetadata {
@@ -180,7 +180,7 @@ namespace DBADashGUI.Performance
                         Description = "Current queued request count",
                         Highlighting = new CellHighlightingRuleSet("queued_request_count")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },
                     } },
                     { "total_cpu_limit_violation_count", new ColumnMetadata {
@@ -189,7 +189,7 @@ namespace DBADashGUI.Performance
                         Description = "Cumulative count of requests exceeding the CPU limit",
                         Highlighting = new CellHighlightingRuleSet("total_cpu_limit_violation_count")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },
                     } },
                     { "total_cpu_usage_ms", new ColumnMetadata {
@@ -233,7 +233,7 @@ namespace DBADashGUI.Performance
                         Description = "Cumulative count of memory grants that reached the maximum limit on the per-request memory grant size",
                         Highlighting = new CellHighlightingRuleSet("total_reduced_memgrant_count")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },
                     } },
                     { "max_request_grant_memory_kb", new ColumnMetadata {

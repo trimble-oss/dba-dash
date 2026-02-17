@@ -5,7 +5,7 @@ namespace DBADashGUI.Performance
 {
     public class ResourceGovernorResourcePoolsReport
     {
-        private static List<CellHighlightingRule> WarningIfCreaterThanZeroGreenIfZero => new List<CellHighlightingRule>
+        private static List<CellHighlightingRule> WarningIfGreaterThanZeroGreenIfZero => new List<CellHighlightingRule>
                             {
                                 new()
                                 {
@@ -36,7 +36,7 @@ namespace DBADashGUI.Performance
                     // Period metrics
                     { "period_cpu_usage_ms", new ColumnMetadata { Alias = "Period CPU Usage (ms)", Description = "CPU usage in milliseconds during the period" , FormatString = "N1"} },
                     { "period_cpu_cores", new ColumnMetadata { Alias = "Period CPU Cores", Description = "Average CPU cores used during the period", FormatString = "N1" } },
-                    { "period_cpu_percent", new ColumnMetadata { Alias = "Period CPU %", Description = "CPU usage as a percentage during the period", FormatString = "N1" } },
+                    { "period_cpu_percent", new ColumnMetadata { Alias = "Period CPU %", Description = "CPU usage as a percentage during the period", FormatString = "P1" } },
                     { "period_cpu_share_percent", new ColumnMetadata { Alias = "Period CPU Share %", Description = "Percentage share of total CPU usage during the period", FormatString = "P1" } },
                     { "cpu_cap_near_threshold_percent", new ColumnMetadata { Alias = "CPU Near Cap %", Description = "Percentage of time CPU usage was at or above 95% of the cap (throttling indicator)", FormatString = "P1",
                         Highlighting = new CellHighlightingRuleSet("cpu_cap_near_threshold_percent")
@@ -67,12 +67,12 @@ namespace DBADashGUI.Performance
                     { "period_memgrant_timeout_count_per_min", new ColumnMetadata { Alias = "Period Memory Grant Timeouts/Min", Description = "Memory grant timeouts per minute during the period", FormatString = "N1",
                         Highlighting = new CellHighlightingRuleSet("period_memgrant_timeout_count_per_min")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },} },
                     { "period_out_of_memory_count_per_min", new ColumnMetadata { Alias = "Period Out of Memory/Min", Description = "Out of memory events per minute during the period", FormatString = "N1",
                         Highlighting = new CellHighlightingRuleSet("period_out_of_memory_count_per_min")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },} },
                     { "period_read_io_queued_per_min", new ColumnMetadata { Alias = "Period Read I/O Queued/Min", Description = "Read I/Os queued per minute during the period", FormatString = "N1" } },
                     { "period_read_io_issued_per_min", new ColumnMetadata { Alias = "Period Read I/O Issued/Min", Description = "Read I/Os issued per minute during the period", FormatString = "N1" } },
@@ -80,14 +80,14 @@ namespace DBADashGUI.Performance
                     { "period_read_io_throttled_per_min", new ColumnMetadata { Alias = "Period Read I/O Throttled/Min", Description = "Read I/Os throttled per minute during the period", FormatString = "N1",
                         Highlighting = new CellHighlightingRuleSet("period_read_io_throttled_per_min")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },} },
                     { "period_read_mb_per_sec", new ColumnMetadata { Alias = "Period Read MB/Sec", Description = "Read throughput in MB per second during the period", FormatString = "N1" } },
                     { "period_read_io_stall_ms_per_min", new ColumnMetadata { Alias = "Period Read I/O Stall ms/Min", Description = "Read I/O stall time in milliseconds per minute during the period", FormatString = "N1" } },
                     { "period_read_io_stall_queued_ms_per_min", new ColumnMetadata { Alias = "Period Read I/O Stall Queued ms/Min", Description = "Read I/O stall queued time in milliseconds per minute during the period. Delay introduced by I/O Resource Governance", FormatString = "N1",
                         Highlighting = new CellHighlightingRuleSet("period_read_io_stall_queued_ms_per_min")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },} },
                     { "period_write_io_queued_per_min", new ColumnMetadata { Alias = "Period Write I/O Queued/Min", Description = "Write I/Os queued per minute during the period", FormatString = "N1" } },
                     { "period_write_io_issued_per_min", new ColumnMetadata { Alias = "Period Write I/O Issued/Min", Description = "Write I/Os issued per minute during the period", FormatString = "N1" } },
@@ -95,19 +95,19 @@ namespace DBADashGUI.Performance
                     { "period_write_io_throttled_per_min", new ColumnMetadata { Alias = "Period Write I/O Throttled/Min", Description = "Write I/Os throttled per minute during the period", FormatString = "N1",
                         Highlighting = new CellHighlightingRuleSet("period_write_io_throttled_per_min")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },} },
                     { "period_write_mb_per_sec", new ColumnMetadata { Alias = "Period Write MB/Sec", Description = "Write throughput in MB per second during the period" , FormatString = "N1"} },
                     { "period_write_io_stall_ms_per_min", new ColumnMetadata { Alias = "Period Write I/O Stall ms/Min", Description = "Write I/O stall time in milliseconds per minute during the period", FormatString = "N1" } },
                     { "period_write_io_stall_queued_ms_per_min", new ColumnMetadata { Alias = "Period Write I/O Stall Queued ms/Min", Description = "Write I/O stall queued time in milliseconds per minute during the period. Delay introduced by I/O Resource Governance", FormatString = "N1",
                         Highlighting = new CellHighlightingRuleSet("period_write_io_stall_queued_ms_per_min")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },} },
                     { "period_io_issue_delay_ms_per_min", new ColumnMetadata { Alias = "Period I/O Issue Delay ms/Min", Description = "I/O issue delay in milliseconds per minute during the period. Delay between scheduled and actual I/O issue", FormatString = "N1",
                         Highlighting = new CellHighlightingRuleSet("period_io_issue_delay_ms_per_min")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },} },
                     { "period_io_issue_delay_non_throttled_ms_per_min", new ColumnMetadata { Alias = "Period I/O Issue Delay Non-Throttled ms/Min", Description = "Non-throttled I/O issue delay in milliseconds per minute during the period", FormatString = "N1" } },
                     { "period_cpu_delayed_ms_per_min", new ColumnMetadata { Alias = "Period CPU Delayed ms/Min", Description = "CPU delay time in milliseconds per minute during the period", FormatString = "N1" } },
@@ -115,12 +115,12 @@ namespace DBADashGUI.Performance
                     { "period_cpu_violation_delay_ms_per_min", new ColumnMetadata { Alias = "Period CPU Violation Delay ms/Min", Description = "CPU violation delay in milliseconds per minute during the period. CPU time delay below minimum guarantee", FormatString = "N1",
                         Highlighting = new CellHighlightingRuleSet("period_cpu_violation_delay_ms_per_min")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },} },
                     { "period_cpu_violation_sec_per_min", new ColumnMetadata { Alias = "Period CPU Violation Sec/Min", Description = "CPU violation time in seconds per minute during the period. Time spent in CPU violation state", FormatString = "N1",
                         Highlighting = new CellHighlightingRuleSet("period_cpu_violation_sec_per_min")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },} },
                     { "period_cpu_usage_preemptive_ms_per_min", new ColumnMetadata { Alias = "Period CPU Preemptive ms/Min", Description = "Preemptive CPU usage in milliseconds per minute during the period", FormatString = "N1" } },
 
@@ -135,14 +135,14 @@ namespace DBADashGUI.Performance
                     { "total_memgrant_timeout_count", new ColumnMetadata { Alias = "Total Memory Grant Timeout Count", Description = "The cumulative count of memory grant time-outs in this resource pool",
                         Highlighting = new CellHighlightingRuleSet("total_memgrant_timeout_count")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },} },
                     { "active_memgrant_count", new ColumnMetadata { Alias = "Active Memory Grant Count", Description = "The current count of memory grants" } },
                     { "active_memgrant_kb", new ColumnMetadata { Alias = "Active Memory Grant (KB)", Description = "The sum, in kilobytes, of current memory grants" } },
                     { "memgrant_waiter_count", new ColumnMetadata { Alias = "Memory Grant Waiter Count", Description = "The count of queries currently pending on memory grants. Indicates memory pressure",
                         Highlighting = new CellHighlightingRuleSet("memgrant_waiter_count")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },} },
                     { "max_memory_kb", new ColumnMetadata { Alias = "Max Memory (KB)", Description = "The maximum amount of memory, in kilobytes, that the resource pool can use as query workspace memory" } },
                     { "used_memory_kb", new ColumnMetadata { Alias = "Used Memory (KB)", Description = "The amount of query workspace memory used, in kilobytes, for the resource pool" } },
@@ -150,7 +150,7 @@ namespace DBADashGUI.Performance
                     { "out_of_memory_count", new ColumnMetadata { Alias = "Out of Memory Count", Description = "The number of failed memory allocations in the pool since the resource governor statistics were reset",
                         Highlighting = new CellHighlightingRuleSet("out_of_memory_count")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },} },
 
                     // Configuration settings
@@ -169,14 +169,14 @@ namespace DBADashGUI.Performance
                     { "read_io_throttled_total", new ColumnMetadata { Alias = "Read I/O Throttled Total", Description = "The total read I/Os throttled since the resource governor statistics were reset",
                         Highlighting = new CellHighlightingRuleSet("read_io_throttled_total")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },} },
                     { "read_bytes_total", new ColumnMetadata { Alias = "Read Bytes Total", Description = "The total number of bytes read since the resource governor statistics were reset" } },
                     { "read_io_stall_total_ms", new ColumnMetadata { Alias = "Read I/O Stall Total (ms)", Description = "Total time (in milliseconds) between read I/O arrival and completion" } },
                     { "read_io_stall_queued_ms", new ColumnMetadata { Alias = "Read I/O Stall Queued (ms)", Description = "Total time (in milliseconds) between read I/O arrival and issue. Delay introduced by I/O Resource Governance",
                         Highlighting = new CellHighlightingRuleSet("read_io_stall_queued_ms")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },} },
                     { "write_io_queued_total", new ColumnMetadata { Alias = "Write I/O Queued Total", Description = "The total write I/Os enqueued since the resource governor statistics were reset" } },
                     { "write_io_issued_total", new ColumnMetadata { Alias = "Write I/O Issued Total", Description = "The total write I/Os issued since the resource governor statistics were reset" } },
@@ -184,7 +184,7 @@ namespace DBADashGUI.Performance
                     { "write_io_throttled_total", new ColumnMetadata { Alias = "Write I/O Throttled Total", Description = "The total write I/Os throttled since the resource governor statistics were reset",
                         Highlighting = new CellHighlightingRuleSet("write_io_throttled_total")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },} },
                     { "write_bytes_total", new ColumnMetadata { Alias = "Write Bytes Total", Description = "The total number of bytes written since the resource governor statistics were reset" } },
                     { "write_io_stall_total_ms", new ColumnMetadata { Alias = "Write I/O Stall Total (ms)", Description = "Total time (in milliseconds) between write I/O arrival and completion" } },
@@ -192,12 +192,12 @@ namespace DBADashGUI.Performance
                     { "io_issue_violations_total", new ColumnMetadata { Alias = "I/O Issue Violations Total", Description = "Total I/O issue violations. That is, the number of times when the rate of I/O issue was lower than the reserved rate",
                         Highlighting = new CellHighlightingRuleSet("io_issue_violations_total")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },} },
                     { "io_issue_delay_total_ms", new ColumnMetadata { Alias = "I/O Issue Delay Total (ms)", Description = "Total time (in milliseconds) between the scheduled issue and actual issue of I/O",
                         Highlighting = new CellHighlightingRuleSet("io_issue_delay_total_ms")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },} },
                     { "io_issue_delay_non_throttled_total_ms", new ColumnMetadata { Alias = "I/O Issue Delay Non-Throttled Total (ms)", Description = "Total time (in milliseconds) between the scheduled issue and actual issue of a non-throttled I/O" } },
 
@@ -207,12 +207,12 @@ namespace DBADashGUI.Performance
                     { "total_cpu_violation_delay_ms", new ColumnMetadata { Alias = "Total CPU Violation Delay (ms)", Description = "Total CPU violation delays (in milliseconds). That is, total CPU time delay that was lower than the minimum guaranteed delay",
                         Highlighting = new CellHighlightingRuleSet("total_cpu_violation_delay_ms")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },} },
                     { "total_cpu_violation_sec", new ColumnMetadata { Alias = "Total CPU Violation (sec)", Description = "Total CPU violations (in seconds). That is, total time accrued when a CPU time violation was in-flight",
                         Highlighting = new CellHighlightingRuleSet("total_cpu_violation_sec")
                         {
-                            Rules = WarningIfCreaterThanZeroGreenIfZero
+                            Rules = WarningIfGreaterThanZeroGreenIfZero
                         },} },
                     { "total_cpu_usage_preemptive_ms", new ColumnMetadata { Alias = "Total CPU Preemptive (ms)", Description = "Total CPU time used while in preemptive mode scheduling for the workload group (in milliseconds)" } },
                 }

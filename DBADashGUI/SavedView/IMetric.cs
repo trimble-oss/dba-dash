@@ -16,7 +16,8 @@ namespace DBADashGUI.Performance
             Blocking,
             ObjectExecution,
             Waits,
-            ResourceGovernorWorkloadGroups
+            ResourceGovernorWorkloadGroups,
+            ResourceGovernorResourcePools
         }
 
         public enum AggregateTypes

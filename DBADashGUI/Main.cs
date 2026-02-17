@@ -151,7 +151,6 @@ namespace DBADashGUI
             tabTuningRecommendations.Controls.Add(new TuningRecommendationsReport() { Dock = DockStyle.Fill });
 
             tabPoolsAndGroups = new TabPage("Resource Governor") { Name = Tabs.PoolsAndGroups.TabName() };
-            var tabRGTabs = new ThemedTabControl() { Dock = DockStyle.Fill, Alignment = TabAlignment.Bottom };
 
             tabPoolsAndGroups.Controls.Add(new ResourceGovernorPerformance { Dock = DockStyle.Fill });
         }
