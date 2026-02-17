@@ -20,7 +20,8 @@ namespace DBADashGUI.Performance
     public partial class ResourceGovernorResourcePools : UserControl, IRefreshData, ISetContext, IMetricChart
     {
         private DBADashContext CurrentContext;
-        private int DateGrouping => DateHelper.DateGrouping(DateRange.DurationMins, 200);
+        private int DateGrouping;
+        private int durationMins;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool CloseVisible
@@ -92,6 +93,15 @@ namespace DBADashGUI.Performance
             InitializeComponent();
             InitializeMetricsMenu();
             UpdateChartTypeIcon();
+            DateHelper.AddDateGroups(tsDateGrouping, DateGrouping_Click);
+        }
+
+        private void DateGrouping_Click(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            DateGrouping = Convert.ToInt32(ts.Tag);
+            tsDateGrouping.Text = DateHelper.DateGroupString(DateGrouping);
+            RefreshData();
         }
 
         private List<string> MetricsToLoad = new List<string>()
@@ -137,6 +147,12 @@ namespace DBADashGUI.Performance
             // Prevent concurrent refreshes
             if (isRefreshing) return;
             isRefreshing = true;
+            if (durationMins != DateRange.DurationMins) // Update date grouping only if date range has changed
+            {
+                DateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 200);
+                tsDateGrouping.Text = DateHelper.DateGroupString(DateGrouping);
+                durationMins = DateRange.DurationMins;
+            }
 
             try
             {
@@ -184,7 +200,8 @@ namespace DBADashGUI.Performance
                             SeriesColumn = "name",
                             MetricColumn = metric,
                             XAxisMin = DateRange.FromUTC,
-                            XAxisMax = DateRange.ToUTC
+                            XAxisMax = DateRange.ToUTC,
+                            GeometrySize = durationMins / Math.Max(DateGrouping, 1) > 500 ? 0 : ChartConfiguration.DefaultGeometrySize
                         }
                      );
                     chart.ApplyTheme();
