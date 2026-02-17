@@ -44,15 +44,16 @@
             tsUp = new System.Windows.Forms.ToolStripButton();
             tsHideTable = new System.Windows.Forms.ToolStripButton();
             toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            pnlCharts = new System.Windows.Forms.Panel();
             tsViewConfig = new System.Windows.Forms.ToolStripButton();
+            pnlCharts = new System.Windows.Forms.Panel();
+            tsDateGrouping = new System.Windows.Forms.ToolStripDropDownButton();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsMetrics, tsChartType, tsClose, tsUp, tsHideTable, toolStripLabel1, tsViewConfig });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsDateGrouping, tsMetrics, tsChartType, tsClose, tsUp, tsHideTable, toolStripLabel1, tsViewConfig });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1009, 27);
@@ -154,14 +155,6 @@
             toolStripLabel1.Size = new System.Drawing.Size(132, 24);
             toolStripLabel1.Text = "Workload Groups";
             // 
-            // pnlCharts
-            // 
-            pnlCharts.Dock = System.Windows.Forms.DockStyle.Fill;
-            pnlCharts.Location = new System.Drawing.Point(0, 27);
-            pnlCharts.Name = "pnlCharts";
-            pnlCharts.Size = new System.Drawing.Size(1009, 488);
-            pnlCharts.TabIndex = 1;
-            // 
             // tsViewConfig
             // 
             tsViewConfig.Image = Properties.Resources.SettingsOutline_16x;
@@ -170,6 +163,22 @@
             tsViewConfig.Size = new System.Drawing.Size(113, 24);
             tsViewConfig.Text = "View Conifg";
             tsViewConfig.Click += ViewConfig_Click;
+            // 
+            // pnlCharts
+            // 
+            pnlCharts.Dock = System.Windows.Forms.DockStyle.Fill;
+            pnlCharts.Location = new System.Drawing.Point(0, 27);
+            pnlCharts.Name = "pnlCharts";
+            pnlCharts.Size = new System.Drawing.Size(1009, 488);
+            pnlCharts.TabIndex = 1;
+            // 
+            // tsDateGrouping
+            // 
+            tsDateGrouping.Image = Properties.Resources.Time_16x;
+            tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsDateGrouping.Name = "tsDateGrouping";
+            tsDateGrouping.Size = new System.Drawing.Size(76, 24);
+            tsDateGrouping.Text = "1min";
             // 
             // ResourceGovernorWorkloadGroupsMetrics
             // 
@@ -200,5 +209,6 @@
         private System.Windows.Forms.ToolStripButton tsHideTable;
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripButton tsViewConfig;
+        private System.Windows.Forms.ToolStripDropDownButton tsDateGrouping;
     }
 }

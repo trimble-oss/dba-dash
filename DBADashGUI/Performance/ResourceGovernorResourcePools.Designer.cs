@@ -46,13 +46,14 @@
             toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             tsViewConfig = new System.Windows.Forms.ToolStripButton();
             pnlCharts = new System.Windows.Forms.Panel();
+            tsDateGrouping = new System.Windows.Forms.ToolStripDropDownButton();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsMetrics, tsChartType, tsClose, tsUp, tsHideTable, toolStripLabel1, tsViewConfig });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsDateGrouping, tsMetrics, tsChartType, tsClose, tsUp, tsHideTable, toolStripLabel1, tsViewConfig });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1009, 27);
@@ -171,6 +172,14 @@
             pnlCharts.Size = new System.Drawing.Size(1009, 488);
             pnlCharts.TabIndex = 1;
             // 
+            // tsDateGrouping
+            // 
+            tsDateGrouping.Image = Properties.Resources.Time_16x;
+            tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsDateGrouping.Name = "tsDateGrouping";
+            tsDateGrouping.Size = new System.Drawing.Size(76, 24);
+            tsDateGrouping.Text = "1min";
+            // 
             // ResourceGovernorResourcePools
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -200,5 +209,6 @@
         private System.Windows.Forms.ToolStripButton tsHideTable;
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripButton tsViewConfig;
+        private System.Windows.Forms.ToolStripDropDownButton tsDateGrouping;
     }
 }
