@@ -37,7 +37,7 @@ namespace DBADashGUI.Performance
                     { "period_cpu_usage_ms", new ColumnMetadata { Alias = "Period CPU Usage (ms)", Description = "CPU usage in milliseconds during the period" , FormatString = "N1"} },
                     { "period_cpu_cores", new ColumnMetadata { Alias = "Period CPU Cores", Description = "Average CPU cores used during the period", FormatString = "N1" } },
                     { "period_cpu_percent", new ColumnMetadata { Alias = "Period CPU %", Description = "CPU usage as a percentage during the period", FormatString = "N1" } },
-                    { "period_cpu_share_percent", new ColumnMetadata { Alias = "Period CPU Share %", Description = "Percentage share of total CPU usage during the period", FormatString = "N1" } },
+                    { "period_cpu_share_percent", new ColumnMetadata { Alias = "Period CPU Share %", Description = "Percentage share of total CPU usage during the period", FormatString = "P1" } },
                     { "cpu_cap_near_threshold_percent", new ColumnMetadata { Alias = "CPU Near Cap %", Description = "Percentage of time CPU usage was at or above 95% of the cap (throttling indicator)", FormatString = "P1",
                         Highlighting = new CellHighlightingRuleSet("cpu_cap_near_threshold_percent")
                         {
