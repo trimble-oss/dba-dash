@@ -270,7 +270,7 @@ namespace DBADash
             // Feature didn't exist before SQL 2008 (v10)
             if (SQLVersion.Major < 10) return false;
 
-            if (SQLVersion.Major >= 16)
+            if (SQLVersion.Major >= 17)
             {
                 // SQL 2025+ supports both Enterprise and Standard (Including Enterprise Developer & Standard Developer)
                 return engineEdition is DatabaseEngineEdition.Enterprise or DatabaseEngineEdition.Standard;

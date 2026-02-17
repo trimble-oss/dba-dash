@@ -35,6 +35,7 @@
         {
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
+            tsDateGrouping = new System.Windows.Forms.ToolStripDropDownButton();
             tsMetrics = new System.Windows.Forms.ToolStripDropDownButton();
             tsChartType = new System.Windows.Forms.ToolStripDropDownButton();
             stackedAreaToolstripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,7 +47,6 @@
             toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             tsViewConfig = new System.Windows.Forms.ToolStripButton();
             pnlCharts = new System.Windows.Forms.Panel();
-            tsDateGrouping = new System.Windows.Forms.ToolStripDropDownButton();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -69,6 +69,14 @@
             tsRefresh.Size = new System.Drawing.Size(29, 24);
             tsRefresh.Text = "Refresh";
             tsRefresh.Click += Refresh_Click;
+            // 
+            // tsDateGrouping
+            // 
+            tsDateGrouping.Image = Properties.Resources.Time_16x;
+            tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsDateGrouping.Name = "tsDateGrouping";
+            tsDateGrouping.Size = new System.Drawing.Size(76, 24);
+            tsDateGrouping.Text = "1min";
             // 
             // tsMetrics
             // 
@@ -161,7 +169,7 @@
             tsViewConfig.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsViewConfig.Name = "tsViewConfig";
             tsViewConfig.Size = new System.Drawing.Size(113, 24);
-            tsViewConfig.Text = "View Conifg";
+            tsViewConfig.Text = "View Config";
             tsViewConfig.Click += ViewConfig_Click;
             // 
             // pnlCharts
@@ -171,14 +179,6 @@
             pnlCharts.Name = "pnlCharts";
             pnlCharts.Size = new System.Drawing.Size(1009, 488);
             pnlCharts.TabIndex = 1;
-            // 
-            // tsDateGrouping
-            // 
-            tsDateGrouping.Image = Properties.Resources.Time_16x;
-            tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsDateGrouping.Name = "tsDateGrouping";
-            tsDateGrouping.Size = new System.Drawing.Size(76, 24);
-            tsDateGrouping.Text = "1min";
             // 
             // ResourceGovernorResourcePools
             // 

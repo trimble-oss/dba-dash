@@ -1192,7 +1192,7 @@ FROM (VALUES('dbo','ObjectExecutionStats',120),
 				('dbo','FailedLogins',90 ),
 				('dbo','RunningQueriesCursors',30),
 				('dbo','ResourceGovernorWorkloadGroupsMetrics',90),
-				('dbo','ResourceGovernorResourcePools',90)
+				('dbo','ResourceGovernorResourcePoolsMetrics',90)
 				) AS t(SchemaName,TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1 
 				FROM dbo.DataRetention DR

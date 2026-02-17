@@ -7,13 +7,13 @@ using System.Collections.Generic;
 namespace DBADashGUI
 {
     /// <summary>
-    /// Used by ResourceGovernorWorkloadGroupsMetrics to store the state of the user control for serialization
+    /// Used by ResourceGovernorResourcePools to store the state of the user control for serialization
     /// </summary>
     public class ResourceGovernorResourcePoolMetric : IMetric
     {
         public static readonly List<string> DefaultMetrics = ["cpu_percent", "cpu_cap_utilization_percent", "read_mb_per_sec"];
 
-        public IMetric.MetricTypes MetricType => IMetric.MetricTypes.ResourceGovernorWorkloadGroups;
+        public IMetric.MetricTypes MetricType => IMetric.MetricTypes.ResourceGovernorResourcePools;
 
         public bool ShowTable { get; set; } = true;
 
