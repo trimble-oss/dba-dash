@@ -342,5 +342,10 @@ namespace DBADashGUI.Performance
         {
             AddChartControl(new ResourceGovernorWorkloadGroupsMetrics() { Metric = new ResourceGovernorWorkloadGroupsMetric() { ShowTable = false, MetricsToDisplay = [.. ResourceGovernorWorkloadGroupsMetric.DefaultMetrics.Take<string>(1)] } });
         }
+
+        private void ResourcePoolAnalysis_Click(object sender, EventArgs e)
+        {
+            AddChartControl(new ResourceGovernorResourcePools() { Metric = new ResourceGovernorResourcePoolMetric() { ShowTable = false, MetricsToDisplay = [.. ResourceGovernorResourcePoolMetric.DefaultMetrics.Take<string>(1)] } });
+        }
     }
 }
