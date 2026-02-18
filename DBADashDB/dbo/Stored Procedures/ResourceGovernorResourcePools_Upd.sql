@@ -10,6 +10,7 @@ AS
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
 DECLARE @Ref VARCHAR(30) = 'ResourceGovernorResourcePools';
+DECLARE @IntWrapValue BIGINT = 4294967296; /* 2^32: Used to handle INT counter wraparound when counters exceed max INT value */
 
 IF NOT EXISTS (
 	SELECT 1
@@ -72,21 +73,21 @@ BEGIN
 			T.total_memgrant_count - RP.total_memgrant_count AS  diff_memgrant_count,
 			T.total_memgrant_timeout_count - RP.total_memgrant_timeout_count AS  diff_memgrant_timeout_count,
 			T.out_of_memory_count - RP.out_of_memory_count AS diff_out_of_memory_count,
-			T.read_io_queued_total - RP.read_io_queued_total AS diff_read_io_queued,
-			T.read_io_issued_total - RP.read_io_issued_total AS diff_read_io_issued,
-			T.read_io_completed_total - RP.read_io_completed_total AS diff_read_io_completed,
-			T.read_io_throttled_total - RP.read_io_throttled_total AS diff_read_io_throttled,
+			CASE WHEN T.read_io_queued_total >= RP.read_io_queued_total THEN T.read_io_queued_total - RP.read_io_queued_total ELSE CAST(T.read_io_queued_total AS BIGINT) - CAST(RP.read_io_queued_total AS BIGINT) + @IntWrapValue END AS diff_read_io_queued,
+			CASE WHEN T.read_io_issued_total >= RP.read_io_issued_total THEN T.read_io_issued_total - RP.read_io_issued_total ELSE CAST(T.read_io_issued_total AS BIGINT) - CAST(RP.read_io_issued_total AS BIGINT) + @IntWrapValue END AS diff_read_io_issued,
+			CASE WHEN T.read_io_completed_total >= RP.read_io_completed_total THEN T.read_io_completed_total - RP.read_io_completed_total ELSE CAST(T.read_io_completed_total AS BIGINT) - CAST(RP.read_io_completed_total AS BIGINT) + @IntWrapValue END AS diff_read_io_completed,
+			CASE WHEN T.read_io_throttled_total >= RP.read_io_throttled_total THEN T.read_io_throttled_total - RP.read_io_throttled_total ELSE CAST(T.read_io_throttled_total AS BIGINT) - CAST(RP.read_io_throttled_total AS BIGINT) + @IntWrapValue END AS diff_read_io_throttled,
 			T.read_bytes_total - RP.read_bytes_total AS diff_read_bytes,
 			T.read_io_stall_total_ms - RP.read_io_stall_total_ms AS diff_read_io_stall_ms,
 			T.read_io_stall_queued_ms - RP.read_io_stall_queued_ms AS diff_read_io_stall_queued_ms,
-			T.write_io_queued_total - RP.write_io_queued_total AS diff_write_io_queued,
-			T.write_io_issued_total - RP.write_io_issued_total AS diff_write_io_issued,
-			T.write_io_completed_total - RP.write_io_completed_total AS diff_write_io_completed,
-			T.write_io_throttled_total - RP.write_io_throttled_total AS diff_write_io_throttled,
+			CASE WHEN T.write_io_queued_total >= RP.write_io_queued_total THEN T.write_io_queued_total - RP.write_io_queued_total ELSE CAST(T.write_io_queued_total AS BIGINT) - CAST(RP.write_io_queued_total AS BIGINT) + @IntWrapValue END AS diff_write_io_queued,
+			CASE WHEN T.write_io_issued_total >= RP.write_io_issued_total THEN T.write_io_issued_total - RP.write_io_issued_total ELSE CAST(T.write_io_issued_total AS BIGINT) - CAST(RP.write_io_issued_total AS BIGINT) + @IntWrapValue END AS diff_write_io_issued,
+			CASE WHEN T.write_io_completed_total >= RP.write_io_completed_total THEN T.write_io_completed_total - RP.write_io_completed_total ELSE CAST(T.write_io_completed_total AS BIGINT) - CAST(RP.write_io_completed_total AS BIGINT) + @IntWrapValue END AS diff_write_io_completed,
+			CASE WHEN T.write_io_throttled_total >= RP.write_io_throttled_total THEN T.write_io_throttled_total - RP.write_io_throttled_total ELSE CAST(T.write_io_throttled_total AS BIGINT) - CAST(RP.write_io_throttled_total AS BIGINT) + @IntWrapValue END AS diff_write_io_throttled,
 			T.write_bytes_total - RP.write_bytes_total AS diff_write_bytes,
 			T.write_io_stall_total_ms - RP.write_io_stall_total_ms AS diff_write_io_stall_ms,
 			T.write_io_stall_queued_ms - RP.write_io_stall_queued_ms AS diff_write_io_stall_queued_ms,
-			T.io_issue_violations_total - RP.io_issue_violations_total AS diff_io_issue_violations,
+			CASE WHEN T.io_issue_violations_total >= RP.io_issue_violations_total THEN T.io_issue_violations_total - RP.io_issue_violations_total ELSE CAST(T.io_issue_violations_total AS BIGINT) - CAST(RP.io_issue_violations_total AS BIGINT) + @IntWrapValue END AS diff_io_issue_violations,
 			T.io_issue_delay_total_ms - RP.io_issue_delay_total_ms AS diff_io_issue_delay_ms,
 			T.io_issue_delay_non_throttled_total_ms - RP.io_issue_delay_non_throttled_total_ms AS diff_io_issue_delay_non_throttled_ms,
 			T.total_cpu_delayed_ms - RP.total_cpu_delayed_ms AS diff_cpu_delayed_ms,
