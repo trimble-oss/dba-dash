@@ -3,6 +3,7 @@ using DBADashGUI.Charts;
 using DBADashGUI.CustomReports;
 using DBADashGUI.Theme;
 using Humanizer;
+using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView.WinForms;
 using Microsoft.Data.SqlClient;
 using SkiaSharp;
@@ -22,6 +23,7 @@ namespace DBADashGUI.Performance
         private DBADashContext CurrentContext;
         private int DateGrouping;
         private int durationMins;
+        private LegendPosition legendPosition = LegendPosition.Bottom;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool CloseVisible
@@ -215,10 +217,11 @@ namespace DBADashGUI.Performance
                             MetricColumn = metric,
                             XAxisMin = DateRange.FromUTC,
                             XAxisMax = DateRange.ToUTC,
+                            LegendPosition = legendPosition,
                             GeometrySize = durationMins / Math.Max(DateGrouping, 1) > 500 ? 0 : ChartConfiguration.DefaultGeometrySize
                         }
                      );
-                     chart.ApplyTheme();
+                    chart.ApplyTheme();
 
                     var chartPanel = ChartLayoutHelper.CreateResizablePanel(chart, metric, rowCount > 1, resizeHelper);
                     chartPanel.ApplyTheme();
@@ -556,6 +559,17 @@ namespace DBADashGUI.Performance
             rg.SetContext(CurrentContext);
             frm.Controls.Add(rg);
             await frm.ShowSingleInstanceAsync();
+        }
+
+        private void SetLegendPosition(object sender, EventArgs e)
+        {
+            var item = (ToolStripMenuItem)sender;
+            Enum.TryParse(item.Tag.ToString(), out legendPosition);
+            foreach (ToolStripMenuItem menuItem in tsLegend.DropDownItems.OfType<ToolStripMenuItem>())
+            {
+                menuItem.Checked = menuItem == item;
+            }
+            RefreshData();
         }
     }
 }
