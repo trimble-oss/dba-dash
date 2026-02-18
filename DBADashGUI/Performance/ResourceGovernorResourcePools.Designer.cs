@@ -43,6 +43,12 @@
             lineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsClose = new System.Windows.Forms.ToolStripButton();
             tsUp = new System.Windows.Forms.ToolStripButton();
+            tsLegend = new System.Windows.Forms.ToolStripDropDownButton();
+            leftToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            rightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            topToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            bottomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            hiddenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsHideTable = new System.Windows.Forms.ToolStripButton();
             toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             tsViewConfig = new System.Windows.Forms.ToolStripButton();
@@ -53,7 +59,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsDateGrouping, tsMetrics, tsChartType, tsClose, tsUp, tsHideTable, toolStripLabel1, tsViewConfig });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsDateGrouping, tsMetrics, tsChartType, tsClose, tsUp, tsLegend, tsHideTable, toolStripLabel1, tsViewConfig });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1009, 27);
@@ -145,6 +151,58 @@
             tsUp.Text = "Move Up";
             tsUp.Click += MoveUp_Click;
             // 
+            // tsLegend
+            // 
+            tsLegend.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsLegend.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { leftToolStripMenuItem, rightToolStripMenuItem, topToolStripMenuItem, bottomToolStripMenuItem, hiddenToolStripMenuItem });
+            tsLegend.Image = Properties.Resources.LegendHS;
+            tsLegend.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsLegend.Name = "tsLegend";
+            tsLegend.Size = new System.Drawing.Size(34, 24);
+            tsLegend.Text = "Legend Position";
+            // 
+            // leftToolStripMenuItem
+            // 
+            leftToolStripMenuItem.Name = "leftToolStripMenuItem";
+            leftToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            leftToolStripMenuItem.Tag = "Left";
+            leftToolStripMenuItem.Text = "Left";
+            leftToolStripMenuItem.Click += SetLegendPosition;
+            // 
+            // rightToolStripMenuItem
+            // 
+            rightToolStripMenuItem.Name = "rightToolStripMenuItem";
+            rightToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            rightToolStripMenuItem.Tag = "Right";
+            rightToolStripMenuItem.Text = "Right";
+            rightToolStripMenuItem.Click += SetLegendPosition;
+            // 
+            // topToolStripMenuItem
+            // 
+            topToolStripMenuItem.Name = "topToolStripMenuItem";
+            topToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            topToolStripMenuItem.Tag = "Top";
+            topToolStripMenuItem.Text = "Top";
+            topToolStripMenuItem.Click += SetLegendPosition;
+            // 
+            // bottomToolStripMenuItem
+            // 
+            bottomToolStripMenuItem.Checked = true;
+            bottomToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            bottomToolStripMenuItem.Name = "bottomToolStripMenuItem";
+            bottomToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            bottomToolStripMenuItem.Tag = "Bottom";
+            bottomToolStripMenuItem.Text = "Bottom";
+            bottomToolStripMenuItem.Click += SetLegendPosition;
+            // 
+            // hiddenToolStripMenuItem
+            // 
+            hiddenToolStripMenuItem.Name = "hiddenToolStripMenuItem";
+            hiddenToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            hiddenToolStripMenuItem.Tag = "Hidden";
+            hiddenToolStripMenuItem.Text = "Hidden";
+            hiddenToolStripMenuItem.Click += SetLegendPosition;
+            // 
             // tsHideTable
             // 
             tsHideTable.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -210,5 +268,11 @@
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripButton tsViewConfig;
         private System.Windows.Forms.ToolStripDropDownButton tsDateGrouping;
+        private System.Windows.Forms.ToolStripDropDownButton tsLegend;
+        private System.Windows.Forms.ToolStripMenuItem leftToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem rightToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem topToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem bottomToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem hiddenToolStripMenuItem;
     }
 }
