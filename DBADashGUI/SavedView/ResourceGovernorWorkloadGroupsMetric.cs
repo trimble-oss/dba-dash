@@ -22,6 +22,8 @@ namespace DBADashGUI
 
         public List<string> MetricsToDisplay { get; set; } = [.. DefaultMetrics];
 
+        public Dictionary<string, float> RowPercentages { get; set; } = new();
+
         public IMetricChart GetChart()
         {
             return new ResourceGovernorWorkloadGroupsMetrics() { Metric = this };

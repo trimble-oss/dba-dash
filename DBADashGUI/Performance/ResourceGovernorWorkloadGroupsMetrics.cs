@@ -84,10 +84,18 @@ namespace DBADashGUI.Performance
             set => _metric.MetricsToDisplay = value;
         }
 
+        private Dictionary<string, float> RowPercentages
+        {
+            get => _metric.RowPercentages;
+            set => _metric.RowPercentages = value;
+        }
+
         private Dictionary<string, SKColor> groupColors = new Dictionary<string, SKColor>();
         private bool isRefreshing = false;
         private CancellationTokenSource colorExtractionCts;
         private CustomReportResult reportResult = ResourceGovernorWorkloadGroupsReport.GetReportResult();
+        private ControlResizeHelper resizeHelper = new ControlResizeHelper();
+        private string lastLayoutKey = string.Empty;
 
         public ResourceGovernorWorkloadGroupsMetrics()
         {
@@ -154,10 +162,14 @@ namespace DBADashGUI.Performance
                 var rowCount = MetricsToDisplay.Count + (ShowTable ? 1 : 0);
                 if (rowCount == 0)
                 {
-                    // Nothing to display, return
                     return;
                 }
-                // Create a TableLayoutPanel for vertical layout
+
+                if (ChartLayoutHelper.HasLayoutChanged(ref lastLayoutKey, MetricsToDisplay, ShowTable))
+                {
+                    RowPercentages.Clear();
+                }
+
                 var tableLayout = new TableLayoutPanel
                 {
                     Dock = DockStyle.Fill,
@@ -165,15 +177,16 @@ namespace DBADashGUI.Performance
                     RowCount = rowCount
                 };
 
-                // Configure column and rows
                 tableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
 
-                float rowPercent = 100F / rowCount;
+                float defaultRowPercent = 100F / rowCount;
                 CartesianChart firstChart = null;
+
                 for (int i = 0; i < MetricsToDisplay.Count; i++)
                 {
-                    tableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, rowPercent));
                     var metric = MetricsToDisplay[i];
+                    var rowPercent = RowPercentages.ContainsKey(metric) ? RowPercentages[metric] : defaultRowPercent;
+                    tableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, rowPercent));
                     var y_format = metric.Contains("percent", StringComparison.OrdinalIgnoreCase) ? "P1" : "N1";
                     var y_max = metric.Contains("percent", StringComparison.OrdinalIgnoreCase) ? 1 : (double?)null;
                     // Create chart for each metric
@@ -192,8 +205,11 @@ namespace DBADashGUI.Performance
                             GeometrySize = durationMins / Math.Max(DateGrouping, 1) > 500 ? 0 : ChartConfiguration.DefaultGeometrySize
                         }
                      );
-                    chart.ApplyTheme();
-                    tableLayout.Controls.Add(chart, 0, i);
+                     chart.ApplyTheme();
+
+                    var chartPanel = ChartLayoutHelper.CreateResizablePanel(chart, metric, rowCount > 1, resizeHelper);
+                    chartPanel.ApplyTheme();
+                    tableLayout.Controls.Add(chartPanel, 0, i);
 
                     // Keep reference to first chart for color extraction
                     if (i == 0)
@@ -204,7 +220,8 @@ namespace DBADashGUI.Performance
                 if (ShowTable)
                 {
                     var dt = await GetResourceGovernorWorkloadGroups();
-                    tableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, rowPercent));
+                    var tablePercent = RowPercentages.ContainsKey("Table") ? RowPercentages["Table"] : defaultRowPercent;
+                    tableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, tablePercent));
                     var dgv = new DBADashDataGridView()
                     {
                         Dock = DockStyle.Fill,
@@ -230,7 +247,8 @@ namespace DBADashGUI.Performance
                     dgv.DataBindingComplete += DataGridView_DataBindingComplete;
                     dgv.ApplyTheme();
 
-                    tableLayout.Controls.Add(dgv, 0, MetricsToDisplay.Count);
+                    var gridPanel = ChartLayoutHelper.CreateResizablePanel(dgv, "Table", rowCount > 1, resizeHelper);
+                    tableLayout.Controls.Add(gridPanel, 0, MetricsToDisplay.Count);
                 }
 
                 // Add the layout panel to the control
@@ -258,11 +276,13 @@ namespace DBADashGUI.Performance
                                 Invoke(new Action(() =>
                                 {
                                     groupColors = colors;
-                                    // Refresh the DataGridView to show the colors if we got any
-                                    if (ShowTable && groupColors.Count > 0 && tableLayout.Controls.Count > MetricsToDisplay.Count &&
-                                        tableLayout.Controls[MetricsToDisplay.Count] is DataGridView dgv)
+                                    if (ShowTable && groupColors.Count > 0 && tableLayout.Controls.Count > MetricsToDisplay.Count)
                                     {
-                                        dgv.Invalidate();
+                                        var gridPanel = tableLayout.Controls[MetricsToDisplay.Count] as Panel;
+                                        if (gridPanel?.Controls[0] is DataGridView dgv)
+                                        {
+                                            dgv.Invalidate();
+                                        }
                                     }
                                 }));
                             }
@@ -434,37 +454,21 @@ namespace DBADashGUI.Performance
 
         private void DisposeExistingControls()
         {
-            // Create a snapshot to avoid modifying collection during iteration
-            var controlsToDispose = pnlCharts.Controls.Cast<Control>().ToArray();
-
-            // Dispose all controls properly before clearing
-            foreach (Control control in controlsToDispose)
+            var tableLayout = pnlCharts.Controls.OfType<TableLayoutPanel>().FirstOrDefault();
+            if (tableLayout != null)
             {
-                if (control is TableLayoutPanel tableLayout)
-                {
-                    // Create snapshot of child controls
-                    var childControls = tableLayout.Controls.Cast<Control>().ToArray();
-
-                    // Dispose controls within the table layout
-                    foreach (Control childControl in childControls)
-                    {
-                        if (childControl is DataGridView dgv)
-                        {
-                            // Remove event handlers to prevent memory leaks
-                            dgv.RowsAdded -= Dgv_RowsAdded;
-                            dgv.CellFormatting -= DataGridView_CellFormatting;
-                            dgv.DataBindingComplete -= DataGridView_DataBindingComplete;
-                        }
-                        childControl.Dispose();
-                    }
-                    tableLayout.Dispose();
-                }
-                else
-                {
-                    control.Dispose();
-                }
+                ChartLayoutHelper.SaveRowPercentages(tableLayout, RowPercentages);
             }
-            pnlCharts.Controls.Clear();
+
+            ChartLayoutHelper.DisposeTableLayoutWithResizablePanels(pnlCharts, resizeHelper, control =>
+            {
+                if (control is DataGridView dgv)
+                {
+                    dgv.RowsAdded -= Dgv_RowsAdded;
+                    dgv.CellFormatting -= DataGridView_CellFormatting;
+                    dgv.DataBindingComplete -= DataGridView_DataBindingComplete;
+                }
+            });
         }
 
         private void SelectChartType_Click(object sender, EventArgs e)
