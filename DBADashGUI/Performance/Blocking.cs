@@ -103,6 +103,8 @@ namespace DBADashGUI.Performance
 
             // Create theme-aware paint for labels
             var labelPaint = CreateLabelPaint();
+            var labelFontSize = DBADashUser.ChartAxisLabelFontSize;
+            var nameFontSize = DBADashUser.ChartAxisNameFontSize;
 
             // Configure axes first (even if no data) to show proper date labels
             chartBlocking.XAxes = new[]
@@ -113,7 +115,9 @@ namespace DBADashGUI.Performance
                     MinLimit = fromTicks,
                     MaxLimit = toTicks,
                     LabelsPaint = labelPaint,
-                    NamePaint = labelPaint
+                    TextSize = labelFontSize,
+                    NamePaint = labelPaint,
+                    NameTextSize = nameFontSize
                 }
             };
 
@@ -124,7 +128,9 @@ namespace DBADashGUI.Performance
                     Labeler = value => value.ToString("0"),
                     MinLimit = 0,
                     LabelsPaint = labelPaint,
+                    TextSize = labelFontSize,
                     NamePaint = labelPaint,
+                    NameTextSize = nameFontSize,
                     Name = "Blocked Sessions"
                 }
             };

@@ -331,17 +331,25 @@ namespace DBADashGUI.Performance
             };
             chartClerk.Series = Array.Empty<ISeries>();
             chartClerk.XAxes = Array.Empty<Axis>();
+
+            var labelPaint = DBADashUser.SelectedTheme.ThemeIdentifier == ThemeType.Dark
+                ? new SolidColorPaint(DashColors.White.ToSKColor())
+                : new SolidColorPaint(DashColors.TrimbleBlueDark.ToSKColor());
+            var labelFontSize = DBADashUser.ChartAxisLabelFontSize;
+            var nameFontSize = DBADashUser.ChartAxisNameFontSize;
+
             chartClerk.YAxes = new[]
             {
                 new Axis
                 {
                     MinLimit = 0,
                     Labeler = val => val.ToString(format),
-                    LabelsPaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
-                    NamePaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
+                    LabelsPaint = labelPaint,
+                    TextSize = labelFontSize,
+                    NamePaint = labelPaint,
+                    NameTextSize = nameFontSize,
                     TicksPaint = new SolidColorPaint(new SKColor(0xCC, 0xCC, 0xCC)),
-                    SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0)),
-                    TextSize = 14
+                    SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0))
                 }
             };
 

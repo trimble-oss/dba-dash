@@ -156,6 +156,12 @@ namespace DBADashGUI.AgentJobs
             chart1.XAxes = Array.Empty<Axis>();
             chart1.YAxes = Array.Empty<Axis>();
 
+            var labelPaint = DBADashUser.SelectedTheme.ThemeIdentifier == ThemeType.Dark
+                ? new SolidColorPaint(DashColors.White.ToSKColor())
+                : new SolidColorPaint(DashColors.TrimbleBlueDark.ToSKColor());
+            var labelFontSize = DBADashUser.ChartAxisLabelFontSize;
+            var nameFontSize = DBADashUser.ChartAxisNameFontSize;
+
             chart1.YAxes = new[]
             {
                 new Axis
@@ -163,22 +169,24 @@ namespace DBADashGUI.AgentJobs
                     Name = "Duration",
                     Labeler = val => TimeSpan.FromSeconds(val).ToString(),
                     MinLimit = 0,
-                    LabelsPaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
-                    NamePaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
+                    LabelsPaint = labelPaint,
+                    TextSize = labelFontSize,
+                    NamePaint = labelPaint,
+                    NameTextSize = nameFontSize,
                     TicksPaint = new SolidColorPaint(new SKColor(0xCC, 0xCC, 0xCC)),
-                    SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0)),
-                    TextSize = 14
+                    SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0))
                 },
                 new Axis
                 {
                     Name = "Count",
                     Labeler = val => val.ToString("N0"),
                     MinLimit = 0,
-                    LabelsPaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
-                    NamePaint = new SolidColorPaint(new SKColor(0x99, 0x99, 0x99)),
+                    LabelsPaint = labelPaint,
+                    TextSize = labelFontSize,
+                    NamePaint = labelPaint,
+                    NameTextSize = nameFontSize,
                     TicksPaint = new SolidColorPaint(new SKColor(0xCC, 0xCC, 0xCC)),
-                    SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0)),
-                    TextSize = 14
+                    SubticksPaint = new SolidColorPaint(new SKColor(0xE0, 0xE0, 0xE0))
                 }
             };
 

@@ -42,6 +42,9 @@ namespace DBADashGUI
             databaseSchemaDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             agentJobDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            chartFontToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            setLabelSizeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            setNameSizeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             configureDisplayNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             externalDiffToolToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             dataRetentionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -394,12 +397,34 @@ namespace DBADashGUI
             // 
             // optionsToolStripMenuItem
             // 
-            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { configureDisplayNameToolStripMenuItem, externalDiffToolToolStripMenuItem, dataRetentionToolStripMenuItem, dateTimeFormatToolStripMenuItem, desktopNotificationsToolStripMenuItem, freezeKeyColumnsToolStripMenuItem, manageInstancesToolStripMenuItem, repoSettingsToolStripMenuItem, saveTimeZonePreferenceToolStripMenuItem, setAutoRefreshToolStripMenuItem, showHiddenToolStripMenuItem, themeToolStripMenuItem });
+            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { chartFontToolStripMenuItem, configureDisplayNameToolStripMenuItem, externalDiffToolToolStripMenuItem, dataRetentionToolStripMenuItem, dateTimeFormatToolStripMenuItem, desktopNotificationsToolStripMenuItem, freezeKeyColumnsToolStripMenuItem, manageInstancesToolStripMenuItem, repoSettingsToolStripMenuItem, saveTimeZonePreferenceToolStripMenuItem, setAutoRefreshToolStripMenuItem, showHiddenToolStripMenuItem, themeToolStripMenuItem });
             optionsToolStripMenuItem.Enabled = false;
             optionsToolStripMenuItem.Image = Properties.Resources.SettingsOutline_16x;
             optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             optionsToolStripMenuItem.Size = new System.Drawing.Size(95, 28);
             optionsToolStripMenuItem.Text = "Options";
+            // 
+            // chartFontToolStripMenuItem
+            // 
+            chartFontToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { setLabelSizeToolStripMenuItem, setNameSizeToolStripMenuItem });
+            chartFontToolStripMenuItem.Image = Properties.Resources.FontSize;
+            chartFontToolStripMenuItem.Name = "chartFontToolStripMenuItem";
+            chartFontToolStripMenuItem.Size = new System.Drawing.Size(276, 26);
+            chartFontToolStripMenuItem.Text = "Chart Font";
+            // 
+            // setLabelSizeToolStripMenuItem
+            // 
+            setLabelSizeToolStripMenuItem.Name = "setLabelSizeToolStripMenuItem";
+            setLabelSizeToolStripMenuItem.Size = new System.Drawing.Size(252, 26);
+            setLabelSizeToolStripMenuItem.Text = "Set Axis Label Font Size";
+            setLabelSizeToolStripMenuItem.Click += SetChartAxisFontSize_Click;
+            // 
+            // setNameSizeToolStripMenuItem
+            // 
+            setNameSizeToolStripMenuItem.Name = "setNameSizeToolStripMenuItem";
+            setNameSizeToolStripMenuItem.Size = new System.Drawing.Size(252, 26);
+            setNameSizeToolStripMenuItem.Text = "Set Axis Name Font Size";
+            setNameSizeToolStripMenuItem.Click += SetChartAxisNameFontSize_Click;
             // 
             // configureDisplayNameToolStripMenuItem
             // 
@@ -2812,5 +2837,8 @@ namespace DBADashGUI
         private HA.AG ag1;
         private System.Windows.Forms.ToolStripMenuItem tsToggleSingleInstance;
         private System.Windows.Forms.ToolStripMenuItem closeChildWindowsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem chartFontToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem setLabelSizeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem setNameSizeToolStripMenuItem;
     }
 }
