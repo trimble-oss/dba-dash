@@ -69,14 +69,17 @@ if(@($UnsignedAssets).Count -eq 0) {
     Write-Host "No unsigned zip files found in the draft release." -ForegroundColor Yellow
     exit 1
 } else {
-    Write-Host "Downloaded $CountOfAssets unsigned zip files to $tempFolder" -ForegroundColor Green
+    Write-Host "Found $(@($UnsignedAssets).Count) unsigned zip files in the draft release." -ForegroundColor Green
 }
 
-# Download all assets from the draft release
+# Download all assets from the draft release (sequential processing to avoid rate limits)
 Write-Host "Downloading assets from draft release..." -ForegroundColor Cyan
-$UnsignedAssets | ForEach-Object {
-    $fileName = $_.name
+foreach ($asset in $UnsignedAssets) {
+    $fileName = $asset.name
     Write-Host "Downloading asset: $fileName" -ForegroundColor Cyan
+    
+    # Rate limiting - wait between requests to avoid overwhelming GitHub
+    Start-Sleep -Seconds 2
     
     # Retry logic for download with exponential backoff
     $maxRetries = 3
@@ -116,15 +119,17 @@ $UnsignedAssets | ForEach-Object {
     }
 }
 
-# Extract and sign each .exe file in the downloaded assets, then re-upload to GitHub
-Get-ChildItem $tempFolder -File | Where-Object {$_.Name -like "*-unsigned.zip"} | ForEach-Object {
-  $extractPath = [IO.Path]::Combine($tempFolder, [IO.Path]::GetFileNameWithoutExtension($_.Name))
+# Extract and sign each .exe file in the downloaded assets, then re-upload to GitHub (sequential processing)
+$unsignedZips = Get-ChildItem $tempFolder -File | Where-Object {$_.Name -like "*-unsigned.zip"}
+foreach ($zipFile in $unsignedZips) {
+  $extractPath = [IO.Path]::Combine($tempFolder, [IO.Path]::GetFileNameWithoutExtension($zipFile.Name))
   Write-Host "Extracting $extractPath"
-  Expand-Archive -LiteralPath $_.FullName -DestinationPath $extractPath -Force
+  Expand-Archive -LiteralPath $zipFile.FullName -DestinationPath $extractPath -Force
   Write-Host "Signing executables in $extractPath"
   Get-ChildItem $extractPath | Where-Object { $_.Name -like $SignPattern } | ForEach-Object {
     $exePath = $_.FullName
     Write-Host "Signing $exePath"
+    # Command format: SignFiles.exe [input_file] [output_folder_or_$] [friendly_name]
     & $signTool $exePath $ $_.Name
     if ($LASTEXITCODE -ne 0) {
       throw "Code signing failed for $exePath with exit code $LASTEXITCODE"
@@ -134,11 +139,50 @@ Get-ChildItem $tempFolder -File | Where-Object {$_.Name -like "*-unsigned.zip"} 
     }
   }
   Write-Host "Recompressing signed files into a new zip..."
-  $newZip = $_.FullName.Replace("-unsigned.zip", ".zip")
+  $newZip = $zipFile.FullName.Replace("-unsigned.zip", ".zip")
   $compressPath = [IO.Path]::Combine($extractPath, "*")
   Compress-Archive -Path $compressPath -DestinationPath $newZip -Force
   Write-Host "Uploading signed zip to draft release: $newZip" -ForegroundColor Cyan
-  gh release upload $DraftRelease.tag_name $newZip --repo $repo --clobber
+  
+  # Rate limiting before upload
+  Write-Host "Waiting before upload to respect GitHub rate limits..." -ForegroundColor Yellow
+  Start-Sleep -Seconds 5
+  
+  # Retry logic for upload with exponential backoff
+  $maxUploadRetries = 5
+  $uploadRetryDelay = 15
+  $uploaded = $false
+  
+  for ($uploadRetry = 1; $uploadRetry -le $maxUploadRetries; $uploadRetry++) {
+      Write-Host "Upload attempt $uploadRetry of $maxUploadRetries for $([IO.Path]::GetFileName($newZip))..." -ForegroundColor Yellow
+      
+      try {
+          gh release upload $DraftRelease.tag_name $newZip --repo $repo --clobber
+          
+          # Check if the command succeeded by examining the exit code
+          if ($LASTEXITCODE -eq 0) {
+              Write-Host "Upload successful!" -ForegroundColor Green
+              $uploaded = $true
+              break
+          } else {
+              Write-Host "Upload attempt $uploadRetry failed with exit code: $LASTEXITCODE" -ForegroundColor Red
+          }
+      }
+      catch {
+          Write-Host "Upload attempt $uploadRetry failed with error: $($_.Exception.Message)" -ForegroundColor Red
+      }
+      
+      if (-not $uploaded -and $uploadRetry -lt $maxUploadRetries) {
+          Write-Host "Waiting $uploadRetryDelay seconds before retry..." -ForegroundColor Yellow
+          Start-Sleep -Seconds $uploadRetryDelay
+          $uploadRetryDelay *= 2  # Exponential backoff
+      }
+  }
+  
+  if (-not $uploaded) {
+      Write-Host "Failed to upload $([IO.Path]::GetFileName($newZip)) after $maxUploadRetries attempts" -ForegroundColor Red
+      throw "Upload failed for $([IO.Path]::GetFileName($newZip))"
+  }
 }
 # Check if the number of assets in the draft release matches the expected count
 if (@(gh api $DraftRelease.assets_url | ConvertFrom-Json).Count -ne (@($Assets).Count + @($UnsignedAssets).Count)) {
