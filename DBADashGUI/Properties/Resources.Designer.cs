@@ -503,6 +503,16 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap FontSize {
+            get {
+                object obj = ResourceManager.GetObject("FontSize", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap FreezeColumn_16x {
             get {
                 object obj = ResourceManager.GetObject("FreezeColumn_16x", resourceCulture);

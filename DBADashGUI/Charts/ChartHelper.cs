@@ -249,6 +249,7 @@ namespace DBADashGUI.Charts
             {
                 chart.LegendPosition = config.LegendPosition;
                 chart.LegendTextPaint = labelPaint;
+                chart.LegendTextSize = DBADashUser.ChartAxisLabelFontSize;
             }
             else
             {
@@ -414,11 +415,16 @@ namespace DBADashGUI.Charts
         private static Axis[] CreateXAxes(TimeSpan unit, SolidColorPaint labelPaint, DateTime minDate, DateTime maxDate)
         {
             var duration = maxDate - minDate;
+            var labelFontSize = DBADashUser.ChartAxisLabelFontSize;
+            var nameFontSize = DBADashUser.ChartAxisNameFontSize;
             return new Axis[]
             {
                 new DateTimeAxis(unit, date => FormatDateForChartLabel(date, duration))
                 {
                     LabelsPaint = labelPaint,
+                    TextSize = labelFontSize,
+                    NamePaint = labelPaint,
+                    NameTextSize = nameFontSize,
                     MinLimit = minDate.Ticks
                 }
             };
@@ -426,6 +432,9 @@ namespace DBADashGUI.Charts
 
         private static Axis[] CreateYAxes(ChartConfiguration config, SolidColorPaint labelPaint)
         {
+            var labelFontSize = DBADashUser.ChartAxisLabelFontSize;
+            var nameFontSize = DBADashUser.ChartAxisNameFontSize;
+
             // If multiple Y-axes are configured, use them
             if (config.YAxes != null && config.YAxes.Length > 0)
             {
@@ -436,9 +445,11 @@ namespace DBADashGUI.Charts
                     var axis = new Axis
                     {
                         LabelsPaint = labelPaint,
+                        TextSize = labelFontSize,
                         MinLimit = axisConfig.MinLimit ?? 0,
                         Name = axisConfig.Label,
                         NamePaint = labelPaint,
+                        NameTextSize = nameFontSize,
                         Position = axisConfig.Position
                     };
 
@@ -457,9 +468,11 @@ namespace DBADashGUI.Charts
             var yAxis = new Axis
             {
                 LabelsPaint = labelPaint,
+                TextSize = labelFontSize,
                 MinLimit = 0,
                 Name = config.YAxisLabel,
-                NamePaint = labelPaint
+                NamePaint = labelPaint,
+                NameTextSize = nameFontSize
             };
 
             if (config.YAxisMax.HasValue)

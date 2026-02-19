@@ -199,11 +199,17 @@ namespace DBADashGUI.Performance
 
             var unit = TimeSpan.FromMinutes(Convert.ToInt64(to.DateTime.RoundDownToPreviousHour().AddHours(1)
                 .Subtract(from.DateTime.RoundDownToPreviousHour()).TotalMinutes / 20));
+            var labelFontSize = DBADashUser.ChartAxisLabelFontSize;
+            var nameFontSize = DBADashUser.ChartAxisNameFontSize;
+
             planChart.XAxes =
             [
                 new DateTimeAxis(unit, date => Charts.ChartHelper.FormatDateForChartLabel(date, to.Subtract(from)))
                 {
                     LabelsPaint = labelPaint,
+                    TextSize = labelFontSize,
+                    NamePaint = labelPaint,
+                    NameTextSize = nameFontSize,
                     MinLimit = to.Subtract(from).TotalMinutes > 60
                         ? from.ToAppTimeZone().DateTime.RoundDownToPreviousHour().Ticks
                         : from.ToAppTimeZone().Ticks,
@@ -211,10 +217,18 @@ namespace DBADashGUI.Performance
             ];
             planChart.YAxes = new Axis[]
             {
-                new() { LabelsPaint = labelPaint, MinLimit = 0, }
+                new() 
+                { 
+                    LabelsPaint = labelPaint, 
+                    TextSize = labelFontSize,
+                    NamePaint = labelPaint,
+                    NameTextSize = nameFontSize,
+                    MinLimit = 0, 
+                }
             };
             planChart.LegendPosition = LegendPosition.Right;
             planChart.LegendTextPaint = labelPaint;
+            planChart.LegendTextSize = labelFontSize;
             // Disable default tooltip - we'll use our custom one
             planChart.TooltipPosition = TooltipPosition.Hidden;
             planChart.Series = series;

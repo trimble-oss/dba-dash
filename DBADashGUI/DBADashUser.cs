@@ -9,6 +9,9 @@ namespace DBADashGUI
 {
     internal static class DBADashUser
     {
+        public const float DefaultChartAxisLabelFontSize = 14f;
+        public const float DefaultChartAxisNameFontSize = 14f;
+
         public static readonly int SystemUserID = -1;
 
         public static int UserID { get; private set; }
@@ -47,6 +50,34 @@ namespace DBADashGUI
             set
             {
                 Properties.Settings.Default.TimeFormatString = value;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        public static float ChartAxisLabelFontSize
+        {
+            get
+            {
+                var value = Properties.Settings.Default.ChartAxisLabelFontSize;
+                return value < 0 ? DefaultChartAxisLabelFontSize : value;
+            }
+            set
+            {
+                Properties.Settings.Default.ChartAxisLabelFontSize = value;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        public static float ChartAxisNameFontSize
+        {
+            get
+            {
+                var value = Properties.Settings.Default.ChartAxisNameFontSize;
+                return value < 0 ? DefaultChartAxisNameFontSize : value;
+            }
+            set
+            {
+                Properties.Settings.Default.ChartAxisNameFontSize = value;
                 Properties.Settings.Default.Save();
             }
         }

@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using DBADashGUI.Charts;
+using DBADashGUI.Theme;
 
 namespace DBADashGUI.Performance
 {
@@ -135,18 +136,27 @@ namespace DBADashGUI.Performance
                 };
 
                 sc.Add(lineSeries);
-                i += 1;
             }
 
             Series = sc;
             UpdateColumnVisibility(columns);
+
+            var labelFontSize = DBADashUser.ChartAxisLabelFontSize;
+            var nameFontSize = DBADashUser.ChartAxisNameFontSize;
+            var labelPaint = DBADashUser.SelectedTheme.ThemeIdentifier == ThemeType.Dark
+                ? new SolidColorPaint(DashColors.White.ToSKColor())
+                : new SolidColorPaint(DashColors.TrimbleBlueDark.ToSKColor());
 
             XAxes = new List<Axis>
             {
                 new Axis
                 {
                     Name = "Time",
-                    Labeler = val => new DateTime((long)val).ToString(DateRange.DateFormatString)
+                    Labeler = val => new DateTime((long)val).ToString(DateRange.DateFormatString),
+                    LabelsPaint = labelPaint,
+                    TextSize = labelFontSize,
+                    NamePaint = labelPaint,
+                    NameTextSize = nameFontSize
                 }
             };
 

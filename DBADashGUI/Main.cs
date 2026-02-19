@@ -2467,6 +2467,63 @@ namespace DBADashGUI
                 $"The date/time format has been set.\n\nThe current time is {DateHelper.AppNow.ToString(DBADashUser.DateTimeFormatString)}.\n\nThe new format will be used when the chart is refreshed.", "Time Format", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
+        private void SetChartAxisFontSize_Click(object sender, EventArgs e)
+        {
+            SetChartFontSize(
+                currentValue: DBADashUser.ChartAxisLabelFontSize,
+                defaultValue: DBADashUser.DefaultChartAxisLabelFontSize,
+                settingName: "axis label",
+                setSetting: size => DBADashUser.ChartAxisLabelFontSize = size
+            );
+        }
+
+        private void SetChartAxisNameFontSize_Click(object sender, EventArgs e)
+        {
+            SetChartFontSize(
+                currentValue: DBADashUser.ChartAxisNameFontSize,
+                defaultValue: DBADashUser.DefaultChartAxisNameFontSize,
+                settingName: "axis title",
+                setSetting: size => DBADashUser.ChartAxisNameFontSize = size
+            );
+        }
+
+        /// <summary>
+        /// Common helper for setting chart font sizes with validation and reset functionality
+        /// </summary>
+        private static void SetChartFontSize(float currentValue, float defaultValue, string settingName, Action<float> setSetting)
+        {
+            var fontSize = currentValue.ToString();
+
+            if (CommonShared.ShowInputDialog(ref fontSize, $"Chart {settingName} font size (6-24 or blank for default:{defaultValue})") != DialogResult.OK)
+                return;
+
+            // Handle empty string as reset to default (-1 means use default constant)
+            if (string.IsNullOrWhiteSpace(fontSize))
+            {
+                setSetting(-1);
+                MessageBox.Show(
+                    $"Chart {settingName} font size has been reset to default ({defaultValue}).\n\nCharts will use the new font size when refreshed.",
+                    "Chart Font Size",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+
+            if (float.TryParse(fontSize, out var size) && size >= 6 && size <= 24)
+            {
+                setSetting(size);
+                MessageBox.Show(
+                    $"Chart {settingName} font size has been set to {size}.\n\nCharts will use the new font size when refreshed.",
+                    "Chart Font Size",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("Please enter a valid font size between 6 and 24.", "Invalid Font Size", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
         private void ToggleSingleInstancePreference(object sender, EventArgs e)
         {
             bool singleInstance = !Settings.Default.ChildFormSingleInstance;
