@@ -188,7 +188,7 @@ namespace DBADashGUI.DBFiles
 
             // Get date range from data
             var dates = HistoryDT.Rows.Cast<DataRow>()
-                .Select(r => ((DateTime)r["SnapshotDate"]).ToAppTimeZone())
+                .Select(r => ((DateTime)r["SnapshotDate"]))
                 .ToList();
             var minDate = dates.Min();
             var maxDate = dates.Max();
@@ -252,7 +252,7 @@ namespace DBADashGUI.DBFiles
                     row["UsedTB"] = Convert.ToDecimal(row["UsedGB"]) / 1024;
                 }
             }
-
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
             return dt;
         }
 

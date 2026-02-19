@@ -291,6 +291,7 @@ namespace DBADashGUI.Performance
                 cmd.CommandTimeout = Config.DefaultCommandTimeout;
                 var da = new SqlDataAdapter(cmd);
                 da.Fill(dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
             }
             return dt;
         }

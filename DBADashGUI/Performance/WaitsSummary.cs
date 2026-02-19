@@ -108,6 +108,7 @@ namespace DBADashGUI.Performance
             }
             var dt = new DataTable();
             da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
             return dt;
         }
 
