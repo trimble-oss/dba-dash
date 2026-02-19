@@ -1,6 +1,7 @@
 ﻿using DBADashGUI.Performance;
 using DBADashGUI.Theme;
 using LiveChartsCore;
+using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
@@ -181,6 +182,7 @@ namespace DBADashGUI.AgentJobs
                     Name = "Count",
                     Labeler = val => val.ToString("N0"),
                     MinLimit = 0,
+                    Position = AxisPosition.End,
                     LabelsPaint = labelPaint,
                     TextSize = labelFontSize,
                     NamePaint = labelPaint,
