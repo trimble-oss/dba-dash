@@ -215,8 +215,8 @@ namespace DBADashGUI.Performance
                             YAxisLabel = FormatMetricName(metric),
                             SeriesColumn = "name",
                             MetricColumn = metric,
-                            XAxisMin = DateRange.FromUTC,
-                            XAxisMax = DateRange.ToUTC,
+                            XAxisMin = DateRange.FromUTC.ToAppTimeZone(),
+                            XAxisMax = DateRange.ToUTC.ToAppTimeZone(),
                             LegendPosition = legendPosition,
                             GeometrySize = durationMins / Math.Max(DateGrouping, 1) > 500 ? 0 : ChartConfiguration.DefaultGeometrySize
                         }
@@ -451,9 +451,9 @@ namespace DBADashGUI.Performance
             }
             await cn.OpenAsync();
             using var rdr = await cmd.ExecuteReaderAsync();
-
             var dt = new DataTable();
             dt.Load(rdr);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
             return dt;
         }
 

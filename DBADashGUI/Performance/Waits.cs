@@ -121,6 +121,7 @@ namespace DBADashGUI.Performance
             cmd.CommandTimeout = Config.DefaultCommandTimeout;
             DataTable dt = new();
             da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
             return dt;
         }
 
