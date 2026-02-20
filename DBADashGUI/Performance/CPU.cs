@@ -153,7 +153,8 @@ namespace DBADashGUI.Performance
                     YAxisLabel = "CPU %",
                     YAxisFormat = "0",
                     YAxisMin = 0,
-                    YAxisMax = 100
+                    YAxisMax = 100,
+                    DateUnit = TimeSpan.FromMinutes(DateGrouping)
                 };
             }
             else
@@ -178,7 +179,8 @@ namespace DBADashGUI.Performance
                     YAxisLabel = "CPU %",
                     YAxisFormat = "0",
                     YAxisMin = 0,
-                    YAxisMax = 100
+                    YAxisMax = 100,
+                    DateUnit = TimeSpan.FromMinutes(DateGrouping)
                 };
             }
 

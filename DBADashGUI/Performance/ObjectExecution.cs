@@ -123,7 +123,8 @@ namespace DBADashGUI.Performance
                 XAxisMax = DateRange.ToUTC.ToAppTimeZone(),
                 YAxisLabel = measures[Metric.Measure].DisplayName,
                 YAxisFormat = "0.0",
-                YAxisMin = 0
+                YAxisMin = 0,
+                DateUnit = TimeSpan.FromMinutes(dateGrouping)
             };
 
             ChartHelper.UpdateChart(objectExecChart, dt, config);

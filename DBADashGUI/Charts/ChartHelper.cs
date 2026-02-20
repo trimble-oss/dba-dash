@@ -226,7 +226,7 @@ namespace DBADashGUI.Charts
                 maxDate = config.XAxisMax ?? maxDate;
             }
 
-            var unit = CalculateDateUnit(minDate, maxDate, config.ChartType, series);
+            var unit = CalculateDateUnit(minDate, maxDate, config.ChartType, series, config);
             var xAxes = CreateXAxes(unit, labelPaint, minDate, maxDate);
             var yAxes = CreateYAxes(config, labelPaint);
 
@@ -597,16 +597,23 @@ namespace DBADashGUI.Charts
         /// </summary>
         /// <param name="minDate">Minimum date in the range</param>
         /// <param name="maxDate">Maximum date in the range</param>
-        /// <param name="dateGroupingMinutes">Optional actual data grouping interval in minutes. When specified, uses this for better bar rendering.</param>
-        /// <returns></returns>
-        private static TimeSpan CalculateDateUnit(DateTime minDate, DateTime maxDate, ChartTypes chartType, List<ISeries> series)
+        /// <param name="chartType">Type of chart being created</param>
+        /// <param name="series">Series data for automatic calculation</param>
+        /// <param name="config">Chart configuration (may contain explicit DateUnit)</param>
+        /// <returns>The date unit interval for the X-axis</returns>
+        private static TimeSpan CalculateDateUnit(DateTime minDate, DateTime maxDate, ChartTypes chartType, List<ISeries> series, ChartConfiguration config)
         {
+            // If DateUnit is explicitly specified, use it
+            if (config.DateUnit.HasValue && config.DateUnit.Value > TimeSpan.Zero)
+                return config.DateUnit.Value;
+
+            // Otherwise, calculate automatically
             if (chartType == ChartTypes.StackedColumn)
             {
                 return CalculateDateUnitForStackedColumn(series);
             }
 
-            // Otherwise, calculate based on target number of points
+            // Calculate based on target number of points
             const int points = 200;
             const int chartMinGrouping = 1; // Minimum grouping of 1 minute
             var durationMins = (int)(maxDate - minDate).TotalMinutes;
@@ -614,60 +621,65 @@ namespace DBADashGUI.Charts
         }
 
         /// <summary>
-        /// Automatically detect the date unit from the series data by analyzing
-        /// the time intervals between consecutive data points.  Impacts the width of the bars
+        /// Automatically detect the date unit from the series data by finding the minimum
+        /// interval between consecutive data points. This represents the actual data collection
+        /// interval and determines the width of the bars.
         /// </summary>
         /// <param name="series">The chart series containing DateTimePoint data</param>
         /// <returns>The detected interval as a TimeSpan, or a default of 1 minute if it cannot be determined</returns>
         private static TimeSpan CalculateDateUnitForStackedColumn(List<ISeries> series)
         {
             const int defaultIntervalMinutes = 1;
+            const int maxSampleSize = 50;
 
             if (series == null || series.Count == 0)
                 return TimeSpan.FromMinutes(defaultIntervalMinutes);
 
-            // Collect all date intervals from all series
-            var intervals = new List<TimeSpan>();
+            // Find the minimum interval from the first series with data
+            double minIntervalMinutes = double.MaxValue;
+            int samplesProcessed = 0;
 
             foreach (var s in series)
             {
-                IEnumerable<DateTimePoint> points = null;
-
-                // Extract DateTimePoint values based on series type
-                if (s is StackedColumnSeries<DateTimePoint> columnSeries)
-                    points = columnSeries.Values?.Cast<DateTimePoint>();
-                else if (s is StackedAreaSeries<DateTimePoint> areaSeries)
-                    points = areaSeries.Values?.Cast<DateTimePoint>();
-                else if (s is LineSeries<DateTimePoint> lineSeries)
-                    points = lineSeries.Values?.Cast<DateTimePoint>();
+                IEnumerable<DateTimePoint> points = s switch
+                {
+                    StackedColumnSeries<DateTimePoint> columnSeries => columnSeries.Values?.Cast<DateTimePoint>(),
+                    StackedAreaSeries<DateTimePoint> areaSeries => areaSeries.Values?.Cast<DateTimePoint>(),
+                    LineSeries<DateTimePoint> lineSeries => lineSeries.Values?.Cast<DateTimePoint>(),
+                    _ => null
+                };
 
                 if (points == null)
                     continue;
 
-                // Sort by date and calculate intervals
-                var sortedPoints = points.OrderBy(p => p.DateTime).ToList();
-                for (int i = 1; i < sortedPoints.Count && i < 10; i++) // Sample first 10 intervals
+                // Points are already sorted from ExtractDataPoints, so no need to OrderBy again
+                DateTime? previousDate = null;
+
+                foreach (var point in points)
                 {
-                    var interval = (sortedPoints[i].DateTime - sortedPoints[i - 1].DateTime);
-                    if (interval > TimeSpan.Zero) // Ignore zero or negative intervals
-                        intervals.Add(interval);
+                    if (previousDate.HasValue)
+                    {
+                        var intervalMinutes = (point.DateTime - previousDate.Value).TotalMinutes;
+                        if (intervalMinutes > 0 && intervalMinutes < minIntervalMinutes)
+                        {
+                            minIntervalMinutes = intervalMinutes;
+                        }
+
+                        if (++samplesProcessed >= maxSampleSize)
+                            break;
+                    }
+                    previousDate = point.DateTime;
                 }
 
                 // If we found intervals, no need to check other series (they should have same interval)
-                if (intervals.Count > 0)
+                if (samplesProcessed > 0)
                     break;
             }
 
-            if (intervals.Count == 0)
+            if (minIntervalMinutes == double.MaxValue)
                 return TimeSpan.FromMinutes(defaultIntervalMinutes);
 
-            // Use the most common interval (mode) to handle any irregularities
-            var groupedIntervals = intervals
-                .GroupBy(i => Math.Round(i.TotalMinutes, 1)) // Round to 0.1 minute precision
-                .OrderByDescending(g => g.Count())
-                .First();
-
-            var detectedIntervalMinutes = (int)Math.Round(groupedIntervals.Key);
+            var detectedIntervalMinutes = (int)Math.Round(minIntervalMinutes);
             return detectedIntervalMinutes > 0
                 ? TimeSpan.FromMinutes(detectedIntervalMinutes)
                 : TimeSpan.FromMinutes(defaultIntervalMinutes);

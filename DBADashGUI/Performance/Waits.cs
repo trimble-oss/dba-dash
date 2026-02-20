@@ -6,6 +6,7 @@ using LiveChartsCore.SkiaSharpView;
 using Microsoft.Data.SqlClient;
 using System;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -203,6 +204,7 @@ namespace DBADashGUI.Performance
                 YAxisLabel = Units,
                 YAxisFormat = "0.0",
                 YAxisMin = 0,
+                DateUnit = TimeSpan.FromMinutes(dateGrouping)
             };
 
             ChartHelper.UpdateChart(waitChart, dt, config);
