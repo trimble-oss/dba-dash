@@ -52,24 +52,28 @@ BEGIN
 	SET is_snapshot=0
 	WHERE is_snapshot IS NULL
 END
-IF OBJECT_ID('dbo.RepositoryMetricsConfig') IS NOT NULL
+IF NOT EXISTS(
+	SELECT 1
+	FROM sys.indexes 
+	WHERE name = 'IX_Databases_InstanceID_name'
+	AND is_unique=1
+	AND object_id = OBJECT_ID('dbo.Databases')
+) AND OBJECT_ID('dbo.Databases') IS NOT NULL
 BEGIN
-	IF NOT EXISTS(
-		SELECT 1 
-		FROM dbo.RepositoryMetricsConfig
-		WHERE MetricType = 'Databases'
-	)
-	BEGIN
-		UPDATE D1
-			SET D1.name = CONCAT(LEFT(D1.name,91),' ',NEWID())
-		FROM dbo.Databases D1
-		WHERE IsActive=0
-		AND EXISTS(SELECT 1 
-				FROM dbo.Databases D2 
-				WHERE D1.name = D2.name
-				AND D2.DatabaseID <> D1.DatabaseID
-				)
-	END
+	/*	Database name was previously only unique for active databases. 
+		Before creating a unique index on InstanceID and name without the IsActive=1 filter, 
+		run an update to append a unique identifier to duplicate database names for inactive databases to prevent deployment issues.
+	*/
+	UPDATE D1
+		SET D1.name = CONCAT(LEFT(D1.name,91),' ',NEWID())
+	FROM dbo.Databases D1
+	WHERE IsActive=0
+	AND EXISTS(SELECT 1 
+			FROM dbo.Databases D2 
+			WHERE D1.name = D2.name
+			AND D2.DatabaseID <> D1.DatabaseID
+			AND D1.InstanceID = D2.InstanceID
+			)
 END
 /* 
 	We shouldn't have duplicates, but just in case, deactivate duplicates by setting IsActive to 0 and file_id to negative FileID (ensuring uniqueness)
