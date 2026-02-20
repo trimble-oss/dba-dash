@@ -6,7 +6,6 @@ using LiveChartsCore.SkiaSharpView;
 using Microsoft.Data.SqlClient;
 using System;
 using System.ComponentModel;
-using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Text;

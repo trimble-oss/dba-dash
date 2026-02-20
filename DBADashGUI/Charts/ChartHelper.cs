@@ -622,8 +622,8 @@ namespace DBADashGUI.Charts
 
         /// <summary>
         /// Automatically detect the date unit from the series data by finding the minimum
-        /// interval between consecutive data points. This represents the actual data collection
-        /// interval and determines the width of the bars.
+        /// interval between consecutive data points across all series. This represents the 
+        /// actual data collection interval and determines the width of the bars.
         /// </summary>
         /// <param name="series">The chart series containing DateTimePoint data</param>
         /// <returns>The detected interval as a TimeSpan, or a default of 1 minute if it cannot be determined</returns>
@@ -635,9 +635,11 @@ namespace DBADashGUI.Charts
             if (series == null || series.Count == 0)
                 return TimeSpan.FromMinutes(defaultIntervalMinutes);
 
-            // Find the minimum interval from the first series with data
+            // Find the global minimum interval across all series
+            // Important: Check all series, not just the first one, because different series
+            // may have different data densities (e.g., Series A every 5 min, Series B every 1 min)
             double minIntervalMinutes = double.MaxValue;
-            int samplesProcessed = 0;
+            int totalSamplesProcessed = 0;
 
             foreach (var s in series)
             {
@@ -665,14 +667,14 @@ namespace DBADashGUI.Charts
                             minIntervalMinutes = intervalMinutes;
                         }
 
-                        if (++samplesProcessed >= maxSampleSize)
+                        if (++totalSamplesProcessed >= maxSampleSize)
                             break;
                     }
                     previousDate = point.DateTime;
                 }
 
-                // If we found intervals, no need to check other series (they should have same interval)
-                if (samplesProcessed > 0)
+                // Stop if we've hit the sample budget
+                if (totalSamplesProcessed >= maxSampleSize)
                     break;
             }
 
