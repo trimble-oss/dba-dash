@@ -403,7 +403,8 @@ namespace DBADashGUI.Performance
                     XAxisMax = DateRange.ToUTC.ToAppTimeZone(),
                     SeriesNames = seriesNames,
                     YAxes = yAxes.ToArray(),
-                    ColumnAxisNames = columnAxisNames
+                    ColumnAxisNames = columnAxisNames,
+                    DateUnit = TimeSpan.FromMinutes(dateGrouping)
                 };
 
                 ChartHelper.UpdateChart(chartIO, dt, config);

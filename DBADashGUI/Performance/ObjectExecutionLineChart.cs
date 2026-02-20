@@ -155,7 +155,8 @@ namespace DBADashGUI.Performance
                 XAxisMax = ToDate.ToAppTimeZone(),
                 SeriesNames = seriesNames,
                 YAxes = yAxes.ToArray(),
-                ColumnAxisNames = columnAxisNames
+                ColumnAxisNames = columnAxisNames,
+                DateUnit = TimeSpan.FromMinutes(dateGrouping)
             };
 
             ChartHelper.UpdateChart(chart1, dt, config);

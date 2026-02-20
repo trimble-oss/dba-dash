@@ -124,6 +124,13 @@ namespace DBADashGUI.Charts
         public DateTime? XAxisMax { get; init; }
 
         /// <summary>
+        /// Explicitly specifies the date unit interval for the X-axis (e.g., TimeSpan.FromMinutes(5)).
+        /// When not specified, the date unit will be automatically calculated based on the data.
+        /// For StackedColumn charts, this determines the width of the bars.
+        /// </summary>
+        public TimeSpan? DateUnit { get; init; }
+
+        /// <summary>
         /// Type of chart to create. Default is StackedColumn.
         /// </summary>
         public ChartTypes ChartType { get; init; } = ChartTypes.StackedColumn;

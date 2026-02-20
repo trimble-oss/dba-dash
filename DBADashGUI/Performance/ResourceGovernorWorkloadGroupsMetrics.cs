@@ -205,7 +205,8 @@ namespace DBADashGUI.Performance
                             XAxisMin = DateRange.FromUTC.ToAppTimeZone(),
                             XAxisMax = DateRange.ToUTC.ToAppTimeZone(),
                             LegendPosition = legendPosition,
-                            GeometrySize = durationMins / Math.Max(DateGrouping, 1) > 500 ? 0 : ChartConfiguration.DefaultGeometrySize
+                            GeometrySize = durationMins / Math.Max(DateGrouping, 1) > 500 ? 0 : ChartConfiguration.DefaultGeometrySize,
+                            DateUnit = TimeSpan.FromMinutes(DateGrouping),
                         }
                      );
                     chart.ApplyTheme();
