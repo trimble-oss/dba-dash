@@ -1318,11 +1318,12 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             await using var cn = new SqlConnection(builder.ConnectionString);
             await using var cmd = new SqlCommand(slowQueriesSQL, cn) { CommandTimeout = CollectionType.SlowQueries.GetCommandTimeout() };
             await cn.OpenAsync();
-
+            bool collectGroupIDAndPoolID = IsResourceGovernorApplicable() && IsResourceGovernorInUse();
             cmd.Parameters.AddWithValue("SlowQueryThreshold", Source.SlowQueryThresholdMs * 1000);
             cmd.Parameters.AddWithValue("MaxMemory", Source.SlowQuerySessionMaxMemoryKB);
             cmd.Parameters.AddWithValue("UseDualSession", Source.UseDualEventSession);
             cmd.Parameters.AddWithValue("MaxTargetMemory", Source.SlowQueryTargetMaxMemoryKB);
+            cmd.Parameters.AddWithValue("CollectGroupIDAndPoolID", collectGroupIDAndPoolID);
             return await cmd.ExecuteScalarAsync();
         }
 

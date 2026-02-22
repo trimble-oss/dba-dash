@@ -104,6 +104,8 @@ namespace DBADashGUI
                 txtPhysicalReadsTo);
             SetFilterFormatting(lblWrites, lblWritesFrom, lblWritesTo, txtWritesFrom, txtWritesTo);
             SetFilterFormatting(lblContextInfo, lblIncludeContextInfo, lblExcludeContextInfo, txtContextInfo, txtExcludeContextInfo);
+            SetFilterFormatting(workloadGroupFilterToolStripMenuItem, includeWorkloadGroupFilterToolStripMenuItem, excludeWorkloadGroupFilterToolStripMenuItem, txtWorkloadGroup, txtExcludeWorkloadGroup);
+            SetFilterFormatting(resourcePoolFilterToolStripMenuItem, includeResourcePoolFilterToolStripMenuItem, excludeResourcePoolFilterToolStripMenuItem, txtResourcePool, txtExcludeResourcePool);
             lblEventType.Font = sqlbatchcompletedToolStripMenuItem.Checked == rpccompletedToolStripMenuItem.Checked
                 ? regularFont
                 : boldFont;
@@ -293,7 +295,10 @@ namespace DBADashGUI
                         CommonShared.ShowExceptionDialog(ex, "Invalid Exclude Context Info");
                     }
                 }
-
+                cmd.Parameters.AddStringIfNotNullOrEmpty("WorkloadGroup", txtWorkloadGroup.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ResourcePool", txtResourcePool.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeWorkloadGroup", txtExcludeWorkloadGroup.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeResourcePool", txtResourcePool.Text);
                 var top = Convert.ToInt32(tsTop.Tag);
                 cmd.Parameters.AddWithValue("Top", top);
                 cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
@@ -312,6 +317,12 @@ namespace DBADashGUI
             lblInstance.Visible = !IsDBLevel;
             instanceToolStripMenuItem.Visible = !IsDBLevel;
             databaseNameToolStripMenuItem.Visible = !IsDBLevel;
+            colResourcePool.Visible = _context.HasResourceGovernorWorkloadGroups;
+            colWorkloadGroup.Visible = _context.HasResourceGovernorWorkloadGroups;
+            workloadGroupToolStripMenuItem.Visible = _context.HasResourceGovernorWorkloadGroups;
+            resourcePoolToolStripMenuItem.Visible = _context.HasResourceGovernorWorkloadGroups;
+            resourcePoolFilterToolStripMenuItem.Visible = _context.HasResourceGovernorWorkloadGroups;
+            workloadGroupFilterToolStripMenuItem.Visible = _context.HasResourceGovernorWorkloadGroups;
             ResetFilters();
             RefreshData();
         }
@@ -480,6 +491,14 @@ namespace DBADashGUI
                         rpccompletedToolStripMenuItem.Checked = selectedGroupValue == "rpc_completed";
                         break;
 
+                    case "workload_group":
+                        txtWorkloadGroup.Text = selectedGroupValue;
+                        break;
+
+                    case "resource_pool":
+                        txtResourcePool.Text = selectedGroupValue;
+                        break;
+
                     default:
                         {
                             if (groupBy.StartsWith("timestamp"))
@@ -635,6 +654,8 @@ namespace DBADashGUI
                 var sessionId = txtSessionID.Text;
                 var eventType = "";
                 var contextInfo = txtContextInfo.Text;
+                var workloadGroup = txtWorkloadGroup.Text;
+                var resourcePool = txtResourcePool.Text;
                 if (sqlbatchcompletedToolStripMenuItem.Checked && !rpccompletedToolStripMenuItem.Checked)
                 {
                     eventType = "sql_batch_completed";
@@ -684,6 +705,14 @@ namespace DBADashGUI
 
                     case "EventType":
                         eventType = selectedGroupValue;
+                        break;
+
+                    case "workload_group":
+                        workloadGroup = selectedGroupValue;
+                        break;
+
+                    case "resource_pool":
+                        resourcePool = selectedGroupValue;
                         break;
 
                     default:
@@ -796,6 +825,10 @@ namespace DBADashGUI
                 }
 
                 cmd.Parameters.AddStringIfNotNullOrEmpty("EventType", eventType);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("WorkloadGroup", workloadGroup);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ResourcePool", resourcePool);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeWorkloadGroup", txtExcludeWorkloadGroup.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeResourcePool", txtResourcePool.Text);
                 var dt = new DataTable();
                 da.Fill(dt);
                 Common.ReplaceBinaryContextInfoColumn(ref dt);

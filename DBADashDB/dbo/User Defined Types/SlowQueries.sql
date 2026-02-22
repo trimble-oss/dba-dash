@@ -16,5 +16,7 @@
     result sysname NULL,
     session_id INT NULL,
     context_info VARBINARY(128) NULL,
-    row_count BIGINT NULL
+    row_count BIGINT NULL,
+    session_resource_group_id INT NULL,
+    session_resource_pool_id INT NULL
 );

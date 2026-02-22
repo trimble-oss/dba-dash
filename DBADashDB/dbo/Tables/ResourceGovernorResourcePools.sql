@@ -47,6 +47,10 @@ CREATE TABLE dbo.ResourceGovernorResourcePools (
 	total_cpu_violation_delay_ms BIGINT NULL,
 	total_cpu_violation_sec BIGINT NULL,
 	total_cpu_usage_preemptive_ms BIGINT NULL,
+	IsActive BIT NOT NULL CONSTRAINT DF_ResourceGovernorResourcePools_IsActive DEFAULT(0),
 	CONSTRAINT PK_ResourceGovernorResourcePools PRIMARY KEY NONCLUSTERED(ResourcePoolID),
     INDEX IX_ResourceGovernorResourcePools_InstanceID_name UNIQUE CLUSTERED (InstanceID, name)
 )
+GO
+CREATE UNIQUE NONCLUSTERED INDEX FIX_ResourceGovernorResourcePools_InstanceID_pool_id ON dbo.ResourceGovernorResourcePools(InstanceID,pool_id) 
+WHERE IsActive = 1

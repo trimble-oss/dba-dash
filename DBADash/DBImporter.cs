@@ -237,6 +237,11 @@ namespace DBADash
                 {
                     dtSlowQueries.Columns.Add("row_count", typeof(long));
                 }
+                if (!dtSlowQueries!.Columns.Contains("session_resource_group_id"))
+                {
+                    dtSlowQueries.Columns.Add("session_resource_group_id", typeof(int));
+                    dtSlowQueries.Columns.Add("session_resource_pool_id", typeof(int));
+                }
             }
 
             if (data.Tables.Contains("RunningQueries"))

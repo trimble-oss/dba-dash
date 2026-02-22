@@ -130,7 +130,11 @@ namespace DBADashGUI
 
         private void GetAdditionalInfo()
         {
-            if (InstanceID <= 0) return;
+            if (InstanceID <= 0)
+            {
+                _hasResourceGovernorWorkloadGroups = CommonData.Instances.Select("HasResourceGovernorWorkloadGroups=1").Any();
+                return;
+            }
             var row = CommonData.Instances.Select($"InstanceID={InstanceID}").FirstOrDefault();
             if (row == null) return;
             _collectAgentID = (int)row["CollectAgentID"];
