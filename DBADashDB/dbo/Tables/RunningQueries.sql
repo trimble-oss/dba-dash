@@ -45,6 +45,7 @@
     task_wait_time_3 BIGINT NULL,
     dop INT NULL,
     WorkloadGroupID INT NULL,
+    ResourcePoolID INT NULL,
     CONSTRAINT PK_RunningQueries PRIMARY KEY(InstanceID,SnapshotDateUTC,session_id) WITH (DATA_COMPRESSION = PAGE) ON PS_RunningQueries(SnapshotDateUTC)
 ) ON PS_RunningQueries(SnapshotDateUTC);
 GO

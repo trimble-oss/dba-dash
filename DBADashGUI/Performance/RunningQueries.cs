@@ -554,6 +554,10 @@ namespace DBADashGUI.Performance
                 {
                     HeaderText = "Workload Group", DataPropertyName = "workload_group", Name = "colWorkloadGroup", Visible = hasWorkloadGroups
                 },
+                new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "Resource Pool", DataPropertyName = "resource_pool", Name = "colResourcePool", Visible = hasWorkloadGroups
+                },
             };
 
         private readonly DataGridViewColumn[] sessionWaitColumns = new DataGridViewColumn[]
