@@ -72,7 +72,6 @@ BEGIN
 	AND NOT EXISTS(SELECT 1 
 					FROM  @ResourceGovernorWorkloadGroups T 
 					WHERE WG.name = T.name 
-					AND WG.InstanceID = @InstanceID
 					)
 	
 	/* Update the current snapshot in the main table.  */

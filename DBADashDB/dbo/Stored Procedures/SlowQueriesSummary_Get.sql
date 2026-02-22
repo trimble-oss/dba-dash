@@ -40,7 +40,11 @@
 	@ShowHidden BIT=1,
 	@Metric VARCHAR(50)='duration', /* duration or cpu_time */
 	@ContextInfo VARBINARY(128)=NULL,
-	@ExcludeContextInfo VARBINARY(128)=NULL
+	@ExcludeContextInfo VARBINARY(128)=NULL,
+	@WorkloadGroup NVARCHAR(128)=NULL,
+	@ExcludeWorkloadGroup NVARCHAR(128)=NULL,
+	@ResourcePool NVARCHAR(128)=NULL,
+	@ExcludeResourcePool NVARCHAR(128)=NULL
 )
 AS
 DECLARE @DurationFromUS BIGINT 
@@ -95,6 +99,8 @@ DECLARE @GroupSQL NVARCHAR(MAX) = CASE @GroupBy WHEN 'ConnectionID' THEN 'I.Conn
 												WHEN 'EventType' THEN 'SQ.event_type'
 												WHEN 'timestamp' THEN 'DATEADD(MINUTE, (DATEDIFF(MINUTE, 0, DATEADD(mi,@TimestampOffset,SQ.timestamp)) / @TimeStampMins) * @TimeStampMins, 0)'
 												WHEN 'context_info' THEN 'CONVERT(VARCHAR(258),SQ.context_info,1)'
+												WHEN 'workload_group' THEN 'WG.name'
+												WHEN 'resource_pool' THEN 'RP.name'
 												ELSE 'InstanceDisplayName' END
 IF @Top<=0
 BEGIN
@@ -122,6 +128,8 @@ N'SELECT ' + CASE WHEN @Top IS NOT NULL THEN 'TOP(@Top) ' ELSE '' END + @GroupSQ
 FROM dbo.SlowQueries SQ
 JOIN dbo.Instances I ON I.InstanceID = SQ.InstanceID
 LEFT JOIN dbo.Databases D ON D.DatabaseID = SQ.DatabaseID
+LEFT JOIN dbo.ResourceGovernorWorkloadGroups WG ON WG.WorkloadGroupID = SQ.WorkloadGroupID AND WG.InstanceID = SQ.InstanceID
+LEFT JOIN dbo.ResourceGovernorResourcePools RP ON RP.ResourcePoolID = SQ.ResourcePoolID AND RP.InstanceID = SQ.InstanceID
 WHERE timestamp>= @FromDate
 AND timestamp< @ToDate
 ' + CASE WHEN @InstanceIDs IS NULL THEN '' ELSE 'AND EXISTS(SELECT 1 FROM @Instances IDs WHERE IDs.ID = SQ.InstanceID)' END + '
@@ -158,6 +166,10 @@ AND timestamp< @ToDate
 ' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND I.ShowInSummary=1' END + '
 ' + CASE WHEN @ContextInfo IS NULL THEN '' ELSE 'AND SQ.context_info = @ContextInfo' END + '
 ' + CASE WHEN @ExcludeContextInfo IS NULL THEN '' ELSE 'AND (SQ.context_info <> @ExcludeContextInfo OR SQ.context_info IS NULL)' END + '
+' + CASE WHEN @WorkloadGroup IS NULL THEN '' ELSE 'AND WG.name = @WorkloadGroup' END + '
+' + CASE WHEN @ExcludeWorkloadGroup IS NULL THEN '' ELSE 'AND WG.name <> @ExcludeWorkloadGroup' END + '
+' + CASE WHEN @ResourcePool IS NULL THEN '' ELSE 'AND RP.name = @ResourcePool' END + '
+' + CASE WHEN @ExcludeResourcePool IS NULL THEN '' ELSE 'AND RP.name <> @ExcludeResourcePool' END + '
 GROUP BY ' + @GroupSQL +'
 ORDER BY ' + CASE WHEN @GroupBy ='timestamp' THEN 'Grp DESC' ELSE 'SUM(Duration) DESC' END
 
@@ -202,7 +214,11 @@ EXEC sp_executesql @SQL,N'@Instances IDs READONLY,
 						@TimestampMins INT,
 						@TimestampOffset INT,
 						@ContextInfo VARBINARY(128),
-						@ExcludeContextInfo VARBINARY(128)',
+						@ExcludeContextInfo VARBINARY(128),
+						@WorkloadGroup NVARCHAR(128),
+						@ExcludeWorkloadGroup NVARCHAR(128),
+						@ResourcePool NVARCHAR(128),
+						@ExcludeResourcePool NVARCHAR(128)',
 						@Instances,
 						@ObjectName,
 						@ClientHostName,
@@ -240,4 +256,8 @@ EXEC sp_executesql @SQL,N'@Instances IDs READONLY,
 						@TimestampMins,
 						@TimestampOffset,
 						@ContextInfo,
-						@ExcludeContextInfo
+						@ExcludeContextInfo,
+						@WorkloadGroup,
+						@ExcludeWorkloadGroup,
+						@ResourcePool,
+						@ExcludeResourcePool

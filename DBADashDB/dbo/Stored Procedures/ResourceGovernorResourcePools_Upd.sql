@@ -114,6 +114,16 @@ BEGIN
 	AND RP.InstanceID = @InstanceID
 	AND RP.statistics_start_time = T.statistics_start_time;
 
+	/* Mark pools that no longer exist for the instance as deleted */
+	UPDATE RP
+		SET RP.IsActive = CAST(0 AS BIT)
+	FROM  dbo.ResourceGovernorResourcePools RP
+	WHERE RP.InstanceID = @InstanceID
+	AND NOT EXISTS(SELECT 1 
+					FROM  @ResourceGovernorResourcePools T 
+					WHERE RP.name = T.name 
+					)
+
 	/* Update the current snapshot in the main table. */
 	UPDATE RP
 	SET		RP.SnapshotDate  = T.SnapshotDate,
@@ -161,7 +171,8 @@ BEGIN
 			RP.total_cpu_active_ms = T.total_cpu_active_ms,
 			RP.total_cpu_violation_delay_ms = T.total_cpu_violation_delay_ms,
 			RP.total_cpu_violation_sec = T.total_cpu_violation_sec,
-			RP.total_cpu_usage_preemptive_ms = T.total_cpu_usage_preemptive_ms
+			RP.total_cpu_usage_preemptive_ms = T.total_cpu_usage_preemptive_ms,
+			RP.IsActive = CAST(1 AS BIT)
 	FROM dbo.ResourceGovernorResourcePools RP
 	JOIN @ResourceGovernorResourcePools T ON RP.name = T.name AND RP.InstanceID = @InstanceID;
 
@@ -213,7 +224,8 @@ BEGIN
 			total_cpu_active_ms,
 			total_cpu_violation_delay_ms,
 			total_cpu_violation_sec,
-			total_cpu_usage_preemptive_ms
+			total_cpu_usage_preemptive_ms,
+			IsActive
 	)
 	SELECT	@InstanceID,
 			SnapshotDate,
@@ -261,7 +273,8 @@ BEGIN
 			total_cpu_active_ms,
 			total_cpu_violation_delay_ms,
 			total_cpu_violation_sec,
-			total_cpu_usage_preemptive_ms
+			total_cpu_usage_preemptive_ms,
+			CAST(1 AS BIT)
 	FROM @ResourceGovernorResourcePools T
 	WHERE NOT EXISTS (
 		SELECT 1

@@ -46,7 +46,9 @@ INSERT INTO dbo.SlowQueries
 	Uniqueifier,
 	session_id,
 	context_info,
-	row_count
+	row_count,
+	WorkloadGroupID,
+    ResourcePoolID
 )
 SELECT @InstanceID,
 		ISNULL(D.DatabaseID,@AzureDatabaseID), /* For AzureDB, use @AzureDatabaseID if the database_id from the extended event doesn't match for some reason. (Issue #481) */
@@ -66,9 +68,13 @@ SELECT @InstanceID,
 		ROW_NUMBER() OVER(PARTITION BY timestamp ORDER BY timestamp), -- just to ensure uniqueness in key
 		session_id,
 		context_info,
-		row_count
+		row_count,
+		WG.WorkloadGroupID,
+		RP.ResourcePoolID
 FROM @SlowQueries SQ
 LEFT JOIN dbo.Databases D ON D.database_id = SQ.database_id AND D.InstanceID = @InstanceID AND D.IsActive=1
+LEFT JOIN dbo.ResourceGovernorWorkloadGroups WG ON WG.group_id = SQ.session_resource_group_id AND WG.InstanceID = @InstanceID AND WG.IsActive=1
+LEFT JOIN dbo.ResourceGovernorResourcePools RP ON RP.pool_id = SQ.session_resource_pool_id AND RP.InstanceID = @InstanceID AND RP.IsActive=1
 WHERE timestamp > @MaxDate
 
 DECLARE @MetricsInstanceID INT 

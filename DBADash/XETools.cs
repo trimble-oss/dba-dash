@@ -57,6 +57,8 @@ namespace DBADash
             dt.Columns.Add("session_id", typeof(int));
             dt.Columns.Add("context_info", typeof(byte[]));
             dt.Columns.Add("row_count", typeof(long));
+            dt.Columns.Add("session_resource_group_id", typeof(int));
+            dt.Columns.Add("session_resource_pool_id", typeof(int));
             return dt;
         }
 

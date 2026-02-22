@@ -39,7 +39,11 @@
 	@EventType SYSNAME=NULL,
 	@ResultFailed BIT=NULL,
 	@ContextInfo VARBINARY(128)=NULL,
-	@ExcludeContextInfo VARBINARY(128)=NULL
+	@ExcludeContextInfo VARBINARY(128)=NULL,
+	@WorkloadGroup NVARCHAR(128)=NULL,
+	@ExcludeWorkloadGroup NVARCHAR(128)=NULL,
+	@ResourcePool NVARCHAR(128)=NULL,
+	@ExcludeResourcePool NVARCHAR(128)=NULL
 )
 AS
 DECLARE @DurationFromUS BIGINT 
@@ -98,9 +102,13 @@ N'SELECT TOP(@Top) SQ.InstanceID,
 	   DATEADD(ms,-duration/1000,timestamp) AS start_time,
 	   HD.HumanDuration AS Duration,
 	   SQ.context_info,
-	   SQ.row_count
+	   SQ.row_count,
+	   WG.name AS workload_group,
+	   RP.name AS resource_pool
 FROM dbo.SlowQueries SQ
 JOIN dbo.Instances I ON I.InstanceID = SQ.InstanceID
+LEFT JOIN dbo.ResourceGovernorWorkloadGroups WG ON WG.WorkloadGroupID = SQ.WorkloadGroupID AND WG.InstanceID = SQ.InstanceID
+LEFT JOIN dbo.ResourceGovernorResourcePools RP ON RP.ResourcePoolID = SQ.ResourcePoolID AND RP.InstanceID = SQ.InstanceID
 CROSS APPLY dbo.MillisecondsToHumanDuration(SQ.Duration/1000) HD
 LEFT JOIN dbo.Databases D ON D.DatabaseID = SQ.DatabaseID
 WHERE timestamp>= @FromDate
@@ -139,6 +147,10 @@ AND timestamp< @ToDate
 ' + CASE WHEN @ResultFailed IS NULL THEN '' WHEN @ResultFailed = 1 THEN 'AND SQ.result <> ''0 - OK'''  ELSE 'AND SQ.result = ''0 - OK''' END + '
 ' + CASE WHEN @ContextInfo IS NULL THEN '' ELSE 'AND SQ.context_info = @ContextInfo' END + '
 ' + CASE WHEN @ExcludeContextInfo IS NULL THEN '' ELSE 'AND (SQ.context_info <> @ExcludeContextInfo OR SQ.context_info IS NULL)' END + '
+' + CASE WHEN @WorkloadGroup IS NULL THEN '' ELSE 'AND WG.name = @WorkloadGroup' END + '
+' + CASE WHEN @ExcludeWorkloadGroup IS NULL THEN '' ELSE 'AND WG.name <> @ExcludeWorkloadGroup' END + '
+' + CASE WHEN @ResourcePool IS NULL THEN '' ELSE 'AND RP.name = @ResourcePool' END + '
+' + CASE WHEN @ExcludeResourcePool IS NULL THEN '' ELSE 'AND RP.name <> @ExcludeResourcePool' END + '
 ' + @SortSQL
 
 EXEC sp_executesql @SQL,N'@Instances IDs READONLY,
@@ -176,7 +188,11 @@ EXEC sp_executesql @SQL,N'@Instances IDs READONLY,
 							@WritesTo BIGINT,
 							@EventType SYSNAME,
 							@ContextInfo VARBINARY(128),
-							@ExcludeContextInfo VARBINARY(128)',
+							@ExcludeContextInfo VARBINARY(128),
+							@WorkloadGroup NVARCHAR(128),
+							@ExcludeWorkloadGroup NVARCHAR(128),
+							@ResourcePool NVARCHAR(128),
+							@ExcludeResourcePool NVARCHAR(128)',
 							@Instances,
 							@ObjectName,
 							@ClientHostName,
@@ -211,4 +227,8 @@ EXEC sp_executesql @SQL,N'@Instances IDs READONLY,
 							@WritesTo,
 							@EventType,
 							@ContextInfo,
-							@ExcludeContextInfo
+							@ExcludeContextInfo,
+							@WorkloadGroup,
+							@ExcludeWorkloadGroup,
+							@ResourcePool,
+							@ExcludeResourcePool

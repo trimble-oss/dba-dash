@@ -50,6 +50,12 @@ namespace DBADashGUI
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SlowQueries));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle25 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle21 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle26 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle27 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle28 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -59,12 +65,6 @@ namespace DBADashGUI
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle32 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle34 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle21 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
             dgvSummary = new DBADashDataGridView();
             Grp = new System.Windows.Forms.DataGridViewLinkColumn();
             _lt5 = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -93,6 +93,7 @@ namespace DBADashGUI
             eventTypeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             instanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             objectNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            resourcePoolToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             resultToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             sessionIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             textToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -100,6 +101,7 @@ namespace DBADashGUI
             dayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             hourToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             usernameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            workloadGroupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsMetric = new System.Windows.Forms.ToolStripDropDownButton();
             durationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             cPUToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -134,6 +136,9 @@ namespace DBADashGUI
             txtDurationFrom = new System.Windows.Forms.ToolStripTextBox();
             lblDurationTo = new System.Windows.Forms.ToolStripMenuItem();
             txtDurationTo = new System.Windows.Forms.ToolStripTextBox();
+            lblEventType = new System.Windows.Forms.ToolStripMenuItem();
+            rpccompletedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            sqlbatchcompletedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             lblInstance = new System.Windows.Forms.ToolStripMenuItem();
             lblIncludeInstance = new System.Windows.Forms.ToolStripMenuItem();
             txtInstance = new System.Windows.Forms.ToolStripTextBox();
@@ -154,6 +159,11 @@ namespace DBADashGUI
             txtPhysicalReadsFrom = new System.Windows.Forms.ToolStripTextBox();
             lblPhysicalReadsTo = new System.Windows.Forms.ToolStripMenuItem();
             txtPhysicalReadsTo = new System.Windows.Forms.ToolStripTextBox();
+            resourcePoolFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            includeResourcePoolFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            txtResourcePool = new System.Windows.Forms.ToolStripTextBox();
+            excludeResourcePoolFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            txtExcludeResourcePool = new System.Windows.Forms.ToolStripTextBox();
             lblResult = new System.Windows.Forms.ToolStripMenuItem();
             lblIncludeResult = new System.Windows.Forms.ToolStripMenuItem();
             txtResult = new System.Windows.Forms.ToolStripTextBox();
@@ -169,6 +179,7 @@ namespace DBADashGUI
             txtText = new System.Windows.Forms.ToolStripTextBox();
             lblExcludeText = new System.Windows.Forms.ToolStripMenuItem();
             txtExcludeText = new System.Windows.Forms.ToolStripTextBox();
+            timeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             lblUser = new System.Windows.Forms.ToolStripMenuItem();
             lblIncludeUser = new System.Windows.Forms.ToolStripMenuItem();
             txtUser = new System.Windows.Forms.ToolStripTextBox();
@@ -179,10 +190,11 @@ namespace DBADashGUI
             txtWritesFrom = new System.Windows.Forms.ToolStripTextBox();
             lblWritesTo = new System.Windows.Forms.ToolStripMenuItem();
             txtWritesTo = new System.Windows.Forms.ToolStripTextBox();
-            lblEventType = new System.Windows.Forms.ToolStripMenuItem();
-            rpccompletedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            sqlbatchcompletedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            timeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            workloadGroupFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            includeWorkloadGroupFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            txtWorkloadGroup = new System.Windows.Forms.ToolStripTextBox();
+            excludeWorkloadGroupFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            txtExcludeWorkloadGroup = new System.Windows.Forms.ToolStripTextBox();
             toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             resetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsTop = new System.Windows.Forms.ToolStripDropDownButton();
@@ -199,6 +211,27 @@ namespace DBADashGUI
             tsConfigureRoot = new System.Windows.Forms.ToolStripMenuItem();
             tsConfigureInstance = new System.Windows.Forms.ToolStripMenuItem();
             dgvSlow = new DBADashDataGridView();
+            Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            DatabaseName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            event_type = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            object_name = new System.Windows.Forms.DataGridViewLinkColumn();
+            timestamp = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            duration = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            cpu_time = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            logical_reads = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            physical_reads = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            Writes = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colRowCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            username = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            client_hostname = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            client_app_name = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colContextInfo = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            Result = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colSessionID = new System.Windows.Forms.DataGridViewLinkColumn();
+            colText = new System.Windows.Forms.DataGridViewLinkColumn();
+            colWorkloadGroup = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colResourcePool = new System.Windows.Forms.DataGridViewTextBoxColumn();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             tsRunning = new System.Windows.Forms.ToolStrip();
             tsRunningBack = new System.Windows.Forms.ToolStripButton();
@@ -232,25 +265,6 @@ namespace DBADashGUI
             dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn19 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            DatabaseName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            event_type = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            object_name = new System.Windows.Forms.DataGridViewLinkColumn();
-            timestamp = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            duration = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            cpu_time = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            logical_reads = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            physical_reads = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            Writes = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colRowCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            username = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            client_hostname = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            client_app_name = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colContextInfo = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            Result = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colSessionID = new System.Windows.Forms.DataGridViewLinkColumn();
-            colText = new System.Windows.Forms.DataGridViewLinkColumn();
             ((System.ComponentModel.ISupportInitialize)dgvSummary).BeginInit();
             tsSummary.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvSlow).BeginInit();
@@ -535,7 +549,7 @@ namespace DBADashGUI
             // tsGroup
             // 
             tsGroup.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            tsGroup.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { appToolStripMenuItem, clientToolStripMenuItem, contextInfoToolStripMenuItem, databaseNameToolStripMenuItem, eventTypeToolStripMenuItem, instanceToolStripMenuItem, objectNameToolStripMenuItem, resultToolStripMenuItem1, sessionIDToolStripMenuItem, textToolStripMenuItem, timeCustomToolStripMenuItem, dayToolStripMenuItem, hourToolStripMenuItem, usernameToolStripMenuItem });
+            tsGroup.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { appToolStripMenuItem, clientToolStripMenuItem, contextInfoToolStripMenuItem, databaseNameToolStripMenuItem, eventTypeToolStripMenuItem, instanceToolStripMenuItem, objectNameToolStripMenuItem, resourcePoolToolStripMenuItem, resultToolStripMenuItem1, sessionIDToolStripMenuItem, textToolStripMenuItem, timeCustomToolStripMenuItem, dayToolStripMenuItem, hourToolStripMenuItem, usernameToolStripMenuItem, workloadGroupToolStripMenuItem });
             tsGroup.Image = (System.Drawing.Image)resources.GetObject("tsGroup.Image");
             tsGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsGroup.Name = "tsGroup";
@@ -545,7 +559,7 @@ namespace DBADashGUI
             // appToolStripMenuItem
             // 
             appToolStripMenuItem.Name = "appToolStripMenuItem";
-            appToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            appToolStripMenuItem.Size = new System.Drawing.Size(201, 26);
             appToolStripMenuItem.Tag = "client_app_name";
             appToolStripMenuItem.Text = "App";
             appToolStripMenuItem.Click += GroupBy_Click;
@@ -553,7 +567,7 @@ namespace DBADashGUI
             // clientToolStripMenuItem
             // 
             clientToolStripMenuItem.Name = "clientToolStripMenuItem";
-            clientToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            clientToolStripMenuItem.Size = new System.Drawing.Size(201, 26);
             clientToolStripMenuItem.Tag = "client_hostname";
             clientToolStripMenuItem.Text = "Client";
             clientToolStripMenuItem.Click += GroupBy_Click;
@@ -561,7 +575,7 @@ namespace DBADashGUI
             // contextInfoToolStripMenuItem
             // 
             contextInfoToolStripMenuItem.Name = "contextInfoToolStripMenuItem";
-            contextInfoToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            contextInfoToolStripMenuItem.Size = new System.Drawing.Size(201, 26);
             contextInfoToolStripMenuItem.Tag = "context_info";
             contextInfoToolStripMenuItem.Text = "Context Info";
             contextInfoToolStripMenuItem.Click += GroupBy_Click;
@@ -569,7 +583,7 @@ namespace DBADashGUI
             // databaseNameToolStripMenuItem
             // 
             databaseNameToolStripMenuItem.Name = "databaseNameToolStripMenuItem";
-            databaseNameToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            databaseNameToolStripMenuItem.Size = new System.Drawing.Size(201, 26);
             databaseNameToolStripMenuItem.Tag = "DatabaseName";
             databaseNameToolStripMenuItem.Text = "Database Name";
             databaseNameToolStripMenuItem.Click += GroupBy_Click;
@@ -577,7 +591,7 @@ namespace DBADashGUI
             // eventTypeToolStripMenuItem
             // 
             eventTypeToolStripMenuItem.Name = "eventTypeToolStripMenuItem";
-            eventTypeToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            eventTypeToolStripMenuItem.Size = new System.Drawing.Size(201, 26);
             eventTypeToolStripMenuItem.Tag = "EventType";
             eventTypeToolStripMenuItem.Text = "Event Type";
             eventTypeToolStripMenuItem.Click += GroupBy_Click;
@@ -587,7 +601,7 @@ namespace DBADashGUI
             instanceToolStripMenuItem.Checked = true;
             instanceToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             instanceToolStripMenuItem.Name = "instanceToolStripMenuItem";
-            instanceToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            instanceToolStripMenuItem.Size = new System.Drawing.Size(201, 26);
             instanceToolStripMenuItem.Tag = "InstanceDisplayName";
             instanceToolStripMenuItem.Text = "Instance";
             instanceToolStripMenuItem.Click += GroupBy_Click;
@@ -595,15 +609,23 @@ namespace DBADashGUI
             // objectNameToolStripMenuItem
             // 
             objectNameToolStripMenuItem.Name = "objectNameToolStripMenuItem";
-            objectNameToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            objectNameToolStripMenuItem.Size = new System.Drawing.Size(201, 26);
             objectNameToolStripMenuItem.Tag = "object_name";
             objectNameToolStripMenuItem.Text = "Object Name";
             objectNameToolStripMenuItem.Click += GroupBy_Click;
             // 
+            // resourcePoolToolStripMenuItem
+            // 
+            resourcePoolToolStripMenuItem.Name = "resourcePoolToolStripMenuItem";
+            resourcePoolToolStripMenuItem.Size = new System.Drawing.Size(201, 26);
+            resourcePoolToolStripMenuItem.Tag = "resource_pool";
+            resourcePoolToolStripMenuItem.Text = "Resource Pool";
+            resourcePoolToolStripMenuItem.Click += GroupBy_Click;
+            // 
             // resultToolStripMenuItem1
             // 
             resultToolStripMenuItem1.Name = "resultToolStripMenuItem1";
-            resultToolStripMenuItem1.Size = new System.Drawing.Size(199, 26);
+            resultToolStripMenuItem1.Size = new System.Drawing.Size(201, 26);
             resultToolStripMenuItem1.Tag = "Result";
             resultToolStripMenuItem1.Text = "Result";
             resultToolStripMenuItem1.Click += GroupBy_Click;
@@ -611,7 +633,7 @@ namespace DBADashGUI
             // sessionIDToolStripMenuItem
             // 
             sessionIDToolStripMenuItem.Name = "sessionIDToolStripMenuItem";
-            sessionIDToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            sessionIDToolStripMenuItem.Size = new System.Drawing.Size(201, 26);
             sessionIDToolStripMenuItem.Tag = "session_id";
             sessionIDToolStripMenuItem.Text = "Session ID";
             sessionIDToolStripMenuItem.Click += GroupBy_Click;
@@ -619,7 +641,7 @@ namespace DBADashGUI
             // textToolStripMenuItem
             // 
             textToolStripMenuItem.Name = "textToolStripMenuItem";
-            textToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            textToolStripMenuItem.Size = new System.Drawing.Size(201, 26);
             textToolStripMenuItem.Tag = "text";
             textToolStripMenuItem.Text = "Text";
             textToolStripMenuItem.Click += GroupBy_Click;
@@ -627,14 +649,14 @@ namespace DBADashGUI
             // timeCustomToolStripMenuItem
             // 
             timeCustomToolStripMenuItem.Name = "timeCustomToolStripMenuItem";
-            timeCustomToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            timeCustomToolStripMenuItem.Size = new System.Drawing.Size(201, 26);
             timeCustomToolStripMenuItem.Text = "Time - Custom";
             timeCustomToolStripMenuItem.Click += TimeCustomToolStripMenuItem_Click;
             // 
             // dayToolStripMenuItem
             // 
             dayToolStripMenuItem.Name = "dayToolStripMenuItem";
-            dayToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            dayToolStripMenuItem.Size = new System.Drawing.Size(201, 26);
             dayToolStripMenuItem.Tag = "timestamp.1440.{UTCOffset}";
             dayToolStripMenuItem.Text = "Time - Day";
             dayToolStripMenuItem.Click += GroupBy_Click;
@@ -642,7 +664,7 @@ namespace DBADashGUI
             // hourToolStripMenuItem
             // 
             hourToolStripMenuItem.Name = "hourToolStripMenuItem";
-            hourToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            hourToolStripMenuItem.Size = new System.Drawing.Size(201, 26);
             hourToolStripMenuItem.Tag = "timestamp.60.{UTCOffset}";
             hourToolStripMenuItem.Text = "Time - Hour";
             hourToolStripMenuItem.Click += GroupBy_Click;
@@ -650,10 +672,18 @@ namespace DBADashGUI
             // usernameToolStripMenuItem
             // 
             usernameToolStripMenuItem.Name = "usernameToolStripMenuItem";
-            usernameToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            usernameToolStripMenuItem.Size = new System.Drawing.Size(201, 26);
             usernameToolStripMenuItem.Tag = "username";
             usernameToolStripMenuItem.Text = "Username";
             usernameToolStripMenuItem.Click += GroupBy_Click;
+            // 
+            // workloadGroupToolStripMenuItem
+            // 
+            workloadGroupToolStripMenuItem.Name = "workloadGroupToolStripMenuItem";
+            workloadGroupToolStripMenuItem.Size = new System.Drawing.Size(201, 26);
+            workloadGroupToolStripMenuItem.Tag = "workload_group";
+            workloadGroupToolStripMenuItem.Text = "Workload Group";
+            workloadGroupToolStripMenuItem.Click += GroupBy_Click;
             // 
             // tsMetric
             // 
@@ -682,7 +712,7 @@ namespace DBADashGUI
             // 
             // tsFilter
             // 
-            tsFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblApp, lblClient, lblContextInfo, lblCPU, lblDatabase, lblDuration, lblInstance, lblLogicalReads, lblObject, lblPhysicalReads, lblResult, lblSessionID, lblText, lblUser, lblWrites, lblEventType, timeToolStripMenuItem, toolStripSeparator2, resetToolStripMenuItem });
+            tsFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblApp, lblClient, lblContextInfo, lblCPU, lblDatabase, lblDuration, lblEventType, lblInstance, lblLogicalReads, lblObject, lblPhysicalReads, resourcePoolFilterToolStripMenuItem, lblResult, lblSessionID, lblText, timeToolStripMenuItem, lblUser, lblWrites, workloadGroupFilterToolStripMenuItem, toolStripSeparator2, resetToolStripMenuItem });
             tsFilter.Image = Properties.Resources.FilterDropdown_16x;
             tsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsFilter.Name = "tsFilter";
@@ -693,7 +723,7 @@ namespace DBADashGUI
             // 
             lblApp.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblIncludeApp, txtApp, lblExcludeApp, txtExcludeApp });
             lblApp.Name = "lblApp";
-            lblApp.Size = new System.Drawing.Size(188, 26);
+            lblApp.Size = new System.Drawing.Size(224, 26);
             lblApp.Text = "App";
             lblApp.ToolTipText = "% Wildcard character supported";
             // 
@@ -729,7 +759,7 @@ namespace DBADashGUI
             // 
             lblClient.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblIncludeClient, txtClient, lblExcludeClient, txtExcludeClient });
             lblClient.Name = "lblClient";
-            lblClient.Size = new System.Drawing.Size(188, 26);
+            lblClient.Size = new System.Drawing.Size(224, 26);
             lblClient.Text = "Client";
             lblClient.ToolTipText = "% Wildcard character supported";
             // 
@@ -765,7 +795,7 @@ namespace DBADashGUI
             // 
             lblContextInfo.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblIncludeContextInfo, txtContextInfo, lblExcludeContextInfo, txtExcludeContextInfo });
             lblContextInfo.Name = "lblContextInfo";
-            lblContextInfo.Size = new System.Drawing.Size(188, 26);
+            lblContextInfo.Size = new System.Drawing.Size(224, 26);
             lblContextInfo.Text = "Context Info";
             // 
             // lblIncludeContextInfo
@@ -800,7 +830,7 @@ namespace DBADashGUI
             // 
             lblCPU.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblCPUFrom, txtCPUFrom, lblCPUTo, txtCPUTo });
             lblCPU.Name = "lblCPU";
-            lblCPU.Size = new System.Drawing.Size(188, 26);
+            lblCPU.Size = new System.Drawing.Size(224, 26);
             lblCPU.Text = "CPU";
             // 
             // lblCPUFrom
@@ -835,7 +865,7 @@ namespace DBADashGUI
             // 
             lblDatabase.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblIncludeDatabase, txtDatabase, lblExcludeDatabase, txtExcludeDatabase });
             lblDatabase.Name = "lblDatabase";
-            lblDatabase.Size = new System.Drawing.Size(188, 26);
+            lblDatabase.Size = new System.Drawing.Size(224, 26);
             lblDatabase.Text = "Database";
             lblDatabase.ToolTipText = "% Wildcard character supported";
             // 
@@ -871,7 +901,7 @@ namespace DBADashGUI
             // 
             lblDuration.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblDurationFrom, txtDurationFrom, lblDurationTo, txtDurationTo });
             lblDuration.Name = "lblDuration";
-            lblDuration.Size = new System.Drawing.Size(188, 26);
+            lblDuration.Size = new System.Drawing.Size(224, 26);
             lblDuration.Text = "Duration";
             // 
             // lblDurationFrom
@@ -902,11 +932,39 @@ namespace DBADashGUI
             txtDurationTo.KeyPress += Filter_Numeric_KeyPress;
             txtDurationTo.TextChanged += Filter_TextChanged;
             // 
+            // lblEventType
+            // 
+            lblEventType.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { rpccompletedToolStripMenuItem, sqlbatchcompletedToolStripMenuItem });
+            lblEventType.Name = "lblEventType";
+            lblEventType.Size = new System.Drawing.Size(224, 26);
+            lblEventType.Text = "Event Type";
+            // 
+            // rpccompletedToolStripMenuItem
+            // 
+            rpccompletedToolStripMenuItem.Checked = true;
+            rpccompletedToolStripMenuItem.CheckOnClick = true;
+            rpccompletedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            rpccompletedToolStripMenuItem.Name = "rpccompletedToolStripMenuItem";
+            rpccompletedToolStripMenuItem.Size = new System.Drawing.Size(232, 26);
+            rpccompletedToolStripMenuItem.Text = "rpc_completed";
+            rpccompletedToolStripMenuItem.CheckedChanged += EventType_CheckedChanged;
+            rpccompletedToolStripMenuItem.Click += EventType_Click;
+            // 
+            // sqlbatchcompletedToolStripMenuItem
+            // 
+            sqlbatchcompletedToolStripMenuItem.Checked = true;
+            sqlbatchcompletedToolStripMenuItem.CheckOnClick = true;
+            sqlbatchcompletedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            sqlbatchcompletedToolStripMenuItem.Name = "sqlbatchcompletedToolStripMenuItem";
+            sqlbatchcompletedToolStripMenuItem.Size = new System.Drawing.Size(232, 26);
+            sqlbatchcompletedToolStripMenuItem.Text = "sql_batch_completed";
+            sqlbatchcompletedToolStripMenuItem.CheckedChanged += EventType_CheckedChanged;
+            // 
             // lblInstance
             // 
             lblInstance.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblIncludeInstance, txtInstance, lblExcludeInstance, txtExcludeInstance });
             lblInstance.Name = "lblInstance";
-            lblInstance.Size = new System.Drawing.Size(188, 26);
+            lblInstance.Size = new System.Drawing.Size(224, 26);
             lblInstance.Text = "Instance";
             lblInstance.ToolTipText = "% Wildcard character supported";
             // 
@@ -942,7 +1000,7 @@ namespace DBADashGUI
             // 
             lblLogicalReads.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblLogicalReadsFrom, txtLogicalReadsFrom, lblLogicalReadsTo, txtLogicalReadsTo });
             lblLogicalReads.Name = "lblLogicalReads";
-            lblLogicalReads.Size = new System.Drawing.Size(188, 26);
+            lblLogicalReads.Size = new System.Drawing.Size(224, 26);
             lblLogicalReads.Text = "Logical Reads";
             // 
             // lblLogicalReadsFrom
@@ -977,7 +1035,7 @@ namespace DBADashGUI
             // 
             lblObject.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblIncludeObject, txtObject, lblExcludeObject, txtExcludeObject });
             lblObject.Name = "lblObject";
-            lblObject.Size = new System.Drawing.Size(188, 26);
+            lblObject.Size = new System.Drawing.Size(224, 26);
             lblObject.Text = "Object";
             lblObject.ToolTipText = "% Wildcard character supported";
             // 
@@ -1013,7 +1071,7 @@ namespace DBADashGUI
             // 
             lblPhysicalReads.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblPhysicalReadsFrom, txtPhysicalReadsFrom, lblPhysicalReadsTo, txtPhysicalReadsTo });
             lblPhysicalReads.Name = "lblPhysicalReads";
-            lblPhysicalReads.Size = new System.Drawing.Size(188, 26);
+            lblPhysicalReads.Size = new System.Drawing.Size(224, 26);
             lblPhysicalReads.Text = "Physical Reads";
             // 
             // lblPhysicalReadsFrom
@@ -1044,11 +1102,47 @@ namespace DBADashGUI
             txtPhysicalReadsTo.KeyPress += Filter_Numeric_KeyPress;
             txtPhysicalReadsTo.TextChanged += Filter_TextChanged;
             // 
+            // resourcePoolFilterToolStripMenuItem
+            // 
+            resourcePoolFilterToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { includeResourcePoolFilterToolStripMenuItem, txtResourcePool, excludeResourcePoolFilterToolStripMenuItem, txtExcludeResourcePool });
+            resourcePoolFilterToolStripMenuItem.Name = "resourcePoolFilterToolStripMenuItem";
+            resourcePoolFilterToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            resourcePoolFilterToolStripMenuItem.Text = "Resource Pool";
+            resourcePoolFilterToolStripMenuItem.ToolTipText = "Enter the full name of the resource pool to include/exclude";
+            // 
+            // includeResourcePoolFilterToolStripMenuItem
+            // 
+            includeResourcePoolFilterToolStripMenuItem.Name = "includeResourcePoolFilterToolStripMenuItem";
+            includeResourcePoolFilterToolStripMenuItem.Size = new System.Drawing.Size(274, 26);
+            includeResourcePoolFilterToolStripMenuItem.Text = "Include:";
+            // 
+            // txtResourcePool
+            // 
+            txtResourcePool.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
+            txtResourcePool.Name = "txtResourcePool";
+            txtResourcePool.Size = new System.Drawing.Size(200, 27);
+            txtResourcePool.KeyPress += Filter_KeyPress;
+            txtResourcePool.TextChanged += Filter_TextChanged;
+            // 
+            // excludeResourcePoolFilterToolStripMenuItem
+            // 
+            excludeResourcePoolFilterToolStripMenuItem.Name = "excludeResourcePoolFilterToolStripMenuItem";
+            excludeResourcePoolFilterToolStripMenuItem.Size = new System.Drawing.Size(274, 26);
+            excludeResourcePoolFilterToolStripMenuItem.Text = "Exclude:";
+            // 
+            // txtExcludeResourcePool
+            // 
+            txtExcludeResourcePool.BackColor = System.Drawing.Color.FromArgb(251, 212, 215);
+            txtExcludeResourcePool.Name = "txtExcludeResourcePool";
+            txtExcludeResourcePool.Size = new System.Drawing.Size(200, 27);
+            txtExcludeResourcePool.KeyPress += Filter_KeyPress;
+            txtExcludeResourcePool.TextChanged += Filter_TextChanged;
+            // 
             // lblResult
             // 
             lblResult.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblIncludeResult, txtResult, lblExcludeResult, txtExcludeResult });
             lblResult.Name = "lblResult";
-            lblResult.Size = new System.Drawing.Size(188, 26);
+            lblResult.Size = new System.Drawing.Size(224, 26);
             lblResult.Text = "Result";
             lblResult.ToolTipText = "% Wildcard character supported";
             // 
@@ -1084,7 +1178,7 @@ namespace DBADashGUI
             // 
             lblSessionID.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblIncludeSessionID, txtSessionID, lblExcludeSessionID, txtExcludeSessionID });
             lblSessionID.Name = "lblSessionID";
-            lblSessionID.Size = new System.Drawing.Size(188, 26);
+            lblSessionID.Size = new System.Drawing.Size(224, 26);
             lblSessionID.Text = "Session ID";
             lblSessionID.ToolTipText = "Comma separated list of IDs";
             // 
@@ -1120,7 +1214,7 @@ namespace DBADashGUI
             // 
             lblText.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblIncludeText, txtText, lblExcludeText, txtExcludeText });
             lblText.Name = "lblText";
-            lblText.Size = new System.Drawing.Size(188, 26);
+            lblText.Size = new System.Drawing.Size(224, 26);
             lblText.Text = "Text";
             lblText.ToolTipText = "Matches anywhere in the string";
             // 
@@ -1152,11 +1246,18 @@ namespace DBADashGUI
             txtExcludeText.KeyPress += Filter_KeyPress;
             txtExcludeText.TextChanged += Filter_TextChanged;
             // 
+            // timeToolStripMenuItem
+            // 
+            timeToolStripMenuItem.Name = "timeToolStripMenuItem";
+            timeToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            timeToolStripMenuItem.Text = "Time";
+            timeToolStripMenuItem.Click += TimeToolStripMenuItem_Click;
+            // 
             // lblUser
             // 
             lblUser.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblIncludeUser, txtUser, lblExcludeUser, txtExcludeUser });
             lblUser.Name = "lblUser";
-            lblUser.Size = new System.Drawing.Size(188, 26);
+            lblUser.Size = new System.Drawing.Size(224, 26);
             lblUser.Text = "User";
             lblUser.ToolTipText = "% Wildcard character supported";
             // 
@@ -1192,7 +1293,7 @@ namespace DBADashGUI
             // 
             lblWrites.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lblWritesFrom, txtWritesFrom, lblWritesTo, txtWritesTo });
             lblWrites.Name = "lblWrites";
-            lblWrites.Size = new System.Drawing.Size(188, 26);
+            lblWrites.Size = new System.Drawing.Size(224, 26);
             lblWrites.Text = "Writes";
             // 
             // lblWritesFrom
@@ -1223,50 +1324,51 @@ namespace DBADashGUI
             txtWritesTo.KeyPress += Filter_Numeric_KeyPress;
             txtWritesTo.TextChanged += Filter_TextChanged;
             // 
-            // lblEventType
+            // workloadGroupFilterToolStripMenuItem
             // 
-            lblEventType.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { rpccompletedToolStripMenuItem, sqlbatchcompletedToolStripMenuItem });
-            lblEventType.Name = "lblEventType";
-            lblEventType.Size = new System.Drawing.Size(188, 26);
-            lblEventType.Text = "Event Type";
+            workloadGroupFilterToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { includeWorkloadGroupFilterToolStripMenuItem, txtWorkloadGroup, excludeWorkloadGroupFilterToolStripMenuItem, txtExcludeWorkloadGroup });
+            workloadGroupFilterToolStripMenuItem.Name = "workloadGroupFilterToolStripMenuItem";
+            workloadGroupFilterToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            workloadGroupFilterToolStripMenuItem.Text = "Workload Group";
+            workloadGroupFilterToolStripMenuItem.ToolTipText = "Enter the full name of the workload group to include/exclude";
             // 
-            // rpccompletedToolStripMenuItem
+            // includeWorkloadGroupFilterToolStripMenuItem
             // 
-            rpccompletedToolStripMenuItem.Checked = true;
-            rpccompletedToolStripMenuItem.CheckOnClick = true;
-            rpccompletedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            rpccompletedToolStripMenuItem.Name = "rpccompletedToolStripMenuItem";
-            rpccompletedToolStripMenuItem.Size = new System.Drawing.Size(232, 26);
-            rpccompletedToolStripMenuItem.Text = "rpc_completed";
-            rpccompletedToolStripMenuItem.CheckedChanged += EventType_CheckedChanged;
-            rpccompletedToolStripMenuItem.Click += EventType_Click;
+            includeWorkloadGroupFilterToolStripMenuItem.Name = "includeWorkloadGroupFilterToolStripMenuItem";
+            includeWorkloadGroupFilterToolStripMenuItem.Size = new System.Drawing.Size(274, 26);
+            includeWorkloadGroupFilterToolStripMenuItem.Text = "Include:";
             // 
-            // sqlbatchcompletedToolStripMenuItem
+            // txtWorkloadGroup
             // 
-            sqlbatchcompletedToolStripMenuItem.Checked = true;
-            sqlbatchcompletedToolStripMenuItem.CheckOnClick = true;
-            sqlbatchcompletedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            sqlbatchcompletedToolStripMenuItem.Name = "sqlbatchcompletedToolStripMenuItem";
-            sqlbatchcompletedToolStripMenuItem.Size = new System.Drawing.Size(232, 26);
-            sqlbatchcompletedToolStripMenuItem.Text = "sql_batch_completed";
-            sqlbatchcompletedToolStripMenuItem.CheckedChanged += EventType_CheckedChanged;
+            txtWorkloadGroup.BackColor = System.Drawing.Color.FromArgb(224, 236, 207);
+            txtWorkloadGroup.Name = "txtWorkloadGroup";
+            txtWorkloadGroup.Size = new System.Drawing.Size(200, 27);
+            txtWorkloadGroup.KeyPress += Filter_KeyPress;
+            txtWorkloadGroup.TextChanged += Filter_TextChanged;
             // 
-            // timeToolStripMenuItem
+            // excludeWorkloadGroupFilterToolStripMenuItem
             // 
-            timeToolStripMenuItem.Name = "timeToolStripMenuItem";
-            timeToolStripMenuItem.Size = new System.Drawing.Size(188, 26);
-            timeToolStripMenuItem.Text = "Time";
-            timeToolStripMenuItem.Click += TimeToolStripMenuItem_Click;
+            excludeWorkloadGroupFilterToolStripMenuItem.Name = "excludeWorkloadGroupFilterToolStripMenuItem";
+            excludeWorkloadGroupFilterToolStripMenuItem.Size = new System.Drawing.Size(274, 26);
+            excludeWorkloadGroupFilterToolStripMenuItem.Text = "Exclude:";
+            // 
+            // txtExcludeWorkloadGroup
+            // 
+            txtExcludeWorkloadGroup.BackColor = System.Drawing.Color.FromArgb(251, 212, 215);
+            txtExcludeWorkloadGroup.Name = "txtExcludeWorkloadGroup";
+            txtExcludeWorkloadGroup.Size = new System.Drawing.Size(200, 27);
+            txtExcludeWorkloadGroup.KeyPress += Filter_KeyPress;
+            txtExcludeWorkloadGroup.TextChanged += Filter_TextChanged;
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new System.Drawing.Size(185, 6);
+            toolStripSeparator2.Size = new System.Drawing.Size(221, 6);
             // 
             // resetToolStripMenuItem
             // 
             resetToolStripMenuItem.Name = "resetToolStripMenuItem";
-            resetToolStripMenuItem.Size = new System.Drawing.Size(188, 26);
+            resetToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             resetToolStripMenuItem.Text = "Reset";
             resetToolStripMenuItem.Click += ResetToolStripMenuItem_Click;
             // 
@@ -1395,7 +1497,7 @@ namespace DBADashGUI
             dataGridViewCellStyle18.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             dgvSlow.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle18;
             dgvSlow.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvSlow.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, DatabaseName, event_type, object_name, timestamp, colDuration, duration, cpu_time, logical_reads, physical_reads, Writes, colRowCount, username, client_hostname, client_app_name, colContextInfo, Result, colSessionID, colText });
+            dgvSlow.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, DatabaseName, event_type, object_name, timestamp, colDuration, duration, cpu_time, logical_reads, physical_reads, Writes, colRowCount, username, client_hostname, client_app_name, colContextInfo, Result, colSessionID, colText, colWorkloadGroup, colResourcePool });
             dataGridViewCellStyle25.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle25.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
             dataGridViewCellStyle25.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -1416,6 +1518,216 @@ namespace DBADashGUI
             dgvSlow.TabIndex = 4;
             dgvSlow.CellContentClick += DgvSlow_CellContentClick;
             dgvSlow.RowsAdded += DgvSlow_RowsAdded;
+            // 
+            // Instance
+            // 
+            Instance.DataPropertyName = "InstanceDisplayName";
+            Instance.HeaderText = "Instance";
+            Instance.MinimumWidth = 6;
+            Instance.Name = "Instance";
+            Instance.ReadOnly = true;
+            Instance.Width = 90;
+            // 
+            // DatabaseName
+            // 
+            DatabaseName.DataPropertyName = "DatabaseName";
+            DatabaseName.HeaderText = "Database";
+            DatabaseName.MinimumWidth = 6;
+            DatabaseName.Name = "DatabaseName";
+            DatabaseName.ReadOnly = true;
+            DatabaseName.Width = 98;
+            // 
+            // event_type
+            // 
+            event_type.DataPropertyName = "event_type";
+            event_type.HeaderText = "Event Type";
+            event_type.MinimumWidth = 6;
+            event_type.Name = "event_type";
+            event_type.ReadOnly = true;
+            event_type.Width = 125;
+            // 
+            // object_name
+            // 
+            object_name.DataPropertyName = "object_name";
+            object_name.HeaderText = "Object Name";
+            object_name.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            object_name.MinimumWidth = 6;
+            object_name.Name = "object_name";
+            object_name.ReadOnly = true;
+            object_name.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            object_name.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            object_name.Width = 109;
+            // 
+            // timestamp
+            // 
+            timestamp.DataPropertyName = "timestamp";
+            timestamp.HeaderText = "Time";
+            timestamp.MinimumWidth = 6;
+            timestamp.Name = "timestamp";
+            timestamp.ReadOnly = true;
+            timestamp.Width = 68;
+            // 
+            // colDuration
+            // 
+            colDuration.DataPropertyName = "Duration";
+            colDuration.HeaderText = "Duration";
+            colDuration.MinimumWidth = 6;
+            colDuration.Name = "colDuration";
+            colDuration.ReadOnly = true;
+            colDuration.Width = 125;
+            // 
+            // duration
+            // 
+            duration.DataPropertyName = "DurationSec";
+            dataGridViewCellStyle19.Format = "N3";
+            duration.DefaultCellStyle = dataGridViewCellStyle19;
+            duration.HeaderText = "Duration (sec)";
+            duration.MinimumWidth = 6;
+            duration.Name = "duration";
+            duration.ReadOnly = true;
+            duration.Width = 117;
+            // 
+            // cpu_time
+            // 
+            cpu_time.DataPropertyName = "CPUTimeSec";
+            dataGridViewCellStyle20.Format = "N3";
+            cpu_time.DefaultCellStyle = dataGridViewCellStyle20;
+            cpu_time.HeaderText = "CPU (sec)";
+            cpu_time.MinimumWidth = 6;
+            cpu_time.Name = "cpu_time";
+            cpu_time.ReadOnly = true;
+            cpu_time.Width = 93;
+            // 
+            // logical_reads
+            // 
+            logical_reads.DataPropertyName = "logical_reads";
+            dataGridViewCellStyle21.Format = "N0";
+            logical_reads.DefaultCellStyle = dataGridViewCellStyle21;
+            logical_reads.HeaderText = "Logical Reads";
+            logical_reads.MinimumWidth = 6;
+            logical_reads.Name = "logical_reads";
+            logical_reads.ReadOnly = true;
+            logical_reads.Width = 117;
+            // 
+            // physical_reads
+            // 
+            physical_reads.DataPropertyName = "physical_reads";
+            dataGridViewCellStyle22.Format = "N0";
+            physical_reads.DefaultCellStyle = dataGridViewCellStyle22;
+            physical_reads.HeaderText = "Physical Reads";
+            physical_reads.MinimumWidth = 6;
+            physical_reads.Name = "physical_reads";
+            physical_reads.ReadOnly = true;
+            physical_reads.Width = 123;
+            // 
+            // Writes
+            // 
+            Writes.DataPropertyName = "Writes";
+            dataGridViewCellStyle23.Format = "N0";
+            Writes.DefaultCellStyle = dataGridViewCellStyle23;
+            Writes.HeaderText = "Writes";
+            Writes.MinimumWidth = 6;
+            Writes.Name = "Writes";
+            Writes.ReadOnly = true;
+            Writes.Width = 77;
+            // 
+            // colRowCount
+            // 
+            colRowCount.DataPropertyName = "row_count";
+            dataGridViewCellStyle24.Format = "N0";
+            colRowCount.DefaultCellStyle = dataGridViewCellStyle24;
+            colRowCount.HeaderText = "Row Count";
+            colRowCount.MinimumWidth = 6;
+            colRowCount.Name = "colRowCount";
+            colRowCount.ReadOnly = true;
+            colRowCount.Width = 77;
+            // 
+            // username
+            // 
+            username.DataPropertyName = "username";
+            username.HeaderText = "UserName";
+            username.MinimumWidth = 6;
+            username.Name = "username";
+            username.ReadOnly = true;
+            username.Width = 104;
+            // 
+            // client_hostname
+            // 
+            client_hostname.DataPropertyName = "client_hostname";
+            client_hostname.HeaderText = "Client";
+            client_hostname.MinimumWidth = 6;
+            client_hostname.Name = "client_hostname";
+            client_hostname.ReadOnly = true;
+            client_hostname.Width = 72;
+            // 
+            // client_app_name
+            // 
+            client_app_name.DataPropertyName = "client_app_name";
+            client_app_name.HeaderText = "App";
+            client_app_name.MinimumWidth = 6;
+            client_app_name.Name = "client_app_name";
+            client_app_name.ReadOnly = true;
+            client_app_name.Width = 62;
+            // 
+            // colContextInfo
+            // 
+            colContextInfo.DataPropertyName = "context_info";
+            colContextInfo.HeaderText = "Context Info";
+            colContextInfo.MinimumWidth = 6;
+            colContextInfo.Name = "colContextInfo";
+            colContextInfo.ReadOnly = true;
+            colContextInfo.Width = 125;
+            // 
+            // Result
+            // 
+            Result.DataPropertyName = "Result";
+            Result.HeaderText = "Result";
+            Result.MinimumWidth = 6;
+            Result.Name = "Result";
+            Result.ReadOnly = true;
+            Result.Width = 77;
+            // 
+            // colSessionID
+            // 
+            colSessionID.DataPropertyName = "session_id";
+            colSessionID.HeaderText = "Session ID";
+            colSessionID.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            colSessionID.MinimumWidth = 6;
+            colSessionID.Name = "colSessionID";
+            colSessionID.ReadOnly = true;
+            colSessionID.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colSessionID.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            colSessionID.Width = 125;
+            // 
+            // colText
+            // 
+            colText.DataPropertyName = "text_trunc";
+            colText.HeaderText = "Text";
+            colText.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            colText.MinimumWidth = 150;
+            colText.Name = "colText";
+            colText.ReadOnly = true;
+            colText.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            colText.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            colText.Width = 244;
+            // 
+            // colWorkloadGroup
+            // 
+            colWorkloadGroup.DataPropertyName = "workload_group";
+            colWorkloadGroup.HeaderText = "Workload Group";
+            colWorkloadGroup.MinimumWidth = 6;
+            colWorkloadGroup.Name = "colWorkloadGroup";
+            colWorkloadGroup.ReadOnly = true;
+            colWorkloadGroup.Width = 125;
+            // 
+            // colResourcePool
+            // 
+            colResourcePool.DataPropertyName = "resource_pool";
+            colResourcePool.HeaderText = "Resource Pool";
+            colResourcePool.MinimumWidth = 6;
+            colResourcePool.Name = "colResourcePool";
+            colResourcePool.ReadOnly = true;
+            colResourcePool.Width = 125;
             // 
             // splitContainer1
             // 
@@ -1757,198 +2069,6 @@ namespace DBADashGUI
             dataGridViewTextBoxColumn19.ReadOnly = true;
             dataGridViewTextBoxColumn19.Width = 125;
             // 
-            // Instance
-            // 
-            Instance.DataPropertyName = "InstanceDisplayName";
-            Instance.HeaderText = "Instance";
-            Instance.MinimumWidth = 6;
-            Instance.Name = "Instance";
-            Instance.ReadOnly = true;
-            Instance.Width = 90;
-            // 
-            // DatabaseName
-            // 
-            DatabaseName.DataPropertyName = "DatabaseName";
-            DatabaseName.HeaderText = "Database";
-            DatabaseName.MinimumWidth = 6;
-            DatabaseName.Name = "DatabaseName";
-            DatabaseName.ReadOnly = true;
-            DatabaseName.Width = 98;
-            // 
-            // event_type
-            // 
-            event_type.DataPropertyName = "event_type";
-            event_type.HeaderText = "Event Type";
-            event_type.MinimumWidth = 6;
-            event_type.Name = "event_type";
-            event_type.ReadOnly = true;
-            event_type.Width = 125;
-            // 
-            // object_name
-            // 
-            object_name.DataPropertyName = "object_name";
-            object_name.HeaderText = "Object Name";
-            object_name.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            object_name.MinimumWidth = 6;
-            object_name.Name = "object_name";
-            object_name.ReadOnly = true;
-            object_name.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            object_name.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            object_name.Width = 109;
-            // 
-            // timestamp
-            // 
-            timestamp.DataPropertyName = "timestamp";
-            timestamp.HeaderText = "Time";
-            timestamp.MinimumWidth = 6;
-            timestamp.Name = "timestamp";
-            timestamp.ReadOnly = true;
-            timestamp.Width = 68;
-            // 
-            // colDuration
-            // 
-            colDuration.DataPropertyName = "Duration";
-            colDuration.HeaderText = "Duration";
-            colDuration.MinimumWidth = 6;
-            colDuration.Name = "colDuration";
-            colDuration.ReadOnly = true;
-            colDuration.Width = 125;
-            // 
-            // duration
-            // 
-            duration.DataPropertyName = "DurationSec";
-            dataGridViewCellStyle19.Format = "N3";
-            duration.DefaultCellStyle = dataGridViewCellStyle19;
-            duration.HeaderText = "Duration (sec)";
-            duration.MinimumWidth = 6;
-            duration.Name = "duration";
-            duration.ReadOnly = true;
-            duration.Width = 117;
-            // 
-            // cpu_time
-            // 
-            cpu_time.DataPropertyName = "CPUTimeSec";
-            dataGridViewCellStyle20.Format = "N3";
-            cpu_time.DefaultCellStyle = dataGridViewCellStyle20;
-            cpu_time.HeaderText = "CPU (sec)";
-            cpu_time.MinimumWidth = 6;
-            cpu_time.Name = "cpu_time";
-            cpu_time.ReadOnly = true;
-            cpu_time.Width = 93;
-            // 
-            // logical_reads
-            // 
-            logical_reads.DataPropertyName = "logical_reads";
-            dataGridViewCellStyle21.Format = "N0";
-            logical_reads.DefaultCellStyle = dataGridViewCellStyle21;
-            logical_reads.HeaderText = "Logical Reads";
-            logical_reads.MinimumWidth = 6;
-            logical_reads.Name = "logical_reads";
-            logical_reads.ReadOnly = true;
-            logical_reads.Width = 117;
-            // 
-            // physical_reads
-            // 
-            physical_reads.DataPropertyName = "physical_reads";
-            dataGridViewCellStyle22.Format = "N0";
-            physical_reads.DefaultCellStyle = dataGridViewCellStyle22;
-            physical_reads.HeaderText = "Physical Reads";
-            physical_reads.MinimumWidth = 6;
-            physical_reads.Name = "physical_reads";
-            physical_reads.ReadOnly = true;
-            physical_reads.Width = 123;
-            // 
-            // Writes
-            // 
-            Writes.DataPropertyName = "Writes";
-            dataGridViewCellStyle23.Format = "N0";
-            Writes.DefaultCellStyle = dataGridViewCellStyle23;
-            Writes.HeaderText = "Writes";
-            Writes.MinimumWidth = 6;
-            Writes.Name = "Writes";
-            Writes.ReadOnly = true;
-            Writes.Width = 77;
-            // 
-            // colRowCount
-            // 
-            colRowCount.DataPropertyName = "row_count";
-            dataGridViewCellStyle24.Format = "N0";
-            colRowCount.DefaultCellStyle = dataGridViewCellStyle24;
-            colRowCount.HeaderText = "Row Count";
-            colRowCount.MinimumWidth = 6;
-            colRowCount.Name = "colRowCount";
-            colRowCount.ReadOnly = true;
-            colRowCount.Width = 77;
-            // 
-            // username
-            // 
-            username.DataPropertyName = "username";
-            username.HeaderText = "UserName";
-            username.MinimumWidth = 6;
-            username.Name = "username";
-            username.ReadOnly = true;
-            username.Width = 104;
-            // 
-            // client_hostname
-            // 
-            client_hostname.DataPropertyName = "client_hostname";
-            client_hostname.HeaderText = "Client";
-            client_hostname.MinimumWidth = 6;
-            client_hostname.Name = "client_hostname";
-            client_hostname.ReadOnly = true;
-            client_hostname.Width = 72;
-            // 
-            // client_app_name
-            // 
-            client_app_name.DataPropertyName = "client_app_name";
-            client_app_name.HeaderText = "App";
-            client_app_name.MinimumWidth = 6;
-            client_app_name.Name = "client_app_name";
-            client_app_name.ReadOnly = true;
-            client_app_name.Width = 62;
-            // 
-            // colContextInfo
-            // 
-            colContextInfo.DataPropertyName = "context_info";
-            colContextInfo.HeaderText = "Context Info";
-            colContextInfo.MinimumWidth = 6;
-            colContextInfo.Name = "colContextInfo";
-            colContextInfo.ReadOnly = true;
-            colContextInfo.Width = 125;
-            // 
-            // Result
-            // 
-            Result.DataPropertyName = "Result";
-            Result.HeaderText = "Result";
-            Result.MinimumWidth = 6;
-            Result.Name = "Result";
-            Result.ReadOnly = true;
-            Result.Width = 77;
-            // 
-            // colSessionID
-            // 
-            colSessionID.DataPropertyName = "session_id";
-            colSessionID.HeaderText = "Session ID";
-            colSessionID.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            colSessionID.MinimumWidth = 6;
-            colSessionID.Name = "colSessionID";
-            colSessionID.ReadOnly = true;
-            colSessionID.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colSessionID.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            colSessionID.Width = 125;
-            // 
-            // colText
-            // 
-            colText.DataPropertyName = "text_trunc";
-            colText.HeaderText = "Text";
-            colText.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            colText.MinimumWidth = 150;
-            colText.Name = "colText";
-            colText.ReadOnly = true;
-            colText.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            colText.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            colText.Width = 244;
-            // 
             // SlowQueries
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -2146,6 +2266,18 @@ namespace DBADashGUI
         private System.Windows.Forms.ToolStripDropDownButton tsConfigureMetrics;
         private System.Windows.Forms.ToolStripMenuItem tsConfigureRoot;
         private System.Windows.Forms.ToolStripMenuItem tsConfigureInstance;
+        private System.Windows.Forms.ToolStripMenuItem resourcePoolFilterToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem includeResourcePoolFilterToolStripMenuItem;
+        private System.Windows.Forms.ToolStripTextBox txtResourcePool;
+        private System.Windows.Forms.ToolStripMenuItem excludeResourcePoolFilterToolStripMenuItem;
+        private System.Windows.Forms.ToolStripTextBox txtExcludeResourcePool;
+        private System.Windows.Forms.ToolStripMenuItem workloadGroupFilterToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem includeWorkloadGroupFilterToolStripMenuItem;
+        private System.Windows.Forms.ToolStripTextBox txtWorkloadGroup;
+        private System.Windows.Forms.ToolStripMenuItem excludeWorkloadGroupFilterToolStripMenuItem;
+        private System.Windows.Forms.ToolStripTextBox txtExcludeWorkloadGroup;
+        private System.Windows.Forms.ToolStripMenuItem resourcePoolToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem workloadGroupToolStripMenuItem;
         private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
         private System.Windows.Forms.DataGridViewTextBoxColumn DatabaseName;
         private System.Windows.Forms.DataGridViewTextBoxColumn event_type;
@@ -2165,5 +2297,7 @@ namespace DBADashGUI
         private System.Windows.Forms.DataGridViewTextBoxColumn Result;
         private System.Windows.Forms.DataGridViewLinkColumn colSessionID;
         private System.Windows.Forms.DataGridViewLinkColumn colText;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colWorkloadGroup;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colResourcePool;
     }
 }
