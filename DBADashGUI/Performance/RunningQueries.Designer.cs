@@ -60,6 +60,7 @@ namespace DBADashGUI.Performance
             programToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             queryHashToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             queryPlanHashToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            resourcePoolToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             sQLHandleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             statusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             textToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -85,7 +86,6 @@ namespace DBADashGUI.Performance
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblRowLimit = new System.Windows.Forms.ToolStripStatusLabel();
             tsEditLimit = new System.Windows.Forms.ToolStripStatusLabel();
-            tsStatus = new System.Windows.Forms.ToolStripStatusLabel();
             dgvSessionWaits = new DBADashDataGridView();
             toolStrip2 = new System.Windows.Forms.ToolStrip();
             lblWaitsForSession = new System.Windows.Forms.ToolStripLabel();
@@ -95,7 +95,7 @@ namespace DBADashGUI.Performance
             allSessionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             summaryViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             sessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            resourcePoolToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsStatus = new System.Windows.Forms.ToolStripStatusLabel();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
@@ -323,6 +323,14 @@ namespace DBADashGUI.Performance
             queryPlanHashToolStripMenuItem.Tag = "query_plan_hash";
             queryPlanHashToolStripMenuItem.Text = "Query Plan Hash";
             queryPlanHashToolStripMenuItem.Click += TsGroupBy_Click;
+            // 
+            // resourcePoolToolStripMenuItem
+            // 
+            resourcePoolToolStripMenuItem.Name = "resourcePoolToolStripMenuItem";
+            resourcePoolToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            resourcePoolToolStripMenuItem.Tag = "resource_pool";
+            resourcePoolToolStripMenuItem.Text = "Resource Pool";
+            resourcePoolToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // sQLHandleToolStripMenuItem
             // 
@@ -573,13 +581,6 @@ namespace DBADashGUI.Performance
             tsEditLimit.Text = "Edit Limit";
             tsEditLimit.Click += TsEditLimit_Click;
             // 
-            // tsStatus
-            // 
-            tsStatus.Name = "tsStatus";
-            tsStatus.Size = new System.Drawing.Size(1184, 20);
-            tsStatus.Spring = true;
-            tsStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
             // dgvSessionWaits
             // 
             dgvSessionWaits.AllowUserToAddRows = false;
@@ -684,13 +685,10 @@ namespace DBADashGUI.Performance
             sessionToolStripMenuItem.Text = "Session ";
             sessionToolStripMenuItem.Click += SessionToolStripMenuItem_Click;
             // 
-            // resourcePoolToolStripMenuItem
+            // tsStatus
             // 
-            resourcePoolToolStripMenuItem.Name = "resourcePoolToolStripMenuItem";
-            resourcePoolToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
-            resourcePoolToolStripMenuItem.Tag = "resource_pool";
-            resourcePoolToolStripMenuItem.Text = "Resource Pool";
-            resourcePoolToolStripMenuItem.Click += TsGroupBy_Click;
+            tsStatus.Name = "tsStatus";
+            tsStatus.Size = new System.Drawing.Size(0, 20);
             // 
             // RunningQueries
             // 
@@ -760,7 +758,6 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripMenuItem showRootBlockersToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem clearBlockingFilterToolStripMenuItem;
         private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.ToolStripStatusLabel tsStatus;
         private System.Windows.Forms.ToolStripLabel tsGroupByFilter;
         private System.Windows.Forms.ToolStripButton tsCols;
         private System.Windows.Forms.ToolStripStatusLabel lblRowLimit;
@@ -781,5 +778,6 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripMenuItem commandToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem workloadGroupToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem resourcePoolToolStripMenuItem;
+        private System.Windows.Forms.ToolStripStatusLabel tsStatus;
     }
 }
