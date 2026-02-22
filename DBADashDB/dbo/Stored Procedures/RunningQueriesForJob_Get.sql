@@ -92,7 +92,8 @@ SELECT InstanceID,
        TaskWaits,
        dop,
        cursor_text,
-       workload_group
+       workload_group,
+       resource_pool
 FROM dbo.RunningQueriesInfo Q
 WHERE Q.SnapshotDateUTC >= @SnapshotDateFrom 
 AND Q.SnapshotDateUTC < @SnapshotDateTo

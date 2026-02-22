@@ -31,6 +31,7 @@
     @SQLHandle VARBINARY(64)=NULL, /* SQL Handle to filter for */
     @PlanHandle VARBINARY(64)=NULL, /* Plan Handle to filter for */
     @WorkloadGroup NVARCHAR(128)=NULL, /* Workload Group to filter on */
+    @ResourcePool NVARCHAR(128)=NULL, /* Resource Pool to filter on */
     @Top INT=NULL, /* Limit the number of rows returned */
     @Debug BIT=0, /* Print dynamic SQL for debugging purposes */
     @HasCursors BIT= 0 OUTPUT /* Output parameter indicating if we have any cursors associated with this snapshot */
@@ -185,7 +186,8 @@ SELECT ' + CASE WHEN @Top IS NULL THEN '' ELSE 'TOP(@Top)' END + '
        TaskWaits,
        dop,
        cursor_text,
-       workload_group
+       workload_group,
+       resource_pool
 FROM dbo.RunningQueriesInfo Q
 WHERE Q.InstanceID = @InstanceID
 ' + CASE WHEN @SnapshotDateFrom = @SnapshotDateTo THEN 'AND Q.SnapshotDateUTC = @SnapshotDateFrom' ELSE 'AND Q.SnapshotDateUTC >= @SnapshotDateFrom AND Q.SnapshotDateUTC < @SnapshotDateTo' END + '
@@ -216,6 +218,7 @@ WHERE Q.InstanceID = @InstanceID
 ' + CASE WHEN @PlanHandle IS NULL THEN '' ELSE 'AND Q.plan_handle_bin = @PlanHandle' END + '
 ' + CASE WHEN @BlockedOrBlocking=1 THEN 'AND (Q.blocking_session_id<>0 OR Q.BlockCount>0)' ELSE '' END + '
 ' + CASE WHEN @WorkloadGroup IS NULL THEN '' ELSE 'AND Q.workload_group = @WorkloadGroup' END + '
+' + CASE WHEN @ResourcePool IS NULL THEN '' ELSE 'AND Q.resource_pool = @ResourcePool' END + '
 ORDER BY Q.SnapshotDateUTC,Q.Duration DESC'
 
 IF @Debug=1
@@ -250,6 +253,7 @@ EXEC sp_executesql @SQL,N'@InstanceID INT,
                          @PlanHandle VARBINARY(64),
                          @HostName NVARCHAR(128),
                          @WorkloadGroup NVARCHAR(128),
+                         @ResourcePool NVARCHAR(128),
                          @Top INT',
                          @InstanceID,
                          @SnapshotDateFrom,
@@ -278,4 +282,5 @@ EXEC sp_executesql @SQL,N'@InstanceID INT,
                          @PlanHandle,
                          @HostName,
                          @WorkloadGroup,
+                         @ResourcePool,
                          @Top

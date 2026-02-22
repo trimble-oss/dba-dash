@@ -310,7 +310,8 @@ BEGIN
 		task_wait_type_3,
 		task_wait_time_3,
 		dop,
-		WorkloadGroupID
+		WorkloadGroupID,
+		ResourcePoolID
     )
     SELECT @InstanceID as InstanceID,
         SnapshotDateUTC,
@@ -357,9 +358,11 @@ BEGIN
 		task_wait_type_3,
 		task_wait_time_3,
 		dop,
-		WG.WorkloadGroupID
+		WG.WorkloadGroupID,
+		RP.ResourcePoolID
     FROM @RunningQueriesDD R
-	LEFT JOIN dbo.ResourceGovernorWorkloadGroups WG ON R.group_id = WG.group_id AND WG.InstanceID = @InstanceID AND WG.IsActive=1;
+	LEFT JOIN dbo.ResourceGovernorWorkloadGroups WG ON R.group_id = WG.group_id AND WG.InstanceID = @InstanceID AND WG.IsActive=1
+	LEFT JOIN dbo.ResourceGovernorResourcePools RP ON RP.pool_id = WG.pool_id AND RP.InstanceID = @InstanceID AND RP.IsActive=1;
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
 										 @Reference = @Ref,
