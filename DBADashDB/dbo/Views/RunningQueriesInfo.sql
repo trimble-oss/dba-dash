@@ -103,7 +103,8 @@ SELECT Q.InstanceID,
     Q.task_wait_type_3,
     Q.task_wait_time_3,
     Q.dop,
-    ISNULL(SUBSTRING(QTC.text,ISNULL((NULLIF(C.statement_start_offset,-1)/2)+1,0),ISNULL((NULLIF(NULLIF(C.statement_end_offset,-1),0) - NULLIF(C.statement_start_offset,-1))/2+1,2147483647)),C.properties) AS cursor_text
+    ISNULL(SUBSTRING(QTC.text,ISNULL((NULLIF(C.statement_start_offset,-1)/2)+1,0),ISNULL((NULLIF(NULLIF(C.statement_end_offset,-1),0) - NULLIF(C.statement_start_offset,-1))/2+1,2147483647)),C.properties) AS cursor_text,
+    WG.name AS workload_group
 FROM dbo.RunningQueries Q
 JOIN dbo.Instances I ON Q.InstanceID = I.InstanceID
 CROSS APPLY(SELECT 	/* 
@@ -160,3 +161,4 @@ LEFT JOIN dbo.RunningQueriesCursors C ON C.InstanceID = Q.InstanceID
                                     AND C.uniqueifier=1 /* Get only the first cursor if multiple exist */
                                     AND C.creation_time_utc <= Q.SnapshotDateUTC /* Ensure cursor was created before or at the same time as the snapshot.  If it was created after it might not be related to this request */
 LEFT JOIN dbo.QueryText QTC ON QTC.sql_handle = C.sql_handle 
+LEFT JOIN dbo.ResourceGovernorWorkloadGroups WG ON WG.WorkloadGroupID = Q.WorkloadGroupID AND WG.InstanceID = Q.InstanceID

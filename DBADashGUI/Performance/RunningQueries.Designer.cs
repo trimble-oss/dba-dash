@@ -49,6 +49,7 @@ namespace DBADashGUI.Performance
             tsGroupBy = new System.Windows.Forms.ToolStripDropDownButton();
             batchTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            commandToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             contextInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             databaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             dOPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -64,6 +65,7 @@ namespace DBADashGUI.Performance
             textToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             waitResourceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             waitTypeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            workloadGroupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             noneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsPrevious = new System.Windows.Forms.ToolStripButton();
@@ -93,7 +95,6 @@ namespace DBADashGUI.Performance
             allSessionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             summaryViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             sessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            commandToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
@@ -210,7 +211,7 @@ namespace DBADashGUI.Performance
             // tsGroupBy
             // 
             tsGroupBy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            tsGroupBy.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { batchTextToolStripMenuItem, toolStripMenuItem1, commandToolStripMenuItem, contextInfoToolStripMenuItem, databaseToolStripMenuItem, dOPToolStripMenuItem, hostNameToolStripMenuItem, loginNameToolStripMenuItem, objectNameToolStripMenuItem, planHandleToolStripMenuItem, programToolStripMenuItem, queryHashToolStripMenuItem, queryPlanHashToolStripMenuItem, sQLHandleToolStripMenuItem, statusToolStripMenuItem, textToolStripMenuItem, waitResourceToolStripMenuItem, waitTypeToolStripMenuItem, toolStripSeparator1, noneToolStripMenuItem });
+            tsGroupBy.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { batchTextToolStripMenuItem, toolStripMenuItem1, commandToolStripMenuItem, contextInfoToolStripMenuItem, databaseToolStripMenuItem, dOPToolStripMenuItem, hostNameToolStripMenuItem, loginNameToolStripMenuItem, objectNameToolStripMenuItem, planHandleToolStripMenuItem, programToolStripMenuItem, queryHashToolStripMenuItem, queryPlanHashToolStripMenuItem, sQLHandleToolStripMenuItem, statusToolStripMenuItem, textToolStripMenuItem, waitResourceToolStripMenuItem, waitTypeToolStripMenuItem, workloadGroupToolStripMenuItem, toolStripSeparator1, noneToolStripMenuItem });
             tsGroupBy.Enabled = false;
             tsGroupBy.Image = (System.Drawing.Image)resources.GetObject("tsGroupBy.Image");
             tsGroupBy.ImageTransparentColor = System.Drawing.Color.Magenta;
@@ -233,6 +234,14 @@ namespace DBADashGUI.Performance
             toolStripMenuItem1.Tag = "client_interface_name";
             toolStripMenuItem1.Text = "Client Interface Name";
             toolStripMenuItem1.Click += TsGroupBy_Click;
+            // 
+            // commandToolStripMenuItem
+            // 
+            commandToolStripMenuItem.Name = "commandToolStripMenuItem";
+            commandToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            commandToolStripMenuItem.Tag = "command";
+            commandToolStripMenuItem.Text = "Command";
+            commandToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // contextInfoToolStripMenuItem
             // 
@@ -353,6 +362,14 @@ namespace DBADashGUI.Performance
             waitTypeToolStripMenuItem.Tag = "wait_type";
             waitTypeToolStripMenuItem.Text = "Wait Type";
             waitTypeToolStripMenuItem.Click += TsGroupBy_Click;
+            // 
+            // workloadGroupToolStripMenuItem
+            // 
+            workloadGroupToolStripMenuItem.Name = "workloadGroupToolStripMenuItem";
+            workloadGroupToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            workloadGroupToolStripMenuItem.Tag = "workload_group";
+            workloadGroupToolStripMenuItem.Text = "Workload Group";
+            workloadGroupToolStripMenuItem.Click += TsGroupBy_Click;
             // 
             // toolStripSeparator1
             // 
@@ -666,14 +683,6 @@ namespace DBADashGUI.Performance
             sessionToolStripMenuItem.Text = "Session ";
             sessionToolStripMenuItem.Click += SessionToolStripMenuItem_Click;
             // 
-            // commandToolStripMenuItem
-            // 
-            commandToolStripMenuItem.Name = "commandToolStripMenuItem";
-            commandToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
-            commandToolStripMenuItem.Tag = "command";
-            commandToolStripMenuItem.Text = "Command";
-            commandToolStripMenuItem.Click += TsGroupBy_Click;
-            // 
             // RunningQueries
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -761,5 +770,6 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripMenuItem textToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dOPToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem commandToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem workloadGroupToolStripMenuItem;
     }
 }

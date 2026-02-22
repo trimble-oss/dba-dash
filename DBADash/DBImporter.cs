@@ -278,6 +278,10 @@ namespace DBADash
                     dtRunningQueries.Columns.Add("task_wait_time_3", typeof(long));
                     dtRunningQueries.Columns.Add("dop", typeof(int));
                 }
+                if (!dtRunningQueries.Columns.Contains("group_id"))
+                {
+                    dtRunningQueries.Columns.Add("group_id", typeof(int));
+                }
             }
 
             if (data.Tables.Contains("IdentityColumns"))

@@ -35,7 +35,11 @@
     tempdb_data_space_kb BIGINT NULL,
     peak_tempdb_data_space_kb BIGINT NULL,
     total_tempdb_data_limit_violation_count BIGINT NULL,
+    IsActive BIT NOT NULL CONSTRAINT DF_ResourceGovernorWorkloadGroups_IsActive DEFAULT(0)
     CONSTRAINT PK_ResourceGovernorWorkloadGroups PRIMARY KEY NONCLUSTERED(WorkloadGroupID),
     INDEX IX_ResourceGovernorWorkloadGroups UNIQUE CLUSTERED (InstanceID, name)
 );
 GO
+/* InstanceID & name are unique for the whole table.  InstanceID & group_id will be unique for active rows. */ 
+CREATE UNIQUE NONCLUSTERED INDEX FIX_ResourceGovernorWorkloadGroups_InstanceID_group_id ON dbo.ResourceGovernorWorkloadGroups(InstanceID,group_id)
+WHERE IsActive = 1

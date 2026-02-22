@@ -59,7 +59,8 @@ SELECT @SnapshotDateUTC as SnapshotDateUTC,
 	' + CASE WHEN @CollectTaskWaits=1 THEN 'oswt_pivot.task_wait_time_2' ELSE 'CAST(NULL AS BIGINT)' END + ' AS task_wait_time_2,
 	' + CASE WHEN @CollectTaskWaits=1 THEN 'oswt_pivot.task_wait_type_3' ELSE 'CAST(NULL AS NVARCHAR(60))' END + ' AS task_wait_type_3,
 	' + CASE WHEN @CollectTaskWaits=1 THEN 'oswt_pivot.task_wait_time_3' ELSE 'CAST(NULL AS BIGINT)' END + ' AS task_wait_time_3,
-	' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_requests'),'dop','ColumnID') IS NULL THEN 'CAST(NULL AS INT) AS dop' ELSE 'r.dop' END + '
+	' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_requests'),'dop','ColumnID') IS NULL THEN 'CAST(NULL AS INT) AS dop,' ELSE 'r.dop,' END + '
+	' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_sessions'),'group_id','ColumnId') IS NULL THEN 'NULL AS group_id' ELSE 's.group_id' END + '
 FROM sys.dm_exec_sessions s
 ' + CASE WHEN @CollectTranBeginTime=1 OR @HasOpenTranCount=0 THEN '
 LEFT HASH JOIN (
