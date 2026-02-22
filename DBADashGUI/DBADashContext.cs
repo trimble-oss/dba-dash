@@ -120,6 +120,8 @@ namespace DBADashGUI
             {
                 if (_hasResourceGovernorWorkloadGroups != null) return _hasResourceGovernorWorkloadGroups.Value;
                 GetAdditionalInfo();
+                _hasResourceGovernorWorkloadGroups ??= false; // Ensure we have a value (We don't higher up the tree levels, so default to false if not set)
+
                 return _hasResourceGovernorWorkloadGroups.Value;
             }
         }
