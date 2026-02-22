@@ -111,6 +111,7 @@ namespace DBADashGUI.Performance
         private int blockedCount;
         private bool hasTaskWaits;
         private bool hasCursorColumn;
+        private bool hasWorkloadGroups;
         private int idleCount;
         private int runningJobCount;
         private bool hasWaitResource;
@@ -548,6 +549,10 @@ namespace DBADashGUI.Performance
                 new DataGridViewTextBoxColumn
                 {
                     HeaderText = "InstanceID", DataPropertyName = "InstanceID", Name = "colInstanceID", Visible = false
+                },
+                new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "Workload Group", DataPropertyName = "workload_group", Name = "colWorkloadGroup", Visible = hasWorkloadGroups
                 },
             };
 
@@ -1021,6 +1026,7 @@ namespace DBADashGUI.Performance
             blockedCount = snapshotDT.AsEnumerable().Count(r => Convert.ToInt16(r["blocking_session_id"]) != 0);
             hasTaskWaits = snapshotDT.AsEnumerable().Any(r => !string.IsNullOrEmpty((string)(r["TaskWaits"].DBNullToNull())));
             hasCursorColumn = snapshotDT.AsEnumerable().Any(r => !string.IsNullOrEmpty((string)(r["cursor_text"].DBNullToNull())));
+            hasWorkloadGroups = snapshotDT.AsEnumerable().Any(r => !string.IsNullOrEmpty((string)(r["workload_group"].DBNullToNull())));
             idleCount = snapshotDT.AsEnumerable()
                 .Count(r => Convert.ToInt64(r["sleeping_session_idle_time_sec"].DBNullToNull()) > 0);
             blockedWait = snapshotDT.AsEnumerable()

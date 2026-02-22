@@ -30,6 +30,7 @@
     @QueryPlanHash VARBINARY(8)=NULL, /* Query Plan Hash to filter on */
     @SQLHandle VARBINARY(64)=NULL, /* SQL Handle to filter for */
     @PlanHandle VARBINARY(64)=NULL, /* Plan Handle to filter for */
+    @WorkloadGroup NVARCHAR(128)=NULL, /* Workload Group to filter on */
     @Top INT=NULL, /* Limit the number of rows returned */
     @Debug BIT=0, /* Print dynamic SQL for debugging purposes */
     @HasCursors BIT= 0 OUTPUT /* Output parameter indicating if we have any cursors associated with this snapshot */
@@ -183,7 +184,8 @@ SELECT ' + CASE WHEN @Top IS NULL THEN '' ELSE 'TOP(@Top)' END + '
        total_elapsed_time,
        TaskWaits,
        dop,
-       cursor_text
+       cursor_text,
+       workload_group
 FROM dbo.RunningQueriesInfo Q
 WHERE Q.InstanceID = @InstanceID
 ' + CASE WHEN @SnapshotDateFrom = @SnapshotDateTo THEN 'AND Q.SnapshotDateUTC = @SnapshotDateFrom' ELSE 'AND Q.SnapshotDateUTC >= @SnapshotDateFrom AND Q.SnapshotDateUTC < @SnapshotDateTo' END + '
@@ -213,6 +215,7 @@ WHERE Q.InstanceID = @InstanceID
 ' + CASE WHEN @SQLHandle IS NULL THEN '' ELSE 'AND Q.sql_handle_bin = @SQLHandle' END + '
 ' + CASE WHEN @PlanHandle IS NULL THEN '' ELSE 'AND Q.plan_handle_bin = @PlanHandle' END + '
 ' + CASE WHEN @BlockedOrBlocking=1 THEN 'AND (Q.blocking_session_id<>0 OR Q.BlockCount>0)' ELSE '' END + '
+' + CASE WHEN @WorkloadGroup IS NULL THEN '' ELSE 'AND Q.workload_group = @WorkloadGroup' END + '
 ORDER BY Q.SnapshotDateUTC,Q.Duration DESC'
 
 IF @Debug=1
@@ -246,6 +249,7 @@ EXEC sp_executesql @SQL,N'@InstanceID INT,
                          @SQLHandle VARBINARY(64),
                          @PlanHandle VARBINARY(64),
                          @HostName NVARCHAR(128),
+                         @WorkloadGroup NVARCHAR(128),
                          @Top INT',
                          @InstanceID,
                          @SnapshotDateFrom,
@@ -261,7 +265,6 @@ EXEC sp_executesql @SQL,N'@InstanceID INT,
                          @Status,
                          @DatabaseName,
                          @MinDurationMs,
-
                          @MinReads,
                          @MinWrites,
                          @MinLogicalReads,
@@ -274,4 +277,5 @@ EXEC sp_executesql @SQL,N'@InstanceID INT,
                          @SQLHandle,
                          @PlanHandle,
                          @HostName,
+                         @WorkloadGroup,
                          @Top

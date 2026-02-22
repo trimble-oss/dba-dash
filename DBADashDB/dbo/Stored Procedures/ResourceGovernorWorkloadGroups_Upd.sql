@@ -63,6 +63,17 @@ BEGIN
 												AND T.statistics_start_time = WG.statistics_start_time 
 	WHERE DATEDIFF_BIG(ms,WG.SnapshotDate,T.SnapshotDate) BETWEEN 0 AND 14400000 /* 4 hours in ms.  Skip recording if the gap between collections is too large. */
 	AND I.InstanceID = @InstanceID
+
+	/* Mark resource groups that no longer exist for the instance as deleted */
+	UPDATE WG
+		SET IsActive = CAST(0 AS BIT)
+	FROM  dbo.ResourceGovernorWorkloadGroups WG
+	WHERE WG.InstanceID = @InstanceID
+	AND NOT EXISTS(SELECT 1 
+					FROM  @ResourceGovernorWorkloadGroups T 
+					WHERE WG.name = T.name 
+					AND WG.InstanceID = @InstanceID
+					)
 	
 	/* Update the current snapshot in the main table.  */
 	UPDATE WG
@@ -98,7 +109,8 @@ BEGIN
 			WG.request_max_memory_grant_percent_numeric = T.request_max_memory_grant_percent_numeric,
 			WG.tempdb_data_space_kb = T.tempdb_data_space_kb,
 			WG.peak_tempdb_data_space_kb = T.peak_tempdb_data_space_kb,
-			WG.total_tempdb_data_limit_violation_count = T.total_tempdb_data_limit_violation_count
+			WG.total_tempdb_data_limit_violation_count = T.total_tempdb_data_limit_violation_count,
+			WG.IsActive=CAST(1 AS BIT)
 	FROM dbo.ResourceGovernorWorkloadGroups WG
 	JOIN @ResourceGovernorWorkloadGroups T ON WG.name = T.name AND WG.InstanceID = @InstanceID
 
@@ -138,7 +150,8 @@ BEGIN
 				request_max_memory_grant_percent_numeric,
 				tempdb_data_space_kb,
 				peak_tempdb_data_space_kb,
-				total_tempdb_data_limit_violation_count
+				total_tempdb_data_limit_violation_count,
+				IsActive
 		)
 		SELECT 	@InstanceID,
 				T.SnapshotDate,
@@ -174,7 +187,8 @@ BEGIN
 				T.request_max_memory_grant_percent_numeric,
 				T.tempdb_data_space_kb,
 				T.peak_tempdb_data_space_kb,
-				T.total_tempdb_data_limit_violation_count
+				T.total_tempdb_data_limit_violation_count,
+				CAST(1 AS BIT)
 		FROM @ResourceGovernorWorkloadGroups T
 		WHERE NOT EXISTS(	SELECT 1 
 							FROM dbo.ResourceGovernorWorkloadGroups WG 

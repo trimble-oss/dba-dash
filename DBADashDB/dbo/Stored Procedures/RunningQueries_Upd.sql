@@ -61,6 +61,7 @@ BEGIN
 						   t.task_wait_type_3,
 						   t.task_wait_time_3,
 						   t.dop,
+						   t.group_id,
 						   ROW_NUMBER() OVER(PARTITION BY t.session_id ORDER BY t.cpu_time DESC) rnum
 					FROM  @RunningQueries t
 	)
@@ -109,7 +110,8 @@ BEGIN
 		task_wait_time_2,
 		task_wait_type_3,
 		task_wait_time_3,
-		dop
+		dop,
+		group_id
 	)
 	SELECT  SnapshotDateUTC,
 	    session_id,
@@ -154,7 +156,8 @@ BEGIN
 		task_wait_time_2,
 		task_wait_type_3,
 		task_wait_time_3,
-		dop
+		dop,
+		group_id
 	FROM deDupe
 	WHERE deDupe.rnum=1
 
@@ -306,7 +309,8 @@ BEGIN
 		task_wait_time_2,
 		task_wait_type_3,
 		task_wait_time_3,
-		dop
+		dop,
+		WorkloadGroupID
     )
     SELECT @InstanceID as InstanceID,
         SnapshotDateUTC,
@@ -352,8 +356,10 @@ BEGIN
 		task_wait_time_2,
 		task_wait_type_3,
 		task_wait_time_3,
-		dop
-    FROM @RunningQueriesDD;
+		dop,
+		WG.WorkloadGroupID
+    FROM @RunningQueriesDD R
+	LEFT JOIN dbo.ResourceGovernorWorkloadGroups WG ON R.group_id = WG.group_id AND WG.InstanceID = @InstanceID AND WG.IsActive=1;
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
 										 @Reference = @Ref,
