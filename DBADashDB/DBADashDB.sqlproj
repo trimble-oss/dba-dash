@@ -873,6 +873,8 @@
     <Build Include="dbo\Stored Procedures\ResourceGovernorResourcePools_Upd.sql" />
     <Build Include="dbo\Stored Procedures\ResourceGovernorResourcePools_Get.sql" />
     <Build Include="dbo\Stored Procedures\ResourceGovernorResourcePoolsMetrics_Get.sql" />
+    <Build Include="dbo\Stored Procedures\ResourceGovernorResourcePoolsMetrics_Del.sql" />
+    <Build Include="dbo\Stored Procedures\ResourceGovernorWorkloadGroupsMetrics_Del.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

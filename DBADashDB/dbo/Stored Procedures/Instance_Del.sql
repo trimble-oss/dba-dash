@@ -490,6 +490,16 @@ BEGIN
 	DELETE dbo.InstanceMetadata
 	WHERE InstanceID = @InstanceID
 
+	EXEC dbo.ResourceGovernorWorkloadGroupsMetrics_Del @InstanceID=@InstanceID,@DaysToKeep=0
+	
+	EXEC dbo.ResourceGovernorResourcePoolsMetrics_Del @InstanceID=@InstanceID,@DaysToKeep=0
+
+	DELETE dbo.ResourceGovernorWorkloadGroups 
+	WHERE InstanceID = @InstanceID
+
+	DELETE dbo.ResourceGovernorResourcePools 
+	WHERE InstanceID = @InstanceID
+
 	IF EXISTS(SELECT 1 
 			FROM dbo.InstanceMetadataHistory
 			WHERE InstanceID = @InstanceID)
