@@ -192,11 +192,10 @@ namespace DBADashGUI.Performance
             // Use ChartHelper with SeriesColumn to group by WaitType
             var config = new ChartConfiguration
             {
-                DateColumn = "Time",
+                XColumn = "Time",
                 MetricColumn = metricColumn,
                 SeriesColumn = "WaitType",  // Group data by WaitType - each becomes a series
                 ChartType = ChartTypes.StackedColumn,
-                ShowLegend = true,
                 LegendPosition = legendPosition,
                 XAxisMin = DateRange.FromUTC.ToAppTimeZone(),
                 XAxisMax = DateRange.ToUTC.ToAppTimeZone(),

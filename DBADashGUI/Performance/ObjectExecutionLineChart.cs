@@ -144,10 +144,9 @@ namespace DBADashGUI.Performance
             // Update chart using ChartHelper with name-based axis mapping
             var config = new ChartConfiguration
             {
-                DateColumn = "SnapshotDate",
+                XColumn = "SnapshotDate",
                 MetricColumns = visibleColumns,
                 ChartType = ChartTypes.Line,
-                ShowLegend = true,
                 LegendPosition = LegendPosition.Bottom,
                 LineSmoothness = lineSmoothness,
                 GeometrySize = geometrySize,

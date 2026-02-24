@@ -96,7 +96,7 @@ namespace DBADashGUI.Performance
         private bool isRefreshing = false;
         private CancellationTokenSource colorExtractionCts;
         private CustomReportResult reportResult = ResourceGovernorWorkloadGroupsReport.GetReportResult();
-        private ControlResizeHelper resizeHelper = new ControlResizeHelper();
+        private ChartLayoutHelper chartLayoutHelper = new ChartLayoutHelper();
         private string lastLayoutKey = string.Empty;
 
         public ResourceGovernorWorkloadGroupsMetrics()
@@ -195,7 +195,7 @@ namespace DBADashGUI.Performance
                     var chart = ChartHelper.GetChartFromDataTable(metricsDT,
                         new ChartConfiguration()
                         {
-                            DateColumn = "SnapshotDate",
+                            XColumn = "SnapshotDate",
                             YAxisFormat = y_format,
                             YAxisMax = y_max,
                             ChartType = ChartType,
@@ -211,7 +211,7 @@ namespace DBADashGUI.Performance
                      );
                     chart.ApplyTheme();
 
-                    var chartPanel = ChartLayoutHelper.CreateResizablePanel(chart, metric, rowCount > 1, resizeHelper);
+                    var chartPanel = chartLayoutHelper.CreateResizablePanel(chart, metric, rowCount > 1);
                     chartPanel.ApplyTheme();
                     tableLayout.Controls.Add(chartPanel, 0, i);
 
@@ -251,7 +251,7 @@ namespace DBADashGUI.Performance
                     dgv.DataBindingComplete += DataGridView_DataBindingComplete;
                     dgv.ApplyTheme();
 
-                    var gridPanel = ChartLayoutHelper.CreateResizablePanel(dgv, "Table", rowCount > 1, resizeHelper);
+                    var gridPanel = chartLayoutHelper.CreateResizablePanel(dgv, "Table", rowCount > 1);
                     tableLayout.Controls.Add(gridPanel, 0, MetricsToDisplay.Count);
                 }
 
@@ -465,7 +465,7 @@ namespace DBADashGUI.Performance
                 ChartLayoutHelper.SaveRowPercentages(tableLayout, RowPercentages);
             }
 
-            ChartLayoutHelper.DisposeTableLayoutWithResizablePanels(pnlCharts, resizeHelper, control =>
+            chartLayoutHelper.DisposeTableLayoutWithResizablePanels(pnlCharts, control =>
             {
                 if (control is DataGridView dgv)
                 {

@@ -88,12 +88,11 @@ namespace DBADashGUI.Drives
             // Order matters: Size first (larger values), then Used (smaller values) to minimize visual overlap
             var config = new ChartConfiguration
             {
-                DateColumn = "SnapshotDate",
+                XColumn = "SnapshotDate",
                 MetricColumns = new[] { "SizeGB", "UsedGB" }, // Size first to draw behind
                 YAxisLabel = "GB",
                 YAxisFormat = "0.0",
                 ChartType = ChartTypes.Line,
-                ShowLegend = true,
                 LegendPosition = LiveChartsCore.Measure.LegendPosition.Bottom,
                 XAxisMin = From,
                 XAxisMax = To

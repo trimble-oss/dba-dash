@@ -18,6 +18,160 @@ namespace DBADashGUI.Charts
 {
     internal class ChartHelper
     {
+        private enum XAxisKind
+        {
+            DateTime,
+            Numeric,
+            Category
+        }
+
+        /// <summary>
+        /// Returns either a Cartesian chart or a Pie chart control depending on the configuration.
+        /// </summary>
+        internal static Control GetChartControlFromDataTable(DataTable dt, ChartConfigurationBase config)
+        {
+            if (config == null) throw new ArgumentNullException(nameof(config));
+            if (config.ChartType == ChartTypes.Pie)
+            {
+                if (config is PieChartConfiguration pieConfig)
+                {
+                    return GetPieChartFromDataTable(dt, pieConfig);
+                }
+                throw new ArgumentException("Pie charts require a PieChartConfiguration instance", nameof(config));
+            }
+
+            // For non-pie chart types we require a full ChartConfiguration instance
+            if (config is ChartConfiguration cartesianConfig)
+            {
+                return GetChartFromDataTable(dt, cartesianConfig);
+            }
+            throw new ArgumentException("Non-pie charts require a ChartConfiguration instance", nameof(config));
+        }
+
+        /// <summary>
+        /// Creates a PieChart (WinForms) from a DataTable using pie-specific configuration.
+        /// Supports either MetricColumns (each column becomes a slice summed across rows)
+        /// or CategoryColumn+ValueColumn (group by category and sum values).
+        /// </summary>
+        private static Control GetPieChartFromDataTable(DataTable dt, PieChartConfiguration config)
+        {
+            ArgumentNullException.ThrowIfNull(dt);
+            ArgumentNullException.ThrowIfNull(config);
+
+            // High-level validation
+            config.Validate();
+
+            var labelPaint = CreateLabelPaint();
+
+            // Build raw slices as (name, value) pairs first
+            var slices = new List<(string name, double value)>();
+
+            // MetricColumns mode: each metric column becomes one slice (aggregated across rows)
+            if (config.MetricColumns != null && config.MetricColumns.Length > 0)
+            {
+                foreach (var metricCol in config.MetricColumns)
+                {
+                    if (!dt.Columns.Contains(metricCol))
+                        continue;
+
+                    double sum = 0;
+                    foreach (DataRow r in dt.Rows)
+                    {
+                        var val = r[metricCol];
+                        if (TryConvertToDouble(val, out var d))
+                        {
+                            sum += d;
+                        }
+                    }
+
+                    if (sum > 0)
+                    {
+                        var name = GetFriendlyColumnName(metricCol, config);
+                        slices.Add((name, sum));
+                    }
+                }
+            }
+            else
+            {
+                // Category + value mode
+                if (!dt.Columns.Contains(config.CategoryColumn) || !dt.Columns.Contains(config.ValueColumn))
+                    throw new ArgumentException("CategoryColumn or ValueColumn not found in DataTable", nameof(config));
+
+                var groups = dt.Rows.Cast<DataRow>()
+                    .Where(r => r[config.CategoryColumn] != null && r[config.CategoryColumn] != DBNull.Value)
+                    .GroupBy(r => r[config.CategoryColumn].ToString());
+
+                foreach (var g in groups)
+                {
+                    double sum = 0;
+                    foreach (var r in g)
+                    {
+                        var v = r[config.ValueColumn];
+                        if (TryConvertToDouble(v, out var d))
+                        {
+                            sum += d;
+                        }
+                    }
+                    if (sum > 0)
+                    {
+                        slices.Add((g.Key, sum));
+                    }
+                }
+            }
+
+            // Apply "Other" grouping if requested
+            var total = slices.Sum(s => s.value);
+            if (config.MinSlicePercent > 0 && total > 0)
+            {
+                var thresholdFraction = config.MinSlicePercent / 100.0;
+                var small = slices.Where(s => (s.value / total) < thresholdFraction).ToList();
+                if (small.Any())
+                {
+                    var otherSum = small.Sum(s => s.value);
+                    slices = slices.Where(s => (s.value / total) >= thresholdFraction).ToList();
+                    slices.Add((config.OtherLabel ?? "Other", otherSum));
+                }
+            }
+
+            // Sort slices descending by value for consistent display
+            slices = slices.OrderByDescending(s => s.value).ToList();
+
+            // Convert to ISeries list. Don't attempt to compute pixel sizes yet - chart size is needed.
+            var series = slices.Select(s => (ISeries)new PieSeries<ObservableValue>
+            {
+                Name = s.name,
+                Values = new ObservableValue[] { new ObservableValue(s.value) },
+                // initialize to unlimited; will be computed once the chart control has a size
+                MaxRadialColumnWidth = double.MaxValue
+            }).ToList();
+
+            var chart = new PieChart
+            {
+                Location = new System.Drawing.Point(0, 0),
+                Dock = DockStyle.Fill,
+                Series = series
+            };
+
+            // If an InnerRadius fraction (0..1) is configured, create a manager to compute
+            // the pixel thickness for the donut and apply it to each PieSeries. The manager
+            // listens for size changes and disposes itself when the control is disposed.
+            if (config.InnerRadius.HasValue)
+            {
+                _ = new PieDonutManager(chart, series, config.InnerRadius.Value);
+            }
+
+            chart.LegendPosition = config.LegendPosition;
+            chart.LegendTextPaint = labelPaint;
+            chart.LegendTextSize = DBADashUser.ChartAxisLabelFontSize;
+
+            // PieChart currently doesn't use the Cartesian custom tooltip helper
+
+            return chart;
+        }
+
+        // Keep for backward compatibility in case other code references it in the future
+        // Currently not used; we rely on config.XColumn being set by the caller.
+
         /// <summary>
         /// Safely creates a DateTimePoint from a DataRow, returning null if conversion fails
         /// </summary>
@@ -46,6 +200,62 @@ namespace DBADashGUI.Charts
             {
                 // Suppress conversion errors and return null
                 return null;
+            }
+        }
+
+        private static ISeries CreateSeriesForGroup(string groupName, ObservablePoint[] values, ChartTypes chartType, double lineSmoothness = 0, double geometrySize = 0, bool lineFill = false)
+        {
+            ArgumentNullException.ThrowIfNull(values);
+            if (values.Length == 0)
+                throw new ArgumentException("Values array cannot be empty", nameof(values));
+
+            if (string.IsNullOrWhiteSpace(groupName))
+                groupName = "Unknown"; // Provide default instead of throwing
+
+            switch (chartType)
+            {
+                case ChartTypes.StackedArea:
+                    return new StackedAreaSeries<ObservablePoint>()
+                    {
+                        Name = groupName,
+                        Values = values,
+                        GeometrySize = geometrySize,
+                        LineSmoothness = lineSmoothness
+                    };
+
+                case ChartTypes.StackedColumn:
+                    return new StackedColumnSeries<ObservablePoint>()
+                    {
+                        Name = groupName,
+                        Values = values
+                    };
+
+                case ChartTypes.Column:
+                    return new ColumnSeries<ObservablePoint>()
+                    {
+                        Name = groupName,
+                        Values = values
+                    };
+
+                case ChartTypes.Line:
+                    var lineSeries = new LineSeries<ObservablePoint>()
+                    {
+                        Name = groupName,
+                        Values = values,
+                        GeometrySize = geometrySize,
+                        LineSmoothness = lineSmoothness
+                    };
+
+                    // Only set Fill to null if lineFill is false (default behavior)
+                    if (!lineFill)
+                    {
+                        lineSeries.Fill = null;
+                    }
+
+                    return lineSeries;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(chartType), $"Unsupported chart type: {chartType}");
             }
         }
 
@@ -143,6 +353,13 @@ namespace DBADashGUI.Charts
                         Values = values
                     };
 
+                case ChartTypes.Column:
+                    return new ColumnSeries<DateTimePoint>()
+                    {
+                        Name = groupName,
+                        Values = values
+                    };
+
                 case ChartTypes.Line:
                     var lineSeries = new LineSeries<DateTimePoint>()
                     {
@@ -210,7 +427,7 @@ namespace DBADashGUI.Charts
             ValidateConfiguration(dt, config);
 
             var labelPaint = CreateLabelPaint();
-            var series = CreateSeriesFromDataTable(dt, config);
+            var series = CreateSeriesFromDataTable(dt, config, out var categories);
 
             // Only extract date range from series if not fully specified in config
             DateTime minDate, maxDate;
@@ -226,8 +443,37 @@ namespace DBADashGUI.Charts
                 maxDate = config.XAxisMax ?? maxDate;
             }
 
-            var unit = CalculateDateUnit(minDate, maxDate, config.ChartType, series, config);
-            var xAxes = CreateXAxes(unit, labelPaint, minDate, maxDate);
+            // Determine X axis kind to create appropriate axes
+            var xKind = DetectXAxisKind(dt, config.XColumn);
+            Axis[] xAxes;
+            if (xKind == XAxisKind.DateTime)
+            {
+                var unit = CalculateDateUnit(minDate, maxDate, config.ChartType, series, config);
+                xAxes = CreateXAxes(unit, labelPaint, minDate, maxDate, config.XAxisLabel);
+            }
+            else if (xKind == XAxisKind.Numeric)
+            {
+                var xAxis = new Axis
+                {
+                    LabelsPaint = labelPaint,
+                    TextSize = DBADashUser.ChartAxisLabelFontSize,
+                    Name = config.XAxisLabel
+                };
+                xAxes = new Axis[] { xAxis };
+            }
+            else
+            {
+                // Category axis: set labels from extracted categories if available
+                var xAxis = new Axis
+                {
+                    LabelsPaint = labelPaint,
+                    TextSize = DBADashUser.ChartAxisLabelFontSize,
+                    Labels = categories ?? Array.Empty<string>(),
+                    Name = config.XAxisLabel
+                };
+                xAxes = new Axis[] { xAxis };
+            }
+
             var yAxes = CreateYAxes(config, labelPaint);
 
             chart.Series = series;
@@ -245,16 +491,9 @@ namespace DBADashGUI.Charts
                 AssignSeriesToYAxes(series, config);
             }
 
-            if (config.ShowLegend)
-            {
-                chart.LegendPosition = config.LegendPosition;
-                chart.LegendTextPaint = labelPaint;
-                chart.LegendTextSize = DBADashUser.ChartAxisLabelFontSize;
-            }
-            else
-            {
-                chart.LegendPosition = LiveChartsCore.Measure.LegendPosition.Hidden;
-            }
+            chart.LegendPosition = config.LegendPosition;
+            chart.LegendTextPaint = labelPaint;
+            chart.LegendTextSize = DBADashUser.ChartAxisLabelFontSize;
         }
 
         private static void ValidateConfiguration(DataTable dt, ChartConfiguration config)
@@ -262,9 +501,14 @@ namespace DBADashGUI.Charts
             ArgumentNullException.ThrowIfNull(dt);
             ArgumentNullException.ThrowIfNull(config);
 
+            // Validate high-level configuration rules first
+            config.Validate();
+
+            // X column is specified in configuration as XColumn
+            var xCol = config.XColumn;
             // Validate input parameters
-            if (string.IsNullOrWhiteSpace(config.DateColumn))
-                throw new ArgumentException("Date column name cannot be null or empty", nameof(config.DateColumn));
+            if (string.IsNullOrWhiteSpace(xCol))
+                throw new ArgumentException("X column name cannot be null or empty", nameof(config.XColumn));
 
             // Validate that either MetricColumn or MetricColumns is specified, but not both
             var hasMetricColumn = !string.IsNullOrWhiteSpace(config.MetricColumn);
@@ -281,8 +525,8 @@ namespace DBADashGUI.Charts
                 throw new ArgumentException("SeriesColumn cannot be used with MetricColumns", nameof(config.SeriesColumn));
 
             // Validate required columns exist
-            if (!dt.Columns.Contains(config.DateColumn))
-                throw new ArgumentException($"Column '{config.DateColumn}' not found in DataTable", nameof(config.DateColumn));
+            if (!dt.Columns.Contains(xCol))
+                throw new ArgumentException($"Column '{xCol}' not found in DataTable", nameof(config));
 
             if (hasMetricColumn && !dt.Columns.Contains(config.MetricColumn))
                 throw new ArgumentException($"Column '{config.MetricColumn}' not found in DataTable", nameof(config.MetricColumn));
@@ -305,9 +549,18 @@ namespace DBADashGUI.Charts
                 throw new ArgumentException("Y-axis minimum cannot be greater than maximum");
         }
 
-        private static List<ISeries> CreateSeriesFromDataTable(DataTable dt, ChartConfiguration config)
+        private static List<ISeries> CreateSeriesFromDataTable(DataTable dt, ChartConfiguration config, out string[] categories)
         {
             var series = new List<ISeries>();
+            categories = null;
+            // detect x-axis kind
+            var xKind = DetectXAxisKind(dt, config.XColumn);
+
+            // If category axis, build global deterministic categories from whole table
+            if (xKind == XAxisKind.Category)
+            {
+                categories = BuildCategoriesFromTable(dt, config.XColumn);
+            }
 
             // Check if using MetricColumns (multiple columns as series)
             if (config.MetricColumns != null && config.MetricColumns.Length > 0)
@@ -315,23 +568,65 @@ namespace DBADashGUI.Charts
                 // Each metric column becomes its own series
                 foreach (var metricColumn in config.MetricColumns)
                 {
-                    var values = ExtractDataPoints(dt.AsEnumerable(), config.DateColumn, metricColumn);
-                    if (values.Length > 0)
+                    if (xKind == XAxisKind.DateTime)
                     {
-                        // Use column name as series name (with optional override from config)
-                        var seriesName = GetFriendlyColumnName(metricColumn, config);
-                        series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                        var values = ExtractDateTimePoints(dt.AsEnumerable(), config.XColumn, metricColumn);
+                        if (values.Length > 0)
+                        {
+                            var seriesName = GetFriendlyColumnName(metricColumn, config);
+                            series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                        }
+                    }
+                    else if (xKind == XAxisKind.Numeric)
+                    {
+                        var values = ExtractNumericPoints(dt.AsEnumerable(), config.XColumn, metricColumn);
+                        if (values.Length > 0)
+                        {
+                            var seriesName = GetFriendlyColumnName(metricColumn, config);
+                            series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                        }
+                    }
+                    else
+                    {
+                        // category: use index as X value and label categories on axis
+                        var values = ExtractCategoryPoints(dt.AsEnumerable(), config.XColumn, metricColumn, categories);
+                        if (values.Length > 0)
+                        {
+                            var seriesName = GetFriendlyColumnName(metricColumn, config);
+                            series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                        }
                     }
                 }
             }
             else if (string.IsNullOrWhiteSpace(config.SeriesColumn))
             {
                 // Single series logic
-                var values = ExtractDataPoints(dt.AsEnumerable(), config.DateColumn, config.MetricColumn);
-                if (values.Length > 0)
+                if (xKind == XAxisKind.DateTime)
                 {
-                    var seriesName = GetFriendlyColumnName(config.MetricColumn, config);
-                    series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                    var values = ExtractDateTimePoints(dt.AsEnumerable(), config.XColumn, config.MetricColumn);
+                    if (values.Length > 0)
+                    {
+                        var seriesName = GetFriendlyColumnName(config.MetricColumn, config);
+                        series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                    }
+                }
+                else if (xKind == XAxisKind.Numeric)
+                {
+                    var values = ExtractNumericPoints(dt.AsEnumerable(), config.XColumn, config.MetricColumn);
+                    if (values.Length > 0)
+                    {
+                        var seriesName = GetFriendlyColumnName(config.MetricColumn, config);
+                        series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                    }
+                }
+                else
+                {
+                    var values = ExtractCategoryPoints(dt.AsEnumerable(), config.XColumn, config.MetricColumn, categories);
+                    if (values.Length > 0)
+                    {
+                        var seriesName = GetFriendlyColumnName(config.MetricColumn, config);
+                        series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                    }
                 }
             }
             else
@@ -343,9 +638,24 @@ namespace DBADashGUI.Charts
 
                 foreach (var group in groupedData)
                 {
-                    var values = ExtractDataPoints(group, config.DateColumn, config.MetricColumn);
-                    if (values.Length > 0)
-                        series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                    if (xKind == XAxisKind.DateTime)
+                    {
+                        var values = ExtractDateTimePoints(group, config.XColumn, config.MetricColumn);
+                        if (values.Length > 0)
+                            series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                    }
+                    else if (xKind == XAxisKind.Numeric)
+                    {
+                        var values = ExtractNumericPoints(group, config.XColumn, config.MetricColumn);
+                        if (values.Length > 0)
+                            series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                    }
+                    else
+                    {
+                        var values = ExtractCategoryPoints(group, config.XColumn, config.MetricColumn, categories);
+                        if (values.Length > 0)
+                            series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                    }
                 }
             }
 
@@ -356,7 +666,7 @@ namespace DBADashGUI.Charts
         /// Converts a column name to a friendly display name by adding spaces before capitals
         /// and handling common abbreviations (e.g., "SizeGB" -> "Size (GB)", "UsedMB" -> "Used (MB)")
         /// </summary>
-        private static string GetFriendlyColumnName(string columnName, ChartConfiguration config)
+        private static string GetFriendlyColumnName(string columnName, ChartConfigurationBase config)
         {
             if (string.IsNullOrWhiteSpace(columnName))
                 return columnName;
@@ -394,15 +704,113 @@ namespace DBADashGUI.Charts
             return result.Trim();
         }
 
-        private static DateTimePoint[] ExtractDataPoints(IEnumerable<DataRow> rows, string dateColumn, string metricColumn)
+        private static DateTimePoint[] ExtractDateTimePoints(IEnumerable<DataRow> rows, string xColumn, string metricColumn)
         {
             return rows
-                .Where(row => row[dateColumn] != null && row[dateColumn] != DBNull.Value &&
+                .Where(row => row[xColumn] != null && row[xColumn] != DBNull.Value &&
                               row[metricColumn] != null && row[metricColumn] != DBNull.Value)
-                .Select(row => TryCreateDateTimePoint(row, dateColumn, metricColumn))
+                .Select(row => TryCreateDateTimePoint(row, xColumn, metricColumn))
                 .Where(point => point != null)
                 .OrderBy(point => point.DateTime)
                 .ToArray();
+        }
+
+        private static ObservablePoint[] ExtractNumericPoints(IEnumerable<DataRow> rows, string xColumn, string metricColumn)
+        {
+            var list = new List<ObservablePoint>();
+            foreach (var row in rows)
+            {
+                var xVal = row[xColumn];
+                var yVal = row[metricColumn];
+                if (xVal == null || xVal == DBNull.Value || yVal == null || yVal == DBNull.Value)
+                    continue;
+
+                if (TryConvertToDouble(xVal, out var x) && TryConvertToDouble(yVal, out var y))
+                {
+                    list.Add(new ObservablePoint(x, y));
+                }
+            }
+            return list.OrderBy(p => p.X).ToArray();
+        }
+
+        private static ObservablePoint[] ExtractCategoryPoints(IEnumerable<DataRow> rows, string xColumn, string metricColumn, string[] categories)
+        {
+            // Use provided global categories if available, otherwise build a deterministic
+            // sorted list of distinct categories from the provided rows.
+            var distinctCats = (categories != null)
+                ? categories.ToList()
+                : rows
+                    .Select(r => r[xColumn])
+                    .Where(v => v != null && v != DBNull.Value)
+                    .Select(v => v.ToString())
+                    .Where(s => !string.IsNullOrEmpty(s))
+                    .Distinct()
+                    .OrderBy(s => s, StringComparer.Ordinal)
+                    .ToList();
+
+            var list = new List<ObservablePoint>();
+
+            foreach (var row in rows)
+            {
+                var xVal = row[xColumn];
+                var yVal = row[metricColumn];
+                if (xVal == null || xVal == DBNull.Value || yVal == null || yVal == DBNull.Value)
+                    continue;
+
+                var cat = xVal.ToString();
+                var xIndex = distinctCats.IndexOf(cat);
+
+                if (xIndex < 0)
+                    continue; // skip unknown category
+
+                if (TryConvertToDouble(yVal, out var y))
+                {
+                    list.Add(new ObservablePoint(xIndex, y));
+                }
+            }
+
+            return list.OrderBy(p => p.X).ToArray();
+        }
+
+        private static string[] BuildCategoriesFromTable(DataTable dt, string xColumn)
+        {
+            return dt.Rows.Cast<DataRow>()
+                .Select(r => r[xColumn])
+                .Where(v => v != null && v != DBNull.Value)
+                .Select(v => v.ToString())
+                .Where(s => !string.IsNullOrEmpty(s))
+                .Distinct()
+                .OrderBy(s => s, StringComparer.Ordinal)
+                .ToArray();
+        }
+
+        private static XAxisKind DetectXAxisKind(DataTable dt, string xColumn)
+        {
+            if (!dt.Columns.Contains(xColumn))
+                return XAxisKind.Category;
+
+            var col = dt.Columns[xColumn];
+            // Check column data type
+            if (col.DataType == typeof(DateTime) || col.DataType == typeof(DateTimeOffset))
+                return XAxisKind.DateTime;
+
+            if (col.DataType == typeof(byte) || col.DataType == typeof(short) || col.DataType == typeof(int) || col.DataType == typeof(long)
+                || col.DataType == typeof(float) || col.DataType == typeof(double) || col.DataType == typeof(decimal))
+                return XAxisKind.Numeric;
+
+            // Fallback: scan some rows to see if they parse as dates or numbers
+            int maxScan = Math.Min(50, dt.Rows.Count);
+            int dateCount = 0, numCount = 0;
+            for (int i = 0; i < maxScan; i++)
+            {
+                var v = dt.Rows[i][xColumn];
+                if (v == null || v == DBNull.Value) continue;
+                if (TryConvertToDateTime(v, out _)) dateCount++;
+                if (TryConvertToDouble(v, out _)) numCount++;
+            }
+            if (dateCount > numCount && dateCount > 0) return XAxisKind.DateTime;
+            if (numCount > 0 && numCount >= dateCount) return XAxisKind.Numeric;
+            return XAxisKind.Category;
         }
 
         private static SolidColorPaint CreateLabelPaint()
@@ -412,7 +820,7 @@ namespace DBADashGUI.Charts
                 : new SolidColorPaint(DashColors.TrimbleBlueDark.ToSKColor());
         }
 
-        private static Axis[] CreateXAxes(TimeSpan unit, SolidColorPaint labelPaint, DateTime minDate, DateTime maxDate)
+        private static Axis[] CreateXAxes(TimeSpan unit, SolidColorPaint labelPaint, DateTime minDate, DateTime maxDate, string label)
         {
             var duration = maxDate - minDate;
             var labelFontSize = DBADashUser.ChartAxisLabelFontSize;
@@ -425,7 +833,8 @@ namespace DBADashGUI.Charts
                     TextSize = labelFontSize,
                     NamePaint = labelPaint,
                     NameTextSize = nameFontSize,
-                    MinLimit = minDate.Ticks
+                    MinLimit = minDate.Ticks,
+                    Name = label
                 }
             };
         }
@@ -457,7 +866,22 @@ namespace DBADashGUI.Charts
                         axis.MaxLimit = axisConfig.MaxLimit.Value;
 
                     if (!string.IsNullOrEmpty(axisConfig.Format))
-                        axis.Labeler = value => value.ToString(axisConfig.Format);
+                    {
+                        // Capture format locally to avoid closure issues and guard against invalid format strings
+                        var fmt = axisConfig.Format;
+                        axis.Labeler = value =>
+                        {
+                            try
+                            {
+                                return value.ToString(fmt, CultureInfo.InvariantCulture);
+                            }
+                            catch (FormatException)
+                            {
+                                // Fall back to a safe invariant format if the provided format is invalid
+                                return value.ToString(CultureInfo.InvariantCulture);
+                            }
+                        };
+                    }
 
                     axes[i] = axis;
                 }
@@ -482,7 +906,20 @@ namespace DBADashGUI.Charts
                 yAxis.MinLimit = config.YAxisMin.Value;
 
             if (!string.IsNullOrEmpty(config.YAxisFormat))
-                yAxis.Labeler = value => value.ToString(config.YAxisFormat);
+            {
+                var fmt = config.YAxisFormat;
+                yAxis.Labeler = value =>
+                {
+                    try
+                    {
+                        return value.ToString(fmt, CultureInfo.InvariantCulture);
+                    }
+                    catch (FormatException)
+                    {
+                        return value.ToString(CultureInfo.InvariantCulture);
+                    }
+                };
+            }
 
             return new Axis[] { yAxis };
         }
@@ -580,7 +1017,15 @@ namespace DBADashGUI.Charts
         /// <returns>Tuple containing min and max DateTime values</returns>
         private static (DateTime minDate, DateTime maxDate) GetDateRangeFromSeries(List<ISeries> series)
         {
-            var allDates = series.SelectMany(s => ((IEnumerable<DateTimePoint>)s.Values).Select(p => p.DateTime)).ToList();
+            var allDates = new List<DateTime>();
+            foreach (var s in series)
+            {
+                if (s?.Values == null) continue;
+                if (s.Values is IEnumerable<DateTimePoint> dtPoints)
+                {
+                    allDates.AddRange(dtPoints.Select(p => p.DateTime));
+                }
+            }
             if (allDates.Count > 0)
             {
                 return (allDates.Min(), allDates.Max());
@@ -608,7 +1053,7 @@ namespace DBADashGUI.Charts
                 return config.DateUnit.Value;
 
             // Otherwise, calculate automatically
-            if (chartType == ChartTypes.StackedColumn)
+            if (chartType == ChartTypes.StackedColumn || chartType == ChartTypes.Column)
             {
                 return CalculateDateUnitForStackedColumn(series);
             }
@@ -622,7 +1067,7 @@ namespace DBADashGUI.Charts
 
         /// <summary>
         /// Automatically detect the date unit from the series data by finding the minimum
-        /// interval between consecutive data points across all series. This represents the 
+        /// interval between consecutive data points across all series. This represents the
         /// actual data collection interval and determines the width of the bars.
         /// </summary>
         /// <param name="series">The chart series containing DateTimePoint data</param>
@@ -723,27 +1168,40 @@ namespace DBADashGUI.Charts
 
                 SKColor color = SKColors.Gray;
 
-                // Extract color based on series type
-                if (series is StackedAreaSeries<DateTimePoint> areaSeries)
+                // Extract color based on series type (handle both DateTimePoint and ObservablePoint series)
+                switch (series)
                 {
-                    if (areaSeries.Fill is SolidColorPaint fillPaint)
-                    {
-                        color = fillPaint.Color;
-                    }
-                }
-                else if (series is StackedColumnSeries<DateTimePoint> columnSeries)
-                {
-                    if (columnSeries.Fill is SolidColorPaint fillPaint)
-                    {
-                        color = fillPaint.Color;
-                    }
-                }
-                else if (series is LineSeries<DateTimePoint> lineSeries)
-                {
-                    if (lineSeries.Stroke is SolidColorPaint strokePaint)
-                    {
-                        color = strokePaint.Color;
-                    }
+                    case StackedAreaSeries<DateTimePoint> areaSeriesD:
+                        if (areaSeriesD.Fill is SolidColorPaint fpD) color = fpD.Color;
+                        break;
+
+                    case StackedColumnSeries<DateTimePoint> columnSeriesD:
+                        if (columnSeriesD.Fill is SolidColorPaint fpDc) color = fpDc.Color;
+                        break;
+
+                    case ColumnSeries<DateTimePoint> columnSeriesDt:
+                        if (columnSeriesDt.Fill is SolidColorPaint fpDt) color = fpDt.Color;
+                        break;
+
+                    case LineSeries<DateTimePoint> lineSeriesD:
+                        if (lineSeriesD.Stroke is SolidColorPaint spD) color = spD.Color;
+                        break;
+
+                    case StackedAreaSeries<ObservablePoint> areaSeriesO:
+                        if (areaSeriesO.Fill is SolidColorPaint fpO) color = fpO.Color;
+                        break;
+
+                    case StackedColumnSeries<ObservablePoint> columnSeriesO:
+                        if (columnSeriesO.Fill is SolidColorPaint fpOc) color = fpOc.Color;
+                        break;
+
+                    case ColumnSeries<ObservablePoint> columnSeriesO2:
+                        if (columnSeriesO2.Fill is SolidColorPaint fpO2) color = fpO2.Color;
+                        break;
+
+                    case LineSeries<ObservablePoint> lineSeriesO:
+                        if (lineSeriesO.Stroke is SolidColorPaint spO) color = spO.Color;
+                        break;
                 }
 
                 seriesColors[series.Name] = color;
@@ -778,6 +1236,72 @@ namespace DBADashGUI.Charts
                             cultureInfo.DateTimeFormat.ShortDatePattern;
                         return date.ToString(dateFormat, cultureInfo).Trim();
                     }
+            }
+        }
+
+        /// <summary>
+        /// Manages applying an InnerRadius fraction to a PieChart by computing
+        /// the pixel MaxRadialColumnWidth value for each PieSeries based on
+        /// the chart control size. The manager attaches a SizeChanged handler
+        /// and unregisters it when the chart is disposed.
+        /// </summary>
+        private sealed class PieDonutManager
+        {
+            private readonly Control chart;
+            private readonly List<ISeries> series;
+            private readonly double innerFraction;
+
+            public PieDonutManager(Control chart, List<ISeries> series, double innerFraction)
+            {
+                this.chart = chart ?? throw new ArgumentNullException(nameof(chart));
+                this.series = series ?? throw new ArgumentNullException(nameof(series));
+                this.innerFraction = Math.Clamp(innerFraction, 0.0, 1.0);
+
+                // attach handlers
+                this.chart.SizeChanged += Chart_SizeChanged;
+                this.chart.Disposed += Chart_Disposed;
+
+                // initial apply
+                ApplyMaxRadialColumnWidth();
+            }
+
+            private void Chart_SizeChanged(object sender, EventArgs e)
+            {
+                ApplyMaxRadialColumnWidth();
+            }
+
+            private void Chart_Disposed(object sender, EventArgs e)
+            {
+                // detach handlers to allow GC of captured objects
+                try
+                {
+                    chart.SizeChanged -= Chart_SizeChanged;
+                    chart.Disposed -= Chart_Disposed;
+                }
+                catch { }
+            }
+
+            private void ApplyMaxRadialColumnWidth()
+            {
+                try
+                {
+                    var minDim = Math.Min(chart.ClientSize.Width, chart.ClientSize.Height);
+                    var radius = minDim / 2.0;
+                    var thicknessPixels = radius * (1.0 - innerFraction);
+                    if (thicknessPixels < 1.0) thicknessPixels = 1.0; // avoid zero which may hide slices
+
+                    foreach (var s in series)
+                    {
+                        if (s is PieSeries<ObservableValue> ps)
+                        {
+                            ps.MaxRadialColumnWidth = thicknessPixels;
+                        }
+                    }
+                }
+                catch
+                {
+                    // swallow - do not let UI fail on layout hiccups
+                }
             }
         }
     }

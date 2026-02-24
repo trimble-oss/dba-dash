@@ -16,6 +16,28 @@ namespace DBADashGUI.CustomReports
         public TuningRecommendationsReport()
         {
             PostGridRefresh += TuningRecommendationsReport_PostGridRefresh;
+            // ensure we unsubscribe event handlers that reference grids when this control is disposed to avoid leaks
+            this.Disposed += (s, e) =>
+            {
+                try
+                {
+                    PostGridRefresh -= TuningRecommendationsReport_PostGridRefresh;
+                }
+                catch { }
+                try
+                {
+                    foreach (var g in Grids)
+                    {
+                        try
+                        {
+                            g.CellFormatting -= TuningRecommendationsReport_CellFormatting;
+                            g.CellContentClick -= TuningRecommendationsReport_CellContentClick;
+                        }
+                        catch { }
+                    }
+                }
+                catch { }
+            };
             Report = Instance;
         }
 

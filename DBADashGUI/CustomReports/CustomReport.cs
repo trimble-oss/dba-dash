@@ -1,7 +1,9 @@
 ﻿using DBADash;
+using DBADashGUI.Charts;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -34,6 +36,17 @@ namespace DBADashGUI.CustomReports
 
         public string CancellationMessageWarning { get; set; }
 
+        public bool ChartVisible { get; set; } = true;
+
+        private bool _tableVisible = true;
+
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Include)]
+        public bool TableVisible
+        {
+            get => _tableVisible || !ChartVisible;
+            set => _tableVisible = value;
+        }
+
         [JsonIgnore]
         public Params Params { get; set; }
 
@@ -49,14 +62,14 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         [JsonIgnore]
         public IEnumerable<Param> UserParams => Params?.ParamList == null ? new List<Param>() : Params.ParamList.Where(p =>
-                                                                                                                                                                                                                                                                                                                                                            !SystemParamNames.Contains(p.ParamName.ToUpper()));
+                                                                                                                                                                                                                                                                                                                                                                                                                    !SystemParamNames.Contains(p.ParamName.ToUpper()));
 
         /// <summary>
         /// Parameters for the stored procedure that are supplied automatically based on context
         /// </summary>
         [JsonIgnore]
         public IEnumerable<Param> SystemParams => Params?.ParamList == null ? new List<Param>() : Params.ParamList.Where(p =>
-                                                                                                                                                                                                                                                            SystemParamNames.Contains(p.ParamName.ToUpper()));
+                                                                                                                                                                                                                                                                                                                    SystemParamNames.Contains(p.ParamName.ToUpper()));
 
         [JsonIgnore]
         public virtual bool IsRootLevel => Params != null && Params.ParamList.Any(p => p.ParamName.Equals("@INSTANCEIDS", StringComparison.OrdinalIgnoreCase));
@@ -77,10 +90,14 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         [JsonIgnore]
         public bool TimeFilterSupported => Params != null && Params.ParamList.Any(p =>
-                                                                                                                                                                                                                                                                                                                                                            p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
-                                                                                                                                                                                                                                                                                                                                                            p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase));
+                                                                                                                                                                                                                                                                                                                                                                                                                    p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
+                                                                                                                                                                                                                                                                                                                                                                                                                    p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase));
 
         public bool ForceRefreshWithoutContextChange { get; set; }
+
+        public List<CustomReportChart> Charts { get; set; } = new();
+
+        // CustomReportChart is defined at namespace level to simplify usage across the project
 
         /// <summary>
         /// Associate report with a view type for rendering.  Most reports will use CustomReportView, but specialized views can be created by deriving from CustomReportView.
@@ -119,7 +136,13 @@ namespace DBADashGUI.CustomReports
 
         public string Serialize() => JsonConvert.SerializeObject(this, Formatting.Indented,
             new JsonSerializerSettings
-            { NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore, TypeNameHandling = TypeNameHandling.Auto, SerializationBinder = new SimpleBinder() });
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                DefaultValueHandling = DefaultValueHandling.Ignore,
+                TypeNameHandling = TypeNameHandling.Auto,
+                SerializationBinder = new SimpleBinder(),
+                Converters = new JsonConverter[] { new StringEnumConverter() }
+            });
 
         /// <summary>
         /// Convert list of parameters for the report to list of CustomSqlParameters
@@ -146,9 +169,32 @@ namespace DBADashGUI.CustomReports
         public override Type BindToType(string assemblyName, string typeName)
         {
             var currentAssembly = typeof(SimpleBinder).Assembly;
-            var currentNamespace = GetType().Namespace;
-            var type = currentAssembly.GetType($"{currentNamespace}.{typeName}") ?? base.BindToType(assemblyName, typeName);
-            return type;
+
+            // Try several likely locations for the type name:
+            // 1. Fully qualified name (typeName may already include namespace)
+            // 2. Current namespace where SimpleBinder is defined
+            // 3. Charts namespace where chart configuration types (e.g., PieChartConfiguration) live
+            Type type = null;
+
+            if (!string.IsNullOrWhiteSpace(typeName))
+            {
+                // If caller provided a namespace-qualified name, this will succeed
+                type = currentAssembly.GetType(typeName);
+
+                if (type == null)
+                {
+                    var currentNamespace = GetType().Namespace;
+                    type = currentAssembly.GetType($"{currentNamespace}.{typeName}");
+                }
+
+                if (type == null)
+                {
+                    // Chart-specific types live in the DBADashGUI.Charts namespace
+                    type = currentAssembly.GetType($"DBADashGUI.Charts.{typeName}");
+                }
+            }
+
+            return type ?? base.BindToType(assemblyName, typeName);
         }
     }
 }

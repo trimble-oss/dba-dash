@@ -26,6 +26,7 @@ namespace DBADashGUI.Performance
         // resize when their container panel becomes visible from a collapsed state.
         // The chart needs to be fully re-rendered after the panel layout completes.
         private DataTable _cachedDBData;
+
         private DataTable _cachedPoolData;
 
         public AzureDBResourceStats()
@@ -273,10 +274,9 @@ namespace DBADashGUI.Performance
             // Update chart using ChartHelper with name-based axis mapping
             var config = new ChartConfiguration
             {
-                DateColumn = "end_time",
+                XColumn = "end_time",
                 MetricColumns = visibleColumns,
                 ChartType = ChartTypes.Line,
-                ShowLegend = true,
                 LegendPosition = LegendPosition.Bottom,
                 LineSmoothness = lineSmoothness,
                 GeometrySize = geometrySize,

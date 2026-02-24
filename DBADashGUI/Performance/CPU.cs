@@ -136,7 +136,7 @@ namespace DBADashGUI.Performance
                 // AVG mode: Stacked area chart for SQL Server and Other CPU
                 config = new ChartConfiguration
                 {
-                    DateColumn = "EventTime",
+                    XColumn = "EventTime",
                     MetricColumns = new[] { "SQLProcessCPU", "OtherCPU" },
                     SeriesNames = new Dictionary<string, string>
                     {
@@ -144,7 +144,6 @@ namespace DBADashGUI.Performance
                         { "OtherCPU", "Other" }
                     },
                     ChartType = ChartTypes.StackedArea,
-                    ShowLegend = true,
                     LegendPosition = legendPosition,
                     GeometrySize = PointSize,
                     LineSmoothness = SmoothLines ? ChartConfiguration.DefaultLineSmoothness : 0,
@@ -162,14 +161,13 @@ namespace DBADashGUI.Performance
                 // MAX mode: Line chart for Max CPU
                 config = new ChartConfiguration
                 {
-                    DateColumn = "EventTime",
+                    XColumn = "EventTime",
                     MetricColumns = new[] { "MaxCPU" },
                     SeriesNames = new Dictionary<string, string>
                     {
                         { "MaxCPU", "Max CPU" }
                     },
                     ChartType = ChartTypes.Line,
-                    ShowLegend = true,
                     LegendPosition = LegendPosition.Hidden,
                     GeometrySize = PointSize,
                     LineFill = true,

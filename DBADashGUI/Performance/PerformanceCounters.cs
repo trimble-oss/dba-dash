@@ -170,10 +170,9 @@ namespace DBADashGUI.Performance
             // Update chart using ChartHelper
             var config = new ChartConfiguration
             {
-                DateColumn = "SnapshotDate",
+                XColumn = "SnapshotDate",
                 MetricColumn = "SelectedValue",
                 ChartType = ChartTypes.Line,
-                ShowLegend = true,
                 LegendPosition = LegendPosition.Hidden,
                 LineSmoothness = lineSmoothness,
                 LineFill = true,

@@ -1,4 +1,3 @@
-using DBADashGUI.Theme;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
@@ -65,6 +64,7 @@ namespace DBADashGUI.Charts
             public Timer ShowTimer { get; set; }
             public bool IsTooltipVisible { get; set; } = false;
             public DateTime? PendingDate { get; set; }
+            public string PendingXLabel { get; set; }
             public List<(string name, string value, Color color)> PendingSeriesData { get; set; }
             public Point PendingMouseLocation { get; set; }
             public DateTime LastMouseMoveTime { get; set; } = DateTime.MinValue;
@@ -142,12 +142,13 @@ namespace DBADashGUI.Charts
 
             protected override bool ShowWithoutActivation => true;
 
-            public void SetContent(DateTime? date, List<(string name, string value, Color color)> series)
+            public void SetContent(DateTime? date, string xLabel, List<(string name, string value, Color color)> series)
             {
-                // Try to reuse existing controls if structure is the same (same series count, same date visibility)
-                bool canReuse = _layout != null && 
+                // Try to reuse existing controls if structure is the same (same series count, same header visibility)
+                var hasHeader = date.HasValue || !string.IsNullOrEmpty(xLabel);
+                bool canReuse = _layout != null &&
                                series.Count == _seriesControls.Count &&
-                               (date.HasValue == (_dateLabel != null));
+                               (hasHeader == (_dateLabel != null));
 
                 if (canReuse)
                 {
@@ -155,9 +156,16 @@ namespace DBADashGUI.Charts
                     this.SuspendLayout();
 
                     // Update existing controls - much faster, no flicker
-                    if (_dateLabel != null && date.HasValue)
+                    if (_dateLabel != null)
                     {
-                        _dateLabel.Text = date.Value.ToString("G");
+                        if (date.HasValue)
+                        {
+                            _dateLabel.Text = date.Value.ToString("G");
+                        }
+                        else
+                        {
+                            _dateLabel.Text = xLabel;
+                        }
                     }
 
                     for (int i = 0; i < series.Count; i++)
@@ -201,12 +209,12 @@ namespace DBADashGUI.Charts
                     _layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
                     _layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
 
-                    // Date header (spans both columns)
-                    if (date.HasValue)
+                    // Header (spans both columns): show date if available, otherwise show xLabel if provided
+                    if (date.HasValue || !string.IsNullOrEmpty(xLabel))
                     {
                         _dateLabel = new Label
                         {
-                            Text = date.Value.ToString("G"),
+                            Text = date.HasValue ? date.Value.ToString("G") : xLabel,
                             AutoSize = true,
                             Font = _headerFont,
                             ForeColor = DashColors.TrimbleBlue,
@@ -331,7 +339,7 @@ namespace DBADashGUI.Charts
 
                         if (state.PendingSeriesData != null && state.PendingSeriesData.Count > 0)
                         {
-                            tooltipForm.SetContent(state.PendingDate, state.PendingSeriesData);
+                            tooltipForm.SetContent(state.PendingDate, state.PendingXLabel, state.PendingSeriesData);
                             PositionTooltip(chart, tooltipForm, state.PendingMouseLocation);
                             state.LastTooltipPosition = tooltipForm.Location; // Track initial position
                             tooltipForm.Show();
@@ -398,8 +406,8 @@ namespace DBADashGUI.Charts
             {
                 // Only update LastMouseMoveTime if mouse actually moved a meaningful distance
                 // This prevents tiny jitters from resetting the tooltip delay timer
-                var mouseMoved = state.LastMousePosition == Point.Empty || 
-                                 Math.Abs(e.X - state.LastMousePosition.X) > MouseJitterThreshold || 
+                var mouseMoved = state.LastMousePosition == Point.Empty ||
+                                 Math.Abs(e.X - state.LastMousePosition.X) > MouseJitterThreshold ||
                                  Math.Abs(e.Y - state.LastMousePosition.Y) > MouseJitterThreshold;
 
                 if (mouseMoved)
@@ -467,8 +475,12 @@ namespace DBADashGUI.Charts
                         state.LastPointIndex = currentIndex;
                         state.LastPointCount = currentCount;
 
-                        // Get date from first point
-                        TryGetDateFromPoint(firstPoint, out var dateTime);
+                        // Get date from first point (nullable)
+                        DateTime? dateTime = null;
+                        if (TryGetDateFromPoint(firstPoint, out var dt))
+                        {
+                            dateTime = dt;
+                        }
 
                         // Collect series info
                         var seriesData = new List<(string name, string value, Color color)>(points.Count);
@@ -491,13 +503,59 @@ namespace DBADashGUI.Charts
                             seriesData.Add((seriesName, formattedValue, color));
                         }
 
+                        // Compute an X label to show in header: prefer DateTime if available, otherwise use point.Coordinate.SecondaryValue or Primary as fallback
+                        string xLabel = null;
+                        if (dateTime.HasValue)
+                        {
+                            xLabel = dateTime.Value.ToString("G");
+                        }
+                        else
+                        {
+                            try
+                            {
+                                // Prefer using axis Labels (category labels) if available on the chart X axis
+                                var coord = firstPoint.Coordinate;
+                                var secondary = coord.SecondaryValue;
+
+                                if (chart != null && chart.XAxes != null && chart.XAxes.Any())
+                                {
+                                    var xAxis = chart.XAxes.First();
+                                    // If axis has string labels, map the numeric index to the label
+                                    if (xAxis.Labels != null && xAxis.Labels.Count > 0 && !double.IsNaN(secondary))
+                                    {
+                                        var idx = (int)Math.Round(secondary);
+                                        if (idx >= 0 && idx < xAxis.Labels.Count)
+                                        {
+                                            xLabel = xAxis.Labels[idx];
+                                        }
+                                    }
+                                }
+
+                                // Fallback to coordinate values if no axis labels mapped
+                                if (xLabel == null)
+                                {
+                                    var primary = coord.PrimaryValue;
+                                    if (!double.IsNaN(secondary))
+                                    {
+                                        xLabel = secondary.ToString();
+                                    }
+                                    else
+                                    {
+                                        xLabel = primary.ToString();
+                                    }
+                                }
+                            }
+                            catch { }
+                        }
+
                         // If tooltip is already visible
                         if (state.IsTooltipVisible)
                         {
                             // Tooltip already showing: keep it visible and update immediately
                             // User has already indicated they want to see tooltips
-                            tooltipForm.SetContent(dateTime, seriesData);
+                            tooltipForm.SetContent(dateTime, xLabel, seriesData);
                             state.PendingDate = dateTime;
+                            state.PendingXLabel = xLabel;
                             state.PendingSeriesData = seriesData;
                             state.PendingMouseLocation = e.Location;
                         }
@@ -505,6 +563,7 @@ namespace DBADashGUI.Charts
                         {
                             // Tooltip not visible: store pending data and start/continue timer
                             state.PendingDate = dateTime;
+                            state.PendingXLabel = xLabel;
                             state.PendingSeriesData = seriesData;
                             state.PendingMouseLocation = e.Location;
 
@@ -528,7 +587,7 @@ namespace DBADashGUI.Charts
                         var newTooltipPos = new Point(screenPt.X + TooltipOffsetX, screenPt.Y + TooltipOffsetY);
 
                         // Only update if moved by more than a few pixels to reduce flicker
-                        if (Math.Abs(newTooltipPos.X - state.LastTooltipPosition.X) > 3 || 
+                        if (Math.Abs(newTooltipPos.X - state.LastTooltipPosition.X) > 3 ||
                             Math.Abs(newTooltipPos.Y - state.LastTooltipPosition.Y) > 3)
                         {
                             PositionTooltip(chart, tooltipForm, e.Location);
@@ -606,6 +665,7 @@ namespace DBADashGUI.Charts
                     LineSeries<DateTimePoint> lineSeries => lineSeries.Values as IList<DateTimePoint>,
                     StackedAreaSeries<DateTimePoint> stackedAreaSeries => stackedAreaSeries.Values as IList<DateTimePoint>,
                     StackedColumnSeries<DateTimePoint> stackedColumnSeries => stackedColumnSeries.Values as IList<DateTimePoint>,
+                    ColumnSeries<DateTimePoint> columnSeries => columnSeries.Values as IList<DateTimePoint>,
                     ScatterSeries<DateTimePoint> scatterSeries => scatterSeries.Values as IList<DateTimePoint>,
                     _ => null
                 };
@@ -628,13 +688,21 @@ namespace DBADashGUI.Charts
         {
             try
             {
-                // Try to extract paint color from various series types
+                // Try to extract paint color from various series types (handle DateTimePoint and ObservablePoint)
+                // Prefer the visible stroke color for lines (stroke usually represents the line color)
+                // and fall back to the fill color if stroke is not available.
                 SolidColorPaint paint = series switch
                 {
-                    LineSeries<DateTimePoint> ls => ls.Fill as SolidColorPaint ?? ls.Stroke as SolidColorPaint,
-                    StackedAreaSeries<DateTimePoint> sas => sas.Fill as SolidColorPaint ?? sas.Stroke as SolidColorPaint,
-                    StackedColumnSeries<DateTimePoint> scs => scs.Fill as SolidColorPaint ?? scs.Stroke as SolidColorPaint,
-                    ScatterSeries<DateTimePoint> ss => ss.Fill as SolidColorPaint ?? ss.Stroke as SolidColorPaint,
+                    LineSeries<DateTimePoint> ls => ls.Stroke as SolidColorPaint ?? ls.Fill as SolidColorPaint,
+                    StackedAreaSeries<DateTimePoint> sas => sas.Stroke as SolidColorPaint ?? sas.Fill as SolidColorPaint,
+                    StackedColumnSeries<DateTimePoint> scs => scs.Stroke as SolidColorPaint ?? scs.Fill as SolidColorPaint,
+                    ColumnSeries<DateTimePoint> csd => csd.Fill as SolidColorPaint ?? csd.Stroke as SolidColorPaint,
+                    ScatterSeries<DateTimePoint> ss => ss.Stroke as SolidColorPaint ?? ss.Fill as SolidColorPaint,
+                    LineSeries<ObservablePoint> lso => lso.Stroke as SolidColorPaint ?? lso.Fill as SolidColorPaint,
+                    StackedAreaSeries<ObservablePoint> saso => saso.Stroke as SolidColorPaint ?? saso.Fill as SolidColorPaint,
+                    StackedColumnSeries<ObservablePoint> scso => scso.Stroke as SolidColorPaint ?? scso.Fill as SolidColorPaint,
+                    ColumnSeries<ObservablePoint> cso => cso.Fill as SolidColorPaint ?? cso.Stroke as SolidColorPaint,
+                    ScatterSeries<ObservablePoint> sso => sso.Stroke as SolidColorPaint ?? sso.Fill as SolidColorPaint,
                     _ => null
                 };
 
@@ -665,7 +733,13 @@ namespace DBADashGUI.Charts
                     LineSeries<DateTimePoint> ls => ls.ScalesYAt,
                     StackedAreaSeries<DateTimePoint> sas => sas.ScalesYAt,
                     StackedColumnSeries<DateTimePoint> scs => scs.ScalesYAt,
+                    ColumnSeries<DateTimePoint> csd => csd.ScalesYAt,
                     ScatterSeries<DateTimePoint> ss => ss.ScalesYAt,
+                    LineSeries<ObservablePoint> lso => lso.ScalesYAt,
+                    StackedAreaSeries<ObservablePoint> saso => saso.ScalesYAt,
+                    StackedColumnSeries<ObservablePoint> scso => scso.ScalesYAt,
+                    ColumnSeries<ObservablePoint> csf => csf.ScalesYAt,
+                    ScatterSeries<ObservablePoint> sso => sso.ScalesYAt,
                     _ => null
                 };
 

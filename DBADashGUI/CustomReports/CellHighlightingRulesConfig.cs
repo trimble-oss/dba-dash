@@ -169,22 +169,6 @@ namespace DBADashGUI.CustomReports
             lblAnd.Visible = conditionType == CellHighlightingRule.ConditionTypes.Between;
         }
 
-        private void KeyPressAllowNumericOnly(object sender, KeyPressEventArgs e)
-        {
-            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && e.KeyChar != '.' && e.KeyChar != '-')
-                e.Handled = true;
-
-            switch (e.KeyChar)
-            {
-                // only allow one decimal point
-                case '.' when ((TextBox)sender).Text.IndexOf('.') > -1:
-                // only allow one minus sign
-                case '-' when ((TextBox)sender).Text.IndexOf('-') > -1:
-                    e.Handled = true;
-                    break;
-            }
-        }
-
         private void BttnAdd_Click(object sender, EventArgs e)
         {
             var rule = GetHighlightingRule();

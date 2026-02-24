@@ -885,5 +885,21 @@ namespace DBADashGUI
 
             objectExecutionForm.ShowSingleInstance();
         }
+
+        public static void KeyPressAllowNumericOnly(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && e.KeyChar != '.' && e.KeyChar != '-')
+                e.Handled = true;
+
+            switch (e.KeyChar)
+            {
+                // only allow one decimal point
+                case '.' when ((TextBox)sender).Text.IndexOf('.') > -1:
+                // only allow one minus sign
+                case '-' when ((TextBox)sender).Text.IndexOf('-') > -1:
+                    e.Handled = true;
+                    break;
+            }
+        }
     }
 }

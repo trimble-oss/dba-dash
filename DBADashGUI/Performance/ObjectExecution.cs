@@ -113,11 +113,10 @@ namespace DBADashGUI.Performance
             // Use ChartHelper with SeriesColumn to group by ObjectName
             var config = new ChartConfiguration
             {
-                DateColumn = "SnapshotDate",
+                XColumn = "SnapshotDate",
                 MetricColumn = "Measure",
                 SeriesColumn = "ObjectName",  // Group data by ObjectName - each becomes a series
                 ChartType = ChartTypes.StackedColumn,
-                ShowLegend = true,
                 LegendPosition = legendPosition,
                 XAxisMin = DateRange.FromUTC.ToAppTimeZone(),
                 XAxisMax = DateRange.ToUTC.ToAppTimeZone(),

@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CustomReportView));
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsExecute = new System.Windows.Forms.ToolStripButton();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
@@ -37,14 +38,15 @@
             tsExcel = new System.Windows.Forms.ToolStripButton();
             tsCols = new System.Windows.Forms.ToolStripButton();
             tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
-            setTitleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            setDescriptionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            renameResultSetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            addChartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             associateCollectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            saveLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            resetLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             editPickersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            renameResultSetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            resetLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            saveLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             scriptReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            setDescriptionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            setTitleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             cboResults = new System.Windows.Forms.ToolStripComboBox();
             lblSelectResults = new System.Windows.Forms.ToolStripLabel();
             toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
@@ -57,33 +59,43 @@
             tsTrigger = new System.Windows.Forms.ToolStripButton();
             tsReset = new System.Windows.Forms.ToolStripButton();
             tsNewWindow = new System.Windows.Forms.ToolStripButton();
+            splitToggle1 = new System.Windows.Forms.ToolStripSeparator();
+            tsToggleCharts = new System.Windows.Forms.ToolStripButton();
+            tsToggleGrids = new System.Windows.Forms.ToolStripButton();
+            splitToggle2 = new System.Windows.Forms.ToolStripSeparator();
             lnkParams = new System.Windows.Forms.LinkLabel();
             pnlParams = new System.Windows.Forms.Panel();
-            splitContainer2 = new System.Windows.Forms.SplitContainer();
+            splitParams = new System.Windows.Forms.SplitContainer();
             lblParamsRequired = new System.Windows.Forms.Label();
-            splitContainer1 = new System.Windows.Forms.SplitContainer();
+            splitResultsAndParams = new System.Windows.Forms.SplitContainer();
+            splitTablesCharts = new System.Windows.Forms.SplitContainer();
+            chartLayout = new System.Windows.Forms.TableLayoutPanel();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblTimer = new System.Windows.Forms.ToolStripStatusLabel();
             tsSep = new System.Windows.Forms.ToolStripStatusLabel();
             lblURL = new System.Windows.Forms.ToolStripStatusLabel();
-            timer1 = new System.Windows.Forms.Timer(components);
             lblDescription = new System.Windows.Forms.ToolStripStatusLabel();
+            timer1 = new System.Windows.Forms.Timer(components);
             toolStrip1.SuspendLayout();
             pnlParams.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)splitContainer2).BeginInit();
-            splitContainer2.Panel1.SuspendLayout();
-            splitContainer2.Panel2.SuspendLayout();
-            splitContainer2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
-            splitContainer1.Panel2.SuspendLayout();
-            splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitParams).BeginInit();
+            splitParams.Panel1.SuspendLayout();
+            splitParams.Panel2.SuspendLayout();
+            splitParams.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitResultsAndParams).BeginInit();
+            splitResultsAndParams.Panel1.SuspendLayout();
+            splitResultsAndParams.Panel2.SuspendLayout();
+            splitResultsAndParams.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitTablesCharts).BeginInit();
+            splitTablesCharts.Panel1.SuspendLayout();
+            splitTablesCharts.SuspendLayout();
             statusStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsExecute, tsRefresh, tsCancel, tsCopy, tsExcel, tsCols, tsConfigure, cboResults, lblSelectResults, toolStripSeparator2, tsParams, toolStripSeparator1, tsScriptResults, tsClearFilter, tsTrigger, tsReset, tsNewWindow });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsExecute, tsRefresh, tsCancel, tsCopy, tsParams, tsExcel, tsCols, tsConfigure, cboResults, lblSelectResults, toolStripSeparator2, toolStripSeparator1, tsScriptResults, tsClearFilter, tsTrigger, tsReset, tsNewWindow, splitToggle1, tsToggleCharts, tsToggleGrids, splitToggle2 });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
@@ -160,7 +172,7 @@
             // tsConfigure
             // 
             tsConfigure.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { setTitleToolStripMenuItem, setDescriptionToolStripMenuItem, renameResultSetToolStripMenuItem, associateCollectionToolStripMenuItem, saveLayoutToolStripMenuItem, resetLayoutToolStripMenuItem, editPickersToolStripMenuItem, scriptReportToolStripMenuItem });
+            tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { addChartToolStripMenuItem, associateCollectionToolStripMenuItem, editPickersToolStripMenuItem, renameResultSetToolStripMenuItem, resetLayoutToolStripMenuItem, saveLayoutToolStripMenuItem, scriptReportToolStripMenuItem, setDescriptionToolStripMenuItem, setTitleToolStripMenuItem });
             tsConfigure.Image = Properties.Resources.SettingsOutline_16x;
             tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsConfigure.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
@@ -168,31 +180,13 @@
             tsConfigure.Size = new System.Drawing.Size(34, 24);
             tsConfigure.Text = "Configure";
             // 
-            // setTitleToolStripMenuItem
+            // addChartToolStripMenuItem
             // 
-            setTitleToolStripMenuItem.Image = Properties.Resources.Rename_16x;
-            setTitleToolStripMenuItem.Name = "setTitleToolStripMenuItem";
-            setTitleToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
-            setTitleToolStripMenuItem.Text = "Set Title";
-            setTitleToolStripMenuItem.ToolTipText = "Change the name of the report";
-            setTitleToolStripMenuItem.Click += SetTitleToolStripMenuItem_Click;
-            // 
-            // setDescriptionToolStripMenuItem
-            // 
-            setDescriptionToolStripMenuItem.Image = Properties.Resources.Rename_16x;
-            setDescriptionToolStripMenuItem.Name = "setDescriptionToolStripMenuItem";
-            setDescriptionToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
-            setDescriptionToolStripMenuItem.Text = "Set Description";
-            setDescriptionToolStripMenuItem.ToolTipText = "Add a description for the report";
-            setDescriptionToolStripMenuItem.Click += SetDescriptionToolStripMenuItem_Click;
-            // 
-            // renameResultSetToolStripMenuItem
-            // 
-            renameResultSetToolStripMenuItem.Image = Properties.Resources.Rename_16x;
-            renameResultSetToolStripMenuItem.Name = "renameResultSetToolStripMenuItem";
-            renameResultSetToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
-            renameResultSetToolStripMenuItem.Text = "Rename Result Set";
-            renameResultSetToolStripMenuItem.Click += RenameResultSet_Click;
+            addChartToolStripMenuItem.Image = Properties.Resources.StackedAreaChart;
+            addChartToolStripMenuItem.Name = "addChartToolStripMenuItem";
+            addChartToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            addChartToolStripMenuItem.Text = "Add Chart";
+            addChartToolStripMenuItem.Click += AddChartToolStripMenuItem_Click;
             // 
             // associateCollectionToolStripMenuItem
             // 
@@ -203,14 +197,21 @@
             associateCollectionToolStripMenuItem.ToolTipText = "Associate Collection - Allow collection to be triggered from report";
             associateCollectionToolStripMenuItem.Click += AssociateCollectionToolStripMenuItem_Click;
             // 
-            // saveLayoutToolStripMenuItem
+            // editPickersToolStripMenuItem
             // 
-            saveLayoutToolStripMenuItem.Image = Properties.Resources.Save_16x;
-            saveLayoutToolStripMenuItem.Name = "saveLayoutToolStripMenuItem";
-            saveLayoutToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
-            saveLayoutToolStripMenuItem.Text = "Save Layout";
-            saveLayoutToolStripMenuItem.ToolTipText = "Saves column visibility, order and size";
-            saveLayoutToolStripMenuItem.Click += SaveLayoutToolStripMenuItem_Click;
+            editPickersToolStripMenuItem.Image = Properties.Resources.ReportParameter_16x;
+            editPickersToolStripMenuItem.Name = "editPickersToolStripMenuItem";
+            editPickersToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            editPickersToolStripMenuItem.Text = "Edit Pickers";
+            editPickersToolStripMenuItem.Click += EditPickersToolStripMenuItem_Click;
+            // 
+            // renameResultSetToolStripMenuItem
+            // 
+            renameResultSetToolStripMenuItem.Image = Properties.Resources.Rename_16x;
+            renameResultSetToolStripMenuItem.Name = "renameResultSetToolStripMenuItem";
+            renameResultSetToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            renameResultSetToolStripMenuItem.Text = "Rename Result Set";
+            renameResultSetToolStripMenuItem.Click += RenameResultSet_Click;
             // 
             // resetLayoutToolStripMenuItem
             // 
@@ -221,13 +222,14 @@
             resetLayoutToolStripMenuItem.ToolTipText = "Resets column visibility, order and size";
             resetLayoutToolStripMenuItem.Click += ResetLayoutToolStripMenuItem_Click;
             // 
-            // editPickersToolStripMenuItem
+            // saveLayoutToolStripMenuItem
             // 
-            editPickersToolStripMenuItem.Image = Properties.Resources.ReportParameter_16x;
-            editPickersToolStripMenuItem.Name = "editPickersToolStripMenuItem";
-            editPickersToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
-            editPickersToolStripMenuItem.Text = "Edit Pickers";
-            editPickersToolStripMenuItem.Click += EditPickersToolStripMenuItem_Click;
+            saveLayoutToolStripMenuItem.Image = Properties.Resources.Save_16x;
+            saveLayoutToolStripMenuItem.Name = "saveLayoutToolStripMenuItem";
+            saveLayoutToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            saveLayoutToolStripMenuItem.Text = "Save Layout";
+            saveLayoutToolStripMenuItem.ToolTipText = "Saves column visibility, order and size";
+            saveLayoutToolStripMenuItem.Click += SaveLayoutToolStripMenuItem_Click;
             // 
             // scriptReportToolStripMenuItem
             // 
@@ -237,6 +239,24 @@
             scriptReportToolStripMenuItem.Text = "Script Report";
             scriptReportToolStripMenuItem.ToolTipText = "Generate a script for this custom report to share with other users of DBA Dash";
             scriptReportToolStripMenuItem.Click += ScriptReportToolStripMenuItem_Click;
+            // 
+            // setDescriptionToolStripMenuItem
+            // 
+            setDescriptionToolStripMenuItem.Image = Properties.Resources.Rename_16x;
+            setDescriptionToolStripMenuItem.Name = "setDescriptionToolStripMenuItem";
+            setDescriptionToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            setDescriptionToolStripMenuItem.Text = "Set Description";
+            setDescriptionToolStripMenuItem.ToolTipText = "Add a description for the report";
+            setDescriptionToolStripMenuItem.Click += SetDescriptionToolStripMenuItem_Click;
+            // 
+            // setTitleToolStripMenuItem
+            // 
+            setTitleToolStripMenuItem.Image = Properties.Resources.Rename_16x;
+            setTitleToolStripMenuItem.Name = "setTitleToolStripMenuItem";
+            setTitleToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            setTitleToolStripMenuItem.Text = "Set Title";
+            setTitleToolStripMenuItem.ToolTipText = "Change the name of the report";
+            setTitleToolStripMenuItem.Click += SetTitleToolStripMenuItem_Click;
             // 
             // cboResults
             // 
@@ -347,6 +367,36 @@
             tsNewWindow.Text = "Open in new window";
             tsNewWindow.Click += TsNewWindow_Click;
             // 
+            // splitToggle1
+            // 
+            splitToggle1.Name = "splitToggle1";
+            splitToggle1.Size = new System.Drawing.Size(6, 31);
+            // 
+            // tsToggleCharts
+            // 
+            tsToggleCharts.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsToggleCharts.Image = (System.Drawing.Image)resources.GetObject("tsToggleCharts.Image");
+            tsToggleCharts.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsToggleCharts.Name = "tsToggleCharts";
+            tsToggleCharts.Size = new System.Drawing.Size(29, 28);
+            tsToggleCharts.Text = "Toggle Charts";
+            tsToggleCharts.Click += ToggleCharts_Click;
+            // 
+            // tsToggleGrids
+            // 
+            tsToggleGrids.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsToggleGrids.Image = Properties.Resources.Table_16x;
+            tsToggleGrids.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsToggleGrids.Name = "tsToggleGrids";
+            tsToggleGrids.Size = new System.Drawing.Size(29, 28);
+            tsToggleGrids.Text = "Toggle Grid";
+            tsToggleGrids.Click += ToggleGrids;
+            // 
+            // splitToggle2
+            // 
+            splitToggle2.Name = "splitToggle2";
+            splitToggle2.Size = new System.Drawing.Size(6, 31);
+            // 
             // lnkParams
             // 
             lnkParams.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -362,33 +412,33 @@
             // 
             // pnlParams
             // 
-            pnlParams.Controls.Add(splitContainer2);
+            pnlParams.Controls.Add(splitParams);
             pnlParams.Dock = System.Windows.Forms.DockStyle.Fill;
             pnlParams.Location = new System.Drawing.Point(0, 0);
             pnlParams.Name = "pnlParams";
             pnlParams.Size = new System.Drawing.Size(824, 555);
             pnlParams.TabIndex = 3;
             // 
-            // splitContainer2
+            // splitParams
             // 
-            splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
-            splitContainer2.IsSplitterFixed = true;
-            splitContainer2.Location = new System.Drawing.Point(0, 0);
-            splitContainer2.Name = "splitContainer2";
-            splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            splitParams.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitParams.IsSplitterFixed = true;
+            splitParams.Location = new System.Drawing.Point(0, 0);
+            splitParams.Name = "splitParams";
+            splitParams.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
-            // splitContainer2.Panel1
+            // splitParams.Panel1
             // 
-            splitContainer2.Panel1.Controls.Add(lnkParams);
-            splitContainer2.Panel1.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            splitParams.Panel1.Controls.Add(lnkParams);
+            splitParams.Panel1.RightToLeft = System.Windows.Forms.RightToLeft.No;
             // 
-            // splitContainer2.Panel2
+            // splitParams.Panel2
             // 
-            splitContainer2.Panel2.Controls.Add(lblParamsRequired);
-            splitContainer2.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            splitContainer2.Size = new System.Drawing.Size(824, 555);
-            splitContainer2.SplitterDistance = 251;
-            splitContainer2.TabIndex = 4;
+            splitParams.Panel2.Controls.Add(lblParamsRequired);
+            splitParams.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            splitParams.Size = new System.Drawing.Size(824, 555);
+            splitParams.SplitterDistance = 251;
+            splitParams.TabIndex = 4;
             // 
             // lblParamsRequired
             // 
@@ -401,22 +451,54 @@
             lblParamsRequired.Text = "Parameters are required to run the report";
             lblParamsRequired.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
-            // splitContainer1
+            // splitResultsAndParams
             // 
-            splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            splitContainer1.Location = new System.Drawing.Point(0, 31);
-            splitContainer1.Name = "splitContainer1";
+            splitResultsAndParams.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitResultsAndParams.Location = new System.Drawing.Point(0, 31);
+            splitResultsAndParams.Name = "splitResultsAndParams";
             // 
-            // splitContainer1.Panel1
+            // splitResultsAndParams.Panel1
             // 
-            splitContainer1.Panel1.AutoScroll = true;
+            splitResultsAndParams.Panel1.Controls.Add(splitTablesCharts);
             // 
-            // splitContainer1.Panel2
+            // splitResultsAndParams.Panel2
             // 
-            splitContainer1.Panel2.Controls.Add(pnlParams);
-            splitContainer1.Size = new System.Drawing.Size(1242, 555);
-            splitContainer1.SplitterDistance = 414;
-            splitContainer1.TabIndex = 4;
+            splitResultsAndParams.Panel2.Controls.Add(pnlParams);
+            splitResultsAndParams.Size = new System.Drawing.Size(1242, 555);
+            splitResultsAndParams.SplitterDistance = 414;
+            splitResultsAndParams.TabIndex = 4;
+            // 
+            // splitTablesCharts
+            // 
+            splitTablesCharts.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitTablesCharts.Location = new System.Drawing.Point(0, 0);
+            splitTablesCharts.Name = "splitTablesCharts";
+            splitTablesCharts.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitTablesCharts.Panel1
+            // 
+            splitTablesCharts.Panel1.Controls.Add(chartLayout);
+            // 
+            // splitTablesCharts.Panel2
+            // 
+            splitTablesCharts.Panel2.AutoScroll = true;
+            splitTablesCharts.Size = new System.Drawing.Size(414, 555);
+            splitTablesCharts.SplitterDistance = 305;
+            splitTablesCharts.TabIndex = 0;
+            // 
+            // chartLayout
+            // 
+            chartLayout.ColumnCount = 1;
+            chartLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            chartLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            chartLayout.Dock = System.Windows.Forms.DockStyle.Fill;
+            chartLayout.Location = new System.Drawing.Point(0, 0);
+            chartLayout.Name = "chartLayout";
+            chartLayout.RowCount = 1;
+            chartLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            chartLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            chartLayout.Size = new System.Drawing.Size(414, 305);
+            chartLayout.TabIndex = 0;
             // 
             // statusStrip1
             // 
@@ -450,11 +532,6 @@
             lblURL.Visible = false;
             lblURL.Click += URL_Click;
             // 
-            // timer1
-            // 
-            timer1.Interval = 1000;
-            timer1.Tick += Timer1_Tick;
-            // 
             // lblDescription
             // 
             lblDescription.Name = "lblDescription";
@@ -462,12 +539,17 @@
             lblDescription.Text = "Description...";
             lblDescription.Visible = false;
             // 
+            // timer1
+            // 
+            timer1.Interval = 1000;
+            timer1.Tick += Timer1_Tick;
+            // 
             // CustomReportView
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             AutoScroll = true;
-            Controls.Add(splitContainer1);
+            Controls.Add(splitResultsAndParams);
             Controls.Add(toolStrip1);
             Controls.Add(statusStrip1);
             DoubleBuffered = true;
@@ -476,13 +558,17 @@
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
             pnlParams.ResumeLayout(false);
-            splitContainer2.Panel1.ResumeLayout(false);
-            splitContainer2.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)splitContainer2).EndInit();
-            splitContainer2.ResumeLayout(false);
-            splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
-            splitContainer1.ResumeLayout(false);
+            splitParams.Panel1.ResumeLayout(false);
+            splitParams.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitParams).EndInit();
+            splitParams.ResumeLayout(false);
+            splitResultsAndParams.Panel1.ResumeLayout(false);
+            splitResultsAndParams.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitResultsAndParams).EndInit();
+            splitResultsAndParams.ResumeLayout(false);
+            splitTablesCharts.Panel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitTablesCharts).EndInit();
+            splitTablesCharts.ResumeLayout(false);
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();
             ResumeLayout(false);
@@ -499,8 +585,8 @@
         private System.Windows.Forms.LinkLabel lnkParams;
         private System.Windows.Forms.Panel pnlParams;
         private System.Windows.Forms.Label lblParamsRequired;
-        private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.SplitContainer splitContainer2;
+        private System.Windows.Forms.SplitContainer splitResultsAndParams;
+        private System.Windows.Forms.SplitContainer splitParams;
         private System.Windows.Forms.ToolStripButton tsCols;
         private System.Windows.Forms.ToolStripMenuItem saveLayoutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem resetLayoutToolStripMenuItem;
@@ -529,5 +615,12 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripStatusLabel lblDescription;
+        private System.Windows.Forms.SplitContainer splitTablesCharts;
+        private System.Windows.Forms.TableLayoutPanel chartLayout;
+        private System.Windows.Forms.ToolStripButton tsToggleCharts;
+        private System.Windows.Forms.ToolStripButton tsToggleGrids;
+        private System.Windows.Forms.ToolStripSeparator splitToggle1;
+        private System.Windows.Forms.ToolStripSeparator splitToggle2;
+        private System.Windows.Forms.ToolStripMenuItem addChartToolStripMenuItem;
     }
 }

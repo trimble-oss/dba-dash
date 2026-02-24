@@ -1,11 +1,13 @@
 ﻿using DBADash;
 using DBADash.Messaging;
+using DBADashGUI.Charts;
 using DBADashGUI.CommunityTools;
 using DBADashGUI.Interface;
 using DBADashGUI.Messaging;
 using DBADashGUI.Performance;
 using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
+using LiveChartsCore.SkiaSharpView.WinForms;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
@@ -13,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -49,6 +52,13 @@ namespace DBADashGUI.CustomReports
 
         private const string ResultSetLabelControlName = "ResultLabel";
 
+        private ChartLayoutHelper chartLayoutHelper = new();
+
+        // Keep track of GridFilterChanged handlers so we can unsubscribe them when disposing/clearing
+        private readonly System.Collections.Generic.Dictionary<DBADashDataGridView, EventHandler> gridFilterHandlers = new();
+
+        private bool wasTableCollapsedBeforeMaximize = false;
+
         public CustomReportView()
         {
             Grids = new();
@@ -57,6 +67,67 @@ namespace DBADashGUI.CustomReports
             this.ApplyTheme();
             scriptDataTablesToolStripMenuItem.Click += (_, _) => ScriptDataTables(false);
             scriptGridsToolStripMenuItem.Click += (_, _) => ScriptDataTables(true);
+            chartLayoutHelper.PanelMaximizeChanged += ChartLayoutHelper_PanelMaximizeChanged;
+            // Ensure managed resources are cleaned up when the control is disposed
+            this.Disposed += (s, e) => DisposeManagedResources();
+            chartLayout.ColumnStyles.Clear();
+            chartLayout.ColumnCount = 1;
+            chartLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        }
+
+        private void DisposeManagedResources()
+        {
+            try
+            {
+                // Unsubscribe events from chartLayoutHelper
+                if (chartLayoutHelper != null)
+                {
+                    chartLayoutHelper.PanelMaximizeChanged -= ChartLayoutHelper_PanelMaximizeChanged;
+                }
+
+                // Dispose resize helper state via ChartLayoutHelper when appropriate
+                try
+                {
+                    chartLayoutHelper.DisposeTableLayoutWithResizablePanels(splitTablesCharts.Panel1, control =>
+                    {
+                        // If panels contain ToolStrip buttons with event handlers wired in this class, attempt to clear them
+                        if (control is Panel pnl)
+                        {
+                            foreach (var ts in pnl.Controls.OfType<ToolStrip>())
+                            {
+                                foreach (ToolStripItem item in ts.Items)
+                                {
+                                    // Remove any known event handlers by setting Click to null where possible
+                                    try { if (item is ToolStripButton btn) btn.Click -= Maximize_Click; } catch { }
+                                }
+                            }
+                        }
+                    });
+                }
+                catch { }
+
+                // Unsubscribe any grid handlers we registered
+                foreach (var kv in gridFilterHandlers.ToList())
+                {
+                    try
+                    {
+                        kv.Key.GridFilterChanged -= kv.Value;
+                    }
+                    catch { }
+                }
+                gridFilterHandlers.Clear();
+            }
+            catch { }
+        }
+
+        private void ChartLayoutHelper_PanelMaximizeChanged(object sender, ChartLayoutHelper.PanelMaximizeChangedEventArgs e)
+        {
+            if (e.IsMaximized)
+            {
+                wasTableCollapsedBeforeMaximize = splitTablesCharts.Panel2Collapsed;
+            }
+
+            splitTablesCharts.Panel2Collapsed = e.IsMaximized || wasTableCollapsedBeforeMaximize;
         }
 
         private void ScriptDataTables(bool fromGrid)
@@ -262,8 +333,8 @@ namespace DBADashGUI.CustomReports
         /// <param name="show">True = parameter prompt is visible.  False = Grid is visible</param>
         private void ShowParamPrompt(bool show)
         {
-            splitContainer1.Panel2Collapsed = !show;
-            splitContainer1.Panel1Collapsed = show;
+            splitResultsAndParams.Panel2Collapsed = !show;
+            splitResultsAndParams.Panel1Collapsed = show;
         }
 
         /// <summary>
@@ -520,6 +591,7 @@ namespace DBADashGUI.CustomReports
         }
 
         public List<DBADashDataGridView> Grids { get; }
+        public List<Control> Charts { get; } = new();
         private string previousSchema;
 
         private void ClearResults()
@@ -530,11 +602,22 @@ namespace DBADashGUI.CustomReports
                 grid.RowsAdded -= Dgv_RowsAdded;
                 grid.CellContentClick -= Dgv_CellContentClick;
                 grid.DataBindingComplete -= Dgv_DataBindingComplete;
-                grid.GridFilterChanged -= (sender, e) => { };
+                if (gridFilterHandlers.TryGetValue(grid, out var handler))
+                {
+                    grid.GridFilterChanged -= handler;
+                    gridFilterHandlers.Remove(grid);
+                }
                 grid.Dispose();
             }
-            splitContainer1.Panel1.Controls.Clear();
+            foreach (var chart in Charts)
+            {
+                chart.Dispose();
+            }
+            chartLayout.Controls.Clear();
+            chartLayout.RowStyles.Clear();
+            splitTablesCharts.Panel2.Controls.Clear();
             Grids.Clear();
+            Charts.Clear();
             previousSchema = string.Empty;
             UpdateClearFilter();
         }
@@ -547,11 +630,240 @@ namespace DBADashGUI.CustomReports
                 var table = reportDS.Tables[grid.ResultSetID];
                 grid.DataSource = new DataView(table, grid.RowFilter, grid.SortString, DataViewRowState.CurrentRows);
             }
+            for (int ci = 0; ci < Charts.Count; ci++)
+            {
+                var chart = Charts[ci];
+                if (chart == null || chart.IsDisposed)
+                {
+                    continue;
+                }
+                var chartWrapper = chart.Tag as CustomReportChart;
+                if (chartWrapper != null)
+                {
+                    var dt = reportDS.Tables[chartWrapper.TableIndex];
+                    var chartConfig = chartWrapper.Config;
+                    // If this is a CartesianChart, update in place
+                    if (chart is CartesianChart cchart && chartConfig is ChartConfiguration crc)
+                    {
+                        ChartHelper.UpdateChart(cchart, dt, crc);
+                    }
+                    else
+                    {
+                        // For non-cartesian controls (e.g., PieChart), recreate the control and replace it in the parent panel
+                        var parent = chart.Parent;
+                        try
+                        {
+                            var newChart = ChartHelper.GetChartControlFromDataTable(dt, chartConfig);
+                            newChart.Tag = chartWrapper;
+
+                            // Replace in the panel's controls keeping the ToolStrip in place
+                            var toolStrip = parent?.Controls.OfType<ToolStrip>().FirstOrDefault();
+                            parent?.Controls.Add(newChart);
+                            if (toolStrip != null)
+                            {
+                                // move newChart to be before the ToolStrip so layout matches CreateResizablePanel
+                                parent.Controls.SetChildIndex(newChart, parent.Controls.IndexOf(toolStrip));
+                            }
+
+                            // Dispose old chart and update our list reference
+                            chart.Dispose();
+                            Charts[ci] = newChart;
+                        }
+                        catch
+                        {
+                            // If replacement fails, ignore and continue
+                        }
+                    }
+                }
+            }
+        }
+
+        private void GetChartPanels()
+        {
+            if (Report.Charts == null || Report.Charts.Count == 0) return;
+            if (reportDS == null || reportDS.Tables.Count == 0) return;
+
+            var parentPanel = splitTablesCharts.Panel1;
+            var enableResize = Report.Charts.Count > 0;
+
+            // Determine layout: 1 col for up to 3 charts, 2 cols for 4-6, 3 cols for 7+.
+            var n = Report.Charts.Count;
+            int cols = n <= 3 ? 1 : (n <= 6 ? 2 : 3);
+            int rows = (n + cols - 1) / cols;
+
+            // Configure TableLayoutPanel
+            chartLayout.Controls.Clear();
+            chartLayout.ColumnStyles.Clear();
+            chartLayout.ColumnCount = cols;
+            for (int c = 0; c < cols; c++)
+            {
+                chartLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / cols));
+            }
+
+            chartLayout.RowStyles.Clear();
+            chartLayout.RowCount = rows;
+            for (int r = 0; r < rows; r++)
+            {
+                chartLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100f / rows));
+            }
+
+            // Generic spanning logic: compute occupancy grid and let the first chart span to use spare cells
+            var totalCells = rows * cols;
+            var spare = Math.Max(0, totalCells - Report.Charts.Count);
+            var firstSpan = Math.Min(cols, 1 + spare); // first chart occupies 1 + spare cells up to cols
+
+            // occupancy grid
+            var occupied = new bool[rows, cols];
+
+            // mark space for first chart
+            for (int c0 = 0; c0 < firstSpan && c0 < cols; c0++)
+            {
+                occupied[0, c0] = true;
+            }
+
+            // Create and place panels in row-major order
+            for (int idx = 0; idx < Report.Charts.Count; idx++)
+            {
+                var chartWrapper = Report.Charts[idx];
+                var chartConfig = chartWrapper.Config;
+                var chartId = idx;
+
+                if (reportDS.Tables.Count <= chartWrapper.TableIndex)
+                {
+                    Debug.WriteLine($"Warning: Chart configured for result set {chartWrapper.TableIndex} but report only returned {reportDS.Tables.Count} result sets.  Chart will be skipped.");
+                    continue;
+                }
+
+                var dt = reportDS.Tables[chartWrapper.TableIndex];
+                var chart = ChartHelper.GetChartControlFromDataTable(dt, chartConfig);
+                chart.Tag = chartWrapper;
+                var pnl = chartLayoutHelper.CreateResizablePanel(chart, chartId, enableResize, chartConfig.ChartTitle, panelName: $"chart_{chartId}");
+                var toolStrip = pnl?.Controls.OfType<ToolStrip>().FirstOrDefault();
+                if (toolStrip != null && Report.CanEditReport)
+                {
+                    var edit = new ToolStripMenuItem("Edit", Properties.Resources.SettingsOutline_16x);
+
+                    var configure = new ToolStripMenuItem("Configure", Properties.Resources.SettingsOutline_16x) { Tag = chartId };
+                    configure.Click += ConfigureChart_Click;
+                    edit.DropDownItems.Add(configure);
+
+                    if (chartId > 0)
+                    {
+                        var up = new ToolStripMenuItem("Move Up", Properties.Resources.arrow_Up_16xLG) { Tag = chartId };
+                        up.Click += MoveChartUp_Click;
+                        edit.DropDownItems.Add(up);
+                    }
+                    if (chartId < Report.Charts.Count - 1)
+                    {
+                        var down = new ToolStripMenuItem("Move Down", Properties.Resources.arrow_Down_16xLG) { Tag = chartId };
+                        down.Click += MoveChartDown_Click;
+                        edit.DropDownItems.Add(down);
+                    }
+
+                    var delete = new ToolStripMenuItem("Delete", Properties.Resources.Close_red_16x) { Tag = chartId };
+                    delete.Click += DeleteChart_Click;
+                    edit.DropDownItems.Add(delete);
+                    toolStrip.Items.Add(edit);
+                }
+
+                pnl.ApplyTheme();
+
+                Charts.Add(chart);
+
+                if (idx == 0)
+                {
+                    // place first spanning chart at top-left
+                    chartLayout.Controls.Add(pnl, 0, 0);
+                    if (firstSpan > 1)
+                    {
+                        try { chartLayout.SetColumnSpan(pnl, firstSpan); } catch { }
+                    }
+                }
+                else
+                {
+                    // find next free cell scanning row-major
+                    bool placed = false;
+                    for (int r = 0; r < rows && !placed; r++)
+                    {
+                        for (int c = 0; c < cols && !placed; c++)
+                        {
+                            if (!occupied[r, c])
+                            {
+                                occupied[r, c] = true;
+                                chartLayout.Controls.Add(pnl, c, r);
+                                placed = true;
+                            }
+                        }
+                    }
+
+                    // Fallback: if not placed (shouldn't happen) put at next sequential position
+                    if (!placed)
+                    {
+                        var frow = idx / cols;
+                        var fcol = idx % cols;
+                        chartLayout.Controls.Add(pnl, fcol, frow);
+                    }
+                }
+            }
+        }
+
+        private void MoveChartDown_Click(object sender, EventArgs e)
+        {
+            var mnu = sender as ToolStripMenuItem;
+            if (mnu == null) return;
+            var chartId = (int)mnu.Tag;
+            RepositionChart(chartId, chartId + 1);
+        }
+
+        private void RepositionChart(int chartId, int newIndex)
+        {
+            if (chartId >= Report.Charts.Count || newIndex >= Report.Charts.Count || chartId == newIndex || newIndex < 0) return;
+            var chart = Report.Charts[chartId];
+            Report.Charts.RemoveAt(chartId);
+            Report.Charts.Insert(newIndex, chart);
+            Report.Update();
+            previousSchema = null; // Force chart to be re-generated with new configuration
+            ShowTable();
+        }
+
+        private void MoveChartUp_Click(object sender, EventArgs e)
+        {
+            var mnu = sender as ToolStripMenuItem;
+            if (mnu == null) return;
+            var chartId = (int)mnu.Tag;
+            RepositionChart(chartId, chartId - 1);
+        }
+
+        private void DeleteChart_Click(object sender, EventArgs e)
+        {
+            var mnu = sender as ToolStripMenuItem;
+            if (mnu == null) return;
+            var chartId = (int)mnu.Tag;
+            if (chartId >= Report.Charts.Count) return;
+            if (MessageBox.Show("Confirm chart deletion?", "Delete Chart", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+            Report.Charts.RemoveAt(chartId);
+            Report.Update();
+            previousSchema = null; // Force chart to be re-generated with new configuration
+            ShowTable();
+        }
+
+        private async void ConfigureChart_Click(object sender, EventArgs e)
+        {
+            var mnu = sender as ToolStripMenuItem;
+            if (mnu == null) return;
+            var chartId = (int)mnu.Tag;
+            var frm = new ConfigureChart() { Report = Report, ReportDS = reportDS, ChartId = chartId };
+            await frm.ShowDialogAsync();
+            if (frm.DialogResult != DialogResult.OK) return;
+            Report.Update();
+            previousSchema = null; // Force chart to be re-generated with new configuration
+            ShowTable();
         }
 
         protected void ShowTable()
         {
             if (reportDS == null || reportDS.Tables.Count == 0) return;
+
             var currentSchema = reportDS.GetXmlSchema();
             if (currentSchema == previousSchema)
             {
@@ -562,9 +874,15 @@ namespace DBADashGUI.CustomReports
 
             const int minDataGridViewHeight = 100; // Minimum height for a DataGridView
             var maxDataGridViewHeight = Math.Max(300, this.Height / Math.Min(3, reportDS.Tables.Count)); // Allow table to take up to 1/3 (or half if there are 2 tables) of the form height with minimum size of 300.
-            var parentPanel = splitContainer1.Panel1;
+            var parentPanel = splitTablesCharts.Panel2;
             ClearResults();
             List<Panel> panels = new();
+            GetChartPanels();
+            tsToggleGrids.Visible = Charts.Count > 0;
+            tsToggleCharts.Visible = Charts.Count > 0;
+            splitToggle1.Visible = Charts.Count > 0;
+            splitToggle2.Visible = Charts.Count > 0;
+            splitTablesCharts.Panel1Collapsed = Charts.Count == 0 || !Report.ChartVisible;
             var i = ShowAllResults ? 0 : cboResults.SelectedIndex;
             var tables = ShowAllResults ? reportDS.Tables.Cast<DataTable>().ToArray() : new[] { reportDS.Tables[cboResults.SelectedIndex] };
             foreach (var table in tables)
@@ -600,6 +918,7 @@ namespace DBADashGUI.CustomReports
                     pnl.MouseUp += DataGridPanel_MouseUp;
                     pnl.MouseLeave += DataGridPanel_MouseLeave;
                 }
+
                 var customReportResults = Report.CustomReportResults[i];
                 dgv.AddColumns(table, customReportResults);
                 dgv.DataBindingComplete += Dgv_DataBindingComplete;
@@ -616,7 +935,7 @@ namespace DBADashGUI.CustomReports
                 Grids.Add(dgv);
                 panels.Add(pnl);
 
-                if (tables.Length > 1)
+                if (tables.Length > 1 || panels.Count > 0)
                 {
                     var ts = new ToolStrip() { Dock = DockStyle.Top };
                     ts.Items.Add(new ToolStripButton("+", null, Maximize_Click)
@@ -662,25 +981,26 @@ namespace DBADashGUI.CustomReports
                             });
                     ts.ApplyTheme();
                     pnl.Controls.AddRange(new Control[] { dgv, ts });
-                    dgv.GridFilterChanged += (sender, e) =>
+                    EventHandler gridFilterHandler = (sender, e) =>
                     {
                         clearFilterMenuItem.Enabled = !string.IsNullOrEmpty(dgv.RowFilter);
                         clearFilterMenuItem.Font = new Font(clearFilterMenuItem.Font, clearFilterMenuItem.Enabled ? FontStyle.Bold : FontStyle.Regular);
                         UpdateClearFilter();
                     };
+                    dgv.GridFilterChanged += gridFilterHandler;
+                    gridFilterHandlers[dgv] = gridFilterHandler;
                 }
                 else
                 {
                     pnl.Controls.Add(dgv);
-                    dgv.GridFilterChanged += (sender, e) =>
-                    {
-                        UpdateClearFilter();
-                    };
+                    EventHandler gridFilterHandler = (sender, e) => { UpdateClearFilter(); };
+                    dgv.GridFilterChanged += gridFilterHandler;
+                    gridFilterHandlers[dgv] = gridFilterHandler;
                 }
                 i += 1;
             }
             parentPanel.Controls.AddRange(panels.OrderByDescending(p => (int)p.Tag!).Cast<Control>().ToArray());
-
+            splitTablesCharts.Panel2Collapsed = !Report.TableVisible;
             OnPostGridRefresh();
             previousSchema = currentSchema;
         }
@@ -752,14 +1072,17 @@ namespace DBADashGUI.CustomReports
 
         private void Maximize_Click(object sender, EventArgs e)
         {
-            foreach (var panel in splitContainer1.Panel1.Controls.OfType<Panel>())
+            foreach (var panel in splitTablesCharts.Panel1.Controls.OfType<Panel>().Union(splitTablesCharts.Panel2.Controls.OfType<Panel>()))
             {
-                if (panel.Controls[1] is ToolStrip ts && ts.Items[0] is ToolStripButton tsb && tsb == sender)
+                var ts = panel.Controls.OfType<ToolStrip>().FirstOrDefault();
+                if (ts != null && ts.Items.Cast<object>().Any(itm => itm == sender))
                 {
                     panel.Dock = DockStyle.Fill;
                     ts.Items[0].Text = "-";
                     ts.Items[0].Click -= Maximize_Click;
                     ts.Items[0].Click += Minimize_Click;
+                    splitTablesCharts.Panel1Collapsed = panel.Parent == splitTablesCharts.Panel2;
+                    splitTablesCharts.Panel2Collapsed = panel.Parent == splitTablesCharts.Panel1;
                 }
                 else
                 {
@@ -770,9 +1093,10 @@ namespace DBADashGUI.CustomReports
 
         private void Minimize_Click(object sender, EventArgs e)
         {
-            foreach (var panel in splitContainer1.Panel1.Controls.OfType<Panel>())
+            foreach (var panel in splitTablesCharts.Panel1.Controls.OfType<Panel>().Union(splitTablesCharts.Panel2.Controls.OfType<Panel>()))
             {
-                if (panel.Controls[1] is ToolStrip ts && ts.Items[0] is ToolStripButton tsb && tsb == sender)
+                var ts = panel.Controls.OfType<ToolStrip>().FirstOrDefault();
+                if (ts != null && ts.Items.Cast<object>().Any(itm => itm == sender))
                 {
                     panel.Dock = DockStyle.Top;
                     ts.Items[0].Text = "+";
@@ -784,6 +1108,8 @@ namespace DBADashGUI.CustomReports
                     panel.Visible = true;
                 }
             }
+            splitTablesCharts.Panel1Collapsed = Charts.Count == 0;
+            splitTablesCharts.Panel2Collapsed = false;
         }
 
         protected virtual void OnPostGridRefresh()
@@ -1343,6 +1669,8 @@ namespace DBADashGUI.CustomReports
             {
                 Report.CustomReportResults[dgv.ResultSetID].ColumnLayout = dgv.GetColumnLayout();
             }
+            Report.ChartVisible = !splitTablesCharts.Panel1Collapsed;
+            Report.TableVisible = !splitTablesCharts.Panel2Collapsed;
             Report.Update();
         }
 
@@ -1603,6 +1931,32 @@ namespace DBADashGUI.CustomReports
         private void Reset_Click(object sender, EventArgs e)
         {
             previousSchema = null;
+            ShowTable();
+        }
+
+        private void ToggleCharts_Click(object sender, EventArgs e)
+        {
+            if (Charts.Count == 0) return;
+            splitTablesCharts.Panel1Collapsed = !splitTablesCharts.Panel1Collapsed;
+            if (!splitTablesCharts.Panel1Collapsed)
+            {
+                GetChartPanels();
+            }
+        }
+
+        private void ToggleGrids(object sender, EventArgs e)
+        {
+            splitTablesCharts.Panel2Collapsed = !splitTablesCharts.Panel2Collapsed;
+        }
+
+        private async void AddChartToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var frm = new ConfigureChart() { Report = Report, ReportDS = reportDS };
+            await frm.ShowDialogAsync();
+            if (frm.DialogResult != DialogResult.OK) return;
+            Report.ChartVisible = true;
+            Report.Update();
+            previousSchema = null; // Force re-generation of grids and charts
             ShowTable();
         }
     }
