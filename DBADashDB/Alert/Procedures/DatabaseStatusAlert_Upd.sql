@@ -61,7 +61,10 @@ AND D.IsActive = 1
 
 EXEC Alert.ActiveAlerts_Upd @AlertDetails = @AlertDetails, @AlertType = @Type, @ResolveAlertsOfType = 0
 
-/* Resolve alerts for databases that are now ONLINE or have been removed */
+/* Resolve alerts when the trigger condition no longer holds:
+   - Database is back ONLINE (state = 0)
+   - Database was dropped (IsActive = 0)
+   - Database was renamed (old name no longer exists in dbo.Databases) */
 UPDATE AA
 		SET ResolvedDate  = SYSUTCDATETIME(),
 		IsResolved    = 1,
@@ -71,11 +74,12 @@ UPDATE AA
 		UpdatedDate   = SYSUTCDATETIME()
 FROM Alert.ActiveAlerts AA
 WHERE AA.AlertType = @Type
-AND EXISTS(
+AND NOT EXISTS(
 	SELECT 1
 	FROM dbo.Databases D
 	WHERE D.InstanceID = AA.InstanceID
 	AND D.name = STUFF(AA.AlertKey, 1, LEN(@AlertKeyPrefix), '')
-	AND (D.state = 0 OR D.IsActive = 0)	/* back online or removed */
+	AND D.state <> 0
+	AND D.IsActive = 1
 )
 AND AA.IsResolved = 0
