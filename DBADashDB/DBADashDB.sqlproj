@@ -819,6 +819,7 @@
     <Build Include="dbo\Stored Procedures\PurgeOfflineInstances.sql" />
     <Build Include="Alert\Procedures\OfflineAlert_Upd.sql" />
     <Build Include="Alert\Procedures\RestartAlert_Upd.sql" />
+    <Build Include="Alert\Procedures\DatabaseStatusAlert_Upd.sql" />
     <Build Include="dbo\Tables\RepositoryMetricsConfig.sql" />
     <Build Include="dbo\Stored Procedures\RepositoryMetricsConfig_Get.sql" />
     <Build Include="dbo\Stored Procedures\RepositoryMetricsConfig_Upd.sql" />
