@@ -35,6 +35,7 @@
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCancel = new System.Windows.Forms.ToolStripButton();
             tsCopy = new System.Windows.Forms.ToolStripButton();
+            tsParams = new System.Windows.Forms.ToolStripDropDownButton();
             tsExcel = new System.Windows.Forms.ToolStripButton();
             tsCols = new System.Windows.Forms.ToolStripButton();
             tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
@@ -50,7 +51,6 @@
             cboResults = new System.Windows.Forms.ToolStripComboBox();
             lblSelectResults = new System.Windows.Forms.ToolStripLabel();
             toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            tsParams = new System.Windows.Forms.ToolStripDropDownButton();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             tsScriptResults = new System.Windows.Forms.ToolStripDropDownButton();
             scriptDataTablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -76,6 +76,11 @@
             lblURL = new System.Windows.Forms.ToolStripStatusLabel();
             lblDescription = new System.Windows.Forms.ToolStripStatusLabel();
             timer1 = new System.Windows.Forms.Timer(components);
+            chartLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            topToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            bottomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            leftToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            rightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStrip1.SuspendLayout();
             pnlParams.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitParams).BeginInit();
@@ -147,6 +152,16 @@
             tsCopy.Text = "Copy";
             tsCopy.Click += Copy_Click;
             // 
+            // tsParams
+            // 
+            tsParams.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsParams.Image = Properties.Resources.ReportParameter_16x;
+            tsParams.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsParams.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            tsParams.Name = "tsParams";
+            tsParams.Size = new System.Drawing.Size(34, 24);
+            tsParams.Text = "Parameters";
+            // 
             // tsExcel
             // 
             tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -172,7 +187,7 @@
             // tsConfigure
             // 
             tsConfigure.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { addChartToolStripMenuItem, associateCollectionToolStripMenuItem, editPickersToolStripMenuItem, renameResultSetToolStripMenuItem, resetLayoutToolStripMenuItem, saveLayoutToolStripMenuItem, scriptReportToolStripMenuItem, setDescriptionToolStripMenuItem, setTitleToolStripMenuItem });
+            tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { addChartToolStripMenuItem, associateCollectionToolStripMenuItem, chartLocationToolStripMenuItem, editPickersToolStripMenuItem, renameResultSetToolStripMenuItem, resetLayoutToolStripMenuItem, saveLayoutToolStripMenuItem, scriptReportToolStripMenuItem, setDescriptionToolStripMenuItem, setTitleToolStripMenuItem });
             tsConfigure.Image = Properties.Resources.SettingsOutline_16x;
             tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsConfigure.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
@@ -281,16 +296,6 @@
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
             toolStripSeparator2.Size = new System.Drawing.Size(6, 31);
-            // 
-            // tsParams
-            // 
-            tsParams.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsParams.Image = Properties.Resources.ReportParameter_16x;
-            tsParams.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsParams.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
-            tsParams.Name = "tsParams";
-            tsParams.Size = new System.Drawing.Size(34, 24);
-            tsParams.Text = "Parameters";
             // 
             // toolStripSeparator1
             // 
@@ -544,6 +549,45 @@
             timer1.Interval = 1000;
             timer1.Tick += Timer1_Tick;
             // 
+            // chartLocationToolStripMenuItem
+            // 
+            chartLocationToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { topToolStripMenuItem, bottomToolStripMenuItem, leftToolStripMenuItem, rightToolStripMenuItem });
+            chartLocationToolStripMenuItem.Name = "chartLocationToolStripMenuItem";
+            chartLocationToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            chartLocationToolStripMenuItem.Text = "Chart Location";
+            // 
+            // topToolStripMenuItem
+            // 
+            topToolStripMenuItem.Name = "topToolStripMenuItem";
+            topToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            topToolStripMenuItem.Tag = "Top";
+            topToolStripMenuItem.Text = "Top";
+            topToolStripMenuItem.Click += SetChartLocation;
+            // 
+            // bottomToolStripMenuItem
+            // 
+            bottomToolStripMenuItem.Name = "bottomToolStripMenuItem";
+            bottomToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            bottomToolStripMenuItem.Tag = "Bottom";
+            bottomToolStripMenuItem.Text = "Bottom";
+            bottomToolStripMenuItem.Click += SetChartLocation;
+            // 
+            // leftToolStripMenuItem
+            // 
+            leftToolStripMenuItem.Name = "leftToolStripMenuItem";
+            leftToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            leftToolStripMenuItem.Tag = "Left";
+            leftToolStripMenuItem.Text = "Left";
+            leftToolStripMenuItem.Click += SetChartLocation;
+            // 
+            // rightToolStripMenuItem
+            // 
+            rightToolStripMenuItem.Name = "rightToolStripMenuItem";
+            rightToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            rightToolStripMenuItem.Tag = "Right";
+            rightToolStripMenuItem.Text = "Right";
+            rightToolStripMenuItem.Click += SetChartLocation;
+            // 
             // CustomReportView
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -622,5 +666,10 @@
         private System.Windows.Forms.ToolStripSeparator splitToggle1;
         private System.Windows.Forms.ToolStripSeparator splitToggle2;
         private System.Windows.Forms.ToolStripMenuItem addChartToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem chartLocationToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem topToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem bottomToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem leftToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem rightToolStripMenuItem;
     }
 }
