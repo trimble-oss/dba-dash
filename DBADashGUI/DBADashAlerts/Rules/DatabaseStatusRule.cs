@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.ComponentModel;
+using Newtonsoft.Json;
 
 namespace DBADashGUI.DBADashAlerts.Rules
 {
@@ -19,6 +21,25 @@ namespace DBADashGUI.DBADashAlerts.Rules
         [Description("Database name to apply to. Supports LIKE syntax. Leave blank to apply to all databases.")]
         [DisplayName("Database Name"), Category("Filters")]
         public string DatabaseName { get; set; }
+
+        [Description("States to exclude from alerting. Empty list uses defaults: ONLINE (0), OFFLINE_SECONDARY (10). " +
+                     "State values: 0=ONLINE, 1=RESTORING, 2=RECOVERING, 3=RECOVERY_PENDING, " +
+                     "4=SUSPECT, 5=EMERGENCY, 6=OFFLINE, 7=COPYING, 10=OFFLINE_SECONDARY")]
+        [DisplayName("Excluded States"), Category("Filters")]
+        public List<int> ExcludedStates { get; set; }
+
+        /// <summary>New rule: pre-populate defaults so the user sees them in the PropertyGrid.</summary>
+        public DatabaseStatusRule()
+        {
+            ExcludedStates = new List<int> { 0, 10 };
+        }
+
+        /// <summary>Deserialization: receives ExcludedStates directly from JSON, bypassing the new-rule default.</summary>
+        [JsonConstructor]
+        private DatabaseStatusRule(List<int> excludedStates)
+        {
+            ExcludedStates = excludedStates ?? new List<int>();
+        }
 
         public override (bool isValid, string message) Validate()
         {

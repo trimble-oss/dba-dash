@@ -20,6 +20,7 @@ CREATE TABLE #DatabaseStatusApplicable(
 	InstanceID INT NOT NULL,
 	Priority TINYINT NOT NULL,
 	DatabaseName NVARCHAR(128) COLLATE DATABASE_DEFAULT NULL,
+	ExcludedStates NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NULL,
 	RuleID INT NOT NULL
 )
 
@@ -28,11 +29,16 @@ INSERT INTO #DatabaseStatusApplicable(
 	InstanceID,
 	Priority,
 	DatabaseName,
+	ExcludedStates,
 	RuleID
 )
 SELECT I.InstanceID,
 		R.Priority,
 		NULLIF(JSON_VALUE(R.Details,'$.DatabaseName'),'') AS DatabaseName,
+		CASE
+			WHEN JSON_VALUE(R.Details,'$.ExcludedStates[0]') IS NULL THEN '[0,10]'
+			ELSE JSON_QUERY(R.Details,'$.ExcludedStates')
+		END AS ExcludedStates,
 		R.RuleID
 FROM Alert.Rules R
 CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID, R.ApplyToInstanceID, R.AlertKey, R.ApplyToHidden) I
@@ -56,13 +62,13 @@ SELECT D.InstanceID,
 FROM dbo.Databases D
 JOIN #DatabaseStatusApplicable DSA ON D.InstanceID = DSA.InstanceID
 		AND (D.name LIKE DSA.DatabaseName OR DSA.DatabaseName IS NULL)
-WHERE D.state <> 0	/* not ONLINE */
-AND D.IsActive = 1
+WHERE D.IsActive = 1
+AND NOT EXISTS(SELECT 1 FROM OPENJSON(DSA.ExcludedStates) WHERE CAST(value AS INT) = D.state)
 
 EXEC Alert.ActiveAlerts_Upd @AlertDetails = @AlertDetails, @AlertType = @Type, @ResolveAlertsOfType = 0
 
 /* Resolve alerts when the trigger condition no longer holds:
-   - Database is back ONLINE (state = 0)
+   - Database is back in an excluded state (state is in ExcludedStates)
    - Database was dropped (IsActive = 0)
    - Database was renamed (old name no longer exists in dbo.Databases) */
 UPDATE AA
@@ -79,7 +85,6 @@ AND NOT EXISTS(
 	FROM dbo.Databases D
 	WHERE D.InstanceID = AA.InstanceID
 	AND D.name = STUFF(AA.AlertKey, 1, LEN(@AlertKeyPrefix), '')
-	AND D.state <> 0
 	AND D.IsActive = 1
 )
 AND AA.IsResolved = 0
