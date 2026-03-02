@@ -14,6 +14,7 @@ using Humanizer;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using System;
+using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -98,9 +99,11 @@ namespace DBADashGUI
         private readonly CommandLineOptions commandLine;
         private readonly List<int> commandLineTags = new();
         private TabPage[] AllTabs;
+
         // Track which theme has been applied to each TabPage to avoid
         // re-theming tabs unnecessarily (costly and can cause flicker).
         private readonly Dictionary<TabPage, ThemeType> _tabThemeApplied = new();
+
         private CustomReports.CustomReports customReports = new();
         private readonly Dictionary<ProcedureExecutionMessage.CommunityProcs, TabPage> CommunityToolsTabPages = new Dictionary<ProcedureExecutionMessage.CommunityProcs, TabPage>();
         private Dictionary<string, TabPage> CustomToolsTabs = new Dictionary<string, TabPage>();
@@ -177,6 +180,31 @@ namespace DBADashGUI
         private int currentPageSize = 100;
         private readonly DiffControl diffSchemaSnapshot = new();
         private bool suppressLoadTab;
+
+        // Win32 message for enabling/disabling redraw to avoid flicker when
+        // making bulk updates to controls (eg. clearing and re-adding TabPages)
+        private const int WM_SETREDRAW = 0x000B;
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr SendMessage(IntPtr hWnd, int wMsg, IntPtr wParam, IntPtr lParam);
+
+        private static void SuspendDrawing(Control c)
+        {
+            if (c.IsHandleCreated)
+            {
+                SendMessage(c.Handle, WM_SETREDRAW, IntPtr.Zero, IntPtr.Zero);
+            }
+        }
+
+        private static void ResumeDrawing(Control c)
+        {
+            if (c.IsHandleCreated)
+            {
+                SendMessage(c.Handle, WM_SETREDRAW, new IntPtr(1), IntPtr.Zero);
+                c.Invalidate(true);
+                c.Refresh();
+            }
+        }
 
         private bool CurrentTabSupportsDayOfWeekFilter =>
             (new List<TabPage>()
@@ -1126,23 +1154,20 @@ namespace DBADashGUI
 
             var suppress = suppressLoadTab;
             suppressLoadTab = true; // Don't Load tab while adding/removing tabs
+            // Capture the currently selected tab so we can tell if it was removed
+            // by the allowedTabs update and choose a fallback selection.
+            var prevSelectedTab = tabs.SelectedTab;
             var n = tv1.SelectedSQLTreeItem();
             tabAzureDB.Text = n.Type == SQLTreeItem.TreeType.ElasticPool ? "Pool" : "Azure DB";
             var allowedTabs = GetAllowedTabs();
 
             Text = n.FriendlyFullPath;
 
-            // Check if Tab pages match tabs currently loaded
-            var validatedTabs = allowedTabs.Count == tabs.TabPages.Count && tabs.TabPages.Cast<TabPage>().All(t => allowedTabs.Contains(t));
-
-            // If tab pages don't match, clear tabs and reload
-            if (!validatedTabs)
-            {
-                tabs.TabPages.Clear();
-                tabs.TabPages.AddRange(allowedTabs.ToArray());
-            }
+            // Update the TabControl to match the allowed tabs (diff update)
+            RefreshTabPages(allowedTabs, prevSelectedTab);
 
             suppressLoadTab = suppress; // Return tab load suppression back to previous value
+
             LoadSelectedTab();
         }
 
@@ -2586,6 +2611,95 @@ namespace DBADashGUI
             cboTimeZone.BackColor = theme.TimeZoneBackColor;
             cboTimeZone.ForeColor = theme.TimeZoneForeColor;
             cboTimeZone.FlatStyle = FlatStyle.Flat;
+        }
+
+        // Extracted helper to keep Tv1_AfterSelect concise. Performs a minimal
+        // diff update of the TabControl pages while avoiding flicker.
+        private void RefreshTabPages(List<TabPage> allowedTabs, TabPage prevSelectedTab)
+        {
+            // Quick-check: if nothing to do, return
+            var validatedTabs = allowedTabs.Count == tabs.TabPages.Count && tabs.TabPages.Cast<TabPage>().All(t => allowedTabs.Contains(t));
+            if (validatedTabs) return;
+
+            var prevVisible = tabs.Visible;
+            try
+            {
+                ShowRefresh(true); // use existing overlay to mask updates
+                tabs.SuspendLayout();
+                SuspendDrawing(tabs);
+
+                // Apply theme to TabControl itself
+                var theme = DBADashUser.SelectedTheme;
+                try { tabs.ApplyTheme(theme); tabs.BackColor = theme.TabBackColor; } catch { }
+
+                // Pre-apply theme to candidate pages
+                foreach (var t in allowedTabs)
+                {
+                    try
+                    {
+                        if (!_tabThemeApplied.TryGetValue(t, out var applied) || applied != DBADashUser.SelectedTheme.ThemeIdentifier)
+                        {
+                            t.ApplyTheme();
+                            _tabThemeApplied[t] = DBADashUser.SelectedTheme.ThemeIdentifier;
+                        }
+                    }
+                    catch { }
+                }
+
+                // Remove pages not allowed
+                var current = tabs.TabPages.Cast<TabPage>().ToList();
+                foreach (var p in current.Where(p => !allowedTabs.Contains(p)).ToList())
+                {
+                    try { tabs.TabPages.Remove(p); } catch { }
+                }
+
+                // Insert or reposition pages to match allowed order
+                for (int i = 0; i < allowedTabs.Count; i++)
+                {
+                    var page = allowedTabs[i];
+                    if (!tabs.TabPages.Contains(page))
+                    {
+                        try { tabs.TabPages.Insert(i, page); } catch { tabs.TabPages.Add(page); }
+                    }
+                    else
+                    {
+                        var idx = tabs.TabPages.IndexOf(page);
+                        if (idx != i)
+                        {
+                            tabs.TabPages.Remove(page);
+                            tabs.TabPages.Insert(i, page);
+                        }
+                    }
+                }
+
+                // Ensure handle-dependent theming (ToolStrip renderers etc.)
+                foreach (TabPage t in tabs.TabPages)
+                {
+                    try
+                    {
+                        t.CreateControl();
+                        t.ApplyTheme();
+                        foreach (var ts in t.Controls.OfType<ToolStrip>())
+                        {
+                            try { ts.Invalidate(); ts.Refresh(); } catch { }
+                        }
+                    }
+                    catch { }
+                }
+
+                // If previously selected tab was removed, pick the first available
+                if (prevSelectedTab != null && !tabs.TabPages.Cast<TabPage>().Contains(prevSelectedTab))
+                {
+                    if (tabs.TabPages.Count > 0) tabs.SelectedIndex = 0;
+                }
+            }
+            finally
+            {
+                ResumeDrawing(tabs);
+                tabs.ResumeLayout();
+                tabs.Visible = prevVisible;
+                ShowRefresh(false);
+            }
         }
     }
 }
