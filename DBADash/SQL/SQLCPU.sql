@@ -12,7 +12,6 @@ BEGIN
 		CAST(avg_cpu_percent AS INT),
 		100-CAST(avg_cpu_percent AS INT) AS SystemIdle
 	FROM sys.dm_db_resource_stats
-	ORDER BY end_time DESC
 END
 ELSE
 BEGIN
