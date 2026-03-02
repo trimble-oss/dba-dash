@@ -33,6 +33,18 @@ namespace DBADashGUI.Charts
         public string ValueColumn { get; init; }
 
         /// <summary>
+        /// When true, the pie slice values will be the count of rows for each category
+        /// instead of summing a numeric ValueColumn. Mutually exclusive with ValueColumn.
+        /// </summary>
+        public bool CountRows { get; init; } = false;
+
+        /// <summary>
+        /// Label to use for rows where the CategoryColumn is null or DBNull. Defaults to "(null)".
+        /// When set to null or whitespace, the default "(null)" will be used.
+        /// </summary>
+        public string NullCategoryLabel { get; init; } = "(null)";
+
+        /// <summary>
         /// Inner radius for donut charts (0..1 where 1 would be fully hollow). Default 0.5 when IsDonut is true.
         /// </summary>
         public double? InnerRadius { get; init; }
@@ -61,16 +73,24 @@ namespace DBADashGUI.Charts
             var errors = new List<string>();
 
             var hasMetricColumns = MetricColumns != null && MetricColumns.Length > 0;
-            var hasCategoryAndValue = !string.IsNullOrWhiteSpace(CategoryColumn) && !string.IsNullOrWhiteSpace(ValueColumn);
+            var hasCategory = !string.IsNullOrWhiteSpace(CategoryColumn);
+            var hasValue = !string.IsNullOrWhiteSpace(ValueColumn);
+            var hasCategoryAndValue = hasCategory && hasValue;
+            var hasCategoryAndCount = hasCategory && CountRows;
 
-            if (!hasMetricColumns && !hasCategoryAndValue)
+            if (!hasMetricColumns && !hasCategoryAndValue && !hasCategoryAndCount)
             {
-                errors.Add("Pie charts require either MetricColumns or CategoryColumn+ValueColumn.");
+                errors.Add("Pie charts require either MetricColumns, CategoryColumn+ValueColumn, or CategoryColumn with CountRows=true.");
             }
 
-            if (hasMetricColumns && hasCategoryAndValue)
+            if (hasMetricColumns && (hasCategoryAndValue || hasCategoryAndCount))
             {
-                errors.Add("MetricColumns and CategoryColumn+ValueColumn are mutually exclusive for pie charts.");
+                errors.Add("MetricColumns and CategoryColumn+ValueColumn/CountRows are mutually exclusive for pie charts.");
+            }
+
+            if (hasCategoryAndCount && hasValue)
+            {
+                errors.Add("CountRows and ValueColumn are mutually exclusive. When CountRows is true, do not set ValueColumn.");
             }
 
             if (InnerRadius.HasValue && (InnerRadius < 0 || InnerRadius > 1))

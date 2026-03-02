@@ -71,6 +71,7 @@
             txtXLabel = new System.Windows.Forms.TextBox();
             bttnAdd = new System.Windows.Forms.Button();
             bttnCancel = new System.Windows.Forms.Button();
+            chkCountRows = new System.Windows.Forms.CheckBox();
             tabConfig.SuspendLayout();
             tabData.SuspendLayout();
             tabPieData.SuspendLayout();
@@ -186,7 +187,7 @@
             tabConfig.Location = new System.Drawing.Point(25, 123);
             tabConfig.Name = "tabConfig";
             tabConfig.SelectedIndex = 0;
-            tabConfig.Size = new System.Drawing.Size(453, 280);
+            tabConfig.Size = new System.Drawing.Size(494, 280);
             tabConfig.TabIndex = 7;
             // 
             // tabData
@@ -207,6 +208,7 @@
             // 
             // tabPieData
             // 
+            tabPieData.Controls.Add(chkCountRows);
             tabPieData.Controls.Add(numRadius);
             tabPieData.Controls.Add(label16);
             tabPieData.Controls.Add(chkDoughnut);
@@ -217,7 +219,7 @@
             tabPieData.Location = new System.Drawing.Point(4, 29);
             tabPieData.Name = "tabPieData";
             tabPieData.Padding = new System.Windows.Forms.Padding(3);
-            tabPieData.Size = new System.Drawing.Size(445, 247);
+            tabPieData.Size = new System.Drawing.Size(486, 247);
             tabPieData.TabIndex = 1;
             tabPieData.Text = "Pie";
             tabPieData.UseVisualStyleBackColor = true;
@@ -483,6 +485,17 @@
             bttnCancel.UseVisualStyleBackColor = true;
             bttnCancel.Click += Cancel_Click;
             // 
+            // chkCountRows
+            // 
+            chkCountRows.AutoSize = true;
+            chkCountRows.Location = new System.Drawing.Point(363, 45);
+            chkCountRows.Name = "chkCountRows";
+            chkCountRows.Size = new System.Drawing.Size(109, 24);
+            chkCountRows.TabIndex = 9;
+            chkCountRows.Text = "Count Rows";
+            chkCountRows.UseVisualStyleBackColor = true;
+            chkCountRows.CheckedChanged += CountRows_CheckedChanged;
+            // 
             // ConfigureChart
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -558,5 +571,6 @@
         private System.Windows.Forms.NumericUpDown numRadius;
         private System.Windows.Forms.Button bttnAdd;
         private System.Windows.Forms.Button bttnCancel;
+        private System.Windows.Forms.CheckBox chkCountRows;
     }
 }

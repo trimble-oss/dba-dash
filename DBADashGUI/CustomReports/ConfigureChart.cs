@@ -251,6 +251,7 @@ namespace DBADashGUI.CustomReports
                     else
                         cboPieValueColumn.Text = pie.ValueColumn;
                 }
+                chkCountRows.Checked = pie.CountRows;
             }
             else if (config is ChartConfiguration cfg)
             {
@@ -475,8 +476,9 @@ namespace DBADashGUI.CustomReports
             {
                 return new PieChartConfiguration
                 {
-                    ValueColumn = cboPieValueColumn.SelectedValue.ToString(),
+                    ValueColumn = chkCountRows.Checked || cboPieValueColumn.SelectedValue == null ? null : cboPieValueColumn.SelectedValue.ToString(),
                     CategoryColumn = cboPieCategory.SelectedValue.ToString(),
+                    CountRows = chkCountRows.Checked,
                     ChartTitle = txtTitle.Text,
                     LegendPosition = cboLegend.SelectedValue as LegendPosition? ?? LegendPosition.Bottom,
                     InnerRadius = chkDoughnut.Checked ? Convert.ToDouble(numRadius.Value / 100) : 0,
@@ -533,9 +535,9 @@ namespace DBADashGUI.CustomReports
 
         private void Add_Click(object sender, EventArgs e)
         {
-            var config = GetChartConfiguration();
             try
             {
+                var config = GetChartConfiguration();
                 config.Validate();
                 var chart = new CustomReportChart() { Config = config, TableIndex = (int)cboResults.SelectedValue };
                 if (ChartId.HasValue)
@@ -558,6 +560,11 @@ namespace DBADashGUI.CustomReports
         private void Cancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
+        }
+
+        private void CountRows_CheckedChanged(object sender, EventArgs e)
+        {
+            cboPieValueColumn.Enabled = !chkCountRows.Checked;
         }
     }
 }
