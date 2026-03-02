@@ -79,6 +79,33 @@ namespace DBADashGUI.Charts
             containerPanel.Controls.Clear();
         }
 
+        /// <summary>
+        /// Disable resizing for panels hosted in the specified TableLayoutPanel and optionally
+        /// unhook any control events, without disposing the table layout or its child controls.
+        /// This is intended for scenarios where the TableLayoutPanel is designer-owned and
+        /// should not be disposed.
+        /// </summary>
+        public void DisableResizingAndUnhookTableLayout(TableLayoutPanel tableLayout, Action<Control> unhookControlEvents = null)
+        {
+            if (tableLayout == null) return;
+
+            foreach (Control control in tableLayout.Controls.OfType<Control>().ToArray())
+            {
+                if (control is Panel panel)
+                {
+                    try { resizeHelper.DisableResizing(panel); } catch { }
+                }
+
+                if (unhookControlEvents != null)
+                {
+                    try { UnhookControlsRecursively(control, unhookControlEvents); } catch { }
+                }
+            }
+
+            // Clear any saved state for this table layout to avoid restoring stale positions
+            ClearState(tableLayout);
+        }
+
         private static string GetControlKey(Control ctrl)
         {
             if (ctrl == null) return null;

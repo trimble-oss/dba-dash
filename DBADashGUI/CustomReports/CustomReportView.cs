@@ -11,6 +11,7 @@ using LiveChartsCore.SkiaSharpView.WinForms;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -59,6 +60,35 @@ namespace DBADashGUI.CustomReports
 
         private bool wasTableCollapsedBeforeMaximize = false;
 
+        // Map chart location to the appropriate split panel.
+        // For Top or Left charts we host them in Panel1; for Bottom or Right use Panel2.
+        private Panel ChartPanel => Report != null && Report.ChartLocation is CustomReport.ChartLocations.Top or CustomReport.ChartLocations.Left ? splitTablesCharts.Panel1 : splitTablesCharts.Panel2;
+
+        private Panel TablePanel => Report != null && ChartPanel == splitTablesCharts.Panel1 ? splitTablesCharts.Panel2 : splitTablesCharts.Panel1;
+
+        // Helpers to set collapsed state on the underlying split panels depending on which side
+        private void SetChartPanelCollapsed(bool collapsed)
+        {
+            if (splitTablesCharts.Panel1 == ChartPanel) splitTablesCharts.Panel1Collapsed = collapsed;
+            else splitTablesCharts.Panel2Collapsed = collapsed;
+        }
+
+        private void SetTablePanelCollapsed(bool collapsed)
+        {
+            if (splitTablesCharts.Panel1 == TablePanel) splitTablesCharts.Panel1Collapsed = collapsed;
+            else splitTablesCharts.Panel2Collapsed = collapsed;
+        }
+
+        private bool IsChartPanelCollapsed()
+        {
+            return splitTablesCharts.Panel1 == ChartPanel ? splitTablesCharts.Panel1Collapsed : splitTablesCharts.Panel2Collapsed;
+        }
+
+        private bool IsTablePanelCollapsed()
+        {
+            return splitTablesCharts.Panel1 == TablePanel ? splitTablesCharts.Panel1Collapsed : splitTablesCharts.Panel2Collapsed;
+        }
+
         public CustomReportView()
         {
             Grids = new();
@@ -84,38 +114,134 @@ namespace DBADashGUI.CustomReports
                 {
                     chartLayoutHelper.PanelMaximizeChanged -= ChartLayoutHelper_PanelMaximizeChanged;
                 }
+                // Perform UI cleanup (dispose controls, unhook handlers)
+                CleanupUI();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"DisposeManagedResources error: {ex}");
+            }
+        }
 
-                // Dispose resize helper state via ChartLayoutHelper when appropriate
+        // Centralized cleanup routine used by ClearResults and DisposeManagedResources to avoid duplication
+        private void CleanupUI()
+        {
+            try
+            {
+                // If the designer-owned TableLayoutPanel (`chartLayout`) exists, disable resizing and
+                // unhook events for its child panels without disposing the TableLayoutPanel itself.
+                // If `chartLayout` is not available, fall back to disposing any table layouts found in the split panels.
                 try
                 {
-                    chartLayoutHelper.DisposeTableLayoutWithResizablePanels(splitTablesCharts.Panel1, control =>
+                    Action<Control> unhook = control =>
                     {
-                        // If panels contain ToolStrip buttons with event handlers wired in this class, attempt to clear them
                         if (control is Panel pnl)
                         {
                             foreach (var ts in pnl.Controls.OfType<ToolStrip>())
                             {
                                 foreach (ToolStripItem item in ts.Items)
                                 {
-                                    // Remove any known event handlers by setting Click to null where possible
                                     try { if (item is ToolStripButton btn) btn.Click -= Maximize_Click; } catch { }
                                 }
                             }
+
+                            // Ensure layout is visible and charts are invalidated so they render
+                            try
+                            {
+                                chartLayout.Visible = true;
+                                chartLayout.ResumeLayout(true);
+                                chartLayout.Invalidate(true);
+                                foreach (var panelChild in chartLayout.Controls.OfType<Panel>())
+                                {
+                                    foreach (Control child in panelChild.Controls)
+                                    {
+                                        try
+                                        {
+                                            child.Visible = true;
+                                            child.Invalidate();
+                                            child.Refresh();
+                                        }
+                                        catch { }
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"CleanupUI error: {ex}");
+                            }
                         }
-                    });
+                    };
+
+                    if (chartLayout != null)
+                    {
+                        try { chartLayoutHelper.DisableResizingAndUnhookTableLayout(chartLayout, unhook); } catch { }
+                    }
+                    else
+                    {
+                        try { chartLayoutHelper.DisposeTableLayoutWithResizablePanels(splitTablesCharts.Panel1, unhook); } catch { }
+                        try { chartLayoutHelper.DisposeTableLayoutWithResizablePanels(splitTablesCharts.Panel2, unhook); } catch { }
+                    }
                 }
                 catch { }
 
-                // Unsubscribe any grid handlers we registered
-                foreach (var kv in gridFilterHandlers.ToList())
+                // Unsubscribe and dispose grids
+                foreach (var grid in Grids)
                 {
                     try
                     {
-                        kv.Key.GridFilterChanged -= kv.Value;
+                        grid.DataSource = null;
+                        grid.RowsAdded -= Dgv_RowsAdded;
+                        grid.CellContentClick -= Dgv_CellContentClick;
+                        grid.DataBindingComplete -= Dgv_DataBindingComplete;
+                        if (gridFilterHandlers.TryGetValue(grid, out var handler))
+                        {
+                            try { grid.GridFilterChanged -= handler; } catch { }
+                            gridFilterHandlers.Remove(grid);
+                        }
+                        try { grid.Dispose(); } catch { }
                     }
                     catch { }
                 }
-                gridFilterHandlers.Clear();
+
+                // Dispose charts
+                foreach (var chart in Charts)
+                {
+                    try { chart.Dispose(); } catch { }
+                }
+
+                // Clear layout
+                try { chartLayout.Controls.Clear(); } catch { }
+                try { chartLayout.RowStyles.Clear(); } catch { }
+
+                // Remove any direct child panels from both split panels except the chartLayout
+                try
+                {
+                    foreach (var ctrl in splitTablesCharts.Panel1.Controls.OfType<Control>().ToArray())
+                    {
+                        if (ctrl == chartLayout) continue;
+                        try { splitTablesCharts.Panel1.Controls.Remove(ctrl); ctrl.Dispose(); } catch { }
+                    }
+                }
+                catch { }
+                try
+                {
+                    foreach (var ctrl in splitTablesCharts.Panel2.Controls.OfType<Control>().ToArray())
+                    {
+                        if (ctrl == chartLayout) continue;
+                        try { splitTablesCharts.Panel2.Controls.Remove(ctrl); ctrl.Dispose(); } catch { }
+                    }
+                }
+                catch { }
+
+                // Keep `chartLayout` hosted by the designer-created container. Do not remove it from its parent here.
+
+                // Clear tracking collections
+                try { Grids.Clear(); } catch { }
+                try { Charts.Clear(); } catch { }
+                try { gridFilterHandlers.Clear(); } catch { }
+
+                previousSchema = string.Empty;
+                try { UpdateClearFilter(); } catch { }
             }
             catch { }
         }
@@ -124,10 +250,10 @@ namespace DBADashGUI.CustomReports
         {
             if (e.IsMaximized)
             {
-                wasTableCollapsedBeforeMaximize = splitTablesCharts.Panel2Collapsed;
+                wasTableCollapsedBeforeMaximize = IsTablePanelCollapsed();
             }
 
-            splitTablesCharts.Panel2Collapsed = e.IsMaximized || wasTableCollapsedBeforeMaximize;
+            SetTablePanelCollapsed(e.IsMaximized || wasTableCollapsedBeforeMaximize);
         }
 
         private void ScriptDataTables(bool fromGrid)
@@ -409,9 +535,12 @@ namespace DBADashGUI.CustomReports
             else
             {
                 StartTimer();
-                cancellationTokenSource = new CancellationTokenSource();
+                // Replace any existing CTS and dispose the old to avoid leaks
+                var newCts = new CancellationTokenSource();
+                var old = System.Threading.Interlocked.Exchange(ref cancellationTokenSource, newCts);
+                try { old?.Dispose(); } catch { }
                 IsMessageInProgress = true;
-                Task.Run(() => { _ = RefreshDataRepository(cancellationTokenSource.Token); });
+                Task.Run(() => { _ = RefreshDataRepository(newCts.Token); });
             }
             RefreshDate = DateTime.Now;
         }
@@ -474,6 +603,19 @@ namespace DBADashGUI.CustomReports
             {
                 IsMessageInProgress = false;
                 StopTimer();
+                try
+                {
+                    // If the CTS used for this run is still the active one, dispose it
+                    var active = System.Threading.Interlocked.CompareExchange(ref cancellationTokenSource, null, cancellationTokenSource);
+                    // The above CompareExchange is only used to get a reference in a thread-safe way; if active != null dispose it
+                    if (active != null)
+                    {
+                        try { active.Dispose(); } catch { }
+                        // ensure we don't double-dispose
+                        System.Threading.Interlocked.CompareExchange(ref cancellationTokenSource, null, active);
+                    }
+                }
+                catch { }
             }
         }
 
@@ -596,30 +738,7 @@ namespace DBADashGUI.CustomReports
 
         private void ClearResults()
         {
-            foreach (var grid in Grids)
-            {
-                grid.DataSource = null;
-                grid.RowsAdded -= Dgv_RowsAdded;
-                grid.CellContentClick -= Dgv_CellContentClick;
-                grid.DataBindingComplete -= Dgv_DataBindingComplete;
-                if (gridFilterHandlers.TryGetValue(grid, out var handler))
-                {
-                    grid.GridFilterChanged -= handler;
-                    gridFilterHandlers.Remove(grid);
-                }
-                grid.Dispose();
-            }
-            foreach (var chart in Charts)
-            {
-                chart.Dispose();
-            }
-            chartLayout.Controls.Clear();
-            chartLayout.RowStyles.Clear();
-            splitTablesCharts.Panel2.Controls.Clear();
-            Grids.Clear();
-            Charts.Clear();
-            previousSchema = string.Empty;
-            UpdateClearFilter();
+            CleanupUI();
         }
 
         private void LoadResultsIntoExistingGrids()
@@ -683,7 +802,7 @@ namespace DBADashGUI.CustomReports
             if (Report.Charts == null || Report.Charts.Count == 0) return;
             if (reportDS == null || reportDS.Tables.Count == 0) return;
 
-            var parentPanel = splitTablesCharts.Panel1;
+            var parentPanel = ChartPanel;
             var enableResize = Report.Charts.Count > 0;
 
             // Determine layout: 1 col for up to 3 charts, 2 cols for 4-6, 3 cols for 7+.
@@ -720,6 +839,18 @@ namespace DBADashGUI.CustomReports
             {
                 occupied[0, c0] = true;
             }
+
+            // Ensure the chartLayout is hosted in the ChartPanel
+            try
+            {
+                if (chartLayout.Parent != ChartPanel)
+                {
+                    chartLayout.Parent?.Controls.Remove(chartLayout);
+                    ChartPanel.Controls.Add(chartLayout);
+                    chartLayout.Dock = DockStyle.Fill;
+                }
+            }
+            catch { }
 
             // Create and place panels in row-major order
             for (int idx = 0; idx < Report.Charts.Count; idx++)
@@ -860,11 +991,37 @@ namespace DBADashGUI.CustomReports
             ShowTable();
         }
 
+        private void SetChartTableLayout()
+        {
+            splitTablesCharts.Orientation = Report.ChartLocation is CustomReport.ChartLocations.Top or CustomReport.ChartLocations.Bottom ? Orientation.Horizontal : Orientation.Vertical;
+            splitTablesCharts.SplitterDistance =
+                Report.ChartLocation switch
+                {
+                    CustomReport.ChartLocations.Top => (int)(this.Height * Report.ChartSplitPercentage),
+                    CustomReport.ChartLocations.Bottom => (int)(this.Height * (1 - Report.ChartSplitPercentage)),
+                    CustomReport.ChartLocations.Right => (int)(this.Width * (1 - Report.ChartSplitPercentage)),
+                    CustomReport.ChartLocations.Left => (int)(this.Width * Report.ChartSplitPercentage),
+                    _ => splitTablesCharts.SplitterDistance
+                };
+        }
+
+        private double GetCurrentChartSplitPercentage()
+        {
+            return Report.ChartLocation switch
+            {
+                CustomReport.ChartLocations.Top => (double)splitTablesCharts.SplitterDistance / this.Height,
+                CustomReport.ChartLocations.Bottom => 1 - ((double)splitTablesCharts.SplitterDistance / this.Height),
+                CustomReport.ChartLocations.Right => 1 - ((double)splitTablesCharts.SplitterDistance / this.Width),
+                CustomReport.ChartLocations.Left => (double)splitTablesCharts.SplitterDistance / this.Width,
+                _ => Report.ChartSplitPercentage
+            };
+        }
+
         protected void ShowTable()
         {
             if (reportDS == null || reportDS.Tables.Count == 0) return;
-
-            var currentSchema = reportDS.GetXmlSchema();
+            SetChartTableLayout();
+            var currentSchema = reportDS.GetXmlSchema() + "\n" + Report.Serialize();
             if (currentSchema == previousSchema)
             {
                 LoadResultsIntoExistingGrids();
@@ -874,7 +1031,7 @@ namespace DBADashGUI.CustomReports
 
             const int minDataGridViewHeight = 100; // Minimum height for a DataGridView
             var maxDataGridViewHeight = Math.Max(300, this.Height / Math.Min(3, reportDS.Tables.Count)); // Allow table to take up to 1/3 (or half if there are 2 tables) of the form height with minimum size of 300.
-            var parentPanel = splitTablesCharts.Panel2;
+            var parentPanel = TablePanel;
             ClearResults();
             List<Panel> panels = new();
             GetChartPanels();
@@ -882,7 +1039,7 @@ namespace DBADashGUI.CustomReports
             tsToggleCharts.Visible = Charts.Count > 0;
             splitToggle1.Visible = Charts.Count > 0;
             splitToggle2.Visible = Charts.Count > 0;
-            splitTablesCharts.Panel1Collapsed = Charts.Count == 0 || !Report.ChartVisible;
+            SetChartPanelCollapsed(Charts.Count == 0 || !Report.ChartVisible);
             var i = ShowAllResults ? 0 : cboResults.SelectedIndex;
             var tables = ShowAllResults ? reportDS.Tables.Cast<DataTable>().ToArray() : new[] { reportDS.Tables[cboResults.SelectedIndex] };
             foreach (var table in tables)
@@ -1000,7 +1157,6 @@ namespace DBADashGUI.CustomReports
                 i += 1;
             }
             parentPanel.Controls.AddRange(panels.OrderByDescending(p => (int)p.Tag!).Cast<Control>().ToArray());
-            splitTablesCharts.Panel2Collapsed = !Report.TableVisible;
             OnPostGridRefresh();
             previousSchema = currentSchema;
         }
@@ -1072,7 +1228,7 @@ namespace DBADashGUI.CustomReports
 
         private void Maximize_Click(object sender, EventArgs e)
         {
-            foreach (var panel in splitTablesCharts.Panel1.Controls.OfType<Panel>().Union(splitTablesCharts.Panel2.Controls.OfType<Panel>()))
+            foreach (var panel in chartLayout.Controls.OfType<Panel>().Union(TablePanel.Controls.OfType<Panel>()))
             {
                 var ts = panel.Controls.OfType<ToolStrip>().FirstOrDefault();
                 if (ts != null && ts.Items.Cast<object>().Any(itm => itm == sender))
@@ -1081,8 +1237,17 @@ namespace DBADashGUI.CustomReports
                     ts.Items[0].Text = "-";
                     ts.Items[0].Click -= Maximize_Click;
                     ts.Items[0].Click += Minimize_Click;
-                    splitTablesCharts.Panel1Collapsed = panel.Parent == splitTablesCharts.Panel2;
-                    splitTablesCharts.Panel2Collapsed = panel.Parent == splitTablesCharts.Panel1;
+                    // Collapse the opposite panel so the selected panel fills the view
+                    if (chartLayout.Controls.Contains(panel))
+                    {
+                        SetTablePanelCollapsed(true);
+                        SetChartPanelCollapsed(false);
+                    }
+                    else
+                    {
+                        SetChartPanelCollapsed(true);
+                        SetTablePanelCollapsed(false);
+                    }
                 }
                 else
                 {
@@ -1093,7 +1258,7 @@ namespace DBADashGUI.CustomReports
 
         private void Minimize_Click(object sender, EventArgs e)
         {
-            foreach (var panel in splitTablesCharts.Panel1.Controls.OfType<Panel>().Union(splitTablesCharts.Panel2.Controls.OfType<Panel>()))
+            foreach (var panel in chartLayout.Controls.OfType<Panel>().Union(TablePanel.Controls.OfType<Panel>()))
             {
                 var ts = panel.Controls.OfType<ToolStrip>().FirstOrDefault();
                 if (ts != null && ts.Items.Cast<object>().Any(itm => itm == sender))
@@ -1108,8 +1273,8 @@ namespace DBADashGUI.CustomReports
                     panel.Visible = true;
                 }
             }
-            splitTablesCharts.Panel1Collapsed = Charts.Count == 0;
-            splitTablesCharts.Panel2Collapsed = false;
+            SetChartPanelCollapsed(Charts.Count == 0);
+            SetTablePanelCollapsed(false);
         }
 
         protected virtual void OnPostGridRefresh()
@@ -1411,6 +1576,8 @@ namespace DBADashGUI.CustomReports
                 lblURL.Visible = !string.IsNullOrEmpty(Report.URL);
                 AddPickers();
                 SetTriggerCollectionVisibility();
+                CheckChartLocation();
+                SetTablePanelCollapsed(!Report.TableVisible);
                 if (AutoLoad)
                 {
                     RefreshData();
@@ -1669,8 +1836,9 @@ namespace DBADashGUI.CustomReports
             {
                 Report.CustomReportResults[dgv.ResultSetID].ColumnLayout = dgv.GetColumnLayout();
             }
-            Report.ChartVisible = !splitTablesCharts.Panel1Collapsed;
-            Report.TableVisible = !splitTablesCharts.Panel2Collapsed;
+            Report.ChartVisible = !IsChartPanelCollapsed();
+            Report.TableVisible = !IsTablePanelCollapsed();
+            Report.ChartSplitPercentage = GetCurrentChartSplitPercentage();
             Report.Update();
         }
 
@@ -1690,6 +1858,7 @@ namespace DBADashGUI.CustomReports
         {
             if (suppressCboResultsIndexChanged) return;
             previousSchema = string.Empty; // Force re-generation of grids
+            SetTablePanelCollapsed(false);
             ShowTable();
         }
 
@@ -1912,7 +2081,17 @@ namespace DBADashGUI.CustomReports
             }
             else
             {
-                await cancellationTokenSource.CancelAsync();
+                // Atomically take ownership of the CTS and cancel/dispose it
+                var cts = System.Threading.Interlocked.Exchange(ref cancellationTokenSource, null);
+                try
+                {
+                    if (cts != null)
+                    {
+                        await cts.CancelAsync();
+                        try { cts.Dispose(); } catch { }
+                    }
+                }
+                catch { }
             }
         }
 
@@ -1937,8 +2116,9 @@ namespace DBADashGUI.CustomReports
         private void ToggleCharts_Click(object sender, EventArgs e)
         {
             if (Charts.Count == 0) return;
-            splitTablesCharts.Panel1Collapsed = !splitTablesCharts.Panel1Collapsed;
-            if (!splitTablesCharts.Panel1Collapsed)
+            var newCollapsed = !IsChartPanelCollapsed();
+            SetChartPanelCollapsed(newCollapsed);
+            if (!newCollapsed)
             {
                 GetChartPanels();
             }
@@ -1946,7 +2126,7 @@ namespace DBADashGUI.CustomReports
 
         private void ToggleGrids(object sender, EventArgs e)
         {
-            splitTablesCharts.Panel2Collapsed = !splitTablesCharts.Panel2Collapsed;
+            SetTablePanelCollapsed(!IsTablePanelCollapsed());
         }
 
         private async void AddChartToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1958,6 +2138,28 @@ namespace DBADashGUI.CustomReports
             Report.Update();
             previousSchema = null; // Force re-generation of grids and charts
             ShowTable();
+        }
+
+        private void SetChartLocation(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            var location = ts.Tag.ToString();
+            Report.ChartLocation = Enum.Parse<CustomReport.ChartLocations>(location);
+            Report.Update();
+            SetTablePanelCollapsed(false); // make table visible
+            SetChartPanelCollapsed(!Charts.Any()); // Make chart panel visible if we have charts, otherwise hide it
+            previousSchema = null; // Force re-generation of grids and charts
+            CheckChartLocation();
+            ShowTable();
+        }
+
+        private void CheckChartLocation()
+        {
+            foreach (ToolStripMenuItem ts in chartLocationToolStripMenuItem.DropDownItems)
+            {
+                var location = ts.Tag.ToString();
+                ts.Checked = Report.ChartLocation == Enum.Parse<CustomReport.ChartLocations>(location);
+            }
         }
     }
 }

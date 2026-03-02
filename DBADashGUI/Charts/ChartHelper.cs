@@ -6,6 +6,7 @@ using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.WinForms;
 using SkiaSharp;
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
@@ -196,9 +197,10 @@ namespace DBADashGUI.Charts
 
                 return new DateTimePoint(date, metric);
             }
-            catch
+            catch (Exception ex)
             {
-                // Suppress conversion errors and return null
+                // Suppress conversion errors but log for diagnostics
+                Debug.WriteLine($"ChartHelper.TryCreateDateTimePoint conversion error: {ex}");
                 return null;
             }
         }
@@ -1298,9 +1300,10 @@ namespace DBADashGUI.Charts
                         }
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // swallow - do not let UI fail on layout hiccups
+                    // swallow - do not let UI fail on layout hiccups, but log for diagnostics
+                    Debug.WriteLine($"ChartHelper.PieDonutManager.ApplyMaxRadialColumnWidth error: {ex}");
                 }
             }
         }
