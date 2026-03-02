@@ -98,6 +98,9 @@ namespace DBADashGUI
         private readonly CommandLineOptions commandLine;
         private readonly List<int> commandLineTags = new();
         private TabPage[] AllTabs;
+        // Track which theme has been applied to each TabPage to avoid
+        // re-theming tabs unnecessarily (costly and can cause flicker).
+        private readonly Dictionary<TabPage, ThemeType> _tabThemeApplied = new();
         private CustomReports.CustomReports customReports = new();
         private readonly Dictionary<ProcedureExecutionMessage.CommunityProcs, TabPage> CommunityToolsTabPages = new Dictionary<ProcedureExecutionMessage.CommunityProcs, TabPage>();
         private Dictionary<string, TabPage> CustomToolsTabs = new Dictionary<string, TabPage>();
@@ -540,7 +543,15 @@ namespace DBADashGUI
             {
                 return;
             }
-            // tabs.SelectedTab?.ApplyTheme();
+            var sel = tabs.SelectedTab;
+            if (sel != null)
+            {
+                if (!_tabThemeApplied.TryGetValue(sel, out var applied) || applied != DBADashUser.SelectedTheme.ThemeIdentifier)
+                {
+                    sel.ApplyTheme();
+                    _tabThemeApplied[sel] = DBADashUser.SelectedTheme.ThemeIdentifier;
+                }
+            }
             SaveContext();
 
             var n = tv1.SelectedSQLTreeItem();
@@ -2288,6 +2299,9 @@ namespace DBADashGUI
             DBADashUser.Update();
             CheckTheme();
             this.ApplyTheme(theme);
+            // Clear per-tab applied theme tracking so tabs will be re-themed
+            // with the new theme when they are next selected.
+            _tabThemeApplied.Clear();
             foreach (var ctrl in tabs.SelectedTab?.Controls.OfType<IRefreshData>()!)
             {
                 ctrl.RefreshData();
