@@ -1,9 +1,18 @@
-﻿IF OBJECT_ID('sys.dm_db_resource_stats') IS NOT NULL
+IF OBJECT_ID('sys.server_resource_stats') IS NOT NULL
+BEGIN
+	SELECT TOP(@TOP) CAST(end_time AS DATETIME) AS EventTime,
+		CAST(avg_cpu_percent AS INT),
+		100-CAST(avg_cpu_percent AS INT) AS SystemIdle
+	FROM sys.server_resource_stats
+	ORDER BY end_time DESC
+END
+ELSE IF OBJECT_ID('sys.dm_db_resource_stats') IS NOT NULL
 BEGIN
 	SELECT TOP(@TOP) end_time AS EventTime,
 		CAST(avg_cpu_percent AS INT),
 		100-CAST(avg_cpu_percent AS INT) AS SystemIdle
 	FROM sys.dm_db_resource_stats
+	ORDER BY end_time DESC
 END
 ELSE
 BEGIN
