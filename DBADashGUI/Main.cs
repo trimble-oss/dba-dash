@@ -125,6 +125,9 @@ namespace DBADashGUI
             commandLine = opts;
             Disposed += OnDispose;
             AddTabs();
+            // Apply currently selected theme immediately so controls are
+            // themed before the form is shown (prevents a short white flash).
+            try { this.ApplyTheme(); } catch { }
             MainFormInstance = this;
             SetSingleInstance(Settings.Default.ChildFormSingleInstance);
         }
@@ -2602,15 +2605,15 @@ namespace DBADashGUI
         void IThemedControl.ApplyTheme(BaseTheme theme)
         {
             Controls.ApplyTheme(theme);
-
-            foreach (var tab in AllTabs)
-            {
-                tab.ApplyTheme();
-            }
             searchLayout.BackColor = theme.SearchBackColor;
             cboTimeZone.BackColor = theme.TimeZoneBackColor;
             cboTimeZone.ForeColor = theme.TimeZoneForeColor;
             cboTimeZone.FlatStyle = FlatStyle.Flat;
+            if (AllTabs == null) return;
+            foreach (var tab in AllTabs)
+            {
+                tab.ApplyTheme();
+            }
         }
 
         // Extracted helper to keep Tv1_AfterSelect concise. Performs a minimal
