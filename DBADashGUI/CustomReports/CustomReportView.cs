@@ -11,7 +11,6 @@ using LiveChartsCore.SkiaSharpView.WinForms;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -185,60 +184,10 @@ namespace DBADashGUI.CustomReports
                 catch { }
 
                 // Unsubscribe and dispose grids
-                foreach (var grid in Grids)
-                {
-                    try
-                    {
-                        grid.DataSource = null;
-                        grid.RowsAdded -= Dgv_RowsAdded;
-                        grid.CellContentClick -= Dgv_CellContentClick;
-                        grid.DataBindingComplete -= Dgv_DataBindingComplete;
-                        if (gridFilterHandlers.TryGetValue(grid, out var handler))
-                        {
-                            try { grid.GridFilterChanged -= handler; } catch { }
-                            gridFilterHandlers.Remove(grid);
-                        }
-                        try { grid.Dispose(); } catch { }
-                    }
-                    catch { }
-                }
+                try { CleanupGrids(); } catch (Exception ex) { Debug.WriteLine($"CleanupUI: CleanupGrids error: {ex}"); }
 
-                // Dispose charts
-                foreach (var chart in Charts)
-                {
-                    try { chart.Dispose(); } catch { }
-                }
-
-                // Clear layout
-                try { chartLayout.Controls.Clear(); } catch { }
-                try { chartLayout.RowStyles.Clear(); } catch { }
-
-                // Remove any direct child panels from both split panels except the chartLayout
-                try
-                {
-                    foreach (var ctrl in splitTablesCharts.Panel1.Controls.OfType<Control>().ToArray())
-                    {
-                        if (ctrl == chartLayout) continue;
-                        try { splitTablesCharts.Panel1.Controls.Remove(ctrl); ctrl.Dispose(); } catch { }
-                    }
-                }
-                catch { }
-                try
-                {
-                    foreach (var ctrl in splitTablesCharts.Panel2.Controls.OfType<Control>().ToArray())
-                    {
-                        if (ctrl == chartLayout) continue;
-                        try { splitTablesCharts.Panel2.Controls.Remove(ctrl); ctrl.Dispose(); } catch { }
-                    }
-                }
-                catch { }
-
-                // Keep `chartLayout` hosted by the designer-created container. Do not remove it from its parent here.
-
-                // Clear tracking collections
-                try { Grids.Clear(); } catch { }
-                try { Charts.Clear(); } catch { }
-                try { gridFilterHandlers.Clear(); } catch { }
+                // Dispose and clear chart panels (separate helper so it can be reused)
+                try { CleanupCharts(); } catch (Exception ex) { Debug.WriteLine($"CleanupUI: CleanupCharts error: {ex}"); }
 
                 previousSchema = string.Empty;
                 try { UpdateClearFilter(); } catch { }
@@ -254,6 +203,148 @@ namespace DBADashGUI.CustomReports
             }
 
             SetTablePanelCollapsed(e.IsMaximized || wasTableCollapsedBeforeMaximize);
+        }
+
+        // Cleanup helper for grids
+        private void CleanupGrids()
+        {
+            try
+            {
+                if (this.InvokeRequired)
+                {
+                    this.Invoke((Action)CleanupGrids);
+                    return;
+                }
+
+                foreach (var grid in Grids.ToArray())
+                {
+                    if (grid == null) continue;
+                    try
+                    {
+                        grid.DataSource = null;
+                        grid.RowsAdded -= Dgv_RowsAdded;
+                        grid.CellContentClick -= Dgv_CellContentClick;
+                        grid.DataBindingComplete -= Dgv_DataBindingComplete;
+                        if (gridFilterHandlers.TryGetValue(grid, out var handler))
+                        {
+                            try { grid.GridFilterChanged -= handler; } catch (Exception ex) { Debug.WriteLine($"CleanupGrids: error removing handler: {ex}"); }
+                            gridFilterHandlers.Remove(grid);
+                        }
+                        try { grid.Dispose(); } catch (Exception ex) { Debug.WriteLine($"CleanupGrids: error disposing grid: {ex}"); }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"CleanupGrids: unexpected error: {ex}");
+                    }
+                }
+
+                // Remove and dispose any Panel containers that were created for grids in ShowTable
+                // Panels created there use the resultset index as the Tag (an int). Use that to identify and remove them.
+                try
+                {
+                    var panels = new List<Panel>();
+                    panels.AddRange(splitTablesCharts.Panel1.Controls.OfType<Panel>());
+                    panels.AddRange(splitTablesCharts.Panel2.Controls.OfType<Panel>());
+                    foreach (var pnl in panels.ToArray())
+                    {
+                        try
+                        {
+                            if (pnl.Tag is int)
+                            {
+                                // Remove from parent then dispose
+                                pnl.Parent?.Controls.Remove(pnl);
+                                pnl.Dispose();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"CleanupGrids: error disposing grid panel: {ex}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"CleanupGrids: error removing grid panels: {ex}");
+                }
+
+                Grids.Clear();
+                gridFilterHandlers.Clear();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"CleanupGrids: error cleaning up grids: {ex}");
+            }
+        }
+
+        // Cleanup helper for charts and layout
+        private void CleanupCharts()
+        {
+            try
+            {
+                if (this.InvokeRequired)
+                {
+                    this.Invoke((Action)CleanupCharts);
+                    return;
+                }
+
+                // Dispose chart controls tracked in Charts and remove them from their parents
+                try
+                {
+                    foreach (var chart in Charts.ToArray())
+                    {
+                        if (chart == null) continue;
+                        try
+                        {
+                            var parent = chart.Parent;
+                            if (parent != null && parent.Controls.Contains(chart))
+                            {
+                                parent.Controls.Remove(chart);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"CleanupCharts: failed removing chart from parent: {ex}");
+                        }
+
+                        try { chart.Dispose(); }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"CleanupCharts: failed disposing chart: {ex}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"CleanupCharts: error disposing charts collection: {ex}");
+                }
+
+                Charts.Clear();
+
+                // Clear chartLayout children and styles
+                try
+                {
+                    foreach (var ctrl in chartLayout.Controls.OfType<Control>().ToArray())
+                    {
+                        try { chartLayout.Controls.Remove(ctrl); ctrl.Dispose(); }
+                        catch (Exception ex) { Debug.WriteLine($"CleanupCharts: error disposing chartLayout child: {ex}"); }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"CleanupCharts: error clearing chartLayout controls: {ex}");
+                }
+
+                try { chartLayout.RowStyles.Clear(); } catch (Exception ex) { Debug.WriteLine($"CleanupCharts: error clearing row styles: {ex}"); }
+                try { chartLayout.ColumnStyles.Clear(); } catch (Exception ex) { Debug.WriteLine($"CleanupCharts: error clearing column styles: {ex}"); }
+
+                // Do not remove controls from the split panels here — grid panels are hosted in the same split
+                // containers and should be managed by CleanupGrids / ShowTable. Only clear `chartLayout` children
+                // and chart tracking to avoid disposing non-chart UI when toggling visibility.
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"CleanupCharts: unexpected error: {ex}");
+            }
         }
 
         private void ScriptDataTables(bool fromGrid)
@@ -535,12 +626,20 @@ namespace DBADashGUI.CustomReports
             else
             {
                 StartTimer();
-                // Replace any existing CTS and dispose the old to avoid leaks
+                // Replace any existing CTS and request cancellation of the old one.
+                // Do NOT dispose the old CTS here because the running task may still be
+                // using its Token/registrations; disposal is performed in the completion
+                // path (RefreshDataRepository) to avoid races.
                 var newCts = new CancellationTokenSource();
                 var old = System.Threading.Interlocked.Exchange(ref cancellationTokenSource, newCts);
-                try { old?.Dispose(); } catch { }
+                try { old?.Cancel(); }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"RefreshData: error cancelling previous CTS: {ex}");
+                }
                 IsMessageInProgress = true;
-                Task.Run(() => { _ = RefreshDataRepository(newCts.Token); });
+                // Pass the CTS instance so the repository runner can dispose the exact CTS it used when it completes
+                Task.Run(() => { _ = RefreshDataRepository(newCts); });
             }
             RefreshDate = DateTime.Now;
         }
@@ -564,8 +663,9 @@ namespace DBADashGUI.CustomReports
             lblTimer.Text = "00:00:00";
         }
 
-        public async Task RefreshDataRepository(CancellationToken token)
+        public async Task RefreshDataRepository(CancellationTokenSource cts)
         {
+            var token = cts.Token;
             try
             {
                 while (!IsHandleCreated)
@@ -605,17 +705,20 @@ namespace DBADashGUI.CustomReports
                 StopTimer();
                 try
                 {
-                    // If the CTS used for this run is still the active one, dispose it
-                    var active = System.Threading.Interlocked.CompareExchange(ref cancellationTokenSource, null, cancellationTokenSource);
-                    // The above CompareExchange is only used to get a reference in a thread-safe way; if active != null dispose it
-                    if (active != null)
+                    // Clear the static field if it still references this run's CTS
+                    System.Threading.Interlocked.CompareExchange(ref cancellationTokenSource, null, cts);
+                    // Dispose the CTS that was used for this run. It's safe to dispose here even if CancelProcessing
+                    // attempted to cancel/dispose earlier; log any exceptions encountered during dispose.
+                    try { cts.Dispose(); }
+                    catch (Exception ex)
                     {
-                        try { active.Dispose(); } catch { }
-                        // ensure we don't double-dispose
-                        System.Threading.Interlocked.CompareExchange(ref cancellationTokenSource, null, active);
+                        Debug.WriteLine($"RefreshDataRepository: error disposing CTS: {ex}");
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"RefreshDataRepository: unexpected error in finally block: {ex}");
+                }
             }
         }
 
@@ -776,21 +879,56 @@ namespace DBADashGUI.CustomReports
                             newChart.Tag = chartWrapper;
 
                             // Replace in the panel's controls keeping the ToolStrip in place
-                            var toolStrip = parent?.Controls.OfType<ToolStrip>().FirstOrDefault();
-                            parent?.Controls.Add(newChart);
-                            if (toolStrip != null)
+                            if (parent != null)
                             {
-                                // move newChart to be before the ToolStrip so layout matches CreateResizablePanel
-                                parent.Controls.SetChildIndex(newChart, parent.Controls.IndexOf(toolStrip));
+                                // Determine where the old chart was located so we can insert the new control at the same position
+                                var oldIndex = parent.Controls.IndexOf(chart);
+                                var toolStrip = parent.Controls.OfType<ToolStrip>().FirstOrDefault();
+
+                                // Remove the old control from the parent before disposing to avoid leaving a disposed control in the collection
+                                try { parent.Controls.Remove(chart); }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine($"Failed removing old chart from parent: {ex}");
+                                }
+
+                                // Add the new chart and set its index. Prefer the original index, otherwise place it before the ToolStrip (to preserve layout)
+                                parent.Controls.Add(newChart);
+                                if (oldIndex >= 0)
+                                {
+                                    try { parent.Controls.SetChildIndex(newChart, oldIndex); }
+                                    catch (Exception ex)
+                                    {
+                                        Debug.WriteLine($"Failed setting child index for new chart: {ex}");
+                                    }
+                                }
+                                else if (toolStrip != null)
+                                {
+                                    try { parent.Controls.SetChildIndex(newChart, parent.Controls.IndexOf(toolStrip)); }
+                                    catch (Exception ex)
+                                    {
+                                        Debug.WriteLine($"Failed setting child index before toolStrip for new chart: {ex}");
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // If no parent, simply add to parent (null-safe) - keep previous behavior
+                                parent?.Controls.Add(newChart);
                             }
 
                             // Dispose old chart and update our list reference
-                            chart.Dispose();
+                            try { chart.Dispose(); }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"Failed disposing old chart: {ex}");
+                            }
                             Charts[ci] = newChart;
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // If replacement fails, ignore and continue
+                            // If replacement fails, log and continue; keep the old chart in place
+                            Debug.WriteLine($"Failed replacing chart control: {ex}");
                         }
                     }
                 }
@@ -801,6 +939,8 @@ namespace DBADashGUI.CustomReports
         {
             if (Report.Charts == null || Report.Charts.Count == 0) return;
             if (reportDS == null || reportDS.Tables.Count == 0) return;
+            // Dispose any existing chart controls and clear tracking before rebuilding to avoid leaks
+            try { CleanupCharts(); } catch (Exception ex) { Debug.WriteLine($"GetChartPanels: CleanupCharts error: {ex}"); }
 
             var parentPanel = ChartPanel;
             var enableResize = Report.Charts.Count > 0;
@@ -2087,11 +2227,16 @@ namespace DBADashGUI.CustomReports
                 {
                     if (cts != null)
                     {
+                        // Only request cancellation here. Do NOT dispose the CTS while the background
+                        // operation may still be unregistering callbacks or using the token. Disposal is
+                        // performed in the completion path (RefreshDataRepository) to avoid races.
                         await cts.CancelAsync();
-                        try { cts.Dispose(); } catch { }
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"CancelProcessing: error cancelling CTS: {ex}");
+                }
             }
         }
 

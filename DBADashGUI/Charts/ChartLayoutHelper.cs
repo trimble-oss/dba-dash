@@ -357,6 +357,11 @@ namespace DBADashGUI.Charts
                         chart.Invalidate();
                         chart.Update();
                     }
+                    if (child is LiveChartsCore.SkiaSharpView.WinForms.PieChart pie)
+                    {
+                        pie.Invalidate();
+                        pie.Update();
+                    }
                 }
             }));
         }

@@ -1,15 +1,13 @@
 ﻿using DBADashGUI.Charts;
 using DBADashGUI.Theme;
-using DocumentFormat.OpenXml.Math;
 using LiveChartsCore.Measure;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Globalization;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -78,6 +76,14 @@ namespace DBADashGUI.CustomReports
         private void StartPreviewWorker()
         {
             _previewCts?.Cancel();
+            // Ensure the preview signal is available and reset before starting
+            try
+            {
+                if (_previewSignal == null) _previewSignal = new ManualResetEventSlim(false);
+                else _previewSignal.Reset();
+            }
+            catch { }
+
             _previewCts = new CancellationTokenSource();
             var token = _previewCts.Token;
             _previewWorkerTask = Task.Run(() => PreviewWorkerLoop(token), token);
@@ -94,9 +100,14 @@ namespace DBADashGUI.CustomReports
             catch { }
             finally
             {
-                _previewCts?.Dispose();
+                try { _previewCts?.Dispose(); } catch { }
                 _previewCts = null;
                 _previewWorkerTask = null;
+
+                // Dispose the ManualResetEventSlim to release the underlying wait handle
+                try { _previewSignal?.Dispose(); } catch { }
+                // Recreate a fresh, unsignaled instance so the form can be reused without leaking handles
+                try { _previewSignal = new ManualResetEventSlim(false); } catch { _previewSignal = null; }
             }
         }
 
@@ -443,9 +454,11 @@ namespace DBADashGUI.CustomReports
 
         private void Results_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (ReportDS == null || cboResults.SelectedIndex < 0) return;
+            if (ReportDS == null || cboResults.SelectedValue == null) return;
+            if (cboResults.SelectedValue is not int selectedKey) return;
+            if (selectedKey < 0 || selectedKey >= ReportDS.Tables.Count) return;
 
-            var table = ReportDS.Tables[cboResults.SelectedIndex];
+            var table = ReportDS.Tables[selectedKey];
             var cols = table.Columns.Cast<DataColumn>().Select(c => c.ColumnName).OrderBy(col => col);
 
             var metricCols = table.Columns.Cast<DataColumn>()
@@ -470,18 +483,28 @@ namespace DBADashGUI.CustomReports
 
         private ChartConfigurationBase GetChartConfiguration()
         {
-            if (cboChartType.SelectedValue == null) return null;
-            var chartType = (ChartTypes)cboChartType.SelectedValue;
+            var sel = SelectedChartType;
+            if (!sel.HasValue) return null;
+            var chartType = sel.Value;
+
+            // Read legend selection using SelectedItem since ValueMember is not set
+            LegendPosition legend = LegendPosition.Bottom;
+            if (cboLegend.SelectedItem is LegendPosition lp) legend = lp;
+
             if (chartType == ChartTypes.Pie)
             {
+                // Use null-safe reads for SelectedValue to avoid NullReferenceException when no selection
+                var valueCol = chkCountRows.Checked ? null : (cboPieValueColumn.SelectedValue?.ToString() ?? cboPieValueColumn.Text);
+                var categoryCol = cboPieCategory.SelectedValue?.ToString() ?? cboPieCategory.SelectedItem?.ToString() ?? cboPieCategory.Text;
+
                 return new PieChartConfiguration
                 {
-                    ValueColumn = chkCountRows.Checked || cboPieValueColumn.SelectedValue == null ? null : cboPieValueColumn.SelectedValue.ToString(),
-                    CategoryColumn = cboPieCategory.SelectedValue.ToString(),
+                    ValueColumn = string.IsNullOrEmpty(valueCol) ? null : valueCol,
+                    CategoryColumn = string.IsNullOrEmpty(categoryCol) ? null : categoryCol,
                     CountRows = chkCountRows.Checked,
                     ChartTitle = txtTitle.Text,
-                    LegendPosition = cboLegend.SelectedValue as LegendPosition? ?? LegendPosition.Bottom,
-                    InnerRadius = chkDoughnut.Checked ? Convert.ToDouble(numRadius.Value / 100) : 0,
+                    LegendPosition = legend,
+                    InnerRadius = chkDoughnut.Checked ? Convert.ToDouble(numRadius.Value / 100) : (double?)null,
                 };
             }
             else
@@ -492,10 +515,10 @@ namespace DBADashGUI.CustomReports
                     ChartType = chartType,
                     MetricColumns = metrics.Count() > 1 ? metrics : null,
                     MetricColumn = metrics.Count() == 1 ? metrics[0] : null,
-                    SeriesColumn = cboSeries.SelectedValue?.ToString(),
-                    XColumn = cboXCol.SelectedValue.ToString(),
+                    SeriesColumn = cboSeries.SelectedValue?.ToString() ?? cboSeries.SelectedItem?.ToString() ?? cboSeries.Text,
+                    XColumn = cboXCol.SelectedValue?.ToString() ?? cboXCol.SelectedItem?.ToString() ?? cboXCol.Text,
                     ChartTitle = txtTitle.Text,
-                    LegendPosition = cboLegend.SelectedValue as LegendPosition? ?? LegendPosition.Bottom,
+                    LegendPosition = legend,
                     YAxisLabel = txtYLabel.Text,
                     XAxisLabel = txtXLabel.Text,
                     YAxisMax = double.TryParse(txtYMax.Text, out var yMax) ? yMax : (double?)null,
@@ -512,7 +535,8 @@ namespace DBADashGUI.CustomReports
             try
             {
                 var config = GetChartConfiguration();
-                var chart = ChartHelper.GetChartControlFromDataTable(ReportDS.Tables[cboResults.SelectedIndex], config);
+                var tableIndex = (int)cboResults.SelectedValue;
+                var chart = ChartHelper.GetChartControlFromDataTable(ReportDS.Tables[tableIndex], config);
                 var pnl = _chartLayoutHelper.CreateResizablePanel(chart, null, false, config.ChartTitle);
 
                 pnlChart.Controls.Clear();

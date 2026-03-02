@@ -41,6 +41,11 @@
             tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
             addChartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             associateCollectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            chartLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            topToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            bottomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            leftToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            rightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             editPickersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             renameResultSetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             resetLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -76,11 +81,6 @@
             lblURL = new System.Windows.Forms.ToolStripStatusLabel();
             lblDescription = new System.Windows.Forms.ToolStripStatusLabel();
             timer1 = new System.Windows.Forms.Timer(components);
-            chartLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            topToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            bottomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            leftToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            rightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStrip1.SuspendLayout();
             pnlParams.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitParams).BeginInit();
@@ -211,6 +211,45 @@
             associateCollectionToolStripMenuItem.Text = "Associate Collection";
             associateCollectionToolStripMenuItem.ToolTipText = "Associate Collection - Allow collection to be triggered from report";
             associateCollectionToolStripMenuItem.Click += AssociateCollectionToolStripMenuItem_Click;
+            // 
+            // chartLocationToolStripMenuItem
+            // 
+            chartLocationToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { topToolStripMenuItem, bottomToolStripMenuItem, leftToolStripMenuItem, rightToolStripMenuItem });
+            chartLocationToolStripMenuItem.Name = "chartLocationToolStripMenuItem";
+            chartLocationToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            chartLocationToolStripMenuItem.Text = "Chart Location";
+            // 
+            // topToolStripMenuItem
+            // 
+            topToolStripMenuItem.Name = "topToolStripMenuItem";
+            topToolStripMenuItem.Size = new System.Drawing.Size(142, 26);
+            topToolStripMenuItem.Tag = "Top";
+            topToolStripMenuItem.Text = "Top";
+            topToolStripMenuItem.Click += SetChartLocation;
+            // 
+            // bottomToolStripMenuItem
+            // 
+            bottomToolStripMenuItem.Name = "bottomToolStripMenuItem";
+            bottomToolStripMenuItem.Size = new System.Drawing.Size(142, 26);
+            bottomToolStripMenuItem.Tag = "Bottom";
+            bottomToolStripMenuItem.Text = "Bottom";
+            bottomToolStripMenuItem.Click += SetChartLocation;
+            // 
+            // leftToolStripMenuItem
+            // 
+            leftToolStripMenuItem.Name = "leftToolStripMenuItem";
+            leftToolStripMenuItem.Size = new System.Drawing.Size(142, 26);
+            leftToolStripMenuItem.Tag = "Left";
+            leftToolStripMenuItem.Text = "Left";
+            leftToolStripMenuItem.Click += SetChartLocation;
+            // 
+            // rightToolStripMenuItem
+            // 
+            rightToolStripMenuItem.Name = "rightToolStripMenuItem";
+            rightToolStripMenuItem.Size = new System.Drawing.Size(142, 26);
+            rightToolStripMenuItem.Tag = "Right";
+            rightToolStripMenuItem.Text = "Right";
+            rightToolStripMenuItem.Click += SetChartLocation;
             // 
             // editPickersToolStripMenuItem
             // 
@@ -495,12 +534,10 @@
             // 
             chartLayout.ColumnCount = 1;
             chartLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            chartLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             chartLayout.Dock = System.Windows.Forms.DockStyle.Fill;
             chartLayout.Location = new System.Drawing.Point(0, 0);
             chartLayout.Name = "chartLayout";
             chartLayout.RowCount = 1;
-            chartLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             chartLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             chartLayout.Size = new System.Drawing.Size(414, 305);
             chartLayout.TabIndex = 0;
@@ -548,45 +585,6 @@
             // 
             timer1.Interval = 1000;
             timer1.Tick += Timer1_Tick;
-            // 
-            // chartLocationToolStripMenuItem
-            // 
-            chartLocationToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { topToolStripMenuItem, bottomToolStripMenuItem, leftToolStripMenuItem, rightToolStripMenuItem });
-            chartLocationToolStripMenuItem.Name = "chartLocationToolStripMenuItem";
-            chartLocationToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
-            chartLocationToolStripMenuItem.Text = "Chart Location";
-            // 
-            // topToolStripMenuItem
-            // 
-            topToolStripMenuItem.Name = "topToolStripMenuItem";
-            topToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            topToolStripMenuItem.Tag = "Top";
-            topToolStripMenuItem.Text = "Top";
-            topToolStripMenuItem.Click += SetChartLocation;
-            // 
-            // bottomToolStripMenuItem
-            // 
-            bottomToolStripMenuItem.Name = "bottomToolStripMenuItem";
-            bottomToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            bottomToolStripMenuItem.Tag = "Bottom";
-            bottomToolStripMenuItem.Text = "Bottom";
-            bottomToolStripMenuItem.Click += SetChartLocation;
-            // 
-            // leftToolStripMenuItem
-            // 
-            leftToolStripMenuItem.Name = "leftToolStripMenuItem";
-            leftToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            leftToolStripMenuItem.Tag = "Left";
-            leftToolStripMenuItem.Text = "Left";
-            leftToolStripMenuItem.Click += SetChartLocation;
-            // 
-            // rightToolStripMenuItem
-            // 
-            rightToolStripMenuItem.Name = "rightToolStripMenuItem";
-            rightToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            rightToolStripMenuItem.Tag = "Right";
-            rightToolStripMenuItem.Text = "Right";
-            rightToolStripMenuItem.Click += SetChartLocation;
             // 
             // CustomReportView
             // 

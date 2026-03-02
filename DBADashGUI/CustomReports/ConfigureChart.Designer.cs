@@ -43,6 +43,7 @@
             tabConfig = new System.Windows.Forms.TabControl();
             tabData = new System.Windows.Forms.TabPage();
             tabPieData = new System.Windows.Forms.TabPage();
+            chkCountRows = new System.Windows.Forms.CheckBox();
             numRadius = new System.Windows.Forms.NumericUpDown();
             label16 = new System.Windows.Forms.Label();
             chkDoughnut = new System.Windows.Forms.CheckBox();
@@ -71,7 +72,6 @@
             txtXLabel = new System.Windows.Forms.TextBox();
             bttnAdd = new System.Windows.Forms.Button();
             bttnCancel = new System.Windows.Forms.Button();
-            chkCountRows = new System.Windows.Forms.CheckBox();
             tabConfig.SuspendLayout();
             tabData.SuspendLayout();
             tabPieData.SuspendLayout();
@@ -101,6 +101,7 @@
             // 
             // cboChartType
             // 
+            cboChartType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             cboChartType.FormattingEnabled = true;
             cboChartType.Location = new System.Drawing.Point(234, 76);
             cboChartType.Name = "cboChartType";
@@ -201,7 +202,7 @@
             tabData.Location = new System.Drawing.Point(4, 29);
             tabData.Name = "tabData";
             tabData.Padding = new System.Windows.Forms.Padding(3);
-            tabData.Size = new System.Drawing.Size(445, 247);
+            tabData.Size = new System.Drawing.Size(486, 247);
             tabData.TabIndex = 0;
             tabData.Text = "Data";
             tabData.UseVisualStyleBackColor = true;
@@ -223,6 +224,17 @@
             tabPieData.TabIndex = 1;
             tabPieData.Text = "Pie";
             tabPieData.UseVisualStyleBackColor = true;
+            // 
+            // chkCountRows
+            // 
+            chkCountRows.AutoSize = true;
+            chkCountRows.Location = new System.Drawing.Point(363, 45);
+            chkCountRows.Name = "chkCountRows";
+            chkCountRows.Size = new System.Drawing.Size(109, 24);
+            chkCountRows.TabIndex = 9;
+            chkCountRows.Text = "Count Rows";
+            chkCountRows.UseVisualStyleBackColor = true;
+            chkCountRows.CheckedChanged += CountRows_CheckedChanged;
             // 
             // numRadius
             // 
@@ -299,7 +311,7 @@
             tabOptions.Location = new System.Drawing.Point(4, 29);
             tabOptions.Name = "tabOptions";
             tabOptions.Padding = new System.Windows.Forms.Padding(3);
-            tabOptions.Size = new System.Drawing.Size(445, 247);
+            tabOptions.Size = new System.Drawing.Size(486, 247);
             tabOptions.TabIndex = 2;
             tabOptions.Text = "Options";
             tabOptions.UseVisualStyleBackColor = true;
@@ -341,6 +353,7 @@
             // 
             // cboLegend
             // 
+            cboLegend.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             cboLegend.FormattingEnabled = true;
             cboLegend.Location = new System.Drawing.Point(205, 39);
             cboLegend.Name = "cboLegend";
@@ -378,7 +391,7 @@
             tabAxis.Location = new System.Drawing.Point(4, 29);
             tabAxis.Name = "tabAxis";
             tabAxis.Padding = new System.Windows.Forms.Padding(3);
-            tabAxis.Size = new System.Drawing.Size(445, 247);
+            tabAxis.Size = new System.Drawing.Size(486, 247);
             tabAxis.TabIndex = 3;
             tabAxis.Text = "Axis";
             tabAxis.UseVisualStyleBackColor = true;
@@ -484,17 +497,6 @@
             bttnCancel.Text = "&Cancel";
             bttnCancel.UseVisualStyleBackColor = true;
             bttnCancel.Click += Cancel_Click;
-            // 
-            // chkCountRows
-            // 
-            chkCountRows.AutoSize = true;
-            chkCountRows.Location = new System.Drawing.Point(363, 45);
-            chkCountRows.Name = "chkCountRows";
-            chkCountRows.Size = new System.Drawing.Size(109, 24);
-            chkCountRows.TabIndex = 9;
-            chkCountRows.Text = "Count Rows";
-            chkCountRows.UseVisualStyleBackColor = true;
-            chkCountRows.CheckedChanged += CountRows_CheckedChanged;
             // 
             // ConfigureChart
             // 

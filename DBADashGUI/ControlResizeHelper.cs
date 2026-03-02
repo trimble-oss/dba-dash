@@ -1,5 +1,6 @@
 using LiveChartsCore.SkiaSharpView.WinForms;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -9,6 +10,7 @@ namespace DBADashGUI
     {
         // Track controls we've enabled resizing on so we can reliably remove handlers on Dispose
         private readonly System.Collections.Generic.HashSet<Control> subscribedControls = new();
+
         private bool _disposed = false;
         private bool isResizing = false;
         private int startY;
@@ -17,6 +19,7 @@ namespace DBADashGUI
         private int activeRow;
         private int neighborRow;
         private Control resizingControl;
+        private bool startedNearTopEdge = false;
         private const int ResizeZoneHeight = 50;
         private const int MinimumHeight = 100;
         private const int ResizeSensitivity = 5;
@@ -122,6 +125,9 @@ namespace DBADashGUI
                 startHeight = rowHeights[activeRow];
                 startNextHeight = rowHeights[neighborRow];
 
+                // Record whether the drag was started on the top edge so we don't flip behavior mid-drag
+                startedNearTopEdge = nearTopEdge;
+
                 isResizing = true;
                 resizingControl = panelToResize;
                 control.Cursor = Cursors.SizeNS;
@@ -147,15 +153,11 @@ namespace DBADashGUI
 
                 if (resizingControl.Parent is TableLayoutPanel tableLayout)
                 {
-                    // For top-edge drags we invert the delta so that dragging "up" decreases
-                    // the current row height and increases the row above (more intuitive).
+                    // Use the edge where the drag started to determine sign. Do NOT recalculate
+                    // from the current cursor position because crossing the resize zone during a drag
+                    // would invert the delta and produce erratic behavior.
                     var effectiveDelta = totalDelta;
-                    var panelTop = resizingControl.PointToScreen(new System.Drawing.Point(0, 0)).Y;
-                    var mouseYOnScreen = control.PointToScreen(e.Location).Y;
-                    var relativeY = mouseYOnScreen - panelTop;
-                    var nearTopEdge = relativeY <= ResizeZoneHeight;
-
-                    if (nearTopEdge)
+                    if (startedNearTopEdge)
                     {
                         effectiveDelta = -totalDelta;
                     }
@@ -233,6 +235,7 @@ namespace DBADashGUI
         {
             if (!isResizing) return;
             isResizing = false;
+            startedNearTopEdge = false;
             if (resizingControl != null)
             {
                 ((Control)sender).Cursor = Cursors.Default;
@@ -267,28 +270,41 @@ namespace DBADashGUI
 
         private void HideChartsInRow(TableLayoutPanel tableLayout, int row)
         {
-            var control = tableLayout.GetControlFromPosition(0, row);
-            if (control is Panel panel)
-            {
-                foreach (Control child in panel.Controls.OfType<CartesianChart>())
-                {
-                    child.Visible = false;
-                }
-            }
+            ApplyToChartsInRow(tableLayout, row, (ctrl) => { ctrl.Visible = false; });
         }
 
         private void ShowChartsInRow(TableLayoutPanel tableLayout, int row)
         {
             if (row >= tableLayout.RowCount) return;
-
-            var control = tableLayout.GetControlFromPosition(0, row);
-            if (control is Panel panel)
+            ApplyToChartsInRow(tableLayout, row, (ctrl) =>
             {
-                foreach (Control child in panel.Controls.OfType<CartesianChart>())
+                ctrl.Visible = true;
+                try { ctrl.Invalidate(true); } catch { }
+                try { ctrl.Refresh(); } catch { }
+            });
+        }
+
+        // Helper to apply an action to chart controls (Cartesian and Pie) in every column of a given row
+        private static void ApplyToChartsInRow(TableLayoutPanel tableLayout, int row, Action<Control> action)
+        {
+            if (tableLayout == null || row < 0 || row >= tableLayout.RowCount || action == null) return;
+
+            for (int col = 0; col < tableLayout.ColumnCount; col++)
+            {
+                var control = tableLayout.GetControlFromPosition(col, row);
+                if (control is Panel panel)
                 {
-                    child.Visible = true;
-                    child.Invalidate(true);
-                    child.Refresh();
+                    // Cartesian charts
+                    foreach (Control child in panel.Controls.OfType<CartesianChart>())
+                    {
+                        try { action(child); } catch (Exception ex) { Debug.WriteLine($"ApplyToChartsInRow: action failed on CartesianChart: {ex}"); }
+                    }
+
+                    // Pie charts (and other non-cartesian LiveCharts controls)
+                    foreach (Control child in panel.Controls.OfType<PieChart>())
+                    {
+                        try { action(child); } catch (Exception ex) { Debug.WriteLine($"ApplyToChartsInRow: action failed on PieChart: {ex}"); }
+                    }
                 }
             }
         }

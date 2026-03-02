@@ -762,8 +762,17 @@ namespace DBADashGUI.Charts
         {
             // Use provided global categories if available, otherwise build a deterministic
             // sorted list of distinct categories from the provided rows.
-            var distinctCats = (categories != null)
-                ? categories.ToList()
+            // Build a lookup dictionary (category -> index) in one step.
+            // If `categories` is provided use its ordering; otherwise derive a deterministic
+            // ordered list of distinct categories from the rows and map them to indices.
+            var catIndex = (categories != null)
+                ? categories
+                    .Select((c, i) => new { c, i })
+                    .Where(x => !string.IsNullOrEmpty(x.c))
+                    // collapse duplicates, keeping the first occurrence
+                    .GroupBy(x => x.c, StringComparer.Ordinal)
+                    .Select(g => g.First())
+                    .ToDictionary(x => x.c, x => x.i, StringComparer.Ordinal)
                 : rows
                     .Select(r => r[xColumn])
                     .Where(v => v != null && v != DBNull.Value)
@@ -771,7 +780,8 @@ namespace DBADashGUI.Charts
                     .Where(s => !string.IsNullOrEmpty(s))
                     .Distinct()
                     .OrderBy(s => s, StringComparer.Ordinal)
-                    .ToList();
+                    .Select((c, i) => new { c, i })
+                    .ToDictionary(x => x.c, x => x.i, StringComparer.Ordinal);
 
             var list = new List<ObservablePoint>();
 
@@ -783,9 +793,8 @@ namespace DBADashGUI.Charts
                     continue;
 
                 var cat = xVal.ToString();
-                var xIndex = distinctCats.IndexOf(cat);
 
-                if (xIndex < 0)
+                if (!catIndex.TryGetValue(cat, out var xIndex))
                     continue; // skip unknown category
 
                 if (TryConvertToDouble(yVal, out var y))
