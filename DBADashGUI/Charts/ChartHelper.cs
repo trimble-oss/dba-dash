@@ -51,8 +51,9 @@ namespace DBADashGUI.Charts
 
         /// <summary>
         /// Creates a PieChart (WinForms) from a DataTable using pie-specific configuration.
-        /// Supports either MetricColumns (each column becomes a slice summed across rows)
-        /// or CategoryColumn+ValueColumn (group by category and sum values).
+        /// Supports either MetricColumns (each column becomes a slice summed across rows),
+        /// CategoryColumn+ValueColumn (group by category and sum values), or
+        /// CategoryColumn with CountRows=true (group by category and count rows).
         /// </summary>
         private static Control GetPieChartFromDataTable(DataTable dt, PieChartConfiguration config)
         {
@@ -94,28 +95,50 @@ namespace DBADashGUI.Charts
             }
             else
             {
-                // Category + value mode
-                if (!dt.Columns.Contains(config.CategoryColumn) || !dt.Columns.Contains(config.ValueColumn))
-                    throw new ArgumentException("CategoryColumn or ValueColumn not found in DataTable", nameof(config));
+                // Category + value or count mode. Include NULL/DBNull as a named category instead of filtering it out.
+                if (!dt.Columns.Contains(config.CategoryColumn))
+                    throw new ArgumentException("CategoryColumn not found in DataTable", nameof(config));
 
-                var groups = dt.Rows.Cast<DataRow>()
-                    .Where(r => r[config.CategoryColumn] != null && r[config.CategoryColumn] != DBNull.Value)
-                    .GroupBy(r => r[config.CategoryColumn].ToString());
+                // Get label for null categories
+                var nullLabel = string.IsNullOrWhiteSpace(config.NullCategoryLabel) ? "(null)" : config.NullCategoryLabel;
 
-                foreach (var g in groups)
+                if (config.CountRows)
                 {
-                    double sum = 0;
-                    foreach (var r in g)
+                    var groups = dt.Rows.Cast<DataRow>()
+                        .GroupBy(r => r[config.CategoryColumn] == null || r[config.CategoryColumn] == DBNull.Value ? nullLabel : r[config.CategoryColumn].ToString());
+
+                    foreach (var g in groups)
                     {
-                        var v = r[config.ValueColumn];
-                        if (TryConvertToDouble(v, out var d))
+                        var count = g.Count();
+                        if (count > 0)
                         {
-                            sum += d;
+                            slices.Add((g.Key, count));
                         }
                     }
-                    if (sum > 0)
+                }
+                else
+                {
+                    if (!dt.Columns.Contains(config.ValueColumn))
+                        throw new ArgumentException("ValueColumn not found in DataTable", nameof(config));
+
+                    var groups = dt.Rows.Cast<DataRow>()
+                        .GroupBy(r => r[config.CategoryColumn] == null || r[config.CategoryColumn] == DBNull.Value ? nullLabel : r[config.CategoryColumn].ToString());
+
+                    foreach (var g in groups)
                     {
-                        slices.Add((g.Key, sum));
+                        double sum = 0;
+                        foreach (var r in g)
+                        {
+                            var v = r[config.ValueColumn];
+                            if (TryConvertToDouble(v, out var d))
+                            {
+                                sum += d;
+                            }
+                        }
+                        if (sum > 0)
+                        {
+                            slices.Add((g.Key, sum));
+                        }
                     }
                 }
             }
