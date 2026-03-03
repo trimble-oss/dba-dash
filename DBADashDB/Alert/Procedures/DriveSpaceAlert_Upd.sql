@@ -74,6 +74,7 @@ WITH DeDupe AS (
 	WHERE (DS.Status = 1 OR T.UseCriticalStatus=0)
 	AND (DS.PctFreeSpace <= (T.Threshold/100.0) OR T.Threshold IS NULL OR T.IsThresholdPercentage=0)
 	AND (DS.FreeGB <= T.Threshold/1024.0 OR T.IsThresholdPercentage=1 OR T.Threshold IS NULL)
+	AND (LEFT(DS.Name, 1) = T.DriveLetter or T.DriveLetter IS NULL)
 )
 INSERT INTO #ExceededThreshold(
 	InstanceID,
