@@ -22,7 +22,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
         [DisplayName("Database Name"), Category("Filters")]
         public string DatabaseName { get; set; }
 
-        [Description("States to exclude from alerting. Empty list uses defaults: ONLINE (0), OFFLINE_SECONDARY (10). " +
+        [Description("States to exclude from alerting. Empty list uses defaults: ONLINE (0), RESTORING (1), COPYING (7), OFFLINE_SECONDARY (10). " +
                      "State values: 0=ONLINE, 1=RESTORING, 2=RECOVERING, 3=RECOVERY_PENDING, " +
                      "4=SUSPECT, 5=EMERGENCY, 6=OFFLINE, 7=COPYING, 10=OFFLINE_SECONDARY")]
         [DisplayName("Excluded States"), Category("Filters")]
@@ -31,7 +31,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
         /// <summary>New rule: pre-populate defaults so the user sees them in the PropertyGrid.</summary>
         public DatabaseStatusRule()
         {
-            ExcludedStates = new List<int> { 0, 10 };
+            ExcludedStates = new List<int> { 0, 1, 7, 10 };
         }
 
         /// <summary>Deserialization: receives ExcludedStates directly from JSON, bypassing the new-rule default.</summary>

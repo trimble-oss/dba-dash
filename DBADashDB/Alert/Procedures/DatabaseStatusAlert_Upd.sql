@@ -36,7 +36,7 @@ SELECT I.InstanceID,
 		R.Priority,
 		NULLIF(JSON_VALUE(R.Details,'$.DatabaseName'),'') AS DatabaseName,
 		CASE
-			WHEN JSON_VALUE(R.Details,'$.ExcludedStates[0]') IS NULL THEN '[0,10]'
+			WHEN JSON_VALUE(R.Details,'$.ExcludedStates[0]') IS NULL THEN '[0,1,7,10]'
 			ELSE JSON_QUERY(R.Details,'$.ExcludedStates')
 		END AS ExcludedStates,
 		R.RuleID
@@ -67,10 +67,10 @@ AND NOT EXISTS(SELECT 1 FROM OPENJSON(DSA.ExcludedStates) WHERE CAST(value AS IN
 
 EXEC Alert.ActiveAlerts_Upd @AlertDetails = @AlertDetails, @AlertType = @Type, @ResolveAlertsOfType = 0
 
-/* Resolve alerts when the trigger condition no longer holds:
-   - Database is back in an excluded state (state is in ExcludedStates)
-   - Database was dropped (IsActive = 0)
-   - Database was renamed (old name no longer exists in dbo.Databases) */
+/* Resolve alerts when the database is no longer in the triggered set:
+   - Database returned to an excluded state (e.g. back ONLINE)
+   - Database was dropped (IsActive = 0) or renamed
+   - Rule was updated (e.g. ExcludedStates now includes the current state) */
 UPDATE AA
 		SET ResolvedDate  = SYSUTCDATETIME(),
 		IsResolved    = 1,
@@ -81,10 +81,9 @@ UPDATE AA
 FROM Alert.ActiveAlerts AA
 WHERE AA.AlertType = @Type
 AND NOT EXISTS(
-	SELECT 1
-	FROM dbo.Databases D
-	WHERE D.InstanceID = AA.InstanceID
-	AND D.name = STUFF(AA.AlertKey, 1, LEN(@AlertKeyPrefix), '')
-	AND D.IsActive = 1
+			SELECT 1
+			FROM @AlertDetails AD
+			WHERE AD.InstanceID = AA.InstanceID
+			AND AD.AlertKey = AA.AlertKey
 )
 AND AA.IsResolved = 0
