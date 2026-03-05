@@ -20,6 +20,7 @@ namespace DBADashGUI.CollectionDates
             InitializeComponent();
             dgvCollectionDates.RegisterClearFilter(tsClearFilter);
             dgvCollectionDates.GridFilterChanged += ((_, _) => PersistFilter = dgvCollectionDates.RowFilter);
+            statusFilterToolStrip1.AcknowledgedVisible = false;
         }
 
         private string PersistFilter;

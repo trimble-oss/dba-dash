@@ -103,23 +103,13 @@ namespace DBADashGUI.CollectionDates
             // 
             // statusFilterToolStrip1
             // 
-            statusFilterToolStrip1.Acknowledged = false;
-            statusFilterToolStrip1.AcknowledgedVisible = false;
-            statusFilterToolStrip1.Critical = true;
-            statusFilterToolStrip1.CriticalVisible = true;
             statusFilterToolStrip1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
             statusFilterToolStrip1.Font = new System.Drawing.Font("Segoe UI", 9F);
             statusFilterToolStrip1.Image = (System.Drawing.Image)resources.GetObject("statusFilterToolStrip1.Image");
             statusFilterToolStrip1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            statusFilterToolStrip1.NA = true;
             statusFilterToolStrip1.Name = "statusFilterToolStrip1";
-            statusFilterToolStrip1.NAVisible = true;
-            statusFilterToolStrip1.OK = true;
-            statusFilterToolStrip1.OKVisible = true;
             statusFilterToolStrip1.Size = new System.Drawing.Size(67, 24);
             statusFilterToolStrip1.Text = "ALL";
-            statusFilterToolStrip1.Warning = true;
-            statusFilterToolStrip1.WarningVisible = true;
             statusFilterToolStrip1.UserChangedStatusFilter += Status_Selected;
             // 
             // tsClearFilter
@@ -144,21 +134,21 @@ namespace DBADashGUI.CollectionDates
             // tsTriggerWarningAndCritical
             // 
             tsTriggerWarningAndCritical.Name = "tsTriggerWarningAndCritical";
-            tsTriggerWarningAndCritical.Size = new System.Drawing.Size(224, 26);
+            tsTriggerWarningAndCritical.Size = new System.Drawing.Size(213, 26);
             tsTriggerWarningAndCritical.Text = "Warning && Critical";
             tsTriggerWarningAndCritical.Click += tsTriggerWarningAndCritical_Click;
             // 
             // tsTriggerSelected
             // 
             tsTriggerSelected.Name = "tsTriggerSelected";
-            tsTriggerSelected.Size = new System.Drawing.Size(224, 26);
+            tsTriggerSelected.Size = new System.Drawing.Size(213, 26);
             tsTriggerSelected.Text = "Selected";
             tsTriggerSelected.Click += tsTriggerSelected_Click;
             // 
             // tsTriggerAll
             // 
             tsTriggerAll.Name = "tsTriggerAll";
-            tsTriggerAll.Size = new System.Drawing.Size(224, 26);
+            tsTriggerAll.Size = new System.Drawing.Size(213, 26);
             tsTriggerAll.Text = "All";
             tsTriggerAll.Click += tsTriggerAll_Click;
             // 
@@ -166,6 +156,7 @@ namespace DBADashGUI.CollectionDates
             // 
             dgvCollectionDates.AllowUserToAddRows = false;
             dgvCollectionDates.AllowUserToDeleteRows = false;
+            dgvCollectionDates.AllowUserToOrderColumns = true;
             dgvCollectionDates.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
@@ -191,8 +182,6 @@ namespace DBADashGUI.CollectionDates
             dgvCollectionDates.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvCollectionDates.Name = "dgvCollectionDates";
             dgvCollectionDates.ReadOnly = true;
-            dgvCollectionDates.ResultSetID = 0;
-            dgvCollectionDates.ResultSetName = null;
             dgvCollectionDates.RowHeadersVisible = false;
             dgvCollectionDates.RowHeadersWidth = 51;
             dgvCollectionDates.Size = new System.Drawing.Size(1357, 457);
@@ -310,10 +299,8 @@ namespace DBADashGUI.CollectionDates
             // lblStatus
             // 
             lblStatus.Name = "lblStatus";
-            lblStatus.Size = new System.Drawing.Size(1342, 20);
-            lblStatus.Spring = true;
+            lblStatus.Size = new System.Drawing.Size(50, 20);
             lblStatus.Text = "Ready";
-            lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // CollectionDates
             // 
@@ -353,11 +340,11 @@ namespace DBADashGUI.CollectionDates
         private System.Windows.Forms.DataGridViewLinkColumn ConfigureRoot;
         private System.Windows.Forms.DataGridViewLinkColumn colRun;
         private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.ToolStripStatusLabel lblStatus;
         private System.Windows.Forms.ToolStripButton tsClearFilter;
         private System.Windows.Forms.ToolStripDropDownButton tsTriggerMenu;
         private System.Windows.Forms.ToolStripMenuItem tsTriggerWarningAndCritical;
         private System.Windows.Forms.ToolStripMenuItem tsTriggerSelected;
         private System.Windows.Forms.ToolStripMenuItem tsTriggerAll;
+        private System.Windows.Forms.ToolStripStatusLabel lblStatus;
     }
 }
