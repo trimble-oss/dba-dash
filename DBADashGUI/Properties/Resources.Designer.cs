@@ -363,6 +363,16 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap database_connect_animated {
+            get {
+                object obj = ResourceManager.GetObject("database-connect-animated", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap DatabaseSettings_16x {
             get {
                 object obj = ResourceManager.GetObject("DatabaseSettings_16x", resourceCulture);
@@ -376,6 +386,26 @@ namespace DBADashGUI.Properties {
         internal static System.Drawing.Bitmap DataTable_16x {
             get {
                 object obj = ResourceManager.GetObject("DataTable_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap db_connection {
+            get {
+                object obj = ResourceManager.GetObject("db-connection", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap db_connection_error {
+            get {
+                object obj = ResourceManager.GetObject("db_connection_error", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

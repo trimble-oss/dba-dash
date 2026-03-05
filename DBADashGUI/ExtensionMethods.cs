@@ -961,5 +961,17 @@ namespace DBADashGUI
             }
             return result;
         }
+
+        public static void InvokeSetEnabled(this Control control, bool isEnabled)
+        {
+            if (control.InvokeRequired)
+            {
+                control.Invoke(new Action(() => control.Enabled = isEnabled));
+            }
+            else
+            {
+                control.Enabled = isEnabled;
+            }
+        }
     }
 }

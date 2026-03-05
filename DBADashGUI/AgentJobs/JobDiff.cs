@@ -35,9 +35,9 @@ namespace DBADashGUI
             }
         }
 
-        private void JobDiff_Load(object sender, EventArgs e)
+        private async void JobDiff_Load(object sender, EventArgs e)
         {
-            var dt = CommonData.GetInstances(default, default, false);
+            var dt = await CommonData.GetInstancesAsync(default, default, false);
             foreach (DataRow row in dt.Rows)
             {
                 var a = new InstanceItem() { Instance = (string)row["InstanceGroupName"], InstanceID = (int)row["InstanceID"] };

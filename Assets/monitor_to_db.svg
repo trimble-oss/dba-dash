@@ -1,0 +1,205 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 148 88" width="148" height="88">
+  <defs>
+    <!-- DB gradients -->
+    <linearGradient id="dbTop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6fb8e0"/>
+      <stop offset="55%" stop-color="#4a9fd4"/>
+      <stop offset="100%" stop-color="#217cbb"/>
+    </linearGradient>
+
+    <linearGradient id="dbFace" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0a3358"/>
+      <stop offset="25%" stop-color="#0063a3"/>
+      <stop offset="100%" stop-color="#217cbb"/>
+    </linearGradient>
+
+    <linearGradient id="dbBand" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#072a4a"/>
+      <stop offset="40%" stop-color="#004f83"/>
+      <stop offset="100%" stop-color="#0a3358"/>
+    </linearGradient>
+
+    <!-- Monitor gradients -->
+    <linearGradient id="screenGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#081422"/>
+      <stop offset="100%" stop-color="#0b1e30"/>
+    </linearGradient>
+
+    <linearGradient id="monitorGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#353a40"/>
+      <stop offset="100%" stop-color="#252a2e"/>
+    </linearGradient>
+
+    <!-- Wire gradient -->
+    <linearGradient id="wireGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#464b52"/>
+      <stop offset="100%" stop-color="#0e416c"/>
+    </linearGradient>
+
+    <!-- Pulse glow -->
+    <filter id="lineGlow" x="-10%" y="-300%" width="120%" height="700%">
+      <feGaussianBlur stdDeviation="1.0" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Screen clip -->
+    <clipPath id="screenClip">
+      <rect x="9" y="9" width="31" height="22"/>
+    </clipPath>
+
+    <!-- Wire path -->
+    <path id="wirePath" d="M 44,30 C 62,30 74,44 90,44"/>
+  </defs>
+
+  <!-- ══════════════════════ -->
+  <!--       MONITOR          -->
+  <!-- ══════════════════════ -->
+
+  <!-- Monitor shell -->
+  <rect x="6" y="6" width="37" height="29" rx="2.5"
+        fill="url(#monitorGrad)" stroke="#464b52" stroke-width="0.8"/>
+
+  <!-- Bezel -->
+  <rect x="8" y="8" width="33" height="25" rx="1.5" fill="#171c1e"/>
+
+  <!-- Screen -->
+  <rect x="9" y="9" width="31" height="23" rx="1" fill="url(#screenGrad)"/>
+
+  <g clip-path="url(#screenClip)">
+    <!-- Grid lines -->
+    <line x1="9"  y1="14.5" x2="40" y2="14.5" stroke="#0e2a40" stroke-width="0.4"/>
+    <line x1="9"  y1="19.5" x2="40" y2="19.5" stroke="#0e2a40" stroke-width="0.4"/>
+    <line x1="9"  y1="24.5" x2="40" y2="24.5" stroke="#0e2a40" stroke-width="0.4"/>
+
+    <!--
+      Scrolling time-series chart illusion:
+      Two identical polylines offset by half a cycle, so as one scrolls off left
+      the other seamlessly continues from the right.
+      The "scroll" moves points leftward by animating translateX from 0 to -32
+      over 6s, while the waveform itself stays fixed — giving the feel of
+      new data arriving from the right and old data leaving left.
+    -->
+
+    <!-- Chart line A -->
+    <g>
+      <animateTransform attributeName="transform" type="translate"
+        from="0,0" to="-32,0" dur="6s" repeatCount="indefinite" calcMode="linear"/>
+      <polyline
+        points="9,21 11,18 14,22 17,15 19,19 22,17 25,21 27,14 30,19 33,16 36,20 39,14 42,18 45,22 48,16 51,20 54,13 57,18 60,16 63,21 66,17 69,23 72,15"
+        fill="none" stroke="#019aeb" stroke-width="1.3"
+        stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Filled area under line -->
+      <polygon
+        points="9,31 9,21 11,18 14,22 17,15 19,19 22,17 25,21 27,14 30,19 33,16 36,20 39,14 42,18 45,22 48,16 51,20 54,13 57,18 60,16 63,21 66,17 69,23 72,15 72,31"
+        fill="#019aeb" opacity="0.08"/>
+    </g>
+
+    <!-- Green secondary trace (DB query rate) -->
+    <g>
+      <animateTransform attributeName="transform" type="translate"
+        from="0,0" to="-32,0" dur="8s" repeatCount="indefinite" calcMode="linear"/>
+      <polyline
+        points="9,26 13,25 18,27 22,24 27,26 31,25 36,27 40,24 45,26 50,25 55,27 60,25 65,26 70,24 75,26"
+        fill="none" stroke="#4ea646" stroke-width="0.8"
+        stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>
+    </g>
+
+    <!-- Blinking dot (status indicator, no text) -->
+    <circle cx="35.5" cy="11" r="1.3" fill="#da212c">
+      <animate attributeName="opacity" values="1;0.1;1" dur="1.1s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Small vertical tick marks on left axis -->
+    <line x1="9" y1="14.5" x2="11" y2="14.5" stroke="#0063a3" stroke-width="0.5"/>
+    <line x1="9" y1="19.5" x2="11" y2="19.5" stroke="#0063a3" stroke-width="0.5"/>
+    <line x1="9" y1="24.5" x2="11" y2="24.5" stroke="#0063a3" stroke-width="0.5"/>
+  </g>
+
+  <!-- Monitor stand neck -->
+  <rect x="20" y="35" width="9" height="3" rx="1" fill="#1e2428"/>
+  <!-- Monitor stand base -->
+  <rect x="16" y="37.5" width="17" height="2" rx="1" fill="#2a3038"/>
+
+  <!-- ══════════════════════ -->
+  <!--     CONNECTION WIRE    -->
+  <!-- ══════════════════════ -->
+
+  <!-- Wire base -->
+  <path d="M 44,30 C 62,30 74,44 90,44"
+        stroke="url(#wireGrad)" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+  <!-- Wire sheen -->
+  <path d="M 44,29.3 C 62,29.3 74,43.3 90,43.3"
+        stroke="rgba(255,255,255,0.09)" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+
+  <!-- Animated cyan pulse -->
+  <path d="M 44,30 C 62,30 74,44 90,44"
+        stroke="#019aeb" stroke-width="2.8" fill="none" stroke-linecap="round"
+        stroke-dasharray="7 62" filter="url(#lineGlow)" opacity="0.95">
+    <animate attributeName="stroke-dashoffset" from="69" to="-7" dur="1.3s" repeatCount="indefinite" calcMode="linear"/>
+  </path>
+
+  <!-- Animated yellow pulse (offset) -->
+  <path d="M 44,30 C 62,30 74,44 90,44"
+        stroke="#fbad26" stroke-width="2" fill="none" stroke-linecap="round"
+        stroke-dasharray="4 62" filter="url(#lineGlow)" opacity="0.75">
+    <animate attributeName="stroke-dashoffset" from="69" to="-7" dur="1.3s" repeatCount="indefinite" calcMode="linear" begin="-0.65s"/>
+  </path>
+
+  <!-- Endpoint dots -->
+  <circle cx="44" cy="30" r="2" fill="#0063a3" stroke="#dcedf9" stroke-width="0.8"/>
+  <circle cx="90" cy="44" r="2" fill="#0063a3" stroke="#dcedf9" stroke-width="0.8"/>
+
+  <!-- ══════════════════════════════════ -->
+  <!--   DATABASE — wider, front-only    -->
+  <!-- ══════════════════════════════════ -->
+
+  <!-- cx=118, rx=20 — wider cylinder, purely front-facing ellipse style -->
+
+  <!-- Segment 3 (bottom) body -->
+  <path d="M 98,57 L 98,70 Q 98,74.5 118,74.5 Q 138,74.5 138,70 L 138,57 Q 138,61.5 118,61.5 Q 98,61.5 98,57 Z"
+        fill="url(#dbFace)"/>
+  <!-- Band ring -->
+  <ellipse cx="118" cy="57" rx="20" ry="4.5" fill="url(#dbBand)"/>
+  <!-- Indent slot -->
+  <path d="M 101,64 Q 110,66.5 118,66.5 Q 126,66.5 132,64.5"
+        stroke="#5aaad0" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.5"/>
+  <!-- Status dots -->
+  <circle cx="130" cy="61.5" r="1.5" fill="#fbad26"/>
+  <circle cx="134" cy="63.5" r="1.3" fill="#da212c"/>
+
+  <!-- Segment 2 (middle) body -->
+  <path d="M 98,41 L 98,57 Q 98,61.5 118,61.5 Q 138,61.5 138,57 L 138,41 Q 138,45.5 118,45.5 Q 98,45.5 98,41 Z"
+        fill="url(#dbFace)"/>
+  <ellipse cx="118" cy="41" rx="20" ry="4.5" fill="url(#dbBand)"/>
+  <path d="M 101,48 Q 110,50.5 118,50.5 Q 126,50.5 132,48.5"
+        stroke="#5aaad0" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.5"/>
+  <circle cx="130" cy="45.5" r="1.5" fill="#fbad26"/>
+  <circle cx="134" cy="47.5" r="1.3" fill="#da212c">
+    <animate attributeName="opacity" values="1;0.2;1" dur="2.1s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Segment 1 (top) body -->
+  <path d="M 98,24 L 98,41 Q 98,45.5 118,45.5 Q 138,45.5 138,41 L 138,24 Q 138,28.5 118,28.5 Q 98,28.5 98,24 Z"
+        fill="url(#dbFace)"/>
+  <ellipse cx="118" cy="24" rx="20" ry="4.5" fill="url(#dbBand)"/>
+  <path d="M 101,31 Q 110,33.5 118,33.5 Q 126,33.5 132,31.5"
+        stroke="#5aaad0" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.5"/>
+  <circle cx="130" cy="28.5" r="1.5" fill="#fbad26"/>
+  <circle cx="134" cy="30.5" r="1.3" fill="#da212c"/>
+
+  <!-- Top cap -->
+  <ellipse cx="118" cy="24" rx="20" ry="4.5" fill="url(#dbTop)" stroke="#4a9fd4" stroke-width="0.7"/>
+  <!-- Top cap sheen -->
+  <ellipse cx="112" cy="22.5" rx="9" ry="2.2" fill="rgba(255,255,255,0.17)" transform="rotate(-8,112,22.5)"/>
+
+  <!-- Wire arrival ripple -->
+  <circle cx="98" cy="44" r="3" fill="none" stroke="#019aeb" stroke-width="1.1">
+    <animate attributeName="r" values="2;7;2" dur="1.3s" repeatCount="indefinite" calcMode="linear"/>
+    <animate attributeName="opacity" values="0.7;0;0.7" dur="1.3s" repeatCount="indefinite" calcMode="linear"/>
+  </circle>
+
+</svg>

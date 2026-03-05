@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 148 88" width="148" height="88">
+  <defs>
+    <!-- DB gradients — desaturated to signal offline state -->
+    <linearGradient id="dbTop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6a7a88"/>
+      <stop offset="55%" stop-color="#4a5a68"/>
+      <stop offset="100%" stop-color="#3a4a58"/>
+    </linearGradient>
+
+    <linearGradient id="dbFace" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1e2830"/>
+      <stop offset="25%" stop-color="#2a3a48"/>
+      <stop offset="100%" stop-color="#3a4e5e"/>
+    </linearGradient>
+
+    <linearGradient id="dbBand" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#141e28"/>
+      <stop offset="40%" stop-color="#1e2e3c"/>
+      <stop offset="100%" stop-color="#1a2632"/>
+    </linearGradient>
+
+    <!-- Monitor gradients -->
+    <linearGradient id="screenGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#081422"/>
+      <stop offset="100%" stop-color="#0b1e30"/>
+    </linearGradient>
+
+    <linearGradient id="monitorGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#353a40"/>
+      <stop offset="100%" stop-color="#252a2e"/>
+    </linearGradient>
+
+    <!-- Wire — red/dark to show broken -->
+    <linearGradient id="wireLeft" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#464b52"/>
+      <stop offset="100%" stop-color="#6a2020"/>
+    </linearGradient>
+    <linearGradient id="wireRight" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3a1818"/>
+      <stop offset="100%" stop-color="#2a2a30"/>
+    </linearGradient>
+
+    <!-- Error badge gradient -->
+    <linearGradient id="errGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e86363"/>
+      <stop offset="100%" stop-color="#ab1f26"/>
+    </linearGradient>
+
+    <!-- Screen clip -->
+    <clipPath id="screenClip">
+      <rect x="9" y="9" width="31" height="22"/>
+    </clipPath>
+  </defs>
+
+  <!-- ══════════════════════ -->
+  <!--       MONITOR          -->
+  <!-- ══════════════════════ -->
+
+  <rect x="6" y="6" width="37" height="29" rx="2.5"
+        fill="url(#monitorGrad)" stroke="#464b52" stroke-width="0.8"/>
+  <rect x="8" y="8" width="33" height="25" rx="1.5" fill="#171c1e"/>
+  <rect x="9" y="9" width="31" height="23" rx="1" fill="url(#screenGrad)"/>
+
+  <g clip-path="url(#screenClip)">
+    <!-- Grid lines -->
+    <line x1="9"  y1="14.5" x2="40" y2="14.5" stroke="#0e2a40" stroke-width="0.4"/>
+    <line x1="9"  y1="19.5" x2="40" y2="19.5" stroke="#0e2a40" stroke-width="0.4"/>
+    <line x1="9"  y1="24.5" x2="40" y2="24.5" stroke="#0e2a40" stroke-width="0.4"/>
+
+    <!-- Flatlined chart — was active, now dead flat with faint ghost of old trace -->
+    <!-- Ghost of old trace (very faint, connection was alive before) -->
+    <polyline
+      points="9,21 11,18 14,22 17,15 19,19 22,17 25,21 27,14 30,19 33,16 36,20 39,14"
+      fill="none" stroke="#019aeb" stroke-width="1.0"
+      stroke-linecap="round" stroke-linejoin="round" opacity="0.15"/>
+
+    <!-- Flatline — signal lost -->
+    <polyline
+      points="9,20 40,20"
+      fill="none" stroke="#da212c" stroke-width="1.1"
+      stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+
+    <!-- Green trace also dead -->
+    <polyline
+      points="9,25 40,25"
+      fill="none" stroke="#4ea646" stroke-width="0.8"
+      stroke-linecap="round" stroke-linejoin="round" opacity="0.2"/>
+
+    <!-- Axis ticks -->
+    <line x1="9" y1="14.5" x2="11" y2="14.5" stroke="#3a4a5a" stroke-width="0.5"/>
+    <line x1="9" y1="19.5" x2="11" y2="19.5" stroke="#3a4a5a" stroke-width="0.5"/>
+    <line x1="9" y1="24.5" x2="11" y2="24.5" stroke="#3a4a5a" stroke-width="0.5"/>
+
+    <!-- Red status dot — solid on, not blinking -->
+    <circle cx="35.5" cy="11" r="1.3" fill="#da212c" opacity="1"/>
+  </g>
+
+  <!-- Monitor stand -->
+  <rect x="20" y="35" width="9" height="3" rx="1" fill="#1e2428"/>
+  <rect x="16" y="37.5" width="17" height="2" rx="1" fill="#2a3038"/>
+
+  <!-- ══════════════════════════════ -->
+  <!--    BROKEN WIRE                 -->
+  <!-- ══════════════════════════════ -->
+
+  <!-- Left wire segment (monitor → break point) -->
+  <path d="M 44,30 C 54,30 58,34 62,36"
+        stroke="url(#wireLeft)" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+  <!-- Right wire segment (break point → DB) — drooping/disconnected -->
+  <path d="M 68,38 C 74,40 82,44 90,44"
+        stroke="url(#wireRight)" stroke-width="4" fill="none" stroke-linecap="round"
+        opacity="0.6"/>
+
+  <!-- Break gap — frayed wire ends -->
+  <!-- Left frayed end -->
+  <line x1="61" y1="35" x2="64" y2="33" stroke="#8a2020" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="62" y1="36" x2="65" y2="37" stroke="#6a1818" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="61.5" y1="36.5" x2="63.5" y2="39" stroke="#5a1010" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Right frayed end -->
+  <line x1="69" y1="37" x2="66" y2="35" stroke="#8a2020" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="68" y1="38.5" x2="65.5" y2="38" stroke="#6a1818" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="68.5" y1="39.5" x2="66" y2="41" stroke="#5a1010" stroke-width="1.2" stroke-linecap="round"/>
+
+  <!-- Endpoint dot on monitor side (dim) -->
+  <circle cx="44" cy="30" r="2" fill="#3a4a5a" stroke="#6a7a8a" stroke-width="0.8"/>
+  <!-- Endpoint dot on DB side (dim) -->
+  <circle cx="90" cy="44" r="2" fill="#2a3040" stroke="#4a5a6a" stroke-width="0.8"/>
+
+  <!-- ══════════════════════════════════ -->
+  <!--   DATABASE — desaturated/offline  -->
+  <!-- ══════════════════════════════════ -->
+
+  <!-- Segment 3 (bottom) -->
+  <path d="M 98,57 L 98,70 Q 98,74.5 118,74.5 Q 138,74.5 138,70 L 138,57 Q 138,61.5 118,61.5 Q 98,61.5 98,57 Z"
+        fill="url(#dbFace)"/>
+  <ellipse cx="118" cy="57" rx="20" ry="4.5" fill="url(#dbBand)"/>
+  <path d="M 101,64 Q 110,66.5 118,66.5 Q 126,66.5 132,64.5"
+        stroke="#3a5060" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.4"/>
+  <!-- Dots dimmed -->
+  <circle cx="130" cy="61.5" r="1.5" fill="#6a5a30" opacity="0.5"/>
+  <circle cx="134" cy="63.5" r="1.3" fill="#7a2a2a" opacity="0.5"/>
+
+  <!-- Segment 2 (middle) -->
+  <path d="M 98,41 L 98,57 Q 98,61.5 118,61.5 Q 138,61.5 138,57 L 138,41 Q 138,45.5 118,45.5 Q 98,45.5 98,41 Z"
+        fill="url(#dbFace)"/>
+  <ellipse cx="118" cy="41" rx="20" ry="4.5" fill="url(#dbBand)"/>
+  <path d="M 101,48 Q 110,50.5 118,50.5 Q 126,50.5 132,48.5"
+        stroke="#3a5060" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.4"/>
+  <circle cx="130" cy="45.5" r="1.5" fill="#6a5a30" opacity="0.5"/>
+  <circle cx="134" cy="47.5" r="1.3" fill="#7a2a2a" opacity="0.5"/>
+
+  <!-- Segment 1 (top) -->
+  <path d="M 98,24 L 98,41 Q 98,45.5 118,45.5 Q 138,45.5 138,41 L 138,24 Q 138,28.5 118,28.5 Q 98,28.5 98,24 Z"
+        fill="url(#dbFace)"/>
+  <ellipse cx="118" cy="24" rx="20" ry="4.5" fill="url(#dbBand)"/>
+  <path d="M 101,31 Q 110,33.5 118,33.5 Q 126,33.5 132,31.5"
+        stroke="#3a5060" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.4"/>
+  <circle cx="130" cy="28.5" r="1.5" fill="#6a5a30" opacity="0.5"/>
+  <circle cx="134" cy="30.5" r="1.3" fill="#7a2a2a" opacity="0.5"/>
+
+  <!-- Top cap — desaturated -->
+  <ellipse cx="118" cy="24" rx="20" ry="4.5" fill="url(#dbTop)" stroke="#4a5a68" stroke-width="0.7"/>
+  <ellipse cx="112" cy="22.5" rx="9" ry="2.2" fill="rgba(255,255,255,0.07)" transform="rotate(-8,112,22.5)"/>
+
+  <!-- ══════════════════════════════════ -->
+  <!--   ERROR BADGE — centre of break   -->
+  <!-- ══════════════════════════════════ -->
+
+  <!-- Badge shadow ring -->
+  <circle cx="65" cy="37" r="8.5" fill="rgba(0,0,0,0.35)"/>
+  <!-- Badge -->
+  <circle cx="65" cy="36" r="8.5" fill="url(#errGrad)" stroke="#fbd4d7" stroke-width="1"/>
+  <!-- X mark -->
+  <line x1="61.5" y1="32.5" x2="68.5" y2="39.5" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="68.5" y1="32.5" x2="61.5" y2="39.5" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+
+</svg>
