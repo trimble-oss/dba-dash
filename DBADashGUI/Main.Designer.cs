@@ -216,6 +216,16 @@ namespace DBADashGUI
             serverServices1 = new DBADashGUI.CustomReports.ServerServices();
             tabDeletedInstances = new System.Windows.Forms.TabPage();
             deletedInstances1 = new DeletedInstances();
+            tabConnecting = new System.Windows.Forms.TabPage();
+            tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            panel1 = new System.Windows.Forms.Panel();
+            bttnRetry = new System.Windows.Forms.Button();
+            picConnectPct = new System.Windows.Forms.PictureBox();
+            lblConnecting = new System.Windows.Forms.Label();
+            lblConnectionInfo = new System.Windows.Forms.Label();
+            bttnCancel = new System.Windows.Forms.Button();
+            txtConnectionError = new System.Windows.Forms.TextBox();
+            label3 = new System.Windows.Forms.Label();
             refresh1 = new Refresh();
             dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -311,6 +321,10 @@ namespace DBADashGUI
             tabQueryStoreForcedPlans.SuspendLayout();
             tabServerServices.SuspendLayout();
             tabDeletedInstances.SuspendLayout();
+            tabConnecting.SuspendLayout();
+            tableLayoutPanel1.SuspendLayout();
+            panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picConnectPct).BeginInit();
             SuspendLayout();
             // 
             // TreeViewImageList
@@ -910,6 +924,7 @@ namespace DBADashGUI
             tabs.Controls.Add(tabQueryStoreForcedPlans);
             tabs.Controls.Add(tabServerServices);
             tabs.Controls.Add(tabDeletedInstances);
+            tabs.Controls.Add(tabConnecting);
             tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             tabs.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
             tabs.Location = new System.Drawing.Point(0, 0);
@@ -2293,6 +2308,129 @@ namespace DBADashGUI
             deletedInstances1.Size = new System.Drawing.Size(190, 53);
             deletedInstances1.TabIndex = 0;
             // 
+            // tabConnecting
+            // 
+            tabConnecting.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
+            tabConnecting.Controls.Add(tableLayoutPanel1);
+            tabConnecting.Controls.Add(label3);
+            tabConnecting.Location = new System.Drawing.Point(4, 39);
+            tabConnecting.Name = "tabConnecting";
+            tabConnecting.Padding = new System.Windows.Forms.Padding(3);
+            tabConnecting.Size = new System.Drawing.Size(192, 57);
+            tabConnecting.TabIndex = 54;
+            tabConnecting.Text = "DBA Dash";
+            // 
+            // tableLayoutPanel1
+            // 
+            tableLayoutPanel1.ColumnCount = 3;
+            tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 700F));
+            tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            tableLayoutPanel1.Controls.Add(panel1, 1, 1);
+            tableLayoutPanel1.Controls.Add(txtConnectionError, 0, 2);
+            tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            tableLayoutPanel1.Location = new System.Drawing.Point(3, 33);
+            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.RowCount = 3;
+            tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 32.6086922F));
+            tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 34.2809372F));
+            tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.1103668F));
+            tableLayoutPanel1.Size = new System.Drawing.Size(186, 21);
+            tableLayoutPanel1.TabIndex = 5;
+            // 
+            // panel1
+            // 
+            panel1.Controls.Add(bttnRetry);
+            panel1.Controls.Add(picConnectPct);
+            panel1.Controls.Add(lblConnecting);
+            panel1.Controls.Add(lblConnectionInfo);
+            panel1.Controls.Add(bttnCancel);
+            panel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            panel1.Location = new System.Drawing.Point(-254, 9);
+            panel1.Name = "panel1";
+            panel1.Size = new System.Drawing.Size(694, 1);
+            panel1.TabIndex = 6;
+            // 
+            // bttnRetry
+            // 
+            bttnRetry.Enabled = false;
+            bttnRetry.Location = new System.Drawing.Point(507, 56);
+            bttnRetry.Name = "bttnRetry";
+            bttnRetry.Size = new System.Drawing.Size(117, 38);
+            bttnRetry.TabIndex = 6;
+            bttnRetry.Text = "&Retry";
+            bttnRetry.UseVisualStyleBackColor = true;
+            bttnRetry.Click += Retry_Click;
+            // 
+            // picConnectPct
+            // 
+            picConnectPct.Image = Properties.Resources.db_connection;
+            picConnectPct.Location = new System.Drawing.Point(0, 3);
+            picConnectPct.Name = "picConnectPct";
+            picConnectPct.Size = new System.Drawing.Size(163, 91);
+            picConnectPct.TabIndex = 5;
+            picConnectPct.TabStop = false;
+            // 
+            // lblConnecting
+            // 
+            lblConnecting.AutoSize = true;
+            lblConnecting.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
+            lblConnecting.ForeColor = System.Drawing.Color.White;
+            lblConnecting.Location = new System.Drawing.Point(169, 3);
+            lblConnecting.Name = "lblConnecting";
+            lblConnecting.Size = new System.Drawing.Size(411, 32);
+            lblConnecting.TabIndex = 1;
+            lblConnecting.Text = "Connecting to repository database";
+            // 
+            // lblConnectionInfo
+            // 
+            lblConnectionInfo.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            lblConnectionInfo.ForeColor = System.Drawing.Color.White;
+            lblConnectionInfo.Location = new System.Drawing.Point(0, 97);
+            lblConnectionInfo.Name = "lblConnectionInfo";
+            lblConnectionInfo.Size = new System.Drawing.Size(694, 0);
+            lblConnectionInfo.TabIndex = 4;
+            lblConnectionInfo.Text = "Waiting for connection";
+            // 
+            // bttnCancel
+            // 
+            bttnCancel.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            bttnCancel.Location = new System.Drawing.Point(373, 56);
+            bttnCancel.Name = "bttnCancel";
+            bttnCancel.Size = new System.Drawing.Size(117, 38);
+            bttnCancel.TabIndex = 0;
+            bttnCancel.Text = "&Cancel";
+            bttnCancel.UseVisualStyleBackColor = true;
+            bttnCancel.Click += CancelConnection_Click;
+            // 
+            // txtConnectionError
+            // 
+            txtConnectionError.BackColor = System.Drawing.Color.Red;
+            txtConnectionError.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            tableLayoutPanel1.SetColumnSpan(txtConnectionError, 3);
+            txtConnectionError.Dock = System.Windows.Forms.DockStyle.Fill;
+            txtConnectionError.ForeColor = System.Drawing.Color.White;
+            txtConnectionError.Location = new System.Drawing.Point(3, 16);
+            txtConnectionError.Multiline = true;
+            txtConnectionError.Name = "txtConnectionError";
+            txtConnectionError.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            txtConnectionError.Size = new System.Drawing.Size(180, 2);
+            txtConnectionError.TabIndex = 3;
+            txtConnectionError.Text = "Error connecting to repository database";
+            txtConnectionError.Visible = false;
+            // 
+            // label3
+            // 
+            label3.Dock = System.Windows.Forms.DockStyle.Top;
+            label3.Font = new System.Drawing.Font("Segoe UI", 13F, System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic);
+            label3.ForeColor = System.Drawing.Color.White;
+            label3.Location = new System.Drawing.Point(3, 3);
+            label3.Name = "label3";
+            label3.Size = new System.Drawing.Size(186, 30);
+            label3.TabIndex = 2;
+            label3.Text = "DBA Dash";
+            label3.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
             // refresh1
             // 
             refresh1.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
@@ -2627,6 +2765,12 @@ namespace DBADashGUI
             tabQueryStoreForcedPlans.ResumeLayout(false);
             tabServerServices.ResumeLayout(false);
             tabDeletedInstances.ResumeLayout(false);
+            tabConnecting.ResumeLayout(false);
+            tableLayoutPanel1.ResumeLayout(false);
+            tableLayoutPanel1.PerformLayout();
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)picConnectPct).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -2840,5 +2984,15 @@ namespace DBADashGUI
         private System.Windows.Forms.ToolStripMenuItem chartFontToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem setLabelSizeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem setNameSizeToolStripMenuItem;
+        private System.Windows.Forms.TabPage tabConnecting;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label lblConnecting;
+        private System.Windows.Forms.Button bttnCancel;
+        private System.Windows.Forms.TextBox txtConnectionError;
+        private System.Windows.Forms.Label lblConnectionInfo;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.PictureBox picConnectPct;
+        private System.Windows.Forms.Button bttnRetry;
     }
 }

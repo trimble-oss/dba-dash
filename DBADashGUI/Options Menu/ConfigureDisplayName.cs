@@ -41,9 +41,9 @@ namespace DBADashGUI
             );
         }
 
-        private void RefreshData()
+        private async void RefreshData()
         {
-            DataTable dt = CommonData.GetInstances(TagIDs, true, false, SearchString);
+            DataTable dt = await CommonData.GetInstancesAsync(TagIDs, true, false, SearchString);
             dgv.DataSource = dt;
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }

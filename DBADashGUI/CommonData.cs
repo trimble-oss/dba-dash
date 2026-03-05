@@ -10,6 +10,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Caching;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -23,35 +24,37 @@ namespace DBADashGUI
         private static readonly MemoryCache cache = MemoryCache.Default;
         internal static readonly string[] databaseNameParams = new string[] { "@DB", "@DBName", "@DatabaseName", "@Database", "@database_name", "db_name" };
 
-        public static void UpdateInstancesList(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "", string groupByTag = "")
+        public static async Task UpdateInstancesListAsync(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "", string groupByTag = "", CancellationToken token = default)
         {
-            Instances = GetInstances(tagIDs, Active, azureDB, searchString, groupByTag);
+            Instances = await GetInstancesAsync(tagIDs, Active, azureDB, searchString, groupByTag, token);
             DBADashContext.HiddenInstanceIDs = Instances.Rows.Cast<DataRow>().Where(r => !r.Field<bool>("ShowInSummary")).Select(r => r.Field<int>("InstanceID")).ToHashSet();
             HasInstanceMetadata = Instances.Rows.Cast<DataRow>().Where(r => r.Field<bool>("HasInstanceMetadata")).Select(r => r.Field<int>("InstanceID")).ToHashSet();
         }
 
-        public static DataTable GetElasticPools()
+        public static async Task<DataTable> GetElasticPoolsAsync(CancellationToken token = default)
         {
-            using var cn = new SqlConnection(Common.ConnectionString);
-            using var cmd = new SqlCommand(@"dbo.AzureDBElasticPool_Get", cn) { CommandType = CommandType.StoredProcedure };
-            using var da = new SqlDataAdapter(cmd);
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand(@"dbo.AzureDBElasticPool_Get", cn) { CommandType = CommandType.StoredProcedure };
+            await cn.OpenAsync(token);
+            var rdr = await cmd.ExecuteReaderAsync(token);
             DataTable dt = new();
-            da.Fill(dt);
+            dt.Load(rdr);
             return dt;
         }
 
-        public static DataTable GetInstances(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "", string groupByTag = "")
+        public static async Task<DataTable> GetInstancesAsync(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "", string groupByTag = "", CancellationToken token = default)
         {
-            using var cn = new SqlConnection(Common.ConnectionString);
-            using var cmd = new SqlCommand(@"dbo.Instances_Get", cn) { CommandType = CommandType.StoredProcedure };
-            using var da = new SqlDataAdapter(cmd);
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand(@"dbo.Instances_Get", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddStringIfNotNullOrEmpty("TagIDs", tagIDs);
             cmd.Parameters.AddWithNullableValue("IsActive", Active);
             cmd.Parameters.AddWithNullableValue("IsAzure", azureDB);
             cmd.Parameters.AddStringIfNotNullOrEmpty("SearchString", searchString);
             cmd.Parameters.AddStringIfNotNullOrEmpty("GroupByTag", groupByTag);
+            await cn.OpenAsync(token);
+            var rdr = await cmd.ExecuteReaderAsync(token);
             DataTable dt = new();
-            da.Fill(dt);
+            dt.Load(rdr);
             return dt;
         }
 

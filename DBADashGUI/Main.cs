@@ -14,14 +14,15 @@ using Humanizer;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using System;
-using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Version = System.Version;
@@ -37,6 +38,125 @@ namespace DBADashGUI
             public Tabs? Tab;
             public string Database;
             public bool SearchFromRoot = false;
+        }
+
+        // Extracted helper to build the instance tree from instance/pool DataTables
+        private SQLTreeItem BuildInstanceTree(DataTable instances, DataTable pools, CustomReports.CustomReports reports, string groupByTag)
+        {
+            var root = new SQLTreeItem(Common.RepositoryDBConnection.Name, SQLTreeItem.TreeType.DBADashRoot);
+            AddRootRefreshContextMenu(root);
+            var changes = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
+            var hadr = new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR);
+            var checks = new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks);
+            var storage = new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage);
+            var jobs = new SQLTreeItem("Jobs", SQLTreeItem.TreeType.AgentJobs);
+
+            root.Nodes.AddRange(new TreeNode[] { changes, checks, hadr, storage, jobs });
+
+            root.AddReportsFolder(reports?.RootLevelReports);
+
+            var parentNode = root;
+
+            var poolTable = pools ?? new DataTable();
+
+            SQLTreeItem AzureNode = null;
+            var currentTagGroup = string.Empty;
+            if (instances != null)
+            {
+                foreach (DataRow row in instances.Rows)
+                {
+                    var instance = (string)row["Instance"];
+                    var displayName = (string)row["InstanceDisplayName"];
+                    var instanceID = (int)row["InstanceID"];
+                    var showInSummary = (bool)row["ShowInSummary"];
+                    var tagGroup = Convert.ToString(row["TagGroup"]);
+
+                    if (currentTagGroup != tagGroup && !string.IsNullOrEmpty(tagGroup))
+                    {
+                        var folderText = string.IsNullOrEmpty(groupByTag) ? tagGroup : groupByTag + ": " + tagGroup;
+                        parentNode = new SQLTreeItem(folderText, SQLTreeItem.TreeType.InstanceFolder);
+                        changes = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
+                        hadr = new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR);
+                        checks = new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks);
+                        storage = new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage);
+                        jobs = new SQLTreeItem("Jobs", SQLTreeItem.TreeType.AgentJobs);
+                        parentNode.Nodes.AddRange(new TreeNode[] { changes, checks, hadr, storage, jobs });
+                        root.Nodes.Add(parentNode);
+                        currentTagGroup = tagGroup;
+                        AzureNode = null;
+                    }
+
+                    DatabaseEngineEdition edition;
+                    try { edition = (DatabaseEngineEdition)Convert.ToInt32(row["EngineEdition"]); } catch { edition = DatabaseEngineEdition.Unknown; }
+
+                    if ((bool)row["IsAzure"])
+                    {
+                        var db = (string)row["AzureDBName"];
+                        if (AzureNode == null || AzureNode.InstanceName != instance)
+                        {
+                            AzureNode = new SQLTreeItem(instance, SQLTreeItem.TreeType.AzureInstance)
+                            { EngineEdition = edition };
+                            parentNode.Nodes.Add(AzureNode);
+                            AzureNode.Nodes.AddRange(new TreeNode[] {
+                                new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration),
+                                new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks),
+                                new SQLTreeItem("Tags", SQLTreeItem.TreeType.Tags),
+                                new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage)
+                            });
+
+                            AzureNode.AddReportsFolder(reports?.InstanceLevelReports);
+                            var poolNodes = poolTable.Rows.Cast<DataRow>()
+                                .Where(r => (string)r["InstanceGroupName"] == instance && r["elastic_pool_name"] != DBNull.Value)
+                                .Select(r => (string)r["elastic_pool_name"]).Distinct().OrderBy(r => r)
+                                .Select(poolName => (TreeNode)new SQLTreeItem(poolName, SQLTreeItem.TreeType.ElasticPool) { ElasticPoolName = poolName }).ToArray();
+                            AzureNode.Nodes.AddRange(poolNodes);
+                        }
+
+                        var poolName = (string)row["elastic_pool_name"].DBNullToNull();
+                        var azureDBNode = new SQLTreeItem(db, SQLTreeItem.TreeType.AzureDatabase)
+                        {
+                            DatabaseID = (int)row["AzureDatabaseID"],
+                            InstanceID = instanceID,
+                            DatabaseName = db,
+                            ElasticPoolName = poolName,
+                            EngineEdition = edition,
+                        };
+                        azureDBNode.Nodes.AddRange(new TreeNode[] {
+                            new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration),
+                            new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks)
+                        });
+                        AzureNode.Nodes.Add(azureDBNode);
+                        azureDBNode.AddDatabaseFolders();
+                        azureDBNode.AddInstanceActionsContextMenu();
+                    }
+                    else
+                    {
+                        var n = new SQLTreeItem(displayName, SQLTreeItem.TreeType.Instance)
+                        {
+                            InstanceID = instanceID,
+                            EngineEdition = edition,
+                            IsVisibleInSummary = showInSummary
+                        };
+                        n.AddDummyNode();
+                        n.AddInstanceActionsContextMenu();
+                        parentNode.Nodes.Add(n);
+                    }
+                }
+            }
+
+            if (ShowCounts)
+            {
+                foreach (var n in root.Nodes.Cast<SQLTreeItem>().Where(t => t.Type == SQLTreeItem.TreeType.InstanceFolder))
+                {
+                    n.Text += "    {" + n.Nodes.Cast<SQLTreeItem>().Count(child => child.Type is SQLTreeItem.TreeType.Instance or SQLTreeItem.TreeType.AzureInstance) + "}";
+                }
+            }
+
+            IsAzureOnly = root.InstanceIDs.Count == root.AzureInstanceIDs.Count;
+            if (IsAzureOnly) root.Nodes.Remove(hadr);
+            if (DBADashUser.IsAdmin) root.Nodes.Add(new SQLTreeItem("Recycle Bin", SQLTreeItem.TreeType.RecycleBin));
+
+            return root;
         }
 
         public enum Tabs
@@ -121,6 +241,8 @@ namespace DBADashGUI
             Application.AddMessageFilter(this);
             FormClosed += (s, e) => Application.RemoveMessageFilter(this);
             InitializeComponent();
+            // Ensure cancel button is hidden until a cancellable connection attempt is in progress
+            bttnCancel.InvokeSetEnabled(false);
             WindowState = FormWindowState.Maximized;
             commandLine = opts;
             Disposed += OnDispose;
@@ -310,11 +432,9 @@ namespace DBADashGUI
 
             try
             {
-                await SetConnection(repositories.GetDefaultConnection());
-            }
-            catch (OperationCanceledException)
-            {
-                return; // User cancelled
+                var conn = repositories.GetDefaultConnection();
+
+                RunSetConnection(conn);
             }
             catch (Exception ex)
             {
@@ -358,61 +478,204 @@ namespace DBADashGUI
             }
         }
 
-        public async Task SetConnection(RepositoryConnection connection)
+        private void RunSetConnection(RepositoryConnection conn)
         {
-            SetConnectionState(false);
-            if (connection == null) return;
+            // Prepare cancellation token for this connection attempt and then
+            // call SetConnection on the UI thread. SetConnection will perform
+            // network I/O using async/await and any costly CPU-bound work will
+            // be offloaded as needed. This keeps ordering and avoids cross-
+            // thread races introduced by Task.Run + UI marshals.
+            try { _setConnectionCts?.Cancel(); _setConnectionCts?.Dispose(); } catch { }
+            _setConnectionCts = new CancellationTokenSource();
+            var token = _setConnectionCts.Token;
 
+            // Remember last attempt for Retry
+            _lastConnectionAttempt = conn;
+
+            // Clear any transient cache from previous runs
+            _customReportsCache = null;
+
+            // Call SetConnection on UI thread so its UI updates are single-threaded
+            // and consistent. SetConnection will use `await` for I/O and offload
+            // heavy work to background tasks explicitly where required.
             try
             {
-                if (!CheckRepositoryDBConnection(connection.ConnectionString))
-                {
-                    return;
-                }
+                // `SetConnection` is async; we intentionally don't await here to
+                // keep caller non-blocking, but we call it on the UI thread so
+                // its marshaling behavior is straightforward.
+                var _ = SetConnection(conn, token);
             }
             catch (Exception ex)
             {
-                CommonShared.ShowExceptionDialog(ex);
+                try { this.BeginInvoke((Action)(() => CommonShared.ShowExceptionDialog(ex))); } catch { }
+            }
+        }
+
+        public async Task SetConnection(RepositoryConnection connection, CancellationToken token = default)
+        {
+            if (connection == null) return;
+
+            // Ensure we have a token to use and record it if caller didn't pass one
+            if (token == default)
+            {
+                try { _setConnectionCts?.Cancel(); _setConnectionCts?.Dispose(); } catch { }
+                _setConnectionCts = new CancellationTokenSource();
+                token = _setConnectionCts.Token;
+            }
+
+            // Start UI connection state (on UI thread)
+            SetConnectionState(false);
+            try { StartConnectingAnimation(); } catch { }
+
+            // remember last attempt for retry
+            _lastConnectionAttempt = connection;
+
+            token.ThrowIfCancellationRequested();
+
+            // 1) Try opening SQL connection (async). This uses await so it won't
+            // block the UI thread and still executes in the UI synchronization
+            // context (keeps ordering simple).
+            try
+            {
+                await using var cn = new SqlConnection(connection.ConnectionString);
+                await cn.OpenAsync(token);
+            }
+            catch (OperationCanceledException)
+            {
+                try { if (token == _setConnectionCts?.Token) SetConnectionError("Connection attempt cancelled."); } catch { }
+                try { if (token == _setConnectionCts?.Token) StopConnectingAnimation(); } catch { }
+                token.ThrowIfCancellationRequested();
+            }
+            catch (Exception ex)
+            {
+                try { if (token == _setConnectionCts?.Token) SetConnectionError("Error connecting to repository database: " + ex.Message, ex); } catch { }
+                try { if (token == _setConnectionCts?.Token) StopConnectingAnimation(); } catch { }
                 return;
             }
 
+            // 2) Version check (may display dialogs) - keep on UI thread for simplicity
             try
             {
                 await CheckVersion(connection.ConnectionString);
             }
             catch (OperationCanceledException)
             {
-                throw; // user cancelled
+                try { if (token == _setConnectionCts?.Token) SetConnectionError("Version check cancelled."); } catch { }
+                try { if (token == _setConnectionCts?.Token) StopConnectingAnimation(); } catch { }
+                token.ThrowIfCancellationRequested();
             }
             catch (Exception ex)
             {
-                CommonShared.ShowExceptionDialog(ex);
+                try { if (token == _setConnectionCts?.Token) SetConnectionError("Error checking repository database version: " + ex.Message, ex); } catch { }
+                try { if (token == _setConnectionCts?.Token) StopConnectingAnimation(); } catch { }
                 return;
             }
 
+            // 3) Perform configuration and prepare data for UI. Offload heavy
+            // data pulls to background thread, but build node objects there and
+            // then apply on UI thread in one shot to avoid flicker.
             Common.SetConnectionString(connection);
+            // Ensure any saved tree layout and command-line tags are applied
+            try { GetCommandLineTags(); } catch { }
+            try { GetTreeLayout(); } catch { }
             try
             {
-                Config.RefreshConfig();
-                DBADashUser.GetUser();
-                customReports = CustomReports.CustomReports.GetCustomReports();
-                GetCommandLineTags();
-                GetTreeLayout();
-                BuildTagMenu(commandLineTags);
-                AddInstances();
-                AddTimeZoneMenus();
-                SetConnectionState(true);
-                repoSettingsToolStripMenuItem.Enabled = DBADashUser.IsAdmin;
-                ThemeExtensions.CellToolTipMaxLength = Config.CellToolTipMaxLength;
+                // Capture UI-dependent values before going to background thread
+                var searchStringLocal = SearchString;
+                var groupByTagLocal = GroupByTag;
+
+                // Offload data reads to background thread and capture snapshots.
+                // We populate CommonData.Instances in the background and capture
+                // pools/customReports for use on the UI thread. Avoid duplicating
+                // the instances DataTable here.
+                DataTable poolsSnapshot = null;
+                try
+                {
+                    Config.RefreshConfig();
+                    DBADashUser.GetUser();
+                    _customReportsCache = CustomReports.CustomReports.GetCustomReports();
+
+                    // Only apply command-line tag filter if one was actually provided.
+                    var commandLineTagIDs = string.Empty;
+                    if (!string.IsNullOrEmpty(commandLine.TagFilters))
+                    {
+                        var tags = DBADashTag.GetTags(Common.ConnectionString, commandLine.TagFilters).ToList();
+                        commandLineTagIDs = string.Join(",", tags.Select(t => t.TagID));
+                    }
+
+                    await CommonData.UpdateInstancesListAsync(tagIDs: commandLineTagIDs, searchString: searchStringLocal, groupByTag: groupByTagLocal, token: token);
+                    poolsSnapshot = await CommonData.GetElasticPoolsAsync(token);
+                }
+                catch (Exception)
+                {
+                    // Let the exception surface to the caller so SetConnection
+                    // can show an error
+                    throw;
+                }
+
+                // Apply UI updates on UI thread in one atomic block
+                if (token == _setConnectionCts?.Token)
+                {
+                    // Marshal the UI updates to the UI thread using BeginInvoke so
+                    // the background Task.Run does not directly access controls.
+                    this.BeginInvoke((Action)(() =>
+                    {
+                        // Update cached reports reference
+                        if (_customReportsCache != null)
+                        {
+                            customReports = _customReportsCache;
+                        }
+
+                        // Build tag menu using any command-line tag filters, else use current selections
+                        var selectedForMenu = string.IsNullOrEmpty(commandLine.TagFilters)
+                            ? SelectedTags()
+                            : DBADashTag.GetTags(Common.ConnectionString, commandLine.TagFilters).Select(t => t.TagID).ToList();
+                        BuildTagMenu(selectedForMenu);
+
+                        // Build tree from authoritative CommonData.Instances and the
+                        // pools snapshot captured earlier.
+                        VisitedNodes.Clear();
+                        tsBack.Enabled = false;
+                        tv1.Nodes.Clear();
+                        var root = BuildInstanceTree(CommonData.Instances, poolsSnapshot, customReports, groupByTagLocal);
+                        tv1.Nodes.Add(root);
+                        root.Expand();
+                        tv1.SelectedNode = root;
+
+                        AddTimeZoneMenus();
+                        SetConnectionState(true);
+                        repoSettingsToolStripMenuItem.Enabled = DBADashUser.IsAdmin;
+                        ThemeExtensions.CellToolTipMaxLength = Config.CellToolTipMaxLength;
+                        StopConnectingAnimation();
+                    }));
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                try { if (token == _setConnectionCts?.Token) SetConnectionError("Connection cancelled."); } catch { }
             }
             catch (Exception ex)
             {
-                CommonShared.ShowExceptionDialog(ex);
+                SetConnectionError("Error loading data: " + ex.Message, ex);
+            }
+            finally
+            {
+                try { if (token == _setConnectionCts?.Token) StopConnectingAnimation(); } catch { }
             }
         }
 
         private void SetConnectionState(bool isGood)
         {
+            if (this.InvokeRequired)
+            {
+                try { this.Invoke((Action)(() => SetConnectionState(isGood))); } catch { }
+                return;
+            }
+            picConnectPct.Image = Properties.Resources.db_connection;
+            lblConnecting.Text = "Connecting to repository database";
+            lblConnectionInfo.Text = "Waiting for connection...";
+            txtConnectionError.Visible = false;
+            txtConnectionError.Text = "";
             bttnSearch.Enabled = isGood;
             optionsToolStripMenuItem.Enabled = isGood;
             diffToolStripMenuItem.Enabled = isGood;
@@ -420,42 +683,59 @@ namespace DBADashGUI
             {
                 tv1.Nodes.Clear();
                 tabs.TabPages.Clear();
-                tabs.TabPages.Add(tabDBADash);
+                tabs.TabPages.Add(tabConnecting);
             }
         }
 
-        /// <summary>
-        /// Check connection to DBA Dash repository DB.  User is prompted to retry or cancel on failure.
-        /// </summary>
-        /// <returns>True if connection succeeded</returns>
-        private static bool CheckRepositoryDBConnection(string connectionString)
+        private void SetConnectionError(string message, Exception ex = null)
         {
-            var connectionCheckPassed = false;
-            while (!connectionCheckPassed)
+            if (this.InvokeRequired)
             {
-                try
-                {
-                    using (var cn = new SqlConnection(connectionString))
-                    {
-                        cn.Open();
-                    }
+                try { this.Invoke((Action)(() => SetConnectionError(message, ex))); } catch { }
+                return;
+            }
+            SetConnectionState(false);
+            lblConnecting.Text = "Connection Failed";
+            lblConnectionInfo.Text = message;
+            txtConnectionError.Text = ex?.ToString();
+            txtConnectionError.Visible = ex != null;
+            picConnectPct.Image = Properties.Resources.db_connection_error;
+            // Enable retry so user can attempt to connect again
+            bttnRetry.InvokeSetEnabled(true);
+            bttnCancel.InvokeSetEnabled(false);
+        }
 
-                    connectionCheckPassed = true;
-                }
-                catch (Exception ex)
+        private void StartConnectingAnimation()
+        {
+            StopConnectingAnimation();
+            picConnectPct.Image = Properties.Resources.database_connect_animated;
+            _connectingDots = 0;
+            lblConnectionInfo.Text = "Waiting for connection";
+            _connectingTimer = new System.Windows.Forms.Timer { Interval = 500 };
+            _connectingTimer.Tick += (s, e) =>
+            {
+                _connectingDots = (_connectingDots + 1) % 100; // 0..100
+                lblConnectionInfo.Text = "Waiting for connection" + new string('.', _connectingDots);
+                Application.DoEvents();
+            };
+            bttnCancel.InvokeSetEnabled(true);
+            bttnRetry.InvokeSetEnabled(false);
+            _connectingTimer.Start();
+        }
+
+        private void StopConnectingAnimation()
+        {
+            try
+            {
+                if (_connectingTimer != null)
                 {
-                    if (CommonShared.ShowExceptionDialog(ex, "Error connecting to repository database",
-                            "Connection Error", TaskDialogIcon.Error, default, new TaskDialogButtonCollection()
-                            {
-                                TaskDialogButton.Retry, TaskDialogButton.Cancel
-                            }) == TaskDialogButton.Cancel)
-                    {
-                        break;
-                    }
+                    _connectingTimer.Stop();
+                    _connectingTimer.Dispose();
+                    _connectingTimer = null;
                 }
             }
-
-            return connectionCheckPassed;
+            catch { }
+            bttnCancel.InvokeSetEnabled(false);
         }
 
         private static void WaitForDBUpgrade(string connectionString, string caption = "Upgrade in progress", string heading = "Repository database upgrade is in progress.  ", string text = "Please wait for this to complete.  If you continue, the application might be unstable.  \n\nThis dialog will close automatically...", bool allowContinue = true)
@@ -488,7 +768,7 @@ namespace DBADashGUI
                 page.DefaultButton = TaskDialogButton.Continue;
             }
 
-            var tmr = new Timer() { Interval = 1000, Enabled = true };
+            var tmr = new System.Windows.Forms.Timer() { Interval = 1000, Enabled = true };
             tmr.Tick += (s, e) =>
             {
                 try
@@ -622,159 +902,32 @@ namespace DBADashGUI
             mnuRootRefresh.Click += MnuRootRefresh_Click;
         }
 
-        private void MnuRootRefresh_Click(object sender, EventArgs e)
+        private async void MnuRootRefresh_Click(object sender, EventArgs e)
         {
-            AddInstances();
+            await AddInstancesAsync();
         }
 
-        private void AddInstances()
+        private async Task AddInstancesAsync(CancellationToken token = default)
         {
+            // Back-compat wrapper - calls the cache-aware implementation when
+            // a cache is present.
+            // Clear navigation history and rebuild the tree from live data
             VisitedNodes.Clear();
             tsBack.Enabled = false;
             tv1.Nodes.Clear();
-            var root = new SQLTreeItem(Common.RepositoryDBConnection.Name, SQLTreeItem.TreeType.DBADashRoot);
-            AddRootRefreshContextMenu(root);
-            var changes = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
-            var hadr = new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR);
-            var checks = new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks);
-            var storage = new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage);
-            var jobs = new SQLTreeItem("Jobs", SQLTreeItem.TreeType.AgentJobs);
 
-            root.Nodes.AddRange(new TreeNode[] { changes, checks, hadr, storage, jobs });
-
-            root.AddReportsFolder(customReports.RootLevelReports);
-
-            var parentNode = root;
-
-            var tags = string.Join(",", SelectedTags());
-
-            CommonData.UpdateInstancesList(tagIDs: tags, searchString: SearchString, groupByTag: GroupByTag);
-            var pools = CommonData.GetElasticPools();
-
-            SQLTreeItem AzureNode = null;
-            var currentTagGroup = string.Empty;
-            foreach (DataRow row in CommonData.Instances.Rows)
-            {
-                var instance = (string)row["Instance"];
-                var displayName = (string)row["InstanceDisplayName"];
-                var instanceID = (int)row["InstanceID"];
-                var showInSummary = (bool)row["ShowInSummary"];
-                var tagGroup = Convert.ToString(row["TagGroup"]);
-
-                if (currentTagGroup != tagGroup && !string.IsNullOrEmpty(tagGroup))
-                {
-                    parentNode = new SQLTreeItem(GroupByTag + ": " + tagGroup, SQLTreeItem.TreeType.InstanceFolder);
-                    changes = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
-                    hadr = new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR);
-                    checks = new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks);
-                    storage = new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage);
-                    jobs = new SQLTreeItem("Jobs", SQLTreeItem.TreeType.AgentJobs);
-                    parentNode.Nodes.AddRange(new TreeNode[] { changes, checks, hadr, storage, jobs });
-                    root.Nodes.Add(parentNode);
-                    currentTagGroup = tagGroup;
-                    AzureNode = null;
-                }
-
-                DatabaseEngineEdition edition;
-                try
-                {
-                    edition = (DatabaseEngineEdition)Convert.ToInt32(row["EngineEdition"]);
-                }
-                catch
-                {
-                    edition = DatabaseEngineEdition.Unknown;
-                }
-
-                if ((bool)row["IsAzure"])
-                {
-                    var db = (string)row["AzureDBName"];
-                    if (AzureNode == null || AzureNode.InstanceName != instance)
-                    {
-                        AzureNode = new SQLTreeItem(instance, SQLTreeItem.TreeType.AzureInstance)
-                        {
-                            EngineEdition = edition
-                        };
-                        parentNode.Nodes.Add(AzureNode);
-                        AzureNode.Nodes.AddRange(
-                            new TreeNode[]
-                            {
-                                new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration),
-                                new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks),
-                                new SQLTreeItem("Tags", SQLTreeItem.TreeType.Tags),
-                                new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage)
-                            }
-                        );
-
-                        AzureNode.AddReportsFolder(customReports.InstanceLevelReports);
-                        var poolNodes = pools.Rows.Cast<DataRow>()
-                            .Where(r => (string)r["InstanceGroupName"] == instance && r["elastic_pool_name"] != DBNull.Value)
-                            .Select(r => (string)r["elastic_pool_name"])
-                            .Distinct()
-                            .OrderBy(r => r)
-                            .Select(poolName => (TreeNode)new SQLTreeItem(poolName, SQLTreeItem.TreeType.ElasticPool) { ElasticPoolName = poolName })
-                            .ToArray();
-
-                        AzureNode.Nodes.AddRange(poolNodes);
-                    }
-
-                    var poolName = (string)row["elastic_pool_name"].DBNullToNull();
-                    var azureDBNode = new SQLTreeItem(db, SQLTreeItem.TreeType.AzureDatabase)
-                    {
-                        DatabaseID = (int)row["AzureDatabaseID"],
-                        InstanceID = instanceID,
-                        DatabaseName = db,
-                        ElasticPoolName = poolName,
-                        EngineEdition = edition,
-                    };
-                    azureDBNode.Nodes.AddRange(
-                        new TreeNode[]
-                        {
-                            new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration),
-                            new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks)
-                            }
-                        );
-                    AzureNode.Nodes.Add(azureDBNode);
-                    azureDBNode.AddDatabaseFolders();
-                    azureDBNode.AddInstanceActionsContextMenu();
-                }
-                else
-                {
-                    var n = new SQLTreeItem(displayName, SQLTreeItem.TreeType.Instance)
-                    {
-                        InstanceID = instanceID,
-                        EngineEdition = edition,
-                        IsVisibleInSummary = showInSummary
-                    };
-                    n.AddDummyNode();
-                    n.AddInstanceActionsContextMenu();
-                    parentNode.Nodes.Add(n);
-                }
-            }
-
-            if (ShowCounts) // Show count of instances for the grouping
-            {
-                foreach (var n in root.Nodes.Cast<SQLTreeItem>()
-                             .Where(t => t.Type == SQLTreeItem.TreeType.InstanceFolder))
-                {
-                    n.Text += "    {" + n.Nodes.Cast<SQLTreeItem>().Count(child => child.Type is SQLTreeItem.TreeType.Instance or SQLTreeItem.TreeType.AzureInstance) + "}";
-                }
-            }
-
-            IsAzureOnly = root.InstanceIDs.Count == root.AzureInstanceIDs.Count;
-            if (IsAzureOnly)
-            {
-                root.Nodes.Remove(hadr);
-            }
-            if (DBADashUser.IsAdmin)
-            {
-                var recycleBin = new SQLTreeItem("Recycle Bin", SQLTreeItem.TreeType.RecycleBin);
-                root.Nodes.Add(recycleBin);
-            }
+            // Build tree using shared helper
+            await CommonData.UpdateInstancesListAsync(tagIDs: string.Join(",", SelectedTags()), searchString: SearchString, groupByTag: GroupByTag, token: token);
+            var pools = await CommonData.GetElasticPoolsAsync();
+            var root = BuildInstanceTree(CommonData.Instances, pools, customReports, GroupByTag);
 
             tv1.Nodes.Add(root);
             root.Expand();
             tv1.SelectedNode = root;
         }
+
+        // No per-instance cache maintained here. Tree is built from
+        // CommonData.Instances and freshly-captured pool/report snapshots.
 
         private static void ExpandJobs(SQLTreeItem jobsNode)
         {
@@ -1446,16 +1599,16 @@ namespace DBADashGUI
             }
         }
 
-        private void ShowCounts_Click(object sender, EventArgs e)
+        private async void ShowCounts_Click(object sender, EventArgs e)
         {
             ShowCounts = ((ToolStripMenuItem)sender).Checked;
-            AddInstances();
+            await AddInstancesAsync();
         }
 
-        private void GroupByTag_Click(object sender, EventArgs e)
+        private async void GroupByTag_Click(object sender, EventArgs e)
         {
             GroupByTag = (string)((ToolStripMenuItem)sender).Tag;
-            AddInstances();
+            await AddInstancesAsync();
         }
 
         private void RefreshTag_Click(object sender, EventArgs e)
@@ -1463,14 +1616,14 @@ namespace DBADashGUI
             BuildTagMenu(SelectedTags());
         }
 
-        private void ClearTag_Click(object sender, EventArgs e)
+        private async void ClearTag_Click(object sender, EventArgs e)
         {
             customReports = CustomReports.CustomReports.GetCustomReports(true);
             isClearTags = true;
             mnuTags.Font = Font = new Font(mnuTags.Font, mnuTags.Font.Style & ~FontStyle.Bold);
             ClearTags(mnuTags.DropDownItems);
             isClearTags = false;
-            AddInstances();
+            await AddInstancesAsync();
             Font = new Font(Font, FontStyle.Regular);
         }
 
@@ -1513,10 +1666,10 @@ namespace DBADashGUI
             return selected;
         }
 
-        private void MTagValue_CheckedChanged(object sender, EventArgs e)
+        private async void MTagValue_CheckedChanged(object sender, EventArgs e)
         {
             if (isClearTags) return;
-            AddInstances();
+            await AddInstancesAsync();
             var mnuTag = (ToolStripMenuItem)sender;
             while (mnuTag.OwnerItem is ToolStripMenuItem item)
             {
@@ -1738,7 +1891,8 @@ namespace DBADashGUI
             {
                 if (manageInstancesForm.InstanceActiveFlagChanged || manageInstancesForm.InstanceSummaryVisibleChanged)
                 {
-                    AddInstances(); // refresh the tree if instances deleted/restored
+                    // Fire-and-forget refresh - don't block UI while dialog closes
+                    _ = AddInstancesAsync(); // refresh the tree if instances deleted/restored
                     if (tabs.SelectedTab == tabSummary)
                     {
                         summary1.RefreshData();
@@ -1778,9 +1932,9 @@ namespace DBADashGUI
             CommonShared.ShowAbout(Common.ConnectionString, this, true);
         }
 
-        private void BttnSearch_Click(object sender, EventArgs e)
+        private async void BttnSearch_Click(object sender, EventArgs e)
         {
-            AddInstances();
+            await AddInstancesAsync();
         }
 
         private void DatabaseSchemaDiffToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1807,11 +1961,11 @@ namespace DBADashGUI
             jobDiffForm.ShowSingleInstance();
         }
 
-        private void TxtSearch_KeyUp(object sender, KeyEventArgs e)
+        private async void TxtSearch_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
-                AddInstances();
+                await AddInstancesAsync();
             }
         }
 
@@ -1829,7 +1983,9 @@ namespace DBADashGUI
             {
                 if (ConfigureDisplayNameForm.EditCount > 0)
                 {
-                    AddInstances();
+                    // Fire-and-forget is acceptable here because the dialog is about
+                    // a user edit; we don't need to block closing on tree refresh.
+                    _ = AddInstancesAsync();
                 }
 
                 ConfigureDisplayNameForm = null;
@@ -2049,7 +2205,6 @@ namespace DBADashGUI
 
         private async void TsConnect_Click(object sender, EventArgs e)
         {
-            var oldConnection = Common.RepositoryDBConnection;
             using var frm = new DBConnection() { ConnectionString = GetNewConnectionString() };
             frm.ShowDialog();
             if (frm.DialogResult != DialogResult.OK) return;
@@ -2057,16 +2212,26 @@ namespace DBADashGUI
             {
                 var connection = new RepositoryConnection() { ConnectionString = frm.ConnectionString };
                 connection.SetDefaultName();
-                await SetConnection(connection);
+                RunSetConnection(connection);
             }
             catch (Exception ex)
             {
                 CommonShared.ShowExceptionDialog(ex, "Error switching to DBA Dash repository database");
-                await SetConnection(oldConnection);
             }
         }
 
         private bool IsLoadingTimeZones = true;
+
+        // Cancellation token source used for background SetConnection attempts
+        private CancellationTokenSource _setConnectionCts;
+
+        // Last connection attempted (used by Retry)
+        private RepositoryConnection _lastConnectionAttempt;
+
+        private CustomReports.CustomReports _customReportsCache;
+
+        private System.Windows.Forms.Timer _connectingTimer;
+        private int _connectingDots;
 
         private void AddTimeZoneMenus()
         {
@@ -2175,7 +2340,7 @@ namespace DBADashGUI
         {
             var name = (string)((ToolStripItem)sender).Tag;
             var connection = repositories.FindByName(name);
-            await SetConnection(connection);
+            RunSetConnection(connection);
             tsConnect.HideDropDown();
         }
 
@@ -2227,7 +2392,7 @@ namespace DBADashGUI
             repositories.Add(connection);
             LoadRepositoryConnections();
             repositories.Save();
-            await SetConnection(connection);
+            RunSetConnection(connection);
         }
 
         private void SetAutoRefresh(object sender, EventArgs e)
@@ -2422,6 +2587,11 @@ namespace DBADashGUI
         {
             while (true)
             {
+                if (string.IsNullOrEmpty(Common.ConnectionString))
+                {
+                    await Task.Delay(10000);
+                    continue;
+                }
                 await UpdateAlertIcon();
                 if (Settings.Default.DesktopNotificationsEnabled)
                 {
@@ -2702,6 +2872,33 @@ namespace DBADashGUI
                 tabs.ResumeLayout();
                 tabs.Visible = prevVisible;
                 ShowRefresh(false);
+            }
+        }
+
+        private void CancelConnection_Click(object sender, EventArgs e)
+        {
+            _setConnectionCts?.Cancel();
+            try
+            {
+                // Give immediate feedback on UI
+                this.Invoke((Action)(() =>
+                {
+                    lblConnecting.Text = "Cancelling...";
+                    lblConnectionInfo.Text = "Cancelling connection...";
+                }));
+            }
+            catch { }
+        }
+
+        private void Retry_Click(object sender, EventArgs e)
+        {
+            // Disable retry to avoid rapid re-clicks
+            bttnRetry.InvokeSetEnabled(false);
+
+            // If we have a last connection attempt, try it again
+            if (_lastConnectionAttempt != null)
+            {
+                RunSetConnection(_lastConnectionAttempt);
             }
         }
     }

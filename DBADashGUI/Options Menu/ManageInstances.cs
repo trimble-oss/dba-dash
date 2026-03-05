@@ -31,9 +31,9 @@ namespace DBADashGUI
             RefreshData();
         }
 
-        private void RefreshData()
+        private async void RefreshData()
         {
-            var dt = CommonData.GetInstances(Tags, null);
+            var dt = await CommonData.GetInstancesAsync(Tags, null);
             dgv.AutoGenerateColumns = false;
             dgv.DataSource = new DataView(dt);
         }
