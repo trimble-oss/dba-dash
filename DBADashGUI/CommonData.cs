@@ -165,6 +165,32 @@ namespace DBADashGUI
             return dt;
         }
 
+        public static async Task<DataTable> GetJobStepsAsync(int InstanceID, Guid JobID, CancellationToken token = default)
+        {
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand("dbo.JobSteps_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("JobID", JobID);
+            await cn.OpenAsync(token);
+            var rdr = await cmd.ExecuteReaderAsync(token);
+            var dt = new DataTable();
+            dt.Load(rdr);
+            return dt;
+        }
+
+        public static async Task<DataTable> GetObjectsAsync(int DatabaseID, string types, CancellationToken token = default)
+        {
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand("dbo.DBObjects_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+            cmd.Parameters.AddWithValue("Types", types);
+            await cn.OpenAsync(token);
+            var rdr = await cmd.ExecuteReaderAsync(token);
+            var dt = new DataTable();
+            dt.Load(rdr);
+            return dt;
+        }
+
         public static DataTable GetJobs(int InstanceId, Guid? JobId = null)
         {
             using var cn = new SqlConnection(Common.ConnectionString);
@@ -174,6 +200,19 @@ namespace DBADashGUI
             cmd.Parameters.AddWithValue("JobId", JobId);
             var dt = new DataTable();
             da.Fill(dt);
+            return dt;
+        }
+
+        public static async Task<DataTable> GetJobsAsync(int InstanceId, Guid? JobId = null, CancellationToken token = default)
+        {
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand("dbo.Jobs_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("InstanceID", InstanceId);
+            cmd.Parameters.AddWithValue("JobId", JobId);
+            await cn.OpenAsync(token);
+            var rdr = await cmd.ExecuteReaderAsync(token);
+            var dt = new DataTable();
+            dt.Load(rdr);
             return dt;
         }
 
@@ -241,6 +280,19 @@ namespace DBADashGUI
             return dt;
         }
 
+        public static async Task<DataTable> GetDBObjectsAsync(int DatabaseID, string types, CancellationToken token = default)
+        {
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand("dbo.DBObjects_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+            cmd.Parameters.AddWithValue("Types", types);
+            await cn.OpenAsync(token);
+            var rdr = await cmd.ExecuteReaderAsync(token);
+            var dt = new DataTable();
+            dt.Load(rdr);
+            return dt;
+        }
+
         public static DataTable GetDDLHistoryForObject(long ObjectId, int PageNum, int PageSize)
         {
             using var cn = new SqlConnection(Common.ConnectionString);
@@ -253,6 +305,20 @@ namespace DBADashGUI
 
             var dt = new DataTable();
             da.Fill(dt);
+            return dt;
+        }
+
+        public static async Task<DataTable> GetDDLHistoryForObjectAsync(long ObjectId, int PageNum, int PageSize, CancellationToken token = default)
+        {
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand("dbo.DDLHistoryForObject_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("ObjectID", ObjectId);
+            cmd.Parameters.AddWithValue("PageSize", PageSize);
+            cmd.Parameters.AddWithValue("PageNumber", PageNum);
+            await cn.OpenAsync(token);
+            var rdr = await cmd.ExecuteReaderAsync(token);
+            var dt = new DataTable();
+            dt.Load(rdr);
             return dt;
         }
 
@@ -293,6 +359,28 @@ namespace DBADashGUI
 
             DataTable dt = new();
             da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            return dt;
+        }
+
+        public static async Task<DataTable> GetDrivesAsync(HashSet<int> instanceIDs, bool includeMetrics, bool includeCritical, bool includeWarning, bool includeNA, bool includeOK, bool showHidden, string driveName, bool hasMetrics = false, CancellationToken token = default)
+        {
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand("dbo.Drives_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", instanceIDs));
+            cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeCritical", DbType = DbType.Boolean, Value = includeCritical });
+            cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeWarning", DbType = DbType.Boolean, Value = includeWarning });
+            cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeNA", DbType = DbType.Boolean, Value = includeNA });
+            cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeOK", DbType = DbType.Boolean, Value = includeOK });
+            cmd.Parameters.AddWithNullableValue("DriveName", driveName);
+            cmd.Parameters.AddWithValue("IncludeMetrics", includeMetrics);
+            cmd.Parameters.AddWithValue("ShowHidden", showHidden);
+            cmd.Parameters.AddWithValue("HasMetrics", hasMetrics);
+
+            await cn.OpenAsync(token);
+            var rdr = await cmd.ExecuteReaderAsync(token);
+            var dt = new DataTable();
+            dt.Load(rdr);
             DateHelper.ConvertUTCToAppTimeZone(ref dt);
             return dt;
         }
