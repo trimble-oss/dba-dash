@@ -929,9 +929,9 @@ namespace DBADashGUI
         // No per-instance cache maintained here. Tree is built from
         // CommonData.Instances and freshly-captured pool/report snapshots.
 
-        private static void ExpandJobs(SQLTreeItem jobsNode)
+        private static async Task ExpandJobsAsync(SQLTreeItem jobsNode)
         {
-            var jobs = CommonData.GetJobs(jobsNode.InstanceID);
+            var jobs = await CommonData.GetJobsAsync(jobsNode.InstanceID);
             foreach (DataRow job in jobs.Rows)
             {
                 var attributes = new Dictionary<string, object>
@@ -991,50 +991,64 @@ namespace DBADashGUI
                                     { DriveName = driveLetter, ForeColor = color }).Cast<TreeNode>().ToArray());
         }
 
-        private static void ExpandDatabases(SQLTreeItem dbFolder)
+        private static async Task ExpandStorageAsync(SQLTreeItem storage)
+        {
+            var drives = await CommonData.GetDrivesAsync(storage.InstanceIDs, false, true, true, true, true, true, null);
+            storage.Nodes.Clear();
+            storage.Nodes.AddRange((from DataRow drive in drives.Rows
+                                    let driveLetter = Convert.ToString(drive["Name"])
+                                    let label = Convert.ToString(drive["Label"])
+                                    let PctFree = Convert.ToDouble(drive["PctFreeSpace"])
+                                    let TotalGB = Convert.ToDouble(drive["TotalGB"])
+                                    let FreeGB = Convert.ToDouble(drive["FreeGB"])
+                                    let UsedGB = TotalGB - FreeGB
+                                    let PctUsed = 1 - PctFree
+                                    let nameAndLetter = label + " (" + driveLetter + ")"
+                                    let color = DBADashStatus.GetStatusBackColor((DBADashStatus.DBADashStatusEnum)Convert.ToInt32(drive["Status"]))
+                                    let name = Common.AsciiProgressBar(PctUsed) + " " + nameAndLetter + "...." + UsedGB.Gigabytes().ToString("###,#.#") + "(" + PctUsed.ToString("P1") + ") Used of " + TotalGB.Gigabytes().Humanize("###,#.#")
+                                    orderby driveLetter
+                                    select new SQLTreeItem(name, SQLTreeItem.TreeType.Drive)
+                                    { DriveName = driveLetter, ForeColor = color }).Cast<TreeNode>().ToArray());
+        }
+
+        private static async Task ExpandDatabasesAsync(SQLTreeItem dbFolder)
         {
             List<TreeNode> nodesToAdd = new();
             var systemNode = new SQLTreeItem("System Databases", SQLTreeItem.TreeType.Folder);
             nodesToAdd.Add(systemNode);
 
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.DatabasesByInstance_Get", cn)
-            { CommandType = CommandType.StoredProcedure })
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand("dbo.DatabasesByInstance_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("InstanceID", dbFolder.InstanceID);
+            await cn.OpenAsync();
+            await using var rdr = await cmd.ExecuteReaderAsync();
+            while (await rdr.ReadAsync())
             {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceID", dbFolder.InstanceID);
-                using (var rdr = cmd.ExecuteReader())
+                var db = (string)rdr["name"];
+                var status = (string)rdr["Status"];
+                var nodeName = string.IsNullOrEmpty(status) ? db : db + " (" + status + ")";
+
+                var n = new SQLTreeItem(nodeName, SQLTreeItem.TreeType.Database)
                 {
-                    while (rdr.Read())
-                    {
-                        var db = (string)rdr["name"];
-                        var status = (string)rdr["Status"];
-                        var nodeName = string.IsNullOrEmpty(status) ? db : db + " (" + status + ")";
+                    DatabaseID = (int)rdr["DatabaseID"],
+                    InstanceID = (int)rdr["InstanceID"],
+                    DatabaseName = db
+                };
+                if (rdr["ObjectID"] != DBNull.Value)
+                {
+                    n.ObjectID = (long)rdr["ObjectID"];
+                }
 
-                        var n = new SQLTreeItem(nodeName, SQLTreeItem.TreeType.Database)
-                        {
-                            DatabaseID = (int)rdr["DatabaseID"],
-                            InstanceID = (int)rdr["InstanceID"],
-                            DatabaseName = db
-                        };
-                        if (rdr["ObjectID"] != DBNull.Value)
-                        {
-                            n.ObjectID = (long)rdr["ObjectID"];
-                        }
-
-                        n.AddDummyNode();
-                        if (systemDatabases.Contains((string)rdr[1]))
-                        {
-                            systemNode.Nodes.Add(n);
-                        }
-                        else
-                        {
-                            nodesToAdd.Add(n);
-                        }
-                    }
+                n.AddDummyNode();
+                if (systemDatabases.Contains((string)rdr[1]))
+                {
+                    systemNode.Nodes.Add(n);
+                }
+                else
+                {
+                    nodesToAdd.Add(n);
                 }
             }
-
             dbFolder.Nodes.AddRange(nodesToAdd.ToArray());
         }
 
@@ -1332,45 +1346,83 @@ namespace DBADashGUI
             var n = e.Node.AsSQLTreeItem();
             if (n.Nodes.Count == 1 && n.Nodes[0].AsSQLTreeItem().Type == SQLTreeItem.TreeType.DummyNode)
             {
+                // Show a minimal visual indicator while async expand completes.
                 n.Nodes.Clear();
+                var loading = new SQLTreeItem("Loading...", SQLTreeItem.TreeType.Folder) { ForeColor = Color.Gray };
+                try
+                {
+                    loading.NodeFont = new Font(tv1.Font, FontStyle.Italic);
+                }
+                catch { }
+
+                n.Nodes.Add(loading);
+                tv1.Refresh();
+
                 if (n.Type == SQLTreeItem.TreeType.Instance)
                 {
                     ExpandInstance(n);
+                    if (n.Nodes.Contains(loading)) n.Nodes.Remove(loading);
+                    n.Expand();
+                    return;
                 }
-                else if (n.Type == SQLTreeItem.TreeType.DatabasesFolder)
+
+                if (n.Type == SQLTreeItem.TreeType.DatabasesFolder)
                 {
-                    ExpandDatabases(n);
+                    await ExpandDatabasesAsync(n);
+                    if (n.Nodes.Contains(loading)) n.Nodes.Remove(loading);
+                    n.Expand();
+                    return;
                 }
-                else if (n.Type == SQLTreeItem.TreeType.AgentJobs)
+
+                if (n.Type == SQLTreeItem.TreeType.AgentJobs)
                 {
-                    ExpandJobs(n);
+                    await ExpandJobsAsync(n);
+                    if (n.Nodes.Contains(loading)) n.Nodes.Remove(loading);
+                    n.Expand();
+                    return;
                 }
-                else if (n.Type == SQLTreeItem.TreeType.AgentJob)
+
+                if (n.Type == SQLTreeItem.TreeType.AgentJob)
                 {
-                    ExpandJobSteps(n);
+                    await ExpandJobStepsAsync(n);
+                    if (n.Nodes.Contains(loading)) n.Nodes.Remove(loading);
+                    n.Expand();
+                    return;
                 }
-                else if (n.Type == SQLTreeItem.TreeType.Database)
+
+                if (n.Type == SQLTreeItem.TreeType.Database)
                 {
                     n.AddDatabaseFolders();
+                    if (n.Nodes.Contains(loading)) n.Nodes.Remove(loading);
+                    n.Expand();
+                    return;
                 }
-                else if (n.Type == SQLTreeItem.TreeType.Storage)
+
+                if (n.Type == SQLTreeItem.TreeType.Storage)
                 {
-                    ExpandStorage(n);
+                    await ExpandStorageAsync(n);
+                    if (n.Nodes.Contains(loading)) n.Nodes.Remove(loading);
+                    n.Expand();
+                    return;
                 }
-                else if (n.Type == SQLTreeItem.TreeType.CustomToolsFolder)
+
+                if (n.Type == SQLTreeItem.TreeType.CustomToolsFolder)
                 {
                     await n.AddCustomToolsAsync();
+                    if (n.Nodes.Contains(loading)) n.Nodes.Remove(loading);
+                    n.Expand();
+                    return;
                 }
-                else
-                {
-                    ExpandObjects(n);
-                }
+
+                await ExpandObjectsAsync(n);
+                if (n.Nodes.Contains(loading)) n.Nodes.Remove(loading);
+                n.Expand();
             }
         }
 
-        private static void ExpandJobSteps(SQLTreeItem n)
+        private static async Task ExpandJobStepsAsync(SQLTreeItem n)
         {
-            var dtSteps = CommonData.GetJobSteps(n.InstanceID, (Guid)n.Tag);
+            var dtSteps = await CommonData.GetJobStepsAsync(n.InstanceID, (Guid)n.Tag);
             foreach (DataRow r in dtSteps.Rows)
             {
                 var stepID = (int)r["step_id"];
@@ -1386,6 +1438,20 @@ namespace DBADashGUI
             }
         }
 
+        private static async Task ExpandObjectsAsync(SQLTreeItem n)
+        {
+            var dbObj = await CommonData.GetObjectsAsync(n.DatabaseID, (string)n.Tag);
+            foreach (DataRow r in dbObj.Rows)
+            {
+                var type = ((string)r[1]).Trim();
+                var objN = new SQLTreeItem((string)r[3], (string)r[2], type)
+                {
+                    ObjectID = (long)r[0]
+                };
+                n.Nodes.Add(objN);
+            }
+        }
+
         #endregion Tree
 
         #region SchemaSnapshots
@@ -1398,12 +1464,12 @@ namespace DBADashGUI
             diffSchemaSnapshot.NewText = newText;
         }
 
-        private void GetHistory(long ObjectID, int PageNum = 1)
+        private async void GetHistory(long ObjectID, int PageNum = 1)
         {
             diffSchemaSnapshot.OldText = "";
             diffSchemaSnapshot.NewText = "";
             currentPageSize = int.Parse(tsPageSize.Text);
-            var dt = CommonData.GetDDLHistoryForObject(ObjectID, PageNum, currentPageSize);
+            var dt = await CommonData.GetDDLHistoryForObjectAsync(ObjectID, PageNum, currentPageSize);
 
             gvHistory.AutoGenerateColumns = false;
             gvHistory.DataSource = dt;
@@ -2621,9 +2687,9 @@ namespace DBADashGUI
                 await using var cmd = new SqlCommand("Alert.NewAlerts_Get", cn)
                 { CommandType = CommandType.StoredProcedure };
                 cmd.Parameters.Add(new SqlParameter("FromDate", SqlDbType.DateTime2) { Value = NewAlertsFromDate });
-                var da = new SqlDataAdapter(cmd);
+                await using var rdr = await cmd.ExecuteReaderAsync();
                 var dt = new DataTable();
-                da.Fill(dt);
+                dt.Load(rdr);
                 if (dt.Rows.Count == 0) return;
                 var priority = dt.Rows.Cast<DataRow>().Min(r => Convert.ToInt16(r["Priority"]));
                 var alertDate = dt.Rows.Cast<DataRow>().Max(r => Convert.ToDateTime(r["AlertDate"]));
