@@ -37,7 +37,7 @@ namespace DBADash.Messaging
             await using var cmd = new SqlCommand("dbo.sp_help_job", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@job_id", JobId);
             cmd.Parameters.AddWithValue("job_aspect", "JOB");
-            var rdr = await cmd.ExecuteReaderAsync(cancellationToken);
+            await using var rdr = await cmd.ExecuteReaderAsync(cancellationToken);
             var dt = new DataTable("JOB");
             dt.Load(rdr);
             return dt;
