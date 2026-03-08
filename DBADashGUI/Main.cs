@@ -677,7 +677,12 @@ namespace DBADashGUI
             bttnSearch.Enabled = isGood;
             txtSearch.Enabled = isGood;
             tsTree.Enabled = isGood;
+            tsAlert.Visible = isGood;
             tsAlert.Enabled = isGood;
+            tsAlert.Text = string.Empty;
+            tsAlert.Image = null;
+            tsAlert.Tag = null;
+            tsAlert.ToolTipText = string.Empty;
             optionsToolStripMenuItem.Enabled = isGood;
             diffToolStripMenuItem.Enabled = isGood;
             if (!isGood)
