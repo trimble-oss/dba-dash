@@ -334,7 +334,7 @@ namespace DBADashGUI
             toolStrip1.Invoke(() =>
             {
                 UpdateRefreshTime();
-                lblRefreshTime.ForeColor = DBADashStatusEnum.OK.GetBackColor();
+                SetRefreshLabelStatus(DBADashStatusEnum.OK);
             }
             );
             refresh1.Invoke((Action)(() => refresh1.Visible = false));
@@ -637,13 +637,24 @@ namespace DBADashGUI
         {
             if (lastRefresh == null || DateTime.UtcNow.Subtract(lastRefresh.Value).TotalMinutes > 60)
             {
-                lblRefreshTime.ForeColor = DBADashStatusEnum.Critical.GetBackColor();
+                SetRefreshLabelStatus(DBADashStatusEnum.Critical);
                 timer1.Enabled = false;
             }
             else if (DateTime.UtcNow.Subtract(lastRefresh.Value).TotalMinutes > 10)
             {
-                lblRefreshTime.ForeColor = DBADashStatusEnum.Warning.GetBackColor();
+                SetRefreshLabelStatus(DBADashStatusEnum.Warning);
             }
+        }
+
+        private void SetRefreshLabelStatus(DBADashStatusEnum status)
+        {
+            lblRefreshTime.Image = status switch
+            {
+                DBADashStatusEnum.Critical => Properties.Resources.StatusCriticalError_16x,
+                DBADashStatusEnum.Warning => Properties.Resources.StatusAnnotations_Warning_16xLG_color,
+                DBADashStatusEnum.OK => Properties.Resources.StatusOK_16x,
+                _ => null
+            };
         }
 
         private void ConfigureThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
