@@ -33,17 +33,44 @@ namespace DBADashGUI
             components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
             dgvSummary = new DBADashDataGridView();
+            Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colHidden = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            MemoryDumpStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            CorruptionStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            LastGoodCheckDBStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            AlertStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            FullBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            DiffBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            LogBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            DriveStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            JobStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            IsAgentRunningStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            LogShippingStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            MirroringStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            AGStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            LogFreeSpaceStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            FileFreeSpaceStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            PctMaxSizeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            ElasticPoolStorageStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            QueryStoreStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            CustomCheckStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            CollectionErrorStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            SnapshotAgeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            DBMailStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            IdentityStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            DatabaseStateStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            UptimeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
             tsCopyGrid = new System.Windows.Forms.ToolStripDropDownButton();
@@ -87,33 +114,6 @@ namespace DBADashGUI
             refresh1 = new Refresh();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             dgvTests = new DBADashDataGridView();
-            Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colHidden = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            MemoryDumpStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            CorruptionStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            LastGoodCheckDBStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            AlertStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            FullBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            DiffBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            LogBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            DriveStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            JobStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            IsAgentRunningStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            LogShippingStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            MirroringStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            AGStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            LogFreeSpaceStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            FileFreeSpaceStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            PctMaxSizeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            ElasticPoolStorageStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            QueryStoreStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            CustomCheckStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            CollectionErrorStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            SnapshotAgeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            DBMailStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            IdentityStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            DatabaseStateStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            UptimeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             ((System.ComponentModel.ISupportInitialize)dgvSummary).BeginInit();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -153,8 +153,6 @@ namespace DBADashGUI
             dgvSummary.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvSummary.Name = "dgvSummary";
             dgvSummary.ReadOnly = true;
-            dgvSummary.ResultSetID = 0;
-            dgvSummary.ResultSetName = null;
             dgvSummary.RowHeadersVisible = false;
             dgvSummary.RowHeadersWidth = 51;
             dgvSummary.Size = new System.Drawing.Size(1800, 121);
@@ -162,411 +160,6 @@ namespace DBADashGUI
             dgvSummary.CellContentClick += DgvSummary_CellContentClick;
             dgvSummary.ColumnHeaderMouseClick += DgvSummary_ColumnHeaderMouseClick;
             dgvSummary.RowsAdded += DgvSummary_RowAdded;
-            // 
-            // toolStrip1
-            // 
-            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopyGrid, tsExportToExcel, tsView, lblRefreshTime, tsOptions, tsClearFilter });
-            toolStrip1.Location = new System.Drawing.Point(0, 0);
-            toolStrip1.Name = "toolStrip1";
-            toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            toolStrip1.Size = new System.Drawing.Size(1800, 31);
-            toolStrip1.TabIndex = 1;
-            toolStrip1.Text = "toolStrip1";
-            // 
-            // tsRefresh
-            // 
-            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsRefresh.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
-            tsRefresh.Name = "tsRefresh";
-            tsRefresh.Size = new System.Drawing.Size(29, 24);
-            tsRefresh.Text = "Refresh";
-            tsRefresh.Click += TsRefresh_Click;
-            // 
-            // tsCopyGrid
-            // 
-            tsCopyGrid.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsCopyGrid.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { copySummaryToolStripMenuItem, copyTestSummaryToolStripMenuItem });
-            tsCopyGrid.Image = Properties.Resources.ASX_Copy_blue_16x;
-            tsCopyGrid.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsCopyGrid.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
-            tsCopyGrid.Name = "tsCopyGrid";
-            tsCopyGrid.Size = new System.Drawing.Size(34, 24);
-            tsCopyGrid.Text = "Copy";
-            // 
-            // copySummaryToolStripMenuItem
-            // 
-            copySummaryToolStripMenuItem.Name = "copySummaryToolStripMenuItem";
-            copySummaryToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
-            copySummaryToolStripMenuItem.Text = "Copy Summary";
-            copySummaryToolStripMenuItem.Click += CopySummaryToolStripMenuItem_Click;
-            // 
-            // copyTestSummaryToolStripMenuItem
-            // 
-            copyTestSummaryToolStripMenuItem.Name = "copyTestSummaryToolStripMenuItem";
-            copyTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
-            copyTestSummaryToolStripMenuItem.Text = "Copy Test Summary";
-            copyTestSummaryToolStripMenuItem.Click += CopyTestSummaryToolStripMenuItem_Click;
-            // 
-            // tsExportToExcel
-            // 
-            tsExportToExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsExportToExcel.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { exportSummaryToolStripMenuItem, exportTestSummaryToolStripMenuItem });
-            tsExportToExcel.Image = Properties.Resources.excel16x16;
-            tsExportToExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsExportToExcel.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
-            tsExportToExcel.Name = "tsExportToExcel";
-            tsExportToExcel.Size = new System.Drawing.Size(34, 24);
-            tsExportToExcel.Text = "Export to Excel";
-            // 
-            // exportSummaryToolStripMenuItem
-            // 
-            exportSummaryToolStripMenuItem.Name = "exportSummaryToolStripMenuItem";
-            exportSummaryToolStripMenuItem.Size = new System.Drawing.Size(231, 26);
-            exportSummaryToolStripMenuItem.Text = "Export Summary";
-            exportSummaryToolStripMenuItem.Click += ExportSummaryToolStripMenuItem_Click;
-            // 
-            // exportTestSummaryToolStripMenuItem
-            // 
-            exportTestSummaryToolStripMenuItem.Name = "exportTestSummaryToolStripMenuItem";
-            exportTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(231, 26);
-            exportTestSummaryToolStripMenuItem.Text = "Export Test Summary";
-            exportTestSummaryToolStripMenuItem.Click += ExportTestSummaryToolStripMenuItem_Click;
-            // 
-            // tsView
-            // 
-            tsView.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { focusedViewToolStripMenuItem, showTestSummaryToolStripMenuItem, saveToolStripMenuItem });
-            tsView.Image = Properties.Resources.Table_16x;
-            tsView.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsView.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
-            tsView.Name = "tsView";
-            tsView.Size = new System.Drawing.Size(75, 24);
-            tsView.Text = "View";
-            // 
-            // focusedViewToolStripMenuItem
-            // 
-            focusedViewToolStripMenuItem.CheckOnClick = true;
-            focusedViewToolStripMenuItem.Name = "focusedViewToolStripMenuItem";
-            focusedViewToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            focusedViewToolStripMenuItem.Text = "Focused View";
-            focusedViewToolStripMenuItem.ToolTipText = "Show only instances and checks that are warning or critical status";
-            focusedViewToolStripMenuItem.Click += FocusedViewToolStripMenuItem_Click;
-            // 
-            // showTestSummaryToolStripMenuItem
-            // 
-            showTestSummaryToolStripMenuItem.Checked = true;
-            showTestSummaryToolStripMenuItem.CheckOnClick = true;
-            showTestSummaryToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            showTestSummaryToolStripMenuItem.Name = "showTestSummaryToolStripMenuItem";
-            showTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            showTestSummaryToolStripMenuItem.Text = "Show Test Summary";
-            showTestSummaryToolStripMenuItem.Click += ShowTestSummaryToolStripMenuItem_Click;
-            // 
-            // saveToolStripMenuItem
-            // 
-            saveToolStripMenuItem.Image = Properties.Resources.Save_16x;
-            saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            saveToolStripMenuItem.Text = "Save";
-            saveToolStripMenuItem.Click += SaveToolStripMenuItem_Click;
-            // 
-            // lblRefreshTime
-            // 
-            lblRefreshTime.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            lblRefreshTime.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
-            lblRefreshTime.Name = "lblRefreshTime";
-            lblRefreshTime.Size = new System.Drawing.Size(98, 24);
-            lblRefreshTime.Text = "Refresh Time:";
-            // 
-            // tsOptions
-            // 
-            tsOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { memoryDumpsToolStripMenuItem1, instanceUptimeToolStripMenuItem, tsSummaryMaxHeight });
-            tsOptions.Image = Properties.Resources.SettingsOutline_16x;
-            tsOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsOptions.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
-            tsOptions.Name = "tsOptions";
-            tsOptions.Size = new System.Drawing.Size(95, 24);
-            tsOptions.Text = "Options";
-            tsOptions.ToolTipText = "Options";
-            // 
-            // memoryDumpsToolStripMenuItem1
-            // 
-            memoryDumpsToolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { acknowledgeDumpsToolStripMenuItem1, configureThresholdsToolStripMenuItem1 });
-            memoryDumpsToolStripMenuItem1.Name = "memoryDumpsToolStripMenuItem1";
-            memoryDumpsToolStripMenuItem1.Size = new System.Drawing.Size(281, 26);
-            memoryDumpsToolStripMenuItem1.Text = "Memory Dumps";
-            // 
-            // acknowledgeDumpsToolStripMenuItem1
-            // 
-            acknowledgeDumpsToolStripMenuItem1.Name = "acknowledgeDumpsToolStripMenuItem1";
-            acknowledgeDumpsToolStripMenuItem1.Size = new System.Drawing.Size(233, 26);
-            acknowledgeDumpsToolStripMenuItem1.Text = "Acknowledge Dumps";
-            acknowledgeDumpsToolStripMenuItem1.Click += AcknowledgeDumpsToolStripMenuItem_Click;
-            // 
-            // configureThresholdsToolStripMenuItem1
-            // 
-            configureThresholdsToolStripMenuItem1.Name = "configureThresholdsToolStripMenuItem1";
-            configureThresholdsToolStripMenuItem1.Size = new System.Drawing.Size(233, 26);
-            configureThresholdsToolStripMenuItem1.Text = "Configure Thresholds";
-            configureThresholdsToolStripMenuItem1.Click += ConfigureThresholdsToolStripMenuItem_Click;
-            // 
-            // instanceUptimeToolStripMenuItem
-            // 
-            instanceUptimeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { acknowledgeUptimeToolStripMenuItem, configureThresholdsToolStripMenuItem2 });
-            instanceUptimeToolStripMenuItem.Name = "instanceUptimeToolStripMenuItem";
-            instanceUptimeToolStripMenuItem.Size = new System.Drawing.Size(281, 26);
-            instanceUptimeToolStripMenuItem.Text = "Instance Uptime";
-            // 
-            // acknowledgeUptimeToolStripMenuItem
-            // 
-            acknowledgeUptimeToolStripMenuItem.Name = "acknowledgeUptimeToolStripMenuItem";
-            acknowledgeUptimeToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
-            acknowledgeUptimeToolStripMenuItem.Text = "Acknowledge Uptime";
-            acknowledgeUptimeToolStripMenuItem.Click += AcknowledgeUptimeToolStripMenuItem_Click;
-            // 
-            // configureThresholdsToolStripMenuItem2
-            // 
-            configureThresholdsToolStripMenuItem2.Name = "configureThresholdsToolStripMenuItem2";
-            configureThresholdsToolStripMenuItem2.Size = new System.Drawing.Size(235, 26);
-            configureThresholdsToolStripMenuItem2.Text = "Configure Thresholds";
-            configureThresholdsToolStripMenuItem2.Click += ConfigureUptimeThresholdsToolStripMenuItem_Click;
-            // 
-            // tsSummaryMaxHeight
-            // 
-            tsSummaryMaxHeight.Name = "tsSummaryMaxHeight";
-            tsSummaryMaxHeight.Size = new System.Drawing.Size(281, 26);
-            tsSummaryMaxHeight.Text = "Test Summary Max Height %";
-            // 
-            // tsClearFilter
-            // 
-            tsClearFilter.Enabled = false;
-            tsClearFilter.Image = Properties.Resources.Eraser_16x;
-            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsClearFilter.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
-            tsClearFilter.Name = "tsClearFilter";
-            tsClearFilter.Size = new System.Drawing.Size(104, 24);
-            tsClearFilter.Text = "Clear Filter";
-            tsClearFilter.Click += TsClearFilter_Click;
-            // 
-            // dataGridViewTextBoxColumn1
-            // 
-            dataGridViewTextBoxColumn1.DataPropertyName = "Instance";
-            dataGridViewTextBoxColumn1.HeaderText = "Instance";
-            dataGridViewTextBoxColumn1.MinimumWidth = 6;
-            dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            dataGridViewTextBoxColumn1.ReadOnly = true;
-            dataGridViewTextBoxColumn1.Width = 90;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            dataGridViewTextBoxColumn2.HeaderText = "Memory Dump";
-            dataGridViewTextBoxColumn2.MinimumWidth = 6;
-            dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            dataGridViewTextBoxColumn2.ReadOnly = true;
-            dataGridViewTextBoxColumn2.Width = 128;
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            dataGridViewTextBoxColumn3.DataPropertyName = "DetectedCorruptionDate ";
-            dataGridViewTextBoxColumn3.HeaderText = "Corruption";
-            dataGridViewTextBoxColumn3.MinimumWidth = 6;
-            dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            dataGridViewTextBoxColumn3.ReadOnly = true;
-            dataGridViewTextBoxColumn3.Width = 103;
-            // 
-            // dataGridViewTextBoxColumn4
-            // 
-            dataGridViewTextBoxColumn4.HeaderText = "Last Good Check DB";
-            dataGridViewTextBoxColumn4.MinimumWidth = 6;
-            dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
-            dataGridViewTextBoxColumn4.ReadOnly = true;
-            dataGridViewTextBoxColumn4.Width = 137;
-            // 
-            // dataGridViewTextBoxColumn5
-            // 
-            dataGridViewCellStyle8.NullValue = "View";
-            dataGridViewTextBoxColumn5.DefaultCellStyle = dataGridViewCellStyle8;
-            dataGridViewTextBoxColumn5.HeaderText = "Alerts";
-            dataGridViewTextBoxColumn5.MinimumWidth = 6;
-            dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
-            dataGridViewTextBoxColumn5.ReadOnly = true;
-            dataGridViewTextBoxColumn5.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            dataGridViewTextBoxColumn5.Width = 73;
-            // 
-            // dataGridViewTextBoxColumn6
-            // 
-            dataGridViewCellStyle9.NullValue = "View";
-            dataGridViewTextBoxColumn6.DefaultCellStyle = dataGridViewCellStyle9;
-            dataGridViewTextBoxColumn6.HeaderText = "Full Backup";
-            dataGridViewTextBoxColumn6.MinimumWidth = 6;
-            dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
-            dataGridViewTextBoxColumn6.ReadOnly = true;
-            dataGridViewTextBoxColumn6.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            dataGridViewTextBoxColumn6.Width = 101;
-            // 
-            // dataGridViewTextBoxColumn7
-            // 
-            dataGridViewCellStyle10.NullValue = "View";
-            dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle10;
-            dataGridViewTextBoxColumn7.HeaderText = "Diff Backup";
-            dataGridViewTextBoxColumn7.MinimumWidth = 6;
-            dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
-            dataGridViewTextBoxColumn7.ReadOnly = true;
-            dataGridViewTextBoxColumn7.Width = 125;
-            // 
-            // dataGridViewTextBoxColumn8
-            // 
-            dataGridViewTextBoxColumn8.HeaderText = "Log Backup";
-            dataGridViewTextBoxColumn8.MinimumWidth = 6;
-            dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
-            dataGridViewTextBoxColumn8.ReadOnly = true;
-            dataGridViewTextBoxColumn8.Width = 103;
-            // 
-            // dataGridViewTextBoxColumn9
-            // 
-            dataGridViewTextBoxColumn9.HeaderText = "Log Shipping";
-            dataGridViewTextBoxColumn9.MinimumWidth = 6;
-            dataGridViewTextBoxColumn9.Name = "dataGridViewTextBoxColumn9";
-            dataGridViewTextBoxColumn9.ReadOnly = true;
-            dataGridViewTextBoxColumn9.Width = 110;
-            // 
-            // dataGridViewTextBoxColumn10
-            // 
-            dataGridViewTextBoxColumn10.HeaderText = "Drive Space";
-            dataGridViewTextBoxColumn10.MinimumWidth = 6;
-            dataGridViewTextBoxColumn10.Name = "dataGridViewTextBoxColumn10";
-            dataGridViewTextBoxColumn10.ReadOnly = true;
-            dataGridViewTextBoxColumn10.Width = 105;
-            // 
-            // dataGridViewTextBoxColumn11
-            // 
-            dataGridViewTextBoxColumn11.HeaderText = "Agent Jobs";
-            dataGridViewTextBoxColumn11.MinimumWidth = 6;
-            dataGridViewTextBoxColumn11.Name = "dataGridViewTextBoxColumn11";
-            dataGridViewTextBoxColumn11.ReadOnly = true;
-            dataGridViewTextBoxColumn11.Width = 125;
-            // 
-            // dataGridViewTextBoxColumn12
-            // 
-            dataGridViewTextBoxColumn12.HeaderText = "Availability Groups";
-            dataGridViewTextBoxColumn12.MinimumWidth = 6;
-            dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
-            dataGridViewTextBoxColumn12.ReadOnly = true;
-            dataGridViewTextBoxColumn12.Width = 141;
-            // 
-            // dataGridViewTextBoxColumn13
-            // 
-            dataGridViewTextBoxColumn13.HeaderText = "File FreeSpace";
-            dataGridViewTextBoxColumn13.MinimumWidth = 6;
-            dataGridViewTextBoxColumn13.Name = "dataGridViewTextBoxColumn13";
-            dataGridViewTextBoxColumn13.ReadOnly = true;
-            dataGridViewTextBoxColumn13.Width = 121;
-            // 
-            // dataGridViewTextBoxColumn14
-            // 
-            dataGridViewTextBoxColumn14.HeaderText = "Custom Checks";
-            dataGridViewTextBoxColumn14.MinimumWidth = 6;
-            dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
-            dataGridViewTextBoxColumn14.ReadOnly = true;
-            dataGridViewTextBoxColumn14.Width = 123;
-            // 
-            // dataGridViewTextBoxColumn15
-            // 
-            dataGridViewTextBoxColumn15.HeaderText = "DBADash Errors";
-            dataGridViewTextBoxColumn15.MinimumWidth = 6;
-            dataGridViewTextBoxColumn15.Name = "dataGridViewTextBoxColumn15";
-            dataGridViewTextBoxColumn15.ReadOnly = true;
-            dataGridViewTextBoxColumn15.Width = 141;
-            // 
-            // dataGridViewTextBoxColumn16
-            // 
-            dataGridViewTextBoxColumn16.HeaderText = "Snapshot Age";
-            dataGridViewTextBoxColumn16.MinimumWidth = 6;
-            dataGridViewTextBoxColumn16.Name = "dataGridViewTextBoxColumn16";
-            dataGridViewTextBoxColumn16.ReadOnly = true;
-            dataGridViewTextBoxColumn16.Width = 116;
-            // 
-            // dataGridViewTextBoxColumn17
-            // 
-            dataGridViewTextBoxColumn17.HeaderText = "Instance Uptime";
-            dataGridViewTextBoxColumn17.MinimumWidth = 6;
-            dataGridViewTextBoxColumn17.Name = "dataGridViewTextBoxColumn17";
-            dataGridViewTextBoxColumn17.Width = 127;
-            // 
-            // timer1
-            // 
-            timer1.Enabled = true;
-            timer1.Interval = 10000;
-            timer1.Tick += Timer1_Tick;
-            // 
-            // refresh1
-            // 
-            refresh1.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
-            refresh1.Dock = System.Windows.Forms.DockStyle.Fill;
-            refresh1.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            refresh1.ForeColor = System.Drawing.Color.White;
-            refresh1.Location = new System.Drawing.Point(0, 31);
-            refresh1.Margin = new System.Windows.Forms.Padding(0);
-            refresh1.Name = "refresh1";
-            refresh1.Size = new System.Drawing.Size(1800, 236);
-            refresh1.TabIndex = 2;
-            // 
-            // splitContainer1
-            // 
-            splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            splitContainer1.Location = new System.Drawing.Point(0, 31);
-            splitContainer1.Name = "splitContainer1";
-            splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitContainer1.Panel1
-            // 
-            splitContainer1.Panel1.Controls.Add(dgvTests);
-            // 
-            // splitContainer1.Panel2
-            // 
-            splitContainer1.Panel2.Controls.Add(dgvSummary);
-            splitContainer1.Size = new System.Drawing.Size(1800, 236);
-            splitContainer1.SplitterDistance = 111;
-            splitContainer1.TabIndex = 3;
-            // 
-            // dgvTests
-            // 
-            dgvTests.AllowUserToAddRows = false;
-            dgvTests.AllowUserToDeleteRows = false;
-            dgvTests.AllowUserToOrderColumns = true;
-            dgvTests.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle11.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle11.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            dataGridViewCellStyle11.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle11.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle11.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvTests.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle11;
-            dgvTests.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle12.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            dataGridViewCellStyle12.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle12.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle12.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
-            dataGridViewCellStyle12.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle12.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgvTests.DefaultCellStyle = dataGridViewCellStyle12;
-            dgvTests.Dock = System.Windows.Forms.DockStyle.Fill;
-            dgvTests.EnableHeadersVisualStyles = false;
-            dgvTests.Location = new System.Drawing.Point(0, 0);
-            dgvTests.Name = "dgvTests";
-            dgvTests.ReadOnly = true;
-            dgvTests.ResultSetID = 0;
-            dgvTests.ResultSetName = null;
-            dgvTests.RowHeadersVisible = false;
-            dgvTests.RowHeadersWidth = 51;
-            dgvTests.Size = new System.Drawing.Size(1800, 111);
-            dgvTests.TabIndex = 0;
-            dgvTests.CellContentClick += DgvTests_CellContentClick;
-            dgvTests.RowsAdded += DgvTests_RowsAdded;
             // 
             // Instance
             // 
@@ -897,6 +490,411 @@ namespace DBADashGUI
             UptimeStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             UptimeStatus.ToolTipText = "Highlights if an instance has recently been rebooted.  Click cell (Or use Options menu) to configure thresholds or clear alert.  ";
             UptimeStatus.Width = 110;
+            // 
+            // toolStrip1
+            // 
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopyGrid, tsExportToExcel, tsView, lblRefreshTime, tsOptions, tsClearFilter });
+            toolStrip1.Location = new System.Drawing.Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            toolStrip1.Size = new System.Drawing.Size(1800, 31);
+            toolStrip1.TabIndex = 1;
+            toolStrip1.Text = "toolStrip1";
+            // 
+            // tsRefresh
+            // 
+            tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsRefresh.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsRefresh.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            tsRefresh.Name = "tsRefresh";
+            tsRefresh.Size = new System.Drawing.Size(29, 24);
+            tsRefresh.Text = "Refresh";
+            tsRefresh.Click += TsRefresh_Click;
+            // 
+            // tsCopyGrid
+            // 
+            tsCopyGrid.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsCopyGrid.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { copySummaryToolStripMenuItem, copyTestSummaryToolStripMenuItem });
+            tsCopyGrid.Image = Properties.Resources.ASX_Copy_blue_16x;
+            tsCopyGrid.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCopyGrid.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            tsCopyGrid.Name = "tsCopyGrid";
+            tsCopyGrid.Size = new System.Drawing.Size(34, 24);
+            tsCopyGrid.Text = "Copy";
+            // 
+            // copySummaryToolStripMenuItem
+            // 
+            copySummaryToolStripMenuItem.Name = "copySummaryToolStripMenuItem";
+            copySummaryToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
+            copySummaryToolStripMenuItem.Text = "Copy Summary";
+            copySummaryToolStripMenuItem.Click += CopySummaryToolStripMenuItem_Click;
+            // 
+            // copyTestSummaryToolStripMenuItem
+            // 
+            copyTestSummaryToolStripMenuItem.Name = "copyTestSummaryToolStripMenuItem";
+            copyTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
+            copyTestSummaryToolStripMenuItem.Text = "Copy Test Summary";
+            copyTestSummaryToolStripMenuItem.Click += CopyTestSummaryToolStripMenuItem_Click;
+            // 
+            // tsExportToExcel
+            // 
+            tsExportToExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsExportToExcel.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { exportSummaryToolStripMenuItem, exportTestSummaryToolStripMenuItem });
+            tsExportToExcel.Image = Properties.Resources.excel16x16;
+            tsExportToExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsExportToExcel.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            tsExportToExcel.Name = "tsExportToExcel";
+            tsExportToExcel.Size = new System.Drawing.Size(34, 24);
+            tsExportToExcel.Text = "Export to Excel";
+            // 
+            // exportSummaryToolStripMenuItem
+            // 
+            exportSummaryToolStripMenuItem.Name = "exportSummaryToolStripMenuItem";
+            exportSummaryToolStripMenuItem.Size = new System.Drawing.Size(231, 26);
+            exportSummaryToolStripMenuItem.Text = "Export Summary";
+            exportSummaryToolStripMenuItem.Click += ExportSummaryToolStripMenuItem_Click;
+            // 
+            // exportTestSummaryToolStripMenuItem
+            // 
+            exportTestSummaryToolStripMenuItem.Name = "exportTestSummaryToolStripMenuItem";
+            exportTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(231, 26);
+            exportTestSummaryToolStripMenuItem.Text = "Export Test Summary";
+            exportTestSummaryToolStripMenuItem.Click += ExportTestSummaryToolStripMenuItem_Click;
+            // 
+            // tsView
+            // 
+            tsView.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { focusedViewToolStripMenuItem, showTestSummaryToolStripMenuItem, saveToolStripMenuItem });
+            tsView.Image = Properties.Resources.Table_16x;
+            tsView.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsView.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            tsView.Name = "tsView";
+            tsView.Size = new System.Drawing.Size(75, 24);
+            tsView.Text = "View";
+            // 
+            // focusedViewToolStripMenuItem
+            // 
+            focusedViewToolStripMenuItem.CheckOnClick = true;
+            focusedViewToolStripMenuItem.Name = "focusedViewToolStripMenuItem";
+            focusedViewToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            focusedViewToolStripMenuItem.Text = "Focused View";
+            focusedViewToolStripMenuItem.ToolTipText = "Show only instances and checks that are warning or critical status";
+            focusedViewToolStripMenuItem.Click += FocusedViewToolStripMenuItem_Click;
+            // 
+            // showTestSummaryToolStripMenuItem
+            // 
+            showTestSummaryToolStripMenuItem.Checked = true;
+            showTestSummaryToolStripMenuItem.CheckOnClick = true;
+            showTestSummaryToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            showTestSummaryToolStripMenuItem.Name = "showTestSummaryToolStripMenuItem";
+            showTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            showTestSummaryToolStripMenuItem.Text = "Show Test Summary";
+            showTestSummaryToolStripMenuItem.Click += ShowTestSummaryToolStripMenuItem_Click;
+            // 
+            // saveToolStripMenuItem
+            // 
+            saveToolStripMenuItem.Image = Properties.Resources.Save_16x;
+            saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            saveToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            saveToolStripMenuItem.Text = "Save";
+            saveToolStripMenuItem.Click += SaveToolStripMenuItem_Click;
+            // 
+            // lblRefreshTime
+            // 
+            lblRefreshTime.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            lblRefreshTime.Image = Properties.Resources.StatusOK_16x;
+            lblRefreshTime.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            lblRefreshTime.Name = "lblRefreshTime";
+            lblRefreshTime.Size = new System.Drawing.Size(118, 24);
+            lblRefreshTime.Text = "Refresh Time:";
+            lblRefreshTime.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
+            // 
+            // tsOptions
+            // 
+            tsOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { memoryDumpsToolStripMenuItem1, instanceUptimeToolStripMenuItem, tsSummaryMaxHeight });
+            tsOptions.Image = Properties.Resources.SettingsOutline_16x;
+            tsOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsOptions.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            tsOptions.Name = "tsOptions";
+            tsOptions.Size = new System.Drawing.Size(95, 24);
+            tsOptions.Text = "Options";
+            tsOptions.ToolTipText = "Options";
+            // 
+            // memoryDumpsToolStripMenuItem1
+            // 
+            memoryDumpsToolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { acknowledgeDumpsToolStripMenuItem1, configureThresholdsToolStripMenuItem1 });
+            memoryDumpsToolStripMenuItem1.Name = "memoryDumpsToolStripMenuItem1";
+            memoryDumpsToolStripMenuItem1.Size = new System.Drawing.Size(281, 26);
+            memoryDumpsToolStripMenuItem1.Text = "Memory Dumps";
+            // 
+            // acknowledgeDumpsToolStripMenuItem1
+            // 
+            acknowledgeDumpsToolStripMenuItem1.Name = "acknowledgeDumpsToolStripMenuItem1";
+            acknowledgeDumpsToolStripMenuItem1.Size = new System.Drawing.Size(233, 26);
+            acknowledgeDumpsToolStripMenuItem1.Text = "Acknowledge Dumps";
+            acknowledgeDumpsToolStripMenuItem1.Click += AcknowledgeDumpsToolStripMenuItem_Click;
+            // 
+            // configureThresholdsToolStripMenuItem1
+            // 
+            configureThresholdsToolStripMenuItem1.Name = "configureThresholdsToolStripMenuItem1";
+            configureThresholdsToolStripMenuItem1.Size = new System.Drawing.Size(233, 26);
+            configureThresholdsToolStripMenuItem1.Text = "Configure Thresholds";
+            configureThresholdsToolStripMenuItem1.Click += ConfigureThresholdsToolStripMenuItem_Click;
+            // 
+            // instanceUptimeToolStripMenuItem
+            // 
+            instanceUptimeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { acknowledgeUptimeToolStripMenuItem, configureThresholdsToolStripMenuItem2 });
+            instanceUptimeToolStripMenuItem.Name = "instanceUptimeToolStripMenuItem";
+            instanceUptimeToolStripMenuItem.Size = new System.Drawing.Size(281, 26);
+            instanceUptimeToolStripMenuItem.Text = "Instance Uptime";
+            // 
+            // acknowledgeUptimeToolStripMenuItem
+            // 
+            acknowledgeUptimeToolStripMenuItem.Name = "acknowledgeUptimeToolStripMenuItem";
+            acknowledgeUptimeToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
+            acknowledgeUptimeToolStripMenuItem.Text = "Acknowledge Uptime";
+            acknowledgeUptimeToolStripMenuItem.Click += AcknowledgeUptimeToolStripMenuItem_Click;
+            // 
+            // configureThresholdsToolStripMenuItem2
+            // 
+            configureThresholdsToolStripMenuItem2.Name = "configureThresholdsToolStripMenuItem2";
+            configureThresholdsToolStripMenuItem2.Size = new System.Drawing.Size(235, 26);
+            configureThresholdsToolStripMenuItem2.Text = "Configure Thresholds";
+            configureThresholdsToolStripMenuItem2.Click += ConfigureUptimeThresholdsToolStripMenuItem_Click;
+            // 
+            // tsSummaryMaxHeight
+            // 
+            tsSummaryMaxHeight.Name = "tsSummaryMaxHeight";
+            tsSummaryMaxHeight.Size = new System.Drawing.Size(281, 26);
+            tsSummaryMaxHeight.Text = "Test Summary Max Height %";
+            // 
+            // tsClearFilter
+            // 
+            tsClearFilter.Enabled = false;
+            tsClearFilter.Image = Properties.Resources.Eraser_16x;
+            tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsClearFilter.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            tsClearFilter.Name = "tsClearFilter";
+            tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            tsClearFilter.Text = "Clear Filter";
+            tsClearFilter.Click += TsClearFilter_Click;
+            // 
+            // dataGridViewTextBoxColumn1
+            // 
+            dataGridViewTextBoxColumn1.DataPropertyName = "Instance";
+            dataGridViewTextBoxColumn1.HeaderText = "Instance";
+            dataGridViewTextBoxColumn1.MinimumWidth = 6;
+            dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            dataGridViewTextBoxColumn1.ReadOnly = true;
+            dataGridViewTextBoxColumn1.Width = 90;
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            dataGridViewTextBoxColumn2.HeaderText = "Memory Dump";
+            dataGridViewTextBoxColumn2.MinimumWidth = 6;
+            dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            dataGridViewTextBoxColumn2.ReadOnly = true;
+            dataGridViewTextBoxColumn2.Width = 128;
+            // 
+            // dataGridViewTextBoxColumn3
+            // 
+            dataGridViewTextBoxColumn3.DataPropertyName = "DetectedCorruptionDate ";
+            dataGridViewTextBoxColumn3.HeaderText = "Corruption";
+            dataGridViewTextBoxColumn3.MinimumWidth = 6;
+            dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            dataGridViewTextBoxColumn3.ReadOnly = true;
+            dataGridViewTextBoxColumn3.Width = 103;
+            // 
+            // dataGridViewTextBoxColumn4
+            // 
+            dataGridViewTextBoxColumn4.HeaderText = "Last Good Check DB";
+            dataGridViewTextBoxColumn4.MinimumWidth = 6;
+            dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            dataGridViewTextBoxColumn4.ReadOnly = true;
+            dataGridViewTextBoxColumn4.Width = 137;
+            // 
+            // dataGridViewTextBoxColumn5
+            // 
+            dataGridViewCellStyle8.NullValue = "View";
+            dataGridViewTextBoxColumn5.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewTextBoxColumn5.HeaderText = "Alerts";
+            dataGridViewTextBoxColumn5.MinimumWidth = 6;
+            dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
+            dataGridViewTextBoxColumn5.ReadOnly = true;
+            dataGridViewTextBoxColumn5.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            dataGridViewTextBoxColumn5.Width = 73;
+            // 
+            // dataGridViewTextBoxColumn6
+            // 
+            dataGridViewCellStyle9.NullValue = "View";
+            dataGridViewTextBoxColumn6.DefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewTextBoxColumn6.HeaderText = "Full Backup";
+            dataGridViewTextBoxColumn6.MinimumWidth = 6;
+            dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
+            dataGridViewTextBoxColumn6.ReadOnly = true;
+            dataGridViewTextBoxColumn6.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            dataGridViewTextBoxColumn6.Width = 101;
+            // 
+            // dataGridViewTextBoxColumn7
+            // 
+            dataGridViewCellStyle10.NullValue = "View";
+            dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle10;
+            dataGridViewTextBoxColumn7.HeaderText = "Diff Backup";
+            dataGridViewTextBoxColumn7.MinimumWidth = 6;
+            dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
+            dataGridViewTextBoxColumn7.ReadOnly = true;
+            dataGridViewTextBoxColumn7.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn8
+            // 
+            dataGridViewTextBoxColumn8.HeaderText = "Log Backup";
+            dataGridViewTextBoxColumn8.MinimumWidth = 6;
+            dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
+            dataGridViewTextBoxColumn8.ReadOnly = true;
+            dataGridViewTextBoxColumn8.Width = 103;
+            // 
+            // dataGridViewTextBoxColumn9
+            // 
+            dataGridViewTextBoxColumn9.HeaderText = "Log Shipping";
+            dataGridViewTextBoxColumn9.MinimumWidth = 6;
+            dataGridViewTextBoxColumn9.Name = "dataGridViewTextBoxColumn9";
+            dataGridViewTextBoxColumn9.ReadOnly = true;
+            dataGridViewTextBoxColumn9.Width = 110;
+            // 
+            // dataGridViewTextBoxColumn10
+            // 
+            dataGridViewTextBoxColumn10.HeaderText = "Drive Space";
+            dataGridViewTextBoxColumn10.MinimumWidth = 6;
+            dataGridViewTextBoxColumn10.Name = "dataGridViewTextBoxColumn10";
+            dataGridViewTextBoxColumn10.ReadOnly = true;
+            dataGridViewTextBoxColumn10.Width = 105;
+            // 
+            // dataGridViewTextBoxColumn11
+            // 
+            dataGridViewTextBoxColumn11.HeaderText = "Agent Jobs";
+            dataGridViewTextBoxColumn11.MinimumWidth = 6;
+            dataGridViewTextBoxColumn11.Name = "dataGridViewTextBoxColumn11";
+            dataGridViewTextBoxColumn11.ReadOnly = true;
+            dataGridViewTextBoxColumn11.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn12
+            // 
+            dataGridViewTextBoxColumn12.HeaderText = "Availability Groups";
+            dataGridViewTextBoxColumn12.MinimumWidth = 6;
+            dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
+            dataGridViewTextBoxColumn12.ReadOnly = true;
+            dataGridViewTextBoxColumn12.Width = 141;
+            // 
+            // dataGridViewTextBoxColumn13
+            // 
+            dataGridViewTextBoxColumn13.HeaderText = "File FreeSpace";
+            dataGridViewTextBoxColumn13.MinimumWidth = 6;
+            dataGridViewTextBoxColumn13.Name = "dataGridViewTextBoxColumn13";
+            dataGridViewTextBoxColumn13.ReadOnly = true;
+            dataGridViewTextBoxColumn13.Width = 121;
+            // 
+            // dataGridViewTextBoxColumn14
+            // 
+            dataGridViewTextBoxColumn14.HeaderText = "Custom Checks";
+            dataGridViewTextBoxColumn14.MinimumWidth = 6;
+            dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
+            dataGridViewTextBoxColumn14.ReadOnly = true;
+            dataGridViewTextBoxColumn14.Width = 123;
+            // 
+            // dataGridViewTextBoxColumn15
+            // 
+            dataGridViewTextBoxColumn15.HeaderText = "DBADash Errors";
+            dataGridViewTextBoxColumn15.MinimumWidth = 6;
+            dataGridViewTextBoxColumn15.Name = "dataGridViewTextBoxColumn15";
+            dataGridViewTextBoxColumn15.ReadOnly = true;
+            dataGridViewTextBoxColumn15.Width = 141;
+            // 
+            // dataGridViewTextBoxColumn16
+            // 
+            dataGridViewTextBoxColumn16.HeaderText = "Snapshot Age";
+            dataGridViewTextBoxColumn16.MinimumWidth = 6;
+            dataGridViewTextBoxColumn16.Name = "dataGridViewTextBoxColumn16";
+            dataGridViewTextBoxColumn16.ReadOnly = true;
+            dataGridViewTextBoxColumn16.Width = 116;
+            // 
+            // dataGridViewTextBoxColumn17
+            // 
+            dataGridViewTextBoxColumn17.HeaderText = "Instance Uptime";
+            dataGridViewTextBoxColumn17.MinimumWidth = 6;
+            dataGridViewTextBoxColumn17.Name = "dataGridViewTextBoxColumn17";
+            dataGridViewTextBoxColumn17.Width = 127;
+            // 
+            // timer1
+            // 
+            timer1.Enabled = true;
+            timer1.Interval = 10000;
+            timer1.Tick += Timer1_Tick;
+            // 
+            // refresh1
+            // 
+            refresh1.BackColor = System.Drawing.Color.FromArgb(0, 99, 163);
+            refresh1.Dock = System.Windows.Forms.DockStyle.Fill;
+            refresh1.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            refresh1.ForeColor = System.Drawing.Color.White;
+            refresh1.Location = new System.Drawing.Point(0, 31);
+            refresh1.Margin = new System.Windows.Forms.Padding(0);
+            refresh1.Name = "refresh1";
+            refresh1.Size = new System.Drawing.Size(1800, 236);
+            refresh1.TabIndex = 2;
+            // 
+            // splitContainer1
+            // 
+            splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitContainer1.Location = new System.Drawing.Point(0, 31);
+            splitContainer1.Name = "splitContainer1";
+            splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            splitContainer1.Panel1.Controls.Add(dgvTests);
+            // 
+            // splitContainer1.Panel2
+            // 
+            splitContainer1.Panel2.Controls.Add(dgvSummary);
+            splitContainer1.Size = new System.Drawing.Size(1800, 236);
+            splitContainer1.SplitterDistance = 111;
+            splitContainer1.TabIndex = 3;
+            // 
+            // dgvTests
+            // 
+            dgvTests.AllowUserToAddRows = false;
+            dgvTests.AllowUserToDeleteRows = false;
+            dgvTests.AllowUserToOrderColumns = true;
+            dgvTests.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle11.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle11.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            dataGridViewCellStyle11.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle11.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle11.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvTests.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle11;
+            dgvTests.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle12.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle12.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle12.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle12.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle12.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle12.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvTests.DefaultCellStyle = dataGridViewCellStyle12;
+            dgvTests.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvTests.EnableHeadersVisualStyles = false;
+            dgvTests.Location = new System.Drawing.Point(0, 0);
+            dgvTests.Name = "dgvTests";
+            dgvTests.ReadOnly = true;
+            dgvTests.RowHeadersVisible = false;
+            dgvTests.RowHeadersWidth = 51;
+            dgvTests.Size = new System.Drawing.Size(1800, 111);
+            dgvTests.TabIndex = 0;
+            dgvTests.CellContentClick += DgvTests_CellContentClick;
+            dgvTests.RowsAdded += DgvTests_RowsAdded;
             // 
             // Summary
             // 
