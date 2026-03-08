@@ -3,7 +3,6 @@ using DBADash;
 using DBADashGUI.CustomReports;
 using DBADashGUI.Performance;
 using Microsoft.Data.SqlClient;
-using Microsoft.SqlServer.Management.Smo;
 using System;
 using System.Data;
 using System.Diagnostics;
@@ -31,11 +30,14 @@ namespace DBADashGUI
 
         public static void SetConnectionString(RepositoryConnection connection)
         {
-            var builder = new SqlConnectionStringBuilder(connection.ConnectionString)
+            if (connection != null)
             {
-                ApplicationName = "DBADashGUI"
-            };
-            connection.ConnectionString = builder.ToString();
+                var builder = new SqlConnectionStringBuilder(connection.ConnectionString)
+                {
+                    ApplicationName = "DBADashGUI"
+                };
+                connection.ConnectionString = builder.ToString();
+            }
             RepositoryDBConnection = connection;
             CommonData.ClearCache();
         }
