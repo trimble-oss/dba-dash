@@ -419,14 +419,11 @@ namespace DBADashGUI
                         Common.ConfigureService();
                         return;
                     }
-                }
-
-                // Prompt the user to connect to an existing DBA Dash repository DB.
-                await AddConnection();
-                if (repositories.Count == 0)
-                {
-                    Application.Exit();
-                    return;
+                    else if (frm.DialogResult == DialogResult.OK)
+                    {
+                        // Prompt the user to connect to an existing DBA Dash repository DB.
+                        await AddConnection();
+                    }
                 }
             }
 
@@ -522,7 +519,7 @@ namespace DBADashGUI
                 _setConnectionCts = new CancellationTokenSource();
                 token = _setConnectionCts.Token;
             }
-
+            Common.SetConnectionString(null); // Clear current connection during transition
             // Start UI connection state (on UI thread)
             SetConnectionState(false);
             try { StartConnectingAnimation(); } catch { }
@@ -593,6 +590,7 @@ namespace DBADashGUI
                 {
                     Config.RefreshConfig();
                     DBADashUser.GetUser();
+                    SetTheme(DBADashUser.SelectedTheme, false);
                     _customReportsCache = CustomReports.CustomReports.GetCustomReports();
 
                     // Only apply command-line tag filter if one was actually provided.
@@ -677,6 +675,9 @@ namespace DBADashGUI
             txtConnectionError.Visible = false;
             txtConnectionError.Text = "";
             bttnSearch.Enabled = isGood;
+            txtSearch.Enabled = isGood;
+            tsTree.Enabled = isGood;
+            tsAlert.Enabled = isGood;
             optionsToolStripMenuItem.Enabled = isGood;
             diffToolStripMenuItem.Enabled = isGood;
             if (!isGood)
@@ -2552,10 +2553,13 @@ namespace DBADashGUI
             whiteToolStripMenuItem.Checked = DBADashUser.SelectedTheme.ThemeIdentifier == ThemeType.White;
         }
 
-        private void SetTheme(BaseTheme theme)
+        private void SetTheme(BaseTheme theme, bool update = true)
         {
-            DBADashUser.SelectedTheme = theme;
-            DBADashUser.Update();
+            if (update)
+            {
+                DBADashUser.SelectedTheme = theme;
+                DBADashUser.Update();
+            }
             CheckTheme();
             this.ApplyTheme(theme);
             // Clear per-tab applied theme tracking so tabs will be re-themed
@@ -2583,6 +2587,8 @@ namespace DBADashGUI
 
         private void TsAlert_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(Common.ConnectionString)) return;
+            if (tv1.Nodes.Count == 0) return;
             tv1.SelectedNode = tv1.Nodes[0];
             tabs.SelectedTab = tabDBADashAlerts;
             LoadSelectedTab();

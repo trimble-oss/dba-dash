@@ -83,7 +83,7 @@ namespace DBADashGUI
             searchLayout = new System.Windows.Forms.TableLayoutPanel();
             txtSearch = new System.Windows.Forms.TextBox();
             bttnSearch = new System.Windows.Forms.Button();
-            toolStrip2 = new System.Windows.Forms.ToolStrip();
+            tsTree = new System.Windows.Forms.ToolStrip();
             tsHome = new System.Windows.Forms.ToolStripButton();
             tsBack = new System.Windows.Forms.ToolStripButton();
             mnuTags = new System.Windows.Forms.ToolStripDropDownButton();
@@ -259,7 +259,7 @@ namespace DBADashGUI
             splitMain.SuspendLayout();
             pnlSearch.SuspendLayout();
             searchLayout.SuspendLayout();
-            toolStrip2.SuspendLayout();
+            tsTree.SuspendLayout();
             tabs.SuspendLayout();
             tabSnapshotSummary.SuspendLayout();
             tabSchema.SuspendLayout();
@@ -603,7 +603,7 @@ namespace DBADashGUI
             // 
             defaultToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             defaultToolStripMenuItem.Name = "defaultToolStripMenuItem";
-            defaultToolStripMenuItem.Size = new System.Drawing.Size(141, 26);
+            defaultToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             defaultToolStripMenuItem.Text = "Default";
             defaultToolStripMenuItem.Click += DefaultToolStripMenuItem_Click;
             // 
@@ -611,7 +611,7 @@ namespace DBADashGUI
             // 
             darkToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             darkToolStripMenuItem.Name = "darkToolStripMenuItem";
-            darkToolStripMenuItem.Size = new System.Drawing.Size(141, 26);
+            darkToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             darkToolStripMenuItem.Text = "Dark";
             darkToolStripMenuItem.Click += DarkToolStripMenuItem_Click;
             // 
@@ -619,13 +619,14 @@ namespace DBADashGUI
             // 
             whiteToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             whiteToolStripMenuItem.Name = "whiteToolStripMenuItem";
-            whiteToolStripMenuItem.Size = new System.Drawing.Size(141, 26);
+            whiteToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             whiteToolStripMenuItem.Text = "White";
             whiteToolStripMenuItem.Click += LightToolStripMenuItem_Click;
             // 
             // tsAlert
             // 
             tsAlert.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsAlert.Enabled = false;
             tsAlert.Image = Properties.Resources.Alert_OK;
             tsAlert.Name = "tsAlert";
             tsAlert.Size = new System.Drawing.Size(51, 28);
@@ -662,6 +663,7 @@ namespace DBADashGUI
             tsDateRange.SelectedTimeSpan = System.TimeSpan.Parse("01:00:00");
             tsDateRange.Size = new System.Drawing.Size(71, 25);
             tsDateRange.Text = "1 Hr";
+            tsDateRange.Visible = false;
             tsDateRange.DateRangeChanged += DateRangeChanged;
             // 
             // tsTimeFilter
@@ -729,7 +731,7 @@ namespace DBADashGUI
             // 
             splitMain.Panel1.Controls.Add(tv1);
             splitMain.Panel1.Controls.Add(pnlSearch);
-            splitMain.Panel1.Controls.Add(toolStrip2);
+            splitMain.Panel1.Controls.Add(tsTree);
             splitMain.Panel1MinSize = 50;
             // 
             // splitMain.Panel2
@@ -791,6 +793,7 @@ namespace DBADashGUI
             // 
             txtSearch.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             txtSearch.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            txtSearch.Enabled = false;
             txtSearch.Location = new System.Drawing.Point(10, 8);
             txtSearch.Margin = new System.Windows.Forms.Padding(10, 8, 10, 8);
             txtSearch.Name = "txtSearch";
@@ -815,16 +818,17 @@ namespace DBADashGUI
             bttnSearch.UseVisualStyleBackColor = true;
             bttnSearch.Click += BttnSearch_Click;
             // 
-            // toolStrip2
+            // tsTree
             // 
-            toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsHome, tsBack, mnuTags, groupToolStripMenuItem });
-            toolStrip2.Location = new System.Drawing.Point(0, 0);
-            toolStrip2.Name = "toolStrip2";
-            toolStrip2.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            toolStrip2.Size = new System.Drawing.Size(365, 27);
-            toolStrip2.TabIndex = 2;
-            toolStrip2.Text = "toolStrip2";
+            tsTree.Enabled = false;
+            tsTree.ImageScalingSize = new System.Drawing.Size(20, 20);
+            tsTree.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsHome, tsBack, mnuTags, groupToolStripMenuItem });
+            tsTree.Location = new System.Drawing.Point(0, 0);
+            tsTree.Name = "tsTree";
+            tsTree.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            tsTree.Size = new System.Drawing.Size(365, 27);
+            tsTree.TabIndex = 2;
+            tsTree.Text = "toolStrip2";
             // 
             // tsHome
             // 
@@ -2699,8 +2703,8 @@ namespace DBADashGUI
             pnlSearch.PerformLayout();
             searchLayout.ResumeLayout(false);
             searchLayout.PerformLayout();
-            toolStrip2.ResumeLayout(false);
-            toolStrip2.PerformLayout();
+            tsTree.ResumeLayout(false);
+            tsTree.PerformLayout();
             tabs.ResumeLayout(false);
             tabSnapshotSummary.ResumeLayout(false);
             tabSchema.ResumeLayout(false);
@@ -2927,7 +2931,7 @@ namespace DBADashGUI
         private Checks.IdentityColumns identityColumns1;
         private System.Windows.Forms.TabPage tabOSLoadedModules;
         private Checks.OSLoadedModules osLoadedModules1;
-        private System.Windows.Forms.ToolStrip toolStrip2;
+        private System.Windows.Forms.ToolStrip tsTree;
         private System.Windows.Forms.ToolStripButton tsHome;
         private System.Windows.Forms.ToolStripButton tsBack;
         private Refresh refresh1;

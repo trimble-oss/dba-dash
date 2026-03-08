@@ -1,5 +1,7 @@
-﻿using System;
+﻿using DBADashGUI.Theme;
+using System;
 using System.Windows.Forms;
+
 namespace DBADashGUI
 {
     public partial class ConnectionOptions : Form
@@ -13,12 +15,12 @@ namespace DBADashGUI
 
         private void BttnOK_Click(object sender, EventArgs e)
         {
-            DialogResult= DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         private void ConnectionOptions_Load(object sender, EventArgs e)
         {
-       
+            this.ApplyTheme();
         }
     }
 }
