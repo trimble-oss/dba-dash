@@ -22,36 +22,42 @@ namespace DBADashGUI
 
         private DataTable GetJobDiff()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.Job_Diff", cn) { CommandType = CommandType.StoredProcedure })
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddWithValue("InstanceID_A", InstanceID_A);
-                cmd.Parameters.AddWithValue("InstanceID_B", InstanceID_B);
-                var dt = new DataTable();
-                da.Fill(dt);
-                DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                return dt;
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.Job_Diff", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+
+            cmd.Parameters.AddWithValue("InstanceID_A", InstanceID_A);
+            cmd.Parameters.AddWithValue("InstanceID_B", InstanceID_B);
+            var dt = new DataTable();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            return dt;
         }
 
         private async void JobDiff_Load(object sender, EventArgs e)
         {
-            var dt = await CommonData.GetInstancesAsync(default, default, false);
-            foreach (DataRow row in dt.Rows)
+            try
             {
-                var a = new InstanceItem() { Instance = (string)row["InstanceGroupName"], InstanceID = (int)row["InstanceID"] };
-                var b = new InstanceItem() { Instance = (string)row["InstanceGroupName"], InstanceID = (int)row["InstanceID"] };
-                cboA.Items.Add(a);
-                cboB.Items.Add(b);
-                if (InstanceID_A == a.InstanceID)
+                var dt = await CommonData.GetInstancesAsync(default, default, false);
+                foreach (DataRow row in dt.Rows)
                 {
-                    cboA.SelectedItem = a;
+                    var a = new InstanceItem() { Instance = (string)row["InstanceGroupName"], InstanceID = (int)row["InstanceID"] };
+                    var b = new InstanceItem() { Instance = (string)row["InstanceGroupName"], InstanceID = (int)row["InstanceID"] };
+                    cboA.Items.Add(a);
+                    cboB.Items.Add(b);
+                    if (InstanceID_A == a.InstanceID)
+                    {
+                        cboA.SelectedItem = a;
+                    }
+                    if (InstanceID_B == b.InstanceID)
+                    {
+                        cboB.SelectedItem = b;
+                    }
                 }
-                if (InstanceID_B == b.InstanceID)
-                {
-                    cboB.SelectedItem = b;
-                }
+            }
+            catch (Exception ex)
+            {
+                Common.ShowExceptionDialog(ex);
             }
         }
 

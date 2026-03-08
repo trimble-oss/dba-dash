@@ -36,7 +36,7 @@ namespace DBADashGUI
             await using var cn = new SqlConnection(Common.ConnectionString);
             await using var cmd = new SqlCommand(@"dbo.AzureDBElasticPool_Get", cn) { CommandType = CommandType.StoredProcedure };
             await cn.OpenAsync(token);
-            var rdr = await cmd.ExecuteReaderAsync(token);
+            await using var rdr = await cmd.ExecuteReaderAsync(token);
             DataTable dt = new();
             dt.Load(rdr);
             return dt;
@@ -52,7 +52,7 @@ namespace DBADashGUI
             cmd.Parameters.AddStringIfNotNullOrEmpty("SearchString", searchString);
             cmd.Parameters.AddStringIfNotNullOrEmpty("GroupByTag", groupByTag);
             await cn.OpenAsync(token);
-            var rdr = await cmd.ExecuteReaderAsync(token);
+            await using var rdr = await cmd.ExecuteReaderAsync(token);
             DataTable dt = new();
             dt.Load(rdr);
             return dt;
@@ -172,7 +172,7 @@ namespace DBADashGUI
             cmd.Parameters.AddWithValue("InstanceID", InstanceID);
             cmd.Parameters.AddWithValue("JobID", JobID);
             await cn.OpenAsync(token);
-            var rdr = await cmd.ExecuteReaderAsync(token);
+            await using var rdr = await cmd.ExecuteReaderAsync(token);
             var dt = new DataTable();
             dt.Load(rdr);
             return dt;
@@ -185,7 +185,7 @@ namespace DBADashGUI
             cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
             cmd.Parameters.AddWithValue("Types", types);
             await cn.OpenAsync(token);
-            var rdr = await cmd.ExecuteReaderAsync(token);
+            await using var rdr = await cmd.ExecuteReaderAsync(token);
             var dt = new DataTable();
             dt.Load(rdr);
             return dt;
@@ -210,7 +210,7 @@ namespace DBADashGUI
             cmd.Parameters.AddWithValue("InstanceID", InstanceId);
             cmd.Parameters.AddWithValue("JobId", JobId);
             await cn.OpenAsync(token);
-            var rdr = await cmd.ExecuteReaderAsync(token);
+            await using var rdr = await cmd.ExecuteReaderAsync(token);
             var dt = new DataTable();
             dt.Load(rdr);
             return dt;
@@ -267,19 +267,6 @@ namespace DBADashGUI
             return objTypes;
         }
 
-        public static DataTable GetDBObjects(int DatabaseID, string types)
-        {
-            var dt = new DataTable();
-            using var cn = new SqlConnection(Common.ConnectionString);
-            using var cmd = new SqlCommand("dbo.DBObjects_Get", cn) { CommandType = CommandType.StoredProcedure };
-            using var da = new SqlDataAdapter(cmd);
-            cn.Open();
-            cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-            cmd.Parameters.AddWithValue("Types", types);
-            da.Fill(dt);
-            return dt;
-        }
-
         public static async Task<DataTable> GetDBObjectsAsync(int DatabaseID, string types, CancellationToken token = default)
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
@@ -287,7 +274,7 @@ namespace DBADashGUI
             cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
             cmd.Parameters.AddWithValue("Types", types);
             await cn.OpenAsync(token);
-            var rdr = await cmd.ExecuteReaderAsync(token);
+            await using var rdr = await cmd.ExecuteReaderAsync(token);
             var dt = new DataTable();
             dt.Load(rdr);
             return dt;
@@ -316,7 +303,7 @@ namespace DBADashGUI
             cmd.Parameters.AddWithValue("PageSize", PageSize);
             cmd.Parameters.AddWithValue("PageNumber", PageNum);
             await cn.OpenAsync(token);
-            var rdr = await cmd.ExecuteReaderAsync(token);
+            await using var rdr = await cmd.ExecuteReaderAsync(token);
             var dt = new DataTable();
             dt.Load(rdr);
             return dt;
@@ -378,7 +365,7 @@ namespace DBADashGUI
             cmd.Parameters.AddWithValue("HasMetrics", hasMetrics);
 
             await cn.OpenAsync(token);
-            var rdr = await cmd.ExecuteReaderAsync(token);
+            await using var rdr = await cmd.ExecuteReaderAsync(token);
             var dt = new DataTable();
             dt.Load(rdr);
             DateHelper.ConvertUTCToAppTimeZone(ref dt);

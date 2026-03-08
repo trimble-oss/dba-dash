@@ -103,7 +103,7 @@ namespace DBADashGUI
             // Persist the user's theme locally so we can apply it on next startup
             try
             {
-                Properties.Settings.Default["Theme"] = SelectedTheme.ThemeIdentifier.ToString();
+                Properties.Settings.Default.Theme = SelectedTheme.ThemeIdentifier.ToString();
                 Properties.Settings.Default.Save();
             }
             catch

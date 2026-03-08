@@ -219,6 +219,7 @@ namespace DBADashGUI
             tabConnecting = new System.Windows.Forms.TabPage();
             tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             panel1 = new System.Windows.Forms.Panel();
+            lblRepositoryDB = new System.Windows.Forms.Label();
             bttnRetry = new System.Windows.Forms.Button();
             picConnectPct = new System.Windows.Forms.PictureBox();
             lblConnecting = new System.Windows.Forms.Label();
@@ -603,7 +604,7 @@ namespace DBADashGUI
             // 
             defaultToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             defaultToolStripMenuItem.Name = "defaultToolStripMenuItem";
-            defaultToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            defaultToolStripMenuItem.Size = new System.Drawing.Size(141, 26);
             defaultToolStripMenuItem.Text = "Default";
             defaultToolStripMenuItem.Click += DefaultToolStripMenuItem_Click;
             // 
@@ -611,7 +612,7 @@ namespace DBADashGUI
             // 
             darkToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             darkToolStripMenuItem.Name = "darkToolStripMenuItem";
-            darkToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            darkToolStripMenuItem.Size = new System.Drawing.Size(141, 26);
             darkToolStripMenuItem.Text = "Dark";
             darkToolStripMenuItem.Click += DarkToolStripMenuItem_Click;
             // 
@@ -619,7 +620,7 @@ namespace DBADashGUI
             // 
             whiteToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             whiteToolStripMenuItem.Name = "whiteToolStripMenuItem";
-            whiteToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            whiteToolStripMenuItem.Size = new System.Drawing.Size(141, 26);
             whiteToolStripMenuItem.Text = "White";
             whiteToolStripMenuItem.Click += LightToolStripMenuItem_Click;
             // 
@@ -828,7 +829,6 @@ namespace DBADashGUI
             tsTree.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
             tsTree.Size = new System.Drawing.Size(365, 27);
             tsTree.TabIndex = 2;
-            tsTree.Text = "toolStrip2";
             // 
             // tsHome
             // 
@@ -2328,7 +2328,7 @@ namespace DBADashGUI
             // 
             tableLayoutPanel1.ColumnCount = 3;
             tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 700F));
+            tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             tableLayoutPanel1.Controls.Add(panel1, 1, 1);
             tableLayoutPanel1.Controls.Add(txtConnectionError, 0, 2);
@@ -2344,6 +2344,7 @@ namespace DBADashGUI
             // 
             // panel1
             // 
+            panel1.Controls.Add(lblRepositoryDB);
             panel1.Controls.Add(bttnRetry);
             panel1.Controls.Add(picConnectPct);
             panel1.Controls.Add(lblConnecting);
@@ -2355,10 +2356,21 @@ namespace DBADashGUI
             panel1.Size = new System.Drawing.Size(694, 1);
             panel1.TabIndex = 6;
             // 
+            // lblRepositoryDB
+            // 
+            lblRepositoryDB.AutoSize = true;
+            lblRepositoryDB.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
+            lblRepositoryDB.ForeColor = System.Drawing.Color.White;
+            lblRepositoryDB.Location = new System.Drawing.Point(169, 45);
+            lblRepositoryDB.Name = "lblRepositoryDB";
+            lblRepositoryDB.Size = new System.Drawing.Size(82, 20);
+            lblRepositoryDB.TabIndex = 7;
+            lblRepositoryDB.Text = "Connection";
+            // 
             // bttnRetry
             // 
             bttnRetry.Enabled = false;
-            bttnRetry.Location = new System.Drawing.Point(507, 56);
+            bttnRetry.Location = new System.Drawing.Point(463, 73);
             bttnRetry.Name = "bttnRetry";
             bttnRetry.Size = new System.Drawing.Size(117, 38);
             bttnRetry.TabIndex = 6;
@@ -2390,7 +2402,7 @@ namespace DBADashGUI
             // 
             lblConnectionInfo.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             lblConnectionInfo.ForeColor = System.Drawing.Color.White;
-            lblConnectionInfo.Location = new System.Drawing.Point(0, 97);
+            lblConnectionInfo.Location = new System.Drawing.Point(0, 125);
             lblConnectionInfo.Name = "lblConnectionInfo";
             lblConnectionInfo.Size = new System.Drawing.Size(694, 0);
             lblConnectionInfo.TabIndex = 4;
@@ -2399,7 +2411,7 @@ namespace DBADashGUI
             // bttnCancel
             // 
             bttnCancel.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            bttnCancel.Location = new System.Drawing.Point(373, 56);
+            bttnCancel.Location = new System.Drawing.Point(340, 73);
             bttnCancel.Name = "bttnCancel";
             bttnCancel.Size = new System.Drawing.Size(117, 38);
             bttnCancel.TabIndex = 0;
@@ -2998,5 +3010,6 @@ namespace DBADashGUI
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.PictureBox picConnectPct;
         private System.Windows.Forms.Button bttnRetry;
+        private System.Windows.Forms.Label lblRepositoryDB;
     }
 }

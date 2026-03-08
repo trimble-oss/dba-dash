@@ -28,23 +28,21 @@ namespace DBADashGUI
             Parser.Default.ParseArguments<CommandLineOptions>(args)
        .WithParsed(o =>
        {
-            try
-            {
-                // If the user has a saved theme in user settings, apply it immediately
-                // so the app starts using the selected theme instead of briefly
-                // showing the default (white) theme.
-                var saved = Properties.Settings.Default["Theme"] as string;
-                if (!string.IsNullOrEmpty(saved) && Enum.TryParse(saved, out ThemeType st))
-                {
-                    DBADashUser.SetTheme(st);
-                }
-            }
-            catch
-            {
-                // ignore
-            }
-           Application.EnableVisualStyles();
-           Application.SetCompatibleTextRenderingDefault(false);
+           try
+           {
+               // If the user has a saved theme in user settings, apply it immediately
+               // so the app starts using the selected theme instead of briefly
+               // showing the default (white) theme.
+               var saved = Properties.Settings.Default.Theme as string;
+               if (!string.IsNullOrEmpty(saved) && Enum.TryParse(saved, out ThemeType st))
+               {
+                   DBADashUser.SetTheme(st);
+               }
+           }
+           catch
+           {
+               // ignore
+           }
            Application.Run(new Main(o));
        });
         }

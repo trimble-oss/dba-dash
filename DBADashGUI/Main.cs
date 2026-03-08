@@ -75,12 +75,16 @@ namespace DBADashGUI
                     {
                         var folderText = string.IsNullOrEmpty(groupByTag) ? tagGroup : groupByTag + ": " + tagGroup;
                         parentNode = new SQLTreeItem(folderText, SQLTreeItem.TreeType.InstanceFolder);
-                        changes = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
-                        hadr = new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR);
-                        checks = new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks);
-                        storage = new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage);
-                        jobs = new SQLTreeItem("Jobs", SQLTreeItem.TreeType.AgentJobs);
-                        parentNode.Nodes.AddRange(new TreeNode[] { changes, checks, hadr, storage, jobs });
+                        var changesGrp = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
+                        var hadrGrp = new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR);
+                        var checksGrp = new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks);
+                        var storageGrp = new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage);
+                        var jobsGrp = new SQLTreeItem("Jobs", SQLTreeItem.TreeType.AgentJobs);
+                        parentNode.Nodes.AddRange(new TreeNode[] { changesGrp, checksGrp, hadrGrp, storageGrp, jobsGrp });
+                        if (IsAzureOnly)
+                        {
+                            parentNode.Nodes.Remove(hadrGrp);
+                        }
                         root.Nodes.Add(parentNode);
                         currentTagGroup = tagGroup;
                         AzureNode = null;
@@ -422,7 +426,7 @@ namespace DBADashGUI
                     else if (frm.DialogResult == DialogResult.OK)
                     {
                         // Prompt the user to connect to an existing DBA Dash repository DB.
-                        await AddConnection();
+                        await AddConnectionAsync();
                     }
                 }
             }
@@ -430,7 +434,6 @@ namespace DBADashGUI
             try
             {
                 var conn = repositories.GetDefaultConnection();
-
                 RunSetConnection(conn);
             }
             catch (Exception ex)
@@ -495,22 +498,27 @@ namespace DBADashGUI
             // Call SetConnection on UI thread so its UI updates are single-threaded
             // and consistent. SetConnection will use `await` for I/O and offload
             // heavy work to background tasks explicitly where required.
-            try
-            {
-                // `SetConnection` is async; we intentionally don't await here to
-                // keep caller non-blocking, but we call it on the UI thread so
-                // its marshaling behavior is straightforward.
-                var _ = SetConnection(conn, token);
-            }
-            catch (Exception ex)
+            // `SetConnection` is async; fire-and-forget but ensure any fault is
+            // observed to avoid unobserved task exceptions.  Use the ObserveFault
+            // extension to attach a continuation that will marshal any exception
+            // back to the UI thread for display.
+            SetConnectionAsync(conn, token).ObserveFault(ex =>
             {
                 try { this.BeginInvoke((Action)(() => CommonShared.ShowExceptionDialog(ex))); } catch { }
-            }
+            });
         }
 
-        public async Task SetConnection(RepositoryConnection connection, CancellationToken token = default)
+        public async Task SetConnectionAsync(RepositoryConnection connection, CancellationToken token = default)
         {
-            if (connection == null) return;
+            // If caller passed a null connection, make sure we bring the UI to a
+            // consistent disconnected/error state rather than silently returning.
+            lblRepositoryDB.Text = connection?.Name ?? "No Connection";
+            if (connection == null)
+            {
+                try { SetConnectionError("No repository connection specified."); } catch { }
+                try { StopConnectingAnimation(); } catch { }
+                return;
+            }
 
             // Ensure we have a token to use and record it if caller didn't pass one
             if (token == default)
@@ -527,7 +535,12 @@ namespace DBADashGUI
             // remember last attempt for retry
             _lastConnectionAttempt = connection;
 
-            token.ThrowIfCancellationRequested();
+            if (token.IsCancellationRequested)
+            {
+                try { if (token == _setConnectionCts?.Token) SetConnectionError("Connection attempt cancelled."); } catch { }
+                try { if (token == _setConnectionCts?.Token) StopConnectingAnimation(); } catch { }
+                return;
+            }
 
             // 1) Try opening SQL connection (async). This uses await so it won't
             // block the UI thread and still executes in the UI synchronization
@@ -541,7 +554,7 @@ namespace DBADashGUI
             {
                 try { if (token == _setConnectionCts?.Token) SetConnectionError("Connection attempt cancelled."); } catch { }
                 try { if (token == _setConnectionCts?.Token) StopConnectingAnimation(); } catch { }
-                token.ThrowIfCancellationRequested();
+                return;
             }
             catch (Exception ex)
             {
@@ -559,7 +572,7 @@ namespace DBADashGUI
             {
                 try { if (token == _setConnectionCts?.Token) SetConnectionError("Version check cancelled."); } catch { }
                 try { if (token == _setConnectionCts?.Token) StopConnectingAnimation(); } catch { }
-                token.ThrowIfCancellationRequested();
+                return;
             }
             catch (Exception ex)
             {
@@ -618,33 +631,45 @@ namespace DBADashGUI
                     // the background Task.Run does not directly access controls.
                     this.BeginInvoke((Action)(() =>
                     {
-                        // Update cached reports reference
-                        if (_customReportsCache != null)
+                        // Re-validate that this delegate still belongs to the current connection attempt.
+                        if (token != _setConnectionCts?.Token)
                         {
-                            customReports = _customReportsCache;
+                            return;
                         }
+                        try
+                        {
+                            // Update cached reports reference
+                            if (_customReportsCache != null)
+                            {
+                                customReports = _customReportsCache;
+                            }
 
-                        // Build tag menu using any command-line tag filters, else use current selections
-                        var selectedForMenu = string.IsNullOrEmpty(commandLine.TagFilters)
-                            ? SelectedTags()
-                            : DBADashTag.GetTags(Common.ConnectionString, commandLine.TagFilters).Select(t => t.TagID).ToList();
-                        BuildTagMenu(selectedForMenu);
+                            // Build tag menu using any command-line tag filters, else use current selections
+                            var selectedForMenu = string.IsNullOrEmpty(commandLine.TagFilters)
+                                ? SelectedTags()
+                                : DBADashTag.GetTags(Common.ConnectionString, commandLine.TagFilters).Select(t => t.TagID).ToList();
+                            BuildTagMenu(selectedForMenu);
 
-                        // Build tree from authoritative CommonData.Instances and the
-                        // pools snapshot captured earlier.
-                        VisitedNodes.Clear();
-                        tsBack.Enabled = false;
-                        tv1.Nodes.Clear();
-                        var root = BuildInstanceTree(CommonData.Instances, poolsSnapshot, customReports, groupByTagLocal);
-                        tv1.Nodes.Add(root);
-                        root.Expand();
-                        tv1.SelectedNode = root;
+                            // Build tree from authoritative CommonData.Instances and the
+                            // pools snapshot captured earlier.
+                            VisitedNodes.Clear();
+                            tsBack.Enabled = false;
+                            tv1.Nodes.Clear();
+                            var root = BuildInstanceTree(CommonData.Instances, poolsSnapshot, customReports, groupByTagLocal);
+                            tv1.Nodes.Add(root);
+                            root.Expand();
+                            tv1.SelectedNode = root;
 
-                        AddTimeZoneMenus();
-                        SetConnectionState(true);
-                        repoSettingsToolStripMenuItem.Enabled = DBADashUser.IsAdmin;
-                        ThemeExtensions.CellToolTipMaxLength = Config.CellToolTipMaxLength;
-                        StopConnectingAnimation();
+                            AddTimeZoneMenus();
+                            SetConnectionState(true);
+                            repoSettingsToolStripMenuItem.Enabled = DBADashUser.IsAdmin;
+                            ThemeExtensions.CellToolTipMaxLength = Config.CellToolTipMaxLength;
+                            StopConnectingAnimation();
+                        }
+                        catch (Exception ex)
+                        {
+                            Common.ShowExceptionDialog(ex, "Error updating the UI for the new connection " + ex.Message);
+                        }
                     }));
                 }
             }
@@ -654,7 +679,7 @@ namespace DBADashGUI
             }
             catch (Exception ex)
             {
-                SetConnectionError("Error loading data: " + ex.Message, ex);
+                try { if (token == _setConnectionCts?.Token) SetConnectionError("Error loading data: " + ex.Message, ex); } catch { }
             }
             finally
             {
@@ -700,6 +725,8 @@ namespace DBADashGUI
                 try { this.Invoke((Action)(() => SetConnectionError(message, ex))); } catch { }
                 return;
             }
+            // Ensure any partially-applied global connection state is cleared
+            try { Common.SetConnectionString(null); } catch { }
             SetConnectionState(false);
             lblConnecting.Text = "Connection Failed";
             lblConnectionInfo.Text = message;
@@ -720,9 +747,8 @@ namespace DBADashGUI
             _connectingTimer = new System.Windows.Forms.Timer { Interval = 500 };
             _connectingTimer.Tick += (s, e) =>
             {
-                _connectingDots = (_connectingDots + 1) % 100; // 0..100
+                _connectingDots = (_connectingDots + 1) % 20;
                 lblConnectionInfo.Text = "Waiting for connection" + new string('.', _connectingDots);
-                Application.DoEvents();
             };
             bttnCancel.InvokeSetEnabled(true);
             bttnRetry.InvokeSetEnabled(false);
@@ -845,12 +871,19 @@ namespace DBADashGUI
             }
         }
 
-        private void Tabs_SelectedIndexChanged(object sender, EventArgs e)
+        private async void Tabs_SelectedIndexChanged(object sender, EventArgs e)
         {
-            LoadSelectedTab();
+            try
+            {
+                await LoadSelectedTabAsync();
+            }
+            catch (Exception ex)
+            {
+                Common.ShowExceptionDialog(ex, "Error loading tab: " + ex.Message);
+            }
         }
 
-        private void LoadSelectedTab()
+        private async Task LoadSelectedTabAsync()
         {
             DisableAutoRefresh();
             setAutoRefreshToolStripMenuItem.Enabled = IsAutoRefreshApplicable;
@@ -885,7 +918,7 @@ namespace DBADashGUI
 
             if (tabs.SelectedTab == tabSchema)
             {
-                GetHistory(n.ObjectID);
+                await GetHistoryAsync(n.ObjectID);
             }
             else
             {
@@ -924,7 +957,7 @@ namespace DBADashGUI
 
             // Build tree using shared helper
             await CommonData.UpdateInstancesListAsync(tagIDs: string.Join(",", SelectedTags()), searchString: SearchString, groupByTag: GroupByTag, token: token);
-            var pools = await CommonData.GetElasticPoolsAsync();
+            var pools = await CommonData.GetElasticPoolsAsync(token);
             var root = BuildInstanceTree(CommonData.Instances, pools, customReports, GroupByTag);
 
             tv1.Nodes.Add(root);
@@ -1056,20 +1089,6 @@ namespace DBADashGUI
                 }
             }
             dbFolder.Nodes.AddRange(nodesToAdd.ToArray());
-        }
-
-        private static void ExpandObjects(SQLTreeItem n)
-        {
-            var dbObj = CommonData.GetDBObjects(n.DatabaseID, (string)n.Tag);
-            foreach (DataRow r in dbObj.Rows)
-            {
-                var type = ((string)r[1]).Trim();
-                var objN = new SQLTreeItem((string)r[3], (string)r[2], type)
-                {
-                    ObjectID = (long)r[0]
-                };
-                n.Nodes.Add(objN);
-            }
         }
 
         private List<TabPage> GetAllowedTabs()
@@ -1319,7 +1338,7 @@ namespace DBADashGUI
             return allowedTabs.Distinct().ToList();
         }
 
-        private void Tv1_AfterSelect(object sender, TreeViewEventArgs e)
+        private async void Tv1_AfterSelect(object sender, TreeViewEventArgs e)
         {
             if (e.Node == null) return;
             e.Node.TreeView.BeginUpdate();
@@ -1343,8 +1362,14 @@ namespace DBADashGUI
             RefreshTabPages(allowedTabs, prevSelectedTab);
 
             suppressLoadTab = suppress; // Return tab load suppression back to previous value
-
-            LoadSelectedTab();
+            try
+            {
+                await LoadSelectedTabAsync();
+            }
+            catch (Exception ex)
+            {
+                Common.ShowExceptionDialog(ex, "An error occurred while loading the selected tab: " + ex.Message);
+            }
         }
 
         private async void Tv1_BeforeExpand(object sender, TreeViewCancelEventArgs e)
@@ -1470,7 +1495,7 @@ namespace DBADashGUI
             diffSchemaSnapshot.NewText = newText;
         }
 
-        private async void GetHistory(long ObjectID, int PageNum = 1)
+        private async Task GetHistoryAsync(long ObjectID, int PageNum = 1)
         {
             diffSchemaSnapshot.OldText = "";
             diffSchemaSnapshot.NewText = "";
@@ -1516,21 +1541,21 @@ namespace DBADashGUI
             }
         }
 
-        private void TsNext_Click(object sender, EventArgs e)
+        private async void TsNext_Click(object sender, EventArgs e)
         {
-            GetHistory(currentObjectID, currentPage + 1);
+            await GetHistoryAsync(currentObjectID, currentPage + 1);
         }
 
-        private void TsPrevious_Click(object sender, EventArgs e)
+        private async void TsPrevious_Click(object sender, EventArgs e)
         {
-            GetHistory(currentObjectID, currentPage - 1);
+            await GetHistoryAsync(currentObjectID, currentPage - 1);
         }
 
-        private void TsPageSize_Validated(object sender, EventArgs e)
+        private async void TsPageSize_Validated(object sender, EventArgs e)
         {
             if (int.Parse(tsPageSize.Text) != currentPageSize)
             {
-                GetHistory(currentObjectID);
+                await GetHistoryAsync(currentObjectID);
             }
         }
 
@@ -1802,7 +1827,7 @@ namespace DBADashGUI
             dataRetentionForm.ShowSingleInstance();
         }
 
-        public void Instance_Selected(object sender, InstanceSelectedEventArgs e)
+        public async void Instance_Selected(object sender, InstanceSelectedEventArgs e)
         {
             var root = e.SearchFromRoot ? tv1.Nodes[0].AsSQLTreeItem() : tv1.SelectedSQLTreeItem();
 
@@ -1895,7 +1920,7 @@ namespace DBADashGUI
                         }
                         else
                         {
-                            NavigateBack();
+                            await NavigateBackAsync();
                             MessageBox.Show("Selected tab page is not available for this context", "Warning",
                                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
@@ -1911,7 +1936,7 @@ namespace DBADashGUI
                     suppressLoadTab = false;
                 }
 
-                LoadSelectedTab();
+                await LoadSelectedTabAsync();
             }
         }
 
@@ -2065,13 +2090,12 @@ namespace DBADashGUI
             ConfigureDisplayNameForm.ShowSingleInstance();
         }
 
-        private void FreezeKeyColumnsToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void FreezeKeyColumnsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Common.FreezeKeyColumn = freezeKeyColumnsToolStripMenuItem.Checked;
-            LoadSelectedTab();
+            await LoadSelectedTabAsync();
         }
 
-        // F5 to refresh
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             var bHandled = false;
@@ -2084,7 +2108,7 @@ namespace DBADashGUI
                     }
                     else
                     {
-                        LoadSelectedTab();
+                        LoadSelectedTabAsync().ObserveFault();
                     }
 
                     bHandled = true;
@@ -2191,15 +2215,15 @@ namespace DBADashGUI
             }
         }
 
-        private void TsBack_Click(object sender, EventArgs e)
+        private async void TsBack_Click(object sender, EventArgs e)
         {
-            NavigateBack();
+            await NavigateBackAsync();
         }
 
         /// <summary>
         /// Navigate back.  If current control supports INavigation, invoke the NavigateBack for the control.  If move back was not performed on control, take user to previous selected node/tab in tree.
         /// </summary>
-        private void NavigateBack()
+        private async Task NavigateBackAsync()
         {
             foreach (var ctrl in tabs.SelectedTab.Controls)
             {
@@ -2222,7 +2246,7 @@ namespace DBADashGUI
                     context.TabIndex ==
                     tabs.SelectedIndex) // If move back location is set to current location, navigate to the next saved location
                 {
-                    NavigateBack();
+                    await NavigateBackAsync();
                 }
                 else
                 {
@@ -2232,7 +2256,7 @@ namespace DBADashGUI
                     tv1.SelectedNode = context.Node;
                     tabs.SelectedIndex = context.TabIndex;
                     suppressLoadTab = false;
-                    LoadSelectedTab(); // Need to refresh data.  In some cases it could be OK not to refresh - in others, data could be shown from the wrong context.
+                    await LoadSelectedTabAsync(); // Need to refresh data.  In some cases it could be OK not to refresh - in others, data could be shown from the wrong context.
                     ShowRefresh(false);
                 }
 
@@ -2264,7 +2288,7 @@ namespace DBADashGUI
                 {
                     case MK_XBUTTON1:
                         // navigate backward
-                        NavigateBack();
+                        NavigateBackAsync().ObserveFault();
                         break;
                         // case MK_XBUTTON2:
                         // navigate forward
@@ -2335,10 +2359,10 @@ namespace DBADashGUI
             }
         }
 
-        private void ShowHidden_Changed(object sender, EventArgs e)
+        private async void ShowHidden_Changed(object sender, EventArgs e)
         {
             Common.ShowHidden = showHiddenToolStripMenuItem.Checked;
-            LoadSelectedTab();
+            await LoadSelectedTabAsync();
         }
 
         private RepositoryConnectionList repositories;
@@ -2418,7 +2442,7 @@ namespace DBADashGUI
 
         private async void TsAddConnection_Click(object sender, EventArgs e)
         {
-            await AddConnection();
+            await AddConnectionAsync();
         }
 
         private static string GetNewConnectionString()
@@ -2436,7 +2460,7 @@ namespace DBADashGUI
             return connectionString;
         }
 
-        private async Task AddConnection()
+        private async Task AddConnectionAsync()
         {
             using var frm = new DBConnection() { ConnectionString = GetNewConnectionString() };
             frm.ShowDialog();
@@ -2590,13 +2614,13 @@ namespace DBADashGUI
 
         #region "Alerts"
 
-        private void TsAlert_Click(object sender, EventArgs e)
+        private async void TsAlert_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(Common.ConnectionString)) return;
             if (tv1.Nodes.Count == 0) return;
             tv1.SelectedNode = tv1.Nodes[0];
             tabs.SelectedTab = tabDBADashAlerts;
-            LoadSelectedTab();
+            await LoadSelectedTabAsync();
         }
 
         public async Task<(int Total, int ForAttention, short Priority)> GetAlertCounts()
@@ -2967,7 +2991,7 @@ namespace DBADashGUI
             catch { }
         }
 
-        private void Retry_Click(object sender, EventArgs e)
+        private async void Retry_Click(object sender, EventArgs e)
         {
             // Disable retry to avoid rapid re-clicks
             bttnRetry.InvokeSetEnabled(false);
@@ -2976,6 +3000,11 @@ namespace DBADashGUI
             if (_lastConnectionAttempt != null)
             {
                 RunSetConnection(_lastConnectionAttempt);
+            }
+            else
+            {
+                await AddConnectionAsync();
+                bttnRetry.Enabled = true;
             }
         }
     }
