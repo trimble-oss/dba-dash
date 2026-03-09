@@ -582,15 +582,27 @@ namespace DBADashGUI
                 return;
             }
 
-            // 3) Perform configuration and prepare data for UI. Offload heavy
-            // data pulls to background thread, but build node objects there and
-            // then apply on UI thread in one shot to avoid flicker.
-            Common.SetConnectionString(connection);
-            // Ensure any saved tree layout and command-line tags are applied
-            try { GetCommandLineTags(); } catch { }
-            try { GetTreeLayout(); } catch { }
             try
             {
+                // 3) Perform configuration and prepare data for UI. Offload heavy
+                // data pulls to background thread, but build node objects there and
+                // then apply on UI thread in one shot to avoid flicker.
+                Common.SetConnectionString(connection);
+
+                await DBADashUser.GetUserAsync(token);
+
+                try
+                {
+                    GetCommandLineTags();
+                }
+                catch (Exception ex)
+                {
+                    Common.ShowExceptionDialog(ex, "Command line tags error");
+                }
+
+                // Ensure any saved tree layout and command-line tags are applied
+                GetTreeLayout();
+
                 // Capture UI-dependent values before going to background thread
                 var searchStringLocal = SearchString;
                 var groupByTagLocal = GroupByTag;
@@ -600,30 +612,21 @@ namespace DBADashGUI
                 // pools/customReports for use on the UI thread. Avoid duplicating
                 // the instances DataTable here.
                 DataTable poolsSnapshot = null;
-                try
-                {
-                    Config.RefreshConfig();
-                    DBADashUser.GetUser();
-                    SetTheme(DBADashUser.SelectedTheme, false);
-                    _customReportsCache = CustomReports.CustomReports.GetCustomReports();
 
-                    // Only apply command-line tag filter if one was actually provided.
-                    var commandLineTagIDs = string.Empty;
-                    if (!string.IsNullOrEmpty(commandLine.TagFilters))
-                    {
-                        var tags = DBADashTag.GetTags(Common.ConnectionString, commandLine.TagFilters).ToList();
-                        commandLineTagIDs = string.Join(",", tags.Select(t => t.TagID));
-                    }
+                Config.RefreshConfig();
+                SetTheme(DBADashUser.SelectedTheme, false);
+                _customReportsCache = CustomReports.CustomReports.GetCustomReports();
 
-                    await CommonData.UpdateInstancesListAsync(tagIDs: commandLineTagIDs, searchString: searchStringLocal, groupByTag: groupByTagLocal, token: token);
-                    poolsSnapshot = await CommonData.GetElasticPoolsAsync(token);
-                }
-                catch (Exception)
+                // Only apply command-line tag filter if one was actually provided.
+                var commandLineTagIDs = string.Empty;
+                if (!string.IsNullOrEmpty(commandLine.TagFilters))
                 {
-                    // Let the exception surface to the caller so SetConnection
-                    // can show an error
-                    throw;
+                    var tags = DBADashTag.GetTags(Common.ConnectionString, commandLine.TagFilters).ToList();
+                    commandLineTagIDs = string.Join(",", tags.Select(t => t.TagID));
                 }
+
+                await CommonData.UpdateInstancesListAsync(tagIDs: commandLineTagIDs, searchString: searchStringLocal, groupByTag: groupByTagLocal, token: token);
+                poolsSnapshot = await CommonData.GetElasticPoolsAsync(token);
 
                 // Apply UI updates on UI thread in one atomic block
                 if (token == _setConnectionCts?.Token)
