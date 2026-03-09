@@ -85,6 +85,7 @@ namespace DBADashGUI
                         {
                             parentNode.Nodes.Remove(hadrGrp);
                         }
+                        parentNode.AddReportsFolder(reports?.RootLevelReports);
                         root.Nodes.Add(parentNode);
                         currentTagGroup = tagGroup;
                         AzureNode = null;
