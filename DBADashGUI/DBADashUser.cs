@@ -3,6 +3,8 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace DBADashGUI
@@ -112,11 +114,11 @@ namespace DBADashGUI
             }
         }
 
-        public static void GetUser()
+        public static async Task GetUserAsync(CancellationToken token)
         {
-            using var cn = new SqlConnection(Common.ConnectionString);
-            using var cmd = new SqlCommand("DBADash.User_Get", cn) { CommandType = CommandType.StoredProcedure };
-            cn.Open();
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand("DBADash.User_Get", cn) { CommandType = CommandType.StoredProcedure };
+            await cn.OpenAsync(token);
             cmd.Parameters.AddWithValue("UserName", Environment.UserName);
             var pUserID = new SqlParameter("UserID", SqlDbType.Int) { Direction = ParameterDirection.Output };
             var pManageGlobalViews = new SqlParameter("ManageGlobalViews", SqlDbType.Bit) { Direction = ParameterDirection.Output };
@@ -127,9 +129,9 @@ namespace DBADashGUI
             var pTheme = new SqlParameter("Theme", SqlDbType.VarChar, 50) { Direction = ParameterDirection.Output };
             var pIsAdmin = new SqlParameter("IsAdmin", SqlDbType.Bit) { Direction = ParameterDirection.Output };
             cmd.Parameters.AddRange(new[] { pUserID, pManageGlobalViews, pTZ, pTheme, pAllowMessaging, pAllowPlanForcing, pIsAdmin, pAllowJobExecution });
-            using var rdr = cmd.ExecuteReader();
+            await using var rdr = await cmd.ExecuteReaderAsync(token);
             Roles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            while (rdr.Read())
+            while (await rdr.ReadAsync(token))
             {
                 Roles.Add(rdr["name"].ToString());
             }
