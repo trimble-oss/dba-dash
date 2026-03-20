@@ -329,24 +329,62 @@ namespace DBADashGUI.Charts
                 // Set up the single timer tick handler
                 state.ShowTimer.Tick += (s, e) =>
                 {
-                    // Check if enough time has passed since last mouse movement
-                    var timeSinceLastMove = DateTime.Now - state.LastMouseMoveTime;
-
-                    if (timeSinceLastMove.TotalMilliseconds >= TooltipShowDelayMs)
+                    try
                     {
-                        // Mouse has been still for the required delay, show tooltip
-                        state.ShowTimer.Stop();
-
-                        if (state.PendingSeriesData != null && state.PendingSeriesData.Count > 0)
+                        // If the chart has been disposed while the timer was running, clean up and return
+                        if (chart == null || chart.IsDisposed)
                         {
-                            tooltipForm.SetContent(state.PendingDate, state.PendingXLabel, state.PendingSeriesData);
-                            PositionTooltip(chart, tooltipForm, state.PendingMouseLocation);
-                            state.LastTooltipPosition = tooltipForm.Location; // Track initial position
-                            tooltipForm.Show();
-                            state.IsTooltipVisible = true;
+                            try { state.ShowTimer.Stop(); } catch { }
+                            try { state.ShowTimer.Dispose(); } catch { }
+                            _tooltipStates.Remove(chart);
+                            if (_tooltipForms.TryGetValue(chart, out var tf))
+                            {
+                                try { tf.Hide(); tf.Dispose(); } catch { }
+                                _tooltipForms.Remove(chart);
+                            }
+                            return;
                         }
+
+                        // Check if enough time has passed since last mouse movement
+                        var timeSinceLastMove = DateTime.Now - state.LastMouseMoveTime;
+
+                        if (timeSinceLastMove.TotalMilliseconds >= TooltipShowDelayMs)
+                        {
+                            // Mouse has been still for the required delay, show tooltip
+                            state.ShowTimer.Stop();
+
+                            if (state.PendingSeriesData != null && state.PendingSeriesData.Count > 0)
+                            {
+                                tooltipForm.SetContent(state.PendingDate, state.PendingXLabel, state.PendingSeriesData);
+                                try
+                                {
+                                    PositionTooltip(chart, tooltipForm, state.PendingMouseLocation);
+                                }
+                                catch (ObjectDisposedException)
+                                {
+                                    // Chart was disposed during positioning; fully disable custom tooltips for this chart
+                                    try { DisableCustomTooltips(chart); } catch { }
+                                    return;
+                                }
+                                catch (InvalidOperationException)
+                                {
+                                    // In case the control handle/state is invalid, disable tooltips
+                                    try { DisableCustomTooltips(chart); } catch { }
+                                    return;
+                                }
+
+                                state.LastTooltipPosition = tooltipForm.Location; // Track initial position
+                                tooltipForm.Show();
+                                state.IsTooltipVisible = true;
+                            }
+                        }
+                        // If not enough time has passed, timer will continue and check again
                     }
-                    // If not enough time has passed, timer will continue and check again
+                    catch
+                    {
+                        // Any unexpected error: ensure tooltip state is reset
+                        try { ResetTooltipState(state, tooltipForm); } catch { }
+                    }
                 };
 
                 _tooltipStates.Add(chart, state);
@@ -656,25 +694,42 @@ namespace DBADashGUI.Charts
 
         private static void PositionTooltip(CartesianChart chart, TooltipForm tooltipForm, Point mouseLocation)
         {
-            var screenPt = chart.PointToScreen(mouseLocation);
-            var tooltipX = screenPt.X + TooltipOffsetX;
-            var tooltipY = screenPt.Y + TooltipOffsetY;
-
-            // Get screen bounds
-            var screen = Screen.FromPoint(screenPt);
-            var screenBounds = screen.WorkingArea;
-
-            // Adjust if would go off screen
-            if (tooltipX + tooltipForm.Width > screenBounds.Right)
+            try
             {
-                tooltipX = screenPt.X - tooltipForm.Width - TooltipMargin;
-            }
-            if (tooltipY + tooltipForm.Height > screenBounds.Bottom)
-            {
-                tooltipY = screenPt.Y - tooltipForm.Height - TooltipMargin;
-            }
+                if (chart == null || chart.IsDisposed || chart.Disposing || !chart.IsHandleCreated)
+                {
+                    try { tooltipForm.Hide(); } catch { }
+                    return;
+                }
 
-            tooltipForm.Location = new Point(tooltipX, tooltipY);
+                var screenPt = chart.PointToScreen(mouseLocation);
+                var tooltipX = screenPt.X + TooltipOffsetX;
+                var tooltipY = screenPt.Y + TooltipOffsetY;
+
+                // Get screen bounds
+                var screen = Screen.FromPoint(screenPt);
+                var screenBounds = screen.WorkingArea;
+
+                // Adjust if would go off screen
+                if (tooltipX + tooltipForm.Width > screenBounds.Right)
+                {
+                    tooltipX = screenPt.X - tooltipForm.Width - TooltipMargin;
+                }
+                if (tooltipY + tooltipForm.Height > screenBounds.Bottom)
+                {
+                    tooltipY = screenPt.Y - tooltipForm.Height - TooltipMargin;
+                }
+
+                tooltipForm.Location = new Point(tooltipX, tooltipY);
+            }
+            catch (ObjectDisposedException)
+            {
+                try { tooltipForm.Hide(); } catch { }
+            }
+            catch (InvalidOperationException)
+            {
+                try { tooltipForm.Hide(); } catch { }
+            }
         }
 
         private static bool TryGetDateFromPoint(LiveChartsCore.Kernel.ChartPoint point, out DateTime dateTime)

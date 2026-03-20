@@ -17,6 +17,14 @@ namespace DBADashGUI.Performance
 
         public DataTable Counters;
 
+        /// <summary>
+        /// When false the "Current" checkbox column will be hidden. Default is true.
+        /// Callers can set this property before showing the dialog.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Browsable(false)]
+        public bool ShowCurrent { get; set; } = true;
+
         private Dictionary<int, Counter> selectedCounters;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -39,7 +47,7 @@ namespace DBADashGUI.Performance
                             InstanceName = (string)row["instance_name"]
                         }
                     into ctr
-                        where ctr.GetAggColumns().Count > 0
+                        where ctr.GetAggColumns(ShowCurrent).Count > 0
                         select ctr).ToDictionary(ctr => ctr.CounterID);
             }
             set => selectedCounters = value;
@@ -60,7 +68,8 @@ namespace DBADashGUI.Performance
             dgvCounters.CurrentCellDirtyStateChanged += DgvCounters_CurrentCellDirtyStateChanged;
             if (Counters == null || Counters.Rows.Count == 0)
             {
-                Counters = CommonData.GetCounters();
+                // Use a copy so we don't mutate the shared cached DataTable returned by CommonData.GetCounters()
+                Counters = CommonData.GetCounters()?.Copy();
                 AddAggSelectionColumns();
                 if (selectedCounters is { Count: > 0 })
                 {
@@ -79,6 +88,8 @@ namespace DBADashGUI.Performance
             }
             dgvCounters.AutoGenerateColumns = false;
             dgvCounters.DataSource = new DataView(Counters);
+            // Allow callers to hide the "Current" selection when appropriate (e.g., plotting over time)
+            colCurrent.Visible = ShowCurrent;
         }
 
         private void DgvCounters_CurrentCellDirtyStateChanged(object sender, EventArgs e)

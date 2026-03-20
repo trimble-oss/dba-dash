@@ -32,7 +32,6 @@ namespace DBADashGUI.CustomReports
 
         protected DataSet reportDS;
         private bool suppressCboResultsIndexChanged;
-        public static DataGridView Grid => new(); // dgv;
         public ToolStripStatusLabel StatusLabel => lblDescription;
         protected DBADashContext context;
 
@@ -55,7 +54,7 @@ namespace DBADashGUI.CustomReports
         private ChartLayoutHelper chartLayoutHelper = new();
 
         // Keep track of GridFilterChanged handlers so we can unsubscribe them when disposing/clearing
-        private readonly System.Collections.Generic.Dictionary<DBADashDataGridView, EventHandler> gridFilterHandlers = new();
+        private readonly Dictionary<DBADashDataGridView, EventHandler> gridFilterHandlers = new();
 
         private bool wasTableCollapsedBeforeMaximize = false;
 
@@ -631,7 +630,7 @@ namespace DBADashGUI.CustomReports
                 // using its Token/registrations; disposal is performed in the completion
                 // path (RefreshDataRepository) to avoid races.
                 var newCts = new CancellationTokenSource();
-                var old = System.Threading.Interlocked.Exchange(ref cancellationTokenSource, newCts);
+                var old = Interlocked.Exchange(ref cancellationTokenSource, newCts);
                 try { old?.Cancel(); }
                 catch (Exception ex)
                 {
@@ -862,8 +861,38 @@ namespace DBADashGUI.CustomReports
                 var chartWrapper = chart.Tag as CustomReportChart;
                 if (chartWrapper != null)
                 {
-                    var dt = reportDS.Tables[chartWrapper.TableIndex];
+                    // If this CustomReportChart references a metric chart type, refresh it via IMetricChart
+                    if (chartWrapper.Metric != null)
+                    {
+                        if (chart is IMetricChart metricChart && context != null)
+                        {
+                            try
+                            {
+                                metricChart.RefreshData(context.InstanceID);
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"Error refreshing metric chart: {ex}");
+                            }
+                        }
+                        continue;
+                    }
+
+                    // configuration-based chart behavior
                     var chartConfig = chartWrapper.Config;
+                    // Ensure the configured table exists
+                    if (chartConfig == null)
+                    {
+                        continue;
+                    }
+                    if (reportDS == null || reportDS.Tables.Count <= chartWrapper.TableIndex)
+                    {
+                        Debug.WriteLine($"Warning: Chart configured for result set {chartWrapper.TableIndex} but report only returned {reportDS?.Tables.Count ?? 0} result sets.  Chart will be skipped.");
+                        continue;
+                    }
+
+                    var dt = reportDS.Tables[chartWrapper.TableIndex];
+
                     // If this is a CartesianChart, update in place
                     if (chart is CartesianChart cchart && chartConfig is ChartConfiguration crc)
                     {
@@ -938,7 +967,14 @@ namespace DBADashGUI.CustomReports
         private void GetChartPanels()
         {
             if (Report.Charts == null || Report.Charts.Count == 0) return;
-            if (reportDS == null || reportDS.Tables.Count == 0) return;
+            // Allow metric-chart-only reports to render even if there are no result tables
+            if (reportDS == null || reportDS.Tables.Count == 0)
+            {
+                if (!Report.Charts.Any(c => c.Metric != null))
+                {
+                    return;
+                }
+            }
             // Dispose any existing chart controls and clear tracking before rebuilding to avoid leaks
             try { CleanupCharts(); } catch (Exception ex) { Debug.WriteLine($"GetChartPanels: CleanupCharts error: {ex}"); }
 
@@ -999,16 +1035,111 @@ namespace DBADashGUI.CustomReports
                 var chartConfig = chartWrapper.Config;
                 var chartId = idx;
 
-                if (reportDS.Tables.Count <= chartWrapper.TableIndex)
+                Control chartControl = null;
+                Panel pnl = null;
+
+                // Defensive validation: chart must have either a metric type or a configuration
+                // otherwise it can't be rendered.  Log and skip invalid entries to avoid
+                // throwing during layout/render.
+                if (chartWrapper.Metric == null && chartConfig == null)
                 {
-                    Debug.WriteLine($"Warning: Chart configured for result set {chartWrapper.TableIndex} but report only returned {reportDS.Tables.Count} result sets.  Chart will be skipped.");
+                    Debug.WriteLine($"GetChartPanels: skipping invalid CustomReportChart at index {idx} - no MetricType or Config");
                     continue;
                 }
 
-                var dt = reportDS.Tables[chartWrapper.TableIndex];
-                var chart = ChartHelper.GetChartControlFromDataTable(dt, chartConfig);
-                chart.Tag = chartWrapper;
-                var pnl = chartLayoutHelper.CreateResizablePanel(chart, chartId, enableResize, chartConfig.ChartTitle, panelName: $"chart_{chartId}");
+                // Metric chart path (instantiated from a type that implements IMetricChart)
+                if (chartWrapper.Metric != null)
+                {
+                    try
+                    {
+                        IMetricChart metric = chartWrapper.Metric.GetChart();
+                        ((Control)metric).Dock = DockStyle.Fill;
+                        metric.MoveUpVisible = Report.CanEditReport;
+                        metric.CloseVisible = Report.CanEditReport;
+                        // Subscribe to metric events to support move/delete actions.
+                        // Resolve the chart index at runtime to avoid capturing the loop variable
+                        // (which becomes stale if charts are reordered or items removed).
+                        metric.Close += (_, __) =>
+                        {
+                            try
+                            {
+                                var curIdx = Report.Charts.FindIndex(c => ReferenceEquals(c, chartWrapper));
+                                if (curIdx >= 0 && curIdx < Report.Charts.Count)
+                                {
+                                    Report.Charts.RemoveAt(curIdx);
+                                    Report.Update();
+                                    previousSchema = null;
+                                    ShowTable();
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"Error removing metric chart: {ex}");
+                            }
+                        };
+                        metric.MoveUp += (_, __) =>
+                        {
+                            try
+                            {
+                                var curIdx = Report.Charts.FindIndex(c => ReferenceEquals(c, chartWrapper));
+                                if (curIdx > 0)
+                                {
+                                    RepositionChart(curIdx, curIdx - 1);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"Error moving metric chart: {ex}");
+                            }
+                        };
+
+                        // Let the metric control refresh itself for the current context
+                        try
+                        {
+                            metric.RefreshData(context?.InstanceID ?? 0);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"Error refreshing metric data: {ex}");
+                        }
+
+                        chartControl = (Control)metric;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error instantiating metric chart: {ex}");
+                    }
+
+                    if (chartControl != null)
+                    {
+                        chartControl.Tag = chartWrapper;
+                        pnl = chartLayoutHelper.CreateResizablePanel(chartControl, chartId, enableResize, string.Empty, panelName: $"chart_{chartId}");
+                    }
+                    else
+                    {
+                        // Could not create metric control - skip
+                        continue;
+                    }
+                }
+                else if (chartConfig != null)
+                {
+                    if (reportDS.Tables.Count <= chartWrapper.TableIndex)
+                    {
+                        Debug.WriteLine($"Warning: Chart configured for result set {chartWrapper.TableIndex} but report only returned {reportDS.Tables.Count} result sets.  Chart will be skipped.");
+                        continue;
+                    }
+
+                    var dt = reportDS.Tables[chartWrapper.TableIndex];
+                    chartControl = ChartHelper.GetChartControlFromDataTable(dt, chartConfig);
+                    chartControl.Tag = chartWrapper;
+                    pnl = chartLayoutHelper.CreateResizablePanel(chartControl, chartId, enableResize, chartConfig.ChartTitle, panelName: $"chart_{chartId}");
+                }
+                else
+                {
+                    // Nothing to render for this chart
+                    continue;
+                }
+
                 var toolStrip = pnl?.Controls.OfType<ToolStrip>().FirstOrDefault();
                 if (toolStrip != null && Report.CanEditReport)
                 {
@@ -1039,7 +1170,7 @@ namespace DBADashGUI.CustomReports
 
                 pnl.ApplyTheme();
 
-                Charts.Add(chart);
+                Charts.Add(chartControl);
 
                 if (idx == 0)
                 {
@@ -1179,6 +1310,7 @@ namespace DBADashGUI.CustomReports
             tsToggleCharts.Visible = Charts.Count > 0;
             splitToggle1.Visible = Charts.Count > 0;
             splitToggle2.Visible = Charts.Count > 0;
+            saveSystemChartStateToolStripMenuItem.Visible = Charts.Any(c => c.Tag is CustomReportChart crc && crc.Metric != null);
             SetChartPanelCollapsed(Charts.Count == 0 || !Report.ChartVisible);
             var i = ShowAllResults ? 0 : cboResults.SelectedIndex;
             var tables = ShowAllResults ? reportDS.Tables.Cast<DataTable>().ToArray() : new[] { reportDS.Tables[cboResults.SelectedIndex] };
@@ -2305,6 +2437,159 @@ namespace DBADashGUI.CustomReports
                 var location = ts.Tag.ToString();
                 ts.Checked = Report.ChartLocation == Enum.Parse<CustomReport.ChartLocations>(location);
             }
+        }
+
+        private void AddSystemChart_Click(object sender, EventArgs e)
+        {
+            var chartType = (IMetric.MetricTypes)Enum.Parse(typeof(IMetric.MetricTypes), ((ToolStripMenuItem)sender).Tag.ToString());
+
+            // Create a sensible default persisted state for the newly added metric chart.
+            IMetric metricState = null;
+            switch (chartType)
+            {
+                case IMetric.MetricTypes.ResourceGovernorWorkloadGroups:
+                    metricState = new ResourceGovernorWorkloadGroupsMetric
+                    {
+                        ShowTable = false,
+                        MetricsToDisplay = new List<string> { ResourceGovernorWorkloadGroupsMetric.DefaultMetrics[0] }
+                    };
+                    break;
+
+                case IMetric.MetricTypes.ResourceGovernorResourcePools:
+                    metricState = new ResourceGovernorResourcePoolMetric
+                    {
+                        ShowTable = false,
+                        MetricsToDisplay = new List<string> { ResourceGovernorResourcePoolMetric.DefaultMetrics[0] }
+                    };
+                    break;
+
+                case IMetric.MetricTypes.PerformanceCounter:
+                    metricState = new PerformanceCounterMetric();
+                    break;
+
+                case IMetric.MetricTypes.CPU:
+                    metricState = new CPUMetric();
+                    break;
+
+                case IMetric.MetricTypes.IO:
+                    metricState = new IOMetric();
+                    break;
+
+                case IMetric.MetricTypes.Blocking:
+                    metricState = new BlockingMetric();
+                    break;
+
+                case IMetric.MetricTypes.ObjectExecution:
+                    metricState = new ObjectExecutionMetric();
+                    break;
+
+                case IMetric.MetricTypes.Waits:
+                    metricState = new WaitMetric();
+                    break;
+
+                default:
+                    break;
+            }
+            if (metricState == null)
+            {
+                MessageBox.Show($"Unsupported chart type: {chartType}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            Report.Charts.Add(new CustomReportChart
+            {
+                Metric = metricState
+            });
+            Report.Update();
+            RefreshData();
+        }
+
+        private void SaveSystemChartState(object sender, EventArgs e)
+        {
+            try
+            {
+                if (Report?.Charts == null || Report.Charts.Count == 0)
+                {
+                    MessageBox.Show("No charts to save state for.", "Save State", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                var saved = 0;
+
+                foreach (var ctrl in Charts.ToArray())
+                {
+                    if (ctrl == null || ctrl.IsDisposed) continue;
+                    if (ctrl.Tag is not CustomReportChart wrapper) continue;
+                    if (wrapper.Metric == null) continue;
+                    if (ctrl is IMetricChart metricChart)
+                    {
+                        IMetric state = null;
+                        try
+                        {
+                            // Persist the metric POCO directly. Controls should expose their
+                            // current configuration via the Metric property.
+                            state = metricChart.Metric;
+                        }
+                        catch (Exception ex)
+                        {
+                            CommonShared.ShowExceptionDialog(ex, "Error getting chart state");
+                            return;
+                        }
+
+                        wrapper.Metric = state; // IMetric POCO
+                        saved++;
+                    }
+                }
+
+                if (saved > 0)
+                {
+                    try
+                    {
+                        Report.Update();
+                    }
+                    catch (Exception ex)
+                    {
+                        CommonShared.ShowExceptionDialog(ex, "Error saving report state");
+                        return;
+                    }
+                }
+
+                MessageBox.Show(saved > 0 ? $"Saved state for {saved} system chart(s)." : "No chart state was saved.", "Save State", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error saving system chart state");
+            }
+        }
+
+        private async void AddPerformanceCounter(object sender, EventArgs e)
+        {
+            var frm = new SelectPerformanceCounters() { ShowCurrent = false };
+            await frm.ShowDialogAsync();
+            if (frm.DialogResult != DialogResult.OK || frm.SelectedCounters == null || frm.SelectedCounters.Count == 0) return;
+
+            var metric = new PerformanceCounterMetric();
+            foreach (var kvp in frm.SelectedCounters)
+            {
+                metric.Counters.Add(kvp.Value);
+            }
+            var title = metric.GetTitle();
+            if (Common.ShowInputDialog(ref title, "Edit Chart Title") == DialogResult.OK)
+            {
+                metric.Title = title;
+            }
+            Report.Charts ??= new();
+            Report.Charts.Add(new CustomReportChart() { Metric = metric });
+
+            Report.Update();
+            RefreshData();
+        }
+
+        private void DeleteAllCharts(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Delete all charts from this report?", "Delete Charts", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+            Report.Charts = new();
+            Report.Update();
+            RefreshData();
         }
     }
 }

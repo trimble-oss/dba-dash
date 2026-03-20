@@ -40,6 +40,15 @@
             tsCols = new System.Windows.Forms.ToolStripButton();
             tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
             addChartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            addSystemChartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            blockingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            cPUToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            iOToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            objectExecutionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            performanceCounterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            resourcePoolAnalysisToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            waitsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            workloadGroupAnalysisToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             associateCollectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             chartLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             topToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -50,6 +59,7 @@
             renameResultSetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             resetLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             saveLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            saveSystemChartStateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             scriptReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             setDescriptionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             setTitleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -81,6 +91,7 @@
             lblURL = new System.Windows.Forms.ToolStripStatusLabel();
             lblDescription = new System.Windows.Forms.ToolStripStatusLabel();
             timer1 = new System.Windows.Forms.Timer(components);
+            deleteAllChartsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStrip1.SuspendLayout();
             pnlParams.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitParams).BeginInit();
@@ -187,7 +198,7 @@
             // tsConfigure
             // 
             tsConfigure.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { addChartToolStripMenuItem, associateCollectionToolStripMenuItem, chartLocationToolStripMenuItem, editPickersToolStripMenuItem, renameResultSetToolStripMenuItem, resetLayoutToolStripMenuItem, saveLayoutToolStripMenuItem, scriptReportToolStripMenuItem, setDescriptionToolStripMenuItem, setTitleToolStripMenuItem });
+            tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { addChartToolStripMenuItem, addSystemChartToolStripMenuItem, associateCollectionToolStripMenuItem, chartLocationToolStripMenuItem, deleteAllChartsToolStripMenuItem, editPickersToolStripMenuItem, renameResultSetToolStripMenuItem, resetLayoutToolStripMenuItem, saveLayoutToolStripMenuItem, saveSystemChartStateToolStripMenuItem, scriptReportToolStripMenuItem, setDescriptionToolStripMenuItem, setTitleToolStripMenuItem });
             tsConfigure.Image = Properties.Resources.SettingsOutline_16x;
             tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsConfigure.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
@@ -199,15 +210,86 @@
             // 
             addChartToolStripMenuItem.Image = Properties.Resources.StackedAreaChart;
             addChartToolStripMenuItem.Name = "addChartToolStripMenuItem";
-            addChartToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            addChartToolStripMenuItem.Size = new System.Drawing.Size(251, 26);
             addChartToolStripMenuItem.Text = "Add Chart";
             addChartToolStripMenuItem.Click += AddChartToolStripMenuItem_Click;
+            // 
+            // addSystemChartToolStripMenuItem
+            // 
+            addSystemChartToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { blockingToolStripMenuItem, cPUToolStripMenuItem, iOToolStripMenuItem, objectExecutionToolStripMenuItem, performanceCounterToolStripMenuItem, resourcePoolAnalysisToolStripMenuItem, waitsToolStripMenuItem, workloadGroupAnalysisToolStripMenuItem });
+            addSystemChartToolStripMenuItem.Image = Properties.Resources.StackedAreaChart;
+            addSystemChartToolStripMenuItem.Name = "addSystemChartToolStripMenuItem";
+            addSystemChartToolStripMenuItem.Size = new System.Drawing.Size(251, 26);
+            addSystemChartToolStripMenuItem.Text = "Add System Chart";
+            // 
+            // blockingToolStripMenuItem
+            // 
+            blockingToolStripMenuItem.Name = "blockingToolStripMenuItem";
+            blockingToolStripMenuItem.Size = new System.Drawing.Size(258, 26);
+            blockingToolStripMenuItem.Tag = "Blocking";
+            blockingToolStripMenuItem.Text = "Blocking";
+            blockingToolStripMenuItem.Click += AddSystemChart_Click;
+            // 
+            // cPUToolStripMenuItem
+            // 
+            cPUToolStripMenuItem.Name = "cPUToolStripMenuItem";
+            cPUToolStripMenuItem.Size = new System.Drawing.Size(258, 26);
+            cPUToolStripMenuItem.Tag = "CPU";
+            cPUToolStripMenuItem.Text = "CPU";
+            cPUToolStripMenuItem.Click += AddSystemChart_Click;
+            // 
+            // iOToolStripMenuItem
+            // 
+            iOToolStripMenuItem.Name = "iOToolStripMenuItem";
+            iOToolStripMenuItem.Size = new System.Drawing.Size(258, 26);
+            iOToolStripMenuItem.Tag = "IO";
+            iOToolStripMenuItem.Text = "IO";
+            iOToolStripMenuItem.Click += AddSystemChart_Click;
+            // 
+            // objectExecutionToolStripMenuItem
+            // 
+            objectExecutionToolStripMenuItem.Name = "objectExecutionToolStripMenuItem";
+            objectExecutionToolStripMenuItem.Size = new System.Drawing.Size(258, 26);
+            objectExecutionToolStripMenuItem.Tag = "ObjectExecution";
+            objectExecutionToolStripMenuItem.Text = "Object Execution";
+            objectExecutionToolStripMenuItem.Click += AddSystemChart_Click;
+            // 
+            // performanceCounterToolStripMenuItem
+            // 
+            performanceCounterToolStripMenuItem.Name = "performanceCounterToolStripMenuItem";
+            performanceCounterToolStripMenuItem.Size = new System.Drawing.Size(258, 26);
+            performanceCounterToolStripMenuItem.Text = "Performance Counter";
+            performanceCounterToolStripMenuItem.Click += AddPerformanceCounter;
+            // 
+            // resourcePoolAnalysisToolStripMenuItem
+            // 
+            resourcePoolAnalysisToolStripMenuItem.Name = "resourcePoolAnalysisToolStripMenuItem";
+            resourcePoolAnalysisToolStripMenuItem.Size = new System.Drawing.Size(258, 26);
+            resourcePoolAnalysisToolStripMenuItem.Tag = "ResourceGovernorResourcePools";
+            resourcePoolAnalysisToolStripMenuItem.Text = "Resource Pool Analysis";
+            resourcePoolAnalysisToolStripMenuItem.Click += AddSystemChart_Click;
+            // 
+            // waitsToolStripMenuItem
+            // 
+            waitsToolStripMenuItem.Name = "waitsToolStripMenuItem";
+            waitsToolStripMenuItem.Size = new System.Drawing.Size(258, 26);
+            waitsToolStripMenuItem.Tag = "Waits";
+            waitsToolStripMenuItem.Text = "Waits";
+            waitsToolStripMenuItem.Click += AddSystemChart_Click;
+            // 
+            // workloadGroupAnalysisToolStripMenuItem
+            // 
+            workloadGroupAnalysisToolStripMenuItem.Name = "workloadGroupAnalysisToolStripMenuItem";
+            workloadGroupAnalysisToolStripMenuItem.Size = new System.Drawing.Size(258, 26);
+            workloadGroupAnalysisToolStripMenuItem.Tag = "ResourceGovernorWorkloadGroups";
+            workloadGroupAnalysisToolStripMenuItem.Text = "Workload Group Analysis";
+            workloadGroupAnalysisToolStripMenuItem.Click += AddSystemChart_Click;
             // 
             // associateCollectionToolStripMenuItem
             // 
             associateCollectionToolStripMenuItem.Image = Properties.Resources.ProjectSystemModelRefresh_16x;
             associateCollectionToolStripMenuItem.Name = "associateCollectionToolStripMenuItem";
-            associateCollectionToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            associateCollectionToolStripMenuItem.Size = new System.Drawing.Size(251, 26);
             associateCollectionToolStripMenuItem.Text = "Associate Collection";
             associateCollectionToolStripMenuItem.ToolTipText = "Associate Collection - Allow collection to be triggered from report";
             associateCollectionToolStripMenuItem.Click += AssociateCollectionToolStripMenuItem_Click;
@@ -216,7 +298,7 @@
             // 
             chartLocationToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { topToolStripMenuItem, bottomToolStripMenuItem, leftToolStripMenuItem, rightToolStripMenuItem });
             chartLocationToolStripMenuItem.Name = "chartLocationToolStripMenuItem";
-            chartLocationToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            chartLocationToolStripMenuItem.Size = new System.Drawing.Size(251, 26);
             chartLocationToolStripMenuItem.Text = "Chart Location";
             // 
             // topToolStripMenuItem
@@ -255,7 +337,7 @@
             // 
             editPickersToolStripMenuItem.Image = Properties.Resources.ReportParameter_16x;
             editPickersToolStripMenuItem.Name = "editPickersToolStripMenuItem";
-            editPickersToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            editPickersToolStripMenuItem.Size = new System.Drawing.Size(251, 26);
             editPickersToolStripMenuItem.Text = "Edit Pickers";
             editPickersToolStripMenuItem.Click += EditPickersToolStripMenuItem_Click;
             // 
@@ -263,7 +345,7 @@
             // 
             renameResultSetToolStripMenuItem.Image = Properties.Resources.Rename_16x;
             renameResultSetToolStripMenuItem.Name = "renameResultSetToolStripMenuItem";
-            renameResultSetToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            renameResultSetToolStripMenuItem.Size = new System.Drawing.Size(251, 26);
             renameResultSetToolStripMenuItem.Text = "Rename Result Set";
             renameResultSetToolStripMenuItem.Click += RenameResultSet_Click;
             // 
@@ -271,7 +353,7 @@
             // 
             resetLayoutToolStripMenuItem.Image = Properties.Resources.Undo_grey_16x;
             resetLayoutToolStripMenuItem.Name = "resetLayoutToolStripMenuItem";
-            resetLayoutToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            resetLayoutToolStripMenuItem.Size = new System.Drawing.Size(251, 26);
             resetLayoutToolStripMenuItem.Text = "Reset Layout";
             resetLayoutToolStripMenuItem.ToolTipText = "Resets column visibility, order and size";
             resetLayoutToolStripMenuItem.Click += ResetLayoutToolStripMenuItem_Click;
@@ -280,16 +362,25 @@
             // 
             saveLayoutToolStripMenuItem.Image = Properties.Resources.Save_16x;
             saveLayoutToolStripMenuItem.Name = "saveLayoutToolStripMenuItem";
-            saveLayoutToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            saveLayoutToolStripMenuItem.Size = new System.Drawing.Size(251, 26);
             saveLayoutToolStripMenuItem.Text = "Save Layout";
             saveLayoutToolStripMenuItem.ToolTipText = "Saves column visibility, order and size";
             saveLayoutToolStripMenuItem.Click += SaveLayoutToolStripMenuItem_Click;
+            // 
+            // saveSystemChartStateToolStripMenuItem
+            // 
+            saveSystemChartStateToolStripMenuItem.Image = Properties.Resources.Save_16x;
+            saveSystemChartStateToolStripMenuItem.Name = "saveSystemChartStateToolStripMenuItem";
+            saveSystemChartStateToolStripMenuItem.Size = new System.Drawing.Size(251, 26);
+            saveSystemChartStateToolStripMenuItem.Text = "Save System Chart State";
+            saveSystemChartStateToolStripMenuItem.Visible = false;
+            saveSystemChartStateToolStripMenuItem.Click += SaveSystemChartState;
             // 
             // scriptReportToolStripMenuItem
             // 
             scriptReportToolStripMenuItem.Image = Properties.Resources.SQLScript_16x;
             scriptReportToolStripMenuItem.Name = "scriptReportToolStripMenuItem";
-            scriptReportToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            scriptReportToolStripMenuItem.Size = new System.Drawing.Size(251, 26);
             scriptReportToolStripMenuItem.Text = "Script Report";
             scriptReportToolStripMenuItem.ToolTipText = "Generate a script for this custom report to share with other users of DBA Dash";
             scriptReportToolStripMenuItem.Click += ScriptReportToolStripMenuItem_Click;
@@ -298,7 +389,7 @@
             // 
             setDescriptionToolStripMenuItem.Image = Properties.Resources.Rename_16x;
             setDescriptionToolStripMenuItem.Name = "setDescriptionToolStripMenuItem";
-            setDescriptionToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            setDescriptionToolStripMenuItem.Size = new System.Drawing.Size(251, 26);
             setDescriptionToolStripMenuItem.Text = "Set Description";
             setDescriptionToolStripMenuItem.ToolTipText = "Add a description for the report";
             setDescriptionToolStripMenuItem.Click += SetDescriptionToolStripMenuItem_Click;
@@ -307,7 +398,7 @@
             // 
             setTitleToolStripMenuItem.Image = Properties.Resources.Rename_16x;
             setTitleToolStripMenuItem.Name = "setTitleToolStripMenuItem";
-            setTitleToolStripMenuItem.Size = new System.Drawing.Size(226, 26);
+            setTitleToolStripMenuItem.Size = new System.Drawing.Size(251, 26);
             setTitleToolStripMenuItem.Text = "Set Title";
             setTitleToolStripMenuItem.ToolTipText = "Change the name of the report";
             setTitleToolStripMenuItem.Click += SetTitleToolStripMenuItem_Click;
@@ -586,6 +677,14 @@
             timer1.Interval = 1000;
             timer1.Tick += Timer1_Tick;
             // 
+            // deleteAllChartsToolStripMenuItem
+            // 
+            deleteAllChartsToolStripMenuItem.Image = Properties.Resources.Close_red_16x;
+            deleteAllChartsToolStripMenuItem.Name = "deleteAllChartsToolStripMenuItem";
+            deleteAllChartsToolStripMenuItem.Size = new System.Drawing.Size(251, 26);
+            deleteAllChartsToolStripMenuItem.Text = "Delete All Charts";
+            deleteAllChartsToolStripMenuItem.Click += DeleteAllCharts;
+            // 
             // CustomReportView
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -669,5 +768,16 @@
         private System.Windows.Forms.ToolStripMenuItem bottomToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem leftToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem rightToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem addSystemChartToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cPUToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem blockingToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem iOToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem objectExecutionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem workloadGroupAnalysisToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem resourcePoolAnalysisToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem waitsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveSystemChartStateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem performanceCounterToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem deleteAllChartsToolStripMenuItem;
     }
 }
