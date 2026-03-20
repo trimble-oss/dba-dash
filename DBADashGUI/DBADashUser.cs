@@ -187,5 +187,7 @@ namespace DBADashGUI
         }
 
         public static BaseTheme SelectedTheme { get => ThemeExtensions.CurrentTheme; set => ThemeExtensions.CurrentTheme = value; }
+
+        public static bool IsDarkTheme => SelectedTheme.ThemeIdentifier == ThemeType.Dark;
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -30,6 +31,9 @@ namespace DBADashGUI.Charts
         }
 
         private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<TableLayoutPanel, LayoutState> _stateTable = new();
+
+        // Map panels to their maximize toggle buttons so restore can reliably find and update them
+        private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Panel, ToolStripButton> _toggleButtonTable = new();
 
         private ControlResizeHelper resizeHelper = new ControlResizeHelper();
 
@@ -63,6 +67,7 @@ namespace DBADashGUI.Charts
                 if (control is Panel panel)
                 {
                     resizeHelper.DisableResizing(panel);
+                    try { _toggleButtonTable.Remove(panel); } catch { }
                 }
 
                 if (unhookControlEvents != null)
@@ -94,6 +99,7 @@ namespace DBADashGUI.Charts
                 if (control is Panel panel)
                 {
                     try { resizeHelper.DisableResizing(panel); } catch { }
+                    try { _toggleButtonTable.Remove(panel); } catch { }
                 }
 
                 if (unhookControlEvents != null)
@@ -185,9 +191,28 @@ namespace DBADashGUI.Charts
                         try { tableLayout.SetColumnSpan(ctrl, Math.Min(span, tableLayout.ColumnCount)); } catch { }
                     }
                     ctrl.Visible = true;
-                    var ts = ctrl.Controls.OfType<ToolStrip>().FirstOrDefault();
-                    var btn = ts?.Items.OfType<ToolStripButton>().FirstOrDefault();
-                    if (btn != null) btn.Text = "+";
+                    // Try to restore the toggle button text using the stored mapping first. If no mapping
+                    // exists (older panels or unexpected structures), fall back to searching for a
+                    // ToolStrip directly under the control.
+                    if (ctrl is Panel pnl)
+                    {
+                        if (_toggleButtonTable.TryGetValue(pnl, out var mappedBtn))
+                        {
+                            try { mappedBtn.Text = "+"; } catch { }
+                        }
+                        else
+                        {
+                            var ts = ctrl.Controls.OfType<ToolStrip>().FirstOrDefault();
+                            var btn = ts?.Items.OfType<ToolStripButton>().FirstOrDefault();
+                            if (btn != null) try { btn.Text = "+"; } catch { }
+                        }
+                    }
+                    else
+                    {
+                        var ts = ctrl.Controls.OfType<ToolStrip>().FirstOrDefault();
+                        var btn = ts?.Items.OfType<ToolStripButton>().FirstOrDefault();
+                        if (btn != null) try { btn.Text = "+"; } catch { }
+                    }
                     RefreshCharts(ctrl as Panel);
                 }
 
@@ -222,14 +247,24 @@ namespace DBADashGUI.Charts
             var panel = new Panel { Dock = DockStyle.Fill, Tag = tag };
             // set a stable Name for persistence. If caller supplied a name, use it; otherwise generate a GUID
             panel.Name = !string.IsNullOrEmpty(panelName) ? panelName : "panel_" + Guid.NewGuid().ToString("N");
-            var ts = new ToolStrip() { Dock = DockStyle.Top };
+            var childTs = childControl.Controls.OfType<ToolStrip>().FirstOrDefault();
+            var ts = childTs == null ? new ToolStrip() { Dock = DockStyle.Top } : childTs;
             var toggleButton = new ToolStripButton("+")
             {
                 Alignment = ToolStripItemAlignment.Right,
                 DisplayStyle = ToolStripItemDisplayStyle.Text,
             };
-            ts.Items.Add(toggleButton);
-            if (!string.IsNullOrEmpty(title))
+            try
+            {
+                _toggleButtonTable.Add(panel, toggleButton);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+            }
+
+            ts.Items.Insert(0, toggleButton);
+            if (!string.IsNullOrEmpty(title) && childTs == null)
             {
                 ts.Items.Add(new ToolStripLabel(title)
                 {
@@ -240,7 +275,10 @@ namespace DBADashGUI.Charts
             toggleButton.Click += (sender, e) => ToggleMaximize(panel, toggleButton);
 
             panel.Controls.Add(childControl);
-            panel.Controls.Add(ts);
+            if (childTs == null)
+            {
+                panel.Controls.Add(ts);
+            }
             if (enableResizing)
             {
                 resizeHelper.EnableResizing(panel);

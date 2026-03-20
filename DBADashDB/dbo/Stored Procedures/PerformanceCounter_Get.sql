@@ -1,6 +1,7 @@
 ﻿CREATE PROC dbo.PerformanceCounter_Get(
 	@InstanceID INT,
-	@CounterID INT,
+	@CounterID INT=NULL, /* Filter for a single CounterID. Overrides @CounterIDs if both provided. */
+	@CounterIDs IDs READONLY, /* Filter for multiple CounterIDs. Leave @CounterID set to default value (NULL). */
 	@FromDate DATETIME2(2),
 	@ToDate DATETIME2(2),
 	@DateGroupingMin INT=NULL,
@@ -27,11 +28,6 @@ SELECT @HoursCsv =  STUFF((SELECT ',' + CAST(ID AS VARCHAR)
 FROM @Hours
 FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
 
-DECLARE @CounterType TINYINT
-SELECT @CounterType = CounterType
-FROM dbo.Counters
-WHERE CounterID = @CounterID
-
 SET @SQL = N'SELECT PC.CounterID,
        ' + @DateGroupingSQL + ' AS SnapshotDate,
        ' + CASE WHEN @Use60Min=1 THEN 'SUM(PC.Value_Total) AS Value_Total,
@@ -45,7 +41,9 @@ SET @SQL = N'SELECT PC.CounterID,
 					AVG(PC.Value) AS Value_Avg,
 					COUNT(*) AS Value_SampleCount'
 	END + '
-FROM dbo.PerformanceCountersBetweenDates' + CASE WHEN @Use60Min=1 THEN '_60MIN' ELSE '' END + '(@FromDate,@ToDate,@InstanceID,@CounterID,@CounterType) PC
+FROM ' + CASE WHEN @CounterID IS NOT NULL THEN '(SELECT @CounterID AS ID) T' ELSE '@CounterIDs T' END + '
+INNER JOIN dbo.Counters C ON T.ID = C.CounterID
+CROSS APPLY dbo.PerformanceCountersBetweenDates' + CASE WHEN @Use60Min=1 THEN '_60MIN' ELSE '' END + '(@FromDate,@ToDate,@InstanceID,C.CounterID,C.CounterType) PC
 ' + CASE WHEN @DateGroupingMin = 0 OR @DateGroupingMin IS NULL THEN '' ELSE 'CROSS APPLY dbo.DateGroupingMins(PC.SnapshotDate,@DateGroupingMin) DG' END + '
 WHERE 1=1
 	' + CASE WHEN @DaysOfWeekCsv IS NULL THEN N'' ELSE 'AND DATEPART(dw,DATEADD(mi, @UTCOffset, PC.SnapshotDate)) IN (' + @DaysOfWeekCsv + ')' END + '
@@ -60,11 +58,11 @@ EXEC sp_executesql @SQL,
 					@CounterID INT,
 					@DateGroupingMin INT,
 					@UTCOffset INT,
-					@CounterType TINYINT',
+					@CounterIDs IDs READONLY',
 					@FromDate,
 					@ToDate,
 					@InstanceID,
 					@CounterID,
 					@DateGroupingMin,
 					@UTCOffset,
-					@CounterType
+					@CounterIDs

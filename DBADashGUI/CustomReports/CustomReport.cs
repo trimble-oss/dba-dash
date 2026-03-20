@@ -5,9 +5,11 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json.Converters;
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using DBADashGUI.Performance;
 
 namespace DBADashGUI.CustomReports
 {
@@ -74,14 +76,14 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         [JsonIgnore]
         public IEnumerable<Param> UserParams => Params?.ParamList == null ? new List<Param>() : Params.ParamList.Where(p =>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                    !SystemParamNames.Contains(p.ParamName.ToUpper()));
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    !SystemParamNames.Contains(p.ParamName.ToUpper()));
 
         /// <summary>
         /// Parameters for the stored procedure that are supplied automatically based on context
         /// </summary>
         [JsonIgnore]
         public IEnumerable<Param> SystemParams => Params?.ParamList == null ? new List<Param>() : Params.ParamList.Where(p =>
-                                                                                                                                                                                                                                                                                                                                                    SystemParamNames.Contains(p.ParamName.ToUpper()));
+                                                                                                                                                                                                                                                                                                                                                                                                                                    SystemParamNames.Contains(p.ParamName.ToUpper()));
 
         [JsonIgnore]
         public virtual bool IsRootLevel => Params != null && Params.ParamList.Any(p => p.ParamName.Equals("@INSTANCEIDS", StringComparison.OrdinalIgnoreCase));
@@ -101,9 +103,9 @@ namespace DBADashGUI.CustomReports
         /// If report has @FromDate & @ToDate parameters, the global date/time filter should be visible and date range supplied to the report
         /// </summary>
         [JsonIgnore]
-        public bool TimeFilterSupported => Params != null && Params.ParamList.Any(p =>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                    p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
-                                                                                                                                                                                                                                                                                                                                                                                                                                                    p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase));
+        public bool TimeFilterSupported => Charts?.Any(c => c.Metric != null) == true || (Params != null && Params.ParamList.Any(p =>
+                                                                                                                p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
+                                                                                                                p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase)));
 
         public bool ForceRefreshWithoutContextChange { get; set; }
 
@@ -135,6 +137,9 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         public void Update()
         {
+            // Remove any invalid chart entries (neither MetricType nor Config) before persisting
+            RemoveInvalidCharts();
+
             var meta = Serialize();
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("dbo.CustomReport_Upd", cn) { CommandType = CommandType.StoredProcedure };
@@ -144,6 +149,34 @@ namespace DBADashGUI.CustomReports
             cmd.Parameters.AddWithValue("Type", GetType().Name);
             cn.Open();
             cmd.ExecuteNonQuery();
+        }
+
+        private void RemoveInvalidCharts()
+        {
+            if (Charts == null || Charts.Count == 0) return;
+            // Identify invalid charts (no metric type and no config)
+            var invalidIndexes = Charts
+                .Select((c, i) => new { Chart = c, Index = i })
+                .Where(x => x.Chart.Metric == null && x.Chart.Config == null)
+                .Select(x => x.Index)
+                .OrderByDescending(i => i)
+                .ToList();
+
+            if (invalidIndexes.Count == 0) return;
+
+            Debug.WriteLine($"CustomReport.RemoveInvalidCharts: removing {invalidIndexes.Count} invalid chart(s)");
+
+            foreach (var idx in invalidIndexes)
+            {
+                try
+                {
+                    Charts.RemoveAt(idx);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"CustomReport.RemoveInvalidCharts: failed removing chart at index {idx}: {ex}");
+                }
+            }
         }
 
         public string Serialize() => JsonConvert.SerializeObject(this, Formatting.Indented,
@@ -203,6 +236,23 @@ namespace DBADashGUI.CustomReports
                 {
                     // Chart-specific types live in the DBADashGUI.Charts namespace
                     type = currentAssembly.GetType($"DBADashGUI.Charts.{typeName}");
+                }
+
+                // Also try common namespaces where metric state/type POCOs live so callers
+                // can reference types by simple name without namespace qualification.
+                if (type == null)
+                {
+                    type = currentAssembly.GetType($"DBADashGUI.{typeName}");
+                }
+
+                if (type == null)
+                {
+                    type = currentAssembly.GetType($"DBADashGUI.Performance.{typeName}");
+                }
+
+                if (type == null)
+                {
+                    type = currentAssembly.GetType($"DBADashGUI.SavedView.{typeName}");
                 }
             }
 

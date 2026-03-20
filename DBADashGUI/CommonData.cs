@@ -311,11 +311,19 @@ namespace DBADashGUI
 
         public static DataTable GetCounters()
         {
+            var key = "Counters";
+            if (cache.Get(key) is DataTable cached) return cached;
+
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("dbo.Counters_Get", cn) { CommandType = CommandType.StoredProcedure };
             using var da = new SqlDataAdapter(cmd);
             DataTable dt = new();
             da.Fill(dt);
+
+            // Cache counters for a short period to avoid repeated DB calls
+            var policy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(10) };
+            cache.Add(key, dt, policy);
+
             return dt;
         }
 
@@ -433,6 +441,7 @@ namespace DBADashGUI
             {
                 cache.Remove(element.Key);
             }
+            CounterEntity.ClearCounterIdCache();
         }
 
         public static (int? ObjectId, string SchemaName, string ObjectName) GetDBObject(string objectIdentifier)
