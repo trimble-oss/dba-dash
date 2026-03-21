@@ -535,13 +535,52 @@ namespace DBADashGUI.Charts
                                 if (xLabel == null)
                                 {
                                     var primary = coord.PrimaryValue;
+                                    // Prefer secondary (X) value when available
                                     if (!double.IsNaN(secondary))
                                     {
-                                        xLabel = secondary.ToString();
+                                        try
+                                        {
+                                            var secLong = (long)Math.Round(secondary);
+                                            if (secLong > DateTime.MinValue.Ticks && secLong < DateTime.MaxValue.Ticks)
+                                            {
+                                                xLabel = new DateTime(secLong).ToString("G");
+                                            }
+                                            else
+                                            {
+                                                xLabel = secondary.ToString();
+                                            }
+                                        }
+                                        catch
+                                        {
+                                            xLabel = secondary.ToString();
+                                        }
                                     }
                                     else
                                     {
-                                        xLabel = primary.ToString();
+                                        // If primary looks like a DateTime ticks value, convert to readable date
+                                        try
+                                        {
+                                            if (!double.IsNaN(primary))
+                                            {
+                                                var primLong = (long)Math.Round(primary);
+                                                if (primLong > DateTime.MinValue.Ticks && primLong < DateTime.MaxValue.Ticks)
+                                                {
+                                                    xLabel = new DateTime(primLong).ToString("G");
+                                                }
+                                                else
+                                                {
+                                                    xLabel = primary.ToString();
+                                                }
+                                            }
+                                            else
+                                            {
+                                                xLabel = primary.ToString();
+                                            }
+                                        }
+                                        catch
+                                        {
+                                            xLabel = primary.ToString();
+                                        }
                                     }
                                 }
                             }
@@ -686,11 +725,9 @@ namespace DBADashGUI.Charts
 
         private static Color GetSeriesColor(ISeries series)
         {
+            // Try pattern matching first for common series types
             try
             {
-                // Try to extract paint color from various series types (handle DateTimePoint and ObservablePoint)
-                // Prefer the visible stroke color for lines (stroke usually represents the line color)
-                // and fall back to the fill color if stroke is not available.
                 SolidColorPaint paint = series switch
                 {
                     LineSeries<DateTimePoint> ls => ls.Stroke as SolidColorPaint ?? ls.Fill as SolidColorPaint,
@@ -713,7 +750,28 @@ namespace DBADashGUI.Charts
             }
             catch
             {
-                // Ignore errors
+                // ignore and try reflection fallback
+            }
+
+            // Reflection fallback: try to read Stroke or Fill properties for other series types
+            try
+            {
+                var seriesType = series.GetType();
+                var strokeProp = seriesType.GetProperty("Stroke");
+                var fillProp = seriesType.GetProperty("Fill");
+
+                var strokeVal = strokeProp?.GetValue(series) as SolidColorPaint;
+                var fillVal = fillProp?.GetValue(series) as SolidColorPaint;
+
+                var paintRef = strokeVal ?? fillVal;
+                if (paintRef?.Color is SKColor skColor2)
+                {
+                    return Color.FromArgb(skColor2.Alpha, skColor2.Red, skColor2.Green, skColor2.Blue);
+                }
+            }
+            catch
+            {
+                // ignore and fall through to default
             }
 
             // Default to TrimbleBlue if color can't be determined

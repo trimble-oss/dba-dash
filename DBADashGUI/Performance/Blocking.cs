@@ -3,6 +3,8 @@ using DBADashGUI.Theme;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Drawing.Geometries;
+using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView.Painting;
 using Microsoft.Data.SqlClient;
 using System;
@@ -26,6 +28,10 @@ namespace DBADashGUI.Performance
         private int databaseID;
 
         private List<DataRow> _rows;
+        private Dictionary<long, int> _tickIndexMap;
+        // Sorted arrays to support fast nearest-tick lookup when exact match isn't found
+        private long[] _sortedTicks;
+        private int[] _sortedIndices;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool CloseVisible
@@ -144,36 +150,42 @@ namespace DBADashGUI.Performance
                 return;
             }
 
-            maxBlockedTime = 0;
-
             var rows = dt.Rows.Cast<DataRow>().ToList();
             _rows = rows;
 
-            var points = rows
-                .Select(r =>
-                {
-                    var dtm = ((DateTime)r["SnapshotDateUTC"]).ToAppTimeZone();
-                    var blockedCnt = (int)r["BlockedSessionCount"];
-                    var blockedTime = (long)r["BlockedWaitTime"];
+            // compute maximum blocked time up-front so sizing is consistent
+            maxBlockedTime = rows.Count == 0 ? 0 : rows.Max(r => (long)r["BlockedWaitTime"]);
 
-                    if (blockedTime > maxBlockedTime)
-                    {
-                        maxBlockedTime = blockedTime;
-                    }
+            // Use a single scatter series with mapping to provide a weight (blocked wait time)
+            // Mapping's third value is used as the weight to scale geometry between MinGeometrySize and GeometrySize
+            const double minDiameter = 6;
 
-                    // Use DateTimePoint instead of ObservablePoint
-                    return new DateTimePoint(dtm, blockedCnt);
-                })
+            // Build weighted points (X=ticks, Y=blocked count, Weight=blocked wait ms)
+            var weightedPoints = rows.Select(r =>
+                new WeightedPoint(((DateTime)r["SnapshotDateUTC"]).ToAppTimeZone().Ticks,
+                                  (double)(int)r["BlockedSessionCount"],
+                                  (double)(long)r["BlockedWaitTime"]))
                 .ToArray();
 
-            var scatter = new ScatterSeries<DateTimePoint>
-            {
-                Values = points,
-                GeometrySize = MaxPointShapeDiameter,
-                Name = "Blocked Sessions"
-            };
+            // Use ChartHelper to create the scatter series
+            var scatterSeries = ChartHelper.CreateWeightedScatterSeries(weightedPoints, "Blocked Sessions", minDiameter, MaxPointShapeDiameter);
+            chartBlocking.Series = new ISeries[] { scatterSeries };
 
-            chartBlocking.Series = new ISeries[] { scatter };
+            // Build a fast lookup from X ticks -> row index for tooltip and click mapping using ChartHelper
+            try
+            {
+                var ticks = weightedPoints.Select(wp => (long)Math.Round(wp.X ?? 0.0)).ToArray();
+                var mapResult = ChartHelper.BuildTickIndexMap(ticks);
+                _tickIndexMap = mapResult.tickIndexMap;
+                _sortedTicks = mapResult.sortedTicks;
+                _sortedIndices = mapResult.sortedIndices;
+            }
+            catch
+            {
+                _tickIndexMap = null;
+                _sortedTicks = null;
+                _sortedIndices = null;
+            }
 
             // Update Y axis max based on actual data
             var yMax = Math.Max(100, rows.Max(r => (int)r["BlockedSessionCount"]));
@@ -188,21 +200,99 @@ namespace DBADashGUI.Performance
             // Enable custom tooltips with custom formatter to show blocked time
             chartBlocking.EnableCustomTooltips(point =>
             {
-                var index = point.Index;
-                if (index < 0 || index >= rows.Count) 
-                    return point.Coordinate.PrimaryValue.ToString("N0");
+                try
+                {
+                    // If series Values is an IList and matches the rows ordering, use point.Index to map back
+                    var valuesObj = point.Context?.Series?.GetType().GetProperty("Values")?.GetValue(point.Context.Series);
+                    if (valuesObj is System.Collections.IList list && list.Count == rows.Count && point.Index >= 0 && point.Index < list.Count)
+                    {
+                        var row = rows[point.Index];
+                        var blockedCnt = (int)row["BlockedSessionCount"];
+                        var blockedTime = (long)row["BlockedWaitTime"];
+                        var timeSpan = TimeSpan.FromMilliseconds(blockedTime);
+                        var timeFormat = timeSpan.TotalDays >= 1
+                            ? $"{(int)timeSpan.TotalDays}d {timeSpan:hh\\:mm\\:ss}"
+                            : $"{timeSpan:hh\\:mm\\:ss}";
+                        return $"{blockedCnt:N0} ({timeFormat})";
+                    }
 
-                var row = rows[index];
-                var blockedCnt = (int)row["BlockedSessionCount"];
-                var blockedTime = (long)row["BlockedWaitTime"];
-                var timeSpan = TimeSpan.FromMilliseconds(blockedTime);
+                    // If the ChartPoint.DataSource contains our adapter, use it
+                    if (point.Context?.DataSource is BlockingPointAdapter bp)
+                    {
+                        var blockedCnt = (int)bp.BlockedSessions;
+                        var blockedTime = (long)bp.BlockedWaitTime;
+                        var timeSpan = TimeSpan.FromMilliseconds(blockedTime);
+                        var timeFormat = timeSpan.TotalDays >= 1
+                            ? $"{(int)timeSpan.TotalDays}d {timeSpan:hh\\:mm\\:ss}"
+                            : $"{timeSpan:hh\\:mm\\:ss}";
+                        return $"{blockedCnt:N0} ({timeFormat})";
+                    }
 
-                // Show days if >= 1 day, otherwise just hh:mm:ss
-                var timeFormat = timeSpan.TotalDays >= 1 
-                    ? $"{(int)timeSpan.TotalDays}d {timeSpan:hh\\:mm\\:ss}"
-                    : $"{timeSpan:hh\\:mm\\:ss}";
+                    // Fallback: try to match by X ticks value using precomputed lookup for performance
+                    var coord = point.Coordinate; // Coordinate is a struct (not nullable)
+                    if (!double.IsNaN(coord.PrimaryValue))
+                    {
+                        var x = (long)Math.Round(coord.PrimaryValue);
+                        int idx = -1;
+                        // Exact map lookup first
+                        if (_tickIndexMap != null && _tickIndexMap.TryGetValue(x, out var mapped))
+                        {
+                            idx = mapped;
+                        }
+                        else if (_sortedTicks != null && _sortedTicks.Length > 0)
+                        {
+                            // Binary search for nearest
+                            var pos = Array.BinarySearch(_sortedTicks, x);
+                            if (pos >= 0)
+                            {
+                                idx = _sortedIndices[pos];
+                            }
+                            else
+                            {
+                                var insert = ~pos;
+                                long bestDiff = long.MaxValue;
+                                int bestIdx = -1;
+                                if (insert < _sortedTicks.Length)
+                                {
+                                    var diff = Math.Abs(_sortedTicks[insert] - x);
+                                    if (diff < bestDiff) { bestDiff = diff; bestIdx = _sortedIndices[insert]; }
+                                }
+                                if (insert - 1 >= 0)
+                                {
+                                    var diff = Math.Abs(_sortedTicks[insert - 1] - x);
+                                    if (diff < bestDiff) { bestDiff = diff; bestIdx = _sortedIndices[insert - 1]; }
+                                }
+                                // Accept only if within 1 second
+                                if (bestIdx >= 0 && bestDiff <= TimeSpan.TicksPerSecond)
+                                {
+                                    idx = bestIdx;
+                                }
+                            }
+                        }
 
-                return $"{blockedCnt:N0} ({timeFormat})";
+                        if (idx >= 0 && idx < rows.Count)
+                        {
+                            var row = rows[idx];
+                            var blockedCnt = (int)row["BlockedSessionCount"];
+                            var blockedTime = (long)row["BlockedWaitTime"];
+                            var timeSpan = TimeSpan.FromMilliseconds(blockedTime);
+                            var timeFormat = timeSpan.TotalDays >= 1
+                                ? $"{(int)timeSpan.TotalDays}d {timeSpan:hh\\:mm\\:ss}"
+                                : $"{timeSpan:hh\\:mm\\:ss}";
+                            return $"{blockedCnt:N0} ({timeFormat})";
+                        }
+                    }
+                }
+                catch { }
+
+                // Last fallback: show the primary Y value formatted
+                var fallbackY = double.NaN;
+                try
+                {
+                    fallbackY = point.Coordinate.PrimaryValue;
+                }
+                catch { }
+                return !double.IsNaN(fallbackY) ? fallbackY.ToString("N0") : string.Empty;
             });
         }
 
@@ -244,8 +334,67 @@ namespace DBADashGUI.Performance
             {
                 return;
             }
+            // Try to map the clicked ChartPoint back to the original row.
+            // Preferred: match by X coordinate (ticks) to avoid relying on series index ordering.
+            int index = -1;
+            try
+            {
+                var coord = firstPoint.Coordinate;
+                double x = double.NaN;
+                if (!double.IsNaN(coord.PrimaryValue)) x = coord.PrimaryValue;
+                else if (!double.IsNaN(coord.SecondaryValue)) x = coord.SecondaryValue;
 
-            var index = firstPoint.Index;
+                if (!double.IsNaN(x))
+                {
+                    var xTicks = (long)Math.Round(x);
+
+                    // Try exact dictionary lookup first
+                    if (_tickIndexMap != null && _tickIndexMap.TryGetValue(xTicks, out var mappedIdx))
+                    {
+                        index = mappedIdx;
+                    }
+                    else if (_sortedTicks != null && _sortedTicks.Length > 0)
+                    {
+                        // Binary search nearest
+                        var pos = Array.BinarySearch(_sortedTicks, xTicks);
+                        if (pos >= 0)
+                        {
+                            index = _sortedIndices[pos];
+                        }
+                        else
+                        {
+                            var insert = ~pos;
+                            long bestDiff = long.MaxValue;
+                            int bestIdx = -1;
+                            if (insert < _sortedTicks.Length)
+                            {
+                                var diff = Math.Abs(_sortedTicks[insert] - xTicks);
+                                if (diff < bestDiff) { bestDiff = diff; bestIdx = _sortedIndices[insert]; }
+                            }
+                            if (insert - 1 >= 0)
+                            {
+                                var diff = Math.Abs(_sortedTicks[insert - 1] - xTicks);
+                                if (diff < bestDiff) { bestDiff = diff; bestIdx = _sortedIndices[insert - 1]; }
+                            }
+                            if (bestIdx >= 0 && bestDiff <= TimeSpan.TicksPerSecond)
+                            {
+                                index = bestIdx;
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                index = -1;
+            }
+
+            // Fallback to using the point.Index when X matching failed (single-series mode)
+            if (index < 0)
+            {
+                index = firstPoint.Index;
+            }
+
             if (index < 0 || index >= _rows.Count)
             {
                 return;
@@ -263,6 +412,21 @@ namespace DBADashGUI.Performance
             };
             frm.Show(this);
         }
+    }
+}
+
+internal class BlockingPointAdapter
+{
+    public DateTime SnapshotDate { get; set; }
+    public double BlockedSessions { get; set; }
+    public double BlockedWaitTime { get; set; }
+    public int Index { get; set; }
+
+    public BlockingPointAdapter(DateTime snapshotDate, double blockedSessions, double blockedWaitTime)
+    {
+        SnapshotDate = snapshotDate;
+        BlockedSessions = blockedSessions;
+        BlockedWaitTime = blockedWaitTime;
     }
 }
 

@@ -14,6 +14,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using LiveChartsCore.SkiaSharpView.Drawing.Geometries;
 
 namespace DBADashGUI.Charts
 {
@@ -282,6 +283,48 @@ namespace DBADashGUI.Charts
                 default:
                     throw new ArgumentOutOfRangeException(nameof(chartType), $"Unsupported chart type: {chartType}");
             }
+        }
+
+        /// <summary>
+        /// Build a tick -> index map and sorted arrays for nearest lookup.
+        /// Returns a tuple of (dictionary, sortedTicks, sortedIndices).
+        /// </summary>
+        public static (Dictionary<long, int> tickIndexMap, long[] sortedTicks, int[] sortedIndices) BuildTickIndexMap(long[] ticks)
+        {
+            if (ticks == null) throw new ArgumentNullException(nameof(ticks));
+
+            var map = new Dictionary<long, int>(ticks.Length);
+            var pairs = new List<KeyValuePair<long, int>>(ticks.Length);
+            for (int i = 0; i < ticks.Length; i++)
+            {
+                var t = ticks[i];
+                if (!map.ContainsKey(t))
+                {
+                    map[t] = i;
+                }
+                pairs.Add(new KeyValuePair<long, int>(t, i));
+            }
+
+            pairs.Sort((a, b) => a.Key.CompareTo(b.Key));
+            var sortedTicks = pairs.Select(p => p.Key).ToArray();
+            var sortedIndices = pairs.Select(p => p.Value).ToArray();
+            return (map, sortedTicks, sortedIndices);
+        }
+
+        /// <summary>
+        /// Create a weighted scatter series (circle geometry) from an array of WeightedPoint.
+        /// </summary>
+        public static ISeries CreateWeightedScatterSeries(WeightedPoint[] points, string name, double minDiameter, double maxDiameter)
+        {
+            if (points == null) throw new ArgumentNullException(nameof(points));
+            var series = new ScatterSeries<WeightedPoint, CircleGeometry>
+            {
+                Values = points,
+                Name = name,
+                MinGeometrySize = (float)minDiameter,
+                GeometrySize = (float)maxDiameter
+            };
+            return series;
         }
 
         /// <summary>
