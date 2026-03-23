@@ -34,6 +34,8 @@ EXEC Alert.CPUAlert_Upd
 EXEC Alert.WaitAlert_Upd
 EXEC Alert.CounterAlert_Upd
 EXEC Alert.AGAlert_Upd
+EXEC Alert.BackupChainRiskAlert_Upd
+EXEC Alert.BackupFreshnessAlert_Upd
 EXEC Alert.DriveSpaceAlert_Upd
 EXEC Alert.CollectionDatesAlert_Upd
 EXEC Alert.AgentJobAlert_Upd

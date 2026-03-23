@@ -56,3 +56,19 @@ DBA Dash can already collect [custom performance counters](OSPerformanceCounters
       - The Script.PostDeployment1.sql file has an insert into CollectionDatesThresholds that you might want to modify.
 * The DBImporter.cs file has the code used to import the data.  Add {MyCollection} to the tables string array.  This will ensure that *{MyCollection}_Upd* gets called for your new collection.
 * You might also need to consider data retention.  Some collections use partition switching to efficiently remove old data.  The service calls PurgeData to remove old partitions.
+
+## Adding a new alert rule
+
+DBA Dash alert rules are implemented across the GUI rule model and the repository database alert procedures.
+
+* Add a new GUI rule class under *DBADashGUI/DBADashAlerts/Rules*
+* Add the new rule type to the *RuleTypes* enum and wire it into *CreateRule* and *GetRule* in *AlertRuleBase.cs*
+* Add a new stored procedure under *DBADashDB/Alert/Procedures* that:
+  - Reads applicable rows from *Alert.Rules*
+  - Uses *Alert.ApplicableInstances_Get* to respect instance filters and blackout handling
+  - Populates *Alert.AlertDetails*
+  - Calls *Alert.ActiveAlerts_Upd*
+* Register the procedure in *DBADashDB.sqlproj* and *Alert/Procedures/Alerts_Upd.sql*
+* If useful, map the alert type to a tab in *DBADashGUI/DBADashAlerts/ActiveAlerts.cs* so clicking the instance can navigate to a relevant view
+
+The *BackupFreshness* and *BackupChainRisk* alert rules are recent examples of this pattern.

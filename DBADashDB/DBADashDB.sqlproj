@@ -775,6 +775,8 @@
     <Build Include="Alert\Procedures\BlackoutPeriod_Del.sql" />
     <Build Include="Alert\Functions\ApplicableInstances_Get.sql" />
     <Build Include="Alert\Procedures\AGAlert_Upd.sql" />
+    <Build Include="Alert\Procedures\BackupChainRiskAlert_Upd.sql" />
+    <Build Include="Alert\Procedures\BackupFreshnessAlert_Upd.sql" />
     <Build Include="Alert\Procedures\ActiveAlerts_Get.sql" />
     <Build Include="Alert\Procedures\ActiveAlertsAck_Upd.sql" />
     <Build Include="Alert\Procedures\NewAlerts_Get.sql" />
