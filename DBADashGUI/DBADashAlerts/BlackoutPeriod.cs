@@ -16,11 +16,25 @@ namespace DBADashGUI.DBADashAlerts
         [Browsable(false)]
         public int? BlackoutPeriodID { get; set; }
 
+        private int? _applyToInstanceID;
+
         [Category("Filters")]
         [Browsable(false)]
-        public int? ApplyToInstanceID { get; set; }
+        public int? ApplyToInstanceID
+        {
+            get => _applyToInstanceID;
+            set
+            {
+                _applyToInstanceID = value;
+                if (value.HasValue)
+                {
+                    _instanceLookupFailed = false;
+                }
+            }
+        }
 
         private string _applyToInstance;
+        private bool _instanceLookupFailed;
 
         [JsonIgnore]
         [Category("Filters"), DisplayName("Apply To (Instance)")]
@@ -32,19 +46,29 @@ namespace DBADashGUI.DBADashAlerts
             {
                 if (!string.IsNullOrEmpty(value))
                 {
-                    ApplyToInstanceID = CommonData.Instances.Rows.Cast<DataRow>().Where(r => string.Equals(r.Field<string>("ConnectionID"), value, StringComparison.InvariantCultureIgnoreCase)).Select(r => r.Field<int?>("InstanceID")).FirstOrDefault() ??
-                                        CommonData.Instances.Rows.Cast<DataRow>().Where(r => string.Equals(r.Field<string>("InstanceDisplayName"), value, StringComparison.InvariantCultureIgnoreCase)).Select(r => r.Field<int?>("InstanceID")).FirstOrDefault();
+                    var found = CommonData.Instances.Rows.Cast<DataRow>()
+                        .Where(r => string.Equals(r.Field<string>("ConnectionID"), value, StringComparison.InvariantCultureIgnoreCase))
+                        .Select(r => r.Field<int?>("InstanceID")).FirstOrDefault()
+                            ?? CommonData.Instances.Rows.Cast<DataRow>()
+                        .Where(r => string.Equals(r.Field<string>("InstanceDisplayName"), value, StringComparison.InvariantCultureIgnoreCase))
+                        .Select(r => r.Field<int?>("InstanceID")).FirstOrDefault();
 
-                    if (ApplyToInstanceID == null)
+                    if (found.HasValue)
                     {
-                        throw new ArgumentException("InstanceID not found", nameof(ApplyToInstance));
+                        ApplyToInstanceID = found;
+                        ApplyToTag = DBADashTag.AllInstancesTag();
+                        _instanceLookupFailed = false;
                     }
-
-                    ApplyToTag = DBADashTag.AllInstancesTag();
+                    else
+                    {
+                        // Don't throw here. Mark that lookup failed so Save() can enforce it for new records.
+                        _instanceLookupFailed = true;
+                    }
                 }
                 else
                 {
                     ApplyToInstanceID = null;
+                    _instanceLookupFailed = false;
                 }
 
                 _applyToInstance = value;
@@ -60,7 +84,7 @@ namespace DBADashGUI.DBADashAlerts
         public string AlertKey { get; set; } = "%";
 
         [Category("Effective Period")]
-        [DisplayName("1. Start Date"),Description("Option to start blackout period at a future date/time.  To start now, set to current date or leave blank.")]
+        [DisplayName("1. Start Date"), Description("Option to start blackout period at a future date/time.  To start now, set to current date or leave blank.")]
         public DateTime? StartDate { get; set; }
 
         [Category("Effective Period")]
@@ -85,6 +109,12 @@ namespace DBADashGUI.DBADashAlerts
 
         public async Task Save()
         {
+            // If the user supplied an instance name but lookup failed, prevent creating a new blackout
+            // period until the instance is resolved.
+            if (!BlackoutPeriodID.HasValue && _instanceLookupFailed)
+            {
+                throw new ArgumentException("InstanceID not found", nameof(ApplyToInstance));
+            }
             await using var cn = new SqlConnection(Common.ConnectionString);
             await using var cmd = new SqlCommand("Alert.BlackoutPeriod_Add", cn)
             { CommandType = CommandType.StoredProcedure };

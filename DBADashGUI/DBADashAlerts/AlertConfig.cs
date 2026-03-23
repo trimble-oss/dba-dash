@@ -364,13 +364,15 @@ namespace DBADashGUI.DBADashAlerts
                 var row = grid.Rows[e.RowIndex];
                 var blackout = new BlackoutPeriod()
                 {
+                    // Ensure BlackoutPeriodID is set before ApplyToInstance so the setter
+                    // doesn't throw when loading an existing blackout whose instance may no longer exist.
+                    BlackoutPeriodID = (int)row.Cells["BlackoutPeriodId"].Value,
                     AlertKey = (string)row.Cells["AlertKey"].Value,
                     ApplyToInstance = (string)row.Cells["ConnectionID"].Value.DBNullToNull(),
                     ApplyToInstanceID = (int)row.Cells["ApplyToInstanceID"].Value,
                     ApplyToTag = DBADashTag.GetTag(Common.ConnectionString, (int)row.Cells["ApplyToTagID"].Value),
                     StartDate = (DateTime?)row.Cells["StartDate"].Value.DBNullToNull(),
                     EndDate = (DateTime?)row.Cells["EndDate"].Value.DBNullToNull(),
-                    BlackoutPeriodID = (int)row.Cells["BlackoutPeriodId"].Value,
                     TimeZone = ScheduleBase.TimeZoneFromString((string)row.Cells["TimeZone"].Value),
                     Monday = (bool)row.Cells["Monday"].Value,
                     Tuesday = (bool)row.Cells["Tuesday"].Value,
