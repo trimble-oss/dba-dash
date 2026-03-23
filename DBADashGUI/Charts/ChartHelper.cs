@@ -293,16 +293,20 @@ namespace DBADashGUI.Charts
         {
             if (ticks == null) throw new ArgumentNullException(nameof(ticks));
 
+            // Build pairs only for the first occurrence of each tick so the
+            // returned sortedTicks array contains unique tick values. This
+            // avoids ambiguous binary-search results when duplicates exist.
             var map = new Dictionary<long, int>(ticks.Length);
             var pairs = new List<KeyValuePair<long, int>>(ticks.Length);
             for (int i = 0; i < ticks.Length; i++)
             {
                 var t = ticks[i];
-                if (!map.ContainsKey(t))
+                // TryAdd returns false if key already present; we want the first index
+                // for each tick, so only add the pair when TryAdd succeeds.
+                if (map.TryAdd(t, i))
                 {
-                    map[t] = i;
+                    pairs.Add(new KeyValuePair<long, int>(t, i));
                 }
-                pairs.Add(new KeyValuePair<long, int>(t, i));
             }
 
             pairs.Sort((a, b) => a.Key.CompareTo(b.Key));
@@ -312,19 +316,69 @@ namespace DBADashGUI.Charts
         }
 
         /// <summary>
+        /// Resolve an X ticks value to the original row index using the provided
+        /// lookup structures. Returns true and sets <paramref name="index"/> when a
+        /// matching or nearby tick (within 1 second) is found; otherwise returns false.
+        /// </summary>
+        public static bool TryGetIndexFromTicks(Dictionary<long, int> tickIndexMap, long[] sortedTicks, int[] sortedIndices, long xTicks, out int index)
+        {
+            index = -1;
+            try
+            {
+                if (tickIndexMap != null && tickIndexMap.TryGetValue(xTicks, out var mapped))
+                {
+                    index = mapped;
+                    return true;
+                }
+
+                if (sortedTicks != null && sortedTicks.Length > 0)
+                {
+                    var pos = Array.BinarySearch(sortedTicks, xTicks);
+                    if (pos >= 0)
+                    {
+                        index = sortedIndices[pos];
+                        return true;
+                    }
+                    else
+                    {
+                        var insert = ~pos;
+                        long bestDiff = long.MaxValue;
+                        int bestIdx = -1;
+                        if (insert < sortedTicks.Length)
+                        {
+                            var diff = Math.Abs(sortedTicks[insert] - xTicks);
+                            if (diff < bestDiff) { bestDiff = diff; bestIdx = sortedIndices[insert]; }
+                        }
+                        if (insert - 1 >= 0)
+                        {
+                            var diff = Math.Abs(sortedTicks[insert - 1] - xTicks);
+                            if (diff < bestDiff) { bestDiff = diff; bestIdx = sortedIndices[insert - 1]; }
+                        }
+                        if (bestIdx >= 0 && bestDiff <= TimeSpan.TicksPerSecond)
+                        {
+                            index = bestIdx;
+                            return true;
+                        }
+                    }
+                }
+            }
+            catch { }
+            return false;
+        }
+
+        /// <summary>
         /// Create a weighted scatter series (circle geometry) from an array of WeightedPoint.
         /// </summary>
-        public static ISeries CreateWeightedScatterSeries(WeightedPoint[] points, string name, double minDiameter, double maxDiameter)
+        public static ScatterSeries<WeightedPoint, CircleGeometry> CreateWeightedScatterSeries(WeightedPoint[] points, string name, double minDiameter, double maxDiameter)
         {
             if (points == null) throw new ArgumentNullException(nameof(points));
-            var series = new ScatterSeries<WeightedPoint, CircleGeometry>
+            return new ScatterSeries<WeightedPoint, CircleGeometry>
             {
                 Values = points,
                 Name = name,
                 MinGeometrySize = (float)minDiameter,
                 GeometrySize = (float)maxDiameter
             };
-            return series;
         }
 
         /// <summary>

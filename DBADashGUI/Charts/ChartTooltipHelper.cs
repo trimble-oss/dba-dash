@@ -538,19 +538,12 @@ namespace DBADashGUI.Charts
                                     // Prefer secondary (X) value when available
                                     if (!double.IsNaN(secondary))
                                     {
-                                        try
+                                        // Try to interpret numeric secondary value as ticks-based DateTime
+                                        if (TryFormatNumericXAsDate(secondary, out var secDateLabel))
                                         {
-                                            var secLong = (long)Math.Round(secondary);
-                                            if (secLong > DateTime.MinValue.Ticks && secLong < DateTime.MaxValue.Ticks)
-                                            {
-                                                xLabel = new DateTime(secLong).ToString("G");
-                                            }
-                                            else
-                                            {
-                                                xLabel = secondary.ToString();
-                                            }
+                                            xLabel = secDateLabel;
                                         }
-                                        catch
+                                        else
                                         {
                                             xLabel = secondary.ToString();
                                         }
@@ -560,17 +553,9 @@ namespace DBADashGUI.Charts
                                         // If primary looks like a DateTime ticks value, convert to readable date
                                         try
                                         {
-                                            if (!double.IsNaN(primary))
+                                            if (!double.IsNaN(primary) && TryFormatNumericXAsDate(primary, out var primDateLabel))
                                             {
-                                                var primLong = (long)Math.Round(primary);
-                                                if (primLong > DateTime.MinValue.Ticks && primLong < DateTime.MaxValue.Ticks)
-                                                {
-                                                    xLabel = new DateTime(primLong).ToString("G");
-                                                }
-                                                else
-                                                {
-                                                    xLabel = primary.ToString();
-                                                }
+                                                xLabel = primDateLabel;
                                             }
                                             else
                                             {
@@ -720,6 +705,31 @@ namespace DBADashGUI.Charts
                 // Ignore errors
             }
 
+            return false;
+        }
+
+        /// <summary>
+        /// Try to format a numeric coordinate value as a DateTime string when it plausibly represents ticks.
+        /// Uses a conservative lower bound (1970-01-01) to avoid interpreting small integers (0..N) as year 0001.
+        /// </summary>
+        private static bool TryFormatNumericXAsDate(double numericValue, out string formatted)
+        {
+            formatted = null;
+            try
+            {
+                if (double.IsNaN(numericValue)) return false;
+                var longTicks = (long)Math.Round(numericValue);
+                var minPlausibleDateTicks = new DateTime(1970, 1, 1).Ticks;
+                if (longTicks >= minPlausibleDateTicks && longTicks < DateTime.MaxValue.Ticks)
+                {
+                    formatted = new DateTime(longTicks).ToString("G");
+                    return true;
+                }
+            }
+            catch
+            {
+                // ignore
+            }
             return false;
         }
 
