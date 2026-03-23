@@ -4,13 +4,13 @@ using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Drawing.Geometries;
-using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView.Painting;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -29,9 +29,14 @@ namespace DBADashGUI.Performance
 
         private List<DataRow> _rows;
         private Dictionary<long, int> _tickIndexMap;
+
         // Sorted arrays to support fast nearest-tick lookup when exact match isn't found
         private long[] _sortedTicks;
+
         private int[] _sortedIndices;
+
+        // Strongly-typed reference to the scatter series to avoid reflection in tooltip rendering
+        private ScatterSeries<WeightedPoint, CircleGeometry> _scatterSeries;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool CloseVisible
@@ -143,7 +148,26 @@ namespace DBADashGUI.Performance
 
             if (dt.Rows.Count == 0)
             {
+                // Clear series and any retained state from previous refreshes to avoid
+                // holding onto DataRow references via tooltip closures and to keep
+                // click/tooltip mapping consistent with the empty chart.
                 chartBlocking.Series = Array.Empty<ISeries>();
+                _scatterSeries = null;
+                _rows = null;
+                _tickIndexMap = null;
+                _sortedTicks = null;
+                _sortedIndices = null;
+
+                // Reset custom tooltip state to remove any closure over previous rows
+                // and restore default tooltip behavior.
+                try
+                {
+                    chartBlocking.DisableCustomTooltips();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Blocking.RefreshData.DisableCustomTooltips error: {ex}");
+                }
                 lblBlocking.Text = databaseID > 0 ? "Blocking: Database" : "Blocking: Instance";
                 toolStrip1.Tag = databaseID > 0 ? "ALT" : null;
                 toolStrip1.ApplyTheme(DBADashUser.SelectedTheme);
@@ -167,9 +191,9 @@ namespace DBADashGUI.Performance
                                   (double)(long)r["BlockedWaitTime"]))
                 .ToArray();
 
-            // Use ChartHelper to create the scatter series
-            var scatterSeries = ChartHelper.CreateWeightedScatterSeries(weightedPoints, "Blocked Sessions", minDiameter, MaxPointShapeDiameter);
-            chartBlocking.Series = new ISeries[] { scatterSeries };
+            // Use ChartHelper to create the scatter series and keep a strongly-typed reference to avoid reflection
+            _scatterSeries = ChartHelper.CreateWeightedScatterSeries(weightedPoints, "Blocked Sessions", minDiameter, MaxPointShapeDiameter);
+            chartBlocking.Series = new ISeries[] { _scatterSeries };
 
             // Build a fast lookup from X ticks -> row index for tooltip and click mapping using ChartHelper
             try
@@ -180,8 +204,10 @@ namespace DBADashGUI.Performance
                 _sortedTicks = mapResult.sortedTicks;
                 _sortedIndices = mapResult.sortedIndices;
             }
-            catch
+            catch (Exception ex)
             {
+                // Fall back to null state but log for diagnostics
+                Debug.WriteLine($"Blocking.RefreshData.BuildTickIndexMap error: {ex}");
                 _tickIndexMap = null;
                 _sortedTicks = null;
                 _sortedIndices = null;
@@ -202,9 +228,8 @@ namespace DBADashGUI.Performance
             {
                 try
                 {
-                    // If series Values is an IList and matches the rows ordering, use point.Index to map back
-                    var valuesObj = point.Context?.Series?.GetType().GetProperty("Values")?.GetValue(point.Context.Series);
-                    if (valuesObj is System.Collections.IList list && list.Count == rows.Count && point.Index >= 0 && point.Index < list.Count)
+                    // If the tooltip is for the scatter series we created, use point.Index directly (avoids reflection)
+                    if (point.Context?.Series == _scatterSeries && point.Index >= 0 && point.Index < rows.Count)
                     {
                         var row = rows[point.Index];
                         var blockedCnt = (int)row["BlockedSessionCount"];
@@ -216,61 +241,16 @@ namespace DBADashGUI.Performance
                         return $"{blockedCnt:N0} ({timeFormat})";
                     }
 
-                    // If the ChartPoint.DataSource contains our adapter, use it
-                    if (point.Context?.DataSource is BlockingPointAdapter bp)
-                    {
-                        var blockedCnt = (int)bp.BlockedSessions;
-                        var blockedTime = (long)bp.BlockedWaitTime;
-                        var timeSpan = TimeSpan.FromMilliseconds(blockedTime);
-                        var timeFormat = timeSpan.TotalDays >= 1
-                            ? $"{(int)timeSpan.TotalDays}d {timeSpan:hh\\:mm\\:ss}"
-                            : $"{timeSpan:hh\\:mm\\:ss}";
-                        return $"{blockedCnt:N0} ({timeFormat})";
-                    }
-
                     // Fallback: try to match by X ticks value using precomputed lookup for performance
                     var coord = point.Coordinate; // Coordinate is a struct (not nullable)
-                    if (!double.IsNaN(coord.PrimaryValue))
+                    // Prefer SecondaryValue for the X coordinate on cartesian charts; fall back to PrimaryValue when rotated
+                    double coordValue = double.NaN;
+                    if (!double.IsNaN(coord.SecondaryValue)) coordValue = coord.SecondaryValue;
+                    else if (!double.IsNaN(coord.PrimaryValue)) coordValue = coord.PrimaryValue;
+                    if (!double.IsNaN(coordValue))
                     {
-                        var x = (long)Math.Round(coord.PrimaryValue);
-                        int idx = -1;
-                        // Exact map lookup first
-                        if (_tickIndexMap != null && _tickIndexMap.TryGetValue(x, out var mapped))
-                        {
-                            idx = mapped;
-                        }
-                        else if (_sortedTicks != null && _sortedTicks.Length > 0)
-                        {
-                            // Binary search for nearest
-                            var pos = Array.BinarySearch(_sortedTicks, x);
-                            if (pos >= 0)
-                            {
-                                idx = _sortedIndices[pos];
-                            }
-                            else
-                            {
-                                var insert = ~pos;
-                                long bestDiff = long.MaxValue;
-                                int bestIdx = -1;
-                                if (insert < _sortedTicks.Length)
-                                {
-                                    var diff = Math.Abs(_sortedTicks[insert] - x);
-                                    if (diff < bestDiff) { bestDiff = diff; bestIdx = _sortedIndices[insert]; }
-                                }
-                                if (insert - 1 >= 0)
-                                {
-                                    var diff = Math.Abs(_sortedTicks[insert - 1] - x);
-                                    if (diff < bestDiff) { bestDiff = diff; bestIdx = _sortedIndices[insert - 1]; }
-                                }
-                                // Accept only if within 1 second
-                                if (bestIdx >= 0 && bestDiff <= TimeSpan.TicksPerSecond)
-                                {
-                                    idx = bestIdx;
-                                }
-                            }
-                        }
-
-                        if (idx >= 0 && idx < rows.Count)
+                        var x = (long)Math.Round(coordValue);
+                        if (ChartHelper.TryGetIndexFromTicks(_tickIndexMap, _sortedTicks, _sortedIndices, x, out var idx) && idx >= 0 && idx < rows.Count)
                         {
                             var row = rows[idx];
                             var blockedCnt = (int)row["BlockedSessionCount"];
@@ -283,7 +263,10 @@ namespace DBADashGUI.Performance
                         }
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Blocking.TooltipFormatter error: {ex}");
+                }
 
                 // Last fallback: show the primary Y value formatted
                 var fallbackY = double.NaN;
@@ -291,7 +274,10 @@ namespace DBADashGUI.Performance
                 {
                     fallbackY = point.Coordinate.PrimaryValue;
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Blocking.TooltipFormatter fallback retrieval error: {ex}");
+                }
                 return !double.IsNaN(fallbackY) ? fallbackY.ToString("N0") : string.Empty;
             });
         }
@@ -340,52 +326,34 @@ namespace DBADashGUI.Performance
             try
             {
                 var coord = firstPoint.Coordinate;
+                // Prefer SecondaryValue for X (primary/secondary depend on chart orientation)
                 double x = double.NaN;
-                if (!double.IsNaN(coord.PrimaryValue)) x = coord.PrimaryValue;
-                else if (!double.IsNaN(coord.SecondaryValue)) x = coord.SecondaryValue;
+                if (!double.IsNaN(coord.SecondaryValue)) x = coord.SecondaryValue;
+                else if (!double.IsNaN(coord.PrimaryValue)) x = coord.PrimaryValue;
 
                 if (!double.IsNaN(x))
                 {
                     var xTicks = (long)Math.Round(x);
 
-                    // Try exact dictionary lookup first
-                    if (_tickIndexMap != null && _tickIndexMap.TryGetValue(xTicks, out var mappedIdx))
+                    // Try to resolve the clicked X ticks to an original row index using
+                    // shared helper to keep behavior consistent with tooltip lookup.
+                    try
                     {
-                        index = mappedIdx;
+                        if (ChartHelper.TryGetIndexFromTicks(_tickIndexMap, _sortedTicks, _sortedIndices, xTicks, out var mappedIdx))
+                        {
+                            index = mappedIdx;
+                        }
                     }
-                    else if (_sortedTicks != null && _sortedTicks.Length > 0)
+                    catch (Exception ex)
                     {
-                        // Binary search nearest
-                        var pos = Array.BinarySearch(_sortedTicks, xTicks);
-                        if (pos >= 0)
-                        {
-                            index = _sortedIndices[pos];
-                        }
-                        else
-                        {
-                            var insert = ~pos;
-                            long bestDiff = long.MaxValue;
-                            int bestIdx = -1;
-                            if (insert < _sortedTicks.Length)
-                            {
-                                var diff = Math.Abs(_sortedTicks[insert] - xTicks);
-                                if (diff < bestDiff) { bestDiff = diff; bestIdx = _sortedIndices[insert]; }
-                            }
-                            if (insert - 1 >= 0)
-                            {
-                                var diff = Math.Abs(_sortedTicks[insert - 1] - xTicks);
-                                if (diff < bestDiff) { bestDiff = diff; bestIdx = _sortedIndices[insert - 1]; }
-                            }
-                            if (bestIdx >= 0 && bestDiff <= TimeSpan.TicksPerSecond)
-                            {
-                                index = bestIdx;
-                            }
-                        }
+                        Debug.WriteLine($"Blocking.ChartMouseDown tick lookup error: {ex}");
+                        index = -1;
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine($"Blocking.ChartMouseDown lookup error: {ex}");
                 index = -1;
             }
 
@@ -412,39 +380,5 @@ namespace DBADashGUI.Performance
             };
             frm.Show(this);
         }
-    }
-}
-
-internal class BlockingPointAdapter
-{
-    public DateTime SnapshotDate { get; set; }
-    public double BlockedSessions { get; set; }
-    public double BlockedWaitTime { get; set; }
-    public int Index { get; set; }
-
-    public BlockingPointAdapter(DateTime snapshotDate, double blockedSessions, double blockedWaitTime)
-    {
-        SnapshotDate = snapshotDate;
-        BlockedSessions = blockedSessions;
-        BlockedWaitTime = blockedWaitTime;
-    }
-}
-
-internal class BlockingPoint
-{
-    public int SnapshotID { get; set; }
-
-    public DateTime SnapshotDate { get; set; }
-
-    public int BlockedSessions { get; set; }
-
-    public long BlockedWaitTime { get; set; }
-
-    public BlockingPoint(int snapshotID, DateTime snapshotDate, int blockedSessions, long blockedWaitTime)
-    {
-        SnapshotID = snapshotID;
-        BlockedSessions = blockedSessions;
-        BlockedWaitTime = blockedWaitTime;
-        SnapshotDate = snapshotDate;
     }
 }
