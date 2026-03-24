@@ -13,9 +13,18 @@ namespace DBADash
             var assembly = Assembly.GetExecutingAssembly();
 
             using var stream = assembly.GetManifestResourceStream(resourcePath) ?? throw new Exception($"Resource {resourcePath} not found.");
-            using StreamReader reader = new(stream);
+            using StreamReader reader = new(stream, System.Text.Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
 
-            return reader.ReadToEnd();
+            var s = reader.ReadToEnd();
+
+            // Trim leading UTF-8 BOM (U+FEFF) if present. Some consumers embed resources and the BOM
+            // can appear as a leading \uFEFF character which can confuse HTML/email parsers.
+            if (!string.IsNullOrEmpty(s) && s[0] == '\uFEFF')
+            {
+                s = s.Substring(1);
+            }
+
+            return s;
         }
 
         private static readonly FrozenSet<int> ExcludedErrorCodes =

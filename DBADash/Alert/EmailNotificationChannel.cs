@@ -1,4 +1,5 @@
 ﻿using DBADashGUI.DBADashAlerts;
+using DBADash;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
@@ -56,7 +57,7 @@ namespace DBADash.Alert
         [Category("Email Message"), DisplayName("Email Subject Template")]
         public string EmailSubjectTemplate { get; set; }
 
-        [Description($"Optional.  Default: {DefaultEmailMessageTemplate}\nPlaceholders: {{Emoji}}, {{AlertKey}}, {{Action}}, {{Instance}}, {{ConnectionID}}, {{InstanceAndConnectionID}}, {{Priority}}, {{Title}}, {{Text}}, {{TriggerDate}}.\nHTML Default:{DefaultHTMLMessageTemplate}")]
+        [Description("Optional.  Default: {Text}\nHTML Default: https://github.com/trimble-oss/dba-dash/blob/main/DBADash/Alert/HTMLEmailAlertTemplate.html\nPlaceholders: {Emoji}, {AlertKey}, {Action}, {Instance}, {ConnectionID}, {InstanceAndConnectionID}, {Priority}, {Title}, {Text}, {TriggerDate}.")]
         [Category("Email Message"), DisplayName("Email Message Template")]
         public string EmailMessageTemplate { get; set; }
 
@@ -66,14 +67,17 @@ namespace DBADash.Alert
         private const string DefaultEmailSubjectTemplate = "{Emoji} {AlertKey} {Action} on {Instance}";
         private const string DefaultEmailMessageTemplate = "{Text}";
 
-        private const string DefaultHTMLMessageTemplate =
-            "<h1><img src=\"{iconurl}\" alt=\"{Priority}\" width=\"30\" height=\"30\"/> {title}<h1/>\r\n<h2>{instance}</h2>\r\n<h3>Priority: {Priority}</h3>\r\n<p>\r\n{text}\r\n</p>\r\n<hr>\r\n<i>Alert generated from <a href=\"https://dbadash.com\">DBA Dash</a></i>\r\n</body>\r\n</html>\r\n";
+        private static readonly Lazy<string> DefaultHTMLMessageTemplateLazy = new(() =>
+            Utility.GetResourceString("DBADash.Alert.HTMLEmailAlertTemplate.html")
+        );
+
+        private string DefaultHTMLMessageTemplate => DefaultHTMLMessageTemplateLazy.Value;
 
         private string GetEmailSubjectTemplate() => string.IsNullOrEmpty(EmailSubjectTemplate)
             ? DefaultEmailSubjectTemplate
             : EmailSubjectTemplate;
 
-        private string GetEmailMessageTemplate() => string.IsNullOrEmpty(EmailMessageTemplate)
+        internal string GetEmailMessageTemplate() => string.IsNullOrEmpty(EmailMessageTemplate)
             ? IsHTML ? DefaultHTMLMessageTemplate : DefaultEmailMessageTemplate
             : EmailMessageTemplate;
 

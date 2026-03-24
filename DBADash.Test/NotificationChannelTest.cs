@@ -156,5 +156,30 @@ namespace DBADashConfig.Test
             // Assert
             Assert.Contains("{TriggerDate}", placeholders, "Placeholders list should contain {TriggerDate}");
         }
+
+        [TestMethod]
+        public void GetEmailMessageTemplate_ReturnsHtmlTemplate()
+        {
+            // Ensure the HTML email template is accessible via the EmailNotificationChannel's default HTML property
+            var emailChannel = new EmailNotificationChannel() { IsHTML = true };
+
+            var content = emailChannel.GetEmailMessageTemplate();
+
+            Assert.IsFalse(string.IsNullOrWhiteSpace(content), "Embedded HTML template should not be empty");
+            StringAssert.Contains(content.ToLowerInvariant(), "<html", "Embedded resource should contain HTML content");
+        }
+
+        [TestMethod]
+        public void GetEmailMessageTemplate_ReturnsPlainText()
+        {
+            // Ensure the plain-text email template is returned when IsHTML is false
+            var emailChannel = new EmailNotificationChannel() { IsHTML = false };
+
+            var content = emailChannel.GetEmailMessageTemplate();
+
+            // When IsHTML is false ensure the returned template is not HTML
+            Assert.IsFalse(string.IsNullOrWhiteSpace(content), "Template should not be empty");
+            Assert.IsFalse(content.ToLowerInvariant().Contains("<html"), "Expected plain-text template, not HTML");
+        }
     }
 }

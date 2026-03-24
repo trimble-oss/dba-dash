@@ -19,6 +19,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Alert\HTMLEmailAlertTemplate.html" />
     <None Remove="SQL\SQLIdentityColumns.sql" />
     <None Remove="SQL\SQLJobs.sql" />
     <None Remove="SQL\SQLJobSteps.sql" />
@@ -33,6 +34,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+    <EmbeddedResource Include="Alert\HTMLEmailAlertTemplate.html" />
     <EmbeddedResource Include="SQL\SQLHasWorkloadGroups.sql" />
     <EmbeddedResource Include="SQL\SQLFailedLogins.sql" />
     <EmbeddedResource Include="SQL\SQLAvailableCounters.sql" />
