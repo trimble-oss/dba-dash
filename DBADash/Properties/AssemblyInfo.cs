@@ -18,4 +18,6 @@ using System.Runtime.InteropServices;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("176c91f1-d5f4-4695-b1ed-2c021249b88f")]
 
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("DBADash.Test")]
+
 
