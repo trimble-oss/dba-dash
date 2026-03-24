@@ -163,7 +163,7 @@ BEGIN
 						CAST(HADR.redo_queue_size AS DECIMAL(28,9)) AS [Redo Queue Size (KB)],
 						CAST(HADR.log_send_queue_size AS DECIMAL(28,9)) AS [Log Send Queue Size (KB)]
 				FROM @DatabasesHADR HADR
-				JOIN dbo.Databases D ON HADR.database_id = D.database_id AND D.InstanceID = @InstanceID
+				JOIN dbo.Databases D ON HADR.database_id = D.database_id AND D.InstanceID = @InstanceID AND D.IsActive = 1
 				JOIN dbo.AvailabilityReplicas AR ON AR.InstanceID = @InstanceID AND AR.replica_id = HADR.replica_id
 				LEFT JOIN @DatabasesHADR PrimaryHADR ON PrimaryHADR.group_database_id = HADR.group_database_id 
 											 AND PrimaryHADR.is_primary_replica = 1
