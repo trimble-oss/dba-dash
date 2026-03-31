@@ -146,7 +146,6 @@
             chartDB.AutoUpdateEnabled = true;
             chartDB.ChartTheme = null;
             chartDB.Dock = System.Windows.Forms.DockStyle.Fill;
-            chartDB.ForceGPU = false;
             skDefaultLegend1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
             skDefaultLegend1.Content = null;
             skDefaultLegend1.IsValid = false;
@@ -215,7 +214,6 @@
             chartPool.AutoUpdateEnabled = true;
             chartPool.ChartTheme = null;
             chartPool.Dock = System.Windows.Forms.DockStyle.Fill;
-            chartPool.ForceGPU = false;
             skDefaultLegend2.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
             skDefaultLegend2.Content = null;
             skDefaultLegend2.IsValid = false;

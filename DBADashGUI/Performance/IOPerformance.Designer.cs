@@ -279,7 +279,6 @@
             chartIO.AutoUpdateEnabled = true;
             chartIO.ChartTheme = null;
             chartIO.Dock = System.Windows.Forms.DockStyle.Fill;
-            chartIO.ForceGPU = false;
             skDefaultLegend1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
             skDefaultLegend1.Content = null;
             skDefaultLegend1.IsValid = false;

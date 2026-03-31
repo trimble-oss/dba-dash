@@ -66,7 +66,6 @@
             planChart.ChartTheme = null;
             planChart.ContextMenuStrip = contextMenuStrip1;
             planChart.Dock = System.Windows.Forms.DockStyle.Fill;
-            planChart.ForceGPU = false;
             skDefaultLegend1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
             skDefaultLegend1.Content = null;
             skDefaultLegend1.IsValid = true;

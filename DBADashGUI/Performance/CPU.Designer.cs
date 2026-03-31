@@ -162,7 +162,6 @@
             chartCPU.AutoUpdateEnabled = true;
             chartCPU.ChartTheme = null;
             chartCPU.Dock = System.Windows.Forms.DockStyle.Fill;
-            chartCPU.ForceGPU = false;
             skDefaultLegend2.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
             skDefaultLegend2.Content = null;
             skDefaultLegend2.IsValid = false;
