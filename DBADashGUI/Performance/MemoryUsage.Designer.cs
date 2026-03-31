@@ -384,7 +384,6 @@ namespace DBADashGUI.Performance
             pieChart1.AutoUpdateEnabled = true;
             pieChart1.ChartTheme = null;
             pieChart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            pieChart1.ForceGPU = false;
             skDefaultLegend1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
             skDefaultLegend1.Content = null;
             skDefaultLegend1.IsValid = true;

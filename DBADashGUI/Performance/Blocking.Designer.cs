@@ -88,7 +88,6 @@
             chartBlocking.AutoUpdateEnabled = true;
             chartBlocking.ChartTheme = null;
             chartBlocking.Dock = System.Windows.Forms.DockStyle.Fill;
-            chartBlocking.ForceGPU = false;
             skDefaultLegend1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
             skDefaultLegend1.Content = null;
             skDefaultLegend1.IsValid = true;

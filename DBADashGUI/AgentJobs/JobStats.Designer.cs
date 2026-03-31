@@ -188,7 +188,6 @@ namespace DBADashGUI.AgentJobs
             chart1.ChartTheme = null;
             chart1.DefaultLineSmoothness = 0.25D;
             chart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            chart1.ForceGPU = false;
             skDefaultLegend1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
             skDefaultLegend1.Content = null;
             skDefaultLegend1.IsValid = false;
