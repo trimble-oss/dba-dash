@@ -2,19 +2,19 @@
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Drawing.Geometries;
 using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.WinForms;
 using SkiaSharp;
 using System;
-using System.Diagnostics;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using LiveChartsCore.SkiaSharpView.Drawing.Geometries;
 
 namespace DBADashGUI.Charts
 {
@@ -26,6 +26,8 @@ namespace DBADashGUI.Charts
             Numeric,
             Category
         }
+
+        private static readonly LiveChartsCore.Drawing.Padding DefaultYAxisPadding = new LiveChartsCore.Drawing.Padding(10, 0, 10, 0);
 
         /// <summary>
         /// Returns either a Cartesian chart or a Pie chart control depending on the configuration.
@@ -990,7 +992,8 @@ namespace DBADashGUI.Charts
                         Name = axisConfig.Label,
                         NamePaint = labelPaint,
                         NameTextSize = nameFontSize,
-                        Position = axisConfig.Position
+                        Position = axisConfig.Position,
+                        Padding = DefaultYAxisPadding
                     };
 
                     if (axisConfig.MaxLimit.HasValue)
@@ -1027,7 +1030,8 @@ namespace DBADashGUI.Charts
                 MinLimit = 0,
                 Name = config.YAxisLabel,
                 NamePaint = labelPaint,
-                NameTextSize = nameFontSize
+                NameTextSize = nameFontSize,
+                Padding = DefaultYAxisPadding
             };
 
             if (config.YAxisMax.HasValue)
