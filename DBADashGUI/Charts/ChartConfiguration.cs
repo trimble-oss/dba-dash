@@ -10,6 +10,7 @@ namespace DBADashGUI.Charts
     public record ChartConfiguration : ChartConfigurationBase
     {
         public const double DefaultLineSmoothness = 0.2;
+        public const double DefaultAreaLineSmoothness = 0.8;
         public const double DefaultGeometrySize = 8;
 
         // Required parameters
@@ -66,7 +67,7 @@ namespace DBADashGUI.Charts
 
         /// <summary>
         /// Line smoothness for line charts (0 = sharp corners, 1 = maximum smoothing). Default is 0.2.
-        /// Only applies to ChartTypes.Line.
+        /// Applies to ChartTypes.Line and ChartTypes.StackedArea.
         /// </summary>
         public double LineSmoothness { get; init; } = DefaultLineSmoothness;
 

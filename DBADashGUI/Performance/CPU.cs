@@ -146,7 +146,7 @@ namespace DBADashGUI.Performance
                     ChartType = ChartTypes.StackedArea,
                     LegendPosition = legendPosition,
                     GeometrySize = PointSize,
-                    LineSmoothness = SmoothLines ? ChartConfiguration.DefaultLineSmoothness : 0,
+                    LineSmoothness = SmoothLines ? ChartConfiguration.DefaultAreaLineSmoothness : 0,
                     XAxisMin = DateRange.FromUTC.ToAppTimeZone(),
                     XAxisMax = DateRange.ToUTC.ToAppTimeZone(),
                     YAxisLabel = "CPU %",
