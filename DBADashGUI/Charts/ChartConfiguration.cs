@@ -66,10 +66,11 @@ namespace DBADashGUI.Charts
         public override ChartTypes ChartType { get; init; } = ChartTypes.StackedColumn;
 
         /// <summary>
-        /// Line smoothness for line charts (0 = sharp corners, 1 = maximum smoothing). Default is 0.2.
+        /// Line smoothness for line/area charts (0 = sharp corners, 1 = maximum smoothing).
+        /// When null, an appropriate per-chart-type default is used (Line: DefaultLineSmoothness, StackedArea: DefaultAreaLineSmoothness).
         /// Applies to ChartTypes.Line and ChartTypes.StackedArea.
         /// </summary>
-        public double LineSmoothness { get; init; } = DefaultLineSmoothness;
+        public double? LineSmoothness { get; init; } = null;
 
         /// <summary>
         /// Size of the geometry (points) on line/area charts. 0 hides points. Default is 8.
@@ -163,7 +164,7 @@ namespace DBADashGUI.Charts
                 }
             }
 
-            if (LineSmoothness < 0 || LineSmoothness > 1)
+            if (LineSmoothness.HasValue && (LineSmoothness.Value < 0 || LineSmoothness.Value > 1))
             {
                 errors.Add("LineSmoothness must be between 0 and 1.");
             }

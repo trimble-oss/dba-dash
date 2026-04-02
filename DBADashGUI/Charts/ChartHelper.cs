@@ -686,6 +686,12 @@ namespace DBADashGUI.Charts
                 categories = BuildCategoriesFromTable(dt, config.XColumn);
             }
 
+            // Determine effective line smoothness: if config.LineSmoothness is null, choose a per-chart-type default
+            var effectiveLineSmoothness = config.LineSmoothness
+                ?? (config.ChartType == ChartTypes.StackedArea
+                    ? ChartConfiguration.DefaultAreaLineSmoothness
+                    : ChartConfiguration.DefaultLineSmoothness);
+
             // Check if using MetricColumns (multiple columns as series)
             if (config.MetricColumns != null && config.MetricColumns.Length > 0)
             {
@@ -698,7 +704,7 @@ namespace DBADashGUI.Charts
                         if (values.Length > 0)
                         {
                             var seriesName = GetFriendlyColumnName(metricColumn, config);
-                            series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                            series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill));
                         }
                     }
                     else if (xKind == XAxisKind.Numeric)
@@ -707,7 +713,7 @@ namespace DBADashGUI.Charts
                         if (values.Length > 0)
                         {
                             var seriesName = GetFriendlyColumnName(metricColumn, config);
-                            series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                            series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill));
                         }
                     }
                     else
@@ -717,7 +723,7 @@ namespace DBADashGUI.Charts
                         if (values.Length > 0)
                         {
                             var seriesName = GetFriendlyColumnName(metricColumn, config);
-                            series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                            series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill));
                         }
                     }
                 }
@@ -731,7 +737,7 @@ namespace DBADashGUI.Charts
                     if (values.Length > 0)
                     {
                         var seriesName = GetFriendlyColumnName(config.MetricColumn, config);
-                        series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                        series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill));
                     }
                 }
                 else if (xKind == XAxisKind.Numeric)
@@ -740,7 +746,7 @@ namespace DBADashGUI.Charts
                     if (values.Length > 0)
                     {
                         var seriesName = GetFriendlyColumnName(config.MetricColumn, config);
-                        series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                        series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill));
                     }
                 }
                 else
@@ -749,7 +755,7 @@ namespace DBADashGUI.Charts
                     if (values.Length > 0)
                     {
                         var seriesName = GetFriendlyColumnName(config.MetricColumn, config);
-                        series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                        series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill));
                     }
                 }
             }
@@ -766,19 +772,19 @@ namespace DBADashGUI.Charts
                     {
                         var values = ExtractDateTimePoints(group, config.XColumn, config.MetricColumn);
                         if (values.Length > 0)
-                            series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                            series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill));
                     }
                     else if (xKind == XAxisKind.Numeric)
                     {
                         var values = ExtractNumericPoints(group, config.XColumn, config.MetricColumn);
                         if (values.Length > 0)
-                            series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                            series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill));
                     }
                     else
                     {
                         var values = ExtractCategoryPoints(group, config.XColumn, config.MetricColumn, categories);
                         if (values.Length > 0)
-                            series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType, config.LineSmoothness, config.GeometrySize, config.LineFill));
+                            series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill));
                     }
                 }
             }
