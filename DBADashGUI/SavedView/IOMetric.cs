@@ -4,7 +4,6 @@ using static DBADashGUI.Performance.IMetric;
 
 namespace DBADashGUI
 {
-
     /// <summary>
     /// Used by IOPerformance to store the state of the user control for serialization
     /// </summary>
@@ -15,6 +14,8 @@ namespace DBADashGUI
         public List<string> VisibleMetrics { get; set; } = new();
 
         public string Drive { get; set; }
+
+        public double PointSize { get; set; }
 
         public IMetricChart GetChart()
         {

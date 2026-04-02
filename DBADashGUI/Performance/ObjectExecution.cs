@@ -12,11 +12,22 @@ using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
 {
-    public partial class ObjectExecution : UserControl, IMetricChart
+    public partial class ObjectExecution : UserControl, IMetricChart, IThemedControl
     {
+        private Label lblError = new Label() { Dock = DockStyle.Fill, Visible = false, TextAlign = System.Drawing.ContentAlignment.MiddleCenter };
+
+        private void ToggleError(bool show, string message = "")
+        {
+            lblError.Text = message;
+            lblError.Visible = show;
+            objectExecChart.Visible = !show;
+        }
+
         public ObjectExecution()
         {
             InitializeComponent();
+            this.Controls.Add(lblError);
+            lblError.BringToFront();
         }
 
         public class DateModel
@@ -40,6 +51,15 @@ namespace DBADashGUI.Performance
         public event EventHandler<EventArgs> Close;
 
         public event EventHandler<EventArgs> MoveUp;
+
+        public void SetContext(DBADashContext _context)
+        {
+            if (_context == null) return;
+            instanceID = _context.InstanceID;
+            databaseid = _context.DatabaseID;
+            objectID = _context.Type.IsQueryStoreObjectType() ? _context.ObjectID : 0;
+            RefreshData();
+        }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool CloseVisible
@@ -86,47 +106,60 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-            lblExecution.Text = databaseid > 0 ? "Execution Stats: Database" : "Execution Stats: Instance";
-            toolStrip1.Tag = databaseid > 0 ? "ALT" : null; // set tag to ALT to use the alternate menu renderer
-            toolStrip1.ApplyTheme(DBADashUser.SelectedTheme);
-
-            var dt = CommonData.ObjectExecutionStats(instanceID, databaseid, objectID, dateGrouping, Metric.Measure, DateRange.FromUTC, DateRange.ToUTC, default, TopRows, IncludeOther);
-
-            if (dt == null || dt.Rows.Count == 0)
+            try
             {
-                objectExecChart.Series = Array.Empty<ISeries>();
-                objectExecChart.XAxes = Array.Empty<Axis>();
-                objectExecChart.YAxes = Array.Empty<Axis>();
-                return;
-            }
-
-            // Add a computed column for ObjectName (combination of DatabaseName and object_name)
-            if (!dt.Columns.Contains("ObjectName"))
-            {
-                dt.Columns.Add("ObjectName", typeof(string));
-                foreach (DataRow row in dt.Rows)
+                if (instanceID == 0)
                 {
-                    row["ObjectName"] = row["DatabaseName"] + " | " + row["object_name"];
+                    ToggleError(true, "No instance selected");
+                    return;
                 }
+                ToggleError(false);
+                lblExecution.Text = databaseid > 0 ? "Execution Stats: Database" : "Execution Stats: Instance";
+                toolStrip1.Tag = databaseid > 0 ? "ALT" : null; // set tag to ALT to use the alternate menu renderer
+                toolStrip1.ApplyTheme(DBADashUser.SelectedTheme);
+
+                var dt = CommonData.ObjectExecutionStats(instanceID, databaseid, objectID, dateGrouping, Metric.Measure, DateRange.FromUTC, DateRange.ToUTC, default, TopRows, IncludeOther);
+
+                if (dt == null || dt.Rows.Count == 0)
+                {
+                    objectExecChart.Series = Array.Empty<ISeries>();
+                    objectExecChart.XAxes = Array.Empty<Axis>();
+                    objectExecChart.YAxes = Array.Empty<Axis>();
+                    return;
+                }
+
+                // Add a computed column for ObjectName (combination of DatabaseName and object_name)
+                if (!dt.Columns.Contains("ObjectName"))
+                {
+                    dt.Columns.Add("ObjectName", typeof(string));
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        row["ObjectName"] = row["DatabaseName"] + " | " + row["object_name"];
+                    }
+                }
+
+                // Use ChartHelper with SeriesColumn to group by ObjectName
+                var config = new ChartConfiguration
+                {
+                    XColumn = "SnapshotDate",
+                    MetricColumn = "Measure",
+                    SeriesColumn = "ObjectName",  // Group data by ObjectName - each becomes a series
+                    ChartType = ChartTypes.StackedColumn,
+                    LegendPosition = legendPosition,
+                    XAxisMin = DateRange.FromUTC.ToAppTimeZone(),
+                    XAxisMax = DateRange.ToUTC.ToAppTimeZone(),
+                    YAxisLabel = measures[Metric.Measure].DisplayName,
+                    YAxisFormat = "0.0",
+                    YAxisMin = 0,
+                    DateUnit = TimeSpan.FromMinutes(dateGrouping)
+                };
+
+                ChartHelper.UpdateChart(objectExecChart, dt, config);
             }
-
-            // Use ChartHelper with SeriesColumn to group by ObjectName
-            var config = new ChartConfiguration
+            catch (Exception ex)
             {
-                XColumn = "SnapshotDate",
-                MetricColumn = "Measure",
-                SeriesColumn = "ObjectName",  // Group data by ObjectName - each becomes a series
-                ChartType = ChartTypes.StackedColumn,
-                LegendPosition = legendPosition,
-                XAxisMin = DateRange.FromUTC.ToAppTimeZone(),
-                XAxisMax = DateRange.ToUTC.ToAppTimeZone(),
-                YAxisLabel = measures[Metric.Measure].DisplayName,
-                YAxisFormat = "0.0",
-                YAxisMin = 0,
-                DateUnit = TimeSpan.FromMinutes(dateGrouping)
-            };
-
-            ChartHelper.UpdateChart(objectExecChart, dt, config);
+                ToggleError(true, "Error loading data: " + ex.Message);
+            }
         }
 
         private class Measure
@@ -242,6 +275,13 @@ namespace DBADashGUI.Performance
                 menuItem.Checked = menuItem == item;
             }
             objectExecChart.LegendPosition = legendPosition;
+        }
+
+        public void ApplyTheme(BaseTheme theme)
+        {
+            objectExecChart.ApplyTheme();
+            toolStrip1.ApplyTheme();
+            lblError.ForeColor = DBADashUser.IsDarkTheme ? DashColors.White : DashColors.Fail;
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace DBADashGUI
 {
-    internal interface ISetContext
+    public interface ISetContext
     {
 
         /// <summary>

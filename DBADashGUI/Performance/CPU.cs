@@ -1,4 +1,5 @@
 ﻿using DBADashGUI.Charts;
+using DBADashGUI.Theme;
 using LiveChartsCore;
 using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
@@ -14,11 +15,29 @@ using UserControl = System.Windows.Forms.UserControl;
 
 namespace DBADashGUI.Performance
 {
-    public partial class CPU : UserControl, IMetricChart
+    public partial class CPU : UserControl, IMetricChart, IThemedControl
     {
+        private Label lblError = new Label() { Dock = DockStyle.Fill, Visible = false, TextAlign = System.Drawing.ContentAlignment.MiddleCenter };
+
+        private void ToggleError(bool show, string message = "")
+        {
+            lblError.Text = message;
+            lblError.Visible = show;
+            chartCPU.Visible = !show;
+        }
+
+        public void SetContext(DBADashContext _context)
+        {
+            if (_context == null) return;
+            InstanceID = _context.InstanceID;
+            RefreshData();
+        }
+
         public CPU()
         {
             InitializeComponent();
+            this.Controls.Add(lblError);
+            lblError.BringToFront();
         }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -68,12 +87,6 @@ namespace DBADashGUI.Performance
 
         private LegendPosition legendPosition = LegendPosition.Hidden;
 
-        public void RefreshData(int InstanceID)
-        {
-            this.InstanceID = InstanceID;
-            RefreshData();
-        }
-
         private async Task<DataTable> GetCpuDataTable()
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
@@ -106,16 +119,29 @@ namespace DBADashGUI.Performance
 
         public async void RefreshData()
         {
-            if (durationMins != DateRange.DurationMins) // Update date grouping only if date range has changed
+            try
             {
-                DateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 200);
-                tsDateGrouping.Text = DateHelper.DateGroupString(DateGrouping);
-                durationMins = DateRange.DurationMins;
+                if (InstanceID == 0)
+                {
+                    ToggleError(true, "No instance selected");
+                    return;
+                }
+                ToggleError(false);
+                if (durationMins != DateRange.DurationMins) // Update date grouping only if date range has changed
+                {
+                    DateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 200);
+                    tsDateGrouping.Text = DateHelper.DateGroupString(DateGrouping);
+                    durationMins = DateRange.DurationMins;
+                }
+
+                CpuDataTable = await GetCpuDataTable();
+
+                RenderCpuChart();
             }
-
-            CpuDataTable = await GetCpuDataTable();
-
-            RenderCpuChart();
+            catch (Exception ex)
+            {
+                ToggleError(true, $"Error loading CPU data: {ex.Message}");
+            }
         }
 
         private void RenderCpuChart()
@@ -257,6 +283,13 @@ namespace DBADashGUI.Performance
                 menuItem.Checked = menuItem == item;
             }
             chartCPU.LegendPosition = legendPosition;
+        }
+
+        public void ApplyTheme(BaseTheme theme)
+        {
+            chartCPU.ApplyTheme();
+            toolStrip1.ApplyTheme();
+            lblError.ForeColor = DBADashUser.IsDarkTheme ? DashColors.White : DashColors.Fail;
         }
     }
 }

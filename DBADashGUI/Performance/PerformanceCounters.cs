@@ -7,11 +7,10 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
 using static DBADashGUI.Performance.IMetric;
-using System.Diagnostics;
-using System.CodeDom;
 
 namespace DBADashGUI.Performance
 {
@@ -195,6 +194,15 @@ namespace DBADashGUI.Performance
         public void RefreshData(int instanceID)
         {
             InstanceID = instanceID;
+            RefreshData();
+        }
+
+        public void SetContext(DBADashContext _context)
+        {
+            if (_context == null) return;
+            InstanceID = _context.InstanceID;
+            FromDate = DateRange.FromUTC;
+            ToDate = DateRange.ToUTC;
             RefreshData();
         }
 

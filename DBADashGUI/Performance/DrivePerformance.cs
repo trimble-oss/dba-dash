@@ -19,7 +19,7 @@ namespace DBADashGUI.Performance
         private int mins;
         private int dateGrouping;
         private double LatencyLimit = 200;
-        private int PointSize => dataPointsToolStripMenuItem.Checked ? 10 : 0;
+        private double PointSize => dataPointsToolStripMenuItem.Checked ? 10 : 0;
 
         private void TsDateGroup_Click(object sender, EventArgs e)
         {

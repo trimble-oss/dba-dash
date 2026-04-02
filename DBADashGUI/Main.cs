@@ -240,6 +240,7 @@ namespace DBADashGUI
         private TabPage tabCloudMetadata;
         private TabPage tabTuningRecommendations;
         private TabPage tabPoolsAndGroups;
+        private TabPage tabPerformance;
 
         public Main(CommandLineOptions opts)
         {
@@ -289,6 +290,9 @@ namespace DBADashGUI
             tabPoolsAndGroups = new TabPage("Resource Governor") { Name = Tabs.PoolsAndGroups.TabName() };
 
             tabPoolsAndGroups.Controls.Add(new ResourceGovernorPerformance { Dock = DockStyle.Fill });
+
+            tabPerformance = new TabPage("Performance") { Name = Tabs.Performance.TabName() };
+            tabPerformance.Controls.Add(new CustomReportView() { Dock = DockStyle.Fill, Report = PerformanceReport.Instance });
         }
 
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommunityProcs proc)
@@ -1279,7 +1283,7 @@ namespace DBADashGUI
             {
                 if (n.Type.IsQueryStoreObjectType())
                 {
-                    allowedTabs.AddRange(new[] { tabObjectExecutionSummary, tabPerformance, tabSchema, tabTopQueries });
+                    allowedTabs.AddRange(new[] { tabObjectExecutionSummary, tabSchema, tabTopQueries });
 
                     foreach (var tool in CommunityTools.CommunityTools.ProcedureLevelTools)
                     {
