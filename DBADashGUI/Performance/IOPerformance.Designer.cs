@@ -50,6 +50,17 @@
             tsLatency1000 = new System.Windows.Forms.ToolStripMenuItem();
             tsLatency2000 = new System.Windows.Forms.ToolStripMenuItem();
             tsLatency5000 = new System.Windows.Forms.ToolStripMenuItem();
+            lineSmoothnessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsSmooth1 = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
+            tsSmoothPoint5 = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            tsSmooth0 = new System.Windows.Forms.ToolStripMenuItem();
+            pointSizeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            noneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            smallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            mediumToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            largeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsLegend = new System.Windows.Forms.ToolStripDropDownButton();
             leftToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             rightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -131,7 +142,7 @@
             // tsOptions
             // 
             tsOptions.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { latencyLimitToolStripMenuItem });
+            tsOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { latencyLimitToolStripMenuItem, lineSmoothnessToolStripMenuItem, pointSizeToolStripMenuItem });
             tsOptions.Image = Properties.Resources.SettingsOutline_16x;
             tsOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsOptions.Name = "tsOptions";
@@ -142,7 +153,7 @@
             // 
             latencyLimitToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsLatency10, tsLatency50, tsLatency100, tsLatency200, tsLatency500, tsLatency1000, tsLatency2000, tsLatency5000 });
             latencyLimitToolStripMenuItem.Name = "latencyLimitToolStripMenuItem";
-            latencyLimitToolStripMenuItem.Size = new System.Drawing.Size(179, 26);
+            latencyLimitToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             latencyLimitToolStripMenuItem.Text = "Latency Limit";
             // 
             // tsLatency10
@@ -203,6 +214,92 @@
             tsLatency5000.Text = "5000";
             tsLatency5000.Click += SetLatencyLimit;
             // 
+            // lineSmoothnessToolStripMenuItem
+            // 
+            lineSmoothnessToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsSmooth1, toolStripMenuItem3, tsSmoothPoint5, toolStripMenuItem2, tsSmooth0 });
+            lineSmoothnessToolStripMenuItem.Name = "lineSmoothnessToolStripMenuItem";
+            lineSmoothnessToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            lineSmoothnessToolStripMenuItem.Text = "Line Smoothness";
+            // 
+            // tsSmooth1
+            // 
+            tsSmooth1.Name = "tsSmooth1";
+            tsSmooth1.Size = new System.Drawing.Size(224, 26);
+            tsSmooth1.Tag = "1.0";
+            tsSmooth1.Text = "100%";
+            tsSmooth1.Click += LineSmoothness_Click;
+            // 
+            // toolStripMenuItem3
+            // 
+            toolStripMenuItem3.Name = "toolStripMenuItem3";
+            toolStripMenuItem3.Size = new System.Drawing.Size(224, 26);
+            toolStripMenuItem3.Tag = "0.75";
+            toolStripMenuItem3.Text = "75%";
+            toolStripMenuItem3.Click += LineSmoothness_Click;
+            // 
+            // tsSmoothPoint5
+            // 
+            tsSmoothPoint5.Name = "tsSmoothPoint5";
+            tsSmoothPoint5.Size = new System.Drawing.Size(224, 26);
+            tsSmoothPoint5.Tag = "0.5";
+            tsSmoothPoint5.Text = "50%";
+            tsSmoothPoint5.Click += LineSmoothness_Click;
+            // 
+            // toolStripMenuItem2
+            // 
+            toolStripMenuItem2.Name = "toolStripMenuItem2";
+            toolStripMenuItem2.Size = new System.Drawing.Size(224, 26);
+            toolStripMenuItem2.Tag = "0.25";
+            toolStripMenuItem2.Text = "25%";
+            toolStripMenuItem2.Click += LineSmoothness_Click;
+            // 
+            // tsSmooth0
+            // 
+            tsSmooth0.Name = "tsSmooth0";
+            tsSmooth0.Size = new System.Drawing.Size(224, 26);
+            tsSmooth0.Tag = "0";
+            tsSmooth0.Text = "0%";
+            tsSmooth0.Click += LineSmoothness_Click;
+            // 
+            // pointSizeToolStripMenuItem
+            // 
+            pointSizeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { noneToolStripMenuItem, smallToolStripMenuItem, mediumToolStripMenuItem, largeToolStripMenuItem });
+            pointSizeToolStripMenuItem.Name = "pointSizeToolStripMenuItem";
+            pointSizeToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            pointSizeToolStripMenuItem.Text = "Points";
+            // 
+            // noneToolStripMenuItem
+            // 
+            noneToolStripMenuItem.Name = "noneToolStripMenuItem";
+            noneToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            noneToolStripMenuItem.Tag = "0";
+            noneToolStripMenuItem.Text = "None";
+            noneToolStripMenuItem.Click += PointSize_Click;
+            // 
+            // smallToolStripMenuItem
+            // 
+            smallToolStripMenuItem.Name = "smallToolStripMenuItem";
+            smallToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            smallToolStripMenuItem.Tag = "5";
+            smallToolStripMenuItem.Text = "Small";
+            smallToolStripMenuItem.Click += PointSize_Click;
+            // 
+            // mediumToolStripMenuItem
+            // 
+            mediumToolStripMenuItem.Name = "mediumToolStripMenuItem";
+            mediumToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            mediumToolStripMenuItem.Tag = "8";
+            mediumToolStripMenuItem.Text = "Medium";
+            mediumToolStripMenuItem.Click += PointSize_Click;
+            // 
+            // largeToolStripMenuItem
+            // 
+            largeToolStripMenuItem.Name = "largeToolStripMenuItem";
+            largeToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            largeToolStripMenuItem.Tag = "15";
+            largeToolStripMenuItem.Text = "Large";
+            largeToolStripMenuItem.Click += PointSize_Click;
+            // 
             // tsLegend
             // 
             tsLegend.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -216,7 +313,7 @@
             // leftToolStripMenuItem
             // 
             leftToolStripMenuItem.Name = "leftToolStripMenuItem";
-            leftToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            leftToolStripMenuItem.Size = new System.Drawing.Size(142, 26);
             leftToolStripMenuItem.Tag = "Left";
             leftToolStripMenuItem.Text = "Left";
             leftToolStripMenuItem.Click += SetLegendPosition;
@@ -224,7 +321,7 @@
             // rightToolStripMenuItem
             // 
             rightToolStripMenuItem.Name = "rightToolStripMenuItem";
-            rightToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            rightToolStripMenuItem.Size = new System.Drawing.Size(142, 26);
             rightToolStripMenuItem.Tag = "Right";
             rightToolStripMenuItem.Text = "Right";
             rightToolStripMenuItem.Click += SetLegendPosition;
@@ -232,7 +329,7 @@
             // topToolStripMenuItem
             // 
             topToolStripMenuItem.Name = "topToolStripMenuItem";
-            topToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            topToolStripMenuItem.Size = new System.Drawing.Size(142, 26);
             topToolStripMenuItem.Tag = "Top";
             topToolStripMenuItem.Text = "Top";
             topToolStripMenuItem.Click += SetLegendPosition;
@@ -240,7 +337,7 @@
             // bottomToolStripMenuItem
             // 
             bottomToolStripMenuItem.Name = "bottomToolStripMenuItem";
-            bottomToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            bottomToolStripMenuItem.Size = new System.Drawing.Size(142, 26);
             bottomToolStripMenuItem.Tag = "Bottom";
             bottomToolStripMenuItem.Text = "Bottom";
             bottomToolStripMenuItem.Click += SetLegendPosition;
@@ -250,7 +347,7 @@
             hiddenToolStripMenuItem.Checked = true;
             hiddenToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             hiddenToolStripMenuItem.Name = "hiddenToolStripMenuItem";
-            hiddenToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            hiddenToolStripMenuItem.Size = new System.Drawing.Size(142, 26);
             hiddenToolStripMenuItem.Tag = "Hidden";
             hiddenToolStripMenuItem.Text = "Hidden";
             hiddenToolStripMenuItem.Click += SetLegendPosition;
@@ -313,6 +410,7 @@
             skDefaultTooltip1.X = 0F;
             skDefaultTooltip1.Y = 0F;
             chartIO.Tooltip = skDefaultTooltip1;
+            chartIO.TooltipFindingStrategy = LiveChartsCore.Measure.TooltipFindingStrategy.Automatic;
             chartIO.UpdaterThrottler = System.TimeSpan.Parse("00:00:00.0500000");
             // 
             // IOPerformance
@@ -358,5 +456,16 @@
         private System.Windows.Forms.ToolStripMenuItem topToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bottomToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem hiddenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem lineSmoothnessToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem tsSmooth1;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem3;
+        private System.Windows.Forms.ToolStripMenuItem tsSmoothPoint5;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
+        private System.Windows.Forms.ToolStripMenuItem tsSmooth0;
+        private System.Windows.Forms.ToolStripMenuItem pointSizeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem noneToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem smallToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mediumToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem largeToolStripMenuItem;
     }
 }

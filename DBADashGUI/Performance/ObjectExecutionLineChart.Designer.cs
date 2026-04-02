@@ -85,7 +85,7 @@
             this.tsSmooth0});
             this.lineSmoothnesToolStripMenuItem.Name = "lineSmoothnesToolStripMenuItem";
             this.lineSmoothnesToolStripMenuItem.Size = new System.Drawing.Size(197, 26);
-            this.lineSmoothnesToolStripMenuItem.Text = "Line Smoothnes";
+            this.lineSmoothnesToolStripMenuItem.Text = "Line Smoothness";
             // 
             // tsSmooth1
             // 

@@ -55,6 +55,7 @@
             bottomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             leftToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             rightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            deleteAllChartsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             editPickersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             renameResultSetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             resetLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -65,8 +66,6 @@
             setTitleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             cboResults = new System.Windows.Forms.ToolStripComboBox();
             lblSelectResults = new System.Windows.Forms.ToolStripLabel();
-            toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             tsScriptResults = new System.Windows.Forms.ToolStripDropDownButton();
             scriptDataTablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             scriptGridsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -91,7 +90,6 @@
             lblURL = new System.Windows.Forms.ToolStripStatusLabel();
             lblDescription = new System.Windows.Forms.ToolStripStatusLabel();
             timer1 = new System.Windows.Forms.Timer(components);
-            deleteAllChartsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStrip1.SuspendLayout();
             pnlParams.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitParams).BeginInit();
@@ -111,7 +109,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsExecute, tsRefresh, tsCancel, tsCopy, tsParams, tsExcel, tsCols, tsConfigure, cboResults, lblSelectResults, toolStripSeparator2, toolStripSeparator1, tsScriptResults, tsClearFilter, tsTrigger, tsReset, tsNewWindow, splitToggle1, tsToggleCharts, tsToggleGrids, splitToggle2 });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsExecute, tsRefresh, tsCancel, tsCopy, tsParams, tsExcel, tsCols, tsConfigure, cboResults, lblSelectResults, tsScriptResults, tsClearFilter, tsTrigger, tsReset, tsNewWindow, splitToggle1, tsToggleCharts, tsToggleGrids, splitToggle2 });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
@@ -333,6 +331,14 @@
             rightToolStripMenuItem.Text = "Right";
             rightToolStripMenuItem.Click += SetChartLocation;
             // 
+            // deleteAllChartsToolStripMenuItem
+            // 
+            deleteAllChartsToolStripMenuItem.Image = Properties.Resources.Close_red_16x;
+            deleteAllChartsToolStripMenuItem.Name = "deleteAllChartsToolStripMenuItem";
+            deleteAllChartsToolStripMenuItem.Size = new System.Drawing.Size(251, 26);
+            deleteAllChartsToolStripMenuItem.Text = "Delete All Charts";
+            deleteAllChartsToolStripMenuItem.Click += DeleteAllCharts;
+            // 
             // editPickersToolStripMenuItem
             // 
             editPickersToolStripMenuItem.Image = Properties.Resources.ReportParameter_16x;
@@ -422,16 +428,6 @@
             lblSelectResults.Text = "Select Results:";
             lblSelectResults.Visible = false;
             // 
-            // toolStripSeparator2
-            // 
-            toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new System.Drawing.Size(6, 31);
-            // 
-            // toolStripSeparator1
-            // 
-            toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(6, 31);
-            // 
             // tsScriptResults
             // 
             tsScriptResults.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -447,14 +443,14 @@
             // 
             scriptDataTablesToolStripMenuItem.Image = Properties.Resources.SQLScript_16x;
             scriptDataTablesToolStripMenuItem.Name = "scriptDataTablesToolStripMenuItem";
-            scriptDataTablesToolStripMenuItem.Size = new System.Drawing.Size(211, 26);
+            scriptDataTablesToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             scriptDataTablesToolStripMenuItem.Text = "Script Data Tables";
             // 
             // scriptGridsToolStripMenuItem
             // 
             scriptGridsToolStripMenuItem.Image = Properties.Resources.TableScript_16x;
             scriptGridsToolStripMenuItem.Name = "scriptGridsToolStripMenuItem";
-            scriptGridsToolStripMenuItem.Size = new System.Drawing.Size(211, 26);
+            scriptGridsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             scriptGridsToolStripMenuItem.Text = "Script Grids";
             // 
             // tsClearFilter
@@ -677,14 +673,6 @@
             timer1.Interval = 1000;
             timer1.Tick += Timer1_Tick;
             // 
-            // deleteAllChartsToolStripMenuItem
-            // 
-            deleteAllChartsToolStripMenuItem.Image = Properties.Resources.Close_red_16x;
-            deleteAllChartsToolStripMenuItem.Name = "deleteAllChartsToolStripMenuItem";
-            deleteAllChartsToolStripMenuItem.Size = new System.Drawing.Size(251, 26);
-            deleteAllChartsToolStripMenuItem.Text = "Delete All Charts";
-            deleteAllChartsToolStripMenuItem.Click += DeleteAllCharts;
-            // 
             // CustomReportView
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -753,8 +741,6 @@
         private System.Windows.Forms.ToolStripMenuItem scriptDataTablesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem scriptGridsToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsReset;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripStatusLabel lblDescription;
         private System.Windows.Forms.SplitContainer splitTablesCharts;
         private System.Windows.Forms.TableLayoutPanel chartLayout;

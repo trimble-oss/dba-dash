@@ -4,8 +4,10 @@ namespace DBADashGUI.Performance
 {
     /// <summary>
     /// Interface for chart controls to implement to allow them to be added to Metrics tab (PerformanceCounterSummary)
+    /// IMetricChart now inherits ISetContext and IRefreshData so callers can set the context and request a refresh
+    /// without relying on a RefreshData overload that accepts an instance id.
     /// </summary>
-    public interface IMetricChart
+    public interface IMetricChart : ISetContext, IRefreshData
     {
         /// <summary>
         /// Event fired when Close button is clicked to remove the chart
@@ -27,13 +29,6 @@ namespace DBADashGUI.Performance
         /// </summary>
         public bool MoveUpVisible { get; set; }
 
-        /// <summary>
-        /// Refresh the chart
-        /// </summary>
-        public void RefreshData(int InstanceID);
-
         public IMetric Metric { get; }
-
-
     }
 }

@@ -186,9 +186,6 @@
     <Compile Update="Performance\ObjectExecutionSummary.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="Performance\Performance.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
     <Compile Update="Performance\ObjectExecution.cs">
       <SubType>UserControl</SubType>
     </Compile>

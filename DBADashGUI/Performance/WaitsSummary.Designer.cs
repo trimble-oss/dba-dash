@@ -441,7 +441,7 @@ namespace DBADashGUI.Performance
             lineSmoothnesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsSmooth1, toolStripMenuItem3, tsSmoothPoint5, toolStripMenuItem2, tsSmooth0 });
             lineSmoothnesToolStripMenuItem.Name = "lineSmoothnesToolStripMenuItem";
             lineSmoothnesToolStripMenuItem.Size = new System.Drawing.Size(197, 26);
-            lineSmoothnesToolStripMenuItem.Text = "Line Smoothnes";
+            lineSmoothnesToolStripMenuItem.Text = "Line Smoothness";
             // 
             // tsSmooth1
             // 

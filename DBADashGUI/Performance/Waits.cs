@@ -1,4 +1,5 @@
 ﻿using DBADashGUI.Charts;
+using DBADashGUI.Theme;
 using Humanizer;
 using LiveChartsCore;
 using LiveChartsCore.Measure;
@@ -13,11 +14,22 @@ using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
 {
-    public partial class Waits : UserControl, IMetricChart
+    public partial class Waits : UserControl, IMetricChart, IThemedControl
     {
+        private Label lblError = new Label() { Dock = DockStyle.Fill, Visible = false, TextAlign = System.Drawing.ContentAlignment.MiddleCenter };
+
+        private void ToggleError(bool show, string message = "")
+        {
+            lblError.Text = message;
+            lblError.Visible = show;
+            waitChart.Visible = !show;
+        }
+
         public Waits()
         {
             InitializeComponent();
+            this.Controls.Add(lblError);
+            lblError.BringToFront();
         }
 
         public class DateModel
@@ -36,6 +48,13 @@ namespace DBADashGUI.Performance
         public event EventHandler<EventArgs> Close;
 
         public event EventHandler<EventArgs> MoveUp;
+
+        public void SetContext(DBADashContext _context)
+        {
+            if (_context == null) return;
+            instanceID = _context.InstanceID;
+            RefreshData();
+        }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool CloseVisible
@@ -171,9 +190,22 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-            dt = GetWaitsDT();
-            CalcTopWaits(ref dt);
-            RefreshChart();
+            try
+            {
+                if (instanceID == 0)
+                {
+                    ToggleError(true, "No instance selected");
+                    return;
+                }
+                ToggleError(false);
+                dt = GetWaitsDT();
+                CalcTopWaits(ref dt);
+                RefreshChart();
+            }
+            catch (Exception ex)
+            {
+                ToggleError(true, "Error loading data: " + ex.Message);
+            }
         }
 
         public void RefreshChart()
@@ -308,6 +340,13 @@ namespace DBADashGUI.Performance
                 menuItem.Checked = menuItem == item;
             }
             waitChart.LegendPosition = legendPosition;
+        }
+
+        public void ApplyTheme(BaseTheme theme)
+        {
+            waitChart.ApplyTheme();
+            toolStrip1.ApplyTheme();
+            lblError.ForeColor = DBADashUser.IsDarkTheme ? DashColors.White : DashColors.Fail;
         }
     }
 }

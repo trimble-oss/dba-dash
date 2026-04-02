@@ -126,8 +126,6 @@ namespace DBADashGUI
             dbFilesControl1 = new DBADashGUI.DBFiles.DBFilesControl();
             tabLastGood = new System.Windows.Forms.TabPage();
             lastGoodCheckDBControl1 = new DBADashGUI.LastGoodCheckDB.LastGoodCheckDBControl();
-            tabPerformance = new System.Windows.Forms.TabPage();
-            performance1 = new DBADashGUI.Performance.Performance();
             tabDBADashErrorLog = new System.Windows.Forms.TabPage();
             collectionErrors1 = new DBADashGUI.CollectionDates.CollectionErrors();
             tabCollectionDates = new System.Windows.Forms.TabPage();
@@ -278,7 +276,6 @@ namespace DBADashGUI
             tabSummary.SuspendLayout();
             tabFiles.SuspendLayout();
             tabLastGood.SuspendLayout();
-            tabPerformance.SuspendLayout();
             tabDBADashErrorLog.SuspendLayout();
             tabCollectionDates.SuspendLayout();
             tabPerformanceSummary.SuspendLayout();
@@ -884,7 +881,6 @@ namespace DBADashGUI
             tabs.Controls.Add(tabSummary);
             tabs.Controls.Add(tabFiles);
             tabs.Controls.Add(tabLastGood);
-            tabs.Controls.Add(tabPerformance);
             tabs.Controls.Add(tabDBADashErrorLog);
             tabs.Controls.Add(tabCollectionDates);
             tabs.Controls.Add(tabPerformanceSummary);
@@ -1343,28 +1339,6 @@ namespace DBADashGUI
             lastGoodCheckDBControl1.Name = "lastGoodCheckDBControl1";
             lastGoodCheckDBControl1.Size = new System.Drawing.Size(190, 53);
             lastGoodCheckDBControl1.TabIndex = 0;
-            // 
-            // tabPerformance
-            // 
-            tabPerformance.Controls.Add(performance1);
-            tabPerformance.Location = new System.Drawing.Point(4, 39);
-            tabPerformance.Margin = new System.Windows.Forms.Padding(1, 2, 1, 2);
-            tabPerformance.Name = "tabPerformance";
-            tabPerformance.Padding = new System.Windows.Forms.Padding(1, 2, 1, 2);
-            tabPerformance.Size = new System.Drawing.Size(192, 57);
-            tabPerformance.TabIndex = 10;
-            tabPerformance.Text = "Performance";
-            tabPerformance.UseVisualStyleBackColor = true;
-            // 
-            // performance1
-            // 
-            performance1.AutoScroll = true;
-            performance1.Dock = System.Windows.Forms.DockStyle.Fill;
-            performance1.Location = new System.Drawing.Point(1, 2);
-            performance1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            performance1.Name = "performance1";
-            performance1.Size = new System.Drawing.Size(190, 53);
-            performance1.TabIndex = 0;
             // 
             // tabDBADashErrorLog
             // 
@@ -2737,7 +2711,6 @@ namespace DBADashGUI
             tabSummary.ResumeLayout(false);
             tabFiles.ResumeLayout(false);
             tabLastGood.ResumeLayout(false);
-            tabPerformance.ResumeLayout(false);
             tabDBADashErrorLog.ResumeLayout(false);
             tabCollectionDates.ResumeLayout(false);
             tabPerformanceSummary.ResumeLayout(false);
@@ -2825,7 +2798,6 @@ namespace DBADashGUI
         private DBFiles.DBFilesControl dbFilesControl1;
         private System.Windows.Forms.TabPage tabLastGood;
         private LastGoodCheckDB.LastGoodCheckDBControl lastGoodCheckDBControl1;
-        private System.Windows.Forms.TabPage tabPerformance;
         private System.Windows.Forms.TabPage tabDBADashErrorLog;
         private System.Windows.Forms.TabPage tabCollectionDates;
         private CollectionDates.CollectionDates collectionDates1;
@@ -2992,7 +2964,6 @@ namespace DBADashGUI
         private System.Windows.Forms.ToolStripMenuItem dateTimeFormatToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem setTimeFormatToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem setDateTimeFormatToolStripMenuItem;
-        private Performance.Performance performance1;
         private DateRangeToolStripMenuItem tsDateRange;
         private HA.AG ag1;
         private System.Windows.Forms.ToolStripMenuItem tsToggleSingleInstance;

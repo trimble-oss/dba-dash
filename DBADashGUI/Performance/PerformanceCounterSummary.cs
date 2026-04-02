@@ -1,4 +1,5 @@
 ﻿using DBADashGUI.Theme;
+using System.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -56,7 +57,14 @@ namespace DBADashGUI.Performance
             {
                 foreach (Control c in layout1.Controls)
                 {
-                    ((IMetricChart)c).RefreshData(InstanceID);
+                    try
+                    {
+                        ((IMetricChart)c).SetContext(new DBADashContext() { InstanceID = InstanceID });
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error setting context on metric chart: {ex}");
+                    }
                 }
             }
         }

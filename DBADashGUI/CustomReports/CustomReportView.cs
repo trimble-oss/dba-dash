@@ -681,6 +681,11 @@ namespace DBADashGUI.CustomReports
                     {
                         ShowTable();
                     }
+                    else if (Report?.Charts != null && Report.Charts.Any(c => c.Metric != null))
+                    {
+                        // Report returned no result sets but includes metric/system charts - render charts
+                        ShowTable();
+                    }
                     else
                     {
                         MessageBox.Show("Report didn't return a result set", "Warning", MessageBoxButtons.OK,
@@ -862,21 +867,21 @@ namespace DBADashGUI.CustomReports
                 if (chartWrapper != null)
                 {
                     // If this CustomReportChart references a metric chart type, refresh it via IMetricChart
-                    if (chartWrapper.Metric != null)
-                    {
-                        if (chart is IMetricChart metricChart && context != null)
+                        if (chartWrapper.Metric != null)
                         {
-                            try
+                            if (chart is IMetricChart metricChart && context != null)
                             {
-                                metricChart.RefreshData(context.InstanceID);
+                                try
+                                {
+                                    metricChart.SetContext(context);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine($"Error refreshing metric chart: {ex}");
+                                }
                             }
-                            catch (Exception ex)
-                            {
-                                Debug.WriteLine($"Error refreshing metric chart: {ex}");
-                            }
+                            continue;
                         }
-                        continue;
-                    }
 
                     // configuration-based chart behavior
                     var chartConfig = chartWrapper.Config;
@@ -981,10 +986,31 @@ namespace DBADashGUI.CustomReports
             var parentPanel = ChartPanel;
             var enableResize = Report.Charts.Count > 0;
 
-            // Determine layout: 1 col for up to 3 charts, 2 cols for 4-6, 3 cols for 7+.
+            // Determine layout. Support optional report hints ChartLayoutColumns / ChartLayoutRows.
             var n = Report.Charts.Count;
-            int cols = n <= 3 ? 1 : (n <= 6 ? 2 : 3);
-            int rows = (n + cols - 1) / cols;
+            int cols;
+            int rows;
+
+            // If ChartLayoutColumns is set use it (cap to n). Otherwise if ChartLayoutRows is set use it.
+            // If neither set, fall back to original auto-calculation.
+            if (Report.ChartLayoutColumns > 0)
+            {
+                cols = Math.Min(Report.ChartLayoutColumns, n);
+                cols = Math.Max(1, cols);
+                rows = (n + cols - 1) / cols;
+            }
+            else if (Report.ChartLayoutRows > 0)
+            {
+                rows = Math.Min(Report.ChartLayoutRows, n);
+                rows = Math.Max(1, rows);
+                cols = (n + rows - 1) / rows;
+            }
+            else
+            {
+                // Determine layout: 1 col for up to 3 charts, 2 cols for 4-6, 3 cols for 7+.
+                cols = n <= 3 ? 1 : (n <= 6 ? 2 : 3);
+                rows = (n + cols - 1) / cols;
+            }
 
             // Configure TableLayoutPanel
             chartLayout.Controls.Clear();
@@ -1093,10 +1119,12 @@ namespace DBADashGUI.CustomReports
                             }
                         };
 
-                        // Let the metric control refresh itself for the current context
+                        // Let the metric control set its context and refresh itself for the current context
                         try
                         {
-                            metric.RefreshData(context?.InstanceID ?? 0);
+                            // IMetricChart now implements ISetContext/IRefreshData. Call SetContext so the control
+                            // can capture any necessary context (InstanceID/DatabaseID/ObjectID) and refresh as needed.
+                            metric.SetContext(context);
                         }
                         catch (Exception ex)
                         {
@@ -1290,9 +1318,14 @@ namespace DBADashGUI.CustomReports
 
         protected void ShowTable()
         {
-            if (reportDS == null || reportDS.Tables.Count == 0) return;
+            var hasData = reportDS != null && reportDS.Tables.Count > 0;
+            var hasCharts = Report?.Charts != null && Report.Charts.Count > 0;
+
+            // If there's no data and no charts to render, nothing to show
+            if (!hasData && !hasCharts) return;
+
             SetChartTableLayout();
-            var currentSchema = reportDS.GetXmlSchema() + "\n" + Report.Serialize();
+            var currentSchema = (reportDS?.GetXmlSchema() ?? string.Empty) + "\n" + Report.Serialize();
             if (currentSchema == previousSchema)
             {
                 LoadResultsIntoExistingGrids();
@@ -1301,19 +1334,38 @@ namespace DBADashGUI.CustomReports
             }
 
             const int minDataGridViewHeight = 100; // Minimum height for a DataGridView
-            var maxDataGridViewHeight = Math.Max(300, this.Height / Math.Min(3, reportDS.Tables.Count)); // Allow table to take up to 1/3 (or half if there are 2 tables) of the form height with minimum size of 300.
+            // Avoid divide by zero when reportDS has no tables (system-only chart reports)
+            var maxDataGridViewHeight = hasData ? Math.Max(300, this.Height / Math.Min(3, reportDS.Tables.Count)) : Math.Max(300, this.Height / 3);
             var parentPanel = TablePanel;
             ClearResults();
             List<Panel> panels = new();
             GetChartPanels();
-            tsToggleGrids.Visible = Charts.Count > 0;
-            tsToggleCharts.Visible = Charts.Count > 0;
-            splitToggle1.Visible = Charts.Count > 0;
-            splitToggle2.Visible = Charts.Count > 0;
+            // Show toggle controls only when charts exist AND there is dataset/table data to toggle
+            var showToggles = Charts.Count > 0 && hasData;
+            tsToggleGrids.Visible = showToggles;
+            tsToggleCharts.Visible = showToggles;
+            splitToggle1.Visible = showToggles;
+            splitToggle2.Visible = showToggles;
+            tsCols.Visible = hasData;
+            tsScriptResults.Visible = hasData;
+            tsExcel.Visible = hasData;
+            tsCopy.Visible = hasData;
+            tsClearFilter.Visible = hasData;
             saveSystemChartStateToolStripMenuItem.Visible = Charts.Any(c => c.Tag is CustomReportChart crc && crc.Metric != null);
             SetChartPanelCollapsed(Charts.Count == 0 || !Report.ChartVisible);
-            var i = ShowAllResults ? 0 : cboResults.SelectedIndex;
-            var tables = ShowAllResults ? reportDS.Tables.Cast<DataTable>().ToArray() : new[] { reportDS.Tables[cboResults.SelectedIndex] };
+
+            // Determine result tables to show (may be empty for system-only reports)
+            var i = 0;
+            DataTable[] tables;
+            if (hasData)
+            {
+                i = ShowAllResults ? 0 : cboResults.SelectedIndex;
+                tables = ShowAllResults ? reportDS.Tables.Cast<DataTable>().ToArray() : new[] { reportDS.Tables[cboResults.SelectedIndex] };
+            }
+            else
+            {
+                tables = Array.Empty<DataTable>();
+            }
             foreach (var table in tables)
             {
                 var pnl = new Panel()
@@ -1693,6 +1745,12 @@ namespace DBADashGUI.CustomReports
         /// <returns></returns>
         protected async Task<DataSet> GetReportDataAsync(CancellationToken cancellationToken)
         {
+            // If no procedure is configured for this report (system-only charts), don't attempt to execute a stored procedure
+            if (string.IsNullOrWhiteSpace(Report?.QualifiedProcedureName))
+            {
+                return new DataSet();
+            }
+
             await using var cn = new SqlConnection(Common.ConnectionString);
             await using var cmd = new SqlCommand(Report.QualifiedProcedureName, cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
             using var da = new SqlDataAdapter(cmd);

@@ -27,6 +27,19 @@ namespace DBADashGUI.CustomReports
 
         public double ChartSplitPercentage { get; set; } = 0.6;
 
+        /// <summary>
+        /// Optional hint to control chart layout. When > 0 this value will be used as the maximum
+        /// number of columns to arrange charts into. If 0 the automatic layout calculation is used.
+        /// </summary>
+        public int ChartLayoutColumns { get; set; } = 0;
+
+        /// <summary>
+        /// Optional hint to control chart layout. When > 0 this value will be used as the maximum
+        /// number of rows to arrange charts into. If 0 the automatic layout calculation is used.
+        /// Mutually exclusive with ChartLayoutColumns - if ChartLayoutColumns is set > 0, ChartLayoutRows will be ignored and treated as 0 (automatic).
+        /// </summary>
+        public int ChartLayoutRows { get => ChartLayoutColumns > 0 ? 0 : field; set; } = 0;
+
         [JsonIgnore]
         private string _schemaName;
 
@@ -76,14 +89,14 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         [JsonIgnore]
         public IEnumerable<Param> UserParams => Params?.ParamList == null ? new List<Param>() : Params.ParamList.Where(p =>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    !SystemParamNames.Contains(p.ParamName.ToUpper()));
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    !SystemParamNames.Contains(p.ParamName.ToUpper()));
 
         /// <summary>
         /// Parameters for the stored procedure that are supplied automatically based on context
         /// </summary>
         [JsonIgnore]
         public IEnumerable<Param> SystemParams => Params?.ParamList == null ? new List<Param>() : Params.ParamList.Where(p =>
-                                                                                                                                                                                                                                                                                                                                                                                                                                    SystemParamNames.Contains(p.ParamName.ToUpper()));
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                    SystemParamNames.Contains(p.ParamName.ToUpper()));
 
         [JsonIgnore]
         public virtual bool IsRootLevel => Params != null && Params.ParamList.Any(p => p.ParamName.Equals("@INSTANCEIDS", StringComparison.OrdinalIgnoreCase));
@@ -104,8 +117,8 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         [JsonIgnore]
         public bool TimeFilterSupported => Charts?.Any(c => c.Metric != null) == true || (Params != null && Params.ParamList.Any(p =>
-                                                                                                                p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
-                                                                                                                p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase)));
+                                                                                                                                                p.ParamName.Equals("@FromDate", StringComparison.CurrentCultureIgnoreCase) ||
+                                                                                                                                                p.ParamName.Equals("@ToDate", StringComparison.CurrentCultureIgnoreCase)));
 
         public bool ForceRefreshWithoutContextChange { get; set; }
 
