@@ -23,6 +23,8 @@ namespace DBADashGUI.DBADashAlerts.Rules
         public enum RuleTypes
         {
             AGHealth,
+            BackupChainRisk,
+            BackupFreshness,
             CollectionDates,
             Counter,
             CPU,
@@ -43,6 +45,8 @@ namespace DBADashGUI.DBADashAlerts.Rules
                 RuleTypes.Wait => new WaitRule(),
                 RuleTypes.Counter => new CounterRule(),
                 RuleTypes.AGHealth => new AGHealthRule(),
+                RuleTypes.BackupChainRisk => new BackupChainRiskRule(),
+                RuleTypes.BackupFreshness => new BackupFreshnessRule(),
                 RuleTypes.DatabaseStatus => new DatabaseStatusRule(),
                 RuleTypes.DriveSpace => new DriveSpaceRule(),
                 RuleTypes.CollectionDates => new CollectionDatesRule(),
@@ -223,6 +227,8 @@ namespace DBADashGUI.DBADashAlerts.Rules
                 RuleTypes.CPU => new CPURule(),
                 RuleTypes.Wait => string.IsNullOrEmpty(details) ? new WaitRule() : JsonConvert.DeserializeObject<WaitRule>(details),
                 RuleTypes.AGHealth => new AGHealthRule(),
+                RuleTypes.BackupChainRisk => string.IsNullOrEmpty(details) ? new BackupChainRiskRule() : JsonConvert.DeserializeObject<BackupChainRiskRule>(details),
+                RuleTypes.BackupFreshness => string.IsNullOrEmpty(details) ? new BackupFreshnessRule() : JsonConvert.DeserializeObject<BackupFreshnessRule>(details),
                 RuleTypes.Counter => string.IsNullOrEmpty(details) ? new CounterRule() : JsonConvert.DeserializeObject<CounterRule>(details),
                 RuleTypes.DatabaseStatus => string.IsNullOrEmpty(details) ? new DatabaseStatusRule() : JsonConvert.DeserializeObject<DatabaseStatusRule>(details),
                 RuleTypes.DriveSpace => string.IsNullOrEmpty(details) ? new DriveSpaceRule() : JsonConvert.DeserializeObject<DriveSpaceRule>(details),

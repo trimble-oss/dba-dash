@@ -1,0 +1,13 @@
+{
+  "dotnet.defaultSolution": "DBADash.CLI.slnf",
+  "dotnetAcquisitionExtension.existingDotnetPath": [
+    {
+      "extensionId": "ms-dotnettools.csdevkit",
+      "path": "/Users/golde/.dotnet/dotnet"
+    },
+    {
+      "extensionId": "ms-dotnettools.csharp",
+      "path": "/Users/golde/.dotnet/dotnet"
+    }
+  ]
+}
