@@ -4,6 +4,7 @@ using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Drawing.Geometries;
 using LiveChartsCore.SkiaSharpView.Painting;
+using LiveChartsCore.SkiaSharpView.SKCharts;
 using LiveChartsCore.SkiaSharpView.WinForms;
 using SkiaSharp;
 using System;
@@ -11,10 +12,12 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DBADashGUI.Utils;
 
 namespace DBADashGUI.Charts
 {
@@ -29,6 +32,164 @@ namespace DBADashGUI.Charts
 
         private static readonly LiveChartsCore.Drawing.Padding DefaultYAxisPadding = new LiveChartsCore.Drawing.Padding(10, 0, 10, 0);
 
+        // Helper: create Copy Image menu item with handler (returns item and handler so callers can unsubscribe)
+        private static (ToolStripMenuItem item, EventHandler handler) CreateCopyMenuItem(Control chart)
+        {
+            var copyItem = new ToolStripMenuItem("Copy Image") { Enabled = true, Image = Properties.Resources.ASX_Copy_blue_16x };
+            EventHandler copyClick = (s, e) =>
+            {
+                System.Drawing.Bitmap bmp = null;
+                try
+                {
+                    // Create bitmap sized to control client area
+                    var w = Math.Max(1, chart.ClientSize.Width);
+                    var h = Math.Max(1, chart.ClientSize.Height);
+                    bmp = new System.Drawing.Bitmap(w, h);
+
+                    // Draw control into bitmap on UI thread to capture clean rendering
+                    Action drawAction = () => chart.DrawToBitmap(bmp, new System.Drawing.Rectangle(0, 0, w, h));
+                    if (chart.InvokeRequired)
+                    {
+                        chart.Invoke(drawAction);
+                    }
+                    else
+                    {
+                        drawAction();
+                    }
+
+                    // Place bitmap on clipboard (must be on UI thread)
+                    Action setClipboard = () => Clipboard.SetImage(bmp);
+                    if (chart.InvokeRequired)
+                    {
+                        chart.Invoke(setClipboard);
+                    }
+                    else
+                    {
+                        setClipboard();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.ShowExceptionDialog(ex, "Error copying chart to clipboard");
+                }
+                finally
+                {
+                    try { bmp?.Dispose(); } catch (Exception ex) { Debug.WriteLine($"CreateCopyMenuItem cleanup disposing bitmap: {ex}"); }
+                }
+            };
+            copyItem.Click += copyClick;
+            return (copyItem, copyClick);
+        }
+
+        // Helper: create Save Image As menu item
+        private static (ToolStripMenuItem item, EventHandler handler) CreateSaveMenuItem(Control chart)
+        {
+            var save = new ToolStripMenuItem("Save Image As...") { Enabled = true, Image = Properties.Resources.Save_16x };
+            EventHandler saveClick = (s, e) =>
+            {
+                try
+                {
+                    using var sfd = new SaveFileDialog()
+                    {
+                        Filter = "PNG Image|*.png|JPEG Image|*.jpg;*.jpeg|WebP Image|*.webp|All Files|*.*",
+                        DefaultExt = "png",
+                        AddExtension = true
+                    };
+                    if (sfd.ShowDialog() == DialogResult.OK)
+                    {
+                        SaveImage(chart, sfd.FileName, null);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.ShowExceptionDialog(ex, "Error saving chart");
+                }
+            };
+            save.Click += saveClick;
+            return (save, saveClick);
+        }
+
+        // Helper: create data export/copy menu items when a DataTable is available
+        private static (ToolStripMenuItem excel, EventHandler excelHandler, ToolStripMenuItem copyData, EventHandler copyDataHandler, ToolStripSeparator sep) CreateDataMenuItems()
+        {
+            ToolStripMenuItem excel = new ToolStripMenuItem("Export Excel") { Image = Properties.Resources.excel16x16 };
+            EventHandler excelClick = (s, e) =>
+            {
+                var owner = (s as ToolStripItem)?.Owner as ContextMenuStrip;
+                var ret = owner?.Tag as Retainer<DataTable>;
+                if (ret != null && ret.TryGet(out var dtLocal))
+                {
+                    Common.PromptSaveDataTableToXLSX(dtLocal);
+                }
+            };
+            excel.Click += excelClick;
+
+            ToolStripMenuItem copyData = new ToolStripMenuItem("Copy Data") { Image = Properties.Resources.ASX_Copy_yellow_16x };
+            EventHandler copyDataClick = (s, e) =>
+            {
+                var owner = (s as ToolStripItem)?.Owner as ContextMenuStrip;
+                var ret = owner?.Tag as Retainer<DataTable>;
+                if (ret != null && ret.TryGet(out var dtLocal))
+                {
+                    Common.CopyDataTableToClipboard(dtLocal);
+                }
+            };
+            copyData.Click += copyDataClick;
+
+            var sep = new ToolStripSeparator();
+            return (excel, excelClick, copyData, copyDataClick, sep);
+        }
+
+        // Helper: attach a Retainer<DataTable> to cms.Tag and wire disposal so resources are released
+        private static void AttachRetentionAndDisposal(ContextMenuStrip cms, Control chart, DataTable dt, TimeSpan retention)
+        {
+            if (cms == null) return;
+            try
+            {
+                var ret = new Retainer<DataTable>(dt, retention, () =>
+                {
+                    try
+                    {
+                        if (!cms.IsDisposed)
+                        {
+                            if (cms.InvokeRequired) cms.BeginInvoke(new Action(() => cms.Tag = null));
+                            else cms.Tag = null;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Retainer onTimeout: failed to clear cms.Tag: {ex}");
+                    }
+                });
+                cms.Tag = ret;
+
+                cms.Disposed += (s, e) =>
+                {
+                    try { ret.Dispose(); }
+                    catch (Exception ex) { Debug.WriteLine($"AttachRetentionAndDisposal: failed to dispose retainer: {ex}"); }
+                    try { cms.Tag = null; }
+                    catch (Exception ex) { Debug.WriteLine($"AttachRetentionAndDisposal: failed to clear cms.Tag: {ex}"); }
+                };
+
+                EventHandler chartDisposedHandler = null;
+                chartDisposedHandler = (s, e) =>
+                {
+                    try { cms.Dispose(); }
+                    catch (Exception ex) { Debug.WriteLine($"AttachRetentionAndDisposal: error disposing cms: {ex}"); }
+                    finally
+                    {
+                        try { chart.Disposed -= chartDisposedHandler; } catch (Exception ex) { Debug.WriteLine($"AttachRetentionAndDisposal: failed to unsubscribe chartDisposedHandler: {ex}"); }
+                    }
+                };
+
+                try { chart.Disposed += chartDisposedHandler; } catch (Exception ex) { Debug.WriteLine($"AttachRetentionAndDisposal: failed to attach chart.Disposed handler: {ex}"); }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"AttachRetentionAndDisposal error: {ex}");
+            }
+        }
+
         /// <summary>
         /// Returns either a Cartesian chart or a Pie chart control depending on the configuration.
         /// </summary>
@@ -39,7 +200,9 @@ namespace DBADashGUI.Charts
             {
                 if (config is PieChartConfiguration pieConfig)
                 {
-                    return GetPieChartFromDataTable(dt, pieConfig);
+                    var c = GetPieChartFromDataTable(dt, pieConfig);
+                    AddChartContextMenu(c, dt);
+                    return c;
                 }
                 throw new ArgumentException("Pie charts require a PieChartConfiguration instance", nameof(config));
             }
@@ -47,7 +210,9 @@ namespace DBADashGUI.Charts
             // For non-pie chart types we require a full ChartConfiguration instance
             if (config is ChartConfiguration cartesianConfig)
             {
-                return GetChartFromDataTable(dt, cartesianConfig);
+                var c = GetChartFromDataTable(dt, cartesianConfig);
+                AddChartContextMenu(c, dt);
+                return c;
             }
             throw new ArgumentException("Non-pie charts require a ChartConfiguration instance", nameof(config));
         }
@@ -191,9 +356,293 @@ namespace DBADashGUI.Charts
             chart.LegendTextPaint = labelPaint;
             chart.LegendTextSize = DBADashUser.ChartAxisLabelFontSize;
 
+            // Context menu for chart actions (copy/save)
+            AddChartContextMenu(chart, dt);
+
             // PieChart currently doesn't use the Cartesian custom tooltip helper
 
             return chart;
+        }
+
+        /// <summary>
+        /// Attach a standard context menu to chart controls providing Copy Image, Save PNG, Save SVG and optional Save Data
+        /// </summary>
+        internal static void AddChartContextMenu(Control chart, DataTable dt = null)
+        {
+            if (chart == null) return;
+            try
+            {
+                var cms = new ContextMenuStrip();
+
+                // Attach a Retainer to cms.Tag and wire disposal/cleanup
+                var dataRetention = TimeSpan.FromMinutes(5);
+                AttachRetentionAndDisposal(cms, chart, dt, dataRetention);
+
+                // keep delegates in locals so they can be unsubscribed when the context menu is disposed
+                EventHandler copyClick = null;
+                EventHandler saveClick = null;
+                EventHandler excelClick = null;
+                EventHandler copyDataClick = null;
+                EventHandler disposedHandler = null;
+                // Handlers to temporarily disable/enable tooltips while context menu is active
+                System.ComponentModel.CancelEventHandler openingHandler = null;
+                ToolStripDropDownClosedEventHandler closedHandler = null;
+
+                // Create standard items (copy, save)
+                var copyTuple = CreateCopyMenuItem(chart);
+                copyClick = copyTuple.handler;
+                var copyItem = copyTuple.item;
+
+                var saveTuple = CreateSaveMenuItem(chart);
+                saveClick = saveTuple.handler;
+                var save = saveTuple.item;
+
+                cms.Items.AddRange(copyItem, save);
+
+                ToolStripMenuItem excel = null;
+                ToolStripMenuItem copyData = null;
+                if (dt != null)
+                {
+                    excel = new ToolStripMenuItem("Export Excel") { Image = Properties.Resources.excel16x16 };
+                    excelClick = (s, e) =>
+                    {
+                        var owner = (s as ToolStripItem)?.Owner as ContextMenuStrip;
+                        var ret = owner?.Tag as Retainer<DataTable>;
+                        if (ret != null && ret.TryGet(out var dtLocal))
+                        {
+                            Common.PromptSaveDataTableToXLSX(dtLocal);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Data is no longer available for export. Please refresh and try again.", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    };
+                    excel.Click += excelClick;
+
+                    copyData = new ToolStripMenuItem("Copy Data") { Image = Properties.Resources.ASX_Copy_yellow_16x };
+                    copyDataClick = (s, e) =>
+                    {
+                        var owner = (s as ToolStripItem)?.Owner as ContextMenuStrip;
+                        var ret = owner?.Tag as Retainer<DataTable>;
+                        if (ret != null && ret.TryGet(out var dtLocal))
+                        {
+                            Common.CopyDataTableToClipboard(dtLocal);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Data is no longer available for export. Please refresh and try again.", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    };
+                    copyData.Click += copyDataClick;
+
+                    var sep = new ToolStripSeparator();
+                    cms.Items.AddRange(sep, excel, copyData);
+                }
+
+                // Ensure we clean up handlers and dispose the ContextMenuStrip when the context menu is disposed
+                disposedHandler = (s, e) =>
+                {
+                    try
+                    {
+                        if (copyItem != null && copyClick != null) copyItem.Click -= copyClick;
+                        if (save != null && saveClick != null) save.Click -= saveClick;
+                        if (excel != null && excelClick != null) excel.Click -= excelClick;
+                        if (copyData != null && copyDataClick != null) copyData.Click -= copyDataClick;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"AddChartContextMenu dispose cleanup error: {ex}");
+                    }
+                    finally
+                    {
+                        // Dispose any retained DataTable to release memory sooner
+                        try
+                        {
+                            var ret = cms.Tag as Retainer<DataTable>;
+                            if (ret != null)
+                            {
+                                ret.Dispose();
+                                // Clear the Tag to release the retainer reference
+                                try
+                                {
+                                    cms.Tag = null;
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine($"AddChartContextMenu: failed to clear cms.Tag after disposing retainer: {ex}");
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"AddChartContextMenu: failed to dispose DataTableRetainer: {ex}");
+                        }
+
+                        // Unsubscribe Opening/Closed tooltip handlers if attached
+                        try
+                        {
+                            if (openingHandler != null) cms.Opening -= openingHandler;
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"AddChartContextMenu: failed to unsubscribe Opening handler: {ex}");
+                        }
+                        try
+                        {
+                            if (closedHandler != null) cms.Closed -= closedHandler;
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"AddChartContextMenu: failed to unsubscribe Closed handler: {ex}");
+                        }
+
+                        // Ensure we unsubscribe this disposed handler to break potential references
+                        try
+                        {
+                            cms.Disposed -= disposedHandler;
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"AddChartContextMenu: failed to unsubscribe disposedHandler: {ex}");
+                        }
+                    }
+                };
+
+                // Attach disposal handler to the context menu itself. The handler will
+                // remove event subscriptions but must not call cms.Dispose() from within
+                // the cms.Disposed event (that can cause recursion). Instead, ensure the
+                // context menu gets disposed when the owning chart is disposed below.
+                cms.Disposed += disposedHandler;
+
+                // Disable tooltip while the context menu is opening to avoid interference
+                try
+                {
+                    openingHandler = (s, e) =>
+                    {
+                        try
+                        {
+                            if (chart is CartesianChart cart)
+                            {
+                                // Pause custom tooltip while context menu is open (lighter than full disable)
+                                try { cart.PauseCustomTooltips(); } catch { }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"AddChartContextMenu openingHandler error: {ex}");
+                        }
+                    };
+                    cms.Opening += openingHandler;
+
+                    closedHandler = (s, e) =>
+                    {
+                        try
+                        {
+                            if (chart is CartesianChart cart)
+                            {
+                                try { cart.ResumeCustomTooltips(); } catch { }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"AddChartContextMenu closedHandler error: {ex}");
+                        }
+                    };
+                    cms.Closed += closedHandler;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"AddChartContextMenu: failed to attach Opening/Closed handlers: {ex}");
+                }
+
+                // Ensure the ContextMenuStrip is disposed when the chart is disposed so
+                // it does not outlive the chart and hold onto captured resources.
+                EventHandler chartDisposedHandler = null;
+                chartDisposedHandler = (s, e) =>
+                {
+                    try
+                    {
+                        // Disposing the cms will raise cms.Disposed which will run the
+                        // disposedHandler above to unsubscribe individual menu handlers.
+                        cms.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"AddChartContextMenu chart dispose cleanup error: {ex}");
+                    }
+                    finally
+                    {
+                        try
+                        {
+                            chart.Disposed -= chartDisposedHandler;
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"AddChartContextMenu: failed to unsubscribe chartDisposedHandler: {ex}");
+                        }
+                    }
+                };
+
+                try
+                {
+                    chart.Disposed += chartDisposedHandler;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"AddChartContextMenu: failed to attach chart.Disposed handler: {ex}");
+                }
+
+                chart.ContextMenuStrip = cms;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"AddChartContextMenu error: {ex}");
+            }
+        }
+
+        private static readonly Dictionary<string, SKEncodedImageFormat> ExtensionMap = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { ".png", SKEncodedImageFormat.Png },
+            { ".jpg", SKEncodedImageFormat.Jpeg },
+            { ".jpeg", SKEncodedImageFormat.Jpeg },
+            { ".webp", SKEncodedImageFormat.Webp },
+            { ".gif", SKEncodedImageFormat.Gif }
+        };
+
+        private static void SaveImage(Control chartControl, string path, SKEncodedImageFormat? format = null, int quality = 100)
+        {
+            // If no explicit format, infer from extension
+            if (format == null)
+            {
+                try
+                {
+                    var ext = Path.GetExtension(path) ?? string.Empty;
+                    if (!string.IsNullOrEmpty(ext) && ExtensionMap.TryGetValue(ext, out var mapped))
+                    {
+                        format = mapped;
+                    }
+                    else
+                    {
+                        format = SKEncodedImageFormat.Png;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"SaveImage: format inference error for path '{path}': {ex}");
+                    format = SKEncodedImageFormat.Png;
+                }
+            }
+
+            if (chartControl is CartesianChart cartesian)
+            {
+                var skChart = new SKCartesianChart(cartesian);
+                skChart.SaveImage(path, format.Value, quality);
+            }
+            else if (chartControl is PieChart pie)
+            {
+                var skChart = new SKPieChart(pie);
+                skChart.SaveImage(path, format.Value, quality);
+            }
         }
 
         // Keep for backward compatibility in case other code references it in the future
@@ -364,7 +813,10 @@ namespace DBADashGUI.Charts
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"TryGetIndexFromTicks error: {ex}");
+            }
             return false;
         }
 
@@ -537,10 +989,95 @@ namespace DBADashGUI.Charts
         internal static void UpdateChart(CartesianChart chart, DataTable dt, ChartConfiguration config)
         {
             ArgumentNullException.ThrowIfNull(chart);
+
+            // Ensure we are running on the UI thread when touching WinForms controls.
+            // If called from a background thread, marshal the call to the UI thread
+            // and return so the rest of the method executes on the correct thread.
+            try
+            {
+                if (chart.InvokeRequired)
+                {
+                    chart.Invoke(new Action(() => UpdateChart(chart, dt, config)));
+                    return;
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                // Chart is already disposed; nothing to update.
+                return;
+            }
             ConfigureChart(chart, dt, config);
 
             // Ensure custom tooltips are enabled
             chart.EnableCustomTooltips();
+            // Ensure a context menu is attached so users can copy/save the chart
+            try
+            {
+                if (chart.ContextMenuStrip == null)
+                {
+                    AddChartContextMenu(chart, dt);
+                }
+                else
+                {
+                    // Update the data reference on the existing context menu so handlers operate on the new table
+                    try
+                    {
+                        var existing = chart.ContextMenuStrip.Tag as Retainer<DataTable>;
+                        if (existing != null)
+                        {
+                            existing.Reset(dt);
+                        }
+                        else
+                        {
+                            // Replace with a retainer to avoid long-lived strong references
+                            chart.ContextMenuStrip.Tag = new Retainer<DataTable>(dt, TimeSpan.FromMinutes(5), () =>
+                            {
+                                try
+                                {
+                                    var cmsLocal = chart.ContextMenuStrip;
+                                    if (cmsLocal != null && !cmsLocal.IsDisposed)
+                                    {
+                                        if (cmsLocal.InvokeRequired)
+                                            cmsLocal.BeginInvoke(new Action(() => cmsLocal.Tag = null));
+                                        else
+                                            cmsLocal.Tag = null;
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine($"Retainer onTimeout (UpdateChart): failed to clear cms.Tag: {ex}");
+                                }
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"UpdateChart: failed to update context menu tag retainer: {ex}");
+                        chart.ContextMenuStrip.Tag = new Retainer<DataTable>(dt, TimeSpan.FromMinutes(5), () =>
+                        {
+                            try
+                            {
+                                var cmsLocal = chart.ContextMenuStrip;
+                                if (cmsLocal != null && !cmsLocal.IsDisposed)
+                                {
+                                    if (cmsLocal.InvokeRequired)
+                                        cmsLocal.BeginInvoke(new Action(() => cmsLocal.Tag = null));
+                                    else
+                                        cmsLocal.Tag = null;
+                                }
+                            }
+                            catch (Exception ex2)
+                            {
+                                Debug.WriteLine($"Retainer onTimeout (UpdateChart fallback): failed to clear cms.Tag: {ex2}");
+                            }
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"UpdateChart: failed to add context menu: {ex}");
+            }
         }
 
         /// <summary>
@@ -1419,7 +1956,10 @@ namespace DBADashGUI.Charts
                     chart.SizeChanged -= Chart_SizeChanged;
                     chart.Disposed -= Chart_Disposed;
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"PieDonutManager.Chart_Disposed cleanup error: {ex}");
+                }
             }
 
             private void ApplyMaxRadialColumnWidth()
