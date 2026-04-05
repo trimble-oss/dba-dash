@@ -867,21 +867,21 @@ namespace DBADashGUI.CustomReports
                 if (chartWrapper != null)
                 {
                     // If this CustomReportChart references a metric chart type, refresh it via IMetricChart
-                        if (chartWrapper.Metric != null)
+                    if (chartWrapper.Metric != null)
+                    {
+                        if (chart is IMetricChart metricChart && context != null)
                         {
-                            if (chart is IMetricChart metricChart && context != null)
+                            try
                             {
-                                try
-                                {
-                                    metricChart.SetContext(context);
-                                }
-                                catch (Exception ex)
-                                {
-                                    Debug.WriteLine($"Error refreshing metric chart: {ex}");
-                                }
+                                metricChart.SetContext(context);
                             }
-                            continue;
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"Error refreshing metric chart: {ex}");
+                            }
                         }
+                        continue;
+                    }
 
                     // configuration-based chart behavior
                     var chartConfig = chartWrapper.Config;

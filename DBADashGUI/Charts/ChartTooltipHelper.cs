@@ -5,6 +5,7 @@ using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.WinForms;
 using SkiaSharp;
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -432,6 +433,60 @@ namespace DBADashGUI.Charts
 
             // Re-enable built-in tooltips
             chart.TooltipPosition = LiveChartsCore.Measure.TooltipPosition.Top;
+        }
+
+        /// <summary>
+        /// Pause custom tooltips for a CartesianChart without tearing down internal state.
+        /// Hides any visible tooltip and stops the show-timer. Use ResumeCustomTooltips to resume.
+        /// </summary>
+        /// <param name="chart">The chart to pause custom tooltips for</param>
+        public static void PauseCustomTooltips(this CartesianChart chart)
+        {
+            if (chart == null) return;
+
+            try
+            {
+                if (_tooltipStates.TryGetValue(chart, out var state))
+                {
+                    try { state.ShowTimer?.Stop(); } catch { }
+                    state.IsTooltipVisible = false;
+                    state.PendingSeriesData = null;
+                }
+
+                if (_tooltipForms.TryGetValue(chart, out var tooltipForm))
+                {
+                    try { tooltipForm.Hide(); } catch { }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"PauseCustomTooltips error: {ex}");
+            }
+        }
+
+        /// <summary>
+        /// Resume custom tooltips previously paused via PauseCustomTooltips. Does not force-show a tooltip;
+        /// normal mouse movement will restart tooltip behavior.
+        /// </summary>
+        /// <param name="chart">The chart to resume custom tooltips for</param>
+        public static void ResumeCustomTooltips(this CartesianChart chart)
+        {
+            if (chart == null) return;
+
+            try
+            {
+                if (_tooltipStates.TryGetValue(chart, out var state))
+                {
+                    // Reset timers so future mouse movements behave normally
+                    try { state.LastMouseMoveTime = DateTime.Now; } catch { }
+                    try { state.ShowTimer?.Stop(); } catch { }
+                    // Do not auto-start the timer here; Chart_MouseMove will start it when appropriate
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"ResumeCustomTooltips error: {ex}");
+            }
         }
 
         private static void Chart_MouseMove(object sender, MouseEventArgs e)
