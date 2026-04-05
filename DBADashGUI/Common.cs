@@ -411,10 +411,11 @@ namespace DBADashGUI
                     }
                     else
                     {
-                        sheet.Cell(rowIndex + 2, colIndex + 1).SetValue(value.ToString());
-                        sheet.Cell(rowIndex, colIndex).SetValue(replaceInvalidChars
-                            ? Convert.ToString(value.ToString()).StripInvalidXmlChars().Truncate(32767, true)
-                            : Convert.ToString(value.ToString()).Truncate(32767, true));
+                        var cellStr = replaceInvalidChars
+                            ? Convert.ToString(value).StripInvalidXmlChars().Truncate(32767, true)
+                            : Convert.ToString(value).Truncate(32767, true);
+
+                        sheet.Cell(rowIndex + 2, colIndex + 1).SetValue(cellStr);
                     }
                 }
             }
