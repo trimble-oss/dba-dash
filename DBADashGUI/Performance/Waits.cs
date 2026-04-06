@@ -99,18 +99,6 @@ namespace DBADashGUI.Performance
         public void RefreshData(int instanceID)
         {
             this.instanceID = instanceID;
-
-            if (mins != DateRange.DurationMins)
-            {
-                dateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 65);
-                if (dateGrouping < 1)
-                {
-                    dateGrouping = 1;
-                }
-                tsDateGrouping.Text = DateHelper.DateGroupString(dateGrouping);
-                mins = DateRange.DurationMins;
-            }
-
             RefreshData();
         }
 
@@ -192,6 +180,16 @@ namespace DBADashGUI.Performance
         {
             try
             {
+                if (mins != DateRange.DurationMins)
+                {
+                    dateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 65);
+                    if (dateGrouping < 1)
+                    {
+                        dateGrouping = 1;
+                    }
+                    tsDateGrouping.Text = DateHelper.DateGroupString(dateGrouping);
+                    mins = DateRange.DurationMins;
+                }
                 if (instanceID == 0)
                 {
                     ToggleError(true, "No instance selected");
