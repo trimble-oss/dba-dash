@@ -1,6 +1,6 @@
 ﻿CREATE PROC Alert.Rule_Add(
 	@Type VARCHAR(50),
-	@AlertKey NVARCHAR(128),
+	@AlertKey NVARCHAR(256),
 	@Priority INT,
 	@ApplyToTagID INT=-1,
 	@ApplyToInstanceID INT=NULL,

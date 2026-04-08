@@ -4,7 +4,7 @@
 	ApplyToInstanceID INT NULL CONSTRAINT DF_Alert_BlackoutPeriod_ApplyToInstanceID DEFAULT(-1),
 	StartDate DATETIME2 NULL,
 	EndDate DATETIME2 NULL CONSTRAINT CK_Alert_BlackoutPeriod_EndDate CHECK(EndDate>StartDate),
-	AlertKey NVARCHAR(128) NOT NULL CONSTRAINT DF_Alert_BlackoutPeriod_AlertKey DEFAULT('%'),
+	AlertKey NVARCHAR(256) NOT NULL CONSTRAINT DF_Alert_BlackoutPeriod_AlertKey DEFAULT('%'),
 	TimeFrom TIME NULL,
 	TimeTo TIME NULL,
 	Monday BIT NOT NULL CONSTRAINT DF_Alert_BlackoutPeriod_Monday DEFAULT(CONVERT(BIT,1)),

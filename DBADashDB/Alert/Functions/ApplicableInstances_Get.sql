@@ -1,7 +1,7 @@
 ﻿CREATE  FUNCTION Alert.ApplicableInstances_Get(
 	@TagID INT, 
 	@InstanceID INT,
-	@AlertKey NVARCHAR(128)='%',
+	@AlertKey NVARCHAR(256)='%',
 	@ApplyToHidden BIT=0
 )
 RETURNS TABLE

@@ -2,7 +2,7 @@ CREATE PROC Alert.DatabaseStatusAlert_Upd
 AS
 SET NOCOUNT ON
 DECLARE @Type VARCHAR(50) = 'DatabaseStatus'
-DECLARE @AlertKeyPrefix NVARCHAR(128) = 'DB:'
+DECLARE @AlertKeyPrefix NVARCHAR(256) = 'DB:'
 
 /* Check if we have any rules to process */
 IF NOT EXISTS(

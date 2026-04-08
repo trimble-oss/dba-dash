@@ -1,7 +1,7 @@
 ﻿CREATE PROC Alert.AgentJobAlert_Upd
 AS
 DECLARE @Type VARCHAR(50)= 'AgentJob'
-DECLARE @AlertKeyPrefix NVARCHAR(128) = 'Job:'
+DECLARE @AlertKeyPrefix NVARCHAR(256) = 'Job:'
 /* Check if we have any rules to process */
 IF NOT EXISTS(
 	SELECT 1 
