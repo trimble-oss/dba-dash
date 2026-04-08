@@ -60,8 +60,8 @@ INSERT INTO #AgentJobApplicable(
 )
 SELECT I.InstanceID,
 		R.Priority,
-		NULLIF(JSON_VALUE(R.Details,'$.Category'),'') AS Category,
-		NULLIF(JSON_VALUE(R.Details,'$.JobName'),'') AS JobName,
+		LEFT(NULLIF(JSON_VALUE(R.Details,'$.Category'),''),128) AS Category,
+		LEFT(NULLIF(JSON_VALUE(R.Details,'$.JobName'),''),128) AS JobName,
 		R.RuleID
 FROM Alert.Rules R
 CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
