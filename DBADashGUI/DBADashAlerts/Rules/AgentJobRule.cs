@@ -9,6 +9,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
         public override RuleTypes RuleType => RuleTypes.AgentJob;
 
         [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         [Browsable(false)]
         public override decimal? Threshold => null;
 
@@ -25,6 +26,16 @@ namespace DBADashGUI.DBADashAlerts.Rules
 
         public override (bool isValid, string message) Validate()
         {
+            if (!string.IsNullOrEmpty(JobName) && JobName.Length > 128)
+            {
+                return (false, "Job Name cannot be longer than 128 characters.");
+            }
+
+            if (!string.IsNullOrEmpty(Category) && Category.Length > 128)
+            {
+                return (false, "Category cannot be longer than 128 characters.");
+            }
+
             return (true, string.Empty);
         }
     }
