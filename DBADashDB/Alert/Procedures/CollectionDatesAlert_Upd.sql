@@ -20,7 +20,7 @@ PRINT CONCAT('Processing alerts of type ',@Type)
 CREATE TABLE #ExceededThreshold(
 	InstanceID INT NOT NULL,
 	Priority INT NOT NULL,
-	AlertKey NVARCHAR(128) NOT NULL,
+	AlertKey NVARCHAR(256) NOT NULL,
 	Reference VARCHAR(100) NOT NULL,
 	Threshold DECIMAL(28,9) NOT NULL,
 	RuleID INT NOT NULL,

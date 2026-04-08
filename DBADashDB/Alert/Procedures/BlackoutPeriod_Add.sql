@@ -4,7 +4,7 @@
 	@ApplyToTagID INT=-1,
 	@StartDate DATETIME2,
 	@EndDate DATETIME2,
-	@AlertKey NVARCHAR(128) = '%',
+	@AlertKey NVARCHAR(256) = '%',
 	@TimeFrom TIME=NULL,
 	@TimeTo TIME=NULL,
 	@TimeZone NVARCHAR(128) ='UTC',

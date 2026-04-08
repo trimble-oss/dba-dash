@@ -1,6 +1,6 @@
 ﻿CREATE FUNCTION Alert.IsBlackoutPeriod(
 	@InstanceID INT=-1,
-	@AlertKey NVARCHAR(128)='%'
+	@AlertKey NVARCHAR(256)='%'
 )
 RETURNS TABLE
 AS
