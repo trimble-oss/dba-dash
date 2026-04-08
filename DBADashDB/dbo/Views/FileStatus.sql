@@ -127,6 +127,7 @@ LEFT OUTER JOIN dbo.DBFileThresholds T_Inst ON T_Inst.InstanceID = F.InstanceID
 											OR 
 											(T_Inst.data_space_id=0 AND F.type=1) /* Log Threshold */
 										) 
+									AND T_FG.InstanceID IS NULL /* Only JOIN if we don't have a Filegroup level threshold (so COALESCE works with NULL thresholds) */
 									AND T_DB.InstanceID IS NULL /* Only JOIN if we don't have a DB level threshold (so COALESCE works with NULL thresholds) */
 /* Root level threshold */
 LEFT OUTER JOIN dbo.DBFileThresholds T_Root ON T_Root.InstanceID = -1 
@@ -136,6 +137,8 @@ LEFT OUTER JOIN dbo.DBFileThresholds T_Root ON T_Root.InstanceID = -1
 											OR 
 											(T_Root.data_space_id=0 AND F.type=1) /* Log Threshold */
 										)
+									AND T_FG.InstanceID IS NULL /* Only JOIN if we don't have a Filegroup level threshold (so COALESCE works with NULL thresholds) */
+									AND T_DB.InstanceID IS NULL /* Only JOIN if we don't have a DB level threshold (so COALESCE works with NULL thresholds) */
 									AND T_Inst.InstanceID IS NULL /* Only JOIN if we don't have an instance threshold (so COALESCE works with NULL thresholds) */
 /* Calculate the threshold we need to apply. */
 OUTER APPLY(
