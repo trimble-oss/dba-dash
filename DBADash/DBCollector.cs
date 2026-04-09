@@ -527,10 +527,9 @@ namespace DBADash
                 Log.Debug("Instance {0} is a Linux instance. WMI collections are disabled.", instanceName);
                 noWMI = true;
             }
-            if (computerName.StartsWith("EC2AMAZ-")) // Disable WMI collection for RDS
+            IsRDS = (bool)dt.Rows[0]["IsRDS"];
+            if (IsRDS)
             {
-                Log.Debug("Instance {0} is a RDS instance. WMI collections are disabled.", instanceName);
-                IsRDS = true;
                 noWMI = true;
             }
             if (engineEdition == DatabaseEngineEdition.SqlDatabase)

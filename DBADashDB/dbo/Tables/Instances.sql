@@ -88,6 +88,7 @@
     ProductMinorVersion INT NULL,
     ProductRevision INT NULL,
     IsWindowsUpdate BIT NULL,
+    IsRDS BIT NOT NULL CONSTRAINT DF_Instances_IsRDS DEFAULT(0),
     InstanceDisplayName AS ISNULL(Alias,ConnectionID),
     InstanceGroupName AS CASE WHEN EngineEdition=5 THEN Instance ELSE ISNULL(Alias,ConnectionID) END,
     LastMemoryDumpUTC AS CONVERT(DATETIME2,LastMemoryDump,1),

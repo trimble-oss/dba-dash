@@ -758,6 +758,10 @@ namespace DBADash
             {
                 cmd.Parameters.AddWithValue("EngineEdition", rInstance["EngineEdition"]);
             }
+            if (rInstance.Table.Columns.Contains("IsRDS"))
+            {
+                cmd.Parameters.AddWithValue("IsRDS", rInstance["IsRDS"]);
+            }
             var pInstanceID = cmd.Parameters.Add(new SqlParameter("InstanceID", SqlDbType.Int) { Direction = ParameterDirection.Output });
             var pIsActive = cmd.Parameters.Add(new SqlParameter("IsActive", SqlDbType.Bit) { Direction = ParameterDirection.Output });
             await cmd.ExecuteNonQueryAsync();
