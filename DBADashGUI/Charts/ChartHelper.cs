@@ -1,4 +1,5 @@
 ﻿using DBADashGUI.Theme;
+using DBADashGUI.Utils;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
@@ -17,7 +18,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADashGUI.Utils;
 
 namespace DBADashGUI.Charts
 {
@@ -1852,6 +1852,28 @@ namespace DBADashGUI.Charts
                         return date.ToString(dateFormat, cultureInfo).Trim();
                     }
             }
+        }
+
+        public static (int rows, int columns) CalculateLayout(int chartCount, int? rows = null, int? columns = null)
+        {
+            if (columns.HasValue && columns.Value > 0)
+            {
+                columns = Math.Min(columns.Value, chartCount);
+                columns = Math.Max(1, columns.Value);
+                rows = (chartCount + columns.Value - 1) / columns.Value;
+                return (rows.Value, columns.Value);
+            }
+            if (rows.HasValue && rows.Value > 0)
+            {
+                rows = Math.Min(rows.Value, chartCount);
+                rows = Math.Max(1, rows.Value);
+                columns = (chartCount + rows.Value - 1) / rows.Value;
+                return (rows.Value, columns.Value);
+            }
+            // Determine layout: 1 col for up to 3 charts, 2 cols for 4-6, 3 cols for 7+.
+            columns = chartCount <= 3 ? 1 : (chartCount <= 6 ? 2 : 3);
+            rows = (chartCount + columns - 1) / columns;
+            return (rows.Value, columns.Value);
         }
 
         /// <summary>
