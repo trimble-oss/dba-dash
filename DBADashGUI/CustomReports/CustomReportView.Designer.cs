@@ -90,6 +90,7 @@
             lblURL = new System.Windows.Forms.ToolStripStatusLabel();
             lblDescription = new System.Windows.Forms.ToolStripStatusLabel();
             timer1 = new System.Windows.Forms.Timer(components);
+            chartLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStrip1.SuspendLayout();
             pnlParams.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitParams).BeginInit();
@@ -196,7 +197,7 @@
             // tsConfigure
             // 
             tsConfigure.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { addChartToolStripMenuItem, addSystemChartToolStripMenuItem, associateCollectionToolStripMenuItem, chartLocationToolStripMenuItem, deleteAllChartsToolStripMenuItem, editPickersToolStripMenuItem, renameResultSetToolStripMenuItem, resetLayoutToolStripMenuItem, saveLayoutToolStripMenuItem, saveSystemChartStateToolStripMenuItem, scriptReportToolStripMenuItem, setDescriptionToolStripMenuItem, setTitleToolStripMenuItem });
+            tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { addChartToolStripMenuItem, addSystemChartToolStripMenuItem, associateCollectionToolStripMenuItem, chartLayoutToolStripMenuItem, chartLocationToolStripMenuItem, deleteAllChartsToolStripMenuItem, editPickersToolStripMenuItem, renameResultSetToolStripMenuItem, resetLayoutToolStripMenuItem, saveLayoutToolStripMenuItem, saveSystemChartStateToolStripMenuItem, scriptReportToolStripMenuItem, setDescriptionToolStripMenuItem, setTitleToolStripMenuItem });
             tsConfigure.Image = Properties.Resources.SettingsOutline_16x;
             tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsConfigure.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
@@ -443,14 +444,14 @@
             // 
             scriptDataTablesToolStripMenuItem.Image = Properties.Resources.SQLScript_16x;
             scriptDataTablesToolStripMenuItem.Name = "scriptDataTablesToolStripMenuItem";
-            scriptDataTablesToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            scriptDataTablesToolStripMenuItem.Size = new System.Drawing.Size(211, 26);
             scriptDataTablesToolStripMenuItem.Text = "Script Data Tables";
             // 
             // scriptGridsToolStripMenuItem
             // 
             scriptGridsToolStripMenuItem.Image = Properties.Resources.TableScript_16x;
             scriptGridsToolStripMenuItem.Name = "scriptGridsToolStripMenuItem";
-            scriptGridsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            scriptGridsToolStripMenuItem.Size = new System.Drawing.Size(211, 26);
             scriptGridsToolStripMenuItem.Text = "Script Grids";
             // 
             // tsClearFilter
@@ -673,6 +674,13 @@
             timer1.Interval = 1000;
             timer1.Tick += Timer1_Tick;
             // 
+            // chartLayoutToolStripMenuItem
+            // 
+            chartLayoutToolStripMenuItem.Name = "chartLayoutToolStripMenuItem";
+            chartLayoutToolStripMenuItem.Size = new System.Drawing.Size(251, 26);
+            chartLayoutToolStripMenuItem.Text = "Chart Layout";
+            chartLayoutToolStripMenuItem.Click += ChartLayout_Click;
+            // 
             // CustomReportView
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -765,5 +773,6 @@
         private System.Windows.Forms.ToolStripMenuItem saveSystemChartStateToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem performanceCounterToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteAllChartsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem chartLayoutToolStripMenuItem;
     }
 }

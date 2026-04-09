@@ -986,58 +986,34 @@ namespace DBADashGUI.CustomReports
             var parentPanel = ChartPanel;
             var enableResize = Report.Charts.Count > 0;
 
-            // Determine layout. Support optional report hints ChartLayoutColumns / ChartLayoutRows.
-            var n = Report.Charts.Count;
-            int cols;
-            int rows;
-
-            // If ChartLayoutColumns is set use it (cap to n). Otherwise if ChartLayoutRows is set use it.
-            // If neither set, fall back to original auto-calculation.
-            if (Report.ChartLayoutColumns > 0)
-            {
-                cols = Math.Min(Report.ChartLayoutColumns, n);
-                cols = Math.Max(1, cols);
-                rows = (n + cols - 1) / cols;
-            }
-            else if (Report.ChartLayoutRows > 0)
-            {
-                rows = Math.Min(Report.ChartLayoutRows, n);
-                rows = Math.Max(1, rows);
-                cols = (n + rows - 1) / rows;
-            }
-            else
-            {
-                // Determine layout: 1 col for up to 3 charts, 2 cols for 4-6, 3 cols for 7+.
-                cols = n <= 3 ? 1 : (n <= 6 ? 2 : 3);
-                rows = (n + cols - 1) / cols;
-            }
+            var layout = ChartHelper.CalculateLayout(Report.Charts.Count, Report.ChartLayoutRows, Report.ChartLayoutColumns);
 
             // Configure TableLayoutPanel
             chartLayout.Controls.Clear();
             chartLayout.ColumnStyles.Clear();
-            chartLayout.ColumnCount = cols;
-            for (int c = 0; c < cols; c++)
+            chartLayout.ColumnCount = layout.columns;
+            for (int c = 0; c < layout.columns; c++)
             {
-                chartLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / cols));
+                chartLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / layout.columns));
             }
 
             chartLayout.RowStyles.Clear();
-            chartLayout.RowCount = rows;
-            for (int r = 0; r < rows; r++)
+            chartLayout.RowCount = layout.rows;
+            for (int r = 0; r < layout.rows; r++)
             {
-                chartLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100f / rows));
+                chartLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100f / layout.rows));
             }
 
             // Generic spanning logic: compute occupancy grid and let the first chart span to use spare cells
-            var totalCells = rows * cols;
+            var totalCells = layout.rows * layout.columns;
             var spare = Math.Max(0, totalCells - Report.Charts.Count);
-            var firstSpan = Math.Min(cols, 1 + spare); // first chart occupies 1 + spare cells up to cols
+            var firstSpan = Math.Min(layout.columns, 1 + spare); // first chart occupies 1 + spare cells up to cols
 
             // occupancy grid
-            var occupied = new bool[rows, cols];
+            var occupied = new bool[layout.rows, layout.columns];
 
             // mark space for first chart
-            for (int c0 = 0; c0 < firstSpan && c0 < cols; c0++)
+            for (int c0 = 0; c0 < firstSpan && c0 < layout.columns; c0++)
             {
                 occupied[0, c0] = true;
             }
@@ -1213,9 +1189,9 @@ namespace DBADashGUI.CustomReports
                 {
                     // find next free cell scanning row-major
                     bool placed = false;
-                    for (int r = 0; r < rows && !placed; r++)
+                    for (int r = 0; r < layout.rows && !placed; r++)
                     {
-                        for (int c = 0; c < cols && !placed; c++)
+                        for (int c = 0; c < layout.columns && !placed; c++)
                         {
                             if (!occupied[r, c])
                             {
@@ -1229,8 +1205,8 @@ namespace DBADashGUI.CustomReports
                     // Fallback: if not placed (shouldn't happen) put at next sequential position
                     if (!placed)
                     {
-                        var frow = idx / cols;
-                        var fcol = idx % cols;
+                        var frow = idx / layout.columns;
+                        var fcol = idx % layout.columns;
                         chartLayout.Controls.Add(pnl, fcol, frow);
                     }
                 }
@@ -2646,6 +2622,21 @@ namespace DBADashGUI.CustomReports
         {
             if (MessageBox.Show("Delete all charts from this report?", "Delete Charts", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
             Report.Charts = new();
+            Report.Update();
+            RefreshData();
+        }
+
+        private void ChartLayout_Click(object sender, EventArgs e)
+        {
+            if (Report?.Charts == null || Report.Charts.Count == 0)
+            {
+                MessageBox.Show("No charts are configured for this report.", "Chart Layout", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            using var layout = new ChartLayout() { ChartCount = Report.Charts.Count, Columns = Report.ChartLayoutColumns, Rows = Report.ChartLayoutRows };
+            layout.ShowDialog(this);
+            if (layout.DialogResult != DialogResult.OK) return;
+            Report.ChartLayoutColumns = layout.Columns;
             Report.Update();
             RefreshData();
         }
