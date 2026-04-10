@@ -182,6 +182,7 @@ namespace DBADashServiceConfig
             label13 = new System.Windows.Forms.Label();
             txtSearch = new System.Windows.Forms.TextBox();
             tabDest = new System.Windows.Forms.TabPage();
+            lblRunningAs = new System.Windows.Forms.Label();
             bttnViewServiceLog = new System.Windows.Forms.Button();
             bttnRestartAsAdmin = new System.Windows.Forms.Button();
             bttnGrantAccessToServiceAccount = new System.Windows.Forms.Button();
@@ -1951,6 +1952,7 @@ namespace DBADashServiceConfig
             // 
             // tabDest
             // 
+            tabDest.Controls.Add(lblRunningAs);
             tabDest.Controls.Add(bttnViewServiceLog);
             tabDest.Controls.Add(bttnRestartAsAdmin);
             tabDest.Controls.Add(bttnGrantAccessToServiceAccount);
@@ -1974,6 +1976,18 @@ namespace DBADashServiceConfig
             tabDest.TabIndex = 2;
             tabDest.Text = "Destination:";
             tabDest.UseVisualStyleBackColor = true;
+            // 
+            // lblRunningAs
+            // 
+            lblRunningAs.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            lblRunningAs.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
+            lblRunningAs.Location = new System.Drawing.Point(255, 659);
+            lblRunningAs.Name = "lblRunningAs";
+            lblRunningAs.Size = new System.Drawing.Size(858, 25);
+            lblRunningAs.TabIndex = 24;
+            lblRunningAs.Text = "Running As: {User}";
+            lblRunningAs.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            lblRunningAs.Visible = false;
             // 
             // bttnViewServiceLog
             // 
@@ -2392,6 +2406,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.CheckBox chkLowPriorityMaxThreadPct;
         private System.Windows.Forms.Label label24;
         private System.Windows.Forms.NumericUpDown numLowMaxThreadPct;
+        private System.Windows.Forms.Label lblRunningAs;
     }
 }
 

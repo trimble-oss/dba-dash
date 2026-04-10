@@ -1067,26 +1067,29 @@ namespace DBADashServiceConfig
             {
                 if (!IsAdmin) return;
                 using var service = new ServiceController(collectionConfig.ServiceName);
-                var nameOfServiceFromPath = ServiceTools.GetServiceNameFromPath();
-                var pathOfService = ServiceTools.GetPathOfService(collectionConfig.ServiceName);
+                var serviceInfoFromPath = ServiceTools.GetServiceInfoFromPath();
+                var serviceInfoFromName = ServiceTools.GetServiceInfoFromName(collectionConfig.ServiceName);
+                var pathOfServiceFromName = serviceInfoFromName?.PathName;
                 var warningText = string.Empty;
                 var status = service.Status;
-                if (!pathOfService.Contains(ServiceTools.ServicePath,
-                        StringComparison.CurrentCultureIgnoreCase) &&
-                    pathOfService != string.Empty)
+                if (!string.IsNullOrEmpty(pathOfServiceFromName) && !pathOfServiceFromName.Contains(ServiceTools.ServicePath,
+                        StringComparison.CurrentCultureIgnoreCase))
                 {
-                    warningText = $"Warning service with name {collectionConfig.ServiceName} is installed at a different location: {pathOfService}";
+                    warningText = $"Warning service with name {collectionConfig.ServiceName} is installed at a different location: {pathOfServiceFromName}";
                 }
-                else if (nameOfServiceFromPath != collectionConfig.ServiceName &&
-                         nameOfServiceFromPath != string.Empty)
+                else if (serviceInfoFromPath != null &&
+                         !string.Equals(serviceInfoFromPath.Name, collectionConfig.ServiceName, StringComparison.CurrentCultureIgnoreCase))
                 {
                     warningText =
-                        $"Warning: Service name from path {nameOfServiceFromPath} does not match the service name {collectionConfig.ServiceName} in ServiceConfig.json.";
+                        $"Warning: Service name from path {serviceInfoFromPath.Name} does not match the service name {collectionConfig.ServiceName} in ServiceConfig.json.";
                 }
+                string serviceAccount = serviceInfoFromName?.AccountName ?? serviceInfoFromPath?.AccountName;
+                serviceAccount = string.IsNullOrEmpty(serviceAccount) ? "???" : serviceAccount;
+                var runningAsText = $"Running As: {serviceAccount}";
 
-                if (service.Status.ToString() != lastStatus || lblServiceWarning.Text != warningText)
+                this.Invoke(() =>
                 {
-                    this.Invoke(() =>
+                    if (service.Status.ToString() != lastStatus || lblServiceWarning.Text != warningText || runningAsText != lblRunningAs.Text)
                     {
                         lblServiceWarning.Visible = !string.IsNullOrEmpty(warningText);
                         lblServiceWarning.Text = warningText;
@@ -1106,8 +1109,11 @@ namespace DBADashServiceConfig
                         toolTip1.SetToolTip(lnkInstall, "Remove Windows service for DBA Dash agent");
                         lnkInstall.Text = "Uninstall service";
                         lastStatus = status.ToString();
-                    });
-                }
+                        lblRunningAs.Text = runningAsText;
+                        lblRunningAs.Visible = true;
+                    }
+                });
+
                 await ProcessFatalErrorAsync();
             }
             catch (Exception ex)
@@ -1141,6 +1147,7 @@ namespace DBADashServiceConfig
                         lblServiceStatus.Text = "Service Status: " + status;
                         lblServiceStatus.ForeColor = Color.Brown;
                         lastStatus = NotInstalled;
+                        lblRunningAs.Visible = false;
                     });
                 }
             }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -6,7 +7,6 @@ using System.Management;
 using System.Runtime.Versioning;
 using System.Security.Principal;
 using System.ServiceProcess;
-using Serilog;
 using System.Text;
 
 namespace DBADash
@@ -14,59 +14,81 @@ namespace DBADash
     [SupportedOSPlatform("windows")]
     public static class ServiceTools
     {
-        public static bool IsServiceInstalledByPath(string path)
-        {
-            using var searcher = new ManagementObjectSearcher("root\\cimv2", "SELECT Name,PathName from Win32_Service");
-
-            var collection = searcher.Get().Cast<ManagementBaseObject>()
-                .Where(service => ((string)service.GetPropertyValue("PathName"))?.Contains(path, StringComparison.InvariantCultureIgnoreCase) == true)
-                .Select(service => (string)service.GetPropertyValue("Name"));
-
-            return collection.Any();
-        }
-
         public static bool IsServiceInstalledByPath()
         {
-            return IsServiceInstalledByPath(ServicePath);
+            return GetServiceInfoFromPath(ServicePath) != null;
         }
 
-        public static bool IsServiceInstalledByName(string ServiceName)
+        public static bool IsServiceInstalledByName(string serviceName)
         {
-            using var searcher = new ManagementObjectSearcher("root\\cimv2", "SELECT Name from Win32_Service");
-
-            var collection = searcher.Get().Cast<ManagementBaseObject>()
-                .Where(service => string.Equals((string)service.GetPropertyValue("Name"), ServiceName, StringComparison.InvariantCultureIgnoreCase))
-                .Select(service => (string)service.GetPropertyValue("Name"));
-
-            return collection.Any();
+            return GetServiceInfoFromName(serviceName) != null;
         }
 
-        public static string GetServiceNameFromPath(string path)
+        private static string EscapeWqlString(string value)
         {
-            using var searcher = new ManagementObjectSearcher("root\\cimv2", "SELECT Name,PathName from Win32_Service");
-
-            var collection = searcher.Get().Cast<ManagementBaseObject>()
-                .Where(service => ((string)service.GetPropertyValue("PathName")).Contains(path, StringComparison.InvariantCultureIgnoreCase))
-                .Select(service => (string)service.GetPropertyValue("Name"));
-
-            return collection.FirstOrDefault(string.Empty);
+            // Escape single quotes for WQL by doubling them.
+            return value?.Replace("'", "''");
         }
 
-        public static string GetPathOfService(string ServiceName)
+        private static string EscapeWqlLikeString(string value)
         {
-            using var searcher = new ManagementObjectSearcher("root\\cimv2", "SELECT Name,PathName from Win32_Service");
-
-            var collection = searcher.Get().Cast<ManagementBaseObject>()
-                .Where(service => string.Equals((string)service.GetPropertyValue("Name"), ServiceName, StringComparison.InvariantCultureIgnoreCase))
-                .Select(service => (string)service.GetPropertyValue("PathName"));
-
-            return collection.FirstOrDefault(string.Empty);
+            if (value == null) return null;
+            // Escape WQL string delimiters and LIKE wildcard characters so the
+            // supplied value is treated as a literal substring match.
+            return EscapeWqlString(value)
+                .Replace("[", "[[]")
+                .Replace("%", "[%]")
+                .Replace("_", "[_]")
+                .Replace(@"\", @"\\");
         }
 
-        public static string GetServiceNameFromPath()
+        public static ServiceInfo GetServiceInfoFromName(string serviceName)
         {
-            return GetServiceNameFromPath(ServicePath);
+            if (string.IsNullOrEmpty(serviceName)) return null;
+            var escapedServiceName = EscapeWqlString(serviceName);
+            var query = $"SELECT Name,PathName,StartName from Win32_Service WHERE name = '{escapedServiceName}'";
+            using var searcher = new ManagementObjectSearcher("root\\cimv2", query);
+
+            var service = searcher.Get().Cast<ManagementBaseObject>().FirstOrDefault();
+
+            if (service == null) return null;
+
+            var name = service.GetPropertyValue("Name") as string;
+            var pathName = service.GetPropertyValue("PathName") as string;
+            var account = service.GetPropertyValue("StartName") as string;
+
+            return new ServiceInfo
+            {
+                Name = name,
+                PathName = pathName,
+                AccountName = account
+            };
         }
+
+        public static ServiceInfo GetServiceInfoFromPath(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return null;
+            var escapedPath = EscapeWqlLikeString(path);
+            var query = $"SELECT Name,PathName,StartName from Win32_Service WHERE PathName LIKE '%{escapedPath}%'";
+            using var searcher = new ManagementObjectSearcher("root\\cimv2", query);
+
+            var service = searcher.Get().Cast<ManagementBaseObject>().FirstOrDefault();
+
+            if (service == null) return null;
+
+            var name = service.GetPropertyValue("Name") as string;
+            var pathName = service.GetPropertyValue("PathName") as string;
+            var account = service.GetPropertyValue("StartName") as string;
+
+            return new ServiceInfo
+            {
+                Name = name,
+                PathName = pathName,
+                AccountName = account
+            };
+        }
+
+        public static ServiceInfo GetServiceInfoFromPath() => GetServiceInfoFromPath(ServicePath);
 
         private static readonly string serviceFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DBADashService.exe");
         public static readonly string ServicePath = serviceFolder;
@@ -151,7 +173,8 @@ namespace DBADash
         {
             var outputBuilder = new StringBuilder();
             var result = new SCCommandResult();
-            var path = GetPathOfService(serviceName);
+            var serviceInfo = GetServiceInfoFromName(serviceName);
+            var path = serviceInfo?.PathName;
             if (string.IsNullOrEmpty(path))
             {
                 throw new Exception($"Service {serviceName} is not installed");
