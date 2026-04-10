@@ -65,20 +65,12 @@ namespace DBADashServiceConfig
 
         private static bool IsDomainAccount(string accountName) => (!accountName.StartsWith("NT AUTHORITY") && accountName.Split("\\").Length == 2) || accountName.Contains('@');
 
-        private static string GetServiceAccount(string serviceName)
-        {
-            var wmiQuery = $"SELECT StartName FROM Win32_Service WHERE Name='{serviceName}'";
-
-            using var searcher = new ManagementObjectSearcher(wmiQuery);
-            using var results = searcher.Get();
-            return results.OfType<ManagementObject>().Select(result => result["StartName"]?.ToString()).FirstOrDefault();
-        }
-
         private void PermissionsHelper_Load(object sender, EventArgs e)
         {
             try
             {
-                ServiceAccountName = GetServiceAccount(ServiceName);
+                var serviceInfo = ServiceTools.GetServiceInfoFromName(ServiceName);
+                ServiceAccountName = serviceInfo?.AccountName;
 
                 bttnGrantRepositoryDB.Enabled = Config.SQLDestinations.Count != 0;
                 LoadConnections();
