@@ -1,7 +1,11 @@
-﻿using DBADashGUI.Charts;
+﻿using DBADash;
+using DBADashGUI.Charts;
+using DBADashGUI.CommunityTools;
+using DBADashGUI.CustomReports;
 using DBADashGUI.Theme;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
+using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Drawing.Geometries;
 using LiveChartsCore.SkiaSharpView.Painting;
@@ -11,6 +15,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -19,6 +24,10 @@ namespace DBADashGUI.Performance
     public partial class Blocking : UserControl, IMetricChart, IThemedControl
     {
         private Label lblError = new Label() { Dock = DockStyle.Fill, Visible = false, TextAlign = System.Drawing.ContentAlignment.MiddleCenter };
+        private DBADashContext CurrentContext;
+        private CustomReport DeadlockReport = CommunityTools.sp_BlitzLock.Instance;
+
+        private bool SeparateDeadlockAxis = true;
 
         private void ToggleError(bool show, string message = "")
         {
@@ -34,12 +43,17 @@ namespace DBADashGUI.Performance
             lblError.BringToFront();
         }
 
-        private int InstanceID;
+        private int InstanceID => CurrentContext?.InstanceID ?? 0;
         private long maxBlockedTime;
-        private int databaseID;
+        private int DatabaseID => CurrentContext?.DatabaseID ?? 0;
 
         private List<DataRow> _rows;
         private Dictionary<long, int> _tickIndexMap;
+
+        // Mouse move throttling to avoid expensive GetPointsAt() calls on every mouse movement
+        private Point _lastMousePosition = Point.Empty;
+
+        private const int MouseMoveThresholdPixels = 2; // Only recompute when mouse moves beyond this threshold
 
         // Sorted arrays to support fast nearest-tick lookup when exact match isn't found
         private long[] _sortedTicks;
@@ -48,6 +62,12 @@ namespace DBADashGUI.Performance
 
         // Strongly-typed reference to the scatter series to avoid reflection in tooltip rendering
         private ScatterSeries<WeightedPoint, CircleGeometry> _scatterSeries;
+
+        // Strongly-typed reference to the deadlock scatter series for tooltip rendering
+        private ScatterSeries<ObservablePoint, RectangleGeometry> _deadlockSeries;
+
+        // Track total deadlock count for button display
+        private long _totalDeadlockCount = 0;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool CloseVisible
@@ -62,21 +82,10 @@ namespace DBADashGUI.Performance
         public void SetContext(DBADashContext _context)
         {
             if (_context == null) return;
-            this.InstanceID = _context.InstanceID;
-            this.databaseID = _context.DatabaseID;
+            this.CurrentContext = _context;
+            tsDeadlocks.Visible = HasDeadlockReportAccess;
+            tsDeadlocks.Enabled = HasDeadlockReportAccess;
             RefreshData();
-        }
-
-        public void RefreshData(int InstanceID, int databaseID)
-        {
-            this.InstanceID = InstanceID;
-            this.databaseID = databaseID;
-            RefreshData();
-        }
-
-        public void RefreshData(int InstanceID)
-        {
-            RefreshData(InstanceID, -1);
         }
 
         private DataTable GetDT()
@@ -88,7 +97,7 @@ namespace DBADashGUI.Performance
             cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
             cmd.Parameters.AddWithValue("@FromDate", DateRange.FromUTC);
             cmd.Parameters.AddWithValue("@ToDate", DateRange.ToUTC);
-            cmd.Parameters.AddIfGreaterThanZero("@DatabaseID", databaseID);
+            cmd.Parameters.AddIfGreaterThanZero("@DatabaseID", DatabaseID);
             cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
             if (DateRange.HasTimeOfDayFilter)
             {
@@ -100,6 +109,23 @@ namespace DBADashGUI.Performance
             }
             cmd.CommandTimeout = Config.DefaultCommandTimeout;
 
+            DataTable dt = new();
+            da.Fill(dt);
+            return dt;
+        }
+
+        private DataTable GetDeadlocksDT()
+        {
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.Deadlocks_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("@FromDate", DateRange.FromUTC);
+            cmd.Parameters.AddWithValue("@ToDate", DateRange.ToUTC);
+            var dateGroupingMin = DateHelper.DateGrouping(DateRange.DurationMins, 200);
+            cmd.Parameters.AddWithValue("@DateGroupingMin", dateGroupingMin);
+            cmd.CommandTimeout = Config.DefaultCommandTimeout;
             DataTable dt = new();
             da.Fill(dt);
             return dt;
@@ -120,7 +146,16 @@ namespace DBADashGUI.Performance
         }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public BlockingMetric Metric { get; set; } = new();
+        public BlockingMetric Metric
+        {
+            get => field;
+            set
+            {
+                field = value;
+                blockingSnapshotsToolStripMenuItem.Checked = value.BlockingSnapshots;
+                deadlocksToolStripMenuItem.Checked = value.Deadlocks;
+            }
+        } = new();
 
         IMetric IMetricChart.Metric => Metric;
 
@@ -133,12 +168,15 @@ namespace DBADashGUI.Performance
                     ToggleError(true, "No instance selected");
                     return;
                 }
+                if (!Metric.Deadlocks && !Metric.BlockingSnapshots)
+                {
+                    ToggleError(true, "No metrics selected");
+                    return;
+                }
                 ToggleError(false);
 
-                var dt = GetDT();
-
-                var fromTicks = DateRange.FromUTC.ToAppTimeZone().Ticks;
-                var toTicks = Math.Min(DateHelper.AppNow.Ticks, DateRange.ToUTC.ToAppTimeZone().Ticks);
+                var dt = Metric.BlockingSnapshots ? GetDT() : new DataTable();
+                var deadlockDt = Metric.Deadlocks ? GetDeadlocksDT() : new DataTable();
 
                 // Create theme-aware paint for labels
                 var labelPaint = CreateLabelPaint();
@@ -146,45 +184,53 @@ namespace DBADashGUI.Performance
                 var nameFontSize = DBADashUser.ChartAxisNameFontSize;
 
                 // Configure axes first (even if no data) to show proper date labels
-                chartBlocking.XAxes = new[]
+                var fromDate = DateRange.FromUTC.ToAppTimeZone();
+                var toDate = DateHelper.AppNow < DateRange.ToUTC.ToAppTimeZone() ? DateHelper.AppNow : DateRange.ToUTC.ToAppTimeZone();
+                var duration = toDate - fromDate;
+                var xStepMinutes = Math.Max(1, DateHelper.DateGrouping((int)duration.TotalMinutes, 200, 1));
+                var xUnit = TimeSpan.FromMinutes(xStepMinutes);
+                chartBlocking.XAxes = new Axis[]
                 {
-                new Axis
-                {
-                    Labeler = value => new DateTime((long)value).ToString(DateRange.DateFormatString),
-                    MinLimit = fromTicks,
-                    MaxLimit = toTicks,
-                    LabelsPaint = labelPaint,
-                    TextSize = labelFontSize,
-                    NamePaint = labelPaint,
-                    NameTextSize = nameFontSize
-                }
-            };
+                    new DateTimeAxis(xUnit, date => ChartHelper.FormatDateForChartLabel(date, duration))
+                    {
+                        MinLimit = fromDate.Ticks,
+                        MaxLimit = toDate.Ticks,
+                        LabelsPaint = labelPaint,
+                        TextSize = labelFontSize,
+                        NamePaint = labelPaint,
+                        NameTextSize = nameFontSize
+                    }
+                };
 
                 chartBlocking.YAxes = new[]
                 {
-                new Axis
-                {
-                    Labeler = value => value.ToString("0"),
-                    MinLimit = 0,
-                    LabelsPaint = labelPaint,
-                    TextSize = labelFontSize,
-                    NamePaint = labelPaint,
-                    NameTextSize = nameFontSize,
-                    Name = "Blocked Sessions"
-                }
-            };
+                    new Axis
+                    {
+                        Labeler = value => value.ToString("0"),
+                        MinLimit = 0,
+                        LabelsPaint = labelPaint,
+                        TextSize = labelFontSize,
+                        NamePaint = labelPaint,
+                        NameTextSize = nameFontSize,
+                        Name = "Blocked Sessions",
+                        IsVisible = Metric.BlockingSnapshots
+                    }
+                };
 
-                if (dt.Rows.Count == 0)
+                if (dt.Rows.Count == 0 && deadlockDt.Rows.Count == 0)
                 {
                     // Clear series and any retained state from previous refreshes to avoid
                     // holding onto DataRow references via tooltip closures and to keep
                     // click/tooltip mapping consistent with the empty chart.
                     chartBlocking.Series = Array.Empty<ISeries>();
                     _scatterSeries = null;
+                    _deadlockSeries = null;
                     _rows = null;
                     _tickIndexMap = null;
                     _sortedTicks = null;
                     _sortedIndices = null;
+                    _totalDeadlockCount = 0;
+                    _lastMousePosition = Point.Empty; // Reset mouse throttling state
 
                     // Reset custom tooltip state to remove any closure over previous rows
                     // and restore default tooltip behavior.
@@ -196,59 +242,143 @@ namespace DBADashGUI.Performance
                     {
                         Debug.WriteLine($"Blocking.RefreshData.DisableCustomTooltips error: {ex}");
                     }
-                    lblBlocking.Text = databaseID > 0 ? "Blocking: Database" : "Blocking: Instance";
-                    toolStrip1.Tag = databaseID > 0 ? "ALT" : null;
+
+                    // Reset button text to default
+                    tsDeadlocks.Text = "Show Deadlocks";
+
+                    lblBlocking.Text = DatabaseID > 0 ? "Blocking: Database" : "Blocking: Instance";
+                    toolStrip1.Tag = DatabaseID > 0 ? "ALT" : null;
                     toolStrip1.ApplyTheme(DBADashUser.SelectedTheme);
                     return;
                 }
 
                 var rows = dt.Rows.Cast<DataRow>().ToList();
                 _rows = rows;
+                _lastMousePosition = Point.Empty; // Reset mouse throttling state on data refresh
 
-                // compute maximum blocked time up-front so sizing is consistent
-                maxBlockedTime = rows.Count == 0 ? 0 : rows.Max(r => (long)r["BlockedWaitTime"]);
+                var seriesList = new List<ISeries>();
 
-                // Use a single scatter series with mapping to provide a weight (blocked wait time)
-                // Mapping's third value is used as the weight to scale geometry between MinGeometrySize and GeometrySize
-                const double minDiameter = 6;
-
-                // Build weighted points (X=ticks, Y=blocked count, Weight=blocked wait ms)
-                var weightedPoints = rows.Select(r =>
-                    new WeightedPoint(((DateTime)r["SnapshotDateUTC"]).ToAppTimeZone().Ticks,
-                                      (double)(int)r["BlockedSessionCount"],
-                                      (double)(long)r["BlockedWaitTime"]))
-                    .ToArray();
-
-                // Use ChartHelper to create the scatter series and keep a strongly-typed reference to avoid reflection
-                _scatterSeries = ChartHelper.CreateWeightedScatterSeries(weightedPoints, "Blocked Sessions", minDiameter, MaxPointShapeDiameter);
-                chartBlocking.Series = new ISeries[] { _scatterSeries };
-
-                // Build a fast lookup from X ticks -> row index for tooltip and click mapping using ChartHelper
-                try
+                if (rows.Count > 0)
                 {
-                    var ticks = weightedPoints.Select(wp => (long)Math.Round(wp.X ?? 0.0)).ToArray();
-                    var mapResult = ChartHelper.BuildTickIndexMap(ticks);
-                    _tickIndexMap = mapResult.tickIndexMap;
-                    _sortedTicks = mapResult.sortedTicks;
-                    _sortedIndices = mapResult.sortedIndices;
+                    // compute maximum blocked time up-front so sizing is consistent
+                    maxBlockedTime = rows.Max(r => (long)r["BlockedWaitTime"]);
+
+                    // Use a single scatter series with mapping to provide a weight (blocked wait time)
+                    // Mapping's third value is used as the weight to scale geometry between MinGeometrySize and GeometrySize
+                    const double minDiameter = 6;
+
+                    // Build weighted points (X=ticks, Y=blocked count, Weight=blocked wait ms)
+                    var weightedPoints = rows.Select(r =>
+                        new WeightedPoint(((DateTime)r["SnapshotDateUTC"]).ToAppTimeZone().Ticks,
+                                          (double)(int)r["BlockedSessionCount"],
+                                          (double)(long)r["BlockedWaitTime"]))
+                        .ToArray();
+
+                    // Use ChartHelper to create the scatter series and keep a strongly-typed reference to avoid reflection
+                    _scatterSeries = ChartHelper.CreateWeightedScatterSeries(weightedPoints, "Blocked Sessions", minDiameter, MaxPointShapeDiameter);
+                    seriesList.Add(_scatterSeries);
+
+                    // Build a fast lookup from X ticks -> row index for tooltip and click mapping using ChartHelper
+                    try
+                    {
+                        var ticks = weightedPoints.Select(wp => (long)Math.Round(wp.X ?? 0.0)).ToArray();
+                        var mapResult = ChartHelper.BuildTickIndexMap(ticks);
+                        _tickIndexMap = mapResult.tickIndexMap;
+                        _sortedTicks = mapResult.sortedTicks;
+                        _sortedIndices = mapResult.sortedIndices;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Fall back to null state but log for diagnostics
+                        Debug.WriteLine($"Blocking.RefreshData.BuildTickIndexMap error: {ex}");
+                        _tickIndexMap = null;
+                        _sortedTicks = null;
+                        _sortedIndices = null;
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    // Fall back to null state but log for diagnostics
-                    Debug.WriteLine($"Blocking.RefreshData.BuildTickIndexMap error: {ex}");
+                    _scatterSeries = null;
                     _tickIndexMap = null;
                     _sortedTicks = null;
                     _sortedIndices = null;
+                    maxBlockedTime = 0;
                 }
 
-                // Update Y axis max based on actual data
-                var yMax = Math.Max(100, rows.Max(r => (int)r["BlockedSessionCount"]));
-                var yAxes = chartBlocking.YAxes.ToArray();
-                yAxes[0].MaxLimit = yMax;
-                chartBlocking.YAxes = yAxes;
+                if (deadlockDt.Rows.Count > 0)
+                {
+                    var deadlockPoints = deadlockDt.Rows.Cast<DataRow>()
+                        .Select(r => new ObservablePoint(
+                            ((DateTime)r["SnapshotDate"]).ToAppTimeZone().Ticks,
+                            Convert.ToDouble(r["DeadlockCount"])))
+                        .Where(p => p.Y > 0)
+                        .ToArray();
 
-                lblBlocking.Text = databaseID > 0 ? "Blocking: Database" : "Blocking: Instance";
-                toolStrip1.Tag = databaseID > 0 ? "ALT" : null; // set tag to ALT to use the alternate menu renderer
+                    // Calculate total deadlock count for button display
+                    _totalDeadlockCount = deadlockDt.Rows.Cast<DataRow>()
+                        .Sum(r => Convert.ToInt64(r["DeadlockCount"]));
+
+                    _deadlockSeries = new ScatterSeries<ObservablePoint, RectangleGeometry>
+                    {
+                        Values = deadlockPoints,
+                        Name = "Deadlocks" + (DatabaseID > 0 ? " (Instance)" : ""), // At database level, deadlocks are instance-wide so clarify in legend
+                        GeometrySize = 8,
+                        Fill = new SolidColorPaint(DashColors.Fail.ToSKColor()),
+                        ScalesYAt = SeparateDeadlockAxis ? 1 : 0
+                    };
+                    seriesList.Add(_deadlockSeries);
+                }
+                else
+                {
+                    _deadlockSeries = null;
+                    _totalDeadlockCount = 0;
+                }
+
+                // Update Y axes before setting series so the secondary axis (index 1)
+                // exists when the deadlock series references ScalesYAt = 1.
+                var yMax = rows.Count > 0 ? Math.Max(100, rows.Max(r => (int)r["BlockedSessionCount"])) : 100;
+                var yAxesList = chartBlocking.YAxes.ToList();
+                yAxesList[0].MaxLimit = yMax;
+
+                if (_deadlockSeries != null && SeparateDeadlockAxis)
+                {
+                    var deadlockMax = deadlockDt.Rows.Cast<DataRow>().Max(r => Convert.ToDouble(r["DeadlockCount"]));
+                    yAxesList.Add(new Axis
+                    {
+                        Labeler = value => value.ToString("0"),
+                        MinLimit = 0,
+                        MaxLimit = Math.Max(10, deadlockMax * 1.1),
+                        LabelsPaint = labelPaint,
+                        TextSize = labelFontSize,
+                        NamePaint = labelPaint,
+                        NameTextSize = nameFontSize,
+                        Name = "Deadlocks",
+                        Position = AxisPosition.End,
+                        SeparatorsPaint = null
+                    });
+                }
+
+                chartBlocking.YAxes = yAxesList.ToArray();
+
+                // Set series after Y axes are configured so ScalesYAt = 1 resolves correctly.
+                chartBlocking.Series = seriesList;
+
+                // Update the Show Deadlocks button text with the total deadlock count
+                if (_totalDeadlockCount > 0)
+                {
+                    tsDeadlocks.Text = $"Show Deadlocks ({_totalDeadlockCount:N0})";
+                }
+                else
+                {
+                    tsDeadlocks.Text = "Show Deadlocks";
+                }
+                var metricLabel = Metric.Deadlocks && Metric.BlockingSnapshots
+                   ? "Blocking && Deadlocks"
+                   : Metric.Deadlocks
+                       ? "Deadlocks"
+                       : "Blocking";
+                lblBlocking.Text = DatabaseID > 0 ? $"{metricLabel}: Database" : $"{metricLabel}: Instance";
+                toolStrip1.Tag = DatabaseID > 0 ? "ALT" : null; // set tag to ALT to use the alternate menu renderer
                 toolStrip1.ApplyTheme(DBADashUser.SelectedTheme);
 
                 // Enable custom tooltips with custom formatter to show blocked time
@@ -256,6 +386,13 @@ namespace DBADashGUI.Performance
                 {
                     try
                     {
+                        // If the tooltip is for the deadlock scatter series
+                        if (point.Context?.Series == _deadlockSeries)
+                        {
+                            var y = point.Coordinate.PrimaryValue;
+                            return !double.IsNaN(y) ? $"Deadlocks: {y:N0}" : string.Empty;
+                        }
+
                         // If the tooltip is for the scatter series we created, use point.Index directly (avoids reflection)
                         if (point.Context?.Series == _scatterSeries && point.Index >= 0 && point.Index < rows.Count)
                         {
@@ -325,6 +462,39 @@ namespace DBADashGUI.Performance
         private void Blocking_Load(object sender, EventArgs e)
         {
             chartBlocking.MouseDown += ChartBlocking_MouseDown;
+            chartBlocking.MouseMove += ChartBlocking_MouseMove;
+        }
+
+        private void ChartBlocking_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_rows == null || _rows.Count == 0)
+            {
+                chartBlocking.Cursor = Cursors.Default;
+                return;
+            }
+
+            // Throttle GetPointsAt() call: only recompute when mouse moves beyond a small pixel threshold
+            // This avoids expensive hit-testing on every single mouse move event
+            var mouseMoved = _lastMousePosition == Point.Empty ||
+                             Math.Abs(e.X - _lastMousePosition.X) > MouseMoveThresholdPixels ||
+                             Math.Abs(e.Y - _lastMousePosition.Y) > MouseMoveThresholdPixels;
+
+            if (!mouseMoved)
+            {
+                return; // Cursor state hasn't changed, skip expensive GetPointsAt() call
+            }
+
+            _lastMousePosition = e.Location;
+
+            var foundPoints = chartBlocking.GetPointsAt(
+                new LiveChartsCore.Drawing.LvcPointD(e.Location.X, e.Location.Y));
+
+            var firstPoint = foundPoints.FirstOrDefault();
+
+            // Show hand cursor only for clickable blocking points (not deadlock series)
+            chartBlocking.Cursor = firstPoint is not null && firstPoint.Context?.Series != _deadlockSeries
+                ? Cursors.Hand
+                : Cursors.Default;
         }
 
         private void TsClose_Click(object sender, EventArgs e)
@@ -349,7 +519,7 @@ namespace DBADashGUI.Performance
                 new LiveChartsCore.Drawing.LvcPointD(e.Location.X, e.Location.Y));
 
             var firstPoint = foundPoints.FirstOrDefault();
-            if (firstPoint is null)
+            if (firstPoint is null || firstPoint.Context?.Series == _deadlockSeries)
             {
                 return;
             }
@@ -420,5 +590,52 @@ namespace DBADashGUI.Performance
             toolStrip1.ApplyTheme();
             lblError.ForeColor = DBADashUser.IsDarkTheme ? DashColors.White : DashColors.Fail;
         }
+
+        private void BlockingSnapshots_Click(object sender, EventArgs e)
+        {
+            Metric.BlockingSnapshots = blockingSnapshotsToolStripMenuItem.Checked;
+            RefreshData();
+        }
+
+        private void DeadlocksSelection_Click(object sender, EventArgs e)
+        {
+            Metric.Deadlocks = deadlocksToolStripMenuItem.Checked;
+            RefreshData();
+        }
+
+        private async void ShowDeadlocks_Click(object sender, EventArgs e)
+        {
+            if (!HasDeadlockReportAccess)
+            {
+                MessageBox.Show("You do not have access to this report.");
+                return;
+            }
+            var reportViewer = new CustomReportViewer() { LoadDirectExecutionReport = true };
+            var context = CurrentContext.DeepCopy();
+            context.ObjectID = 0;
+            context.ObjectName = string.Empty;
+            context.Report = DeadlockReport;
+            reportViewer.Context = context;
+
+            // Convert date range to instance local time
+            var fromDateUtc = DateRange.FromUTC;
+            var toDateUtc = DateRange.ToUTC;
+            var fromDateInstance = fromDateUtc.AddMinutes(-CurrentContext.UTCOffset);
+            var toDateInstance = toDateUtc.AddMinutes(-CurrentContext.UTCOffset);
+            var customParams = DeadlockReport.GetCustomSqlParameters();
+            customParams.RemoveAll(p => p.Param.ParameterName.Equals("@StartDate", StringComparison.OrdinalIgnoreCase) || p.Param.ParameterName.Equals("@EndDate", StringComparison.OrdinalIgnoreCase));
+            customParams.Add(new CustomSqlParameter { Param = new SqlParameter("@StartDate", fromDateInstance) { DbType = DbType.DateTime } });
+            customParams.Add(new CustomSqlParameter { Param = new SqlParameter("@EndDate", toDateInstance) { DbType = DbType.DateTime } });
+            reportViewer.CustomParams = customParams;
+            await reportViewer.ShowDialogAsync();
+        }
+
+        private bool HasDeadlockReportAccess => CurrentContext != null &&
+            DeadlockReport.HasAccess() &&
+            DBADashUser.AllowMessaging &&
+            CurrentContext.CanMessage &&
+            DBADashUser.CommunityScripts
+            && CurrentContext.InstanceID > 0
+            && (CurrentContext.CollectAgent.IsAllowAllScripts || CurrentContext.IsScriptAllowed("dbo", "sp_BlitzLock"));
     }
 }

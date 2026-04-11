@@ -1,4 +1,5 @@
 ﻿using DBADash;
+using DBADashGUI.CommunityTools;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,6 +14,9 @@ namespace DBADashGUI.CustomReports
         {
             InitializeComponent();
         }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool LoadDirectExecutionReport { get; set; } = false;
 
         public CustomReportView CustomReportView => customReportView1;
 
@@ -32,6 +36,10 @@ namespace DBADashGUI.CustomReports
             if (DataSet != null)
             {
                 customReportView1.ShowData(DataSet);
+            }
+            else if (LoadDirectExecutionReport && Context.Report is DirectExecutionReport)
+            {
+                customReportView1.RefreshData();
             }
         }
 

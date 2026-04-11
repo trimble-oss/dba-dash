@@ -53,6 +53,7 @@ namespace DBADashGUI
         private bool? _hasInstanceMetadata;
         private DatabaseEngineEdition? _engineEdition;
         private bool? _hasResourceGovernorWorkloadGroups;
+        private int? _utcOffset;
 
         public bool? HasInstanceMetadata
         {
@@ -126,6 +127,22 @@ namespace DBADashGUI
             }
         }
 
+        /// <summary>
+        /// UTC offset in minutes.  This is used to convert UTC times to local server time or local server time to UTC
+        /// The offset is calculated as DATEDIFF(mi, GETDATE(), GETUTCDATE()) on the server.
+        /// To convert UTC to local server time, subtract the offset.
+        /// </summary>
+        public int UTCOffset
+        {
+            get
+            {
+                if (_utcOffset.HasValue) return _utcOffset.Value;
+                GetAdditionalInfo();
+                _utcOffset ??= 0;
+                return _utcOffset.Value;
+            }
+        }
+
         private bool? _canMessage;
 
         private void GetAdditionalInfo()
@@ -169,6 +186,15 @@ namespace DBADashGUI
             {
                 _engineEdition = DatabaseEngineEdition.Unknown;
                 Log.Debug(ex, "Error retrieving EngineEdition value.");
+            }
+            try
+            {
+                _utcOffset = (int)row["UTCOffset"];
+            }
+            catch (Exception ex)
+            {
+                _utcOffset = 0;
+                Log.Debug(ex, "Error retrieving UTCOffset value.");
             }
         }
 

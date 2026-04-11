@@ -33,19 +33,20 @@
             // 
             // customReportView1
             // 
+            customReportView1.AutoScroll = true;
             customReportView1.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
             customReportView1.Dock = System.Windows.Forms.DockStyle.Fill;
             customReportView1.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
             customReportView1.Location = new System.Drawing.Point(0, 0);
             customReportView1.Name = "customReportView1";
-            customReportView1.Size = new System.Drawing.Size(800, 450);
+            customReportView1.Size = new System.Drawing.Size(1180, 659);
             customReportView1.TabIndex = 0;
             // 
             // CustomReportViewer
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(800, 450);
+            ClientSize = new System.Drawing.Size(1180, 659);
             Controls.Add(customReportView1);
             Name = "CustomReportViewer";
             Text = "CustomReportViewer";

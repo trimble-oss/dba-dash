@@ -50,6 +50,7 @@
             waitsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             workloadGroupAnalysisToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             associateCollectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            chartLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             chartLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             topToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             bottomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -90,7 +91,6 @@
             lblURL = new System.Windows.Forms.ToolStripStatusLabel();
             lblDescription = new System.Windows.Forms.ToolStripStatusLabel();
             timer1 = new System.Windows.Forms.Timer(components);
-            chartLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStrip1.SuspendLayout();
             pnlParams.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitParams).BeginInit();
@@ -292,6 +292,13 @@
             associateCollectionToolStripMenuItem.Text = "Associate Collection";
             associateCollectionToolStripMenuItem.ToolTipText = "Associate Collection - Allow collection to be triggered from report";
             associateCollectionToolStripMenuItem.Click += AssociateCollectionToolStripMenuItem_Click;
+            // 
+            // chartLayoutToolStripMenuItem
+            // 
+            chartLayoutToolStripMenuItem.Name = "chartLayoutToolStripMenuItem";
+            chartLayoutToolStripMenuItem.Size = new System.Drawing.Size(251, 26);
+            chartLayoutToolStripMenuItem.Text = "Chart Layout";
+            chartLayoutToolStripMenuItem.Click += ChartLayout_Click;
             // 
             // chartLocationToolStripMenuItem
             // 
@@ -610,6 +617,7 @@
             // splitTablesCharts.Panel1
             // 
             splitTablesCharts.Panel1.Controls.Add(chartLayout);
+            splitTablesCharts.Panel1Collapsed = true;
             // 
             // splitTablesCharts.Panel2
             // 
@@ -673,13 +681,6 @@
             // 
             timer1.Interval = 1000;
             timer1.Tick += Timer1_Tick;
-            // 
-            // chartLayoutToolStripMenuItem
-            // 
-            chartLayoutToolStripMenuItem.Name = "chartLayoutToolStripMenuItem";
-            chartLayoutToolStripMenuItem.Size = new System.Drawing.Size(251, 26);
-            chartLayoutToolStripMenuItem.Text = "Chart Layout";
-            chartLayoutToolStripMenuItem.Click += ChartLayout_Click;
             // 
             // CustomReportView
             // 
