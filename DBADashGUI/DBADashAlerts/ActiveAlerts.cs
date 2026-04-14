@@ -265,6 +265,8 @@ namespace DBADashGUI.DBADashAlerts
                     case "InstanceDisplayName":
                         var tab = alertType switch
                         {
+                            AlertRuleBase.RuleTypes.BackupChainRisk => Tabs.Backups,
+                            AlertRuleBase.RuleTypes.BackupFreshness => Tabs.Backups,
                             AlertRuleBase.RuleTypes.DriveSpace => Tabs.Drives,
                             AlertRuleBase.RuleTypes.AGHealth => Tabs.AG,
                             AlertRuleBase.RuleTypes.Counter => Tabs.Metrics,

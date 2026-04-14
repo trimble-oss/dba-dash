@@ -1,0 +1,14 @@
+{
+  "solution": {
+    "path": "DBADash.sln",
+    "projects": [
+      "DBADash.Test/DBADash.Test.csproj",
+      "DBADash/DBADash.csproj",
+      "DBADashConfig/DBADashConfig.csproj",
+      "DBADashGUI/DBADashGUI.csproj",
+      "DBADashService/DBADashService.csproj",
+      "DBADashServiceConfig/ServiceConfigTool.csproj",
+      "DBADashSharedGUI/DBADashSharedGUI.csproj"
+    ]
+  }
+}
