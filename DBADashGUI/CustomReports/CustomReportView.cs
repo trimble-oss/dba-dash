@@ -39,6 +39,14 @@ namespace DBADashGUI.CustomReports
         public CustomReport Report { get; set; }
 
         protected List<CustomSqlParameter> customParams = new();
+        /// <summary>
+        /// When true, the Report property will not be overwritten by SetContext when a
+        /// context contains a Report. This allows hosts to lock the initially-assigned
+        /// Report (for example, the Performance report) so subsequent SetContext calls
+        /// don't replace it.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool PreventReportOverwrite { get; set; }
         private CancellationTokenSource cancellationTokenSource;
         private Guid CurrentMessageGroup;
         public EventHandler PostGridRefresh;
@@ -1857,7 +1865,11 @@ namespace DBADashGUI.CustomReports
                 IsMessageInProgress = false;
                 CurrentMessageGroup = Guid.Empty;
                 this.context = _context;
-                Report = _context.Report ?? Report;
+                // Only overwrite Report from context when not explicitly prevented by the host.
+                if (!PreventReportOverwrite)
+                {
+                    Report = _context.Report ?? Report;
+                }
                 customParams = sqlParams ?? Report.GetCustomSqlParameters();
                 SetContextParametersForDirectExecutionReport();
                 tsParams.Visible = Report.UserParams.Any();

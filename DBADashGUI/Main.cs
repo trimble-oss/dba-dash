@@ -292,7 +292,13 @@ namespace DBADashGUI
             tabPoolsAndGroups.Controls.Add(new ResourceGovernorPerformance { Dock = DockStyle.Fill });
 
             tabPerformance = new TabPage("Performance") { Name = Tabs.Performance.TabName() };
-            tabPerformance.Controls.Add(new CustomReportView() { Dock = DockStyle.Fill, Report = PerformanceReport.Instance });
+            var perfView = new CustomReportView()
+            {
+                Dock = DockStyle.Fill,
+                Report = PerformanceReport.Instance,
+                PreventReportOverwrite = true
+            };
+            tabPerformance.Controls.Add(perfView);
         }
 
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommunityProcs proc)
@@ -300,7 +306,7 @@ namespace DBADashGUI
             var tab = new TabPage(proc.ToString());
             var report = CommunityTools.CommunityTools.CommunityToolsList.FirstOrDefault(report => report.ProcedureName == proc.ToString());
             if (report == null) return null;
-            tab.Controls.Add(new CustomReportView() { Dock = DockStyle.Fill, Report = report });
+            tab.Controls.Add(new CustomReportView() { Dock = DockStyle.Fill, Report = report, PreventReportOverwrite = true });
             return tab;
         }
 
