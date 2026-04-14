@@ -182,9 +182,9 @@ namespace DBADashGUI.DBADashAlerts
         public void SetContext(DBADashContext _context)
         {
             if (_context == null) return;
-            CurrentContext = _context;
-            _context.Report = ActiveAlertsReport;
-            customReportView1.SetContext(_context);
+            CurrentContext = _context.DeepCopy();
+            CurrentContext.Report = ActiveAlertsReport;
+            customReportView1.SetContext(CurrentContext);
             if (customReportView1.TimeSinceRefresh.Seconds > 5) // Alerts should show current data on load
             {
                 customReportView1.RefreshData();
