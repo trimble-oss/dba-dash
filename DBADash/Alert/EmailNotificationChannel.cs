@@ -64,6 +64,16 @@ namespace DBADash.Alert
         [Category("Email Message"), DisplayName("Is HTML?")]
         public bool IsHTML { get; set; }
 
+        [Category("Email Config")]
+        [DisplayName("Resolution To Email")]
+        [Description("Optional. Email address to send resolved alert notifications to. If blank, uses To Email.")]
+        public string ResolutionToEmail { get; set; }
+
+        [Description("Optional. Name associated with resolution email address. Default to Resolution To Email or channel name.")]
+        [Category("Email Config")]
+        [DisplayName("Resolution To")]
+        public string ResolutionTo { get; set; }
+
         private const string DefaultEmailSubjectTemplate = "{Emoji} {AlertKey} {Action} on {Instance}";
         private const string DefaultEmailMessageTemplate = "{Text}";
 
@@ -83,9 +93,15 @@ namespace DBADash.Alert
 
         protected override async Task InternalSendNotificationAsync(Alert alert, string connectionString)
         {
+            var sendToResolutionRecipient = alert.IsResolved && !string.IsNullOrWhiteSpace(ResolutionToEmail);
+            var recipientEmail = sendToResolutionRecipient ? ResolutionToEmail : ToEmail;
+            var recipientName = sendToResolutionRecipient
+                ? (string.IsNullOrWhiteSpace(ResolutionTo) ? ResolutionToEmail : ResolutionTo)
+                : (string.IsNullOrWhiteSpace(To) ? ChannelName : To);
+
             using var message = new MimeMessage();
             message.From.Add(new MailboxAddress(From, FromEmail));
-            message.To.Add(new MailboxAddress(string.IsNullOrEmpty(To) ? ChannelName : To, ToEmail));
+            message.To.Add(new MailboxAddress(recipientName, recipientEmail));
             message.Subject = ReplacePlaceholders(alert, GetEmailSubjectTemplate());
 
             message.Body = new TextPart(IsHTML ? "html" : "plain")
