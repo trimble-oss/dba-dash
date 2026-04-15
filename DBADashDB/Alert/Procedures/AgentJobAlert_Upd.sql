@@ -46,10 +46,10 @@ AND J.enabled=1
 CREATE TABLE #AgentJobApplicable(
 	InstanceID INT NOT NULL,
 	Priority TINYINT NOT NULL,
-	Category NVARCHAR(128) COLLATE DATABASE_DEFAULT NULL,
-	JobName NVARCHAR(128) COLLATE DATABASE_DEFAULT NULL,
-	ExcludeCategory NVARCHAR(128) COLLATE DATABASE_DEFAULT NULL,
-	ExcludeJobName NVARCHAR(128) COLLATE DATABASE_DEFAULT NULL,
+	Category NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NULL,
+	JobName NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NULL,
+	ExcludeCategory NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NULL,
+	ExcludeJobName NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NULL,
 	RuleID INT NOT NULL
 )
 /* Get a list of rules and instances they apply to */
@@ -58,16 +58,26 @@ INSERT INTO #AgentJobApplicable(
 	Priority,
 	Category,
 	JobName,
+	ExcludeCategory,
+	ExcludeJobName,
 	RuleID
 )
 SELECT I.InstanceID,
 		R.Priority,
-		LEFT(NULLIF(JSON_VALUE(R.Details,'$.Category'),''),128) AS Category,
-		LEFT(NULLIF(JSON_VALUE(R.Details,'$.JobName'),''),128) AS JobName,
-		LEFT(NULLIF(JSON_VALUE(R.Details,'$.ExcludeCategory'),''),128) AS ExcludeCategory,
-		LEFT(NULLIF(JSON_VALUE(R.Details,'$.ExcludeJobName'),''),128) AS ExcludeJobName,
+		/* Normalize line breaks to CHAR(10) so we can split on that later. This allows users to enter values with line breaks from the UI */
+		NULLIF(LTRIM(REPLACE(REPLACE(D.Category,CHAR(13)+CHAR(10),CHAR(10)),CHAR(13),CHAR(10))),'') AS Category,
+		NULLIF(LTRIM(REPLACE(REPLACE(D.JobName,CHAR(13)+CHAR(10),CHAR(10)),CHAR(13),CHAR(10))),'') AS JobName,
+		NULLIF(REPLACE(REPLACE(D.ExcludeCategory,CHAR(13)+CHAR(10),CHAR(10)),CHAR(13),CHAR(10)),'') AS ExcludeCategory,
+		NULLIF(REPLACE(REPLACE(D.ExcludeJobName,CHAR(13)+CHAR(10),CHAR(10)),CHAR(13),CHAR(10)),'') AS ExcludeJobName,
 		R.RuleID
 FROM Alert.Rules R
+OUTER APPLY OPENJSON(CASE WHEN ISJSON(R.Details)=1 THEN R.Details ELSE N'{}' END)
+WITH (
+	Category NVARCHAR(MAX) '$.Category',
+	JobName NVARCHAR(MAX) '$.JobName',
+	ExcludeCategory NVARCHAR(MAX) '$.ExcludeCategory',
+	ExcludeJobName NVARCHAR(MAX) '$.ExcludeJobName'
+) D
 CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
 WHERE R.Type = @Type
 AND R.IsActive=1
@@ -88,14 +98,56 @@ SELECT J.InstanceID,
 		AJA.RuleID
 FROM dbo.Jobs J
 JOIN #AgentJobApplicable AJA ON J.InstanceID = AJA.InstanceID 
-		AND (J.category LIKE AJA.Category OR J.category = AJA.Category OR AJA.Category IS NULL)
-		AND (J.name LIKE AJA.JobName OR J.name = AJA.JobName OR AJA.JobName IS NULL)
-		AND (J.category NOT LIKE AJA.ExcludeCategory OR AJA.ExcludeCategory IS NULL)
-		AND (J.name NOT LIKE AJA.ExcludeJobName OR AJA.ExcludeJobName IS NULL)
-LEFT JOIN Alert.AgentJobSnapshot SS ON SS.InstanceID = J.InstanceID AND SS.job_id = J.job_id /* previous snapshot of recently failed jobs */
-WHERE (J.LastFailed > SS.LastFailed OR SS.LastFailed IS NULL) /* Job has failed since the last time this proc was run */
+LEFT JOIN Alert.AgentJobSnapshot AJS ON AJS.InstanceID = J.InstanceID AND AJS.job_id = J.job_id /* previous snapshot of recently failed jobs */
+WHERE (J.LastFailed > AJS.LastFailed OR AJS.LastFailed IS NULL) /* Job has failed since the last time this proc was run */
 AND J.LastFailed>=DATEADD(mi,-60,SYSUTCDATETIME()) /* Job has failed within the last hour */
 AND (J.LastSucceeded< J.LastFailed OR J.LastSucceeded IS NULL) /* Last execution status is failed */
+/* Job name matches one of the supplied values or no values supplied */
+AND	(
+	AJA.JobName IS NULL 
+	OR EXISTS(	SELECT 1 
+				FROM STRING_SPLIT(AJA.JobName,CHAR(10)) SS 
+				OUTER APPLY (SELECT LTRIM(RTRIM(SS.value)) AS value) T
+				WHERE T.value <> '' 
+				AND (
+					J.name LIKE T.value
+					OR J.name = T.value
+					)					
+			)
+	)
+/* Category matches one of the supplied values or no values supplied. LIKE or = match */
+AND (AJA.Category IS NULL
+	OR EXISTS(	SELECT 1 
+				FROM STRING_SPLIT(AJA.Category,CHAR(10)) SS 
+				OUTER APPLY (SELECT LTRIM(RTRIM(SS.value)) AS value) T
+				WHERE T.value <> '' 
+				AND (
+					J.category LIKE T.value
+					OR J.category = T.value
+					)
+				)
+	)
+/* Job name does not match any of the supplied exclude values. LIKE or = match */
+AND NOT EXISTS(	SELECT 1 
+				FROM STRING_SPLIT(AJA.ExcludeJobName,CHAR(10)) SS 
+				OUTER APPLY (SELECT LTRIM(RTRIM(SS.value)) AS value) T
+				WHERE T.value <> '' 
+				AND (
+					J.name LIKE T.value
+					OR J.name = T.value
+					)
+				)
+/* Category does not match any of the supplied exclude values. LIKE or = match */
+AND NOT EXISTS(	SELECT 1 
+				FROM STRING_SPLIT(AJA.ExcludeCategory,CHAR(10)) SS 
+				OUTER APPLY (SELECT LTRIM(RTRIM(SS.value)) AS value) T
+				WHERE T.value <> '' 
+				AND (
+					J.category LIKE T.value
+					OR J.category = T.value
+					)
+				)
+
 
 EXEC Alert.ActiveAlerts_Upd @AlertDetails=@AlertDetails,@AlertType=@Type,@ResolveAlertsOfType=0
 
