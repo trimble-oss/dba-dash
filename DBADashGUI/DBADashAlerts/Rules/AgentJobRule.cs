@@ -13,19 +13,19 @@ namespace DBADashGUI.DBADashAlerts.Rules
         [Browsable(false)]
         public override decimal? Threshold => null;
 
-        [Description("SQL Server agent job category to apply to.  Supports LIKE syntax.")]
+        [Description("SQL Server agent job category to apply to. Supports LIKE syntax. Use multiple lines for multiple patterns (newline-delimited).")]
         [DisplayName("Category"), Category("Filters")]
         public string Category { get; set; }
 
-        [Description("SQL Server agent job name to apply to.  Supports LIKE syntax.")]
+        [Description("SQL Server agent job name to apply to. Supports LIKE syntax. Use multiple lines for multiple patterns (newline-delimited).")]
         [DisplayName("Job Name"), Category("Filters")]
         public string JobName { get; set; }
 
-        [Description("SQL Server agent job category to exclude.  Supports LIKE syntax.")]
+        [Description("SQL Server agent job category to exclude. Supports LIKE syntax. Use multiple lines for multiple patterns (newline-delimited).")]
         [DisplayName("Exclude Category"), Category("Filters")]
         public string ExcludeCategory { get; set; }
 
-        [Description("SQL Server agent job name to exclude.  Supports LIKE syntax.")]
+        [Description("SQL Server agent job name to exclude. Supports LIKE syntax. Use multiple lines for multiple patterns (newline-delimited).")]
         [DisplayName("Exclude Job Name"), Category("Filters")]
         public string ExcludeJobName { get; set; }
 
@@ -34,16 +34,6 @@ namespace DBADashGUI.DBADashAlerts.Rules
 
         public override (bool isValid, string message) Validate()
         {
-            if (!string.IsNullOrEmpty(JobName) && JobName.Length > 128)
-            {
-                return (false, "Job Name cannot be longer than 128 characters.");
-            }
-
-            if (!string.IsNullOrEmpty(Category) && Category.Length > 128)
-            {
-                return (false, "Category cannot be longer than 128 characters.");
-            }
-
             return (true, string.Empty);
         }
     }
