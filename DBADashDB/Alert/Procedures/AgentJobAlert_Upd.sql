@@ -48,6 +48,8 @@ CREATE TABLE #AgentJobApplicable(
 	Priority TINYINT NOT NULL,
 	Category NVARCHAR(128) COLLATE DATABASE_DEFAULT NULL,
 	JobName NVARCHAR(128) COLLATE DATABASE_DEFAULT NULL,
+	ExcludeCategory NVARCHAR(128) COLLATE DATABASE_DEFAULT NULL,
+	ExcludeJobName NVARCHAR(128) COLLATE DATABASE_DEFAULT NULL,
 	RuleID INT NOT NULL
 )
 /* Get a list of rules and instances they apply to */
@@ -62,6 +64,8 @@ SELECT I.InstanceID,
 		R.Priority,
 		LEFT(NULLIF(JSON_VALUE(R.Details,'$.Category'),''),128) AS Category,
 		LEFT(NULLIF(JSON_VALUE(R.Details,'$.JobName'),''),128) AS JobName,
+		LEFT(NULLIF(JSON_VALUE(R.Details,'$.ExcludeCategory'),''),128) AS ExcludeCategory,
+		LEFT(NULLIF(JSON_VALUE(R.Details,'$.ExcludeJobName'),''),128) AS ExcludeJobName,
 		R.RuleID
 FROM Alert.Rules R
 CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
@@ -85,7 +89,9 @@ SELECT J.InstanceID,
 FROM dbo.Jobs J
 JOIN #AgentJobApplicable AJA ON J.InstanceID = AJA.InstanceID 
 		AND (J.category LIKE AJA.Category OR J.category = AJA.Category OR AJA.Category IS NULL)
-		AND(J.name LIKE AJA.JobName OR J.name = AJA.JobName OR AJA.JobName IS NULL)
+		AND (J.name LIKE AJA.JobName OR J.name = AJA.JobName OR AJA.JobName IS NULL)
+		AND (J.category NOT LIKE AJA.ExcludeCategory OR AJA.ExcludeCategory IS NULL)
+		AND (J.name NOT LIKE AJA.ExcludeJobName OR AJA.ExcludeJobName IS NULL)
 LEFT JOIN Alert.AgentJobSnapshot SS ON SS.InstanceID = J.InstanceID AND SS.job_id = J.job_id /* previous snapshot of recently failed jobs */
 WHERE (J.LastFailed > SS.LastFailed OR SS.LastFailed IS NULL) /* Job has failed since the last time this proc was run */
 AND J.LastFailed>=DATEADD(mi,-60,SYSUTCDATETIME()) /* Job has failed within the last hour */
