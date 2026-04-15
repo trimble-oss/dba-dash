@@ -21,6 +21,14 @@ namespace DBADashGUI.DBADashAlerts.Rules
         [DisplayName("Job Name"), Category("Filters")]
         public string JobName { get; set; }
 
+        [Description("SQL Server agent job category to exclude.  Supports LIKE syntax.")]
+        [DisplayName("Exclude Category"), Category("Filters")]
+        public string ExcludeCategory { get; set; }
+
+        [Description("SQL Server agent job name to exclude.  Supports LIKE syntax.")]
+        [DisplayName("Exclude Job Name"), Category("Filters")]
+        public string ExcludeJobName { get; set; }
+
         [Browsable(false)]
         public override int? EvaluationPeriodMins => null;
 
