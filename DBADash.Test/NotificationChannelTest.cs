@@ -8,25 +8,30 @@ namespace DBADashConfig.Test
     [TestClass]
     public class NotificationChannelTest
     {
+        // Test data constants
+        private static readonly DateTime DefaultTriggerDate = new DateTime(2026, 2, 9, 14, 30, 45);
+        private const string DefaultAlertName = "TEST_ALERT";
+        private const string DefaultMessage = "Test alert message";
+        private const string DefaultConnectionId = "TestServer";
+        private const string DefaultInstanceDisplayName = "TestServer";
+        private const string DefaultAlertType = "Test";
+
+        private const string DefaultChannelName = "TestChannel";
+        private const string DefaultSmtpHost = "smtp.example.com";
+        private const int DefaultSmtpPort = 587;
+        private const string DefaultFromEmail = "alerts@example.com";
+        private const string DefaultFromName = "DBADash";
+        private const string DefaultToEmail = "to@example.com";
+        private const string DefaultResolutionToEmail = "resolved@example.com";
+
         [TestMethod]
         public void TestTriggerDatePlaceholder()
         {
             // Arrange
-            var testAlert = new Alert
-            {
-                AlertID = 1,
-                AlertName = "TEST_ALERT",
-                Priority = Alert.Priorities.High1,
-                TriggerDate = new DateTime(2026, 2, 9, 14, 30, 45),
-                Message = "Test alert message",
-                ConnectionID = "TestServer",
-                InstanceDisplayName = "TestServer",
-                AlertType = "Test"
-            };
-
+            var testAlert = CreateTestAlert();
             var emailChannel = new EmailNotificationChannel
             {
-                ChannelName = "TestChannel"
+                ChannelName = DefaultChannelName
             };
 
             var template = "Alert triggered at {TriggerDate} on {Instance}";
@@ -35,28 +40,17 @@ namespace DBADashConfig.Test
             var result = emailChannel.ReplacePlaceholders(testAlert, template);
 
             // Assert
-            Assert.AreEqual($"Alert triggered at {testAlert.TriggerDate.ToUtcDateTimeOffset().ToStandardString()} on TestServer", result);
+            Assert.AreEqual($"Alert triggered at {testAlert.TriggerDate.ToUtcDateTimeOffset().ToStandardString()} on {DefaultInstanceDisplayName}", result);
         }
 
         [TestMethod]
         public void TestTriggerDatePlaceholderWithTimeZone()
         {
             // Arrange
-            var testAlert = new Alert
-            {
-                AlertID = 1,
-                AlertName = "TEST_ALERT",
-                Priority = Alert.Priorities.High1,
-                TriggerDate = new DateTime(2026, 2, 9, 14, 30, 45),
-                Message = "Test alert message",
-                ConnectionID = "TestServer",
-                InstanceDisplayName = "TestServer",
-                AlertType = "Test"
-            };
-
+            var testAlert = CreateTestAlert();
             var emailChannel = new EmailNotificationChannel
             {
-                ChannelName = "TestChannel"
+                ChannelName = DefaultChannelName
             };
 
             var template = "Alert triggered at {TriggerDate:America/New_York} on {Instance}";
@@ -66,28 +60,17 @@ namespace DBADashConfig.Test
 
             var convertedDate = TimeZoneInfo.ConvertTime(testAlert.TriggerDate.ToUtcDateTimeOffset(), TimeZoneInfo.FindSystemTimeZoneById("America/New_York"));
             // Assert
-            Assert.AreEqual($"Alert triggered at {convertedDate.ToStandardString()} on TestServer", result);
+            Assert.AreEqual($"Alert triggered at {convertedDate.ToStandardString()} on {DefaultInstanceDisplayName}", result);
         }
 
         [TestMethod]
         public void TestTriggerDatePlaceholderCaseInsensitive()
         {
             // Arrange
-            var testAlert = new Alert
-            {
-                AlertID = 1,
-                AlertName = "TEST_ALERT",
-                Priority = Alert.Priorities.Medium1,
-                TriggerDate = new DateTime(2026, 2, 9, 10, 15, 30),
-                Message = "Test message",
-                ConnectionID = "Server1",
-                InstanceDisplayName = "Server1",
-                AlertType = "Test"
-            };
-
+            var testAlert = CreateTestAlert(priority: Alert.Priorities.Medium1, triggerDate: new DateTime(2026, 2, 9, 10, 15, 30), message: "Test message", connectionId: "Server1", instanceDisplayName: "Server1");
             var emailChannel = new EmailNotificationChannel
             {
-                ChannelName = "TestChannel"
+                ChannelName = DefaultChannelName
             };
 
             // Test various case combinations
@@ -111,17 +94,14 @@ namespace DBADashConfig.Test
         public void TestAllPlaceholdersIncludingTriggerDate()
         {
             // Arrange
-            var testAlert = new Alert
-            {
-                AlertID = 1,
-                AlertName = "CPU_HIGH",
-                Priority = Alert.Priorities.Critical,
-                TriggerDate = new DateTime(2026, 2, 9, 16, 45, 0),
-                Message = "CPU usage is 95%",
-                ConnectionID = "PROD-SQL-01",
-                InstanceDisplayName = "Production SQL Server",
-                AlertType = "Performance"
-            };
+            var testAlert = CreateTestAlert(
+                alertName: "CPU_HIGH",
+                priority: Alert.Priorities.Critical,
+                triggerDate: new DateTime(2026, 2, 9, 16, 45, 0),
+                message: "CPU usage is 95%",
+                connectionId: "PROD-SQL-01",
+                instanceDisplayName: "Production SQL Server",
+                alertType: "Performance");
 
             var emailChannel = new EmailNotificationChannel
             {
@@ -180,6 +160,107 @@ namespace DBADashConfig.Test
             // When IsHTML is false ensure the returned template is not HTML
             Assert.IsFalse(string.IsNullOrWhiteSpace(content), "Template should not be empty");
             Assert.IsFalse(content.ToLowerInvariant().Contains("<html"), "Expected plain-text template, not HTML");
+        }
+
+        private static Alert CreateTestAlert(
+            bool isResolved = false,
+            string alertName = DefaultAlertName,
+            Alert.Priorities priority = Alert.Priorities.High1,
+            DateTime? triggerDate = null,
+            string message = DefaultMessage,
+            string connectionId = DefaultConnectionId,
+            string instanceDisplayName = DefaultInstanceDisplayName,
+            string alertType = DefaultAlertType)
+        {
+            return new Alert
+            {
+                AlertID = 1,
+                AlertName = alertName,
+                Priority = priority,
+                TriggerDate = triggerDate ?? DefaultTriggerDate,
+                Message = message,
+                ConnectionID = connectionId,
+                InstanceDisplayName = instanceDisplayName,
+                AlertType = alertType,
+                IsResolved = isResolved
+            };
+        }
+
+        private static EmailNotificationChannel CreateEmailChannel(
+            string toEmail = DefaultToEmail,
+            string resolutionToEmail = DefaultResolutionToEmail,
+            string channelName = DefaultChannelName,
+            string host = DefaultSmtpHost,
+            int port = DefaultSmtpPort,
+            string fromEmail = DefaultFromEmail,
+            string from = DefaultFromName)
+        {
+            return new EmailNotificationChannel
+            {
+                ChannelName = channelName,
+                Host = host,
+                Port = port,
+                FromEmail = fromEmail,
+                From = from,
+                ToEmail = toEmail,
+                ResolutionToEmail = resolutionToEmail
+            };
+        }
+
+        [TestMethod]
+        public void SendNotification_UnresolvedAlert_UsesToEmail()
+        {
+            // Arrange
+            var testAlert = CreateTestAlert(isResolved: false);
+            var emailChannel = CreateEmailChannel();
+
+            // Act
+            var result = emailChannel.GetRecipientEmail(testAlert);
+
+            // Assert
+            Assert.AreEqual("to@example.com", result, "Unresolved alerts should use ToEmail");
+        }
+
+        [TestMethod]
+        public void SendNotification_ResolvedAlert_UsesResolutionToEmail()
+        {
+            // Arrange
+            var testAlert = CreateTestAlert(isResolved: true);
+            var emailChannel = CreateEmailChannel();
+
+            // Act
+            var result = emailChannel.GetRecipientEmail(testAlert);
+
+            // Assert
+            Assert.AreEqual("resolved@example.com", result, "Resolved alerts should use ResolutionToEmail when configured");
+        }
+
+        [TestMethod]
+        public void SendNotification_ResolvedAlert_FallsBackToToEmail_WhenResolutionToEmailNotConfigured()
+        {
+            // Arrange
+            var testAlert = CreateTestAlert(isResolved: true);
+            var emailChannel = CreateEmailChannel(resolutionToEmail: null);
+
+            // Act
+            var result = emailChannel.GetRecipientEmail(testAlert);
+
+            // Assert
+            Assert.AreEqual("to@example.com", result, "Resolved alerts should fall back to ToEmail when ResolutionToEmail is not configured");
+        }
+
+        [TestMethod]
+        public void SendNotification_ResolvedAlert_FallsBackToToEmail_WhenResolutionToEmailIsEmpty()
+        {
+            // Arrange
+            var testAlert = CreateTestAlert(isResolved: true);
+            var emailChannel = CreateEmailChannel(resolutionToEmail: "   ");
+
+            // Act
+            var result = emailChannel.GetRecipientEmail(testAlert);
+
+            // Assert
+            Assert.AreEqual("to@example.com", result, "Resolved alerts should fall back to ToEmail when ResolutionToEmail is whitespace");
         }
     }
 }

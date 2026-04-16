@@ -69,7 +69,7 @@ namespace DBADash.Alert
         [Description("Optional. Email address to send resolved alert notifications to. If blank, uses To Email.")]
         public string ResolutionToEmail { get; set; }
 
-        [Description("Optional. Name associated with resolution email address. Default to Resolution To Email or channel name.")]
+        [Description("Optional. Name associated with resolution email address. Defaults to ResolutionToEmail if specified, otherwise defaults to To (which defaults to channel name).")]
         [Category("Email Config")]
         [DisplayName("Resolution To")]
         public string ResolutionTo { get; set; }
@@ -91,10 +91,21 @@ namespace DBADash.Alert
             ? IsHTML ? DefaultHTMLMessageTemplate : DefaultEmailMessageTemplate
             : EmailMessageTemplate;
 
-        protected override async Task InternalSendNotificationAsync(Alert alert, string connectionString)
+        /// <summary>
+        /// Gets the recipient email address based on alert resolution status and configuration.
+        /// </summary>
+        /// <param name="alert">The alert to determine the recipient for</param>
+        /// <returns>The recipient email address</returns>
+        public string GetRecipientEmail(Alert alert)
         {
             var sendToResolutionRecipient = alert.IsResolved && !string.IsNullOrWhiteSpace(ResolutionToEmail);
-            var recipientEmail = sendToResolutionRecipient ? ResolutionToEmail : ToEmail;
+            return sendToResolutionRecipient ? ResolutionToEmail : ToEmail;
+        }
+
+        protected override async Task InternalSendNotificationAsync(Alert alert, string connectionString)
+        {
+            var recipientEmail = GetRecipientEmail(alert);
+            var sendToResolutionRecipient = alert.IsResolved && !string.IsNullOrWhiteSpace(ResolutionToEmail);
             var recipientName = sendToResolutionRecipient
                 ? (string.IsNullOrWhiteSpace(ResolutionTo) ? ResolutionToEmail : ResolutionTo)
                 : (string.IsNullOrWhiteSpace(To) ? ChannelName : To);
@@ -137,6 +148,11 @@ namespace DBADash.Alert
                 {
                     yield return new ValidationResult($"Email templates must contain at least one of the following placeholders: {string.Join(", ", Placeholders)}.  Or leave blank to use the default template.");
                 }
+            }
+
+            if (!string.IsNullOrWhiteSpace(ResolutionTo) && string.IsNullOrWhiteSpace(ResolutionToEmail))
+            {
+                yield return new ValidationResult("ResolutionToEmail is required when ResolutionTo is specified. ResolutionTo will only be used when sending to resolved alert recipients.");
             }
 
             foreach (var validationResult in ValidateBase(validationContext)) yield return validationResult;
