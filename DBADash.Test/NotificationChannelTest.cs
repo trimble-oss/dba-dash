@@ -208,7 +208,7 @@ namespace DBADashConfig.Test
         }
 
         [TestMethod]
-        public void SendNotification_UnresolvedAlert_UsesToEmail()
+        public void GetRecipientEmail_UnresolvedAlert_UsesToEmail()
         {
             // Arrange
             var testAlert = CreateTestAlert(isResolved: false);
@@ -222,7 +222,7 @@ namespace DBADashConfig.Test
         }
 
         [TestMethod]
-        public void SendNotification_ResolvedAlert_UsesResolutionToEmail()
+        public void GetRecipientEmail_ResolvedAlert_UsesResolutionToEmail()
         {
             // Arrange
             var testAlert = CreateTestAlert(isResolved: true);
@@ -236,7 +236,7 @@ namespace DBADashConfig.Test
         }
 
         [TestMethod]
-        public void SendNotification_ResolvedAlert_FallsBackToToEmail_WhenResolutionToEmailNotConfigured()
+        public void GetRecipientEmail_ResolvedAlert_FallsBackToToEmail_WhenResolutionToEmailNotConfigured()
         {
             // Arrange
             var testAlert = CreateTestAlert(isResolved: true);
@@ -250,7 +250,7 @@ namespace DBADashConfig.Test
         }
 
         [TestMethod]
-        public void SendNotification_ResolvedAlert_FallsBackToToEmail_WhenResolutionToEmailIsEmpty()
+        public void GetRecipientEmail_ResolvedAlert_FallsBackToToEmail_WhenResolutionToEmailIsEmpty()
         {
             // Arrange
             var testAlert = CreateTestAlert(isResolved: true);
