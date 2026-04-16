@@ -1,4 +1,4 @@
-﻿CREATE PROC Alert.Rule_Add(
+CREATE PROC Alert.Rule_Add(
 	@Type VARCHAR(50),
 	@AlertKey NVARCHAR(256),
 	@Priority INT,
@@ -9,8 +9,9 @@
 	@IsActive BIT=1,
 	@Details NVARCHAR(MAX),
 	@Notes NVARCHAR(MAX)=NULL,
-	@ApplyToHidden BIT=0
+	@ApplyToHidden BIT=0,
+	@GroupID INT=0
 )
 AS
-INSERT INTO Alert.Rules (Type, AlertKey, Priority, ApplyToTagID,ApplyToInstanceID, Threshold, EvaluationPeriodMins, IsActive, Details, Notes, ApplyToHidden)
-VALUES (@Type, @AlertKey, @Priority, @ApplyToTagID,@ApplyToInstanceID, @Threshold, @EvaluationPeriodMins, @IsActive, @Details, @Notes, @ApplyToHidden)
+INSERT INTO Alert.Rules (Type, AlertKey, Priority, ApplyToTagID,ApplyToInstanceID, Threshold, EvaluationPeriodMins, IsActive, Details, Notes, ApplyToHidden, GroupID)
+VALUES (@Type, @AlertKey, @Priority, @ApplyToTagID,@ApplyToInstanceID, @Threshold, @EvaluationPeriodMins, @IsActive, @Details, @Notes, @ApplyToHidden, @GroupID)

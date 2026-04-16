@@ -1,4 +1,4 @@
-﻿CREATE TABLE Alert.NotificationChannel(
+CREATE TABLE Alert.NotificationChannel(
 	NotificationChannelID INT IDENTITY(1,1),
 	NotificationChannelTypeID TINYINT NOT NULL,
 	ChannelName NVARCHAR(100) NOT NULL,
@@ -11,6 +11,7 @@
 	SucceededNotificationCount INT NOT NULL CONSTRAINT DF_Alert_NotificationChannel_SucceededNotificationCount DEFAULT(0),
 	LastFailure NVARCHAR(MAX) NULL,
 	AcknowledgedNotification BIT NOT NULL CONSTRAINT DF_Alert_AcknowledgedNotification DEFAULT(0),
+	GroupID INT NOT NULL CONSTRAINT DF_NotificationChannel_GroupID DEFAULT(0),
 	CONSTRAINT FK_NotificationChannel_NotificationChannelType FOREIGN KEY(NotificationChannelTypeID) REFERENCES Alert.NotificationChannelType(NotificationChannelTypeID),
 	CONSTRAINT PK_NotificationChannel PRIMARY KEY(NotificationChannelID)
 )

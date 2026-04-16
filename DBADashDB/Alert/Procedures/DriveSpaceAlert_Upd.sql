@@ -1,4 +1,4 @@
-﻿CREATE PROC Alert.DriveSpaceAlert_Upd
+CREATE PROC Alert.DriveSpaceAlert_Upd
 AS
 /* 
 	Get instances that fail the DriveSpace alert rule & update the active alerts
@@ -25,19 +25,21 @@ CREATE TABLE #EffectiveThresholds(
 	IsThresholdPercentage BIT NOT NULL,
 	DriveLetter CHAR(1) COLLATE DATABASE_DEFAULT NULL,
 	AlertKey NVARCHAR(256) COLLATE DATABASE_DEFAULT NOT NULL,
-	RuleID INT NOT NULL
+	RuleID INT NOT NULL,
+	GroupID INT NOT NULL DEFAULT(0)
 )
 
 INSERT INTO #EffectiveThresholds
 (
-    InstanceID,
-    Priority,
-    Threshold,
-    UseCriticalStatus,
-    IsThresholdPercentage,
-    DriveLetter,
+	InstanceID,
+	Priority,
+	Threshold,
+	UseCriticalStatus,
+	IsThresholdPercentage,
+	DriveLetter,
 	AlertKey,
-	RuleID
+	RuleID,
+	GroupID
 )
 SELECT I.InstanceID,
 	R.Priority,	
@@ -46,7 +48,8 @@ SELECT I.InstanceID,
 	ISNULL(TRY_CAST(JSON_VALUE(R.Details,'$.IsThresholdPercentage') AS BIT),1) AS IsThresholdPercentage,
 	TRY_CAST(JSON_VALUE(R.Details,'$.DriveLetter') AS CHAR(1)) AS DriveLetter,
 	R.AlertKey,
-	R.RuleID
+	R.RuleID,
+	R.GroupID
 FROM Alert.Rules R
 CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
 WHERE R.Type = @Type
@@ -59,7 +62,8 @@ CREATE TABLE #ExceededThreshold (
 	Priority INT NOT NULL,
 	AlertKey NVARCHAR(256) NOT NULL,
 	Message NVARCHAR(MAX) NOT NULL,
-	RuleID INT NOT NULL
+	RuleID INT NOT NULL,
+	GroupID INT NOT NULL DEFAULT(0)
 );
 /* De dupe so we have a single row per drive/instance */
 WITH DeDupe AS (
@@ -68,7 +72,8 @@ WITH DeDupe AS (
 		T.AlertKey,
 		CONCAT('Drive ',DS.Name,' is low on disk space. ',FORMAT(DS.FreeGB,'N1'),'GB free of ',FORMAT(DS.TotalGB,'N1'),' (',FORMAT(DS.PctFreeSpace,'P1'),')') AS Message,
 		T.RuleID,
-		ROW_NUMBER() OVER (PARTITION BY T.InstanceID,DS.DriveID ORDER BY T.Priority,T.RuleID) AS rnum
+		T.GroupID,
+		ROW_NUMBER() OVER (PARTITION BY T.InstanceID,T.GroupID,DS.DriveID ORDER BY T.Priority,T.RuleID) AS rnum
 	FROM #EffectiveThresholds T
 	JOIN dbo.DriveStatus DS ON T.InstanceID = DS.InstanceID
 	WHERE (DS.Status = 1 OR T.UseCriticalStatus=0)
@@ -81,23 +86,26 @@ INSERT INTO #ExceededThreshold(
 	Priority,
 	AlertKey,
 	Message,
-	RuleID
+	RuleID,
+	GroupID
 )
 SELECT InstanceID,
 	Priority,
 	AlertKey,
 	Message,
-	RuleID 
+	RuleID,
+	GroupID
 FROM DeDupe 
 WHERE rnum = 1
 
 /* Aggregate so we have a single row per instance */
 INSERT INTO @AlertDetails(
-    InstanceID,
-    Priority,
-    Message,
+	InstanceID,
+	Priority,
+	Message,
 	AlertKey,
-	RuleID
+	RuleID,
+	GroupID
 )
 SELECT	ET.InstanceID,
 		MIN(ET.Priority) AS Priority,
@@ -105,11 +113,13 @@ SELECT	ET.InstanceID,
 ' + ETcsv.Message FROM #ExceededThreshold ETcsv
 		WHERE ETcsv.InstanceID = ET.InstanceID
 		AND ETcsv.AlertKey = ET.AlertKey
+		AND ETcsv.GroupID = ET.GroupID
 		ORDER BY ETcsv.Priority
 		FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,2,''),
 		ET.AlertKey,
-		MIN(RuleID) 
+		MIN(RuleID),
+		ET.GroupID
 FROM #ExceededThreshold ET
-GROUP BY ET.InstanceID,ET.AlertKey
+GROUP BY ET.InstanceID,ET.AlertKey,ET.GroupID
 
 EXEC Alert.ActiveAlerts_Upd @AlertDetails=@AlertDetails,@AlertType=@Type

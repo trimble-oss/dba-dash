@@ -1,4 +1,4 @@
-﻿CREATE PROC Alert.AgentJobAlert_Upd
+CREATE PROC Alert.AgentJobAlert_Upd
 AS
 DECLARE @Type VARCHAR(50)= 'AgentJob'
 DECLARE @AlertKeyPrefix NVARCHAR(256) = 'Job:'
@@ -50,7 +50,8 @@ CREATE TABLE #AgentJobApplicable(
 	JobName NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NULL,
 	ExcludeCategory NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NULL,
 	ExcludeJobName NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NULL,
-	RuleID INT NOT NULL
+	RuleID INT NOT NULL,
+	GroupID INT NOT NULL DEFAULT(0)
 )
 /* Get a list of rules and instances they apply to */
 INSERT INTO #AgentJobApplicable(
@@ -60,7 +61,8 @@ INSERT INTO #AgentJobApplicable(
 	JobName,
 	ExcludeCategory,
 	ExcludeJobName,
-	RuleID
+	RuleID,
+	GroupID
 )
 SELECT I.InstanceID,
 		R.Priority,
@@ -69,7 +71,8 @@ SELECT I.InstanceID,
 		NULLIF(LTRIM(REPLACE(REPLACE(D.JobName,CHAR(13)+CHAR(10),CHAR(10)),CHAR(13),CHAR(10))),'') AS JobName,
 		NULLIF(REPLACE(REPLACE(D.ExcludeCategory,CHAR(13)+CHAR(10),CHAR(10)),CHAR(13),CHAR(10)),'') AS ExcludeCategory,
 		NULLIF(REPLACE(REPLACE(D.ExcludeJobName,CHAR(13)+CHAR(10),CHAR(10)),CHAR(13),CHAR(10)),'') AS ExcludeJobName,
-		R.RuleID
+		R.RuleID,
+		R.GroupID
 FROM Alert.Rules R
 OUTER APPLY OPENJSON(CASE WHEN ISJSON(R.Details)=1 THEN R.Details ELSE N'{}' END)
 WITH (
@@ -89,13 +92,15 @@ INSERT INTO @AlertDetails(
 	Priority,
 	Message,
 	AlertKey,
-	RuleID
+	RuleID,
+	GroupID
 )
 SELECT J.InstanceID,
 		AJA.Priority, 
 		J.name + ' job failed',
 		CONCAT(@AlertKeyPrefix, J.name) AS AlertKey,
-		AJA.RuleID
+		AJA.RuleID,
+		AJA.GroupID
 FROM dbo.Jobs J
 JOIN #AgentJobApplicable AJA ON J.InstanceID = AJA.InstanceID 
 LEFT JOIN Alert.AgentJobSnapshot AJS ON AJS.InstanceID = J.InstanceID AND AJS.job_id = J.job_id /* previous snapshot of recently failed jobs */

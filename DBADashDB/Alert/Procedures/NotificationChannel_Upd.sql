@@ -1,11 +1,12 @@
-﻿CREATE PROC Alert.NotificationChannel_Upd(
+CREATE PROC Alert.NotificationChannel_Upd(
 	@ChannelName NVARCHAR(100),
 	@DisableFrom DATETIME=NULL,
 	@DisableTo DATETIME=NULL,
 	@NotificationChannelTypeID INT,
 	@ChannelDetails NVARCHAR(MAX),
 	@NotificationChannelID INT,
-	@AcknowledgedNotification BIT=0
+	@AcknowledgedNotification BIT=0,
+	@GroupID INT=0
 )
 AS
 UPDATE Alert.NotificationChannel
@@ -14,5 +15,6 @@ SET NotificationChannelTypeID = @NotificationChannelTypeID,
 	DisableFrom = @DisableFrom,
 	DisableTo = @DisableTo,
 	ChannelDetails = @ChannelDetails,
-	AcknowledgedNotification = @AcknowledgedNotification
+	AcknowledgedNotification = @AcknowledgedNotification,
+	GroupID = @GroupID
 WHERE NotificationChannelID = @NotificationChannelID

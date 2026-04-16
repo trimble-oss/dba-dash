@@ -40,9 +40,12 @@ SELECT	NC.NotificationChannelID,
 		CASE WHEN NC.LastSucceededNotification IS NULL AND NC.LastFailedNotification IS NULL THEN 3 
 			WHEN NC.LastFailedNotification > ISNULL(NC.LastSucceededNotification,''19000101'') OR LastSucceededNotification IS NULL THEN 1 
 			WHEN NC.LastFailedNotification > DATEADD(d,-3,SYSUTCDATETIME()) THEN 2  ELSE 4 END AS LastFailureStatus,
-		NC.AcknowledgedNotification
+		NC.AcknowledgedNotification,
+		NC.GroupID,
+		G.GroupName
 FROM Alert.NotificationChannel NC 
 JOIN Alert.NotificationChannelType NCT ON NC.NotificationChannelTypeID = NCT.NotificationChannelTypeID
+LEFT JOIN Alert.NotificationChannelGroup G ON NC.GroupID = G.GroupID
 OUTER APPLY(SELECT COUNT(*) AS ScheduleCount
 			FROM Alert.NotificationChannelSchedule NCS
 			WHERE NCS.NotificationChannelID = NC.NotificationChannelID

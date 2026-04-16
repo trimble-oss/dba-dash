@@ -21,7 +21,8 @@ CREATE TABLE #DatabaseStatusApplicable(
 	Priority TINYINT NOT NULL,
 	DatabaseName NVARCHAR(128) COLLATE DATABASE_DEFAULT NULL,
 	ExcludedStates NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NULL,
-	RuleID INT NOT NULL
+	RuleID INT NOT NULL,
+	GroupID INT NOT NULL DEFAULT(0)
 )
 
 /* Get a list of rules and the instances they apply to */
@@ -30,7 +31,8 @@ INSERT INTO #DatabaseStatusApplicable(
 	Priority,
 	DatabaseName,
 	ExcludedStates,
-	RuleID
+	RuleID,
+	GroupID
 )
 SELECT I.InstanceID,
 		R.Priority,
@@ -39,7 +41,8 @@ SELECT I.InstanceID,
 			WHEN JSON_VALUE(R.Details,'$.ExcludedStates[0]') IS NULL THEN '[0,1,7,10]'
 			ELSE JSON_QUERY(R.Details,'$.ExcludedStates')
 		END AS ExcludedStates,
-		R.RuleID
+		R.RuleID,
+		R.GroupID
 FROM Alert.Rules R
 CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID, R.ApplyToInstanceID, R.AlertKey, R.ApplyToHidden) I
 WHERE R.Type = @Type
@@ -52,13 +55,15 @@ INSERT INTO @AlertDetails(
 	Priority,
 	Message,
 	AlertKey,
-	RuleID
+	RuleID,
+	GroupID
 )
 SELECT D.InstanceID,
 		DSA.Priority,
 		CONCAT(D.name, ' is ', D.state_desc),
 		CONCAT(@AlertKeyPrefix, D.name) AS AlertKey,
-		DSA.RuleID
+		DSA.RuleID,
+		DSA.GroupID
 FROM dbo.Databases D
 JOIN #DatabaseStatusApplicable DSA ON D.InstanceID = DSA.InstanceID
 		AND (D.name LIKE DSA.DatabaseName OR DSA.DatabaseName IS NULL)
@@ -85,5 +90,6 @@ AND NOT EXISTS(
 			FROM @AlertDetails AD
 			WHERE AD.InstanceID = AA.InstanceID
 			AND AD.AlertKey = AA.AlertKey
+			AND AD.GroupID = AA.GroupID
 )
 AND AA.IsResolved = 0

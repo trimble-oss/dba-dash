@@ -484,7 +484,9 @@ namespace DBADashGUI.DBADashAlerts
                                 }
                             } },
                             { "RuleID", new ColumnMetadata { Alias = "Rule#", Link = new PlaceholderLinkInfo() } },
-                            { "DefaultSortOrder", new ColumnMetadata { Alias = "Default Sort Order", Visible = false } }
+                            { "DefaultSortOrder", new ColumnMetadata { Alias = "Default Sort Order", Visible = false } },
+                            { "GroupID", new ColumnMetadata { Alias = "Group ID", Visible = false } },
+                            { "GroupName", new ColumnMetadata { Alias = "Group", Visible = true, Description = "Notification channel group" } }
                         }
                     }
                 }
@@ -571,7 +573,9 @@ namespace DBADashGUI.DBADashAlerts
                                     TargetColumn = "RuleNotes"
                                 }
                             } },
-                            { "RuleID", new ColumnMetadata { Alias = "Rule#" } }
+                            { "RuleID", new ColumnMetadata { Alias = "Rule#" } },
+                            { "GroupID", new ColumnMetadata { Alias = "Group ID", Visible = false } },
+                            { "GroupName", new ColumnMetadata { Alias = "Group", Visible = true, Description = "Notification channel group" } }
                         }
                     }
                 }

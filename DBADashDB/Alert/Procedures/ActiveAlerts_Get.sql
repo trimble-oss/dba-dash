@@ -54,6 +54,8 @@ SELECT  AA.AlertID,
 			ELSE 4 END AS AlertStatus,
 		AA.Notes,
 		AA.RuleID,
+		AA.GroupID,
+		ISNULL(NCG.GroupName,CONCAT('Missing group: ',AA.GroupID)) AS GroupName,
 		R.Notes AS RuleNotes,
 		ROW_NUMBER() OVER(ORDER BY AA.IsResolved,
 								AA.IsBlackout,
@@ -64,6 +66,7 @@ SELECT  AA.AlertID,
 FROM Alert.ActiveAlerts AA
 LEFT JOIN Alert.Rules R ON AA.RuleID = R.RuleID
 JOIN dbo.Instances I ON I.InstanceID = AA.InstanceID
+LEFT JOIN Alert.NotificationChannelGroup NCG ON NCG.GroupID = AA.GroupID
 OUTER APPLY dbo.SecondsToHumanDuration(DATEDIFF(SECOND,AA.TriggerDate,CASE WHEN AA.IsResolved=1 THEN AA.ResolvedDate ELSE SYSUTCDATETIME() END)) AS AlertDuration
 OUTER APPLY dbo.SecondsToHumanDuration(DATEDIFF(SECOND,AA.UpdatedDate,SYSUTCDATETIME())) AS LastUpdate
 OUTER APPLY dbo.SecondsToHumanDuration(DATEDIFF(SECOND,AA.LastNotification,SYSUTCDATETIME())) AS LastNotification

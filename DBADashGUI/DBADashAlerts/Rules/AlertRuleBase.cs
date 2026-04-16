@@ -138,6 +138,12 @@ namespace DBADashGUI.DBADashAlerts.Rules
         [DisplayName("Apply To Hidden"), Category("Instance Filtering"), Description("Option to apply alert to instances marked as hidden.  Default is false.")]
         public bool ApplyToHidden { get; set; }
 
+        [JsonIgnore]
+        [DisplayName("Notification Channel Group")]
+        [Category("DBA Dash Notification")]
+        [Description("Assign this rule to a notification channel group. Alerts from this rule will only be sent to channels in the same group.")]
+        public int GroupID { get; set; } = 0;
+
         public abstract (bool isValid, string message) Validate();
 
         public void Save()
@@ -170,6 +176,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
             cmd.Parameters.AddWithValue("@AlertKey", AlertKey);
             cmd.Parameters.AddWithValue("@Notes", Notes);
             cmd.Parameters.AddWithValue("@ApplyToHidden", ApplyToHidden);
+            cmd.Parameters.AddWithValue("@GroupID", GroupID);
             cn.Open();
             cmd.ExecuteNonQuery();
         }
@@ -206,7 +213,8 @@ namespace DBADashGUI.DBADashAlerts.Rules
                     rdr.IsDBNull("ApplyToInstanceID") ? null : rdr.GetInt32("ApplyToInstanceID"),
                     rdr.IsDBNull("ApplyToInstanceID") ? null : Convert.ToString(rdr["ApplyToInstance"]),
                 (string)rdr["Notes"].DBNullToNull(),
-                     (bool)rdr["ApplyToHidden"]);
+                     (bool)rdr["ApplyToHidden"],
+                rdr.IsDBNull("GroupID") ? 0 : rdr.GetInt32("GroupID"));
             }
             else
             {
@@ -216,7 +224,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
 
         public static AlertRuleBase GetRule(int ruleID, RuleTypes ruleType, short priority, int applyToTagID, decimal? threshold,
             int? evaluationPeriodMins, bool isActive, string details, string applyToTag, int? applyToInstanceId,
-            string applyToInstance, string notes, bool applyToHidden)
+            string applyToInstance, string notes, bool applyToHidden, int groupID = 0)
         {
             AlertRuleBase rule = ruleType switch
             {
@@ -244,6 +252,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
             rule.ApplyToInstance = applyToInstance;
             rule.Notes = notes;
             rule.ApplyToHidden = applyToHidden;
+            rule.GroupID = groupID;
             return rule;
         }
     }

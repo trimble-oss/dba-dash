@@ -44,10 +44,13 @@ SELECT  TOP(@Top)
 		CA.Notes,
 		CA.ClosedDate,
 		CA.RuleID,
+		CA.GroupID,
+		ISNULL(NCG.GroupName,CONCAT('Missing group: ',CA.GroupID)) AS GroupName,
 		R.Notes AS RuleNotes
 FROM Alert.ClosedAlerts CA
 LEFT JOIN Alert.Rules R ON CA.RuleID = R.RuleID
 JOIN dbo.Instances I ON I.InstanceID = CA.InstanceID
+LEFT JOIN Alert.NotificationChannelGroup NCG ON NCG.GroupID = CA.GroupID
 OUTER APPLY dbo.SecondsToHumanDuration(DATEDIFF(SECOND,CA.TriggerDate,CASE WHEN CA.IsResolved=1 THEN CA.ResolvedDate ELSE SYSUTCDATETIME() END)) AS AlertDuration
 OUTER APPLY dbo.SecondsToHumanDuration(DATEDIFF(SECOND,CA.UpdatedDate,SYSUTCDATETIME())) AS LastUpdate
 OUTER APPLY dbo.SecondsToHumanDuration(DATEDIFF(SECOND,CA.LastNotification,SYSUTCDATETIME())) AS LastNotification
