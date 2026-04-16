@@ -92,21 +92,30 @@ namespace DBADash.Alert
             : EmailMessageTemplate;
 
         /// <summary>
+        /// Determines whether the resolution recipient should be used for the given alert.
+        /// </summary>
+        /// <param name="alert">The alert to check</param>
+        /// <returns>True if the resolution recipient should be used; otherwise false</returns>
+        private bool ShouldUseResolutionRecipient(Alert alert)
+        {
+            return alert.IsResolved && !string.IsNullOrWhiteSpace(ResolutionToEmail);
+        }
+
+        /// <summary>
         /// Gets the recipient email address based on alert resolution status and configuration.
         /// </summary>
         /// <param name="alert">The alert to determine the recipient for</param>
         /// <returns>The recipient email address</returns>
         public string GetRecipientEmail(Alert alert)
         {
-            var sendToResolutionRecipient = alert.IsResolved && !string.IsNullOrWhiteSpace(ResolutionToEmail);
-            return sendToResolutionRecipient ? ResolutionToEmail : ToEmail;
+            return ShouldUseResolutionRecipient(alert) ? ResolutionToEmail : ToEmail;
         }
 
         protected override async Task InternalSendNotificationAsync(Alert alert, string connectionString)
         {
             var recipientEmail = GetRecipientEmail(alert);
-            var sendToResolutionRecipient = alert.IsResolved && !string.IsNullOrWhiteSpace(ResolutionToEmail);
-            var recipientName = sendToResolutionRecipient
+            var useResolutionRecipient = ShouldUseResolutionRecipient(alert);
+            var recipientName = useResolutionRecipient
                 ? (string.IsNullOrWhiteSpace(ResolutionTo) ? ResolutionToEmail : ResolutionTo)
                 : (string.IsNullOrWhiteSpace(To) ? ChannelName : To);
 
