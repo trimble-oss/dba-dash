@@ -29,6 +29,11 @@ namespace DBADashGUI.DBADashAlerts
             cboType.Text = AlertRule?.RuleType.ToString() ?? string.Empty;
             if (AlertRule != null)
             {
+                // Attach the group converter so the PropertyGrid shows a dropdown instead of a raw int
+                TypeDescriptor.AddProviderTransparent(
+                    new GroupIdConverterProvider(TypeDescriptor.GetProvider(AlertRule)),
+                    AlertRule);
+
                 propertyGrid1.SelectedObject = AlertRule;
                 cboType.Enabled = AlertRule.RuleID == null;
             }
@@ -52,6 +57,11 @@ namespace DBADashGUI.DBADashAlerts
             {
                 CommonShared.ShowExceptionDialog(ex);
             }
+
+            // Attach the group converter so the PropertyGrid shows a dropdown instead of a raw int
+            TypeDescriptor.AddProviderTransparent(
+                new GroupIdConverterProvider(TypeDescriptor.GetProvider(AlertRule)),
+                AlertRule);
 
             propertyGrid1.SelectedObject = AlertRule;
         }

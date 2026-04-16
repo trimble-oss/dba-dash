@@ -1,8 +1,9 @@
-﻿CREATE TYPE Alert.AlertDetails AS TABLE (
+CREATE TYPE Alert.AlertDetails AS TABLE (
 	InstanceID INT NOT NULL,
 	Priority INT NOT NULL,
 	AlertKey NVARCHAR(256) NOT NULL,
 	Message NVARCHAR(MAX) NOT NULL,
-	RuleID INT NULL
+	RuleID INT NULL,
+	GroupID INT NOT NULL DEFAULT(0)
 )
 

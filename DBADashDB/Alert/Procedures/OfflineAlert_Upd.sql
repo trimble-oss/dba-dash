@@ -1,4 +1,4 @@
-﻿CREATE PROC Alert.OfflineAlert_Upd
+CREATE PROC Alert.OfflineAlert_Upd
 AS
 SET NOCOUNT ON
 DECLARE @Type VARCHAR(50)='OFFLINE';
@@ -18,50 +18,57 @@ PRINT CONCAT('Processing alerts of type ',@Type)
 DECLARE @AlertDetails Alert.AlertDetails;
 
 CREATE TABLE #Instances(
-	InstanceID INT NOT NULL PRIMARY KEY,
+	InstanceID INT NOT NULL,
 	AlertKey NVARCHAR(256) COLLATE DATABASE_DEFAULT NOT NULL,
 	Priority INT NOT NULL,
-	RuleID INT NOT NULL
+	RuleID INT NOT NULL,
+	GroupID INT NOT NULL DEFAULT(0),
+	PRIMARY KEY(InstanceID,GroupID)
 );
 
-/* Get the Offline rules that apply to each instance, ensuring thewe have a single rule per instance. */
+/* Get the Offline rules that apply to each instance, ensuring we have a single rule per instance and group. */
 WITH DeDupe AS (
 	SELECT I.InstanceID,
 			R.AlertKey,
 			R.Priority,
 			R.RuleID,
-			ROW_NUMBER() OVER(PARTITION BY I.InstanceID ORDER BY R.Priority, R.RuleID) rnum
+			R.GroupID,
+			ROW_NUMBER() OVER(PARTITION BY I.InstanceID,R.GroupID ORDER BY R.Priority, R.RuleID) rnum
 	FROM Alert.Rules R
 	CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
 	WHERE R.Type = @Type
 	AND R.IsActive=1
 )
 INSERT INTO #Instances(
-    InstanceID,
+	InstanceID,
 	AlertKey,
 	Priority,
-	RuleID
+	RuleID,
+	GroupID
 )
 SELECT	InstanceID,
 		AlertKey,
 		Priority,
-		RuleID 
-FROM DeDupe 
+		RuleID,
+		GroupID
+FROM DeDupe
 WHERE rnum=1
 
 INSERT INTO @AlertDetails
 (
-    InstanceID,
-    Priority,
+	InstanceID,
+	Priority,
 	AlertKey,
-    Message,
-	RuleID
+	Message,
+	RuleID,
+	GroupID
 )
 SELECT	OI.InstanceID,
 		I.Priority,
 		I.AlertKey,
 		'Instance is offline',
-		I.RuleID
+		I.RuleID,
+		I.GroupID
 FROM dbo.OfflineInstances OI
 JOIN #Instances I ON OI.InstanceID = I.InstanceID
 WHERE OI.IsCurrent=1

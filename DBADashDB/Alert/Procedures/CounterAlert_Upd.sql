@@ -1,4 +1,4 @@
-﻿CREATE PROC Alert.CounterAlert_Upd
+CREATE PROC Alert.CounterAlert_Upd
 AS
 /* 
 	Get instances that fail the Counter alert rule & update the active alerts
@@ -27,7 +27,8 @@ CREATE TABLE #EffectiveThresholds (
 	Aggregation VARCHAR(10) COLLATE DATABASE_DEFAULT NOT NULL,
 	Threshold DECIMAL(28,9) NULL,
 	ComparisonSymbol VARCHAR(10) COLLATE DATABASE_DEFAULT NOT NULL,
-	CounterType TINYINT NOT NULL
+	CounterType TINYINT NOT NULL,
+	GroupID INT NOT NULL DEFAULT(0)
 )
 /* Get rule details & the instances they apply to */
 INSERT INTO #EffectiveThresholds(
@@ -40,7 +41,8 @@ INSERT INTO #EffectiveThresholds(
 	Aggregation,
 	Threshold,
 	ComparisonSymbol,
-	CounterType
+	CounterType,
+	GroupID
 )
 SELECT 	I.InstanceID,
 		R.RuleID,
@@ -51,7 +53,8 @@ SELECT 	I.InstanceID,
 		Calc.Aggregation,
 		R.Threshold,
 		Calc.ComparisonSymbol,
-		C.CounterType
+		C.CounterType,
+		R.GroupID
 FROM Alert.Rules R 
 OUTER APPLY(SELECT TRY_CAST(JSON_VALUE(R.Details,'$.Counter.ObjectName') AS NVARCHAR(128)) AS ObjectName,
 		TRY_CAST(JSON_VALUE(R.Details,'$.Counter.CounterName') AS NVARCHAR(128)) AS CounterName,
@@ -76,6 +79,7 @@ CREATE TABLE #ExceededThreshold(
 	Threshold DECIMAL(28,9) NOT NULL,
 	Priority INT NOT NULL,
 	RuleID INT NOT NULL,
+	GroupID INT NOT NULL DEFAULT(0),
 	Aggregation VARCHAR(10) COLLATE DATABASE_DEFAULT NOT NULL,
 	ComparisonSymbol VARCHAR(10) COLLATE DATABASE_DEFAULT NOT NULL,
 	EvaluationPeriodMins TINYINT NOT NULL,
@@ -89,6 +93,7 @@ INSERT INTO #ExceededThreshold(
 		Threshold,
 		Priority,
 		RuleID,
+		GroupID,
 		Aggregation,
 		ComparisonSymbol,
 		EvaluationPeriodMins
@@ -100,6 +105,7 @@ SELECT	T.InstanceID,
 		T.Threshold,
 		T.Priority,
 		T.RuleID,
+		T.GroupID,
 		T.Aggregation,
 		T.ComparisonSymbol,
 		T.EvaluationPeriodMins
@@ -128,18 +134,20 @@ DECLARE @AlertDetails Alert.AlertDetails;
 
 INSERT INTO @AlertDetails
 (
-    InstanceID,
-    Priority,
-    Message,
+	InstanceID,
+	Priority,
+	Message,
 	AlertKey,
-	RuleID
+	RuleID,
+	GroupID
 )
 SELECT	ET.InstanceID,
 		ET.Priority, 
 		CONCAT(ET.AlertKey,' = ',FORMAT(ET.CounterValue,'#,##0.#######'),' exceeded the specified threshold (',
 					ET.Aggregation,ET.ComparisonSymbol,FORMAT(ET.Threshold,'#,##0.#######'),' over ',ET.EvaluationPeriodMins,'mins)'),
 		ET.AlertKey,
-		RuleID
+		RuleID,
+		ET.GroupID
 FROM #ExceededThreshold ET
 
 /* Duplicate AlertKey will be handled here */

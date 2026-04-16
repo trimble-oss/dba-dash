@@ -1,4 +1,4 @@
-﻿CREATE PROC Alert.WaitAlert_Upd 
+CREATE PROC Alert.WaitAlert_Upd 
 AS
 /* 
 	Get instances that fail the Wait alert rule & update the active alerts
@@ -26,7 +26,8 @@ CREATE TABLE #EffectiveThresholds (
 	TotalWaitMsPerSec DECIMAL(18,2) NULL,
 	TotalWaitMsPerSecPerCore DECIMAL(18,2) NULL,
 	AvgWaitTimeMsPerSec DECIMAL(18,2) NULL,
-	scheduler_count INT NOT NULL
+	scheduler_count INT NOT NULL,
+	GroupID INT NOT NULL DEFAULT(0)
 )
 /* Get rules and the instances they apply to */
 INSERT INTO #EffectiveThresholds(
@@ -38,7 +39,8 @@ INSERT INTO #EffectiveThresholds(
 	TotalWaitMsPerSec,
 	TotalWaitMsPerSecPerCore,
 	AvgWaitTimeMsPerSec,
-	scheduler_count
+	scheduler_count,
+	GroupID
 )
 
 SELECT 	I.InstanceID,
@@ -49,8 +51,9 @@ SELECT 	I.InstanceID,
 		CASE WHEN TRY_CAST(JSON_VALUE(R.Details,'$.IsPerCore') AS BIT)=1 THEN NULL ELSE R.Threshold END,
 		CASE WHEN TRY_CAST(JSON_VALUE(R.Details,'$.IsPerCore') AS BIT)=1 THEN R.Threshold ELSE NULL END,
 		TRY_CAST(JSON_VALUE(R.Details,'$.AvgWaitTimeMsPerSec') AS DECIMAL(28,9)),
-		I.scheduler_count
-FROM Alert.Rules R 
+		I.scheduler_count,
+		R.GroupID
+FROM Alert.Rules R
 CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
 WHERE R.Type = @Type
 AND R.IsActive=1
@@ -90,6 +93,7 @@ SELECT T.RuleID,
 		T.InstanceID,
 		T.WaitType,
 		T.Priority,
+		T.GroupID,
 		AGG.TotalWaitMsPerSec,
 		AGG.TotalWaitMsPerSecPerCore,
 		AGG.AvgWaitTimeMs
@@ -119,7 +123,8 @@ INSERT INTO @AlertDetails(
 	Priority,
 	Message,
 	AlertKey,
-	RuleID
+	RuleID,
+	GroupID
 )
 SELECT InstanceID,
 		Priority, 
@@ -127,7 +132,8 @@ SELECT InstanceID,
 				FORMAT(TotalWaitMsPerSec,'N1'),'ms/sec',' / ',FORMAT(TotalWaitMsPerSecPerCore,'N1'),
 				' ms/sec/core. Avg Wait: ', FORMAT(AvgWaitTimeMs,'N1'),'ms'),
 	'Wait - ' + WaitType AS AlertKey,
-	RuleID
+	RuleID,
+	GroupID
 FROM #ExceededThreshold
 
 EXEC Alert.ActiveAlerts_Upd @AlertDetails=@AlertDetails,@AlertType=@Type

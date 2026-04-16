@@ -22,9 +22,12 @@ SELECT R.RuleID,
        R.ApplyToInstanceID,
        I.InstanceDisplayName AS ApplyToInstance,
        R.ApplyToHidden,
-       R.Notes
+       R.Notes,
+       R.GroupID,
+       G.GroupName
 FROM Alert.Rules R
 LEFT JOIN dbo.Tags T ON R.ApplyToTagID = T.TagID
 LEFT JOIN dbo.Instances I ON R.ApplyToInstanceID = I.InstanceID
+LEFT JOIN Alert.NotificationChannelGroup G ON R.GroupID = G.GroupID
 WHERE (R.RuleID = @RuleID OR @RuleID IS NULL)
 OPTION(RECOMPILE)

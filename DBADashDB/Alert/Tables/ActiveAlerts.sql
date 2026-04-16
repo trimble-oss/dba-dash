@@ -1,4 +1,4 @@
-﻿CREATE TABLE Alert.ActiveAlerts(
+CREATE TABLE Alert.ActiveAlerts(
 	AlertID BIGINT IDENTITY(1,1) NOT NULL,
 	InstanceID INT NOT NULL,
 	Priority TINYINT NOT NULL,
@@ -22,11 +22,12 @@
 	DeEscalated DATETIME2 NULL,
 	Notes NVARCHAR(MAX) NULL,
 	RuleID INT NULL,
+	GroupID INT NOT NULL CONSTRAINT DF_Alert_ActiveAlerts_GroupID DEFAULT(0),
 	AcknowledgedDate DATETIME2 NULL,
 	CONSTRAINT FK_ActiveAlerts_Instances FOREIGN KEY(InstanceID) REFERENCES dbo.Instances(InstanceID),
 	CONSTRAINT FK_ActiveAlerts_Rules FOREIGN KEY(RuleID) REFERENCES Alert.Rules(RuleID),
 	CONSTRAINT PK_ActiveAlerts PRIMARY KEY(AlertID),
-	CONSTRAINT CK_ActiveAlerts_Priority CHECK(Priority >= 0 AND Priority <= 41),
+	CONSTRAINT CK_ActiveAlerts_Priority CHECK(Priority >= 0 AND Priority <= 41)
 )
 GO
-CREATE UNIQUE NONCLUSTERED INDEX IX_ActiveAlerts_InstanceID_AlertKey ON Alert.ActiveAlerts(InstanceID,AlertKey)
+CREATE UNIQUE NONCLUSTERED INDEX IX_ActiveAlerts_InstanceID_AlertKey_GroupID ON Alert.ActiveAlerts(InstanceID,AlertKey,GroupID)

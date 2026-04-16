@@ -67,6 +67,12 @@ namespace DBADashGUI.DBADashAlerts
         [Category("DBA Dash Notification Channel")]
         public bool AcknowledgedNotification { get; set; } = true;
 
+        [JsonIgnore]
+        [DisplayName("Notification Channel Group")]
+        [Description("Assign this channel to a notification channel group. Channels in a named group only receive alerts from rules assigned to the same group. Channels with no group (default) receive alerts from rules with no group.")]
+        [Category("DBA Dash Notification Channel")]
+        public int GroupID { get; set; } = 0;
+
         public const int DefaultAlertConsolidationThreshold = 5;
 
         [Browsable(false)]
@@ -210,6 +216,7 @@ namespace DBADashGUI.DBADashAlerts
             cmd.Parameters.AddWithValue("@NotificationChannelTypeID", NotificationChannelType);
             cmd.Parameters.AddWithValue("@ChannelDetails", GetChannelDetails());
             cmd.Parameters.AddWithValue("@AcknowledgedNotification", AcknowledgedNotification);
+            cmd.Parameters.AddWithValue("@GroupID", GroupID);
             cmd.ExecuteNonQuery();
         }
 
@@ -225,6 +232,7 @@ namespace DBADashGUI.DBADashAlerts
             cmd.Parameters.AddWithValue("@ChannelDetails", GetChannelDetails());
             cmd.Parameters.AddWithValue("@NotificationChannelTypeID", NotificationChannelType);
             cmd.Parameters.AddWithValue("@AcknowledgedNotification", AcknowledgedNotification);
+            cmd.Parameters.AddWithValue("@GroupID", GroupID);
             var pChannelID = new SqlParameter("@NotificationChannelID", SqlDbType.Int)
             { Direction = ParameterDirection.Output };
             cmd.Parameters.Add(pChannelID);
@@ -277,6 +285,7 @@ namespace DBADashGUI.DBADashAlerts
                 channel.DisableTo = rdr["DisableTo"] == DBNull.Value ? null : (DateTime)rdr["DisableTo"];
                 channel.Schedules = GetSchedules(channelId, connectionString);
                 channel.AcknowledgedNotification = (bool)rdr["AcknowledgedNotification"];
+                channel.GroupID = rdr["GroupID"] == DBNull.Value ? 0 : Convert.ToInt32(rdr["GroupID"]);
                 return channel;
             }
             else

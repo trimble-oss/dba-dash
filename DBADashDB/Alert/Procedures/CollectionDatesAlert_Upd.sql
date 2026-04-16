@@ -1,4 +1,4 @@
-﻿CREATE PROC Alert.CollectionDatesAlert_Upd
+CREATE PROC Alert.CollectionDatesAlert_Upd
 AS
 /* 
 	Get instances that fail the CollectionDates alert rule & update the active alerts
@@ -24,16 +24,18 @@ CREATE TABLE #ExceededThreshold(
 	Reference VARCHAR(100) NOT NULL,
 	Threshold DECIMAL(28,9) NOT NULL,
 	RuleID INT NOT NULL,
+	GroupID INT NOT NULL DEFAULT(0),
 	SnapshotAge INT NOT NULL
 )
 INSERT INTO #ExceededThreshold
 (
-    InstanceID,
-    Priority,
+	InstanceID,
+	Priority,
 	AlertKey,
-    Reference,
-    Threshold,
-    RuleID,
+	Reference,
+	Threshold,
+	RuleID,
+	GroupID,
 	SnapshotAge
 )
 SELECT 	I.InstanceID,
@@ -42,6 +44,7 @@ SELECT 	I.InstanceID,
 		CDS.Reference,
 		ISNULL(CASE WHEN Calc.UseCriticalStatus=1 AND (CDS.CriticalThreshold<R.Threshold OR R.Threshold IS NULL) THEN CDS.CriticalThreshold ELSE R.Threshold END,0) AS Threshold,
 		R.RuleID,
+		R.GroupID,
 		CDS.SnapshotAge
 FROM Alert.Rules R 
 OUTER APPLY(SELECT 	NULLIF(TRY_CAST(JSON_VALUE(R.Details,'$.Reference') AS VARCHAR(100)),'') AS Reference,
@@ -59,14 +62,15 @@ DECLARE @MaxRows INT=10
 DECLARE @AlertDetails Alert.AlertDetails;
 
 WITH dedupe AS (
-	/* 1 row per instance */
+	/* 1 row per instance, alert key and group */
 	SELECT InstanceID,
 			Priority,
 			RuleID,
+			GroupID,
 			AlertKey,
 			SnapshotAge,
-			COUNT(*) OVER(PARTITION BY InstanceID,AlertKey) cnt,
-			ROW_NUMBER() OVER(PARTITION BY InstanceID,AlertKey ORDER BY Priority) rnum
+			COUNT(*) OVER(PARTITION BY InstanceID,AlertKey,GroupID) cnt,
+			ROW_NUMBER() OVER(PARTITION BY InstanceID,AlertKey,GroupID ORDER BY Priority) rnum
 	FROM #ExceededThreshold
 )
 INSERT INTO @AlertDetails(
@@ -74,7 +78,8 @@ INSERT INTO @AlertDetails(
 		Priority,
 		Message,
 		AlertKey,
-		RuleID
+		RuleID,
+		GroupID
 )
 SELECT dedupe.InstanceID,
 	dedupe.Priority,
@@ -83,12 +88,14 @@ SELECT dedupe.InstanceID,
 	FROM #ExceededThreshold ET2
 	WHERE dedupe.InstanceID = ET2.InstanceID
 	AND dedupe.AlertKey = ET2.AlertKey
+	AND dedupe.GroupID = ET2.GroupID
 	ORDER BY ET2.Priority
 	FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,2,'')
 	+ IIF(dedupe.cnt>@MaxRows,'
 ...',''),
 	dedupe.AlertKey,
-	dedupe.RuleID
+	dedupe.RuleID,
+	dedupe.GroupID
 FROM dedupe
 WHERE rnum=1
 

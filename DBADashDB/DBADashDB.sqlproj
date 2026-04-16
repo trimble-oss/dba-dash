@@ -877,6 +877,11 @@
     <Build Include="dbo\Stored Procedures\ResourceGovernorResourcePoolsMetrics_Del.sql" />
     <Build Include="dbo\Stored Procedures\ResourceGovernorWorkloadGroupsMetrics_Del.sql" />
     <Build Include="dbo\Stored Procedures\Deadlocks_Get.sql" />
+    <Build Include="Alert\Tables\NotificationChannelGroup.sql" />
+    <Build Include="Alert\Procedures\NotificationChannelGroup_Add.sql" />
+    <Build Include="Alert\Procedures\NotificationChannelGroup_Upd.sql" />
+    <Build Include="Alert\Procedures\NotificationChannelGroup_Del.sql" />
+    <Build Include="Alert\Procedures\NotificationChannelGroup_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
