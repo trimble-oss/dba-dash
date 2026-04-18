@@ -265,3 +265,10 @@ __pycache__/
 *.rsuser
 DBADashBuild/
 Visual Studio 2022/
+# Local AI feedback samples (may contain sensitive environment data)
+DBADashAI/ChatFeedback.txt
+
+# Local process/tooling files not required for product runtime
+.github/copilot-instructions.md
+Docs/Secure-Contribution-Checklist.md
+Scripts/security/
