@@ -114,17 +114,17 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AsyncKeyedLock" Version="8.0.2" />
-    <PackageReference Include="AWSSDK.Core" Version="4.0.3.26" />
-    <PackageReference Include="AWSSDK.S3" Version="4.0.20.2" />
-    <PackageReference Include="AWSSDK.SQS" Version="4.0.2.22" />
-    <PackageReference Include="Azure.Core" Version="1.52.0" />
-    <PackageReference Include="Azure.Identity" Version="1.20.0" />
+    <PackageReference Include="AWSSDK.Core" Version="4.0.3.30" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.21.2" />
+    <PackageReference Include="AWSSDK.SQS" Version="4.0.2.25" />
+    <PackageReference Include="Azure.Core" Version="1.53.0" />
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
     <PackageReference Include="Humanizer.Core" Version="3.0.10" />
-    <PackageReference Include="MailKit" Version="4.15.1" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.5" />
+    <PackageReference Include="MailKit" Version="4.16.0" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.6" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.4" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.6" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.83.3" />
     <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.83.3" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.17.0" />
@@ -137,24 +137,24 @@
     <PackageReference Include="Microsoft.SqlServer.Assessment.Authoring" Version="1.1.0" />
     <PackageReference Include="Microsoft.SqlServer.DacFx" Version="170.3.93" />
     <PackageReference Include="Microsoft.SqlServer.Management.SqlParser" Version="173.8.0" />
-    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="181.15.0" />
+    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="181.19.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Octokit" Version="14.0.0" />
     <PackageReference Include="Polly.Core" Version="8.6.6" />
     <PackageReference Include="Serilog" Version="4.3.1" />
     <PackageReference Include="SerilogTimings" Version="3.1.0" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.5" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.6" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-    <PackageReference Include="System.Drawing.Common" Version="10.0.5" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.6" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.17.0" />
-    <PackageReference Include="System.IO.Packaging" Version="10.0.5" />
-    <PackageReference Include="System.Management" Version="10.0.5" />
+    <PackageReference Include="System.IO.Packaging" Version="10.0.6" />
+    <PackageReference Include="System.Management" Version="10.0.6" />
     <PackageReference Include="System.Management.Automation" Version="7.6.0" />
-    <PackageReference Include="System.Memory.Data" Version="10.0.5" />
-    <PackageReference Include="System.Runtime.Caching" Version="10.0.5" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.5" />
-    <PackageReference Include="System.Security.Permissions" Version="10.0.5" />
-    <PackageReference Include="System.ServiceProcess.ServiceController" Version="10.0.5" />
+    <PackageReference Include="System.Memory.Data" Version="10.0.6" />
+    <PackageReference Include="System.Runtime.Caching" Version="10.0.6" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.6" />
+    <PackageReference Include="System.Security.Permissions" Version="10.0.6" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="10.0.6" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
