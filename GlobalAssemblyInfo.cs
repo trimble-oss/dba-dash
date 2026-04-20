@@ -1,6 +1,5 @@
 /* Global Assembly Configuration.  
  * Update application version & metadata here to affect all projects
- * DBADashDB dacpac version needs to be updated separately.  
  * Major/Minor in dacpac should be kept in sync - otherwise an upgrade warning will be prompted to the user.
 */
 using System.Reflection;
