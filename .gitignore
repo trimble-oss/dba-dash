@@ -265,3 +265,37 @@ __pycache__/
 *.rsuser
 DBADashBuild/
 Visual Studio 2022/
+# Local AI feedback samples (may contain sensitive environment data)
+DBADashAI/ChatFeedback.txt
+
+# Local process/tooling files not required for product runtime
+.github/copilot-instructions.md
+Docs/Secure-Contribution-Checklist.md
+Scripts/security/
+
+# AI assistant / agent session artifacts and local handoff notes
+# (these may contain local file system paths, internal notes, or tool state)
+.ai/
+.aider*/
+.aider.*
+.claude/
+.cline/
+.codex/
+.continue/
+.copilot/
+.cursor/
+.junie/
+.opencode/
+.roo/
+.windsurf/
+*.aichat
+
+# Local handoff / PR draft / chat transcripts (never commit)
+SESSION_HANDOFF.md
+SESSION_*.md
+HANDOFF_*.md
+CHAT_*.md
+PR_DESCRIPTION.md
+PR_DRAFT*.md
+*.pr-draft.md
+

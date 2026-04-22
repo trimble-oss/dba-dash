@@ -688,6 +688,25 @@
     <Build Include="dbo\Stored Procedures\Instance_ShowInSummary_Upd.sql" />
     <Build Include="dbo\Functions\TagValue.sql" />
     <Build Include="DBADash\Stored Procedures\User_Upd.sql" />
+    <Build Include="DBADash\Tables\AIExampleQuestions.sql" />
+    <Build Include="DBADash\Stored Procedures\AIExampleQuestions_Get.sql" />
+    <Build Include="DBADash\Stored Procedures\AI_ActiveAlerts_Get.sql" />
+    <Build Include="DBADash\Stored Procedures\AI_AgDrRisk_Get.sql" />
+    <Build Include="DBADash\Stored Procedures\AI_AgentJobAlerts_Get.sql" />
+    <Build Include="DBADash\Stored Procedures\AI_BackupsRisk_Get.sql" />
+    <Build Include="DBADash\Stored Procedures\AI_Blocking_Get.sql" />
+    <Build Include="DBADash\Stored Procedures\AI_CapacityForecast_Get.sql" />
+    <Build Include="DBADash\Stored Procedures\AI_ConfigDrift_Get.sql" />
+    <Build Include="DBADash\Stored Procedures\AI_ConfigRiskDrift_Get.sql" />
+    <Build Include="DBADash\Stored Procedures\AI_CrossSignalCorrelation_Get.sql" />
+    <Build Include="DBADash\Stored Procedures\AI_Deadlocks_Get.sql" />
+    <Build Include="DBADash\Stored Procedures\AI_DrivesRisk_Get.sql" />
+    <Build Include="DBADash\Stored Procedures\AI_InstanceMetadata_Get.sql" />
+    <Build Include="DBADash\Stored Procedures\AI_OperationalHygiene_Get.sql" />
+    <Build Include="DBADash\Stored Procedures\AI_ReliabilityRisk_Get.sql" />
+    <Build Include="DBADash\Stored Procedures\AI_SlowQueries_Get.sql" />
+    <Build Include="DBADash\Stored Procedures\AI_Waits_Get.sql" />
+    <Build Include="DBADash\Stored Procedures\AI_WorkloadPressure_Get.sql" />
     <Build Include="dbo\Stored Procedures\JobTimeline_Get.sql" />
     <Build Include="dbo\Stored Procedures\JobCategories_Get.sql" />
     <Build Include="dbo\Stored Procedures\JobErrorAck.sql" />
@@ -882,6 +901,16 @@
     <Build Include="Alert\Procedures\NotificationChannelGroup_Upd.sql" />
     <Build Include="Alert\Procedures\NotificationChannelGroup_Del.sql" />
     <Build Include="Alert\Procedures\NotificationChannelGroup_Get.sql" />
+    <Build Include="AIModels.sql" />
+    <Build Include="AIModels_Get.sql" />
+    <Build Include="AI_ConfigCurrent_Get.sql" />
+    <Build Include="AI_DBConfigCurrent_Get.sql" />
+    <Build Include="AI_RunningQueries_Get.sql" />
+    <Build Include="AI_IdentityColumns_Get.sql" />
+    <Build Include="AI_StorageSpace_Get.sql" />
+    <Build Include="AI_TableSize_Get.sql" />
+    <Build Include="AI_OSPerformance_Get.sql" />
+    <Build Include="AIExampleQuestions_Seed.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

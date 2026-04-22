@@ -28,6 +28,13 @@ namespace DBADashServiceConfig
     public partial class ServiceConfig : Form, IThemedControl
     {
         private static string FatalErrorFilePath => Path.Combine(AppContext.BaseDirectory, "Logs", "FatalError.txt");
+        private const string AiServiceName = "DBADashAI";
+        private const string AiServiceUrl = "http://localhost:5055";
+        private Label lblAiServiceStatus;
+        private LinkLabel lnkInstallAi;
+        private LinkLabel lnkStartAi;
+        private LinkLabel lnkStopAi;
+        private TabPage tabAiService;
         private bool IsAdmin;
 
         public ServiceConfig()
@@ -503,6 +510,7 @@ namespace DBADashServiceConfig
         {
             try
             {
+                ApplyAiSettingsToConfig();
                 SetJson();
                 collectionConfig.Save();
                 originalJson = txtJson.Text;
@@ -539,6 +547,8 @@ namespace DBADashServiceConfig
             bttnRestartAsAdmin.Visible = !IsAdmin;
             grpService.Enabled = IsAdmin;
             grpService.Text = IsAdmin ? "Service" : "Service (Controls disabled.  Please run as Administrator)";
+            InitializeAiServiceControls();
+            _ = RefreshAiServiceStatusAsync();
 
             cboDeleteAction.SelectedIndex = 0;
             dgvConnections.ColumnHeaderMouseClick += dgvConnections_ColumnHeaderMouseClick;
@@ -822,7 +832,7 @@ namespace DBADashServiceConfig
                     return;
                 }
 
-                SetDgv();
+                setDgv();
                 column.HeaderCell.SortGlyphDirection = direction == ListSortDirection.Descending
                     ? SortOrder.Descending
                     : SortOrder.Ascending;
@@ -988,9 +998,10 @@ namespace DBADashServiceConfig
                 UpdateThreadCount();
                 UpdateSummaryCron();
                 UpdateScanInterval();
-                SetDgv();
+                setDgv();
                 RefreshEncryption();
                 UpdateCustomCollectionCount();
+                LoadAiSettings();
             }
             finally
             {
@@ -1020,13 +1031,19 @@ namespace DBADashServiceConfig
         private void SetJson()
         {
             if (IsSetFromJson) return;
+            ApplyAiSettingsToConfig();
             txtJson.Text = collectionConfig.Serialize();
+        }
+
+        private void setDgv()
+        {
+            dgvConnections.DataSource = new BindingSource() { DataSource = collectionConfig.SourceConnections };
+            ApplySearch();
         }
 
         private void SetDgv()
         {
-            dgvConnections.DataSource = new BindingSource() { DataSource = collectionConfig.SourceConnections };
-            ApplySearch();
+            setDgv();
         }
 
         private string lastStatus = string.Empty;
@@ -1037,8 +1054,8 @@ namespace DBADashServiceConfig
             while (true)
             {
                 // Only refresh service status if there has been user activity within the last 5min & selected tab is tab with service control/status
-                var isDestTabSelected = tab1.Invoke(new Func<bool>(() => tab1.SelectedTab == tabDest));
-                if (DateTime.Now.Subtract(lastUserActivity).TotalMinutes < 5 && isDestTabSelected)
+                var isServiceTabSelected = tab1.Invoke(new Func<bool>(() => tab1.SelectedTab == tabDest || tab1.SelectedTab == tabAiService));
+                if (DateTime.Now.Subtract(lastUserActivity).TotalMinutes < 5 && isServiceTabSelected)
                 {
                     await RefreshServiceStatusAsync();
                     if (RepoDbVersionStatus?.VersionStatus is DBValidations.DBVersionStatusEnum.CreateDB
@@ -1054,6 +1071,7 @@ namespace DBADashServiceConfig
                         }
                     }
                 }
+                // ReSharper disable once InlineOutVariableDeclaration
                 // Use a short 5 second delay between refreshes if the app is loaded within the last 2min or the user has started/stopped or installed the service.
                 // Otherwise use a longer 30 second delay between iterations
                 await Task.Delay(DateTime.Now.Subtract(lastServiceActivity).TotalMinutes < 2 ? 5000 : 30000);
@@ -1063,9 +1081,13 @@ namespace DBADashServiceConfig
 
         private async Task RefreshServiceStatusAsync()
         {
+            if (!IsAdmin)
+            {
+                await RefreshAiServiceStatusAsync();
+                return;
+            }
             try
             {
-                if (!IsAdmin) return;
                 using var service = new ServiceController(collectionConfig.ServiceName);
                 var serviceInfoFromPath = ServiceTools.GetServiceInfoFromPath();
                 var serviceInfoFromName = ServiceTools.GetServiceInfoFromName(collectionConfig.ServiceName);
@@ -1155,8 +1177,9 @@ namespace DBADashServiceConfig
 
         private void TxtJson_Validating(object sender, CancelEventArgs e)
         {
-            errorProvider1.SetError(txtJson, null);
-            if (txtJson.Text.Trim() == "")
+            errorProvider1.SetError(txtSource, null);
+            DBADashConnection source = new(txtSource.Text);
+            if (string.IsNullOrEmpty(txtJson.Text))
             {
                 collectionConfig = new CollectionConfig();
                 return;
@@ -1797,7 +1820,7 @@ namespace DBADashServiceConfig
                     if (frm.DialogResult == DialogResult.OK)
                     {
                         src.CustomCollections = frm.CustomCollections;
-                        SetDgv();
+                        setDgv();
                     }
                 }
                 else
@@ -2141,7 +2164,7 @@ namespace DBADashServiceConfig
             SetJson();
         }
 
-        private void BttnAWS_Click(object sender, EventArgs e)
+        private async void BttnAWS_Click(object sender, EventArgs e)
         {
             var frm = new AWSCreds()
             {
@@ -2445,7 +2468,7 @@ namespace DBADashServiceConfig
                     new DataGridViewTextBoxColumn() { Name = "SnapshotAge", HeaderText = "Last Snapshot Age" });
             }
 
-            SetDgv();
+            setDgv();
 
             bttnCheckConnections.Text = "Check Connections";
             bttnCheckConnections.Enabled = true;
@@ -2822,6 +2845,214 @@ namespace DBADashServiceConfig
             if (IsSetFromJson) return;
             collectionConfig.LowPriorityQueueMaxThreadPercentage = chkLowPriorityMaxThreadPct.Checked ? (double?)numLowMaxThreadPct.Value / 100 : null;
             SetJson();
+        }
+
+        private async Task RefreshAiServiceStatusAsync()
+        {
+            if (lblAiServiceStatus == null) return;
+
+            try
+            {
+                using var service = new ServiceController(AiServiceName);
+                var status = service.Status;
+                this.Invoke(() =>
+                {
+                    lblAiServiceStatus.Text = "AI Service Status: " + status;
+                    lblAiServiceStatus.ForeColor = status == ServiceControllerStatus.Running ? Color.Green : Color.Brown;
+                    lnkStartAi.Enabled = status == ServiceControllerStatus.Stopped;
+                    lnkStopAi.Enabled = status == ServiceControllerStatus.Running;
+                    lnkInstallAi.Text = "Uninstall AI service";
+                    toolTip1.SetToolTip(lnkInstallAi, "Remove Windows service for DBADashAI API");
+                });
+            }
+            catch
+            {
+                this.Invoke(() =>
+                {
+                    lblAiServiceStatus.Text = "AI Service Status: Not Installed";
+                    lblAiServiceStatus.ForeColor = Color.Brown;
+                    lnkStartAi.Enabled = false;
+                    lnkStopAi.Enabled = false;
+                    lnkInstallAi.Text = "Install AI service";
+                    toolTip1.SetToolTip(lnkInstallAi, "Install DBADashAI API as a Windows service");
+                });
+            }
+
+            await Task.CompletedTask;
+        }
+
+        private async Task<(bool Success, string Output)> RunScCommandAsync(string args)
+        {
+            var output = new StringBuilder();
+            using Process p = new();
+            p.StartInfo = new ProcessStartInfo
+            {
+                FileName = "sc.exe",
+                Arguments = args,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
+            };
+            p.OutputDataReceived += (_, e) => { if (!string.IsNullOrEmpty(e.Data)) output.AppendLine(e.Data); };
+            p.ErrorDataReceived += (_, e) => { if (!string.IsNullOrEmpty(e.Data)) output.AppendLine(e.Data); };
+            p.Start();
+            p.BeginOutputReadLine();
+            p.BeginErrorReadLine();
+            await p.WaitForExitAsync();
+            return (p.ExitCode == 0, output.ToString());
+        }
+
+        private string GetAiServiceDllPath()
+        {
+            var appBase = AppContext.BaseDirectory;
+            var portablePath = Path.Combine(appBase, "DBADashAI", "DBADashAI.dll");
+            if (File.Exists(portablePath)) return portablePath;
+
+            var solutionDebug = Path.GetFullPath(Path.Combine(appBase, "..", "..", "..", "..", "DBADashAI", "bin", "Debug", "net10.0", "DBADashAI.dll"));
+            if (File.Exists(solutionDebug)) return solutionDebug;
+
+            var solutionRelease = Path.GetFullPath(Path.Combine(appBase, "..", "..", "..", "..", "DBADashAI", "bin", "Release", "net10.0", "DBADashAI.dll"));
+            return File.Exists(solutionRelease) ? solutionRelease : string.Empty;
+        }
+
+        private static string GetDotnetExePath()
+        {
+            foreach (var dir in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(Path.PathSeparator))
+            {
+                var candidate = Path.Combine(dir.Trim(), "dotnet.exe");
+                if (File.Exists(candidate)) return candidate;
+            }
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "dotnet", "dotnet.exe");
+        }
+
+        private bool IsAiServiceInstalled()
+        {
+            try
+            {
+                using var _ = new ServiceController(AiServiceName);
+                return ServiceTools.GetServiceInfoFromName(AiServiceName) != null;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private async Task InstallAiServiceAsync()
+        {
+            if (!IsAdmin)
+            {
+                MessageBox.Show("Run as Administrator to install services.", "AI Service", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var dllPath = GetAiServiceDllPath();
+            if (string.IsNullOrEmpty(dllPath))
+            {
+                MessageBox.Show("DBADashAI.dll not found. Deploy DBADashAI next to this tool (DBADashAI\\DBADashAI.dll) or build DBADashAI first.", "AI Service", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var dotnetExe = GetDotnetExePath();
+            if (!File.Exists(dotnetExe))
+            {
+                MessageBox.Show($"dotnet.exe not found at {dotnetExe}", "AI Service", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var binPath = $"\\\"{dotnetExe}\\\" \\\"{dllPath}\\\" --urls {AiServiceUrl}";
+            var aiDir = Path.GetDirectoryName(dllPath);
+
+            var frm = new InstallService
+            {
+                ServiceName = AiServiceName,
+                CustomBinPath = binPath,
+                ServiceDescription = "DBA Dash AI API service",
+                CustomAppBaseDirectory = aiDir
+            };
+            frm.ShowDialog();
+
+            await Task.Delay(500);
+            await RefreshAiServiceStatusAsync();
+        }
+
+        private async Task UninstallAiServiceAsync()
+        {
+            if (!IsAdmin)
+            {
+                MessageBox.Show("Run as Administrator to uninstall services.", "AI Service", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (MessageBox.Show("Remove DBADashAI Windows service?", "Uninstall AI Service", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+            {
+                return;
+            }
+
+            var svcCtrl = ServiceController.GetServices().FirstOrDefault(s => s.ServiceName == AiServiceName);
+            if (svcCtrl != null)
+            {
+                if (svcCtrl.Status == ServiceControllerStatus.Running)
+                {
+                    svcCtrl.Stop();
+                    svcCtrl.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(30));
+                }
+                svcCtrl.Dispose();
+            }
+
+            await Task.Delay(500);
+
+            var deleteResult = await RunScCommandAsync($"delete {AiServiceName}");
+            if (!deleteResult.Success)
+            {
+                MessageBox.Show($"sc.exe delete failed.\n\n{deleteResult.Output}", "Uninstall AI Service", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                MessageBox.Show("AI service removed successfully.", "Uninstall AI Service", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
+            await Task.Delay(500);
+            await RefreshAiServiceStatusAsync();
+        }
+
+        private async Task StartAiServiceAsync()
+        {
+            try
+            {
+                using var service = new ServiceController(AiServiceName);
+                service.Refresh();
+                if (service.Status == ServiceControllerStatus.Stopped)
+                {
+                    service.Start();
+                    await Task.Delay(500);
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error starting AI service");
+            }
+            await RefreshAiServiceStatusAsync();
+        }
+
+        private async Task StopAiServiceAsync()
+        {
+            try
+            {
+                using var service = new ServiceController(AiServiceName);
+                service.Refresh();
+                if (service.Status == ServiceControllerStatus.Running)
+                {
+                    service.Stop();
+                    await Task.Delay(500);
+                }
+            }
+            catch
+            {
+                // ignore if not installed
+            }
+            await RefreshAiServiceStatusAsync();
         }
     }
 }

@@ -468,9 +468,37 @@ namespace DBADash
             return newConnections;
         }
 
+        private string EncryptAiSecretIfNeeded(string value)
+        {
+            if (value == "")
+            {
+                return null;
+            }
+
+            if (value == null || value.StartsWith("¬=!"))
+            {
+                return value;
+            }
+
+            wasEncryptionPerformed = true;
+            return "¬=!" + value.EncryptString(myString);
+        }
+
+        private string DecryptAiSecretIfNeeded(string value)
+        {
+            if (!string.IsNullOrEmpty(value) && value.StartsWith("¬=!"))
+            {
+                return value[3..].DecryptString(myString);
+            }
+
+            return value;
+        }
+
         public override bool ContainsSensitive()
         {
-            if (!string.IsNullOrEmpty(SecretKey))
+            if (!string.IsNullOrEmpty(SecretKey)
+                || !string.IsNullOrEmpty(AzureOpenAIApiKey)
+                || !string.IsNullOrEmpty(AnthropicApiKey))
             {
                 return true;
             }
@@ -553,5 +581,41 @@ namespace DBADash
 
             return source;
         }
+
+        public string AIProvider { get; set; }
+
+        public string AzureOpenAIEndpoint { get; set; }
+
+        private string _azureOpenAIApiKey;
+        public string AzureOpenAIApiKey
+        {
+            get => _azureOpenAIApiKey;
+            set => _azureOpenAIApiKey = EncryptAiSecretIfNeeded(value);
+        }
+
+        [JsonIgnore]
+        public string AzureOpenAIApiKeyDecrypted => DecryptAiSecretIfNeeded(_azureOpenAIApiKey);
+
+        public string AzureOpenAIDeployment { get; set; }
+
+        public string AzureOpenAIApiVersion { get; set; }
+
+        public string AnthropicBaseUrl { get; set; }
+
+        private string _anthropicApiKey;
+        public string AnthropicApiKey
+        {
+            get => _anthropicApiKey;
+            set => _anthropicApiKey = EncryptAiSecretIfNeeded(value);
+        }
+
+        [JsonIgnore]
+        public string AnthropicApiKeyDecrypted => DecryptAiSecretIfNeeded(_anthropicApiKey);
+
+        public string AnthropicModel { get; set; }
+
+        public string AnthropicVersion { get; set; }
+
+        public string AnthropicMaxTokens { get; set; }
     }
 }

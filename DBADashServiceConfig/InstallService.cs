@@ -26,6 +26,15 @@ namespace DBADashServiceConfig
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public string ServiceName { get; set; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string CustomBinPath { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string ServiceDescription { get; set; } = "Monitoring tool for SQL Server.  https://dbadash.com";
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string CustomAppBaseDirectory { get; set; }
+
         private bool InstallDBADashService()
         {
             string username = null;
@@ -110,7 +119,15 @@ namespace DBADashServiceConfig
             }
             try
             {
-                var result = ServiceTools.InstallService(ServiceName, username, password);
+                ServiceTools.SCCommandResult result;
+                if (!string.IsNullOrEmpty(CustomBinPath))
+                {
+                    result = ServiceTools.InstallService(ServiceName, CustomBinPath, ServiceDescription, username, password);
+                }
+                else
+                {
+                    result = ServiceTools.InstallService(ServiceName, username, password);
+                }
                 txtOutput.AppendText(result.Output + Environment.NewLine);
             }
             catch (Exception ex)
@@ -121,12 +138,14 @@ namespace DBADashServiceConfig
 
             try
             {
-                GrantFullControlToUser(AppContext.BaseDirectory, username);
-                txtOutput.AppendText($"Granted {username} access to {AppContext.BaseDirectory}");
+                var grantPath = CustomAppBaseDirectory ?? AppContext.BaseDirectory;
+                GrantFullControlToUser(grantPath, username);
+                txtOutput.AppendText($"Granted {username} access to {grantPath}");
             }
             catch (Exception ex)
             {
-                txtOutput.AppendText($"Error granting {username} access to {AppContext.BaseDirectory}\n{ex}");
+                var grantPath = CustomAppBaseDirectory ?? AppContext.BaseDirectory;
+                txtOutput.AppendText($"Error granting {username} access to {grantPath}\n{ex}");
             }
 
             return true;
@@ -188,7 +207,8 @@ namespace DBADashServiceConfig
 
         private void InstallService_Load(object sender, EventArgs e)
         {
-            var args = ServiceTools.GetServiceInstallArgs(ServiceName, "YourDomain\\YourUser", "YourPassword");
+            var binPath = CustomBinPath ?? ServiceTools.ServicePath;
+            var args = ServiceTools.GetServiceInstallArgs(ServiceName, binPath, "YourDomain\\YourUser", "YourPassword");
             txtOutput.Text = txtOutput.Text.Replace("{CommandLine}", $"sc.exe {args}");
             cboServiceCredentials.SelectedIndex = 3;
         }
