@@ -550,7 +550,7 @@ namespace DBADashGUI.Performance
 
         private void LineSmoothness_Click(object sender, EventArgs e)
         {
-            lineSmoothness = Convert.ToDouble(((ToolStripMenuItem)sender).Tag);
+            lineSmoothness = Convert.ToDouble(((ToolStripMenuItem)sender).Tag, CultureInfo.InvariantCulture);
             CheckLineSmoothness();
             RefreshData();
         }
@@ -559,7 +559,7 @@ namespace DBADashGUI.Performance
         {
             foreach (ToolStripMenuItem menuItem in lineSmoothnessToolStripMenuItem.DropDownItems.OfType<ToolStripMenuItem>())
             {
-                menuItem.Checked = Convert.ToDouble(menuItem.Tag) == lineSmoothness;
+                menuItem.Checked = Convert.ToDouble(menuItem.Tag, CultureInfo.InvariantCulture) == lineSmoothness;
             }
         }
 
@@ -567,7 +567,7 @@ namespace DBADashGUI.Performance
         {
             foreach (ToolStripMenuItem menuItem in pointSizeToolStripMenuItem.DropDownItems.OfType<ToolStripMenuItem>())
             {
-                menuItem.Checked = Convert.ToDouble(menuItem.Tag) == PointSize;
+                menuItem.Checked = Convert.ToDouble(menuItem.Tag, CultureInfo.InvariantCulture) == PointSize;
             }
         }
 
