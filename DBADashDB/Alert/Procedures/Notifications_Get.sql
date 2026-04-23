@@ -28,7 +28,7 @@ SELECT AA.AlertID,
 		AA.IsAcknowledged
 FROM Alert.ActiveAlerts AA
 JOIN dbo.Instances I ON AA.InstanceID = I.InstanceID
-CROSS JOIN Alert.NotificationChannel NC
+JOIN Alert.NotificationChannel NC ON AA.GroupID = NC.GroupID
 LEFT JOIN Alert.CustomThreadKey CTK ON AA.AlertID = CTK.AlertID AND NC.NotificationChannelID = CTK.NotificationChannelID
 WHERE (AA.UpdatedDate > AA.LastNotification OR AA.LastNotification IS NULL)
 AND (AA.IsAcknowledged = 0 OR (AA.AcknowledgedDate > AA.LastNotification AND NC.AcknowledgedNotification=1))

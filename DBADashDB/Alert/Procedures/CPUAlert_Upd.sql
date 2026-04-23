@@ -1,4 +1,4 @@
-﻿CREATE PROC Alert.CPUAlert_Upd
+CREATE PROC Alert.CPUAlert_Upd
 AS
 /* 
 	Get instances that fail the CPU alert rule & update the active alerts
@@ -24,6 +24,7 @@ CREATE TABLE #EffectiveThresholds(
 	Priority TINYINT NOT NULL,
 	EvaluationPeriodMins TINYINT NOT NULL,
 	Threshold TINYINT NOT NULL,
+	GroupID INT NOT NULL DEFAULT(0)
 )
 CREATE TABLE #CPUAlert(
 	InstanceID INT NOT NULL PRIMARY KEY,
@@ -39,7 +40,8 @@ WITH T AS (
 		R.Priority,
 		R.EvaluationPeriodMins,
 		TRY_CAST(R.Threshold AS TINYINT) AS Threshold,
-		ROW_NUMBER() OVER(PARTITION BY I.InstanceID,R.EvaluationPeriodMins,R.Priority ORDER BY R.Threshold,R.RuleID) rnum
+		R.GroupID,
+		ROW_NUMBER() OVER(PARTITION BY I.InstanceID,R.GroupID,R.EvaluationPeriodMins,R.Priority ORDER BY R.Threshold,R.RuleID) rnum
 	FROM Alert.Rules R
 	CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
 	WHERE R.Type = @Type
@@ -49,17 +51,19 @@ WITH T AS (
 INSERT INTO #EffectiveThresholds(
 	RuleID,
 	AlertKey,
-    InstanceID,
-    Priority,
-    EvaluationPeriodMins,
-    Threshold
+	InstanceID,
+	Priority,
+	EvaluationPeriodMins,
+	Threshold,
+	GroupID
 )
 SELECT T.RuleID,
 	T.AlertKey,
-    T.InstanceID,
-    T.Priority,
-    ISNULL(T.EvaluationPeriodMins,5),
-    T.Threshold 
+	T.InstanceID,
+	T.Priority,
+	ISNULL(T.EvaluationPeriodMins,5),
+	T.Threshold,
+	T.GroupID
 FROM T 
 WHERE rnum=1;
 
@@ -71,8 +75,9 @@ WITH T AS (
 			T.Priority,
 			T.EvaluationPeriodMins,
 			T.AlertKey,
+			T.GroupID,
 			agg.AvgCPU,
-			ROW_NUMBER() OVER(PARTITION BY T.InstanceID ORDER BY T.Priority,T.RuleID) rnum
+			ROW_NUMBER() OVER(PARTITION BY T.InstanceID,T.GroupID ORDER BY T.Priority,T.RuleID) rnum
 	FROM #EffectiveThresholds T
 	CROSS APPLY(SELECT AVG(TotalCPU) AvgCPU
 				FROM dbo.CPU 
@@ -89,13 +94,15 @@ INSERT INTO @AlertDetails(
 		Priority,
 		Message,
 		AlertKey,
-		RuleID
+		RuleID,
+		GroupID
 )
 SELECT	T.InstanceID,
 		T.Priority,
 		CONCAT(I.ConnectionID,' exceeded CPU threshold, averaging ',T.AvgCPU,'% over ',T.EvaluationPeriodMins,'mins') AS Message,
 		T.AlertKey,
-		T.RuleID
+		T.RuleID,
+		T.GroupID
 FROM T 
 JOIN dbo.Instances I ON T.InstanceID = I.InstanceID
 WHERE T.rnum=1

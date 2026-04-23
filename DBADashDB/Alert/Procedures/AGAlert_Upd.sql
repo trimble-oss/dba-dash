@@ -1,4 +1,4 @@
-﻿CREATE PROC Alert.AGAlert_Upd
+CREATE PROC Alert.AGAlert_Upd
 AS
 /* 
 	Get instances that fail the AGHealth alert rule & update the active alerts
@@ -27,47 +27,54 @@ CREATE TABLE #Unhealthy(
 	synchronization_health_desc NVARCHAR(60) COLLATE DATABASE_DEFAULT NULL,
 	Priority TINYINT NOT NULL,
 	AlertKey NVARCHAR(256) COLLATE DATABASE_DEFAULT NOT NULL,
-	RuleID INT NOT NULL
+	RuleID INT NOT NULL,
+	GroupID INT NOT NULL DEFAULT(0)
 )
 CREATE TABLE #Instances(
-	InstanceID INT NOT NULL PRIMARY KEY,
+	InstanceID INT NOT NULL,
 	AlertKey NVARCHAR(256) COLLATE DATABASE_DEFAULT NOT NULL,
 	Priority INT NOT NULL,
-	RuleID INT NOT NULL
+	RuleID INT NOT NULL,
+	GroupID INT NOT NULL DEFAULT(0),
+	PRIMARY KEY(InstanceID,GroupID)
 );
-/* Get the AG rules that apply to each instance, ensuring thewe have a single rule per instance. */
+/* Get the AG rules that apply to each instance, ensuring we have a single rule per instance and group. */
 WITH DeDupe AS (
 	SELECT I.InstanceID,
 			R.AlertKey,
 			R.Priority,
 			R.RuleID,
-			ROW_NUMBER() OVER(PARTITION BY I.InstanceID ORDER BY R.Priority, R.RuleID) rnum
+			R.GroupID,
+			ROW_NUMBER() OVER(PARTITION BY I.InstanceID,R.GroupID ORDER BY R.Priority, R.RuleID) rnum
 	FROM Alert.Rules R
 	CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
 	WHERE R.Type = @Type
 	AND R.IsActive=1
 )
 INSERT INTO #Instances(
-    InstanceID,
+	InstanceID,
 	AlertKey,
 	Priority,
-	RuleID
+	RuleID,
+	GroupID
 )
 SELECT	InstanceID,
 		AlertKey,
 		Priority,
-		RuleID 
-FROM DeDupe 
+		RuleID,
+		GroupID
+FROM DeDupe
 WHERE rnum=1
 
 INSERT INTO #Unhealthy(
-    InstanceID,
-    DB,
-    synchronization_state_desc,
-    synchronization_health_desc,
+	InstanceID,
+	DB,
+	synchronization_state_desc,
+	synchronization_health_desc,
 	Priority,
 	AlertKey,
-	RuleID
+	RuleID,
+	GroupID
 )
 SELECT	I.InstanceID, 
 		D.name,
@@ -75,7 +82,8 @@ SELECT	I.InstanceID,
 		HADR.synchronization_health_desc,
 		CASE WHEN HADR.synchronization_health_desc='NOT_HEALTHY' THEN T.Priority ELSE T.Priority+1 END AS Priority,
 		T.AlertKey,
-		T.RuleID
+		T.RuleID,
+		T.GroupID
 FROM dbo.DatabasesHADR HADR
 JOIN dbo.Databases D ON D.DatabaseID = HADR.DatabaseID
 JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
@@ -88,10 +96,12 @@ WHERE (
 /* Convert the per database AG health data into a single row per instance */
 INSERT INTO @AlertDetails
 (
-    InstanceID,
-    Priority,
+	InstanceID,
+	Priority,
 	AlertKey,
-    Message
+	Message,
+	RuleID,
+	GroupID
 )
 SELECT I.InstanceID,
 		MIN(I.Priority),
@@ -102,11 +112,14 @@ SELECT I.InstanceID,
 Database ',U.DB,' status is ',U.synchronization_health_desc,' with synchronization state ',U.synchronization_state_desc)
 				FROM #Unhealthy U 
 				WHERE U.InstanceID =  I.InstanceID
+				AND U.GroupID = I.GroupID
 				ORDER BY U.Priority,U.DB
 				FOR XML PATH,TYPE).value('.','NVARCHAR(MAX)'),1,2,''),
 		IIF(COUNT(*)>@MaxDBs,'
-...','')) AS Message
+...','')) AS Message,
+		MIN(I.RuleID),
+		I.GroupID
 FROM #Unhealthy I
-GROUP BY I.InstanceID
+GROUP BY I.InstanceID,I.GroupID
 
 EXEC Alert.ActiveAlerts_Upd @AlertDetails=@AlertDetails,@AlertType=@Type

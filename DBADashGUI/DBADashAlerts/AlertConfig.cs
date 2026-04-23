@@ -7,10 +7,11 @@ using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADash;
+using System.Linq;
 
 namespace DBADashGUI.DBADashAlerts
 {
@@ -37,6 +38,14 @@ namespace DBADashGUI.DBADashAlerts
                 tsAddChannelType.Click += AddChannel_Click;
             }
             customReportView1.ToolStrip.Items.Add(tsAddChannel);
+
+            var tsManageGroups = new ToolStripButton("Add Group", Properties.Resources.GroupBy_16x)
+            {
+                ToolTipText = "Click to add a new notification channel group. Notification channel groups allow you to target alerts to specific notification channels. After creating a group, edit your channels and rules to assign them to the group."
+            };
+            tsManageGroups.Click += ManageGroups_Click;
+            customReportView1.ToolStrip.Items.Add(tsManageGroups);
+
             customReportView1.PostGridRefresh += OnPostGridRefresh;
         }
 
@@ -56,8 +65,36 @@ namespace DBADashGUI.DBADashAlerts
             }
         }
 
+        private void ManageGroups_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var name = string.Empty;
+                if (Common.ShowInputDialog(ref name, "Enter a name for the new notification channel group:") != DialogResult.OK) return;
+                name = name.Trim();
+                if (string.IsNullOrWhiteSpace(name)) return;
+                if (NotificationChannelGroup.GroupExists(name, Common.ConnectionString))
+                {
+                    MessageBox.Show("A group with that name already exists.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                NotificationChannelGroup.Add(Common.ConnectionString, name);
+                NotificationChannelGroupConverter.Invalidate();
+                RefreshData();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
+        }
+
         private void EditChannel(NotificationChannelBase channel)
         {
+            // Attach the group converter so the PropertyGrid shows a dropdown instead of a raw int
+            TypeDescriptor.AddProviderTransparent(
+                new GroupIdConverterProvider(TypeDescriptor.GetProvider(channel)),
+                channel);
+
             using var edit = new PropertyGridDialog();
             edit.Text = channel.ChannelID > 0 ? "Edit Channel" : "Add Channel";
             edit.SelectedObject = channel;
@@ -121,7 +158,15 @@ namespace DBADashGUI.DBADashAlerts
             DBADashDataGridView ruleGrid = null;
             DBADashDataGridView blackoutGrid = null;
             DBADashDataGridView channelGrid = null;
-            if (customReportView1.Grids.Count == 3)
+            DBADashDataGridView groupGrid = null;
+            if (customReportView1.Grids.Count == 4)
+            {
+                ruleGrid = customReportView1.Grids[0];
+                blackoutGrid = customReportView1.Grids[1];
+                channelGrid = customReportView1.Grids[2];
+                groupGrid = customReportView1.Grids[3];
+            }
+            else if (customReportView1.Grids.Count == 3)
             {
                 ruleGrid = customReportView1.Grids[0];
                 blackoutGrid = customReportView1.Grids[1];
@@ -141,6 +186,10 @@ namespace DBADashGUI.DBADashAlerts
 
                     case 2:
                         channelGrid = customReportView1.Grids[0];
+                        break;
+
+                    case 3:
+                        groupGrid = customReportView1.Grids[0];
                         break;
                 }
             }
@@ -261,6 +310,31 @@ namespace DBADashGUI.DBADashAlerts
                 channelGrid.ApplyTheme();
             }
             channelGrid?.AutoResizeColumnsWithMaxColumnWidth();
+            if (groupGrid != null && !groupGrid.Columns.Contains("colEdit"))
+            {
+                groupGrid.Columns.Add(new DataGridViewLinkColumn()
+                {
+                    Name = "colEdit",
+                    HeaderText = @"Edit",
+                    Text = "Edit",
+                    AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader,
+                    UseColumnTextForLinkValue = true,
+                });
+                groupGrid.Columns.Add(new DataGridViewLinkColumn()
+                {
+                    Name = "colDelete",
+                    HeaderText = @"Delete",
+                    Text = "Delete",
+                    AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader,
+                    UseColumnTextForLinkValue = true,
+                });
+                groupGrid.CellContentClick -= GroupGrid_CellContentClick;
+                groupGrid.CellContentClick += GroupGrid_CellContentClick;
+                groupGrid.CellFormatting -= GroupGrid_CellFormatting;
+                groupGrid.CellFormatting += GroupGrid_CellFormatting;
+                groupGrid.ApplyTheme();
+            }
+            groupGrid?.AutoResizeColumnsWithMaxColumnWidth();
         }
 
         private static void ChannelGrid_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
@@ -347,6 +421,64 @@ namespace DBADashGUI.DBADashAlerts
                             RefreshData();
                             break;
                         }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
+        }
+
+        private static void GroupGrid_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            var grid = (DBADashDataGridView)sender;
+            if (grid.Columns[e.ColumnIndex].Name is "colEdit" or "colDelete")
+            {
+                var groupID = Convert.ToInt32(grid.Rows[e.RowIndex].Cells["GroupID"].Value);
+                if (groupID == 0)
+                {
+                    e.Value = string.Empty;
+                    e.FormattingApplied = true;
+                }
+            }
+        }
+
+        private void GroupGrid_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            var grid = (DBADashDataGridView)sender;
+            var groupID = Convert.ToInt32(grid.Rows[e.RowIndex].Cells["GroupID"].Value);
+            var columnName = grid.Columns[e.ColumnIndex].Name;
+            if (groupID == 0 && (columnName == "colEdit" || columnName == "colDelete")) return;
+            var groupName = (string)grid.Rows[e.RowIndex].Cells["GroupName"].Value;
+            var group = new NotificationChannelGroup { GroupID = groupID, GroupName = groupName };
+            try
+            {
+                switch (columnName)
+                {
+                    case "colEdit":
+                        var newName = groupName;
+                        if (Common.ShowInputDialog(ref newName, "Edit Group", description: "Group Name:") != DialogResult.OK) return;
+                        if (string.IsNullOrWhiteSpace(newName) || newName == groupName) return;
+                        if (NotificationChannelGroup.GroupExists(newName, Common.ConnectionString))
+                        {
+                            MessageBox.Show("A group with that name already exists.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                        group.GroupName = newName;
+                        group.Update(Common.ConnectionString);
+                        NotificationChannelGroupConverter.Invalidate();
+                        RefreshData();
+                        break;
+
+                    case "colDelete":
+                        if (MessageBox.Show($"Delete group '{groupName}'?\nChannels and rules in this group will revert to the default group.\nActive alerts associated with the group will be closed.",
+                                @"Delete Group", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+                        group.Delete(Common.ConnectionString);
+                        NotificationChannelGroupConverter.Invalidate();
+                        RefreshData();
+                        break;
                 }
             }
             catch (Exception ex)
@@ -532,7 +664,9 @@ namespace DBADashGUI.DBADashAlerts
                             { "EvaluationPeriodMins", "Evaluation Period (Mins)" },
                             { "IsActive", "Is Active" },
                             { "Details", "Details" },
-                            { "Notes", "Notes"}
+                            { "Notes", "Notes"},
+                            { "GroupID", "Group ID" },
+                            { "GroupName", "Group" }
                         },
                         ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>()
                         {
@@ -551,6 +685,8 @@ namespace DBADashGUI.DBADashAlerts
                             new("Details", new PersistedColumnLayout { Visible = true }),
                             new("ApplyToTagID", new PersistedColumnLayout { Visible = false }),
                             new("Notes", new PersistedColumnLayout { Visible = true }),
+                            new("GroupID", new PersistedColumnLayout { Visible = false }),
+                            new("GroupName", new PersistedColumnLayout { Visible = true }),
                         },
                         CellFormatString = new Dictionary<string, string>()
                         {
@@ -731,8 +867,7 @@ namespace DBADashGUI.DBADashAlerts
                   {
                     2, new CustomReportResult
                     {
-                        ResultName = "Notification Channels",
-                        ColumnAlias = new Dictionary<string, string>
+                        ResultName = "Notification Channels",                        ColumnAlias = new Dictionary<string, string>
                         {
                             { "NotificationChannelID", "Notification Channel ID" },
                             { "NotificationChannelTypeID", "Notification Channel Type ID" },
@@ -750,6 +885,8 @@ namespace DBADashGUI.DBADashAlerts
                             {"SucceededNotificationCount","Succeeded Notification Count"},
                             {"LastFailure","Last Failure"},
                             {"LastFailureStatus","Last Failure Status"},
+                            {"GroupID", "Group ID"},
+                            {"GroupName", "Group"},
                         },
                          ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>()
                             {
@@ -769,6 +906,8 @@ namespace DBADashGUI.DBADashAlerts
                                 new("SucceededNotificationCount", new PersistedColumnLayout(){Visible = true}),
                                 new("LastFailure", new PersistedColumnLayout(){Visible = true}),
                                 new("LastFailureStatus", new PersistedColumnLayout(){Visible = false}),
+                                new("GroupID", new PersistedColumnLayout { Visible = false }),
+                                new("GroupName", new PersistedColumnLayout { Visible = true }),
                             },
                         CellHighlightingRules =
                         {
@@ -821,6 +960,26 @@ namespace DBADashGUI.DBADashAlerts
                                     IsStatusColumn = true
                                 }
                             },
+                        }
+                    }
+                },
+                {
+                    3, new CustomReportResult
+                    {
+                        ResultName = "Notification Channel Groups",
+                        ColumnAlias = new Dictionary<string, string>
+                        {
+                            { "GroupID", "Group ID" },
+                            { "GroupName", "Group Name" },
+                            { "ChannelCount", "Channels" },
+                            { "RuleCount", "Rules" },
+                        },
+                        ColumnLayout = new List<KeyValuePair<string, PersistedColumnLayout>>
+                        {
+                            new("GroupID", new PersistedColumnLayout { Visible = false }),
+                            new("GroupName", new PersistedColumnLayout { Visible = true }),
+                            new("ChannelCount", new PersistedColumnLayout { Visible = true }),
+                            new("RuleCount", new PersistedColumnLayout { Visible = true }),
                         }
                     }
                 }

@@ -10,7 +10,7 @@ AS
 */
 DECLARE @AD AlertDetails;
 /* 
-	Ensure AlertKey is unique for each instance.  
+	Ensure AlertKey is unique for each instance and group.  
 	Take the highest priority rule.
 */
 WITH DeDupe AS (
@@ -19,7 +19,8 @@ WITH DeDupe AS (
 		AlertKey,
 		Message, 
 		RuleID,
-		ROW_NUMBER() OVER(PARTITION BY InstanceID,AlertKey ORDER BY Priority,RuleID) AS rnum 
+		GroupID,
+		ROW_NUMBER() OVER(PARTITION BY InstanceID,AlertKey,GroupID ORDER BY Priority,RuleID) AS rnum 
 	FROM @AlertDetails
 )
 INSERT INTO @AD(
@@ -27,13 +28,15 @@ INSERT INTO @AD(
 		Priority,
 		AlertKey,
 		Message,  
-		RuleID
+		RuleID,
+		GroupID
 		)
 SELECT InstanceID,
 		Priority,
 		AlertKey,
 		Message,  
-		RuleID
+		RuleID,
+		GroupID
 FROM DeDupe
 WHERE rnum=1
 
@@ -53,6 +56,7 @@ BEGIN
 				FROM @AD AD
 				WHERE AD.InstanceID = AA.InstanceID
 				AND AD.AlertKey = AA.AlertKey
+				AND AD.GroupID = AA.GroupID
 				)
 	AND IsResolved=0
 	AND IsBlackout=0
@@ -67,20 +71,22 @@ UPDATE AA
 	Escalated = CASE WHEN A.Priority < AA.Priority THEN SYSUTCDATETIME() ELSE AA.Escalated END,
 	DeEscalated = CASE WHEN A.Priority > AA.Priority THEN SYSUTCDATETIME() ELSE AA.DeEscalated END,
 	Priority = A.Priority,
-	RuleID = A.RuleID
+	RuleID = A.RuleID,
+	GroupID = A.GroupID
 FROM Alert.ActiveAlerts AA
-JOIN @AD A ON AA.InstanceID = A.InstanceID AND AA.AlertKey = A.AlertKey
+JOIN @AD A ON AA.InstanceID = A.InstanceID AND AA.AlertKey = A.AlertKey AND AA.GroupID = A.GroupID
 WHERE AA.AlertType = @AlertType
 AND AA.IsBlackout=0
 
 /* Add new alerts */
-INSERT INTO Alert.ActiveAlerts(InstanceID,Priority,AlertType,AlertKey,FirstMessage,LastMessage,RuleID)
-SELECT AD.InstanceID,AD.Priority,@AlertType,AD.AlertKey,AD.Message,AD.Message,AD.RuleID
+INSERT INTO Alert.ActiveAlerts(InstanceID,Priority,AlertType,AlertKey,FirstMessage,LastMessage,RuleID,GroupID)
+SELECT AD.InstanceID,AD.Priority,@AlertType,AD.AlertKey,AD.Message,AD.Message,AD.RuleID,AD.GroupID
 FROM @AD AD
 OUTER APPLY Alert.IsBlackoutPeriod(AD.InstanceID,AD.AlertKey) BP
 WHERE NOT EXISTS(SELECT 1 
 			FROM Alert.ActiveAlerts AA
 			WHERE AD.InstanceID = AA.InstanceID
 			AND AD.AlertKey = AA.AlertKey
+			AND AD.GroupID = AA.GroupID
 			)
 AND BP.IsBlackout=0

@@ -1,4 +1,4 @@
-﻿CREATE PROC Alert.Rule_Upd(
+CREATE PROC Alert.Rule_Upd(
 	@RuleID INT,
 	@Type VARCHAR(50),
 	@AlertKey NVARCHAR(256),
@@ -10,7 +10,8 @@
 	@IsActive BIT=1,
 	@Details NVARCHAR(MAX),
 	@Notes NVARCHAR(MAX)=NULL,
-	@ApplyToHidden BIT=0
+	@ApplyToHidden BIT=0,
+	@GroupID INT=0
 )
 AS
 UPDATE Alert.Rules SET
@@ -24,5 +25,6 @@ UPDATE Alert.Rules SET
 	IsActive = @IsActive,
 	Details = @Details,
 	Notes = @Notes,
-	ApplyToHidden = @ApplyToHidden
+	ApplyToHidden = @ApplyToHidden,
+	GroupID = @GroupID
 WHERE RuleID = @RuleID

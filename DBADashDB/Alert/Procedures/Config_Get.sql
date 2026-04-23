@@ -53,3 +53,5 @@ OUTER APPLY dbo.SecondsToHumanDuration(DATEDIFF_BIG(s,GETUTCDATE(),BP.StartDate)
 ORDER BY BP.EndDate DESC
 
 EXEC Alert.NotificationChannel_Get
+
+EXEC Alert.NotificationChannelGroup_Get

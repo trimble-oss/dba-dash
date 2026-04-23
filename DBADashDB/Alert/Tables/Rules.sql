@@ -1,4 +1,4 @@
-﻿CREATE TABLE Alert.Rules(
+CREATE TABLE Alert.Rules(
 	RuleID INT IDENTITY(1,1) NOT NULL,
 	Type VARCHAR(50) NOT NULL,
 	AlertKey NVARCHAR(256) NOT NULL,
@@ -12,10 +12,11 @@
 	Notes NVARCHAR(MAX) NULL,
 	ApplyToHidden BIT NOT NULL CONSTRAINT DF_Alert_Rules_ApplyToHidden DEFAULT(0),
 	RuleHash AS HASHBYTES('SHA2_256',CONCAT(Type,'|',AlertKey,'|',ApplyToTagID,'|',ApplyToInstanceID,'|',Threshold,'|',EvaluationPeriodMins,'|',IsActive,'|',Details,'|',ApplyToHidden)),
+	GroupID INT NOT NULL CONSTRAINT DF_Alert_Rules_GroupID DEFAULT(0),
 	CONSTRAINT PK_Alert_Rules PRIMARY KEY(RuleID),
 	CONSTRAINT CK_Rule_Priority CHECK(Priority >= 0 AND Priority <= 41),
 	CONSTRAINT CK_Rule_ApplyTo CHECK(NOT (ApplyToInstanceID IS NOT NULL AND ApplyToTagID > 0)), /* Should be one or the other */
 	CONSTRAINT FK_Alert_Rules_Instances FOREIGN KEY(ApplyToInstanceID) REFERENCES dbo.Instances(InstanceID)
 )
 GO
-CREATE UNIQUE NONCLUSTERED INDEX IX_Alert_Rules_RuleHash ON Alert.Rules(RuleHash)
+CREATE UNIQUE NONCLUSTERED INDEX IX_Alert_Rules_GroupID_RuleHash ON Alert.Rules(GroupID,RuleHash)

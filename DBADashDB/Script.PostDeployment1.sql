@@ -1941,6 +1941,14 @@ WHEN NOT MATCHED BY TARGET THEN
 WHEN NOT MATCHED BY SOURCE THEN 
  DELETE;
 
+/* Add default notification channel group. */
+IF NOT EXISTS(SELECT 1 FROM Alert.NotificationChannelGroup WHERE GroupID = 0)
+BEGIN
+	SET IDENTITY_INSERT Alert.NotificationChannelGroup ON
+	INSERT INTO Alert.NotificationChannelGroup(GroupID, GroupName) VALUES(0, '(Default)')
+	SET IDENTITY_INSERT Alert.NotificationChannelGroup OFF
+END
+
 /* 
 	ResourceGovernorConfiguration collection no longer run non-enterprise edition engines.
 	Remove the row from CollectionDates to prevent warnings about snapshot age for this collection
