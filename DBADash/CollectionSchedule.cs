@@ -66,6 +66,7 @@ namespace DBADashService
                             {CollectionType.ResourceGovernorConfiguration, new CollectionSchedule(){ Schedule = midnight } },
                             {CollectionType.DatabaseQueryStoreOptions, new CollectionSchedule(){ Schedule = midnight } },
                             {CollectionType.IdentityColumns, new CollectionSchedule(){ Schedule = midnight} },
+                            {CollectionType.DatabaseExtendedProperties, new CollectionSchedule(){ Schedule = midnight} },
                             {CollectionType.SchemaSnapshot, new CollectionSchedule(){Schedule=elevenPm} },
                             {CollectionType.AvailableProcs, new CollectionSchedule(){Schedule = elevenPm}},
                             {CollectionType.InstanceMetadata, new CollectionSchedule(){Schedule = tenPm}},
