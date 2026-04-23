@@ -5,6 +5,13 @@ namespace DBADashAI.Services
 {
     public class AiSummaryFormatter
     {
+        private readonly AiPromptDataSerializer _dataSerializer;
+
+        public AiSummaryFormatter(AiPromptDataSerializer dataSerializer)
+        {
+            _dataSerializer = dataSerializer;
+        }
+
         public string BuildSummaryPayload(
             string userQuestion,
             IReadOnlyCollection<AiToolExecutionResult> toolResults,
@@ -18,15 +25,7 @@ namespace DBADashAI.Services
             sb.AppendLine($"RCA Template Guidance: {rcaTemplate}");
             sb.AppendLine();
             sb.AppendLine("Tool Results:");
-
-            foreach (var tool in toolResults)
-            {
-                sb.AppendLine($"- Tool: {tool.Tool}");
-                sb.AppendLine($"  RowCount: {tool.RowCount}");
-                sb.AppendLine($"  ExecutionMs: {tool.ExecutionMs}");
-                sb.AppendLine($"  Data: {System.Text.Json.JsonSerializer.Serialize(tool.Data)}");
-                sb.AppendLine();
-            }
+            sb.Append(_dataSerializer.Serialize(toolResults));
 
             sb.AppendLine("Ranked Evidence (highest quality first):");
             foreach (var ev in rankedEvidence.Take(12))

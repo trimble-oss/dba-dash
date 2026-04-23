@@ -23,7 +23,7 @@ namespace DBADashAI.Services.Tools
 
         public async Task<AiToolResult> RunAsync(AiAskRequest request, CancellationToken cancellationToken)
         {
-            var rows = await _sql.QueryAsync("DBADash.AI_ConfigRiskDrift_Get", request.MaxRows, request.InstanceFilter, request.HoursBack, cancellationToken);
+            var rows = await _sql.QueryAsync("AI.ConfigRiskDrift_Get", request.MaxRows, request.InstanceFilter, request.HoursBack, cancellationToken);
 
             static int RiskWeight(string configName)
             {

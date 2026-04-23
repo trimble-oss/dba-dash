@@ -1,86 +1,92 @@
 # DBA Dash AI Assistant
 
-This document covers the DBA Dash AI Assistant end-to-end:
-- what it is and how it works,
-- how to configure Azure Foundry / Azure OpenAI,
-- how to run `DBADashAI.dll`,
-- how the GUI connects to the API,
-- supported endpoints and troubleshooting.
+The AI Assistant analyses your DBA Dash repository data and answers natural-language questions about alerts, performance, waits, backups, blocking, slow queries, and more.
 
-## 1) Overview
+## How it works
 
-The AI Assistant is split into two parts:
+Two components work together:
 
-1. **DBADashGUI** (`DBADash.exe`)
-   - Hosts the AI Assistant user interface.
-   - Sends requests to the AI API over HTTP (default `http://localhost:5055`).
+| Component | Role |
+|---|---|
+| **DBADashAI** (`DBADashAI.dll`) | ASP.NET Core web service. Runs SQL tools against the repository DB, optionally calls an LLM to summarise findings, and exposes `/api/ai/*` endpoints. |
+| **DBADash GUI** | Discovers the AI service, calls the API, and renders the response in the AI Assistant tab. |
 
-2. **DBADashAI** (`DBADashAI.dll`)
-   - Executes DBA-oriented SQL tools against the DBA Dash repository database.
-   - Optionally calls Azure OpenAI (recommended) or OpenCode to generate concise markdown summaries.
-   - Exposes API endpoints under `/api/ai/*`.
+---
 
-## 2) Why Azure Foundry / Azure OpenAI is needed
+## Deployment modes
 
-The SQL tools can return structured findings, but **LLM summarization** is what turns raw evidence into a concise operator-friendly answer (Summary / Findings / Actions / Confidence).
+### Local mode (default — recommended for getting started)
 
-Without Azure OpenAI (or OpenCode), API responses still work, but summary text will be disabled/fallback.
+Run `DBADashAI` on the same machine as the GUI. It binds to `localhost` only and requires no authentication — the loopback interface is the security boundary.
 
-Azure OpenAI is recommended because it gives:
-- enterprise deployment model and controls,
-- stable model endpoint with API key auth,
-- predictable integration for the DBA Dash AI service.
+- No certificates required
+- No API key required
+- Not registered in the repository database
+- Only the GUI on that machine can use it
 
-## 3) Architecture and request flow
+**`appsettings.json` — leave `Registration:ServiceUrl` empty:**
 
-1. User asks a question in GUI AI panel.
-2. GUI posts to `POST /api/ai/ask`.
-3. API validates request, selects one or more tools, runs SQL queries.
-4. Evidence is ranked, confidence is scored.
-5. If enabled, API sends a prompt + evidence to Azure OpenAI for markdown summary generation.
-6. API returns structured JSON + summary to GUI.
+```json
+{
+  "Registration": {
+    "ServiceUrl": "",
+    "Port": 5055
+  }
+}
+```
 
-## 4) Prerequisites
+### Shared/repository mode
 
-- DBA Dash repository database reachable from the machine running `DBADashAI.dll`.
-- Valid SQL connection string for `ConnectionStrings:Repository`.
-- .NET runtime compatible with project target (workspace is currently targeting .NET 10).
-- Optional but recommended: Azure OpenAI deployment in Azure Foundry.
+Deploy `DBADashAI` on a central server accessible to all GUI clients. Set `Registration:ServiceUrl` to the URL that clients will connect to. The service binds to all interfaces, registers that URL in the repository database, and enforces API key authentication.
 
-## 5) Configure DBADashAI (`DBADashAI/appsettings.json`)
+**`appsettings.json`:**
 
-`DBADashAI` reads settings from `DBADashAI/appsettings.json`.
+```json
+{
+  "Registration": {
+    "ServiceUrl": "https://aiserver.corp.com",
+    "Port": 5055
+  },
+  "Security": {
+    "Enabled": true,
+    "RequireHttps": true
+  }
+}
+```
 
-### Required for data access
+GUI clients discover the URL and API key automatically from the repository database — no client-side configuration needed.
+
+---
+
+## Configuration reference (`appsettings.json`)
+
+All AI service configuration lives in `appsettings.json` in the `DBADashAI` folder. `ServiceConfig.json` is not used by the AI service except to inherit the repository connection string when they are co-located.
+
+### Repository connection string
+
+Required. Tells the AI service which DBA Dash database to query.
 
 ```json
 {
   "ConnectionStrings": {
-    "Repository": "Server=<server>;Database=<db>;Integrated Security=true;Encrypt=true;TrustServerCertificate=true;"
+    "Repository": "Server=sql-server;Database=DBADashDB;Integrated Security=true;Encrypt=true;"
   }
 }
 ```
 
-### AI settings (feedback and runbooks)
+If `DBADashAI` is deployed in the same folder as the collection service, this is inherited automatically from `ServiceConfig.json` and does not need to be set here.
+
+### AI provider
+
+At least one provider must be configured for the LLM summary to work. Without a provider the service still runs — tool data is returned but the `summary` field will be empty.
+
+#### Azure OpenAI
 
 ```json
 {
-  "AI": {
-    "FeedbackStorePath": "",
-    "RunbookBaseUrl": ""
-  }
-}
-```
-
-- `FeedbackStorePath`: optional explicit storage path for feedback persistence.
-- `RunbookBaseUrl`: optional base URL for runbook links in risk/digest outputs.
-
-### Azure OpenAI (recommended)
-
-```json
-{
+  "AI": { "Provider": "AzureOpenAI" },
   "AzureOpenAI": {
-    "Endpoint": "https://<your-resource>.openai.azure.com",
+    "Endpoint": "https://<resource>.openai.azure.com",
     "ApiKey": "<key>",
     "Deployment": "<deployment-name>",
     "ApiVersion": "2024-02-15-preview"
@@ -88,220 +94,169 @@ Azure OpenAI is recommended because it gives:
 }
 ```
 
-All of `Endpoint`, `ApiKey`, and `Deployment` must be present to enable Azure summary generation.
-
-### OpenCode (optional fallback)
+#### Anthropic (direct or via Azure Foundry)
 
 ```json
 {
-  "OpenCode": {
-    "BaseUrl": "",
-    "ApiKey": "",
-    "Model": ""
-  }
-}
-```
-
-OpenCode is used only if Azure settings are not fully configured.
-
-### Provider selection
-
-You can force a specific summary provider with:
-
-```json
-{
-  "AI": {
-    "Provider": "AzureOpenAI"
-  }
-}
-```
-
-Supported values:
-- `AzureOpenAI`
-- `Anthropic`
-- `OpenCode`
-- empty/omitted (auto-fallback order)
-
-If omitted, provider fallback order is:
-1. AzureOpenAI (if fully configured)
-2. Anthropic (if fully configured)
-3. OpenCode (if fully configured)
-
-### Anthropic (optional)
-
-```json
-{
+  "AI": { "Provider": "Anthropic" },
   "Anthropic": {
     "BaseUrl": "https://api.anthropic.com",
-    "ApiKey": "",
-    "Model": "",
+    "ApiKey": "<key>",
+    "Model": "claude-3-5-sonnet-20241022",
     "Version": "2023-06-01",
-    "MaxTokens": "1024"
+    "MaxTokens": 1024
   }
 }
 ```
 
-Required for Anthropic summaries:
-- `Anthropic:ApiKey`
-- `Anthropic:Model`
-
-Optional:
-- `BaseUrl` (default `https://api.anthropic.com`)
-- `Version` (default `2023-06-01`)
-- `MaxTokens` (default `1024`)
-
-### Anthropic on Azure Foundry
-
-If your Foundry admin provides values like:
-- **Target URI**: `https://<resource>.services.ai.azure.com/anthropic/v1/messages`
-- **API key**
-- **deployment/model name** (example: `claude-sonnet-4-6`)
-
-Map them to `DBADashAI/appsettings.json` as:
+For Anthropic via **Azure Foundry**, set `BaseUrl` to the base Foundry URL (ending in `/anthropic/`):
 
 ```json
 {
-  "AI": {
-    "Provider": "Anthropic"
-  },
   "Anthropic": {
     "BaseUrl": "https://<resource>.services.ai.azure.com/anthropic/",
-    "ApiKey": "<api-key>",
-    "Model": "<deployment-name>",
-    "Version": "2023-06-01",
-    "MaxTokens": "1024"
+    "ApiKey": "<foundry-api-key>",
+    "Model": "<deployment-name>"
   }
 }
 ```
 
-Notes:
-- Use the **base** Anthropic URL ending in `/anthropic/` (not `/v1/messages`) for `BaseUrl`.
-- `Model` should be your Foundry deployment/model name.
-- `AI:Provider` should be set to `Anthropic` to force that provider.
+If `AI:Provider` is not set, the service auto-selects the first fully-configured provider in the order: AzureOpenAI → Anthropic.
 
-## 6) Configure GUI to reach API (`DBADashGUI/App.config`)
+### Registration
 
-GUI app settings include:
-
-```xml
-<add key="AIApiBaseUrl" value="http://localhost:5055" />
-<add key="AIToolName" value="" />
-<add key="AIMaxRows" value="50" />
-<add key="AIIncludeSummary" value="true" />
-<add key="AIShowJson" value="false" />
+```json
+{
+  "Registration": {
+    "ServiceUrl": "",
+    "Port": 5055
+  }
+}
 ```
 
-- `AIApiBaseUrl`: where GUI sends AI requests.
-- `AIToolName`: optional fixed tool override (empty = auto routing).
-- `AIMaxRows`: max rows pulled by tools.
-- `AIIncludeSummary`: whether API asks LLM for summary text.
-- `AIShowJson`: shows/hides raw JSON panel in GUI.
+| Key | Description |
+|---|---|
+| `ServiceUrl` | The URL registered in the repository DB for GUI discovery. Empty = local mode (loopback binding, no auth, no DB registration). |
+| `Port` | Port to listen on. Used in both modes. |
 
-## 7) How to run `DBADashAI.dll`
+### Security
 
-From the `DBADashAI` output folder:
+Only applies in shared/repository mode (`ServiceUrl` set). In local mode, auth is automatically disabled.
 
-```powershell
-dotnet DBADashAI.dll --urls http://localhost:5055
+```json
+{
+  "Security": {
+    "Enabled": true,
+    "RequireHttps": false,
+    "KeyRotationDays": 30,
+    "KeyGracePeriodHours": 24
+  }
+}
 ```
 
-Then run `DBADash.exe` and ensure GUI points to same base URL (`AIApiBaseUrl`).
+| Key | Description |
+|---|---|
+| `Enabled` | Enables authentication in shared/repository mode. API key authentication is the current authentication model. |
+| `RequireHttps` | Redirects HTTP requests to HTTPS. Strongly recommended in shared/repository mode. |
+| `KeyRotationDays` | Automatically rotates the shared API key after the specified number of days. Set `0` or less to disable rotation. |
+| `KeyGracePeriodHours` | Grace period for previous keys during rotation. |
 
-### Health check
+**⚠️ HTTPS in shared mode** — **Strongly recommended.** Without HTTPS, API keys are transmitted in plain text and can be intercepted on the network. Set `RequireHttps: true` and configure your binding via a reverse proxy (recommended) or Kestrel certificates. The health endpoint (`/api/ai/health`) is always unauthenticated for load-balancer probes.
 
-```http
-GET /api/ai/health
+### Logging
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "DBADashAI": "Information"
+    }
+  }
+}
 ```
 
-Expected: HTTP 200 with JSON like `{ "status": "ok", ... }`.
+### Azure Key Vault (optional)
 
-## 8) API endpoints
+Store secrets in Key Vault instead of `appsettings.json`. Use `--` to represent hierarchy in secret names (e.g. `AzureOpenAI--ApiKey`).
 
-- `GET /api/ai/health`
-  - service health.
-
-- `GET /api/ai/tools`
-  - available tools and metadata.
-
-- `POST /api/ai/ask`
-  - main ask endpoint.
-  - request model includes question, tool override, summary toggle, and max rows.
-
-- `POST /api/ai/proactive-digest`
-  - proactive digest summary/risk generation.
-
-- `POST /api/ai/feedback`
-  - submit helpful / not-helpful feedback.
-
-- `GET /api/ai/feedback`
-  - recent feedback records.
-
-## 9) Tooling currently wired
-
-Current tool registrations include:
-- active alerts summary,
-- blocking summary,
-- agent job alerts,
-- waits summary,
-- deadlocks summary,
-- slow queries summary,
-- backups risk summary,
-- drives risk summary,
-- configuration drift summary.
-
-The intent router can select one or more tools based on question and settings.
-
-## 10) Azure Foundry setup checklist (practical)
-
-1. Create or use an existing Azure OpenAI resource in your subscription.
-2. Deploy a chat-capable model (e.g., your org-approved model/deployment).
-3. Capture:
-   - endpoint URL,
-   - API key,
-   - deployment name.
-4. Put those values under `AzureOpenAI` in `appsettings.json`.
-5. Restart `DBADashAI.dll`.
-6. Verify:
-   - `GET /api/ai/health` succeeds,
-   - ask request returns a non-empty `summary`.
-
-## 11) Security notes
-
-- Treat API keys as secrets; do not commit them to source control.
-- Limit who can read local config files with secrets.
-- Use least privilege on repository DB access.
-- Prefer environment-specific config management for production.
-
-## 12) Troubleshooting
-
-### GUI says AI request failed / cannot connect
-- Confirm `DBADashAI.dll` is running.
-- Confirm URL match: `AIApiBaseUrl` vs `--urls` argument.
-- Check firewall or loopback restrictions.
-
-### Summary missing
-- Check `AIIncludeSummary=true` in GUI config.
-- Ensure Azure settings are fully populated (Endpoint+ApiKey+Deployment) or valid OpenCode settings.
-- Review API response body for error detail.
-
-### SQL tool errors
-- Validate `ConnectionStrings:Repository`.
-- Validate DB reachability and permissions.
-- Ensure repository schema objects exist and are accessible.
-
-### Slow responses
-- Reduce `AIMaxRows`.
-- Validate SQL performance of repository DB.
-- Monitor model latency and token volume.
-
-## 13) Local dev workflow
-
-For fast UI iteration, run from normal debug outputs:
-- GUI: `DBADashBuild\Debug\DBADash.exe`
-- API: `DBADashAI\bin\Debug\net10.0\DBADashAI.dll`
-
-Create packaged test folders only when you need a snapshot/handoff build.
+```json
+{
+  "KeyVault": {
+    "VaultUri": "https://<vault>.vault.azure.net/",
+    "ManagedIdentityClientId": ""
+  }
+}
+```
 
 ---
 
-If this doc is moved to the website docs later, keep config keys and endpoint names aligned with code (`Program.cs`, `OpenCodeChatClient.cs`, `SqlToolExecutor.cs`, and GUI appSettings).
+## Installing as a Windows service
+
+Use the **AI Service** tab in the DBADashServiceConfig tool, or run `sc.exe` manually:
+
+```powershell
+sc.exe create DBADashAI `
+    binPath="\"C:\Program Files\dotnet\dotnet.exe\" \"C:\DBADash\DBADashAI\DBADashAI.dll\"" `
+    start= auto
+sc.exe start DBADashAI
+```
+
+Configure the service by editing `appsettings.json` in the `DBADashAI` folder before or after installation. Restart the service to apply changes.
+
+---
+
+## GUI discovery
+
+The GUI uses the following priority order to locate the AI service:
+
+1. **Local probe** — always checks `http://localhost:5055` (or the URL in user settings) first. If reachable, uses it with no authentication. The health endpoint returns a repository fingerprint; if the local service is pointed at a different database than the GUI is connected to, a warning is shown and the tab is disabled.
+2. **Repository database** — if no local service responds, reads `AI.ServiceConfig` for the shared service URL and API key registered by the central deployment.
+
+If neither source is available the AI Assistant tab is hidden.
+
+> **Role requirement** — Even when a service is reachable, the AI Assistant tab is only shown to users who are admins (**db_owner** or **sysadmin** on the repository database) or members of the **AIUser** role. If you can reach the service but the tab is still missing, verify that your repository login has one of these roles assigned.
+
+---
+
+## API endpoints
+
+| Endpoint | Auth | Description |
+|---|---|---|
+| `GET /api/ai/health` | None | Service health + repository fingerprint |
+| `GET /api/ai/diagnostics` | Required | Configuration summary (keys redacted) |
+| `GET /api/ai/tools` | Required | Available tools and metadata |
+| `GET /api/ai/examples` | Required | Example questions grouped by category |
+| `GET /api/ai/models` | Required | Available LLM models |
+| `POST /api/ai/ask` | Required | Ask a question |
+| `POST /api/ai/proactive-digest` | Required | Proactive risk digest |
+| `POST /api/ai/feedback` | Required | Submit helpful/not-helpful feedback |
+| `GET /api/ai/feedback` | Required | Recent feedback |
+| `GET /api/ai/test-anthropic` | Required | Test Anthropic provider connectivity and configuration |
+
+---
+
+## Troubleshooting
+
+### AI Assistant tab is not shown
+
+- In local mode: verify the service is running — `Invoke-RestMethod http://localhost:5055/api/ai/health`
+- In shared mode: check `AI.ServiceConfig` exists and `IsActive = 1` (heartbeat within 2 minutes)
+- Verify that your repository login is **db_owner** or **sysadmin** on the repository database, or a member of the **AIUser** role — the tab is hidden for users who have neither
+
+### "AI service is connected to a different repository"
+
+The local service's `ConnectionStrings:Repository` points to a different database than the GUI is connected to. Either update the AI service connection string or switch the GUI to the matching repository.
+
+### Summary is empty
+
+The LLM provider is not configured or unreachable. Check `AI:Provider` and the corresponding provider section. Use `GET /api/ai/diagnostics` (authenticated) to inspect the resolved configuration.
+
+### 401 Unauthorized
+
+Shared mode only. The GUI retrieves the API key from the database automatically. If it fails, check that `AI.ServiceConfig` has a valid key and the GUI has read access to that table.
+
+### Port conflict
+
+Change `Registration:Port` in `appsettings.json` and restart. In local mode the GUI will probe `http://localhost:{port}` — update user settings in the GUI Options if using a non-default port.

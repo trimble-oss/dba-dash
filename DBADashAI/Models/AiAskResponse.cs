@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace DBADashAI.Models
 {
     public class AiAskResponse
@@ -6,7 +8,12 @@ namespace DBADashAI.Models
 
         public string Tool { get; set; } = string.Empty;
 
-        public object Data { get; set; } = new();
+        /// <summary>
+        /// The raw tool data as a JSON element. Single-tool responses contain the tool's
+        /// result object directly; multi-tool responses wrap all results under a "tools" array.
+        /// The schema matches the tool name returned in <see cref="Tool"/>.
+        /// </summary>
+        public JsonElement Data { get; set; }
 
         public string? Summary { get; set; }
 

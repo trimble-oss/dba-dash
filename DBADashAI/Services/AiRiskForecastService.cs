@@ -18,8 +18,7 @@ namespace DBADashAI.Services
 
             foreach (var tool in toolResults)
             {
-                var rows = GetRows(tool.Data);
-                if (rows.Count == 0) continue;
+                var rows = GetRows(tool.Data);                if (rows.Count == 0) continue;
 
                 if (tool.Tool == "backups-risk-summary")
                 {
@@ -101,12 +100,11 @@ namespace DBADashAI.Services
             _ => 1
         };
 
-        private static List<Dictionary<string, object?>> GetRows(object data)
+        private static List<Dictionary<string, object?>> GetRows(JsonElement data)
         {
             try
             {
-                using var doc = JsonDocument.Parse(JsonSerializer.Serialize(data));
-                if (!doc.RootElement.TryGetProperty("rows", out var rowsElement) || rowsElement.ValueKind != JsonValueKind.Array)
+                if (!data.TryGetProperty("rows", out var rowsElement) || rowsElement.ValueKind != JsonValueKind.Array)
                 {
                     return [];
                 }

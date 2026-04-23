@@ -15,6 +15,7 @@ namespace DBADashService
     internal class Program
     {
         private static string FatalErrorFilePath => Path.Combine(AppContext.BaseDirectory, "Logs", "FatalError.txt");
+        private static string FatalErrorDirectoryPath => Path.GetDirectoryName(FatalErrorFilePath);
 
         private static void Main(string[] args)
         {
@@ -37,6 +38,7 @@ namespace DBADashService
         public static void LogFatalError(Exception ex)
         {
             Log.Logger.Error(ex, "Fatal error during startup");
+            EnsureDirectoryExists(FatalErrorDirectoryPath);
             File.WriteAllText(FatalErrorFilePath, ex.ToString());
         }
 
@@ -50,6 +52,12 @@ namespace DBADashService
             {
                 Log.Logger.Error(ex, "Error deleting {path}", path);
             }
+        }
+
+        private static void EnsureDirectoryExists(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return;
+            Directory.CreateDirectory(path);
         }
 
         private static void Startup(string[] args)
@@ -89,6 +97,7 @@ namespace DBADashService
         private static void SetupLogging()
         {
             Directory.SetCurrentDirectory(AppContext.BaseDirectory); //  for Logs folder
+            EnsureDirectoryExists(Path.Combine(AppContext.BaseDirectory, "Logs"));
             // https://swimburger.net/blog/dotnet/changing-serilog-minimum-level-without-application-restart-on-dotnet-framework-and-core
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(AppContext.BaseDirectory)

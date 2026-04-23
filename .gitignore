@@ -267,6 +267,7 @@ DBADashBuild/
 Visual Studio 2022/
 # Local AI feedback samples (may contain sensitive environment data)
 DBADashAI/ChatFeedback.txt
+feedback.jsonl
 
 # Local process/tooling files not required for product runtime
 .github/copilot-instructions.md
@@ -299,3 +300,5 @@ PR_DESCRIPTION.md
 PR_DRAFT*.md
 *.pr-draft.md
 
+# DBADashAI local settings override - contains real secrets, never commit
+appsettings.local.json

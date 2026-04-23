@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DBADashConfig\DBADashConfig.csproj" />
+    <ProjectReference Include="..\DBADashAI\DBADashAI.csproj" />
   </ItemGroup>
 
 </Project>

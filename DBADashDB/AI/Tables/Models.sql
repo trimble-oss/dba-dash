@@ -1,0 +1,10 @@
+CREATE TABLE AI.Models
+(
+    ModelID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    ModelName NVARCHAR(128) NOT NULL,
+    DisplayName NVARCHAR(256) NOT NULL,
+    SortOrder INT NOT NULL DEFAULT 0,
+    IsEnabled BIT NOT NULL DEFAULT 1,
+    CONSTRAINT UQ_AI_Models_ModelName UNIQUE (ModelName)
+)
+GO
