@@ -29,12 +29,19 @@ namespace DBADashGUI
             using var cmd = new SqlCommand("dbo.DatabaseExtendedProperties_Get", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
             cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-            cn.Open();
-            using var da = new SqlDataAdapter(cmd);
-            var dt = new DataTable();
-            da.Fill(dt);
-            dgv.DataSource = dt;
-            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            try
+            {
+                cn.Open();
+                using var da = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                da.Fill(dt);
+                dgv.DataSource = dt;
+                dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            }
+            catch (SqlException ex)
+            {
+                throw new System.Exception($"Error connecting to database '{cn.Database}' on server '{cn.DataSource}': {ex.Message}", ex);
+            }
         }
 
         private void TsRefresh_Click(object sender, System.EventArgs e)
