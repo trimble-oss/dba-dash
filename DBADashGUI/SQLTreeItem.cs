@@ -78,7 +78,8 @@ namespace DBADashGUI
             CommunityTool,
             CustomToolsFolder,
             CustomTool,
-            DirectSystemReport
+            DirectSystemReport,
+            DatabaseExtendedProperties
         }
 
         private DatabaseEngineEdition _engineEdition = DatabaseEngineEdition.Unknown;
@@ -621,6 +622,8 @@ namespace DBADashGUI
 
             Nodes.Add(nTypes);
             Nodes.Add(nSeq);
+            var nExtendedProperties = new SQLTreeItem("Extended Properties", TreeType.DatabaseExtendedProperties);
+            Nodes.Add(nExtendedProperties);
         }
 
         private void AddRefreshContextMenu()

@@ -881,6 +881,7 @@
     <Build Include="dbo\Stored Procedures\ResourceGovernorResourcePoolsMetrics_Del.sql" />
     <Build Include="dbo\Stored Procedures\ResourceGovernorWorkloadGroupsMetrics_Del.sql" />
     <Build Include="dbo\Stored Procedures\Deadlocks_Get.sql" />
+    <Build Include="DatabaseExtendedProperties_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

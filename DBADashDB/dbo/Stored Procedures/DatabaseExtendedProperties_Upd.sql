@@ -14,15 +14,16 @@ IF NOT EXISTS (
 )
 BEGIN
     -- Insert new properties not yet tracked
-    INSERT INTO dbo.DatabaseExtendedProperties (DatabaseID, Name, Value, ValidFrom)
-    SELECT d.DatabaseID, t.name, t.value, @SnapshotDate
+    INSERT INTO dbo.DatabaseExtendedProperties (InstanceID, DatabaseID, Name, Value, ValidFrom)
+    SELECT @InstanceID, d.DatabaseID, t.name, t.value, @SnapshotDate
     FROM @DatabaseExtendedProperties t
     JOIN dbo.Databases d ON t.database_id = d.database_id
     WHERE d.InstanceID = @InstanceID
     AND NOT EXISTS (
         SELECT 1
         FROM dbo.DatabaseExtendedProperties ep
-        WHERE ep.DatabaseID = d.DatabaseID
+        WHERE ep.InstanceID = @InstanceID
+        AND ep.DatabaseID = d.DatabaseID
         AND ep.Name = t.name
     )
 
@@ -31,17 +32,18 @@ BEGIN
     SET ep.Value = t.value,
         ep.ValidFrom = @SnapshotDate
     OUTPUT
+        DELETED.InstanceID,
         DELETED.DatabaseID,
         DELETED.Name,
         DELETED.Value,
         INSERTED.Value,
         DELETED.ValidFrom,
         @SnapshotDate
-    INTO dbo.DatabaseExtendedPropertiesHistory (DatabaseID, Name, Value, NewValue, ValidFrom, ValidTo)
+    INTO dbo.DatabaseExtendedPropertiesHistory (InstanceID, DatabaseID, Name, Value, NewValue, ValidFrom, ValidTo)
     FROM dbo.DatabaseExtendedProperties ep
     JOIN dbo.Databases d ON d.DatabaseID = ep.DatabaseID
     JOIN @DatabaseExtendedProperties t ON t.database_id = d.database_id AND t.name = ep.Name
-    WHERE d.InstanceID = @InstanceID
+    WHERE ep.InstanceID = @InstanceID
     AND d.IsActive = 1
     AND EXISTS (
         SELECT ep.Value
@@ -50,11 +52,11 @@ BEGIN
     )
 
     -- Remove properties that no longer exist on the database; record deletion to history
-    INSERT INTO dbo.DatabaseExtendedPropertiesHistory (DatabaseID, Name, Value, NewValue, ValidFrom, ValidTo)
-    SELECT ep.DatabaseID, ep.Name, ep.Value, NULL, ep.ValidFrom, @SnapshotDate
+    INSERT INTO dbo.DatabaseExtendedPropertiesHistory (InstanceID, DatabaseID, Name, Value, NewValue, ValidFrom, ValidTo)
+    SELECT @InstanceID, ep.DatabaseID, ep.Name, ep.Value, NULL, ep.ValidFrom, @SnapshotDate
     FROM dbo.DatabaseExtendedProperties ep
     JOIN dbo.Databases d ON d.DatabaseID = ep.DatabaseID
-    WHERE d.InstanceID = @InstanceID
+    WHERE ep.InstanceID = @InstanceID
     AND d.IsActive = 1
     AND NOT EXISTS (
         SELECT 1
@@ -66,7 +68,7 @@ BEGIN
     DELETE ep
     FROM dbo.DatabaseExtendedProperties ep
     JOIN dbo.Databases d ON d.DatabaseID = ep.DatabaseID
-    WHERE d.InstanceID = @InstanceID
+    WHERE ep.InstanceID = @InstanceID
     AND d.IsActive = 1
     AND NOT EXISTS (
         SELECT 1
