@@ -23,7 +23,7 @@ namespace DBADashAI.Services.Tools
 
         public async Task<AiToolResult> RunAsync(AiAskRequest request, CancellationToken cancellationToken)
         {
-            var results = await _sql.QueryMultiAsync("DBADash.AI_CrossSignalCorrelation_Get", request.MaxRows, request.InstanceFilter, request.HoursBack, cancellationToken);
+            var results = await _sql.QueryMultiAsync("AI.CrossSignalCorrelation_Get", request.MaxRows, request.InstanceFilter, request.HoursBack, cancellationToken);
             var alertRows = results.Count > 0 ? results[0] : new List<Dictionary<string, object?>>();
             var waitsRows = results.Count > 1 ? results[1] : new List<Dictionary<string, object?>>();
             var blockingRows = results.Count > 2 ? results[2] : new List<Dictionary<string, object?>>();

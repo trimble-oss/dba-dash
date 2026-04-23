@@ -1,4 +1,4 @@
-﻿/*
+/*
 	Post-Deployment section
 */
 /* Security */
@@ -13,6 +13,29 @@ GRANT EXECUTE ON SCHEMA::Messaging TO Messaging;
 GRANT EXECUTE ON SCHEMA::Alert TO App;
 GRANT SELECT ON SCHEMA::Alert TO App;
 GRANT SELECT ON SCHEMA::Alert TO AppReadOnly
+GRANT EXECUTE ON SCHEMA::AI TO AIService;
+GRANT EXECUTE ON OBJECT::AI.ServiceConfig_Get TO AIUser;
+
+DECLARE @ProductMajorVersion INT = TRY_CAST(SERVERPROPERTY('ProductMajorVersion') AS INT);
+IF ISNULL(@ProductMajorVersion, 0) >= 16
+BEGIN
+	/*	
+		Grant UNMASK on ApiKey column of AI.ServiceConfig to AIService and AIUser roles.  Revoke DB level UNMASK which might have been granted on older SQL versions.
+		Dynamic SQL to avoid syntax errors in older versions of SQL Server that do not support column-level UNMASK permissions
+	*/
+	DECLARE @GrantSQL NVARCHAR(MAX)
+	SET @GrantSQL = N'
+	REVOKE UNMASK TO AIService;
+	REVOKE UNMASK TO AIUser;
+	GRANT UNMASK ON AI.ServiceConfig (ApiKey) TO AIService;
+	GRANT UNMASK ON AI.ServiceConfig (ApiKey) TO AIUser;'
+	EXEC sp_executesql @GrantSQL
+END
+ELSE
+BEGIN
+	GRANT UNMASK TO AIService;
+	GRANT UNMASK TO AIUser;
+END
 
 /* App ReadOnly role provides limited app access. Generate grant for stored procedures that end with _Get & inline functions*/
 DECLARE @GrantAppReadOnlySQL NVARCHAR(MAX);
@@ -2062,7 +2085,7 @@ WHERE NOT EXISTS(
 				)
 
 /************/
-MERGE INTO [DBADash].[AIExampleQuestions] AS [Target]
+MERGE INTO [AI].[ExampleQuestions] AS [Target]
 USING (VALUES
   (N'Alerts',N'What are the top issues requiring immediate DBA action right now?',0)
  ,(N'Alerts',N'What unresolved alerts are currently highest priority?',0)
@@ -2250,9 +2273,9 @@ ALTER TABLE dbo.DBFileSnapshot SET (LOCK_ESCALATION = DISABLE);
 */
 EXEC Alert.ActiveAlerts_FixIdentitySeed;
 /* Seed AI Models if table is empty */
-IF NOT EXISTS (SELECT 1 FROM DBADash.AIModels)
+IF NOT EXISTS (SELECT 1 FROM AI.Models)
 BEGIN
-	INSERT INTO DBADash.AIModels (ModelName, DisplayName, SortOrder, IsEnabled) VALUES
+	INSERT INTO AI.Models (ModelName, DisplayName, SortOrder, IsEnabled) VALUES
 		(N'claude-sonnet-4-6', N'Claude Sonnet 4.6', 1, 1),
 		(N'claude-opus-4-7', N'Claude Opus 4.7', 2, 1);
 END

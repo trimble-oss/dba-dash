@@ -38,6 +38,9 @@
     <Setting Name="ChildFormSingleInstance" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
+    <Setting Name="LocalAIServiceUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
     <Setting Name="ChartAxisLabelFontSize" Type="System.Single" Scope="User">
       <Value Profile="(Default)">-1</Value>
     </Setting>

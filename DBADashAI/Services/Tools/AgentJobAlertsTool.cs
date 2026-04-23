@@ -23,7 +23,7 @@ namespace DBADashAI.Services.Tools
 
         public async Task<AiToolResult> RunAsync(AiAskRequest request, CancellationToken cancellationToken)
         {
-            var results = await _sql.QueryMultiAsync("DBADash.AI_AgentJobAlerts_Get", request.MaxRows, request.InstanceFilter, request.HoursBack, cancellationToken);
+            var results = await _sql.QueryMultiAsync("AI.AgentJobAlerts_Get", request.MaxRows, request.InstanceFilter, request.HoursBack, cancellationToken);
             return new AiToolResult
             {
                 RowCount = results.Sum(r => r.Count),

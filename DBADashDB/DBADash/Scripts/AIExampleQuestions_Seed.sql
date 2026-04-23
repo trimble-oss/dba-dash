@@ -1,12 +1,12 @@
-﻿-- ============================================================
+-- ============================================================
 -- DBADash AI Example Questions - Seed Data
 -- Preserves existing categories + adds new tool coverage
 -- ============================================================
 
-DELETE FROM DBADash.AIExampleQuestions;
+DELETE FROM AI.ExampleQuestions;
 GO
 
-INSERT INTO DBADash.AIExampleQuestions (Category, Question, SortOrder) VALUES
+INSERT INTO AI.ExampleQuestions (Category, Question, SortOrder) VALUES
 --  Alerts (existing) 
 (N'Alerts', N'What are the top issues requiring immediate DBA action right now?', 0),
 (N'Alerts', N'What unresolved alerts are currently highest priority?', 0),

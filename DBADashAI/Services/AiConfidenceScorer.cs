@@ -20,17 +20,25 @@ namespace DBADashAI.Services
             var avgEvidenceScore = rankedEvidence.Count == 0 ? 0 : rankedEvidence.Average(e => e.Score);
 
             var score = 0.2; // base confidence when at least one tool ran
+
+            // Tool breadth: up to +0.36 for 3 tools
             score += Math.Min(toolCount, 3) * 0.12;
-            score += Math.Min(evidenceCount, 8) * 0.03;
-            score += (topEvidenceScore * 0.18);
-            score += (avgEvidenceScore * 0.12);
-            score += rows switch
+
+            // Evidence quality: primary drivers of confidence
+            score += Math.Min(evidenceCount, 8) * 0.03;  // up to +0.24
+            score += topEvidenceScore * 0.18;
+            score += avgEvidenceScore * 0.12;
+
+            // Row count: minor modifier only when evidence is present, capped at +0.08.
+            // High row count means more data was available, not that the analysis is better.
+            if (evidenceCount > 0 && rows > 0)
             {
-                > 200 => 0.22,
-                > 50 => 0.16,
-                > 0 => 0.08,
-                _ => 0.0
-            };
+                score += rows switch
+                {
+                    > 50 => 0.08,
+                    _ => 0.04
+                };
+            }
 
             score = Math.Clamp(score, 0.0, 1.0);
             var label = score switch

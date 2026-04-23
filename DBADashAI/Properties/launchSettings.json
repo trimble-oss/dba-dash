@@ -2,11 +2,11 @@
   "profiles": {
     "DBADashAI": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "https://localhost:49650;http://localhost:49651"
+      "applicationUrl": "http://*:5055"
     }
   }
 }

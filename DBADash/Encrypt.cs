@@ -141,5 +141,57 @@ namespace DBADash
 
             return builder.ToString();
         }
+
+        private const string ObfuscationPassPhrase = "g&hAs2&mVOLwE6DqO!I5";
+        public const string ObfuscationPrefix = "\u00ac=!";
+
+        /// <summary>
+        /// If <paramref name="value"/> starts with <see cref="ObfuscationPrefix"/>, strips the prefix
+        /// and decrypts using the DBA Dash obfuscation passphrase. Returns the value unchanged otherwise.
+        /// </summary>
+        public static string DecryptObfuscated(this string value)
+        {
+            if (!value.StartsWith(ObfuscationPrefix)) return value;
+            return value[ObfuscationPrefix.Length..].DecryptString(ObfuscationPassPhrase);
+        }
+
+        /// <summary>
+        /// Encrypts <paramref name="value"/> and prepends <see cref="ObfuscationPrefix"/>.
+        /// </summary>
+        public static string EncryptObfuscated(this string value) =>
+            ObfuscationPrefix + value.EncryptString(ObfuscationPassPhrase);
+
+        /// <summary>
+        /// Prefix used to identify DPAPI LocalMachine-protected values stored in configuration files.
+        /// </summary>
+        public const string DpApiPrefix = "dpapi:";
+
+        /// <summary>
+        /// Encrypts <paramref name="value"/> using DPAPI LocalMachine scope and prepends
+        /// <see cref="DpApiPrefix"/>, so it can be stored safely in a configuration file.
+        /// Any process running on the same machine can decrypt it.
+        /// On non-Windows platforms the value is returned unchanged — use environment variables
+        /// or a dedicated secret store on those platforms.
+        /// </summary>
+        public static string ToMachineProtectedConfigValue(this string value)
+        {
+            if (string.IsNullOrEmpty(value)) return value;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                return DpApiPrefix + value.MachineEncryptString();
+            return value;
+        }
+
+        /// <summary>
+        /// If <paramref name="value"/> starts with <see cref="DpApiPrefix"/>, strips the prefix and
+        /// decrypts using DPAPI LocalMachine scope. Returns the value unchanged otherwise.
+        /// </summary>
+        public static string FromMachineProtectedConfigValue(this string value)
+        {
+            if (string.IsNullOrEmpty(value) || !value.StartsWith(DpApiPrefix))
+                return value;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                return value[DpApiPrefix.Length..].MachineDecryptString();
+            return value;
+        }
     }
 }

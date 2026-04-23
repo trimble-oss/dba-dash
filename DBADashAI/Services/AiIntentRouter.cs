@@ -3,56 +3,99 @@ using System.Text.RegularExpressions;
 
 namespace DBADashAI.Services
 {
+    /// <summary>
+    /// The result of tool selection. Carries the chosen tools plus the resolved
+    /// instance filter and time window so the caller never needs to mutate the
+    /// original <see cref="AiAskRequest"/>.
+    /// </summary>
+    public sealed class RoutingResult
+    {
+        public IReadOnlyList<IAiTool> Tools { get; init; } = [];
+        public string? InstanceFilter { get; init; }
+        public int? HoursBack { get; init; }
+    }
+
     public partial class AiIntentRouter
     {
-        public IReadOnlyList<IAiTool> SelectTools(AiAskRequest request, IEnumerable<IAiTool> tools)
+        private readonly AiFeedbackStore _feedbackStore;
+        private readonly ToolSimilarityScorer _similarityScorer;
+
+        public AiIntentRouter(AiFeedbackStore feedbackStore, ToolSimilarityScorer similarityScorer)
         {
-            // Extract instance filter and time window from the question if not already set
-            request.InstanceFilter ??= ExtractInstanceFilter(request.Question);
-            request.HoursBack ??= ExtractHoursBack(request.Question);
+            _feedbackStore = feedbackStore;
+            _similarityScorer = similarityScorer;
+        }
+
+        public RoutingResult SelectTools(AiAskRequest request, IEnumerable<IAiTool> tools)
+        {
+            // Extract instance filter and time window from the question without mutating the request
+            var instanceFilter = request.InstanceFilter ?? ExtractInstanceFilter(request.Question);
+            var hoursBack = request.HoursBack ?? ExtractHoursBack(request.Question);
 
             var toolList = tools.ToList();
+
+            IReadOnlyList<IAiTool> selectedTools;
 
             if (!string.IsNullOrWhiteSpace(request.ToolName))
             {
                 var explicitTool = toolList.FirstOrDefault(t => string.Equals(t.Name, request.ToolName, StringComparison.OrdinalIgnoreCase));
-                return explicitTool is null ? [] : [explicitTool];
+                selectedTools = explicitTool is null ? [] : [explicitTool];
             }
+            else
+            {
+                var q = request.Question.ToLowerInvariant();
 
-            var q = request.Question.ToLowerInvariant();
+                var scored = toolList
+                    .Select(t => new
+                    {
+                        Tool = t,
+                        Score = ComputeScore(q, t) - _feedbackStore.GetToolPenalty(t.Name)
+                    })
+                    .Where(x => x.Score > 0)
+                    .OrderByDescending(x => x.Score)
+                    .ThenBy(x => x.Tool.Name)
+                    .ToList();
 
-            var scored = toolList
-                .Select(t => new
+                if (scored.Count == 0)
                 {
-                    Tool = t,
-                    Score = ComputeScore(q, t)
-                })
-                .Where(x => x.Score > 0)
-                .OrderByDescending(x => x.Score)
-                .ThenBy(x => x.Tool.Name)
-                .ToList();
+                    // No keyword match — fall back to TF-IDF cosine similarity.
+                    // This handles paraphrased or domain-agnostic questions that don't share
+                    // any literal keyword with a tool (e.g. "what's eating my server?" → waits/cpu).
+                    var similarityMatches = _similarityScorer.GetTopMatches(request.Question, toolList);
+                    if (similarityMatches.Count > 0)
+                    {
+                        selectedTools = _similarityScorer.HasBroadIntent(similarityMatches)
+                            ? similarityMatches.Take(3).Select(x => x.Tool).ToList()
+                            : [similarityMatches[0].Tool];
+                    }
+                    else
+                    {
+                        // Genuine dead-end: nothing scored at all. Use active alerts as a safe
+                        // catch-all since it's the most broadly applicable operational tool.
+                        var fallback = toolList.FirstOrDefault(t => t.Name == "active-alerts-summary")
+                            ?? toolList.FirstOrDefault();
+                        selectedTools = fallback is null ? [] : [fallback];
+                    }
+                }
+                else
+                {
+                    // Keyword match succeeded. Use similarity scores across the keyword-matched
+                    // candidates to detect broad intent more accurately than the old string checks.
+                    var topSimilarity = _similarityScorer.GetTopMatches(request.Question, scored.Select(x => x.Tool));
+                    var wantsBroadTriage = _similarityScorer.HasBroadIntent(topSimilarity);
 
-            var wantsBroadTriage = q.Contains("root cause", StringComparison.OrdinalIgnoreCase)
-                                   || q.Contains("triage", StringComparison.OrdinalIgnoreCase)
-                                   || q.Contains("overall", StringComparison.OrdinalIgnoreCase)
-                                   || q.Contains("big picture", StringComparison.OrdinalIgnoreCase)
-                                   || q.Contains("health check", StringComparison.OrdinalIgnoreCase)
-                                   || q.Contains("everything", StringComparison.OrdinalIgnoreCase)
-                                   || (q.Contains("blocking", StringComparison.OrdinalIgnoreCase) && q.Contains("wait", StringComparison.OrdinalIgnoreCase))
-                                   || (q.Contains("why", StringComparison.OrdinalIgnoreCase) && q.Contains("slow", StringComparison.OrdinalIgnoreCase));
-
-            if (scored.Count == 0)
-            {
-                var fallback = toolList.FirstOrDefault(t => t.Name == "active-alerts-summary") ?? toolList.FirstOrDefault();
-                return fallback is null ? [] : [fallback];
+                    selectedTools = wantsBroadTriage
+                        ? scored.Take(3).Select(x => x.Tool).ToList()
+                        : [scored[0].Tool];
+                }
             }
 
-            if (wantsBroadTriage)
+            return new RoutingResult
             {
-                return scored.Take(3).Select(x => x.Tool).ToList();
-            }
-
-            return [scored[0].Tool];
+                Tools = selectedTools,
+                InstanceFilter = instanceFilter,
+                HoursBack = hoursBack
+            };
         }
 
         private static int ComputeScore(string question, IAiTool tool)

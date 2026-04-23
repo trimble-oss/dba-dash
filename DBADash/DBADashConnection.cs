@@ -21,7 +21,7 @@ namespace DBADash
             Invalid
         }
 
-        private readonly string myString = "g&hAs2&mVOLwE6DqO!I5";
+
         private bool wasEncryptionPerformed;
         private bool isEncrypted;
         private string encryptedConnectionString = "";
@@ -225,14 +225,14 @@ namespace DBADash
             {
                 SqlConnectionStringBuilder builder = new(_connectionString);
 
-                if (builder.Password.StartsWith("¬=!"))
+                if (builder.Password.StartsWith(EncryptText.ObfuscationPrefix))
                 {
                     isEncrypted = true;
                     return _connectionString;
                 }
                 else if (builder.Password.Length > 0)
                 {
-                    builder.Password = "¬=!" + builder.Password.EncryptString(myString);
+                    builder.Password = builder.Password.EncryptObfuscated();
                     wasEncryptionPerformed = true;
                     isEncrypted = true;
                     return builder.ConnectionString;
@@ -257,9 +257,9 @@ namespace DBADash
                 {
                     builder.ApplicationName = "DBADash";
                 }
-                if (builder.Password.StartsWith("¬=!"))
+                if (builder.Password.StartsWith(EncryptText.ObfuscationPrefix))
                 {
-                    builder.Password = builder.Password[3..].DecryptString(myString);
+                    builder.Password = builder.Password.DecryptObfuscated();
                 }
                 return builder.ConnectionString;
             }

@@ -41,6 +41,18 @@ namespace DBADashGUI
             public bool SearchFromRoot = false;
         }
 
+        private void RefreshAllowedTabsForCurrentNode()
+        {
+            if (suppressLoadTab || tv1.SelectedNode == null)
+            {
+                return;
+            }
+
+            var prevSelectedTab = tabs.SelectedTab;
+            var allowedTabs = GetAllowedTabs();
+            RefreshTabPages(allowedTabs, prevSelectedTab);
+        }
+
         // Extracted helper to build the instance tree from instance/pool DataTables
         private SQLTreeItem BuildInstanceTree(DataTable instances, DataTable pools, CustomReports.CustomReports reports, string groupByTag)
         {
@@ -216,7 +228,7 @@ namespace DBADashGUI
             TableSize,
             TuningRecommendations,
             PoolsAndGroups,
-            DatabaseExtendedProperties
+            DatabaseExtendedProperties,
             AIAssistant
         }
 
@@ -246,6 +258,7 @@ namespace DBADashGUI
         private TabPage tabPerformance;
         private TabPage tabDatabaseExtendedProperties;
         private TabPage tabAIAssistant;
+        private AIAssistantControl aiAssistantControl;
 
         public Main(CommandLineOptions opts)
         {
@@ -314,7 +327,8 @@ namespace DBADashGUI
             };
             tabDatabaseExtendedProperties.Controls.Add(extPropView);
             tabAIAssistant = new TabPage("AI Assistant") { Name = Tabs.AIAssistant.TabName() };
-            tabAIAssistant.Controls.Add(new AIAssistantControl { Dock = DockStyle.Fill });
+            aiAssistantControl = new AIAssistantControl { Dock = DockStyle.Fill };
+            tabAIAssistant.Controls.Add(aiAssistantControl);
         }
 
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommunityProcs proc)
@@ -660,7 +674,7 @@ namespace DBADashGUI
                 {
                     // Marshal the UI updates to the UI thread using BeginInvoke so
                     // the background Task.Run does not directly access controls.
-                    this.BeginInvoke((Action)(() =>
+                    this.BeginInvoke((Action)(async () =>
                     {
                         // Re-validate that this delegate still belongs to the current connection attempt.
                         if (token != _setConnectionCts?.Token)
@@ -689,7 +703,16 @@ namespace DBADashGUI
                             var root = BuildInstanceTree(CommonData.Instances, poolsSnapshot, customReports, groupByTagLocal);
                             tv1.Nodes.Add(root);
                             root.Expand();
+
                             tv1.SelectedNode = root;
+
+                            // Discover AI service asynchronously - don't block UI loading.
+                            // Start after the initial root selection so the async completion
+                            // can reliably refresh the currently selected node's tabs.
+                            if (aiAssistantControl != null)
+                            {
+                                _ = RefreshAIAssistantAsync();
+                            }
 
                             AddTimeZoneMenus();
                             SetConnectionState(true);
@@ -746,6 +769,28 @@ namespace DBADashGUI
                 tv1.Nodes.Clear();
                 tabs.TabPages.Clear();
                 tabs.TabPages.Add(tabConnecting);
+            }
+        }
+
+        private async Task RefreshAIAssistantAsync()
+        {
+            try
+            {
+                await aiAssistantControl.RefreshConnectionAsync();
+                if (!IsDisposed)
+                {
+                    BeginInvoke((Action)(() =>
+                    {
+                        if (!IsDisposed)
+                        {
+                            RefreshAllowedTabsForCurrentNode();
+                        }
+                    }));
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"AI refresh failed: {ex.Message}");
             }
         }
 
@@ -1365,7 +1410,13 @@ namespace DBADashGUI
                 allowedTabs.Remove(tabTuningRecommendations);
             }
 
-            allowedTabs.Add(tabAIAssistant);
+            // AI Assistant tab - show only at root level (no tree context is used)
+            if (n.Type is SQLTreeItem.TreeType.DBADashRoot 
+                && aiAssistantControl?.IsServiceAvailable == true
+                && (DBADashUser.IsAdmin || DBADashUser.IsInRole("AIUser")))
+            {
+                allowedTabs.Add(tabAIAssistant);
+            }
 
             if (allowedTabs.Count == 0) // Display default tab if no tabs are applicable
             {

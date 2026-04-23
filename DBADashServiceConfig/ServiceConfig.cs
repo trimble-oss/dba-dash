@@ -30,11 +30,11 @@ namespace DBADashServiceConfig
     {
         private static string FatalErrorFilePath => Path.Combine(AppContext.BaseDirectory, "Logs", "FatalError.txt");
         private const string AiServiceName = "DBADashAI";
-        private const string AiServiceUrl = "http://localhost:5055";
         private Label lblAiServiceStatus;
         private LinkLabel lnkInstallAi;
         private LinkLabel lnkStartAi;
         private LinkLabel lnkStopAi;
+        private LinkLabel lnkRefreshAi;
         private TabPage tabAiService;
         private bool IsAdmin;
 
@@ -511,6 +511,13 @@ namespace DBADashServiceConfig
         {
             try
             {
+                if (!ValidateAiServiceUrl())
+                {
+                    tab1.SelectedTab = tabAiService;
+                    txtAiServiceUrl.Focus();
+                    return false;
+                }
+
                 ApplyAiSettingsToConfig();
                 SetJson();
                 collectionConfig.Save();
@@ -1032,7 +1039,6 @@ namespace DBADashServiceConfig
         private void SetJson()
         {
             if (IsSetFromJson) return;
-            ApplyAiSettingsToConfig();
             txtJson.Text = collectionConfig.Serialize();
         }
 
@@ -2905,18 +2911,7 @@ namespace DBADashServiceConfig
             return (p.ExitCode == 0, output.ToString());
         }
 
-        private string GetAiServiceDllPath()
-        {
-            var appBase = AppContext.BaseDirectory;
-            var portablePath = Path.Combine(appBase, "DBADashAI", "DBADashAI.dll");
-            if (File.Exists(portablePath)) return portablePath;
-
-            var solutionDebug = Path.GetFullPath(Path.Combine(appBase, "..", "..", "..", "..", "DBADashAI", "bin", "Debug", "net10.0", "DBADashAI.dll"));
-            if (File.Exists(solutionDebug)) return solutionDebug;
-
-            var solutionRelease = Path.GetFullPath(Path.Combine(appBase, "..", "..", "..", "..", "DBADashAI", "bin", "Release", "net10.0", "DBADashAI.dll"));
-            return File.Exists(solutionRelease) ? solutionRelease : string.Empty;
-        }
+        private string GetAiServiceDllPath() => Path.Combine(AppContext.BaseDirectory, "DBADashAI.dll");
 
         private static string GetDotnetExePath()
         {
@@ -2941,6 +2936,68 @@ namespace DBADashServiceConfig
             }
         }
 
+        private const string DotNet10DownloadUrl = "https://dotnet.microsoft.com/download/dotnet/10.0";
+
+        /// <summary>
+        /// Verifies the required .NET runtime is available by running
+        /// <c>dotnet DBADashAI.dll --check-runtime</c>, which exits immediately with
+        /// code 0 if the runtime is satisfied, or code 150 if it is missing (the .NET
+        /// host never reaches the app code in that case).
+        /// Blocks installation and offers to open the download page if the runtime is missing.
+        /// </summary>
+        private async Task<bool> CheckAspNetCoreRuntimeAsync(string dotnetExe)
+        {
+            var dllPath = GetAiServiceDllPath();
+            if (!File.Exists(dllPath))
+                return true; // DLL existence is already checked before this call.
+
+            try
+            {
+                var psi = new ProcessStartInfo(dotnetExe, $"\"{dllPath}\" --check-runtime")
+                {
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                using var p = Process.Start(psi);
+                var errorOutput = await p.StandardError.ReadToEndAsync();
+                await p.WaitForExitAsync();
+
+                if (p.ExitCode == 0)
+                    return true;
+
+                ShowRuntimeMissingDialog(p.ExitCode == 150 ? errorOutput.Trim() : null);
+                return false;
+            }
+            catch
+            {
+                ShowRuntimeMissingDialog(null);
+                return false;
+            }
+        }
+
+        private static void ShowRuntimeMissingDialog(string hostErrorMessage)
+        {
+            var detail = string.IsNullOrWhiteSpace(hostErrorMessage)
+                ? string.Empty
+                : hostErrorMessage + "\n\n";
+
+            var openUrl = new TaskDialogButton("Open Download Page");
+            var cancel = new TaskDialogButton("Cancel");
+            var page = new TaskDialogPage
+            {
+                Heading = "Required .NET Runtime Not Found",
+                Text = $"{detail}The DBADashAI service requires the ASP.NET Core Runtime 10.x (x64).\n\n{DotNet10DownloadUrl}",
+                Icon = TaskDialogIcon.Warning,
+                Buttons = new TaskDialogButtonCollection { openUrl, cancel },
+                SizeToContent = true,
+            };
+            var clicked = TaskDialog.ShowDialog(page);
+            if (clicked == openUrl)
+                Process.Start(new ProcessStartInfo(DotNet10DownloadUrl) { UseShellExecute = true });
+        }
+
         private async Task InstallAiServiceAsync()
         {
             if (!IsAdmin)
@@ -2963,7 +3020,10 @@ namespace DBADashServiceConfig
                 return;
             }
 
-            var binPath = $"\\\"{dotnetExe}\\\" \\\"{dllPath}\\\" --urls {AiServiceUrl}";
+            if (!await CheckAspNetCoreRuntimeAsync(dotnetExe))
+                return;
+
+            var binPath = $"\\\"{dotnetExe}\\\" \\\"{dllPath}\\\"";
             var aiDir = Path.GetDirectoryName(dllPath);
 
             var frm = new InstallService

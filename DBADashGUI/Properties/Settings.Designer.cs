@@ -202,5 +202,17 @@ namespace DBADashGUI.Properties {
                 this["Theme"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LocalAIServiceUrl {
+            get {
+                return ((string)(this["LocalAIServiceUrl"]));
+            }
+            set {
+                this["LocalAIServiceUrl"] = value;
+            }
+        }
     }
 }
