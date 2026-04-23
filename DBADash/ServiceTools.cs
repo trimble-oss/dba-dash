@@ -103,6 +103,11 @@ namespace DBADash
 
         public static string GetServiceInstallArgs(string serviceName, string userName, string password, StartMode mode = StartMode.AutomaticDelayedStart)
         {
+            return GetServiceInstallArgs(serviceName, ServicePath, userName, password, mode);
+        }
+
+        public static string GetServiceInstallArgs(string serviceName, string binPath, string userName, string password, StartMode mode = StartMode.AutomaticDelayedStart)
+        {
             var modeString = mode switch
             {
                 StartMode.Automatic => "auto",
@@ -111,7 +116,7 @@ namespace DBADash
                 StartMode.Disabled => "disabled",
                 _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null)
             };
-            var args = $"create {serviceName} binpath=\"{ServicePath}\" start={modeString}";
+            var args = $"create {serviceName} binpath=\"{binPath}\" start={modeString}";
             if (!string.IsNullOrEmpty(userName))
             {
                 args += $" obj=\"{userName}\"";
@@ -310,6 +315,12 @@ namespace DBADash
         public static SCCommandResult InstallService(string serviceName, string userName, string password,
             StartMode mode = StartMode.AutomaticDelayedStart)
         {
+            return InstallService(serviceName, ServicePath, "Monitoring tool for SQL Server.  https://dbadash.com", userName, password, mode);
+        }
+
+        public static SCCommandResult InstallService(string serviceName, string binPath, string description, string userName, string password,
+            StartMode mode = StartMode.AutomaticDelayedStart)
+        {
             var result = new SCCommandResult();
             var outputBuilder = new StringBuilder();
             if (IsServiceInstalledByName(serviceName))
@@ -322,8 +333,8 @@ namespace DBADash
             }
 
             using Process p = new();
-            var args = GetServiceInstallArgs(serviceName, userName, password, mode);
-            var DebugArgs = GetServiceInstallArgs(serviceName, userName, string.IsNullOrEmpty(password) ? string.Empty : "*****", mode);
+            var args = GetServiceInstallArgs(serviceName, binPath, userName, password, mode);
+            var DebugArgs = GetServiceInstallArgs(serviceName, binPath, userName, string.IsNullOrEmpty(password) ? string.Empty : "*****", mode);
             Log.Information($"sc.exe {DebugArgs}");
             var psi = new ProcessStartInfo
             {
@@ -350,7 +361,7 @@ namespace DBADash
             if (p.ExitCode == 0)
             {
                 Log.Information("Setting service description");
-                var descriptionResult = SetServiceDescription(serviceName, "Monitoring tool for SQL Server.  https://dbadash.com");
+                var descriptionResult = SetServiceDescription(serviceName, description);
                 if (!descriptionResult.Success)
                 {
                     Log.Error("Error setting service description: {result}", descriptionResult.Output);

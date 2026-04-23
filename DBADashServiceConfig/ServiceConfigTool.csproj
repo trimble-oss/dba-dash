@@ -35,6 +35,9 @@
     <NoWarn>1701;1702;CA1416</NoWarn>
     <Deterministic>True</Deterministic>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <AdditionalFiles Remove="app.manifest" />
   </ItemGroup>

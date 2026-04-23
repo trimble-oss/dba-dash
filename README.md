@@ -10,6 +10,10 @@
 
 Documentation is now available on [dbadash.com](https://dbadash.com), including an easy to follow [quick start](https://dbadash.com/docs/setup/quick-start/) guide.
 
+## AI Assistant Documentation
+
+See [Docs/AI-Assistant.md](Docs/AI-Assistant.md) for full setup and usage details, including Azure Foundry/Azure OpenAI configuration, running `DBADashAI.dll`, GUI integration settings, API endpoints, and troubleshooting.
+
 ## Project Summary
 
 DBA Dash is a tool for SQL Server DBAs to assist with daily checks, performance monitoring and change tracking.  You can be up and running within minutes and it will provide you with a wealth of information that will make your life as a DBA easier.

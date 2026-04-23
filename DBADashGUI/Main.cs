@@ -1,5 +1,6 @@
 ﻿using DBADash;
 using DBADash.Messaging;
+using DBADashGUI.AI;
 using DBADashGUI.AgentJobs;
 using DBADashGUI.Changes;
 using DBADashGUI.Checks;
@@ -214,7 +215,8 @@ namespace DBADashGUI
             Tags,
             TableSize,
             TuningRecommendations,
-            PoolsAndGroups
+            PoolsAndGroups,
+            AIAssistant
         }
 
         private static readonly List<Main.Tabs> InstanceOnlyTabs = new() { Main.Tabs.PerformanceSummary, Tabs.Metrics, Tabs.Waits, Tabs.Memory, Tabs.RunningQueries };
@@ -241,6 +243,7 @@ namespace DBADashGUI
         private TabPage tabTuningRecommendations;
         private TabPage tabPoolsAndGroups;
         private TabPage tabPerformance;
+        private TabPage tabAIAssistant;
 
         public Main(CommandLineOptions opts)
         {
@@ -299,6 +302,9 @@ namespace DBADashGUI
                 PreventReportOverwrite = true
             };
             tabPerformance.Controls.Add(perfView);
+
+            tabAIAssistant = new TabPage("AI Assistant") { Name = Tabs.AIAssistant.TabName() };
+            tabAIAssistant.Controls.Add(new AIAssistantControl { Dock = DockStyle.Fill });
         }
 
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommunityProcs proc)
@@ -422,7 +428,8 @@ namespace DBADashGUI
             diffSchemaSnapshot.Dock = DockStyle.Fill;
 
             LoadRepositoryConnections();
-            if (repositories.Count == 0) // We don't have a connection to the repository DB yet
+            if (repositories.Count == 0 // We don't have a connection to the repository DB yet
+                )
             {
                 if (File.Exists(Properties.Resources
                         .ServiceConfigToolName)) // The service configuration tool exists (Not the GUI only package).  Give user the option to configure the service or connect to an existing repository.
@@ -964,6 +971,7 @@ namespace DBADashGUI
         {
             // Back-compat wrapper - calls the cache-aware implementation when
             // a cache is present.
+
             // Clear navigation history and rebuild the tree from live data
             VisitedNodes.Clear();
             tsBack.Enabled = false;
@@ -1343,6 +1351,8 @@ namespace DBADashGUI
             {
                 allowedTabs.Remove(tabTuningRecommendations);
             }
+
+            allowedTabs.Add(tabAIAssistant);
 
             if (allowedTabs.Count == 0) // Display default tab if no tabs are applicable
             {
@@ -1849,7 +1859,7 @@ namespace DBADashGUI
 
             if (e.InstanceID <= 0 && string.IsNullOrEmpty(e.Instance)) // No Instance - Use root Level
             {
-                nInstance = root.Type == SQLTreeItem.TreeType.DBAChecks ? root.Parent.AsSQLTreeItem() : root;
+                nInstance = root.Type == SQLTreeItem.TreeType.DBADashRoot ? root : root.Parent.AsSQLTreeItem();
             }
             else
             {
@@ -2226,6 +2236,7 @@ namespace DBADashGUI
 
                 VisitedNodes.Add(new TreeContext() { Node = node, TabIndex = TabIndex });
                 tsBack.Enabled = VisitedNodes.Count > 0;
+                suppressSaveContext = true;
             }
         }
 
@@ -2821,7 +2832,8 @@ namespace DBADashGUI
         {
             var fontSize = currentValue.ToString();
 
-            if (CommonShared.ShowInputDialog(ref fontSize, $"Chart {settingName} font size (6-24 or blank for default:{defaultValue})") != DialogResult.OK)
+            if (CommonShared.ShowInputDialog(ref fontSize, $"Chart {settingName} font size (6-24 or blank for default:{defaultValue})") !=
+                DialogResult.OK)
                 return;
 
             // Handle empty string as reset to default (-1 means use default constant)
@@ -2886,7 +2898,6 @@ namespace DBADashGUI
                 }
             }
         }
-
         void IThemedControl.ApplyTheme(BaseTheme theme)
         {
             Controls.ApplyTheme(theme);
