@@ -20,6 +20,10 @@
     Start Config tool once the upgrade process is complete.
 .PARAMETER Repo
     Option to pass in the github owner and repo name.  e.g. trimble-oss/dba-dash.
+.PARAMETER NonInteractive
+    Run without any interactive prompts. Errors (e.g. failed .NET version check) will throw immediately
+    rather than asking the user whether to proceed. Intended for use when the script is invoked
+    from the DBA Dash service for automated/scheduled upgrades.
 .EXAMPLE
     ./UpgradeDBADash -Clean
 .EXAMPLE
@@ -37,7 +41,9 @@ Param(
     [Parameter(Mandatory=$false)]
     [switch]$StartConfig,
     [Parameter(Mandatory=$false)]
-    [string]$Repo="trimble-oss/dba-dash"
+    [string]$Repo="trimble-oss/dba-dash",
+    [Parameter(Mandatory=$false)]
+    [switch]$NonInteractive
 )
 ####################
 # Check .NET Version
@@ -116,6 +122,9 @@ if (!(Test-Path -Path "DBADash.dll")){
     return
  }
 
+# Capture the install directory once so path comparisons are consistent and boundary-safe.
+$installDir = (Get-Location).Path
+
 # If $Tag parameter isn't passed in, get the latest release tag.  Otherwise check that the tag exists
 if($Tag.Length -eq 0){
     Write-Host "Get the latest release"
@@ -135,7 +144,7 @@ $existingVersion=[System.Version](Get-Item $path).VersionInfo.ProductVersion
 
 $servicePath = [System.IO.Path]::Combine((Get-Location),"DBADashService.exe")
 
-$serviceName = (Get-WmiObject -Class Win32_Service | Where-Object { $_.PathName -ilike "*$servicePath*" } | Select-Object Name).Name
+$serviceName = (Get-CimInstance -ClassName Win32_Service | Where-Object { $_.PathName -ilike "*$servicePath*" } | Select-Object -First 1 -ExpandProperty Name)
 
 $versionCompare = $existingVersion.CompareTo($newVersion)
 
@@ -183,11 +192,17 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
     ## Check .NET version
     try {
         if (!(CheckDotNetVersion -AppVersion $newVersion)){
+            if($NonInteractive){
+                throw ".NET version check failed. Required .NET version is not installed. Aborting non-interactive upgrade."
+            }
             return
         }
     }
     catch{
         Write-Warning ".NET version check failed."
+        if($NonInteractive){
+            throw ".NET version check failed. Aborting non-interactive upgrade."
+        }
         $proceed = Read-Host "Are you sure you want to proceed (Y/N)"
         if($proceed -ne "Y"){
             return $false
@@ -217,12 +232,14 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
         Stop-Service -Name $serviceName -ErrorAction Stop
     }
     # Stop the GUI if running - we don't want locks on any files
+    # Append a separator before the wildcard so paths like C:\DBA\ don't match C:\DBA2\...
     Write-Host "Stop processes"
-    Get-Process -Name DBADash -ErrorAction Ignore | Where-Object { $_.Path -like (Get-Location).Path + "*" } | Stop-Process -Force
-    Get-Process -Name DBADashServiceConfigTool -ErrorAction Ignore | Where-Object { $_.Path -like (Get-Location).Path + "*" } | Stop-Process -Force
-    Get-Process -Name DBADashConfig -ErrorAction Ignore | Where-Object { $_.Path -like (Get-Location).Path + "*" } | Stop-Process -Force
+    $installDirPrefix = $installDir.TrimEnd([System.IO.Path]::DirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar + "*"
+    Get-Process -Name DBADash -ErrorAction Ignore | Where-Object { $_.Path -like $installDirPrefix } | Stop-Process -Force
+    Get-Process -Name DBADashServiceConfigTool -ErrorAction Ignore | Where-Object { $_.Path -like $installDirPrefix } | Stop-Process -Force
+    Get-Process -Name DBADashConfig -ErrorAction Ignore | Where-Object { $_.Path -like $installDirPrefix } | Stop-Process -Force
     # Service should already be stopped but this will ensure the process isn't running.
-    Get-Process -Name DBADashService -ErrorAction Ignore | Where-Object { $_.Path -like (Get-Location).Path + "*" } | Stop-Process -Force
+    Get-Process -Name DBADashService -ErrorAction Ignore | Where-Object { $_.Path -like $installDirPrefix } | Stop-Process -Force
 
     # Wait for file locks to be released
     Start-Sleep -Seconds 2
