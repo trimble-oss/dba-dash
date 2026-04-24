@@ -76,9 +76,9 @@ namespace DBADashGUI.Performance
                 var counters = CommonData.GetCounters();
 
                 // Backwards compatibility: older persisted counters encoded the full path
-                // as "ObjectName\\CounterName\\InstanceName" in CounterName.
+                // as "ObjectName\\CounterName\\InstanceName" or "ObjectName\\CounterName" in CounterName.
                 // Safely parse that format only when ObjectName/InstanceName are not set
-                // and CounterName contains a 3-part backslash-separated value.
+                // and CounterName contains a 2-part or 3-part backslash-separated value.
                 string parsedKey = originalKey;
                 if (string.IsNullOrWhiteSpace(ObjectName)
                     && string.IsNullOrWhiteSpace(InstanceName)
@@ -90,6 +90,13 @@ namespace DBADashGUI.Performance
                         ObjectName = parts[0].Trim();
                         CounterName = parts[1].Trim();
                         InstanceName = parts[2].Trim();
+                        parsedKey = KeyFor(ObjectName, CounterName, InstanceName);
+                    }
+                    else if (parts.Length == 2)
+                    {
+                        ObjectName = parts[0].Trim();
+                        CounterName = parts[1].Trim();
+                        InstanceName = string.Empty;
                         parsedKey = KeyFor(ObjectName, CounterName, InstanceName);
                     }
                 }

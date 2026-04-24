@@ -84,17 +84,25 @@ namespace DBADashGUI.Performance
 
         private void PerformanceCounterSummaryGrid1_CounterSelected(object sender, PerformanceCounterSummaryGrid.CounterSelectedEventArgs e)
         {
-            AddCounter(e.CounterName, e.CounterID);
+            AddCounter(e.CounterName, e.CounterID, e.ObjectName, e.InstanceName);
         }
 
-        private void AddCounter(string CounterName, int CounterID)
+        private void AddCounter(string CounterName, int CounterID, string ObjectName = null, string InstanceName = null)
         {
             PerformanceCounters pc = new()
             {
                 Metric = new PerformanceCounterMetric()
                 {
-                    CounterID = CounterID,
-                    CounterName = CounterName
+                    Counters = new List<Counter>
+                    {
+                        new Counter
+                        {
+                            CounterID = CounterID,
+                            CounterName = CounterName,
+                            ObjectName = ObjectName,
+                            InstanceName = InstanceName
+                        }
+                    }
                 }
             };
             AddChartControl(pc);

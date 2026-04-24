@@ -34,6 +34,8 @@ namespace DBADashGUI.Performance
         {
             public int CounterID { get; set; }
             public string CounterName { get; set; }
+            public string ObjectName { get; set; }
+            public string InstanceName { get; set; }
         }
 
         public class TextSelectedEventArgs : EventArgs
@@ -109,8 +111,13 @@ namespace DBADashGUI.Performance
             var colName = Columns[e.ColumnIndex].Name;
             if (colName == "lnkView")
             {
-                var counter = $"{objectName}\\{counterName}\\{instanceName}".Trim('\\');
-                CounterSelected?.Invoke(this, new CounterSelectedEventArgs() { CounterID = (int)row["CounterID"], CounterName = counter });
+                CounterSelected?.Invoke(this, new CounterSelectedEventArgs()
+                {
+                    CounterID = (int)row["CounterID"],
+                    CounterName = counterName,
+                    ObjectName = objectName,
+                    InstanceName = instanceName
+                });
             }
             else if (colName == "lnkCounter")
             {
