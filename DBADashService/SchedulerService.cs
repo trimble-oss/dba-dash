@@ -406,6 +406,22 @@ namespace DBADashService
             }
         }
 
+        private void ScheduleUpgradeCheck()
+        {
+            if (string.IsNullOrEmpty(config.UpgradeCheckCron))
+            {
+                Log.Information("Automatic upgrade check is disabled");
+                return;
+            }
+
+            var job = JobBuilder.Create<UpgradeCheckJob>()
+                .WithIdentity("UpgradeCheckJob")
+                .Build();
+
+            Log.Information("Schedule upgrade check on schedule {schedule}", config.UpgradeCheckCron);
+            ScheduleJob(config.UpgradeCheckCron, job);
+        }
+
         private async Task ScheduleAndRunAzureScanAsync()
         {
             if (config.ScanForAzureDBs)
@@ -622,6 +638,7 @@ namespace DBADashService
 
             await ScheduleAndRunMaintenanceJobAsync();
             ScheduleSummaryRefresh();
+            ScheduleUpgradeCheck();
 
             if (config.IsUseQueueBasedScheduling())
             {
@@ -921,6 +938,8 @@ namespace DBADashService
             }
             else
             {
+                if (!CronExpression.IsValidExpression(schedule))
+                    throw new ArgumentException($"Invalid cron expression: {schedule}", nameof(schedule));
                 trigger = TriggerBuilder.Create()
                  .StartNow()
                  .WithCronSchedule(schedule)
@@ -940,7 +959,9 @@ namespace DBADashService
 
             ITrigger trigger = int.TryParse(schedule, out var seconds)
                 ? TriggerBuilder.Create().StartNow().WithSimpleSchedule(x => x.WithIntervalInSeconds(seconds).RepeatForever()).Build()
-                : TriggerBuilder.Create().StartNow().WithCronSchedule(schedule).Build();
+                : CronExpression.IsValidExpression(schedule)
+                    ? TriggerBuilder.Create().StartNow().WithCronSchedule(schedule).Build()
+                    : throw new ArgumentException($"Invalid cron expression: {schedule}", nameof(schedule));
 
             scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
         }

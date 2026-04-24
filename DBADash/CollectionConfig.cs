@@ -39,6 +39,8 @@ namespace DBADash
 
         public string SummaryRefreshCron { get; set; }
 
+        public string UpgradeCheckCron { get; set; }
+
         public int? ImportCommandTimeout { get; set; }
         public int? PurgeDataCommandTimeout { get; set; }
         public int? AddPartitionsCommandTimeout { get; set; }
