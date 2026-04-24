@@ -472,8 +472,16 @@ namespace DBADashGUI.Performance
 
         private void PerformanceCounterSummaryGrid1_CounterSelected(object sender, PerformanceCounterSummaryGrid.CounterSelectedEventArgs e)
         {
-            performanceCounters1.CounterID = e.CounterID;
-            performanceCounters1.CounterName = e.CounterName;
+            performanceCounters1.Metric.Counters = new List<Counter>
+            {
+                new Counter
+                {
+                    CounterID = e.CounterID,
+                    CounterName = e.CounterName,
+                    ObjectName = e.ObjectName,
+                    InstanceName = e.InstanceName
+                }
+            };
             ChartView = ChartViews.PerformanceCounter;
             RefreshPerformanceChart();
         }
