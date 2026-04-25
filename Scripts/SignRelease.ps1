@@ -91,7 +91,14 @@ foreach ($asset in $UnsignedAssets) {
         
         Push-Location $tempFolder
         try {
-            gh release download $DraftRelease.tag_name --pattern "$fileName" --repo $repo
+            # Remove any partial/failed download from a previous attempt
+            $downloadPath = Join-Path $tempFolder $fileName
+            if (Test-Path $downloadPath) {
+                Write-Host "Removing existing file from previous attempt: $fileName" -ForegroundColor Yellow
+                Remove-Item -LiteralPath $downloadPath -Force -ErrorAction Stop
+            }
+
+            gh release download $DraftRelease.tag_name --pattern "$fileName" --repo $repo --clobber | Write-Host
             
             # Check if the command succeeded by examining the exit code
             if ($LASTEXITCODE -eq 0) {
@@ -101,6 +108,9 @@ foreach ($asset in $UnsignedAssets) {
             } else {
                 Write-Host "Download attempt $retry failed with exit code: $LASTEXITCODE" -ForegroundColor Red
             }
+        }
+        catch {
+            Write-Host "Download attempt $retry failed with error: $($_.Exception.Message)" -ForegroundColor Red
         }
         finally {
             Pop-Location
