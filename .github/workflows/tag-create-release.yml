@@ -28,6 +28,8 @@ jobs:
 
       - name: Build
         run: dotnet build -c CLI
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build GUI
         run: dotnet build DBADashGUI -o DBADashBuild\DBADashGUIOnly
