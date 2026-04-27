@@ -115,17 +115,17 @@ namespace DBADashGUI.CustomReports
         }
     }
 
-    public class DrillDownLinkColumnInfo : LinkColumnInfo
+    public abstract class BaseDrillDownLinkColumnInfo : LinkColumnInfo
     {
-        public string ReportProcedureName { get; set; }
-
         public Dictionary<string, string> ColumnToParameterMap { get; set; } = new();
+
+        protected abstract CustomReport GetReport(DBADashContext context);
 
         public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
         {
-            var report = context.Report is SystemReport ? CustomReports.SystemReports.FirstOrDefault(r => r.ProcedureName == ReportProcedureName) : CustomReports.GetCustomReports().FirstOrDefault(r => r.ProcedureName == ReportProcedureName);
-
+            var report = GetReport(context);
             if (report == null) return;
+
             var newContext = (DBADashContext)context.Clone();
             newContext.Report = report;
             var customParams = report.GetCustomSqlParameters();
@@ -147,6 +147,29 @@ namespace DBADashGUI.CustomReports
             }
             CustomReportViewer customReportViewer = new() { Context = newContext, CustomParams = customParams };
             customReportViewer.ShowSingleInstance();
+        }
+    }
+
+    public class DrillDownLinkColumnInfo : BaseDrillDownLinkColumnInfo
+    {
+        public string ReportProcedureName { get; set; }
+
+        protected override CustomReport GetReport(DBADashContext context)
+        {
+            return context.Report is SystemReport 
+                ? CustomReports.SystemReports.FirstOrDefault(r => r.ProcedureName == ReportProcedureName) 
+                : CustomReports.GetCustomReports().FirstOrDefault(r => r.ProcedureName == ReportProcedureName);
+        }
+    }
+
+    public class SystemDrillDownLinkColumnInfo : BaseDrillDownLinkColumnInfo
+    {
+        [JsonIgnore]
+        public Func<SystemReport> ReportFactory { get; set; }
+
+        protected override CustomReport GetReport(DBADashContext context)
+        {
+            return ReportFactory?.Invoke();
         }
     }
 

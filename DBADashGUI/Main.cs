@@ -303,7 +303,13 @@ namespace DBADashGUI
             tabPerformance.Controls.Add(perfView);
 
             tabDatabaseExtendedProperties = new TabPage("Extended Properties") { Name = Tabs.DatabaseExtendedProperties.TabName() };
-            tabDatabaseExtendedProperties.Controls.Add(new DatabaseExtendedPropertiesView() { Dock = DockStyle.Fill });
+            var extPropView = new CustomReportView()
+            {
+                Dock = DockStyle.Fill,
+                Report = DatabaseExtendedPropertiesReport.Instance,
+                PreventReportOverwrite = true
+            };
+            tabDatabaseExtendedProperties.Controls.Add(extPropView);
         }
 
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommunityProcs proc)

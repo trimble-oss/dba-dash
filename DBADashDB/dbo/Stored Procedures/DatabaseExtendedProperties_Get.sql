@@ -1,21 +1,25 @@
-CREATE PROC [dbo].[DatabaseExtendedProperties_Get] (
-    @InstanceIDs VARCHAR(MAX) = NULL,
-    @DatabaseID INT = -1
+CREATE PROC dbo.DatabaseExtendedProperties_Get (
+    @InstanceIDs IDs READONLY,
+    @DatabaseID INT = NULL,
+    @InstanceID INT = NULL
 )
 AS
-SELECT EP.Name AS [Property],
-       EP.Value,
-       EP.ValidFrom
+SELECT  I.InstanceID,
+        D.DatabaseID,
+        I.InstanceDisplayName,
+        D.Name AS [Database],
+        EP.Name AS [Property],
+        EP.Value,
+        EP.ValidFrom
 FROM dbo.DatabaseExtendedProperties EP
 JOIN dbo.Databases D ON D.DatabaseID = EP.DatabaseID
-WHERE (
-        @InstanceIDs IS NULL
-        OR EXISTS (
+JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
+WHERE EXISTS (
             SELECT 1
-            FROM STRING_SPLIT(@InstanceIDs, ',') s
-            WHERE CAST(s.value AS INT) = EP.InstanceID
+            FROM @InstanceIDs t
+            WHERE t.ID = EP.InstanceID
         )
-      )
-AND (@DatabaseID = -1 OR EP.DatabaseID = @DatabaseID)
+AND (@DatabaseID <=0 OR @DatabaseID IS NULL OR EP.DatabaseID = @DatabaseID)
 AND D.IsActive = 1
-ORDER BY EP.Name
+AND I.IsActive = 1
+ORDER BY I.InstanceDisplayName, D.Name, EP.Name
